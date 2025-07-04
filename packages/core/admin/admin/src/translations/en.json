@@ -825,6 +825,10 @@
   "tours.overview.close": "Close guided tour",
   "tours.overview.tasks": "Your tasks",
   "tours.overview.contentTypeBuilder.label": "Create your schema",
+  "tours.overview.contentManager.label": "Create and publish content",
+  "tours.overview.apiTokens.label": "Create and copy an API token",
+  "tours.overview.strapiCloud.label": "Deploy your application to Strapi Cloud",
+  "tours.overview.strapiCloud.link": "Read documentation",
   "tours.overview.tour.link": "Start",
   "tours.overview.tour.done": "Done",
   "widget.profile.title": "Profile"

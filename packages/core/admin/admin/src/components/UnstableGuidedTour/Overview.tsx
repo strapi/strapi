@@ -1,36 +1,14 @@
 import { Box, Button, Flex, Link, ProgressBar, Typography } from '@strapi/design-system';
-import { ChevronRight } from '@strapi/icons';
+import { CheckCircle, ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
 
 import { type ValidTourName, unstableUseGuidedTour } from './Context';
 
-const getTourTask = (tourName: ValidTourName) => {
-  const startLabel = {
-    id: 'tours.overview.tour.link',
-    defaultMessage: 'Start',
-  };
-  const doneLabel = {
-    id: 'tours.overview.tour.done',
-    defaultMessage: 'Done',
-  };
-
-  switch (tourName) {
-    case 'contentTypeBuilder':
-      return {
-        start: {
-          label: startLabel,
-          to: '/plugins/content-type-builder',
-        },
-        title: {
-          id: 'tours.overview.contentTypeBuilder.label',
-          defaultMessage: 'Create your schema',
-        },
-        done: doneLabel,
-      };
-  }
-};
+/* -------------------------------------------------------------------------------------------------
+ * Styled
+ * -----------------------------------------------------------------------------------------------*/
 
 const StyledProgressBar = styled(ProgressBar)`
   width: 100%;
@@ -44,7 +22,6 @@ const Container = styled(Flex)`
   width: 100%;
   border-radius: ${({ theme }) => theme.borderRadius};
   background-color: ${({ theme }) => theme.colors.neutral0};
-  border: 1px solid ${({ theme }) => theme.colors.neutral150};
   box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   align-items: stretch;
 `;
@@ -58,6 +35,92 @@ const VerticalSeparator = styled.div`
   width: 1px;
   background-color: ${({ theme }) => theme.colors.neutral150};
 `;
+
+const TourTaskContainer = styled(Flex)`
+  &:not(:last-child) {
+    border-bottom: ${({ theme }) => `1px solid ${theme.colors.neutral150}`};
+  }
+  padding: ${({ theme }) => theme.spaces[4]};
+`;
+
+const TodoCircle = styled(Box)`
+  border: 1px solid ${({ theme }) => theme.colors.neutral300};
+  border-radius: 50%;
+  height: 13px;
+  width: 13px;
+`;
+
+/* -------------------------------------------------------------------------------------------------
+ * Constants
+ * -----------------------------------------------------------------------------------------------*/
+
+const LINK_LABEL = {
+  id: 'tours.overview.tour.link',
+  defaultMessage: 'Start',
+};
+const DONE_LABEL = {
+  id: 'tours.overview.tour.done',
+  defaultMessage: 'Done',
+};
+
+const TASK_CONTENT = [
+  {
+    tourName: 'contentTypeBuilder',
+    link: {
+      label: LINK_LABEL,
+      to: '/plugins/content-type-builder',
+    },
+    title: {
+      id: 'tours.overview.contentTypeBuilder.label',
+      defaultMessage: 'Create your schema',
+    },
+    done: DONE_LABEL,
+  },
+  {
+    tourName: 'contentManager',
+    link: {
+      label: LINK_LABEL,
+      to: '/content-manager',
+    },
+    title: {
+      id: 'tours.overview.contentManager.label',
+      defaultMessage: 'Create and publish content',
+    },
+    done: DONE_LABEL,
+  },
+  {
+    tourName: 'apiTokens',
+    link: {
+      label: LINK_LABEL,
+      to: '/settings/api-tokens',
+    },
+    title: {
+      id: 'tours.overview.apiTokens.label',
+      defaultMessage: 'Create and copy an API token',
+    },
+    done: DONE_LABEL,
+  },
+  {
+    tourName: 'strapiCloud',
+    link: {
+      label: {
+        id: 'tours.overview.strapiCloud.link',
+        defaultMessage: 'Read documentation',
+      },
+      to: 'https://docs.strapi.io/cloud/intro',
+    },
+    title: {
+      id: 'tours.overview.strapiCloud.label',
+      defaultMessage: 'Deploy your application to Strapi Cloud',
+    },
+    done: DONE_LABEL,
+    isExternal: true,
+  },
+];
+
+/* -------------------------------------------------------------------------------------------------
+ * GuidedTourOverview
+ * -----------------------------------------------------------------------------------------------*/
 
 const WaveIcon = () => {
   const theme = useTheme();
@@ -88,6 +151,7 @@ export const UnstableGuidedTourOverview = () => {
 
   return (
     <Container tag="section" gap={0}>
+      {/* Greeting */}
       <ContentSection direction="column" gap={2} alignItems="start">
         <WaveIcon />
         <Flex direction="column" alignItems="start" gap={1} paddingTop={4}>
@@ -123,6 +187,7 @@ export const UnstableGuidedTourOverview = () => {
         </Button>
       </ContentSection>
       <VerticalSeparator />
+      {/* Task List */}
       <ContentSection direction="column" alignItems="start">
         <Typography variant="omega" fontWeight="bold">
           {formatMessage({
@@ -130,31 +195,54 @@ export const UnstableGuidedTourOverview = () => {
             defaultMessage: 'Your tasks',
           })}
         </Typography>
-        <Box width="100%" borderColor="neutral150" padding={4} marginTop={4} hasRadius>
-          {tourNames.map((tourName) => {
-            const task = getTourTask(tourName);
-            const tour = tours[tourName];
+        <Box width="100%" borderColor="neutral150" marginTop={4} hasRadius>
+          {TASK_CONTENT.map((task) => {
+            const tour = tours[task.tourName as ValidTourName];
 
             return (
-              <Flex key={tourName} alignItems="center" justifyContent="space-between">
+              <TourTaskContainer
+                key={task.tourName}
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 {tour.isCompleted ? (
                   <>
-                    <Typography style={{ textDecoration: 'line-through' }} textColor="neutral500">
-                      {formatMessage(task.title)}
-                    </Typography>
+                    <Flex gap={2}>
+                      <CheckCircle fill="success500" />
+                      <Typography style={{ textDecoration: 'line-through' }} textColor="neutral500">
+                        {formatMessage(task.title)}
+                      </Typography>
+                    </Flex>
                     <Typography variant="omega" textColor="neutral500">
                       {formatMessage(task.done)}
                     </Typography>
                   </>
                 ) : (
                   <>
-                    <Typography>{formatMessage(task.title)}</Typography>
-                    <Link tag={NavLink} endIcon={<ChevronRight />} to={task.start.to}>
-                      {formatMessage(task.start.label)}
-                    </Link>
+                    <Flex gap={2} alignItems="center">
+                      <Flex height="16px" width="16px" justifyContent="center">
+                        <TodoCircle />
+                      </Flex>
+                      <Typography>{formatMessage(task.title)}</Typography>
+                    </Flex>
+                    {task.isExternal ? (
+                      <Link
+                        isExternal
+                        href={task.link.to}
+                        onClick={() =>
+                          dispatch({ type: 'skip_tour', payload: task.tourName as ValidTourName })
+                        }
+                      >
+                        {formatMessage(task.link.label)}
+                      </Link>
+                    ) : (
+                      <Link endIcon={<ChevronRight />} to={task.link.to} tag={NavLink}>
+                        {formatMessage(task.link.label)}
+                      </Link>
+                    )}
                   </>
                 )}
-              </Flex>
+              </TourTaskContainer>
             );
           })}
         </Box>
