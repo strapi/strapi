@@ -20,6 +20,9 @@ export type Base = {
   name: string;
   status?: Status;
   customField?: any;
+  conditions?: {
+    visible?: Record<string, any>;
+  };
 };
 
 export type Relation = Base & {

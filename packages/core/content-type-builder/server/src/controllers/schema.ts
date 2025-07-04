@@ -43,7 +43,8 @@ export default () => {
         ctx.body = {};
       } catch (error) {
         internals.isUpdating = false;
-        return ctx.send({ error }, 400);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return ctx.send({ error: errorMessage }, 400);
       }
     },
 
