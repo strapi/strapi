@@ -79,19 +79,19 @@ const UnstableGuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
-  const getInitialTours = () => {
-    return Object.keys(guidedTours).reduce((acc, tourName) => {
-      const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
-      acc[tourName as ValidTourName] = {
-        currentStep: 0,
-        length: tourLength,
-        isCompleted: false,
-      };
-      return acc;
-    }, {} as Tour);
-  };
+  const initialTourState = Object.keys(guidedTours).reduce((acc, tourName) => {
+    const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
+    acc[tourName as ValidTourName] = {
+      currentStep: 0,
+      length: tourLength,
+      isCompleted: false,
+    };
+
+    return acc;
+  }, {} as Tour);
+
   const [tours, setTours] = usePersistentState<State>(STORAGE_KEY, {
-    tours: getInitialTours(),
+    tours: initialTourState,
     enabled,
     completedActions: [],
   });
