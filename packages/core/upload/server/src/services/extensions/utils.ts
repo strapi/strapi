@@ -3,6 +3,7 @@ import { async, traverseEntity } from '@strapi/utils';
 import type { Schema, UID } from '@strapi/types';
 
 import { getService } from '../../utils';
+import { FILE_MODEL_UID } from '../../constants';
 
 import type { File } from '../../types';
 
@@ -67,6 +68,17 @@ const signEntityMediaVisitor: SignEntityMediaVisitor = async (
  * @returns
  */
 const signEntityMedia = async (entity: any, uid: UID.Schema) => {
+  if (!entity) {
+    return entity;
+  }
+
+  // Special handling for direct upload file entities
+  if (uid === FILE_MODEL_UID) {
+    const { signFileUrls } = getService('file');
+    return signFileUrls(entity);
+  }
+
+  // Default handling for content types with media attributes
   const model = strapi.getModel(uid);
   return traverseEntity(
     // @ts-expect-error - FIXME: fix traverseEntity using wrong types
