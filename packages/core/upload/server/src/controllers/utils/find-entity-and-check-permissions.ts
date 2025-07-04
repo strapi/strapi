@@ -26,7 +26,7 @@ const findEntityAndCheckPermissions = async (
     ? await strapi.service('admin::user').findOne(creatorId, ['roles'])
     : null;
 
-  const fileWithRoles = _.set(_.cloneDeep(file), 'createdBy', author);
+  const fileWithRoles = _.set(structuredClone(file), 'createdBy', author);
 
   if (pm.ability.cannot(pm.action, pm.toSubject(fileWithRoles))) {
     throw new errors.ForbiddenError();
