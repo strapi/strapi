@@ -38,7 +38,7 @@ const AdvancedSettingsPage = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC({ update: PERMISSIONS.updateAdvancedSettings });
+  } = useRBAC(PERMISSIONS.updateAdvancedSettings);
 
   const { isLoading: isLoadingData, data } = useQuery(
     ['users-permissions', 'advanced'],

@@ -155,11 +155,10 @@ class Router {
     );
 
     if (
-      !link.Component ||
-      (link.Component &&
-        typeof link.Component === 'function' &&
-        // @ts-expect-error – shh
-        link.Component[Symbol.toStringTag] === 'AsyncFunction')
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
       console.warn(
         `
@@ -278,11 +277,10 @@ class Router {
     );
 
     if (
-      !link.Component ||
-      (link.Component &&
-        typeof link.Component === 'function' &&
-        // @ts-expect-error – shh
-        link.Component[Symbol.toStringTag] === 'AsyncFunction')
+      link.Component &&
+      typeof link.Component === 'function' &&
+      // @ts-expect-error – shh
+      link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
       console.warn(
         `

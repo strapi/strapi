@@ -71,8 +71,8 @@ const ConfigurationProvider = ({
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions.settings?.['project-settings']
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.['project-settings'] ?? {}).flat()
   );
   const token = useAuth('ConfigurationProvider', (state) => state.token);
 

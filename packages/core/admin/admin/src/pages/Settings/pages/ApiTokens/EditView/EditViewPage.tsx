@@ -43,7 +43,9 @@ export const EditView = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { state: locationState } = useLocation();
-  const permissions = useTypedSelector((state) => state.admin_app.permissions);
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.['api-tokens'] ?? {}).flat()
+  );
   const [apiToken, setApiToken] = React.useState<ApiToken | null>(
     locationState?.apiToken?.accessKey
       ? {
@@ -57,7 +59,7 @@ export const EditView = () => {
   const setCurrentStep = useGuidedTour('EditView', (state) => state.setCurrentStep);
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
-  } = useRBAC(permissions.settings?.['api-tokens']);
+  } = useRBAC(permissions);
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const match = useMatch('/settings/api-tokens/:id');
   const id = match?.params?.id;
