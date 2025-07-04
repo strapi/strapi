@@ -3,6 +3,14 @@ import { render, screen, waitFor } from '@tests/utils';
 import { useLicenseLimits } from '../../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { FreeTrialWelcomeModal } from '../FreeTrialWelcomeModal';
 
+jest.mock('../../../../services/admin', () => ({
+  useInitQuery: jest.fn(() => ({
+    data: {
+      uuid: 'test-uuid',
+    },
+  })),
+}));
+
 jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
   useLicenseLimits: jest.fn(() => ({
     license: {
