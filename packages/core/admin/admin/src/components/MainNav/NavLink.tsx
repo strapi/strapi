@@ -49,6 +49,8 @@ const getGuidedTourTooltip = (to: To) => {
       return unstable_tours.contentTypeBuilder.Finish;
     case '':
       return unstable_tours.apiTokens.Finish;
+    case 'settings':
+      return unstable_tours.contentManager.Finish;
     default:
       return React.Fragment;
   }
