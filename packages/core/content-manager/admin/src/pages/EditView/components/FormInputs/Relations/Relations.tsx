@@ -725,7 +725,7 @@ const RelationModalWithContext = ({
           }}
           creatableStartIcon={<Plus fill="neutral500" />}
           name={name}
-          autocomplete="list"
+          autocomplete="none"
           placeholder={
             placeholder ||
             formatMessage({
@@ -757,6 +757,7 @@ const RelationModalWithContext = ({
           onInputChange={(event) => {
             handleSearch(event.currentTarget.value);
           }}
+          allowCustomValue
           {...props}
         >
           {options?.map((opt) => {
