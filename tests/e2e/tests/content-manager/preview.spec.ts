@@ -111,7 +111,9 @@ test.describe('Preview', () => {
   });
 });
 
-test('Publishing from preview with conditional fields should not trigger validation errors', async ({ page }) => {
+test('Publishing from preview with conditional fields should not trigger validation errors', async ({
+  page,
+}) => {
   // Create a content type with conditional fields
   await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
   await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
@@ -124,10 +126,10 @@ test('Publishing from preview with conditional fields should not trigger validat
   const publishButton = page.getByRole('button', { name: /publish/i });
   await expect(publishButton).toBeEnabled();
   await clickAndWait(page, publishButton);
-  
+
   // Verify publication succeeded and no error notifications appeared
   await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
-  
+
   // Check that no validation error toast appeared
   await expect(page.getByText(/There are validation errors in your document/i)).not.toBeVisible();
 });
