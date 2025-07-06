@@ -1,4 +1,4 @@
-import nodeSES from 'node-ses';
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
 interface Settings {
   defaultFrom: string;
@@ -25,26 +25,41 @@ interface ProviderOptions {
 
 export default {
   init(providerOptions: ProviderOptions, settings: Settings) {
-    const client = nodeSES.createClient(providerOptions);
+    const client = new SESClient(providerOptions)
 
     return {
       send(options: SendOptions): Promise<void> {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 
-          const msg: nodeSES.sendEmailOptions = {
-            from: from || settings.defaultFrom,
-            subject,
-            message: html,
-            to,
-            cc,
-            bcc,
-            replyTo: replyTo || settings.defaultReplyTo,
-            altText: text,
-            ...rest,
-          };
+          const command = new SendEmailCommand({
+            Source: from || settings.defaultFrom,
+            Destination: {
+              ToAddresses: [to],
+              CcAddresses: [cc],
+              BccAddresses: [bcc],
+            },
+            Message: {
+              Subject: {
+                Data: subject,
+                Charset: "UTF-8",
+              },
+              Body: {
+                Text: {
+                  Data: text,
+                  Charset: "UTF-8",
+                },
+                Html: {
+                  Data: html,
+                  Charset: "UTF-8",
+                },
+              },
+            },
+            ReplyToAddresses: [replyTo || settings.defaultReplyTo],
+            ...rest
+          });
 
-          client.sendEmail(msg, (err) => {
+          client.send(command, (err) => {
             if (err) {
               if (err.Message) {
                 // eslint-disable-next-line prefer-promise-reject-errors

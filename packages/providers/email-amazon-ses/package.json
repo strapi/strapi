@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@strapi/utils": "5.17.0",
-    "node-ses": "^3.0.3"
+    "@aws-sdk/client-ses": "^3.840.0"
   },
   "devDependencies": {
     "eslint-config-custom": "5.17.0",
