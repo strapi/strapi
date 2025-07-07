@@ -301,10 +301,12 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
         <Portal
           style={{
             position: 'fixed',
-            left: tooltip.x + 16,
-            top: tooltip.y - 16,
+            left: tooltip.x,
+            top: tooltip.y,
             zIndex: 2,
+            transform: 'translate(1.6rem, 1.6rem)',
           }}
+          data-testid="entries-chart-tooltip"
         >
           <Box
             background="neutral900"
@@ -315,7 +317,16 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
             aria-live="polite"
           >
             <Typography textColor="neutral0">
-              {tooltip.value.count} {tooltip.value.label}
+              {formatMessage(
+                {
+                  id: 'content-manager.widget.chart-entries.tooltip',
+                  defaultMessage: '{count} items',
+                },
+                {
+                  count: tooltip.value.count,
+                  label: tooltip.value.label,
+                }
+              )}
             </Typography>
           </Box>
         </Portal>
@@ -371,17 +382,26 @@ const ChartEntriesWidget = () => {
       <DonutChartSVG
         data={[
           {
-            label: 'Draft',
+            label: formatMessage({
+              id: 'content-manager.containers.List.draft',
+              defaultMessage: 'Draft',
+            }),
             count: draft,
             color: 'secondary500',
           },
           {
-            label: 'Modified',
+            label: formatMessage({
+              id: 'content-manager.containers.List.modified',
+              defaultMessage: 'Modified',
+            }),
             count: modified,
             color: 'alternative500',
           },
           {
-            label: 'Published',
+            label: formatMessage({
+              id: 'content-manager.containers.List.published',
+              defaultMessage: 'Published',
+            }),
             count: published,
             color: 'success500',
           },

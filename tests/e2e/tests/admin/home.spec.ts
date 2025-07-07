@@ -118,7 +118,7 @@ test.describe('Home', () => {
     await expect(mostRecentModifiedEntry.getByRole('gridcell', { name: 'Modified' })).toBeVisible();
   });
 
-  test.only('a user should see the entries chart widget', async ({ page }) => {
+  test('a user should see the entries chart widget', async ({ page }) => {
     const chartWidget = page.getByLabel('Entries', { exact: true });
 
     await expect(chartWidget).toBeVisible();
@@ -131,7 +131,7 @@ test.describe('Home', () => {
     const arcDraft = chartWidget.locator('circle').first();
     await arcDraft.focus();
 
-    const tooltip = page.locator('[role="tooltip"]');
+    const tooltip = page.getByTestId('entries-chart-tooltip');
 
     await expect(tooltip).toBeVisible();
     await expect(tooltip).toContainText('11 Draft');
