@@ -29,6 +29,8 @@ type WidgetArgs = {
 
 type Widget = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };
 
+type DescriptionReducer<T extends object> = (prev: Record<string, T>) => Record<string, T>;
+
 class Widgets {
   widgets: Record<string, Widget>;
 
@@ -36,19 +38,21 @@ class Widgets {
     this.widgets = {};
   }
 
-  register = (widget: WidgetArgs | WidgetArgs[]) => {
-    if (Array.isArray(widget)) {
-      widget.forEach((newWidget) => {
+  register = (widgets: WidgetArgs | WidgetArgs[] | DescriptionReducer<Widget>) => {
+    if (Array.isArray(widgets)) {
+      widgets.forEach((newWidget) => {
         this.register(newWidget);
       });
+    } else if (typeof widgets === 'function') {
+      this.widgets = widgets(this.widgets);
     } else {
-      invariant(widget.id, 'An id must be provided');
-      invariant(widget.component, 'A component must be provided');
-      invariant(widget.title, 'A title must be provided');
-      invariant(widget.icon, 'An icon must be provided');
+      invariant(widgets.id, 'An id must be provided');
+      invariant(widgets.component, 'A component must be provided');
+      invariant(widgets.title, 'A title must be provided');
+      invariant(widgets.icon, 'An icon must be provided');
 
       // Replace id and pluginId with computed uid
-      const { id, pluginId, ...widgetToStore } = widget;
+      const { id, pluginId, ...widgetToStore } = widgets;
       const uid: WidgetUID = pluginId ? `plugin::${pluginId}.${id}` : `global::${id}`;
 
       this.widgets[uid] = { ...widgetToStore, uid };

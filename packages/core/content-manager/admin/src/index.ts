@@ -8,6 +8,8 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
+import type { WidgetType } from '@strapi/admin/strapi-admin';
+
 // NOTE: we have to preload it to ensure chunks will have it available as global
 import 'prismjs';
 
@@ -90,6 +92,19 @@ export default {
         permissions: [{ action: 'plugin::content-manager.explorer.read' }],
       },
     ]);
+
+    // Always put the last-edited-entries and last-published-entries widgets first in the list of widgets
+    app.widgets.register((widgets: Record<string, WidgetType>) => {
+      const desiredOrder = [
+        'plugin::content-manager.last-edited-entries',
+        'plugin::content-manager.last-published-entries',
+      ];
+      const ordered = [
+        ...desiredOrder.map((uid) => widgets[uid]).filter(Boolean),
+        ...Object.values(widgets).filter((w) => !desiredOrder.includes(w.uid)),
+      ];
+      return Object.fromEntries(ordered.map((w) => [w.uid, w]));
+    });
   },
   bootstrap(app: any) {
     if (typeof historyAdmin.bootstrap === 'function') {

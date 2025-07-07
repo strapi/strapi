@@ -61,6 +61,25 @@ describe('Widgets', () => {
       );
     });
 
+    test('execute reducer to alter existing widgets', () => {
+      const secondWidget = {
+        ...mockWidget,
+        id: 'second-widget',
+      };
+      widgets.register([mockWidget, secondWidget]);
+
+      // Swap the order using the reducer
+      widgets.register((widgetsMap) => {
+        const arr = Object.values(widgetsMap);
+        const reversed = arr.reverse();
+        return Object.fromEntries(reversed.map((w) => [w.uid, w]));
+      });
+
+      const registeredWidgets = widgets.getAll();
+      expect(registeredWidgets[0].uid).toBe(`global::${secondWidget.id}`);
+      expect(registeredWidgets[1].uid).toBe(`global::${mockWidget.id}`);
+    });
+
     test('throws when id is missing', () => {
       const invalidWidget = { ...mockWidget, id: undefined };
       expect(() => widgets.register(invalidWidget as any)).toThrow('An id must be provided');
