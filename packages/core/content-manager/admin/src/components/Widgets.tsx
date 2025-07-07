@@ -228,6 +228,19 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
     setTooltip((t) => ({ ...t, visible: false }));
   };
 
+  const handleFocus = (e: React.FocusEvent<SVGCircleElement>, value: ChartData) => {
+    setTooltip({
+      visible: true,
+      x:
+        e.currentTarget.getBoundingClientRect().width / 2 +
+        e.currentTarget.getBoundingClientRect().left,
+      y:
+        e.currentTarget.getBoundingClientRect().height +
+        e.currentTarget.getBoundingClientRect().top,
+      value,
+    });
+  };
+
   return (
     <Flex direction="column" gap={6} margin="auto">
       <svg
@@ -253,6 +266,10 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
                 strokeDasharray={dashArray}
                 strokeDashoffset={dashOffset}
                 style={{ transition: 'stroke-dashoffset 0.3s', cursor: 'pointer' }}
+                tabIndex={0}
+                aria-describedby={tooltip.visible ? 'chart-tooltip' : undefined}
+                onFocus={(e) => handleFocus(e, value)}
+                onBlur={handleMouseOut}
                 onMouseMove={(e) => handleMouseOver(e, value)}
                 onMouseLeave={handleMouseOut}
                 $arcColor={value.color}
@@ -281,13 +298,21 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
         </text>
       </svg>
       {tooltip.visible && tooltip.value && (
-        <Portal style={{ position: 'fixed', left: tooltip.x + 16, top: tooltip.y - 16, zIndex: 2 }}>
+        <Portal
+          style={{
+            position: 'fixed',
+            left: tooltip.x + 16,
+            top: tooltip.y - 16,
+            zIndex: 2,
+          }}
+        >
           <Box
             background="neutral900"
             padding={2}
             borderRadius={1}
-            minWidth={120}
             textAlign="center"
+            role="tooltip"
+            aria-live="polite"
           >
             <Typography textColor="neutral0">
               {tooltip.value.count} {tooltip.value.label}
