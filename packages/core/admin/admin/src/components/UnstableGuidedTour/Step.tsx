@@ -55,12 +55,14 @@ const PopoverArrowStandard = styled(Popover.Arrow)`
 
 const createStepComponents = (tourName: ValidTourName): Step => ({
   Root: React.forwardRef((props, ref) => {
+    const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
+    const currentStep = state.tours[tourName].currentStep + 1;
     return (
       <Popover.Content ref={ref} side="top" align="center" {...props}>
         <Flex width="360px" direction="column" alignItems="start">
           {props.children}
         </Flex>
-        <PopoverArrowStandard />
+        {currentStep > 1 && <PopoverArrowStandard />}
       </Popover.Content>
     );
   }),
