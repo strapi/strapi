@@ -49,7 +49,7 @@ const ActionsContainer = styled(Flex)`
   border-top: ${({ theme }) => `1px solid ${theme.colors.neutral150}`};
 `;
 
-const PopoverArrowStandard = styled(Popover.Arrow)`
+const PopoverArrow = styled(Popover.Arrow)`
   fill: ${({ theme }) => `${theme.colors.neutral0}`};
 `;
 
@@ -62,7 +62,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         <Flex width="360px" direction="column" alignItems="start">
           {props.children}
         </Flex>
-        {currentStep > 1 && <PopoverArrowStandard width="20px" height="12px" />}
+        {currentStep > 1 && <PopoverArrow width="20px" height="12px" />}
       </Popover.Content>
     );
   }),
