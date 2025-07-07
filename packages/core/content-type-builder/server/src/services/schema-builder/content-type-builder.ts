@@ -32,7 +32,10 @@ const reuseUnsetPreviousProperties = (
 
 export default function createComponentBuilder() {
   return {
-    setRelation(this: any, { key, uid, attribute }: { key: string; uid: string; attribute: InternalRelationAttribute }) {
+    setRelation(
+      this: any,
+      { key, uid, attribute }: { key: string; uid: string; attribute: InternalRelationAttribute }
+    ) {
       if (!_.has(attribute, 'target')) {
         return;
       }
@@ -61,7 +64,10 @@ export default function createComponentBuilder() {
       );
     },
 
-    unsetRelation(this: any, attribute: Schema.Attribute.Relation<Schema.Attribute.RelationKind.Any>) {
+    unsetRelation(
+      this: any,
+      attribute: Schema.Attribute.Relation<Schema.Attribute.RelationKind.Any>
+    ) {
       if (!('target' in attribute) || !attribute.target) {
         return;
       }
@@ -104,9 +110,14 @@ export default function createComponentBuilder() {
         if (isRelation(attribute)) {
           const relationAttribute = attribute as InternalRelationAttribute;
           if (['manyToMany', 'oneToOne'].includes(relationAttribute.relation)) {
-            if (relationAttribute.target === uid && relationAttribute.targetAttribute !== undefined) {
+            if (
+              relationAttribute.target === uid &&
+              relationAttribute.targetAttribute !== undefined
+            ) {
               // self referencing relation
-              const targetAttribute = attributes[relationAttribute.targetAttribute] as InternalRelationAttribute;
+              const targetAttribute = attributes[
+                relationAttribute.targetAttribute
+              ] as InternalRelationAttribute;
 
               if (targetAttribute.dominant === undefined) {
                 relationAttribute.dominant = true;
@@ -210,7 +221,7 @@ export default function createComponentBuilder() {
         if (isConfigurable(attribute) && isRelation(attribute)) {
           const relationAttribute = attribute as InternalRelationAttribute;
           const targetAttributeName = relationAttribute.inversedBy || relationAttribute.mappedBy;
-          
+
           if (targetAttributeName !== null && targetAttributeName !== undefined) {
             this.unsetRelation(attribute);
           }
@@ -236,10 +247,12 @@ export default function createComponentBuilder() {
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
           const relationAttribute = newAttribute as InternalRelationAttribute;
           const oldRelationAttribute = oldAttribute as InternalRelationAttribute;
-          const oldTargetAttributeName = oldRelationAttribute.inversedBy || oldRelationAttribute.mappedBy;
+          const oldTargetAttributeName =
+            oldRelationAttribute.inversedBy || oldRelationAttribute.mappedBy;
 
           const sameRelation = oldAttribute.relation === relationAttribute.relation;
-          const targetAttributeHasChanged = oldTargetAttributeName !== relationAttribute.targetAttribute;
+          const targetAttributeHasChanged =
+            oldTargetAttributeName !== relationAttribute.targetAttribute;
 
           if (!sameRelation || targetAttributeHasChanged) {
             this.unsetRelation(oldAttribute);
@@ -288,9 +301,14 @@ export default function createComponentBuilder() {
         if (isRelation(attribute)) {
           const relationAttribute = attribute as InternalRelationAttribute;
           if (['manyToMany', 'oneToOne'].includes(relationAttribute.relation)) {
-            if (relationAttribute.target === uid && relationAttribute.targetAttribute !== undefined) {
+            if (
+              relationAttribute.target === uid &&
+              relationAttribute.targetAttribute !== undefined
+            ) {
               // self referencing relation
-              const targetAttribute = newAttributes[relationAttribute.targetAttribute] as InternalRelationAttribute;
+              const targetAttribute = newAttributes[
+                relationAttribute.targetAttribute
+              ] as InternalRelationAttribute;
 
               if (targetAttribute.dominant === undefined) {
                 relationAttribute.dominant = true;
@@ -355,11 +373,11 @@ const createContentTypeUID = ({
   singularName: string;
 }): Internal.UID.ContentType => `api::${singularName}.${singularName}`;
 
-const generateRelation = ({ 
-  key, 
-  attribute, 
-  uid, 
-  targetAttribute = {} 
+const generateRelation = ({
+  key,
+  attribute,
+  uid,
+  targetAttribute = {},
 }: {
   key: string;
   attribute: InternalRelationAttribute;

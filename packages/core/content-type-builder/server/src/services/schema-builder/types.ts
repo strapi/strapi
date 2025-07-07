@@ -24,4 +24,3 @@ export type InternalRelationAttribute = Schema.Attribute.Relation & {
 export type InternalAttribute =
   | Exclude<Schema.Attribute.AnyAttribute, Schema.Attribute.Relation>
   | InternalRelationAttribute;
-

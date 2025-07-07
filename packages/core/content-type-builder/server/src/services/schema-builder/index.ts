@@ -104,14 +104,7 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
       };
 
       if (attribute.type === 'relation') {
-        const {
-          target,
-          relation,
-          targetAttribute,
-          dominant,
-          conditions: _conditions,
-          ...restOfProperties
-        } = attribute;
+        const { target, relation, targetAttribute, dominant, ...restOfProperties } = attribute;
 
         const attr = {
           type: 'relation',
@@ -129,9 +122,6 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
         if (_.isNil(targetAttribute)) {
           return attr;
         }
-        // if (targetAttribute === null || targetAttribute === undefined) {
-        //   return attr;
-        // }
 
         if (['oneToOne', 'manyToMany'].includes(relation) && dominant === true) {
           attr.inversedBy = targetAttribute;

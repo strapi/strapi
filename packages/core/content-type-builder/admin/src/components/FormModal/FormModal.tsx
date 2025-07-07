@@ -740,6 +740,13 @@ export const FormModal = () => {
           });
         } else {
           // Ensure conditions are explicitly set to undefined if they were removed
+          // Explicitly set conditions to undefined when they're removed to distinguish between:
+          // 1. missing property: "don't change existing conditions" (partial update)
+          // 2. undefined property: "delete conditions" (explicit removal)
+          // This allows the backend to detect user intent:
+          // { name: "field" } vs { name: "field", conditions: undefined }
+          // without this, deleted conditions would be preserved by the backend's
+          // reuseUnsetPreviousProperties function.
           const attributeData = { ...modifiedData };
           if (!('conditions' in modifiedData) || modifiedData.conditions === undefined) {
             // Explicitly add the conditions key with undefined value
