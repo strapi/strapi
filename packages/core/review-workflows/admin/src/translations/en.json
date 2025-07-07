@@ -12,5 +12,6 @@
   "settings.page.purchase.perks1": "Customizable review stages",
   "settings.page.purchase.perks2": "Manage user permissions",
   "settings.page.purchase.perks3": "Support for webhooks",
-  "widget.assigned.title": "Assigned to me"
+  "widget.assigned.title": "Assigned to me",
+  "widget.assigned.no-data": "No entries"
 }

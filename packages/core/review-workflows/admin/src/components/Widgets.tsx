@@ -121,7 +121,7 @@ const AssignedWidget = () => {
     return (
       <Widget.NoData>
         {formatMessage({
-          id: 'content-manager.widget.last-published.no-data',
+          id: 'review-workflows.widget.assigned.no-data',
           defaultMessage: 'No entries',
         })}
       </Widget.NoData>
