@@ -5,7 +5,6 @@ import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { type GetGuidedTourMeta } from '../../../../shared/contracts/admin';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
 import {
@@ -102,6 +101,67 @@ const tours = {
       when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
     },
   ]),
+  contentManager: createTour('contentManager', [
+    {
+      name: 'Introduction',
+      content: (Step) => (
+        <Step.Root side="top">
+          <Step.Title
+            id="tours.contentManager.Introduction.title"
+            defaultMessage="Content manager"
+          />
+          <Step.Content
+            id="tours.contentManager.Introduction.content"
+            defaultMessage="Create and manage content from your collection types and single types."
+          />
+          <Step.Actions showSkip />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Fields',
+      content: (Step) => (
+        <Step.Root side={'top'} align="start" sideOffset={-36}>
+          <Step.Title id="tours.contentManager.Fields.title" defaultMessage="Fields" />
+          <Step.Content
+            id="tours.contentManager.Fields.content"
+            defaultMessage="Add content to the fields created in the Content-Type Builder."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Publish',
+      content: (Step) => (
+        <Step.Root side="left" align="center" sideOffset={20}>
+          <Step.Title id="tours.contentManager.Publish.title" defaultMessage="Publish" />
+          <Step.Content
+            id="tours.contentManager.Publish.content"
+            defaultMessage="Publish entries to make their content available through the Document Service API."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Finish',
+      content: (Step) => (
+        <Step.Root side="right" sideOffset={32}>
+          <Step.Title
+            id="tours.contentManager.FinalStep.title"
+            defaultMessage="It’s time to create API Tokens!"
+          />
+          <Step.Content
+            id="tours.contentManager.FinalStep.content"
+            defaultMessage="Now that you’ve created and published content, time to create API tokens and set up permissions."
+          />
+          <Step.Actions showStepCount={false} to="/settings/api-tokens" />
+        </Step.Root>
+      ),
+      when: (completedActions) => completedActions.includes('didCreateContent'),
+    },
+  ]),
   apiTokens: createTour('apiTokens', [
     {
       name: 'Introduction',
@@ -183,6 +243,7 @@ const tours = {
       when: (completedActions) => completedActions.includes('didCopyApiToken'),
     },
   ]),
+  strapiCloud: createTour('strapiCloud', []),
 } as const;
 
 type Tours = typeof tours;

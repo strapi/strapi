@@ -6,6 +6,7 @@ import {
   NotificationConfig,
   useAPIErrorHandler,
   useQueryParams,
+  unstable_tours,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -177,23 +178,39 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
 
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
-      <Flex gap={2}>
-        <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-        {restActions.length > 0 ? (
-          <DocumentActionsMenu
-            actions={restActions}
-            label={formatMessage({
-              id: 'content-manager.containers.edit.panels.default.more-actions',
-              defaultMessage: 'More document actions',
-            })}
-          />
-        ) : null}
-      </Flex>
+      <unstable_tours.contentManager.Publish>
+        <Flex gap={2}>
+          {primaryAction.label === 'Publish' ? (
+            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
+          ) : (
+            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
+          )}
+
+          {restActions.length > 0 ? (
+            <DocumentActionsMenu
+              actions={restActions}
+              label={formatMessage({
+                id: 'content-manager.containers.edit.panels.default.more-actions',
+                defaultMessage: 'More document actions',
+              })}
+            />
+          ) : null}
+        </Flex>
+      </unstable_tours.contentManager.Publish>
       {secondaryAction ? (
-        <DocumentActionButton
-          {...secondaryAction}
-          variant={secondaryAction.variant || 'secondary'}
-        />
+        secondaryAction.label === 'Publish' ? (
+          <unstable_tours.contentManager.Publish>
+            <DocumentActionButton
+              {...secondaryAction}
+              variant={secondaryAction.variant || 'secondary'}
+            />
+          </unstable_tours.contentManager.Publish>
+        ) : (
+          <DocumentActionButton
+            {...secondaryAction}
+            variant={secondaryAction.variant || 'secondary'}
+          />
+        )
       ) : null}
     </Flex>
   );

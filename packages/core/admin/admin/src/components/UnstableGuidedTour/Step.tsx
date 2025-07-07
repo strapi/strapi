@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Popover, Box, Flex, Button, Typography, LinkButton } from '@strapi/design-system';
 import { FormattedMessage, type MessageDescriptor } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { unstableUseGuidedTour, ValidTourName } from './Context';
@@ -85,7 +85,6 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
   ),
 
   Actions: ({ showStepCount = true, showSkip = false, to, ...props }) => {
-    const navigate = useNavigate();
     const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
     const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
     const currentStep = state.tours[tourName].currentStep + 1;
@@ -118,10 +117,9 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
               )}
               {to ? (
                 <LinkButton
-                  onClick={() => {
-                    dispatch({ type: 'next_step', payload: tourName });
-                    navigate(to);
-                  }}
+                  tag={NavLink}
+                  to={to}
+                  onClick={() => dispatch({ type: 'next_step', payload: tourName })}
                 >
                   <FormattedMessage id="tours.next" defaultMessage="Next" />
                 </LinkButton>
