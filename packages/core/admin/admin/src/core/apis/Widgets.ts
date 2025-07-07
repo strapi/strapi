@@ -24,7 +24,7 @@ type WidgetArgs = {
   component: () => Promise<React.ComponentType>;
   pluginId?: string;
   id: string;
-  permissions?: Permission[];
+  permissions?: Array<Pick<Permission, 'action'> & Partial<Omit<Permission, 'action'>>>;
 };
 
 type Widget = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };
