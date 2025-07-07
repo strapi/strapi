@@ -62,7 +62,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         <Flex width="360px" direction="column" alignItems="start">
           {props.children}
         </Flex>
-        {currentStep > 1 && <PopoverArrowStandard />}
+        {currentStep > 1 && <PopoverArrowStandard width="20px" height="12px" />}
       </Popover.Content>
     );
   }),
