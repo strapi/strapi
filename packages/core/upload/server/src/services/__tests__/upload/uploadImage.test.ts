@@ -5,11 +5,29 @@ import _ from 'lodash';
 import createUploadService from '../../upload';
 import imageManipulation from '../../image-manipulation';
 
+const defaultConfig = {
+  'plugin::upload': {
+    breakpoints: {
+      large: 1000,
+      medium: 750,
+    },
+  },
+};
+
 // Set up initial mock before service creation
 global.strapi = {
+  config: {
+    get: (path: any, defaultValue: any) => _.get(defaultConfig, path, defaultValue),
+  },
   plugins: {
     upload: {
       services: {
+        provider: {
+          upload: jest.fn(),
+        },
+        upload: {
+          getSettings: () => ({ responsiveDimensions: false }),
+        },
         'image-manipulation': imageManipulation,
       },
     },
@@ -20,39 +38,14 @@ global.strapi = {
 const uploadService = createUploadService({} as any);
 
 const imageFilePath = path.join(__dirname, './image.png');
-
 const tmpWorkingDirectory = path.join(__dirname, './tmp');
 
 function mockUploadProvider(uploadFunc: any, props?: any) {
   const { responsiveDimensions = false } = props || {};
 
-  const defaultConfig = {
-    'plugin::upload': {
-      breakpoints: {
-        large: 1000,
-        medium: 750,
-      },
-    },
-  };
-
-  global.strapi = {
-    config: {
-      get: (path: any, defaultValue: any) => _.get(defaultConfig, path, defaultValue),
-    },
-    plugins: {
-      upload: {
-        services: {
-          provider: {
-            upload: uploadFunc,
-          },
-          upload: {
-            getSettings: () => ({ responsiveDimensions }),
-          },
-          'image-manipulation': imageManipulation,
-        },
-      },
-    },
-  } as any;
+  // Only mutate the parts that depend on the parameters
+  global.strapi.plugins.upload.services.provider.upload = uploadFunc;
+  global.strapi.plugins.upload.services.upload.getSettings = () => ({ responsiveDimensions });
 }
 
 const getFileData = (filePath: string) => ({

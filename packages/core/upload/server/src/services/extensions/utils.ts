@@ -72,13 +72,13 @@ const signEntityMedia = async (entity: any, uid: UID.Schema) => {
     return entity;
   }
 
-  // Special handling for direct upload file entities
+  // If the entity itself is a file, sign it directly
   if (uid === FILE_MODEL_UID) {
     const { signFileUrls } = getService('file');
     return signFileUrls(entity);
   }
 
-  // Default handling for content types with media attributes
+  // If the entity is a regular content type, look for media attributes
   const model = strapi.getModel(uid);
   return traverseEntity(
     // @ts-expect-error - FIXME: fix traverseEntity using wrong types

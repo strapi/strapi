@@ -3,5 +3,5 @@
 module.exports = {
   preset: '../../../jest-preset.unit.js',
   displayName: 'Plugin GraphQL',
-  passWithNoTests: true,
+  // passWithNoTests: true,
 };

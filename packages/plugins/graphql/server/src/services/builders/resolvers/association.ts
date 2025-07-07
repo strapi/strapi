@@ -76,18 +76,24 @@ export default ({ strapi }: Context) => {
           : {};
 
         const dbQuery = merge(defaultFilters, transformedQuery);
-        let data = await strapi.db?.query(contentTypeUID).load(parent, attributeName, dbQuery);
+        const rawData = await strapi.db?.query(contentTypeUID).load(parent, attributeName, dbQuery);
 
         // Sign media URLs if upload plugin is available and using private provider
-        if (isMediaAttribute && strapi.plugin('upload')) {
-          const { signFileUrls } = strapi.plugin('upload').service('file');
+        const data = await (async () => {
+          if (isMediaAttribute && strapi.plugin('upload')) {
+            const { signFileUrls } = strapi.plugin('upload').service('file');
 
-          if (Array.isArray(data)) {
-            data = await async.map(data, (item: any) => signFileUrls(item));
-          } else if (data) {
-            data = await signFileUrls(data);
+            if (Array.isArray(rawData)) {
+              return async.map(rawData, (item: any) => signFileUrls(item));
+            }
+
+            if (rawData) {
+              return signFileUrls(rawData);
+            }
           }
-        }
+
+          return rawData;
+        })();
 
         const info = {
           args: sanitizedQuery,
