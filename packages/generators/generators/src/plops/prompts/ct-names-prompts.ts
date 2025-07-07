@@ -2,15 +2,13 @@ import pluralize from 'pluralize';
 import slugify from '@sindresorhus/slugify';
 import { strings } from '@strapi/utils';
 
-import type { PromptQuestion } from 'node-plop';
-
 interface Answers {
   displayName: string;
   singularName: string;
   pluralName: string;
 }
 
-const questions: Array<PromptQuestion> = [
+const questions = [
   {
     type: 'input',
     name: 'displayName',
@@ -22,7 +20,7 @@ const questions: Array<PromptQuestion> = [
     name: 'singularName',
     message: 'Content type singular name',
     default: (answers: Answers) => slugify(answers.displayName),
-    validate(input) {
+    validate(input: any) {
       if (!strings.isKebabCase(input)) {
         return 'Value must be in kebab-case';
       }

@@ -1,5 +1,4 @@
 import { join } from 'node:path';
-import nodePlop from 'node-plop';
 
 // Starts the Plop CLI programmatically
 export const runCLI = async () => {
@@ -28,15 +27,36 @@ export const generate = async <T extends Record<string, any>>(
   options: T,
   { dir = process.cwd(), plopFile = 'plopfile.js' } = {}
 ) => {
-  const plop = nodePlop(join(__dirname, plopFile), {
-    destBasePath: join(dir, 'src'),
-    force: false,
-  });
-
-  const generator = plop.getGenerator(generatorName);
-  await generator.runActions(options satisfies T, {
-    onSuccess() {},
-    onFailure() {},
-    onComment() {},
+  const { Plop, run } = await import('plop');
+  
+  return new Promise<void>((resolve, reject) => {
+    Plop.prepare(
+      {
+        cwd: dir,
+        configPath: join(__dirname, plopFile),
+      },
+      (env) => {
+        try {
+          const argv = [generatorName];
+          // Add options as command line arguments
+          for (const [key, value] of Object.entries(options)) {
+            argv.push(`--${key}`, String(value));
+          }
+          
+          Plop.execute(env, argv, (env, argv) => {
+            const runOptions = {
+              ...env,
+              dest: join(dir, 'src'),
+            };
+            
+            return run(runOptions, argv, true)
+              .then(() => resolve())
+              .catch(reject);
+          });
+        } catch (error) {
+          reject(error);
+        }
+      }
+    );
   });
 };
