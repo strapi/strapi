@@ -5,7 +5,6 @@ import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { type GetGuidedTourMeta } from '../../../../shared/contracts/admin';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
 import {
@@ -115,7 +114,6 @@ const tours = {
           <Step.Actions showSkip />
         </Step.Root>
       ),
-      when: (completedActions) => !completedActions.includes('didCreateApiToken'),
     },
     {
       name: 'CreateAnAPIToken',
@@ -203,7 +201,7 @@ const tours = {
     {
       name: 'Fields',
       content: (Step) => (
-        <Step.Root side={'top'} align="start" sideOffset={-36}>
+        <Step.Root side={'top'} sideOffset={-36}>
           <Step.Title id="tours.contentManager.Fields.title" defaultMessage="Fields" />
           <Step.Content
             id="tours.contentManager.Fields.content"

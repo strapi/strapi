@@ -49,14 +49,21 @@ const ActionsContainer = styled(Flex)`
   border-top: ${({ theme }) => `1px solid ${theme.colors.neutral150}`};
 `;
 
+const PopoverArrowStandard = styled(Popover.Arrow)`
+  fill: ${({ theme }) => `${theme.colors.neutral0}`};
+`;
+
 const createStepComponents = (tourName: ValidTourName): Step => ({
-  Root: React.forwardRef((props, ref) => (
-    <Popover.Content ref={ref} side="top" align="center" style={{ border: 'none' }} {...props}>
-      <Flex width="360px" direction="column" alignItems="start">
-        {props.children}
-      </Flex>
-    </Popover.Content>
-  )),
+  Root: React.forwardRef((props, ref) => {
+    return (
+      <Popover.Content ref={ref} side="top" align="center" {...props}>
+        <Flex width="360px" direction="column" alignItems="start">
+          {props.children}
+        </Flex>
+        <PopoverArrowStandard />
+      </Popover.Content>
+    );
+  }),
 
   Title: (props) => {
     return (
