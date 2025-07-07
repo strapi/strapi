@@ -33,6 +33,7 @@ const tours = {
           <Step.Content
             id="tours.contentTypeBuilder.Introduction.content"
             defaultMessage="Create and manage your content structure with collection types, single types and components."
+            withArrow={false}
           />
           <Step.Actions showSkip />
         </Step.Root>
@@ -113,6 +114,7 @@ const tours = {
           <Step.Content
             id="tours.contentManager.Introduction.content"
             defaultMessage="Create and manage content from your collection types and single types."
+            withArrow={false}
           />
           <Step.Actions showSkip />
         </Step.Root>
@@ -121,7 +123,7 @@ const tours = {
     {
       name: 'Fields',
       content: (Step) => (
-        <Step.Root side={'top'} sideOffset={-36}>
+        <Step.Root sideOffset={-36}>
           <Step.Title id="tours.contentManager.Fields.title" defaultMessage="Fields" />
           <Step.Content
             id="tours.contentManager.Fields.content"
@@ -171,6 +173,7 @@ const tours = {
           <Step.Content
             id="tours.apiTokens.Introduction.content"
             defaultMessage="Create and manage API tokens with highly customizable permissions."
+            withArrow={false}
           />
           <Step.Actions showSkip />
         </Step.Root>

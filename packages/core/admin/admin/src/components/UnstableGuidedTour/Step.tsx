@@ -15,12 +15,14 @@ type WithChildren = {
   children: React.ReactNode;
   id?: never;
   defaultMessage?: never;
+  withArrow?: boolean;
 };
 
 type WithIntl = {
   children?: undefined;
   id: MessageDescriptor['id'];
   defaultMessage: MessageDescriptor['defaultMessage'];
+  withArrow?: boolean;
 };
 
 type WithActionsChildren = {
@@ -55,14 +57,11 @@ const PopoverArrow = styled(Popover.Arrow)`
 
 const createStepComponents = (tourName: ValidTourName): Step => ({
   Root: React.forwardRef((props, ref) => {
-    const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
-    const currentStep = state.tours[tourName].currentStep + 1;
     return (
       <Popover.Content ref={ref} side="top" align="center" {...props}>
         <Flex width="360px" direction="column" alignItems="start">
           {props.children}
         </Flex>
-        {currentStep > 1 && <PopoverArrow width="20px" height="12px" />}
       </Popover.Content>
     );
   }),
@@ -81,16 +80,23 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     );
   },
 
-  Content: (props) => (
-    <Box paddingBottom={5} paddingLeft={5} paddingRight={5} width="100%">
-      {'children' in props ? (
-        props.children
-      ) : (
-        <Typography tag="div" variant="omega">
-          <FormattedMessage tagName="p" id={props.id} defaultMessage={props.defaultMessage} />
-        </Typography>
-      )}
-    </Box>
+  Content: ({ withArrow = true, ...restProps }) => (
+    <>
+      <Box paddingBottom={5} paddingLeft={5} paddingRight={5} width="100%">
+        {'children' in restProps ? (
+          restProps.children
+        ) : (
+          <Typography tag="div" variant="omega">
+            <FormattedMessage
+              tagName="p"
+              id={restProps.id}
+              defaultMessage={restProps.defaultMessage}
+            />
+          </Typography>
+        )}
+      </Box>
+      {withArrow && <PopoverArrow />}
+    </>
   ),
 
   Actions: ({ showStepCount = true, showSkip = false, to, ...props }) => {
