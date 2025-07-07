@@ -34,7 +34,7 @@ const getInitials = (user: Partial<User> = {}): string => {
         .split(' ')
         .map((name) => name.substring(0, 1))
         .join('')
-        .substring(0, 2)
+        .substring(0, 1)
         .toUpperCase();
 };
 
