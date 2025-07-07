@@ -79,6 +79,7 @@ export type { Widget as WidgetType } from './core/apis/Widgets';
 export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';
+export * from './utils/rulesEngine';
 export * from './services/api';
 export type { CMAdminConfiguration } from './types/adminConfiguration';
 

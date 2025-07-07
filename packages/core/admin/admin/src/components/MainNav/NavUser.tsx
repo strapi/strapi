@@ -92,7 +92,7 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
 
           <Menu.Item onSelect={handleProfile}>
             {formatMessage({
-              id: 'global.profile',
+              id: 'global.profile.settings',
               defaultMessage: 'Profile settings',
             })}
           </Menu.Item>
