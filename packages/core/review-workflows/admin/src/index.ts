@@ -6,7 +6,7 @@ import { Panel } from './routes/content-manager/model/id/components/Panel';
 import { addColumnToTableHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
-import type { StrapiApp } from '@strapi/admin/strapi-admin';
+import type { StrapiApp, WidgetType } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 const admin: Plugin.Config.AdminInput = {
@@ -37,22 +37,30 @@ const admin: Plugin.Config.AdminInput = {
         },
       });
 
-      app.widgets.register([
-        {
-          icon: SealCheck,
-          title: {
-            id: `${PLUGIN_ID}.widget.assigned.title`,
-            defaultMessage: 'Assigned to me',
-          },
-          component: async () => {
-            const { AssignedWidget } = await import('./components/Widgets');
-            return AssignedWidget;
-          },
-          pluginId: PLUGIN_ID,
-          id: 'assigned',
-          permissions: [{ action: 'plugin::content-manager.explorer.read' }],
+      app.widgets.register({
+        icon: SealCheck,
+        title: {
+          id: `${PLUGIN_ID}.widget.assigned.title`,
+          defaultMessage: 'Assigned to me',
         },
-      ]);
+        component: async () => {
+          const { AssignedWidget } = await import('./components/Widgets');
+          return AssignedWidget;
+        },
+        pluginId: PLUGIN_ID,
+        id: 'assigned',
+        permissions: [{ action: 'plugin::content-manager.explorer.read' }],
+      });
+
+      // Always put the assigned to me widget last in the list of widgets
+      app.widgets.register((widgets: Record<string, WidgetType>) => {
+        const assignedPluginUid = 'plugin::review-workflows.assigned';
+        const ordered = [
+          ...Object.values(widgets).filter((w) => !assignedPluginUid.includes(w.uid)),
+          widgets['plugin::review-workflows.assigned'],
+        ];
+        return Object.fromEntries(ordered.map((w) => [w.uid, w]));
+      });
     } else if (!window.strapi.features.isEnabled(FEATURE_ID) && window.strapi?.flags?.promoteEE) {
       app.addSettingsLink('global', {
         id: PLUGIN_ID,
