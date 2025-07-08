@@ -38,6 +38,25 @@ test.describe('Home', () => {
     await expect(skipTheTourButton).not.toBeVisible();
   });
 
+  test('a user should see its profile information', async ({ page }) => {
+    const profileWidget = page.getByLabel(/Profile/i);
+    await expect(profileWidget).toBeVisible();
+    await expect(profileWidget.getByText('test testing')).toBeVisible();
+    await expect(profileWidget.getByText('test@testing.com')).toBeVisible();
+    await expect(profileWidget.getByText('Super Admin')).toBeVisible();
+
+    // Change the name and make sure it's reflected in the homepage
+    await clickAndWait(page, profileWidget.getByText('Profile settings'));
+    await page.getByRole('textbox', { name: /first name/i }).fill('Ted');
+    await page.getByRole('textbox', { name: /last name/i }).fill('Lasso');
+    await page.getByRole('textbox', { name: /email/i }).fill('ted.lasso@afcrichmond.co.uk');
+    await page.getByRole('button', { name: /save/i }).click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
+
+    await expect(profileWidget.getByText('Ted Lasso')).toBeVisible();
+    await expect(profileWidget.getByText('ted.lasso@afcrichmond.co.uk')).toBeVisible();
+  });
+
   test('a user should see the last edited entries', async ({ page }) => {
     const recentlyEditedWidget = page.getByLabel(/last edited entries/i);
     await expect(recentlyEditedWidget).toBeVisible();

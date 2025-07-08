@@ -23,7 +23,6 @@ import { useConfiguration } from '../features/Configuration';
 import { useStrapiApp } from '../features/StrapiApp';
 import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
-import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
 

@@ -22,7 +22,7 @@ import { useGetPermissionsQuery, useGetRoutesQuery } from '../../../../../servic
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import { FormHead } from '../../../components/Tokens/FormHead';
-import { TokenBox } from '../../../components/Tokens/TokenBox';
+import { TokenBox, UnstableApiTokenBox } from '../../../components/Tokens/TokenBox';
 
 import {
   ApiTokenPermissionsContextValue,
@@ -391,7 +391,16 @@ export const EditView = () => {
                 <Layouts.Content>
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     {apiToken?.accessKey && showToken && (
-                      <TokenBox token={apiToken.accessKey} tokenType={API_TOKEN_TYPE} />
+                      <>
+                        {window.strapi.future.isEnabled('unstableGuidedTour') ? (
+                          <UnstableApiTokenBox
+                            token={apiToken.accessKey}
+                            tokenType={API_TOKEN_TYPE}
+                          />
+                        ) : (
+                          <TokenBox token={apiToken.accessKey} tokenType={API_TOKEN_TYPE} />
+                        )}
+                      </>
                     )}
 
                     <FormApiTokenContainer
