@@ -15,7 +15,6 @@ type WithChildren = {
   children: React.ReactNode;
   id?: never;
   defaultMessage?: never;
-  withArrow?: boolean;
 };
 
 type WithIntl = {
@@ -41,7 +40,9 @@ type StepProps = WithChildren | WithIntl;
 type ActionsProps = WithActionsChildren | WithActionsProps;
 
 type Step = {
-  Root: React.ForwardRefExoticComponent<React.ComponentProps<typeof Popover.Content>>;
+  Root: React.ForwardRefExoticComponent<
+    React.ComponentProps<typeof Popover.Content> & { withArrow?: boolean }
+  >;
   Title: (props: StepProps) => React.ReactNode;
   Content: (props: StepProps) => React.ReactNode;
   Actions: (props: ActionsProps & { to?: string }) => React.ReactNode;
@@ -51,14 +52,32 @@ const ActionsContainer = styled(Flex)`
   border-top: ${({ theme }) => `1px solid ${theme.colors.neutral150}`};
 `;
 
+/**
+ * TODO:
+ * We should probably move all arrow styles + svg to the DS
+ */
 const PopoverArrow = styled(Popover.Arrow)`
-  fill: ${({ theme }) => `${theme.colors.neutral0}`};
+  fill: ${({ theme }) => theme.colors.neutral0};
+  transform: translateY(-16px) rotate(-90deg);
 `;
 
 const createStepComponents = (tourName: ValidTourName): Step => ({
-  Root: React.forwardRef((props, ref) => {
+  Root: React.forwardRef(({ withArrow = true, ...props }, ref) => {
     return (
-      <Popover.Content ref={ref} side="top" align="center" {...props}>
+      <Popover.Content ref={ref} side="top" align="center" style={{ border: 'none' }} {...props}>
+        {withArrow && (
+          <PopoverArrow asChild>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="23"
+              height="25"
+              viewBox="0 0 23 25"
+              fill="none"
+            >
+              <path d="M11 24.5L1.82843 15.3284C0.266332 13.7663 0.26633 11.2337 1.82843 9.67157L11 0.5L23 12.5L11 24.5Z" />
+            </svg>
+          </PopoverArrow>
+        )}
         <Flex width="360px" direction="column" alignItems="start">
           {props.children}
         </Flex>
@@ -80,22 +99,17 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     );
   },
 
-  Content: ({ withArrow = true, ...restProps }) => (
+  Content: (props) => (
     <>
       <Box paddingBottom={5} paddingLeft={5} paddingRight={5} width="100%">
-        {'children' in restProps ? (
-          restProps.children
+        {'children' in props ? (
+          props.children
         ) : (
           <Typography tag="div" variant="omega">
-            <FormattedMessage
-              tagName="p"
-              id={restProps.id}
-              defaultMessage={restProps.defaultMessage}
-            />
+            <FormattedMessage tagName="p" id={props.id} defaultMessage={props.defaultMessage} />
           </Typography>
         )}
       </Box>
-      {withArrow && <PopoverArrow />}
     </>
   ),
 
