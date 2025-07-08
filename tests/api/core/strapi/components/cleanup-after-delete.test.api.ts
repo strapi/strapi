@@ -76,24 +76,23 @@ describe('Component Deletion and Cleanup Test', () => {
   });
 
   afterAll(async () => {
-    // Clean up tables created during the test
-    // Not sure why this is necessary; it could be a bug in builder.cleanup
-    try {
-      // Drop the content type tables
-      await strapi.db.connection.schema.dropTableIfExists(`${contentType.pluralName}_cmps`);
-      await strapi.db.connection.schema.dropTableIfExists(contentType.pluralName);
+    // Delete the content type
+    await rq({
+      method: 'DELETE',
+      url: `/content-type-builder/content-types/${testCollectionTypeUID}`,
+    });
 
-      // Drop the component tables
-      await strapi.db.connection.schema.dropTableIfExists(
-        `components_${compoKeepSchema.category}_${pluralize(compoKeepSchema.displayName)}`
-      );
-      await strapi.db.connection.schema.dropTableIfExists(
-        `components_${compoSchema.category}_${pluralize(compoSchema.displayName)}`
-      );
-    } catch (error) {
-      // Ignore errors if tables don't exist
-      console.warn('Cleanup warning:', error.message);
-    }
+    // Delete the recreated component
+    await rq({
+      method: 'DELETE',
+      url: `/content-type-builder/components/${componentUID}`,
+    });
+
+    // Delete the keep component
+    await rq({
+      method: 'DELETE',
+      url: `/content-type-builder/components/${componentKeepUID}`,
+    });
 
     await strapi.destroy();
     await builder.cleanup();
