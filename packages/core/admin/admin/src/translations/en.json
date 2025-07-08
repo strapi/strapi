@@ -831,5 +831,6 @@
   "tours.overview.strapiCloud.link": "Read documentation",
   "tours.overview.tour.link": "Start",
   "tours.overview.tour.done": "Done",
+  "tours.overview.close.description": "Are you sure you want to close the guided tour?",
   "widget.profile.title": "Profile"
 }
