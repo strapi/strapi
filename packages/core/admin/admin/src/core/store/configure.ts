@@ -92,7 +92,7 @@ const rtkQueryUnauthorizedMiddleware: Middleware =
     // isRejectedWithValue Or isRejected
     if (isRejected(action) && action.payload?.status === 401) {
       dispatch(logout());
-      window.location.href = '/admin/auth/login';
+      window.location.href = process.env.STRAPI_ADMIN_BACKEND_URL + '/admin/auth/login';
       return;
     }
 
