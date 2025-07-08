@@ -25,7 +25,7 @@ const tours = {
     {
       name: 'Introduction',
       content: (Step) => (
-        <Step.Root side="bottom">
+        <Step.Root side="bottom" withArrow={false}>
           <Step.Title
             id="tours.contentTypeBuilder.Introduction.title"
             defaultMessage="Content-Type Builder"
@@ -41,7 +41,7 @@ const tours = {
     {
       name: 'CollectionTypes',
       content: (Step) => (
-        <Step.Root side="right" sideOffset={26}>
+        <Step.Root side="right" sideOffset={16}>
           <Step.Title
             id="tours.contentTypeBuilder.CollectionTypes.title"
             defaultMessage="Collection Types"
@@ -57,7 +57,7 @@ const tours = {
     {
       name: 'SingleTypes',
       content: (Step) => (
-        <Step.Root side="right" sideOffset={26}>
+        <Step.Root side="right" sideOffset={16}>
           <Step.Title
             id="tours.contentTypeBuilder.SingleTypes.title"
             defaultMessage="Single Types"
@@ -73,7 +73,7 @@ const tours = {
     {
       name: 'Components',
       content: (Step) => (
-        <Step.Root side="right" sideOffset={26}>
+        <Step.Root side="right" sideOffset={16}>
           <Step.Title id="tours.contentTypeBuilder.Components.title" defaultMessage="Components" />
           <Step.Content
             id="tours.contentTypeBuilder.Components.content"
@@ -86,7 +86,7 @@ const tours = {
     {
       name: 'Finish',
       content: (Step) => (
-        <Step.Root side="right" sideOffset={32}>
+        <Step.Root side="right">
           <Step.Title
             id="tours.contentTypeBuilder.Finish.title"
             defaultMessage="It’s time to create content!"
@@ -105,7 +105,7 @@ const tours = {
     {
       name: 'Introduction',
       content: (Step) => (
-        <Step.Root side="top">
+        <Step.Root side="top" withArrow={false}>
           <Step.Title
             id="tours.contentManager.Introduction.title"
             defaultMessage="Content manager"
@@ -121,7 +121,7 @@ const tours = {
     {
       name: 'Fields',
       content: (Step) => (
-        <Step.Root side={'top'} align="start" sideOffset={-36}>
+        <Step.Root sideOffset={-12}>
           <Step.Title id="tours.contentManager.Fields.title" defaultMessage="Fields" />
           <Step.Content
             id="tours.contentManager.Fields.content"
@@ -134,7 +134,7 @@ const tours = {
     {
       name: 'Publish',
       content: (Step) => (
-        <Step.Root side="left" align="center" sideOffset={20}>
+        <Step.Root side="left" align="center">
           <Step.Title id="tours.contentManager.Publish.title" defaultMessage="Publish" />
           <Step.Content
             id="tours.contentManager.Publish.content"
@@ -147,7 +147,7 @@ const tours = {
     {
       name: 'Finish',
       content: (Step) => (
-        <Step.Root side="right" sideOffset={32}>
+        <Step.Root side="right">
           <Step.Title
             id="tours.contentManager.FinalStep.title"
             defaultMessage="It’s time to create API Tokens!"
@@ -166,7 +166,7 @@ const tours = {
     {
       name: 'Introduction',
       content: (Step) => (
-        <Step.Root sideOffset={-36}>
+        <Step.Root sideOffset={-36} withArrow={false}>
           <Step.Title id="tours.apiTokens.Introduction.title" defaultMessage="API tokens" />
           <Step.Content
             id="tours.apiTokens.Introduction.content"
@@ -175,12 +175,11 @@ const tours = {
           <Step.Actions showSkip />
         </Step.Root>
       ),
-      when: (completedActions) => !completedActions.includes('didCreateApiToken'),
     },
     {
       name: 'CreateAnAPIToken',
       content: (Step) => (
-        <Step.Root side="bottom" sideOffset={20} align="end">
+        <Step.Root side="bottom" align="end" sideOffset={-10}>
           <Step.Title
             id="tours.apiTokens.CreateAnAPIToken.title"
             defaultMessage="Create an API token"
@@ -196,7 +195,7 @@ const tours = {
     {
       name: 'CopyAPIToken',
       content: (Step) => (
-        <Step.Root side="bottom" align="start">
+        <Step.Root side="bottom" align="start" sideOffset={-5}>
           <Step.Title
             id="tours.apiTokens.CopyAPIToken.title"
             defaultMessage="Copy your new API token"
@@ -215,7 +214,7 @@ const tours = {
       content: (Step) => {
         const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
         return (
-          <Step.Root side="right" align="start" sideOffset={32}>
+          <Step.Root side="right" align="start">
             <Step.Title
               id="tours.apiTokens.FinalStep.title"
               defaultMessage="It’s time to deploy your application!"

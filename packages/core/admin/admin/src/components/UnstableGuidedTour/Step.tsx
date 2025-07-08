@@ -21,6 +21,7 @@ type WithIntl = {
   children?: undefined;
   id: MessageDescriptor['id'];
   defaultMessage: MessageDescriptor['defaultMessage'];
+  withArrow?: boolean;
 };
 
 type WithActionsChildren = {
@@ -39,7 +40,9 @@ type StepProps = WithChildren | WithIntl;
 type ActionsProps = WithActionsChildren | WithActionsProps;
 
 type Step = {
-  Root: React.ForwardRefExoticComponent<React.ComponentProps<typeof Popover.Content>>;
+  Root: React.ForwardRefExoticComponent<
+    React.ComponentProps<typeof Popover.Content> & { withArrow?: boolean }
+  >;
   Title: (props: StepProps) => React.ReactNode;
   Content: (props: StepProps) => React.ReactNode;
   Actions: (props: ActionsProps & { to?: string }) => React.ReactNode;
@@ -49,14 +52,38 @@ const ActionsContainer = styled(Flex)`
   border-top: ${({ theme }) => `1px solid ${theme.colors.neutral150}`};
 `;
 
+/**
+ * TODO:
+ * We should probably move all arrow styles + svg to the DS
+ */
+const PopoverArrow = styled(Popover.Arrow)`
+  fill: ${({ theme }) => theme.colors.neutral0};
+  transform: translateY(-16px) rotate(-90deg);
+`;
+
 const createStepComponents = (tourName: ValidTourName): Step => ({
-  Root: React.forwardRef((props, ref) => (
-    <Popover.Content ref={ref} side="top" align="center" style={{ border: 'none' }} {...props}>
-      <Flex width="360px" direction="column" alignItems="start">
-        {props.children}
-      </Flex>
-    </Popover.Content>
-  )),
+  Root: React.forwardRef(({ withArrow = true, ...props }, ref) => {
+    return (
+      <Popover.Content ref={ref} side="top" align="center" style={{ border: 'none' }} {...props}>
+        {withArrow && (
+          <PopoverArrow asChild>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="23"
+              height="25"
+              viewBox="0 0 23 25"
+              fill="none"
+            >
+              <path d="M11 24.5L1.82843 15.3284C0.266332 13.7663 0.26633 11.2337 1.82843 9.67157L11 0.5L23 12.5L11 24.5Z" />
+            </svg>
+          </PopoverArrow>
+        )}
+        <Flex width="360px" direction="column" alignItems="start">
+          {props.children}
+        </Flex>
+      </Popover.Content>
+    );
+  }),
 
   Title: (props) => {
     return (
