@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-import { Box, Popover, Portal, Flex, LinkButton } from '@strapi/design-system';
+import { Box, Popover, Portal, Flex, Button } from '@strapi/design-system';
 import { FormattedMessage } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
@@ -19,6 +18,16 @@ import { Step, createStepComponents } from './Step';
 /* -------------------------------------------------------------------------------------------------
  * Tours
  * -----------------------------------------------------------------------------------------------*/
+
+const GotItAction = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <Flex justifyContent="end" width="100%">
+      <Button onClick={onClick}>
+        <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
+      </Button>
+    </Flex>
+  );
+};
 
 const tours = {
   contentTypeBuilder: createTour('contentTypeBuilder', [
@@ -72,14 +81,18 @@ const tours = {
     },
     {
       name: 'Components',
-      content: (Step) => (
+      content: (Step, { dispatch }) => (
         <Step.Root side="right" sideOffset={16}>
           <Step.Title id="tours.contentTypeBuilder.Components.title" defaultMessage="Components" />
           <Step.Content
             id="tours.contentTypeBuilder.Components.content"
             defaultMessage="A reusable content structure that can be used across multiple content types, such as buttons, sliders or cards."
           />
-          <Step.Actions />
+          <Step.Actions>
+            <GotItAction
+              onClick={() => dispatch({ type: 'next_step', payload: 'contentTypeBuilder' })}
+            />
+          </Step.Actions>
         </Step.Root>
       ),
     },
@@ -104,6 +117,9 @@ const tours = {
   contentManager: createTour('contentManager', [
     {
       name: 'Introduction',
+      when: (completedActions) =>
+        completedActions.includes('didCreateContentTypeSchema') &&
+        !completedActions.includes('didCreateContent'),
       content: (Step) => (
         <Step.Root side="top" withArrow={false}>
           <Step.Title
@@ -133,14 +149,18 @@ const tours = {
     },
     {
       name: 'Publish',
-      content: (Step) => (
+      content: (Step, { dispatch }) => (
         <Step.Root side="left" align="center">
           <Step.Title id="tours.contentManager.Publish.title" defaultMessage="Publish" />
           <Step.Content
             id="tours.contentManager.Publish.content"
             defaultMessage="Publish entries to make their content available through the Document Service API."
           />
-          <Step.Actions />
+          <Step.Actions>
+            <GotItAction
+              onClick={() => dispatch({ type: 'next_step', payload: 'contentManager' })}
+            />
+          </Step.Actions>
         </Step.Root>
       ),
     },
@@ -165,6 +185,7 @@ const tours = {
   apiTokens: createTour('apiTokens', [
     {
       name: 'Introduction',
+      when: (completedActions) => !completedActions.includes('didCreateApiToken'),
       content: (Step) => (
         <Step.Root sideOffset={-36} withArrow={false}>
           <Step.Title id="tours.apiTokens.Introduction.title" defaultMessage="API tokens" />
@@ -194,7 +215,7 @@ const tours = {
     },
     {
       name: 'CopyAPIToken',
-      content: (Step) => (
+      content: (Step, { dispatch }) => (
         <Step.Root side="bottom" align="start" sideOffset={-5}>
           <Step.Title
             id="tours.apiTokens.CopyAPIToken.title"
@@ -204,41 +225,28 @@ const tours = {
             id="tours.apiTokens.CopyAPIToken.content"
             defaultMessage="Make sure to do it now, you won’t be able to see it again. You’ll need to generate a new one if you lose it."
           />
-          <Step.Actions />
+          <Step.Actions>
+            <GotItAction onClick={() => dispatch({ type: 'next_step', payload: 'apiTokens' })} />
+          </Step.Actions>
         </Step.Root>
       ),
       when: (completedActions) => completedActions.includes('didCreateApiToken'),
     },
     {
       name: 'Finish',
-      content: (Step) => {
-        const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
-        return (
-          <Step.Root side="right" align="start">
-            <Step.Title
-              id="tours.apiTokens.FinalStep.title"
-              defaultMessage="It’s time to deploy your application!"
-            />
-            <Step.Content
-              id="tours.apiTokens.FinalStep.content"
-              defaultMessage="Your application is ready to be deployed and its content to be shared with the world!"
-            />
-            <Step.Actions showStepCount={false}>
-              <Flex justifyContent="end" width={'100%'}>
-                <LinkButton
-                  onClick={() => {
-                    dispatch({ type: 'next_step', payload: 'apiTokens' });
-                  }}
-                  tag={NavLink}
-                  to="/"
-                >
-                  <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
-                </LinkButton>
-              </Flex>
-            </Step.Actions>
-          </Step.Root>
-        );
-      },
+      content: (Step) => (
+        <Step.Root side="right" align="start">
+          <Step.Title
+            id="tours.apiTokens.FinalStep.title"
+            defaultMessage="It’s time to deploy your application!"
+          />
+          <Step.Content
+            id="tours.apiTokens.FinalStep.content"
+            defaultMessage="Your application is ready to be deployed and its content to be shared with the world!"
+          />
+          <Step.Actions showStepCount={false} to="/" />
+        </Step.Root>
+      ),
       when: (completedActions) => completedActions.includes('didCopyApiToken'),
     },
   ]),
