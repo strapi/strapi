@@ -100,17 +100,15 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
   },
 
   Content: (props) => (
-    <>
-      <Box paddingBottom={5} paddingLeft={5} paddingRight={5} width="100%">
-        {'children' in props ? (
-          props.children
-        ) : (
-          <Typography tag="div" variant="omega">
-            <FormattedMessage tagName="p" id={props.id} defaultMessage={props.defaultMessage} />
-          </Typography>
-        )}
-      </Box>
-    </>
+    <Box paddingBottom={5} paddingLeft={5} paddingRight={5} width="100%">
+      {'children' in props ? (
+        props.children
+      ) : (
+        <Typography tag="div" variant="omega">
+          <FormattedMessage tagName="p" id={props.id} defaultMessage={props.defaultMessage} />
+        </Typography>
+      )}
+    </Box>
   ),
 
   Actions: ({ showStepCount = true, showSkip = false, to, ...props }) => {
