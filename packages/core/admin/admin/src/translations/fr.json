@@ -563,5 +563,6 @@
   "components.Blocks.blocks.image": "Image",
   "components.Blocks.blocks.unorderedList": "Liste à puces",
   "components.Blocks.blocks.orderedList": "Liste numérotée",
+  "widget.key-statistics.title": "Statistiques du projet",
   "widget.profile.title": "Profil"
 }

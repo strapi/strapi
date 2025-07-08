@@ -462,6 +462,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
+  function count(params: any = {}): Promise<number> {
+    return strapi.db.query(FILE_MODEL_UID).count({ where: params });
+  }
+
   function findOne(id: ID, populate = {}) {
     const query = strapi.get('query-params').transform(FILE_MODEL_UID, {
       populate,
@@ -549,6 +553,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     upload,
     updateFileInfo,
     replace,
+    count,
     findOne,
     findMany,
     findPage,

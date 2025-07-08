@@ -582,5 +582,6 @@
   "components.Blocks.blocks.heading5": "Título 5",
   "components.Blocks.blocks.heading6": "Título 6",
   "components.Blocks.blocks.image": "Imagen",
+  "widget.key-statistics.title": "Estadísticas del proyecto",
   "widget.profile.title": "Perfil"
 }

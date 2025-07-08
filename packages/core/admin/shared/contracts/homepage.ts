@@ -27,3 +27,23 @@ export declare namespace GetRecentDocuments {
     error?: errors.ApplicationError;
   }
 }
+
+export declare namespace GetKeyStatistics {
+  export interface Request {
+    body: {};
+  }
+
+  export interface Response {
+    data: {
+      entries: number;
+      assets: number;
+      contentTypes: number;
+      components: number;
+      locales: number;
+      admins: number;
+      webhooks: number;
+      apiTokens: number;
+    };
+    error?: errors.ApplicationError;
+  }
+}
