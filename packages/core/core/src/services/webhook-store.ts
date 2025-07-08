@@ -77,6 +77,7 @@ export interface WebhookStore {
   removeAllowedEvent(key: string): void;
   listAllowedEvents(): string[];
   getAllowedEvent(key: string): string | undefined;
+  countWebhooks(): Promise<number>;
   findWebhooks(): Promise<Webhook[]>;
   findWebhook(id: string): Promise<Webhook | null>;
   createWebhook(data: Webhook): Promise<Webhook>;
@@ -105,6 +106,10 @@ const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
     },
     getAllowedEvent(key) {
       return this.allowedEvents.get(key);
+    },
+    async countWebhooks() {
+      const results = await db.query('strapi::webhook').count();
+      return results;
     },
     async findWebhooks() {
       const results = await db.query('strapi::webhook').findMany();

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { User } from '@strapi/icons';
+import { User, ChartBubble } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -338,6 +338,19 @@ class StrapiApp {
           },
           href: '/me',
         },
+      },
+      {
+        icon: ChartBubble,
+        title: {
+          id: 'widget.key-statistics.title',
+          defaultMessage: 'Project statistics',
+        },
+        component: async () => {
+          const { KeyStatisticsWidget } = await import('./components/Widgets');
+          return KeyStatisticsWidget;
+        },
+        pluginId: 'admin',
+        id: 'key-statistics',
       },
     ]);
 
