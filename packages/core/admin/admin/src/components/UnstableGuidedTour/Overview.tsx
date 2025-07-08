@@ -1,8 +1,10 @@
-import { Box, Button, Flex, Link, ProgressBar, Typography } from '@strapi/design-system';
+import { Box, Button, Dialog, Flex, Link, ProgressBar, Typography } from '@strapi/design-system';
 import { CheckCircle, ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
+
+import { ConfirmDialog } from '../ConfirmDialog';
 
 import { type ValidTourName, unstableUseGuidedTour } from './Context';
 
@@ -179,12 +181,22 @@ export const UnstableGuidedTourOverview = () => {
           <Typography variant="pi">{completionPercentage}%</Typography>
           <StyledProgressBar value={completionPercentage} />
         </Flex>
-        <Button variant="tertiary" onClick={() => dispatch({ type: 'skip_all_tours' })}>
-          {formatMessage({
-            id: 'tours.overview.close',
-            defaultMessage: 'Close guided tour',
-          })}
-        </Button>
+        <Dialog.Root>
+          <Dialog.Trigger>
+            <Button variant="tertiary">
+              {formatMessage({
+                id: 'tours.overview.close',
+                defaultMessage: 'Close guided tour',
+              })}
+            </Button>
+          </Dialog.Trigger>
+          <ConfirmDialog onConfirm={() => dispatch({ type: 'skip_all_tours' })}>
+            {formatMessage({
+              id: 'tours.overview.close.description',
+              defaultMessage: 'Are you sure you want to close the guided tour?',
+            })}
+          </ConfirmDialog>
+        </Dialog.Root>
       </ContentSection>
       <VerticalSeparator />
       {/* Task List */}
