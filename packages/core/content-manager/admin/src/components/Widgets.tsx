@@ -301,10 +301,10 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
         <Portal
           style={{
             position: 'fixed',
-            left: tooltip.x,
-            top: tooltip.y,
+            left: 16,
+            top: 16,
             zIndex: 2,
-            transform: 'translate(1.6rem, 1.6rem)',
+            transform: `translate(${tooltip.x}px, ${tooltip.y}px)`,
           }}
           data-testid="entries-chart-tooltip"
         >
