@@ -848,5 +848,6 @@
   "tours.profile.description": "You can reset the guided tour at any time.",
   "tours.profile.reset": "Reset guided tour",
   "tours.profile.notification.success.reset": "Guided tour reset",
+  "widget.key-statistics.title": "Project statistics",
   "widget.profile.title": "Profile"
 }
