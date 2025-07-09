@@ -204,6 +204,7 @@ interface ChartData {
 }
 
 const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
+  const { locale } = useIntl();
   const { formatMessage } = useIntl();
   const total = data.reduce((acc, curr) => acc + curr.count, 0);
   const [tooltip, setTooltip] = React.useState<{
@@ -281,12 +282,15 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
         </g>
         <text x={RADIUS} y={RADIUS} textAnchor="middle" fontSize="2.4rem" fontWeight="bold">
           <TextChart x={RADIUS} dy="0" $textColor="neutral800">
-            {total}
+            {new Intl.NumberFormat(locale, {
+              notation: 'compact',
+              maximumFractionDigits: 1,
+            }).format(total)}
           </TextChart>
           <TextChart
             x={RADIUS}
             dy="1.4em"
-            fontSize="1rem"
+            fontSize="1.4rem"
             fontWeight="normal"
             $textColor="neutral600"
           >

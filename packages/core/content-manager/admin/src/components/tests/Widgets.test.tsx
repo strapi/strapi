@@ -58,4 +58,15 @@ describe('ChartEntriesWidget', () => {
     expect(screen.getByText('Modified')).toBeInTheDocument();
     expect(screen.getByText('6')).toBeInTheDocument();
   });
+
+  it('formats large numbers', () => {
+    jest.mocked(useGetCountDocumentsQuery).mockReturnValue({
+      isLoading: false,
+      error: false,
+      data: { draft: 950, published: 600, modified: 5000 },
+      refetch: jest.fn(),
+    });
+    render(<ChartEntriesWidget />);
+    expect(screen.getByText(/6.6k/i)).toBeInTheDocument();
+  });
 });
