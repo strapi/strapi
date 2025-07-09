@@ -334,6 +334,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
           'RecentDocumentList',
+          'GuidedTourMeta',
         ];
       },
     }),
@@ -377,7 +378,6 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           'Relations',
           { type: 'UidAvailability', id: model },
-          'RecentDocumentList',
           'RecentDocumentList',
         ];
       },

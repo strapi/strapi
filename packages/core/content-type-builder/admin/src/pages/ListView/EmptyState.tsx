@@ -1,4 +1,5 @@
-import { Button, Flex, Typography } from '@strapi/design-system';
+import { unstable_tours } from '@strapi/admin/strapi-admin';
+import { Button, Box, Flex, Typography } from '@strapi/design-system';
 import { Sparkle, Paperclip } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
@@ -43,7 +44,10 @@ export const EmptyState = () => {
       gap={6}
     >
       <EmptyDocuments width="160px" height="88px" />
-
+      <unstable_tours.contentTypeBuilder.Introduction>
+        {/* Invisible Anchor */}
+        <Box paddingTop={5} />
+      </unstable_tours.contentTypeBuilder.Introduction>
       <Flex gap={2} alignItems="center" direction="column">
         <Typography variant="beta" textAlign="center">
           {pluginName}

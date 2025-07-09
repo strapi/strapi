@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upgrade",
-  "version": "5.16.1",
+  "version": "5.18.0",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",
@@ -61,7 +61,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.16.1",
+    "@strapi/utils": "5.18.0",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
@@ -74,13 +74,14 @@
     "ora": "5.4.1",
     "prompts": "2.4.2",
     "semver": "7.5.4",
-    "simple-git": "3.21.0"
+    "simple-git": "3.21.0",
+    "undici": "6.21.2"
   },
   "devDependencies": {
-    "@strapi/types": "5.16.1",
+    "@strapi/types": "5.18.0",
     "@types/fs-extra": "11.0.4",
     "@types/jscodeshift": "0.12.0",
-    "eslint-config-custom": "5.16.1",
+    "eslint-config-custom": "5.18.0",
     "rimraf": "5.0.5"
   },
   "engines": {
