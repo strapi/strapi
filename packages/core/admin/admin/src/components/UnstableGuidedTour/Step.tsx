@@ -5,6 +5,8 @@ import { FormattedMessage, type MessageDescriptor } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { type EventWithoutProperties, useTracking } from '../../features/Tracking';
+
 import { unstableUseGuidedTour, ValidTourName } from './Context';
 
 /* -------------------------------------------------------------------------------------------------
@@ -28,12 +30,14 @@ type WithActionsChildren = {
   children: React.ReactNode;
   showStepCount?: boolean;
   showSkip?: boolean;
+  trackedEvent?: EventWithoutProperties['name'];
 };
 
 type WithActionsProps = {
   children?: undefined;
   showStepCount?: boolean;
   showSkip?: boolean;
+  trackedEvent?: EventWithoutProperties['name'];
 };
 
 type StepProps = WithChildren | WithIntl;
@@ -111,12 +115,18 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     </Box>
   ),
 
-  Actions: ({ showStepCount = true, showSkip = false, to, ...props }) => {
+  Actions: ({ showStepCount = true, showSkip = false, to, trackedEvent, ...props }) => {
+    const { trackUsage } = useTracking();
     const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
     const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
     const currentStep = state.tours[tourName].currentStep + 1;
     // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
     const displayedLength = state.tours[tourName].length - 1;
+
+    const handleSkipAction = () => {
+      trackUsage('didSkipGuidedtour');
+      dispatch({ type: 'skip_tour', payload: tourName });
+    };
 
     return (
       <ActionsContainer width="100%" padding={3} paddingLeft={5}>
@@ -135,10 +145,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
             )}
             <Flex gap={2}>
               {showSkip && (
-                <Button
-                  variant="tertiary"
-                  onClick={() => dispatch({ type: 'skip_tour', payload: tourName })}
-                >
+                <Button variant="tertiary" onClick={handleSkipAction}>
                   <FormattedMessage id="tours.skip" defaultMessage="Skip" />
                 </Button>
               )}
@@ -146,12 +153,20 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
                 <LinkButton
                   tag={NavLink}
                   to={to}
-                  onClick={() => dispatch({ type: 'next_step', payload: tourName })}
+                  onClick={() => {
+                    trackedEvent != null && trackUsage(trackedEvent);
+                    dispatch({ type: 'next_step', payload: tourName });
+                  }}
                 >
                   <FormattedMessage id="tours.next" defaultMessage="Next" />
                 </LinkButton>
               ) : (
-                <Button onClick={() => dispatch({ type: 'next_step', payload: tourName })}>
+                <Button
+                  onClick={() => {
+                    trackedEvent != null && trackUsage(trackedEvent);
+                    dispatch({ type: 'next_step', payload: tourName });
+                  }}
+                >
                   <FormattedMessage id="tours.next" defaultMessage="Next" />
                 </Button>
               )}

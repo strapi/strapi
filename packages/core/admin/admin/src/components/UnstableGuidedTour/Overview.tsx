@@ -4,9 +4,12 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
 
+import { useTracking } from '../../features/Tracking';
 import { ConfirmDialog } from '../ConfirmDialog';
 
 import { type ValidTourName, unstableUseGuidedTour } from './Context';
+
+import type { EventWithoutProperties } from '../../features/Tracking';
 
 /* -------------------------------------------------------------------------------------------------
  * Styled
@@ -65,7 +68,22 @@ const DONE_LABEL = {
   defaultMessage: 'Done',
 };
 
-const TASK_CONTENT = [
+type TaskContentItem = {
+  tourName: ValidTourName | string;
+  link: {
+    label: {
+      id: string;
+      defaultMessage: string;
+    };
+    to: string;
+  };
+  title: { id: string; defaultMessage: string };
+  done: typeof DONE_LABEL;
+  trackingEvent?: EventWithoutProperties['name'];
+  isExternal?: boolean;
+};
+
+const TASK_CONTENT: TaskContentItem[] = [
   {
     tourName: 'contentTypeBuilder',
     link: {
@@ -77,6 +95,7 @@ const TASK_CONTENT = [
       defaultMessage: 'Create your schema',
     },
     done: DONE_LABEL,
+    trackingEvent: 'didClickGuidedTourHomepageContentTypeBuilder',
   },
   {
     tourName: 'contentManager',
@@ -89,6 +108,7 @@ const TASK_CONTENT = [
       defaultMessage: 'Create and publish content',
     },
     done: DONE_LABEL,
+    trackingEvent: 'didClickGuidedTourHomepageContentManager',
   },
   {
     tourName: 'apiTokens',
@@ -101,6 +121,7 @@ const TASK_CONTENT = [
       defaultMessage: 'Create and copy an API token',
     },
     done: DONE_LABEL,
+    trackingEvent: 'didClickGuidedTourHomepageApiTokens',
   },
   {
     tourName: 'strapiCloud',
@@ -142,6 +163,7 @@ export const UnstableGuidedTourOverview = () => {
   const dispatch = unstableUseGuidedTour('Overview', (s) => s.dispatch);
   const enabled = unstableUseGuidedTour('Overview', (s) => s.state.enabled);
   const tourNames = Object.keys(tours) as ValidTourName[];
+  const { trackUsage } = useTracking();
 
   const completedTours = tourNames.filter((tourName) => tours[tourName].isCompleted);
   const completionPercentage =
@@ -211,6 +233,12 @@ export const UnstableGuidedTourOverview = () => {
           {TASK_CONTENT.map((task) => {
             const tour = tours[task.tourName as ValidTourName];
 
+            const handleClick = () => {
+              if (task.trackingEvent) {
+                trackUsage(task.trackingEvent);
+              }
+            };
+
             return (
               <TourTaskContainer
                 key={task.tourName}
@@ -248,7 +276,12 @@ export const UnstableGuidedTourOverview = () => {
                         {formatMessage(task.link.label)}
                       </Link>
                     ) : (
-                      <Link endIcon={<ChevronRight />} to={task.link.to} tag={NavLink}>
+                      <Link
+                        endIcon={<ChevronRight />}
+                        to={task.link.to}
+                        tag={NavLink}
+                        onClick={handleClick}
+                      >
                         {formatMessage(task.link.label)}
                       </Link>
                     )}

@@ -5,6 +5,7 @@ import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useTracking } from '../../features/Tracking';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
 import {
@@ -95,7 +96,11 @@ const tours = {
             id="tours.contentTypeBuilder.Finish.content"
             defaultMessage="Now that you created content types, you’ll be able to create content in the content manager."
           />
-          <Step.Actions showStepCount={false} to="/content-manager" />
+          <Step.Actions
+            showStepCount={false}
+            to="/content-manager"
+            trackedEvent="didCreateGuidedTourCollectionType"
+          />
         </Step.Root>
       ),
       when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
@@ -156,7 +161,11 @@ const tours = {
             id="tours.contentManager.FinalStep.content"
             defaultMessage="Now that you’ve created and published content, time to create API tokens and set up permissions."
           />
-          <Step.Actions showStepCount={false} to="/settings/api-tokens" />
+          <Step.Actions
+            showStepCount={false}
+            to="/settings/api-tokens"
+            trackedEvent="didCreateGuidedTourEntry"
+          />
         </Step.Root>
       ),
       when: (completedActions) => completedActions.includes('didCreateContent'),
@@ -227,6 +236,8 @@ const tours = {
               <Flex justifyContent="end" width={'100%'}>
                 <LinkButton
                   onClick={() => {
+                    const { trackUsage } = useTracking();
+                    trackUsage('didGenerateGuidedTourApiTokens');
                     dispatch({ type: 'next_step', payload: 'apiTokens' });
                   }}
                   tag={NavLink}
