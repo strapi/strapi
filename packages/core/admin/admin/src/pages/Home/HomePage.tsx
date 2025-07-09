@@ -7,6 +7,7 @@ import { Link as ReactRouterLink } from 'react-router-dom';
 
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
+import { UnstableGuidedTourOverview } from '../../components/UnstableGuidedTour/Overview';
 import { Widget } from '../../components/WidgetHelpers';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
@@ -153,7 +154,11 @@ const HomePageCE = () => {
       <FreeTrialEndedModal />
       <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
-          <GuidedTour />
+          {window.strapi.future.isEnabled('unstableGuidedTour') ? (
+            <UnstableGuidedTourOverview />
+          ) : (
+            <GuidedTour />
+          )}
           <Grid.Root gap={5}>
             {getAllWidgets().map((widget) => {
               return (
