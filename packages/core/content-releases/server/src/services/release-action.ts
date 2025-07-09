@@ -195,7 +195,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         return {
           ...action,
           entry,
-          status: entry ? await getEntryStatus(action.contentType, entry) : null,
+          status: entry ? await getEntryStatus(action.contentType, entry, { strapi }) : null,
         };
       });
 

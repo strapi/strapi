@@ -14,7 +14,7 @@ import type {
   MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
-import { getService } from '../utils';
+import { getReleaseTree, getService } from '../utils';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
@@ -280,10 +280,11 @@ const releaseController = {
 
   async publish(ctx: Koa.Context) {
     const id: PublishRelease.Request['params']['id'] = ctx.params.id;
+    const releaseTree = await getReleaseTree(id, strapi);
 
     const releaseService = getService('release', { strapi });
     const releaseActionService = getService('release-action', { strapi });
-    const release = await releaseService.publish(id);
+    const release = await releaseService.publish(id, releaseTree);
 
     const [countPublishActions, countUnpublishActions] = await Promise.all([
       releaseActionService.countActions({
@@ -308,6 +309,13 @@ const releaseController = {
         totalUnpublishedEntries: countUnpublishActions,
       },
     };
+  },
+  async tree(ctx: Koa.Context) {
+    const releaseId = ctx.params.id;
+
+    const releaseTree = await getReleaseTree(releaseId, strapi);
+
+    ctx.body = releaseTree;
   },
 };
 
