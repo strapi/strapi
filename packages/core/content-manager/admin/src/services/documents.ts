@@ -67,6 +67,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         { type: 'Document', id: `${model}_LIST` },
         { type: 'UidAvailability', id: model },
         'RecentDocumentList',
+        'CountDocuments',
       ],
     }),
     /**
@@ -355,8 +356,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_res, _error, { model, documentIds }) =>
-        documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
+      invalidatesTags: (_res, _error, { model, documentIds }) => {
+        return [
+          ...documentIds.map((id) => ({ type: 'Document' as const, id: `${model}_${id}` })),
+          'RecentDocumentList',
+          'CountDocuments',
+        ];
+      },
     }),
     updateDocument: builder.mutation<
       Update.Response,
