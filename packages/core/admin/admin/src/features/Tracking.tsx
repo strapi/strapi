@@ -67,7 +67,7 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
  * Meanwhile those with properties have different property shapes corresponding to the specific
  * event so understanding which properties go with which event is very helpful.
  */
-interface EventWithoutProperties {
+export interface EventWithoutProperties {
   name:
     | 'changeComponentsOrder'
     | 'didAddComponentToDynamicZone'
