@@ -581,5 +581,6 @@
   "components.Blocks.blocks.heading4": "Título 4",
   "components.Blocks.blocks.heading5": "Título 5",
   "components.Blocks.blocks.heading6": "Título 6",
-  "components.Blocks.blocks.image": "Imagen"
+  "components.Blocks.blocks.image": "Imagen",
+  "widget.profile.title": "Perfil"
 }
