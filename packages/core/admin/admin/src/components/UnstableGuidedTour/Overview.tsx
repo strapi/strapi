@@ -4,13 +4,10 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
 
-import { useTracking } from '../../features/Tracking';
+import { type EventWithoutProperties, useTracking } from '../../features/Tracking';
 import { ConfirmDialog } from '../ConfirmDialog';
 
 import { type ValidTourName, unstableUseGuidedTour } from './Context';
-
-import type { EventWithoutProperties } from '../../features/Tracking';
-
 /* -------------------------------------------------------------------------------------------------
  * Styled
  * -----------------------------------------------------------------------------------------------*/
@@ -212,7 +209,12 @@ export const UnstableGuidedTourOverview = () => {
               })}
             </Button>
           </Dialog.Trigger>
-          <ConfirmDialog onConfirm={() => dispatch({ type: 'skip_all_tours' })}>
+          <ConfirmDialog
+            onConfirm={() => {
+              trackUsage('didSkipGuidedTour' as EventWithoutProperties['name']);
+              dispatch({ type: 'skip_all_tours' });
+            }}
+          >
             {formatMessage({
               id: 'tours.overview.close.description',
               defaultMessage: 'Are you sure you want to close the guided tour?',

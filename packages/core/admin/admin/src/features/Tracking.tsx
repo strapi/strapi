@@ -357,6 +357,14 @@ interface DidUpdateCTBSchema {
   };
 }
 
+interface DidSkipGuidedTourStep {
+  name: 'didSkipGuidedTourStep';
+  properties: {
+    from: string;
+    currentStep: number;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
@@ -379,7 +387,8 @@ type EventsWithProperties =
   | WillNavigateEvent
   | DidPublishRelease
   | MediaEvents
-  | DidUpdateCTBSchema;
+  | DidUpdateCTBSchema
+  | DidSkipGuidedTourStep;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

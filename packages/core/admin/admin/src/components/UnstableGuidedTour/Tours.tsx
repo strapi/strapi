@@ -108,11 +108,7 @@ const tours = {
             id="tours.contentTypeBuilder.Finish.content"
             defaultMessage="Now that you created content types, you’ll be able to create content in the content manager."
           />
-          <Step.Actions
-            showStepCount={false}
-            to="/content-manager"
-            trackedEvent="didCreateGuidedTourCollectionType"
-          />
+          <Step.Actions showStepCount={false} to="/content-manager" />
         </Step.Root>
       ),
       when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
@@ -180,11 +176,7 @@ const tours = {
             id="tours.contentManager.FinalStep.content"
             defaultMessage="Now that you’ve created and published content, time to create API tokens and set up permissions."
           />
-          <Step.Actions
-            showStepCount={false}
-            to="/settings/api-tokens"
-            trackedEvent="didCreateGuidedTourEntry"
-          />
+          <Step.Actions showStepCount={false} to="/settings/api-tokens" />
         </Step.Root>
       ),
       when: (completedActions) => completedActions.includes('didCreateContent'),
@@ -252,11 +244,7 @@ const tours = {
             id="tours.apiTokens.FinalStep.content"
             defaultMessage="Your application is ready to be deployed and its content to be shared with the world!"
           />
-          <Step.Actions
-            showStepCount={false}
-            to="/"
-            trackedEvent="didGenerateGuidedTourApiTokens"
-          />
+          <Step.Actions showStepCount={false} to="/" />
         </Step.Root>
       ),
       when: (completedActions) => completedActions.includes('didCopyApiToken'),

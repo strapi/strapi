@@ -30,14 +30,12 @@ type WithActionsChildren = {
   children: React.ReactNode;
   showStepCount?: boolean;
   showSkip?: boolean;
-  trackedEvent?: EventWithoutProperties['name'];
 };
 
 type WithActionsProps = {
   children?: undefined;
   showStepCount?: boolean;
   showSkip?: boolean;
-  trackedEvent?: EventWithoutProperties['name'];
 };
 
 type StepProps = WithChildren | WithIntl;
@@ -50,6 +48,21 @@ type Step = {
   Title: (props: StepProps) => React.ReactNode;
   Content: (props: StepProps) => React.ReactNode;
   Actions: (props: ActionsProps & { to?: string }) => React.ReactNode;
+};
+
+const GUIDED_TOUR_TRACKING_EVENTS = {
+  contentTypeBuilder: {
+    create: 'didCreateGuidedTourCollectionType' as EventWithoutProperties['name'],
+  },
+  contentManager: {
+    create: 'didCreateGuidedTourEntry' as EventWithoutProperties['name'],
+  },
+  apiTokens: {
+    create: 'didGenerateGuidedTourApiTokens' as EventWithoutProperties['name'],
+  },
+  strapiCloud: {
+    create: '' as EventWithoutProperties['name'],
+  },
 };
 
 const ActionsContainer = styled(Flex)`
@@ -115,7 +128,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     </Box>
   ),
 
-  Actions: ({ showStepCount = true, showSkip = false, to, trackedEvent, ...props }) => {
+  Actions: ({ showStepCount = true, showSkip = false, to, ...props }) => {
     const { trackUsage } = useTracking();
     const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
     const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
@@ -124,7 +137,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     const displayedLength = state.tours[tourName].length - 1;
 
     const handleSkipAction = () => {
-      trackUsage('didSkipGuidedtour');
+      trackUsage('didSkipGuidedTourStep', { from: tourName, currentStep });
       dispatch({ type: 'skip_tour', payload: tourName });
     };
 
@@ -154,7 +167,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
                   tag={NavLink}
                   to={to}
                   onClick={() => {
-                    trackedEvent != null && trackUsage(trackedEvent);
+                    trackUsage(GUIDED_TOUR_TRACKING_EVENTS[tourName]?.create);
                     dispatch({ type: 'next_step', payload: tourName });
                   }}
                 >
@@ -163,7 +176,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
               ) : (
                 <Button
                   onClick={() => {
-                    trackedEvent != null && trackUsage(trackedEvent);
+                    trackUsage(GUIDED_TOUR_TRACKING_EVENTS[tourName]?.create);
                     dispatch({ type: 'next_step', payload: tourName });
                   }}
                 >
