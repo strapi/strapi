@@ -3,6 +3,7 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { GetGuidedTourMeta } from '../../../../shared/contracts/admin';
+import { useTracking } from '../../features/Tracking';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
@@ -79,6 +80,7 @@ const UnstableGuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
+  const { trackUsage } = useTracking();
   const initialTourState = Object.keys(guidedTours).reduce((acc, tourName) => {
     const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
     acc[tourName as ValidTourName] = {
@@ -103,6 +105,12 @@ const UnstableGuidedTourContext = ({
       setTours(state);
     }
   }, [state, setTours]);
+
+  React.useEffect(() => {
+    if (enabled) {
+      trackUsage('didLaunchGuidedtour');
+    }
+  }, [enabled, trackUsage]);
 
   return (
     <GuidedTourProviderImpl state={state} dispatch={dispatch}>

@@ -161,7 +161,8 @@ export interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease';
+    | 'didCreateRelease'
+    | 'didLaunchGuidedtour';
   properties?: never;
 }
 
@@ -361,7 +362,6 @@ interface DidSkipGuidedTourStep {
   name: 'didSkipGuidedTourStep';
   properties: {
     from: string;
-    currentStep: number;
   };
 }
 

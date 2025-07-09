@@ -137,7 +137,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     const displayedLength = state.tours[tourName].length - 1;
 
     const handleSkipAction = () => {
-      trackUsage('didSkipGuidedTourStep', { from: tourName, currentStep });
+      trackUsage('didSkipGuidedTourStep', { from: tourName });
       dispatch({ type: 'skip_tour', payload: tourName });
     };
 
