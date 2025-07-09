@@ -143,6 +143,7 @@ export const INVALID_REQUEST_ERROR = 'Invalid request';
 export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
   return () => {
     const strapiVersion = useAppInfo('useAIFetch', (state) => state.strapiVersion);
+    const projectId = useAppInfo('useAIFetch', (state) => state.projectId);
     const userId = useAppInfo('useAIFetch-user', (state) => state.userId);
 
     const [isPending, setIsPending] = useState(false);
@@ -162,6 +163,7 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
           Authorization: `Bearer ${STRAPI_AI_TOKEN}`,
           'X-Strapi-Version': strapiVersion || 'latest',
           'X-Strapi-User': userId || 'unknown',
+          'X-Strapi-Project-Id': projectId || 'unknown',
           ...options.headers,
         } as Record<string, string>;
 
@@ -215,6 +217,7 @@ export const useAIFetch = (endpoint: keyof AIEndpoints) => createAIFetchHook(end
  */
 export const useAIChat: typeof useChat = (props) => {
   const strapiVersion = useAppInfo('useAIChat', (state) => state.strapiVersion);
+  const projectId = useAppInfo('useAIFetch', (state) => state.projectId);
   const userId = useAppInfo('useAIChat-user', (state) => state.userId);
 
   return useChat({
@@ -224,6 +227,7 @@ export const useAIChat: typeof useChat = (props) => {
       Authorization: `Bearer ${STRAPI_AI_TOKEN}`,
       'X-Strapi-Version': strapiVersion || 'latest',
       'X-Strapi-User': userId || 'unknown',
+      'X-Strapi-Project-Id': projectId || 'unknown',
       ...(props?.headers || {}),
     },
   });
