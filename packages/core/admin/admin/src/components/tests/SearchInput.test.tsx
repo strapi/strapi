@@ -28,7 +28,7 @@ describe('SearchInput', () => {
     expect(getByRole('textbox', { name: 'Search label' })).toBeInTheDocument();
   });
 
-  it('should push value to query params', async () => {
+  it('should push value to query params after debounce delay', async () => {
     const { user, getByRole } = render(<SearchInput label="Search label" />, {
       renderOptions: {
         wrapper({ children }) {
@@ -46,13 +46,14 @@ describe('SearchInput', () => {
 
     await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
 
-    await user.keyboard('[Enter]');
-
-    const searchString = getByRole('listitem').textContent ?? '';
-    const searchParams = new URLSearchParams(searchString);
-
-    expect(searchParams.has('_q')).toBe(true);
-    expect(searchParams.get('_q')).toBe('michka');
+    await waitFor(
+      () => {
+        expect(new URLSearchParams(getByRole('listitem').textContent ?? '').get('_q')).toBe(
+          'michka'
+        );
+      },
+      { timeout: 600 }
+    ); // Wait for debounce (500ms) + buffer
   });
 
   it('should clear value and update query params', async () => {
@@ -73,15 +74,25 @@ describe('SearchInput', () => {
 
     await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
 
-    await user.keyboard('[Enter]');
-
-    expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(true);
+    await waitFor(
+      () => {
+        expect(new URLSearchParams(getByRole('listitem').textContent ?? '').get('_q')).toBe(
+          'michka'
+        );
+      },
+      { timeout: 600 }
+    );
 
     await user.click(getByRole('button', { name: 'Clear' }));
 
     expect(getByRole('textbox', { name: 'Search label' })).toHaveValue('');
 
-    expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
+    await waitFor(
+      () => {
+        expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
+      },
+      { timeout: 600 }
+    );
   });
 
   describe('blur behavior', () => {
