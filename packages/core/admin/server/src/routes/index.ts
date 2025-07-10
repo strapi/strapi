@@ -7,6 +7,7 @@ import webhooks from './webhooks';
 import apiTokens from './api-tokens';
 import contentApi from './content-api';
 import transfer from './transfer';
+import homepage from './homepage';
 
 const routes = {
   admin: {
@@ -21,6 +22,7 @@ const routes = {
       ...apiTokens,
       ...contentApi,
       ...transfer,
+      ...homepage,
     ],
   },
 };

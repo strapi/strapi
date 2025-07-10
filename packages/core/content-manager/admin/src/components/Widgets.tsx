@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Widget, useTracking } from '@strapi/admin/strapi-admin';
+import { Widget, useTracking, useGetCountDocumentsQuery } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -18,7 +18,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { styled, DefaultTheme } from 'styled-components';
 
 import { DocumentStatus } from '../pages/EditView/components/DocumentStatus';
-import { useGetRecentDocumentsQuery, useGetCountDocumentsQuery } from '../services/homepage';
+import { useGetRecentDocumentsQuery } from '../services/homepage';
 
 import { RelativeTime } from './RelativeTime';
 
