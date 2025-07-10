@@ -8,7 +8,7 @@ import cropperjscss from 'cropperjs/dist/cropper.css?raw';
 import { useIntl } from 'react-intl';
 import { createGlobalStyle } from 'styled-components';
 
-import { AssetType } from '../../../constants';
+import { AssetType } from '../../../enums';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';
