@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
+import { waitForRestart } from '../../utils/restart';
+import roles from '@strapi/admin/server/src/routes/roles';
 
 test.describe('Home', () => {
   test.beforeEach(async ({ page }) => {
@@ -173,5 +175,125 @@ test.describe('Home', () => {
 
     await expect(tooltip).toBeVisible();
     await expect(tooltip).toContainText('1 Published');
+  });
+
+  test.only('a user should see the key statistics widget', async ({ page }) => {
+    const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
+    await expect(keyStatisticsWidget).toBeVisible();
+
+    // Test that each number is next to its label
+    // Check entries
+    await expect(keyStatisticsWidget.getByText('Entries').locator('..')).toContainText('11');
+
+    // Check assets
+    await expect(keyStatisticsWidget.getByText('Assets').locator('..')).toContainText('9');
+
+    // Check content types
+    await expect(keyStatisticsWidget.getByText('Content-Types').locator('..')).toContainText('10');
+
+    // Check components
+    await expect(keyStatisticsWidget.getByText('Components').locator('..')).toContainText('5');
+
+    // Check locales
+    await expect(keyStatisticsWidget.getByText('Locales').locator('..')).toContainText('4');
+
+    // Check admins
+    await expect(keyStatisticsWidget.getByText('Admins').locator('..')).toContainText('3');
+
+    // Check webhooks
+    await expect(keyStatisticsWidget.getByText('Webhooks').locator('..')).toContainText('0');
+
+    // Check API tokens
+    await expect(keyStatisticsWidget.getByText('API Tokens').locator('..')).toContainText('0');
+
+    // Create an entry
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
+    await page.getByRole('textbox', { name: /title/i }).fill('Test article');
+    await page.getByRole('button', { name: /save/i }).click();
+
+    // Create a content type and a component
+    await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
+    await page.getByRole('button', { name: /skip the tour/i }).click();
+    await page.getByRole('button', { name: /create new collection type/i }).click();
+    await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
+    await page.getByRole('textbox', { name: /display name/i }).fill('NewType');
+    await page.getByRole('button', { name: /continue/i }).click();
+
+    await page.getByRole('button', { name: /create new component/i }).click();
+    await expect(page.getByRole('heading', { name: 'Create a component' })).toBeVisible();
+    await page.getByRole('textbox', { name: /display name/i }).fill('NewComponent');
+    await page
+      .getByRole('combobox', { name: 'Select a category or enter a name to create a new one' })
+      .fill('NewCategory');
+    await page.getByRole('button', { name: /continue/i }).click();
+
+    await page.getByRole('button', { name: /save/i }).click();
+    await waitForRestart(page);
+
+    // Create a locale
+    await navToHeader(page, ['Settings', 'Internationalization'], 'Internationalization');
+    await page.getByRole('button', { name: /add new locale/i }).click();
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'Afrikaans (af)' }).click();
+    await page.getByRole('button', { name: /save/i }).click();
+
+    // Create an admin
+    await navToHeader(page, ['Settings', 'Users'], 'Users');
+    await page.getByRole('button', { name: /invite new user/i }).click();
+    await page.getByRole('textbox', { name: /first name/i }).fill('New');
+    await page.getByRole('textbox', { name: /email/i }).fill('newadmin@example.com');
+    await page.getByRole('combobox', { name: "User's roles" }).click();
+    await page.getByRole('option', { name: 'Author' }).click();
+    await page.keyboard.press('Escape');
+
+    await page.getByRole('button', { name: /invite user/i }).click();
+    await page.getByRole('button', { name: /finish/i }).click();
+
+    // Create a webhook
+    await navToHeader(page, ['Webhooks'], 'Webhooks');
+    await clickAndWait(page, page.getByRole('link', { name: 'Create new webhook' }).first());
+    await page.getByRole('textbox', { name: /name/i }).fill('NewWebhook');
+    await page
+      .getByRole('textbox', { name: /url/i })
+      .fill('http://localhost:1337/api/webhooks/new');
+    await page.getByRole('button', { name: /save/i }).click();
+
+    // Create an API token
+    await navToHeader(page, ['API Tokens'], 'API Tokens');
+    await clickAndWait(page, page.getByRole('link', { name: 'Create new API token' }).first());
+    await page.getByRole('textbox', { name: /name/i }).fill('NewAPIToken');
+    await page.getByRole('combobox', { name: 'Token duration' }).click();
+    await page.getByRole('option', { name: '30 days' }).click();
+    await page.getByRole('combobox', { name: 'Token type' }).click();
+    await page.getByRole('option', { name: 'Full access' }).click();
+    await page.getByRole('button', { name: /save/i }).click();
+
+    // Go back to the home page
+    await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
+
+    // The numbers should have updated
+    await expect(keyStatisticsWidget.getByText('Entries').locator('..')).toContainText('12');
+    await expect(keyStatisticsWidget.getByText('Content-Types').locator('..')).toContainText('11');
+    await expect(keyStatisticsWidget.getByText('Components').locator('..')).toContainText('6');
+    await expect(keyStatisticsWidget.getByText('Locales').locator('..')).toContainText('5');
+    await expect(keyStatisticsWidget.getByText('Admins').locator('..')).toContainText('4');
+    await expect(keyStatisticsWidget.getByText('Webhooks').locator('..')).toContainText('1');
+    await expect(keyStatisticsWidget.getByText('API Tokens').locator('..')).toContainText('1');
+
+    // Remove the collection type and component to reset the dataset
+    page.on('dialog', (dialog) => dialog.accept());
+    await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
+    await page.getByRole('link', { name: 'NewType' }).click();
+    await page.getByRole('button', { name: /edit/i }).click();
+    await page.getByRole('button', { name: /delete/i }).click();
+    await page.getByRole('link', { name: 'NewComponent' }).click();
+    await page.getByRole('button', { name: /edit/i }).click();
+    await page.getByRole('button', { name: /delete/i }).click();
+
+    await page.getByRole('button', { name: /save/i }).click();
+    await waitForRestart(page);
+
+    // TODO: Upload an asset
   });
 });

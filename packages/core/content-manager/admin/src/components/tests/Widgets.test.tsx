@@ -1,6 +1,6 @@
+import { useGetCountDocumentsQuery } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@tests/utils';
 
-import { useGetCountDocumentsQuery } from '../../services/homepage';
 import { ChartEntriesWidget } from '../Widgets';
 
 jest.mock('../../services/homepage', () => ({

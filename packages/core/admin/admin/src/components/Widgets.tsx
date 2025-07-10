@@ -1,6 +1,6 @@
 import { useAuth } from '@strapi/admin/strapi-admin';
 import { Avatar, Badge, Box, Flex, Typography } from '@strapi/design-system';
-import { Alien, Earth, File, Images, User, Key } from '@strapi/icons';
+import { Earth, Images, User, Key, Files, Layout, Graph, Webhooks } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -103,15 +103,15 @@ const KeyStatisticsWidget = () => {
     };
   } = {
     entries: {
-      label: formatMessage({ id: 'widget.key-statistics.list.entries' }),
+      label: formatMessage({ id: 'widget.key-statistics.list.entries', defaultMessage: 'Entries' }),
       icon: {
-        file: <File />,
+        file: <Files />,
         background: 'primary100',
         color: 'primary600',
       },
     },
     assets: {
-      label: formatMessage({ id: 'widget.key-statistics.list.assets' }),
+      label: formatMessage({ id: 'widget.key-statistics.list.assets', defaultMessage: 'Assets' }),
       icon: {
         file: <Images />,
         background: 'warning100',
@@ -119,23 +119,29 @@ const KeyStatisticsWidget = () => {
       },
     },
     contentTypes: {
-      label: formatMessage({ id: 'widget.key-statistics.list.contentTypes' }),
+      label: formatMessage({
+        id: 'widget.key-statistics.list.contentTypes',
+        defaultMessage: 'Content-Types',
+      }),
       icon: {
-        file: <Alien />, // TODO: replace with a proper icon when https://github.com/strapi/design-system/pull/1943 is merged
+        file: <Layout />,
         background: 'secondary100',
         color: 'secondary600',
       },
     },
     components: {
-      label: formatMessage({ id: 'widget.key-statistics.list.components' }),
+      label: formatMessage({
+        id: 'widget.key-statistics.list.components',
+        defaultMessage: 'Components',
+      }),
       icon: {
-        file: <Alien />, // TODO: replace with a proper icon when https://github.com/strapi/design-system/pull/1943 is merged
+        file: <Graph />,
         background: 'alternative100',
         color: 'alternative600',
       },
     },
     locales: {
-      label: formatMessage({ id: 'widget.key-statistics.list.locales' }),
+      label: formatMessage({ id: 'widget.key-statistics.list.locales', defaultMessage: 'Locales' }),
       icon: {
         file: <Earth />,
         background: 'success100',
@@ -143,7 +149,7 @@ const KeyStatisticsWidget = () => {
       },
     },
     admins: {
-      label: formatMessage({ id: 'widget.key-statistics.list.admins' }),
+      label: formatMessage({ id: 'widget.key-statistics.list.admins', defaultMessage: 'Admins' }),
       icon: {
         file: <User />,
         background: 'danger100',
@@ -151,15 +157,21 @@ const KeyStatisticsWidget = () => {
       },
     },
     webhooks: {
-      label: formatMessage({ id: 'widget.key-statistics.list.webhooks' }),
+      label: formatMessage({
+        id: 'widget.key-statistics.list.webhooks',
+        defaultMessage: 'Webhooks',
+      }),
       icon: {
-        file: <Alien />, // TODO: replace with a proper icon when https://github.com/strapi/design-system/pull/1943 is merged
+        file: <Webhooks />,
         background: 'alternative100',
         color: 'alternative600',
       },
     },
     apiTokens: {
-      label: formatMessage({ id: 'widget.key-statistics.list.apiTokens' }),
+      label: formatMessage({
+        id: 'widget.key-statistics.list.apiTokens',
+        defaultMessage: 'API Tokens',
+      }),
       icon: {
         file: <Key />,
         background: 'neutral100',
@@ -184,7 +196,7 @@ const KeyStatisticsWidget = () => {
       }).map(
         ([key, value]) =>
           value !== null && (
-            <GridCell key={`key-statistics-${key}`} padding={3}>
+            <GridCell key={`key-statistics-${key}`} padding={3} data-testid={`stat-${key}`}>
               <Flex alignItems="center" gap={2}>
                 {mapping[key] && (
                   <Flex
