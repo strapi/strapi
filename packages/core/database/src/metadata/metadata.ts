@@ -1,4 +1,4 @@
-import { cloneDeep, snakeCase } from 'lodash/fp';
+import { snakeCase } from 'lodash/fp';
 import { identifiers } from '../utils/identifiers';
 import * as types from '../utils/types';
 import { createRelation } from './relations';
@@ -50,7 +50,7 @@ export class Metadata extends Map<string, Meta> {
 
   loadModels(models: Model[]) {
     // init pass
-    for (const model of cloneDeep(models ?? [])) {
+    for (const model of structuredClone(models ?? [])) {
       const tableName = identifiers.getTableName(model.tableName);
       this.add({
         ...model,
