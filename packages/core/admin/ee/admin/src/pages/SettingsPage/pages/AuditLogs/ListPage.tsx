@@ -20,15 +20,15 @@ import { getDisplayedFilters } from './utils/getDisplayedFilters';
 
 const ListPage = () => {
   const { formatMessage } = useIntl();
-  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings);
+  const permissions = useTypedSelector((state) => [
+    ...Object.values(state.admin_app.permissions.settings?.auditLogs ?? {}).flat(),
+    ...(state.admin_app.permissions.settings?.users.read ?? []),
+  ]);
 
   const {
     allowedActions: { canRead: canReadAuditLogs, canReadUsers },
     isLoading: isLoadingRBAC,
-  } = useRBAC({
-    ...permissions?.auditLogs,
-    readUsers: permissions?.users.read || [],
-  });
+  } = useRBAC(permissions);
 
   const [{ query }, setQuery] = useQueryParams<{ id?: AuditLog['id'] }>();
   const {

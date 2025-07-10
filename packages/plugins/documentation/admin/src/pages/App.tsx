@@ -27,7 +27,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { PERMISSIONS } from '../constants';
+import { allPermissions } from '../constants';
 import {
   useGetInfoQuery,
   useRegenerateDocMutation,
@@ -44,7 +44,7 @@ const App = () => {
   const [deleteVersion] = useDeleteVersionMutation();
   const [showConfirmDelete, setShowConfirmDelete] = React.useState<boolean>(false);
   const [versionToDelete, setVersionToDelete] = React.useState<string>();
-  const { allowedActions, isLoading: isLoadingRBAC } = useRBAC(PERMISSIONS);
+  const { allowedActions, isLoading: isLoadingRBAC } = useRBAC(allPermissions);
 
   const isLoading = isLoadingInfo || isLoadingRBAC;
 

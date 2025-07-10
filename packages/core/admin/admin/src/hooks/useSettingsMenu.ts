@@ -7,7 +7,7 @@ import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
 import { useAppInfo } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useStrapiApp } from '../features/StrapiApp';
-import { selectAdminPermissions } from '../selectors';
+import { useTypedSelector } from '../core/store/hooks';
 import { PermissionMap } from '../types/permissions';
 
 import { useEnterprise } from './useEnterprise';
@@ -72,7 +72,7 @@ const useSettingsMenu = (): {
   );
   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
   const settings = useStrapiApp('useSettingsMenu', (state) => state.settings);
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
 
   /**
    * memoize the return value of this function to avoid re-computing it on every render

@@ -47,7 +47,7 @@ export const ProvidersPage = () => {
   const {
     isLoading: isLoadingPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC({ update: PERMISSIONS.updateProviders });
+  } = useRBAC(PERMISSIONS.updateProviders);
 
   const { isLoading: isLoadingData, data } = useQuery(
     ['users-permissions', 'get-providers'],

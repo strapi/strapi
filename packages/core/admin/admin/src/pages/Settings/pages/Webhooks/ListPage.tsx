@@ -43,7 +43,9 @@ import { useWebhooks } from './hooks/useWebhooks';
 const ListPage = () => {
   const [showModal, setShowModal] = React.useState(false);
   const [webhooksToDelete, setWebhooksToDelete] = React.useState<string[]>([]);
-  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.webhooks);
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.webhooks ?? {}).flat()
+  );
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
