@@ -35,14 +35,28 @@ export declare namespace GetKeyStatistics {
 
   export interface Response {
     data: {
-      entries: number;
       assets: number;
       contentTypes: number;
       components: number;
-      locales: number;
+      locales: number | null;
       admins: number;
       webhooks: number;
       apiTokens: number;
+    };
+    error?: errors.ApplicationError;
+  }
+}
+
+export declare namespace GetCountDocuments {
+  export interface Request {
+    body: {};
+  }
+
+  export interface Response {
+    data: {
+      draft: number;
+      published: number;
+      modified: number;
     };
     error?: errors.ApplicationError;
   }
