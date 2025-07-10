@@ -8,6 +8,7 @@ import { type EventWithoutProperties, useTracking } from '../../features/Trackin
 import { ConfirmDialog } from '../ConfirmDialog';
 
 import { type ValidTourName, unstableUseGuidedTour } from './Context';
+import { GUIDED_TOUR_TRACKING_EVENTS } from './Step';
 /* -------------------------------------------------------------------------------------------------
  * Styled
  * -----------------------------------------------------------------------------------------------*/
@@ -92,7 +93,7 @@ const TASK_CONTENT: TaskContentItem[] = [
       defaultMessage: 'Create your schema',
     },
     done: DONE_LABEL,
-    trackingEvent: 'didClickGuidedTourHomepageContentTypeBuilder',
+    trackingEvent: GUIDED_TOUR_TRACKING_EVENTS['contentTypeBuilder'].final,
   },
   {
     tourName: 'contentManager',
@@ -105,7 +106,7 @@ const TASK_CONTENT: TaskContentItem[] = [
       defaultMessage: 'Create and publish content',
     },
     done: DONE_LABEL,
-    trackingEvent: 'didClickGuidedTourHomepageContentManager',
+    trackingEvent: GUIDED_TOUR_TRACKING_EVENTS['contentManager'].final,
   },
   {
     tourName: 'apiTokens',
@@ -118,7 +119,7 @@ const TASK_CONTENT: TaskContentItem[] = [
       defaultMessage: 'Create and copy an API token',
     },
     done: DONE_LABEL,
-    trackingEvent: 'didClickGuidedTourHomepageApiTokens',
+    trackingEvent: GUIDED_TOUR_TRACKING_EVENTS['apiTokens'].final,
   },
   {
     tourName: 'strapiCloud',
@@ -211,7 +212,7 @@ export const UnstableGuidedTourOverview = () => {
           </Dialog.Trigger>
           <ConfirmDialog
             onConfirm={() => {
-              trackUsage('didSkipGuidedTour' as EventWithoutProperties['name']);
+              trackUsage('didSkipGuidedTour' as EventWithoutProperties['name'], { name: 'all' });
               dispatch({ type: 'skip_all_tours' });
             }}
           >

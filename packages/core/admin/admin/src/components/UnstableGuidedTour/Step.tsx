@@ -50,18 +50,22 @@ type Step = {
   Actions: (props: ActionsProps & { to?: string }) => React.ReactNode;
 };
 
-const GUIDED_TOUR_TRACKING_EVENTS = {
+export const GUIDED_TOUR_TRACKING_EVENTS = {
   contentTypeBuilder: {
-    create: 'didCreateGuidedTourCollectionType' as EventWithoutProperties['name'],
+    start: 'didCreateGuidedTourCollectionType' as EventWithoutProperties['name'],
+    final: 'didClickGuidedTourHomepageContentTypeBuilder' as EventWithoutProperties['name'],
   },
   contentManager: {
-    create: 'didCreateGuidedTourEntry' as EventWithoutProperties['name'],
+    start: 'didCreateGuidedTourEntry' as EventWithoutProperties['name'],
+    final: 'didClickGuidedTourHomepageContentManager' as EventWithoutProperties['name'],
   },
   apiTokens: {
-    create: 'didGenerateGuidedTourApiTokens' as EventWithoutProperties['name'],
+    start: 'didGenerateGuidedTourApiTokens' as EventWithoutProperties['name'],
+    final: 'didClickGuidedTourHomepageApiTokens' as EventWithoutProperties['name'],
   },
   strapiCloud: {
-    create: '' as EventWithoutProperties['name'],
+    start: '' as EventWithoutProperties['name'],
+    final: '' as EventWithoutProperties['name'],
   },
 };
 
@@ -137,8 +141,13 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     const displayedLength = state.tours[tourName].length - 1;
 
     const handleSkipAction = () => {
-      trackUsage('didSkipGuidedTourStep', { from: tourName });
+      trackUsage('didSkipGuidedTour', { name: tourName });
       dispatch({ type: 'skip_tour', payload: tourName });
+    };
+
+    const handleNextStep = () => {
+      trackUsage(GUIDED_TOUR_TRACKING_EVENTS[tourName]?.start);
+      dispatch({ type: 'next_step', payload: tourName });
     };
 
     return (
@@ -163,23 +172,11 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
                 </Button>
               )}
               {to ? (
-                <LinkButton
-                  tag={NavLink}
-                  to={to}
-                  onClick={() => {
-                    trackUsage(GUIDED_TOUR_TRACKING_EVENTS[tourName]?.create);
-                    dispatch({ type: 'next_step', payload: tourName });
-                  }}
-                >
+                <LinkButton tag={NavLink} to={to} onClick={handleNextStep}>
                   <FormattedMessage id="tours.next" defaultMessage="Next" />
                 </LinkButton>
               ) : (
-                <Button
-                  onClick={() => {
-                    trackUsage(GUIDED_TOUR_TRACKING_EVENTS[tourName]?.create);
-                    dispatch({ type: 'next_step', payload: tourName });
-                  }}
-                >
+                <Button onClick={handleNextStep}>
                   <FormattedMessage id="tours.next" defaultMessage="Next" />
                 </Button>
               )}
