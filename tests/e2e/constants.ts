@@ -15,6 +15,8 @@ export const ALLOWED_CONTENT_TYPES = [
   'api::match.match',
   'api::upcoming-match.upcoming-match',
   'api::unique.unique',
+  'api::condition.condition',
+  'api::country.country',
   'plugin::content-manager.history-version',
   /**
    * I18N
