@@ -46,13 +46,7 @@ describe('Guided Tour Meta', () => {
   });
 
   describe('GET /admin/guided-tour-meta', () => {
-    /**
-     * TODO:
-     * clean-after-delete.test.api.ts leaks data causing the app
-     * to intialize withe a schema and content. We need to ensure that test cleans up after itself
-     * Skipping for now.
-     */
-    test.skip('Returns correct initial state for a new installation', async () => {
+    test('Returns correct initial state for a new installation', async () => {
       const res = await authRq({
         url: '/admin/guided-tour-meta',
         method: 'GET',

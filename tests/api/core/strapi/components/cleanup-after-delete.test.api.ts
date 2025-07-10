@@ -1,9 +1,7 @@
-'use strict';
-
-const { createAuthRequest } = require('api-tests/request');
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createTestBuilder } = require('api-tests/builder');
-const pluralize = require('pluralize');
+import { createAuthRequest } from 'api-tests/request';
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createTestBuilder } from 'api-tests/builder';
+import pluralize from 'pluralize';
 
 let strapi;
 let rq;
@@ -78,6 +76,24 @@ describe('Component Deletion and Cleanup Test', () => {
   });
 
   afterAll(async () => {
+    // Delete the content type
+    await rq({
+      method: 'DELETE',
+      url: `/content-type-builder/content-types/${testCollectionTypeUID}`,
+    });
+
+    // Delete the recreated component
+    await rq({
+      method: 'DELETE',
+      url: `/content-type-builder/components/${componentUID}`,
+    });
+
+    // Delete the keep component
+    await rq({
+      method: 'DELETE',
+      url: `/content-type-builder/components/${componentKeepUID}`,
+    });
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -171,7 +187,7 @@ describe('Component Deletion and Cleanup Test', () => {
     });
 
     // Ensure data related to the deleted component is no longer in the database
-    const dbResult = await strapi.db.connection.raw(`SELECT * FROM ${contentType.pluralName}_cmps`);
+    const dbResult = await strapi.db.connection.select('*').from(`${contentType.pluralName}_cmps`);
 
     // Ensure table for the deleted component no longer exists
     const tempComponentTableExists = await strapi.db.connection.schema.hasTable(
