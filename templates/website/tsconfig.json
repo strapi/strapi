@@ -6,7 +6,6 @@
     "target": "ES2019",
     "strict": false,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
