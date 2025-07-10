@@ -71,8 +71,15 @@ const GridCell = styled(Box)`
   }
 `;
 
+const formatNumber = ({ locale, number }: { locale: string; number: number }) => {
+  return new Intl.NumberFormat(locale, {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(number);
+};
+
 const KeyStatisticsWidget = () => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const { data: countDocuments, isLoading: isLoadingCountDocuments } = useGetCountDocumentsQuery();
   const { data: countKeyStatistics, isLoading: isLoadingKeyStatistics } =
     useGetKeyStatisticsQuery();
@@ -174,30 +181,33 @@ const KeyStatisticsWidget = () => {
       {Object.entries({
         entries: totalCountEntries,
         ...countKeyStatistics,
-      }).map(([key, value]) => (
-        <GridCell key={`key-statistics-${key}`} padding={3}>
-          <Flex alignItems="center" gap={2}>
-            {mapping[key] && (
-              <Flex
-                padding={2}
-                borderRadius={1}
-                background={mapping[key].icon.background}
-                color={mapping[key].icon.color}
-              >
-                {mapping[key].icon.file}
+      }).map(
+        ([key, value]) =>
+          value !== null && (
+            <GridCell key={`key-statistics-${key}`} padding={3}>
+              <Flex alignItems="center" gap={2}>
+                {mapping[key] && (
+                  <Flex
+                    padding={2}
+                    borderRadius={1}
+                    background={mapping[key].icon.background}
+                    color={mapping[key].icon.color}
+                  >
+                    {mapping[key].icon.file}
+                  </Flex>
+                )}
+                <Flex direction="column" alignItems="flex-start">
+                  <Typography variant="pi" fontWeight="bold" textColor="neutral500">
+                    {mapping[key].label || key}
+                  </Typography>
+                  <Typography variant="omega" fontWeight="bold" textColor="neutral800">
+                    {formatNumber({ locale, number: value })}
+                  </Typography>
+                </Flex>
               </Flex>
-            )}
-            <Flex direction="column" alignItems="flex-start">
-              <Typography variant="pi" fontWeight="bold" textColor="neutral500">
-                {mapping[key].label || key}
-              </Typography>
-              <Typography variant="omega" fontWeight="bold" textColor="neutral800">
-                {value}
-              </Typography>
-            </Flex>
-          </Flex>
-        </GridCell>
-      ))}
+            </GridCell>
+          )
+      )}
     </Grid>
   );
 };
