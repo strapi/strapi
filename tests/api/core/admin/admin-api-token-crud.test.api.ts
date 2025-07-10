@@ -930,4 +930,34 @@ describe('Admin API Token v2 CRUD (api)', () => {
   });
 
   test.todo('Custom token can only be created with valid permissions that exist');
+
+  test('API token creation generates encrypted keys that exceed varchar(255) limit', async () => {
+    const body = {
+      name: 'encryption-test-token',
+      description: 'Test to verify encrypted keys exceed varchar(255) limit',
+      type: 'read-only',
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+
+    // Get the token from the database with the encrypted key
+    const tokenFromDb = await strapi.db.query('admin::api-token').findOne({
+      select: ['id', 'name', 'encryptedKey'],
+      where: { id: res.body.data.id },
+    });
+
+    expect(tokenFromDb).toBeDefined();
+    expect(tokenFromDb.encryptedKey).toBeDefined();
+    expect(tokenFromDb.encryptedKey).not.toBeNull();
+
+    // Verify the encrypted key is longer than 255 characters
+    // This would fail with database errors if the field was varchar(255) instead of text
+    expect(tokenFromDb.encryptedKey.length).toBeGreaterThan(255);
+  });
 });
