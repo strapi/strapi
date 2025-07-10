@@ -7,8 +7,9 @@ import {
   createContext,
   Form as FormContext,
   Blocker,
+  useField,
 } from '@strapi/admin/strapi-admin';
-import { Box, Flex, FocusTrap, IconButton, Portal } from '@strapi/design-system';
+import { Box, Flex, FocusTrap, IconButton, Popover, Portal } from '@strapi/design-system';
 import { ArrowLineLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
@@ -20,6 +21,7 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
+import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { PreviewHeader } from '../components/PreviewHeader';
@@ -53,6 +55,83 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ isSideEditorOpen: boolean }>`
   transition: rotate 0.2s ease-in-out;
 `;
 
+const VisualEditingModal = ({
+  modalField,
+  setModalField,
+  documentResponse,
+  iframe,
+}: {
+  iframe: React.MutableRefObject<HTMLIFrameElement>;
+  modalField: any;
+  setModalField: (value: unknown) => void;
+  documentResponse: ReturnType<UseDocument>;
+}) => {
+  const { value } = useField(modalField?.path);
+
+  React.useEffect(() => {
+    if (modalField?.path) {
+      iframe.current?.contentWindow?.postMessage(
+        {
+          type: 'strapiFieldTyping',
+          payload: {
+            field: modalField.path,
+            value,
+          },
+        },
+        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
+        new URL(window.location.href).origin
+      );
+    }
+  }, [modalField?.path, value, iframe]);
+
+  if (!modalField || !documentResponse.schema) {
+    return null;
+  }
+
+  const iframeRect = iframe.current.getBoundingClientRect();
+
+  return (
+    <>
+      {modalField && (
+        <Box
+          position={'fixed'}
+          top={iframeRect.top + 'px'}
+          left={iframeRect.left + 'px'}
+          width={iframeRect.width + 'px'}
+          height={iframeRect.height + 'px'}
+          // background={'neutral800'}
+          // style={{ opacity: 0.1 }}
+          zIndex={4}
+        />
+      )}
+      <Popover.Root open={modalField != null} onOpenChange={(open) => !open && setModalField(null)}>
+        <Popover.Trigger>
+          <Box
+            id="hello"
+            position="fixed"
+            width={modalField.position.width + 'px'}
+            height={modalField.position.height + 'px'}
+            top={iframeRect.top + modalField.position.top + 'px'}
+            left={iframeRect.left + modalField.position.left + 'px'}
+          />
+        </Popover.Trigger>
+        <Popover.Content sideOffset={4}>
+          <Box padding={4} width="400px">
+            <InputRenderer
+              document={documentResponse}
+              attribute={documentResponse.schema.attributes[modalField.path]}
+              label={modalField.path}
+              name={modalField.path}
+              type={documentResponse.schema.attributes[modalField.path].type}
+              visible={true}
+            />
+          </Box>
+        </Popover.Content>
+      </Popover.Root>
+    </>
+  );
+};
+
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
@@ -76,6 +155,19 @@ const PreviewPage = () => {
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+
+  const [modalField, setModalField] = React.useState(null);
+  React.useEffect(() => {
+    const handleMessage = (message: MessageEvent) => {
+      if (message.data.type === 'willEditField') {
+        console.log('willEditField', message.data.payload);
+        setModalField(message.data.payload);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -275,6 +367,12 @@ const PreviewPage = () => {
                   )}
                 </Box>
               </Flex>
+              <VisualEditingModal
+                modalField={modalField}
+                setModalField={setModalField}
+                documentResponse={documentResponse}
+                iframe={iframeRef}
+              />
             </Flex>
           )}
         </FormContext>
