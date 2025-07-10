@@ -253,7 +253,7 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
           alignItems={'stretch'}
           style={{
             maxHeight: isOpen ? '1000px' : 0,
-            overflow: 'hidden',
+            overflowY: 'auto',
             transition: isOpen
               ? 'max-height 1s ease-in-out'
               : 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
