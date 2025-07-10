@@ -106,12 +106,6 @@ const UnstableGuidedTourContext = ({
     }
   }, [state, setTours]);
 
-  React.useEffect(() => {
-    if (enabled) {
-      trackUsage('didLaunchGuidedtour');
-    }
-  }, [enabled, trackUsage]);
-
   return (
     <GuidedTourProviderImpl state={state} dispatch={dispatch}>
       {children}
