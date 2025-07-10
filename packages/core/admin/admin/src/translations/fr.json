@@ -564,5 +564,13 @@
   "components.Blocks.blocks.unorderedList": "Liste à puces",
   "components.Blocks.blocks.orderedList": "Liste numérotée",
   "widget.key-statistics.title": "Statistiques du projet",
+  "widget.key-statistics.list.admins": "Administrateurs",
+  "widget.key-statistics.list.apiTokens": "Jetons d'API",
+  "widget.key-statistics.list.assets": "Médias",
+  "widget.key-statistics.list.components": "Composants",
+  "widget.key-statistics.list.contentTypes": "Types de contenu",
+  "widget.key-statistics.list.entries": "Entrées",
+  "widget.key-statistics.list.locales": "Langues",
+  "widget.key-statistics.list.webhooks": "Webhooks",
   "widget.profile.title": "Profil"
 }
