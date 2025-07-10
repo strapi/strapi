@@ -11,6 +11,7 @@ export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
   useTypescriptOnAdmin?: boolean;
   isHostedOnStrapiCloud?: boolean;
+  aiLicenseKey?: string;
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
@@ -161,7 +162,8 @@ interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease';
+    | 'didCreateRelease'
+    | 'didStartNewChat';
   properties?: never;
 }
 
@@ -341,6 +343,30 @@ interface DidPublishRelease {
   };
 }
 
+interface DidUsePresetPromptEvent {
+  name: 'didUsePresetPrompt';
+  properties: {
+    promptType:
+      | 'generate-product-schema'
+      | 'tell-me-about-the-content-type-builder'
+      | 'tell-me-about-strapi';
+  };
+}
+
+interface DidAnswerMessageEvent {
+  name: 'didAnswerMessage';
+  properties: {
+    successful: boolean;
+  };
+}
+
+interface DidVoteAnswerEvent {
+  name: 'didVoteAnswer';
+  properties: {
+    value: 'positive' | 'negative';
+  };
+}
+
 interface DidUpdateCTBSchema {
   name: 'didUpdateCTBSchema';
   properties: {
@@ -372,6 +398,9 @@ type EventsWithProperties =
   | DidSelectFile
   | DidSortMediaLibraryElementsEvent
   | DidSubmitWithErrorsFirstAdminEvent
+  | DidUsePresetPromptEvent
+  | DidAnswerMessageEvent
+  | DidVoteAnswerEvent
   | LogoEvent
   | TokenEvents
   | UpdateEntryEvents
@@ -441,6 +470,7 @@ const useTracking = (): UseTrackingReturn => {
                 ...telemetryProperties,
                 projectId: uuid,
                 projectType: window.strapi.projectType,
+                aiLicenseKey: window.strapi.aiLicenseKey,
               },
             },
             {

@@ -190,6 +190,7 @@ const NpsSurvey = () => {
         version: strapiVersion ?? undefined,
         license: window.strapi.projectType,
         isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
+        aiLicenseKey: process.env.STRAPI_ADMIN_AI_LICENSE,
       };
       const res = await fetch('https://analytics.strapi.io/submit-nps', {
         method: 'POST',

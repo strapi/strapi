@@ -10,6 +10,8 @@ interface DefaultEnv {
   ADMIN_PATH: string;
   STRAPI_ADMIN_BACKEND_URL: string;
   STRAPI_TELEMETRY_DISABLED: string;
+  STRAPI_ADMIN_AI_URL: string;
+  STRAPI_ADMIN_AI_API_KEY?: string;
 }
 
 /**
