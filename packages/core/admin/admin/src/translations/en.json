@@ -849,5 +849,13 @@
   "tours.profile.reset": "Reset guided tour",
   "tours.profile.notification.success.reset": "Guided tour reset",
   "widget.key-statistics.title": "Project statistics",
+  "widget.key-statistics.list.admins": "Admins",
+  "widget.key-statistics.list.apiTokens": "API Tokens",
+  "widget.key-statistics.list.assets": "Assets",
+  "widget.key-statistics.list.components": "Components",
+  "widget.key-statistics.list.contentTypes": "Content-Types",
+  "widget.key-statistics.list.entries": "Entries",
+  "widget.key-statistics.list.locales": "Locales",
+  "widget.key-statistics.list.webhooks": "Webhooks",
   "widget.profile.title": "Profile"
 }

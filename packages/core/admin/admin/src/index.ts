@@ -54,6 +54,7 @@ export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
 export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useAdminUsers } from './services/users';
+export { useGetCountDocumentsQuery } from './services/homepage';
 
 /**
  * Types

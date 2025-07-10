@@ -570,7 +570,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     upload,
     updateFileInfo,
     replace,
-    count,
     findOne,
     findMany,
     findPage,

@@ -1,9 +1,10 @@
 import { useAuth } from '@strapi/admin/strapi-admin';
 import { Avatar, Badge, Box, Flex, Typography } from '@strapi/design-system';
 import { Alien, Earth, File, Images, User, Key } from '@strapi/icons';
+import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useGetKeyStatisticsQuery } from '../services/homepage';
+import { useGetCountDocumentsQuery, useGetKeyStatisticsQuery } from '../services/homepage';
 import { getDisplayName, getInitials } from '../utils/users';
 
 import { Widget } from './WidgetHelpers';
@@ -49,7 +50,7 @@ const ProfileWidget = () => {
 const Grid = styled(Box)`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0; /* or gap: 1px; for borders */
+  gap: 0;
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-radius: ${({ theme }) => theme.borderRadius};
   overflow: hidden;
@@ -71,7 +72,18 @@ const GridCell = styled(Box)`
 `;
 
 const KeyStatisticsWidget = () => {
-  const { data, isLoading } = useGetKeyStatisticsQuery();
+  const { formatMessage } = useIntl();
+  const { data: countDocuments, isLoading: isLoadingCountDocuments } = useGetCountDocumentsQuery();
+  const { data: countKeyStatistics, isLoading: isLoadingKeyStatistics } =
+    useGetKeyStatisticsQuery();
+
+  if (isLoadingKeyStatistics || isLoadingCountDocuments) {
+    return <Widget.Loading />;
+  }
+
+  if (!countKeyStatistics || !countDocuments) {
+    return <Widget.Error />;
+  }
 
   const mapping: {
     [key: string]: {
@@ -84,7 +96,7 @@ const KeyStatisticsWidget = () => {
     };
   } = {
     entries: {
-      label: 'Entries',
+      label: formatMessage({ id: 'widget.key-statistics.list.entries' }),
       icon: {
         file: <File />,
         background: 'primary100',
@@ -92,7 +104,7 @@ const KeyStatisticsWidget = () => {
       },
     },
     assets: {
-      label: 'Assets',
+      label: formatMessage({ id: 'widget.key-statistics.list.assets' }),
       icon: {
         file: <Images />,
         background: 'warning100',
@@ -100,23 +112,23 @@ const KeyStatisticsWidget = () => {
       },
     },
     contentTypes: {
-      label: 'Content-Types',
+      label: formatMessage({ id: 'widget.key-statistics.list.contentTypes' }),
       icon: {
-        file: <Alien />,
+        file: <Alien />, // TODO: replace with a proper icon when https://github.com/strapi/design-system/pull/1943 is merged
         background: 'secondary100',
         color: 'secondary600',
       },
     },
     components: {
-      label: 'Components',
+      label: formatMessage({ id: 'widget.key-statistics.list.components' }),
       icon: {
-        file: <Alien />,
+        file: <Alien />, // TODO: replace with a proper icon when https://github.com/strapi/design-system/pull/1943 is merged
         background: 'alternative100',
         color: 'alternative600',
       },
     },
     locales: {
-      label: 'Locales',
+      label: formatMessage({ id: 'widget.key-statistics.list.locales' }),
       icon: {
         file: <Earth />,
         background: 'success100',
@@ -124,7 +136,7 @@ const KeyStatisticsWidget = () => {
       },
     },
     admins: {
-      label: 'Admins',
+      label: formatMessage({ id: 'widget.key-statistics.list.admins' }),
       icon: {
         file: <User />,
         background: 'danger100',
@@ -132,15 +144,15 @@ const KeyStatisticsWidget = () => {
       },
     },
     webhooks: {
-      label: 'Webhooks',
+      label: formatMessage({ id: 'widget.key-statistics.list.webhooks' }),
       icon: {
-        file: <Alien />,
+        file: <Alien />, // TODO: replace with a proper icon when https://github.com/strapi/design-system/pull/1943 is merged
         background: 'alternative100',
         color: 'alternative600',
       },
     },
     apiTokens: {
-      label: 'API Tokens',
+      label: formatMessage({ id: 'widget.key-statistics.list.apiTokens' }),
       icon: {
         file: <Key />,
         background: 'neutral100',
@@ -149,17 +161,20 @@ const KeyStatisticsWidget = () => {
     },
   };
 
-  if (isLoading) {
-    return <Widget.Loading />;
-  }
+  const { draft, published, modified } = countDocuments ?? {
+    draft: 0,
+    published: 0,
+    modified: 0,
+  };
 
-  if (!data) {
-    return <Widget.Error />;
-  }
+  const totalCountEntries = draft + published + modified;
 
   return (
     <Grid>
-      {Object.entries(data).map(([key, value]) => (
+      {Object.entries({
+        entries: totalCountEntries,
+        ...countKeyStatistics,
+      }).map(([key, value]) => (
         <GridCell key={`key-statistics-${key}`} padding={3}>
           <Flex alignItems="center" gap={2}>
             {mapping[key] && (
