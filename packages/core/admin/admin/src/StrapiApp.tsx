@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { User, ChartBubble } from '@strapi/icons';
+import { User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -340,7 +340,7 @@ class StrapiApp {
         },
       },
       {
-        icon: ChartBubble,
+        icon: TrendUp,
         title: {
           id: 'widget.key-statistics.title',
           defaultMessage: 'Project statistics',
