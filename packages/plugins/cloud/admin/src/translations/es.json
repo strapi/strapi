@@ -11,6 +11,7 @@
   "Homepage.deploy.cli.title": "Desplegar con la CLI",
   "Homepage.deploy.cli.subTitle": "Despliega tu proyecto Strapi directamente desde la línea de comandos",
   "Homepage.deploy.cli.ariaLabel": "Sistema de gestión de paquetes",
+  "Homepage.deploy.cli.copy": "Copiar",
   "Homepage.deploy.documentation": "¿Tienes problemas? Consulta nuestra documentación",
   "Homepage.freePlan.api": "10K peticiones API",
   "Homepage.freePlan.storage": "10 GB de almacenamiento",

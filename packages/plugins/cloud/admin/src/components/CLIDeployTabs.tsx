@@ -6,13 +6,20 @@ import { useIntl } from 'react-intl';
 import { getTrad } from '../utils/getTrad';
 
 const CopyCommandButton = ({ command }: { command: string }) => {
+  const { formatMessage } = useIntl();
+
   const { copy } = useClipboard();
+
+  const copyLabel = formatMessage({
+    id: getTrad('Homepage.deploy.cli.copy'),
+    defaultMessage: 'Copy',
+  });
 
   const handleCopy = async () => await copy(command);
 
   return (
-    <Tooltip label="Copy">
-      <IconButton size="XS" variant="ghost" label="Copy" onClick={handleCopy}>
+    <Tooltip label={copyLabel}>
+      <IconButton size="XS" variant="ghost" label={copyLabel} onClick={handleCopy}>
         <Duplicate />
       </IconButton>
     </Tooltip>

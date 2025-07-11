@@ -11,6 +11,7 @@
   "Homepage.deploy.cli.title": "Розгортання через CLI",
   "Homepage.deploy.cli.subTitle": "Використовуйте командний рядок для прямого розгортання вашого проєкту Strapi",
   "Homepage.deploy.cli.ariaLabel": "Система керування пакунками",
+  "Homepage.deploy.cli.copy": "Копіювати",
   "Homepage.deploy.documentation": "Маєте труднощі? Перевірте нашу документацію",
   "Homepage.freePlan.api": "10 000 API-запитів",
   "Homepage.freePlan.storage": "10 ГБ сховища",
