@@ -10,7 +10,7 @@ import {
   useQueryParams,
   unstable_tours,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Main, Tabs } from '@strapi/design-system';
+import { Grid, Main, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -140,6 +140,14 @@ const EditViewPage = () => {
   return (
     <Main paddingLeft={10} paddingRight={10}>
       <Page.Title>{pageTitle}</Page.Title>
+      {
+        isSingleType && (
+          <unstable_tours.contentManager.Introduction>
+            {/* Invisible Anchor */}
+            <Box paddingTop={5} />
+          </unstable_tours.contentManager.Introduction>
+        )
+      }
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
