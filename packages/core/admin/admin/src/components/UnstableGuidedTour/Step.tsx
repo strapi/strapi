@@ -50,25 +50,6 @@ type Step = {
   Actions: (props: ActionsProps & { to?: string }) => React.ReactNode;
 };
 
-export const GUIDED_TOUR_TRACKING_EVENTS = {
-  contentTypeBuilder: {
-    start: 'didCreateGuidedTourCollectionType' as EventWithoutProperties['name'],
-    final: 'didClickGuidedTourHomepageContentTypeBuilder' as EventWithoutProperties['name'],
-  },
-  contentManager: {
-    start: 'didCreateGuidedTourEntry' as EventWithoutProperties['name'],
-    final: 'didClickGuidedTourHomepageContentManager' as EventWithoutProperties['name'],
-  },
-  apiTokens: {
-    start: 'didGenerateGuidedTourApiTokens' as EventWithoutProperties['name'],
-    final: 'didClickGuidedTourHomepageApiTokens' as EventWithoutProperties['name'],
-  },
-  strapiCloud: {
-    start: '' as EventWithoutProperties['name'],
-    final: '' as EventWithoutProperties['name'],
-  },
-};
-
 const ActionsContainer = styled(Flex)`
   border-top: ${({ theme }) => `1px solid ${theme.colors.neutral150}`};
 `;
@@ -137,8 +118,9 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
     const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
     const currentStep = state.tours[tourName].currentStep + 1;
+    const actualTourLength = state.tours[tourName].length;
     // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
-    const displayedLength = state.tours[tourName].length - 1;
+    const displayedLength = actualTourLength - 1;
 
     const handleSkipAction = () => {
       trackUsage('didSkipGuidedTour', { name: tourName });
@@ -146,7 +128,9 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     };
 
     const handleNextStep = () => {
-      trackUsage(GUIDED_TOUR_TRACKING_EVENTS[tourName]?.start);
+      if (currentStep === actualTourLength) {
+        trackUsage('didCompleteGuidedTour', { name: tourName });
+      }
       dispatch({ type: 'next_step', payload: tourName });
     };
 

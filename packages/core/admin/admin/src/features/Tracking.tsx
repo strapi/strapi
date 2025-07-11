@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import axios, { AxiosResponse } from 'axios';
 
+import { Tours } from '../components/UnstableGuidedTour/Tours';
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
@@ -361,7 +362,21 @@ interface DidUpdateCTBSchema {
 interface DidSkipGuidedTour {
   name: 'didSkipGuidedTour';
   properties: {
-    name: string;
+    name: keyof Tours | 'all';
+  };
+}
+
+interface DidCompleteGuidedTour {
+  name: 'didCompleteGuidedTour';
+  properties: {
+    name: keyof Tours;
+  };
+}
+
+interface DidStartGuidedTour {
+  name: 'didStartGuidedTourFromHomepage';
+  properties: {
+    name: keyof Tours;
   };
 }
 
@@ -388,7 +403,9 @@ type EventsWithProperties =
   | DidPublishRelease
   | MediaEvents
   | DidUpdateCTBSchema
-  | DidSkipGuidedTour;
+  | DidSkipGuidedTour
+  | DidCompleteGuidedTour
+  | DidStartGuidedTour;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

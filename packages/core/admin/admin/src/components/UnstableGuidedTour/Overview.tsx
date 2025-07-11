@@ -4,11 +4,11 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
 
-import { type EventWithoutProperties, useTracking } from '../../features/Tracking';
+import { useTracking } from '../../features/Tracking';
 import { ConfirmDialog } from '../ConfirmDialog';
 
 import { type ValidTourName, unstableUseGuidedTour } from './Context';
-import { GUIDED_TOUR_TRACKING_EVENTS } from './Step';
+
 /* -------------------------------------------------------------------------------------------------
  * Styled
  * -----------------------------------------------------------------------------------------------*/
@@ -66,22 +66,7 @@ const DONE_LABEL = {
   defaultMessage: 'Done',
 };
 
-type TaskContentItem = {
-  tourName: ValidTourName | string;
-  link: {
-    label: {
-      id: string;
-      defaultMessage: string;
-    };
-    to: string;
-  };
-  title: { id: string; defaultMessage: string };
-  done: typeof DONE_LABEL;
-  trackingEvent?: EventWithoutProperties['name'];
-  isExternal?: boolean;
-};
-
-const TASK_CONTENT: TaskContentItem[] = [
+const TASK_CONTENT = [
   {
     tourName: 'contentTypeBuilder',
     link: {
@@ -93,7 +78,6 @@ const TASK_CONTENT: TaskContentItem[] = [
       defaultMessage: 'Create your schema',
     },
     done: DONE_LABEL,
-    trackingEvent: GUIDED_TOUR_TRACKING_EVENTS['contentTypeBuilder'].final,
   },
   {
     tourName: 'contentManager',
@@ -106,7 +90,6 @@ const TASK_CONTENT: TaskContentItem[] = [
       defaultMessage: 'Create and publish content',
     },
     done: DONE_LABEL,
-    trackingEvent: GUIDED_TOUR_TRACKING_EVENTS['contentManager'].final,
   },
   {
     tourName: 'apiTokens',
@@ -119,7 +102,6 @@ const TASK_CONTENT: TaskContentItem[] = [
       defaultMessage: 'Create and copy an API token',
     },
     done: DONE_LABEL,
-    trackingEvent: GUIDED_TOUR_TRACKING_EVENTS['apiTokens'].final,
   },
   {
     tourName: 'strapiCloud',
@@ -212,7 +194,7 @@ export const UnstableGuidedTourOverview = () => {
           </Dialog.Trigger>
           <ConfirmDialog
             onConfirm={() => {
-              trackUsage('didSkipGuidedTour' as EventWithoutProperties['name'], { name: 'all' });
+              trackUsage('didSkipGuidedTour', { name: 'all' });
               dispatch({ type: 'skip_all_tours' });
             }}
           >
@@ -234,20 +216,11 @@ export const UnstableGuidedTourOverview = () => {
         </Typography>
         <Box width="100%" borderColor="neutral150" marginTop={4} hasRadius>
           {TASK_CONTENT.map((task) => {
-            const tour = tours[task.tourName as ValidTourName];
-
-            const handleClick = () => {
-              if (task.trackingEvent) {
-                trackUsage(task.trackingEvent);
-              }
-            };
+            const tourName = task.tourName as ValidTourName;
+            const tour = tours[tourName];
 
             return (
-              <TourTaskContainer
-                key={task.tourName}
-                alignItems="center"
-                justifyContent="space-between"
-              >
+              <TourTaskContainer key={tourName} alignItems="center" justifyContent="space-between">
                 {tour.isCompleted ? (
                   <>
                     <Flex gap={2}>
@@ -272,9 +245,10 @@ export const UnstableGuidedTourOverview = () => {
                       <Link
                         isExternal
                         href={task.link.to}
-                        onClick={() =>
-                          dispatch({ type: 'skip_tour', payload: task.tourName as ValidTourName })
-                        }
+                        onClick={() => {
+                          dispatch({ type: 'skip_tour', payload: tourName });
+                          trackUsage('didCompleteGuidedTour', { name: tourName });
+                        }}
                       >
                         {formatMessage(task.link.label)}
                       </Link>
@@ -283,7 +257,9 @@ export const UnstableGuidedTourOverview = () => {
                         endIcon={<ChevronRight />}
                         to={task.link.to}
                         tag={NavLink}
-                        onClick={handleClick}
+                        onClick={() => {
+                          trackUsage('didStartGuidedTourFromHomepage', { name: tourName });
+                        }}
                       >
                         {formatMessage(task.link.label)}
                       </Link>

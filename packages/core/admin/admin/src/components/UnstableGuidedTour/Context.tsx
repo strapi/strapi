@@ -72,7 +72,6 @@ function reducer(state: State, action: Action): State {
 }
 
 const STORAGE_KEY = 'STRAPI_GUIDED_TOUR';
-
 const UnstableGuidedTourContext = ({
   children,
   enabled = true,
@@ -80,7 +79,6 @@ const UnstableGuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
-  const { trackUsage } = useTracking();
   const initialTourState = Object.keys(guidedTours).reduce((acc, tourName) => {
     const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
     acc[tourName as ValidTourName] = {
