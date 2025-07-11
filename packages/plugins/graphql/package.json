@@ -49,7 +49,7 @@
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "test:unit": "run -T jest",
+    "test:unit": "run -T jest --passWithNoTests",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"
   },
