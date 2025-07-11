@@ -684,8 +684,16 @@ export default {
       }
     }
 
-    // We filter out documentsIds that maybe doesn't exist in a specific locale
-    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
+    // findLocales may return both draft and published versions of the same document,
+    // resulting in multiple entries with the same documentId
+    // Here we deduplicate to get a unique list of documentIds for deletion
+    const localeDocumentsIds = documentLocales.reduce((acc, doc) => {
+      if (!acc.includes(doc.documentId)) {
+        acc.push(doc.documentId);
+      }
+
+      return acc;
+    }, []);
 
     const { count } = await documentManager.deleteMany(localeDocumentsIds, model, { locale });
 
