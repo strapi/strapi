@@ -9305,6 +9305,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
   dependencies:
+    "@strapi/admin": "npm:5.18.0"
     "@strapi/design-system": "npm:2.0.0-rc.29"
     "@strapi/icons": "npm:2.0.0-rc.29"
     "@strapi/strapi": "npm:5.18.0"
@@ -9317,6 +9318,7 @@ __metadata:
     tsconfig: "npm:5.18.0"
     typescript: "npm:5.4.4"
   peerDependencies:
+    "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
