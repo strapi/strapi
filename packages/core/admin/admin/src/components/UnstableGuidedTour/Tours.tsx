@@ -57,7 +57,7 @@ const tours = {
           />
           <Step.Content
             id="tours.contentTypeBuilder.CollectionTypes.content"
-            defaultMessage="Create and manage your content structure with collection types, single types and components."
+            defaultMessage="A content structure that can manage multiple entries, such as articles or products."
           />
           <Step.Actions />
         </Step.Root>
