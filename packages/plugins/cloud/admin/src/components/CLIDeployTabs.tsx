@@ -23,7 +23,7 @@ const CLIDeployTabs = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Box minWidth={'28em'} maxWidth={'28em'} paddingTop={8}>
+    <Box minWidth="28em" maxWidth="28em" paddingTop={8}>
       <Tabs.Root defaultValue="yarn">
         <Tabs.List
           aria-label={formatMessage({
@@ -46,7 +46,7 @@ const CLIDeployTabs = () => {
                 <Typography tag="code" textColor="neutral800">
                   yarn strapi deploy
                 </Typography>
-                <CopyCommandButton command={'yarn strapi deploy'} />
+                <CopyCommandButton command="yarn strapi deploy" />
               </Flex>
             </Box>
           </Box>
@@ -58,7 +58,7 @@ const CLIDeployTabs = () => {
                 <Typography tag="code" textColor="neutral800">
                   npm run deploy
                 </Typography>
-                <CopyCommandButton command={'npm run deploy'} />
+                <CopyCommandButton command="npm run deploy" />
               </Flex>
             </Box>
           </Box>
