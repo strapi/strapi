@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Popover, Portal, Flex, Button } from '@strapi/design-system';
+import { Box, Popover, Portal, Flex, Button, FlexProps } from '@strapi/design-system';
 import { FormattedMessage } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -13,7 +13,7 @@ import {
   ValidTourName,
   ExtendedCompletedActions,
 } from './Context';
-import { Step, createStepComponents } from './Step';
+import { Step, StepCount, createStepComponents } from './Step';
 
 /* -------------------------------------------------------------------------------------------------
  * Tours
@@ -21,11 +21,9 @@ import { Step, createStepComponents } from './Step';
 
 const GotItAction = ({ onClick }: { onClick: () => void }) => {
   return (
-    <Flex justifyContent="end" width="100%">
-      <Button onClick={onClick}>
-        <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
-      </Button>
-    </Flex>
+    <Button onClick={onClick}>
+      <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
+    </Button>
   );
 };
 
@@ -88,7 +86,7 @@ const tours = {
             id="tours.contentTypeBuilder.Components.content"
             defaultMessage="A reusable content structure that can be used across multiple content types, such as buttons, sliders or cards."
           />
-          <Step.Actions>
+          <Step.Actions justifyContent="flex-end">
             <GotItAction
               onClick={() => dispatch({ type: 'next_step', payload: 'contentTypeBuilder' })}
             />
@@ -156,7 +154,7 @@ const tours = {
             id="tours.contentManager.Publish.content"
             defaultMessage="Publish entries to make their content available through the Document Service API."
           />
-          <Step.Actions>
+          <Step.Actions justifyContent="flex-end">
             <GotItAction
               onClick={() => dispatch({ type: 'next_step', payload: 'contentManager' })}
             />
@@ -226,6 +224,7 @@ const tours = {
             defaultMessage="Make sure to do it now, you won’t be able to see it again. You’ll need to generate a new one if you lose it."
           />
           <Step.Actions>
+            <StepCount tourName="apiTokens" />
             <GotItAction onClick={() => dispatch({ type: 'next_step', payload: 'apiTokens' })} />
           </Step.Actions>
         </Step.Root>
