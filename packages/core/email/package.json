@@ -56,8 +56,8 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.28",
-    "@strapi/icons": "2.0.0-rc.28",
+    "@strapi/design-system": "2.0.0-rc.29",
+    "@strapi/icons": "2.0.0-rc.29",
     "@strapi/provider-email-sendmail": "5.18.0",
     "@strapi/utils": "5.18.0",
     "koa2-ratelimit": "^1.1.3",
