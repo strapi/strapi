@@ -18,12 +18,12 @@ const CloudFree = () => {
   return (
     <Box>
       <Box paddingBottom={10}>
-        <Flex direction={'column'}>
-          <Flex direction={'row'} wrap={'wrap'}>
+        <Flex direction="column">
+          <Flex direction="row" wrap="wrap">
             {features.map(({ id, message }) => (
               <Flex key={id} paddingRight={5}>
-                <Check fill={'primary500'} />
-                <Typography variant={'omega'} paddingLeft={1}>
+                <Check fill="primary500" />
+                <Typography variant="omega" paddingLeft={1}>
                   {formatMessage({
                     id: getTrad(`Homepage.freePlan.${id}`),
                     defaultMessage: message,

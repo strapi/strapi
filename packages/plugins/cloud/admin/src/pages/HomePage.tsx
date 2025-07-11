@@ -15,16 +15,9 @@ export const HomePage = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Box
-      paddingLeft={6}
-      paddingRight={6}
-      paddingTop={5}
-      paddingBottom={3}
-      background={'neutral100'}
-    >
-      {/* Header */}
-      <Flex direction={'column'} gap={2}>
-        <Typography variant={'alpha'}>
+    <Box paddingLeft={6} paddingRight={6} paddingTop={5} paddingBottom={3} background="neutral100">
+      <Flex direction="column" gap={2}>
+        <Typography variant="alpha">
           {formatMessage({
             id: getTrad('Homepage.title'),
             defaultMessage: 'Deploy with Strapi Cloud for Free!',
@@ -32,7 +25,7 @@ export const HomePage = () => {
         </Typography>
 
         <Flex direction={{ initial: 'row', medium: 'column' }}>
-          <Typography variant={'epsilon'} textColor={'neutral600'}>
+          <Typography variant="epsilon" textColor="neutral600">
             {formatMessage({
               id: getTrad('Homepage.subTitle'),
               defaultMessage:
@@ -42,11 +35,10 @@ export const HomePage = () => {
         </Flex>
       </Flex>
 
-      {/* Free plan + Deployment sections */}
       <Box padding={8}>
         <CloudFree />
         <Box paddingTop={8}>
-          <Box padding={6} background={'neutral0'} shadow={'tableShadow'}>
+          <Box padding={6} background="neutral0" shadow="tableShadow">
             <CloudDeploy />
           </Box>
         </Box>

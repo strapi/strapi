@@ -7,8 +7,8 @@ const CopyCommandButton = ({ command }: { command: string }) => {
   };
 
   return (
-    <Tooltip label={'Copy'}>
-      <IconButton size={'XS'} variant={'ghost'} label={'Copy'} onClick={handleCopy}>
+    <Tooltip label="Copy">
+      <IconButton size="XS" variant="ghost" label="Copy" onClick={handleCopy}>
         <Duplicate />
       </IconButton>
     </Tooltip>
@@ -18,21 +18,21 @@ const CopyCommandButton = ({ command }: { command: string }) => {
 const CLIDeployTabs = () => {
   return (
     <Box minWidth={'28em'} maxWidth={'28em'} paddingTop={8}>
-      <Tabs.Root defaultValue={'yarn'}>
+      <Tabs.Root defaultValue="yarn">
         <Tabs.List aria-label={'Package manager'}>
-          <Tabs.Trigger value={'yarn'}>
-            <Typography variant={'omega'}>Yarn</Typography>
+          <Tabs.Trigger value="yarn">
+            <Typography variant="omega">Yarn</Typography>
           </Tabs.Trigger>
-          <Tabs.Trigger value={'npm'}>
-            <Typography variant={'omega'}>NPM</Typography>
+          <Tabs.Trigger value="npm">
+            <Typography variant="omega">NPM</Typography>
           </Tabs.Trigger>
         </Tabs.List>
 
-        <Tabs.Content value={'yarn'}>
-          <Box background={'neutral100'}>
+        <Tabs.Content value="yarn">
+          <Box background="neutral100">
             <Box padding={4}>
-              <Flex direction={'row'} justifyContent={'space-between'} alignItems={'center'}>
-                <Typography tag={'code'} textColor={'neutral800'}>
+              <Flex direction="row" justifyContent="space-between" alignItems="center">
+                <Typography tag="code" textColor="neutral800">
                   yarn strapi deploy
                 </Typography>
                 <CopyCommandButton command={'yarn strapi deploy'} />
@@ -40,11 +40,11 @@ const CLIDeployTabs = () => {
             </Box>
           </Box>
         </Tabs.Content>
-        <Tabs.Content value={'npm'}>
-          <Box background={'neutral100'}>
+        <Tabs.Content value="npm">
+          <Box background="neutral100">
             <Box padding={4}>
-              <Flex direction={'row'} justifyContent={'space-between'} alignItems={'center'}>
-                <Typography tag={'code'} textColor={'neutral800'}>
+              <Flex direction="row" justifyContent="space-between" alignItems="center">
+                <Typography tag="code" textColor="neutral800">
                   npm run deploy
                 </Typography>
                 <CopyCommandButton command={'npm run deploy'} />
