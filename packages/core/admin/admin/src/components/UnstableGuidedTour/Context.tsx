@@ -3,6 +3,7 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { GetGuidedTourMeta } from '../../../../shared/contracts/admin';
+import { useTracking } from '../../features/Tracking';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
@@ -71,7 +72,6 @@ function reducer(state: State, action: Action): State {
 }
 
 const STORAGE_KEY = 'STRAPI_GUIDED_TOUR';
-
 const UnstableGuidedTourContext = ({
   children,
   enabled = true,
