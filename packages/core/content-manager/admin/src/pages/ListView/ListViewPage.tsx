@@ -14,6 +14,7 @@ import {
   useRBAC,
   Layouts,
   useTable,
+  unstable_tours,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -228,68 +229,74 @@ const ListViewPage = () => {
 
   if (!isFetching && results.length === 0) {
     return (
-      <Page.Main>
-        <Page.Title>{`${contentTypeTitle}`}</Page.Title>
-        <LayoutsHeaderCustom
-          primaryAction={canCreate ? <CreateButton /> : null}
-          subtitle={formatMessage(
-            {
-              id: getTranslation('pages.ListView.header-subtitle'),
-              defaultMessage:
-                '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
-            },
-            { number: pagination?.total }
-          )}
-          title={contentTypeTitle}
-          navigationAction={<BackButton />}
-        />
-        <Layouts.Action
-          endActions={
-            <>
-              <InjectionZone area="listView.actions" />
-              <ViewSettingsMenu
-                setHeaders={handleSetHeaders}
-                resetHeaders={() => setDisplayedHeaders(list.layout)}
-                headers={displayedHeaders.map((header) => header.name)}
-              />
-            </>
-          }
-          startActions={
-            <>
-              {list.settings.searchable && (
-                <SearchInput
-                  disabled={results.length === 0}
-                  label={formatMessage(
-                    { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                    { target: contentTypeTitle }
-                  )}
-                  placeholder={formatMessage({
-                    id: 'global.search',
-                    defaultMessage: 'Search',
-                  })}
-                  trackedEvent="didSearch"
+      <>
+        <unstable_tours.contentManager.Introduction>
+          {/* Invisible Anchor */}
+          <Box paddingTop={5} />
+        </unstable_tours.contentManager.Introduction>
+        <Page.Main>
+          <Page.Title>{`${contentTypeTitle}`}</Page.Title>
+          <LayoutsHeaderCustom
+            primaryAction={canCreate ? <CreateButton /> : null}
+            subtitle={formatMessage(
+              {
+                id: getTranslation('pages.ListView.header-subtitle'),
+                defaultMessage:
+                  '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
+              },
+              { number: pagination?.total }
+            )}
+            title={contentTypeTitle}
+            navigationAction={<BackButton />}
+          />
+          <Layouts.Action
+            endActions={
+              <>
+                <InjectionZone area="listView.actions" />
+                <ViewSettingsMenu
+                  setHeaders={handleSetHeaders}
+                  resetHeaders={() => setDisplayedHeaders(list.layout)}
+                  headers={displayedHeaders.map((header) => header.name)}
                 />
-              )}
-              {list.settings.filterable && schema ? (
-                <Filters disabled={results.length === 0} schema={schema} />
-              ) : null}
-            </>
-          }
-        />
-        <Layouts.Content>
-          <Box background="neutral0" shadow="filterShadow" hasRadius>
-            <EmptyStateLayout
-              action={canCreate ? <CreateButton variant="secondary" /> : null}
-              content={formatMessage({
-                id: 'app.components.EmptyStateLayout.content-document',
-                defaultMessage: 'No content found',
-              })}
-              hasRadius
-              icon={<EmptyDocuments width="16rem" />}
-            />
-          </Box>
-        </Layouts.Content>
-      </Page.Main>
+              </>
+            }
+            startActions={
+              <>
+                {list.settings.searchable && (
+                  <SearchInput
+                    disabled={results.length === 0}
+                    label={formatMessage(
+                      { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                      { target: contentTypeTitle }
+                    )}
+                    placeholder={formatMessage({
+                      id: 'global.search',
+                      defaultMessage: 'Search',
+                    })}
+                    trackedEvent="didSearch"
+                  />
+                )}
+                {list.settings.filterable && schema ? (
+                  <Filters disabled={results.length === 0} schema={schema} />
+                ) : null}
+              </>
+            }
+          />
+          <Layouts.Content>
+            <Box background="neutral0" shadow="filterShadow" hasRadius>
+              <EmptyStateLayout
+                action={canCreate ? <CreateButton variant="secondary" /> : null}
+                content={formatMessage({
+                  id: 'app.components.EmptyStateLayout.content-document',
+                  defaultMessage: 'No content found',
+                })}
+                hasRadius
+                icon={<EmptyDocuments width="16rem" />}
+              />
+            </Box>
+          </Layouts.Content>
+        </Page.Main>
+      </>
     );
   }
 

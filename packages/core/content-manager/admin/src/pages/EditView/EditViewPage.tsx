@@ -8,6 +8,7 @@ import {
   useRBAC,
   useNotification,
   useQueryParams,
+  unstable_tours,
 } from '@strapi/admin/strapi-admin';
 import { Grid, Main, Tabs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -27,6 +28,7 @@ import { createYupSchema } from '../../utils/validation';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels } from './components/Panels';
+import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
@@ -143,12 +145,22 @@ const EditViewPage = () => {
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
         validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+          // removes hidden fields from the validation
+          // this is necessary because the yup schema doesn't know about the visibility conditions
+          // and we don't want to validate fields that are not visible
+          const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
+            schema,
+            initialValues,
+            components,
+          });
+
           const yupSchema = createYupSchema(schema?.attributes, components, {
             status,
+            removedAttributes,
             ...options,
           });
 
-          return yupSchema.validate(values, { abortEarly: false });
+          return yupSchema.validate(cleanedValues, { abortEarly: false });
         }}
         initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >
@@ -187,9 +199,11 @@ const EditViewPage = () => {
             </Tabs.List>
             <Grid.Root paddingTop={8} gap={4}>
               <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
-                <Tabs.Content value="draft">
-                  <FormLayout layout={layout} document={doc} />
-                </Tabs.Content>
+                <unstable_tours.contentManager.Fields>
+                  <Tabs.Content value="draft">
+                    <FormLayout layout={layout} document={doc} />
+                  </Tabs.Content>
+                </unstable_tours.contentManager.Fields>
                 <Tabs.Content value="published">
                   <FormLayout layout={layout} document={doc} />
                 </Tabs.Content>
