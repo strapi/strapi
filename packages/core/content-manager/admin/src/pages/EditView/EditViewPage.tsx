@@ -140,14 +140,12 @@ const EditViewPage = () => {
   return (
     <Main paddingLeft={10} paddingRight={10}>
       <Page.Title>{pageTitle}</Page.Title>
-      {
-        isSingleType && (
-          <unstable_tours.contentManager.Introduction>
-            {/* Invisible Anchor */}
-            <Box paddingTop={5} />
-          </unstable_tours.contentManager.Introduction>
-        )
-      }
+      {isSingleType && (
+        <unstable_tours.contentManager.Introduction>
+          {/* Invisible Anchor */}
+          <Box paddingTop={5} />
+        </unstable_tours.contentManager.Introduction>
+      )}
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
