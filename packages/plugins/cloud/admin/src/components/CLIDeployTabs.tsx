@@ -1,5 +1,8 @@
 import { Box, Typography, Tabs, IconButton, Flex, Tooltip } from '@strapi/design-system';
 import { Duplicate } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+
+import { getTrad } from '../utils/getTrad';
 
 const CopyCommandButton = ({ command }: { command: string }) => {
   const handleCopy = async () => {
@@ -16,10 +19,17 @@ const CopyCommandButton = ({ command }: { command: string }) => {
 };
 
 const CLIDeployTabs = () => {
+  const { formatMessage } = useIntl();
+
   return (
     <Box minWidth={'28em'} maxWidth={'28em'} paddingTop={8}>
       <Tabs.Root defaultValue="yarn">
-        <Tabs.List aria-label={'Package manager'}>
+        <Tabs.List
+          aria-label={formatMessage({
+            id: getTrad('Homepage.deploy.cli.ariaLabel'),
+            defaultMessage: 'Package manager',
+          })}
+        >
           <Tabs.Trigger value="yarn">
             <Typography variant="omega">Yarn</Typography>
           </Tabs.Trigger>

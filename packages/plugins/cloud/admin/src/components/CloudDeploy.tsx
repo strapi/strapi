@@ -41,7 +41,12 @@ const CloudDeploy = () => {
 
       <Tabs.Root defaultValue="cloud" variant="simple">
         <Flex direction="column">
-          <Tabs.List aria-label={'Deployment options'}>
+          <Tabs.List
+            aria-label={formatMessage({
+              id: getTrad('Homepage.deploy.ariaLabel'),
+              defaultMessage: 'Deployment options',
+            })}
+          >
             <Tabs.Trigger value="cloud">
               <Box minWidth={{ initial: '10em', medium: '20em' }}>
                 <Flex direction="row" gap={2} justifyContent="center">
