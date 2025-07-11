@@ -1,3 +1,4 @@
+import { useClipboard } from '@strapi/admin/strapi-admin';
 import { Box, Typography, Tabs, IconButton, Flex, Tooltip } from '@strapi/design-system';
 import { Duplicate } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -5,9 +6,9 @@ import { useIntl } from 'react-intl';
 import { getTrad } from '../utils/getTrad';
 
 const CopyCommandButton = ({ command }: { command: string }) => {
-  const handleCopy = async () => {
-    navigator.clipboard.writeText(command);
-  };
+  const { copy } = useClipboard();
+
+  const handleCopy = async () => await copy(command);
 
   return (
     <Tooltip label="Copy">
