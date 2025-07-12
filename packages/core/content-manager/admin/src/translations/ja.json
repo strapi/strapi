@@ -65,6 +65,7 @@
   "containers.Edit.clickToJump": "クリックするとエントリにジャンプします",
   "containers.Edit.delete": "削除",
   "containers.Edit.delete-entry": "Delete this entry",
+  "containers.edit.title.new": "エントリを作成",
   "containers.Edit.editing": "編集...",
   "containers.Edit.information": "Information",
   "containers.Edit.information.by": "By",

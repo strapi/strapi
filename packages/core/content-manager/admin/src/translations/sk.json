@@ -67,6 +67,7 @@
   "containers.Edit.clickToJump": "Kliknutím zobrazte položku",
   "containers.Edit.delete": "Zmazať",
   "containers.Edit.delete-entry": "Zmazať túto položku",
+  "containers.edit.title.new": "Vytvoriť záznam",
   "containers.Edit.editing": "Úprava...",
   "containers.Edit.information": "Informácie",
   "containers.Edit.information.by": "Autor",

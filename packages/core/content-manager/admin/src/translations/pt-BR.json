@@ -67,6 +67,7 @@
   "containers.Edit.clickToJump": "Clique para pular para o registro",
   "containers.Edit.delete": "Remover",
   "containers.Edit.delete-entry": "Remover este registro",
+  "containers.edit.title.new": "Criar uma entrada",
   "containers.Edit.editing": "Editando...",
   "containers.Edit.information": "Informação",
   "containers.Edit.information.by": "Por",

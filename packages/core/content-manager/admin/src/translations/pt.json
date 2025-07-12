@@ -21,6 +21,7 @@
   "containers.Edit.addAnItem": "Adicionar uma entrada...",
   "containers.Edit.clickToJump": "Clique para saltar para a entrada",
   "containers.Edit.delete": "Apagar",
+  "containers.edit.title.new": "Criar uma entrada",
   "containers.Edit.editing": "Editando...",
   "containers.Edit.reset": "Restabelecer",
   "containers.Edit.returnList": "Retornar à lista",

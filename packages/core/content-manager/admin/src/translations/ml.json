@@ -67,6 +67,7 @@
   "containers.Edit.clickToJump": "എൻട്രിയിലേക്ക് പോകുന്നതിന് ക്ലിക്കുചെയ്യുക",
   "containers.Edit.delete": "ഇല്ലാതാക്കുക",
   "containers.Edit.delete-entry": "ഈ എൻട്രി ഇല്ലാതാക്കുക",
+  "containers.edit.title.new": "ഒരു എൻട്രി സൃഷ്ടിക്കുക",
   "containers.Edit.editing": "എഡിറ്റിംഗ്...",
   "containers.Edit.information": "വിവരങ്ങൾ",
   "containers.Edit.information.by": "എഴുതിയത്",

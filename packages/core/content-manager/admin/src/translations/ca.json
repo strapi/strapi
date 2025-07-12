@@ -68,6 +68,7 @@
   "containers.Edit.clickToJump": "Click per anar al registre",
   "containers.Edit.delete": "Eliminar",
   "containers.Edit.delete-entry": "Eliminar aquesta entrada",
+  "containers.edit.title.new": "Crear una entrada",
   "containers.Edit.editing": "Editant...",
   "containers.Edit.information": "Informació",
   "containers.Edit.information.by": "Per",

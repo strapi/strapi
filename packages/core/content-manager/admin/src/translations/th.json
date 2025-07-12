@@ -40,6 +40,7 @@
   "containers.Edit.addAnItem": "เพิ่มไอเท็ม...",
   "containers.Edit.clickToJump": "คลิกเพื่อข้ามไปยังรายการ",
   "containers.Edit.delete": "ลบ",
+  "containers.edit.title.new": "สร้างรายการ",
   "containers.Edit.editing": "กำลังแก้ไข...",
   "containers.Edit.pluginHeader.title.new": "สร้างรายการ",
   "containers.Edit.reset": "รีเซ็ต",

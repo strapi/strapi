@@ -44,6 +44,7 @@
   "containers.Edit.clickToJump": "Clicca per andare all'elemento",
   "containers.Edit.delete": "Elimina",
   "containers.Edit.delete-entry": "Elimina questo elemento",
+  "containers.edit.title.new": "Crea una voce",
   "containers.Edit.editing": "Modifica in corso...",
   "containers.Edit.information": "Informazioni",
   "containers.Edit.information.by": "Da",
