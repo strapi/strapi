@@ -4,8 +4,8 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
 
-import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { useTracking } from '../../features/Tracking';
+import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { ConfirmDialog } from '../ConfirmDialog';
 
 import { type ValidTourName, unstableUseGuidedTour } from './Context';
