@@ -37,6 +37,10 @@ describe('Audit logs service', () => {
     get: jest.fn(() => ({
       deleteExpiredEvents: jest.fn(),
     })),
+    cron: {
+      add: jest.fn(),
+      remove: jest.fn(),
+    },
     config: {
       get(key: any) {
         switch (key) {
@@ -103,15 +107,18 @@ describe('Audit logs service', () => {
   });
 
   it('should create a cron job that executed one time a day', async () => {
-    // @ts-expect-error scheduleJob
-    const mockScheduleJob = scheduleJob.mockImplementationOnce(
-      jest.fn((rule, callback) => callback())
-    );
+    // Mock Strapi EE feature to be enabled for this test
+    jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
 
     const lifecycle = createAuditLogsLifecycleService(strapi);
     await lifecycle.register();
 
-    expect(mockScheduleJob).toHaveBeenCalledTimes(1);
-    expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
+    // Verify that strapi.cron.add was called with the correct job configuration
+    expect(strapi.cron.add).toHaveBeenCalledWith({
+      deleteExpiredAuditLogs: {
+        task: expect.any(Function),
+        options: '0 0 * * *',
+      },
+    });
   });
 });
