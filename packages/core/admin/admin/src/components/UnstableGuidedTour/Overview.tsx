@@ -4,6 +4,7 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
 
+import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { ConfirmDialog } from '../ConfirmDialog';
 
 import { type ValidTourName, unstableUseGuidedTour } from './Context';
@@ -141,13 +142,14 @@ export const UnstableGuidedTourOverview = () => {
   const tours = unstableUseGuidedTour('Overview', (s) => s.state.tours);
   const dispatch = unstableUseGuidedTour('Overview', (s) => s.dispatch);
   const enabled = unstableUseGuidedTour('Overview', (s) => s.state.enabled);
+  const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
   const tourNames = Object.keys(tours) as ValidTourName[];
 
   const completedTours = tourNames.filter((tourName) => tours[tourName].isCompleted);
   const completionPercentage =
     tourNames.length > 0 ? Math.round((completedTours.length / tourNames.length) * 100) : 0;
 
-  if (!enabled) {
+  if (!guidedTourMeta?.data.isFirstSuperAdminUser || !enabled) {
     return null;
   }
 
