@@ -9182,6 +9182,7 @@ __metadata:
     copyfiles: "npm:2.4.1"
     eslint-config-custom: "npm:5.17.0"
     fs-extra: "npm:11.2.0"
+    handlebars: "npm:4.7.7"
     plop: "npm:4.0.1"
     pluralize: "npm:8.0.0"
     tsconfig: "npm:5.17.0"
@@ -19265,7 +19266,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"handlebars@npm:^4.7.7":
+"handlebars@npm:4.7.7, handlebars@npm:^4.7.7":
   version: 4.7.7
   resolution: "handlebars@npm:4.7.7"
   dependencies:
