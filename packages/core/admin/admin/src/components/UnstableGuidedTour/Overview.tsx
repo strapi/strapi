@@ -4,6 +4,7 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
 
+import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { useTracking } from '../../features/Tracking';
 import { ConfirmDialog } from '../ConfirmDialog';
 
@@ -142,6 +143,7 @@ export const UnstableGuidedTourOverview = () => {
   const tours = unstableUseGuidedTour('Overview', (s) => s.state.tours);
   const dispatch = unstableUseGuidedTour('Overview', (s) => s.dispatch);
   const enabled = unstableUseGuidedTour('Overview', (s) => s.state.enabled);
+  const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
   const tourNames = Object.keys(tours) as ValidTourName[];
   const { trackUsage } = useTracking();
 
@@ -149,9 +151,20 @@ export const UnstableGuidedTourOverview = () => {
   const completionPercentage =
     tourNames.length > 0 ? Math.round((completedTours.length / tourNames.length) * 100) : 0;
 
-  if (!enabled) {
+  if (!guidedTourMeta?.data.isFirstSuperAdminUser || !enabled) {
     return null;
   }
+
+  const handleConfirmDialog = () => {
+    trackUsage('didSkipGuidedTour', { name: 'all' });
+    dispatch({ type: 'skip_all_tours' });
+  };
+
+  const handleClickOnLink = (tourName: ValidTourName) => {
+    trackUsage('didCompleteGuidedTour', { name: tourName });
+    dispatch({ type: 'skip_tour', payload: tourName });
+  }
+    
 
   return (
     <Container tag="section" gap={0}>
@@ -192,12 +205,7 @@ export const UnstableGuidedTourOverview = () => {
               })}
             </Button>
           </Dialog.Trigger>
-          <ConfirmDialog
-            onConfirm={() => {
-              trackUsage('didSkipGuidedTour', { name: 'all' });
-              dispatch({ type: 'skip_all_tours' });
-            }}
-          >
+          <ConfirmDialog onConfirm={handleConfirmDialog}>
             {formatMessage({
               id: 'tours.overview.close.description',
               defaultMessage: 'Are you sure you want to close the guided tour?',
@@ -220,7 +228,11 @@ export const UnstableGuidedTourOverview = () => {
             const tour = tours[tourName];
 
             return (
-              <TourTaskContainer key={tourName} alignItems="center" justifyContent="space-between">
+              <TourTaskContainer
+                key={tourName}
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 {tour.isCompleted ? (
                   <>
                     <Flex gap={2}>
@@ -245,22 +257,14 @@ export const UnstableGuidedTourOverview = () => {
                       <Link
                         isExternal
                         href={task.link.to}
-                        onClick={() => {
-                          dispatch({ type: 'skip_tour', payload: tourName });
-                          trackUsage('didCompleteGuidedTour', { name: tourName });
-                        }}
+                        onClick={() =>
+                          handleClickOnLink(task.tourName as ValidTourName)
+                        }
                       >
                         {formatMessage(task.link.label)}
                       </Link>
                     ) : (
-                      <Link
-                        endIcon={<ChevronRight />}
-                        to={task.link.to}
-                        tag={NavLink}
-                        onClick={() => {
-                          trackUsage('didStartGuidedTourFromHomepage', { name: tourName });
-                        }}
-                      >
+                      <Link endIcon={<ChevronRight />} to={task.link.to} tag={NavLink} onClick={() => trackUsage('didStartGuidedTourFromHomepage', { name: tourName })}>
                         {formatMessage(task.link.label)}
                       </Link>
                     )}
