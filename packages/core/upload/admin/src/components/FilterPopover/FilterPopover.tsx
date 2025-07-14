@@ -259,7 +259,7 @@ export const FilterPopover = ({
   const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
 
   return (
-    <Popover.Content sideOffset={4}>
+    <Popover.Content sideOffset={4} style={{ zIndex: 499 }}>
       <form onSubmit={handleSubmit}>
         <Flex padding={3} direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
           <Box>
