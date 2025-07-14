@@ -163,8 +163,7 @@ export const UnstableGuidedTourOverview = () => {
   const handleClickOnLink = (tourName: ValidTourName) => {
     trackUsage('didCompleteGuidedTour', { name: tourName });
     dispatch({ type: 'skip_tour', payload: tourName });
-  }
-    
+  };
 
   return (
     <Container tag="section" gap={0}>
@@ -228,11 +227,7 @@ export const UnstableGuidedTourOverview = () => {
             const tour = tours[tourName];
 
             return (
-              <TourTaskContainer
-                key={tourName}
-                alignItems="center"
-                justifyContent="space-between"
-              >
+              <TourTaskContainer key={tourName} alignItems="center" justifyContent="space-between">
                 {tour.isCompleted ? (
                   <>
                     <Flex gap={2}>
@@ -257,14 +252,19 @@ export const UnstableGuidedTourOverview = () => {
                       <Link
                         isExternal
                         href={task.link.to}
-                        onClick={() =>
-                          handleClickOnLink(task.tourName as ValidTourName)
-                        }
+                        onClick={() => handleClickOnLink(task.tourName as ValidTourName)}
                       >
                         {formatMessage(task.link.label)}
                       </Link>
                     ) : (
-                      <Link endIcon={<ChevronRight />} to={task.link.to} tag={NavLink} onClick={() => trackUsage('didStartGuidedTourFromHomepage', { name: tourName })}>
+                      <Link
+                        endIcon={<ChevronRight />}
+                        to={task.link.to}
+                        tag={NavLink}
+                        onClick={() =>
+                          trackUsage('didStartGuidedTourFromHomepage', { name: tourName })
+                        }
+                      >
                         {formatMessage(task.link.label)}
                       </Link>
                     )}
