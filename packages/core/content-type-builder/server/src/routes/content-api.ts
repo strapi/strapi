@@ -24,6 +24,23 @@ const relationAttributeSchema = baseAttributeSchema.extend({
   autoPopulate: z.boolean().optional(),
 });
 
+const componentAttributeSchema = baseAttributeSchema.extend({
+  type: z.literal('component'),
+  component: z.string(),
+  repeatable: z.boolean(),
+  required: z.boolean().optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+});
+
+const dynamicZoneAttributeSchema = baseAttributeSchema.extend({
+  type: z.literal('dynamiczone'),
+  components: z.array(z.string()),
+  required: z.boolean().optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+});
+
 const genericAttributeSchema = z.object({
   type: z.string(),
   required: z.boolean().optional(),
@@ -43,6 +60,8 @@ const genericAttributeSchema = z.object({
 const attributeSchema = z.union([
   mediaAttributeSchema,
   relationAttributeSchema,
+  componentAttributeSchema,
+  dynamicZoneAttributeSchema,
   genericAttributeSchema,
 ]);
 
