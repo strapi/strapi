@@ -23,26 +23,32 @@ export const runCLI = async () => {
   );
 };
 
-// Runs a generator programmatically without prompts
+type GenerateOptions = {
+  dir?: string;
+  plopFile?: string;
+};
+
+type GeneratorAction = {
+  type: 'add' | 'modify';
+  path: string;
+  templateFile?: string;
+  data?: Record<string, any>;
+  transform?: (content: string) => string;
+};
+
 export const generate = async <T extends Record<string, any>>(
   generatorName: string,
   options: T,
-  { dir = process.cwd(), plopFile = 'plopfile.js' } = {}
+  { dir = process.cwd(), plopFile = 'plopfile.js' }: GenerateOptions = {}
 ) => {
-  // Load the plopfile configuration
   const plopfilePath = join(__dirname, plopFile);
-  // We need to use require() here because:
-  // 1. The path is dynamic (based on plopFile parameter)
-  // 2. The plopfile is a CommonJS module
-  // 3. Dynamic imports with variables are restricted by rollup
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const plopModule = require(plopfilePath);
 
-  // Create a mock plop API to collect generator configurations
   const generators: Record<string, any> = {};
   const helpers: Record<string, any> = {};
 
-  const mockPlop = {
+  const plopApi = {
     setGenerator(name: string, config: any) {
       generators[name] = config;
     },
@@ -55,52 +61,55 @@ export const generate = async <T extends Record<string, any>>(
     setWelcomeMessage() {}, // no-op
   };
 
-  // Execute the plopfile to register generators
   if (typeof plopModule.default === 'function') {
-    plopModule.default(mockPlop);
+    plopModule.default(plopApi);
   } else {
-    plopModule(mockPlop);
+    plopModule(plopApi);
   }
 
-  // Find the requested generator
   const generator = generators[generatorName];
   if (!generator) {
     throw new Error(`Generator "${generatorName}" not found`);
   }
 
-  // Register handlebars helpers
-  Object.keys(helpers).forEach((name) => {
-    handlebars.registerHelper(name, helpers[name]);
-  });
-
-  // Get the actions for this generator
-  const actions =
+  registerHandlebarsHelpers(helpers);
+  const actions: GeneratorAction[] =
     typeof generator.actions === 'function' ? generator.actions(options) : generator.actions || [];
 
-  // Execute each action
+  await executeActions(actions, options, dir);
+
+  return { success: true };
+};
+
+const registerHandlebarsHelpers = (helpers: Record<string, any>) => {
+  Object.entries(helpers).forEach(([name, fn]) => handlebars.registerHelper(name, fn));
+};
+
+const executeActions = async (
+  actions: GeneratorAction[],
+  options: Record<string, any>,
+  dir: string
+) => {
   for (const action of actions) {
-    if (action.type === 'add') {
+    const outputPath = handlebars.compile(action.path)(options);
+    const fullPath = join(dir, 'src', outputPath);
+
+    if (action.type === 'add' && action.templateFile) {
       const templatePath = join(__dirname, action.templateFile);
       const templateContent = await fs.readFile(templatePath, 'utf8');
       const compiled = handlebars.compile(templateContent);
       const output = compiled({ ...options, ...action.data });
 
-      const outputPath = handlebars.compile(action.path)(options);
-      const fullOutputPath = join(dir, 'src', outputPath);
+      await fs.ensureDir(dirname(fullPath));
+      await fs.writeFile(fullPath, output);
+    }
 
-      await fs.ensureDir(dirname(fullOutputPath));
-      await fs.writeFile(fullOutputPath, output);
-    } else if (action.type === 'modify') {
-      const filePath = handlebars.compile(action.path)(options);
-      const fullFilePath = join(dir, 'src', filePath);
-
-      if (await fs.pathExists(fullFilePath)) {
-        const content = await fs.readFile(fullFilePath, 'utf8');
+    if (action.type === 'modify') {
+      if (await fs.pathExists(fullPath)) {
+        const content = await fs.readFile(fullPath, 'utf8');
         const modified = action.transform ? action.transform(content) : content;
-        await fs.writeFile(fullFilePath, modified);
+        await fs.writeFile(fullPath, modified);
       }
     }
   }
-
-  return { success: true };
 };

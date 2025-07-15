@@ -1,4 +1,3 @@
-
 import validateAttributeInput from '../utils/validate-attribute-input';
 
 interface AttributeAnswer {

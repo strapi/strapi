@@ -1,11 +1,7 @@
 import { join } from 'path';
 import fs from 'fs-extra';
 
-export default (
-  action: string,
-  basePath: string,
-  { rootFolder = false } = {}
-) => {
+export default (action: string, basePath: string, { rootFolder = false } = {}) => {
   return [
     {
       type: 'list',
