@@ -41,13 +41,20 @@ export const generate = async <T extends Record<string, any>>(
   options: T,
   { dir = process.cwd(), plopFile = 'plopfile.js' }: GenerateOptions = {}
 ) => {
+  // Resolve the absolute path to the plopfile (generator definitions)
   const plopfilePath = join(__dirname, plopFile);
+  // Dynamically require the plopfile module.
+  // Note: This allows loading either CommonJS or transpiled ESM plopfiles.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const plopModule = require(plopfilePath);
 
+  // Internal objects to store registered generators and helpers.
+  // These will be populated by the plopfile when it is executed.
   const generators: Record<string, any> = {};
   const helpers: Record<string, any> = {};
 
+  // Minimal mock Plop API implementation, exposing only the methods needed by our plopfile.
+  // This allows the plopfile to register generators and helpers as it would in a real Plop environment.
   const plopApi = {
     setGenerator(name: string, config: any) {
       generators[name] = config;
@@ -61,6 +68,9 @@ export const generate = async <T extends Record<string, any>>(
     setWelcomeMessage() {}, // no-op
   };
 
+  // Execute the plopfile, passing in our API.
+  // This will populate the `generators` and `helpers` objects.
+  // Support both CommonJS and ESM default exports.
   if (typeof plopModule.default === 'function') {
     plopModule.default(plopApi);
   } else {
@@ -85,6 +95,7 @@ const registerHandlebarsHelpers = (helpers: Record<string, any>) => {
   Object.entries(helpers).forEach(([name, fn]) => handlebars.registerHelper(name, fn));
 };
 
+// Executes generator actions: add or modify files as specified
 const executeActions = async (
   actions: GeneratorAction[],
   options: Record<string, any>,

@@ -20,7 +20,7 @@ const questions = [
     name: 'singularName',
     message: 'Content type singular name',
     default: (answers: Answers) => slugify(answers.displayName),
-    validate(input: any) {
+    validate(input: string) {
       if (!strings.isKebabCase(input)) {
         return 'Value must be in kebab-case';
       }
