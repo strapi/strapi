@@ -82,7 +82,7 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     isConfigured() {
-      return config.enabled === false || config?.config?.handler != null;
+      return config?.enabled === false || config?.config?.handler != null;
     },
 
     isEnabled() {
