@@ -1,12 +1,31 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Typography,
+  TypographyProps,
+  useCallbackRef,
+  IconButton,
+} from '@strapi/design-system';
+import { Question } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import { useLocation, Link } from 'react-router-dom';
 
+import { useTracking } from '../../features/Tracking';
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
+
+import { getMatchingDocLink } from './utils/getMatchingDocLink';
 
 /* -------------------------------------------------------------------------------------------------
  * BaseHeaderLayout
  * -----------------------------------------------------------------------------------------------*/
+
+interface DocLink {
+  link: string;
+  title: string;
+  pathname: string;
+}
 
 interface BaseHeaderLayoutProps extends Omit<TypographyProps<'div'>, 'tag'> {
   navigationAction?: React.ReactNode;
@@ -15,14 +34,48 @@ interface BaseHeaderLayoutProps extends Omit<TypographyProps<'div'>, 'tag'> {
   subtitle?: React.ReactNode;
   sticky?: boolean;
   width?: number;
+  docLink?: DocLink | null;
 }
 
 const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>(
   (
-    { navigationAction, primaryAction, secondaryAction, subtitle, title, sticky, width, ...props },
+    {
+      navigationAction,
+      primaryAction,
+      secondaryAction,
+      subtitle,
+      title,
+      sticky,
+      width,
+      docLink,
+      ...props
+    },
     ref
   ) => {
     const isSubtitleString = typeof subtitle === 'string';
+
+    const { formatMessage } = useIntl();
+    const { trackUsage } = useTracking();
+
+    const docLinkButton = docLink ? (
+      <Flex>
+        <IconButton
+          onClick={() =>
+            trackUsage('didClickOnDocLink', { from: docLink.pathname, to: docLink.link })
+          }
+          size="S"
+          label={formatMessage({
+            id: 'app.HeaderLayout.docLink.label',
+            defaultMessage: 'Learn more on our documentation',
+          })}
+          to={docLink.link}
+          tag={Link}
+          target="_blank"
+        >
+          <Question />
+        </IconButton>
+      </Flex>
+    ) : null;
 
     if (sticky) {
       return (
@@ -40,7 +93,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           zIndex={3}
           data-strapi-header-sticky
         >
-          <Flex justifyContent="space-between">
+          <Flex gap={2} justifyContent="space-between">
             <Flex>
               {navigationAction && <Box paddingRight={3}>{navigationAction}</Box>}
               <Box>
@@ -57,11 +110,20 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
               </Box>
               {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
             </Flex>
-            <Flex>{primaryAction ? <Box paddingLeft={2}>{primaryAction}</Box> : undefined}</Flex>
+            <Flex>
+              {primaryAction ? (
+                <Flex>
+                  {docLinkButton}
+                  {primaryAction}
+                </Flex>
+              ) : undefined}
+            </Flex>
           </Flex>
         </Box>
       );
     }
+
+    console.log(primaryAction ? true : false);
 
     return (
       <Box
@@ -74,14 +136,18 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
         data-strapi-header
       >
         {navigationAction ? <Box paddingBottom={2}>{navigationAction}</Box> : null}
-        <Flex justifyContent="space-between">
+        <Flex gap={2} justifyContent="space-between">
           <Flex minWidth={0}>
             <Typography tag="h1" variant="alpha" {...props}>
               {title}
             </Typography>
             {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
           </Flex>
-          {primaryAction}
+          {/* Experiment */}
+          <Flex>
+            {docLinkButton}
+            {primaryAction}
+          </Flex>
         </Flex>
         {isSubtitleString ? (
           <Typography variant="epsilon" textColor="neutral600" tag="p">
@@ -105,6 +171,8 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   const baseHeaderLayoutRef = React.useRef<HTMLDivElement>(null);
   const [headerSize, setHeaderSize] = React.useState<DOMRect | null>(null);
   const [isVisible, setIsVisible] = React.useState(true);
+  const { pathname } = useLocation();
+  const docLink = getMatchingDocLink(pathname);
 
   const containerRef = useElementOnScreen<HTMLDivElement>(setIsVisible, {
     root: null,
@@ -127,10 +195,12 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   return (
     <>
       <div style={{ height: headerSize?.height }} ref={containerRef}>
-        {isVisible && <BaseHeaderLayout ref={baseHeaderLayoutRef} {...props} />}
+        {isVisible && <BaseHeaderLayout ref={baseHeaderLayoutRef} {...props} docLink={docLink} />}
       </div>
 
-      {!isVisible && <BaseHeaderLayout {...props} sticky width={headerSize?.width} />}
+      {!isVisible && (
+        <BaseHeaderLayout {...props} sticky width={headerSize?.width} docLink={docLink} />
+      )}
     </>
   );
 };
