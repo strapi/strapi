@@ -212,6 +212,18 @@ test.describe('Home as super admin', () => {
     await page.getByRole('textbox', { name: /title/i }).fill('Test article');
     await page.getByRole('button', { name: /save/i }).click();
 
+    // Upload an asset
+    await navToHeader(page, ['Media Library'], 'Media Library');
+    await page.getByRole('button', { name: 'Add new assets' }).first().click();
+    await page
+      .getByLabel('Drag & Drop here or')
+      .setInputFiles('public/assets/administration_panel.png');
+    await page
+      .getByRole('button', { name: 'Upload 1 asset to the library' })
+      .waitFor({ state: 'visible', timeout: 5000 });
+    await page.getByRole('button', { name: 'Upload 1 asset to the library' }).click();
+    await page.getByLabel('Home').click();
+
     // Create a content type and a component
     await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
     await page.getByRole('button', { name: /skip the tour/i }).click();
@@ -274,6 +286,7 @@ test.describe('Home as super admin', () => {
 
     // The numbers should have updated
     await expect(keyStatisticsWidget.getByText('Entries').locator('..')).toContainText('12');
+    await expect(keyStatisticsWidget.getByText('Assets').locator('..')).toContainText('10');
     await expect(keyStatisticsWidget.getByText('Content-Types').locator('..')).toContainText('11');
     await expect(keyStatisticsWidget.getByText('Components').locator('..')).toContainText('6');
     await expect(keyStatisticsWidget.getByText('Locales').locator('..')).toContainText('5');
@@ -293,8 +306,6 @@ test.describe('Home as super admin', () => {
 
     await page.getByRole('button', { name: /save/i }).click();
     await waitForRestart(page);
-
-    // TODO: Upload an asset
   });
 
   test('a user should not see the key statistics widget if they are not a super admin', async ({
