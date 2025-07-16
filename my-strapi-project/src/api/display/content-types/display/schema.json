@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "displays",
+  "info": {
+    "singularName": "display",
+    "pluralName": "displays",
+    "displayName": "DISPLAY"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "TEXT": {
+      "type": "text",
+      "maxLength": 101,
+      "required": true
+    },
+    "JSON": {
+      "type": "blocks"
+    },
+    "INT": {
+      "type": "decimal",
+      "required": true,
+      "unique": false
+    },
+    "BOOL": {
+      "type": "boolean",
+      "required": true
+    }
+  }
+}
