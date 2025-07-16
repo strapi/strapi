@@ -76,7 +76,6 @@ export abstract class AbstractRouteValidator {
 
   /**
    * Provides access to all base query parameter validators
-   * This can be used by subclasses to build upon or override specific validators
    */
   protected get baseQueryValidators() {
     return {

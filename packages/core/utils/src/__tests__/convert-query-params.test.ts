@@ -44,7 +44,7 @@ const models = {
   },
 } satisfies Record<string, Model>;
 
-const { privateConvertFiltersQueryParams, privateConvertPopulateQueryParams } = createTransformer({
+const transformer = createTransformer({
   getModel: (uid: string) => models[uid],
 });
 
@@ -69,7 +69,7 @@ describe('convert-query-params', () => {
     ])('keeps: %s', (key, input) => {
       const expectedOutput = { ...input };
 
-      const res = privateConvertFiltersQueryParams(input, models['api::dog.dog']);
+      const res = transformer.private_convertFiltersQueryParams(input, models['api::dog.dog']);
       expect(res).toEqual(expectedOutput);
     });
 
@@ -79,7 +79,7 @@ describe('convert-query-params', () => {
       ['invalid operator', { $nope: 'test' }],
       ['uppercase operator', { $GT: new Date() }],
     ])('removes: %s', (key, input) => {
-      const res = privateConvertFiltersQueryParams(input, models['api::dog.dog']);
+      const res = transformer.private_convertFiltersQueryParams(input, models['api::dog.dog']);
       expect(res).toEqual({});
     });
 
@@ -98,7 +98,10 @@ describe('convert-query-params', () => {
           cpb: { fields: ['field'] },
         };
 
-        const newPopulate = privateConvertPopulateQueryParams(populate, models['api::dog.dog']);
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
 
         expect(newPopulate).toStrictEqual({
           cpa: { select: ['id', 'field'] },
@@ -111,7 +114,10 @@ describe('convert-query-params', () => {
           one_to_one: { fields: ['title'] },
         };
 
-        const newPopulate = privateConvertPopulateQueryParams(populate, models['api::dog.dog']);
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
 
         expect(newPopulate).toStrictEqual({
           one_to_one: { select: ['id', 'documentId', 'title'] },
@@ -128,7 +134,7 @@ describe('convert-query-params', () => {
         const invalidPopulate = { [key]: { filters: { id: { $in: [1, 2, 3] } } } };
 
         expect(() =>
-          privateConvertPopulateQueryParams(invalidPopulate, models['api::dog.dog'])
+          transformer.private_convertPopulateQueryParams(invalidPopulate, models['api::dog.dog'])
         ).toThrowError(
           `Invalid nested populate for dog.${key} (api::dog.dog). Expected a fragment ("on") or "count" but found {"filters":{"id":{"$in":[1,2,3]}}}`
         );
@@ -141,7 +147,10 @@ describe('convert-query-params', () => {
             [key]: { on: { 'api::dog.dog': { fields: ['title'], populate: 'createdBy' } } },
           };
 
-          const newPopulate = privateConvertPopulateQueryParams(populate, models['api::dog.dog']);
+          const newPopulate = transformer.private_convertPopulateQueryParams(
+            populate,
+            models['api::dog.dog']
+          );
 
           expect(newPopulate).toStrictEqual({
             [key]: {
@@ -163,7 +172,10 @@ describe('convert-query-params', () => {
           },
         };
 
-        const newPopulate = privateConvertPopulateQueryParams(populate, models['api::dog.dog']);
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
 
         expect(newPopulate).toStrictEqual({
           dz: {
@@ -182,7 +194,10 @@ describe('convert-query-params', () => {
       ])('%s attributes can request a count', (_, key) => {
         const populate = { [key]: { count: true } };
 
-        const newPopulate = privateConvertPopulateQueryParams(populate, models['api::dog.dog']);
+        const newPopulate = transformer.private_convertPopulateQueryParams(
+          populate,
+          models['api::dog.dog']
+        );
 
         expect(newPopulate).toStrictEqual({ [key]: { count: true } });
       });
