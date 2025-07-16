@@ -3,9 +3,9 @@ import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
-import roles from '@strapi/admin/server/src/routes/roles';
+import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 
-test.describe('Home', () => {
+test.describe('Home as super admin', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -177,7 +177,7 @@ test.describe('Home', () => {
     await expect(tooltip).toContainText('1 Published');
   });
 
-  test.only('a user should see the key statistics widget', async ({ page }) => {
+  test('a user should see the key statistics widget', async ({ page }) => {
     const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
     await expect(keyStatisticsWidget).toBeVisible();
 
@@ -295,5 +295,32 @@ test.describe('Home', () => {
     await waitForRestart(page);
 
     // TODO: Upload an asset
+  });
+
+  test('a user should not see the key statistics widget if they are not a super admin', async ({
+    page,
+  }) => {
+    await navToHeader(page, ['Settings', 'Users'], 'Users');
+    await page.getByRole('button', { name: /invite new user/i }).click();
+    await page.getByRole('textbox', { name: /first name/i }).fill('New');
+    await page.getByRole('textbox', { name: /email/i }).fill('newadmin@example.com');
+    await page.getByRole('combobox', { name: "User's roles" }).click();
+    await page.getByRole('option', { name: 'Author' }).click();
+    await page.keyboard.press('Escape');
+  });
+});
+
+test.describe('Home as editor', () => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await page.goto('/admin');
+    await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
+  });
+
+  test('a user should not see the key statistics widget if they are not a super admin', async ({
+    page,
+  }) => {
+    const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
+    await expect(keyStatisticsWidget).not.toBeVisible();
   });
 });
