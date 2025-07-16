@@ -33,22 +33,31 @@ export const getBreadcrumbDataML = (
     },
   ];
 
-  if (folder?.parent && typeof folder?.parent !== 'number' && folder?.parent?.parent) {
-    data.push([]);
-  }
-
-  if (folder?.parent && typeof folder.parent !== 'number') {
-    data.push({
-      id: folder.parent.id,
-      label: folder.parent.name,
-      href: getFolderURL(pathname, query || {}, {
-        folder: folder.parent.id?.toString(),
-        folderPath: folder.parent.path,
-      }),
-    });
-  }
-
+  // Build the complete ancestor path if folder exists
   if (folder) {
+    // Collect all ancestors in the correct order
+    const ancestors: Folder[] = [];
+    let currentFolder = folder;
+
+    // Traverse up the folder hierarchy to collect all ancestors
+    while (currentFolder.parent && typeof currentFolder.parent !== 'number') {
+      ancestors.unshift(currentFolder.parent); // Add parent to the beginning of the array
+      currentFolder = currentFolder.parent;
+    }
+
+    // Add all ancestors to the breadcrumb data
+    ancestors.forEach((ancestor) => {
+      data.push({
+        id: ancestor.id,
+        label: ancestor.name,
+        href: getFolderURL(pathname, query || {}, {
+          folder: ancestor.id?.toString(),
+          folderPath: ancestor.path,
+        }),
+      });
+    });
+
+    // Add the current folder as the last item
     data.push({
       id: folder.id,
       label: folder.name,
