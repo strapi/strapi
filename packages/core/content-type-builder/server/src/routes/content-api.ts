@@ -1,27 +1,31 @@
 import type { Core } from '@strapi/types';
 import * as z from 'zod/v4';
 
-// Attribute schemas
+const ctUIDRegexp = /^((strapi|admin)::[\w-]+|(api|plugin)::[\w-]+\.[\w-]+)$/;
+const componentUIDRegexp = /^[\w-]+\.[\w-]+$/;
+
 const baseAttributeSchema = z.object({
   type: z.string(),
   configurable: z.literal(false).optional(),
-  private: z.boolean(),
+  private: z.boolean().optional(),
   pluginOptions: z.record(z.string(), z.unknown()).optional(),
 });
 
 const mediaAttributeSchema = baseAttributeSchema.extend({
   type: z.literal('media'),
   multiple: z.boolean(),
-  required: z.boolean(),
+  required: z.boolean().optional(),
   allowedTypes: z.array(z.string()).optional(),
 });
 
 const relationAttributeSchema = baseAttributeSchema.extend({
   type: z.literal('relation'),
   relation: z.string(),
-  target: z.string(),
+  target: z.string().regex(ctUIDRegexp),
   targetAttribute: z.string().nullable(),
   autoPopulate: z.boolean().optional(),
+  mappedBy: z.string().optional(),
+  inversedBy: z.string().optional(),
 });
 
 const componentAttributeSchema = baseAttributeSchema.extend({
@@ -35,10 +39,15 @@ const componentAttributeSchema = baseAttributeSchema.extend({
 
 const dynamicZoneAttributeSchema = baseAttributeSchema.extend({
   type: z.literal('dynamiczone'),
-  components: z.array(z.string()),
+  components: z.array(z.string().regex(componentUIDRegexp)),
   required: z.boolean().optional(),
   min: z.number().optional(),
   max: z.number().optional(),
+});
+
+const uidAttributeSchema = baseAttributeSchema.extend({
+  type: z.literal('uid'),
+  targetField: z.string().optional(),
 });
 
 const genericAttributeSchema = z.object({
@@ -62,10 +71,10 @@ const attributeSchema = z.union([
   relationAttributeSchema,
   componentAttributeSchema,
   dynamicZoneAttributeSchema,
+  uidAttributeSchema,
   genericAttributeSchema,
 ]);
 
-// Content type schema
 const contentTypeSchemaBase = z.object({
   displayName: z.string(),
   singularName: z.string(),
@@ -86,13 +95,12 @@ const contentTypeSchemaBase = z.object({
 });
 
 const formattedContentTypeSchema = z.object({
-  uid: z.string(),
+  uid: z.string().regex(ctUIDRegexp),
   plugin: z.string().optional(),
   apiID: z.string(),
   schema: contentTypeSchemaBase,
 });
 
-// Component schema
 const componentSchemaBase = z.object({
   displayName: z.string(),
   description: z.string(),
@@ -104,14 +112,11 @@ const componentSchemaBase = z.object({
 });
 
 const formattedComponentSchema = z.object({
-  uid: z.string(),
+  uid: z.string().regex(componentUIDRegexp),
   category: z.string(),
   apiId: z.string(),
   schema: componentSchemaBase,
 });
-
-const ctUIDRegexp = /^((strapi|admin)::[\w-]+|(api|plugin)::[\w-]+\.[\w-]+)$/;
-const componentUIDRegexp = /^[\w-]+\.[\w-]+$/;
 
 export default (): Core.RouterInput => {
   return {
