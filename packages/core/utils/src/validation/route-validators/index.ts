@@ -1,6 +1,12 @@
 /**
  * Route validation utilities for Strapi
  *
+ * This module provides route validation that can be used across different
+ * packages & plugins.
+ *
+ * The utilities are designed to work both standalone (for generic validation) and
+ * as building blocks for more sophisticated schema-aware validation via @strapi/core.
+ *
  * @example
  * ```typescript
  * import { AbstractRouteValidator, type QueryParam } from '@strapi/utils';
@@ -30,5 +36,4 @@
  */
 
 export { AbstractRouteValidator } from './base';
-export type { QueryParam } from './base';
 export * from './query-params';
