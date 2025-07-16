@@ -111,7 +111,11 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
         initialValues={value}
         validationSchema={FIELD_SCHEMA}
         onSubmit={(data) => {
-          onChange(name, data);
+          const submitData = { ...data };
+          if (submitData.placeholder === null || submitData.placeholder === undefined) {
+            submitData.placeholder = '';
+          }
+          onChange(name, submitData);
           onClose();
         }}
       >
