@@ -454,13 +454,13 @@ export default {
       if (targetSchema?.options?.draftAndPublish) {
         if (status === 'published') {
           filters.publishedAt = { $notNull: true };
-        } else {
-          filters.publishedAt = { $null: true };
         }
       }
     } else if (targetSchema?.options?.draftAndPublish) {
       // NOTE: we must return the drafts as some targets might not have a published version yet
-      filters.publishedAt = { $null: true };
+      if(status === 'published'){
+        filters.publishedAt = { $notNull: true }
+      }
     }
 
     /**
