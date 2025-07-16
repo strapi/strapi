@@ -155,6 +155,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
               background={isActive ? 'primary100' : 'transparent'}
               hasRadius
               padding={2}
+              margin={1}
               key={header.name}
             >
               <Checkbox
