@@ -172,7 +172,7 @@ const PopoverImpl = () => {
   };
 
   return (
-    <Popover.Content>
+    <Popover.Content style={{ zIndex: 5 }}>
       <Box padding={3}>
         <Form
           method="POST"
