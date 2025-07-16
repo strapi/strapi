@@ -32,6 +32,11 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
   const [{ query }] = useQueryParams();
   const isModified = useForm('PreviewSidePanel', (state) => state.modified);
 
+  const title = formatMessage({
+    id: 'content-manager.preview.panel.title',
+    defaultMessage: 'Preview',
+  });
+
   /**
    * The preview URL isn't used in this component, we just fetch it to know if preview is enabled
    * for the content type. If it's not, the panel is not displayed. If it is, we display a link to
@@ -48,6 +53,29 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
     },
   });
 
+  // Preview was not configured but not disabled either (otherwise it would be a success 204).
+  // So we encourage the user to set it up.
+  if (error && error.name === 'NotFoundError') {
+    return {
+      title,
+      content: (
+        <Button
+          variant="tertiary"
+          tag={Link}
+          to="https://docs.strapi.io/cms/features/preview"
+          target="_blank"
+          rel="noopener noreferrer"
+          width="100%"
+        >
+          {formatMessage({
+            id: 'content-manager.preview.panel.button-configuration',
+            defaultMessage: 'Set up preview',
+          })}
+        </Button>
+      ),
+    };
+  }
+
   if (!data?.data?.url || error) {
     return null;
   }
@@ -59,7 +87,7 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
   };
 
   return {
-    title: formatMessage({ id: 'content-manager.preview.panel.title', defaultMessage: 'Preview' }),
+    title,
     content: (
       <ConditionalTooltip
         label={formatMessage({

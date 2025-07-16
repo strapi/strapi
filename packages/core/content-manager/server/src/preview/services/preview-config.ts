@@ -56,13 +56,13 @@ const extendMiddlewareConfiguration = (middleware = { name: '', config: {} }) =>
  * Read configuration for static preview
  */
 const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const config = strapi.config.get('admin.preview') as PreviewConfig;
+
   return {
     register() {
       if (!this.isEnabled()) {
         return;
       }
-
-      const config = strapi.config.get('admin.preview') as PreviewConfig;
 
       /**
        * Register the allowed origins for CSP, so the preview URL can be displayed
@@ -81,9 +81,11 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
 
-    isEnabled() {
-      const config = strapi.config.get('admin.preview') as PreviewConfig;
+    isConfigured() {
+      return config.enabled === false || config?.config?.handler != null;
+    },
 
+    isEnabled() {
       if (!config) {
         return false;
       }
@@ -113,8 +115,6 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
      * Utility to get the preview handler from the configuration
      */
     getPreviewHandler(): PreviewConfig['config']['handler'] {
-      const config = strapi.config.get('admin.preview') as PreviewConfig;
-
       const emptyHandler = () => {
         return undefined;
       };
