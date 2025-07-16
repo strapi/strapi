@@ -8,6 +8,17 @@ describe('Metrics middleware', () => {
   });
 
   test('Ignores request with extension in them', async () => {
+    global.strapi = {
+      config: {
+        get(path: string, defaultValue: string) {
+          if (path === 'api.rest.prefix') {
+            return '/api';
+          }
+          return defaultValue;
+        },
+      },
+    } as any;
+
     const sendEvent = jest.fn();
 
     const middleware = createMiddleware({ sendEvent });
@@ -26,6 +37,17 @@ describe('Metrics middleware', () => {
   });
 
   test.each(['OPTIONS', 'HEAD'])('Ignores %s method', async (method) => {
+    global.strapi = {
+      config: {
+        get(path: string, defaultValue: string) {
+          if (path === 'api.rest.prefix') {
+            return '/api';
+          }
+          return defaultValue;
+        },
+      },
+    } as any;
+
     const sendEvent = jest.fn();
 
     const middleware = createMiddleware({ sendEvent });
@@ -34,7 +56,7 @@ describe('Metrics middleware', () => {
       {
         request: {
           method,
-          url: '/some-api',
+          url: '/api',
         },
       } as any,
       jest.fn()
@@ -44,6 +66,17 @@ describe('Metrics middleware', () => {
   });
 
   test('Stops sending after 1000 events', async () => {
+    global.strapi = {
+      config: {
+        get(path: string, defaultValue: string) {
+          if (path === 'api.rest.prefix') {
+            return '/api';
+          }
+          return defaultValue;
+        },
+      },
+    } as any;
+
     const sendEvent = jest.fn();
     const middleware = createMiddleware({ sendEvent });
 
@@ -52,7 +85,7 @@ describe('Metrics middleware', () => {
         {
           request: {
             method: 'GET',
-            url: '/some-api',
+            url: '/api',
           },
         } as any,
         jest.fn()
@@ -63,6 +96,17 @@ describe('Metrics middleware', () => {
   });
 
   test('Resets counter after 24 hours', async () => {
+    global.strapi = {
+      config: {
+        get(path: string, defaultValue: string) {
+          if (path === 'api.rest.prefix') {
+            return '/api';
+          }
+          return defaultValue;
+        },
+      },
+    } as any;
+
     const sendEvent = jest.fn();
     Date.now = () => new Date('2021-01-01T00:00:00Z').getTime();
 
@@ -73,7 +117,7 @@ describe('Metrics middleware', () => {
         {
           request: {
             method: 'GET',
-            url: '/some-api',
+            url: '/api',
           },
         } as any,
         jest.fn()
@@ -86,7 +130,7 @@ describe('Metrics middleware', () => {
       {
         request: {
           method: 'GET',
-          url: '/some-api',
+          url: '/api',
         },
       } as any,
       jest.fn()
