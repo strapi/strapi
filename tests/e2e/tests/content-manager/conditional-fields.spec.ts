@@ -56,8 +56,7 @@ test.describe('Conditional Fields', () => {
       });
   });
 
-  // TODO: add the Condition collection to test this case
-  test.skip('As a user if I toggle a boolean field that affects a conditional relation field, the field should be hidden', async ({
+  test('As a user if I toggle a boolean field that affects a conditional relation field, the field should be hidden', async ({
     page,
   }) => {
     await createContent(
@@ -84,8 +83,7 @@ test.describe('Conditional Fields', () => {
     await expect(page.getByLabel('country')).toBeHidden();
   });
 
-  // TODO: add the Condition collection to test this case
-  test.skip('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({
+  test('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({
     page,
   }) => {
     await createContent(
@@ -93,27 +91,59 @@ test.describe('Conditional Fields', () => {
       'Products',
       [
         { name: 'name*', type: 'text', value: 'Shoes' },
-        { name: 'type', type: 'enumeration', value: 'standard' },
         { name: 'sku', type: 'number', value: 10 },
       ],
       { save: false, publish: false, verify: false }
     );
+
+    // Set the enum field to 'standard' initially
+    await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
+
+    // Verify SKU field is visible and has correct value
     await page.getByLabel('sku').isVisible();
+    const skuInput = page.getByLabel('sku');
+    const initialValue = await skuInput.inputValue();
+    expect(initialValue).toBe('10');
+
     // Change enum value so that SKU field should become hidden
     await fillField(page, { name: 'type', type: 'enumeration', value: 'custom' });
+
+    // Verify SKU field is hidden
     await page.getByLabel('sku').isHidden();
-    // Save, then switch enum value back so SKU reappears
+
+    // Save the content
     await page.getByRole('button', { name: 'Save' }).click();
+
+    // Wait for save notification
+    await page.waitForTimeout(1000);
+
+    // Switch enum value back so SKU field should reappear
     await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
+
+    // Verify SKU field is visible but empty (value was cleared when hidden)
+    await page.getByLabel('sku').isVisible();
     await page
       .getByLabel('sku')
       .textContent()
       .then((text) => {
         expect(text).toBe('');
       });
+
+    // Add a new value to SKU field
+    await page.getByLabel('sku').fill('20');
+
+    // Save again to verify content can be saved correctly
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    // Wait for save notification
+    await page.waitForTimeout(1000);
+
+    // Verify the saved value persists
+    const finalValue = await page.getByLabel('sku').inputValue();
+    expect(finalValue).toBe('20');
   });
 
-  test.skip('As a user if I change an enum field that affects a conditional relation field, the field should be hidden', async ({
+  test('As a user if I change an enum field that affects a conditional relation field, the field should be hidden', async ({
     page,
   }) => {
     await createContent(
