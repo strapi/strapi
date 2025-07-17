@@ -3,8 +3,30 @@ import { render, screen } from '@tests/utils';
 
 import { ChartEntriesWidget } from '../Widgets';
 
-jest.mock('../../services/homepage', () => ({
+jest.mock('@strapi/admin/strapi-admin', () => ({
   useGetCountDocumentsQuery: jest.fn(),
+  adminApi: {
+    enhanceEndpoints: jest.fn(() => ({
+      injectEndpoints: jest.fn(() => ({
+        useGetRecentDocumentsQuery: jest.fn(),
+      })),
+    })),
+  },
+  Widget: {
+    Loading: () => <div>Loading widget content...</div>,
+    Error: () => <div>Couldn&apos;t load widget content</div>,
+    NoData: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  },
+}));
+
+jest.mock('../../services/api', () => ({
+  contentManagerApi: {
+    enhanceEndpoints: jest.fn(() => ({
+      injectEndpoints: jest.fn(() => ({
+        useGetRecentDocumentsQuery: jest.fn(),
+      })),
+    })),
+  },
 }));
 
 describe('ChartEntriesWidget', () => {
