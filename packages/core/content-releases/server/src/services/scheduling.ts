@@ -18,23 +18,21 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      const task = {
-        async task() {
-          try {
-            await getService('release', { strapi }).publish(releaseId);
-            // @TODO: Trigger webhook with success message
-          } catch (error) {
-            // @TODO: Trigger webhook with error message
-          }
-        },
-        options: scheduleDate,
-      };
-
-      const tasks: { [key: string]: typeof task } = {};
       const taskName = `publishRelease_${releaseId}`;
-      tasks[taskName] = task;
 
-      strapi.cron.add(tasks);
+      strapi.cron.add({
+        [taskName]: {
+          async task() {
+            try {
+              await getService('release', { strapi }).publish(releaseId);
+              // @TODO: Trigger webhook with success message
+            } catch (error) {
+              // @TODO: Trigger webhook with error message
+            }
+          },
+          options: scheduleDate,
+        },
+      });
 
       if (scheduledJobs.has(releaseId)) {
         this.cancel(releaseId);

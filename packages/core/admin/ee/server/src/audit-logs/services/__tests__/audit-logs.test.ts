@@ -1,11 +1,5 @@
 import { createAuditLogsLifecycleService } from '../lifecycles';
-import { scheduleJob } from 'node-schedule';
-
 import '@strapi/types';
-
-jest.mock('node-schedule', () => ({
-  scheduleJob: jest.fn(),
-}));
 
 describe('Audit logs service', () => {
   const mockSubscribe = jest.fn();
