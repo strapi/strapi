@@ -1,4 +1,5 @@
 const { releaseChangelog, releasePublish, releaseVersion } = require('nx/release');
+const { execSync } = require('child_process');
 const yargs = require('yargs');
 
 (async () => {
@@ -61,26 +62,27 @@ const yargs = require('yargs');
     })
     .parseAsync();
 
+  let workspaceVersion, projectsVersionData;
+
   if (!options.onlyPublish) {
-    const { workspaceVersion, projectsVersionData } = await releaseVersion({
+    const versionResult = await releaseVersion({
       specifier: options.version,
       dryRun: options.dryRun,
       verbose: options.verbose,
       gitCommit: options.gitCommit,
       preid: options.preid,
     });
-
-    if (options.changelog) {
-      await releaseChangelog({
-        versionData: projectsVersionData,
-        version: workspaceVersion,
-        dryRun: options.dryRun,
-        verbose: options.verbose,
-        gitCommit: false,
-        gitTag: options.gitTag,
-      });
-    }
+    workspaceVersion = versionResult.workspaceVersion;
+    projectsVersionData = versionResult.projectsVersionData;
   }
+
+  // Run clean and build
+  execSync('./node_modules/.bin/nx run-many --target=clean --nx-ignore-cycles', {
+    stdio: 'inherit',
+  });
+  execSync('./node_modules/.bin/nx run-many --target=build --nx-ignore-cycles --skip-nx-cache', {
+    stdio: 'inherit',
+  });
 
   if (options.publish) {
     const publishResults = await releasePublish({
@@ -90,6 +92,17 @@ const yargs = require('yargs');
       otp: options.otp,
     });
     process.exit(Object.values(publishResults).every((result) => result.code === 0) ? 0 : 1);
+  }
+
+  if (options.changelog && !options.onlyPublish) {
+    await releaseChangelog({
+      versionData: projectsVersionData,
+      version: workspaceVersion,
+      dryRun: options.dryRun,
+      verbose: options.verbose,
+      gitCommit: false,
+      gitTag: options.gitTag,
+    });
   }
 
   process.exit();
