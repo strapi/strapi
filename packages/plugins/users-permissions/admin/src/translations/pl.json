@@ -1,5 +1,5 @@
 {
-  "BoundRoute.title": "Wywoływanie",
+  "BoundRoute.title": "Przypisane ścieżki",
   "EditForm.inputSelect.description.role": "Połączy nowego uwierzytelnionego użytkownika z wybraną rolą.",
   "EditForm.inputSelect.label.role": "Domyślna rola dla uwierzytelnionych użytkowników",
   "EditForm.inputToggle.description.email": "Nie zezwalaj użytkownikowi na tworzenie wielu kont za pomocą tego samego adresu e-mail u różnych dostawców uwierzytelniania.",
