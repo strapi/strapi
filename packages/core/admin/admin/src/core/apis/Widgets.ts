@@ -29,7 +29,7 @@ type WidgetArgs = {
 
 type Widget = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };
 
-type DescriptionReducer<T extends object> = (prev: Widget[]) => T[];
+type DescriptionReducer<T extends object> = (prev: Widget[]) => (T | Widget)[];
 
 class Widgets {
   widgets: Widget[];
@@ -52,7 +52,7 @@ class Widgets {
     ) as WidgetUID;
   };
 
-  private addUidToWidgets = (widgets: WidgetArgs[] | Widget[]): Widget[] =>
+  private addUidToWidgets = (widgets: (WidgetArgs | Widget)[]): Widget[] =>
     widgets.map((widget) => {
       // If widget already has uid, it's already a Widget
       if ('uid' in widget && widget.uid) {
@@ -73,7 +73,10 @@ class Widgets {
       };
     });
 
-  register = (widgets: WidgetArgs | WidgetArgs[] | DescriptionReducer<WidgetArgs>) => {
+  register(widgets: WidgetArgs): void;
+  register(widgets: WidgetArgs[]): void;
+  register(widgets: DescriptionReducer<WidgetArgs>): void;
+  register(widgets: WidgetArgs | WidgetArgs[] | DescriptionReducer<WidgetArgs>) {
     if (Array.isArray(widgets)) {
       this.widgets.push(...this.addUidToWidgets(widgets));
     } else if (typeof widgets === 'function') {
@@ -84,7 +87,7 @@ class Widgets {
     } else {
       throw new Error('Expected widgets to be an array or a reducer function');
     }
-  };
+  }
 
   getAll = () => {
     return this.widgets;
