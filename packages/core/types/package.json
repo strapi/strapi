@@ -52,7 +52,7 @@
     "@strapi/utils": "4.25.22",
     "commander": "8.3.0",
     "https-proxy-agent": "5.0.1",
-    "koa": "2.15.4",
+    "koa": "2.16.1",
     "node-fetch": "2.7.0",
     "node-schedule": "2.1.1"
   },
