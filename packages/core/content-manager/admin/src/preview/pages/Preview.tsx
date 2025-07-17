@@ -110,7 +110,7 @@ const PreviewPage = () => {
 
   const isLoading =
     previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
-  if (isLoading && !documentResponse.document?.documentId) {
+  if (isLoading) {
     return <Page.Loading />;
   }
 
