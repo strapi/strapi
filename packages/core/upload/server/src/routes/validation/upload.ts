@@ -4,6 +4,12 @@ import * as z from 'zod/v4';
 
 export type FileQueryParam = QueryParam;
 
+/**
+ * UploadRouteValidator provides validation for upload/file routes.
+ *
+ * Extends the AbstractRouteValidator to inherit common query parameter validation
+ * while adding file-specific validation schemas.
+ */
 export class UploadRouteValidator extends AbstractRouteValidator {
   protected readonly _strapi: Core.Strapi;
 
@@ -12,6 +18,10 @@ export class UploadRouteValidator extends AbstractRouteValidator {
     this._strapi = strapi;
   }
 
+  /**
+   * File schema for upload responses
+   * Defines the structure of a file object returned by the upload API
+   */
   get file() {
     return z.object({
       id: this.fileId,
@@ -39,14 +49,23 @@ export class UploadRouteValidator extends AbstractRouteValidator {
     });
   }
 
+  /**
+   * Array of files schema
+   */
   get files() {
     return z.array(this.file);
   }
 
+  /**
+   * File ID parameter validation
+   */
   get fileId() {
     return z.number().int().positive();
   }
 
+  /**
+   * Upload request body schema for single file uploads
+   */
   get uploadBody() {
     return z.object({
       fileInfo: z
@@ -59,6 +78,9 @@ export class UploadRouteValidator extends AbstractRouteValidator {
     });
   }
 
+  /**
+   * Upload request body schema for multiple file uploads
+   */
   get multiUploadBody() {
     return z.object({
       fileInfo: z
@@ -72,4 +94,7 @@ export class UploadRouteValidator extends AbstractRouteValidator {
         .optional(),
     });
   }
+
+  // Note: queryParams() method is inherited from AbstractRouteValidator
+  // and provides validation for ['fields', 'populate', 'sort', 'pagination', 'filters']
 }

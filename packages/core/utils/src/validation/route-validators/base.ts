@@ -1,33 +1,13 @@
 import * as z from 'zod/v4';
-import {
-  queryFieldsSchema,
-  queryPopulateSchema,
-  querySortSchema,
-  paginationSchema,
-  filtersSchema,
-  localeSchema,
-  statusSchema,
-  searchQuerySchema,
-} from './query-params';
-
-/**
- * QueryParam represents the standard query parameters supported by Strapi's API
- */
-export type QueryParam =
-  | 'fields'
-  | 'populate'
-  | 'sort'
-  | 'filters'
-  | 'pagination'
-  | 'locale'
-  | 'status'
-  | '_q';
+import { queryParameterSchemas, type QueryParam } from './query-params';
 
 /**
  * AbstractRouteValidator provides the foundation for validating routes.
  *
  * This abstract class provides common query parameter validators that can be reused
- * across different route validators in Strapi.
+ * across different route validators in Strapi. It serves as a building block for
+ * both generic validation (plugins, external packages) and schema-aware validation
+ * (core content types).
  */
 export abstract class AbstractRouteValidator {
   /**
@@ -35,7 +15,7 @@ export abstract class AbstractRouteValidator {
    * Validates field selection for API responses
    */
   get queryFields() {
-    return queryFieldsSchema;
+    return queryParameterSchemas.fields;
   }
 
   /**
@@ -43,7 +23,7 @@ export abstract class AbstractRouteValidator {
    * Validates which relations to populate in the response
    */
   get queryPopulate() {
-    return queryPopulateSchema;
+    return queryParameterSchemas.populate;
   }
 
   /**
@@ -51,7 +31,7 @@ export abstract class AbstractRouteValidator {
    * Validates sorting options for list endpoints
    */
   get querySort() {
-    return querySortSchema;
+    return queryParameterSchemas.sort;
   }
 
   /**
@@ -59,7 +39,7 @@ export abstract class AbstractRouteValidator {
    * Supports both page-based and offset-based pagination
    */
   get pagination() {
-    return paginationSchema;
+    return queryParameterSchemas.pagination;
   }
 
   /**
@@ -67,7 +47,7 @@ export abstract class AbstractRouteValidator {
    * Validates filtering options for list endpoints
    */
   get filters() {
-    return filtersSchema;
+    return queryParameterSchemas.filters;
   }
 
   /**
@@ -75,7 +55,7 @@ export abstract class AbstractRouteValidator {
    * Used for internationalization
    */
   get locale() {
-    return localeSchema;
+    return queryParameterSchemas.locale;
   }
 
   /**
@@ -83,7 +63,7 @@ export abstract class AbstractRouteValidator {
    * Used for draft & publish functionality
    */
   get status() {
-    return statusSchema;
+    return queryParameterSchemas.status;
   }
 
   /**
@@ -91,17 +71,14 @@ export abstract class AbstractRouteValidator {
    * Used for text search functionality
    */
   get query() {
-    return searchQuerySchema;
+    return queryParameterSchemas._q;
   }
 
   /**
-   * Helper method to create a query parameters object with specified validators
-   *
-   * @param params - Array of query parameter names to include
-   * @returns Object containing Zod schemas for the requested query parameters
+   * Provides access to all base query parameter validators
    */
-  queryParams(params: QueryParam[]): Record<string, z.ZodSchema> {
-    const validators: Record<QueryParam, () => z.ZodSchema> = {
+  protected get baseQueryValidators() {
+    return {
       fields: () => this.queryFields.optional(),
       populate: () => this.queryPopulate.optional(),
       sort: () => this.querySort.optional(),
@@ -111,6 +88,16 @@ export abstract class AbstractRouteValidator {
       status: () => this.status.optional(),
       _q: () => this.query.optional(),
     };
+  }
+
+  /**
+   * Helper method to create a query parameters object with specified validators
+   *
+   * @param params - Array of query parameter names to include
+   * @returns Object containing Zod schemas for the requested query parameters
+   */
+  queryParams(params: QueryParam[]): Record<string, z.ZodSchema> {
+    const validators = this.baseQueryValidators;
 
     return params.reduce(
       (acc, param) => {

@@ -1,4 +1,4 @@
-import { transformUidToValidOpenApiName } from '../utils';
+import { transformUidToValidOpenApiName } from '../validation/utilities';
 
 describe('transformUidToValidOpenApiName', () => {
   describe('component UIDs', () => {
