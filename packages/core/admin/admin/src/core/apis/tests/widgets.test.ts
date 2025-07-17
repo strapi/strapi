@@ -69,11 +69,7 @@ describe('Widgets', () => {
       widgets.register([mockWidget, secondWidget]);
 
       // Swap the order using the reducer
-      widgets.register((widgetsMap) => {
-        const arr = Object.values(widgetsMap);
-        const reversed = arr.reverse();
-        return Object.fromEntries(reversed.map((w) => [w.uid, w]));
-      });
+      widgets.register((widgets) => widgets.reverse());
 
       const registeredWidgets = widgets.getAll();
       expect(registeredWidgets[0].uid).toBe(`global::${secondWidget.id}`);
