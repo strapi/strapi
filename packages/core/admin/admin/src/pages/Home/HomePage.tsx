@@ -83,6 +83,7 @@ export const WidgetRoot = ({
             variant="omega"
             textColor="primary600"
             style={{ textDecoration: 'none' }}
+            textAlign="right"
             to={link.href}
           >
             {formatMessage(link.label)}

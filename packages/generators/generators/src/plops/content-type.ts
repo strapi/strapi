@@ -18,7 +18,6 @@ export default (plop: NodePlopAPI) => {
     description: 'Generate a content type for an API',
     async prompts(inquirer) {
       const config = await inquirer.prompt([...ctNamesPrompts, ...kindPrompts]);
-      // @ts-expect-error issue with deprecated inquirer.prompts attribute to fix with ugprade to inquirer
       const attributes = await getAttributesPrompts(inquirer);
 
       const api = await inquirer.prompt([

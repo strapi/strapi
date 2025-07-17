@@ -4,7 +4,7 @@ import { contentManagerApi } from './api';
 
 const homepageService = contentManagerApi
   .enhanceEndpoints({
-    addTagTypes: ['RecentDocumentList'],
+    addTagTypes: ['RecentDocumentList', 'CountDocuments'],
   })
   .injectEndpoints({
     /**
@@ -23,9 +23,14 @@ const homepageService = contentManagerApi
           { type: 'RecentDocumentList' as const, id: action },
         ],
       }),
+      getCountDocuments: builder.query<Homepage.GetCountDocuments.Response['data'], void>({
+        query: () => '/content-manager/homepage/count-documents',
+        transformResponse: (response: Homepage.GetCountDocuments.Response) => response.data,
+        providesTags: (_, _err) => ['CountDocuments'],
+      }),
     }),
   });
 
-const { useGetRecentDocumentsQuery } = homepageService;
+const { useGetRecentDocumentsQuery, useGetCountDocumentsQuery } = homepageService;
 
-export { useGetRecentDocumentsQuery };
+export { useGetRecentDocumentsQuery, useGetCountDocumentsQuery };

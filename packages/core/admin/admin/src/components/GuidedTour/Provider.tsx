@@ -143,7 +143,10 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
       setSkipped={setSkipped}
       setStepState={setStepState}
       startSection={startSection}
-      isGuidedTourVisible={isGuidedTourVisible}
+      // TODO: remove the future condition when the unstable guided tour will be released
+      isGuidedTourVisible={
+        isGuidedTourVisible && !window.strapi.future.isEnabled('unstableGuidedTour')
+      }
       isSkipped={isSkipped}
     >
       {children}
