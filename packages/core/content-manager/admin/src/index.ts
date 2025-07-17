@@ -1,4 +1,4 @@
-import { CheckCircle, Feather, Pencil } from '@strapi/icons';
+import { CheckCircle, Feather, Pencil, PuzzlePiece } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
@@ -47,6 +47,20 @@ export default {
 
     // Register homepage widgets
     app.widgets.register([
+      {
+        icon: PuzzlePiece,
+        title: {
+          id: `${PLUGIN_ID}.widget.chart-entries.title`,
+          defaultMessage: 'Entries',
+        },
+        component: async () => {
+          const { ChartEntriesWidget } = await import('./components/Widgets');
+          return ChartEntriesWidget;
+        },
+        pluginId: PLUGIN_ID,
+        id: 'chart-entries',
+        permissions: [{ action: 'plugin::content-manager.explorer.read' }],
+      },
       {
         icon: Pencil,
         title: {
