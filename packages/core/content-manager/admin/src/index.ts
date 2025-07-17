@@ -1,4 +1,4 @@
-import { CheckCircle, Feather, Pencil, PuzzlePiece } from '@strapi/icons';
+import { CheckCircle, Feather, Pencil } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
@@ -8,7 +8,7 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
-import type { WidgetArgs, WidgetType } from '@strapi/admin/strapi-admin';
+import type { WidgetType } from '@strapi/admin/strapi-admin';
 
 // NOTE: we have to preload it to ensure chunks will have it available as global
 import 'prismjs';
@@ -49,7 +49,7 @@ export default {
 
     // Register homepage widgets
     // Always put the last-edited-entries and last-published-entries widgets first in the list of widgets
-    app.widgets.register((widgets: WidgetArgs[] | WidgetType[]) => [
+    app.widgets.register((widgets: WidgetType[]) => [
       ...[
         {
           icon: Pencil,
