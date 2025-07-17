@@ -48,18 +48,24 @@ const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
 
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
 
-const getGuidedTourTooltip = (to: To) => {
+const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode }) => {
   const normalizedTo = to.toString().replace(/\//g, '');
 
   switch (normalizedTo) {
     case 'content-manager':
-      return unstable_tours.contentTypeBuilder.Finish;
+      return (
+        <unstable_tours.contentTypeBuilder.Finish>
+          {children}
+        </unstable_tours.contentTypeBuilder.Finish>
+      );
     case '':
-      return unstable_tours.apiTokens.Finish;
+      return <unstable_tours.apiTokens.Finish>{children}</unstable_tours.apiTokens.Finish>;
     case 'settings':
-      return unstable_tours.contentManager.Finish;
+      return (
+        <unstable_tours.contentManager.Finish>{children}</unstable_tours.contentManager.Finish>
+      );
     default:
-      return React.Fragment;
+      return <>{children}</>;
   }
 };
 
@@ -104,10 +110,9 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                   : undefined;
 
               const labelValue = formatMessage(link.intlLabel);
-              const GuidedTourTooltip = getGuidedTourTooltip(link.to);
               return (
                 <Flex tag="li" key={link.to}>
-                  <GuidedTourTooltip>
+                  <GuidedTourTooltip to={link.to}>
                     <NavLink.Tooltip label={labelValue}>
                       <NavLink.Link
                         to={link.to}
