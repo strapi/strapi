@@ -86,7 +86,8 @@ const tours = {
             id="tours.contentTypeBuilder.Components.content"
             defaultMessage="A reusable content structure that can be used across multiple content types, such as buttons, sliders or cards."
           />
-          <Step.Actions justifyContent="flex-end">
+          <Step.Actions>
+            <StepCount tourName="contentTypeBuilder" />
             <GotItAction
               onClick={() => dispatch({ type: 'next_step', payload: 'contentTypeBuilder' })}
             />
@@ -154,7 +155,8 @@ const tours = {
             id="tours.contentManager.Publish.content"
             defaultMessage="Publish entries to make their content available through the Document Service API."
           />
-          <Step.Actions justifyContent="flex-end">
+          <Step.Actions>
+            <StepCount tourName="contentManager" />
             <GotItAction
               onClick={() => dispatch({ type: 'next_step', payload: 'contentManager' })}
             />
