@@ -65,7 +65,7 @@ const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode
         <unstable_tours.contentManager.Finish>{children}</unstable_tours.contentManager.Finish>
       );
     default:
-      return <>{children}</>;
+      return children;
   }
 };
 
