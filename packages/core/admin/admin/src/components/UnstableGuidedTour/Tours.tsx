@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Popover, Portal, Flex, Button, FlexProps } from '@strapi/design-system';
+import { Box, Popover, Portal, Button } from '@strapi/design-system';
 import { FormattedMessage } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -86,7 +86,8 @@ const tours = {
             id="tours.contentTypeBuilder.Components.content"
             defaultMessage="A reusable content structure that can be used across multiple content types, such as buttons, sliders or cards."
           />
-          <Step.Actions justifyContent="flex-end">
+          <Step.Actions>
+            <StepCount tourName="contentTypeBuilder" />
             <GotItAction
               onClick={() => dispatch({ type: 'next_step', payload: 'contentTypeBuilder' })}
             />
@@ -115,9 +116,7 @@ const tours = {
   contentManager: createTour('contentManager', [
     {
       name: 'Introduction',
-      when: (completedActions) =>
-        completedActions.includes('didCreateContentTypeSchema') &&
-        !completedActions.includes('didCreateContent'),
+      when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
       content: (Step) => (
         <Step.Root side="top" withArrow={false}>
           <Step.Title
@@ -154,7 +153,8 @@ const tours = {
             id="tours.contentManager.Publish.content"
             defaultMessage="Publish entries to make their content available through the Document Service API."
           />
-          <Step.Actions justifyContent="flex-end">
+          <Step.Actions>
+            <StepCount tourName="contentManager" />
             <GotItAction
               onClick={() => dispatch({ type: 'next_step', payload: 'contentManager' })}
             />
@@ -183,7 +183,6 @@ const tours = {
   apiTokens: createTour('apiTokens', [
     {
       name: 'Introduction',
-      when: (completedActions) => !completedActions.includes('didCreateApiToken'),
       content: (Step) => (
         <Step.Root sideOffset={-36} withArrow={false}>
           <Step.Title id="tours.apiTokens.Introduction.title" defaultMessage="API tokens" />
