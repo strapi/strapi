@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Divider, Flex, FlexComponent, useCollator } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
+import { type To, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useAuth } from '../features/Auth';
@@ -16,6 +16,7 @@ import { NavBrand } from './MainNav/NavBrand';
 import { NavLink } from './MainNav/NavLink';
 import { NavUser } from './MainNav/NavUser';
 import { TrialCountdown } from './MainNav/TrialCountdown';
+import { tours as unstable_tours } from './UnstableGuidedTour/Tours';
 
 const sortLinks = (links: MenuItem[]) => {
   return links.sort((a, b) => {
@@ -46,6 +47,27 @@ const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
 `;
 
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
+
+const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode }) => {
+  const normalizedTo = to.toString().replace(/\//g, '');
+
+  switch (normalizedTo) {
+    case 'content-manager':
+      return (
+        <unstable_tours.contentTypeBuilder.Finish>
+          {children}
+        </unstable_tours.contentTypeBuilder.Finish>
+      );
+    case '':
+      return <unstable_tours.apiTokens.Finish>{children}</unstable_tours.apiTokens.Finish>;
+    case 'settings':
+      return (
+        <unstable_tours.contentManager.Finish>{children}</unstable_tours.contentManager.Finish>
+      );
+    default:
+      return children;
+  }
+};
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
   const user = useAuth('AuthenticatedApp', (state) => state.user);
@@ -90,36 +112,38 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
               const labelValue = formatMessage(link.intlLabel);
               return (
                 <Flex tag="li" key={link.to}>
-                  <NavLink.Tooltip label={labelValue}>
-                    <NavLink.Link
-                      to={link.to}
-                      onClick={() => handleClickOnLink(link.to)}
-                      aria-label={labelValue}
-                    >
-                      <NavLink.Icon label={labelValue}>
-                        <LinkIcon width="20" height="20" fill="neutral500" />
-                      </NavLink.Icon>
-                      {badgeContentLock ? (
-                        <NavLinkBadgeLock
-                          label="locked"
-                          textColor="neutral500"
-                          paddingLeft={0}
-                          paddingRight={0}
-                        >
-                          {badgeContentLock}
-                        </NavLinkBadgeLock>
-                      ) : badgeContentNumeric ? (
-                        <NavLinkBadgeCounter
-                          label={badgeContentNumeric}
-                          backgroundColor="primary600"
-                          width="2.3rem"
-                          color="neutral0"
-                        >
-                          {badgeContentNumeric}
-                        </NavLinkBadgeCounter>
-                      ) : null}
-                    </NavLink.Link>
-                  </NavLink.Tooltip>
+                  <GuidedTourTooltip to={link.to}>
+                    <NavLink.Tooltip label={labelValue}>
+                      <NavLink.Link
+                        to={link.to}
+                        onClick={() => handleClickOnLink(link.to)}
+                        aria-label={labelValue}
+                      >
+                        <NavLink.Icon label={labelValue}>
+                          <LinkIcon width="20" height="20" fill="neutral500" />
+                        </NavLink.Icon>
+                        {badgeContentLock ? (
+                          <NavLinkBadgeLock
+                            label="locked"
+                            textColor="neutral500"
+                            paddingLeft={0}
+                            paddingRight={0}
+                          >
+                            {badgeContentLock}
+                          </NavLinkBadgeLock>
+                        ) : badgeContentNumeric ? (
+                          <NavLinkBadgeCounter
+                            label={badgeContentNumeric}
+                            backgroundColor="primary600"
+                            width="2.3rem"
+                            color="neutral0"
+                          >
+                            {badgeContentNumeric}
+                          </NavLinkBadgeCounter>
+                        ) : null}
+                      </NavLink.Link>
+                    </NavLink.Tooltip>
+                  </GuidedTourTooltip>
                 </Flex>
               );
             })
