@@ -17,16 +17,27 @@ import * as z from 'zod/v4';
  * ```
  */
 export const safeGlobalRegistrySet = (id: Internal.UID.Schema, schema: z.ZodType) => {
-  const { _idmap: idMap } = z.globalRegistry;
+  try {
+    const { _idmap: idMap } = z.globalRegistry;
 
-  const transformedId = transformUidToValidOpenApiName(id);
+    const transformedId = transformUidToValidOpenApiName(id);
 
-  // Allow safe overrides in the ID map
-  if (idMap.has(transformedId)) {
-    idMap.delete(transformedId);
+    if (idMap.has(transformedId)) {
+      // Remove existing schema to prevent conflicts
+      strapi.log.debug(`Removing existing schema ${transformedId} from registry`);
+      idMap.delete(transformedId);
+    }
+
+    // Register the new schema with the transformed ID
+    strapi.log.debug(`Registering schema ${transformedId} in global registry`);
+    z.globalRegistry.add(schema, { id: transformedId });
+  } catch (error) {
+    strapi.log.error(
+      `Schema registration failed: Failed to register schema ${id} in global registry`
+    );
+
+    throw error;
   }
-
-  z.globalRegistry.add(schema, { id: transformedId });
 };
 
 /**
@@ -58,26 +69,38 @@ export const safeGlobalRegistrySet = (id: Internal.UID.Schema, schema: z.ZodType
  * ```
  */
 export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.ZodType) => {
-  const { _idmap: idMap } = z.globalRegistry;
+  try {
+    const { _idmap: idMap } = z.globalRegistry;
 
-  const transformedId = transformUidToValidOpenApiName(id);
+    const transformedId = transformUidToValidOpenApiName(id);
 
-  const mapItem = idMap.get(transformedId);
-  if (mapItem) {
-    return mapItem;
+    // Return existing schema if already registered
+    const mapItem = idMap.get(transformedId);
+    if (mapItem) {
+      strapi.log.debug(`Schema ${transformedId} found in registry, returning existing schema`);
+      return mapItem;
+    }
+
+    strapi.log.warn(
+      `Schema ${transformedId} not found in global registry, creating an any placeholder`
+    );
+
+    // Temporary any placeholder before replacing with the actual schema type
+    // Used to prevent infinite loops in cyclical data structures
+    safeGlobalRegistrySet(id, z.any());
+
+    // Generate the actual schema using the callback
+    const schema = callback();
+
+    // Replace the placeholder with the real schema
+    safeGlobalRegistrySet(id, schema);
+
+    strapi.log.debug(`Schema ${transformedId} successfully created and registered`);
+
+    return schema;
+  } catch (error) {
+    strapi.log.error(`Schema creation failed: Failed to create schema ${id}`);
+
+    throw error;
   }
-
-  strapi.log.warn(
-    `Schema ${transformedId} not found in global registry, creating an any placeholder`
-  );
-
-  // Temporary any placeholder before replacing with the actual schema type
-  // Used to prevent infinite loops in cyclical data structures
-  safeGlobalRegistrySet(id, z.any());
-
-  const schema = callback();
-
-  safeGlobalRegistrySet(id, schema);
-
-  return schema;
 };
