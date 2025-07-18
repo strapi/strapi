@@ -29,34 +29,68 @@ type WidgetArgs = {
 
 type Widget = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };
 
+type DescriptionReducer<T extends object> = (prev: Widget[]) => (T | Widget)[];
+
 class Widgets {
-  widgets: Record<string, Widget>;
+  widgets: Widget[];
 
   constructor() {
-    this.widgets = {};
+    this.widgets = [];
   }
 
-  register = (widget: WidgetArgs | WidgetArgs[]) => {
-    if (Array.isArray(widget)) {
-      widget.forEach((newWidget) => {
-        this.register(newWidget);
-      });
-    } else {
-      invariant(widget.id, 'An id must be provided');
-      invariant(widget.component, 'A component must be provided');
-      invariant(widget.title, 'A title must be provided');
-      invariant(widget.icon, 'An icon must be provided');
-
-      // Replace id and pluginId with computed uid
-      const { id, pluginId, ...widgetToStore } = widget;
-      const uid: WidgetUID = pluginId ? `plugin::${pluginId}.${id}` : `global::${id}`;
-
-      this.widgets[uid] = { ...widgetToStore, uid };
+  private generateUid = (widget: WidgetArgs | Widget): WidgetUID => {
+    if ('uid' in widget && widget.uid) {
+      return widget.uid;
     }
+
+    // At this point, widget must be WidgetArgs (has id and pluginId)
+    const widgetArgs = widget as WidgetArgs;
+    return (
+      widgetArgs.pluginId
+        ? `plugin::${widgetArgs.pluginId}.${widgetArgs.id}`
+        : `global::${widgetArgs.id}`
+    ) as WidgetUID;
   };
 
+  private addUidToWidgets = (widgets: (WidgetArgs | Widget)[]): Widget[] =>
+    widgets.map((widget) => {
+      // If widget already has uid, it's already a Widget
+      if ('uid' in widget && widget.uid) {
+        return widget as Widget;
+      }
+
+      // Otherwise, it's a WidgetArgs
+      const widgetArgs = widget as WidgetArgs;
+      invariant(widgetArgs.id, 'An id must be provided');
+      invariant(widgetArgs.component, 'A component must be provided');
+      invariant(widgetArgs.title, 'A title must be provided');
+      invariant(widgetArgs.icon, 'An icon must be provided');
+
+      const { id, pluginId, ...widgetWithoutId } = widgetArgs;
+      return {
+        ...widgetWithoutId,
+        uid: this.generateUid(widgetArgs),
+      };
+    });
+
+  register(widgets: WidgetArgs): void;
+  register(widgets: WidgetArgs[]): void;
+  register(widgets: DescriptionReducer<WidgetArgs>): void;
+  register(widgets: WidgetArgs | WidgetArgs[] | DescriptionReducer<WidgetArgs>) {
+    if (Array.isArray(widgets)) {
+      this.widgets.push(...this.addUidToWidgets(widgets));
+    } else if (typeof widgets === 'function') {
+      const result = widgets(this.widgets);
+      this.widgets = this.addUidToWidgets(result);
+    } else if (typeof widgets === 'object') {
+      this.widgets.push(this.addUidToWidgets([widgets])[0]);
+    } else {
+      throw new Error('Expected widgets to be an array or a reducer function');
+    }
+  }
+
   getAll = () => {
-    return Object.values(this.widgets);
+    return this.widgets;
   };
 }
 
