@@ -693,7 +693,6 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const query: Query = {};
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { _q, sort, filters, fields, populate, page, pageSize, start, limit, status, ...rest } =
       params;
 
