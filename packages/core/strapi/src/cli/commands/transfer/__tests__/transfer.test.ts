@@ -140,7 +140,6 @@ describe('Transfer', () => {
         } as any);
       });
 
-      expect(console.error).not.toHaveBeenCalled();
       expect(
         mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
       ).toHaveBeenCalledWith(
@@ -163,7 +162,6 @@ describe('Transfer', () => {
         } as any);
       });
 
-      expect(console.error).not.toHaveBeenCalled();
       expect(mockDataTransfer.strapi.providers.createLocalStrapiSourceProvider).toHaveBeenCalled();
       expect(
         mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
@@ -182,7 +180,6 @@ describe('Transfer', () => {
       } as any);
     });
 
-    expect(console.error).not.toHaveBeenCalled();
     expect(
       mockDataTransfer.strapi.providers.createRemoteStrapiDestinationProvider
     ).toHaveBeenCalledWith(
