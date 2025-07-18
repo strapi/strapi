@@ -1,15 +1,27 @@
 import type { Core } from '@strapi/types';
+import { AbstractRouteValidator, type QueryParam } from '@strapi/utils';
 import * as z from 'zod/v4';
 
-export type FileQueryParam = 'fields' | 'populate' | 'sort' | 'pagination' | 'filters';
+export type FileQueryParam = QueryParam;
 
-export class UploadRouteValidator {
+/**
+ * UploadRouteValidator provides validation for upload/file routes.
+ *
+ * Extends the AbstractRouteValidator to inherit common query parameter validation
+ * while adding file-specific validation schemas.
+ */
+export class UploadRouteValidator extends AbstractRouteValidator {
   protected readonly _strapi: Core.Strapi;
 
   public constructor(strapi: Core.Strapi) {
+    super();
     this._strapi = strapi;
   }
 
+  /**
+   * File schema for upload responses
+   * Defines the structure of a file object returned by the upload API
+   */
   get file() {
     return z.object({
       id: this.fileId,
@@ -37,11 +49,52 @@ export class UploadRouteValidator {
     });
   }
 
+  /**
+   * Array of files schema
+   */
   get files() {
     return z.array(this.file);
   }
 
+  /**
+   * File ID parameter validation
+   */
   get fileId() {
     return z.number().int().positive();
   }
+
+  /**
+   * Upload request body schema for single file uploads
+   */
+  get uploadBody() {
+    return z.object({
+      fileInfo: z
+        .object({
+          name: z.string().optional(),
+          alternativeText: z.string().optional(),
+          caption: z.string().optional(),
+        })
+        .optional(),
+    });
+  }
+
+  /**
+   * Upload request body schema for multiple file uploads
+   */
+  get multiUploadBody() {
+    return z.object({
+      fileInfo: z
+        .array(
+          z.object({
+            name: z.string().optional(),
+            alternativeText: z.string().optional(),
+            caption: z.string().optional(),
+          })
+        )
+        .optional(),
+    });
+  }
+
+  // Note: queryParams() method is inherited from AbstractRouteValidator
+  // and provides validation for ['fields', 'populate', 'sort', 'pagination', 'filters']
 }
