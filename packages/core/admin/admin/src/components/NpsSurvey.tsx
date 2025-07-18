@@ -192,7 +192,7 @@ const NpsSurvey = () => {
         isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
       };
       const res = await fetch(
-        `${process.env.STRAPI_ADMIN_ANALYTICS_URL || 'https://analytics.strapi.io'}/submit-nps`,
+        `${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/submit-nps`,
         {
           method: 'POST',
           headers: {
