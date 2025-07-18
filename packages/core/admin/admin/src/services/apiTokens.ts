@@ -4,7 +4,7 @@ import { adminApi } from './api';
 
 const apiTokensService = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['ApiToken', 'GuidedTourMeta'],
+    addTagTypes: ['ApiToken'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -31,7 +31,11 @@ const apiTokensService = adminApi
           data: body,
         }),
         transformResponse: (response: ApiToken.Create.Response) => response.data,
-        invalidatesTags: [{ type: 'ApiToken' as const, id: 'LIST' }, 'GuidedTourMeta'],
+        invalidatesTags: [
+          { type: 'ApiToken' as const, id: 'LIST' },
+          'GuidedTourMeta',
+          'HomepageKeyStatistics',
+        ],
       }),
       deleteAPIToken: builder.mutation<
         ApiToken.Revoke.Response['data'],
@@ -42,7 +46,10 @@ const apiTokensService = adminApi
           method: 'DELETE',
         }),
         transformResponse: (response: ApiToken.Revoke.Response) => response.data,
-        invalidatesTags: (_res, _err, id) => [{ type: 'ApiToken' as const, id }],
+        invalidatesTags: (_res, _err, id) => [
+          { type: 'ApiToken' as const, id },
+          'HomepageKeyStatistics',
+        ],
       }),
       updateAPIToken: builder.mutation<
         ApiToken.Update.Response['data'],

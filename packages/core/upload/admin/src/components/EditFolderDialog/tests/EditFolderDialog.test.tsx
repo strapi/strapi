@@ -1,8 +1,10 @@
-import { NotificationsProvider } from '@strapi/admin/strapi-admin';
+import { configureStore } from '@reduxjs/toolkit';
+import { NotificationsProvider, adminApi } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { within, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 
 import { useEditFolder } from '../../../hooks/useEditFolder';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
@@ -29,6 +31,11 @@ const client = new QueryClient({
   },
 });
 
+const store = configureStore({
+  reducer: { [adminApi.reducerPath]: adminApi.reducer },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(adminApi.middleware),
+});
+
 const ComponentFixture = (
   props: Omit<EditFolderDialogProps, 'open' | 'onClose'> & {
     folderStructure?: {
@@ -44,15 +51,17 @@ const ComponentFixture = (
   };
 
   return (
-    <QueryClientProvider client={client}>
-      <IntlProvider locale="en" messages={{}}>
-        <DesignSystemProvider>
-          <NotificationsProvider>
-            <EditFolderDialog open onClose={() => {}} {...nextProps} />
-          </NotificationsProvider>
-        </DesignSystemProvider>
-      </IntlProvider>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={client}>
+        <IntlProvider locale="en" messages={{}}>
+          <DesignSystemProvider>
+            <NotificationsProvider>
+              <EditFolderDialog open onClose={() => {}} {...nextProps} />
+            </NotificationsProvider>
+          </DesignSystemProvider>
+        </IntlProvider>
+      </QueryClientProvider>
+    </Provider>
   );
 };
 
