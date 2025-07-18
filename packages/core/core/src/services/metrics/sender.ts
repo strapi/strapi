@@ -64,6 +64,7 @@ export default (strapi: Core.Strapi): Sender => {
     useTypescriptOnAdmin: tsUtils.isUsingTypeScriptSync(adminRootPath),
     projectId: uuid,
     isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+    aiLicenseKey: env('STRAPI_ADMIN_AI_LICENSE', null),
   };
 
   addPackageJsonStrapiMetadata(anonymousGroupProperties, strapi);
