@@ -35,6 +35,9 @@ type Action =
     }
   | {
       type: 'skip_all_tours';
+    }
+  | {
+      type: 'reset_all_tours';
     };
 
 type Tour = Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>;
@@ -48,6 +51,17 @@ const [GuidedTourProviderImpl, unstableUseGuidedTour] = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
 }>('UnstableGuidedTour');
+
+const initialTourState = Object.keys(guidedTours).reduce((acc, tourName) => {
+  const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
+  acc[tourName as ValidTourName] = {
+    currentStep: 0,
+    length: tourLength,
+    isCompleted: false,
+  };
+
+  return acc;
+}, {} as Tour);
 
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
@@ -68,6 +82,12 @@ function reducer(state: State, action: Action): State {
     if (action.type === 'skip_all_tours') {
       draft.enabled = false;
     }
+
+    if (action.type === 'reset_all_tours') {
+      draft.enabled = true;
+      draft.tours = initialTourState;
+      draft.completedActions = [];
+    }
   });
 }
 
@@ -79,17 +99,6 @@ const UnstableGuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
-  const initialTourState = Object.keys(guidedTours).reduce((acc, tourName) => {
-    const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
-    acc[tourName as ValidTourName] = {
-      currentStep: 0,
-      length: tourLength,
-      isCompleted: false,
-    };
-
-    return acc;
-  }, {} as Tour);
-
   const [tours, setTours] = usePersistentState<State>(STORAGE_KEY, {
     tours: initialTourState,
     enabled,
