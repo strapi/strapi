@@ -13,7 +13,7 @@ test.describe('Conditional Fields', () => {
     await navToHeader(page, ['Content Manager'], 'Content Manager');
   });
 
-  test.skip('As a user if I toggle a boolean field that affects a conditional field, the field should be hidden and the value should not be filled', async ({
+  test('As a user if I toggle a boolean field that affects a conditional field, the field should be hidden and the value should not be filled', async ({
     page,
   }) => {
     await createContent(
@@ -56,7 +56,7 @@ test.describe('Conditional Fields', () => {
       });
   });
 
-  test.skip('As a user if I toggle a boolean field that affects a conditional relation field, the field should be hidden', async ({
+  test('As a user if I toggle a boolean field that affects a conditional relation field, the field should be hidden', async ({
     page,
   }) => {
     await createContent(
@@ -83,7 +83,7 @@ test.describe('Conditional Fields', () => {
     await expect(page.getByLabel('country')).toBeHidden();
   });
 
-  test.skip('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({
+  test('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({
     page,
   }) => {
     await createContent(
@@ -115,7 +115,7 @@ test.describe('Conditional Fields', () => {
     await page.getByRole('button', { name: 'Save' }).click();
 
     // Wait for save notification
-    await findAndClose(page, 'Saved document');
+    await findAndClose(page, 'Saved Document');
 
     // Switch enum value back so SKU field should reappear
     await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
@@ -136,7 +136,7 @@ test.describe('Conditional Fields', () => {
     await page.getByRole('button', { name: 'Save' }).click();
 
     // Wait for save notification
-    await findAndClose(page, 'Saved document');
+    await findAndClose(page, 'Saved Document');
 
     // Verify the saved value persists
     const finalValue = await page.getByLabel('sku').inputValue();
@@ -150,6 +150,11 @@ test.describe('Conditional Fields', () => {
       page,
       'Condition',
       [
+        {
+          name: 'isActive',
+          type: 'boolean',
+          value: true,
+        },
         {
           name: 'roles',
           type: 'enumeration',
@@ -169,7 +174,9 @@ test.describe('Conditional Fields', () => {
 
     await page.getByRole('button', { name: 'Save' }).click();
 
-    await findAndClose(page, 'Saved document');
+    await findAndClose(page, 'Saved Document');
+
+    // Wait for the field to update after save by checking it's no longer visible
     await expect(page.getByLabel('Author')).toBeHidden();
   });
 });

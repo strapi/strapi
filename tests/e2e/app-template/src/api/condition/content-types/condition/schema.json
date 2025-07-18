@@ -37,7 +37,7 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::article.article",
-      "mappedBy": "Article",
+      "inversedBy": "conditions",
       "conditions": {
         "visible": {
           "==": [{ "var": "roles" }, "tank"]

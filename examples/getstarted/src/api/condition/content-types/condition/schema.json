@@ -31,11 +31,7 @@
     },
     "roles": {
       "type": "enumeration",
-      "enum": [
-        "tank",
-        "dps",
-        "heal"
-      ]
+      "enum": ["tank", "dps", "heal"]
     }
   }
 }
