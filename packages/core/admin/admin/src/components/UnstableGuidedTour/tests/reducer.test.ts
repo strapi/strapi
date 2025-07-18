@@ -717,4 +717,199 @@ describe('GuidedTour | reducer', () => {
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
   });
+
+  describe('reset_all_tours', () => {
+    it('should reset when all tours have been completed', () => {
+      const initialState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 5,
+            isCompleted: true,
+            length: 5,
+          },
+          contentManager: {
+            currentStep: 4,
+            isCompleted: true,
+            length: 4,
+          },
+          apiTokens: {
+            currentStep: 4,
+            isCompleted: true,
+            length: 4,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: true,
+            length: 0,
+          },
+        },
+        enabled: true,
+        completedActions: [
+          'didCreateContentTypeSchema',
+          'didCopyApiToken',
+          'didCreateApiToken',
+        ] as ExtendedCompletedActions,
+      };
+
+      const action: Action = {
+        type: 'reset_all_tours',
+      };
+
+      const expectedState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 5,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 4,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 4,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 0,
+          },
+        },
+        enabled: true,
+        completedActions: [] as ExtendedCompletedActions,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    it('should reset when some tours have been completed', () => {
+      const initialState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 2,
+            isCompleted: false,
+            length: 5,
+          },
+          contentManager: {
+            currentStep: 4,
+            isCompleted: true,
+            length: 4,
+          },
+          apiTokens: {
+            currentStep: 1,
+            isCompleted: false,
+            length: 4,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 0,
+          },
+        },
+        enabled: true,
+        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+      };
+
+      const action: Action = {
+        type: 'reset_all_tours',
+      };
+
+      const expectedState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 5,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 4,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 4,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 0,
+          },
+        },
+        enabled: true,
+        completedActions: [] as ExtendedCompletedActions,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    it('should reset when tour is disabled', () => {
+      const initialState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 3,
+            isCompleted: false,
+            length: 5,
+          },
+          contentManager: {
+            currentStep: 2,
+            isCompleted: false,
+            length: 4,
+          },
+          apiTokens: {
+            currentStep: 4,
+            isCompleted: true,
+            length: 4,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 0,
+          },
+        },
+        enabled: false,
+        completedActions: [
+          'didCreateContentTypeSchema',
+          'didCopyApiToken',
+        ] as ExtendedCompletedActions,
+      };
+
+      const action: Action = {
+        type: 'reset_all_tours',
+      };
+
+      const expectedState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 5,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 4,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 4,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 0,
+          },
+        },
+        enabled: true,
+        completedActions: [] as ExtendedCompletedActions,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+  });
 });

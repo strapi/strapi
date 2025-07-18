@@ -140,13 +140,15 @@ const WaveIcon = () => {
 
 export const UnstableGuidedTourOverview = () => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
+
   const tours = unstableUseGuidedTour('Overview', (s) => s.state.tours);
   const dispatch = unstableUseGuidedTour('Overview', (s) => s.dispatch);
   const enabled = unstableUseGuidedTour('Overview', (s) => s.state.enabled);
+  const completedActions = unstableUseGuidedTour('Overview', (s) => s.state.completedActions);
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
-  const tourNames = Object.keys(tours) as ValidTourName[];
-  const { trackUsage } = useTracking();
 
+  const tourNames = Object.keys(tours) as ValidTourName[];
   const completedTours = tourNames.filter((tourName) => tours[tourName].isCompleted);
   const completionPercentage =
     tourNames.length > 0 ? Math.round((completedTours.length / tourNames.length) * 100) : 0;
@@ -160,7 +162,7 @@ export const UnstableGuidedTourOverview = () => {
     dispatch({ type: 'skip_all_tours' });
   };
 
-  const handleClickOnLink = (tourName: ValidTourName) => {
+  const handleClickStrapiCloud = (tourName: ValidTourName) => {
     trackUsage('didCompleteGuidedTour', { name: tourName });
     dispatch({ type: 'skip_tour', payload: tourName });
   };
@@ -186,7 +188,7 @@ export const UnstableGuidedTourOverview = () => {
         </Flex>
         <Flex
           direction="column"
-          alignItems="start"
+          alignItems="flex-start"
           width="100%"
           paddingTop={5}
           paddingBottom={8}
@@ -225,6 +227,9 @@ export const UnstableGuidedTourOverview = () => {
           {TASK_CONTENT.map((task) => {
             const tourName = task.tourName as ValidTourName;
             const tour = tours[tourName];
+            const isLinkDisabled =
+              tourName !== 'contentTypeBuilder' &&
+              !completedActions.includes('didCreateContentTypeSchema');
 
             return (
               <TourTaskContainer key={tourName} alignItems="center" justifyContent="space-between">
@@ -251,14 +256,16 @@ export const UnstableGuidedTourOverview = () => {
                     {task.isExternal ? (
                       <Link
                         isExternal
+                        disabled={isLinkDisabled}
                         href={task.link.to}
-                        onClick={() => handleClickOnLink(task.tourName as ValidTourName)}
+                        onClick={() => handleClickStrapiCloud(task.tourName as ValidTourName)}
                       >
                         {formatMessage(task.link.label)}
                       </Link>
                     ) : (
                       <Link
                         endIcon={<ChevronRight />}
+                        disabled={isLinkDisabled}
                         to={task.link.to}
                         tag={NavLink}
                         onClick={() =>
