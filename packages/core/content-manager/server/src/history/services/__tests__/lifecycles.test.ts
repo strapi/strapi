@@ -1,11 +1,6 @@
 import type { UID } from '@strapi/types';
-import { scheduleJob } from 'node-schedule';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createLifecyclesService } from '../lifecycles';
-
-jest.mock('node-schedule', () => ({
-  scheduleJob: jest.fn(),
-}));
 
 const mockGetRequestContext = jest.fn(() => {
   return {
@@ -73,6 +68,9 @@ const mockStrapi = {
   config: {
     get: () => undefined,
   },
+  cron: {
+    add: jest.fn(),
+  },
 };
 // @ts-expect-error - ignore
 mockStrapi.documents.use = jest.fn();
@@ -93,14 +91,15 @@ describe('history lifecycles service', () => {
   });
 
   it('should create a cron job that runs once a day', async () => {
-    // @ts-expect-error - this is a mock
-    const mockScheduleJob = scheduleJob.mockImplementationOnce(
-      jest.fn((rule, callback) => callback())
-    );
-
     await lifecyclesService.bootstrap();
 
-    expect(mockScheduleJob).toHaveBeenCalledTimes(1);
-    expect(mockScheduleJob).toHaveBeenCalledWith('historyDaily', '0 0 * * *', expect.any(Function));
+    expect(mockStrapi.cron.add).toHaveBeenCalledTimes(1);
+    expect(mockStrapi.cron.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        deleteHistoryDaily: expect.objectContaining({
+          task: expect.any(Function),
+        }),
+      })
+    );
   });
 });
