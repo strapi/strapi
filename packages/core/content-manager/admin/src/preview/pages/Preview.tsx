@@ -8,7 +8,15 @@ import {
   Form as FormContext,
   Blocker,
 } from '@strapi/admin/strapi-admin';
-import { Box, Flex, FocusTrap, IconButton, Portal } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  FocusTrap,
+  IconButton,
+  Portal,
+  SingleSelect,
+  SingleSelectOption,
+} from '@strapi/design-system';
 import { ArrowLineLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
@@ -47,9 +55,9 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * PreviewPage
  * -----------------------------------------------------------------------------------------------*/
 
-const AnimatedArrow = styled(ArrowLineLeft)<{ isSideEditorOpen: boolean }>`
+const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
   will-change: transform;
-  rotate: ${(props) => (props.isSideEditorOpen ? '0deg' : '180deg')};
+  rotate: ${(props) => (props.$isSideEditorOpen ? '0deg' : '180deg')};
   transition: rotate 0.2s ease-in-out;
 `;
 
@@ -76,6 +84,31 @@ const PreviewPage = () => {
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+
+  const devices = [
+    {
+      name: 'desktop',
+      label: formatMessage({
+        id: 'content-manager.preview.device.desktop',
+        defaultMessage: 'Desktop',
+      }),
+      width: '100%',
+      height: '100%',
+    },
+    {
+      name: 'mobile',
+      label: formatMessage({
+        id: 'content-manager.preview.device.mobile',
+        defaultMessage: 'Mobile',
+      }),
+      width: '375px',
+      height: '667px',
+    },
+  ];
+  const [deviceName, setDeviceName] = React.useState<(typeof devices)[number]['name']>(
+    devices[0].name
+  );
+  const device = devices.find((d) => d.name === deviceName) ?? devices[0];
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -228,52 +261,80 @@ const PreviewPage = () => {
                     />
                   </Box>
                 )}
-
-                <Box position="relative" flex={1} height="100%" overflow="hidden">
-                  <Box
-                    data-testid="preview-iframe"
-                    ref={iframeRef}
-                    src={previewUrl}
-                    /**
-                     * For some reason, changing an iframe's src tag causes the browser to add a new item in the
-                     * history stack. This is an issue for us as it means clicking the back button will not let us
-                     * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
-                     * different iframe when the preview URL changes. So we set a key prop to force React
-                     * to mount a different node when the src changes.
-                     */
-                    key={previewUrl}
-                    title={formatMessage({
-                      id: 'content-manager.preview.panel.title',
-                      defaultMessage: 'Preview',
-                    })}
-                    width="100%"
-                    height="100%"
-                    borderWidth={0}
-                    tag="iframe"
-                  />
-                  {hasAdvancedPreview && (
-                    <IconButton
-                      variant="tertiary"
-                      label={formatMessage(
-                        isSideEditorOpen
-                          ? {
-                              id: 'content-manager.preview.content.close-editor',
-                              defaultMessage: 'Close editor',
-                            }
-                          : {
-                              id: 'content-manager.preview.content.open-editor',
-                              defaultMessage: 'Open editor',
-                            }
-                      )}
-                      onClick={() => setIsSideEditorOpen((prev) => !prev)}
-                      position="absolute"
-                      top={2}
-                      left={2}
-                    >
-                      <AnimatedArrow isSideEditorOpen={isSideEditorOpen} />
-                    </IconButton>
-                  )}
-                </Box>
+                <Flex
+                  direction="column"
+                  alignItems="stretch"
+                  flex={1}
+                  height="100%"
+                  overflow="hidden"
+                >
+                  <Flex
+                    direction="row"
+                    background="neutral0"
+                    padding={2}
+                    borderWidth="0 0 1px 0"
+                    borderColor="neutral150"
+                  >
+                    {hasAdvancedPreview && (
+                      <IconButton
+                        variant="ghost"
+                        label={formatMessage(
+                          isSideEditorOpen
+                            ? {
+                                id: 'content-manager.preview.content.close-editor',
+                                defaultMessage: 'Close editor',
+                              }
+                            : {
+                                id: 'content-manager.preview.content.open-editor',
+                                defaultMessage: 'Open editor',
+                              }
+                        )}
+                        onClick={() => setIsSideEditorOpen((prev) => !prev)}
+                      >
+                        <AnimatedArrow $isSideEditorOpen={isSideEditorOpen} />
+                      </IconButton>
+                    )}
+                    <Flex justifyContent="center" flex={1}>
+                      <SingleSelect
+                        value={deviceName}
+                        onChange={(name) => setDeviceName(name.toString())}
+                        aria-label={formatMessage({
+                          id: 'content-manager.preview.device.select',
+                          defaultMessage: 'Select device type',
+                        })}
+                      >
+                        {devices.map((deviceOption) => (
+                          <SingleSelectOption key={deviceOption.name} value={deviceOption.name}>
+                            {deviceOption.label}
+                          </SingleSelectOption>
+                        ))}
+                      </SingleSelect>
+                    </Flex>
+                  </Flex>
+                  <Flex direction="column" justifyContent="center" background="neutral0" flex={1}>
+                    <Box
+                      data-testid="preview-iframe"
+                      ref={iframeRef}
+                      src={previewUrl}
+                      /**
+                       * For some reason, changing an iframe's src tag causes the browser to add a new item in the
+                       * history stack. This is an issue for us as it means clicking the back button will not let us
+                       * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
+                       * different iframe when the preview URL changes. So we set a key prop to force React
+                       * to mount a different node when the src changes.
+                       */
+                      key={previewUrl}
+                      title={formatMessage({
+                        id: 'content-manager.preview.panel.title',
+                        defaultMessage: 'Preview',
+                      })}
+                      width={device.width}
+                      height={device.height}
+                      borderWidth={0}
+                      tag="iframe"
+                    />
+                  </Flex>
+                </Flex>
               </Flex>
             </Flex>
           )}
