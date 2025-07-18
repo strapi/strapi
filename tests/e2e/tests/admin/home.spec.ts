@@ -140,9 +140,6 @@ test.describe('Home', () => {
     const initialDraftMatch = tooltipText?.match(/(\d+) Draft/);
     const initialDraftCount = initialDraftMatch ? parseInt(initialDraftMatch[1]) : 0;
 
-    // Log for debugging
-    console.log('Initial draft count:', initialDraftCount);
-
     // Publish an entry
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));

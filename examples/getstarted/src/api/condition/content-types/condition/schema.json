@@ -22,12 +22,20 @@
         "visible": {
           "==": [
             {
-              "var": "isActive"
+              "var": "roles"
             },
-            true
+            "heal"
           ]
         }
       }
+    },
+    "roles": {
+      "type": "enumeration",
+      "enum": [
+        "tank",
+        "dps",
+        "heal"
+      ]
     }
   }
 }

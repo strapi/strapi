@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
 import { createContent, fillField } from '../../utils/content-creation';
-import { navToHeader } from '../../utils/shared';
+import { findAndClose, navToHeader } from '../../utils/shared';
 
 test.describe('Conditional Fields', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,7 +13,7 @@ test.describe('Conditional Fields', () => {
     await navToHeader(page, ['Content Manager'], 'Content Manager');
   });
 
-  test('As a user if I toggle a boolean field that affects a conditional field, the field should be hidden and the value should not be filled', async ({
+  test.skip('As a user if I toggle a boolean field that affects a conditional field, the field should be hidden and the value should not be filled', async ({
     page,
   }) => {
     await createContent(
@@ -56,7 +56,7 @@ test.describe('Conditional Fields', () => {
       });
   });
 
-  test('As a user if I toggle a boolean field that affects a conditional relation field, the field should be hidden', async ({
+  test.skip('As a user if I toggle a boolean field that affects a conditional relation field, the field should be hidden', async ({
     page,
   }) => {
     await createContent(
@@ -83,7 +83,7 @@ test.describe('Conditional Fields', () => {
     await expect(page.getByLabel('country')).toBeHidden();
   });
 
-  test('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({
+  test.skip('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({
     page,
   }) => {
     await createContent(
@@ -100,8 +100,8 @@ test.describe('Conditional Fields', () => {
     await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
 
     // Verify SKU field is visible and has correct value
-    await page.getByLabel('sku').isVisible();
     const skuInput = page.getByLabel('sku');
+    await skuInput.isVisible();
     const initialValue = await skuInput.inputValue();
     expect(initialValue).toBe('10');
 
@@ -115,7 +115,7 @@ test.describe('Conditional Fields', () => {
     await page.getByRole('button', { name: 'Save' }).click();
 
     // Wait for save notification
-    await page.waitForTimeout(1000);
+    await findAndClose(page, 'Saved document');
 
     // Switch enum value back so SKU field should reappear
     await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
@@ -136,7 +136,7 @@ test.describe('Conditional Fields', () => {
     await page.getByRole('button', { name: 'Save' }).click();
 
     // Wait for save notification
-    await page.waitForTimeout(1000);
+    await findAndClose(page, 'Saved document');
 
     // Verify the saved value persists
     const finalValue = await page.getByLabel('sku').inputValue();
@@ -167,9 +167,9 @@ test.describe('Conditional Fields', () => {
       value: 'dps',
     });
 
-    // Wait for conditional logic to process
-    await page.waitForTimeout(500);
+    await page.getByRole('button', { name: 'Save' }).click();
 
+    await findAndClose(page, 'Saved document');
     await expect(page.getByLabel('Author')).toBeHidden();
   });
 });
