@@ -19,4 +19,4 @@ if [[ -z "$distTag" ]]; then
 fi
 
 ## publish packages
-yarn release --version "$version" --git-commit false --git-tag false --changelog false --dry-run false "$@"
+yarn release --version "$version" --tag "$distTag" --git-commit false --git-tag false --changelog false --dry-run false "$@"
