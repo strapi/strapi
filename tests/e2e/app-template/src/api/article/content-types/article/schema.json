@@ -41,6 +41,12 @@
         }
       },
       "component": "meta.seo"
+    },
+    "conditions": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::condition.condition",
+      "mappedBy": "Author"
     }
   }
 }
