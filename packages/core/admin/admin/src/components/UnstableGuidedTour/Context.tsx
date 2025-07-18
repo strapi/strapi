@@ -3,7 +3,6 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { GetGuidedTourMeta } from '../../../../shared/contracts/admin';
-import { useTracking } from '../../features/Tracking';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 

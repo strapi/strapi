@@ -843,5 +843,6 @@
   "tours.profile.title": "Guided tour",
   "tours.profile.description": "You can reset the guided tour at any time.",
   "tours.profile.reset": "Reset guided tour",
+  "tours.profile.notification.success.reset": "Guided tour reset",
   "widget.profile.title": "Profile"
 }

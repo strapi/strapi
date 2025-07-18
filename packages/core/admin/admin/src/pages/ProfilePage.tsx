@@ -498,7 +498,7 @@ const GuidedTourSection = () => {
     toggleNotification({
       type: 'success',
       message: formatMessage({
-        id: 'notification.success.reset',
+        id: 'tours.profile.notification.success.reset',
         defaultMessage: 'Guided tour reset',
       }),
     });
