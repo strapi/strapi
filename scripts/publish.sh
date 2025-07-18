@@ -29,7 +29,4 @@ git config --global user.name "${GITHUB_ACTOR}"
 git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
 
 # publish packages
-GITHUB_TOKEN=$GITHUB_TOKEN yarn release --version "$version" --publish false --dry-run false "$@"
-./node_modules/.bin/nx run-many --target=clean --nx-ignore-cycles
-./node_modules/.bin/nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
-yarn release --only-publish --tag "$distTag" --dry-run false
+GITHUB_TOKEN=$GITHUB_TOKEN yarn release --version "$version" --tag "$distTag" --dry-run false "$@"
