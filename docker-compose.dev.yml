@@ -1,7 +1,11 @@
 version: '3'
 
 services:
+    security_opt:
+      - no-new-privileges:true
   postgres:
+    security_opt:
+      - no-new-privileges:true
     image: postgres
     restart: always
     volumes:
