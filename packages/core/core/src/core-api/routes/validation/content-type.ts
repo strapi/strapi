@@ -21,6 +21,7 @@ export type QueryParam =
  * A validator for core content-type routes.
  *
  * Provides validation schemas and utilities for handling content-type-specific route validation.
+ * Extends the base AbstractRouteValidator with schema-aware validation for Strapi content types.
  *
  * @example
  * ```ts
@@ -31,8 +32,8 @@ export type QueryParam =
  * // Get validation schema for document
  * const documentSchema = validator.document;
  *
- * // Validate query parameters
- * const querySchema = validator.query(['fields', 'populate', 'sort']);
+ * // Validate query parameters with schema awareness
+ * const querySchema = validator.queryParams(['fields', 'populate', 'sort']);
  * ```
  */
 export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UID.ContentType> {
@@ -98,17 +99,9 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
   }
 
   /**
-   * Generates a validation schema for field selection in queries
-   *
-   * @returns A schema for validating field selection
-   *
-   * @example
-   * ```ts
-   * const validator = new CoreContentTypeRouteValidator(strapi, uid);
-   * const fieldsSchema = validator.queryFields;
-   * ```
+   * Schema-aware fields validation that restricts to actual model fields
    */
-  get queryFields() {
+  protected get schemaAwareQueryFields() {
     return this.scalarFieldsArray
       .readonly()
       .describe(
@@ -117,19 +110,9 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
   }
 
   /**
-   * Generates a validation schema for populate operations.
-   *
-   * Allows wildcard (*), single field, and multiple field population.
-   *
-   * @returns A schema for validating populate parameters
-   *
-   * @example
-   * ```ts
-   * const validator = new CoreContentTypeRouteValidator(strapi, uid);
-   * const populateSchema = validator.queryPopulate;
-   * ```
+   * Schema-aware populate validation that restricts to actual populatable fields
    */
-  get queryPopulate() {
+  protected get schemaAwareQueryPopulate() {
     const wildcardPopulate = z
       .literal('*')
       .readonly()
@@ -149,22 +132,9 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
   }
 
   /**
-   * Generates a validation schema for sorting parameters.
-   *
-   * Allows various sorting formats including single field, multiple fields, and direction specifications
-   *
-   * @returns A schema for validating sort parameters
-   *
-   * @example
-   * ```ts
-   * const validator = new CoreContentTypeRouteValidator(strapi, uid);
-   * const sortSchema = validator.querySort;
-   * ```
-   *
-   * @remarks
-   * - Nested sorts are currently not supported
+   * Schema-aware sort validation that restricts to actual model fields
    */
-  get querySort() {
+  protected get schemaAwareQuerySort() {
     const orderDirection = z.enum(['asc', 'desc']);
 
     // TODO: Handle nested sorts but very low priority, very little usage
@@ -178,34 +148,21 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       .describe('Sort the result');
   }
 
+  /**
+   * Schema-aware filters validation that restricts to actual model fields
+   */
+  protected get schemaAwareFilters() {
+    return z.record(this.scalarFieldsEnum, z.any()).describe('Filters to apply to the query');
+  }
+
   get locale() {
-    return z.string().optional().describe('Select a locale');
+    return z.string().describe('Select a locale');
   }
 
   get status() {
     return z
       .enum(['draft', 'published'])
       .describe('Fetch documents based on their status. Default to "published" if not specified.');
-  }
-
-  get pagination() {
-    return z
-      .intersection(
-        z.object({ withCount: z.boolean().optional() }),
-        z.union([
-          z
-            .object({ page: z.number(), pageSize: z.number() })
-            .describe('Specify a page number and the number of entries per page'),
-          z
-            .object({ start: z.number(), limit: z.number() })
-            .describe('Specify how many entries to skip and to return'),
-        ])
-      )
-      .describe('Pagination parameters');
-  }
-
-  get filters() {
-    return z.record(this.scalarFieldsEnum, z.any()).describe('Filters to apply to the query');
   }
 
   get data() {
@@ -243,15 +200,15 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
    * @example
    * ```ts
    * const validator = new CoreContentTypeRouteValidator(strapi, uid);
-   * const querySchemas = validator.query(['fields', 'populate']);
+   * const querySchemas = validator.queryParams(['fields', 'populate']);
    * ```
    */
   queryParams(params: QueryParam[]): Partial<Record<QueryParam, z.Schema>> {
     const map: Record<QueryParam, () => z.Schema> = {
-      fields: () => this.queryFields.optional(),
-      populate: () => this.queryPopulate.optional(),
-      sort: () => this.querySort.optional(),
-      filters: () => this.filters.optional(),
+      fields: () => this.schemaAwareQueryFields.optional(),
+      populate: () => this.schemaAwareQueryPopulate.optional(),
+      sort: () => this.schemaAwareQuerySort.optional(),
+      filters: () => this.schemaAwareFilters.optional(),
       locale: () => this.locale.optional(),
       pagination: () => this.pagination.optional(),
       status: () => this.status.optional(),
