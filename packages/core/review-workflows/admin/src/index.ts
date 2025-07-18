@@ -30,6 +30,7 @@ const admin: Plugin.Config.AdminInput = {
           id: `${PLUGIN_ID}.plugin.name`,
           defaultMessage: 'Review Workflows',
         },
+        licenseOnly: true,
         permissions: [],
         async Component() {
           const { Router } = await import('./router');
