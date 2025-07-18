@@ -6,48 +6,40 @@ import { useRBAC } from '../useRBAC';
 describe('useRBAC', () => {
   it('should return by default falsey values and if the permissions match then it should return truthy values', async () => {
     const { result } = renderHook(() =>
-      useRBAC({
-        create: [
-          {
-            id: 1,
-            actionParameters: {},
-            action: 'admin::roles.create',
-            subject: null,
-            conditions: [],
-            properties: {},
-          },
-        ],
-        delete: [
-          {
-            id: 2,
-            actionParameters: {},
-            action: 'admin::roles.delete',
-            subject: null,
-            conditions: [],
-            properties: {},
-          },
-        ],
-        read: [
-          {
-            id: 3,
-            actionParameters: {},
-            action: 'admin::roles.read',
-            subject: null,
-            conditions: [],
-            properties: {},
-          },
-        ],
-        update: [
-          {
-            id: 4,
-            actionParameters: {},
-            action: 'admin::roles.update',
-            subject: null,
-            conditions: [],
-            properties: {},
-          },
-        ],
-      })
+      useRBAC([
+        {
+          id: 1,
+          actionParameters: {},
+          action: 'admin::roles.create',
+          subject: null,
+          conditions: [],
+          properties: {},
+        },
+        {
+          id: 2,
+          actionParameters: {},
+          action: 'admin::roles.delete',
+          subject: null,
+          conditions: [],
+          properties: {},
+        },
+        {
+          id: 3,
+          actionParameters: {},
+          action: 'admin::roles.read',
+          subject: null,
+          conditions: [],
+          properties: {},
+        },
+        {
+          id: 4,
+          actionParameters: {},
+          action: 'admin::roles.update',
+          subject: null,
+          conditions: [],
+          properties: {},
+        },
+      ])
     );
 
     expect(result.current.allowedActions).toEqual({
@@ -93,18 +85,16 @@ describe('useRBAC', () => {
   describe('checking against the server if there are conditions in the permissions', () => {
     it.skip('should return truthy values if the permissions condition passes', async () => {
       const { result } = renderHook(() => {
-        return useRBAC({
-          create: [
-            {
-              id: 1,
-              actionParameters: {},
-              action: 'admin::roles.create',
-              subject: null,
-              conditions: ['willPass'],
-              properties: {},
-            },
-          ],
-        });
+        return useRBAC([
+          {
+            id: 1,
+            actionParameters: {},
+            action: 'admin::roles.create',
+            subject: null,
+            conditions: ['willPass'],
+            properties: {},
+          },
+        ]);
       });
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -121,14 +111,7 @@ describe('useRBAC', () => {
 
       const { result } = renderHook(
         () => {
-          return useRBAC({
-            create: [
-              {
-                action: 'admin::roles.create',
-                subject: null,
-              },
-            ],
-          });
+          return useRBAC([{ action: 'admin::roles.create', subject: null }]);
         },
         {
           providerOptions: {

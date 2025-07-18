@@ -21,7 +21,7 @@ import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 
 import { CreateManyReleaseActions } from '../../../shared/contracts/release-actions';
-import { PERMISSIONS as releasePermissions } from '../constants';
+import { allPermissions } from '../constants';
 import { useCreateManyReleaseActionsMutation, useGetReleasesQuery } from '../services/release';
 
 import {
@@ -35,22 +35,16 @@ import { ReleaseActionOptions } from './ReleaseActionOptions';
 import type { BulkActionComponent } from '@strapi/content-manager/strapi-admin';
 import type { UID } from '@strapi/types';
 
-const getContentPermissions = (subject: string) => {
-  const permissions = {
-    publish: [
-      {
-        action: 'plugin::content-manager.explorer.publish',
-        subject,
-        id: '',
-        actionParameters: {},
-        properties: {},
-        conditions: [],
-      },
-    ],
-  };
-
-  return permissions;
-};
+const getContentPermissions = (subject: string) => [
+  {
+    action: 'plugin::content-manager.explorer.publish',
+    subject,
+    id: '',
+    actionParameters: {},
+    properties: {},
+    conditions: [],
+  },
+];
 
 const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
@@ -63,7 +57,7 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
   } = useRBAC(contentPermissions);
   const {
     allowedActions: { canCreate },
-  } = useRBAC(releasePermissions);
+  } = useRBAC(allPermissions);
   const { hasDraftAndPublish } = useContentManagerContext();
 
   // Get all the releases not published

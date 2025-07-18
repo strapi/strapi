@@ -15,7 +15,7 @@ import { styled } from 'styled-components';
 
 import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
 import { Release } from '../../../shared/contracts/releases';
-import { PERMISSIONS } from '../constants';
+import { allPermissions } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
 
 // TODO: has to be fixed in the DS - https://github.com/strapi/design-system/issues/1934
@@ -46,7 +46,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
   const [deleteReleaseAction] = useDeleteReleaseActionMutation();
   const {
     allowedActions: { canDeleteAction },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(allPermissions);
 
   const handleDeleteAction = async () => {
     const response = await deleteReleaseAction({
@@ -131,14 +131,12 @@ const ReleaseActionEntryLinkItem = ({
 
   const {
     allowedActions: { canUpdate: canUpdateContentType },
-  } = useRBAC({
-    updateContentType: [
-      {
-        action: 'plugin::content-manager.explorer.update',
-        subject: contentTypeUid,
-      },
-    ],
-  });
+  } = useRBAC([
+    {
+      action: 'plugin::content-manager.explorer.update',
+      subject: contentTypeUid,
+    },
+  ]);
 
   if (!canUpdateContentType || !canUpdateEntryForLocale) {
     return null;
@@ -201,7 +199,7 @@ interface RootProps {
 const Root = ({ children }: RootProps) => {
   const { formatMessage } = useIntl();
 
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(allPermissions);
 
   return (
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release

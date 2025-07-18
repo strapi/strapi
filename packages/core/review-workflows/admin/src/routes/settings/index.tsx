@@ -26,8 +26,8 @@ export const ReviewWorkflowsListView = () => {
   const { data, isLoading: isLoadingModels } = useGetContentTypesQuery();
   const { meta, workflows, isLoading, delete: deleteAction } = useReviewWorkflows();
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions.settings?.['review-workflows']
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.['review-workflows'] ?? []).flat()
   );
   const {
     allowedActions: { canCreate, canRead, canUpdate, canDelete },

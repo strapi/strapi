@@ -66,8 +66,8 @@ const tableHeaders = [
 const ListView = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions.settings?.['transfer-tokens']
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.['transfer-tokens'] ?? {}).flat()
   );
   const {
     isLoading: isLoadingRBAC,
