@@ -36,6 +36,31 @@ import { useGetPreviewUrlQuery } from '../services/preview';
 import type { UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
+ * Constants
+ * -----------------------------------------------------------------------------------------------*/
+
+const DEVICES = [
+  {
+    name: 'desktop',
+    label: {
+      id: 'content-manager.preview.device.desktop',
+      defaultMessage: 'Desktop',
+    },
+    width: '100%',
+    height: '100%',
+  },
+  {
+    name: 'mobile',
+    label: {
+      id: 'content-manager.preview.device.mobile',
+      defaultMessage: 'Mobile',
+    },
+    width: '375px',
+    height: '667px',
+  },
+];
+
+/* -------------------------------------------------------------------------------------------------
  * PreviewProvider
  * -----------------------------------------------------------------------------------------------*/
 
@@ -85,30 +110,10 @@ const PreviewPage = () => {
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
-  const devices = [
-    {
-      name: 'desktop',
-      label: formatMessage({
-        id: 'content-manager.preview.device.desktop',
-        defaultMessage: 'Desktop',
-      }),
-      width: '100%',
-      height: '100%',
-    },
-    {
-      name: 'mobile',
-      label: formatMessage({
-        id: 'content-manager.preview.device.mobile',
-        defaultMessage: 'Mobile',
-      }),
-      width: '375px',
-      height: '667px',
-    },
-  ];
-  const [deviceName, setDeviceName] = React.useState<(typeof devices)[number]['name']>(
-    devices[0].name
+  const [deviceName, setDeviceName] = React.useState<(typeof DEVICES)[number]['name']>(
+    DEVICES[0].name
   );
-  const device = devices.find((d) => d.name === deviceName) ?? devices[0];
+  const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -303,9 +308,9 @@ const PreviewPage = () => {
                           defaultMessage: 'Select device type',
                         })}
                       >
-                        {devices.map((deviceOption) => (
+                        {DEVICES.map((deviceOption) => (
                           <SingleSelectOption key={deviceOption.name} value={deviceOption.name}>
-                            {deviceOption.label}
+                            {formatMessage(deviceOption.label)}
                           </SingleSelectOption>
                         ))}
                       </SingleSelect>
