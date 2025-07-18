@@ -14,6 +14,7 @@ import {
   useRBAC,
   Layouts,
   useTable,
+  unstable_tours,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -228,6 +229,83 @@ const ListViewPage = () => {
 
   if (!isFetching && results.length === 0) {
     return (
+      <>
+        <unstable_tours.contentManager.Introduction>
+          {/* Invisible Anchor */}
+          <Box paddingTop={5} />
+        </unstable_tours.contentManager.Introduction>
+        <Page.Main>
+          <Page.Title>{`${contentTypeTitle}`}</Page.Title>
+          <LayoutsHeaderCustom
+            primaryAction={canCreate ? <CreateButton /> : null}
+            subtitle={formatMessage(
+              {
+                id: getTranslation('pages.ListView.header-subtitle'),
+                defaultMessage:
+                  '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
+              },
+              { number: pagination?.total }
+            )}
+            title={contentTypeTitle}
+            navigationAction={<BackButton />}
+          />
+          <Layouts.Action
+            endActions={
+              <>
+                <InjectionZone area="listView.actions" />
+                <ViewSettingsMenu
+                  setHeaders={handleSetHeaders}
+                  resetHeaders={() => setDisplayedHeaders(list.layout)}
+                  headers={displayedHeaders.map((header) => header.name)}
+                />
+              </>
+            }
+            startActions={
+              <>
+                {list.settings.searchable && (
+                  <SearchInput
+                    disabled={results.length === 0}
+                    label={formatMessage(
+                      { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                      { target: contentTypeTitle }
+                    )}
+                    placeholder={formatMessage({
+                      id: 'global.search',
+                      defaultMessage: 'Search',
+                    })}
+                    trackedEvent="didSearch"
+                  />
+                )}
+                {list.settings.filterable && schema ? (
+                  <Filters disabled={results.length === 0} schema={schema} />
+                ) : null}
+              </>
+            }
+          />
+          <Layouts.Content>
+            <Box background="neutral0" shadow="filterShadow" hasRadius>
+              <EmptyStateLayout
+                action={canCreate ? <CreateButton variant="secondary" /> : null}
+                content={formatMessage({
+                  id: 'app.components.EmptyStateLayout.content-document',
+                  defaultMessage: 'No content found',
+                })}
+                hasRadius
+                icon={<EmptyDocuments width="16rem" />}
+              />
+            </Box>
+          </Layouts.Content>
+        </Page.Main>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <unstable_tours.contentManager.Introduction>
+        {/* Invisible Anchor */}
+        <Box paddingTop={5} />
+      </unstable_tours.contentManager.Introduction>
       <Page.Main>
         <Page.Title>{`${contentTypeTitle}`}</Page.Title>
         <LayoutsHeaderCustom
@@ -277,155 +355,90 @@ const ListViewPage = () => {
           }
         />
         <Layouts.Content>
-          <Box background="neutral0" shadow="filterShadow" hasRadius>
-            <EmptyStateLayout
-              action={canCreate ? <CreateButton variant="secondary" /> : null}
-              content={formatMessage({
-                id: 'app.components.EmptyStateLayout.content-document',
-                defaultMessage: 'No content found',
-              })}
-              hasRadius
-              icon={<EmptyDocuments width="16rem" />}
-            />
-          </Box>
+          <Flex gap={4} direction="column" alignItems="stretch">
+            <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
+              <TableActionsBar />
+              <Table.Content>
+                <Table.Head>
+                  <Table.HeaderCheckboxCell />
+                  {tableHeaders.map((header: ListFieldLayout) => (
+                    <Table.HeaderCell key={header.name} {...header} />
+                  ))}
+                </Table.Head>
+                <Table.Loading />
+                <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
+                <Table.Body>
+                  {results.map((row) => {
+                    return (
+                      <Table.Row
+                        cursor="pointer"
+                        key={row.id}
+                        onClick={handleRowClick(row.documentId)}
+                      >
+                        <Table.CheckboxCell id={row.id} />
+                        {tableHeaders.map(({ cellFormatter, ...header }) => {
+                          if (header.name === 'status') {
+                            const { status } = row;
+
+                            return (
+                              <Table.Cell key={header.name}>
+                                <DocumentStatus status={status} maxWidth={'min-content'} />
+                              </Table.Cell>
+                            );
+                          }
+                          if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
+                            // Display the users full name
+                            // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
+                            // In this case, we display a dash
+                            return (
+                              <Table.Cell key={header.name}>
+                                <Typography textColor="neutral800">
+                                  {row[header.name.split('.')[0]]
+                                    ? getDisplayName(row[header.name.split('.')[0]])
+                                    : '-'}
+                                </Typography>
+                              </Table.Cell>
+                            );
+                          }
+                          if (typeof cellFormatter === 'function') {
+                            return (
+                              <Table.Cell key={header.name}>
+                                {/* @ts-expect-error – TODO: fix this TS error */}
+                                {cellFormatter(row, header, { collectionType, model })}
+                              </Table.Cell>
+                            );
+                          }
+                          return (
+                            <Table.Cell key={header.name}>
+                              <CellContent
+                                content={row[header.name.split('.')[0]]}
+                                rowId={row.documentId}
+                                {...header}
+                              />
+                            </Table.Cell>
+                          );
+                        })}
+                        {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
+                        <ActionsCell onClick={(e) => e.stopPropagation()}>
+                          <TableActions document={row} />
+                        </ActionsCell>
+                      </Table.Row>
+                    );
+                  })}
+                </Table.Body>
+              </Table.Content>
+            </Table.Root>
+            <Pagination.Root
+              {...pagination}
+              onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
+            >
+              <Pagination.PageSize />
+              <Pagination.Links />
+            </Pagination.Root>
+          </Flex>
         </Layouts.Content>
       </Page.Main>
-    );
-  }
-
-  return (
-    <Page.Main>
-      <Page.Title>{`${contentTypeTitle}`}</Page.Title>
-      <LayoutsHeaderCustom
-        primaryAction={canCreate ? <CreateButton /> : null}
-        subtitle={formatMessage(
-          {
-            id: getTranslation('pages.ListView.header-subtitle'),
-            defaultMessage:
-              '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
-          },
-          { number: pagination?.total }
-        )}
-        title={contentTypeTitle}
-        navigationAction={<BackButton />}
-      />
-      <Layouts.Action
-        endActions={
-          <>
-            <InjectionZone area="listView.actions" />
-            <ViewSettingsMenu
-              setHeaders={handleSetHeaders}
-              resetHeaders={() => setDisplayedHeaders(list.layout)}
-              headers={displayedHeaders.map((header) => header.name)}
-            />
-          </>
-        }
-        startActions={
-          <>
-            {list.settings.searchable && (
-              <SearchInput
-                disabled={results.length === 0}
-                label={formatMessage(
-                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                  { target: contentTypeTitle }
-                )}
-                placeholder={formatMessage({
-                  id: 'global.search',
-                  defaultMessage: 'Search',
-                })}
-                trackedEvent="didSearch"
-              />
-            )}
-            {list.settings.filterable && schema ? (
-              <Filters disabled={results.length === 0} schema={schema} />
-            ) : null}
-          </>
-        }
-      />
-      <Layouts.Content>
-        <Flex gap={4} direction="column" alignItems="stretch">
-          <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
-            <TableActionsBar />
-            <Table.Content>
-              <Table.Head>
-                <Table.HeaderCheckboxCell />
-                {tableHeaders.map((header: ListFieldLayout) => (
-                  <Table.HeaderCell key={header.name} {...header} />
-                ))}
-              </Table.Head>
-              <Table.Loading />
-              <Table.Empty action={canCreate ? <CreateButton variant="secondary" /> : null} />
-              <Table.Body>
-                {results.map((row) => {
-                  return (
-                    <Table.Row
-                      cursor="pointer"
-                      key={row.id}
-                      onClick={handleRowClick(row.documentId)}
-                    >
-                      <Table.CheckboxCell id={row.id} />
-                      {tableHeaders.map(({ cellFormatter, ...header }) => {
-                        if (header.name === 'status') {
-                          const { status } = row;
-
-                          return (
-                            <Table.Cell key={header.name}>
-                              <DocumentStatus status={status} maxWidth={'min-content'} />
-                            </Table.Cell>
-                          );
-                        }
-                        if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
-                          // Display the users full name
-                          // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
-                          // In this case, we display a dash
-                          return (
-                            <Table.Cell key={header.name}>
-                              <Typography textColor="neutral800">
-                                {row[header.name.split('.')[0]]
-                                  ? getDisplayName(row[header.name.split('.')[0]])
-                                  : '-'}
-                              </Typography>
-                            </Table.Cell>
-                          );
-                        }
-                        if (typeof cellFormatter === 'function') {
-                          return (
-                            <Table.Cell key={header.name}>
-                              {/* @ts-expect-error – TODO: fix this TS error */}
-                              {cellFormatter(row, header, { collectionType, model })}
-                            </Table.Cell>
-                          );
-                        }
-                        return (
-                          <Table.Cell key={header.name}>
-                            <CellContent
-                              content={row[header.name.split('.')[0]]}
-                              rowId={row.documentId}
-                              {...header}
-                            />
-                          </Table.Cell>
-                        );
-                      })}
-                      {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
-                      <ActionsCell onClick={(e) => e.stopPropagation()}>
-                        <TableActions document={row} />
-                      </ActionsCell>
-                    </Table.Row>
-                  );
-                })}
-              </Table.Body>
-            </Table.Content>
-          </Table.Root>
-          <Pagination.Root
-            {...pagination}
-            onPageSizeChange={() => trackUsage('willChangeNumberOfEntriesPerPage')}
-          >
-            <Pagination.PageSize />
-            <Pagination.Links />
-          </Pagination.Root>
-        </Flex>
-      </Layouts.Content>
-    </Page.Main>
+    </>
   );
 };
 

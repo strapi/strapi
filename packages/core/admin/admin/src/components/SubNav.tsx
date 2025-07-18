@@ -1,4 +1,4 @@
-import { useId, useState, Fragment } from 'react';
+import { useId, useState } from 'react';
 
 import { Box, SubNav as DSSubNav, Flex, Typography, IconButton } from '@strapi/design-system';
 import { ChevronDown, Plus } from '@strapi/icons';
@@ -120,16 +120,34 @@ const Sections = ({ children, ...props }: { children: React.ReactNode[]; [key: s
  * This would be better in the content-type-builder package directly but currently
  * the SubNav API does not expose a way to wrap the link, instead it wraps the link and the list
  */
-const getGuidedTourTooltip = (sectionName: string) => {
-  switch (sectionName) {
-    case 'Collection Types':
-      return unstable_tours.contentTypeBuilder.CollectionTypes;
-    case 'Single Types':
-      return unstable_tours.contentTypeBuilder.SingleTypes;
-    case 'Components':
-      return unstable_tours.contentTypeBuilder.Components;
+const GuidedTourTooltip = ({
+  sectionId,
+  children,
+}: {
+  sectionId?: string;
+  children: React.ReactNode;
+}) => {
+  switch (sectionId) {
+    case 'models':
+      return (
+        <unstable_tours.contentTypeBuilder.CollectionTypes>
+          {children}
+        </unstable_tours.contentTypeBuilder.CollectionTypes>
+      );
+    case 'singleTypes':
+      return (
+        <unstable_tours.contentTypeBuilder.SingleTypes>
+          {children}
+        </unstable_tours.contentTypeBuilder.SingleTypes>
+      );
+    case 'components':
+      return (
+        <unstable_tours.contentTypeBuilder.Components>
+          {children}
+        </unstable_tours.contentTypeBuilder.Components>
+      );
     default:
-      return Fragment;
+      return children;
   }
 };
 
@@ -137,13 +155,14 @@ const Section = ({
   label,
   children,
   link,
+  sectionId,
 }: {
   label: string;
   children: React.ReactNode[];
   link?: { label: string; onClik: () => void };
+  sectionId?: string;
 }) => {
   const listId = useId();
-  const GuidedTourTooltip = getGuidedTourTooltip(label);
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
@@ -157,7 +176,7 @@ const Section = ({
             </Box>
           </Flex>
           {link && (
-            <GuidedTourTooltip>
+            <GuidedTourTooltip sectionId={sectionId}>
               <IconButton
                 label={link.label}
                 variant="ghost"
