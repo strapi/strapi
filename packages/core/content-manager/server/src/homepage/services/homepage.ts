@@ -279,11 +279,13 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
                       .andOnNotNull('published.published_at');
                   })
                   .countDistinct('draft.document_id as count')
+                  .groupBy('draft.document_id')
                   .first()
               : await strapiDBConnection(tableName)
                   .select('document_id')
                   .from(`${tableName}`)
                   .countDistinct('document_id as count')
+                  .groupBy('document_id')
                   .first();
             countDocuments.published += Number(publishedDocuments?.count) || 0;
 
@@ -297,6 +299,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
                   .andOnNotNull('published.published_at');
               })
               .countDistinct('draft.document_id as count')
+              .groupBy('draft.document_id')
               .first();
             countDocuments.modified += Number(modifiedDocuments?.count) || 0;
           }
