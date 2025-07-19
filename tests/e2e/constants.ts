@@ -17,6 +17,8 @@ export const ALLOWED_CONTENT_TYPES = [
   'api::unique.unique',
   'api::condition.condition',
   'api::country.country',
+  'api::cat.cat',
+  'api::dog.dog',
   'plugin::content-manager.history-version',
   /**
    * I18N
