@@ -8,6 +8,14 @@ import { Layout } from '../Layout';
 
 jest.mock('../../../hooks/useSettingsMenu');
 
+jest.mock('../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
+  useLicenseLimits: jest.fn(() => ({
+    license: {
+      features: [],
+    },
+  })),
+}));
+
 const LocationDisplay = () => {
   const location = useLocation();
 

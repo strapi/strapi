@@ -50,7 +50,7 @@ const ConfirmBulkActionDialog = ({
         </Dialog.Body>
         <Dialog.Footer>
           <Dialog.Cancel>
-            <Button fullWidth onClick={onToggleDialog} variant="tertiary">
+            <Button width={'50%'} onClick={onToggleDialog} variant="tertiary">
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
@@ -173,6 +173,7 @@ const ConfirmDialogPublishAll = ({
       }
       endAction={
         <Button
+          width={'50%'}
           onClick={onConfirm}
           variant="secondary"
           startIcon={<Check />}

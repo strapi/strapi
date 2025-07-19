@@ -88,8 +88,9 @@
   "containers.Home.pluginHeaderDescription": "Créer et modifier votre type de contenu",
   "containers.Home.pluginHeaderTitle": "Type de contenu",
   "containers.List.draft": "Brouillon",
-  "containers.List.errorFetchRecords": "Erreur",
   "containers.List.published": "Publié",
+  "containers.List.modified": "Modifié",
+  "containers.List.errorFetchRecords": "Erreur",
   "containers.list.displayedFields": "Champs affichés",
   "containers.list.items": "{number, plural, =0 {élements} one {élement} other {élements}}",
   "containers.list.table-headers.publishedAt": "Statut",
@@ -281,5 +282,12 @@
   "history.content.not-localized": "Cette valeur est commune à toutes les locales. Si vous restaurez cette version, le contenu sera remplacé pour toutes les locales.",
   "history.restore.error.message": "Impossible de restaurer la version.",
   "validation.error": "Votre document contient des erreurs de validation. Veuillez les corriger avant de l'enregistrer.",
-  "bulk-publish.edit": "Editer"
+  "bulk-publish.edit": "Editer",
+  "widget.chart-entries.title": "Entrées",
+  "widget.chart-entries.tooltip": "{count} {label}",
+  "widget.last-edited.title": "Dernières entrées éditées",
+  "widget.last-edited.single-type": "Types uniques",
+  "widget.last-edited.no-data": "Aucune entrée éditée",
+  "widget.last-published.title": "Dernières entrées publiées",
+  "widget.last-published.no-data": "Aucune entrée publiée"
 }

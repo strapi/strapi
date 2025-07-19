@@ -3,10 +3,11 @@ import { join, resolve } from 'path';
 import crypto from 'crypto';
 import type { Core } from '@strapi/types';
 
-import { machineID } from '@strapi/utils';
+import { generateInstallId } from '@strapi/utils';
 
 interface LicenseInfo {
   type: 'bronze' | 'silver' | 'gold';
+  isTrial: boolean;
   expireAt?: string;
   seats?: number;
   features?: Array<{ name: string; options?: Record<string, unknown> }>;
@@ -26,6 +27,8 @@ const DEFAULT_FEATURES = {
     { name: 'cms-advanced-preview' },
   ],
 };
+
+const LICENSE_REGISTRY_URI = 'https://license.strapi.io';
 
 const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
@@ -75,6 +78,10 @@ const verifyLicense = (license: string) => {
     licenseInfo.features = DEFAULT_FEATURES[licenseInfo.type];
   }
 
+  if (!licenseInfo.isTrial) {
+    licenseInfo.isTrial = false;
+  }
+
   Object.freeze(licenseInfo.features);
   return licenseInfo;
 };
@@ -88,11 +95,17 @@ const fetchLicense = async (
   key: string,
   projectId: string
 ) => {
+  const { installId: installIdFromPackageJson } = strapi.config;
+
   const response = await strapi
-    .fetch(`https://license.strapi.io/api/licenses/validate`, {
+    .fetch(`${LICENSE_REGISTRY_URI}/api/licenses/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, projectId, deviceId: machineID() }),
+      body: JSON.stringify({
+        key,
+        projectId,
+        deviceId: generateInstallId(projectId, installIdFromPackageJson),
+      }), // NOTE: Doing nothing on the LR with the installId
     })
     .catch(throwError);
 
@@ -116,4 +129,4 @@ const fetchLicense = async (
   }
 };
 
-export { readLicense, verifyLicense, fetchLicense, LicenseCheckError };
+export { readLicense, verifyLicense, fetchLicense, LicenseCheckError, LICENSE_REGISTRY_URI };

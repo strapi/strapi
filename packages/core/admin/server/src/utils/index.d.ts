@@ -3,13 +3,14 @@ import role from '../services/role';
 import user from '../services/user';
 import passport from '../services/passport';
 import metrics from '../services/metrics';
+import encryption from '../services/encryption';
 import * as permission from '../services/permission';
 import * as contentType from '../services/content-type';
 import * as token from '../services/token';
 import * as apiToken from '../services/api-token';
 import * as projectSettings from '../services/project-settings';
 import * as transfer from '../services/transfer';
-import { createHomepageService } from '../services/homepage';
+import { createGuidedTourService } from '../services/guided-tour';
 
 type S = {
   role: typeof role;
@@ -23,7 +24,8 @@ type S = {
   'api-token': typeof apiToken;
   'project-settings': typeof projectSettings;
   transfer: typeof transfer;
-  homepage: ReturnType<typeof createHomepageService>;
+  encryption: typeof encryption;
+  'guided-tour': ReturnType<typeof createGuidedTourService>;
 };
 
 type Resolve<T> = T extends (...args: unknown[]) => unknown ? T : { [K in keyof T]: T[K] };

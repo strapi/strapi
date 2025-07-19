@@ -6,6 +6,7 @@ import {
   type UpdateProjectSettings,
   type Plugins,
   type GetLicenseLimitInformation,
+  GetGuidedTourMeta,
 } from '../../../shared/contracts/admin';
 import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
@@ -21,7 +22,7 @@ interface ConfigurationLogo {
 
 const admin = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['ProjectSettings', 'LicenseLimits'],
+    addTagTypes: ['ProjectSettings', 'LicenseLimits', 'LicenseTrialTimeLeft', 'GuidedTourMeta'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -33,6 +34,7 @@ const admin = adminApi
         transformResponse(res: Init.Response) {
           return res.data;
         },
+        providesTags: ['ProjectSettings'],
       }),
       information: builder.query<Information.Response['data'], void>({
         query: () => ({
@@ -107,6 +109,20 @@ const admin = adminApi
         }),
         providesTags: ['LicenseLimits'],
       }),
+      getLicenseTrialTimeLeft: builder.query<{ trialEndsAt: string }, void>({
+        query: () => ({
+          url: '/admin/license-trial-time-left',
+          method: 'GET',
+        }),
+        providesTags: ['LicenseTrialTimeLeft'],
+      }),
+      getGuidedTourMeta: builder.query<GetGuidedTourMeta.Response, void>({
+        query: () => ({
+          url: '/admin/guided-tour-meta',
+          method: 'GET',
+        }),
+        providesTags: ['GuidedTourMeta'],
+      }),
     }),
     overrideExisting: false,
   });
@@ -119,6 +135,8 @@ const {
   useUpdateProjectSettingsMutation,
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
+  useGetLicenseTrialTimeLeftQuery,
+  useGetGuidedTourMetaQuery,
 } = admin;
 
 export {
@@ -129,6 +147,8 @@ export {
   useUpdateProjectSettingsMutation,
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
+  useGetLicenseTrialTimeLeftQuery,
+  useGetGuidedTourMetaQuery,
 };
 
 export type { ConfigurationLogo };

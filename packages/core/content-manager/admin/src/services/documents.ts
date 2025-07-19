@@ -27,12 +27,17 @@ import type {
 const documentApi = contentManagerApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    autoCloneDocument: builder.mutation<Clone.Response, Clone.Params & { query?: string }>({
-      query: ({ model, sourceId, query }) => ({
+    autoCloneDocument: builder.mutation<
+      Clone.Response,
+      Clone.Params & {
+        params?: Find.Request['query'] & Clone.Request['query'];
+      }
+    >({
+      query: ({ model, sourceId, params }) => ({
         url: `/content-manager/collection-types/${model}/auto-clone/${sourceId}`,
         method: 'POST',
         config: {
-          params: query,
+          params,
         },
       }),
       invalidatesTags: (_result, error, { model }) => {
@@ -40,7 +45,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           return [];
         }
 
-        return [{ type: 'Document', id: `${model}_LIST` }, 'RecentDocumentList'];
+        return [{ type: 'Document', id: `${model}_LIST` }, 'RecentDocumentList', 'CountDocuments'];
       },
     }),
     cloneDocument: builder.mutation<
@@ -62,6 +67,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         { type: 'Document', id: `${model}_LIST` },
         { type: 'UidAvailability', id: model },
         'RecentDocumentList',
+        'CountDocuments',
       ],
     }),
     /**
@@ -88,6 +94,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         'Relations',
         { type: 'UidAvailability', id: model },
         'RecentDocumentList',
+        'CountDocuments',
       ],
       transformResponse: (response: Create.Response, meta, arg): Create.Response => {
         /**
@@ -128,6 +135,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_result, _error, { collectionType, model }) => [
         { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_LIST` : model },
         'RecentDocumentList',
+        'CountDocuments',
       ],
     }),
     deleteManyDocuments: builder.mutation<
@@ -145,6 +153,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_res, _error, { model }) => [
         { type: 'Document', id: `${model}_LIST` },
         'RecentDocumentList',
+        'CountDocuments',
       ],
     }),
     discardDocument: builder.mutation<
@@ -176,6 +185,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           'Relations',
           { type: 'UidAvailability', id: model },
           'RecentDocumentList',
+          'CountDocuments',
         ];
       },
     }),
@@ -329,6 +339,8 @@ const documentApi = contentManagerApi.injectEndpoints({
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
           'RecentDocumentList',
+          'GuidedTourMeta',
+          'CountDocuments',
         ];
       },
     }),
@@ -344,8 +356,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_res, _error, { model, documentIds }) =>
-        documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
+      invalidatesTags: (_res, _error, { model, documentIds }) => {
+        return [
+          ...documentIds.map((id) => ({ type: 'Document' as const, id: `${model}_${id}` })),
+          'RecentDocumentList',
+          'CountDocuments',
+        ];
+      },
     }),
     updateDocument: builder.mutation<
       Update.Response,
@@ -373,7 +390,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           'Relations',
           { type: 'UidAvailability', id: model },
           'RecentDocumentList',
-          'RecentDocumentList',
+          'CountDocuments',
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
@@ -435,6 +452,7 @@ const documentApi = contentManagerApi.injectEndpoints({
             id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
           'RecentDocumentList',
+          'CountDocuments',
         ];
       },
     }),
@@ -456,6 +474,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_res, _error, { model, documentIds }) => [
         ...documentIds.map((id) => ({ type: 'Document' as const, id: `${model}_${id}` })),
         'RecentDocumentList',
+        'CountDocuments',
       ],
     }),
   }),

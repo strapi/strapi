@@ -6,4 +6,5 @@ declare global {
       backendURL: string;
     };
   }
+  declare module '*?raw';
 }

@@ -45,7 +45,7 @@ interface AuthContextValue {
    * empty, the user does not have any of those permissions.
    */
   checkUserHasPermissions: (
-    permissions?: Permission[],
+    permissions?: Array<Pick<Permission, 'action'> & Partial<Omit<Permission, 'action'>>>,
     passedPermissions?: Permission[],
     rawQueryContext?: string
   ) => Promise<Permission[]>;
@@ -83,6 +83,13 @@ const AuthProvider = ({
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
   const [{ rawQuery }] = useQueryParams();
+
+  const locationRef = React.useRef(location);
+
+  // Update ref without causing re-render
+  React.useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
 
   const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
@@ -231,7 +238,10 @@ const AuthProvider = ({
       const matchingPermissions = actualUserPermissions.filter(
         (permission) =>
           permissions.findIndex(
-            (perm) => perm.action === permission.action && perm.subject === permission.subject
+            (perm) =>
+              perm.action === permission.action &&
+              // Only check the subject if it's provided
+              (perm.subject == undefined || perm.subject === permission.subject)
           ) >= 0
       );
 
@@ -239,7 +249,7 @@ const AuthProvider = ({
         {
           user,
           permissions: userPermissions,
-          pathname: location.pathname,
+          pathname: locationRef.current.pathname,
           search: (rawQueryContext || rawQuery).split('?')[1] ?? '',
         },
         matchingPermissions
@@ -266,7 +276,7 @@ const AuthProvider = ({
         return middlewaredPermissions.filter((_, index) => data?.data[index] === true);
       }
     },
-    [checkPermissions, location.pathname, rawQuery, runRbacMiddleware, user, userPermissions]
+    [checkPermissions, rawQuery, runRbacMiddleware, user, userPermissions]
   );
 
   const isLoading = isLoadingUser || isLoadingPermissions;

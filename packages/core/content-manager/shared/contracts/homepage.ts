@@ -27,3 +27,18 @@ export declare namespace GetRecentDocuments {
     error?: errors.ApplicationError;
   }
 }
+
+export declare namespace GetCountDocuments {
+  export interface Request {
+    body: {};
+  }
+
+  export interface Response {
+    data: {
+      draft: number;
+      published: number;
+      modified: number;
+    };
+    error?: errors.ApplicationError;
+  }
+}

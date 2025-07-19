@@ -4,9 +4,11 @@ import {
   Page,
   useAPIErrorHandler,
   isFetchError,
+  GradientBadge,
   useNotification,
   useField,
   useRBAC,
+  FormHelpers,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -27,6 +29,10 @@ import { SETTINGS_SCHEMA } from '../validation/schemas';
 
 import type { UpdateSettings } from '../../../shared/contracts/settings';
 
+interface UpdateDefaultTimezone {
+  defaultTimezone: string;
+}
+
 const ReleasesSettingsPage = () => {
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
@@ -43,11 +49,36 @@ const ReleasesSettingsPage = () => {
 
   const { timezoneList } = getTimezones(new Date());
 
-  const handleSubmit = async (body: UpdateSettings.Request['body']) => {
+  const handleSubmit = async (
+    body: UpdateSettings.Request['body'],
+    { setErrors }: FormHelpers<UpdateDefaultTimezone>
+  ) => {
     const { defaultTimezone } = body;
-    const isBodyTimezoneValid = timezoneList.some((timezone) => timezone.value === defaultTimezone);
+    const formattedDefaultTimezone = defaultTimezone;
+    const isBodyTimezoneValid = timezoneList.some(
+      (timezone) => timezone.value === formattedDefaultTimezone
+    );
+
+    if (!isBodyTimezoneValid && defaultTimezone) {
+      const errorMessage = formatMessage({
+        id: 'components.Input.error.validation.combobox.invalid',
+        defaultMessage: 'The value provided is not valid',
+      });
+      setErrors({
+        defaultTimezone: errorMessage,
+      });
+      toggleNotification({
+        type: 'danger',
+        message: errorMessage,
+      });
+      return;
+    }
+
     const newBody =
-      !defaultTimezone || !isBodyTimezoneValid ? { defaultTimezone: null } : { ...body };
+      !defaultTimezone || !isBodyTimezoneValid
+        ? { defaultTimezone: null }
+        : { defaultTimezone: formattedDefaultTimezone };
+
     try {
       const response = await updateReleaseSettings(newBody);
 
@@ -67,13 +98,19 @@ const ReleasesSettingsPage = () => {
       } else {
         toggleNotification({
           type: 'danger',
-          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+          message: formatMessage({
+            id: 'notification.error',
+            defaultMessage: 'An error occurred',
+          }),
         });
       }
     } catch (error) {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        message: formatMessage({
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        }),
       });
     }
   };
@@ -82,13 +119,18 @@ const ReleasesSettingsPage = () => {
     return <Page.Loading />;
   }
 
+  const releasePageTitle = formatMessage({
+    id: 'content-releases.pages.Releases.title',
+    defaultMessage: 'Releases',
+  });
+
   return (
     <Layouts.Root>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
-            name: 'Releases',
+            name: releasePageTitle,
           }
         )}
       </Page.Title>
@@ -120,10 +162,15 @@ const ReleasesSettingsPage = () => {
                       </Button>
                     ) : null
                   }
-                  title={formatMessage({
-                    id: 'content-releases.pages.Settings.releases.title',
-                    defaultMessage: 'Releases',
-                  })}
+                  secondaryAction={
+                    <GradientBadge
+                      label={formatMessage({
+                        id: 'components.premiumFeature.title',
+                        defaultMessage: 'Premium feature',
+                      })}
+                    />
+                  }
+                  title={releasePageTitle}
                   subtitle={formatMessage({
                     id: 'content-releases.pages.Settings.releases.description',
                     defaultMessage: 'Create and manage content updates',
@@ -176,7 +223,7 @@ const TimezoneDropdown = () => {
       name="defaultTimezone"
       hint={formatMessage({
         id: 'content-releases.pages.Settings.releases.timezone.hint',
-        defaultMessage: 'The timezone of every release can still be changed individually. ',
+        defaultMessage: 'The timezone of every release can still be changed individually.',
       })}
       error={field.error}
     >
@@ -188,8 +235,12 @@ const TimezoneDropdown = () => {
       </Field.Label>
       <Combobox
         autocomplete={{ type: 'list', filter: 'contains' }}
-        onChange={(value) => field.onChange('defaultTimezone', value)}
         onTextValueChange={(value) => field.onChange('defaultTimezone', value)}
+        onChange={(value) => {
+          if ((field.value && value) || !field.value) {
+            field.onChange('defaultTimezone', value);
+          }
+        }}
         onClear={() => field.onChange('defaultTimezone', '')}
         value={field.value}
         disabled={!canUpdate}

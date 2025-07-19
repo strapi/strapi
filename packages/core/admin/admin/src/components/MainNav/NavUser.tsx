@@ -36,22 +36,8 @@ const BadgeWrapper = styled(Flex)`
   width: 100%;
 `;
 const StyledTypography = styled(Typography)`
+  word-break: break-word;
   margin-bottom: ${({ theme }) => theme.spaces[3]};
-`;
-
-const MenuItem = styled(Menu.Item)`
-  & > span {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: ${({ theme }) => theme.spaces[3]};
-  }
-`;
-
-const MenuItemDanger = styled(MenuItem)`
-  &:hover {
-    background: ${({ theme }) => theme.colors.danger100};
-  }
 `;
 
 export interface NavUserProps {
@@ -104,19 +90,19 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
 
           <Menu.Separator />
 
-          <MenuItem onSelect={handleProfile}>
+          <Menu.Item onSelect={handleProfile}>
             {formatMessage({
-              id: 'global.profile',
+              id: 'global.profile.settings',
               defaultMessage: 'Profile settings',
             })}
-          </MenuItem>
+          </Menu.Item>
 
-          <MenuItemDanger onSelect={handleLogout} color="danger600">
+          <Menu.Item variant="danger" onSelect={handleLogout} color="danger600">
             {formatMessage({
               id: 'app.components.LeftMenu.logout',
               defaultMessage: 'Log out',
             })}
-          </MenuItemDanger>
+          </Menu.Item>
         </MenuContent>
       </Menu.Root>
     </Flex>

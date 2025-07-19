@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import axios, { AxiosResponse } from 'axios';
 
+import { Tours } from '../components/UnstableGuidedTour/Tours';
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
@@ -45,31 +46,6 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
-
-  React.useEffect(() => {
-    if (uuid && data) {
-      const event = 'didInitializeAdministration';
-      try {
-        fetch('https://analytics.strapi.io/api/v2/track', {
-          method: 'POST',
-          body: JSON.stringify({
-            // This event is anonymous
-            event,
-            userId: '',
-            eventPropeties: {},
-            groupProperties: { ...data, projectId: uuid },
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Strapi-Event': event,
-          },
-        });
-      } catch {
-        // silence is golden
-      }
-    }
-  }, [data, uuid]);
-
   const value = React.useMemo(
     () => ({
       uuid,
@@ -92,10 +68,9 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
  * Meanwhile those with properties have different property shapes corresponding to the specific
  * event so understanding which properties go with which event is very helpful.
  */
-interface EventWithoutProperties {
+export interface EventWithoutProperties {
   name:
     | 'changeComponentsOrder'
-    | 'didAccessAuthenticatedAdministration'
     | 'didAddComponentToDynamicZone'
     | 'didBulkDeleteEntries'
     | 'didNotBulkDeleteEntries'
@@ -187,8 +162,17 @@ interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease';
+    | 'didCreateRelease'
+    | 'didLaunchGuidedtour';
   properties?: never;
+}
+
+interface DidAccessAuthenticatedAdministrationEvent {
+  name: 'didAccessAuthenticatedAdministration';
+  properties: {
+    registeredWidgets: string[];
+    projectId: string;
+  };
 }
 
 interface DidFilterMediaLibraryElementsEvent {
@@ -318,6 +302,8 @@ interface CreateEntryEvents {
     documentId?: string;
     status?: string;
     error?: unknown;
+    fromPreview?: boolean;
+    fromRelationModal?: boolean;
   };
 }
 
@@ -357,9 +343,47 @@ interface DidPublishRelease {
   };
 }
 
+interface DidUpdateCTBSchema {
+  name: 'didUpdateCTBSchema';
+  properties: {
+    success: boolean;
+    newContentTypes: number;
+    editedContentTypes: number;
+    deletedContentTypes: number;
+    newComponents: number;
+    editedComponents: number;
+    deletedComponents: number;
+    newFields: number;
+    editedFields: number;
+    deletedFields: number;
+  };
+}
+
+interface DidSkipGuidedTour {
+  name: 'didSkipGuidedTour';
+  properties: {
+    name: keyof Tours | 'all';
+  };
+}
+
+interface DidCompleteGuidedTour {
+  name: 'didCompleteGuidedTour';
+  properties: {
+    name: keyof Tours;
+  };
+}
+
+interface DidStartGuidedTour {
+  name: 'didStartGuidedTourFromHomepage';
+  properties: {
+    name: keyof Tours;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
+  | DidAccessAuthenticatedAdministrationEvent
   | DidAccessTokenListEvent
   | DidChangeModeEvent
   | DidCropFileEvent
@@ -377,7 +401,11 @@ type EventsWithProperties =
   | WillModifyTokenEvent
   | WillNavigateEvent
   | DidPublishRelease
-  | MediaEvents;
+  | MediaEvents
+  | DidUpdateCTBSchema
+  | DidSkipGuidedTour
+  | DidCompleteGuidedTour
+  | DidStartGuidedTour;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

@@ -4,6 +4,7 @@ import user from './user';
 import role from './role';
 import passport from './passport';
 import metrics from './metrics';
+import encryption from './encryption';
 import * as token from './token';
 import * as permission from './permission';
 import * as contentType from './content-type';
@@ -13,7 +14,7 @@ import * as action from './action';
 import * as apiToken from './api-token';
 import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
-import { createHomepageService } from './homepage';
+import { createGuidedTourService } from './guided-tour';
 
 // TODO: TS - Export services one by one as this export is cjs
 export default {
@@ -31,5 +32,6 @@ export default {
   'api-token': apiToken,
   transfer,
   'project-settings': projectSettings,
-  homepage: createHomepageService,
+  encryption,
+  'guided-tour': createGuidedTourService,
 };

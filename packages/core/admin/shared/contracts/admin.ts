@@ -1,5 +1,7 @@
+import { Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import type { File } from 'formidable';
+import type { GuidedTourCompletedActions } from '../../server/src/services/guided-tour';
 
 export interface Logo {
   name: string;
@@ -213,6 +215,22 @@ export declare namespace GetLicenseLimitInformation {
       shouldNotify: boolean;
       shouldStopCreate: boolean;
       type: string;
+      isTrial: boolean;
+    };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * Meta data for the guided tour
+ */
+export declare namespace GetGuidedTourMeta {
+  export interface Request {}
+
+  export interface Response {
+    data: {
+      isFirstSuperAdminUser: boolean;
+      completedActions: GuidedTourCompletedActions[];
     };
     error?: errors.ApplicationError;
   }

@@ -1,49 +1,35 @@
+import { Box } from '@strapi/design-system';
 import get from 'lodash/get';
 
-import { useDataManager } from '../hooks/useDataManager';
-
+import { ComponentRow } from './ComponentRow';
+import { useDataManager } from './DataManager/useDataManager';
 import { List } from './List';
-import { Tr } from './Tr';
 
-import type { Internal } from '@strapi/types';
+import type { UID } from '@strapi/types';
 
 interface ComponentListProps {
-  component: Internal.UID.Component;
-  customRowComponent: any;
-  firstLoopComponentUid?: string;
+  component: UID.Component;
+  firstLoopComponentUid?: UID.Component | null;
   isFromDynamicZone?: boolean;
-  isNestedInDZComponent?: boolean;
 }
 
 export const ComponentList = ({
-  customRowComponent,
   component,
   isFromDynamicZone = false,
-  isNestedInDZComponent = false,
   firstLoopComponentUid,
 }: ComponentListProps) => {
-  const { modifiedData } = useDataManager();
-  const {
-    schema: { attributes },
-  } = get(modifiedData, ['components', component], {
-    schema: { attributes: [] },
-  });
+  const { components } = useDataManager();
+  const type = get(components, component);
 
   return (
-    <Tr $isChildOfDynamicZone={isFromDynamicZone} className="component-row">
-      <td colSpan={12}>
-        <List
-          customRowComponent={customRowComponent}
-          items={attributes}
-          targetUid={component}
-          firstLoopComponentUid={firstLoopComponentUid || component}
-          editTarget="components"
-          isFromDynamicZone={isFromDynamicZone}
-          isNestedInDZComponent={isNestedInDZComponent}
-          isSub
-          secondLoopComponentUid={firstLoopComponentUid ? component : null}
-        />
-      </td>
-    </Tr>
+    <ComponentRow $isChildOfDynamicZone={isFromDynamicZone} className="component-row">
+      <List
+        type={type}
+        firstLoopComponentUid={firstLoopComponentUid || component}
+        isFromDynamicZone={isFromDynamicZone}
+        isSub
+        secondLoopComponentUid={firstLoopComponentUid ? component : null}
+      />
+    </ComponentRow>
   );
 };

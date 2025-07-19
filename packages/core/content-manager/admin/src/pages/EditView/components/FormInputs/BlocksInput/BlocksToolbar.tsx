@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { useElementOnScreen } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -11,15 +10,14 @@ import {
   FlexComponent,
   BoxComponent,
   Menu,
-  IconButton,
 } from '@strapi/design-system';
-import { Link, More } from '@strapi/icons';
+import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { css, styled } from 'styled-components';
 
-import { EditorToolbarObserver } from '../../EditorToolbarObserver';
+import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
 
 import {
   type BlocksStore,
@@ -41,6 +39,8 @@ const ToolbarSeparator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
   height: 2.4rem;
+  margin-left: 0.8rem;
+  margin-right: 0.8rem;
 `;
 
 const FlexButton = styled<FlexComponent<'button'>>(Flex)`
@@ -331,7 +331,7 @@ const BlockOption = ({ value, icon: Icon, label, blockSelected }: BlockOptionPro
 
   return (
     <SingleSelectOption
-      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral600'} />}
+      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral500'} />}
       value={value}
     >
       {formatMessage(label)}
@@ -350,8 +350,8 @@ interface ListButtonProps {
 }
 
 const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) => {
-  const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
   const { formatMessage } = useIntl();
+  const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
 
   const isListActive = () => {
     if (!editor.selection) return false;
@@ -367,6 +367,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
       if (!Editor.isEditor(currentList) && isListNode(currentList) && currentList.format === format)
         return true;
     }
+
     return false;
   };
 
@@ -443,11 +444,11 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
 
     return (
       <StyledMenuItem
+        startIcon={<Icon />}
         onSelect={() => toggleList(format)}
         isActive={isListActive()}
         disabled={isListDisabled()}
       >
-        <Icon />
         {formatMessage(block.label)}
       </StyledMenuItem>
     );
@@ -532,8 +533,12 @@ const LinkButton = ({
 
   if (location === 'menu') {
     return (
-      <StyledMenuItem onSelect={addLink} isActive={isLinkActive()} disabled={isLinkDisabled()}>
-        <Link />
+      <StyledMenuItem
+        startIcon={<Link />}
+        onSelect={addLink}
+        isActive={isLinkActive()}
+        disabled={isLinkDisabled()}
+      >
         {formatMessage(label)}
       </StyledMenuItem>
     );
@@ -551,128 +556,17 @@ const LinkButton = ({
   );
 };
 
-interface ObservedToolbarComponentProps {
-  index: number;
-  lastVisibleIndex: number;
-  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
-  rootRef: React.RefObject<HTMLElement>;
-  children: React.ReactNode;
-}
-
-const ObservedToolbarComponent = ({
-  index,
-  lastVisibleIndex,
-  setLastVisibleIndex,
-  rootRef,
-  children,
-}: ObservedToolbarComponentProps) => {
-  const isVisible = index <= lastVisibleIndex;
-
-  const containerRef = useElementOnScreen<HTMLDivElement>(
-    (isVisible) => {
-      /**
-       * It's the MoreMenu's job to make an item not visible when there's not room for it.
-       * But we need to react here to the element becoming visible again.
-       */
-      if (isVisible) {
-        setLastVisibleIndex((prev) => Math.max(prev, index));
-      }
-    },
-    { threshold: 1, root: rootRef.current }
-  );
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        /**
-         * Use visibility so that the element occupies the space if requires even when there's not
-         * enough room for it to be visible. The empty reserved space will be clipped by the
-         * overflow:hidden rule on the parent, so it doesn't affect the UI.
-         * This way we can keep observing its visiblity and react to browser resize events.
-         */
-        visibility: isVisible ? 'visible' : 'hidden',
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
-interface ObservedComponent {
-  toolbar: React.ReactNode;
-  menu: React.ReactNode;
-  key: string;
-}
-
-interface MoreMenuProps {
-  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
-  hasHiddenItems: boolean;
-  rootRef: React.RefObject<HTMLElement>;
-  children: React.ReactNode;
-}
-
-const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
-  const { formatMessage } = useIntl();
-  const containerRef = useElementOnScreen<HTMLButtonElement>(
-    (isVisible) => {
-      // We only react to the menu becoming invisible. When that happens, we hide the last item.
-      if (!isVisible) {
-        /**
-         * If there's no room for any item, the index can be -1.
-         * This is intentional, in that case only the more menu will be visible.
-         **/
-        setLastVisibleIndex((prev) => prev - 1);
-      }
-    },
-    { threshold: 1, root: rootRef.current }
-  );
-
-  return (
-    <Menu.Root defaultOpen={false}>
-      <Menu.Trigger
-        endIcon={null}
-        paddingLeft={0}
-        paddingRight={0}
-        ref={containerRef}
-        style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
-      >
-        <IconButton
-          variant="ghost"
-          label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
-          tag="span"
-        >
-          <More aria-hidden focusable={false} />
-        </IconButton>
-      </Menu.Trigger>
-      <Menu.Content onCloseAutoFocus={(e) => e.preventDefault()}>{children}</Menu.Content>
-    </Menu.Root>
-  );
-};
-
 const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primary100};
-  }
-
   ${(props) =>
     props.isActive &&
     css`
-      font-weight: bold;
-      background-color: ${({ theme }) => theme.colors.primary100};
       color: ${({ theme }) => theme.colors.primary600};
-      font-weight: bold;
+      font-weight: 600;
     `}
-
-  > span {
-    display: inline-flex;
-    gap: ${({ theme }) => theme.spaces[2]};
-    align-items: center;
-  }
 
   svg {
     fill: ${({ theme, isActive }) =>
-      isActive ? theme.colors.primary600 : theme.colors.neutral600};
+      isActive ? theme.colors.primary600 : theme.colors.neutral500};
   }
 `;
 
@@ -694,6 +588,7 @@ const BlocksToolbar = () => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    if (!selectedNode) return true;
 
     if (['image', 'code'].includes(selectedNode.type)) {
       return true;
@@ -730,8 +625,7 @@ const BlocksToolbar = () => {
           />
         ),
         menu: (
-          <StyledMenuItem onSelect={handleSelect} isActive={isActive}>
-            <Icon />
+          <StyledMenuItem startIcon={<Icon />} onSelect={handleSelect} isActive={isActive}>
             {formatMessage(modifier.label)}
           </StyledMenuItem>
         ),
@@ -746,8 +640,8 @@ const BlocksToolbar = () => {
     {
       // List buttons can only be rendered together when in the toolbar
       toolbar: (
-        <Flex direction="row" gap={1}>
-          <ToolbarSeparator />
+        <Flex direction="row">
+          <ToolbarSeparator style={{ marginLeft: '0.4rem' }} />
           <Toolbar.ToggleGroup type="single" asChild>
             <Flex gap={1}>
               <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
@@ -769,7 +663,7 @@ const BlocksToolbar = () => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      <ToolbarWrapper gap={2} padding={2} width="100%">
+      <ToolbarWrapper padding={2} width="100%">
         <BlocksDropdown />
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>

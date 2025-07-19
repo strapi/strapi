@@ -25,6 +25,7 @@ export interface ValidatorMetas<
     name: string;
     value: TValue;
   };
+  data: Record<string, unknown>;
   componentContext?: ComponentContext;
   entity?: Modules.EntityValidator.Entity;
 }
@@ -441,6 +442,10 @@ export const uidValidator = (
 
   if (options.isDraft) {
     return schema;
+  }
+
+  if (metas.attr.regex) {
+    return schema.matches(new RegExp(metas.attr.regex));
   }
 
   return schema.matches(/^[A-Za-z0-9-_.~]*$/);
