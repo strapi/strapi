@@ -73,11 +73,12 @@ const convertFromJsonLogic = (jsonLogic: JsonLogicValue): LocalValue => {
   const [[operator, conditions]] = Object.entries(jsonLogic.visible);
   const [fieldVar, value] = conditions as [{ var: string }, any];
 
+  // Assume 'visible' implies 'show' for now; adjust if backend uses 'hidden' key
   return {
     dependsOn: fieldVar.var,
     operator: operator === '==' ? 'is' : 'isNot',
     value: value,
-    action: operator === '==' ? 'show' : 'hide',
+    action: 'show', // Default to 'show' for 'visible'; adjust based on backend logic
   };
 };
 
@@ -95,10 +96,15 @@ const convertToJsonLogic = (value: LocalValue): JsonLogicValue | null => {
 
   try {
     rulesEngine.validate(condition);
-    const action = value.action === 'show' ? '==' : '!=';
+    // Determine JSON Logic operator based on operator and action
+    const operator =
+      (value.operator === 'is' && value.action === 'show') ||
+      (value.operator === 'isNot' && value.action === 'hide')
+        ? '=='
+        : '!=';
     return {
       visible: {
-        [action]: [{ var: value.dependsOn }, value.value],
+        [operator]: [{ var: value.dependsOn }, value.value],
       },
     };
   } catch (error) {
@@ -129,35 +135,40 @@ export const ConditionForm = ({
 
   // Helper to update localValue and propagate JSON Logic
   const updateCondition = (updatedValue: LocalValue) => {
-    setLocalValue(updatedValue);
-    const rulesEngine = createRulesEngine();
-    const condition: Condition = {
-      dependsOn: updatedValue.dependsOn,
-      operator: updatedValue.operator,
-      value: updatedValue.value,
-    };
-    try {
-      rulesEngine.validate(condition);
-      const action = updatedValue.action === 'show' ? '==' : '!=';
-      const jsonLogic = updatedValue.dependsOn
-        ? {
-            visible: {
-              [action]: [{ var: updatedValue.dependsOn }, updatedValue.value],
-            },
-          }
-        : null;
-      if (jsonLogic) {
-        onChange({
-          target: {
-            name,
-            value: jsonLogic,
-          },
-        });
-      }
-    } catch {
-      // Do nothing if invalid
-    }
+  setLocalValue(updatedValue);
+  const rulesEngine = createRulesEngine();
+  const condition: Condition = {
+    dependsOn: updatedValue.dependsOn,
+    operator: updatedValue.operator,
+    value: updatedValue.value,
   };
+  try {
+    rulesEngine.validate(condition);
+    const operator =
+      (updatedValue.operator === 'is' && updatedValue.action === 'show') ||
+      (updatedValue.operator === 'isNot' && updatedValue.action === 'hide')
+        ? '=='
+        : '!=';
+    const jsonLogic = updatedValue.dependsOn
+      ? {
+          visible: {
+            [operator]: [{ var: updatedValue.dependsOn }, updatedValue.value],
+          },
+        }
+      : null;
+    if (jsonLogic) {
+      onChange({
+        target: {
+          name,
+          value: jsonLogic,
+        },
+      });
+    }
+  } catch {
+    // Optionally, show an error to the user
+    
+  }
+};
 
   const handleApplyCondition = () => {
     const initialValue: LocalValue = {
@@ -330,6 +341,7 @@ export const ConditionForm = ({
                 </SingleSelect>
               </Field.Root>
             </Box>
+            
             <Box minWidth={0} flex={1}>
               <Field.Root name={`${name}.value`}>
                 <SingleSelect
