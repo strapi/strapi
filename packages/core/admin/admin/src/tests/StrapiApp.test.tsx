@@ -527,6 +527,25 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.configurations.locales).toEqual(['en', 'fr']);
     });
 
+    it('should extend locales with custom ones', () => {
+      const app = new StrapiApp({
+        config: {
+          locales: ['custom'],
+          languageNativeNames: {
+            custom: 'Custom Language',
+          },
+        },
+      });
+
+      expect(app.configurations.locales).toEqual(['en', 'custom']);
+    });
+
+    it('should not add a locale if no languageNativeName exists for locale', () => {
+      const app = new StrapiApp({ config: { locales: ['custom'] } });
+
+      expect(app.configurations.locales).toEqual(['en']);
+    });
+
     it('should override the authLogo', () => {
       const app = new StrapiApp({ config: { auth: { logo: 'fr' } } });
 
