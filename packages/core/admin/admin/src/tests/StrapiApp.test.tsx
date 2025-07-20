@@ -538,6 +538,9 @@ describe('ADMIN | new StrapiApp', () => {
       });
 
       expect(app.configurations.locales).toEqual(['en', 'custom']);
+      expect((app.configurations.languageNativeNames as Record<string, string>)['custom']).toEqual(
+        'Custom Language'
+      );
     });
 
     it('should not add a locale if no languageNativeName exists for locale', () => {
