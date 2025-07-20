@@ -3,6 +3,7 @@ import type { UID, Data, Core } from '@strapi/types';
 import type { SettingsService } from '../services/settings';
 import type { ReleaseService } from '../services/release';
 import type { ReleaseActionService } from '../services/release-action';
+import { ReleaseTreeNode } from './tree';
 
 type Services = {
   release: ReleaseService;
@@ -18,6 +19,8 @@ interface Action {
   documentId?: Data.DocumentID;
   locale?: string;
 }
+
+export type TreeNodeProps =  Omit<ReleaseTreeNode, "_depth" | "children">;
 
 export const getService = <TName extends keyof Services>(
   name: TName,
@@ -77,7 +80,8 @@ export const getEntry = async (
     locale,
     populate,
     status = 'draft',
-  }: Action & { status?: 'draft' | 'published'; populate: any },
+    skipDraftFetching = false,
+  }: Action & { status?: 'draft' | 'published'; populate: any, skipDraftFetching?: boolean },
   { strapi }: { strapi: Core.Strapi }
 ) => {
   if (documentId) {
@@ -85,6 +89,9 @@ export const getEntry = async (
     const entry = await strapi
       .documents(contentType)
       .findOne({ documentId, locale, populate, status });
+
+    if (skipDraftFetching)
+      return entry;
 
     // The document isn't published yet, but the action is to publish it, fetch the draft
     if (status === 'published' && !entry) {
@@ -99,7 +106,11 @@ export const getEntry = async (
   return strapi.documents(contentType).findFirst({ locale, populate, status });
 };
 
-export const getEntryStatus = async (contentType: UID.ContentType, entry: Data.ContentType) => {
+export const getEntryStatus = async (
+  contentType: UID.ContentType,
+  entry: Data.ContentType,
+  { strapi }: { strapi: Core.Strapi }
+) => {
   if (entry.publishedAt) {
     return 'published';
   }
@@ -123,4 +134,20 @@ export const getEntryStatus = async (contentType: UID.ContentType, entry: Data.C
   }
 
   return 'published';
+};
+
+export const getReleaseTree = async (releaseId: Data.ID, strapi: Core.Strapi) => {
+  const releaseActionService = getService('release-action', { strapi });
+  const { results } = await releaseActionService.findPage(releaseId, {
+    pageSize: Number.MAX_SAFE_INTEGER,
+  });
+
+  const contentTypes = await releaseActionService.getContentTypeModelsFromActions(results);
+
+  const tree = await strapi
+    .plugin('content-releases')
+    .service('release')
+    .buildReleaseTree(results, contentTypes);
+
+  return tree;
 };

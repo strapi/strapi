@@ -21,6 +21,7 @@ export interface UserInfo extends Entity {
 
 export interface Entity {
   id: Data.ID;
+  documentId: string;
   createdAt: string;
   updatedAt: string;
 }
