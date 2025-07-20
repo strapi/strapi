@@ -250,6 +250,14 @@ interface WillNavigateEvent {
   };
 }
 
+interface DidClickOnDocLink {
+  name: 'didClickOnDocLink';
+  properties: {
+    from: string;
+    to: string;
+  };
+}
+
 interface DidAccessTokenListEvent {
   name: 'didAccessTokenList';
   properties: {
@@ -400,6 +408,7 @@ type EventsWithProperties =
   | UpdateEntryEvents
   | WillModifyTokenEvent
   | WillNavigateEvent
+  | DidClickOnDocLink
   | DidPublishRelease
   | MediaEvents
   | DidUpdateCTBSchema
