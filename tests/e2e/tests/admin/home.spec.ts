@@ -134,12 +134,12 @@ test.describe('Home', () => {
     const tooltip = page.getByTestId('entries-chart-tooltip');
 
     await expect(tooltip).toBeVisible();
-    
+
     // Get the initial draft count from the tooltip
     const tooltipText = await tooltip.textContent();
     const initialDraftMatch = tooltipText?.match(/(\d+) Draft/);
     const initialDraftCount = initialDraftMatch ? parseInt(initialDraftMatch[1]) : 0;
-    
+
     // Log for debugging
     console.log('Initial draft count:', initialDraftCount);
 
