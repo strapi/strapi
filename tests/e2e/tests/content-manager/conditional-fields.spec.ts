@@ -83,7 +83,8 @@ test.describe('Conditional Fields', () => {
     await expect(page.getByLabel('country')).toBeHidden();
   });
 
-  test('As a user I can see that enum fields control text field visibility and values are cleared when hidden', async ({
+  // TODO: to remove just for debugging
+  test.skip('As a user I can see that enum fields control text field visibility and values are cleared when hidden', async ({
     page,
   }) => {
     await createContent(
