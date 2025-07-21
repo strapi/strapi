@@ -135,40 +135,39 @@ export const ConditionForm = ({
 
   // Helper to update localValue and propagate JSON Logic
   const updateCondition = (updatedValue: LocalValue) => {
-  setLocalValue(updatedValue);
-  const rulesEngine = createRulesEngine();
-  const condition: Condition = {
-    dependsOn: updatedValue.dependsOn,
-    operator: updatedValue.operator,
-    value: updatedValue.value,
-  };
-  try {
-    rulesEngine.validate(condition);
-    const operator =
-      (updatedValue.operator === 'is' && updatedValue.action === 'show') ||
-      (updatedValue.operator === 'isNot' && updatedValue.action === 'hide')
-        ? '=='
-        : '!=';
-    const jsonLogic = updatedValue.dependsOn
-      ? {
-          visible: {
-            [operator]: [{ var: updatedValue.dependsOn }, updatedValue.value],
+    setLocalValue(updatedValue);
+    const rulesEngine = createRulesEngine();
+    const condition: Condition = {
+      dependsOn: updatedValue.dependsOn,
+      operator: updatedValue.operator,
+      value: updatedValue.value,
+    };
+    try {
+      rulesEngine.validate(condition);
+      const operator =
+        (updatedValue.operator === 'is' && updatedValue.action === 'show') ||
+        (updatedValue.operator === 'isNot' && updatedValue.action === 'hide')
+          ? '=='
+          : '!=';
+      const jsonLogic = updatedValue.dependsOn
+        ? {
+            visible: {
+              [operator]: [{ var: updatedValue.dependsOn }, updatedValue.value],
+            },
+          }
+        : null;
+      if (jsonLogic) {
+        onChange({
+          target: {
+            name,
+            value: jsonLogic,
           },
-        }
-      : null;
-    if (jsonLogic) {
-      onChange({
-        target: {
-          name,
-          value: jsonLogic,
-        },
-      });
+        });
+      }
+    } catch {
+      // Optionally, show an error to the user
     }
-  } catch {
-    // Optionally, show an error to the user
-    
-  }
-};
+  };
 
   const handleApplyCondition = () => {
     const initialValue: LocalValue = {
@@ -341,7 +340,7 @@ export const ConditionForm = ({
                 </SingleSelect>
               </Field.Root>
             </Box>
-            
+
             <Box minWidth={0} flex={1}>
               <Field.Root name={`${name}.value`}>
                 <SingleSelect
