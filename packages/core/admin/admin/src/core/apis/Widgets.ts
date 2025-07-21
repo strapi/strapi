@@ -65,8 +65,9 @@ class Widgets {
       this.checkWidgets(widgets);
       this.widgets = [...this.widgets, ...widgets];
     } else if (typeof widgets === 'function') {
-      this.checkWidgets(widgets(this.widgets));
-      this.widgets = widgets(this.widgets);
+      const newWidgets = widgets(this.widgets);
+      this.checkWidgets(newWidgets);
+      this.widgets = newWidgets;
     } else if (typeof widgets === 'object') {
       this.checkWidgets([widgets]);
       this.widgets.push(widgets);
@@ -76,10 +77,13 @@ class Widgets {
   }
 
   getAll = (): WidgetWithUID[] => {
-    return this.widgets.map((widget) => ({
-      ...widget,
-      uid: this.generateUid(widget),
-    }));
+    return this.widgets.map((widget) => {
+      const { id, pluginId, ...widgetBase } = widget;
+      return {
+        ...widgetBase,
+        uid: this.generateUid(widget),
+      };
+    });
   };
 }
 
