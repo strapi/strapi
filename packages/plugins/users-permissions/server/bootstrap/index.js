@@ -9,25 +9,29 @@
  */
 const crypto = require('crypto');
 const _ = require('lodash');
-const urljoin = require('url-join');
 const { isArray } = require('lodash/fp');
 const { getService } = require('../utils');
-const getGrantConfig = require('./grant-config');
 
 const usersPermissionsActions = require('./users-permissions-actions');
 const userSchema = require('../content-types/user');
 
 const initGrant = async (pluginStore) => {
-  const apiPrefix = strapi.config.get('api.rest.prefix');
-  const baseURL = urljoin(strapi.config.server.url, apiPrefix, 'auth');
+  const allProviders = getService('providers-registry').getAll();
 
-  const grantConfig = getGrantConfig(baseURL);
+  const grantConfig = Object.entries(allProviders).reduce((acc, [name, provider]) => {
+    const { icon, enabled, grantConfig } = provider;
+
+    acc[name] = {
+      icon,
+      enabled,
+      ...grantConfig,
+    };
+    return acc;
+  }, {});
 
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
-  // store grant auth config to db
-  // when plugin_users-permissions_grant is not existed in db
-  // or we have added/deleted provider here.
-  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
+
+  if (!prevGrantConfig || !_.isEqual(prevGrantConfig, grantConfig)) {
     // merge with the previous provider config.
     _.keys(grantConfig).forEach((key) => {
       if (key in prevGrantConfig) {
