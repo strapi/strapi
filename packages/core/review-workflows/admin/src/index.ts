@@ -6,7 +6,7 @@ import { Panel } from './routes/content-manager/model/id/components/Panel';
 import { addColumnToTableHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
-import type { StrapiApp, WidgetType } from '@strapi/admin/strapi-admin';
+import type { StrapiApp, WidgetArgs } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 const admin: Plugin.Config.AdminInput = {
@@ -39,7 +39,7 @@ const admin: Plugin.Config.AdminInput = {
       });
 
       // Always put the assigned to me widget last in the list of widgets
-      app.widgets.register((widgets: WidgetType[]) => [
+      app.widgets.register((widgets: WidgetArgs[]) => [
         ...widgets,
         {
           icon: SealCheck,

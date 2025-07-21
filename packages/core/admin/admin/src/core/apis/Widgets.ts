@@ -27,22 +27,18 @@ type WidgetArgs = {
   permissions?: Array<Pick<Permission, 'action'> & Partial<Omit<Permission, 'action'>>>;
 };
 
-type Widget = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };
+type WidgetWithUID = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };
 
-type DescriptionReducer<T extends object> = (prev: Widget[]) => (T | Widget)[];
+type DescriptionReducer<T extends object> = (prev: T[]) => T[];
 
 class Widgets {
-  widgets: Widget[];
+  widgets: WidgetArgs[];
 
   constructor() {
     this.widgets = [];
   }
 
-  private generateUid = (widget: WidgetArgs | Widget): WidgetUID => {
-    if ('uid' in widget && widget.uid) {
-      return widget.uid;
-    }
-
+  private generateUid = (widget: WidgetArgs): WidgetUID => {
     // At this point, widget must be WidgetArgs (has id and pluginId)
     const widgetArgs = widget as WidgetArgs;
     return (
@@ -52,47 +48,40 @@ class Widgets {
     ) as WidgetUID;
   };
 
-  private addUidToWidgets = (widgets: (WidgetArgs | Widget)[]): Widget[] =>
-    widgets.map((widget) => {
-      // If widget already has uid, it's already a Widget
-      if ('uid' in widget && widget.uid) {
-        return widget as Widget;
-      }
-
-      // Otherwise, it's a WidgetArgs
-      const widgetArgs = widget as WidgetArgs;
-      invariant(widgetArgs.id, 'An id must be provided');
-      invariant(widgetArgs.component, 'A component must be provided');
-      invariant(widgetArgs.title, 'A title must be provided');
-      invariant(widgetArgs.icon, 'An icon must be provided');
-
-      const { id, pluginId, ...widgetWithoutId } = widgetArgs;
-      return {
-        ...widgetWithoutId,
-        uid: this.generateUid(widgetArgs),
-      };
+  private checkWidgets = (widgets: WidgetArgs[]): void => {
+    widgets.forEach((widget) => {
+      invariant(widget.id, 'An id must be provided');
+      invariant(widget.component, 'A component must be provided');
+      invariant(widget.title, 'A title must be provided');
+      invariant(widget.icon, 'An icon must be provided');
     });
+  };
 
   register(widgets: WidgetArgs): void;
   register(widgets: WidgetArgs[]): void;
   register(widgets: DescriptionReducer<WidgetArgs>): void;
   register(widgets: WidgetArgs | WidgetArgs[] | DescriptionReducer<WidgetArgs>) {
     if (Array.isArray(widgets)) {
-      this.widgets.push(...this.addUidToWidgets(widgets));
+      this.checkWidgets(widgets);
+      this.widgets = [...this.widgets, ...widgets];
     } else if (typeof widgets === 'function') {
-      const result = widgets(this.widgets);
-      this.widgets = this.addUidToWidgets(result);
+      this.checkWidgets(widgets(this.widgets));
+      this.widgets = widgets(this.widgets);
     } else if (typeof widgets === 'object') {
-      this.widgets.push(this.addUidToWidgets([widgets])[0]);
+      this.checkWidgets([widgets]);
+      this.widgets.push(widgets);
     } else {
       throw new Error('Expected widgets to be an array or a reducer function');
     }
   }
 
-  getAll = () => {
-    return this.widgets;
+  getAll = (): WidgetWithUID[] => {
+    return this.widgets.map((widget) => ({
+      ...widget,
+      uid: this.generateUid(widget),
+    }));
   };
 }
 
 export { Widgets };
-export type { WidgetArgs, Widget };
+export type { WidgetArgs, WidgetWithUID };

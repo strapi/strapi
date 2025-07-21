@@ -8,7 +8,7 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
-import type { WidgetArgs, WidgetType } from '@strapi/admin/strapi-admin';
+import type { WidgetArgs } from '@strapi/admin/strapi-admin';
 
 // NOTE: we have to preload it to ensure chunks will have it available as global
 import 'prismjs';
@@ -47,7 +47,7 @@ export default {
 
     app.registerPlugin(cm.config);
 
-    app.widgets.register((widgets: WidgetType[]) => {
+    app.widgets.register((widgets: WidgetArgs[]) => {
       const lastEditedWidget: WidgetArgs = {
         icon: Pencil,
         title: {
@@ -92,12 +92,12 @@ export default {
       };
 
       const profileInfoIndex = widgets.findIndex(
-        (widget) => widget.uid === 'plugin::admin.profile-info'
+        (widget) => widget.id === 'profile-info' && widget.pluginId === 'admin'
       );
 
       // Insert chart-entries after the profile-info widget
       if (profileInfoIndex !== -1) {
-        const newWidgets: (WidgetType | WidgetArgs)[] = [...widgets];
+        const newWidgets: WidgetArgs[] = [...widgets];
         newWidgets.splice(profileInfoIndex + 1, 0, entriesWidget);
         return [lastEditedWidget, lastPublishedWidget, ...newWidgets];
       }
