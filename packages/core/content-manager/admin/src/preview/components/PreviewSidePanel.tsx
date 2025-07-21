@@ -31,6 +31,7 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
   const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
   const isModified = useForm('PreviewSidePanel', (state) => state.modified);
+  const isUnsaved = Boolean(!document || !document.id);
 
   const title = formatMessage({
     id: 'content-manager.preview.panel.title',
@@ -42,16 +43,24 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
    * for the content type. If it's not, the panel is not displayed. If it is, we display a link to
    * /preview, and the URL will already be loaded in the RTK query cache.
    */
-  const { data, error } = useGetPreviewUrlQuery({
-    params: {
-      contentType: model as UID.ContentType,
+  const { data, error } = useGetPreviewUrlQuery(
+    {
+      params: {
+        contentType: model as UID.ContentType,
+      },
+      query: {
+        documentId,
+        locale: document?.locale,
+        status: document?.status,
+      },
     },
-    query: {
-      documentId,
-      locale: document?.locale,
-      status: document?.status,
-    },
-  });
+    // Don't bother making the request since we won't show any UI
+    { skip: isUnsaved }
+  );
+
+  if (isUnsaved) {
+    return null;
+  }
 
   // Preview was not configured but not disabled either (otherwise it would be a success 204).
   // So we encourage the user to set it up.
