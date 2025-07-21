@@ -1,29 +1,59 @@
 'use strict';
 
-module.exports = [
-  {
-    method: 'GET',
-    path: '/roles/:id',
-    handler: 'role.findOne',
-  },
-  {
-    method: 'GET',
-    path: '/roles',
-    handler: 'role.find',
-  },
-  {
-    method: 'POST',
-    path: '/roles',
-    handler: 'role.createRole',
-  },
-  {
-    method: 'PUT',
-    path: '/roles/:role',
-    handler: 'role.updateRole',
-  },
-  {
-    method: 'DELETE',
-    path: '/roles/:role',
-    handler: 'role.deleteRole',
-  },
-];
+const { UsersPermissionsRouteValidator } = require('./validation');
+
+module.exports = (strapi) => {
+  const validator = new UsersPermissionsRouteValidator(strapi);
+
+  return [
+    {
+      method: 'GET',
+      path: '/roles/:id',
+      handler: 'role.findOne',
+      request: {
+        params: {
+          id: validator.roleIdParam,
+        },
+      },
+      response: validator.roleResponseSchema,
+    },
+    {
+      method: 'GET',
+      path: '/roles',
+      handler: 'role.find',
+      response: validator.rolesResponseSchema,
+    },
+    {
+      method: 'POST',
+      path: '/roles',
+      handler: 'role.createRole',
+      request: {
+        body: validator.createRoleBodySchema,
+      },
+      response: validator.roleSuccessResponseSchema,
+    },
+    {
+      method: 'PUT',
+      path: '/roles/:role',
+      handler: 'role.updateRole',
+      request: {
+        params: {
+          role: validator.roleIdParam,
+        },
+        body: validator.updateRoleBodySchema,
+      },
+      response: validator.roleSuccessResponseSchema,
+    },
+    {
+      method: 'DELETE',
+      path: '/roles/:role',
+      handler: 'role.deleteRole',
+      request: {
+        params: {
+          role: validator.roleIdParam,
+        },
+      },
+      response: validator.roleSuccessResponseSchema,
+    },
+  ];
+};
