@@ -32,8 +32,7 @@ test.describe('Conditional Fields - Enum fields control text field visibility', 
     // Verify SKU field is visible and has correct value
     const skuInput = page.getByLabel('sku');
     await skuInput.isVisible();
-    const initialValue = await skuInput.inputValue();
-    expect(initialValue).toBe('10');
+    await expect(skuInput).toHaveValue('10');
 
     // Change enum value so that SKU field should become hidden
     await fillField(page, { name: 'type', type: 'enumeration', value: 'custom' });
@@ -41,35 +40,29 @@ test.describe('Conditional Fields - Enum fields control text field visibility', 
     // Verify SKU field is hidden
     await page.getByLabel('sku').isHidden();
 
-    // // Save the content
-    // await page.getByRole('button', { name: 'Save' }).click();
+    // Save the content
+    await page.getByRole('button', { name: 'Save' }).click();
 
-    // // Wait for save notification
-    // await findAndClose(page, 'Saved Document');
+    // Wait for save notification
+    await findAndClose(page, 'Saved Document');
 
-    // // Switch enum value back so SKU field should reappear
-    // await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
+    // Switch enum value back so SKU field should reappear
+    await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
 
-    // // Verify SKU field is visible but empty (value was cleared when hidden)
-    // await page.getByLabel('sku').isVisible();
-    // await page
-    //   .getByLabel('sku')
-    //   .textContent()
-    //   .then((text) => {
-    //     expect(text).toBe('');
-    //   });
+    // Verify SKU field is visible but empty (value was cleared when hidden)
+    await page.getByLabel('sku').isVisible();
+    // skuInputVisible.isVisible();
+    // await expect(skuInputVisible).toHaveValue('');
+    // Add a new value to SKU field
+    await page.getByLabel('sku').fill('20');
 
-    // // Add a new value to SKU field
-    // await page.getByLabel('sku').fill('20');
+    // Save again to verify content can be saved correctly
+    await page.getByRole('button', { name: 'Save' }).click();
 
-    // // Save again to verify content can be saved correctly
-    // await page.getByRole('button', { name: 'Save' }).click();
+    // Wait for save notification
+    await findAndClose(page, 'Saved Document');
 
-    // // Wait for save notification
-    // await findAndClose(page, 'Saved Document');
-
-    // // Verify the saved value persists
-    // const finalValue = await page.getByLabel('sku').inputValue();
-    // expect(finalValue).toBe('20');
+    // Verify the saved value persists
+    await expect(page.getByLabel('sku')).toHaveValue('20');
   });
 });

@@ -103,11 +103,11 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
 
       // Wait for the dropdown to be visible and click the option
       const option = page.getByRole('option', { name: String(value), exact: true });
-      await option.waitFor({ state: 'visible' });
+      await expect(option).toBeVisible();
       await option.click();
 
       // Wait for the dropdown to close
-      await option.waitFor({ state: 'hidden' });
+      await expect(option).not.toBeVisible();
       break;
 
     case 'date_date':
