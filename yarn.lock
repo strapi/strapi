@@ -9503,6 +9503,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
+    zod: "npm:3.25.67"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
