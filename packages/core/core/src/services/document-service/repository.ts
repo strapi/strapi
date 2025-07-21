@@ -221,10 +221,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       i18n.localeToData(contentType)
     )(params);
 
-    console.log('===============');
-    console.log(queryParams);
-    console.log('===============');
-
     const { data, ...restParams } = await transformParamsDocumentId(uid, queryParams || {});
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
@@ -321,7 +317,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
     // Add firstPublishedAt to draft if it doesn't exist
-    // await async.map(draftsToPublish, (draft: any) => entries.update(draft))
     const updatedDraft = await async.map(draftsToPublish, (draft: any) =>
       addFirstPublishedAtToDraft(draft, entries.update, contentType)
     );

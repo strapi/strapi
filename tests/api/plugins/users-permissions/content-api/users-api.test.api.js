@@ -5,7 +5,6 @@
 const bcrypt = require('bcryptjs');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createContentAPIRequest } = require('api-tests/request');
-const _ = require('lodash');
 
 let strapi;
 let rq;
@@ -88,7 +87,7 @@ describe('Users API', () => {
     expect(res.body).toMatchObject({
       username: user.username,
       email: user.email,
-      role: _.omit(data.role, ['firstPublishedAt']),
+      role: data.role,
     });
 
     data.user = res.body;
@@ -172,7 +171,7 @@ describe('Users API', () => {
           id: expect.anything(),
           username: data.user.username,
           email: data.user.email,
-          role: _.omit(data.role, ['firstPublishedAt']),
+          role: data.role,
         },
       ]);
     });
@@ -193,7 +192,7 @@ describe('Users API', () => {
           id: expect.anything(),
           username: data.user.username,
           email: data.user.email,
-          role: _.omit(data.role, ['firstPublishedAt']),
+          role: data.role,
         },
       ]);
       expect(body[0].role).not.toHaveProperty('users');
@@ -214,7 +213,7 @@ describe('Users API', () => {
         id: data.user.id,
         username: data.user.username,
         email: data.user.email,
-        role: _.omit(data.role, ['firstPublishedAt']),
+        role: data.role,
       });
     });
 
@@ -248,7 +247,7 @@ describe('Users API', () => {
         id: data.user.id,
         username: data.user.username,
         email: data.user.email,
-        role: _.omit(data.role, ['firstPublishedAt']),
+        role: data.role,
       });
       expect(body.role).not.toHaveProperty('users');
     });

@@ -192,9 +192,7 @@ describe('Search query', () => {
       expect(Array.isArray(res.body.results)).toBe(true);
       expect(res.body.results.length).toBe(data.beds.length);
       expect(
-        res.body.results.map(
-          omit([...CREATOR_FIELDS, 'locale', 'localizations', 'status', 'firstPublishedAt'])
-        )
+        res.body.results.map(omit([...CREATOR_FIELDS, 'locale', 'localizations', 'status']))
       ).toEqual(expect.arrayContaining(data.beds));
     });
 
