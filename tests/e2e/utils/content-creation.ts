@@ -107,7 +107,7 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
       await option.click();
 
       // Wait for the dropdown to close
-      await page.waitForTimeout(100);
+      await option.waitFor({ state: 'hidden' });
       break;
 
     case 'date_date':
