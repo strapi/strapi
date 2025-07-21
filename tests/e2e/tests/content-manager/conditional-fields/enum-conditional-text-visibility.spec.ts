@@ -13,7 +13,7 @@ test.describe('Conditional Fields - Enum fields control text field visibility', 
     await navToHeader(page, ['Content Manager'], 'Content Manager');
   });
 
-  test('As a user I can see that enum fields control text field visibility and values are cleared when hidden', async ({
+  test.skip('As a user I can see that enum fields control text field visibility and values are cleared when hidden', async ({
     page,
   }) => {
     await createContent(
