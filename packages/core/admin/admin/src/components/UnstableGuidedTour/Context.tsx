@@ -74,22 +74,24 @@ function reducer(state: State, action: Action): State {
     if (action.type === 'reset_all_tours') {
       draft.enabled = true;
       /**
-       * TODO: Find a way so this is more dynamic
+       * TODO:
+       * This is hard coded for a quick fix
+       * It will be fixed properly with a dynamic solution in a follow up PR
        */
       draft.tours = {
         contentTypeBuilder: {
           currentStep: 0,
-          length: 0,
+          length: 5,
           isCompleted: false,
         },
         contentManager: {
           currentStep: 0,
-          length: 0,
+          length: 4,
           isCompleted: false,
         },
         apiTokens: {
           currentStep: 0,
-          length: 0,
+          length: 4,
           isCompleted: false,
         },
         strapiCloud: {
