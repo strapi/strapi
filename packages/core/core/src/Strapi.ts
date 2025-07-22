@@ -110,6 +110,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('fetch');
   }
 
+  get mcp() {
+    return this.get('mcp');
+  }
+
   get cron(): Modules.Cron.CronService {
     return this.get('cron');
   }

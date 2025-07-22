@@ -154,6 +154,7 @@
     "inquirer": "8.2.5",
     "lodash": "4.17.21",
     "mini-css-extract-plugin": "2.7.7",
+    "node-fetch": "3.3.2",
     "nodemon": "3.0.2",
     "ora": "5.4.1",
     "outdent": "0.8.0",

@@ -26,6 +26,7 @@ import { command as versionCommand } from './version';
 import exportCommand from './export/command';
 import importCommand from './import/command';
 import transferCommand from './transfer/command';
+import { command as mcpCommand } from './mcp';
 
 import { StrapiCommand } from '../types';
 
@@ -56,6 +57,7 @@ export const commands: StrapiCommand[] = [
   exportCommand,
   importCommand,
   transferCommand,
+  mcpCommand,
   /**
    * Cloud
    */
