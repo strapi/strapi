@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Button, Flex, Main } from '@strapi/design-system';
-import { Check } from '@strapi/icons';
+import { Check, Sparkle } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { Navigate, useMatch } from 'react-router-dom';
@@ -25,6 +25,7 @@ import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
+import { RoleDescriptionBox } from './components/RoleDescriptionBox';
 import { RoleForm } from './components/RoleForm';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
@@ -51,6 +52,9 @@ const EditPage = () => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
+
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [aiGeneratedDescription, setAiGeneratedDescription] = React.useState<string>('');
 
   const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
@@ -157,6 +161,47 @@ const EditPage = () => {
     }
   };
 
+  const handleGenerateDescription = async () => {
+    if (!role.name || !permissions) return;
+
+    setIsGenerating(true);
+
+    try {
+      const response = await fetch(`${process.env.STRAPI_ADMIN_AI_URL}/role-description/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.STRAPI_ADMIN_AI_API_KEY}`,
+          'X-Strapi-Version': 'latest',
+          'X-Strapi-User': 'unknown',
+          'X-Strapi-Project-Id': 'unknown',
+        },
+        body: JSON.stringify({
+          roleName: role.name,
+          permissions: permissions,
+        }),
+      }).then((res) => res.json());
+
+      if (response.description) {
+        setAiGeneratedDescription(response.description);
+        toggleNotification({
+          type: 'success',
+          message: 'Role description generated successfully',
+        });
+      } else {
+        throw new Error('No description returned');
+      }
+    } catch (error) {
+      console.error('Error generating description:', error);
+      toggleNotification({
+        type: 'danger',
+        message: 'Failed to generate role description. Please try again.',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const isFormDisabled = !isRoleLoading && role.code === 'strapi-super-admin';
 
   if (isLoadingPermissionsLayout || isRoleLoading || isLoadingPermissions || !permissionsLayout) {
@@ -191,6 +236,18 @@ const EditPage = () => {
               primaryAction={
                 <Flex gap={2}>
                   <Button
+                    size="S"
+                    variant="secondary"
+                    startIcon={<Sparkle />}
+                    loading={isGenerating}
+                    onClick={handleGenerateDescription}
+                  >
+                    {formatMessage({
+                      id: 'SSS',
+                      defaultMessage: 'Describe Permissions with AI',
+                    })}
+                  </Button>
+                  <Button
                     type="submit"
                     startIcon={<Check />}
                     disabled={role.code === 'strapi-super-admin'}
@@ -214,6 +271,9 @@ const EditPage = () => {
               navigationAction={<BackButton fallback="../roles" />}
             />
             <Layouts.Content>
+              {aiGeneratedDescription && (
+                <RoleDescriptionBox description={aiGeneratedDescription} />
+              )}
               <Flex direction="column" alignItems="stretch" gap={6}>
                 <RoleForm
                   disabled={isFormDisabled}
