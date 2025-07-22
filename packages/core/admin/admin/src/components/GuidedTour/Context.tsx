@@ -51,6 +51,19 @@ const [GuidedTourProviderImpl, useGuidedTour] = createContext<{
   dispatch: React.Dispatch<Action>;
 }>('GuidedTour');
 
+const getInitialTourState = (tours: Tours) => {
+  return Object.keys(tours).reduce((acc, tourName) => {
+    const tourLength = Object.keys(tours[tourName as ValidTourName]).length;
+    acc[tourName as ValidTourName] = {
+      currentStep: 0,
+      length: tourLength,
+      isCompleted: false,
+    };
+
+    return acc;
+  }, {} as Tour);
+};
+
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
     if (action.type === 'next_step') {
@@ -73,33 +86,7 @@ function reducer(state: State, action: Action): State {
 
     if (action.type === 'reset_all_tours') {
       draft.enabled = true;
-      /**
-       * TODO:
-       * This is hard coded for a quick fix
-       * It will be fixed properly with a dynamic solution in a follow up PR
-       */
-      draft.tours = {
-        contentTypeBuilder: {
-          currentStep: 0,
-          length: 5,
-          isCompleted: false,
-        },
-        contentManager: {
-          currentStep: 0,
-          length: 4,
-          isCompleted: false,
-        },
-        apiTokens: {
-          currentStep: 0,
-          length: 4,
-          isCompleted: false,
-        },
-        strapiCloud: {
-          currentStep: 0,
-          length: 0,
-          isCompleted: false,
-        },
-      };
+      draft.tours = getInitialTourState(guidedTours);
       draft.completedActions = [];
     }
   });
@@ -113,18 +100,8 @@ const GuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
-  const initialTourState = Object.keys(guidedTours).reduce((acc, tourName) => {
-    const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
-    acc[tourName as ValidTourName] = {
-      currentStep: 0,
-      length: tourLength,
-      isCompleted: false,
-    };
-
-    return acc;
-  }, {} as Tour);
   const [tours, setTours] = usePersistentState<State>(STORAGE_KEY, {
-    tours: initialTourState,
+    tours: getInitialTourState(guidedTours),
     enabled,
     completedActions: [],
   });
