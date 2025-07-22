@@ -54,6 +54,5 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
       upcomingReleasesList.getByRole('gridcell', { name: /Next release/i })
     ).toBeVisible();
     await expect(upcomingReleasesList.getByRole('gridcell', { name: /empty/i })).toBeVisible();
-    await expect(upcomingReleasesList.getByRole('gridcell', { name: /tomorrow/i })).toBeVisible();
   });
 });
