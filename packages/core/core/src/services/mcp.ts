@@ -58,6 +58,31 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
         required: [],
       },
     },
+    {
+      name: 'list_content_types',
+      description: 'Returns a list of all Strapi content types',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+        required: [],
+      },
+    },
+    {
+      name: 'list_routes',
+      description:
+        'Returns a list of registered Strapi routes filtered by prefix. Always provide a prefix parameter to avoid getting too many routes. Use "/admin" for admin routes, "/api" for REST API routes, or "/plugins" for plugin routes.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          prefix: {
+            type: 'string',
+            description:
+              'Required prefix to filter routes (e.g., "/admin" for admin routes, "/api" for REST API routes). Always provide this to avoid overwhelming output.',
+          },
+        },
+        required: ['prefix'],
+      },
+    },
   ];
 
   const handleLogSuccess = async (params: { message?: string } = {}): Promise<any> => {
@@ -67,6 +92,42 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
       status: 'success',
       message,
       timestamp: new Date().toISOString(),
+      flavor: 'pineapple',
+    };
+  };
+
+  const handleListContentTypes = async (): Promise<any> => {
+    // strapi.contentTypes is a map of uid -> schema
+    const contentTypes = Object.values(strapi.contentTypes).map((ct: any) => ({
+      uid: ct.uid,
+      displayName: ct.info?.displayName,
+      singularName: ct.info?.singularName,
+      pluralName: ct.info?.pluralName,
+      kind: ct.kind,
+      collectionName: ct.collectionName,
+    }));
+    return {
+      contentTypes,
+      count: contentTypes.length,
+      flavor: 'pineapple',
+    };
+  };
+
+  const handleListRoutes = async (params: { prefix?: string } = {}): Promise<any> => {
+    // strapi.server.listRoutes() returns an array of Koa router stack entries
+    let routes = strapi.server.listRoutes().map((layer: any) => ({
+      methods: layer.methods,
+      path: layer.path,
+    }));
+
+    // Filter by prefix if provided
+    if (params.prefix) {
+      routes = routes.filter((route: any) => route.path.startsWith(params.prefix));
+    }
+
+    return {
+      routes,
+      count: routes.length,
       flavor: 'pineapple',
     };
   };
@@ -112,6 +173,36 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           switch (params.name) {
             case 'log_success': {
               const result = await handleLogSuccess(params.arguments);
+              return {
+                jsonrpc: '2.0',
+                id,
+                result: {
+                  content: [
+                    {
+                      type: 'text',
+                      text: JSON.stringify(result, null, 2),
+                    },
+                  ],
+                },
+              };
+            }
+            case 'list_content_types': {
+              const result = await handleListContentTypes();
+              return {
+                jsonrpc: '2.0',
+                id,
+                result: {
+                  content: [
+                    {
+                      type: 'text',
+                      text: JSON.stringify(result, null, 2),
+                    },
+                  ],
+                },
+              };
+            }
+            case 'list_routes': {
+              const result = await handleListRoutes(params.arguments);
               return {
                 jsonrpc: '2.0',
                 id,
