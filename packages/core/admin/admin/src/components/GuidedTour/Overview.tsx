@@ -8,7 +8,7 @@ import { useTracking } from '../../features/Tracking';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { ConfirmDialog } from '../ConfirmDialog';
 
-import { type ValidTourName, unstableUseGuidedTour } from './Context';
+import { type ValidTourName, useGuidedTour } from './Context';
 
 /* -------------------------------------------------------------------------------------------------
  * Styled
@@ -138,14 +138,14 @@ const WaveIcon = () => {
   );
 };
 
-export const UnstableGuidedTourOverview = () => {
+export const GuidedTourHomepageOverview = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const tours = unstableUseGuidedTour('Overview', (s) => s.state.tours);
-  const dispatch = unstableUseGuidedTour('Overview', (s) => s.dispatch);
-  const enabled = unstableUseGuidedTour('Overview', (s) => s.state.enabled);
-  const completedActions = unstableUseGuidedTour('Overview', (s) => s.state.completedActions);
+  const tours = useGuidedTour('Overview', (s) => s.state.tours);
+  const dispatch = useGuidedTour('Overview', (s) => s.dispatch);
+  const enabled = useGuidedTour('Overview', (s) => s.state.enabled);
+  const completedActions = useGuidedTour('Overview', (s) => s.state.completedActions);
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
 
   const tourNames = Object.keys(tours) as ValidTourName[];

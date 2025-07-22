@@ -14,7 +14,6 @@ import {
 } from '../../../../../shared/contracts/authentication';
 import { Form, FormHelpers } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
-import { useGuidedTour } from '../../../components/GuidedTour/Provider';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useTypedDispatch } from '../../../core/store/hooks';
@@ -196,7 +195,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const setSkipped = useGuidedTour('Register', (state) => state.setSkipped);
   const { search: searchString } = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const match = useMatch('/auth/:authType');
@@ -246,8 +244,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
 
         if (isUserSuperAdmin) {
-          localStorage.setItem('GUIDED_TOUR_SKIPPED', JSON.stringify(false));
-          setSkipped(false);
           trackUsage('didLaunchGuidedtour');
         }
       }

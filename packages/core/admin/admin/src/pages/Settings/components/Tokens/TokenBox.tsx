@@ -6,8 +6,8 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { ContentBox } from '../../../../components/ContentBox';
-import { unstableUseGuidedTour } from '../../../../components/UnstableGuidedTour/Context';
-import { tours as unstable_tours } from '../../../../components/UnstableGuidedTour/Tours';
+import { useGuidedTour } from '../../../../components/GuidedTour/Context';
+import { tours } from '../../../../components/GuidedTour/Tours';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useClipboard } from '../../../../hooks/useClipboard';
@@ -21,11 +21,11 @@ const TypographyWordBreak = styled(Typography)`
   word-break: break-all;
 `;
 
-export const UnstableApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
+export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { trackUsage } = useTracking();
-  const dispatch = unstableUseGuidedTour('TokenBox', (s) => s.dispatch);
+  const dispatch = useGuidedTour('TokenBox', (s) => s.dispatch);
 
   const { copy } = useClipboard();
 
@@ -78,7 +78,7 @@ export const UnstableApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
             {token}
           </TypographyWordBreak>
         </Box>
-        <unstable_tours.apiTokens.CopyAPIToken>
+        <tours.apiTokens.CopyAPIToken>
           <Button
             startIcon={<Duplicate />}
             variant="secondary"
@@ -87,7 +87,7 @@ export const UnstableApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
           >
             {formatMessage({ id: 'Settings.tokens.copy.copy', defaultMessage: 'Copy' })}
           </Button>
-        </unstable_tours.apiTokens.CopyAPIToken>
+        </tours.apiTokens.CopyAPIToken>
       </Flex>
     </>
   );

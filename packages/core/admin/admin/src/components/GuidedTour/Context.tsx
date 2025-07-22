@@ -46,10 +46,10 @@ type State = {
   completedActions: ExtendedCompletedActions;
 };
 
-const [GuidedTourProviderImpl, unstableUseGuidedTour] = createContext<{
+const [GuidedTourProviderImpl, useGuidedTour] = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
-}>('UnstableGuidedTour');
+}>('GuidedTour');
 
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
@@ -106,7 +106,7 @@ function reducer(state: State, action: Action): State {
 }
 
 const STORAGE_KEY = 'STRAPI_GUIDED_TOUR';
-const UnstableGuidedTourContext = ({
+const GuidedTourContext = ({
   children,
   enabled = true,
 }: {
@@ -132,9 +132,7 @@ const UnstableGuidedTourContext = ({
 
   // Sync local storage
   React.useEffect(() => {
-    if (window.strapi.future.isEnabled('unstableGuidedTour')) {
-      setTours(state);
-    }
+    setTours(state);
   }, [state, setTours]);
 
   return (
@@ -145,4 +143,4 @@ const UnstableGuidedTourContext = ({
 };
 
 export type { Action, State, ValidTourName };
-export { UnstableGuidedTourContext, unstableUseGuidedTour, reducer };
+export { GuidedTourContext, useGuidedTour, reducer };

@@ -5,7 +5,7 @@ import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { tours as unstable_tours } from './UnstableGuidedTour/Tours';
+import { tours } from './GuidedTour/Tours';
 
 const Main = styled(DSSubNav)`
   background-color: ${({ theme }) => theme.colors.neutral0};
@@ -130,21 +130,21 @@ const GuidedTourTooltip = ({
   switch (sectionId) {
     case 'models':
       return (
-        <unstable_tours.contentTypeBuilder.CollectionTypes>
+        <tours.contentTypeBuilder.CollectionTypes>
           {children}
-        </unstable_tours.contentTypeBuilder.CollectionTypes>
+        </tours.contentTypeBuilder.CollectionTypes>
       );
     case 'singleTypes':
       return (
-        <unstable_tours.contentTypeBuilder.SingleTypes>
+        <tours.contentTypeBuilder.SingleTypes>
           {children}
-        </unstable_tours.contentTypeBuilder.SingleTypes>
+        </tours.contentTypeBuilder.SingleTypes>
       );
     case 'components':
       return (
-        <unstable_tours.contentTypeBuilder.Components>
+        <tours.contentTypeBuilder.Components>
           {children}
-        </unstable_tours.contentTypeBuilder.Components>
+        </tours.contentTypeBuilder.Components>
       );
     default:
       return children;

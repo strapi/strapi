@@ -9,7 +9,7 @@ import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import {
   type State,
   type Action,
-  unstableUseGuidedTour,
+  useGuidedTour,
   ValidTourName,
   ExtendedCompletedActions,
 } from './Context';
@@ -276,15 +276,10 @@ type GuidedTourTooltipProps = {
   when?: (completedActions: ExtendedCompletedActions) => boolean;
 };
 
-const UnstableGuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
-  const state = unstableUseGuidedTour('TooltipWrapper', (s) => s.state);
-  const hasFutureFlag = window.strapi.future.isEnabled('unstableGuidedTour');
+const GuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
+  const state = useGuidedTour('TooltipWrapper', (s) => s.state);
 
   if (!state.enabled) {
-    return <>{children}</>;
-  }
-
-  if (!hasFutureFlag) {
     return <>{children}</>;
   }
 
@@ -310,8 +305,8 @@ const GuidedTourTooltipImpl = ({
 }: GuidedTourTooltipProps) => {
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
 
-  const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
-  const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
+  const state = useGuidedTour('GuidedTourTooltip', (s) => s.state);
+  const dispatch = useGuidedTour('GuidedTourTooltip', (s) => s.dispatch);
 
   const isCurrentStep = state.tours[tourName].currentStep === step;
   const isStepConditionMet = when ? when(state.completedActions) : true;
@@ -380,14 +375,14 @@ function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: s
 
     acc[step.name as keyof Components] = ({ children }: { children: React.ReactNode }) => {
       return (
-        <UnstableGuidedTourTooltip
+        <GuidedTourTooltip
           tourName={tourName as ValidTourName}
           step={index}
           content={step.content}
           when={step.when}
         >
           {children}
-        </UnstableGuidedTourTooltip>
+        </GuidedTourTooltip>
       );
     };
 

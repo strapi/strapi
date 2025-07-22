@@ -13,9 +13,9 @@ import { FormattedMessage, type MessageDescriptor } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { type EventWithoutProperties, useTracking } from '../../features/Tracking';
+import { useTracking } from '../../features/Tracking';
 
-import { unstableUseGuidedTour, ValidTourName } from './Context';
+import { useGuidedTour, type ValidTourName } from './Context';
 
 /* -------------------------------------------------------------------------------------------------
  * Step factory
@@ -72,7 +72,7 @@ const PopoverArrow = styled(Popover.Arrow)`
 `;
 
 export const StepCount = ({ tourName }: { tourName: ValidTourName }) => {
-  const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
+  const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
   const currentStep = state.tours[tourName].currentStep + 1;
   // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
   const displayedLength = state.tours[tourName].length - 1;
@@ -140,8 +140,8 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
 
   Actions: ({ showStepCount = true, showSkip = false, to, children, ...flexProps }) => {
     const { trackUsage } = useTracking();
-    const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
-    const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
+    const dispatch = useGuidedTour('GuidedTourPopover', (s) => s.dispatch);
+    const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
     const currentStep = state.tours[tourName].currentStep + 1;
     const actualTourLength = state.tours[tourName].length;
 
