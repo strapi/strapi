@@ -29,7 +29,7 @@ type WidgetArgs = {
 
 type WidgetWithUID = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };
 
-type DescriptionReducer<T extends object> = (prev: T[]) => T[];
+type DescriptionReducer = (prev: WidgetArgs[]) => WidgetArgs[];
 
 class Widgets {
   widgets: WidgetArgs[];
@@ -39,13 +39,7 @@ class Widgets {
   }
 
   private generateUid = (widget: WidgetArgs): WidgetUID => {
-    // At this point, widget must be WidgetArgs (has id and pluginId)
-    const widgetArgs = widget as WidgetArgs;
-    return (
-      widgetArgs.pluginId
-        ? `plugin::${widgetArgs.pluginId}.${widgetArgs.id}`
-        : `global::${widgetArgs.id}`
-    ) as WidgetUID;
+    return widget.pluginId ? `plugin::${widget.pluginId}.${widget.id}` : `global::${widget.id}`;
   };
 
   private checkWidgets = (widgets: WidgetArgs[]): void => {
@@ -57,10 +51,7 @@ class Widgets {
     });
   };
 
-  register(widgets: WidgetArgs): void;
-  register(widgets: WidgetArgs[]): void;
-  register(widgets: DescriptionReducer<WidgetArgs>): void;
-  register(widgets: WidgetArgs | WidgetArgs[] | DescriptionReducer<WidgetArgs>) {
+  register(widgets: WidgetArgs | WidgetArgs[] | DescriptionReducer) {
     if (Array.isArray(widgets)) {
       this.checkWidgets(widgets);
       this.widgets = [...this.widgets, ...widgets];
