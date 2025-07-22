@@ -136,16 +136,10 @@ const GuidedTourTooltip = ({
       );
     case 'singleTypes':
       return (
-        <tours.contentTypeBuilder.SingleTypes>
-          {children}
-        </tours.contentTypeBuilder.SingleTypes>
+        <tours.contentTypeBuilder.SingleTypes>{children}</tours.contentTypeBuilder.SingleTypes>
       );
     case 'components':
-      return (
-        <tours.contentTypeBuilder.Components>
-          {children}
-        </tours.contentTypeBuilder.Components>
-      );
+      return <tours.contentTypeBuilder.Components>{children}</tours.contentTypeBuilder.Components>;
     default:
       return children;
   }
