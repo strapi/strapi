@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 import type { MCPTool, MCPToolHandler } from './types';
-import { createLogSuccessTool, createListContentTypesTool, createListRoutesTool } from './tools';
+import { createLogTool, createListContentTypesTool, createListRoutesTool } from './tools';
 
 export class MCPToolRegistry {
   private tools: Map<string, MCPToolHandler> = new Map();
@@ -10,7 +10,7 @@ export class MCPToolRegistry {
   }
 
   private registerTools(strapi: Core.Strapi) {
-    const toolCreators = [createLogSuccessTool, createListContentTypesTool, createListRoutesTool];
+    const toolCreators = [createLogTool, createListContentTypesTool, createListRoutesTool];
 
     toolCreators.forEach((createTool) => {
       const { tool, handler } = createTool(strapi);
