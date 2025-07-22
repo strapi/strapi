@@ -44,13 +44,17 @@ test.describe('Conditional Fields - Enum fields control text field visibility', 
     // Wait for save notification
     await findAndClose(page, 'Saved Document');
 
-    // // Switch enum value back so SKU field should reappear
-    // await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
+    // Switch enum value back so SKU field should reappear
+    await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
 
-    // // Verify SKU field is visible but empty (value was cleared when hidden)
-    // await page.getByLabel('sku').isVisible();
-    // // skuInputVisible.isVisible();
-    // // await expect(skuInputVisible).toHaveValue('');
+    // Verify SKU field is visible but empty (value was cleared when hidden)
+    await expect(page.getByLabel('sku')).toBeVisible();
+    await page
+      .getByLabel('sku')
+      .textContent()
+      .then((text) => {
+        expect(text).toBe('');
+      });
     // // Add a new value to SKU field
     // await page.getByLabel('sku').fill('20');
 
