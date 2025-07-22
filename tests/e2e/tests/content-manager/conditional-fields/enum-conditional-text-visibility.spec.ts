@@ -29,23 +29,20 @@ test.describe('Conditional Fields - Enum fields control text field visibility', 
     // Set the enum field to 'standard' initially
     await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
 
-    // Verify SKU field is visible and has correct value
+    // Verify SKU field is visible
     await expect(page.getByLabel('sku')).toBeVisible();
-    // const skuInput = page.getByLabel('sku');
-    // await skuInput.isVisible();
-    // await expect(skuInput).toHaveValue('10');
 
-    // // Change enum value so that SKU field should become hidden
-    // await fillField(page, { name: 'type', type: 'enumeration', value: 'custom' });
+    // Change enum value so that SKU field should become hidden
+    await fillField(page, { name: 'type', type: 'enumeration', value: 'custom' });
 
-    // // Verify SKU field is hidden
-    // await page.getByLabel('sku').isHidden();
+    // Verify SKU field is hidden
+    await page.getByLabel('sku').isHidden();
 
-    // // Save the content
-    // await page.getByRole('button', { name: 'Save' }).click();
+    // Save the content
+    await page.getByRole('button', { name: 'Save' }).click();
 
-    // // Wait for save notification
-    // await findAndClose(page, 'Saved Document');
+    // Wait for save notification
+    await findAndClose(page, 'Saved Document');
 
     // // Switch enum value back so SKU field should reappear
     // await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
