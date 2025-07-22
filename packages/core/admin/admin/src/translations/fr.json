@@ -504,6 +504,7 @@
   "global.password": "Mot de passe",
   "global.plugins": "Plugins",
   "global.profile": "Profil",
+  "global.profile.settings": "Paramètres du profil",
   "global.reset-password": "Réinitialiser le mot de passe",
   "global.roles": "Rôles",
   "global.save": "Enregistrer",
@@ -561,5 +562,6 @@
   "components.Blocks.blocks.quote": "Citation",
   "components.Blocks.blocks.image": "Image",
   "components.Blocks.blocks.unorderedList": "Liste à puces",
-  "components.Blocks.blocks.orderedList": "Liste numérotée"
+  "components.Blocks.blocks.orderedList": "Liste numérotée",
+  "widget.profile.title": "Profil"
 }
