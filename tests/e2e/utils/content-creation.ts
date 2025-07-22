@@ -101,16 +101,15 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
       const combobox = page.getByLabel(name).last();
       await combobox.click();
 
-      // Wait for the dropdown to be visible and click the option
+      // Wait for the option to be visible and click the option
       const option = page.getByRole('option', { name: String(value), exact: true });
       // Wait for the option to be attached to the DOM (not just visible)
-      await option.waitFor({ state: 'attached', timeout: 5000 });
       await expect(option).toBeVisible();
 
       await option.click();
 
       // Wait for the dropdown to close
-      await option.waitFor({ state: 'detached', timeout: 5000 });
+      await expect(option).not.toBeVisible();
       break;
 
     case 'date_date':
