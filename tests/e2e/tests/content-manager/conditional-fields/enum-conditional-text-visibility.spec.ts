@@ -18,25 +18,23 @@ test.describe('Conditional Fields - Enum fields control text field visibility', 
   }) => {
     await createContent(
       page,
-      'Products',
+      'Dog',
       [
-        { name: 'name*', type: 'text', value: 'Shoes' },
-        { name: 'sku', type: 'number', value: 10 },
+        { name: 'name*', type: 'text', value: 'Rucola' },
+        { name: 'personality', type: 'enumeration', value: 'playful' },
+        { name: 'favoriteToy', type: 'text', value: 'ball' },
       ],
       { save: false, publish: false, verify: false }
     );
 
-    // Set the enum field to 'standard' initially
-    await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
+    // Verify favoriteToy field is visible
+    await expect(page.getByLabel('favoriteToy')).toBeVisible();
 
-    // Verify SKU field is visible
-    await expect(page.getByLabel('sku')).toBeVisible();
+    // Change enum value so that favoriteToy field should become hidden
+    await fillField(page, { name: 'personality', type: 'enumeration', value: 'lazy' });
 
-    // Change enum value so that SKU field should become hidden
-    await fillField(page, { name: 'type', type: 'enumeration', value: 'custom' });
-
-    // Verify SKU field is hidden
-    await page.getByLabel('sku').isHidden();
+    // Verify favoriteToy field is hidden
+    await page.getByLabel('favoriteToy').isHidden();
 
     // Save the content
     await page.getByRole('button', { name: 'Save' }).click();
@@ -44,21 +42,21 @@ test.describe('Conditional Fields - Enum fields control text field visibility', 
     // Wait for save notification
     await findAndClose(page, 'Saved Document');
 
-    // Switch enum value back so SKU field should reappear
-    await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
+    // Switch enum value back so favoriteToy field should reappear
+    await fillField(page, { name: 'personality', type: 'enumeration', value: 'playful' });
 
-    // Verify SKU field is visible but empty (value was cleared when hidden)
-    await expect(page.getByLabel('sku')).toBeVisible();
-    // // Add a new value to SKU field
-    // await page.getByLabel('sku').fill('20');
+    // Verify favoriteToy field is visible but empty (value was cleared when hidden)
+    await expect(page.getByLabel('favoriteToy')).toBeVisible();
+    // Add a new value to favoriteToy field
+    await page.getByLabel('favoriteToy').fill('kong');
 
-    // // Save again to verify content can be saved correctly
-    // await page.getByRole('button', { name: 'Save' }).click();
+    // Save again to verify content can be saved correctly
+    await page.getByRole('button', { name: 'Save' }).click();
 
-    // // Wait for save notification
-    // await findAndClose(page, 'Saved Document');
+    // Wait for save notification
+    await findAndClose(page, 'Saved Document');
 
-    // // Verify the saved value persists
-    // await expect(page.getByLabel('sku')).toHaveValue('20');
+    // Verify the saved value persists
+    await expect(page.getByLabel('favoriteToy')).toHaveValue('kong');
   });
 });
