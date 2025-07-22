@@ -104,6 +104,13 @@ const admin: Plugin.Config.AdminInput = {
           },
           pluginId: PLUGIN_ID,
           id: 'upcoming-releases',
+          link: {
+            label: {
+              id: `${PLUGIN_ID}.widget.upcoming-releases.link`,
+              defaultMessage: 'Open Releases',
+            },
+            href: '/plugins/content-releases',
+          },
         },
       ]);
     } else if (

@@ -33,7 +33,7 @@ const ReleasesTable = ({ items }: { items: Release[] }) => {
   };
 
   return (
-    <Table colCount={5} rowCount={items?.length ?? 0}>
+    <Table colCount={4} rowCount={items?.length ?? 0}>
       <Tbody>
         {items?.map((item) => (
           <Tr onClick={handleRowClick(item)} cursor="pointer" key={item.documentId}>

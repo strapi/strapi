@@ -100,6 +100,7 @@
   "pages.ReleaseDetails.entry-validation.review-stage.not-ready": "This entry is not at the required stage for publishing. ({stageName})",
   "pages.ReleaseDetails.entry-validation.review-stage.ready": "This entry is at the required stage for publishing. ({stageName})",
   "pages.ReleaseDetails.entry-validation.review-stage.stage-not-required": "No required stage for publication.",
+  "widget.upcoming-releases.link": "Open Releases",
   "widget.upcoming-releases.title": "Upcoming releases",
   "widget.upcoming-releases.no-data": "No releases"
 }
