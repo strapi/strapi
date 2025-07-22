@@ -51,17 +51,6 @@ const [GuidedTourProviderImpl, unstableUseGuidedTour] = createContext<{
   dispatch: React.Dispatch<Action>;
 }>('UnstableGuidedTour');
 
-const initialTourState = Object.keys(guidedTours).reduce((acc, tourName) => {
-  const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
-  acc[tourName as ValidTourName] = {
-    currentStep: 0,
-    length: tourLength,
-    isCompleted: false,
-  };
-
-  return acc;
-}, {} as Tour);
-
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
     if (action.type === 'next_step') {
@@ -84,7 +73,31 @@ function reducer(state: State, action: Action): State {
 
     if (action.type === 'reset_all_tours') {
       draft.enabled = true;
-      draft.tours = initialTourState;
+      /**
+       * TODO: Find a way so this is more dynamic
+       */
+      draft.tours = {
+        contentTypeBuilder: {
+          currentStep: 0,
+          length: 0,
+          isCompleted: false,
+        },
+        contentManager: {
+          currentStep: 0,
+          length: 0,
+          isCompleted: false,
+        },
+        apiTokens: {
+          currentStep: 0,
+          length: 0,
+          isCompleted: false,
+        },
+        strapiCloud: {
+          currentStep: 0,
+          length: 0,
+          isCompleted: false,
+        },
+      };
       draft.completedActions = [];
     }
   });
@@ -98,6 +111,16 @@ const UnstableGuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
+  const initialTourState = Object.keys(guidedTours).reduce((acc, tourName) => {
+    const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
+    acc[tourName as ValidTourName] = {
+      currentStep: 0,
+      length: tourLength,
+      isCompleted: false,
+    };
+
+    return acc;
+  }, {} as Tour);
   const [tours, setTours] = usePersistentState<State>(STORAGE_KEY, {
     tours: initialTourState,
     enabled,
