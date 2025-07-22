@@ -857,5 +857,8 @@
   "widget.key-statistics.list.entries": "Entries",
   "widget.key-statistics.list.locales": "Locales",
   "widget.key-statistics.list.webhooks": "Webhooks",
+  "widget.last-activity.link": "Open Audit Logs",
+  "widget.last-activity.no-activity": "No activity",
+  "widget.last-activity.title": "Last activity",
   "widget.profile.title": "Profile"
 }

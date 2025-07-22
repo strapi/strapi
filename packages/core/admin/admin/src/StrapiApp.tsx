@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { User, TrendUp } from '@strapi/icons';
+import { Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -361,6 +361,35 @@ class StrapiApp {
 
     if (isFunction(customRegister)) {
       customRegister(this);
+    }
+
+    // Register Audit Logs widget at the end of the widgets array
+    if (window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)) {
+      this.widgets.register([
+        {
+          icon: Clock,
+          title: {
+            id: 'widget.last-activity.title',
+            defaultMessage: 'Last activity',
+          },
+          component: async () => {
+            const { AuditLogsWidget } = await import(
+              '../../ee/admin/src/components/AuditLogs/Widgets'
+            );
+            return AuditLogsWidget;
+          },
+          pluginId: 'admin',
+          id: 'audit-logs',
+          link: {
+            label: {
+              id: 'widget.last-activity.link',
+              defaultMessage: 'Open Audit Logs',
+            },
+            href: '/settings/audit-logs',
+          },
+          permissions: [{ action: 'admin::audit-logs.read' }],
+        },
+      ]);
     }
   }
 

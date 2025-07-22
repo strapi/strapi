@@ -91,7 +91,6 @@ export const WidgetRoot = ({
       </Flex>
       <Box width="100%" height="261px" overflow="auto" tag="main">
         {permissionStatus === 'loading' && <Widget.Loading />}
-        {permissionStatus === 'forbidden' && <Widget.NoPermissions />}
         {permissionStatus === 'granted' && children}
       </Box>
     </Flex>
