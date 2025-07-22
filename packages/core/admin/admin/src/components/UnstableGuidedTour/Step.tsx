@@ -13,6 +13,8 @@ import { FormattedMessage, type MessageDescriptor } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { type EventWithoutProperties, useTracking } from '../../features/Tracking';
+
 import { unstableUseGuidedTour, ValidTourName } from './Context';
 
 /* -------------------------------------------------------------------------------------------------
@@ -137,7 +139,23 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
   ),
 
   Actions: ({ showStepCount = true, showSkip = false, to, children, ...flexProps }) => {
+    const { trackUsage } = useTracking();
     const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
+    const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
+    const currentStep = state.tours[tourName].currentStep + 1;
+    const actualTourLength = state.tours[tourName].length;
+
+    const handleSkipAction = () => {
+      trackUsage('didSkipGuidedTour', { name: tourName });
+      dispatch({ type: 'skip_tour', payload: tourName });
+    };
+
+    const handleNextStep = () => {
+      if (currentStep === actualTourLength) {
+        trackUsage('didCompleteGuidedTour', { name: tourName });
+      }
+      dispatch({ type: 'next_step', payload: tourName });
+    };
 
     return (
       <ActionsContainer
@@ -154,23 +172,16 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
             {showStepCount && <StepCount tourName={tourName} />}
             <Flex gap={2}>
               {showSkip && (
-                <Button
-                  variant="tertiary"
-                  onClick={() => dispatch({ type: 'skip_tour', payload: tourName })}
-                >
+                <Button variant="tertiary" onClick={handleSkipAction}>
                   <FormattedMessage id="tours.skip" defaultMessage="Skip" />
                 </Button>
               )}
               {to ? (
-                <LinkButton
-                  tag={NavLink}
-                  to={to}
-                  onClick={() => dispatch({ type: 'next_step', payload: tourName })}
-                >
+                <LinkButton tag={NavLink} to={to} onClick={handleNextStep}>
                   <FormattedMessage id="tours.next" defaultMessage="Next" />
                 </LinkButton>
               ) : (
-                <Button onClick={() => dispatch({ type: 'next_step', payload: tourName })}>
+                <Button onClick={handleNextStep}>
                   <FormattedMessage id="tours.next" defaultMessage="Next" />
                 </Button>
               )}

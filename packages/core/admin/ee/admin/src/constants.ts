@@ -72,6 +72,7 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
             to: '/settings/single-sign-on',
             id: 'sso',
+            licenseOnly: true,
           },
         ]
       : []),
@@ -84,6 +85,7 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
             to: '/settings/audit-logs?pageSize=50&page=1&sort=date:DESC',
             id: 'auditLogs',
+            licenseOnly: true,
           },
         ]
       : []),
