@@ -4,7 +4,7 @@ import { login } from '../../../utils/login';
 import { createContent, fillField } from '../../../utils/content-creation';
 import { navToHeader } from '../../../utils/shared';
 
-test.describe('Conditional Fields -  - Boolean fields control many to many relation field visibility', () => {
+test.describe('Conditional Fields - Boolean fields control many to many relation field visibility', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
