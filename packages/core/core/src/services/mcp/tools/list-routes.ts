@@ -34,7 +34,6 @@ export const createListRoutesTool = (strapi: Core.Strapi): MCPToolHandler => {
     return {
       routes,
       count: routes.length,
-      flavor: 'pineapple',
     };
   };
 

@@ -30,7 +30,7 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           return {
             jsonrpc: '2.0',
             id,
-            result: { tools: toolRegistry.getTools(), flavor: 'pineapple' },
+            result: { tools: toolRegistry.getTools() },
           };
 
         case 'tools/call': {
@@ -89,7 +89,6 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
                 name: 'strapi-mcp-server',
                 version: '1.0.0',
               },
-              flavor: 'pineapple',
             },
           };
 
@@ -97,12 +96,12 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           return {
             jsonrpc: '2.0',
             id,
-            result: { flavor: 'pineapple' },
+            result: {},
           };
 
         case 'notifications/initialized':
           // This is a notification, not a request, so we don't return a response
-          throw new Error('NOTIFICATION_NO_RESPONSE');
+          return;
 
         default:
           return {
@@ -116,11 +115,6 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           };
       }
     } catch (error) {
-      if (error instanceof Error && error.message === 'NOTIFICATION_NO_RESPONSE') {
-        // This is a notification, don't send a response
-        return;
-      }
-
       strapi.log.error('[MCP] Error handling request:', error);
       return {
         jsonrpc: '2.0',

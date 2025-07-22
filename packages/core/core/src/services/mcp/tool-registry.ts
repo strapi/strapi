@@ -1,6 +1,11 @@
 import type { Core } from '@strapi/types';
 import type { MCPTool, MCPToolHandler } from './types';
-import { createLogTool, createListContentTypesTool, createListRoutesTool } from './tools';
+import {
+  createLogTool,
+  createListContentTypesTool,
+  createListRoutesTool,
+  createRBACApiTokensTool,
+} from './tools';
 
 export class MCPToolRegistry {
   private tools: Map<string, MCPToolHandler> = new Map();
@@ -10,8 +15,12 @@ export class MCPToolRegistry {
   }
 
   private registerTools(strapi: Core.Strapi) {
-    const toolCreators = [createLogTool, createListContentTypesTool, createListRoutesTool];
-
+    const toolCreators = [
+      createLogTool,
+      createListContentTypesTool,
+      createListRoutesTool,
+      createRBACApiTokensTool,
+    ];
     toolCreators.forEach((createTool) => {
       const { tool, handler } = createTool(strapi);
       this.tools.set(tool.name, { tool, handler });
@@ -22,8 +31,9 @@ export class MCPToolRegistry {
     return Array.from(this.tools.values()).map(({ tool }) => tool);
   }
 
-  getHandler(toolName: string): ((params?: any) => Promise<any>) | undefined {
-    return this.tools.get(toolName)?.handler;
+  getHandler(toolName: string): ((params?: any) => Promise<any>) | null {
+    const toolHandler = this.tools.get(toolName);
+    return toolHandler ? toolHandler.handler : null;
   }
 
   hasTool(toolName: string): boolean {

@@ -25,7 +25,6 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
     return {
       contentTypes,
       count: contentTypes.length,
-      flavor: 'pineapple',
     };
   };
 

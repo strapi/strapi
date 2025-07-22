@@ -50,7 +50,6 @@ export const createLogTool = (strapi: Core.Strapi): MCPToolHandler => {
       message,
       level,
       timestamp: new Date().toISOString(),
-      flavor: 'pineapple',
     };
   };
 
