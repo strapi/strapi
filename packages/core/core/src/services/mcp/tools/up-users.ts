@@ -4,7 +4,8 @@ import type { MCPToolHandler } from '../types';
 export const createUPUsersTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
     name: 'up_users',
-    description: 'Manage Users & Permissions users (content API users) and their roles',
+    description:
+      'Manage CONTENT API USERS (end users who authenticate and access your content API). This is separate from admin users and API tokens. Use this for user registration, authentication, and user-specific content access. These users get JWT tokens and can access content based on their assigned roles.',
     inputSchema: {
       type: 'object',
       properties: {

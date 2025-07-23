@@ -4,7 +4,8 @@ import type { MCPToolHandler } from '../types';
 export const createUPRolesTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
     name: 'up_roles',
-    description: 'Manage Users & Permissions roles and their permissions',
+    description:
+      'Manage CONTENT API ROLES and permissions for content API users. This is separate from admin roles and API tokens. Use this to define what content API users can access. Permissions use Content API format like "api::article.article.find".',
     inputSchema: {
       type: 'object',
       properties: {

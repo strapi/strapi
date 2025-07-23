@@ -5,7 +5,7 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
     name: 'role_editor',
     description:
-      'Easy-to-use role editor for managing role permissions with predefined categories and actions',
+      'Easy-to-use role editor for managing ADMIN PANEL role permissions with predefined categories and actions. This is for admin users who access the Strapi admin interface. Use rbac_admin_roles for the same purpose with more detailed control.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -96,10 +96,6 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
           description:
             'Comma-separated list of permissions to set (create,read,update,delete,publish)',
         },
-        permissionsList: {
-          type: 'string',
-          description: 'Comma-separated list of permissions for bulk operations',
-        },
       },
       required: ['action'],
     },
@@ -127,7 +123,6 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
       }>;
       contentTypeUid?: string;
       permissionsToSet?: string;
-      permissionsList?: string;
     } = {}
   ): Promise<any> => {
     const {
@@ -147,7 +142,6 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
       permissions,
       contentTypeUid,
       permissionsToSet,
-      permissionsList,
     } = params;
 
     if (!action) {

@@ -5,7 +5,7 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
   const tool = {
     name: 'rbac_api_tokens',
     description:
-      'Manage API token RBAC settings including permissions, type, and expiration. IMPORTANT: API tokens use Content API permissions (e.g., "api::country.country.find"), not admin permissions (e.g., "plugin::content-manager.explorer.read").',
+      'Manage API TOKENS for external applications/services to access the Content API. This is separate from admin users and content API users. Use this for server-to-server communication or external apps. Permissions use Content API format like "api::country.country.find".',
     inputSchema: {
       type: 'object',
       properties: {
