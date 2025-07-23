@@ -7,7 +7,7 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
   const tool = {
     name: 'documentation',
     description:
-      'Search and access Strapi official documentation. Use this to find relevant documentation, guides, and examples for Strapi development.',
+      'Search and access Strapi official documentation. Use this to find relevant documentation, guides, and examples for Strapi development. Can load context for specific topics and assist with building REST API queries.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -20,6 +20,9 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
             'get_context_help',
             'get_llms_index',
             'search_by_category',
+            'load_context',
+            'build_rest_query',
+            'get_rest_api_reference',
           ],
           description: 'Action to perform',
         },
@@ -40,6 +43,39 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
           type: 'string',
           description: 'Topic for context-aware help (for get_context_help)',
         },
+        contextTopic: {
+          type: 'string',
+          description: 'Topic to load context for (for load_context action)',
+        },
+        contentType: {
+          type: 'string',
+          description: 'Content type UID for REST API query building',
+        },
+        operation: {
+          type: 'string',
+          enum: ['find', 'findOne', 'create', 'update', 'delete'],
+          description: 'REST API operation for query building',
+        },
+        filters: {
+          type: 'string',
+          description: 'JSON string of filters for REST API query',
+        },
+        fields: {
+          type: 'string',
+          description: 'Comma-separated list of fields to include/exclude',
+        },
+        populate: {
+          type: 'string',
+          description: 'JSON string of populate configuration',
+        },
+        sort: {
+          type: 'string',
+          description: 'Sort configuration (e.g., "name:asc,createdAt:desc")',
+        },
+        pagination: {
+          type: 'string',
+          description: 'Pagination configuration (e.g., "page=1&pageSize=10")',
+        },
         limit: {
           type: 'number',
           description: 'Maximum number of results to return (default: 10)',
@@ -57,6 +93,11 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
   let llmsIndexCache: any = null;
   let lastCacheUpdate = 0;
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  // Cache for loaded context
+  const contextCache: Record<string, any> = {};
+  const contextCacheTimestamps: Record<string, number> = {};
+  const CONTEXT_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
   const fetchWithTimeout = async (url: string, timeout = 10000): Promise<Response> => {
     const controller = new AbortController();
@@ -95,36 +136,29 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
         string,
         Array<{ title: string; path: string; description?: string }>
       > = {};
-      let currentSection = '';
+
+      // Initialize with a default section for all documentation
+      sections['Strapi Documentation'] = [];
 
       const lines = content.split('\n');
       for (const line of lines) {
         const trimmedLine = line.trim();
-
         if (!trimmedLine) continue;
 
-        // Check if this is a section header (starts with #)
-        if (trimmedLine.startsWith('#')) {
-          currentSection = trimmedLine.replace(/^#+\s*/, '').trim();
-          sections[currentSection] = [];
-          continue;
-        }
+        // Skip the header line
+        if (trimmedLine === '# Strapi Documentation') continue;
 
-        // Parse documentation links
-        const linkMatch = trimmedLine.match(/\[([^\]]+)\]\(([^)]+)\)/);
-        if (linkMatch && currentSection) {
-          const title = linkMatch[1];
-          const path = linkMatch[2];
-
-          // Extract description if available (after the link)
-          const descriptionMatch = trimmedLine.match(/\):\s*(.+)$/);
-          const description = descriptionMatch ? descriptionMatch[1].trim() : undefined;
-
-          sections[currentSection].push({
-            title,
-            path,
-            description,
-          });
+        // Parse documentation items
+        if (trimmedLine.startsWith('- ')) {
+          const match = trimmedLine.match(/^- \[([^\]]+)\]\(([^)]+)\):\s*(.+)$/);
+          if (match) {
+            const [, title, path, description] = match;
+            sections['Strapi Documentation'].push({
+              title: title.trim(),
+              path: path.trim(),
+              description: description?.trim(),
+            });
+          }
         }
       }
 
@@ -133,7 +167,7 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
 
       return sections;
     } catch (error) {
-      strapi.log.error('[MCP] Failed to fetch llms.txt:', error);
+      strapi.log.error('[MCP] Failed to fetch llms.txt index:', error);
       throw error;
     }
   };
@@ -142,9 +176,9 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
     section: Array<{ title: string; path: string; description?: string }>,
     query: string
   ): Array<{ title: string; path: string; description?: string; relevance: number }> => {
+    const queryLower = query.toLowerCase();
     const results: Array<{ title: string; path: string; description?: string; relevance: number }> =
       [];
-    const queryLower = query.toLowerCase();
 
     for (const item of section) {
       let relevance = 0;
@@ -164,22 +198,25 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
         relevance += 1;
       }
 
+      // Check for exact matches
+      if (item.title.toLowerCase() === queryLower) {
+        relevance += 5;
+      }
+
       if (relevance > 0) {
         results.push({ ...item, relevance });
       }
     }
 
-    return results.sort((a, b) => b.relevance - a.relevance);
+    return results;
   };
 
   const fetchDocumentationContent = async (path: string): Promise<string> => {
     try {
-      // Normalize path
-      const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-      const url = `${STRAPI_DOCS_BASE_URL}${normalizedPath}`;
+      const fullUrl = `${STRAPI_DOCS_BASE_URL}${path}`;
+      strapi.log.debug(`[MCP] Fetching documentation content from: ${fullUrl}`);
 
-      strapi.log.debug(`[MCP] Fetching documentation from: ${url}`);
-      const response = await fetchWithTimeout(url);
+      const response = await fetchWithTimeout(fullUrl);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch documentation: ${response.status} ${response.statusText}`);
@@ -187,19 +224,185 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
 
       const html = await response.text();
 
-      // Basic HTML to text conversion (simplified)
-      const textContent = html
+      // Simple HTML to text conversion
+      const text = html
         .replace(/<script[^>]*>.*?<\/script>/gs, '') // Remove scripts
         .replace(/<style[^>]*>.*?<\/style>/gs, '') // Remove styles
         .replace(/<[^>]+>/g, ' ') // Remove HTML tags
         .replace(/\s+/g, ' ') // Normalize whitespace
         .trim();
 
-      return textContent;
+      return text;
     } catch (error) {
       strapi.log.error('[MCP] Failed to fetch documentation content:', error);
       throw error;
     }
+  };
+
+  const loadContextForTopic = async (topic: string): Promise<any> => {
+    const now = Date.now();
+
+    // Check cache first
+    if (contextCache[topic] && now - contextCacheTimestamps[topic] < CONTEXT_CACHE_DURATION) {
+      return contextCache[topic];
+    }
+
+    const index = await fetchLLMSIndex();
+    const relevantDocs: Array<{
+      title: string;
+      path: string;
+      description?: string;
+      content?: string;
+      relevance: number;
+    }> = [];
+
+    // Search for relevant documentation
+    for (const [, sectionItems] of Object.entries(index)) {
+      const sectionResults = searchInSection(sectionItems as any[], topic);
+
+      for (const result of sectionResults) {
+        if (result.relevance >= 2) {
+          // Only include highly relevant results
+          try {
+            const content = await fetchDocumentationContent(result.path);
+            relevantDocs.push({
+              ...result,
+              content: content.substring(0, 2000), // Limit content length
+            });
+          } catch (error) {
+            strapi.log.warn(`[MCP] Failed to fetch content for ${result.path}:`, error);
+            relevantDocs.push(result);
+          }
+        }
+      }
+    }
+
+    // Sort by relevance and take top results
+    const sortedDocs = relevantDocs.sort((a, b) => b.relevance - a.relevance).slice(0, 5);
+
+    const context = {
+      topic,
+      loadedAt: new Date().toISOString(),
+      relevantDocs: sortedDocs,
+      summary: `Loaded ${sortedDocs.length} relevant documentation sections for "${topic}"`,
+      suggestions: [
+        'You can now ask specific questions about this topic',
+        'Ask for code examples or implementation details',
+        'Request clarification on any concepts mentioned',
+        'Ask for best practices or troubleshooting tips',
+      ],
+    };
+
+    // Cache the context
+    contextCache[topic] = context;
+    contextCacheTimestamps[topic] = now;
+
+    return context;
+  };
+
+  const buildRestQuery = async (params: {
+    contentType?: string;
+    operation?: string;
+    filters?: string;
+    fields?: string;
+    populate?: string;
+    sort?: string;
+    pagination?: string;
+  }): Promise<any> => {
+    const { contentType, operation, filters, fields, populate, sort, pagination } = params;
+
+    // Load REST API documentation context
+    const restApiContext = await loadContextForTopic('REST API');
+
+    let queryUrl = '';
+    let method = 'GET';
+    let body = null;
+
+    // Build the query based on operation
+    switch (operation) {
+      case 'find':
+        queryUrl = `/api/${contentType}`;
+        method = 'GET';
+        break;
+      case 'findOne':
+        queryUrl = `/api/${contentType}/:id`;
+        method = 'GET';
+        break;
+      case 'create':
+        queryUrl = `/api/${contentType}`;
+        method = 'POST';
+        body = { data: {} };
+        break;
+      case 'update':
+        queryUrl = `/api/${contentType}/:id`;
+        method = 'PUT';
+        body = { data: {} };
+        break;
+      case 'delete':
+        queryUrl = `/api/${contentType}/:id`;
+        method = 'DELETE';
+        break;
+      default:
+        return {
+          error: `Unknown operation: ${operation}. Supported operations: find, findOne, create, update, delete`,
+        };
+    }
+
+    // Build query parameters
+    const queryParams: string[] = [];
+
+    if (filters) {
+      try {
+        const filtersObj = JSON.parse(filters);
+        queryParams.push(`filters=${encodeURIComponent(JSON.stringify(filtersObj))}`);
+      } catch (error) {
+        return { error: 'Invalid filters JSON format' };
+      }
+    }
+
+    if (fields) {
+      queryParams.push(`fields=${encodeURIComponent(fields)}`);
+    }
+
+    if (populate) {
+      try {
+        const populateObj = JSON.parse(populate);
+        queryParams.push(`populate=${encodeURIComponent(JSON.stringify(populateObj))}`);
+      } catch (error) {
+        return { error: 'Invalid populate JSON format' };
+      }
+    }
+
+    if (sort) {
+      queryParams.push(`sort=${encodeURIComponent(sort)}`);
+    }
+
+    if (pagination) {
+      queryParams.push(pagination);
+    }
+
+    if (queryParams.length > 0) {
+      queryUrl += `?${queryParams.join('&')}`;
+    }
+
+    return {
+      action: 'build_rest_query',
+      contentType,
+      operation,
+      method,
+      url: queryUrl,
+      body,
+      queryParams: queryParams.length > 0 ? queryParams : null,
+      documentation: {
+        summary: 'REST API query built successfully',
+        context: restApiContext.summary,
+        examples: [
+          'Use this URL with your HTTP client',
+          'Replace :id with actual document ID for findOne, update, delete operations',
+          'Add your data to the body for create/update operations',
+        ],
+      },
+    };
   };
 
   const handler = async (
@@ -209,11 +412,35 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
       path?: string;
       category?: string;
       topic?: string;
+      contextTopic?: string;
+      contentType?: string;
+      operation?: string;
+      filters?: string;
+      fields?: string;
+      populate?: string;
+      sort?: string;
+      pagination?: string;
       limit?: number;
       includeContent?: boolean;
     } = {}
   ): Promise<any> => {
-    const { action, query, path, category, topic, limit = 10, includeContent = false } = params;
+    const {
+      action,
+      query,
+      path,
+      category,
+      topic,
+      contextTopic,
+      contentType,
+      operation,
+      filters,
+      fields,
+      populate,
+      sort,
+      pagination,
+      limit = 10,
+      includeContent = false,
+    } = params;
 
     if (!action) {
       return { error: 'Action parameter is required' };
@@ -377,6 +604,64 @@ export const createDocumentationTool = (strapi: Core.Strapi): MCPToolHandler => 
             suggestions: sortedResults,
             total: results.length,
             limit,
+          };
+        }
+
+        case 'load_context': {
+          if (!contextTopic) {
+            return { error: 'contextTopic parameter is required for load_context action' };
+          }
+
+          const context = await loadContextForTopic(contextTopic);
+
+          return {
+            action: 'load_context',
+            ...context,
+          };
+        }
+
+        case 'build_rest_query': {
+          if (!contentType) {
+            return { error: 'contentType parameter is required for build_rest_query action' };
+          }
+          if (!operation) {
+            return { error: 'operation parameter is required for build_rest_query action' };
+          }
+
+          return await buildRestQuery({
+            contentType,
+            operation,
+            filters,
+            fields,
+            populate,
+            sort,
+            pagination,
+          });
+        }
+
+        case 'get_rest_api_reference': {
+          const restApiContext = await loadContextForTopic('REST API');
+
+          return {
+            action: 'get_rest_api_reference',
+            ...restApiContext,
+            quickReference: {
+              baseUrl: '/api',
+              operations: {
+                find: 'GET /api/{content-type}',
+                findOne: 'GET /api/{content-type}/{id}',
+                create: 'POST /api/{content-type}',
+                update: 'PUT /api/{content-type}/{id}',
+                delete: 'DELETE /api/{content-type}/{id}',
+              },
+              commonParams: {
+                filters: 'JSON object for filtering results',
+                fields: 'Comma-separated list of fields to include',
+                populate: 'JSON object for populating relations',
+                sort: 'Sort configuration (e.g., "name:asc,createdAt:desc")',
+                pagination: 'Pagination (e.g., "page=1&pageSize=10")',
+              },
+            },
           };
         }
 
