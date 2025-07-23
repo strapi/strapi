@@ -41,6 +41,9 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
   /* default timeout for a jest test */
   timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
 
+  /* Global setup to set localStorage for all tests */
+  globalSetup: require.resolve('./tests/e2e/utils/global-setup.ts'),
+
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
@@ -91,6 +94,9 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
           },
         }
       : 'off',
+
+    /* Use the storage state with localStorage set globally */
+    storageState: './tests/e2e/playwright-storage-state.json',
   },
 
   /* Configure projects for major browsers */
