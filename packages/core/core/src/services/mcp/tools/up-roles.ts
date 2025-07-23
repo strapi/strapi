@@ -272,6 +272,45 @@ export const createUPRolesTool = (strapi: Core.Strapi): MCPToolHandler => {
           populate: ['permissions', 'users'],
         });
 
+        // If content type permissions are provided, set them immediately
+        let permissionsSet: string[] = [];
+        if (contentTypeUid && permissionsToSet) {
+          // Parse comma-separated permissions string
+          const permissionsArray = permissionsToSet
+            .split(',')
+            .map((p) => p.trim())
+            .filter((p) => p.length > 0);
+
+          if (permissionsArray.length > 0) {
+            // Map permission names to U&P action IDs
+            const actionMap: Record<string, string> = {
+              find: `${contentTypeUid}.find`,
+              findOne: `${contentTypeUid}.findOne`,
+              create: `${contentTypeUid}.create`,
+              update: `${contentTypeUid}.update`,
+              delete: `${contentTypeUid}.delete`,
+            };
+
+            // Create new permissions
+            const newPermissions = await Promise.all(
+              permissionsArray.map(async (permName) => {
+                const actionId = actionMap[permName];
+                if (!actionId) {
+                  throw new Error(`Unknown permission: ${permName}`);
+                }
+                return strapi.db.query('plugin::users-permissions.permission').create({
+                  data: {
+                    action: actionId,
+                    role: role.id,
+                  },
+                });
+              })
+            );
+
+            permissionsSet = permissionsArray;
+          }
+        }
+
         const responseRole = detailed
           ? role
           : {
@@ -287,7 +326,12 @@ export const createUPRolesTool = (strapi: Core.Strapi): MCPToolHandler => {
         return {
           action: 'create_role',
           role: responseRole,
-          message: 'Role created successfully',
+          permissionsSet: permissionsSet.length > 0 ? permissionsSet : undefined,
+          contentTypeUid: permissionsSet.length > 0 ? contentTypeUid : undefined,
+          message:
+            permissionsSet.length > 0
+              ? `Role created successfully with ${permissionsSet.length} permissions`
+              : 'Role created successfully',
           success: true,
         };
       } catch (error) {

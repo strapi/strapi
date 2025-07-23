@@ -3,7 +3,7 @@ import type { MCPToolHandler } from '../types';
 
 export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
-    name: 'rbac_api_tokens',
+    name: 'api_tokens',
     description:
       'Manage API TOKENS for external applications/services to access the Content API. This is separate from admin users and content API users. Use this for server-to-server communication or external apps. Permissions use Content API format like "api::country.country.find".',
     inputSchema: {

@@ -3,7 +3,7 @@ import type { MCPToolHandler } from '../types';
 
 export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
-    name: 'rbac_admin_roles',
+    name: 'admin_roles',
     description:
       'Manage ADMIN PANEL roles and permissions (for users who access the Strapi admin interface). This is separate from API tokens and content API users. Use this for admin users who need to manage content through the admin panel. Permissions use admin format like "plugin::content-manager.explorer.read".',
     inputSchema: {
@@ -623,6 +623,28 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
 
         const roleService = strapi.admin.services.role;
         const newRole = await roleService.create(roleData);
+
+        // If permissions are provided, set them immediately
+        let permissionsSet: string[] = [];
+        if (permissions && permissions.length > 0) {
+          // Create permissions for the new role
+          await Promise.all(
+            permissions.map(async (permission) => {
+              return strapi.db.query('admin::permission').create({
+                data: {
+                  action: permission.action,
+                  subject: permission.subject || null,
+                  properties: permission.properties || {},
+                  conditions: permission.conditions || [],
+                  role: newRole.id,
+                },
+              });
+            })
+          );
+
+          permissionsSet = permissions.map((p) => p.action);
+        }
+
         return {
           action: 'create_role',
           role: {
@@ -631,7 +653,11 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
             code: newRole.code,
             description: newRole.description,
           },
-          message: 'Role created successfully',
+          permissionsSet: permissionsSet.length > 0 ? permissionsSet : undefined,
+          message:
+            permissionsSet.length > 0
+              ? `Role created successfully with ${permissionsSet.length} permissions`
+              : 'Role created successfully',
         };
       } catch (error) {
         return { error: error instanceof Error ? error.message : 'Failed to create role' };
