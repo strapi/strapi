@@ -107,7 +107,7 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           type: 'array',
           items: { type: 'string' },
           description:
-            'Array of specific fields to include in the response. If provided, overrides detailed setting.',
+            'Array of specific fields to include in the response. If provided, overrides detailed setting. Only works with top-level fields. Use detailed=true to get all fields including nested data.',
         },
       },
       required: ['action'],

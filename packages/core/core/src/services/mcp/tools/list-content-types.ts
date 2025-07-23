@@ -47,15 +47,11 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
           type: 'boolean',
           description: 'Return detailed content type information (default: false)',
         },
-        minimal: {
-          type: 'boolean',
-          description: 'Return only essential fields: uid, displayName, kind (default: true)',
-        },
         fields: {
           type: 'array',
           items: { type: 'string' },
           description:
-            'Array of specific fields to include in the response. If provided, overrides minimal/detailed settings.',
+            'Array of specific fields to include in the response. If provided, overrides detailed setting. Only works with top-level fields. Use detailed=true to get all fields including nested data.',
         },
       },
       required: [],
@@ -73,7 +69,6 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       sortBy?: string;
       sortOrder?: string;
       detailed?: boolean;
-      minimal?: boolean;
       fields?: string[];
     } = {}
   ): Promise<any> => {
@@ -87,7 +82,6 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       sortBy,
       sortOrder,
       detailed = false,
-      minimal = true,
       fields,
     } = params;
 
@@ -162,13 +156,6 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
     } else if (detailed) {
       // Return full data when detailed is requested
       responseContentTypes = contentTypes;
-    } else if (minimal) {
-      // Return only essential fields for efficiency
-      responseContentTypes = contentTypes.map((ct) => ({
-        uid: ct.uid,
-        displayName: ct.displayName,
-        kind: ct.kind,
-      }));
     } else {
       // Return standard fields (original behavior)
       responseContentTypes = contentTypes.map((ct) => ({
@@ -187,7 +174,6 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       count: contentTypes.length,
       totalCount,
       detailed,
-      minimal,
       fields: fields || null,
       filters: { search, kind, plugin, uid, limit, offset, sortBy, sortOrder },
     };
