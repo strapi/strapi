@@ -99,7 +99,7 @@
     "index.js"
   ],
   "scripts": {
-    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build": "run -T npm-run-all clean --parallel build:code build:types && cp src/cli/commands/rules/.rules dist/src/cli/commands/rules/.rules",
     "build:code": "run -T  rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",

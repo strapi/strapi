@@ -1,0 +1,377 @@
+<strapi-content-type-generation>
+<!-- Description: Guidelines for generating Strapi content-types and schemas -->
+When generating Strapi content-types:
+
+1. **Always create files manually**: Never use `strapi generate` command - create all files manually for full control
+2. **Complete API creation**: When creating a content-type, ALWAYS create all 4 required files together:
+
+   - Schema (content-type definition)
+   - Controller (HTTP request handling)
+   - Service (business logic)
+   - Routes (endpoint definitions)
+
+3. **Schema structure**: Content-types must have this exact schema.json structure:
+
+```json
+{
+  "kind": "collectionType", // or "singleType"
+  "collectionName": "restaurants", // database table name (plural)
+  "info": {
+    "singularName": "restaurant", // API singular name (kebab-case)
+    "pluralName": "restaurants", // API plural name (kebab-case)
+    "displayName": "Restaurant", // Admin panel display name
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true // if content versioning needed
+  },
+  "pluginOptions": {},
+  "attributes": {
+    // field definitions here
+  }
+}
+```
+
+4. **Required directory structure**: Create this exact directory structure manually:
+
+```
+./src/api/[api-name]/
+├── content-types/[content-type-name]/
+│   └── schema.json
+├── controllers/[content-type-name].js
+├── services/[content-type-name].js
+└── routes/[content-type-name].js
+```
+
+5. **Complete controller template**: Always create controller with this exact template:
+
+```javascript
+const { createCoreController } = require("@strapi/strapi").factories;
+
+module.exports = createCoreController("api::[api-name].[content-type-name]");
+```
+
+6. **Complete service template**: Always create service with this exact template:
+
+```javascript
+const { createCoreService } = require("@strapi/strapi").factories;
+
+module.exports = createCoreService("api::[api-name].[content-type-name]");
+```
+
+7. **Complete routes template**: Always create routes with this exact template:
+
+```javascript
+const { createCoreRouter } = require("@strapi/strapi").factories;
+
+module.exports = createCoreRouter("api::[api-name].[content-type-name]");
+```
+
+8. **Naming conventions**: Use kebab-case for API names, proper singular/plural forms
+9. **After schema changes**: Always run `strapi ts:generate-types` for TypeScript support
+10. **Field types**: Use Strapi's native field types (text, richtext, email, password, number, boolean, date, media, relation, etc.)
+    </strapi-content-type-generation>
+
+<strapi-controller-patterns>
+<!-- Description: Best practices for creating Strapi controllers -->
+When creating Strapi controllers:
+
+1. **Always use factory function**: Never create controllers without `createCoreController`
+
+```javascript
+const { createCoreController } = require("@strapi/strapi").factories;
+
+module.exports = createCoreController(
+  "api::restaurant.restaurant",
+  ({ strapi }) => ({
+    // custom methods here
+  })
+);
+```
+
+2. **Three customization approaches**:
+
+   - **Custom actions**: Entirely new methods
+   - **Wrapping**: Extend existing with `await super.methodName(ctx)`
+   - **Replacing**: Complete replacement with proper sanitization
+
+3. **Mandatory sanitization**: Always include these in custom controllers:
+
+```javascript
+async customAction(ctx) {
+  await this.validateQuery(ctx);
+  const sanitizedQueryParams = await this.sanitizeQuery(ctx);
+  // your logic here
+  const sanitizedResults = await this.sanitizeOutput(results, ctx);
+  return sanitizedResults;
+}
+```
+
+4. **File location**: Controllers go in `./src/api/[api-name]/controllers/`
+5. **Keep controllers thin**: Business logic should be in services, controllers handle HTTP concerns
+6. **Error handling**: Use Strapi's error handling utilities and HTTP status codes
+   </strapi-controller-patterns>
+
+<strapi-service-architecture>
+<!-- Description: Guidelines for creating and using Strapi services -->
+When creating Strapi services:
+
+1. **Use factory function**: Always use `createCoreService`
+
+```javascript
+const { createCoreService } = require("@strapi/strapi").factories;
+
+module.exports = createCoreService(
+  "api::restaurant.restaurant",
+  ({ strapi }) => ({
+    // custom methods here
+  })
+);
+```
+
+2. **Prefer Document Service API**: Use `strapi.documents()` over Entity Service API
+
+```javascript
+// Preferred approach
+const entries = await strapi.documents("api::restaurant.restaurant").findMany({
+  filters: { name: { $contains: "pizza" } },
+  populate: ["category"],
+});
+```
+
+3. **File location**: Services go in `./src/api/[api-name]/services/`
+4. **Service usage**: Access services via `strapi.service('api::apiName.serviceName').methodName()`
+5. **Business logic location**: Put all business logic in services, not controllers
+6. **Database operations**: Use Document Service methods: `findOne()`, `findMany()`, `create()`, `update()`, `delete()`
+7. **Parameters support**: Leverage locale, status, filters, fields, populate parameters
+   </strapi-service-architecture>
+
+<strapi-route-configuration>
+<!-- Description: Best practices for configuring Strapi routes -->
+When configuring Strapi routes:
+
+1. **Core routes**: Use `createCoreRouter` for basic CRUD operations
+
+```javascript
+const { createCoreRouter } = require("@strapi/strapi").factories;
+
+module.exports = createCoreRouter("api::restaurant.restaurant", {
+  config: {
+    find: {
+      auth: false, // public route
+      policies: ["policy-name"],
+      middlewares: ["middleware-name"],
+    },
+  },
+});
+```
+
+2. **Custom routes**: Create route arrays with method, path, handler, config
+
+```javascript
+module.exports = {
+  routes: [
+    {
+      method: "GET",
+      path: "/restaurants/custom",
+      handler: "restaurant.customMethod",
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+  ],
+};
+```
+
+3. **Route ordering**: Prefix custom route files with numbers (e.g., `01-custom-routes.js`) to load before core routes
+4. **File location**: Routes go in `./src/api/[api-name]/routes/`
+5. **Configuration over code**: Use route config for policies, middlewares, and auth settings
+6. **Public routes**: Set `auth: false` for public endpoints
+   </strapi-route-configuration>
+
+<strapi-plugin-development>
+<!-- Description: Guidelines for creating local Strapi plugins -->
+When creating local Strapi plugins:
+
+1. **Manual plugin creation**: Create plugins manually instead of using SDK - provides full control over structure
+2. **Plugin structure**: Two-part architecture required:
+
+   - `admin/` folder: Admin Panel API (React components, hooks)
+   - `server/` folder: Server API (controllers, services, routes)
+
+3. **Entry points**: Create proper entry files:
+
+   - `strapi-server.js`: Server-side functionality
+   - `strapi-admin.js`: Admin panel integration
+
+4. **Local development**: Use `yalc` for linking plugins during development
+
+```bash
+# In plugin directory
+yalc publish
+# In Strapi project
+yalc add my-plugin
+```
+
+5. **Plugin registration**: Register in `./src/plugins/` directory or `./config/plugins.js`
+6. **Server structure**: Follow API patterns (controllers, services, routes, policies)
+7. **Admin integration**: Use Strapi's admin panel components and design system
+8. **Configuration**: Support plugin-specific configuration in `config/plugins.js`
+   </strapi-plugin-development>
+
+<strapi-api-best-practices>
+<!-- Description: Best practices for Strapi API development -->
+When working with Strapi APIs:
+
+1. **REST endpoint patterns**: Follow auto-generated REST conventions:
+
+   - `GET /api/restaurants` - Find many
+   - `GET /api/restaurants/:id` - Find one
+   - `POST /api/restaurants` - Create
+   - `PUT /api/restaurants/:id` - Update
+   - `DELETE /api/restaurants/:id` - Delete
+
+2. **Query parameters**: Use Strapi's built-in query parameters:
+
+   - `?filters[field][$operator]=value` - Filtering
+   - `?populate=*` or `?populate[field]=true` - Population
+   - `?fields[0]=name&fields[1]=description` - Field selection
+   - `?sort[0]=createdAt:desc` - Sorting
+   - `?pagination[page]=1&pagination[pageSize]=25` - Pagination
+
+3. **Response format**: Strapi APIs return data in this format:
+
+```json
+{
+  "data": [], // or {} for single
+  "meta": {
+    "pagination": {}
+  }
+}
+```
+
+4. **Error handling**: Use proper HTTP status codes and Strapi's error format
+5. **Authentication**: Configure proper authentication/authorization for endpoints
+6. **Validation**: Use Strapi's built-in validation or custom validators
+7. **Relations**: Use populate parameter for related data, avoid N+1 queries
+   </strapi-api-best-practices>
+
+<strapi-cli-workflow>
+<!-- Description: Essential Strapi CLI commands and workflows -->
+When using Strapi CLI:
+
+1. **Avoid CLI generation**: Do NOT use `strapi generate` commands - always create files manually:
+
+   - Never use `strapi generate` - Manual creation preferred
+   - Never use `strapi generate api restaurant` - Create files manually
+   - Never use `strapi generate controller restaurant` - Manual creation only
+
+2. **Development workflow**:
+
+   - `strapi develop` - Development mode with auto-reloading
+   - `strapi build` - Build admin panel
+   - `strapi start` - Start production server
+
+3. **TypeScript support**:
+
+   - `strapi ts:generate-types` - Generate TypeScript definitions (run after schema changes)
+   - Always run this after content-type modifications
+
+4. **Debugging commands**:
+
+   - `strapi routes:list` - List all routes
+   - `strapi services:list` - List all services
+   - `strapi controllers:list` - List all controllers
+   - `strapi policies:list` - List all policies
+
+5. **Database commands**:
+
+   - `strapi console` - Access Strapi instance programmatically
+   - Database migrations through code, not CLI
+
+6. **Plugin commands**:
+   - `strapi install <plugin-name>` - Install plugins
+   - `strapi uninstall <plugin-name>` - Remove plugins
+     </strapi-cli-workflow>
+
+<strapi-project-structure>
+<!-- Description: Standard Strapi project structure and file organization -->
+When organizing Strapi projects:
+
+1. **Standard structure**:
+
+```
+./src/
+├── admin/           # Admin panel customizations
+├── api/            # API definitions
+│   └── [api-name]/
+│       ├── content-types/
+│       ├── controllers/
+│       ├── routes/
+│       ├── services/
+│       └── policies/
+├── components/     # Reusable content-type components
+├── extensions/     # Core extensions
+├── middlewares/    # Custom middlewares
+└── plugins/       # Local plugins
+./config/          # Configuration files
+./database/        # Database files
+```
+
+2. **Auto-loading**: Strapi auto-loads files from standard locations
+3. **Naming conventions**: Use kebab-case for folder and file names
+4. **Configuration files**: Place in `./config/` directory (database.js, server.js, etc.)
+5. **Environment files**: Use `.env` for environment variables
+6. **Custom code**: Always place in `./src/` directory, never in `node_modules`
+7. **Component definitions**: Reusable components go in `./src/components/`
+   </strapi-project-structure>
+
+<strapi-configuration-management>
+<!-- Description: Best practices for Strapi configuration -->
+When configuring Strapi:
+
+1. **Environment-based config**: Use environment variables for sensitive data
+
+```javascript
+// config/database.js
+module.exports = ({ env }) => ({
+  connection: {
+    client: "postgres",
+    connection: {
+      host: env("DATABASE_HOST", "127.0.0.1"),
+      port: env.int("DATABASE_PORT", 5432),
+      database: env("DATABASE_NAME", "strapi"),
+      user: env("DATABASE_USERNAME", "strapi"),
+      password: env("DATABASE_PASSWORD", "strapi"),
+    },
+  },
+});
+```
+
+2. **Plugin configuration**: Configure plugins in `./config/plugins.js`
+3. **Middleware configuration**: Order matters in middleware configuration
+4. **Security configuration**: Configure CORS, helmet, and other security middlewares
+5. **File uploads**: Configure upload providers and limits
+6. **Email configuration**: Set up email providers for notifications
+7. **Admin panel**: Customize admin panel URL, authentication
+8. **API tokens**: Use API tokens for programmatic access
+   </strapi-configuration-management>
+
+<strapi-development-workflow>
+<!-- Description: Recommended development workflow for Strapi projects -->
+Development workflow recommendations:
+
+1. **Start with content modeling**: Design content-types before implementing logic
+2. **Manual file creation**: Always create files manually - never use `strapi generate`
+3. **Incremental development**: Build one API endpoint at a time
+4. **Test early**: Test APIs as soon as they're created
+5. **Type generation**: Run `strapi ts:generate-types` after schema changes
+6. **Version control**: Commit schema changes and generated types together
+7. **Environment separation**: Use different databases for dev/staging/prod
+8. **Plugin development**: Develop plugins in isolation, then integrate
+9. **Performance monitoring**: Use populate wisely to avoid N+1 queries
+10. **Documentation**: Document custom APIs and business logic
+11. **Migration strategy**: Plan data migrations for schema changes
+12. **Build verification**: Always test build process before deployment
+    </strapi-development-workflow>
