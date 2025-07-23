@@ -20,6 +20,8 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
             'list_available_permissions',
             'copy_permissions_from_role',
             'reset_role_permissions',
+            'set_content_type_permissions',
+            'set_permissions_bulk',
           ],
           description: 'Action to perform',
         },
@@ -85,6 +87,19 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
           },
           description: 'Array of permission objects for bulk updates',
         },
+        contentTypeUid: {
+          type: 'string',
+          description: 'Content type UID for set_content_type_permissions action',
+        },
+        permissionsToSet: {
+          type: 'string',
+          description:
+            'Comma-separated list of permissions to set (create,read,update,delete,publish)',
+        },
+        permissionsList: {
+          type: 'string',
+          description: 'Comma-separated list of permissions for bulk operations',
+        },
       },
       required: ['action'],
     },
@@ -110,6 +125,9 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
         subject?: string;
         enabled: boolean;
       }>;
+      contentTypeUid?: string;
+      permissionsToSet?: string;
+      permissionsList?: string;
     } = {}
   ): Promise<any> => {
     const {
@@ -127,10 +145,92 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
       detailed = false,
       grouped = true,
       permissions,
+      contentTypeUid,
+      permissionsToSet,
+      permissionsList,
     } = params;
 
     if (!action) {
       return { error: 'Action parameter is required' };
+    }
+
+    // New optimized action for setting content type permissions
+    if (action === 'set_content_type_permissions') {
+      if (!roleId) {
+        return { error: 'Role ID is required for set_content_type_permissions action' };
+      }
+      if (!contentTypeUid) {
+        return { error: 'Content type UID is required for set_content_type_permissions action' };
+      }
+      if (!permissionsToSet) {
+        return { error: 'Permissions string is required for set_content_type_permissions action' };
+      }
+
+      // Parse comma-separated permissions string
+      const permissionsArray = permissionsToSet
+        .split(',')
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
+      if (permissionsArray.length === 0) {
+        return { error: 'No valid permissions found in permissions string' };
+      }
+
+      try {
+        // Map permission names to Strapi action IDs
+        const actionMap: Record<string, string> = {
+          create: 'plugin::content-manager.explorer.create',
+          read: 'plugin::content-manager.explorer.read',
+          update: 'plugin::content-manager.explorer.update',
+          delete: 'plugin::content-manager.explorer.delete',
+          publish: 'plugin::content-manager.explorer.publish',
+        };
+
+        // Get fields for content type permissions
+        let properties = {};
+        try {
+          const contentType = (strapi.contentTypes as any)[contentTypeUid];
+          if (contentType && contentType.attributes) {
+            const fields = Object.keys(contentType.attributes).filter(
+              (key) =>
+                key !== 'id' && key !== 'createdAt' && key !== 'updatedAt' && key !== 'publishedAt'
+            );
+            properties = { fields };
+          }
+        } catch (error) {
+          console.log('[MCP] Could not get content type fields for', contentTypeUid);
+        }
+
+        // Create permissions array
+        const strapiPermissions = permissionsArray.map((permName) => {
+          const actionId = actionMap[permName];
+          if (!actionId) {
+            throw new Error(`Unknown permission: ${permName}`);
+          }
+          return {
+            action: actionId,
+            subject: contentTypeUid,
+            properties,
+            conditions: [],
+          };
+        });
+
+        const roleService = strapi.admin.services.role;
+        await roleService.assignPermissions(roleId, strapiPermissions);
+
+        return {
+          action: 'set_content_type_permissions',
+          roleId,
+          contentTypeUid,
+          permissionsSet: permissionsArray,
+          message: `Set ${strapiPermissions.length} permissions for content type ${contentTypeUid}`,
+          success: true,
+        };
+      } catch (error) {
+        return {
+          error: error instanceof Error ? error.message : 'Failed to set content type permissions',
+          success: false,
+        };
+      }
     }
 
     if (action === 'get_role_permissions') {
@@ -261,10 +361,12 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
           roleId,
           message: `Updated ${strapiPermissions.length} permissions for role`,
           updatedPermissions: strapiPermissions.length,
+          success: true,
         };
       } catch (error) {
         return {
           error: error instanceof Error ? error.message : 'Failed to update role permissions',
+          success: false,
         };
       }
     }
@@ -315,10 +417,12 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
           roleId,
           permission,
           message: 'Permission added to role successfully',
+          success: true,
         };
       } catch (error) {
         return {
           error: error instanceof Error ? error.message : 'Failed to add permission to role',
+          success: false,
         };
       }
     }
@@ -363,10 +467,12 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
             subject: permissionToRemove.subject,
           },
           message: 'Permission removed from role successfully',
+          success: true,
         };
       } catch (error) {
         return {
           error: error instanceof Error ? error.message : 'Failed to remove permission from role',
+          success: false,
         };
       }
     }
@@ -540,10 +646,12 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
           targetRoleId: roleId,
           copiedPermissions: permissions.length,
           message: `Copied ${permissions.length} permissions from source role`,
+          success: true,
         };
       } catch (error) {
         return {
           error: error instanceof Error ? error.message : 'Failed to copy permissions from role',
+          success: false,
         };
       }
     }
@@ -575,10 +683,12 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
           roleId,
           removedPermissions: currentPermissions.length,
           message: `Reset role permissions - removed ${currentPermissions.length} permissions`,
+          success: true,
         };
       } catch (error) {
         return {
           error: error instanceof Error ? error.message : 'Failed to reset role permissions',
+          success: false,
         };
       }
     }

@@ -47,6 +47,10 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
           type: 'boolean',
           description: 'Return detailed content type information (default: false)',
         },
+        minimal: {
+          type: 'boolean',
+          description: 'Return only essential fields: uid, displayName, kind (default: true)',
+        },
       },
       required: [],
     },
@@ -63,6 +67,7 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       sortBy?: string;
       sortOrder?: string;
       detailed?: boolean;
+      minimal?: boolean;
     } = {}
   ): Promise<any> => {
     const {
@@ -75,9 +80,10 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       sortBy,
       sortOrder,
       detailed = false,
+      minimal = true,
     } = params;
 
-    // Get all content types
+    // Get all content types with minimal data by default
     let contentTypes = Object.values(strapi.contentTypes).map((ct: any) => ({
       uid: ct.uid,
       displayName: ct.info?.displayName,
@@ -132,20 +138,37 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       contentTypes = contentTypes.slice(0, limit);
     }
 
-    // Apply progressive disclosure based on detailed flag
-    const responseContentTypes = detailed
-      ? contentTypes
-      : contentTypes.map((ct) => ({
-          uid: ct.uid,
-          displayName: ct.displayName,
-          kind: ct.kind,
-        }));
+    // Apply progressive disclosure based on detailed and minimal flags
+    let responseContentTypes;
+    if (detailed) {
+      // Return full data when detailed is requested
+      responseContentTypes = contentTypes;
+    } else if (minimal) {
+      // Return only essential fields for efficiency
+      responseContentTypes = contentTypes.map((ct) => ({
+        uid: ct.uid,
+        displayName: ct.displayName,
+        kind: ct.kind,
+      }));
+    } else {
+      // Return standard fields (original behavior)
+      responseContentTypes = contentTypes.map((ct) => ({
+        uid: ct.uid,
+        displayName: ct.displayName,
+        singularName: ct.singularName,
+        pluralName: ct.pluralName,
+        kind: ct.kind,
+        collectionName: ct.collectionName,
+        plugin: ct.plugin,
+      }));
+    }
 
     return {
       contentTypes: responseContentTypes,
       count: contentTypes.length,
       totalCount,
       detailed,
+      minimal,
       filters: { search, kind, plugin, uid, limit, offset, sortBy, sortOrder },
     };
   };

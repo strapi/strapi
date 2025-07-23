@@ -322,6 +322,12 @@ const assignPermissions = async (
   roleId: Data.ID,
   permissions: Array<Pick<Permission, 'action' | 'subject' | 'conditions'>> = []
 ) => {
+  // Log the incoming permissions for debugging
+  console.log('[MCP DEBUG] assignPermissions called with:', {
+    roleId,
+    permissions: JSON.stringify(permissions, null, 2),
+  });
+
   await validatePermissionsExist(permissions);
 
   // Internal actions are not handled by the role service, so any permission
@@ -379,6 +385,12 @@ const assignPermissions = async (
 };
 
 const addPermissions = async (roleId: Data.ID, permissions: any) => {
+  // Log the incoming permissions for debugging
+  console.log('[MCP DEBUG] addPermissions called with:', {
+    roleId,
+    permissions: JSON.stringify(permissions, null, 2),
+  });
+
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
 

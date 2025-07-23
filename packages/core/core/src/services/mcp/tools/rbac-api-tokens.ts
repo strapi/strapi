@@ -4,14 +4,24 @@ import type { MCPToolHandler } from '../types';
 export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
     name: 'rbac_api_tokens',
-    description: 'Manage API token RBAC settings including permissions, type, and expiration',
+    description:
+      'Manage API token RBAC settings including permissions, type, and expiration. IMPORTANT: API tokens use Content API permissions (e.g., "api::country.country.find"), not admin permissions (e.g., "plugin::content-manager.explorer.read").',
     inputSchema: {
       type: 'object',
       properties: {
         action: {
           type: 'string',
-          enum: ['get', 'update', 'add_permissions', 'remove_permissions', 'list_all', 'create'],
-          description: 'Action to perform',
+          enum: [
+            'get',
+            'update',
+            'add_permissions',
+            'remove_permissions',
+            'list_all',
+            'create',
+            'list_available_permissions',
+          ],
+          description:
+            'Action to perform. Use "list_available_permissions" to see what Content API permissions are available.',
         },
         tokenId: {
           type: 'string',
@@ -38,7 +48,8 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
         permissions: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Array of permission strings (required for custom type)',
+          description:
+            'Array of Content API permission strings (required for custom type). Format: "api::<content-type>.<content-type>.<action>". Examples: ["api::country.country.find", "api::country.country.create"]. Do NOT use admin permissions like "plugin::content-manager.explorer.read".',
         },
         applyToAll: {
           type: 'boolean',
@@ -198,12 +209,8 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           updateData.lifespan = lifespanMs;
         }
         if (type === 'custom' && permissions !== undefined) {
-          // Convert array of permission strings to object format
-          const permissionsObj: Record<string, boolean> = {};
-          permissions.forEach((permission: string) => {
-            permissionsObj[permission] = true;
-          });
-          updateData.permissions = permissionsObj;
+          // Pass permissions as array of strings (not object)
+          updateData.permissions = permissions;
         }
 
         if (applyToAll) {
@@ -488,6 +495,37 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
       }
     }
 
+    if (action === 'list_available_permissions') {
+      try {
+        const actionsMap = await strapi.contentAPI.permissions.getActionsMap();
+        const availablePermissions: string[] = [];
+
+        // Convert the actions map to a flat list of permissions
+        Object.entries(actionsMap).forEach(([api, value]: [string, any]) => {
+          const { controllers } = value;
+          Object.entries(controllers).forEach(([controller, actions]: [string, any]) => {
+            actions.forEach((action: string) => {
+              availablePermissions.push(`${api}.${controller}.${action}`);
+            });
+          });
+        });
+
+        return {
+          action: 'list_available_permissions',
+          permissions: availablePermissions,
+          count: availablePermissions.length,
+          message: `Found ${availablePermissions.length} available Content API permissions`,
+          note: 'These are the permissions that can be used for API tokens. Format: api::<content-type>.<content-type>.<action>',
+        };
+      } catch (error) {
+        return {
+          error: error instanceof Error ? error.message : 'Failed to list available permissions',
+          details:
+            'Could not retrieve Content API permissions. This might be due to the content API not being fully initialized.',
+        };
+      }
+    }
+
     if (action === 'create') {
       if (!name) {
         return { error: 'Name is required for create action' };
@@ -499,10 +537,35 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
         type === 'custom' &&
         (!permissions || !Array.isArray(permissions) || permissions.length === 0)
       ) {
-        return { error: 'Permissions array is required for custom token type' };
+        return {
+          error: 'Permissions array is required for custom token type',
+          details: `Custom API tokens require Content API permissions. Example:
+{
+  "permissions": ["api::country.country.find", "api::country.country.create"]
+}
+
+Format: "api::<content-type>.<content-type>.<action>"
+Common actions: find, findOne, create, update, delete`,
+        };
       }
       if (type !== 'custom' && permissions) {
         return { error: 'Permissions should not be provided for non-custom token types' };
+      }
+
+      // Validate permission format for custom tokens
+      if (type === 'custom' && Array.isArray(permissions)) {
+        const invalidPermissions = permissions.filter(
+          (perm) => !perm.startsWith('api::') && !perm.startsWith('plugin::')
+        );
+        if (invalidPermissions.length > 0) {
+          return {
+            error: 'Invalid permission format detected',
+            details: `The following permissions don't follow the Content API format: ${invalidPermissions.join(', ')}. 
+            
+Content API permissions should start with 'api::' or 'plugin::' and follow the format 'api::<content-type>.<content-type>.<action>'.
+Examples: api::country.country.find, api::article.article.create, plugin::upload.upload.read`,
+          };
+        }
       }
 
       let lifespanMs: number | null = null;
@@ -519,12 +582,8 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
       };
 
       if (type === 'custom' && Array.isArray(permissions)) {
-        // Convert array of permission strings to object format
-        const permissionsObj: Record<string, boolean> = {};
-        permissions.forEach((permission: string) => {
-          permissionsObj[permission] = true;
-        });
-        tokenAttributes.permissions = permissionsObj;
+        // Pass permissions as array of strings (not object)
+        tokenAttributes.permissions = permissions;
       }
 
       try {
@@ -545,9 +604,38 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           message: 'Token created successfully',
         };
       } catch (error) {
+        let errorMessage = error instanceof Error ? error.message : 'Failed to create token';
+        let details = error instanceof Error ? error.stack : undefined;
+
+        // Provide more helpful error messages for common permission issues
+        if (errorMessage.includes('Unknown permissions provided:')) {
+          const unknownPermissions = errorMessage.match(/Unknown permissions provided: (.+)/)?.[1];
+          errorMessage = `Invalid permissions for API token. API tokens use Content API permissions (e.g., 'api::country.country.find'), not admin permissions (e.g., 'plugin::content-manager.explorer.read'). Unknown permissions: ${unknownPermissions}`;
+          details = `API Token Permissions Guide:
+          
+1. API tokens use Content API permissions, not admin permissions
+2. Format: 'api::<content-type>.<content-type>.<action>'
+3. Common actions: find, findOne, create, update, delete
+4. Example for countries: 'api::country.country.find'
+5. Example for articles: 'api::article.article.create'
+
+Admin permissions (for roles) vs Content API permissions (for tokens):
+- Admin: 'plugin::content-manager.explorer.read'
+- API Token: 'api::country.country.find'
+
+To get available Content API permissions, check the API routes or use the content API permissions endpoint.`;
+        } else if (errorMessage.includes('Missing permissions attribute for custom token')) {
+          errorMessage =
+            'Custom API tokens require permissions. Please provide a permissions array with Content API permissions.';
+          details = `Example:
+{
+  "permissions": ["api::country.country.find", "api::country.country.create"]
+}`;
+        }
+
         return {
-          error: error instanceof Error ? error.message : 'Failed to create token',
-          details: error instanceof Error ? error.stack : undefined,
+          error: errorMessage,
+          details,
         };
       }
     }
