@@ -24,18 +24,6 @@ test.describe('Home', () => {
     await page.getByRole('button', { name: /save/i }).click();
     await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
     await expect(page.getByText('Hello Rebecca')).toBeVisible();
-
-    /**
-     * Assert the user can see and dismiss the guided tour
-     */
-    const skipTheTourButton = page.getByRole('button', { name: 'Skip the tour' });
-    await expect(skipTheTourButton).toBeVisible();
-
-    await skipTheTourButton.click();
-    await expect(skipTheTourButton).not.toBeVisible();
-    // Reload to ensure the update persisted
-    await page.reload();
-    await expect(skipTheTourButton).not.toBeVisible();
   });
 
   test('a user should see its profile information', async ({ page }) => {

@@ -11,7 +11,6 @@ test.describe('Preview', () => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
     await resetFiles();
     await page.goto('/admin');
-    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
     await login({ page });
     await page.waitForURL('/admin');
   });
@@ -119,7 +118,6 @@ describeOnCondition(edition === 'EE')('Advanced Preview', () => {
     });
     await resetFiles();
     await page.goto('/admin');
-    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
     await login({ page });
     await page.waitForURL('/admin');
   });

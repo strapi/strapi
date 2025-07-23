@@ -43,7 +43,6 @@ describeOnCondition(edition === 'EE')('History', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('history-spec', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
       importData: 'with-admin.tar',
       resetAlways: true, // NOTE: this makes tests extremely slow, but it's necessary to ensure isolation between tests
