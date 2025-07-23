@@ -11,8 +11,24 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
   const handleRequest = async (request: MCPRequest): Promise<MCPResponse | undefined> => {
     const { jsonrpc, id, method, params } = request;
 
+    // Log all MCP calls
+    strapi.log.info('[MCP] Request received', {
+      method,
+      id,
+      params:
+        method === 'tools/call'
+          ? {
+              toolName: params?.name,
+              arguments: params?.arguments ? Object.keys(params.arguments) : [],
+              hasArguments: !!params?.arguments,
+            }
+          : params,
+      timestamp: new Date().toISOString(),
+    });
+
     // Validate JSON-RPC version
     if (jsonrpc !== '2.0') {
+      strapi.log.error('[MCP] Invalid JSON-RPC version', { jsonrpc, id });
       return {
         jsonrpc: '2.0',
         id,
@@ -27,6 +43,11 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
     try {
       switch (method) {
         case 'tools/list':
+          strapi.log.info('[MCP] Tools list requested', {
+            id,
+            availableTools: toolRegistry.getTools().map((t) => t.name),
+            timestamp: new Date().toISOString(),
+          });
           return {
             jsonrpc: '2.0',
             id,
@@ -48,21 +69,44 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
 
           const handler = toolRegistry.getHandler(params.name);
           if (handler) {
-            const result = await handler(params.arguments);
-            return {
-              jsonrpc: '2.0',
-              id,
-              result: {
-                content: [
-                  {
-                    type: 'text',
-                    text: JSON.stringify(result, null, 2),
-                  },
-                ],
-              },
-            };
+            try {
+              const result = await handler(params.arguments);
+              strapi.log.info('[MCP] Tool call successful', {
+                toolName: params.name,
+                id,
+                resultType: typeof result,
+                hasError: !!result?.error,
+                timestamp: new Date().toISOString(),
+              });
+              return {
+                jsonrpc: '2.0',
+                id,
+                result: {
+                  content: [
+                    {
+                      type: 'text',
+                      text: JSON.stringify(result, null, 2),
+                    },
+                  ],
+                },
+              };
+            } catch (error) {
+              strapi.log.error('[MCP] Tool call failed', {
+                toolName: params.name,
+                id,
+                error: error instanceof Error ? error.message : 'Unknown error',
+                timestamp: new Date().toISOString(),
+              });
+              throw error;
+            }
           }
 
+          strapi.log.warn('[MCP] Unknown tool requested', {
+            toolName: params.name,
+            id,
+            availableTools: toolRegistry.getTools().map((t) => t.name),
+            timestamp: new Date().toISOString(),
+          });
           return {
             jsonrpc: '2.0',
             id,
@@ -75,6 +119,10 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
         }
 
         case 'initialize':
+          strapi.log.info('[MCP] Client initialization', {
+            id,
+            timestamp: new Date().toISOString(),
+          });
           return {
             jsonrpc: '2.0',
             id,
@@ -93,6 +141,10 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           };
 
         case 'ping':
+          strapi.log.debug('[MCP] Ping received', {
+            id,
+            timestamp: new Date().toISOString(),
+          });
           return {
             jsonrpc: '2.0',
             id,
@@ -108,6 +160,18 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           };
 
         default:
+          strapi.log.warn('[MCP] Unknown method requested', {
+            method,
+            id,
+            availableMethods: [
+              'tools/list',
+              'tools/call',
+              'initialize',
+              'ping',
+              'notifications/initialized',
+            ],
+            timestamp: new Date().toISOString(),
+          });
           return {
             jsonrpc: '2.0',
             id,
@@ -119,7 +183,13 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           };
       }
     } catch (error) {
-      strapi.log.error('[MCP] Error handling request:', error);
+      strapi.log.error('[MCP] Error handling request', {
+        method,
+        id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString(),
+      });
       return {
         jsonrpc: '2.0',
         id,
