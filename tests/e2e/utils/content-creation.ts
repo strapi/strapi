@@ -103,9 +103,7 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
 
       // Wait for the option to be visible and click the option
       const option = page.getByRole('option', { name: String(value), exact: true });
-      // Wait for the option to be attached to the DOM (not just visible)
       await expect(option).toBeVisible();
-
       await option.click();
 
       // Wait for the dropdown to close
