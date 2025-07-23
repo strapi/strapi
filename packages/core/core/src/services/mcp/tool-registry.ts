@@ -9,6 +9,7 @@ import {
   createRoleEditorTool,
   createUPUsersTool,
   createMarketplaceTool,
+  createDocumentationTool,
 } from './tools';
 
 export class MCPToolRegistry {
@@ -28,6 +29,7 @@ export class MCPToolRegistry {
       createRoleEditorTool,
       createUPUsersTool,
       createMarketplaceTool,
+      createDocumentationTool,
     ];
     toolCreators.forEach((createTool) => {
       const { tool, handler } = createTool(strapi);

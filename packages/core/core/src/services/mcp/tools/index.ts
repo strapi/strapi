@@ -6,3 +6,4 @@ export { createRBACAdminRolesTool } from './rbac-admin-roles';
 export { createRoleEditorTool } from './role-editor';
 export { createUPUsersTool } from './up-users';
 export { createMarketplaceTool } from './marketplace';
+export { createDocumentationTool } from './documentation';
