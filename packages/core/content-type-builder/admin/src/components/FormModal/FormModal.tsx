@@ -329,7 +329,7 @@ export const FormModal = () => {
     get(modifiedData, 'createComponent', false) || isCreatingComponentWhileAddingAField;
   const isInFirstComponentStep = step === '1';
   const isPickingAttribute = modalType === 'chooseAttribute';
-  const uid = createUid(modifiedData.displayName || '');
+  const uid = createUid(modifiedData.singularName || '');
   const attributes = get(type, ['attributes'], null) as {
     name: string;
   }[];
