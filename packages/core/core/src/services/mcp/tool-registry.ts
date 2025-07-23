@@ -7,6 +7,8 @@ import {
   createRBACApiTokensTool,
   createRBACAdminRolesTool,
   createRoleEditorTool,
+  createUPUsersTool,
+  createUPRolesTool,
 } from './tools';
 
 export class MCPToolRegistry {
@@ -24,6 +26,8 @@ export class MCPToolRegistry {
       createRBACApiTokensTool,
       createRBACAdminRolesTool,
       createRoleEditorTool,
+      createUPUsersTool,
+      createUPRolesTool,
     ];
     toolCreators.forEach((createTool) => {
       const { tool, handler } = createTool(strapi);
