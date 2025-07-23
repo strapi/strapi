@@ -101,11 +101,11 @@ const tours = {
         <Step.Root side="right">
           <Step.Title
             id="tours.contentTypeBuilder.Finish.title"
-            defaultMessage="It’s time to create content!"
+            defaultMessage="It's time to create content!"
           />
           <Step.Content
             id="tours.contentTypeBuilder.Finish.content"
-            defaultMessage="Now that you created content types, you’ll be able to create content in the content manager."
+            defaultMessage="Now that you created content types, you'll be able to create content in the content manager."
           />
           <Step.Actions showStepCount={false} to="/content-manager" />
         </Step.Root>
@@ -168,11 +168,11 @@ const tours = {
         <Step.Root side="right">
           <Step.Title
             id="tours.contentManager.FinalStep.title"
-            defaultMessage="It’s time to create API Tokens!"
+            defaultMessage="It's time to create API Tokens!"
           />
           <Step.Content
             id="tours.contentManager.FinalStep.content"
-            defaultMessage="Now that you’ve created and published content, time to create API tokens and set up permissions."
+            defaultMessage="Now that you've created and published content, time to create API tokens and set up permissions."
           />
           <Step.Actions showStepCount={false} to="/settings/api-tokens" />
         </Step.Root>
@@ -236,7 +236,7 @@ const tours = {
         <Step.Root side="right" align="start">
           <Step.Title
             id="tours.apiTokens.FinalStep.title"
-            defaultMessage="It’s time to deploy your application!"
+            defaultMessage="It's time to deploy your application!"
           />
           <Step.Content
             id="tours.apiTokens.FinalStep.content"

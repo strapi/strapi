@@ -91,7 +91,14 @@ export const StepCount = ({ tourName }: { tourName: ValidTourName }) => {
 const createStepComponents = (tourName: ValidTourName): Step => ({
   Root: React.forwardRef(({ withArrow = true, ...props }, ref) => {
     return (
-      <Popover.Content ref={ref} side="top" align="center" style={{ border: 'none' }} {...props}>
+      <Popover.Content
+        ref={ref}
+        aria-labelledby="guided-tour-title"
+        side="top"
+        align="center"
+        style={{ border: 'none' }}
+        {...props}
+      >
         {withArrow && (
           <PopoverArrow asChild>
             <svg
@@ -118,8 +125,8 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         {'children' in props ? (
           props.children
         ) : (
-          <Typography tag="div" variant="omega" fontWeight="bold">
-            <FormattedMessage tagName="h1" id={props.id} defaultMessage={props.defaultMessage} />
+          <Typography tag="h1" id="guided-tour-title" variant="omega" fontWeight="bold">
+            <FormattedMessage id={props.id} defaultMessage={props.defaultMessage} />
           </Typography>
         )}
       </Box>
@@ -132,7 +139,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         props.children
       ) : (
         <Typography tag="div" variant="omega">
-          <FormattedMessage tagName="p" id={props.id} defaultMessage={props.defaultMessage} />
+          <FormattedMessage id={props.id} defaultMessage={props.defaultMessage} />
         </Typography>
       )}
     </Box>
