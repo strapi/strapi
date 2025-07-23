@@ -27,6 +27,7 @@ import { translatedErrors } from '../../../../utils/translatedErrors';
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleDescriptionBox } from './components/RoleDescriptionBox';
 import { RoleForm } from './components/RoleForm';
+import { AIPermissionAssistant } from './components/AIPermissionAssistant';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
   name: yup.string().required(translatedErrors.required.id),
@@ -55,6 +56,7 @@ const EditPage = () => {
 
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [aiGeneratedDescription, setAiGeneratedDescription] = React.useState<string>('');
+  const [showAIAssistant, setShowAIAssistant] = React.useState(false);
 
   const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
@@ -161,6 +163,13 @@ const EditPage = () => {
     }
   };
 
+  const handleAIPermissionChanges = (changes: any) => {
+    // Apply the changes through the permissions ref
+    if (permissionsRef.current) {
+      permissionsRef.current.applyAIChanges(changes);
+    }
+  };
+
   const handleGenerateDescription = async () => {
     if (!role.name || !permissions) return;
 
@@ -237,14 +246,14 @@ const EditPage = () => {
                 <Flex gap={2}>
                   <Button
                     size="S"
-                    variant="secondary"
+                    variant={showAIAssistant ? 'default' : 'tertiary'}
                     startIcon={<Sparkle />}
-                    loading={isGenerating}
-                    onClick={handleGenerateDescription}
+                    onClick={() => setShowAIAssistant(!showAIAssistant)}
+                    type="button"
                   >
                     {formatMessage({
-                      id: 'SSS',
-                      defaultMessage: 'Describe Permissions with AI',
+                      id: 'Settings.roles.ai-assistant',
+                      defaultMessage: 'AI Assistant',
                     })}
                   </Button>
                   <Button
@@ -283,6 +292,17 @@ const EditPage = () => {
                   onBlur={handleBlur}
                   role={role}
                 />
+                {showAIAssistant && !isFormDisabled && (
+                  <AIPermissionAssistant
+                    permissions={permissions}
+                    layout={permissionsLayout}
+                    onApplyChanges={handleAIPermissionChanges}
+                    roleId={id}
+                    roleName={role.name || ''}
+                    currentDescription={aiGeneratedDescription}
+                    onDescriptionGenerated={setAiGeneratedDescription}
+                  />
+                )}
                 <Box shadow="filterShadow" hasRadius>
                   <Permissions
                     isFormDisabled={isFormDisabled}

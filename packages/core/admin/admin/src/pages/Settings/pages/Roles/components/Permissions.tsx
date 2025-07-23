@@ -60,6 +60,7 @@ export interface PermissionsAPI {
   };
   resetForm: () => void;
   setFormAfterSubmit: () => void;
+  applyAIChanges?: (changes: any) => void;
 }
 
 interface PermissionsProps {
@@ -108,6 +109,150 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
         setFormAfterSubmit() {
           dispatch({ type: 'SET_FORM_AFTER_SUBMIT' });
         },
+        applyAIChanges(changes) {
+          console.log('=== AI Changes Debug ===');
+          console.log('Changes to apply:', changes);
+          console.log('Current modifiedData:', modifiedData);
+          
+          // Filter to only collection type changes for now
+          const collectionTypeChanges = changes.filter((change: any) => {
+            if (!change.contentType) return false;
+            const isCollectionType = layouts.collectionTypes?.subjects?.some(
+              (subject: any) => subject.uid === change.contentType
+            );
+            return isCollectionType;
+          });
+          
+          if (collectionTypeChanges.length === 0) {
+            console.log('No collection type changes to apply');
+            return;
+          }
+          
+          console.log(`Processing ${collectionTypeChanges.length} collection type changes`);
+          
+          // Check if we have bulk changes
+          const bulkChanges = collectionTypeChanges.filter((change: any) => change.type === 'bulk');
+          if (bulkChanges.length > 0) {
+            console.log('Processing bulk changes, action:', bulkChanges[0].action);
+            
+            // Check if we're applying to ALL content types or specific ones
+            const allCollectionTypes = layouts.collectionTypes?.subjects?.map((s: any) => s.uid) || [];
+            const targetContentTypes = bulkChanges.map((c: any) => c.contentType);
+            const isAllContentTypes = targetContentTypes.length === allCollectionTypes.length;
+            
+            console.log(`Applying to ${targetContentTypes.length} of ${allCollectionTypes.length} content types`);
+            console.log('Target content types:', targetContentTypes);
+            
+            if (isAllContentTypes) {
+              // Use global checkboxes for all content types
+              console.log('Using global checkboxes for all content types');
+              
+              // Determine what actions to set based on bulk action type
+              const bulkActionType = bulkChanges[0].action;
+              console.log('Bulk action type:', bulkActionType);
+              console.log('First bulk change actions:', bulkChanges[0].actions);
+              
+              let actionMap: Record<string, boolean> = {};
+              
+              if (bulkActionType === 'read-only') {
+                // For read-only, we intentionally modify ALL permissions
+                // This is a special pattern where we want to ensure ONLY read is enabled
+                actionMap = {
+                  'plugin::content-manager.explorer.read': true,     // Enable read
+                  'plugin::content-manager.explorer.create': false,  // Disable create
+                  'plugin::content-manager.explorer.update': false,  // Disable update
+                  'plugin::content-manager.explorer.delete': false,  // Disable delete
+                  'plugin::content-manager.explorer.publish': false  // Disable publish
+                };
+              } else if (bulkActionType === 'full-access') {
+                // For full-access, enable all requested permissions
+                // Build from the actual actions in the bulk changes
+                bulkChanges.forEach((bulkChange: any) => {
+                  if (bulkChange.actions) {
+                    bulkChange.actions.forEach((actionItem: any) => {
+                      // For full access, all should be add/modify (enable)
+                      actionMap[actionItem.action] = true;
+                    });
+                  }
+                });
+              } else {
+                // For other bulk changes, only change the permissions that are requested
+                actionMap = {};
+                
+                // Build action map based on what's actually being changed
+                bulkChanges.forEach((bulkChange: any) => {
+                  if (bulkChange.actions) {
+                    bulkChange.actions.forEach((actionItem: any) => {
+                      // Set true for add/modify, false for remove
+                      actionMap[actionItem.action] = actionItem.type !== 'remove';
+                    });
+                  }
+                });
+                
+                console.log('Action map for bulk changes:', actionMap);
+              }
+              
+              Object.entries(actionMap).forEach(([actionId, shouldEnable]) => {
+                console.log(`Setting ${actionId} to ${shouldEnable} globally`);
+                handleChangeCollectionTypeGlobalActionCheckbox(
+                  'collectionTypes',
+                  actionId,
+                  shouldEnable
+                );
+              });
+            } else {
+              // Apply to specific content types only
+              console.log('Applying to specific content types only');
+              
+              bulkChanges.forEach((bulkChange: any) => {
+                if (bulkChange.actions) {
+                  console.log(`Processing ${bulkChange.contentType}: ${bulkChange.actions.length} actions`, bulkChange.actions);
+                  
+                  // Apply each action
+                  bulkChange.actions.forEach((actionItem: any) => {
+                    // For add and modify, enable the permission
+                    // For remove, disable the permission
+                    const value = actionItem.type !== 'remove';
+                    
+                    // Check the current permission state to debug
+                    const currentPermission = get(modifiedData, ['collectionTypes', bulkChange.contentType, actionItem.action]);
+                    console.log(`Current permission state for ${bulkChange.contentType}.${actionItem.action}:`, currentPermission);
+                    
+                    // Check if this permission has properties (complex structure) or is simple
+                    const hasProperties = currentPermission && typeof currentPermission === 'object' && 'properties' in currentPermission;
+                    
+                    if (hasProperties) {
+                      // For permissions with properties, we need to use the parent checkbox handler
+                      const checkboxName = `collectionTypes..${bulkChange.contentType}..${actionItem.action}`;
+                      console.log(`Using parent checkbox handler for ${checkboxName} = ${value}`);
+                      handleChangeParentCheckbox({
+                        target: {
+                          name: checkboxName,
+                          value,
+                        }
+                      });
+                    } else {
+                      // For simple permissions, set the enabled property directly
+                      const checkboxName = `collectionTypes..${bulkChange.contentType}..${actionItem.action}..enabled`;
+                      console.log(`Using simple checkbox handler for ${checkboxName} = ${value}`);
+                      handleChangeSimpleCheckbox({
+                        target: {
+                          name: checkboxName,
+                          value,
+                        }
+                      });
+                    }
+                  });
+                }
+              });
+            }
+            
+            return; // Exit after processing bulk changes
+          }
+          
+          // All patterns are now handled through bulk changes above
+          // Since we're always creating bulk changes, this code path should not be reached
+        },
       } satisfies PermissionsAPI;
     });
 
@@ -138,6 +283,8 @@ const Permissions = React.forwardRef<PermissionsAPI, PermissionsProps>(
         value,
       });
     };
+    
+    const onChangeCollectionTypeGlobalActionCheckbox = handleChangeCollectionTypeGlobalActionCheckbox;
 
     const handleChangeConditions = (conditions: OnChangeConditionsAction['conditions']) => {
       dispatch({ type: 'ON_CHANGE_CONDITIONS', conditions });
