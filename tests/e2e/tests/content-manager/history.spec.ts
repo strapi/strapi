@@ -3,7 +3,6 @@ import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '..
 import { resetFiles } from '../../utils/file-reset';
 import { waitForRestart } from '../../utils/restart';
 import { sharedSetup } from '../../utils/setup';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
