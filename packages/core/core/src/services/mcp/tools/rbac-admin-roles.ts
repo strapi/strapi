@@ -89,31 +89,116 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           },
           description: 'Array of permission objects',
         },
+        // Search and filter parameters for list actions
+        search: {
+          type: 'string',
+          description:
+            'General search term for users (email, username, name) or roles (name, code, description)',
+        },
+        emailFilter: {
+          type: 'string',
+          description: 'Filter users by email (partial match)',
+        },
+        usernameFilter: {
+          type: 'string',
+          description: 'Filter users by username (partial match)',
+        },
+        firstnameFilter: {
+          type: 'string',
+          description: 'Filter users by first name (partial match)',
+        },
+        lastnameFilter: {
+          type: 'string',
+          description: 'Filter users by last name (partial match)',
+        },
+        isActiveFilter: {
+          type: 'boolean',
+          description: 'Filter users by active status',
+        },
+        roleNameFilter: {
+          type: 'string',
+          description: 'Filter roles by name (partial match)',
+        },
+        roleCodeFilter: {
+          type: 'string',
+          description: 'Filter roles by code (partial match)',
+        },
+        hasUsers: {
+          type: 'boolean',
+          description: 'Filter roles that have users assigned (true) or no users (false)',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of results to return (default: 20)',
+        },
+        offset: {
+          type: 'number',
+          description: 'Number of results to skip for pagination',
+        },
+        sortBy: {
+          type: 'string',
+          enum: [
+            'email',
+            'username',
+            'firstname',
+            'lastname',
+            'name',
+            'code',
+            'usersCount',
+            'permissionsCount',
+          ],
+          description: 'Field to sort by',
+        },
+        sortOrder: {
+          type: 'string',
+          enum: ['asc', 'desc'],
+          description: 'Sort order (asc or desc)',
+        },
+        detailed: {
+          type: 'boolean',
+          description: 'Return detailed information including populated relations (default: false)',
+        },
       },
       required: ['action'],
     },
   };
 
-  const handler = async (params: {
-    action: string;
-    userId?: string;
-    roleId?: string;
-    email?: string;
-    firstname?: string;
-    lastname?: string;
-    username?: string;
-    password?: string;
-    isActive?: boolean;
-    roleName?: string;
-    roleCode?: string;
-    roleDescription?: string;
-    permissions?: Array<{
-      action: string;
-      subject?: string;
-      properties?: Record<string, any>;
-      conditions?: string[];
-    }>;
-  }): Promise<any> => {
+  const handler = async (
+    params: {
+      action?: string;
+      userId?: string;
+      roleId?: string;
+      email?: string;
+      firstname?: string;
+      lastname?: string;
+      username?: string;
+      password?: string;
+      isActive?: boolean;
+      roleName?: string;
+      roleCode?: string;
+      roleDescription?: string;
+      permissions?: Array<{
+        action: string;
+        subject?: string;
+        properties?: Record<string, any>;
+        conditions?: string[];
+      }>;
+      search?: string;
+      emailFilter?: string;
+      usernameFilter?: string;
+      firstnameFilter?: string;
+      lastnameFilter?: string;
+      isActiveFilter?: boolean;
+      roleNameFilter?: string;
+      roleCodeFilter?: string;
+      hasUsers?: boolean;
+      limit?: number;
+      offset?: number;
+      sortBy?: string;
+      sortOrder?: string;
+      detailed?: boolean;
+    } = {}
+  ): Promise<any> => {
     const {
       action,
       userId,
@@ -128,7 +213,25 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       roleCode,
       roleDescription,
       permissions,
+      search,
+      emailFilter,
+      usernameFilter,
+      firstnameFilter,
+      lastnameFilter,
+      isActiveFilter,
+      roleNameFilter,
+      roleCodeFilter,
+      hasUsers,
+      limit = 20,
+      offset,
+      sortBy,
+      sortOrder,
+      detailed = false,
     } = params;
+
+    if (!action) {
+      return { error: 'Action parameter is required' };
+    }
 
     // User management actions
     if (action === 'get_user') {
@@ -170,27 +273,112 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
 
     if (action === 'list_users') {
       try {
-        const users = await strapi.db.query('admin::user').findMany({
+        let users = await strapi.db.query('admin::user').findMany({
           populate: ['roles'],
         });
-        return {
-          action: 'list_users',
-          users: users.map((user: any) => ({
-            id: user.id,
-            email: user.email,
-            firstname: user.firstname,
-            lastname: user.lastname,
-            username: user.username,
-            isActive: user.isActive,
-            blocked: user.blocked,
-            roles:
-              user.roles?.map((role: any) => ({
+
+        // Apply filters
+        if (search) {
+          const searchLower = search.toLowerCase();
+          users = users.filter(
+            (user: any) =>
+              user.email?.toLowerCase().includes(searchLower) ||
+              user.username?.toLowerCase().includes(searchLower) ||
+              user.firstname?.toLowerCase().includes(searchLower) ||
+              user.lastname?.toLowerCase().includes(searchLower)
+          );
+        }
+
+        if (emailFilter) {
+          const emailLower = emailFilter.toLowerCase();
+          users = users.filter((user: any) => user.email?.toLowerCase().includes(emailLower));
+        }
+
+        if (usernameFilter) {
+          const usernameLower = usernameFilter.toLowerCase();
+          users = users.filter((user: any) => user.username?.toLowerCase().includes(usernameLower));
+        }
+
+        if (firstnameFilter) {
+          const firstnameLower = firstnameFilter.toLowerCase();
+          users = users.filter((user: any) =>
+            user.firstname?.toLowerCase().includes(firstnameLower)
+          );
+        }
+
+        if (lastnameFilter) {
+          const lastnameLower = lastnameFilter.toLowerCase();
+          users = users.filter((user: any) => user.lastname?.toLowerCase().includes(lastnameLower));
+        }
+
+        if (isActiveFilter !== undefined) {
+          users = users.filter((user: any) => user.isActive === isActiveFilter);
+        }
+
+        // Apply sorting
+        if (sortBy) {
+          users.sort((a: any, b: any) => {
+            const aVal = a[sortBy] || '';
+            const bVal = b[sortBy] || '';
+            const comparison = aVal.localeCompare(bVal);
+            return sortOrder === 'desc' ? -comparison : comparison;
+          });
+        }
+
+        const totalCount = users.length;
+
+        // Apply pagination
+        if (offset) {
+          users = users.slice(offset);
+        }
+        if (limit) {
+          users = users.slice(0, limit);
+        }
+
+        // Apply progressive disclosure based on detailed flag
+        const responseUsers = users.map((user: any) => {
+          if (detailed) {
+            return {
+              id: user.id,
+              email: user.email,
+              firstname: user.firstname,
+              lastname: user.lastname,
+              username: user.username,
+              isActive: user.isActive,
+              blocked: user.blocked,
+              roles: (Array.isArray(user.roles) ? user.roles : []).map((role: any) => ({
                 id: role.id,
                 name: role.name,
                 code: role.code,
-              })) || [],
-          })),
+              })),
+            };
+          }
+          return {
+            id: user.id,
+            email: user.email,
+            isActive: user.isActive,
+            rolesCount: (Array.isArray(user.roles) ? user.roles : []).length,
+          };
+        });
+
+        return {
+          action: 'list_users',
+          users: responseUsers,
           count: users.length,
+          totalCount,
+          detailed,
+          filters: {
+            search,
+            emailFilter,
+            usernameFilter,
+            firstnameFilter,
+            lastnameFilter,
+            isActiveFilter,
+            limit,
+            offset,
+            sortBy,
+            sortOrder,
+          },
         };
       } catch (error) {
         return { error: error instanceof Error ? error.message : 'Failed to list users' };
@@ -325,20 +513,94 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
 
     if (action === 'list_roles') {
       try {
-        const roles = await strapi.db.query('admin::role').findMany({
+        let roles = await strapi.db.query('admin::role').findMany({
           populate: ['users', 'permissions'],
         });
-        return {
-          action: 'list_roles',
-          roles: roles.map((role: any) => ({
+
+        // Apply filters
+        if (search) {
+          const searchLower = search.toLowerCase();
+          roles = roles.filter(
+            (role: any) =>
+              role.name?.toLowerCase().includes(searchLower) ||
+              role.code?.toLowerCase().includes(searchLower) ||
+              role.description?.toLowerCase().includes(searchLower)
+          );
+        }
+
+        if (roleNameFilter) {
+          const nameLower = roleNameFilter.toLowerCase();
+          roles = roles.filter((role: any) => role.name?.toLowerCase().includes(nameLower));
+        }
+
+        if (roleCodeFilter) {
+          const codeLower = roleCodeFilter.toLowerCase();
+          roles = roles.filter((role: any) => role.code?.toLowerCase().includes(codeLower));
+        }
+
+        if (hasUsers !== undefined) {
+          roles = roles.filter((role: any) => {
+            const hasUsersAssigned = Array.isArray(role.users) && role.users.length > 0;
+            return hasUsers ? hasUsersAssigned : !hasUsersAssigned;
+          });
+        }
+
+        // Apply sorting
+        if (sortBy) {
+          roles.sort((a: any, b: any) => {
+            const aVal = a[sortBy] || '';
+            const bVal = b[sortBy] || '';
+            const comparison = aVal.localeCompare(bVal);
+            return sortOrder === 'desc' ? -comparison : comparison;
+          });
+        }
+
+        const totalCount = roles.length;
+
+        // Apply pagination
+        if (offset) {
+          roles = roles.slice(offset);
+        }
+        if (limit) {
+          roles = roles.slice(0, limit);
+        }
+
+        // Apply progressive disclosure based on detailed flag
+        const responseRoles = roles.map((role: any) => {
+          if (detailed) {
+            return {
+              id: role.id,
+              name: role.name,
+              code: role.code,
+              description: role.description,
+              usersCount: role.users?.length || 0,
+              permissionsCount: role.permissions?.length || 0,
+            };
+          }
+          return {
             id: role.id,
             name: role.name,
-            code: role.code,
-            description: role.description,
             usersCount: role.users?.length || 0,
             permissionsCount: role.permissions?.length || 0,
-          })),
+          };
+        });
+
+        return {
+          action: 'list_roles',
+          roles: responseRoles,
           count: roles.length,
+          totalCount,
+          detailed,
+          filters: {
+            search,
+            roleNameFilter,
+            roleCodeFilter,
+            hasUsers,
+            limit,
+            offset,
+            sortBy,
+            sortOrder,
+          },
         };
       } catch (error) {
         return { error: error instanceof Error ? error.message : 'Failed to list roles' };
@@ -434,14 +696,15 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
         return {
           action: 'get_role_permissions',
           roleId,
-          permissions:
-            role.permissions?.map((permission: any) => ({
+          permissions: (Array.isArray(role.permissions) ? role.permissions : []).map(
+            (permission: any) => ({
               id: permission.id,
               action: permission.action,
               subject: permission.subject,
               properties: permission.properties,
               conditions: permission.conditions,
-            })) || [],
+            })
+          ),
         };
       } catch (error) {
         return { error: error instanceof Error ? error.message : 'Failed to get role permissions' };
@@ -477,8 +740,43 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
         return { error: 'Permissions array is required for add_permissions_to_role action' };
       }
       try {
+        // Process permissions to include field properties for content types
+        const processedPermissions = await Promise.all(
+          permissions.map(async (permission) => {
+            // Get fields for content type permissions
+            let properties = permission.properties || {};
+            if (
+              permission.subject &&
+              permission.action.includes('plugin::content-manager.explorer')
+            ) {
+              try {
+                // Get the content type definition from the content type builder
+                const contentType = (strapi.contentTypes as any)[permission.subject];
+                if (contentType && contentType.attributes) {
+                  const fields = Object.keys(contentType.attributes).filter(
+                    (key) =>
+                      key !== 'id' &&
+                      key !== 'createdAt' &&
+                      key !== 'updatedAt' &&
+                      key !== 'publishedAt'
+                  );
+                  properties = { fields };
+                }
+              } catch (error) {
+                // If we can't get the content type, use empty properties
+                console.log('[MCP] Could not get content type fields for', permission.subject);
+              }
+            }
+
+            return {
+              ...permission,
+              properties,
+            };
+          })
+        );
+
         const roleService = strapi.admin.services.role;
-        await roleService.addPermissions(roleId, permissions);
+        await roleService.addPermissions(roleId, processedPermissions);
         return {
           action: 'add_permissions_to_role',
           message: 'Permissions added to role successfully',
@@ -508,12 +806,13 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
         }
 
         // Find permissions to remove
-        const permissionsToRemove =
-          role.permissions?.filter((permission: any) =>
-            permissions.some(
-              (p: any) => p.action === permission.action && p.subject === permission.subject
-            )
-          ) || [];
+        const permissionsToRemove = (
+          Array.isArray(role.permissions) ? role.permissions : []
+        ).filter((permission: any) =>
+          permissions.some(
+            (p: any) => p.action === permission.action && p.subject === permission.subject
+          )
+        );
 
         if (permissionsToRemove.length > 0) {
           const permissionService = strapi.admin.services.permission;

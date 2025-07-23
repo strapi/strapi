@@ -100,8 +100,12 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           };
 
         case 'notifications/initialized':
-          // This is a notification, not a request, so we don't return a response
-          return;
+          // This is a notification, not a request, so we return a success response
+          return {
+            jsonrpc: '2.0',
+            id,
+            result: { status: 'ok' },
+          };
 
         default:
           return {
@@ -169,10 +173,20 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
                   const request = JSON.parse(body) as MCPRequest;
                   const response = await handleRequest(request);
 
-                  // Don't send response for notifications
-                  if (response === undefined) {
-                    res.writeHead(204);
-                    res.end();
+                  // Always send a response
+                  if (!response) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(
+                      JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: request.id,
+                        error: {
+                          code: -32603,
+                          message: 'Internal error',
+                          data: 'No response generated',
+                        },
+                      })
+                    );
                     return;
                   }
 
@@ -363,9 +377,21 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           if (line.trim()) {
             handleRequest(JSON.parse(line.trim()))
               .then((response) => {
-                // Don't send response for notifications
-                if (response !== undefined) {
+                // Always send a response
+                if (response) {
                   console.log(JSON.stringify(response));
+                } else {
+                  console.log(
+                    JSON.stringify({
+                      jsonrpc: '2.0',
+                      id: null,
+                      error: {
+                        code: -32603,
+                        message: 'Internal error',
+                        data: 'No response generated',
+                      },
+                    })
+                  );
                 }
               })
               .catch((error) => {

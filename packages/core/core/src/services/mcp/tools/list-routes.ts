@@ -5,7 +5,7 @@ export const createListRoutesTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
     name: 'list_routes',
     description:
-      'Returns a list of registered Strapi routes filtered by prefix. Always provide a prefix parameter to avoid getting too many routes. Use "/admin" for admin routes, "/api" for REST API routes, or "/plugins" for plugin routes.',
+      'Returns a list of registered Strapi routes with filtering options. Always provide a prefix parameter to avoid getting too many routes.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -14,26 +14,134 @@ export const createListRoutesTool = (strapi: Core.Strapi): MCPToolHandler => {
           description:
             'Required prefix to filter routes (e.g., "/admin" for admin routes, "/api" for REST API routes). Always provide this to avoid overwhelming output.',
         },
+        method: {
+          type: 'string',
+          enum: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+          description: 'Filter by HTTP method',
+        },
+        path: {
+          type: 'string',
+          description: 'Search by path pattern (partial matching)',
+        },
+        handler: {
+          type: 'string',
+          description: 'Search by handler name (partial matching)',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of results to return (default: 20)',
+        },
+        offset: {
+          type: 'number',
+          description: 'Number of results to skip for pagination',
+        },
+        sortBy: {
+          type: 'string',
+          enum: ['path', 'method'],
+          description: 'Field to sort by',
+        },
+        sortOrder: {
+          type: 'string',
+          enum: ['asc', 'desc'],
+          description: 'Sort order (asc or desc)',
+        },
+        detailed: {
+          type: 'boolean',
+          description: 'Return detailed route information including handler names (default: false)',
+        },
       },
       required: ['prefix'],
     },
   };
 
-  const handler = async (params: { prefix?: string } = {}): Promise<any> => {
+  const handler = async (
+    params: {
+      prefix?: string;
+      method?: string;
+      path?: string;
+      handler?: string;
+      limit?: number;
+      offset?: number;
+      sortBy?: string;
+      sortOrder?: string;
+      detailed?: boolean;
+    } = {}
+  ): Promise<any> => {
+    const {
+      prefix,
+      method,
+      path,
+      handler,
+      limit = 20,
+      offset,
+      sortBy,
+      sortOrder,
+      detailed = false,
+    } = params;
+
+    if (!prefix) {
+      return { error: 'Prefix parameter is required' };
+    }
+
     // strapi.server.listRoutes() returns an array of Koa router stack entries
     let routes = strapi.server.listRoutes().map((layer: any) => ({
       methods: layer.methods,
       path: layer.path,
+      handler: layer.handler?.name || 'anonymous',
     }));
 
-    // Filter by prefix if provided
-    if (params.prefix) {
-      routes = routes.filter((route: any) => route.path.startsWith(params.prefix));
+    // Filter by prefix (required)
+    routes = routes.filter((route: any) => route.path.startsWith(prefix));
+
+    // Apply additional filters
+    if (method) {
+      routes = routes.filter((route: any) => route.methods.includes(method.toUpperCase()));
     }
 
+    if (path) {
+      const pathLower = path.toLowerCase();
+      routes = routes.filter((route: any) => route.path.toLowerCase().includes(pathLower));
+    }
+
+    if (handler) {
+      const handlerLower = handler.toLowerCase();
+      routes = routes.filter((route: any) => route.handler.toLowerCase().includes(handlerLower));
+    }
+
+    // Apply sorting
+    if (sortBy) {
+      routes.sort((a, b) => {
+        const aVal = (a as any)[sortBy] || '';
+        const bVal = (b as any)[sortBy] || '';
+        const comparison = aVal.localeCompare(bVal);
+        return sortOrder === 'desc' ? -comparison : comparison;
+      });
+    }
+
+    const totalCount = routes.length;
+
+    // Apply pagination
+    if (offset) {
+      routes = routes.slice(offset);
+    }
+    if (limit) {
+      routes = routes.slice(0, limit);
+    }
+
+    // Apply progressive disclosure based on detailed flag
+    const responseRoutes = detailed
+      ? routes
+      : routes.map((route) => ({
+          path: route.path,
+          method: route.methods[0] || 'GET', // Just show first method
+        }));
+
     return {
-      routes,
+      routes: responseRoutes,
       count: routes.length,
+      totalCount,
+      detailed,
+      filters: { prefix, method, path, handler, limit, offset, sortBy, sortOrder },
     };
   };
 

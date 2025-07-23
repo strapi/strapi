@@ -44,22 +44,107 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           type: 'boolean',
           description: 'Apply operation to all tokens (for bulk operations)',
         },
+        // Search and filter parameters for list_all action
+        search: {
+          type: 'string',
+          description: 'Search term to filter by name or description',
+        },
+        nameFilter: {
+          type: 'string',
+          description: 'Filter by exact name match',
+        },
+        typeFilter: {
+          type: 'string',
+          enum: ['read-only', 'full-access', 'custom'],
+          description: 'Filter by token type',
+        },
+        expired: {
+          type: 'boolean',
+          description: 'Filter by expiration status (true for expired, false for active)',
+        },
+        createdAfter: {
+          type: 'string',
+          description: 'Filter tokens created after this date (ISO string)',
+        },
+        createdBefore: {
+          type: 'string',
+          description: 'Filter tokens created before this date (ISO string)',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of results to return (default: 20)',
+        },
+        offset: {
+          type: 'number',
+          description: 'Number of results to skip for pagination',
+        },
+        sortBy: {
+          type: 'string',
+          enum: ['name', 'type', 'createdAt', 'expiresAt'],
+          description: 'Field to sort by',
+        },
+        sortOrder: {
+          type: 'string',
+          enum: ['asc', 'desc'],
+          description: 'Sort order (asc or desc)',
+        },
+        detailed: {
+          type: 'boolean',
+          description: 'Return detailed token information including permissions (default: false)',
+        },
       },
       required: ['action'],
     },
   };
 
-  const handler = async (params: {
-    action: string;
-    tokenId?: string;
-    name?: string;
-    description?: string;
-    type?: string;
-    lifespan?: string;
-    permissions?: string[];
-    applyToAll?: boolean;
-  }): Promise<any> => {
-    const { action, tokenId, name, description, type, lifespan, permissions, applyToAll } = params;
+  const handler = async (
+    params: {
+      action?: string;
+      tokenId?: string;
+      name?: string;
+      description?: string;
+      type?: string;
+      lifespan?: string;
+      permissions?: string[];
+      applyToAll?: boolean;
+      search?: string;
+      nameFilter?: string;
+      typeFilter?: string;
+      expired?: boolean;
+      createdAfter?: string;
+      createdBefore?: string;
+      limit?: number;
+      offset?: number;
+      sortBy?: string;
+      sortOrder?: string;
+      detailed?: boolean;
+    } = {}
+  ): Promise<any> => {
+    const {
+      action,
+      tokenId,
+      name,
+      description,
+      type,
+      lifespan,
+      permissions,
+      applyToAll,
+      search,
+      nameFilter,
+      typeFilter,
+      expired,
+      createdAfter,
+      createdBefore,
+      limit = 20,
+      offset,
+      sortBy,
+      sortOrder,
+      detailed = false,
+    } = params;
+
+    if (!action) {
+      return { error: 'Action parameter is required' };
+    }
 
     if (action === 'get') {
       if (!tokenId) {
@@ -291,19 +376,112 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
 
     if (action === 'list_all') {
       try {
-        const tokens = await strapi.db.query('admin::api-token').findMany();
-        return {
-          action: 'list_all',
-          tokens: tokens.map((token: any) => ({
+        let tokens = await strapi.db.query('admin::api-token').findMany();
+
+        // Apply filters
+        if (search) {
+          const searchLower = search.toLowerCase();
+          tokens = tokens.filter(
+            (token: any) =>
+              token.name?.toLowerCase().includes(searchLower) ||
+              token.description?.toLowerCase().includes(searchLower)
+          );
+        }
+
+        if (nameFilter) {
+          tokens = tokens.filter((token: any) => token.name === nameFilter);
+        }
+
+        if (typeFilter) {
+          tokens = tokens.filter((token: any) => token.type === typeFilter);
+        }
+
+        if (expired !== undefined) {
+          const now = new Date();
+          tokens = tokens.filter((token: any) => {
+            if (!token.expiresAt) return !expired; // No expiration = not expired
+            return expired ? new Date(token.expiresAt) < now : new Date(token.expiresAt) >= now;
+          });
+        }
+
+        if (createdAfter) {
+          const afterDate = new Date(createdAfter);
+          tokens = tokens.filter((token: any) => new Date(token.createdAt) >= afterDate);
+        }
+
+        if (createdBefore) {
+          const beforeDate = new Date(createdBefore);
+          tokens = tokens.filter((token: any) => new Date(token.createdAt) <= beforeDate);
+        }
+
+        // Apply sorting
+        if (sortBy) {
+          tokens.sort((a: any, b: any) => {
+            const aVal = a[sortBy] || '';
+            const bVal = b[sortBy] || '';
+            let comparison = 0;
+
+            if (typeof aVal === 'string' && typeof bVal === 'string') {
+              comparison = aVal.localeCompare(bVal);
+            } else if (aVal instanceof Date && bVal instanceof Date) {
+              comparison = aVal.getTime() - bVal.getTime();
+            } else if (aVal < bVal) comparison = -1;
+            else if (aVal > bVal) comparison = 1;
+            else comparison = 0;
+
+            return sortOrder === 'desc' ? -comparison : comparison;
+          });
+        }
+
+        const totalCount = tokens.length;
+
+        // Apply pagination
+        if (offset) {
+          tokens = tokens.slice(offset);
+        }
+        if (limit) {
+          tokens = tokens.slice(0, limit);
+        }
+
+        // Apply progressive disclosure based on detailed flag
+        const responseTokens = tokens.map((token: any) => {
+          if (detailed) {
+            return {
+              id: token.id,
+              name: token.name,
+              description: token.description,
+              type: token.type,
+              lifespan: token.lifespan,
+              expiresAt: token.expiresAt,
+              permissions: token.permissions || {},
+            };
+          }
+          return {
             id: token.id,
             name: token.name,
-            description: token.description,
             type: token.type,
-            lifespan: token.lifespan,
-            expiresAt: token.expiresAt,
-            permissions: token.permissions || {},
-          })),
+            permissionsCount: Object.keys(token.permissions || {}).length,
+          };
+        });
+
+        return {
+          action: 'list_all',
+          tokens: responseTokens,
           count: tokens.length,
+          totalCount,
+          detailed,
+          filters: {
+            search,
+            nameFilter,
+            typeFilter,
+            expired,
+            createdAfter,
+            createdBefore,
+            limit,
+            offset,
+            sortBy,
+            sortOrder,
+          },
         };
       } catch (error) {
         return { error: error instanceof Error ? error.message : 'Failed to list tokens' };

@@ -22,8 +22,12 @@ export const createLogTool = (strapi: Core.Strapi): MCPToolHandler => {
     },
   };
 
-  const handler = async (params: { message: string; level?: string }): Promise<any> => {
+  const handler = async (params: { message?: string; level?: string } = {}): Promise<any> => {
     const { message, level = 'info' } = params;
+
+    if (!message) {
+      return { error: 'Message parameter is required' };
+    }
 
     // Map level to appropriate logger method
     switch (level) {

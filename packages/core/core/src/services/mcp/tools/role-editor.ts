@@ -45,6 +45,34 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
           enum: ['content-types', 'plugins', 'settings', 'admin', 'api', 'all'],
           description: 'Permission category to filter by',
         },
+        search: {
+          type: 'string',
+          description: 'Search term to filter permissions by display name or action',
+        },
+        plugin: {
+          type: 'string',
+          description: 'Filter by specific plugin',
+        },
+        subCategory: {
+          type: 'string',
+          description: 'Filter by subcategory',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of results to return (default: 20)',
+        },
+        offset: {
+          type: 'number',
+          description: 'Number of results to skip for pagination',
+        },
+        detailed: {
+          type: 'boolean',
+          description: 'Return detailed permission information (default: false)',
+        },
+        grouped: {
+          type: 'boolean',
+          description: 'Group permissions by category for better overview (default: true)',
+        },
         permissions: {
           type: 'array',
           items: {
@@ -62,19 +90,28 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
     },
   };
 
-  const handler = async (params: {
-    action: string;
-    roleId?: string;
-    sourceRoleId?: string;
-    permissionAction?: string;
-    permissionSubject?: string;
-    category?: string;
-    permissions?: Array<{
-      action: string;
-      subject?: string;
-      enabled: boolean;
-    }>;
-  }): Promise<any> => {
+  const handler = async (
+    params: {
+      action?: string;
+      roleId?: string;
+      sourceRoleId?: string;
+      permissionAction?: string;
+      permissionSubject?: string;
+      category?: string;
+      search?: string;
+      plugin?: string;
+      subCategory?: string;
+      limit?: number;
+      offset?: number;
+      detailed?: boolean;
+      grouped?: boolean;
+      permissions?: Array<{
+        action: string;
+        subject?: string;
+        enabled: boolean;
+      }>;
+    } = {}
+  ): Promise<any> => {
     const {
       action,
       roleId,
@@ -82,8 +119,19 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
       permissionAction,
       permissionSubject,
       category,
+      search,
+      plugin,
+      subCategory,
+      limit = 20,
+      offset,
+      detailed = false,
+      grouped = true,
       permissions,
     } = params;
+
+    if (!action) {
+      return { error: 'Action parameter is required' };
+    }
 
     if (action === 'get_role_permissions') {
       if (!roleId) {
@@ -100,30 +148,60 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
 
         // Group permissions by category for easier reading
         const groupedPermissions: Record<string, any[]> = {};
-        const allPermissions = role.permissions || [];
+        const allPermissions = Array.isArray(role.permissions) ? role.permissions : [];
 
         allPermissions.forEach((permission: any) => {
-          const actionParts = permission.action.split('::');
-          const category = actionParts[0] || 'other';
-          if (!groupedPermissions[category]) {
-            groupedPermissions[category] = [];
+          if (permission && permission.action) {
+            const actionParts = permission.action.split('::');
+            const category = actionParts[0] || 'other';
+            if (!groupedPermissions[category]) {
+              groupedPermissions[category] = [];
+            }
+            groupedPermissions[category].push({
+              id: permission.id,
+              action: permission.action,
+              subject: permission.subject || null,
+              properties: permission.properties || {},
+              conditions: permission.conditions || [],
+            });
           }
-          groupedPermissions[category].push({
-            id: permission.id,
-            action: permission.action,
-            subject: permission.subject,
-            properties: permission.properties,
-            conditions: permission.conditions,
-          });
         });
+
+        // Apply smart grouping and progressive disclosure
+        let responsePermissions;
+        if (grouped) {
+          if (detailed) {
+            responsePermissions = groupedPermissions;
+          } else {
+            // Return category summaries with minimal data
+            responsePermissions = Object.entries(groupedPermissions).map(([category, perms]) => ({
+              category,
+              count: perms.length,
+              // Only include a few example permissions per category
+              examples: perms.slice(0, 3).map((p) => p.action),
+            }));
+          }
+        } else {
+          // Flatten permissions
+          const flatPermissions = Object.values(groupedPermissions).flat();
+          if (detailed) {
+            responsePermissions = flatPermissions;
+          } else {
+            responsePermissions = flatPermissions.map((p) => ({
+              action: p.action,
+            }));
+          }
+        }
 
         return {
           action: 'get_role_permissions',
           roleId,
           roleName: role.name,
           roleCode: role.code,
-          permissions: groupedPermissions,
+          permissions: responsePermissions,
           totalPermissions: allPermissions.length,
+          detailed,
+          grouped,
         };
       } catch (error) {
         return { error: error instanceof Error ? error.message : 'Failed to get role permissions' };
@@ -140,14 +218,40 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
 
       try {
         // Convert the simplified permissions format to Strapi's format
-        const strapiPermissions = permissions
-          .filter((p) => p.enabled)
-          .map((p) => ({
-            action: p.action,
-            subject: p.subject || null,
-            properties: {},
-            conditions: [],
-          }));
+        const strapiPermissions = await Promise.all(
+          permissions
+            .filter((p) => p.enabled)
+            .map(async (p) => {
+              // Get fields for content type permissions
+              let properties = {};
+              if (p.subject && p.action.includes('plugin::content-manager.explorer')) {
+                try {
+                  // Get the content type definition from the content type builder
+                  const contentType = (strapi.contentTypes as any)[p.subject];
+                  if (contentType && contentType.attributes) {
+                    const fields = Object.keys(contentType.attributes).filter(
+                      (key) =>
+                        key !== 'id' &&
+                        key !== 'createdAt' &&
+                        key !== 'updatedAt' &&
+                        key !== 'publishedAt'
+                    );
+                    properties = { fields };
+                  }
+                } catch (error) {
+                  // If we can't get the content type, use empty properties
+                  console.log('[MCP] Could not get content type fields for', p.subject);
+                }
+              }
+
+              return {
+                action: p.action,
+                subject: p.subject || null,
+                properties,
+                conditions: [],
+              };
+            })
+        );
 
         const roleService = strapi.admin.services.role;
         await roleService.assignPermissions(roleId, strapiPermissions);
@@ -174,10 +278,32 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
       }
 
       try {
+        // Get fields for content type permissions
+        let properties = {};
+        if (permissionSubject && permissionAction.includes('plugin::content-manager.explorer')) {
+          try {
+            // Get the content type definition from the content type builder
+            const contentType = (strapi.contentTypes as any)[permissionSubject];
+            if (contentType && contentType.attributes) {
+              const fields = Object.keys(contentType.attributes).filter(
+                (key) =>
+                  key !== 'id' &&
+                  key !== 'createdAt' &&
+                  key !== 'updatedAt' &&
+                  key !== 'publishedAt'
+              );
+              properties = { fields };
+            }
+          } catch (error) {
+            // If we can't get the content type, use empty properties
+            console.log('[MCP] Could not get content type fields for', permissionSubject);
+          }
+        }
+
         const permission = {
           action: permissionAction,
           subject: permissionSubject || null,
-          properties: {},
+          properties,
           conditions: [],
         };
 
@@ -216,7 +342,7 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
         }
 
         // Find permission to remove
-        const permissionToRemove = role.permissions?.find(
+        const permissionToRemove = (Array.isArray(role.permissions) ? role.permissions : []).find(
           (permission: any) =>
             permission.action === permissionAction &&
             permission.subject === (permissionSubject || null)
@@ -250,22 +376,27 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
         const permissionService = strapi.admin.services.permission;
         const actions = permissionService.actionProvider.values();
 
+        // Ensure actions is an array
+        const actionsArray = Array.isArray(actions) ? actions : [];
+
         // Group actions by category
         const categories: Record<string, any> = {};
-        actions.forEach((action: any) => {
-          const category = action.section || 'other';
-          if (!categories[category]) {
-            categories[category] = {
-              name: category,
-              actions: [],
-            };
+        actionsArray.forEach((action: any) => {
+          if (action && action.section) {
+            const category = action.section || 'other';
+            if (!categories[category]) {
+              categories[category] = {
+                name: category,
+                actions: [],
+              };
+            }
+            categories[category].actions.push({
+              actionId: action.actionId,
+              displayName: action.displayName,
+              plugin: action.plugin,
+              subCategory: action.subCategory,
+            });
           }
-          categories[category].actions.push({
-            actionId: action.actionId,
-            displayName: action.displayName,
-            plugin: action.plugin,
-            subCategory: action.subCategory,
-          });
         });
 
         return {
@@ -285,22 +416,78 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
         const permissionService = strapi.admin.services.permission;
         const actions = permissionService.actionProvider.values();
 
-        let filteredActions = actions;
+        // Ensure actions is an array
+        let filteredActions = Array.isArray(actions) ? actions : [];
+
+        // Apply category filter
         if (category && category !== 'all') {
-          filteredActions = actions.filter((action: any) => action.section === category);
+          filteredActions = filteredActions.filter(
+            (action: any) => action && action.section === category
+          );
         }
+
+        // Apply search filter
+        if (search) {
+          const searchLower = search.toLowerCase();
+          filteredActions = filteredActions.filter(
+            (action: any) =>
+              action &&
+              (action.displayName?.toLowerCase().includes(searchLower) ||
+                action.actionId?.toLowerCase().includes(searchLower))
+          );
+        }
+
+        // Apply plugin filter
+        if (plugin) {
+          const pluginLower = plugin.toLowerCase();
+          filteredActions = filteredActions.filter(
+            (action: any) => action && action.plugin?.toLowerCase().includes(pluginLower)
+          );
+        }
+
+        // Apply subcategory filter
+        if (subCategory) {
+          const subCategoryLower = subCategory.toLowerCase();
+          filteredActions = filteredActions.filter(
+            (action: any) => action && action.subCategory?.toLowerCase().includes(subCategoryLower)
+          );
+        }
+
+        const totalCount = filteredActions.length;
+
+        // Apply pagination
+        if (offset) {
+          filteredActions = filteredActions.slice(offset);
+        }
+        if (limit) {
+          filteredActions = filteredActions.slice(0, limit);
+        }
+
+        // Apply progressive disclosure based on detailed flag
+        const responsePermissions = filteredActions.map((action: any) => {
+          if (detailed) {
+            return {
+              actionId: action.actionId,
+              displayName: action.displayName,
+              plugin: action.plugin,
+              section: action.section,
+              subCategory: action.subCategory,
+            };
+          }
+          return {
+            actionId: action.actionId,
+            displayName: action.displayName,
+          };
+        });
 
         return {
           action: 'list_available_permissions',
           category: category || 'all',
-          permissions: filteredActions.map((action: any) => ({
-            actionId: action.actionId,
-            displayName: action.displayName,
-            plugin: action.plugin,
-            section: action.section,
-            subCategory: action.subCategory,
-          })),
+          permissions: responsePermissions,
           count: filteredActions.length,
+          totalCount,
+          detailed,
+          filters: { category, search, plugin, subCategory, limit, offset },
         };
       } catch (error) {
         return {
@@ -377,7 +564,7 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
         }
 
         // Remove all permissions
-        const currentPermissions = role.permissions || [];
+        const currentPermissions = Array.isArray(role.permissions) ? role.permissions : [];
         if (currentPermissions.length > 0) {
           const permissionService = strapi.admin.services.permission;
           await permissionService.deleteByIds(currentPermissions.map((p: any) => p.id));
