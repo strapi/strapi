@@ -238,16 +238,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     if ('data' in res) {
       dispatch(login({ token: res.data.token }));
 
-      const { roles } = res.data.user;
-
-      if (roles) {
-        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
-
-        if (isUserSuperAdmin) {
-          trackUsage('didLaunchGuidedtour');
-        }
-      }
-
       if (news) {
         // Only enable EE survey if user accepted the newsletter
         setNpsSurveySettings((s) => ({ ...s, enabled: true }));
