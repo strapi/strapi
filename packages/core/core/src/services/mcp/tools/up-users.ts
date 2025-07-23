@@ -99,6 +99,12 @@ export const createUPUsersTool = (strapi: Core.Strapi): MCPToolHandler => {
           type: 'boolean',
           description: 'Return detailed user information (default: false)',
         },
+        fields: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'Array of specific fields to include in the response. If provided, overrides detailed setting.',
+        },
       },
       required: ['action'],
     },
@@ -125,6 +131,7 @@ export const createUPUsersTool = (strapi: Core.Strapi): MCPToolHandler => {
       sortBy?: string;
       sortOrder?: string;
       detailed?: boolean;
+      fields?: string[];
     } = {}
   ): Promise<any> => {
     const {
@@ -147,6 +154,7 @@ export const createUPUsersTool = (strapi: Core.Strapi): MCPToolHandler => {
       sortBy,
       sortOrder,
       detailed = false,
+      fields,
     } = params;
 
     if (!action) {
@@ -206,18 +214,32 @@ export const createUPUsersTool = (strapi: Core.Strapi): MCPToolHandler => {
           .query('plugin::users-permissions.user')
           .count(query.where);
 
-        // Apply progressive disclosure
-        const responseUsers = detailed
-          ? users
-          : users.map((user: any) => ({
-              id: user.id,
-              email: user.email,
-              username: user.username,
-              confirmed: user.confirmed,
-              blocked: user.blocked,
-              role: user.role ? { id: user.role.id, name: user.role.name } : null,
-              createdAt: user.createdAt,
-            }));
+        // Apply progressive disclosure based on detailed and fields flags
+        let responseUsers;
+        if (fields && fields.length > 0) {
+          // Return only specified fields when fields parameter is provided
+          responseUsers = users.map((user: any) => {
+            const filtered: any = {};
+            fields.forEach((field) => {
+              if (Object.prototype.hasOwnProperty.call(user, field)) {
+                filtered[field] = user[field];
+              }
+            });
+            return filtered;
+          });
+        } else if (detailed) {
+          responseUsers = users;
+        } else {
+          responseUsers = users.map((user: any) => ({
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            confirmed: user.confirmed,
+            blocked: user.blocked,
+            role: user.role ? { id: user.role.id, name: user.role.name } : null,
+            createdAt: user.createdAt,
+          }));
+        }
 
         return {
           action: 'list_users',
@@ -225,6 +247,7 @@ export const createUPUsersTool = (strapi: Core.Strapi): MCPToolHandler => {
           count: users.length,
           totalCount,
           detailed,
+          fields: fields || null,
           filters: {
             search,
             emailFilter,

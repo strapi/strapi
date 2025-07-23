@@ -103,6 +103,12 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           type: 'boolean',
           description: 'Return detailed token information including permissions (default: false)',
         },
+        fields: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'Array of specific fields to include in the response. If provided, overrides detailed setting.',
+        },
       },
       required: ['action'],
     },
@@ -129,6 +135,7 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
       sortBy?: string;
       sortOrder?: string;
       detailed?: boolean;
+      fields?: string[];
     } = {}
   ): Promise<any> => {
     const {
@@ -151,6 +158,7 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
       sortBy,
       sortOrder,
       detailed = false,
+      fields,
     } = params;
 
     if (!action) {
@@ -450,8 +458,18 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           tokens = tokens.slice(0, limit);
         }
 
-        // Apply progressive disclosure based on detailed flag
+        // Apply progressive disclosure based on detailed and fields flags
         const responseTokens = tokens.map((token: any) => {
+          if (fields && fields.length > 0) {
+            // Return only specified fields when fields parameter is provided
+            const filtered: any = {};
+            fields.forEach((field) => {
+              if (Object.prototype.hasOwnProperty.call(token, field)) {
+                filtered[field] = token[field];
+              }
+            });
+            return filtered;
+          }
           if (detailed) {
             return {
               id: token.id,
@@ -477,6 +495,7 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           count: tokens.length,
           totalCount,
           detailed,
+          fields: fields || null,
           filters: {
             search,
             nameFilter,

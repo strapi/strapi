@@ -158,6 +158,12 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           type: 'boolean',
           description: 'Return detailed information including populated relations (default: false)',
         },
+        fields: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'Array of specific fields to include in the response. If provided, overrides detailed setting.',
+        },
       },
       required: ['action'],
     },
@@ -197,6 +203,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       sortBy?: string;
       sortOrder?: string;
       detailed?: boolean;
+      fields?: string[];
     } = {}
   ): Promise<any> => {
     const {
@@ -227,6 +234,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       sortBy,
       sortOrder,
       detailed = false,
+      fields,
     } = params;
 
     if (!action) {
@@ -335,8 +343,18 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           users = users.slice(0, limit);
         }
 
-        // Apply progressive disclosure based on detailed flag
+        // Apply progressive disclosure based on detailed and fields flags
         const responseUsers = users.map((user: any) => {
+          if (fields && fields.length > 0) {
+            // Return only specified fields when fields parameter is provided
+            const filtered: any = {};
+            fields.forEach((field) => {
+              if (Object.prototype.hasOwnProperty.call(user, field)) {
+                filtered[field] = user[field];
+              }
+            });
+            return filtered;
+          }
           if (detailed) {
             return {
               id: user.id,
@@ -367,6 +385,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           count: users.length,
           totalCount,
           detailed,
+          fields: fields || null,
           filters: {
             search,
             emailFilter,

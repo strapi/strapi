@@ -51,6 +51,12 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
           type: 'boolean',
           description: 'Return only essential fields: uid, displayName, kind (default: true)',
         },
+        fields: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'Array of specific fields to include in the response. If provided, overrides minimal/detailed settings.',
+        },
       },
       required: [],
     },
@@ -68,6 +74,7 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       sortOrder?: string;
       detailed?: boolean;
       minimal?: boolean;
+      fields?: string[];
     } = {}
   ): Promise<any> => {
     const {
@@ -81,6 +88,7 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       sortOrder,
       detailed = false,
       minimal = true,
+      fields,
     } = params;
 
     // Get all content types with minimal data by default
@@ -138,9 +146,20 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       contentTypes = contentTypes.slice(0, limit);
     }
 
-    // Apply progressive disclosure based on detailed and minimal flags
+    // Apply progressive disclosure based on detailed, minimal, and fields flags
     let responseContentTypes;
-    if (detailed) {
+    if (fields && fields.length > 0) {
+      // Return only specified fields when fields parameter is provided
+      responseContentTypes = contentTypes.map((ct) => {
+        const filtered: any = {};
+        fields.forEach((field) => {
+          if (Object.prototype.hasOwnProperty.call(ct, field)) {
+            filtered[field] = (ct as any)[field];
+          }
+        });
+        return filtered;
+      });
+    } else if (detailed) {
       // Return full data when detailed is requested
       responseContentTypes = contentTypes;
     } else if (minimal) {
@@ -169,6 +188,7 @@ export const createListContentTypesTool = (strapi: Core.Strapi): MCPToolHandler 
       totalCount,
       detailed,
       minimal,
+      fields: fields || null,
       filters: { search, kind, plugin, uid, limit, offset, sortBy, sortOrder },
     };
   };

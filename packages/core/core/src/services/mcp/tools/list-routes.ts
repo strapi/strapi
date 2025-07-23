@@ -49,6 +49,12 @@ export const createListRoutesTool = (strapi: Core.Strapi): MCPToolHandler => {
           type: 'boolean',
           description: 'Return detailed route information including handler names (default: false)',
         },
+        fields: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'Array of specific fields to include in the response. If provided, overrides detailed setting.',
+        },
       },
       required: ['prefix'],
     },
@@ -65,6 +71,7 @@ export const createListRoutesTool = (strapi: Core.Strapi): MCPToolHandler => {
       sortBy?: string;
       sortOrder?: string;
       detailed?: boolean;
+      fields?: string[];
     } = {}
   ): Promise<any> => {
     const {
@@ -77,6 +84,7 @@ export const createListRoutesTool = (strapi: Core.Strapi): MCPToolHandler => {
       sortBy,
       sortOrder,
       detailed = false,
+      fields,
     } = params;
 
     if (!prefix) {
@@ -128,19 +136,36 @@ export const createListRoutesTool = (strapi: Core.Strapi): MCPToolHandler => {
       routes = routes.slice(0, limit);
     }
 
-    // Apply progressive disclosure based on detailed flag
-    const responseRoutes = detailed
-      ? routes
-      : routes.map((route) => ({
-          path: route.path,
-          method: route.methods[0] || 'GET', // Just show first method
-        }));
+    // Apply progressive disclosure based on detailed and fields flags
+    let responseRoutes;
+    if (fields && fields.length > 0) {
+      // Return only specified fields when fields parameter is provided
+      responseRoutes = routes.map((route) => {
+        const filtered: any = {};
+        fields.forEach((field) => {
+          if (Object.prototype.hasOwnProperty.call(route, field)) {
+            filtered[field] = (route as any)[field];
+          }
+        });
+        return filtered;
+      });
+    } else if (detailed) {
+      // Return full data when detailed is requested
+      responseRoutes = routes;
+    } else {
+      // Return minimal data for efficiency
+      responseRoutes = routes.map((route) => ({
+        path: route.path,
+        method: route.methods[0] || 'GET', // Just show first method
+      }));
+    }
 
     return {
       routes: responseRoutes,
       count: routes.length,
       totalCount,
       detailed,
+      fields: fields || null,
       filters: { prefix, method, path, handler, limit, offset, sortBy, sortOrder },
     };
   };
