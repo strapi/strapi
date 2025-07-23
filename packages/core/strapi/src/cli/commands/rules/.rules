@@ -3,6 +3,7 @@
 When generating Strapi content-types:
 
 1. **Always create files manually**: Never use `strapi generate` command - create all files manually for full control
+
 2. **Complete API creation**: When creating a content-type, ALWAYS create all 4 required files together:
 
    - Schema (content-type definition)
@@ -10,7 +11,17 @@ When generating Strapi content-types:
    - Service (business logic)
    - Routes (endpoint definitions)
 
-3. **Schema structure**: Content-types must have this exact schema.json structure:
+3. **File type enforcement**: If the project contains a `tsconfig.json` file, all controllers, services, and routes must be created as `.ts` TypeScript files. Otherwise, use `.js` files.
+
+4. **Populate and filter rules**: When implementing API endpoints, always use Strapi's built-in query parameters for filtering and population:
+
+   - Use `?filters[field][$operator]=value` for filtering
+   - Use `?populate=*` or `?populate[field]=true` for population
+   - Avoid N+1 queries by using the correct populate syntax for nested relations
+
+5. **Service API usage**: The Entity Service API (`strapi.entityService`) is deprecated. Always use the Document Service API (`strapi.documents()`) for all database operations in services and controllers.
+
+6. **Schema structure**: Content-types must have this exact schema.json structure:
 
 ```json
 {
@@ -32,7 +43,7 @@ When generating Strapi content-types:
 }
 ```
 
-4. **Required directory structure**: Create this exact directory structure manually:
+7. **Required directory structure**: Create this exact directory structure manually:
 
 ```
 ./src/api/[api-name]/
@@ -43,28 +54,28 @@ When generating Strapi content-types:
 └── routes/[content-type-name].js
 ```
 
-5. **Complete controller template**: Always create controller with this exact template:
+8. **Complete controller template**: Always create controller with this exact template:
 
 ```javascript
-const { createCoreController } = require("@strapi/strapi").factories;
+const { createCoreController } = require('@strapi/strapi').factories;
 
-module.exports = createCoreController("api::[api-name].[content-type-name]");
+module.exports = createCoreController('api::[api-name].[content-type-name]');
 ```
 
 6. **Complete service template**: Always create service with this exact template:
 
 ```javascript
-const { createCoreService } = require("@strapi/strapi").factories;
+const { createCoreService } = require('@strapi/strapi').factories;
 
-module.exports = createCoreService("api::[api-name].[content-type-name]");
+module.exports = createCoreService('api::[api-name].[content-type-name]');
 ```
 
 7. **Complete routes template**: Always create routes with this exact template:
 
 ```javascript
-const { createCoreRouter } = require("@strapi/strapi").factories;
+const { createCoreRouter } = require('@strapi/strapi').factories;
 
-module.exports = createCoreRouter("api::[api-name].[content-type-name]");
+module.exports = createCoreRouter('api::[api-name].[content-type-name]');
 ```
 
 8. **Naming conventions**: Use kebab-case for API names, proper singular/plural forms
@@ -79,14 +90,11 @@ When creating Strapi controllers:
 1. **Always use factory function**: Never create controllers without `createCoreController`
 
 ```javascript
-const { createCoreController } = require("@strapi/strapi").factories;
+const { createCoreController } = require('@strapi/strapi').factories;
 
-module.exports = createCoreController(
-  "api::restaurant.restaurant",
-  ({ strapi }) => ({
-    // custom methods here
-  })
-);
+module.exports = createCoreController('api::restaurant.restaurant', ({ strapi }) => ({
+  // custom methods here
+}));
 ```
 
 2. **Three customization approaches**:
@@ -119,23 +127,20 @@ When creating Strapi services:
 1. **Use factory function**: Always use `createCoreService`
 
 ```javascript
-const { createCoreService } = require("@strapi/strapi").factories;
+const { createCoreService } = require('@strapi/strapi').factories;
 
-module.exports = createCoreService(
-  "api::restaurant.restaurant",
-  ({ strapi }) => ({
-    // custom methods here
-  })
-);
+module.exports = createCoreService('api::restaurant.restaurant', ({ strapi }) => ({
+  // custom methods here
+}));
 ```
 
 2. **Prefer Document Service API**: Use `strapi.documents()` over Entity Service API
 
 ```javascript
 // Preferred approach
-const entries = await strapi.documents("api::restaurant.restaurant").findMany({
-  filters: { name: { $contains: "pizza" } },
-  populate: ["category"],
+const entries = await strapi.documents('api::restaurant.restaurant').findMany({
+  filters: { name: { $contains: 'pizza' } },
+  populate: ['category'],
 });
 ```
 
@@ -153,14 +158,14 @@ When configuring Strapi routes:
 1. **Core routes**: Use `createCoreRouter` for basic CRUD operations
 
 ```javascript
-const { createCoreRouter } = require("@strapi/strapi").factories;
+const { createCoreRouter } = require('@strapi/strapi').factories;
 
-module.exports = createCoreRouter("api::restaurant.restaurant", {
+module.exports = createCoreRouter('api::restaurant.restaurant', {
   config: {
     find: {
       auth: false, // public route
-      policies: ["policy-name"],
-      middlewares: ["middleware-name"],
+      policies: ['policy-name'],
+      middlewares: ['middleware-name'],
     },
   },
 });
@@ -172,9 +177,9 @@ module.exports = createCoreRouter("api::restaurant.restaurant", {
 module.exports = {
   routes: [
     {
-      method: "GET",
-      path: "/restaurants/custom",
-      handler: "restaurant.customMethod",
+      method: 'GET',
+      path: '/restaurants/custom',
+      handler: 'restaurant.customMethod',
       config: {
         policies: [],
         middlewares: [],
@@ -337,13 +342,13 @@ When configuring Strapi:
 // config/database.js
 module.exports = ({ env }) => ({
   connection: {
-    client: "postgres",
+    client: 'postgres',
     connection: {
-      host: env("DATABASE_HOST", "127.0.0.1"),
-      port: env.int("DATABASE_PORT", 5432),
-      database: env("DATABASE_NAME", "strapi"),
-      user: env("DATABASE_USERNAME", "strapi"),
-      password: env("DATABASE_PASSWORD", "strapi"),
+      host: env('DATABASE_HOST', '127.0.0.1'),
+      port: env.int('DATABASE_PORT', 5432),
+      database: env('DATABASE_NAME', 'strapi'),
+      user: env('DATABASE_USERNAME', 'strapi'),
+      password: env('DATABASE_PASSWORD', 'strapi'),
     },
   },
 });
