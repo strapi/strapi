@@ -9,6 +9,17 @@ on:
         options:
           - patch
           - minor
+          - prepatch
+          - preminor
+      distTag:
+        type: choice
+        description: 'NPM dist-tag'
+        default: 'latest'
+        options:
+          - latest
+          - beta
+          - rc
+          - alpha
 
 jobs:
   publish:
@@ -34,6 +45,7 @@ jobs:
       - run: ./scripts/publish.sh
         env:
           VERSION: ${{ github.event.inputs.version }}
-          DIST_TAG: 'latest'
+          DIST_TAG: ${{ github.event.inputs.distTag }}
+          PREID: ${{ github.event.inputs.distTag }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_ACTOR: ${{ github.actor }}
