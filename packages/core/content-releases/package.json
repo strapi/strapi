@@ -74,7 +74,7 @@
     "@strapi/admin": "4.25.23",
     "@strapi/admin-test-utils": "4.25.23",
     "@strapi/pack-up": "4.23.0",
-    "@strapi/strapi": "4.25.22",
+    "@strapi/strapi": "4.25.23",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
