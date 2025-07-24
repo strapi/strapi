@@ -4,6 +4,7 @@ import { extractCredentials } from '../utils';
 
 const accessKeyId = 'AWS_ACCESS_KEY_ID';
 const secretAccessKey = 'AWS_ACCESS_SECRET';
+const sessionToken = 'AWS_SESSION_TOKEN';
 
 const defaultOptions = {
   region: 'AWS_REGION',
@@ -31,6 +32,25 @@ describe('Utils', () => {
       expect(credentials).toEqual({
         accessKeyId,
         secretAccessKey,
+      });
+    });
+    test('Ensure sessionToken s3Options gets extracted when provided', () => {
+      const options: InitOptions = {
+        s3Options: {
+          credentials: {
+            accessKeyId,
+            secretAccessKey,
+            sessionToken,
+          },
+          ...defaultOptions,
+        },
+      };
+      const credentials = extractCredentials(options);
+
+      expect(credentials).toEqual({
+        accessKeyId,
+        secretAccessKey,
+        sessionToken,
       });
     });
     test('Does not throw an error when credentials are not present', () => {
