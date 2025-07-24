@@ -109,7 +109,7 @@ const ListPage = () => {
         startActions={
           <Filters.Root options={displayedFilters}>
             <Filters.Trigger />
-            <Filters.Popover />
+            <Filters.Popover zIndex={499} />
             <Filters.List />
           </Filters.Root>
         }
