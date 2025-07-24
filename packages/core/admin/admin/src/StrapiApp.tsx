@@ -9,7 +9,7 @@ import pick from 'lodash/pick';
 import { RouterProvider } from 'react-router-dom';
 import { DefaultTheme } from 'styled-components';
 
-import { ADMIN_PERMISSIONS_EE } from '../../ee/admin/src/constants';
+import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/admin/src/constants';
 
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
@@ -385,7 +385,7 @@ class StrapiApp {
               id: 'widget.last-activity.link',
               defaultMessage: 'Open Audit Logs',
             },
-            href: '/settings/audit-logs',
+            href: `/settings/audit-logs?pageSize=${AUDIT_LOGS_DEFAULT_PAGE_SIZE}&page=1&sort=date:DESC`,
           },
           permissions: [{ action: 'admin::audit-logs.read' }],
         },

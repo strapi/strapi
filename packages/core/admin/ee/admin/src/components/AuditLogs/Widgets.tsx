@@ -3,10 +3,10 @@ import { Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/desig
 import { Eye } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
-import { styled } from 'styled-components';
 
 import { useQueryParams } from '../../../../../admin/src/hooks/useQueryParams';
 import { AuditLog } from '../../../../../shared/contracts/audit-logs';
+import { AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../constants';
 import { useFormatTimeStamp } from '../../pages/SettingsPage/pages/AuditLogs/hooks/useFormatTimeStamp';
 import { getDefaultMessage } from '../../pages/SettingsPage/pages/AuditLogs/utils/getActionTypesDefaultMessages';
 import { useGetAuditLogsQuery } from '../../services/auditLogs';
@@ -18,7 +18,7 @@ const LastActivityTable = ({ items }: { items: AuditLog[] }) => {
   const navigate = useNavigate();
 
   const getAuditLogDetailsLink = (item: AuditLog): string => {
-    return `/settings/audit-logs?id=${item.id}`;
+    return `/settings/audit-logs?pageSize=${AUDIT_LOGS_DEFAULT_PAGE_SIZE}&page=1&sort=date:DESC&id=${item.id}`;
   };
 
   const handleRowClick = (document: AuditLog) => () => {
