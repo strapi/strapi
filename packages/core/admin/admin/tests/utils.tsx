@@ -41,6 +41,8 @@ import { adminApi } from '../src/services/api';
 import { server } from './server';
 import { initialState } from './store';
 
+import type { Widget } from '../src/core/apis/Widgets';
+
 setLogger({
   log: () => {},
   warn: () => {},
@@ -111,7 +113,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
             components={{}}
             rbac={new RBAC()}
             widgets={{
-              widgets: {},
+              widgets: {} as Record<string, Widget>,
               getAll: jest.fn(),
               register: jest.fn(),
             }}
