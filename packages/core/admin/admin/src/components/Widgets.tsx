@@ -194,28 +194,36 @@ const KeyStatisticsWidget = () => {
   return (
     <Grid>
       {Object.entries(keyStatisticsList).map(([key, item]) => {
-        const value = countKeyStatistics?.[key as keyof typeof countKeyStatistics] ?? 0;
+        const value = countKeyStatistics?.[key as keyof typeof countKeyStatistics];
         return (
-          <GridCell key={`key-statistics-${key}`} padding={3} data-testid={`stat-${key}`}>
-            <Flex alignItems="center" gap={2}>
-              <Flex
-                padding={2}
-                borderRadius={1}
-                background={item.icon.background}
-                color={item.icon.color}
-              >
-                {item.icon.component}
+          value !== null && (
+            <GridCell key={`key-statistics-${key}`} padding={3} data-testid={`stat-${key}`}>
+              <Flex alignItems="center" gap={2}>
+                <Flex
+                  padding={2}
+                  borderRadius={1}
+                  background={item.icon.background}
+                  color={item.icon.color}
+                >
+                  {item.icon.component}
+                </Flex>
+                <Flex direction="column" alignItems="flex-start">
+                  <Typography variant="pi" fontWeight="bold" textColor="neutral500">
+                    {formatMessage({
+                      id: item.label.key,
+                      defaultMessage: item.label.defaultMessage,
+                    })}
+                  </Typography>
+                  <Typography variant="omega" fontWeight="bold" textColor="neutral800">
+                    {formatNumber({
+                      locale,
+                      number: key === 'entries' ? totalCountEntries : value,
+                    })}
+                  </Typography>
+                </Flex>
               </Flex>
-              <Flex direction="column" alignItems="flex-start">
-                <Typography variant="pi" fontWeight="bold" textColor="neutral500">
-                  {formatMessage({ id: item.label.key, defaultMessage: item.label.defaultMessage })}
-                </Typography>
-                <Typography variant="omega" fontWeight="bold" textColor="neutral800">
-                  {formatNumber({ locale, number: key === 'entries' ? totalCountEntries : value })}
-                </Typography>
-              </Flex>
-            </Flex>
-          </GridCell>
+            </GridCell>
+          )
         );
       })}
     </Grid>
