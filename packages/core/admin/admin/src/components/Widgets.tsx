@@ -92,88 +92,91 @@ const KeyStatisticsWidget = () => {
     return <Widget.Error />;
   }
 
-  const mapping: {
-    [key: string]: {
-      label: string;
-      icon: {
-        file: React.ReactNode;
-        background: string;
-        color: string;
-      };
-    };
-  } = {
+  const keyStatisticsList = {
     entries: {
-      label: formatMessage({ id: 'widget.key-statistics.list.entries', defaultMessage: 'Entries' }),
+      label: {
+        key: 'widget.key-statistics.list.entries',
+        defaultMessage: 'Entries',
+      },
       icon: {
-        file: <Files />,
+        component: <Files />,
         background: 'primary100',
         color: 'primary600',
       },
     },
     assets: {
-      label: formatMessage({ id: 'widget.key-statistics.list.assets', defaultMessage: 'Assets' }),
+      label: {
+        key: 'widget.key-statistics.list.assets',
+        defaultMessage: 'Assets',
+      },
       icon: {
-        file: <Images />,
+        component: <Images />,
         background: 'warning100',
         color: 'warning600',
       },
     },
     contentTypes: {
-      label: formatMessage({
-        id: 'widget.key-statistics.list.contentTypes',
+      label: {
+        key: 'widget.key-statistics.list.contentTypes',
         defaultMessage: 'Content-Types',
-      }),
+      },
       icon: {
-        file: <Layout />,
+        component: <Layout />,
         background: 'secondary100',
         color: 'secondary600',
       },
     },
     components: {
-      label: formatMessage({
-        id: 'widget.key-statistics.list.components',
+      label: {
+        key: 'widget.key-statistics.list.components',
         defaultMessage: 'Components',
-      }),
+      },
       icon: {
-        file: <Graph />,
+        component: <Graph />,
         background: 'alternative100',
         color: 'alternative600',
       },
     },
     locales: {
-      label: formatMessage({ id: 'widget.key-statistics.list.locales', defaultMessage: 'Locales' }),
+      label: {
+        key: 'widget.key-statistics.list.locales',
+        defaultMessage: 'Locales',
+      },
       icon: {
-        file: <Earth />,
+        component: <Earth />,
         background: 'success100',
         color: 'success600',
       },
     },
     admins: {
-      label: formatMessage({ id: 'widget.key-statistics.list.admins', defaultMessage: 'Admins' }),
+      label: {
+        key: 'widget.key-statistics.list.admins',
+        defaultMessage: 'Admins',
+      },
       icon: {
-        file: <User />,
+        component: <User />,
         background: 'danger100',
         color: 'danger600',
       },
     },
     webhooks: {
-      label: formatMessage({
-        id: 'widget.key-statistics.list.webhooks',
+      label: {
+        key: 'widget.key-statistics.list.webhooks',
         defaultMessage: 'Webhooks',
-      }),
+      },
       icon: {
-        file: <Webhooks />,
+        component: <Webhooks />,
         background: 'alternative100',
         color: 'alternative600',
       },
     },
     apiTokens: {
-      label: formatMessage({
-        id: 'widget.key-statistics.list.apiTokens',
+      label: {
+        key: 'widget.key-statistics.list.apiTokens',
         defaultMessage: 'API Tokens',
-      }),
+      },
       icon: {
-        file: <Key />,
+        component: <Key />,
         background: 'neutral100',
         color: 'neutral600',
       },
@@ -190,36 +193,31 @@ const KeyStatisticsWidget = () => {
 
   return (
     <Grid>
-      {Object.entries({
-        entries: totalCountEntries,
-        ...countKeyStatistics,
-      }).map(
-        ([key, value]) =>
-          value !== null && (
-            <GridCell key={`key-statistics-${key}`} padding={3} data-testid={`stat-${key}`}>
-              <Flex alignItems="center" gap={2}>
-                {mapping[key] && (
-                  <Flex
-                    padding={2}
-                    borderRadius={1}
-                    background={mapping[key].icon.background}
-                    color={mapping[key].icon.color}
-                  >
-                    {mapping[key].icon.file}
-                  </Flex>
-                )}
-                <Flex direction="column" alignItems="flex-start">
-                  <Typography variant="pi" fontWeight="bold" textColor="neutral500">
-                    {mapping[key].label || key}
-                  </Typography>
-                  <Typography variant="omega" fontWeight="bold" textColor="neutral800">
-                    {formatNumber({ locale, number: value })}
-                  </Typography>
-                </Flex>
+      {Object.entries(keyStatisticsList).map(([key, item]) => {
+        const value = countKeyStatistics?.[key as keyof typeof countKeyStatistics] ?? 0;
+        return (
+          <GridCell key={`key-statistics-${key}`} padding={3} data-testid={`stat-${key}`}>
+            <Flex alignItems="center" gap={2}>
+              <Flex
+                padding={2}
+                borderRadius={1}
+                background={item.icon.background}
+                color={item.icon.color}
+              >
+                {item.icon.component}
               </Flex>
-            </GridCell>
-          )
-      )}
+              <Flex direction="column" alignItems="flex-start">
+                <Typography variant="pi" fontWeight="bold" textColor="neutral500">
+                  {formatMessage({ id: item.label.key, defaultMessage: item.label.defaultMessage })}
+                </Typography>
+                <Typography variant="omega" fontWeight="bold" textColor="neutral800">
+                  {formatNumber({ locale, number: key === 'entries' ? totalCountEntries : value })}
+                </Typography>
+              </Flex>
+            </Flex>
+          </GridCell>
+        );
+      })}
     </Grid>
   );
 };

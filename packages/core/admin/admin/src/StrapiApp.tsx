@@ -351,7 +351,7 @@ class StrapiApp {
         },
         pluginId: 'admin',
         id: 'key-statistics',
-        superAdminOnly: true,
+        roles: ['strapi-super-admin'],
       },
     ]);
 

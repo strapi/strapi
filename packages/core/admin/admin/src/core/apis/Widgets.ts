@@ -25,7 +25,7 @@ type WidgetArgs = {
   pluginId?: string;
   id: string;
   permissions?: Array<Pick<Permission, 'action'> & Partial<Omit<Permission, 'action'>>>;
-  superAdminOnly?: boolean;
+  roles?: string[];
 };
 
 type WidgetWithUID = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };

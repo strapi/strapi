@@ -138,7 +138,8 @@ const HomePageCE = () => {
     () =>
       getAllWidgets().filter(
         (widget) =>
-          !widget.superAdminOnly || user?.roles?.find(({ code }) => code === 'strapi-super-admin')
+          !widget.roles ||
+          user?.roles?.some((userRole) => widget.roles?.find((role) => userRole.code === role))
       ),
     [getAllWidgets, user?.roles]
   );
