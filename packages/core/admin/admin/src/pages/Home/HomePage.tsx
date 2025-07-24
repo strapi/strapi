@@ -16,6 +16,7 @@ import { useStrapiApp } from '../../features/StrapiApp';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
 import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
 
+import type { WidgetWithUID } from '../../core/apis/Widgets';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
@@ -26,34 +27,10 @@ interface WidgetRootProps extends Pick<WidgetType, 'title' | 'icon' | 'permissio
   children: React.ReactNode;
 }
 
-export const WidgetRoot = ({
-  title,
-  icon = PuzzlePiece,
-  permissions = [],
-  children,
-  link,
-}: WidgetRootProps) => {
+export const WidgetRoot = ({ title, icon = PuzzlePiece, children, link }: WidgetRootProps) => {
   const { formatMessage } = useIntl();
   const id = React.useId();
   const Icon = icon;
-
-  const [permissionStatus, setPermissionStatus] = React.useState<
-    'loading' | 'granted' | 'forbidden'
-  >('loading');
-  const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
-  React.useEffect(() => {
-    const checkPermissions = async () => {
-      const matchingPermissions = await checkUserHasPermissions(permissions);
-      const shouldGrant = matchingPermissions.length >= permissions.length;
-      setPermissionStatus(shouldGrant ? 'granted' : 'forbidden');
-    };
-
-    if (!permissions || permissions.length === 0) {
-      setPermissionStatus('granted');
-    } else {
-      checkPermissions();
-    }
-  }, [checkUserHasPermissions, permissions]);
 
   return (
     <Flex
@@ -90,8 +67,7 @@ export const WidgetRoot = ({
         )}
       </Flex>
       <Box width="100%" height="261px" overflow="auto" tag="main">
-        {permissionStatus === 'loading' && <Widget.Loading />}
-        {permissionStatus === 'granted' && children}
+        {children}
       </Box>
     </Flex>
   );
@@ -131,17 +107,27 @@ const HomePageCE = () => {
   const { formatMessage } = useIntl();
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
-
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
-  const filteredWidgets = React.useMemo(
-    () =>
-      getAllWidgets().filter(
-        (widget) =>
-          !widget.roles ||
-          user?.roles?.some((userRole) => widget.roles?.find((role) => userRole.code === role))
-      ),
-    [getAllWidgets, user?.roles]
-  );
+  const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
+  const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const checkWidgetsPermissions = async () => {
+      const allWidgets = getAllWidgets();
+      const authorizedWidgets = await Promise.all(
+        allWidgets.map(async (widget) => {
+          if (!widget.permissions || widget.permissions.length === 0) return true;
+          const matchingPermissions = await checkUserHasPermissions(widget.permissions);
+          return matchingPermissions.length >= widget.permissions.length;
+        })
+      );
+      setFilteredWidgets(allWidgets.filter((_, i) => authorizedWidgets[i]));
+      setLoading(false);
+    };
+
+    checkWidgetsPermissions();
+  }, [checkUserHasPermissions, getAllWidgets]);
 
   return (
     <Main>
@@ -163,22 +149,21 @@ const HomePageCE = () => {
       <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
           <GuidedTourHomepageOverview />
-          <Grid.Root gap={5}>
-            {filteredWidgets.map((widget) => {
-              return (
+          {loading ? (
+            <Box position="absolute">
+              <Widget.Loading />
+            </Box>
+          ) : (
+            <Grid.Root gap={5}>
+              {filteredWidgets.map((widget) => (
                 <Grid.Item col={6} s={12} key={widget.uid}>
-                  <WidgetRoot
-                    title={widget.title}
-                    icon={widget.icon}
-                    permissions={widget.permissions}
-                    link={widget.link}
-                  >
+                  <WidgetRoot title={widget.title} icon={widget.icon} link={widget.link}>
                     <WidgetComponent component={widget.component} />
                   </WidgetRoot>
                 </Grid.Item>
-              );
-            })}
-          </Grid.Root>
+              ))}
+            </Grid.Root>
+          )}
         </Flex>
       </Layouts.Content>
     </Main>
