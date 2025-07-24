@@ -102,7 +102,7 @@ class StrapiApp {
   configurations = {
     authLogo: Logo,
     head: { favicon: '' },
-    locales: ['en'],
+    locales: ['en', 'fa'],
     menuLogo: Logo,
     notifications: { releases: true },
     themes: { light: lightTheme, dark: darkTheme },
