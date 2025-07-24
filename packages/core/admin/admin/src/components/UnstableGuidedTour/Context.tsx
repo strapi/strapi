@@ -3,7 +3,6 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { GetGuidedTourMeta } from '../../../../shared/contracts/admin';
-import { useTracking } from '../../features/Tracking';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
@@ -35,6 +34,9 @@ type Action =
     }
   | {
       type: 'skip_all_tours';
+    }
+  | {
+      type: 'reset_all_tours';
     };
 
 type Tour = Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>;
@@ -68,6 +70,38 @@ function reducer(state: State, action: Action): State {
     if (action.type === 'skip_all_tours') {
       draft.enabled = false;
     }
+
+    if (action.type === 'reset_all_tours') {
+      draft.enabled = true;
+      /**
+       * TODO:
+       * This is hard coded for a quick fix
+       * It will be fixed properly with a dynamic solution in a follow up PR
+       */
+      draft.tours = {
+        contentTypeBuilder: {
+          currentStep: 0,
+          length: 5,
+          isCompleted: false,
+        },
+        contentManager: {
+          currentStep: 0,
+          length: 4,
+          isCompleted: false,
+        },
+        apiTokens: {
+          currentStep: 0,
+          length: 4,
+          isCompleted: false,
+        },
+        strapiCloud: {
+          currentStep: 0,
+          length: 0,
+          isCompleted: false,
+        },
+      };
+      draft.completedActions = [];
+    }
   });
 }
 
@@ -89,7 +123,6 @@ const UnstableGuidedTourContext = ({
 
     return acc;
   }, {} as Tour);
-
   const [tours, setTours] = usePersistentState<State>(STORAGE_KEY, {
     tours: initialTourState,
     enabled,
