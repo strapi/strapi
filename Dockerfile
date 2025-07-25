@@ -1,22 +1,27 @@
+# Dockerfile para Strapi (sin yarn.lock y sin --immutable)
+
 FROM node:18-alpine
 
-# libvips para sharp
+# Dependencias nativas para procesamiento de imágenes (sharp)
 RUN apk add --no-cache vips-dev
 
+# Establece el directorio de trabajo
 WORKDIR /opt/app
 
-# 1) Copia sólo los archivos de gestión de paquetes
-COPY package.json yarn.lock ./
-
-# 2) Fija exactamente la versión de Yarn que genera tu lockfile
-RUN corepack prepare yarn@3.5.2 --activate
-
-# 3) Ya puedes instalar de forma inmutable
-RUN yarn install --immutable
-
-# 4) Copia el resto del código y construye
+# Copia todo el código de la aplicación
 COPY . .
+
+# Activa Corepack para gestionar Yarn
+RUN corepack enable
+
+# Instala dependencias y genera yarn.lock dentro del contenedor
+RUN yarn install
+
+# Compila la aplicación Strapi
 RUN yarn build
 
+# Expone el puerto por defecto de Strapi
 EXPOSE 1337
+
+# Comando por defecto para iniciar el servidor
 CMD ["yarn", "start"]
