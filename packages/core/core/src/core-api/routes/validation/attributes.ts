@@ -7,7 +7,14 @@
 
 import { type Schema, UID } from '@strapi/types';
 
-import { relations } from '@strapi/utils';
+import {
+  relations,
+  maybeRequired,
+  maybeReadonly,
+  maybeWithDefault,
+  maybeWithMinMax,
+  augmentSchema,
+} from '@strapi/utils';
 import { z } from 'zod/v4';
 
 import { BOOLEAN_LITERAL_VALUES } from './constants';
@@ -15,14 +22,8 @@ import { BOOLEAN_LITERAL_VALUES } from './constants';
 // eslint-disable-next-line import/no-cycle
 import { CoreComponentRouteValidator } from './component';
 import { CoreContentTypeRouteValidator } from './content-type';
-import {
-  augmentSchema,
-  maybeReadonly,
-  maybeRequired,
-  maybeWithDefault,
-  maybeWithMinMax,
-  safeSchemaCreation,
-} from './utils';
+
+import { safeSchemaCreation } from './utils';
 
 /**
  * Converts a BigInteger attribute to a Zod schema.
@@ -174,7 +175,7 @@ export const dynamicZoneToSchema = (attribute: Schema.Attribute.DynamicZone): z.
 export const emailToSchema = (attribute: Schema.Attribute.Email): z.Schema => {
   const { writable, required, default: defaultValue, minLength, maxLength } = attribute;
 
-  const baseSchema = z.string().email();
+  const baseSchema = z.email();
 
   const schema = augmentSchema(baseSchema, [
     maybeWithMinMax(minLength, maxLength),
@@ -527,7 +528,7 @@ export const dynamicZoneToInputSchema = (attribute: Schema.Attribute.DynamicZone
 export const emailToInputSchema = (attribute: Schema.Attribute.Email) => {
   const { required, default: defaultValue, minLength, maxLength } = attribute;
 
-  const baseSchema = z.string().email();
+  const baseSchema = z.email();
 
   const schema = augmentSchema(baseSchema, [
     maybeWithMinMax(minLength, maxLength),

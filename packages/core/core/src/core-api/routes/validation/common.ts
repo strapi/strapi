@@ -1,18 +1,21 @@
 import type { Core, UID } from '@strapi/types';
 
-import { contentTypes } from '@strapi/utils';
+import { contentTypes, AbstractRouteValidator } from '@strapi/utils';
 import * as z from 'zod/v4';
 
 /**
  * AbstractCoreRouteValidator provides the foundation for validating and managing core routes within a Strapi context for a specific model.
  *
- * This abstract class facilitates validation logic for scalar and populatable fields defined in a model schema.
+ * This abstract class extends the base AbstractRouteValidator from utils to add schema-aware validation
+ * logic for scalar and populatable fields defined in a model schema.
  *
  * It uses runtime information about Strapi models to derive and expose schema validations.
  *
  * @template {UID.Schema} T Representing the schema identifier to be validated.
  */
-export abstract class AbstractCoreRouteValidator<T extends UID.Schema> {
+export abstract class AbstractCoreRouteValidator<
+  T extends UID.Schema,
+> extends AbstractRouteValidator {
   /**
    * The `_strapi` variable serves as a reference to the core Strapi instance.
    * It is used for interacting with the loaded model.
@@ -34,6 +37,7 @@ export abstract class AbstractCoreRouteValidator<T extends UID.Schema> {
    * @param uid The unique identifier for the instance.
    */
   public constructor(strapi: Core.Strapi, uid: T) {
+    super();
     this._strapi = strapi;
     this._uid = uid;
   }

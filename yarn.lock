@@ -9130,6 +9130,7 @@ __metadata:
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
+    zod: "npm:3.25.67"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     koa: ^2.15.2
@@ -9215,6 +9216,7 @@ __metadata:
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
+    zod: "npm:3.25.67"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/content-manager": ^5.0.0
@@ -9501,6 +9503,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
+    zod: "npm:3.25.67"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9924,6 +9927,7 @@ __metadata:
     sharp: "npm:0.33.5"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
+    zod: "npm:3.25.67"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
