@@ -24,7 +24,7 @@ module.exports = (strapi) => {
         prefix: '',
       },
       request: {
-        body: validator.loginBodySchema,
+        body: { 'application/json': validator.loginBodySchema },
       },
       response: validator.authResponseSchema,
     },
@@ -37,7 +37,7 @@ module.exports = (strapi) => {
         prefix: '',
       },
       request: {
-        body: validator.registerBodySchema,
+        body: { 'application/json': validator.registerBodySchema },
       },
       response: validator.authRegisterResponseSchema,
     },
@@ -64,7 +64,7 @@ module.exports = (strapi) => {
         prefix: '',
       },
       request: {
-        body: validator.forgotPasswordBodySchema,
+        body: { 'application/json': validator.forgotPasswordBodySchema },
       },
       response: validator.forgotPasswordResponseSchema,
     },
@@ -77,7 +77,7 @@ module.exports = (strapi) => {
         prefix: '',
       },
       request: {
-        body: validator.resetPasswordBodySchema,
+        body: { 'application/json': validator.resetPasswordBodySchema },
       },
       response: validator.authResponseSchema,
     },
@@ -97,7 +97,7 @@ module.exports = (strapi) => {
         prefix: '',
       },
       request: {
-        body: validator.sendEmailConfirmationBodySchema,
+        body: { 'application/json': validator.sendEmailConfirmationBodySchema },
       },
       response: validator.sendEmailConfirmationResponseSchema,
     },
@@ -110,7 +110,7 @@ module.exports = (strapi) => {
         prefix: '',
       },
       request: {
-        body: validator.changePasswordBodySchema,
+        body: { 'application/json': validator.changePasswordBodySchema },
       },
       response: validator.authResponseSchema,
     },

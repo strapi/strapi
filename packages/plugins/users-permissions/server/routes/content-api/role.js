@@ -28,7 +28,7 @@ module.exports = (strapi) => {
       path: '/roles',
       handler: 'role.createRole',
       request: {
-        body: validator.createRoleBodySchema,
+        body: { 'application/json': validator.createRoleBodySchema },
       },
       response: validator.roleSuccessResponseSchema,
     },
@@ -40,7 +40,7 @@ module.exports = (strapi) => {
         params: {
           role: validator.roleIdParam,
         },
-        body: validator.updateRoleBodySchema,
+        body: { 'application/json': validator.updateRoleBodySchema },
       },
       response: validator.roleSuccessResponseSchema,
     },

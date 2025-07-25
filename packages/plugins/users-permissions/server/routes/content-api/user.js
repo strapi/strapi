@@ -80,7 +80,7 @@ module.exports = (strapi) => {
         prefix: '',
       },
       request: {
-        body: validator.createUserBodySchema,
+        body: { 'application/json': validator.createUserBodySchema },
       },
       response: validator.userSchema,
     },
@@ -95,7 +95,7 @@ module.exports = (strapi) => {
         params: {
           id: validator.userIdParam,
         },
-        body: validator.updateUserBodySchema,
+        body: { 'application/json': validator.updateUserBodySchema },
       },
       response: validator.userSchema,
     },
