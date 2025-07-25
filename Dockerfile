@@ -10,6 +10,9 @@ WORKDIR /opt/app
 COPY ./package.json ./
 COPY ./yarn.lock ./
 
+# Enable Corepack to use the correct Yarn version
+RUN corepack enable
+
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
