@@ -86,9 +86,12 @@ export const maybeReadonly = (writable?: boolean) => {
  */
 export const maybeWithDefault = (defaultValue?: unknown) => {
   return <T extends z.Schema>(schema: T) => {
-    return defaultValue !== undefined
-      ? schema.default(typeof defaultValue === 'function' ? defaultValue() : defaultValue)
-      : schema;
+    if (defaultValue === undefined) {
+      return schema;
+    }
+
+    const value = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+    return schema.default(value);
   };
 };
 

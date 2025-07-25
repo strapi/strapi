@@ -86,8 +86,6 @@ export const createAttributesInputSchema = (
  * const booleanAttribute = { type: 'boolean', default: false };
  * const booleanSchema = mapAttributeToSchema(booleanAttribute); // Returns a Zod boolean schema with a default.
  * ```
- *
- * @todo: Move to @strapi/utils if needed for other validation
  */
 export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): z.ZodTypeAny => {
   switch (attribute.type) {
@@ -179,7 +177,6 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
  *
  * @throws {Error} Throws an error if an unsupported attribute type is provided
  *
- * @todo: Move to @strapi/utils if needed for other validation
  */
 export const mapAttributeToInputSchema = (
   attribute: Schema.Attribute.AnyAttribute
