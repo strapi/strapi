@@ -11,7 +11,6 @@ test.describe('RBAC - See Roles', () => {
       login: true,
       resetFiles: true,
       importData: 'with-admin.tar',
-      skipTour: true,
     });
 
     // Navigate to the Roles management page

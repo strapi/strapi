@@ -8,7 +8,7 @@ import { useTracking } from '../../features/Tracking';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { ConfirmDialog } from '../ConfirmDialog';
 
-import { type ValidTourName, unstableUseGuidedTour } from './Context';
+import { type ValidTourName, useGuidedTour } from './Context';
 
 /* -------------------------------------------------------------------------------------------------
  * Styled
@@ -138,14 +138,14 @@ const WaveIcon = () => {
   );
 };
 
-export const UnstableGuidedTourOverview = () => {
+export const GuidedTourHomepageOverview = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const tours = unstableUseGuidedTour('Overview', (s) => s.state.tours);
-  const dispatch = unstableUseGuidedTour('Overview', (s) => s.dispatch);
-  const enabled = unstableUseGuidedTour('Overview', (s) => s.state.enabled);
-  const completedActions = unstableUseGuidedTour('Overview', (s) => s.state.completedActions);
+  const tours = useGuidedTour('Overview', (s) => s.state.tours);
+  const dispatch = useGuidedTour('Overview', (s) => s.dispatch);
+  const enabled = useGuidedTour('Overview', (s) => s.state.enabled);
+  const completedActions = useGuidedTour('Overview', (s) => s.state.completedActions);
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
 
   const tourNames = Object.keys(tours) as ValidTourName[];
@@ -173,7 +173,7 @@ export const UnstableGuidedTourOverview = () => {
       <ContentSection direction="column" gap={2} alignItems="start">
         <WaveIcon />
         <Flex direction="column" alignItems="start" gap={1} paddingTop={4}>
-          <Typography fontSize="20px" fontWeight="bold">
+          <Typography tag="h2" fontSize="20px" fontWeight="bold">
             {formatMessage({
               id: 'tours.overview.title',
               defaultMessage: 'Discover your application!',
@@ -223,7 +223,7 @@ export const UnstableGuidedTourOverview = () => {
             defaultMessage: 'Your tasks',
           })}
         </Typography>
-        <Box width="100%" borderColor="neutral150" marginTop={4} hasRadius>
+        <Box tag="ul" width="100%" borderColor="neutral150" marginTop={4} hasRadius>
           {TASK_CONTENT.map((task) => {
             const tourName = task.tourName as ValidTourName;
             const tour = tours[tourName];
@@ -232,7 +232,13 @@ export const UnstableGuidedTourOverview = () => {
               !completedActions.includes('didCreateContentTypeSchema');
 
             return (
-              <TourTaskContainer key={tourName} alignItems="center" justifyContent="space-between">
+              <TourTaskContainer
+                tag="li"
+                aria-label={formatMessage(task.title)}
+                key={tourName}
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 {tour.isCompleted ? (
                   <>
                     <Flex gap={2}>

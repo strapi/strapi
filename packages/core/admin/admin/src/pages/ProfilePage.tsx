@@ -8,9 +8,9 @@ import * as yup from 'yup';
 
 import { Form, FormHelpers } from '../components/Form';
 import { InputRenderer } from '../components/FormInputs/Renderer';
+import { useGuidedTour } from '../components/GuidedTour/Context';
 import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
-import { unstableUseGuidedTour } from '../components/UnstableGuidedTour/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
@@ -491,7 +491,7 @@ const UserInfoSection = () => {
 const GuidedTourSection = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const dispatch = unstableUseGuidedTour('ProfilePage', (s) => s.dispatch);
+  const dispatch = useGuidedTour('ProfilePage', (s) => s.dispatch);
 
   const onClickReset = () => {
     dispatch({ type: 'reset_all_tours' });

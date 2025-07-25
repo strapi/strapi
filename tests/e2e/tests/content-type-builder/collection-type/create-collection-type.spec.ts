@@ -11,7 +11,6 @@ test.describe('Create collection type with all field types', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-ct', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
       importData: 'with-admin.tar',
     });
