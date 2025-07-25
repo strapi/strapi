@@ -6,18 +6,14 @@ RUN apk add --no-cache vips-dev
 # Set up the working directory
 WORKDIR /opt/app
 
-# Copy package.json and yarn.lock
-COPY ./package.json ./
-COPY ./yarn.lock ./
+# Copy all project files first to give context to yarn workspaces
+COPY . .
 
 # Enable Corepack to use the correct Yarn version
 RUN corepack enable
 
-# Install dependencies
-RUN yarn install --frozen-lockfile
-
-# Copy the rest of the application
-COPY . .
+# Install dependencies using the recommended flag for CI
+RUN yarn install --immutable
 
 # Build the application
 RUN yarn build
