@@ -1,0 +1,63 @@
+# =============================================================#
+# StatefulSet Postgress
+# =============================================================#
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgress
+  namespace: tipsoption-dev
+spec:
+  replicas: 1
+  serviceName: svc-postgress
+  selector:
+    matchLabels:
+      app: postgress
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 10Gi
+  template:
+    metadata:
+      labels:
+        app: postgress
+    spec:
+      containers:
+        - name: postgress
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgress-secret
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgress-secret
+                  key: pwd
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgress-secret
+                  key: database
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: datadir
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+              ephemeral-storage: 1Gi
+            limits:
+              cpu: "250m"
+              memory: "512Mi"
+              ephemeral-storage: 1Gi

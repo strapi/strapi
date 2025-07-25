@@ -1,0 +1,16 @@
+# =============================================================#
+# Service Postgress Trips Packages (Headless)
+# =============================================================#
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-postgress
+  namespace: tipsoption-dev
+spec:
+  # Configuración headless para DNS estable en StatefulSet
+  clusterIP: None
+  selector:
+    app: postgress
+  ports:
+    - port: 5432
+      targetPort: 5432

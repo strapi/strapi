@@ -1,0 +1,14 @@
+# =============================================================#
+# Service Strapi
+# =============================================================#
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-strapi
+  namespace: tipsoption-dev
+spec:
+  selector:
+    app: strapi
+  ports:
+    - port: 1337
+      targetPort: 1337

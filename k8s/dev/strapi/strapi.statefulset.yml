@@ -1,0 +1,90 @@
+# =============================================================#
+# StateFullSet Strapi
+# =============================================================#
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: strapi
+  namespace: tipsoption-dev
+spec:
+  replicas: 1
+  serviceName: svc-strapi
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: strapi
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 10Gi
+  template:
+    metadata:
+      labels:
+        app: strapi
+    spec:
+      volumes:
+        - name: env
+          secret:
+            secretName: strapi-secret
+      containers:
+        - name: strapi
+          image: IMAGE_PLACEHOLDER
+          ports:
+            - containerPort: 1337
+              name: http
+          # command: ["/bin/bash", "-c", "tail -F anything"]
+          volumeMounts:
+            - name: datadir
+              mountPath: /srv/app
+          env:
+            - name: DATABASE_CLIENT
+              value: postgres
+            - name: DATABASE_HOST
+              value: svc-postgress
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: strapi
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgress-secret
+                  key: user
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgress-secret
+                  key: pwd
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgress-secret
+                  key: database
+          startupProbe:
+            httpGet:
+              path: /_health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 10
+            initialDelaySeconds: 60
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+              ephemeral-storage: 1Gi
+            limits:
+              cpu: "200m"
+              memory: "512Mi"
+              ephemeral-storage: 1Gi
+# =============================================================#

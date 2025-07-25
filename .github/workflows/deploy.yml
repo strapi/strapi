@@ -1,0 +1,39 @@
+name: Deploy to EKS
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_number:
+        description: "Versión (tag) de la imagen a desplegar"
+        required: true
+        type: string
+
+env:
+  REPOSITORY_NAME: "strapi"     # Mismo nombre del repositorio usado en build
+  DEPLOYMENT_NAME: "strapi"  # Nombre del Deployment en EKS que se actualizará
+  CONTAINER_NAME: "strapi"    # Nombre del contenedor dentro del Deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials for Deployment
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+
+      - name: Update Kubernetes Deployment Image and Deploy
+        run: |
+          IMAGE_URL="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ github.event.inputs.version_number }}"
+          sed -i "s|image: IMAGE_PLACEHOLDER|image: $IMAGE_URL|g" k8s/dev/strapi/strapi.statefulset.yml
+          kubectl apply -f k8s/dev/strapi/strapi.statefulset.yml
+          kubectl rollout status statefulset/${{ env.DEPLOYMENT_NAME }}
