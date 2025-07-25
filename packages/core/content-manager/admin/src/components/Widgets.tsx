@@ -24,7 +24,9 @@ import { RelativeTime } from './RelativeTime';
 
 import type { RecentDocument } from '../../../shared/contracts/homepage';
 
-const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 'block' })`
+const CellTypography = styled(Typography)`
+  display: block;
+  max-width: 14.4rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
