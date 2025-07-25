@@ -1,25 +1,22 @@
 FROM node:18-alpine
 
-# Installing libvips-dev for sharp image processing
+# libvips para sharp
 RUN apk add --no-cache vips-dev
 
-# Set up the working directory
 WORKDIR /opt/app
 
-# Copy all project files first to give context to yarn workspaces
-COPY . .
+# 1) Copia sólo los archivos de gestión de paquetes
+COPY package.json yarn.lock ./
 
-# Enable Corepack to use the correct Yarn version
-RUN corepack enable
+# 2) Fija exactamente la versión de Yarn que genera tu lockfile
+RUN corepack prepare yarn@3.5.2 --activate
 
-# Install dependencies using the recommended flag for CI
+# 3) Ya puedes instalar de forma inmutable
 RUN yarn install --immutable
 
-# Build the application
+# 4) Copia el resto del código y construye
+COPY . .
 RUN yarn build
 
-# Expose the port Strapi runs on
 EXPOSE 1337
-
-# Start the application
 CMD ["yarn", "start"]
