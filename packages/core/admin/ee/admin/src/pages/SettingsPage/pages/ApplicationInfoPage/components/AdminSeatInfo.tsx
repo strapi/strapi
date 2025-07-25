@@ -4,19 +4,21 @@ import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
-import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
+import { useTypedSelector } from '../../../../../../../../admin/src/core/store/hooks';
 
 const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 const MANAGE_SEATS_URL = 'https://strapi.io/billing/manage-seats';
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
-  const { settings } = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.users ?? {}).flat()
+  );
   const {
     isLoading: isRBACLoading,
     allowedActions: { canRead, canCreate, canUpdate, canDelete },
-  } = useRBAC(settings?.users ?? {});
+  } = useRBAC(permissions);
   const {
     license,
     isError,

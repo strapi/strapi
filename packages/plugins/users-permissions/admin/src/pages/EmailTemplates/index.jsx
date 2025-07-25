@@ -39,7 +39,7 @@ const EmailTemplatesPage = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useRBAC({ update: PERMISSIONS.updateEmailTemplates });
+  } = useRBAC(PERMISSIONS.updateEmailTemplates);
 
   const { isLoading: isLoadingData, data } = useQuery(
     ['users-permissions', 'email-templates'],

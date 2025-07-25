@@ -73,6 +73,8 @@ export const PERMISSIONS = {
   ],
 } satisfies Record<string, StrapiPermission[]>;
 
+export const allPermissions = Object.values(PERMISSIONS).flat();
+
 export const PERMISSIONS_SETTINGS = {
   read: [
     {

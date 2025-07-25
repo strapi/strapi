@@ -40,8 +40,8 @@ const ReleasesSettingsPage = () => {
   const { data, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [updateReleaseSettings, { isLoading: isSubmittingForm }] =
     useUpdateReleaseSettingsMutation();
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions['settings']?.['releases']
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions['settings']?.['releases'] ?? {}).flat()
   );
   const {
     allowedActions: { canUpdate },
@@ -209,8 +209,8 @@ const ReleasesSettingsPage = () => {
 };
 
 const TimezoneDropdown = () => {
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions['settings']?.['releases']
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions['settings']?.['releases'] ?? {}).flat()
   );
   const {
     allowedActions: { canUpdate },

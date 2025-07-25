@@ -30,7 +30,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { NavLink } from 'react-router-dom';
 
-import { PERMISSIONS } from '../../../../constants';
+import { PERMISSIONS, allPermissions } from '../../../../constants';
 import { getTrad } from '../../../../utils';
 
 import TableBody from './components/TableBody';
@@ -49,12 +49,7 @@ export const RolesListPage = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canRead, canDelete, canCreate, canUpdate },
-  } = useRBAC({
-    create: PERMISSIONS.createRole,
-    read: PERMISSIONS.readRoles,
-    update: PERMISSIONS.updateRole,
-    delete: PERMISSIONS.deleteRole,
-  });
+  } = useRBAC(allPermissions);
 
   const {
     isLoading: isLoadingForData,
