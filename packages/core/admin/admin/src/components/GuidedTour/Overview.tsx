@@ -173,7 +173,7 @@ export const GuidedTourHomepageOverview = () => {
       <ContentSection direction="column" gap={2} alignItems="start">
         <WaveIcon />
         <Flex direction="column" alignItems="start" gap={1} paddingTop={4}>
-          <Typography fontSize="20px" fontWeight="bold">
+          <Typography tag="h2" fontSize="20px" fontWeight="bold">
             {formatMessage({
               id: 'tours.overview.title',
               defaultMessage: 'Discover your application!',
@@ -223,7 +223,7 @@ export const GuidedTourHomepageOverview = () => {
             defaultMessage: 'Your tasks',
           })}
         </Typography>
-        <Box width="100%" borderColor="neutral150" marginTop={4} hasRadius>
+        <Box tag="ul" width="100%" borderColor="neutral150" marginTop={4} hasRadius>
           {TASK_CONTENT.map((task) => {
             const tourName = task.tourName as ValidTourName;
             const tour = tours[tourName];
@@ -232,7 +232,13 @@ export const GuidedTourHomepageOverview = () => {
               !completedActions.includes('didCreateContentTypeSchema');
 
             return (
-              <TourTaskContainer key={tourName} alignItems="center" justifyContent="space-between">
+              <TourTaskContainer
+                tag="li"
+                aria-label={formatMessage(task.title)}
+                key={tourName}
+                alignItems="center"
+                justifyContent="space-between"
+              >
                 {tour.isCompleted ? (
                   <>
                     <Flex gap={2}>

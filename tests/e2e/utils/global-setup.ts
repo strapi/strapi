@@ -1,7 +1,7 @@
-import { chromium } from '@playwright/test';
+import { Page, chromium } from '@playwright/test';
 import path from 'path';
 
-const STRAPI_GUIDED_TOUR_CONFIG = {
+export const STRAPI_GUIDED_TOUR_CONFIG = {
   tours: {
     contentTypeBuilder: {
       currentStep: 0,
@@ -28,12 +28,10 @@ const STRAPI_GUIDED_TOUR_CONFIG = {
   completedActions: [],
 };
 
-async function globalSetup() {
-  // Create a browser context and set up localStorage
-  const browser = await chromium.launch();
-  const context = await browser.newContext();
-  const page = await context.newPage();
-
+export const setGuidedTourLocalStorage = async (
+  page: Page,
+  guidedTourState: typeof STRAPI_GUIDED_TOUR_CONFIG
+) => {
   // Navigate to the admin page to set localStorage
   const port = process.env.PORT || 1337;
   await page.goto(`http://127.0.0.1:${port}/admin`);
@@ -41,7 +39,16 @@ async function globalSetup() {
   // Set a default local storage so the guided tour is disabled by default
   await page.evaluate((config) => {
     localStorage.setItem('STRAPI_GUIDED_TOUR', JSON.stringify(config));
-  }, STRAPI_GUIDED_TOUR_CONFIG);
+  }, guidedTourState);
+};
+
+async function globalSetup() {
+  // Create a browser context and set up localStorage
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  await setGuidedTourLocalStorage(page, STRAPI_GUIDED_TOUR_CONFIG);
 
   // Save the storage state to be used by all tests - save it in the e2e directory
   const storageStatePath = path.join(__dirname, '..', 'playwright-storage-state.json');

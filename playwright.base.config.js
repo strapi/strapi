@@ -105,6 +105,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        permissions: ['clipboard-read', 'clipboard-write'],
       },
     },
 
@@ -112,6 +113,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
+        // Firefox doesn't need clipboard permissions for secure sites
       },
     },
 
@@ -119,6 +121,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
+        permissions: ['clipboard-read'],
       },
     },
   ],
