@@ -1,7 +1,9 @@
 import type { Knex } from 'knex';
 
 import type { Migration } from '../common';
+import { transformLogMessage } from '../logger';
 
+const migrationScriptId = '5.0.0-03-created-locale';
 /**
  * In v4, content types with disabled i18n did not have any locale column.
  * In v5, we need to add a `locale` column to all content types.
@@ -16,8 +18,9 @@ const createLocaleColumn = async (db: Knex, tableName: string) => {
 };
 
 export const createdLocale: Migration = {
-  name: '5.0.0-03-created-locale',
+  name: migrationScriptId,
   async up(knex, db) {
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} running`));
     for (const meta of db.metadata.values()) {
       const hasTable = await knex.schema.hasTable(meta.tableName);
 
@@ -39,6 +42,7 @@ export const createdLocale: Migration = {
         await createLocaleColumn(knex, meta.tableName);
       }
     }
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} completed`));
   },
   async down() {
     throw new Error('not implemented');
