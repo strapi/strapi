@@ -1,28 +1,33 @@
-# Dockerfile para Strapi con compilación de dependencias nativas
+# =============================================================
+# Dockerfile para Strapi (usando el lockfile y configuración oficial)
+# =============================================================
+FROM node:18-bullseye-slim
 
-FROM node:18-alpine
-
-# 1) Instala vips (sharp), sqlite (better-sqlite3) y herramientas de compilación
-RUN apk add --no-cache \
-    vips-dev vips-tools \
-    sqlite-dev \
-    build-base \
-    python3
+# 1) Dependencias del sistema para módulos nativos (sharp, sqlite, etc.)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3 \
+    python3-dev \
+    libvips-dev \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/app
 
-# 2) Copia todo el proyecto
+# 2) Copia sólo los manifiestos de dependencias para cachear:
+COPY package.json yarn.lock .yarnrc.yml .yarn/releases/ ./
+
+# 3) Copia la configuración completa de Yarn Berry:
+COPY .yarn/ ./.yarn/
+
+# 4) Activa la versión correcta de Yarn y instala en modo inmutable:
+RUN corepack prepare yarn@4.5.0 --activate \
+ && yarn install --immutable
+
+# 5) Copia el resto de tu código y compila:
 COPY . .
-
-# 3) Activa Corepack (Yarn 4.x)
-RUN corepack enable
-
-# 4) Instala dependencias (ahora las nativas pueden compilarse)
-RUN yarn install
-
-# 5) Compila Strapi
 RUN yarn build
 
-# 6) Expone el puerto y arranca
+# 6) Modo producción y lanzamiento
+ENV NODE_ENV=production
 EXPOSE 1337
 CMD ["yarn", "start"]
