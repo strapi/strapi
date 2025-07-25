@@ -13,9 +13,9 @@ import { FormattedMessage, type MessageDescriptor } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { type EventWithoutProperties, useTracking } from '../../features/Tracking';
+import { useTracking } from '../../features/Tracking';
 
-import { unstableUseGuidedTour, ValidTourName } from './Context';
+import { useGuidedTour, type ValidTourName } from './Context';
 
 /* -------------------------------------------------------------------------------------------------
  * Step factory
@@ -72,7 +72,7 @@ const PopoverArrow = styled(Popover.Arrow)`
 `;
 
 export const StepCount = ({ tourName }: { tourName: ValidTourName }) => {
-  const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
+  const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
   const currentStep = state.tours[tourName].currentStep + 1;
   // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
   const displayedLength = state.tours[tourName].length - 1;
@@ -91,7 +91,14 @@ export const StepCount = ({ tourName }: { tourName: ValidTourName }) => {
 const createStepComponents = (tourName: ValidTourName): Step => ({
   Root: React.forwardRef(({ withArrow = true, ...props }, ref) => {
     return (
-      <Popover.Content ref={ref} side="top" align="center" style={{ border: 'none' }} {...props}>
+      <Popover.Content
+        ref={ref}
+        aria-labelledby="guided-tour-title"
+        side="top"
+        align="center"
+        style={{ border: 'none' }}
+        {...props}
+      >
         {withArrow && (
           <PopoverArrow asChild>
             <svg
@@ -118,8 +125,8 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         {'children' in props ? (
           props.children
         ) : (
-          <Typography tag="div" variant="omega" fontWeight="bold">
-            <FormattedMessage tagName="h1" id={props.id} defaultMessage={props.defaultMessage} />
+          <Typography tag="h1" id="guided-tour-title" variant="omega" fontWeight="bold">
+            <FormattedMessage id={props.id} defaultMessage={props.defaultMessage} />
           </Typography>
         )}
       </Box>
@@ -132,7 +139,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         props.children
       ) : (
         <Typography tag="div" variant="omega">
-          <FormattedMessage tagName="p" id={props.id} defaultMessage={props.defaultMessage} />
+          <FormattedMessage id={props.id} defaultMessage={props.defaultMessage} />
         </Typography>
       )}
     </Box>
@@ -140,8 +147,8 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
 
   Actions: ({ showStepCount = true, showSkip = false, to, children, ...flexProps }) => {
     const { trackUsage } = useTracking();
-    const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
-    const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
+    const dispatch = useGuidedTour('GuidedTourPopover', (s) => s.dispatch);
+    const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
     const currentStep = state.tours[tourName].currentStep + 1;
     const actualTourLength = state.tours[tourName].length;
 

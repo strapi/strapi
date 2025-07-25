@@ -11,12 +11,12 @@ import { useTracking } from '../features/Tracking';
 import { Menu, MenuItem } from '../hooks/useMenu';
 import { getDisplayName, getInitials } from '../utils/users';
 
+import { tours } from './GuidedTour/Tours';
 import { MainNav } from './MainNav/MainNav';
 import { NavBrand } from './MainNav/NavBrand';
 import { NavLink } from './MainNav/NavLink';
 import { NavUser } from './MainNav/NavUser';
 import { TrialCountdown } from './MainNav/TrialCountdown';
-import { tours as unstable_tours } from './UnstableGuidedTour/Tours';
 
 const sortLinks = (links: MenuItem[]) => {
   return links.sort((a, b) => {
@@ -53,17 +53,11 @@ const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode
 
   switch (normalizedTo) {
     case 'content-manager':
-      return (
-        <unstable_tours.contentTypeBuilder.Finish>
-          {children}
-        </unstable_tours.contentTypeBuilder.Finish>
-      );
+      return <tours.contentTypeBuilder.Finish>{children}</tours.contentTypeBuilder.Finish>;
     case '':
-      return <unstable_tours.apiTokens.Finish>{children}</unstable_tours.apiTokens.Finish>;
+      return <tours.apiTokens.Finish>{children}</tours.apiTokens.Finish>;
     case 'settings':
-      return (
-        <unstable_tours.contentManager.Finish>{children}</unstable_tours.contentManager.Finish>
-      );
+      return <tours.contentManager.Finish>{children}</tours.contentManager.Finish>;
     default:
       return children;
   }

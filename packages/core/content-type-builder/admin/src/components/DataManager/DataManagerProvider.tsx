@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  useGuidedTour,
   useTracking,
   useStrapiApp,
   useNotification,
@@ -54,7 +53,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
-  const { setCurrentStep, setStepState } = useGuidedTour('DataManagerProvider', (state) => state);
   const serverRestartWatcher = useServerRestartWatcher();
 
   const getPlugin = useStrapiApp('DataManagerProvider', (state) => state.getPlugin);
@@ -175,9 +173,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await fetchClient.post(`/content-type-builder/update-schema`, { data: requestData });
 
       if (isSendingContentTypes) {
-        setStepState('contentTypeBuilder.success', true);
         trackUsage('didCreateGuidedTourCollectionType');
-        setCurrentStep(null);
       }
 
       // Make sure the server has restarted
