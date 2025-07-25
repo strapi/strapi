@@ -82,7 +82,7 @@ const UseCasePage = () => {
   const handleSubmit = async (event: React.FormEvent, skipPersona: boolean) => {
     event.preventDefault();
     try {
-      await fetch('https://analytics.strapi.io/register', {
+      await fetch(`${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

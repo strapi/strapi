@@ -110,11 +110,13 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
           <StrapiAppProvider
             components={{}}
             rbac={new RBAC()}
-            widgets={{
-              widgets: {},
-              getAll: jest.fn(),
-              register: jest.fn(),
-            }}
+            widgets={
+              {
+                widgets: [],
+                getAll: jest.fn(),
+                register: jest.fn(),
+              } as any
+            }
             customFields={{
               customFields: {},
               get: jest.fn().mockReturnValue({
