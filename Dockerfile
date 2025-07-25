@@ -1,27 +1,28 @@
-# Dockerfile para Strapi (sin yarn.lock y sin --immutable)
+# Dockerfile para Strapi con compilación de dependencias nativas
 
 FROM node:18-alpine
 
-# Dependencias nativas para procesamiento de imágenes (sharp)
-RUN apk add --no-cache vips-dev
+# 1) Instala vips (sharp), sqlite (better-sqlite3) y herramientas de compilación
+RUN apk add --no-cache \
+    vips-dev vips-tools \
+    sqlite-dev \
+    build-base \
+    python3
 
-# Establece el directorio de trabajo
 WORKDIR /opt/app
 
-# Copia todo el código de la aplicación
+# 2) Copia todo el proyecto
 COPY . .
 
-# Activa Corepack para gestionar Yarn
+# 3) Activa Corepack (Yarn 4.x)
 RUN corepack enable
 
-# Instala dependencias y genera yarn.lock dentro del contenedor
+# 4) Instala dependencias (ahora las nativas pueden compilarse)
 RUN yarn install
 
-# Compila la aplicación Strapi
+# 5) Compila Strapi
 RUN yarn build
 
-# Expone el puerto por defecto de Strapi
+# 6) Expone el puerto y arranca
 EXPOSE 1337
-
-# Comando por defecto para iniciar el servidor
 CMD ["yarn", "start"]
