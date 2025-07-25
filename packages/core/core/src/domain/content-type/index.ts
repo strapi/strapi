@@ -14,6 +14,7 @@ const {
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
+  FIRST_PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
 } = contentTypesUtils.constants;
@@ -50,6 +51,8 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
 
   addCreatorFields(schema);
 
+  addFirstPublishedAt(schema);
+
   return schema;
 };
 
@@ -80,6 +83,24 @@ const addDraftAndPublish = (schema: Schema.ContentType) => {
       return new Date();
     },
   };
+};
+
+const addFirstPublishedAt = (schema: Schema.ContentType) => {
+  const isEnabled =
+    strapi.config.get('admin.firstPublishedAtField.enabled', false) &&
+    _.get(schema, 'options.draftAndPublish', false);
+
+  // Note: As an expertimental feature, we are okay if this data is deleted if this feature is
+  // switched off. Once "preserve_attributes" come into play, this will be updated.
+  if (isEnabled) {
+    schema.attributes[FIRST_PUBLISHED_AT_ATTRIBUTE] = {
+      type: 'datetime',
+      configurable: false,
+      writable: true,
+      visible: false,
+      private: !isEnabled,
+    };
+  }
 };
 
 const addCreatorFields = (schema: Schema.ContentType) => {
