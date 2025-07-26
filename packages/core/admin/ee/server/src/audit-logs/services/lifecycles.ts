@@ -1,5 +1,4 @@
 import type { Core } from '@strapi/types';
-import { scheduleJob } from 'node-schedule';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
@@ -156,9 +155,15 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
 
       // Manage audit logs auto deletion
       const retentionDays = getRetentionDays(strapi);
-      state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
-        const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-        auditLogsService.deleteExpiredEvents(expirationDate);
+
+      strapi.cron.add({
+        deleteExpiredAuditLogs: {
+          task: async () => {
+            const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+            auditLogsService.deleteExpiredEvents(expirationDate);
+          },
+          options: '0 0 * * *',
+        },
       });
 
       return this;
@@ -173,9 +178,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
         state.eventHubUnsubscribe();
       }
 
-      if (state.deleteExpiredJob) {
-        state.deleteExpiredJob.cancel();
-      }
+      strapi.cron.remove('deleteExpiredAuditLogs');
 
       return this;
     },
