@@ -1,9 +1,11 @@
-import { NotificationsProvider } from '@strapi/admin/strapi-admin';
+import { configureStore } from '@reduxjs/toolkit';
+import { NotificationsProvider, adminApi } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 
 import en from '../../../translations/en.json';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
@@ -87,25 +89,38 @@ const asset = {
   updatedAt: '2021-10-04T09:42:31.670Z',
 };
 
-const renderCompo = (handleCloseSpy = jest.fn()) => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: false,
-      },
-    },
-  });
+const store = configureStore({
+  reducer: { [adminApi.reducerPath]: adminApi.reducer },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(adminApi.middleware),
+});
 
-  return render(
-    <QueryClientProvider client={queryClient}>
+const ComponentFixture = ({ children }: { children: React.ReactNode }) => (
+  <Provider store={store}>
+    <QueryClientProvider
+      client={
+        new QueryClient({
+          defaultOptions: {
+            queries: {
+              refetchOnWindowFocus: false,
+            },
+          },
+        })
+      }
+    >
       <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-          <NotificationsProvider>
-            <RemoveAssetDialog open onClose={handleCloseSpy} asset={asset} />
-          </NotificationsProvider>
+          <NotificationsProvider>{children}</NotificationsProvider>
         </IntlProvider>
       </DesignSystemProvider>
     </QueryClientProvider>
+  </Provider>
+);
+
+const renderCompo = (handleCloseSpy = jest.fn()) => {
+  return render(
+    <ComponentFixture>
+      <RemoveAssetDialog open onClose={handleCloseSpy} asset={asset} />
+    </ComponentFixture>
   );
 };
 
