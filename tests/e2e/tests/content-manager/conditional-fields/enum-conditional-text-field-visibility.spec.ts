@@ -4,7 +4,7 @@ import { login } from '../../../utils/login';
 import { createContent, fillField } from '../../../utils/content-creation';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 
-test.describe('Conditional Fields - Enum fields control text field visibility', () => {
+test.describe('Conditional Fields - Enum-controlled conditional text fields and value are cleared when hidden', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -47,6 +47,8 @@ test.describe('Conditional Fields - Enum fields control text field visibility', 
 
     // Verify favoriteToy field is visible but empty (value was cleared when hidden)
     await expect(page.getByLabel('favoriteToy')).toBeVisible();
+    const toyValue = await page.getByLabel('favoriteToy').inputValue();
+    expect(toyValue).toBe('');
     // Add a new value to favoriteToy field
     await page.getByLabel('favoriteToy').fill('kong');
 

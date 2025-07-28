@@ -4,7 +4,7 @@ import { login } from '../../../utils/login';
 import { createContent, fillField } from '../../../utils/content-creation';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 
-test.describe('Conditional Fields - Select relations in a conditional relation field', () => {
+test.describe('Conditional Fields - Boolean-controlled conditional relation fields and select relation', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
