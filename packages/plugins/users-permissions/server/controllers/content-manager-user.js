@@ -2,8 +2,7 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const { ApplicationError, ValidationError, NotFoundError, ForbiddenError } =
-  require('@strapi/utils').errors;
+const { ApplicationError, NotFoundError, ForbiddenError } = require('@strapi/utils').errors;
 const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
@@ -133,8 +132,8 @@ module.exports = {
 
     await validateUpdateUserBody(ctx.request.body);
 
-    if (_.has(body, 'password') && !password && user.provider === 'local') {
-      throw new ValidationError('password.notNull');
+    if (_.has(body, 'password') && (password == null || password === '')) {
+      delete body.password;
     }
 
     if (_.has(body, 'username')) {

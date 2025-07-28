@@ -1,4 +1,3 @@
-import { scheduleJob, Job } from 'node-schedule';
 import type { Core } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
@@ -7,7 +6,7 @@ import { getService } from '../utils';
 import { RELEASE_MODEL_UID } from '../constants';
 
 const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
-  const scheduledJobs = new Map<Release['id'], Job>();
+  const scheduledJobs = new Map<Release['id'], string>();
 
   return {
     async set(releaseId: Release['id'], scheduleDate: Date) {
@@ -19,29 +18,34 @@ const createSchedulingService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      const job = scheduleJob(scheduleDate, async () => {
-        try {
-          await getService('release', { strapi }).publish(releaseId);
-          // @TODO: Trigger webhook with success message
-        } catch (error) {
-          // @TODO: Trigger webhook with error message
-        }
+      const taskName = `publishRelease_${releaseId}`;
 
-        this.cancel(releaseId);
+      strapi.cron.add({
+        [taskName]: {
+          async task() {
+            try {
+              await getService('release', { strapi }).publish(releaseId);
+              // @TODO: Trigger webhook with success message
+            } catch (error) {
+              // @TODO: Trigger webhook with error message
+            }
+          },
+          options: scheduleDate,
+        },
       });
 
       if (scheduledJobs.has(releaseId)) {
         this.cancel(releaseId);
       }
 
-      scheduledJobs.set(releaseId, job);
+      scheduledJobs.set(releaseId, taskName);
 
       return scheduledJobs;
     },
 
     cancel(releaseId: Release['id']) {
       if (scheduledJobs.has(releaseId)) {
-        scheduledJobs.get(releaseId)!.cancel();
+        strapi.cron.remove(scheduledJobs.get(releaseId)!);
         scheduledJobs.delete(releaseId);
       }
 

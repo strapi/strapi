@@ -8,6 +8,14 @@ import { Layout } from '../Layout';
 
 jest.mock('../../../hooks/useSettingsMenu');
 
+jest.mock('../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
+  useLicenseLimits: jest.fn(() => ({
+    license: {
+      features: [],
+    },
+  })),
+}));
+
 const LocationDisplay = () => {
   const location = useLocation();
 
@@ -23,11 +31,13 @@ const render = (settings: StrapiAppContextValue['settings']) =>
           <StrapiAppProvider
             components={{}}
             fields={{}}
-            widgets={{
-              widgets: {},
-              register: jest.fn(),
-              getAll: jest.fn(),
-            }}
+            widgets={
+              {
+                widgets: [],
+                register: jest.fn(),
+                getAll: jest.fn(),
+              } as any
+            }
             customFields={{
               customFields: {},
               get: jest.fn(),

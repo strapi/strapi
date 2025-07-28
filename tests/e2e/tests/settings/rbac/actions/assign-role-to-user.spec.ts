@@ -15,7 +15,6 @@ test.describe('RBAC - Assign Role to Users', () => {
       login: true,
       resetFiles: true,
       importData: 'with-admin.tar',
-      skipTour: true,
     });
 
     // Navigate to the Users management page

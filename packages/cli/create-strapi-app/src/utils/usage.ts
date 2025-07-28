@@ -58,8 +58,10 @@ function trackEvent(event: string, payload: Record<string, unknown>) {
     return;
   }
 
+  const analyticsUrl = process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io';
+
   try {
-    return fetch('https://analytics.strapi.io/api/v2/track', {
+    return fetch(`${analyticsUrl}/api/v2/track`, {
       method: 'POST',
       body: JSON.stringify({
         event,

@@ -21,7 +21,6 @@ test.describe('RBAC - Create Roles', () => {
       login: true,
       resetFiles: true,
       importData: 'with-admin.tar',
-      skipTour: true,
     });
 
     // Navigate to the Roles management page

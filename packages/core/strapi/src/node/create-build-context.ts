@@ -100,6 +100,7 @@ const createBuildContext = async <TOptions extends BaseOptions>({
     STRAPI_ADMIN_AI_URL:
       process.env.STRAPI_ADMIN_AI_URL?.replace(/\/+$/, '') ?? 'https://strapi-ai.apps.strapi.io',
     STRAPI_ADMIN_AI_API_KEY: process.env.STRAPI_ADMIN_AI_API_KEY,
+    STRAPI_ANALYTICS_URL: process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io',
   });
 
   const envKeys = Object.keys(env);

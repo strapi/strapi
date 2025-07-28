@@ -25,8 +25,6 @@ const defaultQueryOpts = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-const ANALYTICS_URI = 'https://analytics.strapi.io';
-
 /**
  * Add properties from the package.json strapi key in the metadata
  */
@@ -90,7 +88,8 @@ export default (strapi: Core.Strapi): Sender => {
     };
 
     try {
-      const res = await strapi.fetch(`${ANALYTICS_URI}/api/v2/track`, reqParams);
+      const analyticsUrl = env('STRAPI_ANALYTICS_URL', 'https://analytics.strapi.io');
+      const res = await strapi.fetch(`${analyticsUrl}/api/v2/track`, reqParams);
       return res.ok;
     } catch (err) {
       return false;

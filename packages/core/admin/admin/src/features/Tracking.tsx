@@ -2,11 +2,12 @@ import * as React from 'react';
 
 import axios, { AxiosResponse } from 'axios';
 
-import { Tours } from '../components/UnstableGuidedTour/Tours';
+import { Tours } from '../components/GuidedTour/Tours';
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
 import { useAuth } from './Auth';
+import { useStrapiApp } from './StrapiApp';
 
 export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
@@ -43,10 +44,38 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const token = useAuth('App', (state) => state.token);
   const { data: initData } = useInitQuery();
   const { uuid } = initData ?? {};
+  const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
 
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
+  React.useEffect(() => {
+    if (uuid && data) {
+      const event = 'didInitializeAdministration';
+      try {
+        fetch(`${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`, {
+          method: 'POST',
+          body: JSON.stringify({
+            // This event is anonymous
+            event,
+            userId: '',
+            eventPropeties: {},
+            groupProperties: {
+              ...data,
+              projectId: uuid,
+              registeredWidgets: getAllWidgets().map((widget) => widget.uid),
+            },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Strapi-Event': event,
+          },
+        });
+      } catch {
+        // silence is golden
+      }
+    }
+  }, [data, uuid, getAllWidgets]);
   const value = React.useMemo(
     () => ({
       uuid,
@@ -486,7 +515,7 @@ const useTracking = (): UseTrackingReturn => {
       try {
         if (uuid && !window.strapi.telemetryDisabled) {
           const res = await axios.post<string>(
-            'https://analytics.strapi.io/api/v2/track',
+            `${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`,
             {
               event,
               userId,

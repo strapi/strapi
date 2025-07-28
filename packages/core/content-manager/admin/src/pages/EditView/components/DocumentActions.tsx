@@ -6,7 +6,7 @@ import {
   NotificationConfig,
   useAPIErrorHandler,
   useQueryParams,
-  unstable_tours,
+  tours,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -178,7 +178,7 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
 
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
-      <unstable_tours.contentManager.Publish>
+      <tours.contentManager.Publish>
         <Flex gap={2}>
           {primaryAction.label === 'Publish' ? (
             <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
@@ -196,15 +196,15 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
             />
           ) : null}
         </Flex>
-      </unstable_tours.contentManager.Publish>
+      </tours.contentManager.Publish>
       {secondaryAction ? (
         secondaryAction.label === 'Publish' ? (
-          <unstable_tours.contentManager.Publish>
+          <tours.contentManager.Publish>
             <DocumentActionButton
               {...secondaryAction}
               variant={secondaryAction.variant || 'secondary'}
             />
-          </unstable_tours.contentManager.Publish>
+          </tours.contentManager.Publish>
         ) : (
           <DocumentActionButton
             {...secondaryAction}

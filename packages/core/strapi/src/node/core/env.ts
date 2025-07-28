@@ -12,6 +12,7 @@ interface DefaultEnv {
   STRAPI_TELEMETRY_DISABLED: string;
   STRAPI_ADMIN_AI_URL: string;
   STRAPI_ADMIN_AI_API_KEY?: string;
+  STRAPI_ANALYTICS_URL?: string;
 }
 
 /**

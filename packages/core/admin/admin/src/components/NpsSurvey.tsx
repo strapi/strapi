@@ -192,13 +192,16 @@ const NpsSurvey = () => {
         isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
         aiLicenseKey: process.env.STRAPI_ADMIN_AI_LICENSE,
       };
-      const res = await fetch('https://analytics.strapi.io/submit-nps', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        `${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/submit-nps`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        }
+      );
 
       if (!res.ok) {
         throw new Error('Failed to submit NPS survey');

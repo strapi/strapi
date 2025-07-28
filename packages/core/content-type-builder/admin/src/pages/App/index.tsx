@@ -3,7 +3,7 @@
 /* eslint-disable check-file/no-index */
 import { lazy, Suspense, useEffect, useRef } from 'react';
 
-import { Page, useGuidedTour, Layouts, useAppInfo } from '@strapi/admin/strapi-admin';
+import { Page, Layouts, useAppInfo } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
@@ -27,15 +27,8 @@ const App = () => {
     id: `${pluginId}.plugin.name`,
     defaultMessage: 'Content Types Builder',
   });
-  const startSection = useGuidedTour('App', (state) => state.startSection);
-  const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
-  const startSectionRef = useRef(startSection);
 
-  useEffect(() => {
-    if (startSectionRef.current) {
-      startSectionRef.current('contentTypeBuilder');
-    }
-  }, []);
+  const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
 
   return (
     <Page.Protect permissions={PERMISSIONS.main}>

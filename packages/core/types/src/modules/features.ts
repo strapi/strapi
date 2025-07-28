@@ -1,7 +1,5 @@
 export interface FeaturesConfig {
-  future?: {
-    unstableGuidedTour?: boolean;
-  };
+  future?: Record<string, unknown>;
 }
 
 export interface FeaturesService {
@@ -11,6 +9,5 @@ export interface FeaturesService {
   config: FeaturesConfig | undefined;
   future: {
     isEnabled: (futureFlagName: string) => boolean;
-    unstableGuidedTour?: boolean;
   };
 }
