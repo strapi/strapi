@@ -7,6 +7,7 @@ export * from './commands';
 export * from './middleware';
 export * from './policy';
 export * from './service';
+export * from './route';
 export * from './router';
 export * from './plugin';
 export * from './module';
