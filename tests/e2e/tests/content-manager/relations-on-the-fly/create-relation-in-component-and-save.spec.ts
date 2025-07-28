@@ -40,9 +40,7 @@ test.describe('Relations on the fly - Create a Relation inside a component and S
     // Wait for the modal to be closed
     await expect(page.getByText('Create a relation')).not.toBeVisible();
 
-    // // Wait for the button to be visible with a more specific selector
-    // const productButton = page.getByRole('button', { name: 'Nike Zoom Kd Iv Gold C800' });
-    // // add timeout to wait for the button to be visible
-    // await expect(productButton).toBeVisible({ timeout: 20000 });
+    // Wait for the button to be visible with a more specific selector
+    await expect(page.getByRole('button', { name: 'Nike Zoom Kd Iv Gold C800' })).toBeVisible();
   });
 });
