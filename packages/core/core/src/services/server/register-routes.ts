@@ -31,6 +31,10 @@ export default (strapi: Core.Strapi) => {
 const registerAdminRoutes = (strapi: Core.Strapi) => {
   const generateRouteScope = createRouteScopeGenerator(`admin::`);
 
+  // Instantiate function-like routers
+  // Mutate admin.routes in-place and make sure router factories are instantiated correctly
+  strapi.admin.routes = instantiateRouterInputs(strapi.admin.routes, strapi);
+
   _.forEach(strapi.admin.routes, (router) => {
     router.type = router.type || 'admin';
     router.prefix = router.prefix || `/admin`;
@@ -64,9 +68,13 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
         routes: plugin.routes,
       });
     } else {
+      // Instantiate function-like routers
+      // Mutate plugin.routes in-place and make sure router factories are instantiated correctly
+      plugin.routes = instantiateRouterInputs(plugin.routes, strapi);
+
       _.forEach(plugin.routes, (router) => {
-        router.type = router.type || 'admin';
-        router.prefix = router.prefix || `/${pluginName}`;
+        router.type = router.type ?? 'admin';
+        router.prefix = router.prefix ?? `/${pluginName}`;
         router.routes.forEach((route) => {
           generateRouteScope(route);
           route.info = { pluginName };
@@ -87,6 +95,9 @@ const registerAPIRoutes = (strapi: Core.Strapi) => {
 
     const generateRouteScope = createRouteScopeGenerator(`api::${apiName}`);
 
+    // Mutate api.routes in-place and make sure router factories are instantiated correctly
+    api.routes = instantiateRouterInputs(api.routes, strapi);
+
     _.forEach(api.routes, (router) => {
       // TODO: remove once auth setup
       // pass meta down to compose endpoint
@@ -99,4 +110,17 @@ const registerAPIRoutes = (strapi: Core.Strapi) => {
       return strapi.server.routes(router);
     });
   }
+};
+
+const instantiateRouterInputs = (
+  routers: Record<string, Core.RouterConfig>,
+  strapi: Core.Strapi
+): Record<string, Core.Router> => {
+  const entries = Object.entries(routers);
+
+  return entries.reduce((record, [key, inputOrCallback]) => {
+    const isCallback = typeof inputOrCallback === 'function';
+
+    return { ...record, [key]: isCallback ? inputOrCallback({ strapi }) : inputOrCallback };
+  }, {});
 };
