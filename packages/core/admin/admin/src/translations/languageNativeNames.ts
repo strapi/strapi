@@ -10,6 +10,7 @@ export const languageNativeNames = {
   eu: 'Euskara',
   uz: 'O`zbekcha',
   ro: 'Română',
+  fa: 'فارسی',
   fr: 'Français',
   gu: 'Gujarati',
   he: 'עברית',
