@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
+import { clickAndWait, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 
