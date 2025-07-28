@@ -148,7 +148,7 @@ const PreviewPage = () => {
 
   const isLoading =
     previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
-  if (isLoading) {
+  if (isLoading && (!documentResponse.document?.documentId || previewUrlResponse.isLoading)) {
     return <Page.Loading />;
   }
 
