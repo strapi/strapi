@@ -49,36 +49,22 @@ export const matchOrigin = async (
     originList = configuredOrigin;
   }
 
-  // Handle arrays of origins
+  // Normalize originList into an array
+  let normalizedOrigins: string[];
   if (Array.isArray(originList)) {
-    // Check if wildcard is in the array
-    if (originList.includes('*')) {
-      return requestOrigin;
-    }
-    return originList.includes(requestOrigin) ? requestOrigin : '';
+    normalizedOrigins = originList;
+  } else {
+    // Handle comma-separated string of origins
+    normalizedOrigins = originList.split(',').map((origin) => origin.trim());
   }
 
-  // Handle comma-separated string of origins
-  const parsedOrigin = originList.split(',').map((origin) => origin.trim());
-  if (parsedOrigin.length > 1) {
-    // Check if wildcard is in the comma-separated list
-    if (parsedOrigin.includes('*')) {
-      return requestOrigin;
-    }
-    return parsedOrigin.includes(requestOrigin) ? requestOrigin : '';
+  // Check if wildcard is in the normalized origins
+  if (normalizedOrigins.includes('*')) {
+    return requestOrigin;
   }
 
-  // Handle string of one origin with exact match
-  if (typeof originList === 'string') {
-    // Handle wildcard origin
-    if (originList === '*') {
-      return requestOrigin;
-    }
-    return originList === requestOrigin ? requestOrigin : '';
-  }
-
-  // block the request
-  return '';
+  // Check if request origin is in the normalized origins
+  return normalizedOrigins.includes(requestOrigin) ? requestOrigin : '';
 };
 
 export const cors: Core.MiddlewareFactory<Config> = (config) => {
