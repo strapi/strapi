@@ -160,6 +160,36 @@ describe('CORS middleware', () => {
         const result = await matchOrigin('', 'https://example.com:3000');
         expect(result).toBe('*');
       });
+
+      it('should block "null" origin when not explicitly allowed', async () => {
+        const result = await matchOrigin('null', 'https://example.com:3000');
+        expect(result).toBe('');
+      });
+
+      it('should allow "null" origin when wildcard is configured', async () => {
+        const result = await matchOrigin('null', '*');
+        expect(result).toBe('null');
+      });
+
+      it('should allow any origin with default configuration (wildcard)', async () => {
+        const result = await matchOrigin('https://example.com:3000', '*');
+        expect(result).toBe('https://example.com:3000');
+      });
+
+      it('should allow all origins when configuredOrigin is undefined', async () => {
+        const result = await matchOrigin('https://example.com:3000', undefined as any);
+        expect(result).toBe('https://example.com:3000');
+      });
+
+      it('should allow all origins when configuredOrigin is null', async () => {
+        const result = await matchOrigin('https://example.com:3000', null as any);
+        expect(result).toBe('https://example.com:3000');
+      });
+
+      it('should block all origins when configuredOrigin is empty string', async () => {
+        const result = await matchOrigin('https://example.com:3000', '');
+        expect(result).toBe('');
+      });
     });
 
     describe('Edge cases', () => {

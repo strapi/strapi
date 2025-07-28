@@ -53,6 +53,9 @@ export const matchOrigin = async (
   let normalizedOrigins: string[];
   if (Array.isArray(originList)) {
     normalizedOrigins = originList;
+  } else if (originList === undefined || originList === null) {
+    // Handle undefined/null - treat as wildcard
+    normalizedOrigins = ['*'];
   } else {
     // Handle comma-separated string of origins
     normalizedOrigins = originList.split(',').map((origin) => origin.trim());
