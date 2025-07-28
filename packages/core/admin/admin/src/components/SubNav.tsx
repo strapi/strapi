@@ -1,11 +1,11 @@
-import { useId, useState, Fragment } from 'react';
+import { useId, useState } from 'react';
 
 import { Box, SubNav as DSSubNav, Flex, Typography, IconButton } from '@strapi/design-system';
 import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { tours as unstable_tours } from './UnstableGuidedTour/Tours';
+import { tours } from './GuidedTour/Tours';
 
 const Main = styled(DSSubNav)`
   background-color: ${({ theme }) => theme.colors.neutral0};
@@ -120,16 +120,28 @@ const Sections = ({ children, ...props }: { children: React.ReactNode[]; [key: s
  * This would be better in the content-type-builder package directly but currently
  * the SubNav API does not expose a way to wrap the link, instead it wraps the link and the list
  */
-const getGuidedTourTooltip = (sectionName: string) => {
-  switch (sectionName) {
-    case 'Collection Types':
-      return unstable_tours.contentTypeBuilder.CollectionTypes;
-    case 'Single Types':
-      return unstable_tours.contentTypeBuilder.SingleTypes;
-    case 'Components':
-      return unstable_tours.contentTypeBuilder.Components;
+const GuidedTourTooltip = ({
+  sectionId,
+  children,
+}: {
+  sectionId?: string;
+  children: React.ReactNode;
+}) => {
+  switch (sectionId) {
+    case 'models':
+      return (
+        <tours.contentTypeBuilder.CollectionTypes>
+          {children}
+        </tours.contentTypeBuilder.CollectionTypes>
+      );
+    case 'singleTypes':
+      return (
+        <tours.contentTypeBuilder.SingleTypes>{children}</tours.contentTypeBuilder.SingleTypes>
+      );
+    case 'components':
+      return <tours.contentTypeBuilder.Components>{children}</tours.contentTypeBuilder.Components>;
     default:
-      return Fragment;
+      return children;
   }
 };
 
@@ -137,13 +149,14 @@ const Section = ({
   label,
   children,
   link,
+  sectionId,
 }: {
   label: string;
   children: React.ReactNode[];
   link?: { label: string; onClik: () => void };
+  sectionId?: string;
 }) => {
   const listId = useId();
-  const GuidedTourTooltip = getGuidedTourTooltip(label);
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
@@ -157,7 +170,7 @@ const Section = ({
             </Box>
           </Flex>
           {link && (
-            <GuidedTourTooltip>
+            <GuidedTourTooltip sectionId={sectionId}>
               <IconButton
                 label={link.label}
                 variant="ghost"

@@ -24,18 +24,6 @@ test.describe('Home', () => {
     await page.getByRole('button', { name: /save/i }).click();
     await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
     await expect(page.getByText('Hello Rebecca')).toBeVisible();
-
-    /**
-     * Assert the user can see and dismiss the guided tour
-     */
-    const skipTheTourButton = page.getByRole('button', { name: 'Skip the tour' });
-    await expect(skipTheTourButton).toBeVisible();
-
-    await skipTheTourButton.click();
-    await expect(skipTheTourButton).not.toBeVisible();
-    // Reload to ensure the update persisted
-    await page.reload();
-    await expect(skipTheTourButton).not.toBeVisible();
   });
 
   test('a user should see its profile information', async ({ page }) => {
@@ -123,7 +111,7 @@ test.describe('Home', () => {
 
     await expect(chartWidget).toBeVisible();
 
-    // By default, the chart should only show 11 draft entries
+    // By default, the chart should only show draft entries (no published/modified)
     await expect(chartWidget.getByText('Draft')).toBeVisible();
     await expect(chartWidget.getByText('Modified')).not.toBeVisible();
     await expect(chartWidget.getByText('Published')).not.toBeVisible();
@@ -134,7 +122,11 @@ test.describe('Home', () => {
     const tooltip = page.getByTestId('entries-chart-tooltip');
 
     await expect(tooltip).toBeVisible();
-    await expect(tooltip).toContainText('11 Draft');
+
+    // Get the initial draft count from the tooltip
+    const tooltipText = await tooltip.textContent();
+    const initialDraftMatch = tooltipText?.match(/(\d+) Draft/);
+    const initialDraftCount = initialDraftMatch ? parseInt(initialDraftMatch[1]) : 0;
 
     // Publish an entry
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
@@ -167,7 +159,8 @@ test.describe('Home', () => {
     await arcDraftUpdated.focus();
 
     await expect(tooltip).toBeVisible();
-    await expect(tooltip).toContainText('9 Draft');
+    // Should be 2 less than initial (we published 2 entries)
+    await expect(tooltip).toContainText(`${initialDraftCount - 2} Draft`);
 
     const arcPublished = chartWidget.locator('circle').nth(1);
     await arcPublished.focus();

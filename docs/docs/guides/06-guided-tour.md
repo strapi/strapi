@@ -50,19 +50,19 @@ const tours = {
 } as const;
 ```
 
-Tours for the CMS are defined in the `packages/core/admin/admin/src/components/UnstableGuidedTour/Tours.tsx` file.
+Tours for the CMS are defined in the `packages/core/admin/admin/src/components/GuidedTour/Tours.tsx` file.
 
-The tours are then passed to the `UnstableGuidedTourContext` provider.
+The tours are then passed to the `GuidedTourContext` provider.
 
 ```tsx
-import { tours } from '../UnstableGuidedTour/Tours';
-import { UnstableGuidedTourContext } from '../UnstableGuidedTour/Context';
+import { tours } from '../GuidedTour/Tours';
+import { GuidedTourContext } from '../GuidedTour/Context';
 
 function App() {
   return (
-    <UnstableGuidedTourContext tours={tours}>
+    <GuidedTourContext tours={tours}>
       <Outlet />
-    </UnstableGuidedTourContext>
+    </GuidedTourContext>
   );
 }
 ```
@@ -84,7 +84,7 @@ The provider derives the tour state. Continuing our example from above, the init
 The tours object is exported from strapi admin and can be accessed anywhere in the CMS. Wrapping an element will anchor the tour tooltip to that element.
 
 ```tsx
-import { tours } from '../UnstableGuidedTour/Tours';
+import { tours } from '../GuidedTour/Tours';
 
 <tours.contentManager.TheFeatureStepName>
   <div>A part of a feature I want to show off<div>

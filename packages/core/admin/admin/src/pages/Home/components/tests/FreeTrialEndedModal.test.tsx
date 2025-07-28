@@ -18,12 +18,17 @@ jest.mock('../../../../../src/services/admin', () => ({
       trialEndsAt: '2025-05-15T00:00:00.000Z',
     },
   })),
+  useInitQuery: jest.fn(() => ({
+    data: {
+      uuid: 'test-uuid',
+    },
+  })),
 }));
 
 describe('FreeTrialEndedModal', () => {
   beforeEach(() => {
-    localStorage.removeItem('STRAPI_FREE_TRIAL_ENDS_AT');
-    localStorage.removeItem('STRAPI_FREE_TRIAL_ENDED_MODAL');
+    localStorage.removeItem('STRAPI_FREE_TRIAL_ENDS_AT:test-uuid');
+    localStorage.removeItem('STRAPI_FREE_TRIAL_ENDED_MODAL:test-uuid');
   });
 
   beforeAll(() => {
@@ -36,7 +41,7 @@ describe('FreeTrialEndedModal', () => {
   });
 
   it('should render when trial ended less than 7 days ago and modal never appeared before', async () => {
-    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT', '2025-05-21T09:50:00.000Z');
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT:test-uuid', '2025-05-21T09:50:00.000Z');
 
     // @ts-expect-error – mock
     useLicenseLimits.mockImplementationOnce(() => ({
@@ -53,8 +58,8 @@ describe('FreeTrialEndedModal', () => {
   });
 
   it('should not render when trial ended less than 7 days ago but modal already appeared before', async () => {
-    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT', '2025-05-21T09:50:00.000Z');
-    localStorage.setItem('STRAPI_FREE_TRIAL_ENDED_MODAL', 'true');
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT:test-uuid', '2025-05-21T09:50:00.000Z');
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDED_MODAL:test-uuid', 'true');
 
     // @ts-expect-error – mock
     useLicenseLimits.mockImplementationOnce(() => ({
