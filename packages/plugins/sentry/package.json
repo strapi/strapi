@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-sentry",
-  "version": "5.17.0",
+  "version": "5.19.0",
   "description": "Send Strapi error events to Sentry",
   "repository": {
     "type": "git",
@@ -54,11 +54,11 @@
   },
   "dependencies": {
     "@sentry/node": "7.112.2",
-    "@strapi/design-system": "2.0.0-rc.28",
-    "@strapi/icons": "2.0.0-rc.28"
+    "@strapi/design-system": "2.0.0-rc.29",
+    "@strapi/icons": "2.0.0-rc.29"
   },
   "devDependencies": {
-    "@strapi/strapi": "5.17.0",
+    "@strapi/strapi": "5.19.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",

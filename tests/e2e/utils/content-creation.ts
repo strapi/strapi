@@ -96,6 +96,20 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
       }
       break;
 
+    case 'enumeration':
+      // Click the combobox to open the dropdown
+      const combobox = page.getByLabel(name).last();
+      await combobox.click();
+
+      // Wait for the option to be visible and click the option
+      const option = page.getByRole('option', { name: String(value), exact: true });
+      await expect(option).toBeVisible();
+      await option.click();
+
+      // Wait for the dropdown to close
+      await expect(option).not.toBeVisible();
+      break;
+
     case 'date_date':
       // 1) Parse the date from the string (expected "MM/DD/YYYY" or something that new Date(...) can handle)
       const date = new Date(value as string);

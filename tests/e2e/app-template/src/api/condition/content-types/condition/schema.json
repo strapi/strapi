@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "conditions",
+  "info": {
+    "singularName": "condition",
+    "pluralName": "conditions",
+    "displayName": "Condition"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "isActive": {
+      "type": "boolean"
+    },
+    "country": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::country.country",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "isActive"
+            },
+            true
+          ]
+        }
+      }
+    },
+    "roles": {
+      "type": "enumeration",
+      "enum": ["tank", "dps", "heal"]
+    },
+    "Author": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::article.article",
+      "mappedBy": "Article",
+      "conditions": {
+        "visible": {
+          "==": [{ "var": "roles" }, "tank"]
+        }
+      }
+    }
+  }
+}
