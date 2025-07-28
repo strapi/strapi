@@ -78,6 +78,14 @@ interface PreviewContextValue {
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
 
 /* -------------------------------------------------------------------------------------------------
+ * Preview injected script
+ * -----------------------------------------------------------------------------------------------*/
+
+const previewScript = () => {
+  window.alert('i come from the admin');
+};
+
+/* -------------------------------------------------------------------------------------------------
  * PreviewPage
  * -----------------------------------------------------------------------------------------------*/
 
@@ -115,6 +123,25 @@ const PreviewPage = () => {
     DEVICES[0].name
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
+
+  // Listen for ready message from iframe before injecting script
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'strapiReady') {
+        const script = `(${previewScript.toString()})()`;
+        iframeRef?.current?.contentWindow?.postMessage(
+          { type: 'strapiScript', script },
+          new URL(iframeRef.current.src).origin
+        );
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');

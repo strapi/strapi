@@ -20,16 +20,21 @@ const PreviewComponent = () => {
   });
 
   React.useEffect(() => {
-    const handleStrapiUpdate = (event) => {
+    const handleMessage = (event) => {
       if (event.data?.type === 'strapiUpdate') {
         refetch();
+      } else if (event.data?.type === 'strapiScript') {
+        const script = window.document.createElement('script');
+        script.textContent = event.data.script;
+        window.document.head.appendChild(script);
       }
     };
 
-    window.addEventListener('message', handleStrapiUpdate);
+    window.addEventListener('message', handleMessage);
+    window.parent?.postMessage({ type: 'strapiReady' }, '*');
 
     return () => {
-      window.removeEventListener('message', handleStrapiUpdate);
+      window.removeEventListener('message', handleMessage);
     };
   }, []);
 
