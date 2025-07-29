@@ -82,7 +82,101 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * -----------------------------------------------------------------------------------------------*/
 
 const previewScript = () => {
-  window.alert('i come from the admin');
+  // Remove existing overlay if it exists
+  const existingOverlay = document.getElementById('strapi-preview-overlay');
+  if (existingOverlay) {
+    existingOverlay.remove();
+  }
+
+  // Clean up any existing observers
+  if ((window as any).__strapiPreviewCleanup) {
+    (window as any).__strapiPreviewCleanup();
+  }
+
+  // Create overlay container
+  const overlay = document.createElement('div');
+  overlay.id = 'strapi-preview-overlay';
+  overlay.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  `;
+
+  // Add overlay to document body
+  document.body.appendChild(overlay);
+
+  const elements = document.querySelectorAll('[data-strapisrc]');
+  const highlights: HTMLElement[] = [];
+  const resizeObserver = new ResizeObserver(() => {
+    updateAllHighlights();
+  });
+
+  const drawOverlay = (target: Element, highlight: HTMLElement) => {
+    if (!highlight) return;
+
+    const rect = target.getBoundingClientRect();
+    highlight.style.width = `${rect.width}px`;
+    highlight.style.height = `${rect.height}px`;
+    highlight.style.transform = `translate(${rect.left + window.scrollX}px, ${rect.top + window.scrollY}px)`;
+  };
+
+  const updateAllHighlights = () => {
+    highlights.forEach((highlight, index) => {
+      const element = elements[index];
+      if (element && highlight) {
+        drawOverlay(element, highlight);
+      }
+    });
+  };
+
+  // Create highlights for each element
+  elements.forEach((element) => {
+    if (element instanceof HTMLElement) {
+      // Create highlight div for this element
+      const highlight = document.createElement('div');
+      highlight.style.cssText = `
+        position: absolute;
+        border: 2px solid rgba(255, 69, 240, 0.8);
+        box-shadow: 0 0 0 2px rgba(255, 69, 240, 0.2);
+        pointer-events: none;
+        background-color: transparent;
+      `;
+
+      highlights.push(highlight);
+      overlay.appendChild(highlight);
+
+      // Initial draw
+      drawOverlay(element, highlight);
+
+      // Observe this element for resize/position changes
+      resizeObserver.observe(element);
+    }
+  });
+
+  // Also observe document element for scroll changes
+  resizeObserver.observe(document.documentElement);
+
+  // Update highlights on scroll and resize
+  const updateOnScroll = () => {
+    updateAllHighlights();
+  };
+
+  window.addEventListener('scroll', updateOnScroll);
+  window.addEventListener('resize', updateOnScroll);
+
+  // Store cleanup function on window for potential cleanup
+  (window as any).__strapiPreviewCleanup = () => {
+    resizeObserver.disconnect();
+    window.removeEventListener('scroll', updateOnScroll);
+    window.removeEventListener('resize', updateOnScroll);
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  };
 };
 
 /* -------------------------------------------------------------------------------------------------

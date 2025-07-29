@@ -21,9 +21,15 @@ const PreviewComponent = () => {
 
   React.useEffect(() => {
     const handleMessage = (event) => {
-      if (event.data?.type === 'strapiUpdate') {
+      const { origin, data } = event;
+
+      if (origin !== 'http://localhost:1337') {
+        return;
+      }
+
+      if (data?.type === 'strapiUpdate') {
         refetch();
-      } else if (event.data?.type === 'strapiScript') {
+      } else if (data?.type === 'strapiScript') {
         const script = window.document.createElement('script');
         script.textContent = event.data.script;
         window.document.head.appendChild(script);
@@ -31,12 +37,17 @@ const PreviewComponent = () => {
     };
 
     window.addEventListener('message', handleMessage);
-    window.parent?.postMessage({ type: 'strapiReady' }, '*');
 
     return () => {
       window.removeEventListener('message', handleMessage);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (document) {
+      window.parent?.postMessage({ type: 'strapiReady' }, '*');
+    }
+  }, [document]);
 
   return (
     <Layouts.Root>
@@ -61,6 +72,22 @@ const PreviewComponent = () => {
             </Typography>
 
             <Grid.Root gap={5} tag="dl">
+              {document?.name && (
+                <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Typography variant="sigma" textColor="neutral600" tag="dt">
+                    Name
+                  </Typography>
+                  <Flex
+                    gap={3}
+                    direction="column"
+                    alignItems="start"
+                    tag="dd"
+                    data-strapisrc="name"
+                  >
+                    <Typography>{document.name}</Typography>
+                  </Flex>
+                </Grid.Item>
+              )}
               <Grid.Item col={6} s={12} direction="column" alignItems="start">
                 <Typography variant="sigma" textColor="neutral600" tag="dt">
                   Content Type
