@@ -28,7 +28,7 @@ GuidedTour/
 
 ### 1. Tours and Steps
 
-Tours are collections of steps that guide users through specific workflows:
+Tours are collections of steps that guide users through specific workflows. Each step will display its content in a popover. 
 
 ```typescript
 const tours = {
@@ -138,7 +138,9 @@ const tours = {
 } as const;
 ```
 
-2. **Add tour components to your UI**:
+2. **Add tour components to Strapi**:
+
+Wrap the element that should be the anchor for the step popover.
 
 ```tsx
 import { tours } from '@strapi/admin/strapi-admin';
