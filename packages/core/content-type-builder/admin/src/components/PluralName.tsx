@@ -50,14 +50,8 @@ export const PluralName = ({
         // If pluralize fails, use the base value
       }
 
-      // Only update if the field is empty or matches the previous auto-generated value
-      if (
-        !value ||
-        (previousValue.current && value === pluralize(nameToSlug(previousDisplayName.current), 2))
-      ) {
-        onChangeRef.current({ target: { name, value: newValue } });
-        previousValue.current = newValue;
-      }
+      onChangeRef.current({ target: { name, value: newValue } });
+      previousValue.current = newValue;
       previousDisplayName.current = displayName;
     } else if (!displayName) {
       onChangeRef.current({ target: { name, value: '' } });

@@ -35,11 +35,8 @@ export const SingularName = ({
   useEffect(() => {
     if (displayName && displayName !== previousDisplayName.current) {
       const newValue = nameToSlug(displayName);
-      // Only update if the field is empty or matches the previous auto-generated value
-      if (!value || (previousValue.current && value === nameToSlug(previousDisplayName.current))) {
-        onChangeRef.current({ target: { name, value: newValue } });
-        previousValue.current = newValue;
-      }
+      onChangeRef.current({ target: { name, value: newValue } });
+      previousValue.current = newValue;
       previousDisplayName.current = displayName;
     } else if (!displayName) {
       onChangeRef.current({ target: { name, value: '' } });
