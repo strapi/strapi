@@ -11,8 +11,22 @@ test.describe('RBAC - Delete Roles', () => {
       login: true,
       resetFiles: true,
       importData: 'with-admin.tar',
-      skipTour: true,
     });
+
+    // Navigate to the Users management page
+    await navToHeader(page, ['Settings', ['Administration Panel', 'Users']], 'Users');
+
+    // Locate the author user role
+    const authorUserRowLocator = page.getByRole('row', { name: 'author' });
+
+    // Delete the user
+    await authorUserRowLocator.getByRole('button', { name: 'Delete' }).click();
+
+    // Confirm deletion in the alert dialog
+    await clickAndWait(
+      page,
+      page.getByRole('alertdialog').getByRole('button', { name: 'Confirm' })
+    );
 
     // Navigate to the Roles management page
     await navToHeader(page, ['Settings', ['Administration Panel', 'Roles']], 'Roles');

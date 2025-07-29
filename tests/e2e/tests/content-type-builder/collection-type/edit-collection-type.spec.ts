@@ -16,7 +16,6 @@ test.describe('Edit collection type', () => {
     await sharedSetup('ctb-edit-ct', page, {
       importData: 'with-admin.tar',
       login: true,
-      skipTour: true,
       resetFiles: true,
     });
 
@@ -41,7 +40,7 @@ test.describe('Edit collection type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('cell', { name: 'product', exact: true })).toBeVisible();
+    await expect(page.getByLabel('product')).toBeVisible();
 
     // update relation in Content-Type Builder to oneToOne
     await page.getByRole('button', { name: /edit product/i }).click();
@@ -49,7 +48,7 @@ test.describe('Edit collection type', () => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
-    await expect(page.getByRole('cell', { name: 'product', exact: true })).toBeVisible();
+    await expect(page.getByLabel('product')).toBeVisible();
   });
 
   test('Can toggle internationalization', async ({ page }) => {
@@ -59,6 +58,7 @@ test.describe('Edit collection type', () => {
     await page.getByText('Internationalization').click();
     await page.getByRole('button', { name: 'Yes, disable' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
 
@@ -67,6 +67,7 @@ test.describe('Edit collection type', () => {
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Internationalization').click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
@@ -78,6 +79,7 @@ test.describe('Edit collection type', () => {
     await page.getByText('Draft & publish').click();
     await page.getByRole('button', { name: 'Yes, disable' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
 
@@ -86,6 +88,7 @@ test.describe('Edit collection type', () => {
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
@@ -161,6 +164,7 @@ test.describe('Edit collection type', () => {
     await page.getByRole('textbox', { name: 'Display name' }).fill(newname);
 
     await page.getByRole('button', { name: 'Finish', exact: true }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
 
     await waitForRestart(page);
 
@@ -174,6 +178,7 @@ test.describe('Edit collection type', () => {
     page.on('dialog', (dialog) => dialog.accept());
 
     await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
 
     await waitForRestart(page);
 

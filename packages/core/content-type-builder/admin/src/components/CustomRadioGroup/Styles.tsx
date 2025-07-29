@@ -6,13 +6,10 @@ const Wrapper = styled(Flex)`
   align-items: stretch;
 
   label {
-    border-radius: 4px;
     max-width: 50%;
     cursor: pointer;
     user-select: none;
     flex: 1;
-    border-radius: 4px;
-    border: 1px solid ${({ theme }) => theme.colors.neutral200};
 
     ${inputFocusStyle()}
   }
@@ -24,9 +21,10 @@ const Wrapper = styled(Flex)`
 
   .option {
     height: 100%;
-    border-radius: 4px;
     will-change: transform, opacity;
     background: ${({ theme }) => theme.colors.neutral0};
+    border: 1px solid ${({ theme }) => theme.colors.neutral200};
+    border-radius: ${({ theme }) => theme.borderRadius};
 
     .checkmark {
       position: relative;

@@ -88,7 +88,7 @@ export const AttributeIcon = ({ type, customField = null, ...rest }: AttributeIc
   }
 
   return (
-    <IconBox width="3.2rem" shrink={0} {...rest} aria-hidden>
+    <IconBox width="3.2rem" height="3.2rem" shrink={0} {...rest} aria-hidden>
       <Box tag={Compo} />
     </IconBox>
   );

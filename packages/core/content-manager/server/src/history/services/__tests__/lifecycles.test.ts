@@ -1,11 +1,6 @@
 import type { UID } from '@strapi/types';
-import { scheduleJob } from 'node-schedule';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createLifecyclesService } from '../lifecycles';
-
-jest.mock('node-schedule', () => ({
-  scheduleJob: jest.fn(),
-}));
 
 const mockGetRequestContext = jest.fn(() => {
   return {
@@ -21,7 +16,11 @@ const mockGetRequestContext = jest.fn(() => {
 });
 
 const mockStrapi = {
-  service: jest.fn(),
+  service: jest.fn((name: string) => {
+    if (name === 'admin::persist-tables') {
+      return { persistTablesWithPrefix: jest.fn() };
+    }
+  }),
   plugins: {
     'content-manager': {
       service: jest.fn(() => ({
@@ -69,6 +68,9 @@ const mockStrapi = {
   config: {
     get: () => undefined,
   },
+  cron: {
+    add: jest.fn(),
+  },
 };
 // @ts-expect-error - ignore
 mockStrapi.documents.use = jest.fn();
@@ -81,22 +83,23 @@ describe('history lifecycles service', () => {
     jest.useRealTimers();
   });
 
-  it('inits service only once', () => {
-    lifecyclesService.bootstrap();
-    lifecyclesService.bootstrap();
+  it('inits service only once', async () => {
+    await lifecyclesService.bootstrap();
+    await lifecyclesService.bootstrap();
     // @ts-expect-error - ignore
     expect(mockStrapi.documents.use).toHaveBeenCalledTimes(1);
   });
 
   it('should create a cron job that runs once a day', async () => {
-    // @ts-expect-error - this is a mock
-    const mockScheduleJob = scheduleJob.mockImplementationOnce(
-      jest.fn((rule, callback) => callback())
-    );
-
     await lifecyclesService.bootstrap();
 
-    expect(mockScheduleJob).toHaveBeenCalledTimes(1);
-    expect(mockScheduleJob).toHaveBeenCalledWith('historyDaily', '0 0 * * *', expect.any(Function));
+    expect(mockStrapi.cron.add).toHaveBeenCalledTimes(1);
+    expect(mockStrapi.cron.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        deleteHistoryDaily: expect.objectContaining({
+          task: expect.any(Function),
+        }),
+      })
+    );
   });
 });

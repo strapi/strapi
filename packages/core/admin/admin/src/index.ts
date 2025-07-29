@@ -22,8 +22,10 @@ export * from './components/Pagination';
 export * from './components/SearchInput';
 export * from './components/Table';
 export * from './components/ContentBox';
+export * from './components/SubNav';
+export * from './components/GradientBadge';
 
-export { useGuidedTour } from './components/GuidedTour/Provider';
+export { tours } from './components/GuidedTour/Tours';
 
 /**
  * Features
@@ -68,7 +70,7 @@ export type {
   Entity,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
-export type { Widget as WidgetType } from './core/apis/Widgets';
+export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';
 
 /**
  * Utils
@@ -76,6 +78,7 @@ export type { Widget as WidgetType } from './core/apis/Widgets';
 export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';
+export * from './utils/rulesEngine';
 export * from './services/api';
 export type { CMAdminConfiguration } from './types/adminConfiguration';
 

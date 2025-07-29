@@ -1,8 +1,7 @@
-import { reducer as dataManagerProviderReducer } from './components/DataManagerProvider/reducer';
+import { reducer as dataManagerProviderReducer } from './components/DataManager/reducer';
 import { reducer as formModalReducer } from './components/FormModal/reducer';
-import { pluginId } from './pluginId';
 
 export const reducers = {
-  [`${pluginId}_formModal`]: formModalReducer,
-  [`${pluginId}_dataManagerProvider`]: dataManagerProviderReducer,
+  [`content-type-builder_formModal`]: formModalReducer,
+  [`content-type-builder_dataManagerProvider`]: dataManagerProviderReducer,
 };

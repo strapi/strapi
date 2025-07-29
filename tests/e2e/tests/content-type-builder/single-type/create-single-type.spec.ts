@@ -1,10 +1,6 @@
 import { test } from '@playwright/test';
 import { resetFiles } from '../../../utils/file-reset';
-import {
-  createCollectionType,
-  createSingleType,
-  type AddAttribute,
-} from '../../../utils/content-types';
+import { createSingleType, type AddAttribute } from '../../../utils/content-types';
 import { sharedSetup } from '../../../utils/setup';
 import { clickAndWait } from '../../../utils/shared';
 
@@ -15,7 +11,6 @@ test.describe('Create single type with all field types', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-st', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
       importData: 'with-admin.tar',
     });

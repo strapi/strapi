@@ -2,6 +2,14 @@ import { render } from '@tests/utils';
 
 import { SettingsNav, SettingsNavProps } from '../SettingsNav';
 
+jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
+  useLicenseLimits: jest.fn(() => ({
+    license: {
+      features: [],
+    },
+  })),
+}));
+
 const menu = [
   {
     id: 'global',

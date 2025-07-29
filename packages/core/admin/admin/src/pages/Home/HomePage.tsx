@@ -5,6 +5,7 @@ import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
 
+import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { Widget } from '../../components/WidgetHelpers';
@@ -12,7 +13,8 @@ import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 
-import { GuidedTour } from './components/GuidedTour';
+import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
+import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
 
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 
@@ -80,6 +82,7 @@ export const WidgetRoot = ({
             variant="omega"
             textColor="primary600"
             style={{ textDecoration: 'none' }}
+            textAlign="right"
             to={link.href}
           >
             {formatMessage(link.label)}
@@ -147,9 +150,11 @@ const HomePageCE = () => {
           defaultMessage: 'Welcome to your administration panel',
         })}
       />
+      <FreeTrialWelcomeModal />
+      <FreeTrialEndedModal />
       <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
-          <GuidedTour />
+          <GuidedTourHomepageOverview />
           <Grid.Root gap={5}>
             {getAllWidgets().map((widget) => {
               return (

@@ -44,10 +44,38 @@ interface InputOption {
   value: string;
 }
 
-interface CustomInputProps<TAttribute extends Schema.Attribute.AnyAttribute>
-  extends Omit<GenericInputProps<TAttribute>, 'customInputs'> {
-  ref?: React.Ref<HTMLElement>;
+interface CustomInputProps<
+  TAttribute extends Schema.Attribute.AnyAttribute = Schema.Attribute.AnyAttribute,
+> {
+  attribute?: TAttribute;
+  autoComplete?: string;
+  description?: TranslationMessage;
+  disabled?: boolean;
+  error?: string;
   hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
+  intlLabel: TranslationMessage;
+  labelAction?: React.ReactNode;
+  name: string;
+  onChange: (
+    payload: {
+      target: {
+        name: string;
+        value: Schema.Attribute.Value<TAttribute>;
+        type?: string;
+      };
+    },
+    shouldSetInitialValue?: boolean
+  ) => void;
+  onDelete?: () => void;
+  options?: InputOption[];
+  placeholder?: TranslationMessage;
+  required?: boolean;
+  step?: number;
+  type: string;
+  value?: Schema.Attribute.Value<TAttribute>;
+  autoFocus?: boolean;
+  attributeName?: string;
+  conditionFields?: Record<string, boolean>;
 }
 
 interface GenericInputProps<
@@ -72,6 +100,7 @@ interface GenericInputProps<
     },
     shouldSetInitialValue?: boolean
   ) => void;
+  onDelete?: () => void;
   options?: InputOption[];
   placeholder?: TranslationMessage;
   required?: boolean;
@@ -80,6 +109,9 @@ interface GenericInputProps<
   // TODO: The value depends on the input type, too complicated to handle all cases here
   value?: Schema.Attribute.Value<TAttribute>;
   isNullable?: boolean;
+  autoFocus?: boolean;
+  attributeName?: string;
+  conditionFields?: Record<string, boolean>;
 }
 
 const GenericInput = ({
@@ -92,6 +124,7 @@ const GenericInput = ({
   error,
   name,
   onChange,
+  onDelete,
   options = [],
   placeholder,
   required,
@@ -99,7 +132,10 @@ const GenericInput = ({
   type,
   value: defaultValue,
   isNullable,
+  autoFocus,
   attribute,
+  attributeName,
+  conditionFields,
   ...rest
 }: GenericInputProps) => {
   const { formatMessage } = useIntl();
@@ -193,11 +229,15 @@ const GenericInput = ({
         error={errorMessage || ''}
         name={name}
         onChange={onChange}
+        onDelete={onDelete}
         options={options}
         required={required}
         placeholder={placeholder}
         type={type}
         value={value}
+        autoFocus={autoFocus}
+        attributeName={attributeName}
+        conditionFields={conditionFields}
       />
     );
   }
@@ -317,6 +357,7 @@ const GenericInput = ({
             placeholder={formattedPlaceholder}
             step={step}
             value={value}
+            autoFocus={autoFocus}
           />
         );
       }
@@ -331,6 +372,7 @@ const GenericInput = ({
             placeholder={formattedPlaceholder}
             type="email"
             value={valueWithEmptyStringFallback}
+            autoFocus={autoFocus}
           />
         );
       }
@@ -347,6 +389,7 @@ const GenericInput = ({
             placeholder={formattedPlaceholder}
             type="text"
             value={valueWithEmptyStringFallback}
+            autoFocus={autoFocus}
           />
         );
       }

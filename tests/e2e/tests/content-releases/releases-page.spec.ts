@@ -1,15 +1,23 @@
 import { test, expect } from '@playwright/test';
 import { clickAndWait, describeOnCondition } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
+import { waitForRestart } from '../../utils/restart';
+import { resetFiles } from '../../utils/file-reset';
+import { sharedSetup } from '../../utils/setup';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 describeOnCondition(edition === 'EE')('Releases page', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
-    await login({ page });
+    await sharedSetup('history-spec', page, {
+      login: true,
+      resetFiles: true,
+      importData: 'with-admin.tar',
+      resetAlways: true, // NOTE: this makes tests extremely slow, but it's necessary to ensure isolation between tests
+    });
+  });
+
+  test.afterAll(async () => {
+    await resetFiles();
   });
 
   test('A user should be able to create a release without scheduling it and view their pending and done releases', async ({
@@ -137,5 +145,40 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       await clickAndWait(page, releaseColumn.first());
       await expect(page.getByText('The Diamond Dogs')).toBeVisible();
     });
+  });
+
+  test('Should not show "add to release" bulk action for content types without draft & publish enabled', async ({
+    page,
+  }) => {
+    // Publish articles, otherwise they'll be deleted when we disable draft & publish
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await page.getByRole('checkbox', { name: 'Select all entries' }).check();
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    await page.getByRole('button', { name: 'Publish' }).click();
+    const publishConfirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+    await expect(publishConfirmationDialog).toBeVisible();
+    await publishConfirmationDialog.getByRole('button', { name: 'Publish' }).click();
+
+    // Disable draft & publish for the Article content type
+    await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Edit', exact: true }));
+    await clickAndWait(page, page.getByRole('tab', { name: /advanced settings/i }));
+    await page.getByLabel('Draft & publish').click();
+    const ctbConfirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+    await expect(ctbConfirmationDialog).toBeVisible();
+    await ctbConfirmationDialog.getByRole('button', { name: /disable/i }).click();
+    await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
+
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+
+    // Go to the content manager and bulk select articlesto make sure the "add to release" does not show up
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+    await page.getByRole('checkbox', { name: 'Select all entries' }).check();
+    await expect(page.getByRole('button', { name: /add to release/i })).not.toBeVisible();
   });
 });

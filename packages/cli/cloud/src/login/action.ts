@@ -24,7 +24,10 @@ export async function promptLogin(ctx: CLIContext) {
   return false;
 }
 
-export default async function loginAction(ctx: CLIContext): Promise<boolean> {
+export default async function loginAction(
+  ctx: CLIContext,
+  { showDashboardLink = true }: { showDashboardLink?: boolean } = {}
+): Promise<boolean> {
   const { logger, promptExperiment } = ctx;
   const tokenService = await tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
@@ -41,10 +44,12 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
         } else {
           logger.log('You are already logged in.');
         }
-        logger.log(
-          'To access your dashboard, please copy and paste the following URL into your web browser:'
-        );
-        logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
+        if (showDashboardLink) {
+          logger.log(
+            'To access your dashboard, please copy and paste the following URL into your web browser:'
+          );
+          logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
+        }
         return true;
       } catch (e) {
         logger.debug('Failed to fetch user info', e);
@@ -54,7 +59,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
 
   let cliConfig: CloudCliConfig;
   try {
-    logger.info('🔌 Connecting to the Strapi Cloud API...');
+    logger.info('🔌 Connecting...');
     const config = await cloudApiService.config();
     cliConfig = config.data;
   } catch (e: unknown) {
@@ -182,11 +187,13 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
       }
     }
     spinner.succeed('Authentication successful!');
-    logger.log('You are now logged into Strapi Cloud.');
-    logger.log(
-      'To access your dashboard, please copy and paste the following URL into your web browser:'
-    );
-    logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
+    if (showDashboardLink) {
+      logger.log('You are now logged into Strapi Cloud.');
+      logger.log(
+        'To access your dashboard, please copy and paste the following URL into your web browser:'
+      );
+      logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
+    }
     await trackEvent(ctx, cloudApiService, 'didLogin', {
       loginMethod: 'cli',
       ...(promptExperiment && { promptExperiment }),

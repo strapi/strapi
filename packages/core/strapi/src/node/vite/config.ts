@@ -10,6 +10,7 @@ import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
+  const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
 
   return {
     root: ctx.cwd,
@@ -35,6 +36,66 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom/client',
         'styled-components',
         'react-router-dom',
+        /**
+         * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
+         * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why
+         * Only include dependencies for our internal example apps, otherwise it will break
+         * real user apps that may not have those dependencies.
+         */
+        ...(isMonorepoExampleApp
+          ? [
+              '@dnd-kit/core',
+              '@dnd-kit/sortable',
+              '@dnd-kit/utilities',
+              '@dnd-kit/modifiers',
+              '@radix-ui/react-toolbar',
+              'codemirror5',
+              'codemirror5/addon/display/placeholder',
+              'date-fns-tz',
+              'date-fns/format',
+              'date-fns/formatISO',
+              'highlight.js',
+              'lodash/capitalize',
+              'lodash/fp',
+              'lodash/groupBy',
+              'lodash/has',
+              'lodash/isNil',
+              'lodash/locale',
+              'lodash/map',
+              'lodash/mapValues',
+              'lodash/pull',
+              'lodash/size',
+              'lodash/sortBy',
+              'lodash/tail',
+              'lodash/toLower',
+              'lodash/toNumber',
+              'lodash/toString',
+              'lodash/truncate',
+              'lodash/uniq',
+              'lodash/upperFirst',
+              'markdown-it',
+              'markdown-it-abbr',
+              'markdown-it-container',
+              'markdown-it-deflist',
+              'markdown-it-emoji',
+              'markdown-it-footnote',
+              'markdown-it-ins',
+              'markdown-it-mark',
+              'markdown-it-sub',
+              'markdown-it-sup',
+              'prismjs/components/*.js',
+              'react-colorful',
+              'react-dnd-html5-backend',
+              'react-window',
+              'sanitize-html',
+              'semver',
+              'semver/functions/lt',
+              'semver/functions/valid',
+              'slate',
+              'slate-history',
+              'slate-react',
+            ]
+          : []),
       ],
     },
     resolve: {
@@ -89,6 +150,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
       middlewareMode: true,
       open: ctx.options.open,
       hmr: {
+        overlay: false,
         server: ctx.options.hmrServer,
         clientPort: ctx.options.hmrClientPort,
       },

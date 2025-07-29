@@ -167,3 +167,40 @@ export type StartsWith<TValue extends string, TPrefix extends Literal> = Extends
   TValue,
   `${TPrefix}${string}`
 >;
+
+/**
+ * Combines a union of literal types with a more general type while preserving autocompletion.
+ *
+ * When using string literal unions, it maintains IDE suggestions for the literal values while
+ * still allowing any value of the base type.
+ *
+ * @template T - The literal type to suggest in autocompletion (for example, specific strings)
+ * @template U - The base type that T extends from (defaults to string)
+ *
+ * @example
+ * // Define a type for specific HTTP methods while allowing custom one's
+ * type HttpMethod = LiteralUnion<'GET' | 'POST' | 'PUT' | 'DELETE'>;
+ *
+ * // These will show up in autocompletion
+ * const method1: HttpMethod = 'GET';     // ✓ Valid
+ * const method2: HttpMethod = 'POST';    // ✓ Valid
+ *
+ * // This is also valid since any string is allowed
+ * const method3: HttpMethod = 'PATCH';   // ✓ Valid
+ *
+ * @example
+ * // Can be used with number literals too
+ * type CommonPorts = LiteralUnion<80 | 443 | 3000, number>;
+ *
+ * // Suggested in autocompletion
+ * const port1: CommonPorts = 80;         // ✓ Valid
+ * const port2: CommonPorts = 443;        // ✓ Valid
+ *
+ * // Any number is still accepted
+ * const port3: CommonPorts = 8080;       // ✓ Valid
+ *
+ * @remark
+ * This type is particularly useful for API parameters where specific values should be suggested,
+ * but custom values shouldn't be restricted.
+ */
+export type LiteralUnion<T extends U, U = string> = T | (U & NonNullable<unknown>);

@@ -9,6 +9,11 @@ export type ProjectAnswers = {
   plan: string;
 };
 
+type BoxedErrorMessage = {
+  firstLine: string;
+  secondLine: string;
+};
+
 export type CloudCliConfig = {
   clientId: string;
   baseUrl: string;
@@ -23,14 +28,25 @@ export type CloudCliConfig = {
     introText: string;
     userChoice?: object;
     reference?: string;
+    errors: {
+      environmentCreationFailed: BoxedErrorMessage;
+    };
   };
   projectDeployment: {
     confirmationText: string;
+    errors: {
+      environmentNotReady: BoxedErrorMessage;
+    };
   };
   buildLogsConnectionTimeout: string;
   buildLogsMaxRetries: string;
   notificationsConnectionTimeout: string;
   maxProjectFileSize: string;
+  featureFlags: {
+    cloudLoginPromptEnabled: boolean;
+    growthSsoTrialEnabled: boolean;
+    asyncProjectCreationEnabled: boolean;
+  };
 };
 
 export interface CLIContext {
@@ -53,7 +69,7 @@ export type StrapiCloudCommandInfo = {
   name: string;
   description: string;
   command: StrapiCloudCommand;
-  action: (ctx: CLIContext) => Promise<unknown>;
+  action: (ctx: CLIContext, options?: Record<string, unknown>) => Promise<unknown>;
 };
 
 export type TrackPayload = Record<string, unknown>;
