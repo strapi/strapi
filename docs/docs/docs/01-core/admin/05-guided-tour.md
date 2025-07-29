@@ -1,4 +1,3 @@
-
 # Guided Tour
 
 The Guided Tour provides an interactive onboarding experience that guides new users through key features of the admin panel. This documentation explains how the system works and how to create new guided tours.
@@ -8,7 +7,7 @@ The Guided Tour provides an interactive onboarding experience that guides new us
 The Guided Tour system is built with a modular architecture consisting of:
 
 - **Context Provider** (`Context.tsx`) - Global state management and persistence
-- **Tour Factory** (`Tours.tsx`) - Tour creation and step management  
+- **Tour Factory** (`Tours.tsx`) - Tour creation and step management
 - **Step Components** (`Step.tsx`) - Reusable popover components for tour steps
 - **Overview Component** (`Overview.tsx`) - Homepage tour overview and progress tracking
 
@@ -28,7 +27,7 @@ GuidedTour/
 
 ### 1. Tours and Steps
 
-Tours are collections of steps that guide users through specific workflows. Each step will display its content in a popover. 
+Tours are collections of steps that guide users through specific workflows. Each step will display its content in a popover.
 
 ```typescript
 const tours = {
@@ -54,9 +53,9 @@ The tour state is managed through a React Context with a reducer pattern:
 
 ```typescript
 type State = {
-  tours: Tour;                    // Tour progress for each tour
-  enabled: boolean;               // Whether tours are globally enabled
-  completedActions: ExtendedCompletedActions;  // User-completed actions
+  tours: Tour; // Tour progress for each tour
+  enabled: boolean; // Whether tours are globally enabled
+  completedActions: ExtendedCompletedActions; // User-completed actions
 };
 ```
 
@@ -84,11 +83,11 @@ const myNewTour = createTour('myNewTour', [
     name: 'Introduction',
     content: (Step) => (
       <Step.Root>
-        <Step.Title 
+        <Step.Title
           id="tours.myNewTour.Introduction.title"
           defaultMessage="My New Feature"
         />
-        <Step.Content 
+        <Step.Content
           id="tours.myNewTour.Introduction.content"
           defaultMessage="This tour will show you how to use this feature."
         />
@@ -100,11 +99,11 @@ const myNewTour = createTour('myNewTour', [
     name: 'MainAction',
     content: (Step) => (
       <Step.Root side="right" sideOffset={16}>
-        <Step.Title 
+        <Step.Title
           id="tours.myNewTour.MainAction.title"
           defaultMessage="Main Action"
         />
-        <Step.Content 
+        <Step.Content
           id="tours.myNewTour.MainAction.content"
           defaultMessage="Click this button to perform the main action."
         />
@@ -116,11 +115,11 @@ const myNewTour = createTour('myNewTour', [
     name: 'Finish',
     content: (Step) => (
       <Step.Root>
-        <Step.Title 
+        <Step.Title
           id="tours.myNewTour.Finish.title"
           defaultMessage="You're all set!"
         />
-        <Step.Content 
+        <Step.Content
           id="tours.myNewTour.Finish.content"
           defaultMessage="You've successfully completed this tour."
         />
@@ -151,11 +150,9 @@ const MyComponent = () => {
       <tours.myNewTour.Introduction>
         <h1>My Feature Title</h1>
       </tours.myNewTour.Introduction>
-      
+
       <tours.myNewTour.MainAction>
-        <Button onClick={handleMainAction}>
-          Main Action
-        </Button>
+        <Button onClick={handleMainAction}>Main Action</Button>
       </tours.myNewTour.MainAction>
     </div>
   );
@@ -165,7 +162,7 @@ const MyComponent = () => {
 3. **Mark actions complete** to trigger conditional steps:
 
 :::note
-To foster a declarative API it is recommended to update the [backend endpoint](#backend-integration) for actions that save to the database and invalidate the cache when the action is completed. Otherwise an action on the frontend (ie didCopyApiToken) can update the state imperatively. 
+To foster a declarative API it is recommended to update the [backend endpoint](#backend-integration) for actions that save to the database and invalidate the cache when the action is completed. Otherwise an action on the frontend (ie didCopyApiToken) can update the state imperatively.
 :::
 
 ```tsx
@@ -173,11 +170,11 @@ import { useGuidedTour } from './Context';
 
 const MyComponent = () => {
   const dispatch = useGuidedTour('MyComponent', (s) => s.dispatch);
-  
+
   const handleMainAction = () => {
     // Perform the action
     performMainAction();
-    
+
     // Track the completion
     dispatch({
       type: 'set_completed_actions',
@@ -192,10 +189,11 @@ const MyComponent = () => {
 Each step provides three main components:
 
 #### Step.Root
+
 The container for the popover with positioning options. Wraps and receives the same props as the [Radix popover](https://www.radix-ui.com/primitives/docs/components/popover).
 
 ```tsx
-<Step.Root 
+<Step.Root
   side="top|right|bottom|left"     // Popover position
   align="start|center|end"         // Alignment along the side
   sideOffset={number}              // Offset from the anchor
@@ -204,12 +202,13 @@ The container for the popover with positioning options. Wraps and receives the s
 ```
 
 #### Step.Title
+
 The step title with i18n support:
 
 ```tsx
-<Step.Title 
-  id="translation.key" 
-  defaultMessage="Default Title" 
+<Step.Title
+  id="translation.key"
+  defaultMessage="Default Title"
 />
 
 // Or with custom content:
@@ -218,13 +217,14 @@ The step title with i18n support:
 </Step.Title>
 ```
 
-#### Step.Content  
+#### Step.Content
+
 The step content with i18n support:
 
 ```tsx
-<Step.Content 
-  id="translation.key" 
-  defaultMessage="Default content message" 
+<Step.Content
+  id="translation.key"
+  defaultMessage="Default content message"
 />
 
 // Or with custom content:
@@ -234,12 +234,13 @@ The step content with i18n support:
 ```
 
 #### Step.Actions
+
 Action buttons with built-in functionality:
 
 ```tsx
-<Step.Actions 
+<Step.Actions
   showStepCount={boolean}    // Show "Step X of Y" (default: true)
-  showSkip={boolean}         // Show skip button (default: false)  
+  showSkip={boolean}         // Show skip button (default: false)
   to="/path"                 // Navigate to path on next (optional)
 />
 
@@ -272,7 +273,7 @@ const initialState = {
       currentStep: 0,
       length: 3,
       isCompleted: false,
-    }
+    },
   },
   enabled: true,
   completedActions: ['didCreateSchema'],
@@ -297,11 +298,11 @@ import { useGuidedTour } from './Context';
 const MyComponent = () => {
   const state = useGuidedTour('MyComponent', (s) => s.state);
   const dispatch = useGuidedTour('MyComponent', (s) => s.dispatch);
-  
+
   const currentTour = state.tours.myNewTour;
   const isEnabled = state.enabled;
   const completedActions = state.completedActions;
-  
+
   // Dispatch actions
   const handleNext = () => {
     dispatch({ type: 'next_step', payload: 'myNewTour' });
@@ -318,7 +319,7 @@ Tour state is automatically persisted to localStorage using the `usePersistentSt
 Tours integrate with the backend through:
 
 - `useGetGuidedTourMetaQuery()` - Fetches tour metadata from the server
-- Completed actions are synchronized between client and server. 
+- Completed actions are synchronized between client and server.
 - First-time user detection (`isFirstSuperAdminUser`)
 
 ## E2E Testing
@@ -344,7 +345,7 @@ type State = {
   completedActions: ExtendedCompletedActions;
 };
 
-type Action = 
+type Action =
   | { type: 'next_step'; payload: ValidTourName }
   | { type: 'skip_tour'; payload: ValidTourName }
   | { type: 'set_completed_actions'; payload: ExtendedCompletedActions }
