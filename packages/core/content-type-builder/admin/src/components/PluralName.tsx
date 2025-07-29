@@ -36,21 +36,35 @@ export const PluralName = ({
   const { formatMessage } = useIntl();
   const onChangeRef = useRef(onChange);
   const displayName = modifiedData?.displayName || '';
+  const previousDisplayName = useRef(displayName);
+  const previousValue = useRef(value);
 
   useEffect(() => {
-    if (displayName) {
-      const value = nameToSlug(displayName);
+    if (displayName && displayName !== previousDisplayName.current) {
+      const baseValue = nameToSlug(displayName);
+      let newValue = baseValue;
 
       try {
-        const plural = pluralize(value, 2);
-        onChangeRef.current({ target: { name, value: plural } });
+        newValue = pluralize(baseValue, 2);
       } catch (err) {
-        onChangeRef.current({ target: { name, value } });
+        // If pluralize fails, use the base value
       }
-    } else {
+
+      // Only update if the field is empty or matches the previous auto-generated value
+      if (
+        !value ||
+        (previousValue.current && value === pluralize(nameToSlug(previousDisplayName.current), 2))
+      ) {
+        onChangeRef.current({ target: { name, value: newValue } });
+        previousValue.current = newValue;
+      }
+      previousDisplayName.current = displayName;
+    } else if (!displayName) {
       onChangeRef.current({ target: { name, value: '' } });
+      previousValue.current = '';
+      previousDisplayName.current = '';
     }
-  }, [displayName, name]);
+  }, [displayName, name, value]);
 
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const hint = description
