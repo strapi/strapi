@@ -6,6 +6,7 @@ export default {
   // NOTE: Overrides CE admin controller
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
+    const ai = strapi.config.get('admin.ai', {});
     try {
       return {
         data: {
@@ -14,6 +15,7 @@ export default {
           features: strapi.ee.features.list(),
           flags,
           type: strapi.ee.type,
+          ai,
         },
       };
     } catch (err) {

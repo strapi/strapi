@@ -39,6 +39,9 @@ export interface Strapi extends Container {
   app: any;
   EE?: boolean;
   aiLicenseKey?: string;
+  ai?: {
+    disable: boolean;
+  };
   ee: {
     seats: number | null | undefined;
     type: string | null | undefined;

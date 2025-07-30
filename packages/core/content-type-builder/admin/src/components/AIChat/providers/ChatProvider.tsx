@@ -151,11 +151,12 @@ export const BaseChatProvider = ({
       });
     }
   }, [chat.status, messages, trackUsage]);
+  const isAiDisabled = window.strapi.ai?.disable;
 
   return (
     <ChatContext.Provider
       value={{
-        isChatEnabled: !!STRAPI_AI_TOKEN,
+        isChatEnabled: !!STRAPI_AI_TOKEN && !isAiDisabled,
         ...chat,
         messages,
         rawMessages: chat.messages,
