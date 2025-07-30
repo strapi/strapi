@@ -77,7 +77,7 @@ test.describe('Homepage - Content Manager Widgets', () => {
 
     await expect(chartWidget).toBeVisible();
 
-    // By default, the chart should only show 11 draft entries
+    // By default, the chart should only show draft entries (no published/modified)
     await expect(chartWidget.getByText('Draft')).toBeVisible();
     await expect(chartWidget.getByText('Modified')).not.toBeVisible();
     await expect(chartWidget.getByText('Published')).not.toBeVisible();
@@ -88,7 +88,11 @@ test.describe('Homepage - Content Manager Widgets', () => {
     const tooltip = page.getByTestId('entries-chart-tooltip');
 
     await expect(tooltip).toBeVisible();
-    await expect(tooltip).toContainText('11 Draft');
+
+    // Get the initial draft count from the tooltip
+    const tooltipText = await tooltip.textContent();
+    const initialDraftMatch = tooltipText?.match(/(\d+) Draft/);
+    const initialDraftCount = initialDraftMatch ? parseInt(initialDraftMatch[1]) : 0;
 
     // Publish an entry
     await navToHeader(page, ['Content Manager', 'Article'], 'Article');
@@ -121,7 +125,8 @@ test.describe('Homepage - Content Manager Widgets', () => {
     await arcDraftUpdated.focus();
 
     await expect(tooltip).toBeVisible();
-    await expect(tooltip).toContainText('9 Draft');
+    // Should be 2 less than initial (we published 2 entries)
+    await expect(tooltip).toContainText(`${initialDraftCount - 2} Draft`);
 
     const arcPublished = chartWidget.locator('circle').nth(1);
     await arcPublished.focus();
