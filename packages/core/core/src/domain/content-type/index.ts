@@ -86,13 +86,12 @@ const addDraftAndPublish = (schema: Schema.ContentType) => {
 };
 
 const addFirstPublishedAt = (schema: Schema.ContentType) => {
-  const isEnabled =
-    strapi.config.get('admin.firstPublishedAtField.enabled', false) &&
-    _.get(schema, 'options.draftAndPublish', false);
+  const isEnabled = contentTypesUtils.hasFirstPublishedAtField(schema);
 
   // Note: As an expertimental feature, we are okay if this data is deleted if this feature is
   // switched off. Once "preserve_attributes" come into play, this will be updated.
   if (isEnabled) {
+    strapi.log.warn(`Experimental feature enabled: firstPublishedAt on ${schema.collectionName}`);
     schema.attributes[FIRST_PUBLISHED_AT_ATTRIBUTE] = {
       type: 'datetime',
       configurable: false,

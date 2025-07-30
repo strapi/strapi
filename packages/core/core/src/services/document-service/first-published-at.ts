@@ -1,6 +1,6 @@
-import { contentTypes, types } from '@strapi/utils';
+import { contentTypes } from '@strapi/utils';
 import { assoc } from 'lodash/fp';
-import type { Modules } from '@strapi/types';
+import type { Modules, Schema } from '@strapi/types';
 
 type EntriesUpdate = (entryToUpdate: any, param?: any) => Promise<any>;
 type ParamsTransform = (params: Modules.Documents.Params.All) => Modules.Documents.Params.All;
@@ -8,7 +8,7 @@ type ParamsTransform = (params: Modules.Documents.Params.All) => Modules.Documen
 const addFirstPublishedAtToDraft = async (
   draft: any,
   update: EntriesUpdate,
-  contentType: types.Model
+  contentType: Schema.ContentType
 ) => {
   if (!contentTypes.hasFirstPublishedAtField(contentType)) {
     return draft;

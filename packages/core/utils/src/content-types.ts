@@ -117,7 +117,8 @@ const hasDraftAndPublish = (model: Model) =>
   _.get(model, 'options.draftAndPublish', false) === true;
 
 const hasFirstPublishedAtField = (model: Model) =>
-  strapi.config.get('admin.firstPublishedAtField.enabled', false) && hasDraftAndPublish(model);
+  strapi.config.get('features.future.experimental_firstPublishedAt', false) &&
+  hasDraftAndPublish(model);
 
 const isDraft = <T extends object>(data: T, model: Model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
