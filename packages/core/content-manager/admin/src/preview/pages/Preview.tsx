@@ -183,8 +183,8 @@ const previewScript = () => {
         editButton.style.display = 'none';
       });
 
-      // Add click handler for edit button
-      editButton.addEventListener('click', (e) => {
+      // Function to trigger edit action
+      const triggerEdit = (e: Event) => {
         e.stopPropagation();
         e.preventDefault();
 
@@ -207,7 +207,13 @@ const previewScript = () => {
             '*'
           );
         }
-      });
+      };
+
+      // Add click handler for edit button
+      editButton.addEventListener('click', triggerEdit);
+
+      // Add double-click handler for highlight
+      highlight.addEventListener('dblclick', triggerEdit);
 
       highlight.appendChild(editButton);
       highlights.push(highlight);
