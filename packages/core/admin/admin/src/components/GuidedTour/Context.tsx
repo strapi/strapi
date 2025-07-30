@@ -7,6 +7,7 @@ import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
 import { type Tours, tours as guidedTours } from './Tours';
+import { migrateTourLengths } from './utils/migrations';
 
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourProvider
@@ -68,15 +69,6 @@ const getInitialTourState = (tours: Tours) => {
 
     return acc;
   }, {} as Tour);
-};
-
-const migrateTourLengths = (tourState: State) => {
-  return produce(tourState, (draft) => {
-    Object.keys(tourState.tours).forEach((tourName) => {
-      const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
-      draft.tours[tourName as ValidTourName].length = tourLength;
-    });
-  });
 };
 
 function reducer(state: State, action: Action): State {

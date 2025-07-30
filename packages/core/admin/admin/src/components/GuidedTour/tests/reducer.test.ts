@@ -723,9 +723,9 @@ describe('GuidedTour | reducer', () => {
       const initialState = {
         tours: {
           contentTypeBuilder: {
-            currentStep: 5,
+            currentStep: 8,
             isCompleted: true,
-            length: 5,
+            length: 8,
           },
           contentManager: {
             currentStep: 4,
@@ -760,7 +760,7 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 5,
+            length: 8,
           },
           contentManager: {
             currentStep: 0,
@@ -791,7 +791,7 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 2,
             isCompleted: false,
-            length: 5,
+            length: 8,
           },
           contentManager: {
             currentStep: 4,
@@ -822,7 +822,7 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 5,
+            length: 8,
           },
           contentManager: {
             currentStep: 0,
@@ -853,7 +853,7 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 3,
             isCompleted: false,
-            length: 5,
+            length: 8,
           },
           contentManager: {
             currentStep: 2,
@@ -887,7 +887,7 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 5,
+            length: 8,
           },
           contentManager: {
             currentStep: 0,
@@ -898,6 +898,134 @@ describe('GuidedTour | reducer', () => {
             currentStep: 0,
             isCompleted: false,
             length: 4,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 0,
+          },
+        },
+        enabled: true,
+        completedActions: [] as ExtendedCompletedActions,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+  });
+
+  describe('previous_step', () => {
+    it('should decrement the step count for the specified tour', () => {
+      const initialState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 2,
+            isCompleted: false,
+            length: 3,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 2,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 0,
+          },
+        },
+        enabled: true,
+        completedActions: [] as ExtendedCompletedActions,
+      };
+
+      const action: Action = {
+        type: 'previous_step',
+        payload: 'contentTypeBuilder',
+      };
+
+      const expectedState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 1,
+            isCompleted: false,
+            length: 3,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 2,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 0,
+          },
+        },
+        enabled: true,
+        completedActions: [] as ExtendedCompletedActions,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    it('should not decrement below 0', () => {
+      const initialState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 2,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 0,
+          },
+        },
+        enabled: true,
+        completedActions: [] as ExtendedCompletedActions,
+      };
+
+      const action: Action = {
+        type: 'previous_step',
+        payload: 'contentTypeBuilder',
+      };
+
+      const expectedState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 2,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
