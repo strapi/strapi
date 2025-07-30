@@ -46,6 +46,14 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
     edit: { components },
   } = useDocumentLayout(currentDocumentMeta.model);
 
+  const handleFocus = () => {
+    console.log('focus found!');
+  };
+
+  const handleBlur = () => {
+    console.log('focus lost');
+  };
+
   const collectionType =
     document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
 
@@ -109,98 +117,118 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
    * If the user can't read the field then we don't want to ever render it.
    */
   if (!canUserReadField && !isInDynamicZone) {
-    return <NotAllowedInput hint={hint} {...props} />;
+    return (
+      <div onFocus={handleFocus} onBlur={handleBlur} tabIndex={-1}>
+        <NotAllowedInput hint={hint} {...props} />
+      </div>
+    );
   }
 
   const fieldIsDisabled =
     (!canUserEditField && !isInDynamicZone) || props.disabled || isFormDisabled;
 
-  /**
-   * Because a custom field has a unique prop but the type could be confused with either
-   * the useField hook or the type of the field we need to handle it separately and first.
-   */
-  if (attributeHasCustomFieldProperty(props.attribute)) {
-    const CustomInput = lazyComponentStore[props.attribute.customField];
+  const renderInput = () => {
+    /**
+     * Because a custom field has a unique prop but the type could be confused with either
+     * the useField hook or the type of the field we need to handle it separately and first.
+     */
+    if (attributeHasCustomFieldProperty(props.attribute)) {
+      const CustomInput = lazyComponentStore[props.attribute.customField];
 
-    if (CustomInput) {
-      // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
-      return <CustomInput {...props} {...field} hint={hint} disabled={fieldIsDisabled} />;
+      if (CustomInput) {
+        return (
+          <>
+            {/* @ts-expect-error – TODO: fix this type error in the useLazyComponents hook. */}
+            <CustomInput {...props} {...field} hint={hint} disabled={fieldIsDisabled} />
+          </>
+        );
+      }
+
+      return (
+        <FormInputRenderer
+          {...props}
+          hint={hint}
+          // @ts-expect-error – this workaround lets us display that the custom field is missing.
+          type={props.attribute.customField}
+          disabled={fieldIsDisabled}
+        />
+      );
     }
 
-    return (
-      <FormInputRenderer
-        {...props}
-        hint={hint}
-        // @ts-expect-error – this workaround lets us display that the custom field is missing.
-        type={props.attribute.customField}
-        disabled={fieldIsDisabled}
-      />
-    );
-  }
-
-  /**
-   * This is where we handle ONLY the fields from the `useLibrary` hook.
-   */
-  const addedInputTypes = Object.keys(fields);
-  if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
-    const CustomInput = fields[props.type];
-    // @ts-expect-error – TODO: fix this type error in the useLibrary hook.
-    return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
-  }
-
-  /**
-   * These include the content-manager specific fields, failing that we fall back
-   * to the more generic form input renderer.
-   */
-  switch (props.type) {
-    case 'blocks':
-      return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
-    case 'component':
-      return (
-        <ComponentInput
-          {...props}
-          hint={hint}
-          layout={components[props.attribute.component].layout}
-          disabled={fieldIsDisabled}
-        >
-          {(inputProps) => <InputRenderer {...inputProps} />}
-        </ComponentInput>
-      );
-    case 'dynamiczone':
-      return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
-    case 'relation':
-      return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
-    case 'richtext':
-      return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
-    case 'uid':
-      return <UIDInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     /**
-     * Enumerations are a special case because they require options.
+     * This is where we handle ONLY the fields from the `useLibrary` hook.
      */
-    case 'enumeration':
+    const addedInputTypes = Object.keys(fields);
+    if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
+      const CustomInput = fields[props.type];
       return (
-        <FormInputRenderer
-          {...props}
-          hint={hint}
-          options={props.attribute.enum.map((value) => ({ value }))}
-          // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
-          type={props.customField ? 'custom-field' : props.type}
-          disabled={fieldIsDisabled}
-        />
+        <>
+          {/* @ts-expect-error – TODO: fix this type error in the useLibrary hook. */}
+          <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />
+        </>
       );
-    default:
-      // These props are not needed for the generic form input renderer.
-      const { unique: _unique, mainField: _mainField, ...restProps } = props;
-      return (
-        <FormInputRenderer
-          {...restProps}
-          hint={hint}
-          // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
-          type={props.customField ? 'custom-field' : props.type}
-          disabled={fieldIsDisabled}
-        />
-      );
-  }
+    }
+
+    /**
+     * These include the content-manager specific fields, failing that we fall back
+     * to the more generic form input renderer.
+     */
+    switch (props.type) {
+      case 'blocks':
+        return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      case 'component':
+        return (
+          <ComponentInput
+            {...props}
+            hint={hint}
+            layout={components[props.attribute.component].layout}
+            disabled={fieldIsDisabled}
+          >
+            {(inputProps) => <InputRenderer {...inputProps} />}
+          </ComponentInput>
+        );
+      case 'dynamiczone':
+        return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
+      case 'relation':
+        return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      case 'richtext':
+        return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      case 'uid':
+        return <UIDInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      /**
+       * Enumerations are a special case because they require options.
+       */
+      case 'enumeration':
+        return (
+          <FormInputRenderer
+            {...props}
+            hint={hint}
+            options={props.attribute.enum.map((value) => ({ value }))}
+            // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
+            type={props.customField ? 'custom-field' : props.type}
+            disabled={fieldIsDisabled}
+          />
+        );
+      default:
+        // These props are not needed for the generic form input renderer.
+        const { unique: _unique, mainField: _mainField, ...restProps } = props;
+        return (
+          <FormInputRenderer
+            {...restProps}
+            hint={hint}
+            // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
+            type={props.customField ? 'custom-field' : props.type}
+            disabled={fieldIsDisabled}
+          />
+        );
+    }
+  };
+
+  return (
+    <div onFocus={handleFocus} onBlur={handleBlur} tabIndex={-1}>
+      {renderInput()}
+    </div>
+  );
 };
 
 const attributeHasCustomFieldProperty = (
