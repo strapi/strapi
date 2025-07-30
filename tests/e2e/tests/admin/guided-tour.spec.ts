@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { sharedSetup } from '../../utils/setup';
 import { STRAPI_GUIDED_TOUR_CONFIG, setGuidedTourLocalStorage } from '../../utils/global-setup';
 import { clickAndWait } from '../../utils/shared';
+import { waitForRestart } from '../../utils/restart';
 
 test.describe('Guided tour', () => {
   test.beforeEach(async ({ page }) => {
@@ -39,15 +40,43 @@ test.describe('Guided tour', () => {
     );
     const nextButton = page.getByRole('button', { name: 'Next' });
     const gotItButton = page.getByRole('button', { name: 'Got it' });
-    await expect(page.getByRole('dialog', { name: 'Content-Type Builder' })).toBeVisible();
+    await expect(
+      page.getByRole('dialog', { name: 'Welcome to the Content-Type Builder!' })
+    ).toBeVisible();
     await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Collection Types' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Meet Collection Types' })).toBeVisible();
     await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Single Types' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Say Hi to Single Types' })).toBeVisible();
     await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Components' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Components to the rescue!' })).toBeVisible();
+    await nextButton.click();
+    await expect(page.getByRole('dialog', { name: 'Your turn — Build something!' })).toBeVisible();
+    await nextButton.click();
+
+    // Create collection type
+    await page.getByRole('button', { name: 'Create new collection type' }).click();
+    await page.getByRole('textbox', { name: 'Display name' }).fill('Test');
+    await page.getByRole('button', { name: 'Continue' }).click();
+
+    await expect(
+      page.getByRole('dialog', { name: 'Add a field to bring it to life' })
+    ).toBeVisible();
     await gotItButton.click();
-    await expect(page.getByRole('dialog', { name: "It's time to create content!" })).toBeVisible();
+
+    // Add field to collection type
+    await page.getByRole('button', { name: 'Add new field' }).last().click();
+    await page
+      .getByRole('button', { name: 'Text Small or long text like title or description' })
+      .click();
+    await page.getByRole('textbox', { name: 'Name' }).fill('testField');
+    await page.getByRole('button', { name: 'Finish' }).click();
+
+    await expect(page.getByRole('dialog', { name: "Don't leave without saving!" })).toBeVisible();
+    await gotItButton.click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+
+    await expect(page.getByRole('dialog', { name: 'First Step: Done! 🎉' })).toBeVisible();
     await clickAndWait(page, page.getByRole('link', { name: 'Next' }));
 
     await expect(page).toHaveURL(/.*\/admin\/content-manager.*/);
