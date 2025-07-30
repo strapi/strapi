@@ -17,11 +17,17 @@ type ValidTourName = keyof Tours;
 export type ExtendedCompletedActions = (
   | GetGuidedTourMeta.Response['data']['completedActions'][number]
   | 'didCopyApiToken'
+  | 'didAddFieldToSchema'
+  | 'didCreateContentTypeSchema'
 )[];
 
 type Action =
   | {
       type: 'next_step';
+      payload: ValidTourName;
+    }
+  | {
+      type: 'previous_step';
       payload: ValidTourName;
     }
   | {
@@ -64,12 +70,28 @@ const getInitialTourState = (tours: Tours) => {
   }, {} as Tour);
 };
 
+const migrateTourLengths = (tourState: State) => {
+  return produce(tourState, (draft) => {
+    Object.keys(tourState.tours).forEach((tourName) => {
+      const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
+      draft.tours[tourName as ValidTourName].length = tourLength;
+    });
+  });
+};
+
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
     if (action.type === 'next_step') {
       const nextStep = draft.tours[action.payload].currentStep + 1;
       draft.tours[action.payload].currentStep = nextStep;
       draft.tours[action.payload].isCompleted = nextStep === draft.tours[action.payload].length;
+    }
+
+    if (action.type === 'previous_step') {
+      const previousStep = draft.tours[action.payload].currentStep - 1;
+      if (previousStep >= 0) {
+        draft.tours[action.payload].currentStep = previousStep;
+      }
     }
 
     if (action.type === 'skip_tour') {
@@ -100,17 +122,18 @@ const GuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
-  const [tours, setTours] = usePersistentState<State>(STORAGE_KEY, {
+  const [storedTours, setStoredTours] = usePersistentState<State>(STORAGE_KEY, {
     tours: getInitialTourState(guidedTours),
     enabled,
     completedActions: [],
   });
-  const [state, dispatch] = React.useReducer(reducer, tours);
+  const migratedTourState = migrateTourLengths(storedTours);
+  const [state, dispatch] = React.useReducer(reducer, migratedTourState);
 
   // Sync local storage
   React.useEffect(() => {
-    setTours(state);
-  }, [state, setTours]);
+    setStoredTours(state);
+  }, [state, setStoredTours]);
 
   return (
     <GuidedTourProviderImpl state={state} dispatch={dispatch}>
