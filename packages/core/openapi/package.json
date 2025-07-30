@@ -62,7 +62,7 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/types": "5.19.0",
+    "@strapi/types": "5.20.0",
     "@types/debug": "^4"
   }
 }
