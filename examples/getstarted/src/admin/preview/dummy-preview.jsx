@@ -77,14 +77,13 @@ const PreviewComponent = () => {
                   <Typography variant="sigma" textColor="neutral600" tag="dt">
                     Name
                   </Typography>
-                  <Flex
-                    gap={3}
-                    direction="column"
-                    alignItems="start"
-                    tag="dd"
-                    data-strapisrc="name"
-                  >
-                    <Typography>{document.name}</Typography>
+                  <Flex gap={3} direction="column" alignItems="start" tag="dd">
+                    <Typography
+                      // TODO: don't hardcode this
+                      data-strapisrc="name"
+                    >
+                      {document.name}
+                    </Typography>
                   </Flex>
                 </Grid.Item>
               )}

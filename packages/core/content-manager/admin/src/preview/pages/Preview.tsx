@@ -7,12 +7,14 @@ import {
   createContext,
   Form as FormContext,
   Blocker,
+  useField,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
   FocusTrap,
   IconButton,
+  Popover,
   Portal,
   SingleSelect,
   SingleSelectOption,
@@ -28,6 +30,7 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
+import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
 import { handleInvisibleAttributes } from '../../pages/EditView/utils/data';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
@@ -73,6 +76,7 @@ interface PreviewContextValue {
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
   layout: EditLayout;
   onPreview: () => void;
+  iframeRef: React.RefObject<HTMLIFrameElement>;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -82,6 +86,8 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * -----------------------------------------------------------------------------------------------*/
 
 const previewScript = () => {
+  const HIGHLIGHT_PADDING = 2;
+
   // Remove existing overlay if it exists
   const existingOverlay = document.getElementById('strapi-preview-overlay');
   if (existingOverlay) {
@@ -119,9 +125,9 @@ const previewScript = () => {
     if (!highlight) return;
 
     const rect = target.getBoundingClientRect();
-    highlight.style.width = `${rect.width}px`;
-    highlight.style.height = `${rect.height}px`;
-    highlight.style.transform = `translate(${rect.left + window.scrollX}px, ${rect.top + window.scrollY}px)`;
+    highlight.style.width = `${rect.width + HIGHLIGHT_PADDING * 2}px`;
+    highlight.style.height = `${rect.height + HIGHLIGHT_PADDING * 2}px`;
+    highlight.style.transform = `translate(${rect.left - HIGHLIGHT_PADDING + window.scrollX}px, ${rect.top - HIGHLIGHT_PADDING + window.scrollY}px)`;
   };
 
   const updateAllHighlights = () => {
@@ -140,10 +146,11 @@ const previewScript = () => {
       const highlight = document.createElement('div');
       highlight.style.cssText = `
         position: absolute;
-        border: 2px solid rgba(255, 69, 240, 0.8);
-        box-shadow: 0 0 0 2px rgba(255, 69, 240, 0.2);
+        outline: 2px solid transparent;
         pointer-events: auto;
+        border-radius: 2px 0 2px 2px;
         background-color: transparent;
+        transition: outline-color 0.15s ease-in-out;
       `;
 
       // Create edit button
@@ -151,8 +158,8 @@ const previewScript = () => {
       editButton.textContent = 'Edit';
       editButton.style.cssText = `
         position: absolute;
-        top: 0;
-        right: -2px;
+        top: 0px;
+        right: -${HIGHLIGHT_PADDING}px;
         transform: translateY(-100%);
         font-size: 12px;
         padding: 4px 8px;
@@ -167,12 +174,14 @@ const previewScript = () => {
         z-index: 10000;
       `;
 
-      // Add hover functionality to show/hide edit button
+      // Add hover functionality to show/hide outline and edit button
       highlight.addEventListener('mouseenter', () => {
+        highlight.style.outlineColor = '#4945ff';
         editButton.style.display = 'block';
       });
 
       highlight.addEventListener('mouseleave', () => {
+        highlight.style.outlineColor = 'transparent';
         editButton.style.display = 'none';
       });
 
@@ -225,15 +234,114 @@ const previewScript = () => {
   window.addEventListener('scroll', updateOnScroll);
   window.addEventListener('resize', updateOnScroll);
 
+  // Listen for strapiFieldTyping messages from parent window
+  const handleFieldTyping = (event: MessageEvent) => {
+    if (event.data?.type === 'strapiFieldTyping') {
+      const { field, value } = event.data.payload;
+      if (field) {
+        const matchingElements = document.querySelectorAll(`[data-strapisrc="${field}"]`);
+        matchingElements.forEach((element) => {
+          if (element instanceof HTMLElement) {
+            element.textContent = value || '';
+          }
+        });
+      }
+    }
+  };
+
+  window.addEventListener('message', handleFieldTyping);
+
   // Store cleanup function on window for potential cleanup
   (window as any).__strapiPreviewCleanup = () => {
     resizeObserver.disconnect();
     window.removeEventListener('scroll', updateOnScroll);
     window.removeEventListener('resize', updateOnScroll);
+    window.removeEventListener('message', handleFieldTyping);
     if (overlay.parentNode) {
       overlay.parentNode.removeChild(overlay);
     }
   };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * VisualEditingPopover
+ * -----------------------------------------------------------------------------------------------*/
+
+const VisualEditingPopover = ({
+  popoverField,
+  setPopoverField,
+  documentResponse,
+}: {
+  popoverField: any;
+  setPopoverField: (value: string | null) => void;
+  documentResponse: ReturnType<UseDocument>;
+}) => {
+  const iframeRef = usePreviewContext('VisualEditingPopover', (state) => state.iframeRef);
+  const { value } = useField(popoverField?.path);
+
+  React.useEffect(() => {
+    if (popoverField?.path) {
+      iframeRef.current?.contentWindow?.postMessage(
+        {
+          type: 'strapiFieldTyping',
+          payload: {
+            field: popoverField.path,
+            value,
+          },
+        },
+        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
+        new URL(iframeRef.current.src).origin
+      );
+    }
+  }, [popoverField?.path, value, iframeRef]);
+
+  if (!popoverField || !documentResponse.schema || !iframeRef.current) {
+    return null;
+  }
+
+  const iframeRect = iframeRef.current.getBoundingClientRect();
+
+  return (
+    <>
+      {popoverField && (
+        <Box
+          position={'fixed'}
+          top={iframeRect.top + 'px'}
+          left={iframeRect.left + 'px'}
+          width={iframeRect.width + 'px'}
+          height={iframeRect.height + 'px'}
+          zIndex={4}
+        />
+      )}
+      <Popover.Root
+        open={popoverField != null}
+        onOpenChange={(open) => !open && setPopoverField(null)}
+      >
+        <Popover.Trigger>
+          <Box
+            id="popover-trigger"
+            position="fixed"
+            width={popoverField.position.width + 'px'}
+            height={popoverField.position.height + 'px'}
+            top={iframeRect.top + popoverField.position.top + 'px'}
+            left={iframeRect.left + popoverField.position.left + 'px'}
+          />
+        </Popover.Trigger>
+        <Popover.Content sideOffset={4}>
+          <Box padding={4} width="400px">
+            <InputRenderer
+              document={documentResponse}
+              attribute={documentResponse.schema.attributes[popoverField.path] as any}
+              label={popoverField.path}
+              name={popoverField.path}
+              type={documentResponse.schema.attributes[popoverField.path].type}
+              visible={true}
+            />
+          </Box>
+        </Popover.Content>
+      </Popover.Root>
+    </>
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -275,6 +383,8 @@ const PreviewPage = () => {
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
+  const [popoverField, setPopoverField] = React.useState<string | null>(null);
+
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -292,6 +402,18 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
+  }, []);
+
+  // Listen for willEditField message from iframe
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'willEditField') {
+        setPopoverField(event.data.payload);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   if (!collectionType) {
@@ -403,6 +525,7 @@ const PreviewPage = () => {
         schema={documentResponse.schema}
         layout={documentLayoutResponse.edit}
         onPreview={onPreview}
+        iframeRef={iframeRef}
       >
         <FormContext
           method="PUT"
@@ -534,6 +657,11 @@ const PreviewPage = () => {
                   </Flex>
                 </Flex>
               </Flex>
+              <VisualEditingPopover
+                popoverField={popoverField}
+                setPopoverField={setPopoverField}
+                documentResponse={documentResponse}
+              />
             </Flex>
           )}
         </FormContext>
