@@ -38,7 +38,6 @@ const DiscardAllMenuItem = styled(Menu.Item)`
 export const ContentTypeBuilderNav = () => {
   const { menu, search } = useContentTypeBuilderMenu();
   const { saveSchema, isModified, history, isInDevelopmentMode } = useDataManager();
-  const dispatchGuidedTour = useGuidedTour('ContentTypeBuilderNav', (s) => s.dispatch);
 
   const { formatMessage } = useIntl();
 
@@ -109,10 +108,6 @@ export const ContentTypeBuilderNav = () => {
               onClick={(e) => {
                 e.preventDefault();
                 saveSchema();
-                dispatchGuidedTour({
-                  type: 'set_completed_actions',
-                  payload: ['didCreateContentTypeSchema'],
-                });
               }}
               type="submit"
               disabled={!isModified || !isInDevelopmentMode}

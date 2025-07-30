@@ -8,6 +8,7 @@ import {
   useFetchClient,
   useAuth,
   adminApi,
+  useGuidedTour,
 } from '@strapi/admin/strapi-admin';
 import groupBy from 'lodash/groupBy';
 import isEqual from 'lodash/isEqual';
@@ -41,6 +42,7 @@ const selectState = (state: Record<string, unknown>) =>
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
   const state = useSelector(selectState);
+  const dispatchGuidedTour = useGuidedTour('DataManagerProvider', (s) => s.dispatch);
 
   const {
     components,
@@ -195,6 +197,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } finally {
       setIsSaving(false);
       unlockAppWithAutoreload();
+
+      dispatchGuidedTour({
+        type: 'set_completed_actions',
+        payload: ['didCreateContentTypeSchema'],
+      });
 
       trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: true });
     }
