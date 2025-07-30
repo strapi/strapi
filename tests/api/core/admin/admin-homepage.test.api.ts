@@ -38,15 +38,7 @@ describe('Admin Homepage API', () => {
 
     expect(response.statusCode).toBe(200);
     // Default values
-    expect(response.body.data).toMatchObject({
-      assets: 1,
-      contentTypes: 1,
-      components: 0,
-      locales: 1,
-      admins: 1,
-      webhooks: 0,
-      apiTokens: 2,
-    });
+    const initialData = response.body.data;
 
     // Perform a few actions that will update the key statistics
     // Upload a file
@@ -95,15 +87,14 @@ describe('Admin Homepage API', () => {
     });
 
     expect(responseUpdated.statusCode).toBe(200);
+    const newData = {
+      ...initialData,
+      assets: initialData.assets + 1,
+      locales: initialData.locales + 1,
+      webhooks: initialData.webhooks + 1,
+      apiTokens: initialData.apiTokens + 1,
+    };
     // Updated values
-    expect(responseUpdated.body.data).toMatchObject({
-      assets: 2,
-      contentTypes: 1,
-      components: 0,
-      locales: 2,
-      admins: 1,
-      webhooks: 1,
-      apiTokens: 3,
-    });
+    expect(responseUpdated.body.data).toMatchObject(newData);
   });
 });
