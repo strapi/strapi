@@ -1,5 +1,1 @@
-export default () => ({
-  future: {
-    unstableGuidedTour: true,
-  },
-});
+export default () => ({});
