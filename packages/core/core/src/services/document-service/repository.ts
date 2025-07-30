@@ -6,6 +6,7 @@ import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
+import { copyNonLocalizedFields } from './internationalization';
 import * as components from './components';
 
 import { createEntriesService } from './entries';
@@ -242,9 +243,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
+        const mergedData = await copyNonLocalizedFields(contentType, documentId, {
+          ...queryParams.data,
+          documentId,
+        });
+
         updatedDraft = await entries.create({
           ...queryParams,
-          data: { ...queryParams.data, documentId },
+          data: mergedData,
         });
         emitEvent('entry.create', updatedDraft);
       }

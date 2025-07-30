@@ -5,6 +5,7 @@ import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
 
+import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { Widget } from '../../components/WidgetHelpers';
@@ -14,7 +15,6 @@ import { useStrapiApp } from '../../features/StrapiApp';
 
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
 import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
-import { GuidedTour } from './components/GuidedTour';
 
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 
@@ -82,6 +82,7 @@ export const WidgetRoot = ({
             variant="omega"
             textColor="primary600"
             style={{ textDecoration: 'none' }}
+            textAlign="right"
             to={link.href}
           >
             {formatMessage(link.label)}
@@ -153,7 +154,7 @@ const HomePageCE = () => {
       <FreeTrialEndedModal />
       <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
-          <GuidedTour />
+          <GuidedTourHomepageOverview />
           <Grid.Root gap={5}>
             {getAllWidgets().map((widget) => {
               return (

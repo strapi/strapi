@@ -3,7 +3,6 @@
  * You can learn more at https://docs.strapi.io/developer-docs/latest/getting-started/usage-information.html
  */
 
-import { Job, scheduleJob } from 'node-schedule';
 import type { Core } from '@strapi/types';
 
 import wrapWithRateLimit from './rate-limiter';
@@ -25,7 +24,6 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
   const isDisabled =
     !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED) || isTruthy(telemetryDisabled);
 
-  const crons: Job[] = [];
   const sender = createSender(strapi);
   const sendEvent = wrapWithRateLimit(sender, { limitedEvents: LIMITED_EVENTS });
 
@@ -36,8 +34,12 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
 
     register() {
       if (!isDisabled) {
-        const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
-        crons.push(pingCron);
+        strapi.cron.add({
+          sendPingEvent: {
+            task: () => sendEvent('ping'),
+            options: '0 0 12 * * *',
+          },
+        });
 
         strapi.server.use(createMiddleware({ sendEvent }));
       }
@@ -45,14 +47,13 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
 
     bootstrap() {},
 
-    destroy() {
-      // Clear open handles
-      crons.forEach((cron) => cron.cancel());
-    },
-
     async send(event: string, payload: Record<string, unknown> = {}) {
       if (isDisabled) return true;
       return sendEvent(event, payload);
+    },
+
+    destroy() {
+      // Clean up resources if needed
     },
   };
 };

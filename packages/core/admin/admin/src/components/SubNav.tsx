@@ -5,6 +5,8 @@ import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { tours } from './GuidedTour/Tours';
+
 const Main = styled(DSSubNav)`
   background-color: ${({ theme }) => theme.colors.neutral0};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
@@ -113,14 +115,46 @@ const Sections = ({ children, ...props }: { children: React.ReactNode[]; [key: s
   );
 };
 
+/**
+ * TODO:
+ * This would be better in the content-type-builder package directly but currently
+ * the SubNav API does not expose a way to wrap the link, instead it wraps the link and the list
+ */
+const GuidedTourTooltip = ({
+  sectionId,
+  children,
+}: {
+  sectionId?: string;
+  children: React.ReactNode;
+}) => {
+  switch (sectionId) {
+    case 'models':
+      return (
+        <tours.contentTypeBuilder.CollectionTypes>
+          {children}
+        </tours.contentTypeBuilder.CollectionTypes>
+      );
+    case 'singleTypes':
+      return (
+        <tours.contentTypeBuilder.SingleTypes>{children}</tours.contentTypeBuilder.SingleTypes>
+      );
+    case 'components':
+      return <tours.contentTypeBuilder.Components>{children}</tours.contentTypeBuilder.Components>;
+    default:
+      return children;
+  }
+};
+
 const Section = ({
   label,
   children,
   link,
+  sectionId,
 }: {
   label: string;
   children: React.ReactNode[];
   link?: { label: string; onClik: () => void };
+  sectionId?: string;
 }) => {
   const listId = useId();
 
@@ -136,15 +170,17 @@ const Section = ({
             </Box>
           </Flex>
           {link && (
-            <IconButton
-              label={link.label}
-              variant="ghost"
-              withTooltip
-              onClick={link.onClik}
-              size="XS"
-            >
-              <Plus />
-            </IconButton>
+            <GuidedTourTooltip sectionId={sectionId}>
+              <IconButton
+                label={link.label}
+                variant="ghost"
+                withTooltip
+                onClick={link.onClik}
+                size="XS"
+              >
+                <Plus />
+              </IconButton>
+            </GuidedTourTooltip>
           )}
         </Flex>
       </Box>

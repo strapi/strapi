@@ -81,7 +81,12 @@
         }
       },
       "type": "integer",
-      "unique": true
+      "unique": true,
+      "conditions": {
+        "visible": {
+          "==": [{ "var": "isAvailable" }, true]
+        }
+      }
     },
     "variations": {
       "type": "component",
@@ -92,6 +97,21 @@
         }
       },
       "component": "product.variations"
+    },
+    "type": {
+      "type": "enumeration",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "enum": ["standard", "custom", "cheap", "fancy"]
+    },
+    "countries": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::country.country",
+      "mappedBy": "product"
     }
   }
 }

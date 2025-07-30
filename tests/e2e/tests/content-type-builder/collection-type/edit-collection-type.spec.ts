@@ -16,7 +16,6 @@ test.describe('Edit collection type', () => {
     await sharedSetup('ctb-edit-ct', page, {
       importData: 'with-admin.tar',
       login: true,
-      skipTour: true,
       resetFiles: true,
     });
 

@@ -54,10 +54,17 @@ export const authenticate = async (ctx: Context) => {
     }
   }
 
-  // update lastUsedAt if the token has not been used in the last hour
-  // @ts-expect-error - FIXME: verify lastUsedAt is defined
-  const hoursSinceLastUsed = differenceInHours(currentDate, parseISO(apiToken.lastUsedAt));
-  if (hoursSinceLastUsed >= 1) {
+  if (!isNil(apiToken.lastUsedAt)) {
+    // update lastUsedAt if the token has not been used in the last hour
+    const hoursSinceLastUsed = differenceInHours(currentDate, parseISO(apiToken.lastUsedAt));
+    if (hoursSinceLastUsed >= 1) {
+      await strapi.db.query('admin::api-token').update({
+        where: { id: apiToken.id },
+        data: { lastUsedAt: currentDate },
+      });
+    }
+  } else {
+    // If lastUsedAt is not set, initialize it to the current date
     await strapi.db.query('admin::api-token').update({
       where: { id: apiToken.id },
       data: { lastUsedAt: currentDate },

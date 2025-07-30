@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
+import { User } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -317,6 +318,29 @@ class StrapiApp {
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
 
   async register(customRegister?: unknown) {
+    this.widgets.register([
+      {
+        icon: User,
+        title: {
+          id: 'widget.profile.title',
+          defaultMessage: 'Profile',
+        },
+        component: async () => {
+          const { ProfileWidget } = await import('./components/Widgets');
+          return ProfileWidget;
+        },
+        pluginId: 'admin',
+        id: 'profile-info',
+        link: {
+          label: {
+            id: 'global.profile.settings',
+            defaultMessage: 'Profile settings',
+          },
+          href: '/me',
+        },
+      },
+    ]);
+
     Object.keys(this.appPlugins).forEach((plugin) => {
       this.appPlugins[plugin].register(this);
     });

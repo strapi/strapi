@@ -1,3 +1,1 @@
-module.exports = ({ env }) => ({
-  future: {},
-});
+module.exports = ({ env }) => ({});

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/core",
-  "version": "5.16.0",
+  "version": "5.19.0",
   "description": "Core of Strapi",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -56,14 +56,14 @@
     "@koa/cors": "5.0.0",
     "@koa/router": "12.0.2",
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/admin": "5.16.0",
-    "@strapi/database": "5.16.0",
-    "@strapi/generators": "5.16.0",
-    "@strapi/logger": "5.16.0",
-    "@strapi/permissions": "5.16.0",
-    "@strapi/types": "5.16.0",
-    "@strapi/typescript-utils": "5.16.0",
-    "@strapi/utils": "5.16.0",
+    "@strapi/admin": "5.19.0",
+    "@strapi/database": "5.19.0",
+    "@strapi/generators": "5.19.0",
+    "@strapi/logger": "5.19.0",
+    "@strapi/permissions": "5.19.0",
+    "@strapi/types": "5.19.0",
+    "@strapi/typescript-utils": "5.19.0",
+    "@strapi/utils": "5.19.0",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -82,6 +82,7 @@
     "http-errors": "2.0.0",
     "inquirer": "8.2.5",
     "is-docker": "2.2.1",
+    "json-logic-js": "2.0.5",
     "koa": "2.16.1",
     "koa-body": "6.0.1",
     "koa-compose": "4.1.0",
@@ -104,7 +105,8 @@
     "statuses": "2.0.1",
     "typescript": "5.4.4",
     "undici": "6.21.2",
-    "yup": "0.32.9"
+    "yup": "0.32.9",
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@strapi/ts-zen": "^0.2.0",
@@ -116,6 +118,7 @@
     "@types/global-agent": "2.1.3",
     "@types/http-errors": "2.0.4",
     "@types/jest": "29.5.2",
+    "@types/json-logic-js": "2.0.8",
     "@types/koa": "2.13.4",
     "@types/koa-compress": "4.0.3",
     "@types/koa-session": "6.4.1",
@@ -126,9 +129,9 @@
     "@types/node": "18.19.24",
     "@types/node-schedule": "2.1.7",
     "@types/statuses": "2.0.1",
-    "eslint-config-custom": "5.16.0",
+    "eslint-config-custom": "5.19.0",
     "supertest": "6.3.3",
-    "tsconfig": "5.16.0"
+    "tsconfig": "5.19.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
