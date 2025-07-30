@@ -103,16 +103,20 @@ export default {
 
     const upload = async (file: File, customParams: Partial<PutObjectCommandInput> = {}) => {
       const fileKey = getFileKey(file);
-      const uploadObj = new Upload({
-        client: s3Client,
-        params: {
+      const params: any = {
           Bucket: config.params.Bucket,
           Key: fileKey,
           Body: file.stream || Buffer.from(file.buffer as any, 'binary'),
-          ACL: config.params.ACL,
+         
           ContentType: file.mime,
           ...customParams,
-        },
+        };
+    if(config.params.ACL){
+      params['ACL'] = config.params.ACL;
+} 
+      const uploadObj = new Upload({
+        client: s3Client,
+        params: params,
       });
 
       const upload = (await uploadObj.done()) as UploadCommandOutput;
