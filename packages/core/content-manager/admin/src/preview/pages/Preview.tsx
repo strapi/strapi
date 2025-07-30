@@ -142,10 +142,67 @@ const previewScript = () => {
         position: absolute;
         border: 2px solid rgba(255, 69, 240, 0.8);
         box-shadow: 0 0 0 2px rgba(255, 69, 240, 0.2);
-        pointer-events: none;
+        pointer-events: auto;
         background-color: transparent;
       `;
 
+      // Create edit button
+      const editButton = document.createElement('button');
+      editButton.textContent = 'Edit';
+      editButton.style.cssText = `
+        position: absolute;
+        top: 0;
+        right: -2px;
+        transform: translateY(-100%);
+        font-size: 12px;
+        padding: 4px 8px;
+        background: #4945ff;
+        color: white;
+        border: none;
+        border-radius: 4px 4px 0 0;
+        cursor: pointer;
+        pointer-events: auto;
+        display: none;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        z-index: 10000;
+      `;
+
+      // Add hover functionality to show/hide edit button
+      highlight.addEventListener('mouseenter', () => {
+        editButton.style.display = 'block';
+      });
+
+      highlight.addEventListener('mouseleave', () => {
+        editButton.style.display = 'none';
+      });
+
+      // Add click handler for edit button
+      editButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const fieldPath = element.getAttribute('data-strapisrc');
+        if (fieldPath && window.parent) {
+          const rect = element.getBoundingClientRect();
+          window.parent.postMessage(
+            {
+              type: 'willEditField',
+              payload: {
+                path: fieldPath,
+                position: {
+                  top: rect.top,
+                  left: rect.left,
+                  width: rect.width,
+                  height: rect.height,
+                },
+              },
+            },
+            '*'
+          );
+        }
+      });
+
+      highlight.appendChild(editButton);
       highlights.push(highlight);
       overlay.appendChild(highlight);
 
