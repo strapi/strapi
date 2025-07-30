@@ -95,7 +95,7 @@ const KeyStatisticsWidget = () => {
   const keyStatisticsList = {
     entries: {
       label: {
-        key: 'widget.key-statistics.list.entries',
+        id: 'widget.key-statistics.list.entries',
         defaultMessage: 'Entries',
       },
       icon: {
@@ -106,7 +106,7 @@ const KeyStatisticsWidget = () => {
     },
     assets: {
       label: {
-        key: 'widget.key-statistics.list.assets',
+        id: 'widget.key-statistics.list.assets',
         defaultMessage: 'Assets',
       },
       icon: {
@@ -117,7 +117,7 @@ const KeyStatisticsWidget = () => {
     },
     contentTypes: {
       label: {
-        key: 'widget.key-statistics.list.contentTypes',
+        id: 'widget.key-statistics.list.contentTypes',
         defaultMessage: 'Content-Types',
       },
       icon: {
@@ -128,7 +128,7 @@ const KeyStatisticsWidget = () => {
     },
     components: {
       label: {
-        key: 'widget.key-statistics.list.components',
+        id: 'widget.key-statistics.list.components',
         defaultMessage: 'Components',
       },
       icon: {
@@ -139,7 +139,7 @@ const KeyStatisticsWidget = () => {
     },
     locales: {
       label: {
-        key: 'widget.key-statistics.list.locales',
+        id: 'widget.key-statistics.list.locales',
         defaultMessage: 'Locales',
       },
       icon: {
@@ -150,7 +150,7 @@ const KeyStatisticsWidget = () => {
     },
     admins: {
       label: {
-        key: 'widget.key-statistics.list.admins',
+        id: 'widget.key-statistics.list.admins',
         defaultMessage: 'Admins',
       },
       icon: {
@@ -161,7 +161,7 @@ const KeyStatisticsWidget = () => {
     },
     webhooks: {
       label: {
-        key: 'widget.key-statistics.list.webhooks',
+        id: 'widget.key-statistics.list.webhooks',
         defaultMessage: 'Webhooks',
       },
       icon: {
@@ -172,7 +172,7 @@ const KeyStatisticsWidget = () => {
     },
     apiTokens: {
       label: {
-        key: 'widget.key-statistics.list.apiTokens',
+        id: 'widget.key-statistics.list.apiTokens',
         defaultMessage: 'API Tokens',
       },
       icon: {
@@ -209,10 +209,7 @@ const KeyStatisticsWidget = () => {
                 </Flex>
                 <Flex direction="column" alignItems="flex-start">
                   <Typography variant="pi" fontWeight="bold" textColor="neutral500">
-                    {formatMessage({
-                      id: item.label.key,
-                      defaultMessage: item.label.defaultMessage,
-                    })}
+                    {formatMessage(item.label)}
                   </Typography>
                   <Typography variant="omega" fontWeight="bold" textColor="neutral800">
                     {formatNumber({

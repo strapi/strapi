@@ -9884,7 +9884,7 @@ __metadata:
   dependencies:
     "@mux/mux-player-react": "npm:3.1.0"
     "@reduxjs/toolkit": "npm:1.9.7"
-    "@strapi/admin": "npm:5.19.0"
+    "@strapi/admin": "npm:5.20.0"
     "@strapi/design-system": "npm:2.0.0-rc.29"
     "@strapi/icons": "npm:2.0.0-rc.29"
     "@strapi/provider-upload-local": "npm:5.20.0"
