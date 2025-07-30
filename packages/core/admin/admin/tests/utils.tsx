@@ -25,10 +25,9 @@ import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-router-dom';
 
-import { GuidedTourProvider } from '../src/components/GuidedTour/Provider';
+import { GuidedTourContext } from '../src/components/GuidedTour/Context';
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
-import { UnstableGuidedTourContext } from '../src/components/UnstableGuidedTour/Context';
 import { RBAC } from '../src/core/apis/rbac';
 import { AppInfoProvider } from '../src/features/AppInfo';
 import { AuthProvider, type Permission } from '../src/features/Auth';
@@ -40,8 +39,6 @@ import { adminApi } from '../src/services/api';
 
 import { server } from './server';
 import { initialState } from './store';
-
-import type { Widget } from '../src/core/apis/Widgets';
 
 setLogger({
   log: () => {},
@@ -112,11 +109,13 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
           <StrapiAppProvider
             components={{}}
             rbac={new RBAC()}
-            widgets={{
-              widgets: {} as Record<string, Widget>,
-              getAll: jest.fn(),
-              register: jest.fn(),
-            }}
+            widgets={
+              {
+                widgets: [],
+                getAll: jest.fn(),
+                register: jest.fn(),
+              } as any
+            }
             customFields={{
               customFields: {},
               get: jest.fn().mockReturnValue({
@@ -161,32 +160,30 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                         }}
                       >
                         <NotificationsProvider>
-                          <GuidedTourProvider>
-                            <UnstableGuidedTourContext enabled={false}>
-                              <ConfigurationContextProvider
-                                showReleaseNotification={false}
-                                logos={{
-                                  auth: { default: 'default' },
-                                  menu: { default: 'default' },
+                          <GuidedTourContext enabled={false}>
+                            <ConfigurationContextProvider
+                              showReleaseNotification={false}
+                              logos={{
+                                auth: { default: 'default' },
+                                menu: { default: 'default' },
+                              }}
+                              updateProjectSettings={jest.fn()}
+                            >
+                              <AppInfoProvider
+                                autoReload
+                                useYarn
+                                dependencies={{
+                                  '@strapi/plugin-documentation': '4.2.0',
+                                  '@strapi/provider-upload-cloudinary': '4.2.0',
                                 }}
-                                updateProjectSettings={jest.fn()}
+                                strapiVersion="4.1.0"
+                                communityEdition
+                                shouldUpdateStrapi={false}
                               >
-                                <AppInfoProvider
-                                  autoReload
-                                  useYarn
-                                  dependencies={{
-                                    '@strapi/plugin-documentation': '4.2.0',
-                                    '@strapi/provider-upload-cloudinary': '4.2.0',
-                                  }}
-                                  strapiVersion="4.1.0"
-                                  communityEdition
-                                  shouldUpdateStrapi={false}
-                                >
-                                  {children}
-                                </AppInfoProvider>
-                              </ConfigurationContextProvider>
-                            </UnstableGuidedTourContext>
-                          </GuidedTourProvider>
+                                {children}
+                              </AppInfoProvider>
+                            </ConfigurationContextProvider>
+                          </GuidedTourContext>
                         </NotificationsProvider>
                       </Theme>
                     </LanguageProvider>

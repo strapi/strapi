@@ -28,6 +28,7 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
+import { handleInvisibleAttributes } from '../../pages/EditView/utils/data';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { PreviewHeader } from '../components/PreviewHeader';
@@ -148,7 +149,7 @@ const PreviewPage = () => {
 
   const isLoading =
     previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
-  if (isLoading) {
+  if (isLoading && (!documentResponse.document?.documentId || previewUrlResponse.isLoading)) {
     return <Page.Loading />;
   }
 
@@ -172,16 +173,23 @@ const PreviewPage = () => {
   const documentTitle = documentResponse.getTitle(documentLayoutResponse.edit.settings.mainField);
 
   const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
+    const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
+      schema: documentResponse.schema,
+      initialValues,
+      components: documentResponse.components,
+    });
+
     const yupSchema = createYupSchema(
       documentResponse.schema?.attributes,
       documentResponse.components,
       {
         status: documentResponse.document?.status,
+        removedAttributes,
         ...options,
       }
     );
 
-    return yupSchema.validateSync(values, { abortEarly: false });
+    return yupSchema.validateSync(cleanedValues, { abortEarly: false });
   };
 
   const previewUrl = previewUrlResponse.data.data.url;
@@ -229,16 +237,23 @@ const PreviewPage = () => {
           initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
           height="100%"
           validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+            const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
+              schema: documentResponse.schema,
+              initialValues,
+              components: documentResponse.components,
+            });
+
             const yupSchema = createYupSchema(
               documentResponse.schema?.attributes,
               documentResponse.components,
               {
                 status: documentResponse.document?.status,
+                removedAttributes,
                 ...options,
               }
             );
 
-            return yupSchema.validate(values, { abortEarly: false });
+            return yupSchema.validate(cleanedValues, { abortEarly: false });
           }}
         >
           {({ resetForm }) => (

@@ -6,8 +6,6 @@ import { StrapiAppContextValue, StrapiAppProvider } from '../../../features/Stra
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 import { Layout } from '../Layout';
 
-import type { Widget } from '../../../core/apis/Widgets';
-
 jest.mock('../../../hooks/useSettingsMenu');
 
 jest.mock('../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
@@ -33,11 +31,13 @@ const render = (settings: StrapiAppContextValue['settings']) =>
           <StrapiAppProvider
             components={{}}
             fields={{}}
-            widgets={{
-              widgets: {} as Record<string, Widget>,
-              register: jest.fn(),
-              getAll: jest.fn(),
-            }}
+            widgets={
+              {
+                widgets: [],
+                register: jest.fn(),
+                getAll: jest.fn(),
+              } as any
+            }
             customFields={{
               customFields: {},
               get: jest.fn(),

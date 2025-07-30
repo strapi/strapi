@@ -213,9 +213,9 @@ test.describe('Settings', () => {
      */
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     /**
-     * It is 3 because it contains also the header row
+     * It is 4 because it contains also the header row
      */
-    expect(await page.getByRole('row').all()).toHaveLength(3);
+    expect(await page.getByRole('row').all()).toHaveLength(4);
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('UK English');
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of ['UK English', ...LOCALES].filter((locale) => locale !== 'English (en)')) {

@@ -34,6 +34,14 @@ const routeSchema = yup.object({
 
     return yup.mixed().isFunction().required();
   }),
+  request: yup
+    .object({
+      params: yup.object().notRequired(),
+      query: yup.object().notRequired(),
+      body: yup.object().notRequired(),
+    })
+    .notRequired(),
+  response: yup.object().notRequired(),
   config: yup
     .object({
       auth: yup.lazy((value) => {
@@ -85,7 +93,7 @@ const createRouteManager = (strapi: Core.Strapi, opts: { type?: string } = {}) =
     const routeWithInfo = Object.assign(route, {
       info: {
         ...(route.info ?? {}),
-        type: type || 'api',
+        type: type ?? 'api',
       },
     });
 
