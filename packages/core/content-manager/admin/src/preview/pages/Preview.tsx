@@ -7,7 +7,6 @@ import {
   createContext,
   Form as FormContext,
   Blocker,
-  useField,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -87,7 +86,6 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
 
 const previewScript = () => {
   const HIGHLIGHT_PADDING = 2;
-
   // Remove existing overlay if it exists
   const existingOverlay = document.getElementById('strapi-preview-overlay');
   if (existingOverlay) {
@@ -277,23 +275,6 @@ const VisualEditingPopover = ({
   documentResponse: ReturnType<UseDocument>;
 }) => {
   const iframeRef = usePreviewContext('VisualEditingPopover', (state) => state.iframeRef);
-  const { value } = useField(popoverField?.path);
-
-  React.useEffect(() => {
-    if (popoverField?.path) {
-      iframeRef.current?.contentWindow?.postMessage(
-        {
-          type: 'strapiFieldTyping',
-          payload: {
-            field: popoverField.path,
-            value,
-          },
-        },
-        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
-        new URL(iframeRef.current.src).origin
-      );
-    }
-  }, [popoverField?.path, value, iframeRef]);
 
   if (!popoverField || !documentResponse.schema || !iframeRef.current) {
     return null;

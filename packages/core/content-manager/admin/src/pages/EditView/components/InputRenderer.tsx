@@ -14,6 +14,7 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
+import { usePreviewContext } from '../../../preview/pages/Preview';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
@@ -55,6 +56,25 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
+
+  const previewIframe = usePreviewContext(
+    'VisualEditingPopover',
+    (state) => state.iframeRef,
+    false
+  );
+  const { value } = useField(props.name);
+  React.useEffect(() => {
+    previewIframe?.current?.contentWindow?.postMessage(
+      {
+        type: 'strapiFieldTyping',
+        payload: {
+          field: props.name,
+          value,
+        },
+      },
+      new URL(previewIframe.current.src).origin
+    );
+  }, [props.name, value, previewIframe]);
 
   let idToCheck = document.document?.documentId;
   if (collectionType === SINGLE_TYPES) {
