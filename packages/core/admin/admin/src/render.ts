@@ -57,6 +57,9 @@ const renderAdmin = async (
       nps: false,
       promoteEE: true,
     },
+    ai: {
+      disable: false,
+    },
   };
 
   const { get } = getFetchClient();
@@ -67,12 +70,15 @@ const renderAdmin = async (
     features: {
       name: string;
     }[];
+    ai: {
+      disable: boolean;
+    };
   }
 
   try {
     const {
       data: {
-        data: { isEE, isTrial, features, flags },
+        data: { isEE, isTrial, features, flags, ai },
       },
     } = await get<{ data: ProjectType }>('/admin/project-type');
 
@@ -85,6 +91,7 @@ const renderAdmin = async (
     };
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
     window.strapi.aiLicenseKey = process.env.STRAPI_ADMIN_AI_API_KEY;
+    window.strapi.ai = ai;
   } catch (err) {
     /**
      * If this fails, we simply don't activate any EE features.
