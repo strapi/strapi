@@ -26,6 +26,7 @@ export * from './components/SubNav';
 export * from './components/GradientBadge';
 
 export { tours } from './components/GuidedTour/Tours';
+export { useGuidedTour } from './components/GuidedTour/Context';
 
 /**
  * Features
