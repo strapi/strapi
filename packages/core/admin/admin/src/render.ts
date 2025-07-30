@@ -84,6 +84,7 @@ const renderAdmin = async (
       isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
     };
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
+    window.strapi.aiLicenseKey = process.env.STRAPI_ADMIN_AI_API_KEY;
   } catch (err) {
     /**
      * If this fails, we simply don't activate any EE features.

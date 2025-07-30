@@ -127,7 +127,7 @@ export interface DataManagerContextValue {
   isSaving: boolean;
   applyChange: (opts: {
     action: 'add' | 'update' | 'delete';
-    schema: Component | ContentType;
+    schema: ContentType | Component;
   }) => void;
   history: {
     undo(): void;
