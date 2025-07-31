@@ -20,6 +20,8 @@ import { createDocumentService } from '../../services/document-service';
 type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
 
+const migrationScriptId = 'core::5.0.0-discard-drafts'
+
 /**
  * Check if the model has draft and publish enabled.
  */
@@ -158,6 +160,7 @@ export async function* getBatchToDiscard({
  * And then discard the drafts to copy the relations.
  */
 const migrateUp = async (trx: Knex, db: Database) => {
+  db.logger.info(`${migrationScriptId} running. This will discard all the drafts for published entries.`);
   const dpModels = [];
   for (const meta of db.metadata.values()) {
     const hasDP = await hasDraftAndPublish(trx, meta);
@@ -196,22 +199,77 @@ const migrateUp = async (trx: Knex, db: Database) => {
   });
 
   for (const model of dpModels) {
-    const discardDraft = async (entry: DocumentVersion) =>
-      documentService(model.uid as UID.ContentType).discardDraft({
-        documentId: entry.documentId,
-        locale: entry.locale,
-      });
+    db.logger.info(`${migrationScriptId} - Processing model: ${model.uid}`);
+    
+    const discardDraft = async (entry: DocumentVersion) => {
+      try {
+        db.logger.debug(`${migrationScriptId} - Discarding draft for documentId: ${entry.documentId}, locale: ${entry.locale}`);
+        const result = await documentService(model.uid as UID.ContentType).discardDraft({
+          documentId: entry.documentId,
+          locale: entry.locale,
+        });
+        return result;
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        db.logger.error(`${migrationScriptId} - Error discarding draft for documentId: ${entry.documentId}, locale: ${entry.locale}: ${err.message}`);
+        throw error; // Re-throw to handle at batch level
+      }
+    };
 
+    let batchCount = 0;
+    let totalProcessed = 0;
+    
+    // Process batches sequentially to avoid deadlocks with self-references
     for await (const batch of getBatchToDiscard({ db, trx, uid: model.uid })) {
-      // NOTE: concurrency had to be disabled to prevent a race condition with self-references
-      // TODO: improve performance in a safe way
-      await async.map(batch, discardDraft, { concurrency: 1 });
+      batchCount++;
+      const batchSize = batch.length;
+      db.logger.info(`${migrationScriptId} - Processing batch #${batchCount} with ${batchSize} entries for model: ${model.uid}`);
+      
+      // Group documents by their document ID to process related documents together
+      const documentGroups = batch.reduce((groups, entry) => {
+        const key = entry.documentId;
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+        groups[key].push(entry);
+        return groups;
+      }, {} as Record<string, DocumentVersion[]>);
+
+      const groupCount = Object.keys(documentGroups).length;
+      db.logger.info(`${migrationScriptId} - Batch #${batchCount} contains ${groupCount} unique document groups`);
+      
+      let currentGroup = 0;
+      
+      // Process document groups sequentially to avoid deadlocks
+      for (const documentId of Object.keys(documentGroups)) {
+        currentGroup++;
+        const entries = documentGroups[documentId];
+        
+        db.logger.info(`${migrationScriptId} - Processing group ${currentGroup}/${groupCount}, documentId: ${documentId} with ${entries.length} locales`);
+        
+        try {
+          // Process entries within the same document ID in parallel (safe because they're different locales)
+          await async.map(entries, discardDraft, { concurrency: 5 });
+          totalProcessed += entries.length;
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          db.logger.error(`${migrationScriptId} - Failed to process document group for documentId: ${documentId}: ${err.message}`);
+          // Continue with next group despite errors
+        }
+        
+        if (currentGroup % 10 === 0 || currentGroup === groupCount) {
+          db.logger.info(`${migrationScriptId} - Progress: ${currentGroup}/${groupCount} groups processed in current batch`);
+        }
+      }
+      
+      db.logger.info(`${migrationScriptId} - Completed batch #${batchCount}, total entries processed so far: ${totalProcessed}`);
     }
   }
+  db.logger.info(`${migrationScriptId} is complete and has discarded all the drafts for published entries.`);
 };
 
 export const discardDocumentDrafts: Migration = {
-  name: 'core::5.0.0-discard-drafts',
+  name: migrationScriptId,
   async up(trx, db) {
     await migrateUp(trx, db);
   },
