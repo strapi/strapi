@@ -23,6 +23,9 @@ describe('Admin API Token v2 CRUD (api)', () => {
   // Initialization Actions
   beforeAll(async () => {
     strapi = await createStrapiInstance();
+
+    // Set up encryption key for API token encryption; without this, we can't test viewable tokens
+    strapi.config.set('admin.secrets.encryptionKey', 'test-encryption-key-for-api-tokens');
     rq = await createAuthRequest({ strapi });
     // To eliminate latency in the request and predict the expiry timestamp, we freeze Date.now()
     now = Date.now();
@@ -929,5 +932,86 @@ describe('Admin API Token v2 CRUD (api)', () => {
     });
   });
 
-  test.todo('Custom token can only be created with valid permissions that exist');
+  test('Custom token can only be created with valid permissions', async () => {
+    // Mock the available permissions
+    strapi.contentAPI.permissions.providers.action.keys = jest.fn(() => [
+      'api::foo.foo.find',
+      'api::foo.foo.create',
+    ]);
+
+    // Try to create a token with invalid permissions
+    const invalidBody = {
+      name: 'api-token_tests-invalid-perms',
+      description: 'Testing invalid permissions',
+      type: 'custom',
+      permissions: ['api::foo.foo.find', 'api::invalid.action'],
+    };
+
+    const invalidRes = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body: invalidBody,
+    });
+
+    expect(invalidRes.statusCode).toBe(400);
+    expect(invalidRes.body.error).toMatchObject({
+      name: 'ValidationError',
+      message: 'Unknown permissions provided: api::invalid.action',
+    });
+
+    // Create a token with valid permissions
+    const validBody = {
+      name: 'api-token_tests-valid-perms',
+      description: 'Testing valid permissions',
+      type: 'custom',
+      permissions: ['api::foo.foo.find', 'api::foo.foo.create'],
+    };
+
+    const validRes = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body: validBody,
+    });
+
+    expect(validRes.statusCode).toBe(201);
+    expect(validRes.body.data.permissions).toEqual(expect.arrayContaining(validBody.permissions));
+  });
+
+  test('Supports viewable API tokens', async () => {
+    // Create a token
+    const body = {
+      name: 'api-token_tests-viewable',
+      description: 'Testing viewable token functionality',
+      type: 'read-only',
+    };
+
+    // Create the token and get back the viewable token
+    const createRes = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(createRes.statusCode).toBe(201);
+    expect(createRes.body.data.accessKey).toBeDefined();
+
+    // Verify the token is stored encrypted but can be decrypted
+    const storedToken = await strapi.db.query('admin::api-token').findOne({
+      where: { id: createRes.body.data.id },
+      select: ['encryptedKey'],
+    });
+
+    const decryptedKey = strapi.service('admin::encryption').decrypt(storedToken.encryptedKey);
+    expect(decryptedKey).toBe(createRes.body.data.accessKey);
+
+    // Verify retrieving the token returns the decrypted value
+    const getRes = await rq({
+      url: `/admin/api-tokens/${createRes.body.data.id}`,
+      method: 'GET',
+    });
+
+    expect(getRes.statusCode).toBe(200);
+    expect(getRes.body.data.accessKey).toBe(decryptedKey); // Verify API sends decrypted token
+    expect(getRes.body.data.accessKey).toBe(createRes.body.data.accessKey); // Verify it matches original
+  });
 });
