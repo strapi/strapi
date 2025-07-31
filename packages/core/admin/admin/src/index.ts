@@ -25,7 +25,9 @@ export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
 
+/** @internal */
 export { tours } from './components/GuidedTour/Tours';
+/** @internal */
 export { useGuidedTour } from './components/GuidedTour/Context';
 
 /**
