@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import axios, { AxiosResponse } from 'axios';
 
-import { Tours } from '../components/UnstableGuidedTour/Tours';
+import { Tours } from '../components/GuidedTour/Tours';
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
@@ -177,6 +177,7 @@ export interface EventWithoutProperties {
     | 'willEditEntryFromButton'
     | 'willEditEntryFromHome'
     | 'willEditEntryFromList'
+    | 'willEditReleaseFromHome'
     | 'willEditFieldOfContentType'
     | 'willEditMediaLibraryConfig'
     | 'willEditNameOfContentType'

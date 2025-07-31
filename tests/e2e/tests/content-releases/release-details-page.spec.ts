@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { clickAndWait, describeOnCondition } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, navToHeader } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
 import { findAndClose } from '../../utils/shared';
@@ -33,7 +33,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.goto('/admin');
     await login({ page });
 
-    await page.getByRole('link', { name: 'Releases' }).click();
+    await navToHeader(page, ['Releases'], 'Releases');
     page.getByRole('link', { name: `${releaseName}` }).click();
     await page.waitForURL('/admin/plugins/content-releases/*');
   });

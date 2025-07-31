@@ -1,0 +1,1 @@
+export { UploadRouteValidator } from './upload';

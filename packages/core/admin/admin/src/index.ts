@@ -25,8 +25,7 @@ export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
 
-export { useGuidedTour } from './components/GuidedTour/Provider';
-export { tours as unstable_tours } from './components/UnstableGuidedTour/Tours';
+export { tours } from './components/GuidedTour/Tours';
 
 /**
  * Features
@@ -55,6 +54,7 @@ export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
 export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useAdminUsers } from './services/users';
+export { useGetCountDocumentsQuery } from './services/homepage';
 
 /**
  * Types
