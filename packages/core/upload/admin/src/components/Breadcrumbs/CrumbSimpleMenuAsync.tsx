@@ -22,6 +22,7 @@ export const CrumbSimpleMenuAsync = ({
   const [shouldFetch, setShouldFetch] = React.useState(false);
   const { data, isLoading } = useFolderStructure({ enabled: shouldFetch });
   const { pathname } = useLocation();
+  const fullPathname = `/admin${pathname}`;
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
 
@@ -70,8 +71,8 @@ export const CrumbSimpleMenuAsync = ({
             );
           }
 
-          const url = getFolderURL(pathname, query, {
-            folder: typeof ascendant?.id === 'string' ? ascendant.id : undefined,
+          const url = getFolderURL(fullPathname, query, {
+            folder: String(ascendant.id),
             folderPath: ascendant?.path,
           });
 
