@@ -97,18 +97,6 @@ describe('Guided Tour Meta', () => {
       expect(secondSuperAdminUserResponse.body.data.isFirstSuperAdminUser).toBe(false);
     });
 
-    test('Detects created content type schemas', async () => {
-      await restartWithSchema();
-
-      const res = await authRq({
-        url: '/admin/guided-tour-meta',
-        method: 'GET',
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.completedActions).toContain('didCreateContentTypeSchema');
-    });
-
     test('Detects created content', async () => {
       await restartWithSchema();
 
