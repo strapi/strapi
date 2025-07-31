@@ -1,6 +1,7 @@
-import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { useNotification, useFetchClient, adminApi } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
+import { useDispatch } from 'react-redux';
 
 import { BulkDeleteFiles, File } from '../../../shared/contracts/files';
 import { pluginId } from '../pluginId';
@@ -16,6 +17,7 @@ type BulkRemovePayload = Partial<BulkDeleteFiles.Request['body']> &
   Partial<BulkDeleteFolders.Request['body']>;
 
 export const useBulkRemove = () => {
+  const dispatch = useDispatch();
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
@@ -64,6 +66,8 @@ export const useBulkRemove = () => {
           defaultMessage: 'Elements have been successfully deleted.',
         }),
       });
+
+      dispatch(adminApi.util.invalidateTags(['HomepageKeyStatistics']));
     },
     onError(error) {
       toggleNotification({ type: 'danger', message: error?.message });

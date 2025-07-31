@@ -25,6 +25,20 @@ const dogModel = {
   },
 };
 
+const uploadFile = async (request, filePath = path.join(__dirname, '../utils/rec.jpg')) => {
+  const res = await request({
+    method: 'POST',
+    url: '/upload',
+    formData: { files: fs.createReadStream(filePath) },
+  });
+  return res;
+};
+
+const getFiles = async (request) => {
+  const res = await request({ method: 'GET', url: '/upload/files' });
+  return res;
+};
+
 describe('Upload', () => {
   beforeAll(async () => {
     await builder.addContentType(dogModel).build();
@@ -45,12 +59,7 @@ describe('Upload', () => {
     });
 
     test('Can upload a file', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/upload',
-        formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
-      });
-
+      const res = await uploadFile(rq);
       expect(res.statusCode).toBe(201);
     });
   });
@@ -132,7 +141,7 @@ describe('Upload', () => {
     });
 
     test('GET /upload/files => Find files', async () => {
-      const res = await rq({ method: 'GET', url: '/upload/files' });
+      const res = await getFiles(rq);
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
@@ -171,3 +180,5 @@ describe('Upload', () => {
     });
   });
 });
+
+module.exports = { uploadFile, getFiles };
