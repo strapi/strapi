@@ -772,7 +772,20 @@ class TransferEngine<
       // Note: This will be configurable in the future
       await this.destinationProvider.rollback?.(e as Error);
 
+      // Ensure we close providers even on error
+      try {
+        await this.close();
+      } catch (closeError) {
+        this.reportError(closeError as Error, 'error');
+      }
+
       throw e;
+    }
+
+    // Check if there were any errors in the diagnostics
+    const hasErrors = this.diagnostics.stack.items.some((item) => item.kind === 'error');
+    if (hasErrors) {
+      throw new Error('Transfer completed with errors. Check the logs for details.');
     }
 
     return {
