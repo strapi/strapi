@@ -126,7 +126,7 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
       <Flex gap={2}>
         <CrossCircle fill="danger600" />
         <Tooltip description={validationErrorsMessages}>
-          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
+          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="bold" ellipsis>
             {validationErrorsMessages}
           </TypographyMaxWidth>
         </Tooltip>
@@ -152,7 +152,7 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
     return (
       <Flex gap={2}>
         <ArrowsCounterClockwise fill="alternative600" />
-        <Typography>
+        <Typography textColor="alternative600" fontWeight="bold">
           {formatMessage({
             id: 'content-manager.bulk-publish.modified',
             defaultMessage: 'Ready to publish changes',
@@ -165,7 +165,7 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
   return (
     <Flex gap={2}>
       <CheckCircle fill="success600" />
-      <Typography>
+      <Typography textColor="success600" fontWeight="bold">
         {formatMessage({
           id: 'app.utils.ready-to-publish',
           defaultMessage: 'Ready to publish',
@@ -290,14 +290,22 @@ interface PublicationStatusSummaryProps {
   count: number;
   icon: React.ReactNode;
   message: string;
+  textColor: string;
 }
 
-const PublicationStatusSummary = ({ count, icon, message }: PublicationStatusSummaryProps) => {
+const PublicationStatusSummary = ({
+  count,
+  icon,
+  message,
+  textColor,
+}: PublicationStatusSummaryProps) => {
   return (
     <Flex justifyContent="space-between" flex={1} gap={3}>
       <Flex gap={2}>
         {icon}
-        <Typography>{message}</Typography>
+        <Typography textColor={textColor} fontWeight="bold">
+          {message}
+        </Typography>
       </Flex>
       <Typography fontWeight="bold">{count}</Typography>
     </Flex>
@@ -330,6 +338,7 @@ const PublicationStatusGrid = ({
           <Tr>
             <Td>
               <PublicationStatusSummary
+                textColor="success600"
                 count={entriesReadyToPublishCount}
                 icon={<CheckCircle fill="success600" />}
                 message={formatMessage({
@@ -340,6 +349,7 @@ const PublicationStatusGrid = ({
             </Td>
             <Td>
               <PublicationStatusSummary
+                textColor="success600"
                 count={entriesPublishedCount}
                 icon={<CheckCircle fill="success600" />}
                 message={formatMessage({
@@ -352,6 +362,7 @@ const PublicationStatusGrid = ({
           <Tr>
             <Td>
               <PublicationStatusSummary
+                textColor="alternative600"
                 count={entriesModifiedCount}
                 icon={<ArrowsCounterClockwise fill="alternative600" />}
                 message={formatMessage({
@@ -362,6 +373,7 @@ const PublicationStatusGrid = ({
             </Td>
             <Td>
               <PublicationStatusSummary
+                textColor="danger600"
                 count={entriesWithErrorsCount}
                 icon={<CrossCircle fill="danger600" />}
                 message={formatMessage({
