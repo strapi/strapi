@@ -148,6 +148,19 @@ export default async (opts: CmdOptions) => {
     getAssetsBackupHandler(engine, { force: opts.force, action: 'transfer' })
   );
 
+  // Update more frequently to ensure elapsed time is accurate even if the stage is not progressing
+  const activeStages = new Set<string>();
+  const lastStageData: Record<string, any> = {};
+  const interval = setInterval(() => {
+    for (const stage of activeStages) {
+      if (lastStageData[stage]) {
+        // Clone the lastStageData and ensure endTime is undefined so elapsed uses Date.now()
+        const dataCopy = { ...lastStageData[stage], endTime: undefined };
+        updateLoader(stage as any, { [stage]: dataCopy });
+      }
+    }
+  }, 100);
+
   progress.on(`stage::start`, ({ stage, data }) => {
     updateLoader(stage, data).start();
   });
@@ -157,12 +170,17 @@ export default async (opts: CmdOptions) => {
   });
 
   progress.on('stage::progress', ({ stage, data }) => {
+    lastStageData[stage] = data[stage];
+    activeStages.add(stage);
     updateLoader(stage, data);
   });
 
   progress.on('stage::error', ({ stage, data }) => {
     updateLoader(stage, data).fail();
   });
+
+  progress.on('transfer::finish', () => clearInterval(interval));
+  progress.on('transfer::error', () => clearInterval(interval));
 
   progress.on('transfer::start', async () => {
     console.log(`Starting transfer...`);
