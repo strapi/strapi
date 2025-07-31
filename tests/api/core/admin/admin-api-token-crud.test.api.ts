@@ -932,7 +932,50 @@ describe('Admin API Token v2 CRUD (api)', () => {
     });
   });
 
-  test.todo('Custom token can only be created with valid permissions that exist');
+  test('Custom token can only be created with valid permissions', async () => {
+    // Mock the available permissions
+    strapi.contentAPI.permissions.providers.action.keys = jest.fn(() => [
+      'api::foo.foo.find',
+      'api::foo.foo.create',
+    ]);
+
+    // Try to create a token with invalid permissions
+    const invalidBody = {
+      name: 'api-token_tests-invalid-perms',
+      description: 'Testing invalid permissions',
+      type: 'custom',
+      permissions: ['api::foo.foo.find', 'api::invalid.action'],
+    };
+
+    const invalidRes = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body: invalidBody,
+    });
+
+    expect(invalidRes.statusCode).toBe(400);
+    expect(invalidRes.body.error).toMatchObject({
+      name: 'ValidationError',
+      message: 'Unknown permissions provided: api::invalid.action',
+    });
+
+    // Create a token with valid permissions
+    const validBody = {
+      name: 'api-token_tests-valid-perms',
+      description: 'Testing valid permissions',
+      type: 'custom',
+      permissions: ['api::foo.foo.find', 'api::foo.foo.create'],
+    };
+
+    const validRes = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body: validBody,
+    });
+
+    expect(validRes.statusCode).toBe(201);
+    expect(validRes.body.data.permissions).toEqual(expect.arrayContaining(validBody.permissions));
+  });
 
   test('Supports viewable API tokens', async () => {
     // Create a token
