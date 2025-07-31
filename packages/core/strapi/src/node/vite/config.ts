@@ -10,7 +10,7 @@ import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
-  const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid.startsWith(
+  const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid?.startsWith(
     'strapi_examples_'
   );
 
