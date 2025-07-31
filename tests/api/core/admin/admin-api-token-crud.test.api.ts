@@ -968,6 +968,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
     });
 
     expect(getRes.statusCode).toBe(200);
-    expect(getRes.body.data.accessKey).toBe(createRes.body.data.accessKey);
+    expect(getRes.body.data.accessKey).toBe(decryptedKey); // Verify API sends decrypted token
+    expect(getRes.body.data.accessKey).toBe(createRes.body.data.accessKey); // Verify it matches original
   });
 });
