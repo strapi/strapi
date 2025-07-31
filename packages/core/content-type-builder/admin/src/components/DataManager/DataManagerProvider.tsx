@@ -180,8 +180,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
       // Make sure the server has restarted
       await serverRestartWatcher();
-      // Invalidate the guided tour meta and homepage key statistics widget query cache
-      dispatch(adminApi.util.invalidateTags(['GuidedTourMeta', 'HomepageKeyStatistics']));
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
       // Update the app's permissions
@@ -198,6 +196,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       setIsSaving(false);
       unlockAppWithAutoreload();
 
+      dispatch(adminApi.util.invalidateTags(['GuidedTourMeta', 'HomepageKeyStatistics']));
       dispatchGuidedTour({
         type: 'set_completed_actions',
         payload: ['didCreateContentTypeSchema'],

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Box, Popover, Portal, Button } from '@strapi/design-system';
+import { UID } from '@strapi/types';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -30,23 +31,20 @@ const GotItAction = ({ onClick }: { onClick: () => void }) => {
 };
 
 const ContentTypeBuilderFinish = ({ Step }: Pick<ContentProps, 'Step'>) => {
-  const { collectionTypes, singleTypes } = useContentTypes();
+  const { data } = useGetGuidedTourMetaQuery();
   const { '*': routeParams } = useParams();
   // Get the uid from the params
   const uid = routeParams?.split('/').pop();
-  // Spread all content-types together
-  const allContentTypes = [...collectionTypes, ...singleTypes];
-  // Find the content-type mathching the params uid
-  const contentType = allContentTypes.find((ct) => ct.uid === uid);
+
+  const contentType = uid ? data?.data?.schemas?.[uid as UID.ContentType] : null;
   const contentTypeKindDictionary = {
     collectionType: 'collection-types',
     singleType: 'single-types',
   };
   // Create the to path with fallback to content-manager
-  const to =
-    contentType?.kind && contentType?.uid
-      ? `/content-manager/${contentTypeKindDictionary[contentType.kind]}/${contentType.uid}`
-      : '/content-manager';
+  const to = contentType
+    ? `/content-manager/${contentTypeKindDictionary[contentType.kind as keyof typeof contentTypeKindDictionary]}/${contentType.uid}`
+    : '/content-manager';
 
   return (
     <Step.Root side="right">

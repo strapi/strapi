@@ -79,7 +79,7 @@ test.describe('Guided tour', () => {
     await expect(page.getByRole('dialog', { name: 'First Step: Done! 🎉' })).toBeVisible();
     await clickAndWait(page, page.getByRole('link', { name: 'Next' }));
 
-    await expect(page).toHaveURL(/.*\/admin\/content-manager.*/);
+    await expect(page).toHaveURL(/.*\/admin\/content-manager\/collection-types\/api::test.test.*/);
     await page.goto('/admin');
 
     await expect(

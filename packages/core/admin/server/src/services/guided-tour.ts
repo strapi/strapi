@@ -11,16 +11,17 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
   /**
    * @internal
    * TODO:
-   * Remove this service and handle everything on the frontend
+   * Remove completed actions from the server and handle it all on the frontend
+   * [x] didCreateContentTypeSchema
+   * [ ] didCreateContent
+   * [ ] didCreateApiToken
    */
   const getCompletedActions = async () => {
-    // Check if any content-type schemas have been created on the api:: namespace
-    const contentTypeSchemaNames = Object.keys(strapi.contentTypes).filter((contentTypeUid) =>
-      contentTypeUid.startsWith('api::')
-    );
     // Check if any content has been created for content-types on the api:: namespace
     const hasContent = await (async () => {
-      for (const name of contentTypeSchemaNames) {
+      for (const name of Object.keys(strapi.contentTypes).filter((contentTypeUid) =>
+        contentTypeUid.startsWith('api::')
+      )) {
         const count = await strapi.documents(name as Internal.UID.ContentType).count({});
 
         if (count > 0) return true;

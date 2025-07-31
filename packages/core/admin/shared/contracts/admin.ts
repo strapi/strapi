@@ -1,4 +1,4 @@
-import { Data } from '@strapi/types';
+import { Struct, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import type { File } from 'formidable';
 import type { GuidedTourCompletedActions } from '../../server/src/services/guided-tour';
@@ -230,6 +230,7 @@ export declare namespace GetGuidedTourMeta {
   export interface Response {
     data: {
       isFirstSuperAdminUser: boolean;
+      schemas: Record<UID.ContentType, Struct.ContentTypeSchema>;
       completedActions: GuidedTourCompletedActions[];
     };
     error?: errors.ApplicationError;
