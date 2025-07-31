@@ -39,8 +39,31 @@ import { handleInvisibleAttributes } from './utils/data';
 const BlockerWrapper = () => {
   const resetForm = useForm('BlockerWrapper', (state) => state.resetForm);
 
+  const shouldBlock = ({ currentLocation, nextLocation, modified, isSubmitting }) => {
+    // Don't block if form is not modified or is submitting
+    if (!modified || isSubmitting) {
+      return false;
+    }
+
+    // Don't block if only pathname changed
+    if (currentLocation.pathname !== nextLocation.pathname) {
+      return true;
+    }
+
+    // Parse search parameters to check if only "field" parameter changed
+    const currentParams = new URLSearchParams(currentLocation.search);
+    const nextParams = new URLSearchParams(nextLocation.search);
+
+    // Remove "field" parameter from both to compare other parameters
+    currentParams.delete('field');
+    nextParams.delete('field');
+
+    // Block if any parameter other than "field" changed
+    return currentParams.toString() !== nextParams.toString();
+  };
+
   // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-  return <Blocker onProceed={resetForm} />;
+  return <Blocker onProceed={resetForm} shouldBlock={shouldBlock} />;
 };
 
 const EditViewPage = () => {

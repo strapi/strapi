@@ -76,6 +76,7 @@ interface PreviewContextValue {
   layout: EditLayout;
   onPreview: () => void;
   iframeRef: React.RefObject<HTMLIFrameElement>;
+  isSideEditorOpen: boolean;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -86,6 +87,8 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
 
 const previewScript = () => {
   const HIGHLIGHT_PADDING = 2;
+  const HIGHLIGHT_COLOR = '#4945ff';
+
   // Remove existing overlay if it exists
   const existingOverlay = document.getElementById('strapi-preview-overlay');
   if (existingOverlay) {
@@ -115,6 +118,11 @@ const previewScript = () => {
 
   const elements = document.querySelectorAll('[data-strapisrc]');
   const highlights: HTMLElement[] = [];
+
+  // Track currently focused field
+  let focusedField: string | null = null;
+  const focusedHighlights: HTMLElement[] = [];
+
   const resizeObserver = new ResizeObserver(() => {
     updateAllHighlights();
   });
@@ -161,7 +169,7 @@ const previewScript = () => {
         transform: translateY(-100%);
         font-size: 12px;
         padding: 4px 8px;
-        background: #4945ff;
+        background: ${HIGHLIGHT_COLOR};
         color: white;
         border: none;
         border-radius: 4px 4px 0 0;
@@ -174,12 +182,16 @@ const previewScript = () => {
 
       // Add hover functionality to show/hide outline and edit button
       highlight.addEventListener('mouseenter', () => {
-        highlight.style.outlineColor = '#4945ff';
+        highlight.style.outlineColor = HIGHLIGHT_COLOR;
         editButton.style.display = 'block';
       });
 
       highlight.addEventListener('mouseleave', () => {
-        highlight.style.outlineColor = 'transparent';
+        // Only hide outline if this field is not currently focused
+        const fieldPath = element.getAttribute('data-strapisrc');
+        if (fieldPath !== focusedField) {
+          highlight.style.outlineColor = 'transparent';
+        }
         editButton.style.display = 'none';
       });
 
@@ -238,8 +250,8 @@ const previewScript = () => {
   window.addEventListener('scroll', updateOnScroll);
   window.addEventListener('resize', updateOnScroll);
 
-  // Listen for strapiFieldTyping messages from parent window
-  const handleFieldTyping = (event: MessageEvent) => {
+  // Listen for messages from parent window
+  const handleMessages = (event: MessageEvent) => {
     if (event.data?.type === 'strapiFieldTyping') {
       const { field, value } = event.data.payload;
       if (field) {
@@ -250,17 +262,47 @@ const previewScript = () => {
           }
         });
       }
+    } else if (event.data?.type === 'strapiFieldFocus') {
+      const { field } = event.data.payload;
+      if (field) {
+        // Clear previous focus
+        focusedHighlights.forEach((highlight) => {
+          highlight.style.outlineColor = 'transparent';
+        });
+        focusedHighlights.length = 0;
+
+        // Set new focus
+        focusedField = field;
+        const matchingElements = document.querySelectorAll(`[data-strapisrc="${field}"]`);
+        matchingElements.forEach((element) => {
+          const highlight = highlights[Array.from(elements).indexOf(element)];
+          if (highlight) {
+            highlight.style.outlineColor = HIGHLIGHT_COLOR;
+            focusedHighlights.push(highlight);
+          }
+        });
+      }
+    } else if (event.data?.type === 'strapiFieldBlur') {
+      const { field } = event.data.payload;
+      if (field === focusedField) {
+        // Clear focus outlines
+        focusedHighlights.forEach((highlight) => {
+          highlight.style.outlineColor = 'transparent';
+        });
+        focusedHighlights.length = 0;
+        focusedField = null;
+      }
     }
   };
 
-  window.addEventListener('message', handleFieldTyping);
+  window.addEventListener('message', handleMessages);
 
   // Store cleanup function on window for potential cleanup
   (window as any).__strapiPreviewCleanup = () => {
     resizeObserver.disconnect();
     window.removeEventListener('scroll', updateOnScroll);
     window.removeEventListener('resize', updateOnScroll);
-    window.removeEventListener('message', handleFieldTyping);
+    window.removeEventListener('message', handleMessages);
     if (overlay.parentNode) {
       overlay.parentNode.removeChild(overlay);
     }
@@ -276,8 +318,8 @@ const VisualEditingPopover = ({
   setPopoverField,
   documentResponse,
 }: {
-  popoverField: any;
-  setPopoverField: (value: string | null) => void;
+  popoverField: PopoverField | null;
+  setPopoverField: (value: PopoverField | null) => void;
   documentResponse: ReturnType<UseDocument>;
 }) => {
   const iframeRef = usePreviewContext('VisualEditingPopover', (state) => state.iframeRef);
@@ -341,6 +383,11 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
   transition: rotate 0.2s ease-in-out;
 `;
 
+interface PopoverField {
+  path: string;
+  position: DOMRect;
+}
+
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
@@ -358,9 +405,15 @@ const PreviewPage = () => {
     id: string;
     collectionType: string;
   }>();
-  const [{ query }] = useQueryParams<{
+  const [
+    {
+      query: { field: _field, ...query },
+    },
+    setQuery,
+  ] = useQueryParams<{
     plugins?: Record<string, unknown>;
     status?: string;
+    field?: string;
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -370,7 +423,7 @@ const PreviewPage = () => {
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
-  const [popoverField, setPopoverField] = React.useState<string | null>(null);
+  const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
 
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
@@ -395,13 +448,17 @@ const PreviewPage = () => {
   React.useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'willEditField') {
-        setPopoverField(event.data.payload);
+        if (isSideEditorOpen) {
+          setQuery({ field: event.data.payload.path }, 'push', true);
+        } else {
+          setPopoverField(event.data.payload);
+        }
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [isSideEditorOpen, setQuery]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -513,6 +570,7 @@ const PreviewPage = () => {
         layout={documentLayoutResponse.edit}
         onPreview={onPreview}
         iframeRef={iframeRef}
+        isSideEditorOpen={isSideEditorOpen}
       >
         <FormContext
           method="PUT"
@@ -544,113 +602,138 @@ const PreviewPage = () => {
             return yupSchema.validate(cleanedValues, { abortEarly: false });
           }}
         >
-          {({ resetForm }) => (
-            <Flex direction="column" height="100%" alignItems="stretch">
-              <Blocker onProceed={resetForm} />
-              <PreviewHeader />
-              <Flex flex={1} overflow="auto" alignItems="stretch">
-                {hasAdvancedPreview && (
-                  <Box
-                    overflow="auto"
-                    width={isSideEditorOpen ? '50%' : 0}
-                    borderWidth="0 1px 0 0"
-                    borderColor="neutral150"
-                    paddingTop={6}
-                    paddingBottom={6}
-                    // Remove horizontal padding when the editor is closed or it won't fully disappear
-                    paddingLeft={isSideEditorOpen ? 6 : 0}
-                    paddingRight={isSideEditorOpen ? 6 : 0}
-                    transition="all 0.2s ease-in-out"
-                  >
-                    <FormLayout
-                      layout={documentLayoutResponse.edit.layout}
-                      document={documentResponse}
-                      hasBackground={false}
-                    />
-                  </Box>
-                )}
-                <Flex
-                  direction="column"
-                  alignItems="stretch"
-                  flex={1}
-                  height="100%"
-                  overflow="hidden"
-                >
+          {({ resetForm }) => {
+            const shouldBlock = ({ currentLocation, nextLocation, modified, isSubmitting }) => {
+              // Don't block if form is not modified or is submitting
+              if (!modified || isSubmitting) {
+                return false;
+              }
+
+              // Don't block if only pathname changed
+              if (currentLocation.pathname !== nextLocation.pathname) {
+                return true;
+              }
+
+              // Parse search parameters to check if only "field" parameter changed
+              const currentParams = new URLSearchParams(currentLocation.search);
+              const nextParams = new URLSearchParams(nextLocation.search);
+
+              // Remove "field" parameter from both to compare other parameters
+              currentParams.delete('field');
+              nextParams.delete('field');
+
+              // Block if any parameter other than "field" changed
+              return currentParams.toString() !== nextParams.toString();
+            };
+
+            return (
+              <Flex direction="column" height="100%" alignItems="stretch">
+                <Blocker onProceed={resetForm} shouldBlock={shouldBlock} />
+                <PreviewHeader />
+                <Flex flex={1} overflow="auto" alignItems="stretch">
+                  {hasAdvancedPreview && (
+                    <Box
+                      overflow="auto"
+                      width={isSideEditorOpen ? '50%' : 0}
+                      borderWidth="0 1px 0 0"
+                      borderColor="neutral150"
+                      paddingTop={6}
+                      paddingBottom={6}
+                      // Remove horizontal padding when the editor is closed or it won't fully disappear
+                      paddingLeft={isSideEditorOpen ? 6 : 0}
+                      paddingRight={isSideEditorOpen ? 6 : 0}
+                      transition="all 0.2s ease-in-out"
+                    >
+                      <FormLayout
+                        layout={documentLayoutResponse.edit.layout}
+                        document={documentResponse}
+                        hasBackground={false}
+                      />
+                    </Box>
+                  )}
                   <Flex
-                    direction="row"
-                    background="neutral0"
-                    padding={2}
-                    borderWidth="0 0 1px 0"
-                    borderColor="neutral150"
+                    direction="column"
+                    alignItems="stretch"
+                    flex={1}
+                    height="100%"
+                    overflow="hidden"
                   >
-                    {hasAdvancedPreview && (
-                      <IconButton
-                        variant="ghost"
-                        label={formatMessage(
-                          isSideEditorOpen
-                            ? {
-                                id: 'content-manager.preview.content.close-editor',
-                                defaultMessage: 'Close editor',
-                              }
-                            : {
-                                id: 'content-manager.preview.content.open-editor',
-                                defaultMessage: 'Open editor',
-                              }
-                        )}
-                        onClick={() => setIsSideEditorOpen((prev) => !prev)}
-                      >
-                        <AnimatedArrow $isSideEditorOpen={isSideEditorOpen} />
-                      </IconButton>
-                    )}
-                    <Flex justifyContent="center" flex={1}>
-                      <SingleSelect
-                        value={deviceName}
-                        onChange={(name) => setDeviceName(name.toString())}
-                        aria-label={formatMessage({
-                          id: 'content-manager.preview.device.select',
-                          defaultMessage: 'Select device type',
+                    <Flex
+                      direction="row"
+                      background="neutral0"
+                      padding={2}
+                      borderWidth="0 0 1px 0"
+                      borderColor="neutral150"
+                    >
+                      {hasAdvancedPreview && (
+                        <IconButton
+                          variant="ghost"
+                          label={formatMessage(
+                            isSideEditorOpen
+                              ? {
+                                  id: 'content-manager.preview.content.close-editor',
+                                  defaultMessage: 'Close editor',
+                                }
+                              : {
+                                  id: 'content-manager.preview.content.open-editor',
+                                  defaultMessage: 'Open editor',
+                                }
+                          )}
+                          onClick={() => setIsSideEditorOpen((prev) => !prev)}
+                        >
+                          <AnimatedArrow $isSideEditorOpen={isSideEditorOpen} />
+                        </IconButton>
+                      )}
+                      <Flex justifyContent="center" flex={1}>
+                        <SingleSelect
+                          value={deviceName}
+                          onChange={(name) => setDeviceName(name.toString())}
+                          aria-label={formatMessage({
+                            id: 'content-manager.preview.device.select',
+                            defaultMessage: 'Select device type',
+                          })}
+                        >
+                          {DEVICES.map((deviceOption) => (
+                            <SingleSelectOption key={deviceOption.name} value={deviceOption.name}>
+                              {formatMessage(deviceOption.label)}
+                            </SingleSelectOption>
+                          ))}
+                        </SingleSelect>
+                      </Flex>
+                    </Flex>
+                    <Flex direction="column" justifyContent="center" background="neutral0" flex={1}>
+                      <Box
+                        data-testid="preview-iframe"
+                        ref={iframeRef}
+                        src={previewUrl}
+                        /**
+                         * For some reason, changing an iframe's src tag causes the browser to add a new item in the
+                         * history stack. This is an issue for us as it means clicking the back button will not let us
+                         * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
+                         * different iframe when the preview URL changes. So we set a key prop to force React
+                         * to mount a different node when the src changes.
+                         */
+                        key={previewUrl}
+                        title={formatMessage({
+                          id: 'content-manager.preview.panel.title',
+                          defaultMessage: 'Preview',
                         })}
-                      >
-                        {DEVICES.map((deviceOption) => (
-                          <SingleSelectOption key={deviceOption.name} value={deviceOption.name}>
-                            {formatMessage(deviceOption.label)}
-                          </SingleSelectOption>
-                        ))}
-                      </SingleSelect>
+                        width={device.width}
+                        height={device.height}
+                        borderWidth={0}
+                        tag="iframe"
+                      />
                     </Flex>
                   </Flex>
-                  <Flex direction="column" justifyContent="center" background="neutral0" flex={1}>
-                    <Box
-                      data-testid="preview-iframe"
-                      ref={iframeRef}
-                      src={previewUrl}
-                      /**
-                       * For some reason, changing an iframe's src tag causes the browser to add a new item in the
-                       * history stack. This is an issue for us as it means clicking the back button will not let us
-                       * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
-                       * different iframe when the preview URL changes. So we set a key prop to force React
-                       * to mount a different node when the src changes.
-                       */
-                      key={previewUrl}
-                      title={formatMessage({
-                        id: 'content-manager.preview.panel.title',
-                        defaultMessage: 'Preview',
-                      })}
-                      width={device.width}
-                      height={device.height}
-                      borderWidth={0}
-                      tag="iframe"
-                    />
-                  </Flex>
                 </Flex>
+                <VisualEditingPopover
+                  popoverField={popoverField}
+                  setPopoverField={setPopoverField}
+                  documentResponse={documentResponse}
+                />
               </Flex>
-              <VisualEditingPopover
-                popoverField={popoverField}
-                setPopoverField={setPopoverField}
-                documentResponse={documentResponse}
-              />
-            </Flex>
-          )}
+            );
+          }}
         </FormContext>
       </PreviewProvider>
     </>

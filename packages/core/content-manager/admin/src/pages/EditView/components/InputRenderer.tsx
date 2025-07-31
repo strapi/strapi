@@ -7,6 +7,7 @@ import {
   useField,
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
+import { useSearchParams } from 'react-router-dom';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
@@ -45,13 +46,53 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   const {
     edit: { components },
   } = useDocumentLayout(currentDocumentMeta.model);
+  const isSideEditorOpen = usePreviewContext(
+    'InputRenderer',
+    (state) => state.isSideEditorOpen,
+    false
+  );
+
+  const [, setSearchParams] = useSearchParams();
 
   const handleFocus = () => {
-    console.log('focus found!');
+    // If side editor is open, input renderers are inside popovers in the right location,
+    // so no need for focus highlights as it's clear where the field is used.
+    if (!isSideEditorOpen) return;
+
+    previewIframe?.current?.contentWindow?.postMessage(
+      {
+        type: 'strapiFieldFocus',
+        payload: {
+          field: props.name,
+        },
+      },
+      new URL(previewIframe.current.src).origin
+    );
   };
 
   const handleBlur = () => {
-    console.log('focus lost');
+    // If side editor is open, input renderers are inside popovers in the right location,
+    // so no need for focus highlights as it's clear where the field is used.
+    if (!isSideEditorOpen) return;
+
+    // Clear the field query parameter when blurring so it can be autofocused again if needed
+    setSearchParams(
+      (prev) => {
+        prev.delete('field');
+        return prev;
+      },
+      { replace: true }
+    );
+
+    previewIframe?.current?.contentWindow?.postMessage(
+      {
+        type: 'strapiFieldBlur',
+        payload: {
+          field: props.name,
+        },
+      },
+      new URL(previewIframe.current.src).origin
+    );
   };
 
   const collectionType =

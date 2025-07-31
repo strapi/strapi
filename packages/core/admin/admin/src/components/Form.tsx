@@ -13,7 +13,7 @@ import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
 import isEqual from 'lodash/isEqual';
 import { useIntl, type MessageDescriptor, type PrimitiveType } from 'react-intl';
-import { useBlocker } from 'react-router-dom';
+import { useBlocker, type Location } from 'react-router-dom';
 
 import { getIn, setIn } from '../utils/objects';
 
@@ -758,20 +758,31 @@ const isErrorMessageDescriptor = (object?: object): object is TranslationMessage
  * Props for the Blocker component.
  * @param onProceed Function to be called when the user confirms the action that triggered the blocker.
  * @param onCancel Function to be called when the user cancels the action that triggered the blocker.
+ * @param shouldBlock Optional custom function to determine if navigation should be blocked.
  */
 interface BlockerProps {
   onProceed?: () => void;
   onCancel?: () => void;
+  shouldBlock?: (params: {
+    currentLocation: Location;
+    nextLocation: Location;
+    modified: boolean;
+    isSubmitting: boolean;
+  }) => boolean;
 }
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) => {
+const Blocker = ({ onProceed = () => {}, onCancel = () => {}, shouldBlock }: BlockerProps) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
 
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    if (shouldBlock) {
+      return shouldBlock({ currentLocation, nextLocation, modified, isSubmitting });
+    }
+
     return (
       !isSubmitting &&
       modified &&
