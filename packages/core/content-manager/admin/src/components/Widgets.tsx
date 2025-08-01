@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Widget, useTracking } from '@strapi/admin/strapi-admin';
+import { Widget, useTracking, useGetCountDocumentsQuery } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -18,13 +18,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { styled, DefaultTheme } from 'styled-components';
 
 import { DocumentStatus } from '../pages/EditView/components/DocumentStatus';
-import { useGetRecentDocumentsQuery, useGetCountDocumentsQuery } from '../services/homepage';
+import { useGetRecentDocumentsQuery } from '../services/homepage';
 
 import { RelativeTime } from './RelativeTime';
 
 import type { RecentDocument } from '../../../shared/contracts/homepage';
 
-const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 'block' })`
+const CellTypography = styled(Typography)`
+  display: block;
+  max-width: 14.4rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
