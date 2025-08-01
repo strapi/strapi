@@ -127,7 +127,7 @@ const newEngine = (params: EngineParams): Engine => {
         conditions.map(async (condition) => ({
           condition,
           result: await condition.handler(
-            _.merge(options, { permission: _.cloneDeep(permission) })
+            _.merge(options, { permission: structuredClone(permission) })
           ),
         }))
       );

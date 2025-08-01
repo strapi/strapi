@@ -1,5 +1,3 @@
-import { cloneDeep } from 'lodash/fp';
-
 import type { Utils } from '@strapi/types';
 
 import { createJSONTransformAPI } from '../transform-api';
@@ -13,7 +11,7 @@ describe('JSON Transform API', () => {
   let obj: Utils.JSONObject;
 
   beforeEach(() => {
-    obj = cloneDeep(model);
+    obj = structuredClone(model);
     api = createJSONTransformAPI(obj);
   });
 
