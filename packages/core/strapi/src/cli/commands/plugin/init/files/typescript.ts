@@ -57,8 +57,8 @@ const SERVER = {
             "baseUrl": ".",
             "module": "CommonJS",
             "moduleResolution": "Node",
-            "lib": ["ES2020"],
-            "target": "ES2019",
+            "lib": ["ES2021"],
+            "target": "ES2021",
 
             "strict": false,
             "skipLibCheck": true,
