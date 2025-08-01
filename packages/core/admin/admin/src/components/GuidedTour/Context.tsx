@@ -7,7 +7,7 @@ import { createContext } from '../Context';
 
 import { type Tours, tours as guidedTours } from './Tours';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
-import { migrateTourLengths } from './utils/migrations';
+import { migrateTourSteps } from './utils/migrations';
 
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourProvider
@@ -131,7 +131,7 @@ const GuidedTourContext = ({
     enabled,
     completedActions: [],
   });
-  const migratedTourState = migrateTourLengths(storedTours);
+  const migratedTourState = migrateTourSteps(storedTours);
   const [state, dispatch] = React.useReducer(reducer, migratedTourState);
 
   // Sync local storage

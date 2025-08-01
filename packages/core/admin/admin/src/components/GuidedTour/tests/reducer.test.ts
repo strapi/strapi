@@ -1,4 +1,4 @@
-import { type Action, type CompletedActions, reducer } from '../Context';
+import { type Action, reducer } from '../Context';
 import { tours } from '../Tours';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 

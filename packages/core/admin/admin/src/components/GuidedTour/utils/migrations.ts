@@ -6,7 +6,7 @@ import { GUIDED_TOUR_REQUIRED_ACTIONS } from './constants';
 
 import type { State, ValidTourName } from '../Context';
 
-const migrateTourLengths = (storedTourState: State) => {
+const migrateTourSteps = (storedTourState: State) => {
   const storedTourNames = Object.keys(storedTourState.tours) as ValidTourName[];
 
   return produce(storedTourState, (draft) => {
@@ -14,7 +14,6 @@ const migrateTourLengths = (storedTourState: State) => {
       const currentTourLength = Object.keys(tours[tourName]).length;
       const storedTourLength = storedTourState.tours[tourName].length;
 
-      // Migrate when the tour length has changed
       if (currentTourLength !== storedTourLength) {
         draft.tours[tourName].length = currentTourLength;
         draft.tours[tourName].currentStep = 0;
@@ -26,4 +25,4 @@ const migrateTourLengths = (storedTourState: State) => {
   });
 };
 
-export { migrateTourLengths };
+export { migrateTourSteps };
