@@ -44,11 +44,11 @@ test.describe('Guided tour', () => {
       page.getByRole('dialog', { name: 'Welcome to the Content-Type Builder!' })
     ).toBeVisible();
     await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Meet Collection Types' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Collection Types' })).toBeVisible();
     await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Say Hi to Single Types' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Single Types' })).toBeVisible();
     await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Components to the rescue!' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Components' })).toBeVisible();
     await nextButton.click();
     await expect(page.getByRole('dialog', { name: 'Your turn — Build something!' })).toBeVisible();
     await nextButton.click();
