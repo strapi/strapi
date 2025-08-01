@@ -7,10 +7,10 @@ const GUIDED_TOUR_REQUIRED_ACTIONS = {
     createContent: 'didCreateContent',
   },
   apiTokens: {
-    copyToken: 'didCopyApiToken',
     createToken: 'didCreateApiToken',
+    copyToken: 'didCopyApiToken',
   },
   strapiCloud: {},
-};
+} as const;
 
 export { GUIDED_TOUR_REQUIRED_ACTIONS };

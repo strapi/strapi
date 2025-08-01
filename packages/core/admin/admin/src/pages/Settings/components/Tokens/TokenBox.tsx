@@ -8,6 +8,7 @@ import { styled } from 'styled-components';
 import { ContentBox } from '../../../../components/ContentBox';
 import { useGuidedTour } from '../../../../components/GuidedTour/Context';
 import { tours } from '../../../../components/GuidedTour/Tours';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../../../../components/GuidedTour/utils/constants';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useClipboard } from '../../../../hooks/useClipboard';
@@ -39,7 +40,7 @@ export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
         });
         dispatch({
           type: 'set_completed_actions',
-          payload: ['didCopyApiToken'],
+          payload: [GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken],
         });
         toggleNotification({
           type: 'success',

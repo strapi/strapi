@@ -9,6 +9,7 @@ import {
   useAuth,
   adminApi,
   useGuidedTour,
+  GUIDED_TOUR_REQUIRED_ACTIONS,
 } from '@strapi/admin/strapi-admin';
 import groupBy from 'lodash/groupBy';
 import isEqual from 'lodash/isEqual';
@@ -199,7 +200,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       dispatch(adminApi.util.invalidateTags(['GuidedTourMeta', 'HomepageKeyStatistics']));
       dispatchGuidedTour({
         type: 'set_completed_actions',
-        payload: ['didCreateContentTypeSchema'],
+        payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       });
 
       trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: true });

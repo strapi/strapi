@@ -1,4 +1,4 @@
-import { type Action, type ExtendedCompletedActions, reducer } from '../Context';
+import { type Action, type CompletedActions, reducer } from '../Context';
 import { tours } from '../Tours';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 
@@ -29,7 +29,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -61,7 +61,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -92,7 +92,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -124,7 +124,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -156,7 +156,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -188,7 +188,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -221,7 +221,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -253,7 +253,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -284,7 +284,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -316,7 +316,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -349,7 +349,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -357,7 +357,7 @@ describe('GuidedTour | reducer', () => {
         payload: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent,
-        ] as ExtendedCompletedActions,
+        ],
       };
 
       const expectedState = {
@@ -387,7 +387,7 @@ describe('GuidedTour | reducer', () => {
         completedActions: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent,
-        ] as ExtendedCompletedActions,
+        ],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -421,7 +421,7 @@ describe('GuidedTour | reducer', () => {
         completedActions: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
-        ] as ExtendedCompletedActions,
+        ],
       };
 
       const action: Action = {
@@ -429,7 +429,7 @@ describe('GuidedTour | reducer', () => {
         payload: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
-        ] as ExtendedCompletedActions,
+        ],
       };
 
       const expectedState = {
@@ -460,7 +460,7 @@ describe('GuidedTour | reducer', () => {
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
-        ] as ExtendedCompletedActions,
+        ],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -491,14 +491,12 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [
-          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
-        ] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       const action: Action = {
         type: 'set_completed_actions',
-        payload: [] as ExtendedCompletedActions,
+        payload: [],
       };
 
       const expectedState = {
@@ -525,9 +523,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [
-          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
-        ] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -558,12 +554,12 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: false,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
         type: 'set_completed_actions',
-        payload: [GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken] as ExtendedCompletedActions,
+        payload: [GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken],
       };
 
       const expectedState = {
@@ -590,9 +586,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: false,
-        completedActions: [
-          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
-        ] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -625,9 +619,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [
-          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
-        ] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       const action: Action = {
@@ -658,9 +650,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: false,
-        completedActions: [
-          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
-        ] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -695,7 +685,7 @@ describe('GuidedTour | reducer', () => {
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
-        ] as ExtendedCompletedActions,
+        ],
       };
 
       const action: Action = {
@@ -730,7 +720,7 @@ describe('GuidedTour | reducer', () => {
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
-        ] as ExtendedCompletedActions,
+        ],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -767,7 +757,7 @@ describe('GuidedTour | reducer', () => {
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
-        ] as ExtendedCompletedActions,
+        ],
       };
 
       const action: Action = {
@@ -798,7 +788,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -829,7 +819,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       const action: Action = {
@@ -860,7 +850,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -892,9 +882,9 @@ describe('GuidedTour | reducer', () => {
         },
         enabled: false,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-        ] as ExtendedCompletedActions,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+        ],
       };
 
       const action: Action = {
@@ -925,7 +915,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -958,7 +948,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -990,7 +980,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -1021,7 +1011,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -1053,7 +1043,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
