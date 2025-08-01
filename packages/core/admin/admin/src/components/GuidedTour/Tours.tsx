@@ -6,7 +6,6 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { useContentTypes } from '../../hooks/useContentTypes';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
 import {

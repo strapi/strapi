@@ -29,6 +29,8 @@ export * from './components/GradientBadge';
 export { tours } from './components/GuidedTour/Tours';
 /** @internal */
 export { useGuidedTour } from './components/GuidedTour/Context';
+/** @internal */
+export { GUIDED_TOUR_REQUIRED_ACTIONS } from './components/GuidedTour/utils/constants';
 
 /**
  * Features
