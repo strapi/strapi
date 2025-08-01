@@ -12,6 +12,8 @@ module.exports = [
         useDefaults: true,
         directives: {
           'frame-src': ["'self'"], // URLs that will be loaded in an iframe (e.g. Content Preview)
+          // Needed to load the @vercel/stega lib on the dummy-preview page
+          'script-src': ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
         },
       },
     },

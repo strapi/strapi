@@ -85,7 +85,13 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * Preview injected script
  * -----------------------------------------------------------------------------------------------*/
 
-const previewScript = () => {
+const previewScript = async () => {
+  // Load @vercel/stega from CDN
+  const { vercelStegaSplit: stegaSplit } = await import(
+    // eslint-disable-next-line import/no-unresolved
+    'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
+  );
+
   const HIGHLIGHT_PADDING = 2;
   const HIGHLIGHT_COLOR = '#4945ff';
 
