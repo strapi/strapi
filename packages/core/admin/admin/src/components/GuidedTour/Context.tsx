@@ -79,16 +79,23 @@ const getInitialTourState = (tours: Tours) => {
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
     if (action.type === 'next_step') {
-      const nextStep = draft.tours[action.payload].currentStep + 1;
+      const currentStep = draft.tours[action.payload].currentStep;
+      const tourLength = draft.tours[action.payload].length;
+
+      if (currentStep >= tourLength) return;
+
+      const nextStep = currentStep + 1;
       draft.tours[action.payload].currentStep = nextStep;
-      draft.tours[action.payload].isCompleted = nextStep === draft.tours[action.payload].length;
+      draft.tours[action.payload].isCompleted = nextStep === tourLength;
     }
 
     if (action.type === 'previous_step') {
-      const previousStep = draft.tours[action.payload].currentStep - 1;
-      if (previousStep >= 0) {
-        draft.tours[action.payload].currentStep = previousStep;
-      }
+      const currentStep = draft.tours[action.payload].currentStep;
+
+      if (currentStep <= 0) return;
+
+      const previousStep = currentStep - 1;
+      draft.tours[action.payload].currentStep = previousStep;
     }
 
     if (action.type === 'skip_tour') {
