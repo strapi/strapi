@@ -1,4 +1,6 @@
 import { type Action, type ExtendedCompletedActions, reducer } from '../Context';
+import { tours } from '../Tours';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 
 describe('GuidedTour | reducer', () => {
   describe('next_step', () => {
@@ -8,22 +10,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -40,22 +42,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -71,22 +73,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
-            length: 1,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 2,
             isCompleted: false,
-            length: 1,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -103,22 +105,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 2,
             isCompleted: false,
-            length: 1,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 2,
             isCompleted: false,
-            length: 1,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -129,27 +131,28 @@ describe('GuidedTour | reducer', () => {
     });
 
     it('should mark tour as completed when reaching the last step', () => {
+      const tourLength = Object.keys(tours.contentTypeBuilder).length;
       const initialState = {
         tours: {
           contentTypeBuilder: {
-            currentStep: 0,
+            currentStep: tourLength - 1,
             isCompleted: false,
-            length: 1,
+            length: tourLength,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -164,24 +167,24 @@ describe('GuidedTour | reducer', () => {
       const expectedState = {
         tours: {
           contentTypeBuilder: {
-            currentStep: 1,
+            currentStep: tourLength,
             isCompleted: true,
-            length: 1,
+            length: tourLength,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -199,22 +202,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -231,22 +234,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: true,
-            length: 3,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -262,22 +265,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -294,22 +297,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: true,
-            length: 3,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -327,22 +330,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -351,7 +354,10 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'set_completed_actions',
-        payload: ['didCreateContentTypeSchema', 'didCreateContent'] as ExtendedCompletedActions,
+        payload: [
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent,
+        ] as ExtendedCompletedActions,
       };
 
       const expectedState = {
@@ -359,28 +365,28 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCreateContent',
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent,
         ] as ExtendedCompletedActions,
       };
 
@@ -393,34 +399,37 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
         ] as ExtendedCompletedActions,
       };
 
       const action: Action = {
         type: 'set_completed_actions',
-        payload: ['didCreateContentTypeSchema', 'didCreateApiToken'] as ExtendedCompletedActions,
+        payload: [
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
+        ] as ExtendedCompletedActions,
       };
 
       const expectedState = {
@@ -428,29 +437,29 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-          'didCreateApiToken',
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
         ] as ExtendedCompletedActions,
       };
 
@@ -463,26 +472,28 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+        ] as ExtendedCompletedActions,
       };
 
       const action: Action = {
@@ -495,26 +506,28 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+        ] as ExtendedCompletedActions,
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -526,22 +539,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: true,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 2,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: false,
@@ -550,7 +563,7 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'set_completed_actions',
-        payload: ['didCopyApiToken'] as ExtendedCompletedActions,
+        payload: [GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken] as ExtendedCompletedActions,
       };
 
       const expectedState = {
@@ -558,26 +571,28 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: true,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 2,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: false,
-        completedActions: ['didCopyApiToken'] as ExtendedCompletedActions,
+        completedActions: [
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+        ] as ExtendedCompletedActions,
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -591,26 +606,28 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: true,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 2,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+        ] as ExtendedCompletedActions,
       };
 
       const action: Action = {
@@ -622,26 +639,28 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: true,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 2,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: false,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+        ] as ExtendedCompletedActions,
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -653,29 +672,29 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-          'didCreateApiToken',
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
         ] as ExtendedCompletedActions,
       };
 
@@ -688,29 +707,29 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: false,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-          'didCreateApiToken',
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
         ] as ExtendedCompletedActions,
       };
 
@@ -719,35 +738,35 @@ describe('GuidedTour | reducer', () => {
   });
 
   describe('reset_all_tours', () => {
-    it('should reset when all tours have been completed', () => {
+    it('should reset all tours', () => {
       const initialState = {
         tours: {
           contentTypeBuilder: {
             currentStep: 8,
             isCompleted: true,
-            length: 8,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 4,
             isCompleted: true,
-            length: 4,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 4,
             isCompleted: true,
-            length: 4,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: true,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-          'didCreateApiToken',
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
         ] as ExtendedCompletedActions,
       };
 
@@ -760,22 +779,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 8,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -791,22 +810,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 2,
             isCompleted: false,
-            length: 8,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 4,
             isCompleted: true,
-            length: 4,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 1,
             isCompleted: false,
-            length: 4,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -822,22 +841,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 8,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -853,22 +872,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 3,
             isCompleted: false,
-            length: 8,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 2,
             isCompleted: false,
-            length: 4,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 4,
             isCompleted: true,
-            length: 4,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: false,
@@ -887,22 +906,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 8,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -920,22 +939,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 2,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -952,22 +971,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -983,22 +1002,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
@@ -1015,22 +1034,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.contentTypeBuilder).length,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
+            length: Object.keys(tours.contentManager).length,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
+            length: Object.keys(tours.apiTokens).length,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
+            length: Object.keys(tours.strapiCloud).length,
           },
         },
         enabled: true,
