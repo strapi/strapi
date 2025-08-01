@@ -40,7 +40,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           zIndex={3}
           data-strapi-header-sticky
         >
-          <Flex justifyContent="space-between">
+          <Flex justifyContent="space-between" wrap="wrap">
             <Flex>
               {navigationAction && <Box paddingRight={3}>{navigationAction}</Box>}
               <Box>
@@ -66,15 +66,23 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     return (
       <Box
         ref={ref}
-        paddingLeft={10}
-        paddingRight={10}
+        paddingLeft={{
+          initial: 6,
+          small: 8,
+          medium: 10,
+        }}
+        paddingRight={{
+          initial: 6,
+          small: 8,
+          medium: 10,
+        }}
         paddingBottom={8}
         paddingTop={navigationAction ? 6 : 8}
         background="neutral100"
         data-strapi-header
       >
         {navigationAction ? <Box paddingBottom={2}>{navigationAction}</Box> : null}
-        <Flex justifyContent="space-between">
+        <Flex justifyContent="space-between" wrap="wrap" gap={2}>
           <Flex minWidth={0}>
             <Typography tag="h1" variant="alpha" {...props}>
               {title}
