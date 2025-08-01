@@ -16,14 +16,14 @@ const localesApi = i18nApi.injectEndpoints({
         method: 'POST',
         data,
       }),
-      invalidatesTags: [{ type: 'Locale', id: 'LIST' }, 'KeyStatistics'],
+      invalidatesTags: [{ type: 'Locale', id: 'LIST' }, 'HomepageKeyStatistics'],
     }),
     deleteLocale: builder.mutation<DeleteLocale.Response, DeleteLocale.Params['id']>({
       query: (id) => ({
         url: `/i18n/locales/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: (result, error, id) => [{ type: 'Locale', id }, 'KeyStatistics'],
+      invalidatesTags: (result, error, id) => [{ type: 'Locale', id }, 'HomepageKeyStatistics'],
     }),
     getLocales: builder.query<GetLocales.Response, void>({
       query: () => '/i18n/locales',

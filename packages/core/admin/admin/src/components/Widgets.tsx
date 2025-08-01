@@ -2,6 +2,7 @@ import { useAuth } from '@strapi/admin/strapi-admin';
 import { Avatar, Badge, Box, Flex, Typography } from '@strapi/design-system';
 import { Earth, Images, User, Key, Files, Layout, Graph, Webhooks } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useGetCountDocumentsQuery, useGetKeyStatisticsQuery } from '../services/homepage';
@@ -78,6 +79,11 @@ const formatNumber = ({ locale, number }: { locale: string; number: number }) =>
   }).format(number);
 };
 
+const LinkCell = styled(Link)`
+  text-decoration: none;
+  padding: 12px;
+`;
+
 const KeyStatisticsWidget = () => {
   const { formatMessage, locale } = useIntl();
   const { data: countDocuments, isLoading: isLoadingCountDocuments } = useGetCountDocumentsQuery();
@@ -103,6 +109,7 @@ const KeyStatisticsWidget = () => {
         background: 'primary100',
         color: 'primary600',
       },
+      link: '/content-manager',
     },
     assets: {
       label: {
@@ -114,6 +121,7 @@ const KeyStatisticsWidget = () => {
         background: 'warning100',
         color: 'warning600',
       },
+      link: '/plugins/upload',
     },
     contentTypes: {
       label: {
@@ -125,6 +133,7 @@ const KeyStatisticsWidget = () => {
         background: 'secondary100',
         color: 'secondary600',
       },
+      link: '/plugins/content-type-builder',
     },
     components: {
       label: {
@@ -136,6 +145,7 @@ const KeyStatisticsWidget = () => {
         background: 'alternative100',
         color: 'alternative600',
       },
+      link: '/plugins/content-type-builder',
     },
     locales: {
       label: {
@@ -147,6 +157,7 @@ const KeyStatisticsWidget = () => {
         background: 'success100',
         color: 'success600',
       },
+      link: '/settings/internationalization',
     },
     admins: {
       label: {
@@ -158,6 +169,7 @@ const KeyStatisticsWidget = () => {
         background: 'danger100',
         color: 'danger600',
       },
+      link: '/settings/users?pageSize=10&page=1&sort=firstname',
     },
     webhooks: {
       label: {
@@ -169,6 +181,7 @@ const KeyStatisticsWidget = () => {
         background: 'alternative100',
         color: 'alternative600',
       },
+      link: '/settings/webhooks',
     },
     apiTokens: {
       label: {
@@ -180,6 +193,7 @@ const KeyStatisticsWidget = () => {
         background: 'neutral100',
         color: 'neutral600',
       },
+      link: '/settings/api-tokens?sort=name:ASC',
     },
   };
 
@@ -197,7 +211,12 @@ const KeyStatisticsWidget = () => {
         const value = countKeyStatistics?.[key as keyof typeof countKeyStatistics];
         return (
           value !== null && (
-            <GridCell key={`key-statistics-${key}`} padding={3} data-testid={`stat-${key}`}>
+            <GridCell
+              as={LinkCell}
+              to={item.link}
+              key={`key-statistics-${key}`}
+              data-testid={`stat-${key}`}
+            >
               <Flex alignItems="center" gap={2}>
                 <Flex
                   padding={2}
