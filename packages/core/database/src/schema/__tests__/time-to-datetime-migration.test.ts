@@ -136,19 +136,9 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
     expect(schemaQuery).toBeDefined();
     expect(schemaQuery[1]).toEqual(['my_times', 'hour']);
 
-    // Verify warnings were logged
+    // Verify warning was logged with the new concise format
     expect(db.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'Database type conversion: Converting column "hour" in table "my_times" from "time without time zone" to "datetime"'
-      )
-    );
-    expect(db.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'Time values will be converted to datetime with default date "1970-01-01"'
-      )
-    );
-    expect(db.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('This conversion may result in data changes')
+      expect.stringContaining('Database type conversion: "my_times.hour" from "time without time zone" to "datetime". Time values will be converted to datetime with default date "1970-01-01". Original time values will be preserved.')
     );
   });
 
@@ -203,19 +193,9 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
     expect(alterCall).toBeDefined();
     expect(alterCall[1]).toEqual(['my_times', 'timestamp_field', 'timestamp_field']);
 
-    // Verify warnings were logged
+    // Verify warning was logged with the new concise format
     expect(db.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'Database type conversion: Converting column "timestamp_field" in table "my_times" from "timestamp without time zone" to "time"'
-      )
-    );
-    expect(db.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'Datetime values will be converted to time only. Date information will be lost'
-      )
-    );
-    expect(db.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('This conversion may result in data changes')
+      expect.stringContaining('Database type conversion: "my_times.timestamp_field" from "timestamp without time zone" to "time". Datetime values will be converted to time only. Date information will be lost.')
     );
   });
 
@@ -312,5 +292,10 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
     const defaultCall = rawCalls.find((call) => call[0].includes('SET DEFAULT'));
     expect(defaultCall).toBeDefined();
     expect(defaultCall[1]).toEqual(['my_times', 'hour', '2024-01-01 00:00:00']);
+
+    // Verify warning was logged with the new concise format
+    expect(db.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Database type conversion: "my_times.hour" from "time without time zone" to "datetime". Time values will be converted to datetime with default date "1970-01-01". Original time values will be preserved.')
+    );
   });
 });

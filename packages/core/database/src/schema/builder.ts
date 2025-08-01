@@ -76,11 +76,24 @@ export default (db: Database) => {
 
       // Pre-fetch metadata for all updated tables
       const existingMetadata: Record<string, { indexes: Index[]; foreignKeys: ForeignKey[] }> = {};
+      const columnTypes: Record<string, Record<string, string | null>> = {};
+      
       for (const table of schemaDiff.tables.updated) {
         existingMetadata[table.name] = {
           indexes: await db.dialect.schemaInspector.getIndexes(table.name),
           foreignKeys: await db.dialect.schemaInspector.getForeignKeys(table.name),
         };
+        
+        // Pre-fetch column types for PostgreSQL to avoid transaction timeouts
+        if (db.config.connection.client === 'postgres') {
+          columnTypes[table.name] = {};
+          for (const updatedColumn of table.columns.updated) {
+            columnTypes[table.name][updatedColumn.name] = await helpers.getCurrentColumnType(
+              table.name,
+              updatedColumn.name
+            );
+          }
+        }
       }
 
       await db.connection.transaction(async (trx) => {
@@ -107,7 +120,7 @@ export default (db: Database) => {
           debug(`Updating table: ${table.name}`);
 
           // Handle special type conversions before standard alterations
-          await helpers.handleSpecialTypeConversions(trx, table);
+          await helpers.handleSpecialTypeConversions(trx, table, columnTypes[table.name] || {});
 
           // alter table
           const schemaBuilder = this.getSchemaBuilder(trx);
@@ -434,19 +447,26 @@ const createHelpers = (db: Database) => {
     tableName: string,
     columnName: string
   ): Promise<string | null> => {
-    const schemaName = db.getSchemaName();
-    const result = await db.connection.raw(
-      `
-      SELECT data_type 
-      FROM information_schema.columns 
-      WHERE table_name = ? 
-        AND column_name = ?
-        ${schemaName ? 'AND table_schema = ?' : ''}
-    `,
-      schemaName ? [tableName, columnName, schemaName] : [tableName, columnName]
-    );
+    try {
+      const schemaName = db.getSchemaName();
+      const result = await db.connection.raw(
+        `
+        SELECT data_type 
+        FROM information_schema.columns 
+        WHERE table_name = ? 
+          AND column_name = ?
+          ${schemaName ? 'AND table_schema = ?' : ''}
+        LIMIT 1
+      `,
+        schemaName ? [tableName, columnName, schemaName] : [tableName, columnName]
+      );
 
-    return result.rows?.[0]?.data_type || null;
+      return result.rows?.[0]?.data_type || null;
+    } catch (error) {
+      // Log error but don't fail the migration
+      debug(`Failed to get column type for ${tableName}.${columnName}: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
+    }
   };
 
   /**
@@ -487,7 +507,11 @@ const createHelpers = (db: Database) => {
   /**
    * Handle special type conversions that require custom SQL
    */
-  const handleSpecialTypeConversions = async (trx: Knex.Transaction, table: TableDiff['diff']) => {
+  const handleSpecialTypeConversions = async (
+    trx: Knex.Transaction, 
+    table: TableDiff['diff'],
+    preloadedColumnTypes: Record<string, string | null> = {}
+  ) => {
     // Only PostgreSQL needs special handling for now
     if (db.config.connection.client !== 'postgres') {
       return;
@@ -498,7 +522,9 @@ const createHelpers = (db: Database) => {
     // Check each updated column for special type conversions
     for (const updatedColumn of table.columns.updated) {
       const { name: columnName, object: column } = updatedColumn;
-      const currentType = await getCurrentColumnType(table.name, columnName);
+      
+      // Use pre-loaded column type if available, otherwise fetch it
+      const currentType = preloadedColumnTypes[columnName] ?? await getCurrentColumnType(table.name, columnName);
 
       if (currentType) {
         // Check if dialect has special conversion SQL
@@ -522,16 +548,9 @@ const createHelpers = (db: Database) => {
       const { column, sql, params, currentType, targetType, warning } = conversion;
 
       // Log warning about type conversion
+      const warningMessage = warning || 'This conversion may result in data changes.';
       db.logger.warn(
-        `⚠️  Database type conversion: Converting column "${column.name}" in table "${table.name}" from "${currentType}" to "${targetType}".`
-      );
-
-      if (warning) {
-        db.logger.warn(`   ${warning}`);
-      }
-
-      db.logger.warn(
-        `   This conversion may result in data changes. Please review your data after migration.`
+        `Database type conversion: "${table.name}.${column.name}" from "${currentType}" to "${targetType}". ${warningMessage}`
       );
 
       debug(`Applying special type conversion for column ${column.name} on ${table.name}`);
@@ -554,5 +573,6 @@ const createHelpers = (db: Database) => {
     createTableForeignKeys,
     dropTableForeignKeys,
     handleSpecialTypeConversions,
+    getCurrentColumnType,
   };
 };
