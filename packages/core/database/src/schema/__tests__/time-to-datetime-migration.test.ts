@@ -15,6 +15,12 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
           client: 'postgres',
         },
       },
+      logger: {
+        warn: jest.fn(),
+        info: jest.fn(),
+        error: jest.fn(),
+        debug: jest.fn(),
+      },
       getSchemaName: jest.fn().mockReturnValue(null),
       getSchemaConnection: jest.fn().mockReturnValue({
         alterTable: jest.fn().mockImplementation(async (_tableName, callback) => {
@@ -38,7 +44,7 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
           return Promise.resolve({});
         }),
         transaction: jest.fn().mockImplementation(async (callback) => {
-          await callback({});
+          await callback();
         }),
       },
       dialect: {
@@ -48,6 +54,26 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
           getIndexes: jest.fn().mockResolvedValue([]),
           getForeignKeys: jest.fn().mockResolvedValue([]),
         },
+        getColumnTypeConversionSQL: jest.fn().mockImplementation((currentType, targetType) => {
+          // PostgreSQL conversions
+          if (targetType === 'datetime' && currentType === 'time without time zone') {
+            return {
+              sql: `ALTER TABLE ?? ALTER COLUMN ?? TYPE timestamp(6) USING ('1970-01-01 ' || ??::text)::timestamp`,
+              typeClause: 'timestamp(6)',
+              warning:
+                'Time values will be converted to datetime with default date "1970-01-01". Original time values will be preserved.',
+            };
+          }
+          if (targetType === 'time' && currentType === 'timestamp without time zone') {
+            return {
+              sql: `ALTER TABLE ?? ALTER COLUMN ?? TYPE time(3) USING ??::time`,
+              typeClause: 'time(3)',
+              warning:
+                'Datetime values will be converted to time only. Date information will be lost.',
+            };
+          }
+          return null;
+        }),
       },
     };
 
@@ -109,6 +135,21 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
     const schemaQuery = rawCalls.find((call) => call[0].includes('information_schema'));
     expect(schemaQuery).toBeDefined();
     expect(schemaQuery[1]).toEqual(['my_times', 'hour']);
+
+    // Verify warnings were logged
+    expect(db.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Database type conversion: Converting column "hour" in table "my_times" from "time without time zone" to "datetime"'
+      )
+    );
+    expect(db.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Time values will be converted to datetime with default date "1970-01-01"'
+      )
+    );
+    expect(db.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('This conversion may result in data changes')
+    );
   });
 
   it('should handle datetime to time conversion with proper USING clause', async () => {
@@ -161,6 +202,21 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
 
     expect(alterCall).toBeDefined();
     expect(alterCall[1]).toEqual(['my_times', 'timestamp_field', 'timestamp_field']);
+
+    // Verify warnings were logged
+    expect(db.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Database type conversion: Converting column "timestamp_field" in table "my_times" from "timestamp without time zone" to "time"'
+      )
+    );
+    expect(db.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Datetime values will be converted to time only. Date information will be lost'
+      )
+    );
+    expect(db.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('This conversion may result in data changes')
+    );
   });
 
   it('should not apply special handling for non-PostgreSQL databases', async () => {

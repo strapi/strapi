@@ -106,98 +106,8 @@ export default (db: Database) => {
         for (const table of schemaDiff.tables.updated) {
           debug(`Updating table: ${table.name}`);
 
-          // Handle special case: time/datetime type conversions in PostgreSQL
-          if (db.config.connection.client === 'postgres') {
-            const specialConversions = [];
-
-            // Check each updated column for special type conversions
-            for (const updatedColumn of table.columns.updated) {
-              const columnName = updatedColumn.name;
-              const newType = updatedColumn.object.type;
-
-              // Query the current column type from the database
-              const schemaName = db.getSchemaName();
-              const result = await db.connection.raw(
-                `
-                SELECT data_type 
-                FROM information_schema.columns 
-                WHERE table_name = ? 
-                  AND column_name = ?
-                  ${schemaName ? 'AND table_schema = ?' : ''}
-              `,
-                schemaName ? [table.name, columnName, schemaName] : [table.name, columnName]
-              );
-
-              if (result.rows && result.rows[0]) {
-                const currentType = result.rows[0].data_type;
-
-                // Handle time to datetime conversion
-                if (newType === 'datetime' && currentType === 'time without time zone') {
-                  specialConversions.push({
-                    column: updatedColumn,
-                    conversionType: 'time-to-datetime',
-                    sql: `ALTER TABLE ?? ALTER COLUMN ?? TYPE timestamp(6) USING ('1970-01-01 ' || ??::text)::timestamp`,
-                    params: [table.name, columnName, columnName],
-                  });
-                }
-                // Handle datetime to time conversion
-                else if (newType === 'time' && currentType === 'timestamp without time zone') {
-                  specialConversions.push({
-                    column: updatedColumn,
-                    conversionType: 'datetime-to-time',
-                    sql: `ALTER TABLE ?? ALTER COLUMN ?? TYPE time(3) USING ??::time`,
-                    params: [table.name, columnName, columnName],
-                  });
-                }
-              }
-            }
-
-            // Apply special conversions
-            if (specialConversions.length > 0) {
-              for (const conversion of specialConversions) {
-                debug(
-                  `Handling ${conversion.conversionType} conversion for column ${conversion.column.name} on ${table.name}`
-                );
-
-                // Use a custom ALTER statement with USING clause
-                await db.connection.raw(conversion.sql, conversion.params);
-
-                // Apply other column properties
-                if (conversion.column.object.notNullable) {
-                  await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET NOT NULL`, [
-                    table.name,
-                    conversion.column.name,
-                  ]);
-                } else {
-                  await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? DROP NOT NULL`, [
-                    table.name,
-                    conversion.column.name,
-                  ]);
-                }
-
-                if (conversion.column.object.defaultTo !== undefined) {
-                  const [defaultValue, defaultOpts] = castArray(conversion.column.object.defaultTo);
-                  if (prop('isRaw', defaultOpts)) {
-                    await db.connection.raw(
-                      `ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ${defaultValue}`,
-                      [table.name, conversion.column.name]
-                    );
-                  } else {
-                    await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ?`, [
-                      table.name,
-                      conversion.column.name,
-                      defaultValue,
-                    ]);
-                  }
-                }
-
-                // Remove this column from the updates to prevent double processing
-                table.columns.updated = table.columns.updated.filter(
-                  (col) => col.name !== conversion.column.name
-                );
-              }
-            }
-          }
+          // Handle special type conversions before standard alterations
+          await helpers.handleSpecialTypeConversions(trx, table);
 
           // alter table
           const schemaBuilder = this.getSchemaBuilder(trx);
@@ -517,11 +427,132 @@ const createHelpers = (db: Database) => {
     });
   };
 
+  /**
+   * Get the current column type from the database
+   */
+  const getCurrentColumnType = async (
+    tableName: string,
+    columnName: string
+  ): Promise<string | null> => {
+    const schemaName = db.getSchemaName();
+    const result = await db.connection.raw(
+      `
+      SELECT data_type 
+      FROM information_schema.columns 
+      WHERE table_name = ? 
+        AND column_name = ?
+        ${schemaName ? 'AND table_schema = ?' : ''}
+    `,
+      schemaName ? [tableName, columnName, schemaName] : [tableName, columnName]
+    );
+
+    return result.rows?.[0]?.data_type || null;
+  };
+
+  /**
+   * Apply column properties after type conversion
+   */
+  const applyColumnProperties = async (tableName: string, columnName: string, column: Column) => {
+    // Apply NOT NULL constraint
+    if (column.notNullable) {
+      await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET NOT NULL`, [
+        tableName,
+        columnName,
+      ]);
+    } else {
+      await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? DROP NOT NULL`, [
+        tableName,
+        columnName,
+      ]);
+    }
+
+    // Apply default value
+    if (column.defaultTo !== undefined) {
+      const [defaultValue, defaultOpts] = castArray(column.defaultTo);
+      if (prop('isRaw', defaultOpts)) {
+        await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ${defaultValue}`, [
+          tableName,
+          columnName,
+        ]);
+      } else {
+        await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ?`, [
+          tableName,
+          columnName,
+          defaultValue,
+        ]);
+      }
+    }
+  };
+
+  /**
+   * Handle special type conversions that require custom SQL
+   */
+  const handleSpecialTypeConversions = async (trx: Knex.Transaction, table: TableDiff['diff']) => {
+    // Only PostgreSQL needs special handling for now
+    if (db.config.connection.client !== 'postgres') {
+      return;
+    }
+
+    const conversionsToApply = [];
+
+    // Check each updated column for special type conversions
+    for (const updatedColumn of table.columns.updated) {
+      const { name: columnName, object: column } = updatedColumn;
+      const currentType = await getCurrentColumnType(table.name, columnName);
+
+      if (currentType) {
+        // Check if dialect has special conversion SQL
+        const conversionSQL = db.dialect.getColumnTypeConversionSQL(currentType, column.type);
+
+        if (conversionSQL) {
+          conversionsToApply.push({
+            column: updatedColumn,
+            sql: conversionSQL.sql,
+            params: [table.name, columnName, columnName],
+            currentType,
+            targetType: column.type,
+            warning: conversionSQL.warning,
+          });
+        }
+      }
+    }
+
+    // Apply conversions
+    for (const conversion of conversionsToApply) {
+      const { column, sql, params, currentType, targetType, warning } = conversion;
+
+      // Log warning about type conversion
+      db.logger.warn(
+        `⚠️  Database type conversion: Converting column "${column.name}" in table "${table.name}" from "${currentType}" to "${targetType}".`
+      );
+
+      if (warning) {
+        db.logger.warn(`   ${warning}`);
+      }
+
+      db.logger.warn(
+        `   This conversion may result in data changes. Please review your data after migration.`
+      );
+
+      debug(`Applying special type conversion for column ${column.name} on ${table.name}`);
+
+      // Execute the conversion
+      await db.connection.raw(sql, params);
+
+      // Apply other column properties
+      await applyColumnProperties(table.name, column.name, column.object);
+
+      // Remove from standard updates to prevent double processing
+      table.columns.updated = table.columns.updated.filter((col) => col.name !== column.name);
+    }
+  };
+
   return {
     createTable,
     alterTable,
     dropTable,
     createTableForeignKeys,
     dropTableForeignKeys,
+    handleSpecialTypeConversions,
   };
 };
