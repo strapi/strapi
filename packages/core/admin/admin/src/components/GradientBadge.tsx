@@ -9,6 +9,7 @@ const GradientBadge = styled(Badge)`
     ${({ theme }) => theme.colors.alternative600} 121.48%
   );
   padding: 0.4rem 1rem;
+  white-space: nowrap;
 `;
 
 const GradientBadgeWithIcon = ({ label }: { label: string }) => {
