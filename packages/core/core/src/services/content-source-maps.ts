@@ -1,7 +1,6 @@
 import { vercelStegaCombine } from '@vercel/stega';
 import type { Core, Struct } from '@strapi/types';
 
-const BASE_EDIT_URL = '/admin/content-manager/collectionType';
 const ENCODABLE_TYPES = [
   'string',
   'text',
@@ -44,7 +43,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
     },
 
     isEnabled(): boolean {
-      return this.config.enabled;
+      return this.config.enabled ?? true;
     },
 
     async encodeSourceMaps(
@@ -59,9 +58,9 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
 
       const fileModel = strapi.getModel('plugin::upload.file');
 
-      function encodeEditInfo(text: string, href: string): string {
+      function encodeEditInfo(text: string, key: string): string {
         const res = vercelStegaCombine(text, {
-          href,
+          key,
         });
         return res;
       }
@@ -88,7 +87,8 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
             if (ENCODABLE_TYPES.includes(attribute.type)) {
               entryData[key] = encodeEditInfo(
                 value,
-                `${BASE_EDIT_URL}/${entryRootModel}/${entryRootId}`
+                key
+                // `${BASE_EDIT_URL}/${entryRootModel}/${entryRootId}`
               );
               return;
             }
@@ -124,7 +124,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
                   return encodeEntry(
                     item.id,
                     relatedModel.uid,
-                    item.attributes,
+                    item,
                     strapi.getModel(attribute.target)
                   );
                 });
@@ -133,7 +133,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
               return encodeEntry(
                 value.data.id,
                 relatedModel.uid,
-                value.data.attributes,
+                value.data,
                 strapi.getModel(attribute.target)
               );
             }
@@ -141,11 +141,11 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
             if (attribute.type === 'media') {
               if (Array.isArray(value.data)) {
                 return value.data.forEach((item: any) => {
-                  return encodeEntry(entryRootId, entryRootModel, item.attributes, fileModel);
+                  return encodeEntry(entryRootId, entryRootModel, item, fileModel);
                 });
               }
 
-              return encodeEntry(entryRootId, entryRootModel, value.data?.attributes, fileModel);
+              return encodeEntry(entryRootId, entryRootModel, value.data, fileModel);
             }
           }
         });
@@ -169,4 +169,3 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
 };
 
 export { createContentSourceMapsService };
-export type ContentSourceMapsService = Core.ContentSourceMaps.Service;

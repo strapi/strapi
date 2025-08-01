@@ -87,10 +87,30 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
 
 const previewScript = async () => {
   // Load @vercel/stega from CDN
-  const { vercelStegaSplit: stegaSplit } = await import(
+  const { vercelStegaDecode: stegaDecode } = await import(
     // eslint-disable-next-line import/no-unresolved
     'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
   );
+
+  // Scan all DOM elements for stega-encoded data
+  const allElements = document.querySelectorAll('*');
+
+  Array.from(allElements).forEach((element) => {
+    // Get only the direct text content of this element (not including children)
+    const directTextContent = Array.from(element.childNodes)
+      .filter((node) => node.nodeType === Node.TEXT_NODE)
+      .map((node) => node.textContent || '')
+      .join('');
+
+    if (directTextContent) {
+      try {
+        const result = stegaDecode(directTextContent);
+        if (result) {
+          element.setAttribute('data-strapi-source', result.key);
+        }
+      } catch (error) {}
+    }
+  });
 
   const HIGHLIGHT_PADDING = 2;
   const HIGHLIGHT_COLOR = '#4945ff';
@@ -120,9 +140,9 @@ const previewScript = async () => {
   `;
 
   // Add overlay to document body
-  document.body.appendChild(overlay);
+  window.document.body.appendChild(overlay);
 
-  const elements = document.querySelectorAll('[data-strapisrc]');
+  const elements = window.document.querySelectorAll('[data-strapi-source]');
   const highlights: HTMLElement[] = [];
 
   // Track currently focused field
@@ -194,7 +214,7 @@ const previewScript = async () => {
 
       highlight.addEventListener('mouseleave', () => {
         // Only hide outline if this field is not currently focused
-        const fieldPath = element.getAttribute('data-strapisrc');
+        const fieldPath = element.getAttribute('data-strapi-source');
         if (fieldPath !== focusedField) {
           highlight.style.outlineColor = 'transparent';
         }
@@ -206,7 +226,7 @@ const previewScript = async () => {
         e.stopPropagation();
         e.preventDefault();
 
-        const fieldPath = element.getAttribute('data-strapisrc');
+        const fieldPath = element.getAttribute('data-strapi-source');
         if (fieldPath && window.parent) {
           const rect = element.getBoundingClientRect();
           window.parent.postMessage(
@@ -261,7 +281,7 @@ const previewScript = async () => {
     if (event.data?.type === 'strapiFieldTyping') {
       const { field, value } = event.data.payload;
       if (field) {
-        const matchingElements = document.querySelectorAll(`[data-strapisrc="${field}"]`);
+        const matchingElements = document.querySelectorAll(`[data-strapi-source="${field}"]`);
         matchingElements.forEach((element) => {
           if (element instanceof HTMLElement) {
             element.textContent = value || '';
@@ -279,7 +299,7 @@ const previewScript = async () => {
 
         // Set new focus
         focusedField = field;
-        const matchingElements = document.querySelectorAll(`[data-strapisrc="${field}"]`);
+        const matchingElements = document.querySelectorAll(`[data-strapi-source="${field}"]`);
         matchingElements.forEach((element) => {
           const highlight = highlights[Array.from(elements).indexOf(element)];
           if (highlight) {
