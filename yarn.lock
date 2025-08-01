@@ -8955,6 +8955,7 @@ __metadata:
     "@types/node": "npm:18.19.24"
     "@types/node-schedule": "npm:2.1.7"
     "@types/statuses": "npm:2.0.1"
+    "@vercel/stega": "npm:0.1.2"
     bcryptjs: "npm:2.4.3"
     boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
@@ -12039,6 +12040,13 @@ __metadata:
   bin:
     ncc: dist/ncc/cli.js
   checksum: 10c0/430f506d7243155d85b8f99d46f46159b9dea58190ae4c28eadebe6b1b90e350e9861c7accc4f3b2dcb603f47fbe7cc947c56af396c96ba1059419f1b4f20928
+  languageName: node
+  linkType: hard
+
+"@vercel/stega@npm:0.1.2":
+  version: 0.1.2
+  resolution: "@vercel/stega@npm:0.1.2"
+  checksum: 10c0/66eb80f286d46806004a2eacd215af80ad3cd443e7a96a6070d390dbb3f4d1f6e063013ec0d196c7fe852721d5dbe62e23b44c32975e36b18cda30e5e0728e04
   languageName: node
   linkType: hard
 

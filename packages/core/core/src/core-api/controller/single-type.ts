@@ -28,7 +28,15 @@ const createSingleTypeController = ({
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
-      return this.transformResponse(sanitizedEntity);
+      const encodeSourceMaps = ctx.query.encodeSourceMaps === 'true';
+      return this.transformResponse(
+        sanitizedEntity,
+        {},
+        {
+          contentType,
+          encodeSourceMaps,
+        }
+      );
     },
 
     /**

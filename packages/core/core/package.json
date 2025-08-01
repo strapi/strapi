@@ -64,6 +64,7 @@
     "@strapi/types": "5.19.0",
     "@strapi/typescript-utils": "5.19.0",
     "@strapi/utils": "5.19.0",
+    "@vercel/stega": "0.1.2",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "4.1.2",

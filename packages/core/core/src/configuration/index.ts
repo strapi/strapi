@@ -45,6 +45,9 @@ const defaultConfig = {
     rest: {
       prefix: '/api',
     },
+    contentSourceMaps: {
+      enabled: true,
+    },
   } satisfies Partial<Core.Config.Api>,
 };
 
