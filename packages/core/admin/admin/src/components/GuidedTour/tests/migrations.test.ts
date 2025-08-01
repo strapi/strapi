@@ -1,10 +1,10 @@
 import { tours } from '../Tours';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
-import { migrateTourLengths } from '../utils/migrations';
+import { migrateTourSteps } from '../utils/migrations';
 
-import type { CompletedActions, State } from '../Context';
+import type { State } from '../Context';
 
-describe('GuidedTour | migrateTourLengths', () => {
+describe('GuidedTour | migrateTourSteps', () => {
   it('should selectively update only tours with changed lengths', () => {
     const initialState: State = {
       tours: {
@@ -33,7 +33,7 @@ describe('GuidedTour | migrateTourLengths', () => {
       completedActions: [],
     };
 
-    const migratedState = migrateTourLengths(initialState);
+    const migratedState = migrateTourSteps(initialState);
 
     // Tours with stale lengths should be updated
     expect(migratedState.tours.contentTypeBuilder.length).toBe(
@@ -84,7 +84,7 @@ describe('GuidedTour | migrateTourLengths', () => {
       completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
     };
 
-    const migratedState = migrateTourLengths(initialState);
+    const migratedState = migrateTourSteps(initialState);
 
     // currentStep should be reset to 0 for all tours (since all had wrong lengths)
     expect(migratedState.tours.contentTypeBuilder.currentStep).toBe(0);
@@ -148,7 +148,7 @@ describe('GuidedTour | migrateTourLengths', () => {
       ],
     };
 
-    const migratedState = migrateTourLengths(initialState);
+    const migratedState = migrateTourSteps(initialState);
 
     // contentTypeBuilder tour-specific actions should be removed since that tour was migrated
     expect(migratedState.completedActions).toEqual([
@@ -191,7 +191,7 @@ describe('GuidedTour | migrateTourLengths', () => {
       completedActions: [],
     };
 
-    const migratedState = migrateTourLengths(initialState);
+    const migratedState = migrateTourSteps(initialState);
 
     // Should return the same state object since no changes were needed
     expect(migratedState).toBe(initialState);
