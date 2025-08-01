@@ -8,14 +8,9 @@ import { styled } from 'styled-components';
 
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
-import {
-  type State,
-  type Action,
-  useGuidedTour,
-  ValidTourName,
-  ExtendedCompletedActions,
-} from './Context';
+import { type State, type Action, useGuidedTour, ValidTourName, CompletedActions } from './Context';
 import { Step, StepCount, createStepComponents } from './Step';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 
 /* -------------------------------------------------------------------------------------------------
  * Tours
@@ -42,7 +37,7 @@ const ContentTypeBuilderFinish = ({ Step }: Pick<ContentProps, 'Step'>) => {
   };
   // Create the to path with fallback to content-manager
   const to = contentType
-    ? `/content-manager/${contentTypeKindDictionary[contentType.kind as keyof typeof contentTypeKindDictionary]}/${contentType.uid}`
+    ? `/content-manager/${contentTypeKindDictionary[contentType.kind]}/${contentType.uid}`
     : '/content-manager';
 
   return (
@@ -159,7 +154,8 @@ const tours = {
     },
     {
       name: 'Save',
-      when: (completedActions) => completedActions.includes('didAddFieldToSchema'),
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.addField),
       content: ({ Step, dispatch }) => (
         <Step.Root side="right">
           <Step.Title
@@ -182,13 +178,15 @@ const tours = {
     {
       name: 'Finish',
       content: ({ Step }) => <ContentTypeBuilderFinish Step={Step} />,
-      when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema),
     },
   ]),
   contentManager: createTour('contentManager', [
     {
       name: 'Introduction',
-      when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema),
       content: ({ Step }) => (
         <Step.Root side="top" withArrow={false}>
           <Step.Title
@@ -249,7 +247,8 @@ const tours = {
           <Step.Actions showStepCount={false} to="/settings/api-tokens" />
         </Step.Root>
       ),
-      when: (completedActions) => completedActions.includes('didCreateContent'),
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.addField),
     },
   ]),
   apiTokens: createTour('apiTokens', [
@@ -300,7 +299,8 @@ const tours = {
           </Step.Actions>
         </Step.Root>
       ),
-      when: (completedActions) => completedActions.includes('didCreateApiToken'),
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken),
     },
     {
       name: 'Finish',
@@ -317,7 +317,8 @@ const tours = {
           <Step.Actions showStepCount={false} to="/" />
         </Step.Root>
       ),
-      when: (completedActions) => completedActions.includes('didCopyApiToken'),
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken),
     },
   ]),
   strapiCloud: createTour('strapiCloud', []),
@@ -341,7 +342,7 @@ type GuidedTourTooltipProps = {
   content: Content;
   tourName: ValidTourName;
   step: number;
-  when?: (completedActions: ExtendedCompletedActions) => boolean;
+  when?: (completedActions: CompletedActions) => boolean;
 };
 
 const GuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
@@ -428,7 +429,7 @@ const GuidedTourTooltipImpl = ({
 type TourStep<P extends string> = {
   name: P;
   content: Content;
-  when?: (completedActions: ExtendedCompletedActions) => boolean;
+  when?: (completedActions: CompletedActions) => boolean;
 };
 
 function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: string, steps: T) {

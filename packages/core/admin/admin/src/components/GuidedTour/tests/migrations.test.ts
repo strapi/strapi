@@ -1,7 +1,8 @@
 import { tours } from '../Tours';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 import { migrateTourLengths } from '../utils/migrations';
 
-import type { ExtendedCompletedActions, State } from '../Context';
+import type { CompletedActions, State } from '../Context';
 
 describe('GuidedTour | migrateTourLengths', () => {
   it('should selectively update only tours with changed lengths', () => {
@@ -29,7 +30,7 @@ describe('GuidedTour | migrateTourLengths', () => {
         },
       },
       enabled: true,
-      completedActions: [] as ExtendedCompletedActions,
+      completedActions: [],
     };
 
     const migratedState = migrateTourLengths(initialState);
@@ -80,7 +81,7 @@ describe('GuidedTour | migrateTourLengths', () => {
         },
       },
       enabled: false,
-      completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+      completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
     };
 
     const migratedState = migrateTourLengths(initialState);
@@ -139,18 +140,19 @@ describe('GuidedTour | migrateTourLengths', () => {
       },
       enabled: true,
       completedActions: [
-        'didCreateContentTypeSchema', // contentTypeBuilder action - should be removed
-        'didAddFieldToSchema', // contentTypeBuilder action - should be removed
-        'didCreateContent', // contentManager action - should be preserved
+        GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+        GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.addField,
+        GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent,
+        // @ts-expect-error test
         'someOtherAction', // non-tour action - should be preserved
-      ] as ExtendedCompletedActions,
+      ],
     };
 
     const migratedState = migrateTourLengths(initialState);
 
     // contentTypeBuilder tour-specific actions should be removed since that tour was migrated
     expect(migratedState.completedActions).toEqual([
-      'didCreateContent', // contentManager action preserved
+      GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent,
       'someOtherAction', // non-tour action preserved
     ]);
 
@@ -186,7 +188,7 @@ describe('GuidedTour | migrateTourLengths', () => {
         },
       },
       enabled: true,
-      completedActions: [] as ExtendedCompletedActions,
+      completedActions: [],
     };
 
     const migratedState = migrateTourLengths(initialState);

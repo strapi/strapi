@@ -2,11 +2,11 @@ import * as React from 'react';
 
 import { produce } from 'immer';
 
-import { GetGuidedTourMeta } from '../../../../shared/contracts/admin';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
 import { type Tours, tours as guidedTours } from './Tours';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 import { migrateTourLengths } from './utils/migrations';
 
 /* -------------------------------------------------------------------------------------------------
@@ -15,12 +15,17 @@ import { migrateTourLengths } from './utils/migrations';
 
 type ValidTourName = keyof Tours;
 
-export type ExtendedCompletedActions = (
-  | GetGuidedTourMeta.Response['data']['completedActions'][number]
-  | 'didCopyApiToken'
-  | 'didAddFieldToSchema'
-  | 'didCreateContentTypeSchema'
-)[];
+// Extract all string literal values from GUIDED_TOUR_REQUIRED_ACTIONS
+type RequiredActionValues = {
+  [K in keyof typeof GUIDED_TOUR_REQUIRED_ACTIONS]: (typeof GUIDED_TOUR_REQUIRED_ACTIONS)[K] extends Record<
+    string,
+    string
+  >
+    ? (typeof GUIDED_TOUR_REQUIRED_ACTIONS)[K][keyof (typeof GUIDED_TOUR_REQUIRED_ACTIONS)[K]]
+    : never;
+}[keyof typeof GUIDED_TOUR_REQUIRED_ACTIONS];
+
+export type CompletedActions = RequiredActionValues[];
 
 type Action =
   | {
@@ -37,7 +42,7 @@ type Action =
     }
   | {
       type: 'set_completed_actions';
-      payload: ExtendedCompletedActions;
+      payload: CompletedActions;
     }
   | {
       type: 'skip_all_tours';
@@ -50,7 +55,7 @@ type Tour = Record<ValidTourName, { currentStep: number; length: number; isCompl
 type State = {
   tours: Tour;
   enabled: boolean;
-  completedActions: ExtendedCompletedActions;
+  completedActions: CompletedActions;
 };
 
 const [GuidedTourProviderImpl, useGuidedTour] = createContext<{
