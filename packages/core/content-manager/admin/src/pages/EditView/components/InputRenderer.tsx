@@ -7,7 +7,6 @@ import {
   useField,
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { useSearchParams } from 'react-router-dom';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
@@ -15,7 +14,7 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
-import { usePreviewContext } from '../../../preview/pages/Preview';
+import { usePreviewInputManager } from '../../../preview/utils/usePreviewInputManager';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
@@ -46,54 +45,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   const {
     edit: { components },
   } = useDocumentLayout(currentDocumentMeta.model);
-  const isSideEditorOpen = usePreviewContext(
-    'InputRenderer',
-    (state) => state.isSideEditorOpen,
-    false
-  );
-
-  const [, setSearchParams] = useSearchParams();
-
-  const handleFocus = () => {
-    // If side editor is open, input renderers are inside popovers in the right location,
-    // so no need for focus highlights as it's clear where the field is used.
-    if (!isSideEditorOpen) return;
-
-    previewIframe?.current?.contentWindow?.postMessage(
-      {
-        type: 'strapiFieldFocus',
-        payload: {
-          field: props.name,
-        },
-      },
-      new URL(previewIframe.current.src).origin
-    );
-  };
-
-  const handleBlur = () => {
-    // If side editor is open, input renderers are inside popovers in the right location,
-    // so no need for focus highlights as it's clear where the field is used.
-    if (!isSideEditorOpen) return;
-
-    // Clear the field query parameter when blurring so it can be autofocused again if needed
-    setSearchParams(
-      (prev) => {
-        prev.delete('field');
-        return prev;
-      },
-      { replace: true }
-    );
-
-    previewIframe?.current?.contentWindow?.postMessage(
-      {
-        type: 'strapiFieldBlur',
-        payload: {
-          field: props.name,
-        },
-      },
-      new URL(previewIframe.current.src).origin
-    );
-  };
 
   const collectionType =
     document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
@@ -105,25 +56,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
-
-  const previewIframe = usePreviewContext(
-    'VisualEditingPopover',
-    (state) => state.iframeRef,
-    false
-  );
-  const { value } = useField(props.name);
-  React.useEffect(() => {
-    previewIframe?.current?.contentWindow?.postMessage(
-      {
-        type: 'strapiFieldTyping',
-        payload: {
-          field: props.name,
-          value,
-        },
-      },
-      new URL(previewIframe.current.src).origin
-    );
-  }, [props.name, value, previewIframe]);
 
   let idToCheck = document.document?.documentId;
   if (collectionType === SINGLE_TYPES) {
@@ -150,6 +82,9 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
 
+  // Everything preview related
+  const { onFocus, onBlur } = usePreviewInputManager(props.name);
+
   if (!visible) {
     return null;
   }
@@ -158,118 +93,171 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
    * If the user can't read the field then we don't want to ever render it.
    */
   if (!canUserReadField && !isInDynamicZone) {
-    return (
-      <div onFocus={handleFocus} onBlur={handleBlur} tabIndex={-1}>
-        <NotAllowedInput hint={hint} {...props} />
-      </div>
-    );
+    return <NotAllowedInput hint={hint} {...props} />;
   }
 
   const fieldIsDisabled =
     (!canUserEditField && !isInDynamicZone) || props.disabled || isFormDisabled;
 
-  const renderInput = () => {
-    /**
-     * Because a custom field has a unique prop but the type could be confused with either
-     * the useField hook or the type of the field we need to handle it separately and first.
-     */
-    if (attributeHasCustomFieldProperty(props.attribute)) {
-      const CustomInput = lazyComponentStore[props.attribute.customField];
+  /**
+   * Because a custom field has a unique prop but the type could be confused with either
+   * the useField hook or the type of the field we need to handle it separately and first.
+   */
+  if (attributeHasCustomFieldProperty(props.attribute)) {
+    const CustomInput = lazyComponentStore[props.attribute.customField];
 
-      if (CustomInput) {
-        return (
-          <>
-            {/* @ts-expect-error – TODO: fix this type error in the useLazyComponents hook. */}
-            <CustomInput {...props} {...field} hint={hint} disabled={fieldIsDisabled} />
-          </>
-        );
-      }
-
-      return (
-        <FormInputRenderer
-          {...props}
-          hint={hint}
-          // @ts-expect-error – this workaround lets us display that the custom field is missing.
-          type={props.attribute.customField}
-          disabled={fieldIsDisabled}
-        />
-      );
-    }
-
-    /**
-     * This is where we handle ONLY the fields from the `useLibrary` hook.
-     */
-    const addedInputTypes = Object.keys(fields);
-    if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
-      const CustomInput = fields[props.type];
+    if (CustomInput) {
       return (
         <>
-          {/* @ts-expect-error – TODO: fix this type error in the useLibrary hook. */}
-          <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />
+          {/* @ts-expect-error – TODO: fix this type error in the useLazyComponents hook. */}
+          <CustomInput
+            {...props}
+            {...field}
+            hint={hint}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            disabled={fieldIsDisabled}
+          />
         </>
       );
     }
 
-    /**
-     * These include the content-manager specific fields, failing that we fall back
-     * to the more generic form input renderer.
-     */
-    switch (props.type) {
-      case 'blocks':
-        return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
-      case 'component':
-        return (
-          <ComponentInput
-            {...props}
-            hint={hint}
-            layout={components[props.attribute.component].layout}
-            disabled={fieldIsDisabled}
-          >
-            {(inputProps) => <InputRenderer {...inputProps} />}
-          </ComponentInput>
-        );
-      case 'dynamiczone':
-        return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
-      case 'relation':
-        return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
-      case 'richtext':
-        return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
-      case 'uid':
-        return <UIDInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
-      /**
-       * Enumerations are a special case because they require options.
-       */
-      case 'enumeration':
-        return (
-          <FormInputRenderer
-            {...props}
-            hint={hint}
-            options={props.attribute.enum.map((value) => ({ value }))}
-            // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
-            type={props.customField ? 'custom-field' : props.type}
-            disabled={fieldIsDisabled}
-          />
-        );
-      default:
-        // These props are not needed for the generic form input renderer.
-        const { unique: _unique, mainField: _mainField, ...restProps } = props;
-        return (
-          <FormInputRenderer
-            {...restProps}
-            hint={hint}
-            // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
-            type={props.customField ? 'custom-field' : props.type}
-            disabled={fieldIsDisabled}
-          />
-        );
-    }
-  };
+    return (
+      <FormInputRenderer
+        {...props}
+        hint={hint}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        // @ts-expect-error – this workaround lets us display that the custom field is missing.
+        type={props.attribute.customField}
+        disabled={fieldIsDisabled}
+      />
+    );
+  }
 
-  return (
-    <div onFocus={handleFocus} onBlur={handleBlur} tabIndex={-1}>
-      {renderInput()}
-    </div>
-  );
+  /**
+   * This is where we handle ONLY the fields from the `useLibrary` hook.
+   */
+  const addedInputTypes = Object.keys(fields);
+  if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
+    const CustomInput = fields[props.type];
+    return (
+      <>
+        {/* @ts-expect-error – TODO: fix this type error in the useLibrary hook. */}
+        <CustomInput
+          {...props}
+          hint={hint}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          disabled={fieldIsDisabled}
+        />
+      </>
+    );
+  }
+
+  /**
+   * These include the content-manager specific fields, failing that we fall back
+   * to the more generic form input renderer.
+   */
+  switch (props.type) {
+    case 'blocks':
+      return (
+        <BlocksInput
+          {...props}
+          hint={hint}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          type={props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
+    case 'component':
+      return (
+        <ComponentInput
+          {...props}
+          hint={hint}
+          layout={components[props.attribute.component].layout}
+          // onFocus={onFocus}
+          // onBlur={onBlur}
+          disabled={fieldIsDisabled}
+        >
+          {(inputProps) => <InputRenderer {...inputProps} />}
+        </ComponentInput>
+      );
+    case 'dynamiczone':
+      return (
+        <DynamicZone
+          {...props}
+          hint={hint}
+          // onFocus={onFocus}
+          // onBlur={onBlur}
+          disabled={fieldIsDisabled}
+        />
+      );
+    case 'relation':
+      return (
+        <RelationsInput
+          {...props}
+          hint={hint}
+          // onFocus={onFocus}
+          // onBlur={onBlur}
+          disabled={fieldIsDisabled}
+        />
+      );
+    case 'richtext':
+      return (
+        <Wysiwyg
+          {...props}
+          hint={hint}
+          type={props.type}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          disabled={fieldIsDisabled}
+        />
+      );
+    case 'uid':
+      return (
+        <UIDInput
+          {...props}
+          hint={hint}
+          type={props.type}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          disabled={fieldIsDisabled}
+        />
+      );
+    /**
+     * Enumerations are a special case because they require options.
+     */
+    case 'enumeration':
+      return (
+        <FormInputRenderer
+          {...props}
+          hint={hint}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          options={props.attribute.enum.map((value) => ({ value }))}
+          // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
+          type={props.customField ? 'custom-field' : props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
+    default:
+      // These props are not needed for the generic form input renderer.
+      const { unique: _unique, mainField: _mainField, ...restProps } = props;
+      return (
+        <FormInputRenderer
+          {...restProps}
+          hint={hint}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
+          type={props.customField ? 'custom-field' : props.type}
+          disabled={fieldIsDisabled}
+          onFocus={onFocus}
+        />
+      );
+  }
 };
 
 const attributeHasCustomFieldProperty = (

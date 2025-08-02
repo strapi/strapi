@@ -1,4 +1,4 @@
-import { Ref, useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
 
 import { useLocation } from 'react-router-dom';
 
@@ -16,9 +16,9 @@ import { useLocation } from 'react-router-dom';
  * );
  * ```
  */
-const useFocusInputField = <T extends HTMLElement>(name: string): Ref<T> => {
+const useFocusInputField = <T extends HTMLElement>(name: string): React.Ref<T> => {
   const { search: searchString } = useLocation();
-  const search = useMemo(() => new URLSearchParams(searchString), [searchString]);
+  const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
 
   /**
    * TODO: remove union and just use `HTMLElement`
@@ -26,9 +26,9 @@ const useFocusInputField = <T extends HTMLElement>(name: string): Ref<T> => {
    * Realistically, it will only be an `HTMLElement` but `TextInput` in the design-system
    * has an imperativeHandle we can't remove until v2 of the design-system.
    */
-  const [field, setField] = useState<HTMLElement | null>(null);
+  const [field, setField] = React.useState<HTMLElement | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (search.has('field') && search.get('field') === name && field) {
       field.focus();
       field.scrollIntoView({
