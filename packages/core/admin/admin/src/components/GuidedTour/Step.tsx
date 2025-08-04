@@ -56,7 +56,11 @@ type Step = {
     React.ComponentProps<typeof Popover.Content> & { withArrow?: boolean }
   >;
   Title: (props: StepProps) => React.ReactNode;
-  Content: (props: StepProps) => React.ReactNode;
+  Content: (
+    props: StepProps & {
+      values?: Record<string, React.ReactNode | ((chunks: React.ReactNode) => React.ReactNode)>;
+    }
+  ) => React.ReactNode;
   Actions: (props: ActionsProps & { to?: string } & FlexProps) => React.ReactNode;
 };
 
@@ -141,7 +145,11 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         props.children
       ) : (
         <Typography tag="div" variant="omega">
-          <FormattedMessage id={props.id} defaultMessage={props.defaultMessage} />
+          <FormattedMessage
+            id={props.id}
+            defaultMessage={props.defaultMessage}
+            values={props.values}
+          />
         </Typography>
       )}
     </Box>
@@ -166,10 +174,13 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
       dispatch({ type: 'skip_tour', payload: tourName });
     };
 
-    const handleNextStep = () => {
+    const handleNextStep = (e: React.MouseEvent) => {
+      e.stopPropagation();
+
       if (currentStep === actualTourLength) {
         trackUsage('didCompleteGuidedTour', { name: tourName });
       }
+
       dispatch({ type: 'next_step', payload: tourName });
     };
 
@@ -195,7 +206,10 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
               {!showSkip && showPrevious && (
                 <Button
                   variant="tertiary"
-                  onClick={() => dispatch({ type: 'previous_step', payload: tourName })}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    dispatch({ type: 'previous_step', payload: tourName });
+                  }}
                 >
                   <FormattedMessage id="tours.previous" defaultMessage="Previous" />
                 </Button>
