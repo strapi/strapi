@@ -119,8 +119,8 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
             if (attribute.type === 'relation') {
               const relatedModel = strapi.getModel(attribute.target);
 
-              if (Array.isArray(value.data)) {
-                return value.data.forEach((item: any) => {
+              if (Array.isArray(value)) {
+                return value.forEach((item: any) => {
                   return encodeEntry(
                     item.id,
                     relatedModel.uid,
@@ -130,10 +130,12 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
                 });
               }
 
+              console.log('Encoding relation. value:', value);
+
               return encodeEntry(
-                value.data.id,
+                value.id,
                 relatedModel.uid,
-                value.data,
+                value,
                 strapi.getModel(attribute.target)
               );
             }

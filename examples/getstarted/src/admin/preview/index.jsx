@@ -29,6 +29,7 @@ const previewLoader = async ({ params }) => {
       locale,
       status,
       encodeSourceMaps: 'true',
+      populate: '*',
     });
 
     const response = await fetch(`/api/${apiName}/${documentId}?${searchParams.toString()}`, {
