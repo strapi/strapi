@@ -14,9 +14,9 @@ declare global {
  * To get a better overview of everything previewScript does, go to the orchestration part at its end.
  */
 const previewScript = (shouldRun = true) => {
-  /* -------------------------------------------------------------------------------------------------
+  /* -----------------------------------------------------------------------------------------------
    * Params
-   * -----------------------------------------------------------------------------------------------*/
+   * ---------------------------------------------------------------------------------------------*/
 
   const HIGHLIGHT_PADDING = 2; // in pixels
   const HIGHLIGHT_COLOR = window.__strapi_HIGHLIGHT_COLOR ?? '#4945ff';
@@ -31,6 +31,11 @@ const previewScript = (shouldRun = true) => {
     STRAPI_FIELD_BLUR: 'strapiFieldBlur',
   } as const;
 
+  /**
+   * Calling the function in no-run mode lets us retrieve the constants from other files and keep
+   * a single source of truth for them. It's the only way to do this because this script can't
+   * refer to any variables outside of its own scope, because it's stringified before it's run.
+   */
   if (!shouldRun) {
     return { EVENTS };
   }
@@ -156,6 +161,7 @@ const previewScript = (shouldRun = true) => {
           display: none;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           z-index: 10000;
+          user-select: none;
         `;
 
         highlight.addEventListener('mouseenter', () => {

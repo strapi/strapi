@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLoaderData, useRevalidator } from 'react-router-dom';
 
 // @ts-ignore
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
@@ -7,43 +7,8 @@ import { Grid, Flex, Typography, JSONInput, Box } from '@strapi/design-system';
 
 const PreviewComponent = () => {
   const { apiName, documentId, locale, status: documentStatus, collectionType } = useParams();
-
-  const [data, setData] = React.useState(null);
-  const [status, setStatus] = React.useState('idle');
-
-  const fetchData = async () => {
-    if (!documentId) return;
-
-    setStatus('loading');
-
-    try {
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-
-      if (process.env.STRAPI_ADMIN_API_TOKEN) {
-        headers.Authorization = `Bearer ${process.env.STRAPI_ADMIN_API_TOKEN}`;
-      }
-
-      const searchParams = new URLSearchParams({
-        locale,
-        status: documentStatus,
-        encodeSourceMaps: 'true',
-      });
-      const response = await fetch(`/api/${apiName}/${documentId}?${searchParams.toString()}`, {
-        headers,
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const result = await response.json();
-      setData(result.data);
-      setStatus('success');
-      window.parent?.postMessage({ type: 'strapiReady' }, '*');
-    } catch (error) {
-      setStatus('error');
-    }
-  };
+  const data = useLoaderData();
+  const revalidator = useRevalidator();
 
   const filterAttributes = (item) => {
     const excludedKeys = ['documentId', 'id', 'createdAt', 'updatedAt', 'publishedAt'];
@@ -51,8 +16,8 @@ const PreviewComponent = () => {
   };
 
   React.useEffect(() => {
-    fetchData();
-  }, [documentId]);
+    window.parent?.postMessage({ type: 'strapiReady' }, '*');
+  }, [data]);
 
   React.useEffect(() => {
     const handleMessage = (event) => {
@@ -64,7 +29,7 @@ const PreviewComponent = () => {
 
       if (data?.type === 'strapiUpdate') {
         // The data is stale, force a refetch
-        fetchData();
+        revalidator.revalidate();
       } else if (data?.type === 'strapiScript') {
         const script = window.document.createElement('script');
         script.textContent = event.data.script;
@@ -155,14 +120,9 @@ const PreviewComponent = () => {
               <Typography variant="delta" tag="h3">
                 Rest API data
               </Typography>
-              {status === 'loading' && <Typography>Loading data...</Typography>}
-              {status === 'error' && (
-                <Typography textColor="danger600">Error loading data</Typography>
-              )}
-              {status === 'success' && !data && (
-                <Typography textColor="neutral600">No data found</Typography>
-              )}
-              {status === 'success' && data && (
+              {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
+              {!data && <Typography textColor="neutral600">No data found</Typography>}
+              {data && (
                 <>
                   <Grid.Root gap={5} tag="dl">
                     {filterAttributes(data).map(([key, value]) => (
