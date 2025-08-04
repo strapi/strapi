@@ -30,7 +30,7 @@ interface BrowserStrapi {
   telemetryDisabled: boolean;
   aiLicenseKey?: string;
   ai: {
-    disable: boolean;
+    enabled: boolean;
   };
 }
 

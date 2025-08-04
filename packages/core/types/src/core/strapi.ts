@@ -40,7 +40,7 @@ export interface Strapi extends Container {
   EE?: boolean;
   aiLicenseKey?: string;
   ai?: {
-    disable: boolean;
+    enabled: boolean;
   };
   ee: {
     seats: number | null | undefined;

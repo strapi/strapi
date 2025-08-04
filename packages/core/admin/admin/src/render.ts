@@ -58,7 +58,7 @@ const renderAdmin = async (
       promoteEE: true,
     },
     ai: {
-      disable: false,
+      enabled: true,
     },
   };
 
@@ -71,7 +71,7 @@ const renderAdmin = async (
       name: string;
     }[];
     ai: {
-      disable: boolean;
+      enabled: boolean;
     };
   }
 
