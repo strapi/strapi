@@ -1,10 +1,9 @@
 // NOTE: This override is for the properties on _user's site_, it's not about Strapi Admin.
 declare global {
   interface Window {
-    __strapi?: {
-      previewCleanup?: () => void;
-      HIGHLIGHT_COLOR?: string;
-    };
+    __strapi_previewCleanup?: () => void;
+    __strapi_HIGHLIGHT_COLOR?: string;
+    __strapi_DISABLE_STEGA_DECODING?: boolean;
   }
 }
 
@@ -14,13 +13,14 @@ declare global {
  * It's why many functions are defined within previewScript, it's the only way to avoid going full spaghetti.
  * To get a better overview of everything previewScript does, go to the orchestration part at its end.
  */
-const previewScript = (shouldRun = false) => {
+const previewScript = (shouldRun = true) => {
   /* -------------------------------------------------------------------------------------------------
    * Params
    * -----------------------------------------------------------------------------------------------*/
 
   const HIGHLIGHT_PADDING = 2; // in pixels
-  const HIGHLIGHT_COLOR = window.__strapi?.HIGHLIGHT_COLOR ?? '#4945ff';
+  const HIGHLIGHT_COLOR = window.__strapi_HIGHLIGHT_COLOR ?? '#4945ff';
+  const DISABLE_STEGA_DECODING = window.__strapi_DISABLE_STEGA_DECODING ?? false;
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
   const OVERLAY_ID = 'strapi-preview-overlay';
   const EVENTS = {
@@ -48,6 +48,10 @@ const previewScript = (shouldRun = false) => {
    * ---------------------------------------------------------------------------------------------*/
 
   const setupStegaDecoding = async () => {
+    if (DISABLE_STEGA_DECODING) {
+      return;
+    }
+
     const { vercelStegaDecode: stegaDecode } = await import(
       // @ts-expect-error it's not a local dependency
       // eslint-disable-next-line import/no-unresolved
@@ -79,9 +83,7 @@ const previewScript = (shouldRun = false) => {
       existingOverlay.remove();
     }
 
-    if (window.__strapi?.previewCleanup) {
-      window.__strapi.previewCleanup();
-    }
+    window.__strapi_previewCleanup?.();
 
     const overlay = document.createElement('div');
     overlay.id = OVERLAY_ID;
@@ -288,10 +290,7 @@ const previewScript = (shouldRun = false) => {
     observers: ReturnType<typeof setupObservers>,
     eventHandlers: ReturnType<typeof setupEventHandlers>
   ) => {
-    if (!window.__strapi) {
-      window.__strapi = {};
-    }
-    window.__strapi.previewCleanup = () => {
+    window.__strapi_previewCleanup = () => {
       observers.resizeObserver.disconnect();
       window.removeEventListener('scroll', observers.updateOnScroll);
       window.removeEventListener('resize', observers.updateOnScroll);
