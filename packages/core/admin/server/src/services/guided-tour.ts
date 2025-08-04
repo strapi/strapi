@@ -2,44 +2,26 @@ import { Core, Internal } from '@strapi/types';
 import constants from './constants';
 
 export type GuidedTourRequiredActions = {
-  didCreateContentTypeSchema: boolean;
   didCreateContent: boolean;
   didCreateApiToken: boolean;
 };
 export type GuidedTourCompletedActions = keyof GuidedTourRequiredActions;
 
-const DEFAULT_ATTIBUTES = [
-  'createdAt',
-  'updatedAt',
-  'publishedAt',
-  'createdBy',
-  'updatedBy',
-  'locale',
-  'localizations',
-];
-
 export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => {
+  /**
+   * @internal
+   * TODO:
+   * Remove completed actions from the server and handle it all on the frontend
+   * [x] didCreateContentTypeSchema
+   * [ ] didCreateContent
+   * [ ] didCreateApiToken
+   */
   const getCompletedActions = async () => {
-    // Check if any content-type schemas have been created on the api:: namespace
-    const contentTypeSchemaNames = Object.keys(strapi.contentTypes).filter((contentTypeUid) =>
-      contentTypeUid.startsWith('api::')
-    );
-    const contentTypeSchemaAttributes = contentTypeSchemaNames.map((uid) => {
-      const attributes = Object.keys(
-        strapi.contentType(uid as Internal.UID.ContentType).attributes
-      );
-      return attributes.filter((attribute) => !DEFAULT_ATTIBUTES.includes(attribute));
-    });
-    const didCreateContentTypeSchema = (() => {
-      if (contentTypeSchemaNames.length === 0) {
-        return false;
-      }
-      return contentTypeSchemaAttributes.some((attributes) => attributes.length > 0);
-    })();
-
     // Check if any content has been created for content-types on the api:: namespace
     const hasContent = await (async () => {
-      for (const name of contentTypeSchemaNames) {
+      for (const name of Object.keys(strapi.contentTypes).filter((contentTypeUid) =>
+        contentTypeUid.startsWith('api::')
+      )) {
         const count = await strapi.documents(name as Internal.UID.ContentType).count({});
 
         if (count > 0) return true;
@@ -47,7 +29,7 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
 
       return false;
     })();
-    const didCreateContent = didCreateContentTypeSchema && hasContent;
+    const didCreateContent = hasContent;
 
     // Check if any api tokens have been created besides the default ones
     const createdApiTokens = await strapi
@@ -61,7 +43,6 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
 
     // Compute an array of action names that have been completed
     const requiredActions = {
-      didCreateContentTypeSchema,
       didCreateContent,
       didCreateApiToken,
     };

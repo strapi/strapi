@@ -1,19 +1,16 @@
 import * as React from 'react';
 
 import { Box, Popover, Portal, Button } from '@strapi/design-system';
+import { UID } from '@strapi/types';
 import { FormattedMessage } from 'react-intl';
+import { useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
-import {
-  type State,
-  type Action,
-  useGuidedTour,
-  ValidTourName,
-  ExtendedCompletedActions,
-} from './Context';
+import { type State, type Action, useGuidedTour, ValidTourName, CompletedActions } from './Context';
 import { Step, StepCount, createStepComponents } from './Step';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 
 /* -------------------------------------------------------------------------------------------------
  * Tours
@@ -27,11 +24,42 @@ const GotItAction = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
+const ContentTypeBuilderFinish = ({ Step }: Pick<ContentProps, 'Step'>) => {
+  const { data } = useGetGuidedTourMetaQuery();
+  const { '*': routeParams } = useParams();
+  // Get the uid from the params
+  const uid = routeParams?.split('/').pop();
+
+  const contentType = uid ? data?.data?.schemas?.[uid as UID.ContentType] : null;
+  const contentTypeKindDictionary = {
+    collectionType: 'collection-types',
+    singleType: 'single-types',
+  };
+  // Create the to path with fallback to content-manager
+  const to = contentType
+    ? `/content-manager/${contentTypeKindDictionary[contentType.kind]}/${contentType.uid}`
+    : '/content-manager';
+
+  return (
+    <Step.Root side="right">
+      <Step.Title
+        id="tours.contentTypeBuilder.Finish.title"
+        defaultMessage="It's time to create content!"
+      />
+      <Step.Content
+        id="tours.contentTypeBuilder.Finish.content"
+        defaultMessage="Now that you created content types, you'll be able to create content in the content manager."
+      />
+      <Step.Actions showStepCount={false} showPrevious={false} to={to} />
+    </Step.Root>
+  );
+};
+
 const tours = {
   contentTypeBuilder: createTour('contentTypeBuilder', [
     {
       name: 'Introduction',
-      content: (Step) => (
+      content: ({ Step }) => (
         <Step.Root side="bottom" withArrow={false}>
           <Step.Title
             id="tours.contentTypeBuilder.Introduction.title"
@@ -47,7 +75,7 @@ const tours = {
     },
     {
       name: 'CollectionTypes',
-      content: (Step) => (
+      content: ({ Step }) => (
         <Step.Root side="right" sideOffset={16}>
           <Step.Title
             id="tours.contentTypeBuilder.CollectionTypes.title"
@@ -63,7 +91,7 @@ const tours = {
     },
     {
       name: 'SingleTypes',
-      content: (Step) => (
+      content: ({ Step }) => (
         <Step.Root side="right" sideOffset={16}>
           <Step.Title
             id="tours.contentTypeBuilder.SingleTypes.title"
@@ -79,12 +107,64 @@ const tours = {
     },
     {
       name: 'Components',
-      content: (Step, { dispatch }) => (
+      content: ({ Step }) => (
         <Step.Root side="right" sideOffset={16}>
           <Step.Title id="tours.contentTypeBuilder.Components.title" defaultMessage="Components" />
           <Step.Content
             id="tours.contentTypeBuilder.Components.content"
             defaultMessage="A reusable content structure that can be used across multiple content types, such as buttons, sliders or cards."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'YourTurn',
+      content: ({ Step }) => (
+        <Step.Root side="right" sideOffset={16}>
+          <Step.Title id="tours.contentTypeBuilder.YourTurn.title" defaultMessage="Your turn" />
+          <Step.Content
+            id="tours.contentTypeBuilder.YourTurn.content"
+            defaultMessage="Create a collection type or single type and configure it."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'AddFields',
+      content: ({ Step, dispatch }) => (
+        <Step.Root side="bottom">
+          <Step.Title
+            id="tours.contentTypeBuilder.AddFields.title"
+            defaultMessage="Don't forget to add a field to your content type"
+          />
+          <Step.Content
+            id="tours.contentTypeBuilder.AddFields.content"
+            defaultMessage="Add the fields your content needs such as text, media and relations."
+          />
+          <Step.Actions>
+            <StepCount tourName="contentTypeBuilder" />
+            <GotItAction
+              onClick={() => dispatch({ type: 'next_step', payload: 'contentTypeBuilder' })}
+            />
+          </Step.Actions>
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Save',
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.addField),
+      content: ({ Step, dispatch }) => (
+        <Step.Root side="right">
+          <Step.Title
+            id="tours.contentTypeBuilder.Save.title"
+            defaultMessage="Save before you leave!"
+          />
+          <Step.Content
+            id="tours.contentTypeBuilder.Save.content"
+            defaultMessage="Save the changes you made here before leaving this page."
           />
           <Step.Actions>
             <StepCount tourName="contentTypeBuilder" />
@@ -97,27 +177,17 @@ const tours = {
     },
     {
       name: 'Finish',
-      content: (Step) => (
-        <Step.Root side="right">
-          <Step.Title
-            id="tours.contentTypeBuilder.Finish.title"
-            defaultMessage="It's time to create content!"
-          />
-          <Step.Content
-            id="tours.contentTypeBuilder.Finish.content"
-            defaultMessage="Now that you created content types, you'll be able to create content in the content manager."
-          />
-          <Step.Actions showStepCount={false} to="/content-manager" />
-        </Step.Root>
-      ),
-      when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
+      content: ({ Step }) => <ContentTypeBuilderFinish Step={Step} />,
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema),
     },
   ]),
   contentManager: createTour('contentManager', [
     {
       name: 'Introduction',
-      when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
-      content: (Step) => (
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema),
+      content: ({ Step }) => (
         <Step.Root side="top" withArrow={false}>
           <Step.Title
             id="tours.contentManager.Introduction.title"
@@ -133,7 +203,7 @@ const tours = {
     },
     {
       name: 'Fields',
-      content: (Step) => (
+      content: ({ Step }) => (
         <Step.Root sideOffset={-12}>
           <Step.Title id="tours.contentManager.Fields.title" defaultMessage="Fields" />
           <Step.Content
@@ -146,7 +216,7 @@ const tours = {
     },
     {
       name: 'Publish',
-      content: (Step, { dispatch }) => (
+      content: ({ Step, dispatch }) => (
         <Step.Root side="left" align="center">
           <Step.Title id="tours.contentManager.Publish.title" defaultMessage="Publish" />
           <Step.Content
@@ -164,7 +234,7 @@ const tours = {
     },
     {
       name: 'Finish',
-      content: (Step) => (
+      content: ({ Step }) => (
         <Step.Root side="right">
           <Step.Title
             id="tours.contentManager.FinalStep.title"
@@ -177,13 +247,14 @@ const tours = {
           <Step.Actions showStepCount={false} to="/settings/api-tokens" />
         </Step.Root>
       ),
-      when: (completedActions) => completedActions.includes('didCreateContent'),
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent),
     },
   ]),
   apiTokens: createTour('apiTokens', [
     {
       name: 'Introduction',
-      content: (Step) => (
+      content: ({ Step }) => (
         <Step.Root sideOffset={-36} withArrow={false}>
           <Step.Title id="tours.apiTokens.Introduction.title" defaultMessage="API tokens" />
           <Step.Content
@@ -196,7 +267,7 @@ const tours = {
     },
     {
       name: 'CreateAnAPIToken',
-      content: (Step) => (
+      content: ({ Step }) => (
         <Step.Root side="bottom" align="end" sideOffset={-10}>
           <Step.Title
             id="tours.apiTokens.CreateAnAPIToken.title"
@@ -212,7 +283,7 @@ const tours = {
     },
     {
       name: 'CopyAPIToken',
-      content: (Step, { dispatch }) => (
+      content: ({ Step, dispatch }) => (
         <Step.Root side="bottom" align="start" sideOffset={-5}>
           <Step.Title
             id="tours.apiTokens.CopyAPIToken.title"
@@ -228,11 +299,12 @@ const tours = {
           </Step.Actions>
         </Step.Root>
       ),
-      when: (completedActions) => completedActions.includes('didCreateApiToken'),
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken),
     },
     {
       name: 'Finish',
-      content: (Step) => (
+      content: ({ Step }) => (
         <Step.Root side="right" align="start">
           <Step.Title
             id="tours.apiTokens.FinalStep.title"
@@ -245,7 +317,8 @@ const tours = {
           <Step.Actions showStepCount={false} to="/" />
         </Step.Root>
       ),
-      when: (completedActions) => completedActions.includes('didCopyApiToken'),
+      when: (completedActions) =>
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken),
     },
   ]),
   strapiCloud: createTour('strapiCloud', []),
@@ -257,23 +330,19 @@ type Tours = typeof tours;
  * GuidedTourTooltip
  * -----------------------------------------------------------------------------------------------*/
 
-type Content = (
-  Step: Step,
-  {
-    state,
-    dispatch,
-  }: {
-    state: State;
-    dispatch: React.Dispatch<Action>;
-  }
-) => React.ReactNode;
+type ContentProps = {
+  Step: Step;
+  state: State;
+  dispatch: React.Dispatch<Action>;
+};
+type Content = (props: ContentProps) => React.ReactNode;
 
 type GuidedTourTooltipProps = {
   children: React.ReactNode;
   content: Content;
   tourName: ValidTourName;
   step: number;
-  when?: (completedActions: ExtendedCompletedActions) => boolean;
+  when?: (completedActions: CompletedActions) => boolean;
 };
 
 const GuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
@@ -347,7 +416,7 @@ const GuidedTourTooltipImpl = ({
       )}
       <Popover.Root open={isPopoverOpen}>
         <Popover.Anchor>{children}</Popover.Anchor>
-        {content(Step, { state, dispatch })}
+        {content({ Step, state, dispatch })}
       </Popover.Root>
     </>
   );
@@ -360,7 +429,7 @@ const GuidedTourTooltipImpl = ({
 type TourStep<P extends string> = {
   name: P;
   content: Content;
-  when?: (completedActions: ExtendedCompletedActions) => boolean;
+  when?: (completedActions: CompletedActions) => boolean;
 };
 
 function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: string, steps: T) {
