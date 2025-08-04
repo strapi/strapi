@@ -106,8 +106,9 @@ const RepeatableComponent = ({
       }
 
       const [, path] = fieldParam.split(`${name}.`);
+      const fieldValue = getIn(value, path, undefined);
 
-      if (getIn(value, path, undefined) !== undefined) {
+      if (fieldValue !== undefined && !Array.isArray(fieldValue)) {
         const [subpath] = path.split('.');
 
         return getIn(value, subpath, undefined)?.__temp_key__;
