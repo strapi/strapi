@@ -109,14 +109,14 @@ const PreviewComponent = () => {
 
   return (
     <Box
-    // position="fixed"
-    // top={0}
-    // left={0}
-    // right={0}
-    // bottom={0}
-    // zIndex={100}
-    // background="neutral100"
-    // overflow="auto"
+      position="fixed"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
+      zIndex={100}
+      background="neutral100"
+      overflow="auto"
     >
       <Layouts.Root>
         <Page.Main>

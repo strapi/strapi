@@ -88,7 +88,7 @@ const previewScript = (shouldRun = true) => {
     const overlay = document.createElement('div');
     overlay.id = OVERLAY_ID;
     overlay.style.cssText = `
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -113,7 +113,7 @@ const previewScript = (shouldRun = true) => {
       const rect = target.getBoundingClientRect();
       highlight.style.width = `${rect.width + HIGHLIGHT_PADDING * 2}px`;
       highlight.style.height = `${rect.height + HIGHLIGHT_PADDING * 2}px`;
-      highlight.style.transform = `translate(${rect.left - HIGHLIGHT_PADDING + window.scrollX}px, ${rect.top - HIGHLIGHT_PADDING + window.scrollY}px)`;
+      highlight.style.transform = `translate(${rect.left - HIGHLIGHT_PADDING}px, ${rect.top - HIGHLIGHT_PADDING}px)`;
     };
 
     const updateAllHighlights = () => {
@@ -134,6 +134,7 @@ const previewScript = (shouldRun = true) => {
           pointer-events: auto;
           border-radius: 2px 0 2px 2px;
           background-color: transparent;
+          will-change: transform;
           transition: outline-color 0.15s ease-in-out;
         `;
 
@@ -279,10 +280,39 @@ const previewScript = (shouldRun = true) => {
       highlightManager.updateAllHighlights();
     };
 
-    window.addEventListener('scroll', updateOnScroll);
-    window.addEventListener('resize', updateOnScroll);
+    // Find all scrollable ancestors for all tracked elements
+    const scrollableElements = new Set<Element | Window>();
+    scrollableElements.add(window); // Add window as a special case
 
-    return { resizeObserver, updateOnScroll };
+    highlightManager.elements.forEach((element) => {
+      let parent = element.parentElement;
+      while (parent) {
+        const computedStyle = window.getComputedStyle(parent);
+        const overflow = computedStyle.overflow + computedStyle.overflowX + computedStyle.overflowY;
+
+        if (overflow.includes('scroll') || overflow.includes('auto')) {
+          scrollableElements.add(parent);
+        }
+
+        parent = parent.parentElement;
+      }
+    });
+
+    // Add scroll listeners to all scrollable elements
+    scrollableElements.forEach((element) => {
+      if (element === window) {
+        window.addEventListener('scroll', updateOnScroll);
+        window.addEventListener('resize', updateOnScroll);
+      } else {
+        (element as Element).addEventListener('scroll', updateOnScroll);
+      }
+    });
+
+    return {
+      resizeObserver,
+      updateOnScroll,
+      scrollableElements,
+    };
   };
 
   const createCleanupSystem = (
@@ -292,8 +322,17 @@ const previewScript = (shouldRun = true) => {
   ) => {
     window.__strapi_previewCleanup = () => {
       observers.resizeObserver.disconnect();
-      window.removeEventListener('scroll', observers.updateOnScroll);
-      window.removeEventListener('resize', observers.updateOnScroll);
+
+      // Remove all scroll listeners
+      observers.scrollableElements.forEach((element) => {
+        if (element === window) {
+          window.removeEventListener('scroll', observers.updateOnScroll);
+          window.removeEventListener('resize', observers.updateOnScroll);
+        } else {
+          (element as Element).removeEventListener('scroll', observers.updateOnScroll);
+        }
+      });
+
       window.removeEventListener('message', eventHandlers.handleMessages);
       if (overlay.parentNode) {
         overlay.parentNode.removeChild(overlay);
