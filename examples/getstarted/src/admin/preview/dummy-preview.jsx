@@ -19,7 +19,12 @@ const PreviewComponent = () => {
     const handleMessage = (event) => {
       const { origin, data } = event;
 
-      if (origin !== 'http://localhost:1337') {
+      /**
+       * This is a special case because this is an admin page that's meant to be embedded within
+       * the admin itself. For real user websites, this will likely be something like this instead:
+       * `if (origin !== process.env.API_URL) return`
+       */
+      if (origin !== window.origin) {
         return;
       }
 
@@ -106,8 +111,7 @@ const PreviewComponent = () => {
                 Rest API data
               </Typography>
               {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
-              {!data && <Typography textColor="neutral600">No data found</Typography>}
-              {data && (
+              {data ? (
                 <>
                   <Grid.Root gap={5} tag="dl">
                     {filterAttributes(data).map(([key, value]) => (
@@ -127,6 +131,8 @@ const PreviewComponent = () => {
                   </Grid.Root>
                   <JSONInput value={JSON.stringify(data, null, 2)} disabled />
                 </>
+              ) : (
+                <Typography textColor="neutral600">No data found</Typography>
               )}
             </Flex>
           </Layouts.Content>
