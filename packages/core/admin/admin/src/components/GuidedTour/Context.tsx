@@ -15,7 +15,10 @@ import { migrateTourSteps } from './utils/migrations';
 
 type ValidTourName = keyof Tours;
 
-// Extract all string literal values from GUIDED_TOUR_REQUIRED_ACTIONS
+/**
+ * Derive the union of all string literal values from GUIDED_TOUR_REQUIRED_ACTIONS
+ * (ie didCreateContentTypeSchema | didCreateContent etc...)
+ */
 type RequiredActionValues = {
   [K in keyof typeof GUIDED_TOUR_REQUIRED_ACTIONS]: (typeof GUIDED_TOUR_REQUIRED_ACTIONS)[K] extends Record<
     string,

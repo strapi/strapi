@@ -248,7 +248,7 @@ const tours = {
         </Step.Root>
       ),
       when: (completedActions) =>
-        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.addField),
+        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent),
     },
   ]),
   apiTokens: createTour('apiTokens', [
