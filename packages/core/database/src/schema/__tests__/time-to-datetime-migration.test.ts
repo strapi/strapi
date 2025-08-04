@@ -145,7 +145,9 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
 
     // Verify warning was logged with the new concise format
     expect(db.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Database type conversion: "my_times.hour" from "time without time zone" to "datetime". Time values will be converted to datetime with default date "1970-01-01". Original time values will be preserved.')
+      expect.stringContaining(
+        'Database type conversion: "my_times.hour" from "time without time zone" to "datetime". Time values will be converted to datetime with default date "1970-01-01". Original time values will be preserved.'
+      )
     );
   });
 
@@ -202,7 +204,9 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
 
     // Verify warning was logged with the new concise format
     expect(db.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Database type conversion: "my_times.timestamp_field" from "timestamp without time zone" to "time". Datetime values will be converted to time only. Date information will be lost.')
+      expect.stringContaining(
+        'Database type conversion: "my_times.timestamp_field" from "timestamp without time zone" to "time". Datetime values will be converted to time only. Date information will be lost.'
+      )
     );
   });
 
@@ -303,7 +307,9 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
 
     // Verify warning was logged with the new concise format
     expect(db.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Database type conversion: "my_times.hour" from "time without time zone" to "datetime". Time values will be converted to datetime with default date "1970-01-01". Original time values will be preserved.')
+      expect.stringContaining(
+        'Database type conversion: "my_times.hour" from "time without time zone" to "datetime". Time values will be converted to datetime with default date "1970-01-01". Original time values will be preserved.'
+      )
     );
   });
 });
