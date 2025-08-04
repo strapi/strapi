@@ -472,30 +472,29 @@ const createHelpers = (db: Database) => {
   /**
    * Apply column properties after type conversion
    */
-  const applyColumnProperties = async (tableName: string, columnName: string, column: Column) => {
+  const applyColumnProperties = async (
+    trx: Knex.Transaction,
+    tableName: string,
+    columnName: string,
+    column: Column
+  ) => {
     // Apply NOT NULL constraint
     if (column.notNullable) {
-      await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET NOT NULL`, [
-        tableName,
-        columnName,
-      ]);
+      await trx.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET NOT NULL`, [tableName, columnName]);
     } else {
-      await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? DROP NOT NULL`, [
-        tableName,
-        columnName,
-      ]);
+      await trx.raw(`ALTER TABLE ?? ALTER COLUMN ?? DROP NOT NULL`, [tableName, columnName]);
     }
 
     // Apply default value
     if (column.defaultTo !== undefined) {
       const [defaultValue, defaultOpts] = castArray(column.defaultTo);
       if (prop('isRaw', defaultOpts)) {
-        await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ${defaultValue}`, [
+        await trx.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ${defaultValue}`, [
           tableName,
           columnName,
         ]);
       } else {
-        await db.connection.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ?`, [
+        await trx.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ?`, [
           tableName,
           columnName,
           defaultValue,
@@ -554,12 +553,19 @@ const createHelpers = (db: Database) => {
       );
 
       debug(`Applying special type conversion for column ${column.name} on ${table.name}`);
+      debug(`Executing SQL: ${sql} with params: ${JSON.stringify(params)}`);
 
-      // Execute the conversion
-      await db.connection.raw(sql, params);
+      try {
+        // Execute the conversion using the transaction connection
+        await trx.raw(sql, params);
+        debug(`Successfully converted ${column.name} from ${currentType} to ${targetType}`);
+      } catch (conversionError) {
+        db.logger.error(`Failed to convert column ${column.name}: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`);
+        throw conversionError;
+      }
 
       // Apply other column properties
-      await applyColumnProperties(table.name, column.name, column.object);
+      await applyColumnProperties(trx, table.name, column.name, column.object);
 
       // Remove from standard updates to prevent double processing
       table.columns.updated = table.columns.updated.filter((col) => col.name !== column.name);

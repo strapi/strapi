@@ -44,7 +44,14 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
           return Promise.resolve({});
         }),
         transaction: jest.fn().mockImplementation(async (callback) => {
-          await callback();
+          const mockTrx = {
+            raw: jest.fn().mockImplementation((...args) => {
+              rawCalls.push(args);
+              return Promise.resolve({});
+            }),
+            withSchema: jest.fn().mockReturnThis(),
+          };
+          await callback(mockTrx);
         }),
       },
       dialect: {
