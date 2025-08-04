@@ -295,10 +295,11 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
     expect(notNullCall).toBeDefined();
     expect(notNullCall[1]).toEqual(['my_times', 'hour']);
 
-    // Verify SET DEFAULT was called
+    // Verify SET DEFAULT was called with properly escaped value
     const defaultCall = rawCalls.find((call) => call[0].includes('SET DEFAULT'));
     expect(defaultCall).toBeDefined();
-    expect(defaultCall[1]).toEqual(['my_times', 'hour', '2024-01-01 00:00:00']);
+    expect(defaultCall[0]).toContain("SET DEFAULT '2024-01-01 00:00:00'");
+    expect(defaultCall[1]).toEqual(['my_times', 'hour']);
 
     // Verify warning was logged with the new concise format
     expect(db.logger.warn).toHaveBeenCalledWith(

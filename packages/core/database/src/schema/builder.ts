@@ -494,10 +494,13 @@ const createHelpers = (db: Database) => {
           columnName,
         ]);
       } else {
-        await trx.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ?`, [
+        // PostgreSQL doesn't support parameterized SET DEFAULT, so we need to escape the value
+        const escapedDefault = typeof defaultValue === 'string' 
+          ? `'${defaultValue.replace(/'/g, "''")}'`
+          : defaultValue;
+        await trx.raw(`ALTER TABLE ?? ALTER COLUMN ?? SET DEFAULT ${escapedDefault}`, [
           tableName,
           columnName,
-          defaultValue,
         ]);
       }
     }
