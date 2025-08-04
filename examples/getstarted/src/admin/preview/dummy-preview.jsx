@@ -5,27 +5,8 @@ import { useParams } from 'react-router-dom';
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
 import { Grid, Flex, Typography, JSONInput, Box } from '@strapi/design-system';
 
-// TODO: instead of this update the handler function in the preview config file so we have access to
-// the route name in the URL instead of the model UID
-const modelsRouteNames = {
-  'api::address.address': 'addresses',
-  'api::category.category': 'categories',
-  'api::condition.condition': 'conditions',
-  'api::country.country': 'countries',
-  'api::homepage.homepage': 'homepages',
-  'api::kitchensink.kitchensink': 'kitchensink',
-  'api::like.like': 'likes',
-  'api::menu.menu': 'menus',
-  'api::menusection.menusection': 'menusections',
-  'api::relation-locale.relation-locale': 'relation-locales',
-  'api::restaurant.restaurant': 'restaurants',
-  'api::review.review': 'reviews',
-  'api::tag.tag': 'tags',
-  'api::temp.temp': 'temps',
-};
-
 const PreviewComponent = () => {
-  const { uid: model, documentId, locale, status: documentStatus, collectionType } = useParams();
+  const { apiName, documentId, locale, status: documentStatus, collectionType } = useParams();
 
   const [data, setData] = React.useState(null);
   const [status, setStatus] = React.useState('idle');
@@ -49,12 +30,9 @@ const PreviewComponent = () => {
         status: documentStatus,
         encodeSourceMaps: 'true',
       });
-      const response = await fetch(
-        `http://localhost:1337/api/${modelsRouteNames[model]}/${documentId}?${searchParams.toString()}`,
-        {
-          headers,
-        }
-      );
+      const response = await fetch(`/api/${apiName}/${documentId}?${searchParams.toString()}`, {
+        headers,
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -120,7 +98,7 @@ const PreviewComponent = () => {
     >
       <Layouts.Root>
         <Page.Main>
-          <Page.Title>{`Previewing ${model}`}</Page.Title>
+          <Page.Title>{`Previewing ${apiName}`}</Page.Title>
           <Layouts.Header
             title="Static Preview"
             subtitle="Dummy frontend so we can test Preview in getstarted"
@@ -148,7 +126,7 @@ const PreviewComponent = () => {
                     Content Type
                   </Typography>
                   <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                    <Typography>{model}</Typography>
+                    <Typography>{apiName}</Typography>
                   </Flex>
                 </Grid.Item>
                 <Grid.Item col={6} s={12} direction="column" alignItems="start">

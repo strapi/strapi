@@ -135,7 +135,7 @@ const previewScript = (shouldRun = true) => {
           border-radius: 2px 0 2px 2px;
           background-color: transparent;
           will-change: transform;
-          transition: outline-color 0.15s ease-in-out;
+          transition: outline-color 0.1s ease-in-out;
         `;
 
         const editButton = document.createElement('button');
