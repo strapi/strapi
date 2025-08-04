@@ -109,10 +109,10 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
     if (CustomInput) {
       return (
         <>
-          {/* @ts-expect-error – TODO: fix this type error in the useLazyComponents hook. */}
           <CustomInput
             {...props}
             {...field}
+            // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
             hint={hint}
             onFocus={onFocus}
             onBlur={onBlur}
@@ -143,9 +143,9 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
     const CustomInput = fields[props.type];
     return (
       <>
-        {/* @ts-expect-error – TODO: fix this type error in the useLibrary hook. */}
         <CustomInput
           {...props}
+          // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
           hint={hint}
           onFocus={onFocus}
           onBlur={onBlur}
@@ -165,8 +165,8 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
         <BlocksInput
           {...props}
           hint={hint}
-          onFocus={onFocus}
-          onBlur={onBlur}
+          // onFocus={onFocus}
+          // onBlur={onBlur}
           type={props.type}
           disabled={fieldIsDisabled}
         />
@@ -210,8 +210,8 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
           {...props}
           hint={hint}
           type={props.type}
-          onFocus={onFocus}
-          onBlur={onBlur}
+          // onFocus={onFocus}
+          // onBlur={onBlur}
           disabled={fieldIsDisabled}
         />
       );
@@ -221,8 +221,8 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
           {...props}
           hint={hint}
           type={props.type}
-          onFocus={onFocus}
-          onBlur={onBlur}
+          // onFocus={onFocus}
+          // onBlur={onBlur}
           disabled={fieldIsDisabled}
         />
       );
@@ -254,7 +254,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}
           disabled={fieldIsDisabled}
-          onFocus={onFocus}
         />
       );
   }

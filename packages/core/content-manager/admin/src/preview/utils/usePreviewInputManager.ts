@@ -5,6 +5,8 @@ import { useSearchParams } from 'react-router-dom';
 
 import { usePreviewContext } from '../pages/Preview';
 
+import { EVENTS } from './constants';
+
 function usePreviewInputManager(
   name: string
 ): Pick<Required<React.InputHTMLAttributes<HTMLInputElement>>, 'onFocus' | 'onBlur'> {
@@ -39,7 +41,7 @@ function usePreviewInputManager(
       return;
     }
 
-    sendMessage('strapiFieldTyping', { field: name, value });
+    sendMessage(EVENTS.STRAPI_FIELD_TYPING, { field: name, value });
   }, [name, value, isUsingPreview, sendMessage]);
 
   if (!isUsingPreview) {
@@ -53,7 +55,7 @@ function usePreviewInputManager(
       // so no need for focus highlights as it's clear where the field is used.
       if (!isSideEditorOpen) return;
 
-      sendMessage('strapiFieldFocus', { field: name });
+      sendMessage(EVENTS.STRAPI_FIELD_FOCUS, { field: name });
     },
     onBlur: () => {
       // If side editor is open, input renderers are inside popovers in the right location,
@@ -68,7 +70,7 @@ function usePreviewInputManager(
         },
         { replace: true }
       );
-      sendMessage('strapiFieldBlur', { field: name });
+      sendMessage(EVENTS.STRAPI_FIELD_BLUR, { field: name });
     },
   };
 }

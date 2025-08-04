@@ -14,7 +14,7 @@ declare global {
  * It's why many functions are defined within previewScript, it's the only way to avoid going full spaghetti.
  * To get a better overview of everything previewScript does, go to the orchestration part at its end.
  */
-const previewScript = async () => {
+const previewScript = (shouldRun = false) => {
   /* -------------------------------------------------------------------------------------------------
    * Params
    * -----------------------------------------------------------------------------------------------*/
@@ -30,6 +30,10 @@ const previewScript = async () => {
     STRAPI_FIELD_FOCUS: 'strapiFieldFocus',
     STRAPI_FIELD_BLUR: 'strapiFieldBlur',
   } as const;
+
+  if (!shouldRun) {
+    return { EVENTS };
+  }
 
   /* -----------------------------------------------------------------------------------------------
    * Utils
@@ -209,7 +213,9 @@ const previewScript = async () => {
     };
   };
 
-  const setupEventHandlers = (highlightManager: any) => {
+  type HighlightManager = ReturnType<typeof createHighlightManager>;
+
+  const setupEventHandlers = (highlightManager: HighlightManager) => {
     const handleMessages = (event: MessageEvent) => {
       if (event.data?.type === EVENTS.STRAPI_FIELD_TYPING) {
         const { field, value } = event.data.payload;
@@ -256,7 +262,7 @@ const previewScript = async () => {
     return { handleMessages };
   };
 
-  const setupObservers = (highlightManager: any) => {
+  const setupObservers = (highlightManager: HighlightManager) => {
     const resizeObserver = new ResizeObserver(() => {
       highlightManager.updateAllHighlights();
     });
@@ -300,12 +306,13 @@ const previewScript = async () => {
    * Orchestration
    * ---------------------------------------------------------------------------------------------*/
 
-  await setupStegaDecoding();
-  const overlay = createOverlaySystem();
-  const highlightManager = createHighlightManager(overlay);
-  const eventHandlers = setupEventHandlers(highlightManager);
-  const observers = setupObservers(highlightManager);
-  createCleanupSystem(overlay, observers, eventHandlers);
+  setupStegaDecoding().then(() => {
+    const overlay = createOverlaySystem();
+    const highlightManager = createHighlightManager(overlay);
+    const eventHandlers = setupEventHandlers(highlightManager);
+    const observers = setupObservers(highlightManager);
+    createCleanupSystem(overlay, observers, eventHandlers);
+  });
 };
 
 export { previewScript };
