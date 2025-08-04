@@ -37,10 +37,10 @@ const LastActivityTable = ({ items }: { items: AuditLog[] }) => {
               // @ts-expect-error – getDefaultMessage probably doesn't benefit from being so strongly typed unless we just add string at the end.
               defaultMessage: getDefaultMessage(item.action),
             },
-            { model: (item.payload?.model as string) ?? '' }
+            { model: (item.payload.model as string) ?? '' }
           );
           const actionDate = formatTimeStamp(item.date);
-          const userDisplayName = item?.user?.displayName ?? '-';
+          const userDisplayName = item.user?.displayName ?? '-';
           return (
             <Tr
               onClick={handleRowClick(item)}

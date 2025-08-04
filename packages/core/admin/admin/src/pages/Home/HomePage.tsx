@@ -150,8 +150,8 @@ const HomePageCE = () => {
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
           <GuidedTourHomepageOverview />
           {loading ? (
-            <Box position="absolute">
-              <Widget.Loading />
+            <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+              <Page.Loading />
             </Box>
           ) : (
             <Grid.Root gap={5}>
