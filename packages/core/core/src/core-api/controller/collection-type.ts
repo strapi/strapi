@@ -28,15 +28,7 @@ const createCollectionTypeController = ({
       const { results, pagination } = await strapi.service(uid).find(sanitizedQuery);
       const sanitizedResults = await this.sanitizeOutput(results, ctx);
 
-      const encodeSourceMaps = ctx.query.encodeSourceMaps === 'true';
-      return this.transformResponse(
-        sanitizedResults,
-        { pagination },
-        {
-          contentType,
-          encodeSourceMaps,
-        }
-      );
+      return this.transformResponse(sanitizedResults, { pagination });
     },
 
     /**
@@ -50,15 +42,7 @@ const createCollectionTypeController = ({
       const entity = await strapi.service(uid).findOne(id, sanitizedQuery);
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
-      const encodeSourceMaps = ctx.query.encodeSourceMaps === 'true';
-      return this.transformResponse(
-        sanitizedEntity,
-        {},
-        {
-          contentType,
-          encodeSourceMaps,
-        }
-      );
+      return this.transformResponse(sanitizedEntity, {});
     },
 
     /**
