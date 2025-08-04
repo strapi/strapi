@@ -139,6 +139,7 @@ export const EditorToolbarObserver = ({
           maxHeight="100%"
           minWidth="256px"
           popoverPlacement="bottom-end"
+          zIndex={2}
         >
           {observedComponents.slice(menuIndex).map((component) => (
             <React.Fragment key={component.key}>{component.menu}</React.Fragment>

@@ -35,6 +35,11 @@ export interface TransferProp {
   token: TransferTokenProp;
 }
 
+export interface FlagsProp {
+  nps?: boolean | undefined;
+  promoteEE?: boolean | undefined;
+}
+
 export interface Admin {
   // required
   apiToken: ApiTokenProp;
@@ -46,4 +51,5 @@ export interface Admin {
   url?: string;
   forgotPassword?: ForgotPasswordProp;
   rateLimit?: RateLimitProp;
+  flags?: FlagsProp;
 }

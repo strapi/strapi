@@ -147,7 +147,7 @@ export default {
 
             const hasI18nEnabled = get(
               contentTypeSchema,
-              ['schema', 'pluginOptions', 'i18n', 'localized'],
+              ['pluginOptions', 'i18n', 'localized'],
               false
             );
 

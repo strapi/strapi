@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
+import { User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
@@ -16,6 +17,7 @@ import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
+import { Widgets } from './core/apis/Widgets';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
@@ -121,6 +123,7 @@ class StrapiApp {
   reducers: ReducersMapObject = {};
   store: Store | null = null;
   customFields = new CustomFields();
+  widgets = new Widgets();
 
   constructor({ config, appPlugins }: StrapiAppConstructorArgs = {}) {
     this.appPlugins = appPlugins || {};
@@ -315,6 +318,43 @@ class StrapiApp {
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
 
   async register(customRegister?: unknown) {
+    this.widgets.register([
+      {
+        icon: User,
+        title: {
+          id: 'widget.profile.title',
+          defaultMessage: 'Profile',
+        },
+        component: async () => {
+          const { ProfileWidget } = await import('./components/Widgets');
+          return ProfileWidget;
+        },
+        pluginId: 'admin',
+        id: 'profile-info',
+        link: {
+          label: {
+            id: 'global.profile.settings',
+            defaultMessage: 'Profile settings',
+          },
+          href: '/me',
+        },
+      },
+      {
+        icon: TrendUp,
+        title: {
+          id: 'widget.key-statistics.title',
+          defaultMessage: 'Project statistics',
+        },
+        component: async () => {
+          const { KeyStatisticsWidget } = await import('./components/Widgets');
+          return KeyStatisticsWidget;
+        },
+        pluginId: 'admin',
+        id: 'key-statistics',
+        roles: ['strapi-super-admin'],
+      },
+    ]);
+
     Object.keys(this.appPlugins).forEach((plugin) => {
       this.appPlugins[plugin].register(this);
     });

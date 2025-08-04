@@ -13,7 +13,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/icons": "2.0.0-rc.16",
+    "@strapi/icons": "2.0.0-rc.29",
     "@strapi/plugin-color-picker": "workspace:*",
     "@strapi/plugin-documentation": "workspace:*",
     "@strapi/plugin-graphql": "workspace:*",
@@ -40,6 +40,6 @@
     "npm": ">=6.0.0"
   },
   "strapi": {
-    "uuid": "getstarted"
+    "uuid": "strapi_examples_getstarted"
   }
 }

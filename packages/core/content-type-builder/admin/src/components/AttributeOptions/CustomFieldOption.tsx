@@ -4,8 +4,8 @@ import { StrapiAppContextValue } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { AttributeIcon, IconByType } from '../AttributeIcon';
+import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
 import { OptionBoxWrapper } from './OptionBoxWrapper';
 

@@ -85,8 +85,9 @@
   "containers.Home.pluginHeaderDescription": "Gestiona sus registros en una bella y poderoza interfaz.",
   "containers.Home.pluginHeaderTitle": "Gestor de Contenido",
   "containers.List.draft": "Borrador",
-  "containers.List.errorFetchRecords": "Error",
   "containers.List.published": "Publicado",
+  "containers.List.modified": "Modificado",
+  "containers.List.errorFetchRecords": "Error",
   "containers.list.displayedFields": "Campos mostrados",
   "containers.list.items": "{number, plural, =0 {elementos} one {elemento} other {elementos}}",
   "containers.list.table-headers.publishedAt": "Estado",
@@ -182,5 +183,7 @@
   "success.record.unpublish": "Sin publicar",
   "utils.data-loaded": "{number, plural, =1 {La entrada se ha cargado correctamente} other {Las entradas se han cargado correctamente}}",
   "popUpWarning.warning.publish-question": "¿Aún quieres publicarlo?",
-  "popUpwarning.warning.has-draft-relations.button-confirm": "Si, publicar"
+  "popUpwarning.warning.has-draft-relations.button-confirm": "Si, publicar",
+  "widget.chart-entries.title": "Entradas",
+  "widget.chart-entries.tooltip": "{count} {label}"
 }

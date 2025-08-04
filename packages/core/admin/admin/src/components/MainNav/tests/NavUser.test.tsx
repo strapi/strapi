@@ -30,7 +30,7 @@ describe('NavUser', () => {
     await screen.findByText('JD');
     const buttonMenu = screen.getByRole('button');
     await user.click(buttonMenu);
-    const profileLink = screen.getByText('Profile');
+    const profileLink = screen.getByText('Profile settings');
     expect(profileLink).toBeInTheDocument();
   });
 
@@ -39,7 +39,7 @@ describe('NavUser', () => {
     await screen.findByText('JD');
     const buttonMenu = screen.getByRole('button');
     await user.click(buttonMenu);
-    const logoutLink = screen.getByText('Logout');
+    const logoutLink = screen.getByText('Log out');
     expect(logoutLink).toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe('NavUser', () => {
     const buttonMenu = screen.getByRole('button');
     await user.click(buttonMenu);
 
-    const neutralMenuItem = screen.getByText('Logout');
+    const neutralMenuItem = screen.getByText('Log out');
     await user.hover(neutralMenuItem);
     expect(neutralMenuItem).toHaveStyle({
       backgroundColor: 'theme.colors.danger100',

@@ -10,7 +10,7 @@ import { NotificationsProvider } from '../features/Notifications';
 import { StrapiAppProvider } from '../features/StrapiApp';
 import { TrackingProvider } from '../features/Tracking';
 
-import { GuidedTourProvider } from './GuidedTour/Provider';
+import { GuidedTourContext } from './GuidedTour/Context';
 import { LanguageProvider } from './LanguageProvider';
 import { Theme } from './Theme';
 
@@ -32,10 +32,13 @@ interface ProvidersProps {
 }
 
 const Providers = ({ children, strapi, store }: ProvidersProps) => {
+  const isGuidedTourEnabled = process.env.NODE_ENV !== 'test';
+
   return (
     <StrapiAppProvider
       components={strapi.library.components}
       customFields={strapi.customFields}
+      widgets={strapi.widgets}
       fields={strapi.library.fields}
       menu={strapi.router.menu}
       getAdminInjectedComponents={strapi.getAdminInjectedComponents}
@@ -55,7 +58,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                 <Theme themes={strapi.configurations.themes}>
                   <NotificationsProvider>
                     <TrackingProvider>
-                      <GuidedTourProvider>
+                      <GuidedTourContext enabled={isGuidedTourEnabled}>
                         <ConfigurationProvider
                           defaultAuthLogo={strapi.configurations.authLogo}
                           defaultMenuLogo={strapi.configurations.menuLogo}
@@ -63,7 +66,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                         >
                           {children}
                         </ConfigurationProvider>
-                      </GuidedTourProvider>
+                      </GuidedTourContext>
                     </TrackingProvider>
                   </NotificationsProvider>
                 </Theme>

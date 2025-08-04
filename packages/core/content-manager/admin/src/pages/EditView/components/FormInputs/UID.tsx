@@ -23,7 +23,7 @@ import { useMatch } from 'react-router-dom';
 import { styled, keyframes } from 'styled-components';
 
 import { useDebounce } from '../../../../hooks/useDebounce';
-import { useDoc } from '../../../../hooks/useDocument';
+import { useDocumentContext } from '../../../../hooks/useDocumentContext';
 import { CLONE_PATH } from '../../../../router';
 import {
   useGenerateUIDMutation,
@@ -42,12 +42,13 @@ import type { Schema } from '@strapi/types';
 const UID_REGEX = /^[A-Za-z0-9-_.~]*$/;
 
 interface UIDInputProps extends Omit<InputProps, 'type'> {
+  attribute?: Pick<Schema.Attribute.UIDProperties, 'regex'>;
   type: Schema.Attribute.TypeOf<Schema.Attribute.UID>;
 }
 
 const UIDInput = React.forwardRef<any, UIDInputProps>(
-  ({ hint, label, labelAction, name, required, ...props }, ref) => {
-    const { model, id } = useDoc();
+  ({ hint, label, labelAction, name, required, attribute = {}, ...props }, ref) => {
+    const { currentDocumentMeta } = useDocumentContext('UIDInput');
     const allFormValues = useForm('InputUID', (form) => form.values);
     const [availability, setAvailability] = React.useState<CheckUIDAvailability.Response>();
     const [showRegenerate, setShowRegenerate] = React.useState(false);
@@ -61,16 +62,19 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const [{ query }] = useQueryParams();
     const params = React.useMemo(() => buildValidParams(query), [query]);
 
+    const { regex } = attribute;
+    const validationRegExp = regex ? new RegExp(regex) : UID_REGEX;
+
     const {
       data: defaultGeneratedUID,
       isLoading: isGeneratingDefaultUID,
       error: apiError,
     } = useGetDefaultUIDQuery(
       {
-        contentTypeUID: model,
+        contentTypeUID: currentDocumentMeta.model,
         field: name,
         data: {
-          id: id ?? '',
+          id: currentDocumentMeta.documentId ?? '',
           ...allFormValues,
         },
         params,
@@ -104,9 +108,9 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const handleRegenerateClick = async () => {
       try {
         const res = await generateUID({
-          contentTypeUID: model,
+          contentTypeUID: currentDocumentMeta.model,
           field: name,
-          data: { id: id ?? '', ...allFormValues },
+          data: { id: currentDocumentMeta.documentId ?? '', ...allFormValues },
           params,
         });
 
@@ -135,7 +139,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
       error: availabilityError,
     } = useGetAvailabilityQuery(
       {
-        contentTypeUID: model,
+        contentTypeUID: currentDocumentMeta.model,
         field: name,
         value: debouncedValue ? debouncedValue.trim() : '',
         params,
@@ -143,7 +147,9 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
       {
         // Don't check availability if the value is empty or wasn't changed
         skip: !Boolean(
-          (hasChanged || isCloning) && debouncedValue && UID_REGEX.test(debouncedValue.trim())
+          (hasChanged || isCloning) &&
+            debouncedValue &&
+            validationRegExp.test(debouncedValue.trim())
         ),
       }
     );

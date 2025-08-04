@@ -11,6 +11,8 @@ const contentManagerApi = adminApi.enhanceEndpoints({
     'Relations',
     'UidAvailability',
     'RecentDocumentList',
+    'GuidedTourMeta',
+    'CountDocuments',
   ],
 });
 

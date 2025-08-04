@@ -2,10 +2,12 @@ import * as React from 'react';
 
 import axios, { AxiosResponse } from 'axios';
 
+import { Tours } from '../components/GuidedTour/Tours';
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
 import { useAuth } from './Auth';
+import { useStrapiApp } from './StrapiApp';
 
 export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
@@ -41,23 +43,27 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const token = useAuth('App', (state) => state.token);
   const { data: initData } = useInitQuery();
   const { uuid } = initData ?? {};
+  const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
 
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
-
   React.useEffect(() => {
     if (uuid && data) {
       const event = 'didInitializeAdministration';
       try {
-        fetch('https://analytics.strapi.io/api/v2/track', {
+        fetch(`${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`, {
           method: 'POST',
           body: JSON.stringify({
             // This event is anonymous
             event,
             userId: '',
             eventPropeties: {},
-            groupProperties: { ...data, projectId: uuid },
+            groupProperties: {
+              ...data,
+              projectId: uuid,
+              registeredWidgets: getAllWidgets().map((widget) => widget.uid),
+            },
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -68,8 +74,7 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
         // silence is golden
       }
     }
-  }, [data, uuid]);
-
+  }, [data, uuid, getAllWidgets]);
   const value = React.useMemo(
     () => ({
       uuid,
@@ -92,10 +97,9 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
  * Meanwhile those with properties have different property shapes corresponding to the specific
  * event so understanding which properties go with which event is very helpful.
  */
-interface EventWithoutProperties {
+export interface EventWithoutProperties {
   name:
     | 'changeComponentsOrder'
-    | 'didAccessAuthenticatedAdministration'
     | 'didAddComponentToDynamicZone'
     | 'didBulkDeleteEntries'
     | 'didNotBulkDeleteEntries'
@@ -131,7 +135,6 @@ interface EventWithoutProperties {
     | 'didNotCreateFirstAdmin'
     | 'didNotSaveComponent'
     | 'didPluginLearnMore'
-    | 'didPublishEntry'
     | 'didBulkPublishEntries'
     | 'didNotBulkPublishEntries'
     | 'didUnpublishEntry'
@@ -174,6 +177,7 @@ interface EventWithoutProperties {
     | 'willEditEntryFromButton'
     | 'willEditEntryFromHome'
     | 'willEditEntryFromList'
+    | 'willEditReleaseFromHome'
     | 'willEditFieldOfContentType'
     | 'willEditMediaLibraryConfig'
     | 'willEditNameOfContentType'
@@ -183,14 +187,22 @@ interface EventWithoutProperties {
     | 'willEditStage'
     | 'willFilterEntries'
     | 'willInstallPlugin'
-    | 'willPublishEntry'
     | 'willUnpublishEntry'
     | 'willSaveComponent'
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease';
+    | 'didCreateRelease'
+    | 'didLaunchGuidedtour';
   properties?: never;
+}
+
+interface DidAccessAuthenticatedAdministrationEvent {
+  name: 'didAccessAuthenticatedAdministration';
+  properties: {
+    registeredWidgets: string[];
+    projectId: string;
+  };
 }
 
 interface DidFilterMediaLibraryElementsEvent {
@@ -317,16 +329,31 @@ interface DeleteEntryEvents {
 interface CreateEntryEvents {
   name: 'willCreateEntry' | 'didCreateEntry' | 'didNotCreateEntry';
   properties: {
+    documentId?: string;
     status?: string;
     error?: unknown;
+    fromPreview?: boolean;
+    fromRelationModal?: boolean;
+  };
+}
+
+interface PublishEntryEvents {
+  name: 'willPublishEntry' | 'didPublishEntry';
+  properties: {
+    documentId?: string;
+    fromPreview?: boolean;
+    fromRelationModal?: boolean;
   };
 }
 
 interface UpdateEntryEvents {
   name: 'willEditEntry' | 'didEditEntry' | 'didNotEditEntry';
   properties: {
+    documentId?: string;
     status?: string;
     error?: unknown;
+    fromPreview?: boolean;
+    fromRelationModal?: boolean;
   };
 }
 
@@ -346,8 +373,47 @@ interface DidPublishRelease {
   };
 }
 
+interface DidUpdateCTBSchema {
+  name: 'didUpdateCTBSchema';
+  properties: {
+    success: boolean;
+    newContentTypes: number;
+    editedContentTypes: number;
+    deletedContentTypes: number;
+    newComponents: number;
+    editedComponents: number;
+    deletedComponents: number;
+    newFields: number;
+    editedFields: number;
+    deletedFields: number;
+  };
+}
+
+interface DidSkipGuidedTour {
+  name: 'didSkipGuidedTour';
+  properties: {
+    name: keyof Tours | 'all';
+  };
+}
+
+interface DidCompleteGuidedTour {
+  name: 'didCompleteGuidedTour';
+  properties: {
+    name: keyof Tours;
+  };
+}
+
+interface DidStartGuidedTour {
+  name: 'didStartGuidedTourFromHomepage';
+  properties: {
+    name: keyof Tours;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
+  | PublishEntryEvents
+  | DidAccessAuthenticatedAdministrationEvent
   | DidAccessTokenListEvent
   | DidChangeModeEvent
   | DidCropFileEvent
@@ -365,7 +431,11 @@ type EventsWithProperties =
   | WillModifyTokenEvent
   | WillNavigateEvent
   | DidPublishRelease
-  | MediaEvents;
+  | MediaEvents
+  | DidUpdateCTBSchema
+  | DidSkipGuidedTour
+  | DidCompleteGuidedTour
+  | DidStartGuidedTour;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {
@@ -417,7 +487,7 @@ const useTracking = (): UseTrackingReturn => {
       try {
         if (uuid && !window.strapi.telemetryDisabled) {
           const res = await axios.post<string>(
-            'https://analytics.strapi.io/api/v2/track',
+            `${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`,
             {
               event,
               userId,

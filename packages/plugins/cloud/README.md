@@ -1,6 +1,10 @@
-# Strapi Cloud Plugin
+# ☁️ Strapi Cloud Plugin ☁️
 
-A simple plugin giving instructions on how to deploy your Strapi local project to Strapi Cloud:
+A plugin to easily deploy your Strapi project to [Strapi Cloud](https://cloud.strapi.io). Provides a UI to select a deployment method and launch your project in a few clicks.
 
-- Upload your project to GitHub if not already done.
-- Authenticate & Deploy on Strapi Cloud.
+---
+
+## ✨ Features
+
+- Choose between **Strapi Cloud dashboard** (recommended) and **CLI** deployment methods
+- Built-in guidance and quick access to documentation

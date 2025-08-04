@@ -56,13 +56,14 @@ export interface Scope {
   runApp?: boolean;
   isQuickstart?: boolean;
   uuid?: string;
-  deviceId?: string;
+  installId?: string;
   database: DatabaseInfo;
   tmpPath?: string;
   packageJsonStrapi?: Record<string, unknown>;
   useTypescript?: boolean;
   useExample?: boolean;
   gitInit?: boolean;
+  shouldCreateGrowthSsoTrial: boolean;
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';

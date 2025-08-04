@@ -96,7 +96,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
         {data?.results && (
           <>
             {data.results.map((entry) => (
-              <Menu.Item key={entry.documentId} disabled>
+              <Menu.Item key={entry.documentId}>
                 <Typography maxWidth="50rem" ellipsis>
                   {getRelationLabel(entry, mainField)}
                 </Typography>

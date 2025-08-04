@@ -4,7 +4,7 @@ import _ from 'lodash';
 import isDocker from 'is-docker';
 import ciEnv from 'ci-info';
 import tsUtils from '@strapi/typescript-utils';
-import { env, machineID } from '@strapi/utils';
+import { env, generateInstallId } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { generateAdminUserHash } from './admin-user-hash';
 
@@ -25,8 +25,6 @@ const defaultQueryOpts = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-const ANALYTICS_URI = 'https://analytics.strapi.io';
-
 /**
  * Add properties from the package.json strapi key in the metadata
  */
@@ -40,8 +38,9 @@ const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi:
  * Create a send function for event with all the necessary metadata
  */
 export default (strapi: Core.Strapi): Sender => {
-  const { uuid } = strapi.config;
-  const deviceId = machineID();
+  const { uuid, installId: installIdFromPackageJson } = strapi.config;
+
+  const installId = generateInstallId(uuid, installIdFromPackageJson);
 
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
@@ -75,7 +74,7 @@ export default (strapi: Core.Strapi): Sender => {
       body: JSON.stringify({
         event,
         userId,
-        deviceId,
+        installId,
         eventProperties: payload.eventProperties,
         userProperties: userId ? { ...anonymousUserProperties, ...payload.userProperties } : {},
         groupProperties: {
@@ -88,7 +87,8 @@ export default (strapi: Core.Strapi): Sender => {
     };
 
     try {
-      const res = await strapi.fetch(`${ANALYTICS_URI}/api/v2/track`, reqParams);
+      const analyticsUrl = env('STRAPI_ANALYTICS_URL', 'https://analytics.strapi.io');
+      const res = await strapi.fetch(`${analyticsUrl}/api/v2/track`, reqParams);
       return res.ok;
     } catch (err) {
       return false;
