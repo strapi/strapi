@@ -1,21 +1,27 @@
 import * as React from 'react';
 
 import { useField } from '@strapi/admin/strapi-admin';
-import { useSearchParams } from 'react-router-dom';
 
 import { usePreviewContext } from '../pages/Preview';
+import { EVENTS } from '../utils/constants';
 
-import { EVENTS } from './constants';
+type PreviewInputProps = Pick<
+  Required<React.InputHTMLAttributes<HTMLInputElement>>,
+  'onFocus' | 'onBlur'
+> & {
+  ref: React.RefObject<HTMLInputElement> | null;
+};
 
-// Meant to be used in the CM's InputRenderer
-export function usePreviewInputManager(
-  name: string
-): Pick<Required<React.InputHTMLAttributes<HTMLInputElement>>, 'onFocus' | 'onBlur'> {
-  const [, setSearchParams] = useSearchParams();
+export function usePreviewInputManager(name: string): PreviewInputProps {
   const iframe = usePreviewContext('usePreviewInputManager', (state) => state.iframeRef, false);
   const isSideEditorOpen = usePreviewContext(
     'usePreviewInputManager',
     (state) => state.isSideEditorOpen,
+    false
+  );
+  const setPopoverField = usePreviewContext(
+    'usePreviewInputManager',
+    (state) => state.setPopoverField,
     false
   );
   const { value } = useField(name);
@@ -45,9 +51,37 @@ export function usePreviewInputManager(
     sendMessage(EVENTS.STRAPI_FIELD_TYPING, { field: name, value });
   }, [name, value, isUsingPreview, sendMessage]);
 
+  const fieldRef = React.useRef<HTMLInputElement | null>(null);
+
+  React.useEffect(() => {
+    if (!isUsingPreview) {
+      return;
+    }
+
+    const handleMessage = ({ data }: MessageEvent) => {
+      if (data?.type === EVENTS.WILL_EDIT_FIELD && data.payload?.path === name) {
+        // If the side editor is open, focus the matching field inside it
+        if (isSideEditorOpen) {
+          fieldRef.current?.focus();
+          fieldRef.current?.scrollIntoView({
+            block: 'center',
+            behavior: 'smooth',
+          });
+        } else {
+          // No side editor so we display the field in a popover
+          setPopoverField?.(data.payload);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => window.removeEventListener('message', handleMessage);
+  }, [name, fieldRef, isSideEditorOpen, setPopoverField, isUsingPreview]);
+
   if (!isUsingPreview) {
     // Return no-ops for convenience so we can always safely destructure these methods
-    return { onBlur: () => {}, onFocus: () => {} };
+    return { onBlur: () => {}, onFocus: () => {}, ref: null };
   }
 
   return {
@@ -63,15 +97,9 @@ export function usePreviewInputManager(
       // so no need for focus highlights as it's clear where the field is used.
       if (!isSideEditorOpen) return;
 
-      // Clear the field query parameter when blurring so it can be autofocused again if needed
-      setSearchParams(
-        (prev) => {
-          prev.delete('field');
-          return prev;
-        },
-        { replace: true }
-      );
+      setPopoverField?.(null);
       sendMessage(EVENTS.STRAPI_FIELD_BLUR, { field: name });
     },
+    ref: fieldRef,
   };
 }

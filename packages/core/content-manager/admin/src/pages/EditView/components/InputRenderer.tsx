@@ -14,7 +14,7 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
-import { usePreviewInputManager } from '../../../preview/utils/hooks';
+import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
@@ -40,7 +40,12 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
+const InputRenderer = ({
+  visible,
+  hint: providedHint,
+  document,
+  ...inputProps
+}: InputRendererProps) => {
   const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const {
     edit: { components },
@@ -65,6 +70,10 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   const editableFields = idToCheck ? canUpdateFields : canCreateFields;
   const readableFields = idToCheck ? canReadFields : canCreateFields;
 
+  // Everything preview related
+  const previewProps = usePreviewInputManager(inputProps.name);
+  const props = { ...inputProps, ...previewProps };
+
   /**
    * Component fields are always readable and editable,
    * however the fields within them may not be.
@@ -81,9 +90,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
-
-  // Everything preview related
-  const { onFocus, onBlur } = usePreviewInputManager(props.name);
 
   if (!visible) {
     return null;
@@ -114,8 +120,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
             {...field}
             // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
             hint={hint}
-            onFocus={onFocus}
-            onBlur={onBlur}
             disabled={fieldIsDisabled}
           />
         </>
@@ -125,9 +129,8 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
     return (
       <FormInputRenderer
         {...props}
+        {...previewProps}
         hint={hint}
-        onFocus={onFocus}
-        onBlur={onBlur}
         // @ts-expect-error – this workaround lets us display that the custom field is missing.
         type={props.attribute.customField}
         disabled={fieldIsDisabled}
@@ -147,8 +150,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
           {...props}
           // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
           hint={hint}
-          onFocus={onFocus}
-          onBlur={onBlur}
           disabled={fieldIsDisabled}
         />
       </>
@@ -161,71 +162,26 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
    */
   switch (props.type) {
     case 'blocks':
-      return (
-        <BlocksInput
-          {...props}
-          hint={hint}
-          // onFocus={onFocus}
-          // onBlur={onBlur}
-          type={props.type}
-          disabled={fieldIsDisabled}
-        />
-      );
+      return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'component':
       return (
         <ComponentInput
           {...props}
           hint={hint}
           layout={components[props.attribute.component].layout}
-          // onFocus={onFocus}
-          // onBlur={onBlur}
           disabled={fieldIsDisabled}
         >
           {(inputProps) => <InputRenderer {...inputProps} />}
         </ComponentInput>
       );
     case 'dynamiczone':
-      return (
-        <DynamicZone
-          {...props}
-          hint={hint}
-          // onFocus={onFocus}
-          // onBlur={onBlur}
-          disabled={fieldIsDisabled}
-        />
-      );
+      return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
-      return (
-        <RelationsInput
-          {...props}
-          hint={hint}
-          // onFocus={onFocus}
-          // onBlur={onBlur}
-          disabled={fieldIsDisabled}
-        />
-      );
+      return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'richtext':
-      return (
-        <Wysiwyg
-          {...props}
-          hint={hint}
-          type={props.type}
-          // onFocus={onFocus}
-          // onBlur={onBlur}
-          disabled={fieldIsDisabled}
-        />
-      );
+      return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'uid':
-      return (
-        <UIDInput
-          {...props}
-          hint={hint}
-          type={props.type}
-          // onFocus={onFocus}
-          // onBlur={onBlur}
-          disabled={fieldIsDisabled}
-        />
-      );
+      return <UIDInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     /**
      * Enumerations are a special case because they require options.
      */
@@ -234,8 +190,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
         <FormInputRenderer
           {...props}
           hint={hint}
-          onFocus={onFocus}
-          onBlur={onBlur}
           options={props.attribute.enum.map((value) => ({ value }))}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}
@@ -249,8 +203,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
         <FormInputRenderer
           {...restProps}
           hint={hint}
-          onFocus={onFocus}
-          onBlur={onBlur}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}
           disabled={fieldIsDisabled}

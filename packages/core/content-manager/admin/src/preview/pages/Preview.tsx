@@ -68,6 +68,11 @@ const DEVICES = [
  * PreviewProvider
  * -----------------------------------------------------------------------------------------------*/
 
+interface PopoverField {
+  path: string;
+  position: DOMRect;
+}
+
 interface PreviewContextValue {
   url: string;
   title: string;
@@ -78,6 +83,8 @@ interface PreviewContextValue {
   onPreview: () => void;
   iframeRef: React.RefObject<HTMLIFrameElement>;
   isSideEditorOpen: boolean;
+  popoverField: PopoverField | null;
+  setPopoverField: (value: PopoverField | null) => void;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -87,15 +94,16 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * -----------------------------------------------------------------------------------------------*/
 
 const VisualEditingPopover = ({
-  popoverField,
-  setPopoverField,
   documentResponse,
 }: {
-  popoverField: PopoverField | null;
-  setPopoverField: (value: PopoverField | null) => void;
   documentResponse: ReturnType<UseDocument>;
 }) => {
   const iframeRef = usePreviewContext('VisualEditingPopover', (state) => state.iframeRef);
+  const popoverField = usePreviewContext('VisualEditingPopover', (state) => state.popoverField);
+  const setPopoverField = usePreviewContext(
+    'VisualEditingPopover',
+    (state) => state.setPopoverField
+  );
 
   if (!popoverField || !documentResponse.schema || !iframeRef.current) {
     return null;
@@ -156,11 +164,6 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
   transition: rotate 0.2s ease-in-out;
 `;
 
-interface PopoverField {
-  path: string;
-  position: DOMRect;
-}
-
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
@@ -216,22 +219,6 @@ const PreviewPage = () => {
       window.removeEventListener('message', handleMessage);
     };
   }, []);
-
-  // Listen for willEditField message from iframe
-  React.useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'willEditField') {
-        if (isSideEditorOpen) {
-          setQuery({ field: event.data.payload.path }, 'push', true);
-        } else {
-          setPopoverField(event.data.payload);
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [isSideEditorOpen, setQuery]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -344,6 +331,8 @@ const PreviewPage = () => {
         onPreview={onPreview}
         iframeRef={iframeRef}
         isSideEditorOpen={isSideEditorOpen}
+        popoverField={popoverField}
+        setPopoverField={setPopoverField}
       >
         <FormContext
           method="PUT"
