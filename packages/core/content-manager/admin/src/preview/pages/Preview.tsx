@@ -35,7 +35,8 @@ import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
-import { previewScript } from '../utils/script';
+import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
+import { previewScript } from '../utils/previewScript';
 
 import type { UID } from '@strapi/types';
 
@@ -164,12 +165,39 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
   transition: rotate 0.2s ease-in-out;
 `;
 
+type MessageType =
+  | (typeof INTERNAL_EVENTS)[keyof typeof INTERNAL_EVENTS]
+  | (typeof PUBLIC_EVENTS)[keyof typeof PUBLIC_EVENTS];
+
+/**
+ * A function factory so we can generate a new sendMessage everytime we need one.
+ * We can't store and reuse a single sendMessage because it needs to have a stable identity
+ * as it used in a useEffect function. And we can't rely on useCallback because we need the
+ * up-to-date iframe ref, and this would make it stale (refs don't trigger callback reevaluations).
+ */
+function getSendMessage(iframe: React.RefObject<HTMLIFrameElement>) {
+  return (type: MessageType, payload?: unknown) => {
+    if (!iframe.current) return;
+
+    const { origin } = new URL(iframe.current.src);
+
+    iframe.current.contentWindow?.postMessage(
+      {
+        type,
+        ...(payload !== undefined && { payload }),
+      },
+      origin
+    );
+  };
+}
+
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
+  const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
 
   // Read all the necessary data from the URL to find the right preview URL
   const {
@@ -185,7 +213,6 @@ const PreviewPage = () => {
     {
       query: { field: _field, ...query },
     },
-    setQuery,
   ] = useQueryParams<{
     plugins?: Record<string, unknown>;
     status?: string;
@@ -199,17 +226,13 @@ const PreviewPage = () => {
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
-  const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
-
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'strapiReady') {
+      if (event.data?.type === PUBLIC_EVENTS.PREVIEW_READY) {
         const script = `(${previewScript.toString()})()`;
-        iframeRef?.current?.contentWindow?.postMessage(
-          { type: 'strapiScript', script },
-          new URL(iframeRef.current.src).origin
-        );
+        const sendMessage = getSendMessage(iframeRef);
+        sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
       }
     };
 
@@ -299,11 +322,8 @@ const PreviewPage = () => {
   const previewUrl = previewUrlResponse.data.data.url;
 
   const onPreview = () => {
-    iframeRef?.current?.contentWindow?.postMessage(
-      { type: 'strapiUpdate' },
-      // The iframe origin is safe to use since it must be provided through the allowedOrigins config
-      new URL(iframeRef.current.src).origin
-    );
+    const sendMessage = getSendMessage(iframeRef);
+    sendMessage(PUBLIC_EVENTS.STRAPI_UPDATE);
   };
 
   const hasAdvancedPreview = window.strapi.features.isEnabled('cms-advanced-preview');
@@ -463,11 +483,7 @@ const PreviewPage = () => {
                 </Flex>
               </Flex>
             </Flex>
-            <VisualEditingPopover
-              popoverField={popoverField}
-              setPopoverField={setPopoverField}
-              documentResponse={documentResponse}
-            />
+            <VisualEditingPopover documentResponse={documentResponse} />
           </Flex>
         </FormContext>
       </PreviewProvider>

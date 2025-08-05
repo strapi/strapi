@@ -171,7 +171,7 @@ const InputRenderer = ({
           layout={components[props.attribute.component].layout}
           disabled={fieldIsDisabled}
         >
-          {(inputProps) => <InputRenderer {...inputProps} />}
+          {(componentInputProps) => <InputRenderer {...componentInputProps} />}
         </ComponentInput>
       );
     case 'dynamiczone':

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useField } from '@strapi/admin/strapi-admin';
 
 import { usePreviewContext } from '../pages/Preview';
-import { EVENTS } from '../utils/constants';
+import { INTERNAL_EVENTS } from '../utils/constants';
 
 type PreviewInputProps = Pick<
   Required<React.InputHTMLAttributes<HTMLInputElement>>,
@@ -48,7 +48,7 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
       return;
     }
 
-    sendMessage(EVENTS.STRAPI_FIELD_TYPING, { field: name, value });
+    sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_TYPING, { field: name, value });
   }, [name, value, isUsingPreview, sendMessage]);
 
   const fieldRef = React.useRef<HTMLInputElement | null>(null);
@@ -59,7 +59,7 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
     }
 
     const handleMessage = ({ data }: MessageEvent) => {
-      if (data?.type === EVENTS.WILL_EDIT_FIELD && data.payload?.path === name) {
+      if (data?.type === INTERNAL_EVENTS.WILL_EDIT_FIELD && data.payload?.path === name) {
         // If the side editor is open, focus the matching field inside it
         if (isSideEditorOpen) {
           fieldRef.current?.focus();
@@ -90,7 +90,7 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
       // so no need for focus highlights as it's clear where the field is used.
       if (!isSideEditorOpen) return;
 
-      sendMessage(EVENTS.STRAPI_FIELD_FOCUS, { field: name });
+      sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS, { field: name });
     },
     onBlur: () => {
       // If side editor is open, input renderers are inside popovers in the right location,
@@ -98,7 +98,7 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
       if (!isSideEditorOpen) return;
 
       setPopoverField?.(null);
-      sendMessage(EVENTS.STRAPI_FIELD_BLUR, { field: name });
+      sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_BLUR, { field: name });
     },
     ref: fieldRef,
   };

@@ -16,7 +16,7 @@ const PreviewComponent = () => {
   };
 
   React.useEffect(() => {
-    window.parent?.postMessage({ type: 'strapiReady' }, '*');
+    window.parent?.postMessage({ type: 'previewReady' }, '*');
   }, [data]);
 
   React.useEffect(() => {
@@ -32,7 +32,7 @@ const PreviewComponent = () => {
         revalidator.revalidate();
       } else if (data?.type === 'strapiScript') {
         const script = window.document.createElement('script');
-        script.textContent = event.data.script;
+        script.textContent = data.payload.script;
         window.document.head.appendChild(script);
       }
     };
@@ -46,7 +46,7 @@ const PreviewComponent = () => {
 
   React.useEffect(() => {
     if (document) {
-      window.parent?.postMessage({ type: 'strapiReady' }, '*');
+      window.parent?.postMessage({ type: 'previewReady' }, '*');
     }
   }, [document]);
 

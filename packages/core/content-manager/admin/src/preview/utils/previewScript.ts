@@ -23,9 +23,8 @@ const previewScript = (shouldRun = true) => {
   const DISABLE_STEGA_DECODING = window.__strapi_DISABLE_STEGA_DECODING ?? false;
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
   const OVERLAY_ID = 'strapi-preview-overlay';
-  const EVENTS = {
+  const INTERNAL_EVENTS = {
     WILL_EDIT_FIELD: 'willEditField',
-    STRAPI_READY: 'strapiReady',
     STRAPI_FIELD_TYPING: 'strapiFieldTyping',
     STRAPI_FIELD_FOCUS: 'strapiFieldFocus',
     STRAPI_FIELD_BLUR: 'strapiFieldBlur',
@@ -37,14 +36,17 @@ const previewScript = (shouldRun = true) => {
    * refer to any variables outside of its own scope, because it's stringified before it's run.
    */
   if (!shouldRun) {
-    return { EVENTS };
+    return { INTERNAL_EVENTS };
   }
 
   /* -----------------------------------------------------------------------------------------------
    * Utils
    * ---------------------------------------------------------------------------------------------*/
 
-  const sendMessage = (type: (typeof EVENTS)[keyof typeof EVENTS], payload: unknown) => {
+  const sendMessage = (
+    type: (typeof INTERNAL_EVENTS)[keyof typeof INTERNAL_EVENTS],
+    payload: unknown
+  ) => {
     window.parent.postMessage({ type, payload }, '*');
   };
 
@@ -186,7 +188,7 @@ const previewScript = (shouldRun = true) => {
           const fieldPath = element.getAttribute(SOURCE_ATTRIBUTE);
           if (fieldPath && window.parent) {
             const rect = element.getBoundingClientRect();
-            sendMessage(EVENTS.WILL_EDIT_FIELD, {
+            sendMessage(INTERNAL_EVENTS.WILL_EDIT_FIELD, {
               path: fieldPath,
               position: {
                 top: rect.top,
@@ -226,7 +228,7 @@ const previewScript = (shouldRun = true) => {
 
   const setupEventHandlers = (highlightManager: HighlightManager) => {
     const handleMessages = (event: MessageEvent) => {
-      if (event.data?.type === EVENTS.STRAPI_FIELD_TYPING) {
+      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_TYPING) {
         const { field, value } = event.data.payload;
         if (field) {
           const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
@@ -236,7 +238,7 @@ const previewScript = (shouldRun = true) => {
             }
           });
         }
-      } else if (event.data?.type === EVENTS.STRAPI_FIELD_FOCUS) {
+      } else if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS) {
         const { field } = event.data.payload;
         if (field) {
           highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
@@ -255,7 +257,7 @@ const previewScript = (shouldRun = true) => {
             }
           });
         }
-      } else if (event.data?.type === EVENTS.STRAPI_FIELD_BLUR) {
+      } else if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_BLUR) {
         const { field } = event.data.payload;
         if (field === highlightManager.getFocusedField()) {
           highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
