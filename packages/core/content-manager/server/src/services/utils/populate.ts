@@ -3,8 +3,12 @@ import strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 
-const { isVisibleAttribute, isScalarAttribute, getDoesAttributeRequireValidation, isPrivateAttribute } =
-  strapiUtils.contentTypes;
+const {
+  isVisibleAttribute,
+  isScalarAttribute,
+  getDoesAttributeRequireValidation,
+  isPrivateAttribute,
+} = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
@@ -203,7 +207,10 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
   return Object.entries(model.attributes).reduce((populateAcc: any, [attributeName, attribute]) => {
     if (isScalarAttribute(attribute)) {
       // If the scalar attribute requires validation, add it to the fields array
-      if (getDoesAttributeRequireValidation(attribute) && !isPrivateAttribute(model, attributeName)) {
+      if (
+        getDoesAttributeRequireValidation(attribute) &&
+        !isPrivateAttribute(model, attributeName)
+      ) {
         populateAcc.fields = populateAcc.fields || [];
         populateAcc.fields.push(attributeName);
       }
@@ -211,7 +218,10 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
     }
 
     if (isMedia(attribute)) {
-      if (getDoesAttributeRequireValidation(attribute) && !isPrivateAttribute(model, attributeName)) {
+      if (
+        getDoesAttributeRequireValidation(attribute) &&
+        !isPrivateAttribute(model, attributeName)
+      ) {
         populateAcc.populate = populateAcc.populate || {};
         populateAcc.populate[attributeName] = {
           populate: {
