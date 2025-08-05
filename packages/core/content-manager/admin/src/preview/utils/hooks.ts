@@ -7,7 +7,8 @@ import { usePreviewContext } from '../pages/Preview';
 
 import { EVENTS } from './constants';
 
-function usePreviewInputManager(
+// Meant to be used in the CM's InputRenderer
+export function usePreviewInputManager(
   name: string
 ): Pick<Required<React.InputHTMLAttributes<HTMLInputElement>>, 'onFocus' | 'onBlur'> {
   const [, setSearchParams] = useSearchParams();
@@ -74,5 +75,3 @@ function usePreviewInputManager(
     },
   };
 }
-
-export { usePreviewInputManager };
