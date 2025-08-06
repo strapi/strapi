@@ -55,7 +55,7 @@ const getRetentionDays = (strapi: Core.Strapi) => {
   }
 
   // Allow users to override the license retention days, but not to increase it
-  if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
+  if (userRetentionDays && userRetentionDays <= licenseRetentionDays) {
     return userRetentionDays;
   }
 

@@ -177,6 +177,7 @@ export interface EventWithoutProperties {
     | 'willEditEntryFromButton'
     | 'willEditEntryFromHome'
     | 'willEditEntryFromList'
+    | 'willEditReleaseFromHome'
     | 'willEditFieldOfContentType'
     | 'willEditMediaLibraryConfig'
     | 'willEditNameOfContentType'
