@@ -19,7 +19,8 @@ const previewScript = (shouldRun = true) => {
    * ---------------------------------------------------------------------------------------------*/
 
   const HIGHLIGHT_PADDING = 2; // in pixels
-  const HIGHLIGHT_COLOR = window.__strapi_HIGHLIGHT_COLOR ?? '#4945ff';
+  const HIGHLIGHT_HOVER_COLOR = window.__strapi_HIGHLIGHT_COLOR ?? '#4945ff'; // dark primary500
+  const HIGHLIGHT_ACTIVE_COLOR = window.__strapi_HIGHLIGHT_COLOR ?? '#7b79ff'; // dark primary600
   const DISABLE_STEGA_DECODING = window.__strapi_DISABLE_STEGA_DECODING ?? false;
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
   const OVERLAY_ID = 'strapi-preview-overlay';
@@ -139,37 +140,14 @@ const previewScript = (shouldRun = true) => {
           position: absolute;
           outline: 2px solid transparent;
           pointer-events: auto;
-          border-radius: 2px 0 2px 2px;
+          border-radius: 2px;
           background-color: transparent;
           will-change: transform;
           transition: outline-color 0.1s ease-in-out;
         `;
 
-        const editButton = document.createElement('button');
-        editButton.textContent = 'Edit';
-        editButton.style.cssText = `
-          position: absolute;
-          top: 0px;
-          right: -${HIGHLIGHT_PADDING}px;
-          transform: translateY(-100%);
-          font-size: 12px;
-          padding: 4px 8px;
-          background: ${HIGHLIGHT_COLOR};
-          color: white;
-          border: none;
-          border-radius: 4px 4px 0 0;
-          cursor: pointer;
-          pointer-events: auto;
-          display: none;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          z-index: 10000;
-          user-select: none;
-        `;
-
         highlight.addEventListener('mouseenter', () => {
-          highlight.style.outlineColor = HIGHLIGHT_COLOR;
-          editButton.style.display = 'block';
-          highlight.style.borderRadius = '2px 0 2px 2px';
+          highlight.style.outlineColor = HIGHLIGHT_HOVER_COLOR;
         });
 
         highlight.addEventListener('mouseleave', () => {
@@ -177,8 +155,6 @@ const previewScript = (shouldRun = true) => {
           if (fieldPath !== focusedField) {
             highlight.style.outlineColor = 'transparent';
           }
-          editButton.style.display = 'none';
-          highlight.style.borderRadius = '2px';
         });
 
         const triggerEdit = (e: Event) => {
@@ -200,10 +176,8 @@ const previewScript = (shouldRun = true) => {
           }
         };
 
-        editButton.addEventListener('click', triggerEdit);
         highlight.addEventListener('dblclick', triggerEdit);
 
-        highlight.appendChild(editButton);
         highlights.push(highlight);
         overlay.appendChild(highlight);
 
@@ -252,7 +226,8 @@ const previewScript = (shouldRun = true) => {
             const highlight =
               highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];
             if (highlight) {
-              highlight.style.outlineColor = HIGHLIGHT_COLOR;
+              highlight.style.outlineColor = HIGHLIGHT_ACTIVE_COLOR;
+              highlight.style.outlineWidth = '3px';
               highlightManager.focusedHighlights.push(highlight);
             }
           });
@@ -262,6 +237,7 @@ const previewScript = (shouldRun = true) => {
         if (field === highlightManager.getFocusedField()) {
           highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
             highlight.style.outlineColor = 'transparent';
+            highlight.style.outlineWidth = '2px';
           });
           highlightManager.focusedHighlights.length = 0;
           highlightManager.setFocusedField(null);
