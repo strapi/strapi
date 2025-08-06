@@ -3,9 +3,9 @@ on:
   workflow_dispatch: # Allows manual triggering from the Github UI
 
 permissions:
-  issues: write  # Required to close issues and post comments
-  contents: read  # Needed by most GitHub Actions
-  pull-requests: read  # Needed to access PR data
+  issues: write # Required to close issues and post comments
+  contents: read # Needed by most GitHub Actions
+  pull-requests: read # Needed to access PR data
 
 jobs:
   close-inactive:
@@ -16,9 +16,9 @@ jobs:
           # Set the cutoff date (issues created before this date will be labeled)
           CUTOFF_DATE="2021-01-01"
           LABEL="stale-before-2021"
-          
+
           echo "Labeling issues created before $CUTOFF_DATE with $LABEL"
-          
+
           # Get all open issues created before the cutoff date
           # Exclude issues with 'severity: high' or 'severity: critical' and 'issue: security' label and issues in milestones
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
