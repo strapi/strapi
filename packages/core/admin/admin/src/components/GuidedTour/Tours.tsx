@@ -329,7 +329,7 @@ const tours = {
         <Step.Root side="right" align="start">
           <Step.Title
             id="tours.apiTokens.FinalStep.title"
-            defaultMessage="It's time to deploy your application!"
+            defaultMessage="Congratulations, it's time to deploy your application!"
           />
           <Step.Content
             id="tours.apiTokens.FinalStep.content"
