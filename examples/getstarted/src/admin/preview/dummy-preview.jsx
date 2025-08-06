@@ -31,6 +31,10 @@ const PreviewComponent = () => {
       if (data?.type === 'strapiUpdate') {
         // The data is stale, force a refetch
         revalidator.revalidate();
+      } else if (data?.type === 'strapiScript') {
+        const script = window.document.createElement('script');
+        script.textContent = data.payload.script;
+        window.document.head.appendChild(script);
       }
     };
 
@@ -40,6 +44,12 @@ const PreviewComponent = () => {
       window.removeEventListener('message', handleMessage);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (document) {
+      window.parent?.postMessage({ type: 'previewReady' }, '*');
+    }
+  }, [document]);
 
   return (
     <Box
