@@ -81,7 +81,7 @@ const formatNumber = ({ locale, number }: { locale: string; number: number }) =>
 
 const LinkCell = styled(Link)`
   text-decoration: none;
-  padding: 12px;
+  padding: ${({ theme }) => theme.spaces[3]};
 `;
 
 const KeyStatisticsWidget = () => {
