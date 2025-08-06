@@ -228,11 +228,18 @@ export const GuidedTourHomepageOverview = () => {
           {TASK_CONTENT.map((task) => {
             const tourName = task.tourName as ValidTourName;
             const tour = tours[tourName];
-            const isLinkDisabled =
-              tourName !== 'contentTypeBuilder' &&
+            const hasApiSchema =
+              Object.keys(guidedTourMeta?.data?.schemas ?? {}).filter((key) =>
+                key.startsWith('api::')
+              ).length > 0;
+
+            const needsContentTypeSchema =
+              !hasApiSchema ||
               !completedActions.includes(
                 GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema
               );
+
+            const isLinkDisabled = tourName !== 'contentTypeBuilder' && needsContentTypeSchema;
 
             return (
               <TourTaskContainer

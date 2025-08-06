@@ -339,7 +339,6 @@ const documentApi = contentManagerApi.injectEndpoints({
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
           'RecentDocumentList',
-          'GuidedTourMeta',
           'CountDocuments',
         ];
       },
