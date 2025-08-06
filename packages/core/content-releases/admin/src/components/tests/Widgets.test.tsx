@@ -15,11 +15,22 @@ const mockReleases = [
   {
     id: 1,
     documentId: '123456',
-    name: 'Test Release',
+    name: 'Test Scheduled Release',
     status: 'ready',
-    updatedAt: '2024-07-18T12:00:00Z',
-    publishedAt: '2024-07-18T12:00:00Z',
+    updatedAt: '2025-07-31T00:00:00Z',
+    publishedAt: '2025-07-31T00:00:00Z',
     scheduledAt,
+    timezone: 'Europe/Paris',
+    locale: null,
+  },
+  {
+    id: 2,
+    documentId: '234567',
+    name: 'Test No Date Release',
+    status: 'blocked',
+    updatedAt: '2025-07-31T00:00:00Z',
+    publishedAt: '2025-07-31T00:00:00Z',
+    scheduledAt: null,
     timezone: 'Europe/Paris',
     locale: null,
   },
@@ -39,11 +50,14 @@ describe('ChartEntriesWidget', () => {
     });
 
     render(<UpcomingReleasesWidget />);
-    expect(screen.getByText(/test release/i)).toBeInTheDocument();
+    expect(screen.getByText('Test Scheduled Release')).toBeInTheDocument();
     expect(screen.getByText(/ready/i)).toBeInTheDocument();
     expect(screen.getByText(/tomorrow/i)).toBeInTheDocument();
+    expect(screen.getByText('Test No Date Release')).toBeInTheDocument();
+    expect(screen.getByText(/blocked/i)).toBeInTheDocument();
+    expect(screen.getByText(/not scheduled/i)).toBeInTheDocument();
 
-    const editLink = screen.getByRole('link', { name: /Edit/i });
+    const editLink = screen.getAllByRole('link', { name: /Edit/i })[0];
     expect(editLink).toBeInTheDocument();
     expect(editLink).toHaveAttribute('href');
     expect(editLink).toHaveAttribute(
