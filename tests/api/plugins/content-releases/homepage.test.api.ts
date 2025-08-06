@@ -9,6 +9,25 @@ import { CreateRelease } from '../../../../packages/core/content-releases/shared
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
+const productUID = 'api::product.product';
+const productModel = {
+  draftAndPublish: true,
+  pluginOptions: {},
+  singularName: 'product',
+  pluralName: 'products',
+  displayName: 'Product',
+  kind: 'collectionType',
+  attributes: {
+    name: {
+      type: 'string',
+      required: true,
+    },
+    description: {
+      type: 'string',
+    },
+  },
+};
+
 describeOnCondition(edition === 'EE')('Content Releases API', () => {
   const builder = createTestBuilder();
   let strapi;
@@ -29,7 +48,20 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
   };
 
+  const createReleaseAction = async (releaseId, { contentType, entryDocumentId, type }) => {
+    return rq({
+      method: 'POST',
+      url: `/content-releases/${releaseId}/actions`,
+      body: {
+        entryDocumentId,
+        contentType,
+        type,
+      },
+    });
+  };
+
   beforeAll(async () => {
+    await builder.addContentType(productModel).build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
@@ -45,10 +77,25 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   });
 
   test('should retrieve the list of upcoming releases', async () => {
-    // Create a release with not scheduled (shouldn't appear in the homepage)
-    await createRelease('Not scheduled release');
+    // Create a release not scheduled
+    const createNotScheduledReleaseRes = await createRelease('Not scheduled release');
+    const notScheduledRelease = createNotScheduledReleaseRes.body.data;
+    // Add a product to the release
+    const product = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${productUID}`,
+      body: {
+        name: 'Product 1',
+        description: 'Description',
+      },
+    });
+    await createReleaseAction(notScheduledRelease.id, {
+      contentType: productUID,
+      entryDocumentId: product.body.data.documentId,
+      type: 'publish',
+    });
 
-    // Create a release with scheduled date in the future (should appear in the homepage)
+    // Create a release with scheduled date in the future
     await createRelease('Next week release', {
       scheduledAt: new Date('2024-01-08T00:00:00.000Z'),
       timezone: 'Europe/Madrid',
@@ -61,11 +108,16 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
     // Assert the response
     expect(response.statusCode).toBe(200);
-    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data).toHaveLength(2);
     // Assert the releases data
-    expect(response.body.data[0].name).toBe('Next week release');
-    expect(response.body.data[0].scheduledAt).toBeDefined();
-    expect(response.body.data[0].timezone).toBe('Europe/Madrid');
-    expect(response.body.data[0].status).toBe('empty');
+    // Not scheduled release
+    expect(response.body.data[0].name).toBe('Not scheduled release');
+    expect(response.body.data[0].scheduledAt).toBeNull();
+    expect(response.body.data[0].status).toBe('ready');
+    // Next week release
+    expect(response.body.data[1].name).toBe('Next week release');
+    expect(response.body.data[1].scheduledAt).toBeDefined();
+    expect(response.body.data[1].timezone).toBe('Europe/Madrid');
+    expect(response.body.data[1].status).toBe('empty');
   });
 });
