@@ -1,0 +1,50 @@
+name: Label Pre-2021 Issues
+on:
+  workflow_dispatch: # Allows manual triggering from the Github UI
+
+permissions:
+  issues: write # Required to close issues and post comments
+  contents: read # Needed by most GitHub Actions
+  pull-requests: read # Needed to access PR data
+
+jobs:
+  close-inactive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label old issues
+        run: |
+          # Set the cutoff date (issues created before this date will be labeled)
+          CUTOFF_DATE="2021-01-01"
+          LABEL="stale-before-2021"
+
+          echo "Labeling issues created before $CUTOFF_DATE with $LABEL"
+
+          # Get all open issues created before the cutoff date
+          # Exclude issues with 'severity: high' or 'severity: critical' and 'issue: security' label and issues in milestones
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/issues?state=open&per_page=100" | \
+            jq -r --arg cutoff "$CUTOFF_DATE" --arg label "$LABEL" ' 
+              .[] | 
+              select(.created_at < $cutoff) |
+              select(.pull_request == null) |
+              select(any(.labels[]?; .name == "severity: high") | not) |
+              select(any(.labels[]?; .name == "severity: critical") | not) |
+              select(any(.labels[]?; .name == "issue: security") | not) |
+              select(.milestone == null) |
+              select(any(.labels[]?; .name == $label) | not) |
+              .number
+            ' | while read issue_number; do
+              if [ ! -z "$issue_number" ]; then
+                echo "Labeling issue #$issue_number with $label" 
+                
+                # Add the stale-before-2021 label
+                curl -s -X POST \
+                  -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "https://api.github.com/repos/${{ github.repository }}/issues/$issue_number/labels" \
+                  -d "{\"labels\": [\"$label\"]}"
+                
+                echo "Labeled issue #$issue_number"
+              fi
+            done
