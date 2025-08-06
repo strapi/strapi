@@ -53,6 +53,7 @@ export async function handleCloudLogin(): Promise<boolean> {
 
   if (!userChoice.toLowerCase().includes('skip')) {
     const cliContext = {
+      user: { id: '' }, // This will be set later when the user logs in
       logger,
       cwd: process.cwd(),
       ...(cloudApiConfig.projectCreation?.reference && {
