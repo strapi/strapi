@@ -21,30 +21,27 @@ jobs:
 
           # Get all open issues created before the cutoff date
           # Exclude issues with 'severity: high' or 'severity: critical' and 'issue: security' label and issues in milestones
+          # NOTE: This will only process the first 100 issues due to pagination limitation
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/issues?state=open&per_page=100" | \
-            jq -r --arg cutoff "$CUTOFF_DATE" --arg label "$LABEL" ' 
-              .[] | 
-              select(.created_at < $cutoff) |
-              select(.pull_request == null) |
-              select(any(.labels[]?; .name == "severity: high") | not) |
-              select(any(.labels[]?; .name == "severity: critical") | not) |
-              select(any(.labels[]?; .name == "issue: security") | not) |
-              select(.milestone == null) |
+            "https://api.github.com/search/issues?q=repo:${{ github.repository }}+is:issue+is:open+created:%3C$CUTOFF_DATE+no:milestone+-label:%22severity:%20high%22+-label:%22severity:%20critical%22+-label:%22issue:%20security%22&per_page=100" | \
+            jq -r --arg label "$LABEL" ' 
+              .items[] | 
               select(any(.labels[]?; .name == $label) | not) |
               .number
             ' | while read issue_number; do
               if [ ! -z "$issue_number" ]; then
-                echo "Labeling issue #$issue_number with $label" 
+                echo "Labeling issue #$issue_number with $LABEL" 
                 
-                # Add the stale-before-2021 label
+                # Add the label
                 curl -s -X POST \
                   -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                   -H "Accept: application/vnd.github.v3+json" \
                   "https://api.github.com/repos/${{ github.repository }}/issues/$issue_number/labels" \
-                  -d "{\"labels\": [\"$label\"]}"
+                  -d "{\"labels\": [\"$LABEL\"]}"
                 
                 echo "Labeled issue #$issue_number"
+              else
+                echo "No issue found."
               fi
             done
