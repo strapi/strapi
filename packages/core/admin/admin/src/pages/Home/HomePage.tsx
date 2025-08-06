@@ -134,6 +134,15 @@ const HomePageCE = () => {
   const displayName = user?.firstname ?? user?.username ?? user?.email;
 
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
+  const filteredWidgets = React.useMemo(
+    () =>
+      getAllWidgets().filter(
+        (widget) =>
+          !widget.roles ||
+          user?.roles?.some((userRole) => widget.roles?.find((role) => userRole.code === role))
+      ),
+    [getAllWidgets, user?.roles]
+  );
 
   return (
     <Main>
@@ -156,7 +165,7 @@ const HomePageCE = () => {
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
           <GuidedTourHomepageOverview />
           <Grid.Root gap={5}>
-            {getAllWidgets().map((widget) => {
+            {filteredWidgets.map((widget) => {
               return (
                 <Grid.Item col={6} s={12} key={widget.uid}>
                   <WidgetRoot
