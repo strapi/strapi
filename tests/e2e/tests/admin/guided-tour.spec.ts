@@ -121,7 +121,7 @@ test.describe('Guided tour', () => {
      */
     await clickAndWait(
       page,
-      page.getByRole('listitem', { name: 'Create and copy an API token' }).getByRole('link', {
+      page.getByRole('listitem', { name: 'Copy an API token' }).getByRole('link', {
         name: 'Start',
       })
     );
@@ -155,14 +155,14 @@ test.describe('Guided tour', () => {
     await gotItButton.click();
     await page.getByRole('button', { name: 'Copy' }).click();
     await expect(
-      page.getByRole('dialog', { name: "Congratulations! It's time to deploy your application!" })
+      page.getByRole('dialog', { name: "Congratulations, it's time to deploy your application!" })
     ).toBeVisible();
     await clickAndWait(page, page.getByRole('link', { name: 'Next' }));
 
     await expect(page).toHaveURL(/.*\/admin/);
 
     await expect(
-      page.getByRole('listitem', { name: 'Create and copy an API token' }).getByText('Done')
+      page.getByRole('listitem', { name: 'Copy an API token' }).getByText('Done')
     ).toBeVisible();
     await expect(page.getByText('75%')).toBeVisible();
 
