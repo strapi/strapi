@@ -46,10 +46,10 @@ const PreviewComponent = () => {
   }, []);
 
   React.useEffect(() => {
-    if (document) {
+    if (data) {
       window.parent?.postMessage({ type: 'previewReady' }, '*');
     }
-  }, [document]);
+  }, [data]);
 
   return (
     <Box
