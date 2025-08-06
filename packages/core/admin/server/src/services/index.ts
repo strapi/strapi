@@ -14,7 +14,6 @@ import * as action from './action';
 import * as apiToken from './api-token';
 import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
-import { createGuidedTourService } from './guided-tour';
 import { homepageService } from './homepage';
 
 // TODO: TS - Export services one by one as this export is cjs
@@ -34,6 +33,5 @@ export default {
   transfer,
   'project-settings': projectSettings,
   encryption,
-  'guided-tour': createGuidedTourService,
   homepage: homepageService,
 };

@@ -100,9 +100,7 @@ test.describe('Guided tour', () => {
     await nextButton.click();
     await expect(page.getByRole('dialog', { name: 'Publish' })).toBeVisible();
     await gotItButton.click();
-    await expect(
-      page.getByRole('dialog', { name: "It's time to create API tokens!" })
-    ).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Time to setup API tokens!' })).toBeVisible();
     await clickAndWait(page, page.getByRole('link', { name: 'Next' }));
 
     await expect(page).toHaveURL(/.*\/admin\/settings\/api-tokens.*/);

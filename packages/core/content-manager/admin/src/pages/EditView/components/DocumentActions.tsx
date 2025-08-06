@@ -7,6 +7,8 @@ import {
   useAPIErrorHandler,
   useQueryParams,
   tours,
+  useGuidedTour,
+  GUIDED_TOUR_REQUIRED_ACTIONS,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -598,6 +600,8 @@ const PublishAction: DocumentActionComponent = ({
   );
   const rootDocumentMeta = useRelationModal('PublishAction', (state) => state.rootDocumentMeta);
 
+  const dispatchGuidedTour = useGuidedTour('PublishAction', (s) => s.dispatch);
+
   const { currentDocumentMeta } = useDocumentContext('PublishAction');
   const [updateDocumentMutation] = useUpdateDocumentMutation();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -759,6 +763,10 @@ const PublishAction: DocumentActionComponent = ({
       // Reset form if successful
       if ('data' in res) {
         resetForm();
+        dispatchGuidedTour({
+          type: 'set_completed_actions',
+          payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
+        });
       }
 
       if ('data' in res && collectionType !== SINGLE_TYPES) {
