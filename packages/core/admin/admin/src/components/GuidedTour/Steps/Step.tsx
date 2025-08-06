@@ -13,9 +13,37 @@ import { FormattedMessage, type MessageDescriptor } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { useTracking } from '../../features/Tracking';
+import { useTracking } from '../../../features/Tracking';
+import { useGuidedTour, type ValidTourName } from '../Context';
 
-import { useGuidedTour, type ValidTourName } from './Context';
+/* -------------------------------------------------------------------------------------------------
+ * Common Step Components
+ * -----------------------------------------------------------------------------------------------*/
+
+const StepCount = ({ tourName }: { tourName: ValidTourName }) => {
+  const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
+  const currentStep = state.tours[tourName].currentStep + 1;
+  // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
+  const displayedLength = state.tours[tourName].length - 1;
+
+  return (
+    <Typography variant="omega" fontSize="12px">
+      <FormattedMessage
+        id="tours.stepCount"
+        defaultMessage="Step {currentStep} of {tourLength}"
+        values={{ currentStep, tourLength: displayedLength }}
+      />
+    </Typography>
+  );
+};
+
+const GotItAction = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <Button onClick={onClick}>
+      <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
+    </Button>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Step factory
@@ -72,23 +100,6 @@ const PopoverArrow = styled(Popover.Arrow)`
   fill: ${({ theme }) => theme.colors.neutral0};
   transform: translateY(-16px) rotate(-90deg);
 `;
-
-export const StepCount = ({ tourName }: { tourName: ValidTourName }) => {
-  const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
-  const currentStep = state.tours[tourName].currentStep + 1;
-  // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
-  const displayedLength = state.tours[tourName].length - 1;
-
-  return (
-    <Typography variant="omega" fontSize="12px">
-      <FormattedMessage
-        id="tours.stepCount"
-        defaultMessage="Step {currentStep} of {tourLength}"
-        values={{ currentStep, tourLength: displayedLength }}
-      />
-    </Typography>
-  );
-};
 
 const createStepComponents = (tourName: ValidTourName): Step => ({
   Root: React.forwardRef(({ withArrow = true, ...props }, ref) => {
@@ -218,4 +229,4 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
 });
 
 export type { Step };
-export { createStepComponents };
+export { createStepComponents, GotItAction, StepCount };
