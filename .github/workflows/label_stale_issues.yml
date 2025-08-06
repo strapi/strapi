@@ -1,7 +1,5 @@
-name: Close Pre-2021 Issues
+name: Label Pre-2021 Issues
 on:
-  # schedule:
-    # - cron: '35 15 * * *'  # Runs daily at 3:30 PM - stop after first run
   workflow_dispatch: # Allows manual triggering from the Github UI
 
 permissions:
@@ -13,14 +11,6 @@ jobs:
   close-inactive:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          
       - name: Label old issues
         run: |
           # Set the cutoff date (issues created before this date will be labeled)

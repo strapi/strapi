@@ -1,0 +1,42 @@
+name: Close Pre-2021 Issues
+on:
+  workflow_dispatch: # Allows manual triggering from the Github UI
+
+permissions:
+  issues: write  # Required to close issues and post comments
+  contents: read  # Needed by most GitHub Actions
+  pull-requests: read  # Needed to access PR data
+
+jobs:
+  close-inactive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Close stale old issues
+        uses: actions/stale@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          stale-issue-labels: 'stale-before-2021'  # Only process issues with this label
+          exempt-issue-labels: 'issue: security,severity: critical,severity: high'  # Don't close issues with this label
+          exempt-all-milestones: true  # Don't close issues that are part of a milestone
+          days-before-stale: 0  # Mark as stale immediately
+          days-before-close: 0  # Close immediately
+          operations-per-run: 100
+          stale-issue-message: |
+            👋 Hello there!
+            
+            We noticed this issue was created before 2024. As part of our efforts to keep our issue tracker current and actionable, we are closing older issues that have been inactive.
+            
+            This issue has been automatically closed due to inactivity. If this issue is still relevant:
+            - Please add a comment to let us know and we will reopen it.
+            - Share any updates or additional context.
+            
+            Thank you for your contribution to making Strapi better! 🙏
+          
