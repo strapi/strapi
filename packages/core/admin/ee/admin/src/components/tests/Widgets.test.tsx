@@ -51,7 +51,7 @@ describe('Homepage Widget Audit Logs', () => {
         results: [
           {
             action: 'entry.update',
-            date: '2025-07-30T12:00:00.000Z',
+            date: new Date().setHours(new Date().getHours() - 1),
             payload: {
               model: 'tag',
             },
@@ -64,7 +64,7 @@ describe('Homepage Widget Audit Logs', () => {
           },
           {
             action: 'entry.create',
-            date: '2025-07-30T11:00:00.000Z',
+            date: new Date().setDate(new Date().getDate() - 1),
             payload: {
               model: 'tag',
             },
@@ -77,7 +77,7 @@ describe('Homepage Widget Audit Logs', () => {
           },
           {
             action: 'admin.auth.success',
-            date: '2025-07-30T10:00:00.000Z',
+            date: new Date().setDate(new Date().getDate() - 8),
             payload: {
               provider: 'local',
             },
@@ -96,15 +96,15 @@ describe('Homepage Widget Audit Logs', () => {
 
     // Check that the first row displays the update entry parts
     expect(screen.getByText('Update entry (tag)')).toBeInTheDocument();
-    expect(screen.getByText('July 30, 2025, 12:00:00')).toBeInTheDocument();
+    expect(screen.getByText(/1 hour ago/i)).toBeInTheDocument();
 
     // Check that the second row displays the create entry parts
     expect(screen.getByText('Create entry (tag)')).toBeInTheDocument();
-    expect(screen.getByText('July 30, 2025, 11:00:00')).toBeInTheDocument();
+    expect(screen.getByText(/yesterday/i)).toBeInTheDocument();
 
     // Check that the third row displays the admin login parts
     expect(screen.getByText('Admin login')).toBeInTheDocument();
-    expect(screen.getByText('July 30, 2025, 10:00:00')).toBeInTheDocument();
+    expect(screen.getByText(/8 days ago/i)).toBeInTheDocument();
 
     expect(screen.getAllByText('Michael Scott')).toHaveLength(3);
   });

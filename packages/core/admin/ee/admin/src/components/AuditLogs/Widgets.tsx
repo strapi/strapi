@@ -3,16 +3,24 @@ import { Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/desig
 import { Eye } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
+import { styled } from 'styled-components';
 
+import { RelativeTime as BaseRelativeTime } from '../../../../../admin/src/components/RelativeTime';
 import { useQueryParams } from '../../../../../admin/src/hooks/useQueryParams';
 import { AuditLog } from '../../../../../shared/contracts/audit-logs';
 import { AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../constants';
-import { useFormatTimeStamp } from '../../pages/SettingsPage/pages/AuditLogs/hooks/useFormatTimeStamp';
 import { getDefaultMessage } from '../../pages/SettingsPage/pages/AuditLogs/utils/getActionTypesDefaultMessages';
 import { useGetAuditLogsQuery } from '../../services/auditLogs';
 
+const RelativeTime = styled(BaseRelativeTime)`
+  display: inline-block;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+`;
+
 const LastActivityTable = ({ items }: { items: AuditLog[] }) => {
-  const formatTimeStamp = useFormatTimeStamp();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
@@ -39,7 +47,6 @@ const LastActivityTable = ({ items }: { items: AuditLog[] }) => {
             },
             { model: (item.payload.model as string) ?? '' }
           );
-          const actionDate = formatTimeStamp(item.date);
           const userDisplayName = item.user?.displayName ?? '-';
           return (
             <Tr
@@ -53,8 +60,8 @@ const LastActivityTable = ({ items }: { items: AuditLog[] }) => {
                 </Typography>
               </Td>
               <Td>
-                <Typography title={actionDate} variant="omega" textColor="neutral800">
-                  {actionDate}
+                <Typography variant="omega" textColor="neutral800">
+                  <RelativeTime timestamp={new Date(item.date)} />
                 </Typography>
               </Td>
               <Td>
