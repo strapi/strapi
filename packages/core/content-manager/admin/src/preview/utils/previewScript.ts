@@ -1,6 +1,10 @@
 // NOTE: This override is for the properties on _user's site_, it's not about Strapi Admin.
 declare global {
-  interface Window {}
+  interface Window {
+    __strapi_previewCleanup?: () => void;
+    __strapi_HIGHLIGHT_COLOR?: string;
+    __strapi_DISABLE_STEGA_DECODING?: boolean;
+  }
 }
 
 /**
@@ -10,6 +14,11 @@ declare global {
  * To get a better overview of everything previewScript does, go to the orchestration part at its end.
  */
 const previewScript = (shouldRun = true) => {
+  const HIGHLIGHT_PADDING = 2; // in pixels
+  const HIGHLIGHT_HOVER_COLOR = window.__strapi_HIGHLIGHT_COLOR ?? '#4945ff'; // dark primary500
+  const HIGHLIGHT_ACTIVE_COLOR = window.__strapi_HIGHLIGHT_COLOR ?? '#7b79ff'; // dark primary600
+  const SOURCE_ATTRIBUTE = 'data-strapi-source';
+  const OVERLAY_ID = 'strapi-preview-overlay';
   const INTERNAL_EVENTS = {
     DUMMY_EVENT: 'dummyEvent',
   } as const;
@@ -26,6 +35,30 @@ const previewScript = (shouldRun = true) => {
   // Live Preview logic will go here.
   // eslint-disable-next-line no-console
   console.log('Preview script running');
+
+  const createOverlaySystem = () => {
+    const existingOverlay = document.getElementById(OVERLAY_ID);
+    if (existingOverlay) {
+      existingOverlay.remove();
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = OVERLAY_ID;
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    `;
+
+    window.document.body.appendChild(overlay);
+    return overlay;
+  };
+
+  createOverlaySystem();
 };
 
 export { previewScript };
