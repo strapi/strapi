@@ -130,7 +130,7 @@ const PreviewComponent = () => {
                           {key}
                         </Typography>
                         <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                          <Typography>
+                          <Typography data-strapi-source={key}>
                             {typeof value === 'object' && value !== null
                               ? JSON.stringify(value, null, 2)
                               : String(value)}
