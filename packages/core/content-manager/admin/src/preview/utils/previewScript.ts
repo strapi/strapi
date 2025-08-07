@@ -61,9 +61,16 @@ const previewScript = (shouldRun = true) => {
     return overlay;
   };
 
+  type EventListenersList = Array<{
+    element: HTMLElement;
+    type: keyof HTMLElementEventMap;
+    handler: EventListener;
+  }>;
+
   const createHighlightManager = (overlay: HTMLElement) => {
     const elements = window.document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
     const highlights: HTMLElement[] = [];
+    const eventListeners: EventListenersList = [];
 
     const drawOverlay = (target: Element, highlight: HTMLElement) => {
       if (!highlight) return;
@@ -89,20 +96,44 @@ const previewScript = (shouldRun = true) => {
         highlight.style.cssText = `
           position: absolute;
           outline: 2px solid transparent;
-          pointer-events: auto;
+          pointer-events: none;
           border-radius: 2px;
           background-color: transparent;
           will-change: transform;
           transition: outline-color 0.1s ease-in-out;
         `;
 
-        highlight.addEventListener('mouseenter', () => {
+        // Move hover detection to the underlying element
+        const mouseEnterHandler = () => {
           highlight.style.outlineColor = HIGHLIGHT_HOVER_COLOR;
-        });
-
-        highlight.addEventListener('mouseleave', () => {
+        };
+        const mouseLeaveHandler = () => {
           highlight.style.outlineColor = 'transparent';
-        });
+        };
+        const doubleClickHandler = () => {
+          // TODO: handle for real
+          // eslint-disable-next-line no-console
+          console.log('Double click on highlight', element);
+        };
+        const mouseDownHandler = (event: MouseEvent) => {
+          // Prevent default multi click to select behavior
+          if (event.detail >= 2) {
+            event.preventDefault();
+          }
+        };
+
+        element.addEventListener('mouseenter', mouseEnterHandler);
+        element.addEventListener('mouseleave', mouseLeaveHandler);
+        element.addEventListener('dblclick', doubleClickHandler);
+        element.addEventListener('mousedown', mouseDownHandler);
+
+        // Store event listeners for cleanup
+        eventListeners.push(
+          { element, type: 'mouseenter', handler: mouseEnterHandler },
+          { element, type: 'mouseleave', handler: mouseLeaveHandler },
+          { element, type: 'dblclick', handler: doubleClickHandler },
+          { element, type: 'mousedown', handler: mouseDownHandler as EventListener }
+        );
 
         highlights.push(highlight);
         overlay.appendChild(highlight);
@@ -114,6 +145,7 @@ const previewScript = (shouldRun = true) => {
     return {
       elements,
       updateAllHighlights,
+      eventListeners,
     };
   };
 
@@ -169,9 +201,15 @@ const previewScript = (shouldRun = true) => {
     };
   };
 
+  const setupEventHandlers = (highlightManager: HighlightManager) => {
+    // TODO: The listeners for postMessage events will go here
+    return highlightManager.eventListeners;
+  };
+
   const createCleanupSystem = (
     overlay: HTMLElement,
-    observers: ReturnType<typeof setupObservers>
+    observers: ReturnType<typeof setupObservers>,
+    eventHandlers: EventListenersList
   ) => {
     window.__strapi_previewCleanup = () => {
       observers.resizeObserver.disconnect();
@@ -186,6 +224,11 @@ const previewScript = (shouldRun = true) => {
         }
       });
 
+      // Remove highlight event listeners
+      eventHandlers.forEach(({ element, type, handler }) => {
+        element.removeEventListener(type, handler);
+      });
+
       overlay.remove();
     };
   };
@@ -197,7 +240,9 @@ const previewScript = (shouldRun = true) => {
   const overlay = createOverlaySystem();
   const highlightManager = createHighlightManager(overlay);
   const observers = setupObservers(highlightManager);
-  createCleanupSystem(overlay, observers);
+  const eventHandlers = setupEventHandlers(highlightManager);
+
+  createCleanupSystem(overlay, observers, eventHandlers);
 };
 
 export { previewScript };
