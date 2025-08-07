@@ -40,6 +40,6 @@
     "npm": ">=6.0.0"
   },
   "strapi": {
-    "uuid": "strapi_examples_getstarted"
+    "uuid": "getstarted"
   }
 }
