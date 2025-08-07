@@ -48,23 +48,4 @@ export default {
       private: true,
     },
   },
-  config: {
-    attributes: {
-      user: {
-        hidden: true,
-      },
-      sessionId: {
-        hidden: true,
-      },
-      deviceId: {
-        hidden: true,
-      },
-      origin: {
-        hidden: true,
-      },
-      expiresAt: {
-        hidden: true,
-      },
-    },
-  },
 };
