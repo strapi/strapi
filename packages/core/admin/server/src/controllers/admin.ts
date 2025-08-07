@@ -195,6 +195,7 @@ export default {
     return {
       data: {
         isFirstSuperAdminUser,
+        schemas: strapi.contentTypes,
         completedActions,
       },
     } satisfies GetGuidedTourMeta.Response;

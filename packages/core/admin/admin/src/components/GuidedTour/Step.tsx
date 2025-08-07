@@ -38,12 +38,14 @@ type WithActionsChildren = {
   children: React.ReactNode;
   showStepCount?: boolean;
   showSkip?: boolean;
+  showPrevious?: boolean;
 };
 
 type WithActionsProps = {
   children?: undefined;
   showStepCount?: boolean;
   showSkip?: boolean;
+  showPrevious?: boolean;
 };
 
 type StepProps = WithChildren | WithIntl;
@@ -145,7 +147,14 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     </Box>
   ),
 
-  Actions: ({ showStepCount = true, showSkip = false, to, children, ...flexProps }) => {
+  Actions: ({
+    showStepCount = true,
+    showPrevious = true,
+    showSkip = false,
+    to,
+    children,
+    ...flexProps
+  }) => {
     const { trackUsage } = useTracking();
     const dispatch = useGuidedTour('GuidedTourPopover', (s) => s.dispatch);
     const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
@@ -181,6 +190,14 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
               {showSkip && (
                 <Button variant="tertiary" onClick={handleSkipAction}>
                   <FormattedMessage id="tours.skip" defaultMessage="Skip" />
+                </Button>
+              )}
+              {!showSkip && showPrevious && (
+                <Button
+                  variant="tertiary"
+                  onClick={() => dispatch({ type: 'previous_step', payload: tourName })}
+                >
+                  <FormattedMessage id="tours.previous" defaultMessage="Previous" />
                 </Button>
               )}
               {to ? (

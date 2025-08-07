@@ -9,6 +9,7 @@ import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { ConfirmDialog } from '../ConfirmDialog';
 
 import { type ValidTourName, useGuidedTour } from './Context';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 
 /* -------------------------------------------------------------------------------------------------
  * Styled
@@ -229,7 +230,9 @@ export const GuidedTourHomepageOverview = () => {
             const tour = tours[tourName];
             const isLinkDisabled =
               tourName !== 'contentTypeBuilder' &&
-              !completedActions.includes('didCreateContentTypeSchema');
+              !completedActions.includes(
+                GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema
+              );
 
             return (
               <TourTaskContainer
