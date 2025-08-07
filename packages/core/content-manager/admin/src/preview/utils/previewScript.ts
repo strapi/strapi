@@ -40,10 +40,7 @@ const previewScript = (shouldRun = true) => {
   const createOverlaySystem = () => {
     // Clean up before creating a new overlay so we can safely call previewScript multiple times
     window.__strapi_previewCleanup?.();
-    const existingOverlay = document.getElementById(OVERLAY_ID);
-    if (existingOverlay) {
-      existingOverlay.remove();
-    }
+    document.getElementById(OVERLAY_ID)?.remove();
 
     const overlay = document.createElement('div');
     overlay.id = OVERLAY_ID;
@@ -241,7 +238,6 @@ const previewScript = (shouldRun = true) => {
   const highlightManager = createHighlightManager(overlay);
   const observers = setupObservers(highlightManager);
   const eventHandlers = setupEventHandlers(highlightManager);
-
   createCleanupSystem(overlay, observers, eventHandlers);
 };
 
