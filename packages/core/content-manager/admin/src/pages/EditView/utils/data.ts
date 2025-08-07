@@ -317,10 +317,13 @@ const handleInvisibleAttributes = (
           removedAttributes
         ).data;
 
-        return {
-          __component: compUID,
-          ...cleaned,
-        };
+        // For newly created components, we want to be sure that the id is undefined (in case of reordering items)
+        const processedItem =
+          dzItem.id === undefined || dzItem.id === null
+            ? { __component: compUID, ...cleaned, id: undefined }
+            : { __component: compUID, ...cleaned };
+
+        return processedItem;
       });
 
       continue;
