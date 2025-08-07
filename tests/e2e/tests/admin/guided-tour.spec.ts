@@ -20,9 +20,7 @@ test.describe('Guided tour', () => {
     await expect(page.getByRole('heading', { name: 'Discover your application!' })).toBeVisible();
     await expect(page.getByRole('listitem', { name: 'Create your schema' })).toBeVisible();
     await expect(page.getByRole('listitem', { name: 'Create and publish content' })).toBeVisible();
-    await expect(
-      page.getByRole('listitem', { name: 'Create and copy an API token' })
-    ).toBeVisible();
+    await expect(page.getByRole('listitem', { name: 'Copy an API token' })).toBeVisible();
     await expect(
       page.getByRole('listitem', { name: 'Deploy your application to Strapi Cloud' })
     ).toBeVisible();
