@@ -11,7 +11,7 @@ const filterAttributes = (item) => {
 };
 
 const PreviewComponent = () => {
-  const { apiName, documentId, locale, status: documentStatus, collectionType } = useParams();
+  const { apiName, documentId, locale, status: documentStatus } = useParams();
   const data = useLoaderData();
   const revalidator = useRevalidator();
 
