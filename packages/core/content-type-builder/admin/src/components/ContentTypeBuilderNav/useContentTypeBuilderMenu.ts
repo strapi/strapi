@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
-import { useCollator, useFilter } from '@strapi/design-system';
+import { useCollator } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 
@@ -49,10 +49,6 @@ export const useContentTypeBuilderMenu = () => {
   const [searchValue, setSearchValue] = useState('');
   const { onOpenModalCreateSchema } = useFormModalNavigation();
   const { locale } = useIntl();
-
-  const { startsWith } = useFilter(locale, {
-    sensitivity: 'base',
-  });
 
   const formatter = useCollator(locale, {
     sensitivity: 'base',
@@ -178,7 +174,11 @@ export const useContentTypeBuilderMenu = () => {
         ...section,
         links: section.links.reduce((acc, link) => {
           const filteredLinks =
-            'links' in link ? link.links.filter((link) => startsWith(link.title, searchValue)) : [];
+            'links' in link
+              ? link.links.filter((link) =>
+                  link.title.toLowerCase().includes(searchValue.toLowerCase())
+                )
+              : [];
 
           if (filteredLinks.length === 0) {
             return acc;
@@ -198,7 +198,7 @@ export const useContentTypeBuilderMenu = () => {
     }
 
     const filteredLinks = section.links
-      .filter((link) => startsWith(link.title, searchValue))
+      .filter((link) => link.title.toLowerCase().includes(searchValue.toLowerCase()))
       .sort((a, b) => formatter.compare(a.title, b.title));
 
     return {
