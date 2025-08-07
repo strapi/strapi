@@ -40,6 +40,18 @@ export interface AccessTokenPayload {
 
 export type TokenPayload = RefreshTokenPayload | AccessTokenPayload;
 
+export interface ValidateRefreshTokenResult {
+  isValid: boolean;
+  userId?: string;
+  sessionId?: string;
+  error?:
+    | 'invalid_token'
+    | 'token_expired'
+    | 'session_not_found'
+    | 'session_expired'
+    | 'wrong_token_type';
+}
+
 class DatabaseSessionProvider implements SessionProvider {
   private db: Database;
 
@@ -139,6 +151,49 @@ class SessionManager {
     });
 
     return { token, sessionId };
+  }
+
+  async validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult> {
+    try {
+      const payload = jwt.verify(token, this.config.jwtSecret) as RefreshTokenPayload;
+
+      // Check if token has correct type
+      if (payload.type !== 'refresh') {
+        return { isValid: false };
+      }
+
+      // Look up session in database
+      const session = await this.provider.findBySessionId(payload.sessionId);
+      if (!session) {
+        return { isValid: false };
+      }
+
+      // Check if session has expired
+      if (new Date(session.expiresAt) <= new Date()) {
+        // Clean up expired session
+        await this.provider.deleteBySessionId(payload.sessionId);
+        return { isValid: false };
+      }
+
+      // Verify user ID matches
+      if (session.user !== payload.userId) {
+        return { isValid: false };
+      }
+
+      return {
+        isValid: true,
+        userId: payload.userId,
+        sessionId: payload.sessionId,
+      };
+    } catch (error: any) {
+      // JWT verification failed (invalid signature, malformed token, or expired)
+      if (error instanceof jwt.JsonWebTokenError) {
+        return { isValid: false };
+      }
+
+      // Re-throw unexpected errors
+      throw error;
+    }
   }
 }
 
