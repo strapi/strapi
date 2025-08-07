@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { createContent, fillField } from '../../utils/content-creation';
-import { navToHeader } from '../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { createContent, fillField } from '../../../utils/content-creation';
+import { navToHeader } from '../../../utils/shared';
 
-test.describe('Conditional Fields', () => {
+test.describe('Conditional Fields - Boolean-controlled conditional text fields', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -13,7 +13,7 @@ test.describe('Conditional Fields', () => {
     await navToHeader(page, ['Content Manager'], 'Content Manager');
   });
 
-  test('As a user if I toggle a boolean field that affects a conditional field, the field should be hidden and the value should not be filled', async ({
+  test('As a user I can see that boolean fields control text field visibility and values are cleared when hidden', async ({
     page,
   }) => {
     await createContent(

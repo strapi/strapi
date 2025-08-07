@@ -61,6 +61,8 @@ export const getEERoutes = (): RouteObject[] =>
       ]
     : [];
 
+export const AUDIT_LOGS_DEFAULT_PAGE_SIZE = 50;
+
 // TODO: the constants.js file is imported before the React application is setup and
 // therefore `window.strapi` might not exist at import-time. We should probably define
 // which constant is available at which stage of the application lifecycle.
@@ -83,7 +85,7 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
       ? [
           {
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
-            to: '/settings/audit-logs?pageSize=50&page=1&sort=date:DESC',
+            to: `/settings/audit-logs?pageSize=${AUDIT_LOGS_DEFAULT_PAGE_SIZE}&page=1&sort=date:DESC`,
             id: 'auditLogs',
             licenseOnly: true,
           },
