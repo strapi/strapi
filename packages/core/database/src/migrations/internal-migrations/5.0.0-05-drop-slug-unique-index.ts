@@ -8,6 +8,9 @@
 import type { Knex } from 'knex';
 
 import type { Migration } from '../common';
+import { transformLogMessage } from '../logger';
+
+const migrationScriptId = '5.0.0-05-drop-slug-fields-index';
 
 const dropIndex = async (knex: Knex, tableName: string, columnName: string) => {
   try {
@@ -22,8 +25,9 @@ const dropIndex = async (knex: Knex, tableName: string, columnName: string) => {
 };
 
 export const dropSlugFieldsIndex: Migration = {
-  name: '5.0.0-05-drop-slug-fields-index',
+  name: migrationScriptId,
   async up(knex, db) {
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} running`));
     for (const meta of db.metadata.values()) {
       const hasTable = await knex.schema.hasTable(meta.tableName);
       if (!hasTable) {
@@ -36,6 +40,7 @@ export const dropSlugFieldsIndex: Migration = {
         }
       }
     }
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} completed`));
   },
   async down() {
     throw new Error('not implemented');
