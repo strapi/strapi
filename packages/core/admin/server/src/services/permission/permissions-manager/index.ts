@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { cloneDeep, isPlainObject } from 'lodash/fp';
+import { isPlainObject } from 'lodash/fp';
 import { subject as asSubject } from '@casl/ability';
 import createSanitizeHelpers from './sanitize';
 import createValidateHelpers from './validate';
@@ -33,7 +33,7 @@ export default ({ ability, action, model }: any) => ({
 
   // eslint-disable-next-line @typescript-eslint/default-param-last
   addPermissionsQueryTo(query = {} as any, action: unknown) {
-    const newQuery = cloneDeep(query);
+    const newQuery = structuredClone(query);
     const permissionQuery = this.getQuery(action) ?? undefined;
 
     if (isPlainObject(query.filters)) {

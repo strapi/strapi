@@ -1,4 +1,4 @@
-import { cloneDeep, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 
 import type { Schema } from '@strapi/types';
 import { async } from '@strapi/utils';
@@ -35,7 +35,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
 
   await async.map(localeEntriesToUpdate, async (entry: any) => {
     const transformedData = await strapi.documents.utils.transformData(
-      cloneDeep(nonLocalizedAttributes),
+      structuredClone(nonLocalizedAttributes),
       {
         uid,
         status,
@@ -58,7 +58,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
       },
       // The data we send to the update function is the entry data merged with
       // the updated component data
-      data: Object.assign(cloneDeep(entryData), componentData),
+      data: Object.assign(structuredClone(entryData), componentData),
     });
   });
 };
