@@ -1,5 +1,5 @@
 # ==============================================================#
-# Dockerfile Strapi (fork oficial) con Workspaces y peerDeps opcionales
+# Dockerfile Strapi (fork oficial) - Solución para lockfile desactualizado
 # ==============================================================#
 FROM node:18-bullseye-slim
 
@@ -15,36 +15,34 @@ RUN apt-get update \
 # 2) Directorio de trabajo
 WORKDIR /opt/app
 
-# 3) Copia manifiestos y config de Yarn
-COPY package.json yarn.lock .yarnrc.yml .yarn/releases/ ./
-
-# 4) Copia todo el engine de Yarn Berry
-COPY .yarn/ ./.yarn/
-
-# 5) Copia los workspaces de Strapi para que Yarn los resuelva
-COPY packages/ packages/
-
-# 6) Ajuste para ignorar peerDependencies faltantes
-RUN printf "\npackageExtensions:\n" >> .yarnrc.yml \
- && printf "  \"@strapi/*@*\":\n" >> .yarnrc.yml \
- && printf "    peerDependenciesMeta:\n" >> .yarnrc.yml \
- && printf "      esbuild:\n" >> .yarnrc.yml \
- && printf "        optional: true\n" >> .yarnrc.yml \
- && printf "      tslib:\n" >> .yarnrc.yml \
- && printf "        optional: true\n" >> .yarnrc.yml \
- && printf "      jest:\n" >> .yarnrc.yml \
- && printf "        optional: true\n" >> .yarnrc.yml
-
-# 7) Activa la versión correcta de Yarn y ejecuta instalación inmutable
-RUN corepack prepare yarn@4.5.0 --activate \
- && yarn install --immutable
-
-# 8) Copia el resto del código y compila
+# 3) Copia TODO el proyecto completo (monorepo requiere contexto completo)
 COPY . .
+
+# 4) Activa Yarn 4.5.0 y configura para CI
+RUN corepack enable && corepack prepare yarn@4.5.0 --activate
+
+# 5) Instala dependencias sin modo inmutable (permite actualizar lockfile)
+RUN yarn install
+
+# 6) Construye la aplicación
 RUN yarn build
 
-# 9) Modo producción y arranque
-ENV NODE_ENV=production
+# 7) Configuración para la aplicación de ejemplo
+WORKDIR /opt/app/examples/getstarted
+
+# 8) Variables de entorno por defecto para Strapi
+ENV NODE_ENV=development
+ENV JWT_SECRET=defaultJwtSecret123456789
+ENV APP_KEYS=defaultAppKey1,defaultAppKey2,defaultAppKey3,defaultAppKey4
+ENV API_TOKEN_SALT=defaultApiTokenSalt123
+ENV ADMIN_JWT_SECRET=defaultAdminJwtSecret123
+ENV TRANSFER_TOKEN_SALT=defaultTransferTokenSalt123
+ENV HOST=0.0.0.0
+ENV PORT=1337
+ENV DB=sqlite
+
 EXPOSE 1337
-CMD ["yarn", "start"]
+
+# Inicia la aplicación Strapi de ejemplo en modo desarrollo
+CMD ["yarn", "develop"]
 # ==============================================================#

@@ -1,6 +1,10 @@
 name: Compile Image
 
 on:
+  push:
+    branches:
+      - develop
+      - main
   workflow_dispatch:
     inputs:
       version_number:
@@ -10,6 +14,7 @@ on:
 
 env:
   REPOSITORY_NAME: "tipsoption"  # Nombre del repositorio ECR
+  PROJECT_NAME: "strapi"         # Nombre del proyecto específico
   DOCKER_FILE: "./Dockerfile"
 
 jobs:
@@ -38,5 +43,6 @@ jobs:
           file: ${{ env.DOCKER_FILE }}
           push: true
           tags: |
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ github.event.inputs.version_number }}
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-${{ github.event.inputs.version_number || 'develop' }}
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-${{ github.sha }}
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-latest

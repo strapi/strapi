@@ -42,6 +42,39 @@ spec:
             - name: datadir
               mountPath: /srv/app
           env:
+            - name: NODE_ENV
+              value: development
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: jwt-secret
+            - name: APP_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: app-keys
+            - name: API_TOKEN_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: api-token-salt
+            - name: ADMIN_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: admin-jwt-secret
+            - name: TRANSFER_TOKEN_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: strapi-secret
+                  key: transfer-token-salt
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "1337"
+            - name: DB
+              value: postgres
             - name: DATABASE_CLIENT
               value: postgres
             - name: DATABASE_HOST
@@ -49,7 +82,10 @@ spec:
             - name: DATABASE_PORT
               value: "5432"
             - name: DATABASE_NAME
-              value: strapi
+              valueFrom:
+                secretKeyRef:
+                  name: postgress-secret
+                  key: database
             - name: DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -60,23 +96,18 @@ spec:
                 secretKeyRef:
                   name: postgress-secret
                   key: pwd
-            - name: DATABASE_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: postgress-secret
-                  key: database
           startupProbe:
             httpGet:
-              path: /_health
+              path: /admin
               port: http
             periodSeconds: 10
             failureThreshold: 10
             initialDelaySeconds: 60
           livenessProbe:
             httpGet:
-              path: /_health
+              path: /admin
               port: http
-            periodSeconds: 10
+            periodSeconds: 30
             failureThreshold: 3
           resources:
             requests:

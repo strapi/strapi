@@ -1,0 +1,63 @@
+name: Deploy to EKS
+
+on:
+  workflow_run:
+    workflows: ["Compile Image"]
+    types:
+      - completed
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+  NAMESPACE: "tipsoption-dev"
+  REPOSITORY_NAME: "tipsoption"
+  PROJECT_NAME: "strapi"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Configure kubectl for EKS
+        run: |
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+
+      - name: Update image in StatefulSet
+        run: |
+          # Actualizar la imagen en el StatefulSet
+          sed -i "s|IMAGE_PLACEHOLDER|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-latest|g" k8s/dev/strapi/strapi.statefulset.yml
+
+      - name: Deploy to Kubernetes
+        run: |
+          # Aplicar manifiestos de PostgreSQL primero
+          kubectl apply -f k8s/dev/postgress/
+          
+          # Esperar a que PostgreSQL StatefulSet esté listo
+          kubectl wait --for=condition=ready pod -l app=postgress -n ${{ env.NAMESPACE }} --timeout=300s || true
+          
+          # Aplicar manifiestos de Strapi
+          kubectl apply -f k8s/dev/strapi/
+          
+          # Verificar el despliegue de Strapi
+          kubectl rollout status statefulset/strapi -n ${{ env.NAMESPACE }} --timeout=600s
+
+      - name: Get service status
+        run: |
+          kubectl get services -n ${{ env.NAMESPACE }}
+          kubectl get pods -n ${{ env.NAMESPACE }}
