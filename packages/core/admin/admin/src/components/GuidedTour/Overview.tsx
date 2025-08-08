@@ -101,7 +101,7 @@ const TASK_CONTENT = [
     },
     title: {
       id: 'tours.overview.apiTokens.label',
-      defaultMessage: 'Create and copy an API token',
+      defaultMessage: 'Copy an API token',
     },
     done: DONE_LABEL,
   },

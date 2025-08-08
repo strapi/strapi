@@ -119,30 +119,5 @@ describe('Guided Tour Meta', () => {
         documentId: createdDocument.documentId,
       });
     });
-
-    test('Detects created custom API tokens', async () => {
-      // Create a custom API token
-      const createdToken = await strapi.documents('admin::api-token').create({
-        data: {
-          name: 'Custom Token',
-          type: 'read-only',
-          description: 'Test token',
-          accessKey: 'beep boop',
-        },
-      });
-
-      const res = await authRq({
-        url: '/admin/guided-tour-meta',
-        method: 'GET',
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.completedActions).toContain('didCreateApiToken');
-
-      // Cleanup
-      await strapi.documents('admin::api-token').delete({
-        documentId: createdToken.documentId,
-      });
-    });
   });
 });

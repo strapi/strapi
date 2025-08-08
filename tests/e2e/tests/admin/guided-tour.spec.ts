@@ -8,7 +8,6 @@ test.describe('Guided tour', () => {
   test.beforeEach(async ({ page }) => {
     await setGuidedTourLocalStorage(page, { ...STRAPI_GUIDED_TOUR_CONFIG, enabled: true });
 
-    // Now proceed with the normal setup (login, etc.)
     await sharedSetup('guided-tour', page, {
       login: true,
       resetFiles: true,
@@ -20,9 +19,7 @@ test.describe('Guided tour', () => {
     await expect(page.getByRole('heading', { name: 'Discover your application!' })).toBeVisible();
     await expect(page.getByRole('listitem', { name: 'Create your schema' })).toBeVisible();
     await expect(page.getByRole('listitem', { name: 'Create and publish content' })).toBeVisible();
-    await expect(
-      page.getByRole('listitem', { name: 'Create and copy an API token' })
-    ).toBeVisible();
+    await expect(page.getByRole('listitem', { name: 'Copy an API token' })).toBeVisible();
     await expect(
       page.getByRole('listitem', { name: 'Deploy your application to Strapi Cloud' })
     ).toBeVisible();
@@ -121,35 +118,48 @@ test.describe('Guided tour', () => {
      */
     await clickAndWait(
       page,
-      page.getByRole('listitem', { name: 'Create and copy an API token' }).getByRole('link', {
+      page.getByRole('listitem', { name: 'Copy an API token' }).getByRole('link', {
         name: 'Start',
       })
     );
-    await expect(page.getByRole('dialog', { name: 'API Tokens' })).toBeVisible();
+    await expect(
+      page.getByRole('dialog', { name: 'Last but not least, API tokens' })
+    ).toBeVisible();
     await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Create an API token' })).toBeVisible();
-    await nextButton.click();
-    await clickAndWait(page, page.getByRole('link', { name: 'Create new API token' }));
+    await expect(page.getByRole('dialog', { name: 'Manage an API token' })).toBeVisible();
+    await clickAndWait(page, nextButton);
+    await clickAndWait(page, page.getByRole('link', { name: 'Edit Read Only' }));
 
-    await page.getByRole('textbox', { name: 'Name' }).fill('Test token');
-    await page.getByRole('combobox', { name: 'Token duration' }).click();
-    await page.getByRole('option', { name: '7 days' }).click();
-    await page.getByRole('combobox', { name: 'Token type' }).click();
-    await page.getByRole('option', { name: 'Read' }).click();
-    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+    await expect(page.getByRole('dialog', { name: 'View API token' })).toBeVisible();
+    await gotItButton.click();
 
-    await expect(page.getByRole('dialog', { name: 'Copy your new API token' })).toBeVisible();
+    /**
+     * TODO:
+     * Currently the test environment does not work with ENCRYPTION_KEY,
+     * so we have to regenerate the token instead of clicking view token directly.
+     * In a real app generated with create-strapi-app the view token button is enabled by
+     * default.
+     *
+     * Remove the regeneration clicks below and replace with
+     *
+     * await page.getByRole('button', { name: 'View token' }).click();
+     */
+    await page.getByRole('button', { name: 'Regenerate' }).click();
+    // Confirm dialog generate button
+    await page.getByRole('button', { name: 'Regenerate' }).click();
+
+    await expect(page.getByRole('dialog', { name: 'Copy your API token' })).toBeVisible();
     await gotItButton.click();
     await page.getByRole('button', { name: 'Copy' }).click();
     await expect(
-      page.getByRole('dialog', { name: "It's time to deploy your application!" })
+      page.getByRole('dialog', { name: "Congratulations, it's time to deploy your application!" })
     ).toBeVisible();
     await clickAndWait(page, page.getByRole('link', { name: 'Next' }));
 
     await expect(page).toHaveURL(/.*\/admin/);
 
     await expect(
-      page.getByRole('listitem', { name: 'Create and copy an API token' }).getByText('Done')
+      page.getByRole('listitem', { name: 'Copy an API token' }).getByText('Done')
     ).toBeVisible();
     await expect(page.getByText('75%')).toBeVisible();
 

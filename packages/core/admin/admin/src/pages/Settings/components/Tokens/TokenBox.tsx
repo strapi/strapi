@@ -30,7 +30,7 @@ export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
 
   const { copy } = useClipboard();
 
-  const handleClick = (token: TokenBoxProps['token']) => async () => {
+  const handleCopyToken = async (token: TokenBoxProps['token']) => {
     if (token) {
       const didCopy = await copy(token);
 
@@ -69,8 +69,8 @@ export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
           </Typography>
           <Typography>
             {formatMessage({
-              id: 'Settings.tokens.copy.lastWarning',
-              defaultMessage: "Make sure to copy this token, you won't be able to see it again!",
+              id: 'Settings.apiTokens.copy.lastWarning',
+              defaultMessage: 'Copy your API token',
             })}
           </Typography>
         </Flex>
@@ -83,7 +83,10 @@ export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
           <Button
             startIcon={<Duplicate />}
             variant="secondary"
-            onClick={handleClick(token)}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              handleCopyToken(token);
+            }}
             marginTop={6}
           >
             {formatMessage({ id: 'Settings.tokens.copy.copy', defaultMessage: 'Copy' })}

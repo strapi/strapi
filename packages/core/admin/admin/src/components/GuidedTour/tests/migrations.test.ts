@@ -71,7 +71,7 @@ describe('GuidedTour | migrateTourSteps', () => {
         },
         apiTokens: {
           currentStep: 3,
-          length: 5, // Outdated length - will trigger migration
+          length: 4, // Outdated length - will trigger migration
           isCompleted: false,
         },
         strapiCloud: {

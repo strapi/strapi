@@ -19,16 +19,9 @@ type ValidTourName = keyof Tours;
  * Derive the union of all string literal values from GUIDED_TOUR_REQUIRED_ACTIONS
  * (ie didCreateContentTypeSchema | didCreateContent etc...)
  */
-type RequiredActionValues = {
-  [K in keyof typeof GUIDED_TOUR_REQUIRED_ACTIONS]: (typeof GUIDED_TOUR_REQUIRED_ACTIONS)[K] extends Record<
-    string,
-    string
-  >
-    ? (typeof GUIDED_TOUR_REQUIRED_ACTIONS)[K][keyof (typeof GUIDED_TOUR_REQUIRED_ACTIONS)[K]]
-    : never;
-}[keyof typeof GUIDED_TOUR_REQUIRED_ACTIONS];
-
-export type CompletedActions = RequiredActionValues[];
+type ValueOf<T> = T[keyof T];
+type NonEmptyValueOf<T> = T extends Record<string, never> ? never : ValueOf<T>;
+export type CompletedActions = NonEmptyValueOf<ValueOf<typeof GUIDED_TOUR_REQUIRED_ACTIONS>>[];
 
 type Action =
   | {
