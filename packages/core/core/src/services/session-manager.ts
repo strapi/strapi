@@ -1,0 +1,250 @@
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+import type { Database } from '@strapi/database';
+
+export interface SessionProvider {
+  create(session: SessionData): Promise<SessionData>;
+  findBySessionId(sessionId: string): Promise<SessionData | null>;
+  findByIdentifier(userId: string): Promise<SessionData[]>;
+  deleteBySessionId(sessionId: string): Promise<void>;
+  deleteByIdentifier(userId: string): Promise<void>;
+  deleteExpiredByIdentifier(userId: string): Promise<void>;
+  deleteExpired(): Promise<void>;
+}
+
+export interface SessionData {
+  id?: string;
+  user: string; // User ID stored as string (key-value store)
+  sessionId: string;
+  deviceId: string;
+  origin: string;
+  expiresAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface RefreshTokenPayload {
+  userId: string;
+  sessionId: string;
+  type: 'refresh';
+  exp: number;
+  iat: number;
+}
+
+export interface AccessTokenPayload {
+  userId: string;
+  sessionId: string;
+  type: 'access';
+  exp: number;
+  iat: number;
+}
+
+export type TokenPayload = RefreshTokenPayload | AccessTokenPayload;
+
+export interface ValidateRefreshTokenResult {
+  isValid: boolean;
+  userId?: string;
+  sessionId?: string;
+  error?:
+    | 'invalid_token'
+    | 'token_expired'
+    | 'session_not_found'
+    | 'session_expired'
+    | 'wrong_token_type';
+}
+
+class DatabaseSessionProvider implements SessionProvider {
+  private db: Database;
+
+  private contentType: string;
+
+  constructor(db: Database, contentType: string) {
+    this.db = db;
+    this.contentType = contentType;
+  }
+
+  async create(session: SessionData): Promise<SessionData> {
+    const result = await this.db.query(this.contentType).create({
+      data: session,
+    });
+    return result as SessionData;
+  }
+
+  async findBySessionId(sessionId: string): Promise<SessionData | null> {
+    const result = await this.db.query(this.contentType).findOne({
+      where: { sessionId },
+    });
+    return result as SessionData | null;
+  }
+
+  async findByIdentifier(userId: string): Promise<SessionData[]> {
+    const results = await this.db.query(this.contentType).findMany({
+      where: { user: userId },
+    });
+    return results as SessionData[];
+  }
+
+  async deleteBySessionId(sessionId: string): Promise<void> {
+    await this.db.query(this.contentType).delete({
+      where: { sessionId },
+    });
+  }
+
+  async deleteByIdentifier(userId: string): Promise<void> {
+    await this.db.query(this.contentType).delete({
+      where: { user: userId },
+    });
+  }
+
+  async deleteExpired(): Promise<void> {
+    await this.db.query(this.contentType).delete({
+      where: { expiresAt: { $lt: new Date() } },
+    });
+  }
+
+  async deleteExpiredByIdentifier(userId: string): Promise<void> {
+    await this.db.query(this.contentType).delete({
+      where: { user: userId, expiresAt: { $lt: new Date() } },
+    });
+  }
+}
+
+export interface SessionManagerConfig {
+  jwtSecret: string;
+  refreshTokenLifespan: number; // default 30 days
+  accessTokenLifespan: number; // default 1 hour
+}
+
+class SessionManager {
+  private provider: SessionProvider;
+
+  private config: SessionManagerConfig;
+
+  constructor(provider: SessionProvider, config: SessionManagerConfig) {
+    this.provider = provider;
+    this.config = config;
+  }
+
+  generateSessionId(): string {
+    return crypto.randomBytes(16).toString('hex');
+  }
+
+  async generateRefreshToken(
+    userId: string,
+    deviceId: string,
+    origin: string
+  ): Promise<{ token: string; sessionId: string }> {
+    if (typeof this.provider?.deleteExpiredByIdentifier === 'function') {
+      await this.provider.deleteExpiredByIdentifier(userId);
+    } else {
+      await this.provider.deleteExpired();
+    }
+
+    const sessionId = this.generateSessionId();
+    const expiresAt = new Date(Date.now() + this.config.refreshTokenLifespan * 1000);
+
+    await this.provider.create({
+      user: userId,
+      sessionId,
+      deviceId,
+      origin,
+      expiresAt,
+    });
+
+    const payload: Omit<RefreshTokenPayload, 'iat' | 'exp'> = {
+      userId,
+      sessionId,
+      type: 'refresh',
+    };
+
+    const token = jwt.sign(payload, this.config.jwtSecret, {
+      expiresIn: this.config.refreshTokenLifespan,
+    });
+
+    return { token, sessionId };
+  }
+
+  async validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult> {
+    try {
+      const payload = jwt.verify(token, this.config.jwtSecret) as RefreshTokenPayload;
+
+      if (payload.type !== 'refresh') {
+        return { isValid: false };
+      }
+
+      const session = await this.provider.findBySessionId(payload.sessionId);
+      if (!session) {
+        return { isValid: false };
+      }
+
+      if (new Date(session.expiresAt) <= new Date()) {
+        // Clean up expired session
+        await this.provider.deleteBySessionId(payload.sessionId);
+        return { isValid: false };
+      }
+
+      if (session.user !== payload.userId) {
+        return { isValid: false };
+      }
+
+      return {
+        isValid: true,
+        userId: payload.userId,
+        sessionId: payload.sessionId,
+      };
+    } catch (error: any) {
+      // If the token is expired, verify signature ignoring expiration to safely extract payload
+      // and clean up the corresponding session in database.
+      if (error instanceof jwt.JsonWebTokenError) {
+        if (error.name === 'TokenExpiredError') {
+          try {
+            const expiredPayload = jwt.verify(token, this.config.jwtSecret, {
+              // Validate signature but ignore exp to retrieve session information
+              ignoreExpiration: true as any,
+            }) as RefreshTokenPayload;
+
+            if (expiredPayload?.sessionId) {
+              await this.provider.deleteBySessionId(expiredPayload.sessionId);
+            }
+          } catch (_) {
+            // If we cannot recover payload safely, skip cleanup
+          }
+        }
+        return { isValid: false };
+      }
+
+      throw error;
+    }
+  }
+
+  async generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }> {
+    const validation = await this.validateRefreshToken(refreshToken);
+
+    if (!validation.isValid) {
+      return { error: 'invalid_refresh_token' };
+    }
+
+    const payload: Omit<AccessTokenPayload, 'iat' | 'exp'> = {
+      userId: validation.userId!,
+      sessionId: validation.sessionId!,
+      type: 'access',
+    };
+
+    const token = jwt.sign(payload, this.config.jwtSecret, {
+      expiresIn: this.config.accessTokenLifespan,
+    });
+
+    return { token };
+  }
+}
+
+const createDatabaseProvider = (db: Database, contentType: string): SessionProvider => {
+  return new DatabaseSessionProvider(db, contentType);
+};
+
+const createSessionManager = ({ db, config }: { db: Database; config: SessionManagerConfig }) => {
+  const provider = createDatabaseProvider(db, 'admin::session');
+  return new SessionManager(provider, config);
+};
+
+export { createSessionManager, createDatabaseProvider };
