@@ -33,7 +33,7 @@ spec:
             secretName: strapi-secret
       containers:
         - name: strapi
-          image: 973145121826.dkr.ecr.eu-west-1.amazonaws.com/tipsoption:strapi-latest
+          image: 973145121826.dkr.ecr.eu-west-1.amazonaws.com/tipsoption:strapi-0.0.2
           ports:
             - containerPort: 1337
               name: http
@@ -113,11 +113,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              cpu: "50m"
-              memory: "512Mi"
-              ephemeral-storage: 256Mi
+              cpu: "25m"
+              memory: "256Mi"
+              ephemeral-storage: 128Mi
             limits:
-              cpu: "150m"
-              memory: "1Gi"
+              cpu: "100m"
+              memory: "768Mi"
               ephemeral-storage: 256Mi
 # =============================================================#
