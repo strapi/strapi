@@ -1,10 +1,21 @@
 name: Deploy to EKS
 
 on:
-  workflow_run:
-    workflows: ["Compile Image"]
-    types:
-      - completed
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Rama a deployar"
+        required: true
+        type: choice
+        options:
+          - develop
+          - main
+          - feature/test
+        default: develop
+      version_number:
+        description: "Versión (tag) de la imagen Docker a deployar (ej: 0.0.1)"
+        required: true
+        type: string
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -16,11 +27,12 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -40,20 +52,20 @@ jobs:
 
       - name: Update image in StatefulSet
         run: |
-          # Actualizar la imagen en el StatefulSet
-          sed -i "s|IMAGE_PLACEHOLDER|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-latest|g" k8s/dev/strapi/strapi.statefulset.yml
+          # Actualizar la imagen en el StatefulSet con la versión específica
+          sed -i "s|IMAGE_PLACEHOLDER|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-${{ github.event.inputs.version_number }}|g" k8s/dev/strapi/strapi.statefulset.yml
 
       - name: Deploy to Kubernetes
         run: |
           # Aplicar manifiestos de PostgreSQL primero
           kubectl apply -f k8s/dev/postgress/
-          
+
           # Esperar a que PostgreSQL StatefulSet esté listo
           kubectl wait --for=condition=ready pod -l app=postgress -n ${{ env.NAMESPACE }} --timeout=300s || true
-          
+
           # Aplicar manifiestos de Strapi
           kubectl apply -f k8s/dev/strapi/
-          
+
           # Verificar el despliegue de Strapi
           kubectl rollout status statefulset/strapi -n ${{ env.NAMESPACE }} --timeout=600s
 
@@ -61,3 +73,4 @@ jobs:
         run: |
           kubectl get services -n ${{ env.NAMESPACE }}
           kubectl get pods -n ${{ env.NAMESPACE }}
+          echo "Deployment completed for version: ${{ github.event.inputs.version_number }}"

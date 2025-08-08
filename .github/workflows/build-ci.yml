@@ -1,14 +1,19 @@
 name: Compile Image
 
 on:
-  push:
-    branches:
-      - develop
-      - main
   workflow_dispatch:
     inputs:
+      branch:
+        description: "Rama a deployar"
+        required: true
+        type: choice
+        options:
+          - develop
+          - main
+          - feature/test
+        default: develop
       version_number:
-        description: "Versión (tag) para la imagen Docker"
+        description: "Versión (tag) para la imagen Docker (ej: 0.0.1)"
         required: true
         type: string
 
@@ -23,6 +28,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -43,6 +50,5 @@ jobs:
           file: ${{ env.DOCKER_FILE }}
           push: true
           tags: |
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-${{ github.event.inputs.version_number || 'develop' }}
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-${{ github.sha }}
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-${{ github.event.inputs.version_number }}
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.REPOSITORY_NAME }}:${{ env.PROJECT_NAME }}-latest
