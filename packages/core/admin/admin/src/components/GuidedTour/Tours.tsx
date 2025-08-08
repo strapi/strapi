@@ -262,7 +262,7 @@ const tours = {
           />
           <Step.Content
             id="tours.apiTokens.Introduction.content"
-            defaultMessage="Create and manage API tokens with highly customizable permissions to control access to your content."
+            defaultMessage="Control API access with highly customizable permissions."
           />
           <Step.Actions showSkip />
         </Step.Root>
