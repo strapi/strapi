@@ -184,6 +184,11 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
       dispatch({ type: 'next_step', payload: tourName });
     };
 
+    const handlePreviousStep = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      dispatch({ type: 'previous_step', payload: tourName });
+    };
+
     return (
       <ActionsContainer
         width="100%"
@@ -204,13 +209,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
                 </Button>
               )}
               {!showSkip && showPrevious && (
-                <Button
-                  variant="tertiary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    dispatch({ type: 'previous_step', payload: tourName });
-                  }}
-                >
+                <Button variant="tertiary" onClick={handlePreviousStep}>
                   <FormattedMessage id="tours.previous" defaultMessage="Previous" />
                 </Button>
               )}

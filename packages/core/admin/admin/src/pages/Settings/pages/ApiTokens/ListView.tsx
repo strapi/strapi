@@ -133,7 +133,7 @@ export const ListView = () => {
       {apiTokens.length > 0 && (
         <tours.apiTokens.Introduction>
           {/* Invisible Anchor */}
-          <Box paddingTop={5} />
+          <Box />
         </tours.apiTokens.Introduction>
       )}
       <Page.Title>

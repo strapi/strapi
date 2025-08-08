@@ -255,7 +255,7 @@ const tours = {
     {
       name: 'Introduction',
       content: ({ Step }) => (
-        <Step.Root side="top" withArrow={false}>
+        <Step.Root side="top" sideOffset={32} withArrow={false}>
           <Step.Title
             id="tours.apiTokens.Introduction.title"
             defaultMessage="Last but not least, API tokens"
@@ -310,10 +310,14 @@ const tours = {
           />
           <Step.Content
             id="tours.apiTokens.CopyAPIToken.content"
-            defaultMessage="piclle"
+            defaultMessage="Copy your API token"
             values={{
               spacer: <Box paddingTop={2} />,
-              a: (msg) => <a href="https://docs.strapi.io/cms/features/api-tokens#usage">{msg}</a>,
+              a: (msg) => (
+                <Link isExternal href="https://docs.strapi.io/cms/features/api-tokens#usage">
+                  {msg}
+                </Link>
+              ),
             }}
           />
           <Step.Actions>

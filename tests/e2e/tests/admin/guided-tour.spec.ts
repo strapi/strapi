@@ -8,7 +8,6 @@ test.describe('Guided tour', () => {
   test.beforeEach(async ({ page }) => {
     await setGuidedTourLocalStorage(page, { ...STRAPI_GUIDED_TOUR_CONFIG, enabled: true });
 
-    // Now proceed with the normal setup (login, etc.)
     await sharedSetup('guided-tour', page, {
       login: true,
       resetFiles: true,
