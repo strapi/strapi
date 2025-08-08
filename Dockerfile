@@ -30,6 +30,9 @@ RUN yarn build
 # 7) Configuración para la aplicación de ejemplo
 WORKDIR /opt/app/examples/getstarted
 
+# 7.1) Instalar driver de PostgreSQL
+RUN yarn add pg
+
 # 8) Variables de entorno por defecto para Strapi
 ENV NODE_ENV=development
 ENV JWT_SECRET=defaultJwtSecret123456789
@@ -39,7 +42,8 @@ ENV ADMIN_JWT_SECRET=defaultAdminJwtSecret123
 ENV TRANSFER_TOKEN_SALT=defaultTransferTokenSalt123
 ENV HOST=0.0.0.0
 ENV PORT=1337
-ENV DB=sqlite
+ENV DB=postgres
+ENV DATABASE_CLIENT=postgres
 
 EXPOSE 1337
 

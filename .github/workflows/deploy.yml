@@ -57,17 +57,42 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          # Aplicar manifiestos de PostgreSQL primero
-          kubectl apply -f k8s/dev/postgress/
+          # Verificar y crear secret de Strapi si no existe
+          if ! kubectl get secret strapi-secret -n ${{ env.NAMESPACE }} >/dev/null 2>&1; then
+            echo "Creando secret strapi-secret..."
+            kubectl apply -f k8s/dev/strapi/strapi.secret.yml
+          else
+            echo "Secret strapi-secret ya existe, omitiendo creación"
+          fi
 
-          # Esperar a que PostgreSQL StatefulSet esté listo
-          kubectl wait --for=condition=ready pod -l app=postgress -n ${{ env.NAMESPACE }} --timeout=300s || true
-
-          # Aplicar manifiestos de Strapi
-          kubectl apply -f k8s/dev/strapi/
+          # Aplicar service y statefulset de Strapi
+          kubectl apply -f k8s/dev/strapi/strapi.service.yml
+          kubectl apply -f k8s/dev/strapi/strapi.statefulset.yml
 
           # Verificar el despliegue de Strapi
           kubectl rollout status statefulset/strapi -n ${{ env.NAMESPACE }} --timeout=600s
+
+      - name: Verify connection to existing PostgreSQL
+        run: |
+          echo "Verificando recursos existentes en namespace ${{ env.NAMESPACE }}..."
+
+          # Verificar PostgreSQL existente
+          if kubectl get service svc-postgress -n ${{ env.NAMESPACE }} >/dev/null 2>&1; then
+            echo "✅ PostgreSQL service encontrado: svc-postgress"
+          else
+            echo "❌ PostgreSQL service NO encontrado: svc-postgress"
+            exit 1
+          fi
+
+          if kubectl get secret postgress-secret -n ${{ env.NAMESPACE }} >/dev/null 2>&1; then
+            echo "✅ PostgreSQL secret encontrado: postgress-secret"
+          else
+            echo "❌ PostgreSQL secret NO encontrado: postgress-secret"
+            exit 1
+          fi
+
+          # Verificar Strapi resources
+          kubectl get secret strapi-secret -n ${{ env.NAMESPACE }} && echo "✅ Strapi secret existe" || echo "ℹ️ Strapi secret será creado"
 
       - name: Get service status
         run: |

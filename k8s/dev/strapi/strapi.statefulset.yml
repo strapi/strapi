@@ -33,14 +33,14 @@ spec:
             secretName: strapi-secret
       containers:
         - name: strapi
-          image: IMAGE_PLACEHOLDER
+          image: 973145121826.dkr.ecr.eu-west-1.amazonaws.com/tipsoption:strapi-latest
           ports:
             - containerPort: 1337
               name: http
           # command: ["/bin/bash", "-c", "tail -F anything"]
           volumeMounts:
             - name: datadir
-              mountPath: /srv/app
+              mountPath: /opt/data
           env:
             - name: NODE_ENV
               value: development
@@ -96,6 +96,8 @@ spec:
                 secretKeyRef:
                   name: postgress-secret
                   key: pwd
+            - name: STRAPI_LOG_LEVEL
+              value: "info"
           startupProbe:
             httpGet:
               path: /admin
@@ -111,11 +113,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              cpu: "100m"
-              memory: "256Mi"
-              ephemeral-storage: 1Gi
-            limits:
-              cpu: "200m"
+              cpu: "50m"
               memory: "512Mi"
-              ephemeral-storage: 1Gi
+              ephemeral-storage: 256Mi
+            limits:
+              cpu: "150m"
+              memory: "1Gi"
+              ephemeral-storage: 256Mi
 # =============================================================#
