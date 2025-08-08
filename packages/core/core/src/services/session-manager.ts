@@ -8,6 +8,7 @@ export interface SessionProvider {
   findByIdentifier(userId: string): Promise<SessionData[]>;
   deleteBySessionId(sessionId: string): Promise<void>;
   deleteByIdentifier(userId: string): Promise<void>;
+  deleteExpiredByIdentifier(userId: string): Promise<void>;
   deleteExpired(): Promise<void>;
 }
 
@@ -100,6 +101,12 @@ class DatabaseSessionProvider implements SessionProvider {
       where: { expiresAt: { $lt: new Date() } },
     });
   }
+
+  async deleteExpiredByIdentifier(userId: string): Promise<void> {
+    await this.db.query(this.contentType).delete({
+      where: { user: userId, expiresAt: { $lt: new Date() } },
+    });
+  }
 }
 
 export interface SessionManagerConfig {
@@ -127,7 +134,11 @@ class SessionManager {
     deviceId: string,
     origin: string
   ): Promise<{ token: string; sessionId: string }> {
-    await this.provider.deleteExpired();
+    if (typeof this.provider?.deleteExpiredByIdentifier === 'function') {
+      await this.provider.deleteExpiredByIdentifier(userId);
+    } else {
+      await this.provider.deleteExpired();
+    }
 
     const sessionId = this.generateSessionId();
     const expiresAt = new Date(Date.now() + this.config.refreshTokenLifespan * 1000);
@@ -182,12 +193,48 @@ class SessionManager {
         sessionId: payload.sessionId,
       };
     } catch (error: any) {
+      // If the token is expired, verify signature ignoring expiration to safely extract payload
+      // and clean up the corresponding session in database.
       if (error instanceof jwt.JsonWebTokenError) {
+        if (error.name === 'TokenExpiredError') {
+          try {
+            const expiredPayload = jwt.verify(token, this.config.jwtSecret, {
+              // Validate signature but ignore exp to retrieve session information
+              ignoreExpiration: true as any,
+            }) as RefreshTokenPayload;
+
+            if (expiredPayload?.sessionId) {
+              await this.provider.deleteBySessionId(expiredPayload.sessionId);
+            }
+          } catch (_) {
+            // If we cannot recover payload safely, skip cleanup
+          }
+        }
         return { isValid: false };
       }
 
       throw error;
     }
+  }
+
+  async generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }> {
+    const validation = await this.validateRefreshToken(refreshToken);
+
+    if (!validation.isValid) {
+      return { error: 'invalid_refresh_token' };
+    }
+
+    const payload: Omit<AccessTokenPayload, 'iat' | 'exp'> = {
+      userId: validation.userId!,
+      sessionId: validation.sessionId!,
+      type: 'access',
+    };
+
+    const token = jwt.sign(payload, this.config.jwtSecret, {
+      expiresIn: this.config.accessTokenLifespan,
+    });
+
+    return { token };
   }
 }
 

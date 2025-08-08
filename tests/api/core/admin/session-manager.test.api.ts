@@ -36,6 +36,7 @@ describe('SessionManager API Integration', () => {
         expect(typeof strapi.sessionManager.generateRefreshToken).toBe('function');
         expect(typeof strapi.sessionManager.generateSessionId).toBe('function');
         expect(typeof strapi.sessionManager.validateRefreshToken).toBe('function');
+        expect(typeof strapi.sessionManager.generateAccessToken).toBe('function');
       });
     });
 
@@ -284,6 +285,167 @@ describe('SessionManager API Integration', () => {
         expect(result).toEqual({
           isValid: false,
         });
+      });
+    });
+
+    describe('generateAccessToken', () => {
+      it('should generate access token for valid refresh token', async () => {
+        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        const accessTokenResult = await strapi.sessionManager.generateAccessToken(
+          refreshTokenResult.token
+        );
+
+        expect(accessTokenResult).toHaveProperty('token');
+        expect(accessTokenResult).not.toHaveProperty('error');
+        expect(typeof accessTokenResult.token).toBe('string');
+      });
+
+      it('should generate access token with correct JWT payload', async () => {
+        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        const accessTokenResult = await strapi.sessionManager.generateAccessToken(
+          refreshTokenResult.token
+        );
+
+        expect(accessTokenResult).toHaveProperty('token');
+
+        // Verify the JWT payload structure
+        const jwt = require('jsonwebtoken');
+        const jwtSecret = strapi.config.get('admin.auth.secret');
+        const decodedPayload = jwt.verify(accessTokenResult.token, jwtSecret);
+
+        expect(decodedPayload).toMatchObject({
+          userId: testUserId,
+          sessionId: refreshTokenResult.sessionId,
+          type: 'access',
+          exp: expect.any(Number),
+          iat: expect.any(Number),
+        });
+
+        const tokenLifespan = decodedPayload.exp - decodedPayload.iat;
+        // Verify access token has shorter lifespan (1 hour = 3600 seconds)
+        expect(tokenLifespan).toBe(3600);
+      });
+
+      it('should return error for invalid refresh token', async () => {
+        const result = await strapi.sessionManager.generateAccessToken('invalid-jwt-token');
+
+        expect(result).toEqual({
+          error: 'invalid_refresh_token',
+        });
+      });
+
+      it('should return error for expired refresh token', async () => {
+        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        // Update the session to be expired
+        await strapi.db.query(contentTypeUID).update({
+          where: { sessionId: refreshTokenResult.sessionId },
+          data: { expiresAt: new Date(Date.now() - 60 * 60 * 1000) }, // 1 hour ago
+        });
+
+        const result = await strapi.sessionManager.generateAccessToken(refreshTokenResult.token);
+
+        expect(result).toEqual({
+          error: 'invalid_refresh_token',
+        });
+      });
+
+      it('should return error when refresh token session not found', async () => {
+        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        // Delete the session from database
+        await strapi.db.query(contentTypeUID).delete({
+          where: { sessionId: refreshTokenResult.sessionId },
+        });
+
+        const result = await strapi.sessionManager.generateAccessToken(refreshTokenResult.token);
+
+        expect(result).toEqual({
+          error: 'invalid_refresh_token',
+        });
+      });
+
+      it('should return error for access token passed as refresh token', async () => {
+        // First generate a refresh token and then an access token
+        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        const accessTokenResult = await strapi.sessionManager.generateAccessToken(
+          refreshTokenResult.token
+        );
+
+        // Ensure we got a token, not an error
+        expect(accessTokenResult).toHaveProperty('token');
+
+        // Try to use the access token to generate another access token (should fail)
+        const result = await strapi.sessionManager.generateAccessToken(
+          (accessTokenResult as { token: string }).token
+        );
+
+        expect(result).toEqual({
+          error: 'invalid_refresh_token',
+        });
+      });
+
+      it('should return error when user ID mismatch in session', async () => {
+        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        // Manually modify session in database to have different user
+        await strapi.db.query(contentTypeUID).update({
+          where: { sessionId: refreshTokenResult.sessionId },
+          data: { user: 'different-user-id' },
+        });
+
+        const result = await strapi.sessionManager.generateAccessToken(refreshTokenResult.token);
+
+        expect(result).toEqual({
+          error: 'invalid_refresh_token',
+        });
+      });
+
+      it('should work with multiple valid refresh tokens', async () => {
+        const refreshToken1 = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          'device-1',
+          testOrigin
+        );
+        const refreshToken2 = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          'device-2',
+          testOrigin
+        );
+
+        const accessToken1 = await strapi.sessionManager.generateAccessToken(refreshToken1.token);
+        const accessToken2 = await strapi.sessionManager.generateAccessToken(refreshToken2.token);
+
+        expect(accessToken1).toHaveProperty('token');
+        expect(accessToken2).toHaveProperty('token');
+        expect(accessToken1.token).not.toBe(accessToken2.token);
       });
     });
   });
