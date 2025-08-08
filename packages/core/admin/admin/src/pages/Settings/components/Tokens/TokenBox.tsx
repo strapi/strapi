@@ -69,7 +69,7 @@ export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
           </Typography>
           <Typography>
             {formatMessage({
-              id: 'Settings.tokens.copy.lastWarning',
+              id: 'Settings.apiTokens.copy.lastWarning',
               defaultMessage: 'Copy your API token',
             })}
           </Typography>
