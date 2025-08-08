@@ -83,6 +83,7 @@
     "inquirer": "8.2.5",
     "is-docker": "2.2.1",
     "json-logic-js": "2.0.5",
+    "jsonwebtoken": "9.0.0",
     "koa": "2.16.1",
     "koa-body": "6.0.1",
     "koa-compose": "4.1.0",
