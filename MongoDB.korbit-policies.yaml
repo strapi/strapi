@@ -1,0 +1,2731 @@
+version: '0.1'
+topics:
+- name: "Security & Access Control"
+  paths:
+    - '**/*.ts'
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Security - Avoid Hardcoding MongoDB Credentials"
+      description: |
+        Connection strings and credentials must not be hardcoded directly in the application's source code.
+      impact: |
+        Hardcoding credentials exposes sensitive information, creating a significant security vulnerability if the code is ever leaked or accessed by unauthorized personnel. This practice also complicates credential rotation and managing different environments (dev, staging, prod).
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/reference/connection-string/
+      required_context: single-file
+      severity: mandatory
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            from pymongo import MongoClient
+            # Bad: Credentials are hardcoded.
+            client = MongoClient('mongodb://admin:S3cr3tP@ssw0rd@mongodb0.example.com:27017/')
+          compliant: |
+            #compliant python example
+            import os
+            from pymongo import MongoClient
+            # Good: Connection string is loaded from an environment variable.
+            mongo_uri = os.environ.get('MONGO_URI')
+            client = MongoClient(mongo_uri)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            const { MongoClient } = require('mongodb');
+            // Bad: Credentials are hardcoded.
+            const uri = 'mongodb://admin:S3cr3tP@ssw0rd@mongodb0.example.com:27017/';
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            const { MongoClient } = require('mongodb');
+            // Good: Connection string is loaded from environment variables.
+            const uri = process.env.MONGO_URI;
+            const client = new MongoClient(uri);
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            const mongoose = require('mongoose');
+            // Bad: Credentials are hardcoded in the connection string.
+            mongoose.connect('mongodb://admin:S3cr3tP@ssw0rd@mongodb0.example.com:27017/my_database');
+          compliant: |
+            #compliant mongoose example
+            const mongoose = require('mongoose');
+            // Good: Connection string is loaded from environment variables.
+            mongoose.connect(process.env.MONGO_URI);
+
+    - title: "Security - Use Parameterized Queries to Prevent NoSQL Injection"
+      description: |
+        Database queries must use parameterized inputs or properly sanitized data instead of building queries from raw, unvalidated user input strings.
+      impact: |
+        Constructing queries by concatenating raw user input can lead to NoSQL injection attacks. An attacker could manipulate the query structure to bypass authentication, read sensitive data, or execute arbitrary commands on the database.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/faq/fundamentals/#how-does-mongodb-address-sql-or-query-injection
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: User input is directly used to construct a query filter.
+            def find_user(username_input):
+                # An attacker could provide a malicious dictionary as input.
+                return db.users.find_one({ "username": { "$eq": username_input } })
+          compliant: |
+            #compliant python example
+            # Good: The query structure is fixed, and only the value is from user input after type validation.
+            def find_user(username_input):
+                if not isinstance(username_input, str):
+                    raise TypeError("Username must be a string.")
+                return db.users.find_one({ "username": username_input })
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: The user-controlled `req.body` object is used directly as a query filter.
+            // An attacker could submit `{"$ne": null}` to list all users.
+            app.post('/login', async (req, res) => {
+              const user = await db.collection('users').findOne(req.body);
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: The query filter is constructed with expected properties from the input.
+            app.post('/login', async (req, res) => {
+              const { username, password } = req.body;
+              const user = await db.collection('users').findOne({
+                username: String(username),
+                password: String(password)
+              });
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: A query filter object is passed directly from a user request.
+            // Attacker could pass `{"$where": "sleep(5000)"}`
+            const potentiallyMaliciousQuery = req.query.q;
+            const results = await User.find(potentiallyMaliciousQuery);
+          compliant: |
+            #compliant mongoose example
+            // Good: Destructure and validate input before building the query.
+            const { status, name } = req.query;
+            if (typeof status !== 'string') { throw new Error("Invalid status"); }
+            const results = await User.find({ status: status, name: name });
+
+    - title: "Security - Enforce TLS/SSL for Encrypting Data in Transit"
+      description: |
+        Client connection strings must explicitly enable TLS/SSL.
+      impact: |
+        Without TLS/SSL, network traffic between the application and the database is unencrypted. This allows attackers with access to the network to intercept sensitive data, including credentials and application data, via man-in-the-middle attacks.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/security-tls-ssl/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: The connection string does not enforce TLS.
+            uri = "mongodb://user:pass@host:27017/"
+            client = MongoClient(uri)
+          compliant: |
+            #compliant python example
+            # Good: The connection string explicitly requires TLS.
+            uri = "mongodb://user:pass@host:27017/?tls=true"
+            client = MongoClient(uri)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: The tls=true option is missing.
+            const uri = "mongodb://user:pass@host:27017/";
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            // Good: The connection string includes tls=true.
+            const uri = "mongodb://user:pass@host:27017/?tls=true";
+            const client = new MongoClient(uri);
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: The `tls` option is missing or false.
+            const uri = "mongodb://user:pass@host:27017/";
+            mongoose.connect(uri);
+          compliant: |
+            #compliant mongoose example
+            // Good: The connection string forces TLS encryption.
+            const uri = "mongodb://user:pass@host:27017/?tls=true";
+            mongoose.connect(uri);
+    
+    - title: "Security - Avoid Using Deprecated `db.eval()`"
+      description: |
+        Source code must not use the `db.eval()` command.
+      impact: |
+        The `db.eval()` command has been deprecated since MongoDB 3.0. It poses a significant security risk as it can execute arbitrary JavaScript on the server with access to the global scope, which can easily be exploited for injection attacks.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/reference/method/db.eval/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Using the dangerous and deprecated db.eval() command.
+            result = db.command('eval', 'function() { return db.users.count(); }')
+          compliant: |
+            #compliant python example
+            # Good: Using the standard, safe driver method to get the count.
+            result = db.users.count_documents({})
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Using the deprecated and insecure db.eval() method.
+            const count = await db.eval('function() { return db.users.count(); }');
+          compliant: |
+            #compliant javascript example
+            // Good: Using the modern and safe countDocuments method.
+            const count = await db.collection('users').countDocuments();
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Using db.eval through the Mongoose connection.
+            const result = await mongoose.connection.db.eval('new Function("return 1")');
+          compliant: |
+            #compliant mongoose example
+            // Good: Performing application logic in the application, not the database.
+            function calculateValue() {
+                return 1;
+            }
+            const result = calculateValue();
+
+    - title: "Access Control - Avoid Common Admin Usernames in Connection Strings"
+      description: |
+        Connection strings must not use common administrative usernames like 'root', 'admin', or 'administrator'.
+      impact: |
+        Using well-known administrative usernames in application connection strings increases security risks. If an application is compromised, an attacker gains high-privilege access. It also violates the principle of least privilege, as applications should use dedicated, restricted-access roles.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/security-least-privilege/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Connecting with a user that has a common admin name.
+            client = MongoClient(
+                host='mongodb://host',
+                username='admin',
+                password=os.environ.get('DB_PASS')
+            )
+          compliant: |
+            #compliant python example
+            # Good: Connecting with a user assigned a specific, limited application role.
+            client = MongoClient(
+                host='mongodb://host',
+                username='order_service_user',
+                password=os.environ.get('DB_PASS')
+            )
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Connecting with a user known to have root privileges.
+            const client = new MongoClient(uri, {
+              auth: { username: "root", password: process.env.DB_PASSWORD }
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: Connecting with a limited-privilege application user.
+            const client = new MongoClient(uri, {
+              auth: { username: "report_generator", password: process.env.DB_PASSWORD }
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: The connection logic uses a common admin username.
+            mongoose.connect(uri, {
+              user: "administrator",
+              pass: process.env.DB_PASSWORD,
+              authSource: "admin"
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: The connection is made with a user assigned a specific application role.
+            mongoose.connect(uri, {
+              user: "order_service_user",
+              pass: process.env.DB_PASSWORD,
+              authSource: "admin"
+            });
+
+- name: "Authentication, Authorization, and Role Design"
+  paths:
+    - '**/*.ts'
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Authentication - Verify that Authentication is Enforced in Connection String"
+      description: |
+        The application must connect to MongoDB using a connection string that includes user credentials.
+      impact: |
+        Allowing anonymous access is a critical security risk. It allows any process with network access to the database to view, modify, and delete data without any verification, effectively bypassing all access controls.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/authentication/
+      required_context: single-file
+      severity: mandatory
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Connecting without any username or password.
+            client = MongoClient("mongodb://my-mongo-host:27017/")
+          compliant: |
+            #compliant python example
+            # Good: Connecting with a username and password from environment variables.
+            user = os.environ.get("DB_USER")
+            pwd = os.environ.get("DB_PASS")
+            client = MongoClient(f"mongodb://{user}:{pwd}@my-mongo-host:27017/")
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Connecting without credentials.
+            const uri = "mongodb://my-mongo-host:27017/my_db";
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            // Good: Connection string includes authentication details from environment variables.
+            const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@my-mongo-host:27017/my_db`;
+            const client = new MongoClient(uri);
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Anonymous connection string with no credentials.
+            const uri = "mongodb://my-mongo-host:27017/my_db";
+            mongoose.connect(uri);
+          compliant: |
+            #compliant mongoose example
+            // Good: Connection string includes credentials from environment variables.
+            const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@my-mongo-host:27017/my_db`;
+            mongoose.connect(uri);
+
+    - title: "Authentication - Use a Strong Authentication Mechanism like SCRAM"
+      description: |
+        Scripts that create users must use strong, challenge-response based authentication mechanisms like SCRAM-SHA-256 and must not use legacy mechanisms like MONGODB-CR.
+      impact: |
+        Legacy authentication mechanisms like MONGODB-CR are less secure and more vulnerable to compromise. SCRAM provides better protection against password sniffing and replay attacks.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/security-scram/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: A script that creates a user with a legacy authentication mechanism.
+            db.command(
+                "createUser", "legacyUser",
+                pwd="password123",
+                mechanisms=["MONGODB-CR"],
+                roles=[{"role": "readWrite", "db": "test"}]
+            )
+          compliant: |
+            #compliant python example
+            # Good: Creating a user with the default, secure SCRAM mechanism.
+            db.command(
+                "createUser", "secureUser",
+                pwd="aVeryComplexPassword",
+                roles=[{"role": "readWrite", "db": "test"}]
+            )
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Explicitly using the insecure MONGODB-CR.
+            db.getSiblingDB('admin').command({
+              createUser: 'legacyUser',
+              pwd: 'password',
+              mechanisms: ['MONGODB-CR'],
+              roles: [{role: 'read', db: 'test'}]
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: Allowing the server to use the default, secure SCRAM mechanism.
+            db.getSiblingDB('admin').command({
+              createUser: 'secureUser',
+              pwd: 'password',
+              roles: [{role: 'read', db: 'test'}]
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Mongoose uses the underlying driver, so this is a conceptual example of a script.
+            // Bad: Creating a user with the legacy MONGODB-CR mechanism.
+            mongoose.connection.db.admin().command({
+                createUser: "legacyUser",
+                pwd: "password123",
+                mechanisms: [ "MONGODB-CR" ], // Legacy mechanism
+                roles: [ { role: "readWrite", db: "test" } ]
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: The default mechanism is SCRAM. Do not downgrade it.
+            mongoose.connection.db.admin().command({
+                createUser: "secureUser",
+                pwd: "aVeryComplexPassword",
+                roles: [ { role: "readWrite", db: "test" } ]
+            });
+
+- name: "Data Modeling & Schema Design"
+  paths:
+    - '**/*schema.ts'
+    - '**/*schema.js'
+    - '**/*model.py'
+  policies:
+    - title: "Schema Design - Avoid Unbounded Array Growth"
+      description: |
+        Document schemas must not allow arrays to grow indefinitely. For large one-to-many relationships, document references must be used instead of embedding.
+      impact: |
+        Embedding an unbounded array can cause documents to exceed the 16MB size limit, which results in failed write operations. It also leads to performance degradation, as large documents are slower to read, update, and require more memory.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/tutorial/model-referenced-one-to-many-relationships-between-documents/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # A product schema where every review is embedded.
+            # The 'reviews' array can grow infinitely.
+            product_schema = {
+                "name": "Laptop",
+                "reviews": [ {"user": "A", "comment": "..."} ]
+            }
+          compliant: |
+            #compliant python example
+            # Reviews are defined in a separate collection, referencing the product.
+            review_schema = {
+                "product_id": "laptop_sku_123",
+                "user": "C",
+                "comment": "..."
+            }
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: A post document that embeds all comments.
+            const PostSchema = {
+              title: "My Post",
+              comments: [ { text: "first comment" } ]
+            };
+          compliant: |
+            #compliant javascript example
+            // Good: Comments are in a separate collection.
+            const CommentSchema = {
+              postId: "some_post_id",
+              text: "another comment"
+            };
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // The 'comments' array on a Post can grow infinitely large.
+            const PostSchema = new mongoose.Schema({
+              title: String,
+              comments: [{ author: String, body: String }]
+            });
+          compliant: |
+            #compliant mongoose example
+            // Comments are a separate entity, linked by post_id.
+            const CommentSchema = new mongoose.Schema({
+              post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+              author: String,
+              body: String
+            });
+
+    - title: "Schema Design - Use Appropriate Data Types for Financial Data"
+      description: |
+        Fields representing monetary values must use the `Decimal128` BSON data type.
+      impact: |
+        Using standard floating-point numbers for financial data can lead to precision and rounding errors, which is a critical bug for any application handling money. `Decimal128` provides the exact precision required for financial calculations.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/reference/bson-types/#decimal128
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Using a float for a monetary value.
+            db.products.insert_one({ "name": "Laptop", "price": 899.99 })
+          compliant: |
+            #compliant python example
+            from bson.decimal128 import Decimal128
+            # Good: Using Decimal128 preserves exact precision.
+            db.products.insert_one({ "name": "Laptop", "price": Decimal128("899.99") })
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Using a standard number for price.
+            db.collection('products').insertOne({ name: 'Book', price: 19.99 });
+          compliant: |
+            #compliant javascript example
+            const { Decimal128 } = require('mongodb');
+            // Good: Using the Decimal128 BSON type.
+            db.collection('products').insertOne({ name: 'Book', price: Decimal128.fromString('19.99') });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            const ProductSchema = new mongoose.Schema({
+              name: String,
+              price: Number // Bad: standard Number is a float, prone to precision errors.
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: Using Decimal128 for financial data.
+            const ProductSchema = new mongoose.Schema({
+              name: String,
+              price: mongoose.Schema.Types.Decimal128
+            });
+
+- name: "Indexing Strategies and Query Optimization"
+  paths:
+    - '**/*.ts'
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Indexing - Use Partial Indexes for Targeted Queries"
+      description: |
+        Index creation scripts must use a partial index for queries that target a known and very small subset of documents in a collection.
+      impact: |
+        Using a full index when only a small fraction of documents will ever be queried is inefficient. Partial indexes are smaller, consume less RAM, and have lower maintenance overhead for write operations.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/docs/manual/core/index-partial/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # A full index is used, even though queries only target unpaid orders.
+            # This wastes space and write performance.
+            db.orders.create_index("payment_status")
+          compliant: |
+            #compliant python example
+            # A partial index is smaller and more efficient for this specific query.
+            db.orders.create_index(
+                [("payment_status", 1)],
+                partialFilterExpression={"payment_status": "UNPAID"}
+            )
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: A full index on `rating` is created.
+            db.collection('reviews').createIndex({ rating: 1 });
+          compliant: |
+            #compliant javascript example
+            // Good: A partial index for only highly-rated reviews, which are queried often.
+            db.collection('reviews').createIndex(
+              { rating: 1 },
+              { partialFilterExpression: { rating: { $gte: 4 } } }
+            );
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // A query that only ever finds 'incomplete' orders.
+            // Bad: A full index on 'processed_at' includes all documents.
+            OrderSchema.index({ processed_at: 1 });
+          compliant: |
+            #compliant mongoose example
+            // Good: A partial index that only includes incomplete orders.
+            OrderSchema.index(
+              { processed_at: 1 },
+              { partialFilterExpression: { status: "incomplete" } }
+            );
+
+    - title: "Query Optimization - Use Cursors for Large Result Sets"
+      description: |
+        Queries that may return a large number of documents must be processed iteratively using a cursor.
+      impact: |
+        Loading a large result set into memory by calling a method like `.toArray()` can exhaust the application's available RAM, leading to slow performance or crashes. Cursors allow the application to process the results in small batches, maintaining a low memory footprint.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/node/current/fundamentals/crud/read-operations/cursor/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: This could load millions of documents into memory.
+            all_logs = list(db.logs.find({}))
+          compliant: |
+            #compliant python example
+            # Good: Processing documents one by one, with low memory usage.
+            for log_doc in db.logs.find({}):
+                process_log(log_doc)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: The .toArray() method can cause an out-of-memory error.
+            const allLogs = await db.collection('logs').find({}).toArray();
+          compliant: |
+            #compliant javascript example
+            // Good: The cursor is iterated, processing one document at a time.
+            const cursor = db.collection('logs').find({});
+            for await (const doc of cursor) {
+              processLog(doc);
+            }
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: This query fetches all users and holds them in memory.
+            const allUsers = await User.find({});
+          compliant: |
+            #compliant mongoose example
+            // Good: Using a cursor to process users one by one.
+            for await (const user of User.find({}).cursor()) {
+              processUser(user);
+            }
+
+    - title: "Query Optimization - Prefer Projections to Limit Data Returned"
+      description: |
+        Database queries must use projections to specify exactly which fields to return.
+      impact: |
+        Returning the entire document when only a few fields are needed increases network traffic and the memory required by both the database and the client application. Projections lead to faster, more efficient queries.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/tutorial/project-fields-from-query-results/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Returns the entire user document, including large bio field.
+            users = db.users.find({})
+          compliant: |
+            #compliant python example
+            # Good: Returns only the fields needed for the user list page.
+            users = db.users.find({}, {"_id": 1, "name": 1, "email": 1})
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: The query returns all fields in the documents.
+            const users = await db.collection('users').find({}).toArray();
+          compliant: |
+            #compliant javascript example
+            // Good: Using projection to return only necessary fields.
+            const options = { projection: { name: 1, email: 1, _id: 0 } };
+            const users = await db.collection('users').find({}, options).toArray();
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Fetches the entire user document, including potentially large fields
+            // like 'profilePicture' or 'bio'.
+            const users = await User.find({});
+          compliant: |
+            #compliant mongoose example
+            // Good: Selects only the `name` and `email` fields, reducing payload size.
+            const users = await User.find({}).select('name email');
+
+- name: "Backup, Restore & Disaster Recovery"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Durability - Use Majority Write Concern For Critical Operations"
+      description: |
+        Database write operations on critical data must use a write concern of `w: "majority"`.
+      impact: |
+        Using a weak write concern (like `w: 1`) creates a risk of data loss. The write could be acknowledged after being written to the primary, but before being replicated. If the primary crashes at that moment, the write is lost. A `majority` write concern ensures data is durable and recoverable in a failover scenario.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/reference/write-concern/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: The default write concern (w: 1) is used for a critical financial transaction.
+            db.accounts.update_one({"_id": 1}, {"$inc": {"balance": -100}})
+          compliant: |
+            #compliant python example
+            from pymongo import WriteConcern
+            # Good: Using w="majority" ensures the write is durable and aids recovery.
+            majority_wc = WriteConcern(w="majority")
+            db.accounts.with_options(write_concern=majority_wc).update_one({"_id": 1}, {"$inc": {"balance": -100}})
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Using the default, less safe write concern.
+            await db.collection('accounts').updateOne({ _id: 1 }, { $inc: { balance: -100 } });
+          compliant: |
+            #compliant javascript example
+            // Good: Specifying a majority write concern for durability.
+            await db.collection('accounts').updateOne(
+              { _id: 1 },
+              { $inc: { balance: -100 } },
+              { writeConcern: { w: 'majority' } }
+            );
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: This operation uses the default write concern.
+            await Account.updateOne({ _id: accountId }, { $inc: { balance: -100 } });
+          compliant: |
+            #compliant mongoose example
+            // Good: The query options specify a majority write concern.
+            // Note: In recent Mongoose, this is often set at the connection or schema level.
+            await Account.updateOne(
+              { _id: accountId },
+              { $inc: { balance: -100 } },
+              { writeConcern: { w: 'majority' } }
+            );
+
+- name: "Performance Tuning and Capacity Planning"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Performance - Set Appropriate Connection Pool Size"
+      description: |
+        The maximum connection pool size (`maxPoolSize`) in the client driver must be explicitly configured.
+      impact: |
+        The default pool size (often 100) is not optimal for all workloads. If `maxPoolSize` is too small, application threads may be blocked waiting for a connection. If it's too large, it can overwhelm the server.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/reference/connection-string/#mongodb-uri-option-maxPoolSize
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Using the default pool size, which might be too large or small.
+            client = MongoClient(uri)
+          compliant: |
+            #compliant python example
+            # Explicitly setting the pool size to a tested value.
+            client = MongoClient(uri, maxPoolSize=50)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // No maxPoolSize is set, using the driver's default.
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            // Setting a specific connection pool size.
+            const client = new MongoClient(uri, { maxPoolSize: 50 });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Relying on Mongoose's default pool size.
+            mongoose.connect(uri);
+          compliant: |
+            #compliant mongoose example
+            // Explicitly configuring the connection pool size.
+            mongoose.connect(uri, { maxPoolSize: 50 });
+
+    - title: "Performance - Use `estimatedDocumentCount` for Full Collection Counts"
+      description: |
+        When counting all documents in a collection without a filter, the `estimatedDocumentCount` method must be used instead of `countDocuments`.
+      impact: |
+        For a full collection count, `estimatedDocumentCount` is significantly faster because it retrieves the count from the collection's metadata. `countDocuments` must perform a full collection scan if no filter is provided, which is much slower and more resource-intensive on large collections.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/reference/method/db.collection.estimatedDocumentCount/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Using count_documents({}) is slow for getting the total count.
+            total_docs = db.users.count_documents({})
+          compliant: |
+            #compliant python example
+            # Good: Using estimated_document_count() is much faster.
+            total_docs = db.users.estimated_document_count()
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: This performs a collection scan.
+            const count = await db.collection('users').countDocuments({});
+          compliant: |
+            #compliant javascript example
+            // Good: This reads from metadata and is much faster.
+            const count = await db.collection('users').estimatedDocumentCount();
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: `countDocuments` with an empty filter is inefficient for a total count.
+            const userCount = await User.countDocuments({});
+          compliant: |
+            #compliant mongoose example
+            // Good: Using `estimatedDocumentCount` for a fast, metadata-based count.
+            const userCount = await User.estimatedDocumentCount();
+
+- name: "Monitoring, Observability & Alerting"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Monitoring - Correlate Application Logs with Database Operations"
+      description: |
+        Database queries must include a comment containing a unique request or correlation ID.
+      impact: |
+        Without correlation, it's very difficult to trace a slow or failed operation from the application front-end all the way to the specific query that caused the issue in the database logs, significantly increasing debugging time.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/docs/manual/reference/method/cursor.comment/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: A generic query with no identifying information.
+            def get_order(db, order_id):
+                return db.orders.find_one({"_id": order_id})
+          compliant: |
+            #compliant python example
+            import uuid
+            # Good: The query includes a comment with a unique request ID.
+            def get_order(db, order_id):
+                request_id = str(uuid.uuid4())
+                # This ID would also be in the application logs
+                return db.orders.find_one({"_id": order_id}, comment=f"req_id={request_id}")
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            # Bad: The query has no comment.
+            const order = await db.collection('orders').findOne({ _id: orderId });
+          compliant: |
+            #compliant javascript example
+            # Good: Adding a comment with a request ID.
+            const { randomUUID } = require('crypto');
+            const requestId = randomUUID();
+            console.log(`Processing request: ${requestId}`);
+            const order = await db.collection('orders').findOne(
+              { _id: orderId },
+              { comment: `reqId=${requestId}` }
+            );
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            # Bad: A generic query with no identifying information.
+            const order = await Order.findById(orderId);
+          compliant: |
+            #compliant mongoose example
+            # Good: Adding a comment with a unique request ID.
+            const { randomUUID } = require('crypto');
+            const requestId = randomUUID();
+            console.log(`Processing request: ${requestId}`);
+            const order = await Order.findById(orderId).comment(`reqId=${requestId}`);
+
+- name: "Transactions, Consistency & ACID Patterns"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Transactions - Keep Multi-Document Transactions Short"
+      description: |
+        Multi-document ACID transactions must not contain long-running operations or external network calls.
+      impact: |
+        Long-running transactions hold locks on documents for an extended period, which can block other operations and significantly degrade application concurrency and performance. All slow operations should be performed before the transaction begins.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/docs/manual/core/transactions/#long-running-transactions
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: A long network call is made inside the transaction, holding locks.
+            with client.start_session() as session:
+                with session.start_transaction():
+                    # This external API call could take seconds, blocking others.
+                    response = requests.get("https://api.example.com/check_fraud")
+                    db.accounts.update_one(...)
+          compliant: |
+            #compliant python example
+            # Good: Data fetching and external calls happen BEFORE the transaction starts.
+            response = requests.get("https://api.example.com/check_fraud")
+            with client.start_session() as session:
+                with session.start_transaction():
+                    db.accounts.update_one(...)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: A slow operation is inside the transaction.
+            await session.withTransaction(async () => {
+              await collection.insertOne({ status: 'pending' }, { session });
+              await new Promise(resolve => setTimeout(resolve, 5000)); // Represents a slow operation
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: All slow operations are performed before the transaction starts.
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Represents a slow operation
+            await session.withTransaction(async () => {
+              await collection.insertOne({ status: 'pending' }, { session });
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Long-running logic inside the transaction callback.
+            await session.withTransaction(async () => {
+              await Account.updateOne(...);
+              await someSlowApiCall();
+              await Log.create(...);
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: The slow call is made before the transaction begins.
+            const apiResult = await someSlowApiCall();
+            await session.withTransaction(async () => {
+              await Account.updateOne(...);
+              await Log.create({ result: apiResult });
+            });
+
+    - title: "Transactions - Handle Transaction Errors and Implement Retry Logic"
+      description: |
+        Application code must include logic to catch and handle transient transaction errors and retry the entire transaction.
+      impact: |
+        Without proper error handling and retry logic, transient network issues or temporary lock conflicts can cause transactions to fail permanently, leading to inconsistent application state and data loss.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/docs/manual/core/transactions-in-applications/#retry-transaction
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: No error handling or retry logic for the transaction.
+            with client.start_session() as session:
+                with session.start_transaction():
+                    # ... database operations ...
+                    pass
+          compliant: |
+            #compliant python example
+            # Good: A retry loop is implemented to handle transient errors.
+            for _ in range(3): # Retry up to 3 times
+                try:
+                    with client.start_session() as session:
+                        with session.start_transaction():
+                            # ... database operations ...
+                            pass
+                    break
+                except (ConnectionFailure, OperationFailure) as e:
+                    if e.has_error_label("TransientTransactionError"):
+                        continue
+                    raise
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: If this transaction fails, it won't be retried.
+            await session.withTransaction(async () => {
+              await collection.insertOne(...);
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: A function that runs a transaction with retry logic.
+            async function runTransactionWithRetry(session, txnFunc) {
+              try {
+                await session.withTransaction(txnFunc);
+              } catch (error) {
+                if (error.hasErrorLabel("TransientTransactionError")) {
+                  console.log("Retrying transaction...");
+                  await runTransactionWithRetry(session, txnFunc);
+                } else {
+                  throw error;
+                }
+              }
+            }
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: No error handling or retry logic for the transaction.
+            async function transferMoney(session) {
+              session.startTransaction();
+              await Account.updateOne(...);
+              await session.commitTransaction();
+            }
+          compliant: |
+            #compliant mongoose example
+            // Good: A retry loop is implemented to handle transient errors.
+            async function transferMoneyWithRetry(session) {
+              while (true) {
+                try {
+                  await session.withTransaction(async () => { /* ... */ });
+                  break;
+                } catch (error) {
+                  if (!error.hasErrorLabel("TransientTransactionError")) throw error;
+                  await session.abortTransaction();
+                }
+              }
+            }
+
+    - title: "Consistency - Critical Queries Must Use Strong Read Concern"
+      description: |
+        A `readConcern` of 'majority' or 'linearizable' must be explicitly specified for queries on critical data.
+      impact: |
+        Using a weaker read concern (like the default 'local' or 'available') can lead to reading stale data or data that may be rolled back. For critical operations like checking a balance before a transaction, this can lead to incorrect business logic.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/docs/manual/reference/read-concern/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Relying on default 'local' read concern for a critical financial read.
+            account = db.accounts.find_one({"_id": 123})
+          compliant: |
+            #compliant python example
+            from pymongo.read_concern import ReadConcern
+            # Good: 'majority' ensures the data read has been committed by a majority of nodes.
+            account = db.accounts.with_options(read_concern=ReadConcern("majority")).find_one({"_id": 123})
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: The default read concern may not be strong enough for this operation.
+            const user = await db.collection('users').findOne({ _id: 1 });
+          compliant: |
+            #compliant javascript example
+            // Good: 'majority' provides strong consistency guarantees.
+            const user = await db.collection('users').findOne({ _id: 1 }, { readConcern: { level: 'majority' } });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Relying on the default read concern for a critical read.
+            const order = await Order.findOne({ _id: 1 });
+          compliant: |
+            #compliant mongoose example
+            // Good: 'majority' ensures that the data read is durable.
+            const order = await Order.findOne({ _id: 1 }).readConcern('majority');
+
+    - title: "ACID Patterns - Use Single-Document Atomicity Where Possible"
+      description: |
+        Operations that modify only a single document must not be wrapped in a multi-document transaction.
+      impact: |
+        Multi-document transactions have higher performance overhead than single-document atomic operations. A well-designed schema can often co-locate data that needs to be updated together into a single document, making a transaction unnecessary and inefficient.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/write-operations-atomicity/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Using a costly transaction to update a single user's profile.
+            with client.start_session() as session:
+                with session.start_transaction():
+                    db.users.update_one({"_id": 1}, {"$set": {"status": "active"}})
+          compliant: |
+            #compliant python example
+            # Good: A single update operation is already atomic by default.
+            db.users.update_one({"_id": 1}, {"$set": {"status": "active"}})
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Unnecessarily wrapping a single update in a transaction.
+            await session.withTransaction(async () => {
+              await db.collection('users').updateOne({ _id: 1 }, { $set: { status: 'active' } });
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: The single update is atomic by itself.
+            await db.collection('users').updateOne({ _id: 1 }, { $set: { status: 'active' } });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Using a costly transaction to update a single user's profile.
+            const session = await mongoose.startSession();
+            session.startTransaction();
+            await User.updateOne({ _id: userId }, { $set: { status: "active" } }, { session });
+            await session.commitTransaction();
+          compliant: |
+            #compliant mongoose example
+            // Good: A single update operation is already atomic by default.
+            await User.updateOne({ _id: userId }, { $set: { status: "active" } });
+
+- name: "Operational Maintenance, Upgrades & Automation"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Upgrades - Avoid Using Deprecated Driver Methods"
+      description: |
+        Application code must not use deprecated MongoDB driver methods or options.
+      impact: |
+        Using deprecated methods can cause the application to break unexpectedly when the driver is upgraded. It indicates that the code has not been kept up-to-date with the latest best practices and may contain other legacy issues.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/node/current/whats-new/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: `insert` is a deprecated method.
+            db.users.insert({"name": "John Doe"})
+          compliant: |
+            #compliant python example
+            # Good: `insert_one` is the current method.
+            db.users.insert_one({"name": "John Doe"})
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: The `remove` method is deprecated.
+            await db.collection('users').remove({ name: 'test' });
+          compliant: |
+            #compliant javascript example
+            // Good: Using `deleteOne` or `deleteMany` is the correct approach.
+            await db.collection('users').deleteOne({ name: 'test' });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: `update` with a callback is a legacy pattern.
+            User.update({ name: 'Test' }, { $set: { name: 'New Test' } }, (err, result) => {});
+          compliant: |
+            #compliant mongoose example
+            // Good: Using the promise-based `updateOne` is the modern approach.
+            await User.updateOne({ name: 'Test' }, { $set: { name: 'New Test' } });
+
+- name: "Testing & Quality Assurance"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Testing - Validate Index Usage in Test Suites"
+      description: |
+        Integration tests for database queries must include a step that uses the `explain()` method to verify that the query is using an index and not performing a collection scan (COLLSCAN).
+      impact: |
+        This policy enforces performance testing as part of the development lifecycle. It prevents inefficient queries from reaching production by catching them automatically during testing, protecting the production database from performance degradation.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/reference/command/explain/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # A test that only checks for correctness, not performance.
+            def test_find_user():
+                assert find_user_by_email("a@b.com") is not None
+          compliant: |
+            #compliant python example
+            # A test that also checks the query plan for index usage.
+            def test_find_user_performance():
+                explanation = db.users.find({"email": "a@b.com"}).explain()
+                winning_plan = explanation['queryPlanner']['winningPlan']['stage']
+                assert winning_plan == 'IXSCAN', "Query is not using an index!"
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // A unit test that mocks the database call entirely.
+            // It cannot detect a missing index.
+            test('finds user by email', () => { /* ... mock ... */ });
+          compliant: |
+            #compliant javascript example
+            // An integration test that checks the actual query plan.
+            test('finds user by email efficiently', async () => {
+              const plan = await db.collection('users').find({email: 'a@b.com'}).explain();
+              expect(plan.queryPlanner.winningPlan.stage).toBe('IXSCAN');
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // A test that checks functionality but not performance.
+            it('should find a user', async () => {
+              const user = await User.findOne({ email: 'a@b.com' });
+              expect(user).toBeDefined();
+            });
+          compliant: |
+            #compliant mongoose example
+            // A test that asserts the query is using an index.
+            it('should find a user using an index', async () => {
+              const result = await User.findOne({ email: 'a@b.com' }).explain();
+              const winningStage = result[0].queryPlanner.winningPlan.stage;
+              expect(winningStage).toBe('IXSCAN');
+            });
+
+    - title: "Testing - Isolate Test Database Configuration from Production"
+      description: |
+        The application code must use a different database connection string for testing environments versus production environments.
+      impact: |
+        Hardcoding the production connection string or failing to isolate test configurations creates a high risk of automated tests accidentally running against and modifying or deleting production data. This separation is a critical safety measure.
+      software_version: all
+      reference_link: https://www.mongodb.com/developer/languages/javascript/local-mongodb-testing-environment-jest/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: The production URI is used regardless of the environment.
+            DB_URI = "mongodb://prod-server/..."
+            client = MongoClient(DB_URI)
+          compliant: |
+            #compliant python example
+            # Good: The URI is chosen based on an environment variable.
+            if os.environ.get("ENV") == "test":
+                DB_URI = "mongodb://localhost/test_db"
+            else:
+                DB_URI = os.environ.get("PROD_DB_URI")
+            client = MongoClient(DB_URI)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: A single, hardcoded connection string.
+            const uri = 'mongodb://prod.example.com/my-db';
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            // Good: Selecting the URI based on the environment.
+            const uri = process.env.NODE_ENV === 'test'
+              ? process.env.TEST_MONGO_URI
+              : process.env.PROD_MONGO_URI;
+            const client = new MongoClient(uri);
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: The production connection string is hardcoded.
+            mongoose.connect('mongodb://prod.example.com/main');
+          compliant: |
+            #compliant mongoose example
+            // Good: The connection string is determined by the environment.
+            const connectionString = process.env.NODE_ENV === 'test'
+              ? 'mongodb://localhost/test'
+              : process.env.MONGO_URI;
+            mongoose.connect(connectionString);
+
+    - title: "Testing - Use a Dedicated, Isolated Database for Each Test Run"
+      description: |
+        Automated test suites must create and connect to a unique, isolated database for each test run.
+      impact: |
+        Sharing a single, hardcoded test database between concurrent test runs can cause tests to interfere with each other (e.g., one test deletes data another needs). This leads to flaky, unreliable tests. Isolated databases ensure test runs are independent and results are consistent.
+      software_version: all
+      reference_link: https://www.mongodb.com/developer/languages/javascript/local-mongodb-testing-environment-jest/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # A test suite that connects to a hardcoded 'test' database.
+            client = MongoClient()
+            db = client.test
+          compliant: |
+            #compliant python example
+            # A test setup that creates a unique database for the test run.
+            import uuid
+            db_name = f"test_{uuid.uuid4().hex}"
+            db = client[db_name]
+            # ... teardown logic would drop this database ...
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // All tests connect to the same hardcoded 'test' database.
+            const db = client.db('test');
+          compliant: |
+            #compliant javascript example
+            // Each test file gets a unique database.
+            const { randomUUID } = require('crypto');
+            const dbName = `test-${randomUUID()}`;
+            const db = client.db(dbName);
+            afterAll(async () => { await db.dropDatabase(); });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // A test suite that connects to a shared 'test' database.
+            beforeAll(async () => {
+              await mongoose.connect('mongodb://localhost/test');
+            });
+          compliant: |
+            #compliant mongoose example
+            // A test suite that creates a unique database for each run.
+            const { randomUUID } = require('crypto');
+            beforeAll(async () => {
+              const dbName = `test-${randomUUID()}`;
+              await mongoose.connect(`mongodb://localhost/${dbName}`);
+            });
+
+- name: "Event-Driven & Change Streams"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Change Streams - Apply Filters on the Server Side"
+      description: |
+        Change streams must use a `$match` pipeline to filter events on the server side.
+      impact: |
+        Filtering events on the client side forces the database to send all change events over the network, wasting bandwidth and client-side CPU. Server-side filtering is far more efficient and reduces application load.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/docs/manual/changeStreams/#watch-a-collection--database--or-client
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Fetching all changes and filtering in the application code.
+            for change in db.mycollection.watch():
+                if change['operationType'] == 'insert' and change['fullDocument']['status'] == 'active':
+                    # process event
+          compliant: |
+            #compliant python example
+            # Good: The filter is applied on the server. Only relevant events are sent.
+            pipeline = [{'$match': { 'fullDocument.status': 'active' }}]
+            for change in db.mycollection.watch(pipeline):
+                # process event
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Client-side filtering.
+            const changeStream = db.collection('orders').watch();
+            changeStream.on('change', (change) => {
+              if (change.fullDocument.total > 1000) {
+                // process big order
+              }
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: Server-side filtering with a match pipeline.
+            const pipeline = [{ $match: { 'fullDocument.total': { $gt: 1000 } } }];
+            const changeStream = db.collection('orders').watch(pipeline);
+            changeStream.on('change', (change) => { /* process big order */ });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Getting all changes and filtering in the app.
+            User.watch().on('change', change => {
+              if (change.operationType === 'update') { /* ... */ }
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: Using a pipeline to filter for only 'update' events on the server.
+            const pipeline = [{ $match: { operationType: 'update' } }];
+            User.watch(pipeline).on('change', change => { /* ... */ });
+
+    - title: "Change Streams - Use a Dead Letter Queue for Failed Events"
+      description: |
+        Change stream consumers must implement a dead-letter queue (DLQ) mechanism to handle events that repeatedly fail to be processed.
+      impact: |
+        Without a DLQ, a single malformed or problematic event (a "poison pill") can block the entire change stream processor, causing all subsequent events to be delayed. A DLQ isolates the failing event for later inspection without halting the entire system.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/developer/products/mongodb/change-streams-triggers-transactions/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: A processing error crashes the consumer, which will retry the same event on restart.
+            for change in stream:
+                process_event_that_might_fail(change)
+          compliant: |
+            #compliant python example
+            # Good: The consumer uses a try/except block to move failing events to a DLQ.
+            for change in stream:
+                try:
+                    process_event_that_might_fail(change)
+                except Exception as e:
+                    db.dead_letter_queue.insert_one({"event": change, "error": str(e)})
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: A poison pill event will crash this consumer repeatedly.
+            changeStream.on('change', async (change) => {
+              await processEvent(change);
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: The consumer uses a try/catch to isolate and save failing events.
+            changeStream.on('change', async (change) => {
+              try {
+                await processEvent(change);
+              } catch (error) {
+                await db.collection('dlq').insertOne({ event: change, error: error.message });
+              }
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: No DLQ logic.
+            User.watch().on('change', async (change) => {
+              await processEvent(change);
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: Isolating failing events.
+            const DeadLetter = mongoose.model('DeadLetter', new mongoose.Schema({}, { strict: false }));
+            User.watch().on('change', async (change) => {
+              try {
+                await processEvent(change);
+              } catch (error) {
+                await DeadLetter.create({ event: change, error: error.message });
+              }
+            });
+
+- name: "Driver & Client-Side Best Practices"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Driver - Use a Single `MongoClient` Instance per Application"
+      description: |
+        A single, shared `MongoClient` instance must be created when the application starts up and be reused for all database operations.
+      impact: |
+        Each `MongoClient` instance manages a connection pool. Creating a new client for every request is extremely inefficient, as it repeatedly sets up and tears down these pools, leading to severe performance bottlenecks and resource exhaustion.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/node/current/fundamentals/connection/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: A new client is created inside the request handler.
+            def handle_request():
+                client = MongoClient(uri) # Very inefficient!
+                # ...
+          compliant: |
+            #compliant python example
+            # Good: A single client is created and shared across the application.
+            client = MongoClient(uri)
+            def handle_request():
+                # ... use the shared client instance ...
+                db = client.mydb
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Creating a new client for each API request.
+            app.get('/users', async (req, res) => {
+              const client = new MongoClient(uri);
+              await client.connect();
+              // ...
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: Creating a single client instance that the application shares.
+            const client = new MongoClient(uri);
+            client.connect().then(() => {
+              app.listen(3000);
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Calling `mongoose.connect()` inside a request handler.
+            app.get('/users', async (req, res) => {
+              await mongoose.connect(uri); // Very bad practice
+              // ...
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: Connecting once when the application starts.
+            mongoose.connect(uri).then(() => {
+              app.listen(3000, () => console.log('Server started'));
+            });
+
+    - title: "Driver - Configure Connection Timeouts"
+      description: |
+        The MongoDB driver configuration must explicitly set connection and socket timeouts.
+      impact: |
+        Without timeouts, an application thread can get stuck for a very long time trying to connect to an unresponsive database or waiting for a query response. This consumes resources and can cause the entire application to become unresponsive.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/node/current/fundamentals/connection/options/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: No timeouts are configured, relying on long system defaults.
+            client = MongoClient(uri)
+          compliant: |
+            #compliant python example
+            # Good: Setting reasonable timeouts.
+            client = MongoClient(uri, connectTimeoutMS=10000, socketTimeoutMS=30000)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: No timeouts are specified in the client options.
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            // Good: Connection and socket timeouts are explicitly set.
+            const options = { connectTimeoutMS: 10000, socketTimeoutMS: 30000 };
+            const client = new MongoClient(uri, options);
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: No timeouts are configured.
+            mongoose.connect(uri);
+          compliant: |
+            #compliant mongoose example
+            // Good: Setting reasonable timeouts in the connection options.
+            const options = {
+              connectTimeoutMS: 10000,
+              socketTimeoutMS: 30000,
+            };
+            mongoose.connect(uri, options);
+
+    - title: "Driver - Use the Latest Stable Version of the MongoDB Driver"
+      description: |
+        The application's dependencies must specify a recent, stable version of the MongoDB driver.
+      impact: |
+        Older driver versions may contain bugs, security vulnerabilities, or lack support for new database features. Using the latest driver ensures you have the best performance, security, and compatibility with modern MongoDB features.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/
+      required_context: other
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # In requirements.txt
+            # Bad: Using an old version of the driver.
+            pymongo==3.12.0
+          compliant: |
+            #compliant python example
+            # In requirements.txt
+            # Good: Using a recent, stable version.
+            pymongo>=4.6.0
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // In package.json
+            // Bad: Dependency on an old major version.
+            // "mongodb": "^5.9.0"
+          compliant: |
+            #compliant javascript example
+            // In package.json
+            // Good: Dependency on a recent major version.
+            // "mongodb": "^6.5.0"
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // In package.json
+            // Bad: Using an old, outdated version of Mongoose.
+            // "mongoose": "^7.6.0"
+          compliant: |
+            #compliant mongoose example
+            // In package.json
+            // Good: Using a recent, stable version.
+            // "mongoose": "^8.3.0"
+
+    - title: "Driver - Implement Proper Error Handling for Database Operations"
+      description: |
+        All database operations must be wrapped in appropriate error handling blocks.
+      impact: |
+        Unhandled database errors can crash the application process or leave the application in an inconsistent state. Proper error handling ensures the application remains stable and can provide meaningful feedback to the user or system for issues like duplicate keys or validation failures.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/node/current/fundamentals/error-handling/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: No error handling. If the insert fails, the app will crash.
+            def create_user(db, user):
+                db.users.insert_one(user)
+          compliant: |
+            #compliant python example
+            # Good: The operation is wrapped in a try...except block.
+            from pymongo.errors import DuplicateKeyError
+            def create_user(db, user):
+                try:
+                    db.users.insert_one(user)
+                except DuplicateKeyError:
+                    print("User already exists.")
+                    raise
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: No try...catch block.
+            async function createUser(db, user) {
+              await db.collection('users').insertOne(user);
+            }
+          compliant: |
+            #compliant javascript example
+            // Good: Using a try...catch block to handle errors.
+            async function createUser(db, user) {
+              try {
+                await db.collection('users').insertOne(user);
+              } catch (e) {
+                if (e.code === 11000) { /* handle duplicate key */ }
+                else { throw e; }
+              }
+            }
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: No error handling for the save operation.
+            const user = new User({ email: 'test@example.com' });
+            await user.save();
+          compliant: |
+            #compliant mongoose example
+            // Good: Wrapping the save operation in a try...catch block.
+            const user = new User({ email: 'test@example.com' });
+            try {
+              await user.save();
+            } catch (error) {
+              if (error.code === 11000) {
+                console.error("User with this email already exists.");
+              } else {
+                console.error("Failed to save user:", error);
+              }
+            }
+
+- name: "Mobile & Edge Synchronization (Realm)"
+  paths:
+    - '**/*.js'
+    - '**/*.ts'
+  policies:
+    - title: "Realm - Define Realm Schema with Partition Keys for Data Isolation"
+      description: |
+        When using Realm Partition-Based Sync, the data model schema must include a partition key field.
+      impact: |
+        The partition key is the fundamental mechanism for data isolation and security in Realm's Partition-Based Sync. A missing partition key can lead to serious data leakage, where users can access and sync data that does not belong to them.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/realm/sdk/node/data-types/partition-keys/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: The Task object has no partition key. All tasks are in a global
+            // partition, and every user could potentially access every other user's tasks.
+            const TaskSchema = { name: 'Task', properties: { _id: 'objectId', name: 'string' } };
+          compliant: |
+            #compliant javascript example
+            // Good: The `_partition` key is set to the user's ID. Each user's tasks
+            // are in their own isolated data partition.
+            const TaskSchema = {
+              name: 'Task',
+              properties: {
+                _id: 'objectId',
+                _partition: 'string', // The partition key
+                name: 'string'
+              },
+              primaryKey: '_id',
+            };
+
+    - title: "Realm - Handle Sync Errors and Client Resets"
+      description: |
+        The Realm Sync configuration must include a client reset handler.
+      impact: |
+        Failing to handle sync errors can leave the local Realm file in a corrupt or un-syncable state. Properly handling a Client Reset ensures that the application can recover from severe sync issues without losing user data.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/realm/sdk/node/sync/client-reset/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: No client reset handler is configured.
+            const config = {
+              schema: [TaskSchema],
+              sync: { user, partitionValue: 'myPartition' }
+            };
+            const realm = new Realm(config);
+          compliant: |
+            #compliant javascript example
+            // Good: A client reset handler is provided in the configuration.
+            const config = {
+              schema: [TaskSchema],
+              sync: {
+                user,
+                partitionValue: 'myPartition',
+                clientReset: { mode: 'recoverUnsyncedChanges' }
+              }
+            };
+            const realm = new Realm(config);
+
+    - title: "Realm - Structure Write Operations within `realm.write()` Blocks"
+      description: |
+        All operations that modify the on-device Realm database must be wrapped within a `realm.write()` transaction block.
+      impact: |
+        Realm guarantees atomicity and consistency for operations inside a write transaction. Performing modifications outside of a transaction block will fail and can lead to an inconsistent state or application crashes.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/realm/sdk/node/write-to-realm/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Trying to modify a Realm object outside a transaction. This will throw an error.
+            const task = realm.objectForPrimaryKey("Task", taskId);
+            task.status = "complete";
+          compliant: |
+            #compliant javascript example
+            // Good: All modifications are wrapped in a transaction block.
+            realm.write(() => {
+              const task = realm.objectForPrimaryKey("Task", taskId);
+              if (task) {
+                task.status = "complete";
+              }
+            });
+
+    - title: "Realm - Close Realm Instances When They Are No Longer Needed"
+      description: |
+        Realm database instances must be properly closed using `realm.close()` when they are no longer needed.
+      impact: |
+        Failing to close Realm instances can lead to memory leaks and can hold onto file handles and system resources unnecessarily. In some cases, it can also prevent background sync from operating correctly.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/realm/sdk/node/realm-database/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // In a React component, a realm instance is opened but never closed.
+            useEffect(() => {
+              let realm;
+              const openRealm = async () => {
+                realm = await Realm.open(config);
+                setRealmInstance(realm);
+              };
+              openRealm();
+              // No cleanup function is returned.
+            }, []);
+          compliant: |
+            #compliant javascript example
+            // Good: The useEffect hook returns a cleanup function that closes the realm.
+            useEffect(() => {
+              let realm;
+              const openRealm = async () => {
+                realm = await Realm.open(config);
+                setRealmInstance(realm);
+              };
+              openRealm();
+              return () => {
+                if (realm && !realm.isClosed) {
+                  realm.close();
+                }
+              };
+            }, []);
+
+- name: "High Availability & Replication Topology"
+  paths:
+    - '**/*.ts'
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "High Availability - Use an Odd Number of Replica Set Voting Members in Configuration Scripts"
+      description: |
+        Scripts that configure a replica set must define an odd number of voting members.
+      impact: |
+        An even number of voting members increases the risk of a tied election, where no primary can be elected. This renders the database unable to accept writes, effectively causing downtime. This policy ensures that configuration scripts follow best practices for fault tolerance.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/replica-set-elections/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # A script to configure a replica set with an even number of members.
+            config = {'_id': 'rs0', 'members': [
+                {'_id': 0, 'host': 'mongo1:27017'},
+                {'_id': 1, 'host': 'mongo2:27017'}]}
+            client.admin.command('replSetInitiate', config)
+          compliant: |
+            #compliant python example
+            # Good: The configuration defines an odd number of members.
+            config = {'_id': 'rs0', 'members': [
+                {'_id': 0, 'host': 'mongo1:27017'},
+                {'_id': 1, 'host': 'mongo2:27017'},
+                {'_id': 2, 'host': 'mongo3:27017'}]}
+            client.admin.command('replSetInitiate', config)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // A script to initiate a replica set with 2 members.
+            // Bad: An even number of members risks a tied election.
+            rs.initiate({
+              _id: "myReplicaSet",
+              members: [ { _id: 0, host: "mongo1:27017" }, { _id: 1, host: "mongo2:27017" } ]
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: A 3-member replica set ensures a majority can always be reached.
+            rs.initiate({
+              _id: "myReplicaSet",
+              members: [ { _id: 0, host: "mongo1:27017" }, { _id: 1, host: "mongo2:27017" }, { _id: 2, host: "mongo3:27017" } ]
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // A conceptual check of the replica set status from within an application.
+            const status = await mongoose.connection.db.admin().replSetGetStatus();
+            if (status.members.length % 2 === 0) {
+              console.error("Non-compliant: Even number of replica set members.");
+            }
+          compliant: |
+            #compliant mongoose example
+            // A conceptual check of the replica set status.
+            const status = await mongoose.connection.db.admin().replSetGetStatus();
+            if (status.members.length % 2 !== 0) {
+              console.log("Compliant: Odd number of replica set members.");
+            }
+
+    - title: "High Availability - Ensure Drivers Use Replica Set Connection String"
+      description: |
+        Application drivers must connect to the database using a replica set connection string format, providing the hostnames of multiple members and the `replicaSet` name.
+      impact: |
+        If the client connects directly to a single host, it will not be able to automatically fail over if that host goes down. A replica set connection string allows the driver to discover all members and fail over seamlessly.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/reference/connection-string/#replica-set-option
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Connecting to a single host. No automatic failover.
+            client = MongoClient("mongodb://mongo1.example.com:27017/")
+          compliant: |
+            #compliant python example
+            # Good: Providing multiple hosts and the replica set name.
+            client = MongoClient("mongodb://mongo1:27017,mongo2:27017/?replicaSet=myReplicaSet")
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Connecting to only one member of the replica set.
+            const uri = "mongodb://mongo1.example.com:27017/mydb";
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            // Good: Providing a seed list of members and the replica set name.
+            const uri = "mongodb://mongo1:27017,mongo2:27017/mydb?replicaSet=myReplicaSet";
+            const client = new MongoClient(uri);
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Connecting to a single host. No automatic failover.
+            const uri = "mongodb://mongo1.example.com:27017/mydb";
+            mongoose.connect(uri);
+          compliant: |
+            #compliant mongoose example
+            // Good: Providing multiple hosts and the replica set name enables failover.
+            const uri = "mongodb://mongo1:27017,mongo2:27017/mydb?replicaSet=myReplicaSet";
+            mongoose.connect(uri);
+
+- name: "Sharding & Horizontal Scalability"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Sharding - Choose an Effective Shard Key"
+      description: |
+        Scripts that configure sharding must use a shard key with high cardinality.
+      impact: |
+        A poor shard key with low cardinality (few unique values) leads to unbalanced data distribution, creating "hot shards" that are overwhelmed with data and requests. This prevents horizontal scaling and negates the primary benefit of sharding.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/sharding-shard-key/#choose-a-shard-key
+      required_context: single-file
+      severity: mandatory
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Sharding an 'iot_events' collection on the 'device_type' field.
+            # This key has low cardinality.
+            client.admin.command('shardCollection', 'iot.events', key={'device_type': 1})
+          compliant: |
+            #compliant python example
+            # Good: Sharding on a compound key of 'device_id' and 'timestamp'.
+            client.admin.command('shardCollection', 'iot.events', key={'device_id': 1, 'timestamp': 1})
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Sharding on a boolean `isActive` field. Only two possible values.
+            db.adminCommand({ shardCollection: "users.profiles", key: { isActive: 1 } });
+          compliant: |
+            #compliant javascript example
+            // Good: Sharding on a high-cardinality field like `username`.
+            db.adminCommand({ shardCollection: "users.profiles", key: { username: 1 } });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Sharding a 'users' collection on 'country'. This has low cardinality.
+            db.adminCommand({ shardCollection: "users.profiles", key: { country: 1 } });
+          compliant: |
+            #compliant mongoose example
+            // Good: Sharding on 'userId', which has high cardinality.
+            db.adminCommand({ shardCollection: "users.profiles", key: { userId: 1 } });
+
+- name: "Data Lifecycle & Archiving"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Data Lifecycle - Avoid Storing Large Binary Data Directly in Documents"
+      description: |
+        Binary data larger than a few megabytes must not be stored directly in a document field.
+      impact: |
+        Storing large binary objects (like images or videos) inside documents can quickly cause them to exceed the 16MB size limit, causing write failures. It is also highly inefficient for performance. GridFS is the appropriate mechanism for storing large binary files in MongoDB.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/gridfs/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Storing a large file directly in a document field.
+            with open('large_video.mp4', 'rb') as f:
+                video_data = f.read()
+                db.videos.insert_one({'filename': 'intro.mp4', 'data': video_data})
+          compliant: |
+            #compliant python example
+            # Good: Using GridFS to store the large file.
+            import gridfs
+            fs = gridfs.GridFS(db)
+            with open('large_video.mp4', 'rb') as f:
+                fs.put(f, filename='intro.mp4')
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            # Bad: A user profile schema that embeds a full-resolution image.
+            const UserProfile = {
+              userId: 'abc',
+              // This could easily be several megabytes.
+              profilePictureBase64: 'iVBORw0KGgoAAAANSUhEUgAAB... etc'
+            };
+          compliant: |
+            #compliant javascript example
+            # Good: The profile stores a reference (ObjectId) to a file in GridFS.
+            const UserProfile = {
+              userId: 'abc',
+              profilePictureFileId: new ObjectId('6a5b...')
+            };
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            # Bad: A schema with a Buffer to hold a large file.
+            const FileSchema = new mongoose.Schema({
+              name: String,
+              data: Buffer
+            });
+          compliant: |
+            #compliant mongoose example
+            # Good: While Mongoose doesn't have a native GridFS schema type,
+            # the schema should store the file ID and logic should use a GridFS library.
+            const FileSchema = new mongoose.Schema({
+              name: String,
+              gridFsId: mongoose.Schema.Types.ObjectId
+            });
+
+    - title: "Data Lifecycle - Use Capped Collections for Fixed-Size Logging"
+      description: |
+        For high-throughput logging where only the most recent entries are needed, `capped` collections must be used.
+      impact: |
+        Capped collections have high performance for writes and provide a memory-efficient way to store logs by automatically overwriting the oldest entries when the collection reaches its size limit. This avoids the need for TTL indexes or manual cleanup scripts for this specific use case.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/capped-collections/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Using a regular collection for high-volume logs that don't need to be kept long-term.
+            db.create_collection("realtime_logs")
+          compliant: |
+            #compliant python example
+            # Good: Creating a capped collection that will store a maximum of 1GB of logs.
+            db.create_collection("realtime_logs", capped=True, size=1073741824)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            # Bad: Using a standard collection for logs might grow indefinitely.
+            await db.createCollection('logs');
+          compliant: |
+            #compliant javascript example
+            # Good: Creating a capped collection that automatically removes old documents.
+            await db.createCollection('logs', { capped: true, size: 52428800 }); // 50MB
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            # Bad: Using a normal schema for high-throughput logs.
+            const LogSchema = new mongoose.Schema({ message: String, timestamp: Date });
+          compliant: |
+            #compliant mongoose example
+            # Good: Defining the schema as a capped collection.
+            const LogSchema = new mongoose.Schema({ message: String, timestamp: Date }, {
+              capped: { size: 1048576, max: 1000 } // 1MB or 1000 documents
+            });
+
+    - title: "Data Lifecycle - Implement a Soft Deletion Pattern"
+      description: |
+        Instead of permanently deleting documents, a soft-delete pattern must be implemented by marking documents with a flag (e.g., `isDeleted: true`) or a deletion timestamp.
+      impact: |
+        Permanent deletes are irreversible and can lead to accidental data loss. A soft-delete pattern provides a safety net, allowing data to be easily recovered. It is also useful for maintaining audit trails and historical data integrity.
+      software_version: all
+      reference_link: https://www.mongodb.com/developer/products/mongodb/mongodb-soft-delete-pattern/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Permanently deleting a user document.
+            db.users.delete_one({"_id": user_id})
+          compliant: |
+            #compliant python example
+            # Good: Marking the user as deleted.
+            db.users.update_one(
+                {"_id": user_id},
+                {"$set": {"isDeleted": True, "deletedAt": datetime.now()}}
+            )
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: The document is permanently removed.
+            await db.collection('posts').deleteOne({ _id: postId });
+          compliant: |
+            #compliant javascript example
+            // Good: The document is marked as deleted but remains in the database.
+            await db.collection('posts').updateOne(
+              { _id: postId },
+              { $set: { isDeleted: true, deletedAt: new Date() } }
+            );
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Using a destructive delete operation.
+            await User.deleteOne({ _id: userId });
+          compliant: |
+            #compliant mongoose example
+            // Good: Using a Mongoose plugin or a static method to handle soft deletes.
+            // This often involves overriding find methods to exclude soft-deleted documents by default.
+            await User.softDelete({ _id: userId });
+
+- name: "Cost Optimization & Sizing"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Driver - Use Bulk Writes for Multiple Operations"
+      description: |
+        When performing multiple `insert`, `update`, or `delete` operations in a loop, a bulk write operation must be used instead.
+      impact: |
+        Sending database operations one at a time in a loop creates significant network overhead and is much slower than sending them all in a single batch. Bulk writes dramatically improve performance for mass data modification and can reduce operational costs.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/core/bulk-write-operations/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Sending one request per document is very slow.
+            for doc in my_documents:
+                db.my_collection.insert_one(doc)
+          compliant: |
+            #compliant python example
+            # Good: Sending all documents in a single network request.
+            db.my_collection.insert_many(my_documents)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: An individual update operation is sent for each document.
+            for (const id of idsToUpdate) {
+              await db.collection('items').updateOne({ _id: id }, { $set: { status: 'processed' } });
+            }
+          compliant: |
+            #compliant javascript example
+            // Good: Using bulkWrite to perform all updates in one operation.
+            const operations = idsToUpdate.map(id => ({
+              updateOne: {
+                filter: { _id: id },
+                update: { $set: { status: 'processed' } }
+              }
+            }));
+            await db.collection('items').bulkWrite(operations);
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: This iterates and saves each document individually.
+            for (const user of users) {
+              await user.save();
+            }
+          compliant: |
+            #compliant mongoose example
+            // Good: Using `insertMany` for efficient bulk insertion.
+            await User.insertMany(users);
+
+    - title: "Driver - Configure Network Compression"
+      description: |
+        The application's MongoDB connection string must enable network compression.
+      impact: |
+        Network compression can significantly reduce cloud data transfer costs, especially for applications with large result sets. It trades a small amount of CPU time for a potentially large reduction in network bandwidth.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/docs/manual/reference/connection-string/#mongodb-uri-option-compressors
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Compression is not enabled.
+            client = MongoClient("mongodb://host/?replicaSet=myReplicaSet")
+          compliant: |
+            #compliant python example
+            # Good: The 'zlib' compressor is enabled in the connection string.
+            client = MongoClient("mongodb://host/?replicaSet=myReplicaSet&compressors=zlib")
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: No compressors are specified in the URI options.
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            // Good: Specifying one or more compressors.
+            const client = new MongoClient(uri, { compressors: ['snappy', 'zlib'] });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Compression is not specified in the connection options.
+            const uri = "mongodb://user:pass@host:27017/db";
+            mongoose.connect(uri);
+          compliant: |
+            #compliant mongoose example
+            // Good: Enabling 'zlib' compression.
+            const uri = "mongodb://user:pass@host:27017/db?compressors=zlib";
+            mongoose.connect(uri);
+
+- name: "Testing & Quality Assurance"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Testing - Validate Index Usage in Test Suites"
+      description: |
+        Integration tests for database queries must include a step that uses the `explain()` method to verify that the query is using an index and not performing a collection scan (COLLSCAN).
+      impact: |
+        This policy enforces performance testing as part of the development lifecycle. It prevents inefficient queries from reaching production by catching them automatically during testing, protecting the production database from performance degradation.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/manual/reference/command/explain/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # A test that only checks for correctness, not performance.
+            def test_find_user():
+                assert find_user_by_email("a@b.com") is not None
+          compliant: |
+            #compliant python example
+            # A test that also checks the query plan for index usage.
+            def test_find_user_performance():
+                explanation = db.users.find({"email": "a@b.com"}).explain()
+                winning_plan = explanation['queryPlanner']['winningPlan']['stage']
+                assert winning_plan == 'IXSCAN', "Query is not using an index!"
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // A unit test that mocks the database call entirely.
+            // It cannot detect a missing index.
+            test('finds user by email', () => { /* ... mock ... */ });
+          compliant: |
+            #compliant javascript example
+            // An integration test that checks the actual query plan.
+            test('finds user by email efficiently', async () => {
+              const plan = await db.collection('users').find({email: 'a@b.com'}).explain();
+              expect(plan.queryPlanner.winningPlan.stage).toBe('IXSCAN');
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // A test that checks functionality but not performance.
+            it('should find a user', async () => {
+              const user = await User.findOne({ email: 'a@b.com' });
+              expect(user).toBeDefined();
+            });
+          compliant: |
+            #compliant mongoose example
+            // A test that asserts the query is using an index.
+            it('should find a user using an index', async () => {
+              const result = await User.findOne({ email: 'a@b.com' }).explain();
+              const winningStage = result[0].queryPlanner.winningPlan.stage;
+              expect(winningStage).toBe('IXSCAN');
+            });
+
+    - title: "Testing - Isolate Test Database Configuration from Production"
+      description: |
+        The application code must use a different database connection string for testing environments versus production environments.
+      impact: |
+        Hardcoding the production connection string or failing to isolate test configurations creates a high risk of automated tests accidentally running against and modifying or deleting production data. This separation is a critical safety measure.
+      software_version: all
+      reference_link: https://www.mongodb.com/developer/languages/javascript/local-mongodb-testing-environment-jest/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: The production URI is used regardless of the environment.
+            DB_URI = "mongodb://prod-server/..."
+            client = MongoClient(DB_URI)
+          compliant: |
+            #compliant python example
+            # Good: The URI is chosen based on an environment variable.
+            if os.environ.get("ENV") == "test":
+                DB_URI = "mongodb://localhost/test_db"
+            else:
+                DB_URI = os.environ.get("PROD_DB_URI")
+            client = MongoClient(DB_URI)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: A single, hardcoded connection string.
+            const uri = 'mongodb://prod.example.com/my-db';
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            // Good: Selecting the URI based on the environment.
+            const uri = process.env.NODE_ENV === 'test'
+              ? process.env.TEST_MONGO_URI
+              : process.env.PROD_MONGO_URI;
+            const client = new MongoClient(uri);
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: The production connection string is hardcoded.
+            mongoose.connect('mongodb://prod.example.com/main');
+          compliant: |
+            #compliant mongoose example
+            // Good: The connection string is determined by the environment.
+            const connectionString = process.env.NODE_ENV === 'test'
+              ? 'mongodb://localhost/test'
+              : process.env.MONGO_URI;
+            mongoose.connect(connectionString);
+
+    - title: "Testing - Use a Dedicated, Isolated Database for Each Test Run"
+      description: |
+        Automated test suites must create and connect to a unique, isolated database for each test run.
+      impact: |
+        Sharing a single, hardcoded test database between concurrent test runs can cause tests to interfere with each other (e.g., one test deletes data another needs). This leads to flaky, unreliable tests. Isolated databases ensure test runs are independent and results are consistent.
+      software_version: all
+      reference_link: https://www.mongodb.com/developer/languages/javascript/local-mongodb-testing-environment-jest/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # A test suite that connects to a hardcoded 'test' database.
+            client = MongoClient()
+            db = client.test
+          compliant: |
+            #compliant python example
+            # A test setup that creates a unique database for the test run.
+            import uuid
+            db_name = f"test_{uuid.uuid4().hex}"
+            db = client[db_name]
+            # ... teardown logic would drop this database ...
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // All tests connect to the same hardcoded 'test' database.
+            const db = client.db('test');
+          compliant: |
+            #compliant javascript example
+            // Each test file gets a unique database.
+            const { randomUUID } = require('crypto');
+            const dbName = `test-${randomUUID()}`;
+            const db = client.db(dbName);
+            afterAll(async () => { await db.dropDatabase(); });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // A test suite that connects to a shared 'test' database.
+            beforeAll(async () => {
+              await mongoose.connect('mongodb://localhost/test');
+            });
+          compliant: |
+            #compliant mongoose example
+            // A test suite that creates a unique database for each run.
+            const { randomUUID } = require('crypto');
+            beforeAll(async () => {
+              const dbName = `test-${randomUUID()}`;
+              await mongoose.connect(`mongodb://localhost/${dbName}`);
+            });
+
+- name: "Event-Driven & Change Streams"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Change Streams - Apply Filters on the Server Side"
+      description: |
+        Change streams must use a `$match` pipeline to filter events on the server side.
+      impact: |
+        Filtering events on the client side forces the database to send all change events over the network, wasting bandwidth and client-side CPU. Server-side filtering is far more efficient and reduces application load.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/docs/manual/changeStreams/#watch-a-collection--database--or-client
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: Fetching all changes and filtering in the application code.
+            for change in db.mycollection.watch():
+                if change['operationType'] == 'insert' and change['fullDocument']['status'] == 'active':
+                    # process event
+          compliant: |
+            #compliant python example
+            # Good: The filter is applied on the server. Only relevant events are sent.
+            pipeline = [{'$match': { 'fullDocument.status': 'active' }}]
+            for change in db.mycollection.watch(pipeline):
+                # process event
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Client-side filtering.
+            const changeStream = db.collection('orders').watch();
+            changeStream.on('change', (change) => {
+              if (change.fullDocument.total > 1000) {
+                // process big order
+              }
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: Server-side filtering with a match pipeline.
+            const pipeline = [{ $match: { 'fullDocument.total': { $gt: 1000 } } }];
+            const changeStream = db.collection('orders').watch(pipeline);
+            changeStream.on('change', (change) => { /* process big order */ });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Getting all changes and filtering in the app.
+            User.watch().on('change', change => {
+              if (change.operationType === 'update') { /* ... */ }
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: Using a pipeline to filter for only 'update' events on the server.
+            const pipeline = [{ $match: { operationType: 'update' } }];
+            User.watch(pipeline).on('change', change => { /* ... */ });
+
+    - title: "Change Streams - Use a Dead Letter Queue for Failed Events"
+      description: |
+        Change stream consumers must implement a dead-letter queue (DLQ) mechanism to handle events that repeatedly fail to be processed.
+      impact: |
+        Without a DLQ, a single malformed or problematic event (a "poison pill") can block the entire change stream processor, causing all subsequent events to be delayed. A DLQ isolates the failing event for later inspection without halting the entire system.
+      software_version:
+        - 7.0
+        - 8.0
+      reference_link: https://www.mongodb.com/developer/products/mongodb/change-streams-triggers-transactions/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: A processing error crashes the consumer, which will retry the same event on restart.
+            for change in stream:
+                process_event_that_might_fail(change)
+          compliant: |
+            #compliant python example
+            # Good: The consumer uses a try/except block to move failing events to a DLQ.
+            for change in stream:
+                try:
+                    process_event_that_might_fail(change)
+                except Exception as e:
+                    db.dead_letter_queue.insert_one({"event": change, "error": str(e)})
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: A poison pill event will crash this consumer repeatedly.
+            changeStream.on('change', async (change) => {
+              await processEvent(change);
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: The consumer uses a try/catch to isolate and save failing events.
+            changeStream.on('change', async (change) => {
+              try {
+                await processEvent(change);
+              } catch (error) {
+                await db.collection('dlq').insertOne({ event: change, error: error.message });
+              }
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: No DLQ logic.
+            User.watch().on('change', async (change) => {
+              await processEvent(change);
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: Isolating failing events.
+            const DeadLetter = mongoose.model('DeadLetter', new mongoose.Schema({}, { strict: false }));
+            User.watch().on('change', async (change) => {
+              try {
+                await processEvent(change);
+              } catch (error) {
+                await DeadLetter.create({ event: change, error: error.message });
+              }
+            });
+
+- name: "Driver & Client-Side Best Practices"
+  paths:
+    - '**/*.js'
+    - '**/*.py'
+  policies:
+    - title: "Driver - Use a Single `MongoClient` Instance per Application"
+      description: |
+        A single, shared `MongoClient` instance must be created when the application starts up and be reused for all database operations.
+      impact: |
+        Each `MongoClient` instance manages a connection pool. Creating a new client for every request is extremely inefficient, as it repeatedly sets up and tears down these pools, leading to severe performance bottlenecks and resource exhaustion.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/node/current/fundamentals/connection/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: A new client is created inside the request handler.
+            def handle_request():
+                client = MongoClient(uri) # Very inefficient!
+                # ...
+          compliant: |
+            #compliant python example
+            # Good: A single client is created and shared across the application.
+            client = MongoClient(uri)
+            def handle_request():
+                # ... use the shared client instance ...
+                db = client.mydb
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Creating a new client for each API request.
+            app.get('/users', async (req, res) => {
+              const client = new MongoClient(uri);
+              await client.connect();
+              // ...
+            });
+          compliant: |
+            #compliant javascript example
+            // Good: Creating a single client instance that the application shares.
+            const client = new MongoClient(uri);
+            client.connect().then(() => {
+              app.listen(3000);
+            });
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: Calling `mongoose.connect()` inside a request handler.
+            app.get('/users', async (req, res) => {
+              await mongoose.connect(uri); // Very bad practice
+              // ...
+            });
+          compliant: |
+            #compliant mongoose example
+            // Good: Connecting once when the application starts.
+            mongoose.connect(uri).then(() => {
+              app.listen(3000, () => console.log('Server started'));
+            });
+
+    - title: "Driver - Configure Connection Timeouts"
+      description: |
+        The MongoDB driver configuration must explicitly set connection and socket timeouts.
+      impact: |
+        Without timeouts, an application thread can get stuck for a very long time trying to connect to an unresponsive database or waiting for a query response. This consumes resources and can cause the entire application to become unresponsive.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/node/current/fundamentals/connection/options/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: No timeouts are configured, relying on long system defaults.
+            client = MongoClient(uri)
+          compliant: |
+            #compliant python example
+            # Good: Setting reasonable timeouts.
+            client = MongoClient(uri, connectTimeoutMS=10000, socketTimeoutMS=30000)
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: No timeouts are specified in the client options.
+            const client = new MongoClient(uri);
+          compliant: |
+            #compliant javascript example
+            // Good: Connection and socket timeouts are explicitly set.
+            const options = { connectTimeoutMS: 10000, socketTimeoutMS: 30000 };
+            const client = new MongoClient(uri, options);
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: No timeouts are configured.
+            mongoose.connect(uri);
+          compliant: |
+            #compliant mongoose example
+            // Good: Setting reasonable timeouts in the connection options.
+            const options = {
+              connectTimeoutMS: 10000,
+              socketTimeoutMS: 30000,
+            };
+            mongoose.connect(uri, options);
+
+    - title: "Driver - Use the Latest Stable Version of the MongoDB Driver"
+      description: |
+        The application's dependencies must specify a recent, stable version of the MongoDB driver.
+      impact: |
+        Older driver versions may contain bugs, security vulnerabilities, or lack support for new database features. Using the latest driver ensures you have the best performance, security, and compatibility with modern MongoDB features.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/
+      required_context: other
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # In requirements.txt
+            # Bad: Using an old version of the driver.
+            pymongo==3.12.0
+          compliant: |
+            #compliant python example
+            # In requirements.txt
+            # Good: Using a recent, stable version.
+            pymongo>=4.6.0
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // In package.json
+            // Bad: Dependency on an old major version.
+            // "mongodb": "^5.9.0"
+          compliant: |
+            #compliant javascript example
+            // In package.json
+            // Good: Dependency on a recent major version.
+            // "mongodb": "^6.5.0"
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // In package.json
+            // Bad: Using an old, outdated version of Mongoose.
+            // "mongoose": "^7.6.0"
+          compliant: |
+            #compliant mongoose example
+            // In package.json
+            // Good: Using a recent, stable version.
+            // "mongoose": "^8.3.0"
+
+    - title: "Driver - Implement Proper Error Handling for Database Operations"
+      description: |
+        All database operations must be wrapped in appropriate error handling blocks.
+      impact: |
+        Unhandled database errors can crash the application process or leave the application in an inconsistent state. Proper error handling ensures the application remains stable and can provide meaningful feedback to the user or system for issues like duplicate keys or validation failures.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/drivers/node/current/fundamentals/error-handling/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # Python examples
+        - non_compliant: |
+            #non-compliant python example
+            # Bad: No error handling. If the insert fails, the app will crash.
+            def create_user(db, user):
+                db.users.insert_one(user)
+          compliant: |
+            #compliant python example
+            # Good: The operation is wrapped in a try...except block.
+            from pymongo.errors import DuplicateKeyError
+            def create_user(db, user):
+                try:
+                    db.users.insert_one(user)
+                except DuplicateKeyError:
+                    print("User already exists.")
+                    raise
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: No try...catch block.
+            async function createUser(db, user) {
+              await db.collection('users').insertOne(user);
+            }
+          compliant: |
+            #compliant javascript example
+            // Good: Using a try...catch block to handle errors.
+            async function createUser(db, user) {
+              try {
+                await db.collection('users').insertOne(user);
+              } catch (e) {
+                if (e.code === 11000) { /* handle duplicate key */ }
+                else { throw e; }
+              }
+            }
+        # Mongoose examples
+        - non_compliant: |
+            #non-compliant mongoose example
+            // Bad: No error handling for the save operation.
+            const user = new User({ email: 'test@example.com' });
+            await user.save();
+          compliant: |
+            #compliant mongoose example
+            // Good: Wrapping the save operation in a try...catch block.
+            const user = new User({ email: 'test@example.com' });
+            try {
+              await user.save();
+            } catch (error) {
+              if (error.code === 11000) {
+                console.error("User with this email already exists.");
+              } else {
+                console.error("Failed to save user:", error);
+              }
+            }
+
+- name: "Mobile & Edge Synchronization (Realm)"
+  paths:
+    - '**/*.js'
+    - '**/*.ts'
+  policies:
+    - title: "Realm - Define Realm Schema with Partition Keys for Data Isolation"
+      description: |
+        When using Realm Partition-Based Sync, the data model schema must include a partition key field.
+      impact: |
+        The partition key is the fundamental mechanism for data isolation and security in Realm's Partition-Based Sync. A missing partition key can lead to serious data leakage, where users can access and sync data that does not belong to them.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/realm/sdk/node/data-types/partition-keys/
+      required_context: single-file
+      severity: high
+      code_examples:
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: The Task object has no partition key. All tasks are in a global
+            // partition, and every user could potentially access every other user's tasks.
+            const TaskSchema = { name: 'Task', properties: { _id: 'objectId', name: 'string' } };
+          compliant: |
+            #compliant javascript example
+            // Good: The `_partition` key is set to the user's ID. Each user's tasks
+            // are in their own isolated data partition.
+            const TaskSchema = {
+              name: 'Task',
+              properties: {
+                _id: 'objectId',
+                _partition: 'string', // The partition key
+                name: 'string'
+              },
+              primaryKey: '_id',
+            };
+
+    - title: "Realm - Handle Sync Errors and Client Resets"
+      description: |
+        The Realm Sync configuration must include a client reset handler.
+      impact: |
+        Failing to handle sync errors can leave the local Realm file in a corrupt or un-syncable state. Properly handling a Client Reset ensures that the application can recover from severe sync issues without losing user data.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/realm/sdk/node/sync/client-reset/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: No client reset handler is configured.
+            const config = {
+              schema: [TaskSchema],
+              sync: { user, partitionValue: 'myPartition' }
+            };
+            const realm = new Realm(config);
+          compliant: |
+            #compliant javascript example
+            // Good: A client reset handler is provided in the configuration.
+            const config = {
+              schema: [TaskSchema],
+              sync: {
+                user,
+                partitionValue: 'myPartition',
+                clientReset: { mode: 'recoverUnsyncedChanges' }
+              }
+            };
+            const realm = new Realm(config);
+
+    - title: "Realm - Structure Write Operations within `realm.write()` Blocks"
+      description: |
+        All operations that modify the on-device Realm database must be wrapped within a `realm.write()` transaction block.
+      impact: |
+        Realm guarantees atomicity and consistency for operations inside a write transaction. Performing modifications outside of a transaction block will fail and can lead to an inconsistent state or application crashes.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/realm/sdk/node/write-to-realm/
+      required_context: single-file
+      severity: medium
+      code_examples:
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // Bad: Trying to modify a Realm object outside a transaction. This will throw an error.
+            const task = realm.objectForPrimaryKey("Task", taskId);
+            task.status = "complete";
+          compliant: |
+            #compliant javascript example
+            // Good: All modifications are wrapped in a transaction block.
+            realm.write(() => {
+              const task = realm.objectForPrimaryKey("Task", taskId);
+              if (task) {
+                task.status = "complete";
+              }
+            });
+
+    - title: "Realm - Close Realm Instances When They Are No Longer Needed"
+      description: |
+        Realm database instances must be properly closed using `realm.close()` when they are no longer needed.
+      impact: |
+        Failing to close Realm instances can lead to memory leaks and can hold onto file handles and system resources unnecessarily. In some cases, it can also prevent background sync from operating correctly.
+      software_version: all
+      reference_link: https://www.mongodb.com/docs/realm/sdk/node/realm-database/
+      required_context: single-file
+      severity: low
+      code_examples:
+        # JavaScript examples
+        - non_compliant: |
+            #non-compliant javascript example
+            // In a React component, a realm instance is opened but never closed.
+            useEffect(() => {
+              let realm;
+              const openRealm = async () => {
+                realm = await Realm.open(config);
+                setRealmInstance(realm);
+              };
+              openRealm();
+              // No cleanup function is returned.
+            }, []);
+          compliant: |
+            #compliant javascript example
+            // Good: The useEffect hook returns a cleanup function that closes the realm.
+            useEffect(() => {
+              let realm;
+              const openRealm = async () => {
+                realm = await Realm.open(config);
+                setRealmInstance(realm);
+              };
+              openRealm();
+              return () => {
+                if (realm && !realm.isClosed) {
+                  realm.close();
+                }
+              };
+            }, []);
