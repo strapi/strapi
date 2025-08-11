@@ -1,14 +1,15 @@
 import * as React from 'react';
 
-import { Box, Popover, Portal, Link } from '@strapi/design-system';
+import { Box, Popover, Portal } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
 import { type State, type Action, useGuidedTour, ValidTourName, CompletedActions } from './Context';
+import { apiTokensSteps } from './Steps/ApiTokensSteps';
 import { contentManagerSteps } from './Steps/ContentManagerSteps';
 import { contentTypeBuilderSteps } from './Steps/ContentTypeBuilderSteps';
-import { GotItAction, Step, StepCount, createStepComponents } from './Steps/Step';
+import { type Step, createStepComponents } from './Steps/Step';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 
 /* -------------------------------------------------------------------------------------------------
@@ -18,101 +19,7 @@ import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 const tours = {
   contentTypeBuilder: createTour('contentTypeBuilder', contentTypeBuilderSteps),
   contentManager: createTour('contentManager', contentManagerSteps),
-  apiTokens: createTour('apiTokens', [
-    {
-      name: 'Introduction',
-      content: ({ Step }) => (
-        <Step.Root side="top" sideOffset={32} withArrow={false}>
-          <Step.Title
-            id="tours.apiTokens.Introduction.title"
-            defaultMessage="Last but not least, API tokens"
-          />
-          <Step.Content
-            id="tours.apiTokens.Introduction.content"
-            defaultMessage="Control API access with highly customizable permissions."
-          />
-          <Step.Actions showSkip />
-        </Step.Root>
-      ),
-    },
-    {
-      name: 'ManageAPIToken',
-      content: ({ Step }) => (
-        <Step.Root side="bottom" align="end">
-          <Step.Title
-            id="tours.apiTokens.ManageAPIToken.title"
-            defaultMessage="Manage an API token"
-          />
-          <Step.Content
-            id="tours.apiTokens.ManageAPIToken.content"
-            defaultMessage='Click the "Pencil" icon to view and update an existing API token.'
-          />
-          <Step.Actions />
-        </Step.Root>
-      ),
-    },
-    {
-      name: 'ViewAPIToken',
-      content: ({ Step, dispatch }) => (
-        <Step.Root side="bottom" align="end">
-          <Step.Title id="tours.apiTokens.ViewAPIToken.title" defaultMessage="View API token" />
-          <Step.Content
-            id="tours.apiTokens.ViewAPIToken.content"
-            defaultMessage='Click the "View token" button to see your API token.'
-          />
-          <Step.Actions>
-            <StepCount tourName="apiTokens" />
-            <GotItAction onClick={() => dispatch({ type: 'next_step', payload: 'apiTokens' })} />
-          </Step.Actions>
-        </Step.Root>
-      ),
-    },
-    {
-      name: 'CopyAPIToken',
-      content: ({ Step, dispatch }) => (
-        <Step.Root side="bottom" align="start" sideOffset={-5}>
-          <Step.Title
-            id="tours.apiTokens.CopyAPIToken.title"
-            defaultMessage="Copy your new API token"
-          />
-          <Step.Content
-            id="tours.apiTokens.CopyAPIToken.content"
-            defaultMessage="Copy your API token"
-            values={{
-              spacer: <Box paddingTop={2} />,
-              a: (msg) => (
-                <Link isExternal href="https://docs.strapi.io/cms/features/api-tokens#usage">
-                  {msg}
-                </Link>
-              ),
-            }}
-          />
-          <Step.Actions>
-            <StepCount tourName="apiTokens" />
-            <GotItAction onClick={() => dispatch({ type: 'next_step', payload: 'apiTokens' })} />
-          </Step.Actions>
-        </Step.Root>
-      ),
-    },
-    {
-      name: 'Finish',
-      content: ({ Step }) => (
-        <Step.Root side="right" align="start">
-          <Step.Title
-            id="tours.apiTokens.FinalStep.title"
-            defaultMessage="Congratulations, it's time to deploy your application!"
-          />
-          <Step.Content
-            id="tours.apiTokens.FinalStep.content"
-            defaultMessage="Your application is ready to be deployed and its content to be shared with the world!"
-          />
-          <Step.Actions showPrevious={false} showStepCount={false} to="/" />
-        </Step.Root>
-      ),
-      when: (completedActions) =>
-        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken),
-    },
-  ]),
+  apiTokens: createTour('apiTokens', apiTokensSteps),
   strapiCloud: createTour('strapiCloud', []),
 } as const;
 
