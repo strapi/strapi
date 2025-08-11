@@ -104,6 +104,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         align="center"
         style={{ border: 'none' }}
         {...props}
+        onClick={(e) => e.stopPropagation()}
       >
         {withArrow && (
           <PopoverArrow asChild>
