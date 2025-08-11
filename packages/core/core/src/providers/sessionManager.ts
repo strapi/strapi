@@ -18,10 +18,16 @@ export default defineProvider({
       );
     }
 
+    const refreshTokenLifespan = strapi.config.get<number>(
+      'admin.auth.refreshTokenLifespan',
+      30 * 24 * 60 * 60
+    );
+    const accessTokenLifespan = strapi.config.get<number>('admin.auth.accessTokenLifespan', 60 * 60);
+
     const config = {
       jwtSecret,
-      refreshTokenLifespan: 30 * 24 * 60 * 60, // 30 days in seconds
-      accessTokenLifespan: 60 * 60, // 1 hour in seconds
+      refreshTokenLifespan,
+      accessTokenLifespan,
     };
 
     strapi.add('sessionManager', () =>

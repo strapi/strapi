@@ -13,7 +13,7 @@ export interface SessionProvider {
 
 export interface SessionData {
   id?: string;
-  user: string; // User ID stored as string (key-value store)
+  userId: string; // User ID stored as string (key-value store)
   sessionId: string;
   deviceId: string;
   origin: string;
@@ -66,7 +66,7 @@ class DatabaseSessionProvider implements SessionProvider {
 
   async findByIdentifier(userId: string): Promise<SessionData[]> {
     const results = await this.db.query(this.contentType).findMany({
-      where: { user: userId },
+      where: { userId },
     });
     return results as SessionData[];
   }
@@ -79,7 +79,7 @@ class DatabaseSessionProvider implements SessionProvider {
 
   async deleteByIdentifier(userId: string): Promise<void> {
     await this.db.query(this.contentType).deleteMany({
-      where: { user: userId },
+      where: { userId },
     });
   }
 
@@ -101,6 +101,10 @@ class SessionManager {
 
   private config: SessionManagerConfig;
 
+  // Run expired cleanup only every N calls to avoid extra queries
+  private cleanupInvocationCounter: number = 0;
+  private readonly cleanupEveryCalls: number = 50;
+
   constructor(provider: SessionProvider, config: SessionManagerConfig) {
     this.provider = provider;
     this.config = config;
@@ -110,18 +114,28 @@ class SessionManager {
     return crypto.randomBytes(16).toString('hex');
   }
 
+  private maybeCleanupExpired(): void {
+    this.cleanupInvocationCounter += 1;
+    if (this.cleanupInvocationCounter >= this.cleanupEveryCalls) {
+      this.cleanupInvocationCounter = 0;
+      this.provider.deleteExpired().catch(() => {
+        // Intentionally ignore errors
+      });
+    }
+  }
+
   async generateRefreshToken(
     userId: string,
     deviceId: string,
     origin: string
   ): Promise<{ token: string; sessionId: string }> {
-    await this.provider.deleteExpired();
+    this.maybeCleanupExpired();
 
     const sessionId = this.generateSessionId();
     const expiresAt = new Date(Date.now() + this.config.refreshTokenLifespan * 1000);
 
     await this.provider.create({
-      user: userId,
+      userId,
       sessionId,
       deviceId,
       origin,
@@ -136,6 +150,7 @@ class SessionManager {
 
     const token = jwt.sign(payload, this.config.jwtSecret, {
       expiresIn: this.config.refreshTokenLifespan,
+      algorithm: 'HS256',
     });
 
     return { token, sessionId };
