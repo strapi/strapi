@@ -2728,4 +2728,5 @@ topics:
                   realm.close();
                 }
               };
+
             }, []);
