@@ -72,12 +72,16 @@ const TrashBinButton = ({ onDrop }: TrashBinButtonProps) => {
  * WidgetRoot
  * -----------------------------------------------------------------------------------------------*/
 
-interface WidgetRootProps extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link'> {
+interface WidgetRootProps extends Pick<WidgetType, 'title' | 'icon' | 'link'> {
   children: React.ReactNode;
   id: string;
   findWidget: (id: string) => { index: number };
   moveWidget: (id: string, to: number) => void;
   setDisplayTrashBin: (display: boolean) => void;
+  columnWidths: Record<string, number>;
+  setColumnWidths: (
+    widths: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)
+  ) => void;
 }
 
 interface Item {
@@ -94,6 +98,8 @@ export const WidgetRoot = ({
   findWidget,
   moveWidget,
   setDisplayTrashBin,
+  columnWidths,
+  setColumnWidths,
 }: WidgetRootProps) => {
   const { formatMessage } = useIntl();
   const Icon = icon;
@@ -138,6 +144,7 @@ export const WidgetRoot = ({
   );
 
   const opacity = isDragging ? 0 : 1;
+  const columnWidth = columnWidths[id] || 6;
 
   return (
     <Flex
@@ -157,6 +164,7 @@ export const WidgetRoot = ({
           drag(drop(node));
         }
       }}
+      position="relative"
       style={{ opacity, zIndex: isDragging ? 10 : 1 }}
     >
       <Flex direction="row" gap={2} width="100%" tag="header" alignItems="center">
@@ -189,6 +197,42 @@ export const WidgetRoot = ({
       <Box width="100%" height="261px" overflow="auto" tag="main">
         {children}
       </Box>
+      <Flex
+        position="absolute"
+        top={0}
+        bottom={0}
+        right={0}
+        padding={2}
+        alignItems="center"
+        style={{ cursor: 'col-resize' }}
+        onMouseDown={(e) => {
+          const startX = e.clientX;
+          const startWidth = columnWidth;
+
+          const handleMouseMove = (moveEvent: MouseEvent) => {
+            const deltaX = moveEvent.clientX - startX;
+            const threshold = 100;
+            const newWidth = Math.max(1, Math.min(12, startWidth + Math.round(deltaX / threshold)));
+
+            if (newWidth >= 4) {
+              setColumnWidths((prev) => ({
+                ...prev,
+                [id]: newWidth,
+              }));
+            }
+          };
+
+          const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        }}
+      >
+        <Box background="neutral150" height="24px" width="2px" borderRadius={1} />
+      </Flex>
     </Flex>
   );
 };
@@ -235,6 +279,7 @@ const HomePageCE = () => {
   const [displayTrashBin, setDisplayTrashBin] = React.useState(false);
   const [displayAddNewWidget, setDisplayAddNewWidget] = React.useState(false);
   const [selectedWidgetToAdd, setSelectedWidgetToAdd] = React.useState('');
+  const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
 
   React.useEffect(() => {
     const checkWidgetsPermissions = async () => {
@@ -327,7 +372,7 @@ const HomePageCE = () => {
           ) : (
             <Grid.Root gap={5} ref={drop}>
               {filteredWidgets.map((widget) => (
-                <Grid.Item col={6} s={12} key={widget.uid}>
+                <Grid.Item col={columnWidths[widget.uid] || 6} s={12} key={widget.uid}>
                   <WidgetRoot
                     id={widget.uid}
                     title={widget.title}
@@ -336,6 +381,8 @@ const HomePageCE = () => {
                     findWidget={findWidget}
                     moveWidget={moveWidget}
                     setDisplayTrashBin={setDisplayTrashBin}
+                    columnWidths={columnWidths}
+                    setColumnWidths={setColumnWidths}
                   >
                     <WidgetComponent component={widget.component} />
                   </WidgetRoot>
