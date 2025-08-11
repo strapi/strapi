@@ -19,7 +19,13 @@ const CellTypography = styled(Typography)`
   white-space: nowrap;
 `;
 
-const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) => {
+const RecentDocumentsTable = ({
+  documents,
+  type,
+}: {
+  documents: RecentDocument[];
+  type: 'assigned';
+}) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
@@ -33,7 +39,7 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
   };
 
   const handleRowClick = (document: RecentDocument) => () => {
-    trackUsage('willEditEntryFromHome');
+    trackUsage('willEditEntryFromHome', { type });
     const link = getEditViewLink(document);
     navigate(link);
   };
@@ -85,7 +91,7 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
                 <IconButton
                   tag={Link}
                   to={getEditViewLink(document)}
-                  onClick={() => trackUsage('willEditEntryFromHome')}
+                  onClick={() => trackUsage('willEditEntryFromHome', { type })}
                   label={formatMessage({
                     id: 'content-manager.actions.edit.label',
                     defaultMessage: 'Edit',
@@ -130,7 +136,7 @@ const AssignedWidget = () => {
     );
   }
 
-  return <RecentDocumentsTable documents={data} />;
+  return <RecentDocumentsTable documents={data} type="assigned" />;
 };
 
 export { AssignedWidget };
