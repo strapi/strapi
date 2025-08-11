@@ -1,4 +1,5 @@
 {
+  "link": "Link",
   "Settings.email.plugin.button.test-email": "Wyślij testowy email",
   "Settings.email.plugin.label.defaultFrom": "Domyślny nadawca",
   "Settings.email.plugin.label.defaultReplyTo": "Domyślny obiorca",
