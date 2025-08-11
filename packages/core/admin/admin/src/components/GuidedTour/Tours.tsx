@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Popover, Portal, Button } from '@strapi/design-system';
+import { Box, Popover, Portal, Button, Link } from '@strapi/design-system';
 import { UID } from '@strapi/types';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -255,29 +255,48 @@ const tours = {
     {
       name: 'Introduction',
       content: ({ Step }) => (
-        <Step.Root sideOffset={-36} withArrow={false}>
-          <Step.Title id="tours.apiTokens.Introduction.title" defaultMessage="API tokens" />
+        <Step.Root side="top" sideOffset={32} withArrow={false}>
+          <Step.Title
+            id="tours.apiTokens.Introduction.title"
+            defaultMessage="Last but not least, API tokens"
+          />
           <Step.Content
             id="tours.apiTokens.Introduction.content"
-            defaultMessage="Create and manage API tokens with highly customizable permissions."
+            defaultMessage="Control API access with highly customizable permissions."
           />
           <Step.Actions showSkip />
         </Step.Root>
       ),
     },
     {
-      name: 'CreateAnAPIToken',
+      name: 'ManageAPIToken',
       content: ({ Step }) => (
-        <Step.Root side="bottom" align="end" sideOffset={-10}>
+        <Step.Root side="bottom" align="end">
           <Step.Title
-            id="tours.apiTokens.CreateAnAPIToken.title"
-            defaultMessage="Create an API token"
+            id="tours.apiTokens.ManageAPIToken.title"
+            defaultMessage="Manage an API token"
           />
           <Step.Content
-            id="tours.apiTokens.CreateAnAPIToken.content"
-            defaultMessage="Create a new API token. Choose a name, duration and type."
+            id="tours.apiTokens.ManageAPIToken.content"
+            defaultMessage='Click the "Pencil" icon to view and update an existing API token.'
           />
           <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'ViewAPIToken',
+      content: ({ Step, dispatch }) => (
+        <Step.Root side="bottom" align="end">
+          <Step.Title id="tours.apiTokens.ViewAPIToken.title" defaultMessage="View API token" />
+          <Step.Content
+            id="tours.apiTokens.ViewAPIToken.content"
+            defaultMessage='Click the "View token" button to see your API token.'
+          />
+          <Step.Actions>
+            <StepCount tourName="apiTokens" />
+            <GotItAction onClick={() => dispatch({ type: 'next_step', payload: 'apiTokens' })} />
+          </Step.Actions>
         </Step.Root>
       ),
     },
@@ -291,7 +310,15 @@ const tours = {
           />
           <Step.Content
             id="tours.apiTokens.CopyAPIToken.content"
-            defaultMessage="Make sure to do it now, you won’t be able to see it again. You’ll need to generate a new one if you lose it."
+            defaultMessage="Copy your API token"
+            values={{
+              spacer: <Box paddingTop={2} />,
+              a: (msg) => (
+                <Link isExternal href="https://docs.strapi.io/cms/features/api-tokens#usage">
+                  {msg}
+                </Link>
+              ),
+            }}
           />
           <Step.Actions>
             <StepCount tourName="apiTokens" />
@@ -299,8 +326,6 @@ const tours = {
           </Step.Actions>
         </Step.Root>
       ),
-      when: (completedActions) =>
-        completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken),
     },
     {
       name: 'Finish',
@@ -308,13 +333,13 @@ const tours = {
         <Step.Root side="right" align="start">
           <Step.Title
             id="tours.apiTokens.FinalStep.title"
-            defaultMessage="It's time to deploy your application!"
+            defaultMessage="Congratulations, it's time to deploy your application!"
           />
           <Step.Content
             id="tours.apiTokens.FinalStep.content"
             defaultMessage="Your application is ready to be deployed and its content to be shared with the world!"
           />
-          <Step.Actions showStepCount={false} to="/" />
+          <Step.Actions showPrevious={false} showStepCount={false} to="/" />
         </Step.Root>
       ),
       when: (completedActions) =>
