@@ -26,6 +26,7 @@ describe('SessionManager Factory', () => {
       findOne: jest.fn(),
       findMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     };
 
     mockDb = {
