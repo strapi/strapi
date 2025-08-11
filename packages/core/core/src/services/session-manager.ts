@@ -78,13 +78,13 @@ class DatabaseSessionProvider implements SessionProvider {
   }
 
   async deleteByIdentifier(userId: string): Promise<void> {
-    await this.db.query(this.contentType).delete({
+    await this.db.query(this.contentType).deleteMany({
       where: { user: userId },
     });
   }
 
   async deleteExpired(): Promise<void> {
-    await this.db.query(this.contentType).delete({
+    await this.db.query(this.contentType).deleteMany({
       where: { expiresAt: { $lt: new Date() } },
     });
   }

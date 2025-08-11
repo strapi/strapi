@@ -26,6 +26,7 @@ describe('SessionManager Factory', () => {
       findOne: jest.fn(),
       findMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     };
 
     mockDb = {
@@ -65,7 +66,7 @@ describe('SessionManager Factory', () => {
     it('should clean up expired sessions first', async () => {
       await sessionManager.generateRefreshToken(userId, deviceId, origin);
 
-      expect(mockQuery.delete).toHaveBeenCalledWith({
+      expect(mockQuery.deleteMany).toHaveBeenCalledWith({
         where: { expiresAt: { $lt: expect.any(Date) } },
       });
     });
@@ -161,6 +162,7 @@ describe('DatabaseSessionProvider', () => {
       findOne: jest.fn(),
       findMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     };
 
     mockDb = {
@@ -271,7 +273,7 @@ describe('DatabaseSessionProvider', () => {
 
       await provider.deleteByIdentifier(userId);
 
-      expect(mockQuery.delete).toHaveBeenCalledWith({ where: { user: userId } });
+      expect(mockQuery.deleteMany).toHaveBeenCalledWith({ where: { user: userId } });
     });
   });
 
@@ -279,7 +281,7 @@ describe('DatabaseSessionProvider', () => {
     it('should delete expired sessions', async () => {
       await provider.deleteExpired();
 
-      expect(mockQuery.delete).toHaveBeenCalledWith({
+      expect(mockQuery.deleteMany).toHaveBeenCalledWith({
         where: { expiresAt: { $lt: expect.any(Date) } },
       });
     });
