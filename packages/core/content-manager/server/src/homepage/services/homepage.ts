@@ -173,8 +173,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const permittedContentTypes = await getPermittedContentTypes();
       const allowedContentTypeUids = draftAndPublishOnly
         ? permittedContentTypes.filter((uid) => {
-          return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
-        })
+            return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
+          })
         : permittedContentTypes;
       // Fetch the configuration for each content type in a single query
       const configurations = await getConfiguration(allowedContentTypeUids);
@@ -271,21 +271,21 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
             const publishedDocuments = meta.hasDraftAndPublish
               ? await strapiDBConnection(tableName)
-                .countDistinct('draft.document_id as count')
-                .from(`${tableName} as draft`)
-                .join(`${tableName} as published`, function () {
-                  this.on('draft.document_id', '=', 'published.document_id')
-                    .andOn('draft.updated_at', '=', 'published.updated_at')
-                    .andOnNull('draft.published_at')
-                    .andOnNotNull('published.published_at');
-                })
-                .first()
+                  .countDistinct('draft.document_id as count')
+                  .from(`${tableName} as draft`)
+                  .join(`${tableName} as published`, function () {
+                    this.on('draft.document_id', '=', 'published.document_id')
+                      .andOn('draft.updated_at', '=', 'published.updated_at')
+                      .andOnNull('draft.published_at')
+                      .andOnNotNull('published.published_at');
+                  })
+                  .first()
               : await strapiDBConnection(tableName)
-                .select('document_id')
-                .from(`${tableName}`)
-                .countDistinct('document_id as count')
-                .groupBy('document_id')
-                .first();
+                  .select('document_id')
+                  .from(`${tableName}`)
+                  .countDistinct('document_id as count')
+                  .groupBy('document_id')
+                  .first();
             countDocuments.published += Number(publishedDocuments?.count) || 0;
 
             const modifiedDocuments = await strapiDBConnection(tableName)
