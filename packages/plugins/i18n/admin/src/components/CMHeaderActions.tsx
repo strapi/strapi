@@ -29,7 +29,7 @@ import {
   Dialog,
   type StatusVariant,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus } from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus, Magic } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -353,6 +353,132 @@ const FillFromAnotherLocaleAction = ({
                 {formatMessage({
                   id: getTranslation('CMEditViewCopyLocale.submit-text'),
                   defaultMessage: 'Yes, fill in',
+                })}
+              </Button>
+            </Flex>
+          </Dialog.Footer>
+        </>
+      ),
+    },
+  };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * AITranslateFromAnotherLocaleAction
+ * -----------------------------------------------------------------------------------------------*/
+
+const AITranslateFromAnotherLocaleAction = ({
+  documentId,
+  meta,
+  model,
+  collectionType,
+}: HeaderActionProps) => {
+  const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams<I18nBaseQuery>();
+  const { hasI18n } = useI18n();
+  const currentDesiredLocale = query.plugins?.i18n?.locale;
+  const [localeSelected, setLocaleSelected] = React.useState<string | null>(null);
+  const setValues = useForm('AITranslateFromAnotherLocale', (state) => state.setValues);
+
+  const { getDocument } = useDocumentActions();
+  const { schema, components } = useDocument({
+    model,
+    documentId,
+    collectionType,
+    params: { locale: currentDesiredLocale },
+  });
+  const { data: locales = [] } = useGetLocalesQuery();
+
+  const availableLocales = Array.isArray(locales)
+    ? locales.filter((locale) => meta?.availableLocales.some((l) => l.locale === locale.code))
+    : [];
+
+  const aiTranslateFromLocale = (onClose: () => void) => async () => {
+    const response = await getDocument({
+      collectionType,
+      model,
+      documentId,
+      params: { locale: localeSelected },
+    });
+    if (!response || !schema) {
+      return;
+    }
+
+    const { data } = response;
+
+    const cleanedData = cleanData(data, schema, components);
+
+    setValues(cleanedData);
+
+    onClose();
+  };
+
+  if (!hasI18n) {
+    return null;
+  }
+
+  return {
+    type: 'icon',
+    icon: <Magic />,
+    disabled: availableLocales.length === 0,
+    label: formatMessage({
+      id: getTranslation('CMEditViewAITranslate.copy-text'),
+      defaultMessage: 'AI Translate from another locale',
+    }),
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: getTranslation('CMEditViewAITranslate.dialog.title'),
+        defaultMessage: 'AI Translation',
+      }),
+      content: ({ onClose }: { onClose: () => void }) => (
+        <>
+          <Dialog.Body>
+            <Flex direction="column" gap={3}>
+              <Magic width="24px" height="24px" fill="primary600" />
+              <Typography textAlign="center">
+                {formatMessage({
+                  id: getTranslation('CMEditViewAITranslate.dialog.body'),
+                  defaultMessage: 'Content will be AI-translated from the selected locale:',
+                })}
+              </Typography>
+              <Field.Root width="100%">
+                <Field.Label>
+                  {formatMessage({
+                    id: getTranslation('CMEditViewAITranslate.dialog.field.label'),
+                    defaultMessage: 'Source Locale',
+                  })}
+                </Field.Label>
+                <SingleSelect
+                  value={localeSelected}
+                  placeholder={formatMessage({
+                    id: getTranslation('CMEditViewAITranslate.dialog.field.placeholder'),
+                    defaultMessage: 'Select source locale...',
+                  })}
+                  // @ts-expect-error – the DS will handle numbers, but we're not allowing the API.
+                  onChange={(value) => setLocaleSelected(value)}
+                >
+                  {availableLocales.map((locale) => (
+                    <SingleSelectOption key={locale.code} value={locale.code}>
+                      {locale.name}
+                    </SingleSelectOption>
+                  ))}
+                </SingleSelect>
+              </Field.Root>
+            </Flex>
+          </Dialog.Body>
+          <Dialog.Footer>
+            <Flex gap={2} width="100%">
+              <Button flex="auto" variant="tertiary" onClick={onClose}>
+                {formatMessage({
+                  id: getTranslation('CMEditViewAITranslate.cancel-text'),
+                  defaultMessage: 'Cancel',
+                })}
+              </Button>
+              <Button flex="auto" variant="success" onClick={aiTranslateFromLocale(onClose)}>
+                {formatMessage({
+                  id: getTranslation('CMEditViewAITranslate.submit-text'),
+                  defaultMessage: 'Translate',
                 })}
               </Button>
             </Flex>
@@ -805,4 +931,5 @@ export {
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
+  AITranslateFromAnotherLocaleAction,
 };
