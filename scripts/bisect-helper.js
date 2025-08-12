@@ -111,10 +111,14 @@ async function printFirstBadFromBisectLog() {
       const text = summary.replace(/^#\s*first bad commit:\s*/, '');
       const match = text.match(/^\[([0-9a-f]{7,40})\]\s+(.*)$/i);
       if (match) {
-        const short = match[1].slice(0, 10);
-        const subject = match[2];
+        const fullHash = match[1];
+        const [{ stdout: short }, { stdout: subject }] = await Promise.all([
+          execa('git', ['rev-parse', '--short', fullHash]),
+          execa('git', ['show', '-s', '--format=%s', fullHash]),
+        ]);
         console.log(`FIRST_BAD_COMMIT: ${short} - ${subject}`);
       } else {
+        // Fallback: print as-is from the bisect log
         console.log(`FIRST_BAD_COMMIT: ${text}`);
       }
     }
