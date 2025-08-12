@@ -82,7 +82,6 @@ Some steps shouldn't be counted in the step count displayed to the user. Use `ex
 - `_meta.totalStepCount` - The total number of steps defined for the tour
 - `_meta.displayedStepCount` - The total number of steps - the number of steps with `excludeFromStepCount: true`
 
-
 ## Usage Guide
 
 ### Creating a New Tour
