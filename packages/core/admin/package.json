@@ -112,7 +112,7 @@
     "is-localhost-ip": "2.0.0",
     "json-logic-js": "2.0.5",
     "jsonwebtoken": "9.0.0",
-    "koa": "2.16.1",
+    "koa": "2.16.2",
     "koa-compose": "4.1.0",
     "koa-passport": "6.0.0",
     "koa-static": "5.0.0",
