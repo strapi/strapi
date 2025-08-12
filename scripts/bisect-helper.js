@@ -36,6 +36,18 @@ const execa = require('execa');
 const writeFile = promisify(fs.writeFile);
 const chmod = promisify(fs.chmod);
 
+async function printFinalBadCommitLine() {
+  try {
+    const [{ stdout: short }, { stdout: subject }] = await Promise.all([
+      execa('git', ['rev-parse', '--short', 'HEAD']),
+      execa('git', ['show', '-s', '--format=%s', 'HEAD']),
+    ]);
+    console.log(`\nFIRST_BAD_COMMIT: ${short} - ${subject}`);
+  } catch {
+    // ignore
+  }
+}
+
 async function promptInputs() {
   const answers = await inquirer.prompt([
     {
@@ -163,10 +175,12 @@ async function runBisect({ goodRef, badRef, runnerPath }) {
   try {
     await execa('git', ['bisect', 'run', runnerPath], { stdio: 'inherit' });
     console.log('\nGit bisect run completed. The first bad commit should be shown above.');
+    await printFinalBadCommitLine();
   } catch (err) {
     console.error(
       `\nGit bisect run exited with status ${err.exitCode ?? 'unknown'}. See output above for details.`
     );
+    await printFinalBadCommitLine();
   }
 
   console.log('\nNote: Your repository is currently checked out at a commit in the bisect state.');
