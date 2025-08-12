@@ -413,7 +413,7 @@ interface DidStartGuidedTour {
 interface WillEditEntryFromHome {
   name: 'willEditEntryFromHome';
   properties: {
-    type: 'edited' | 'published' | 'assigned';
+    entryType: 'edited' | 'published' | 'assigned';
   };
 }
 
@@ -424,10 +424,10 @@ interface DidOpenHomeWidgetLink {
   };
 }
 
-interface DidOpenProjectStatisticsWidgetLink {
-  name: 'didOpenProjectStatisticsWidgetLink';
+interface DidOpenKeyStatisticsWidgetLink {
+  name: 'didOpenKeyStatisticsWidgetLink';
   properties: {
-    item: string;
+    itemKey: string;
   };
 }
 
@@ -457,9 +457,9 @@ type EventsWithProperties =
   | DidSkipGuidedTour
   | DidCompleteGuidedTour
   | DidStartGuidedTour
-  | WillEditEntryFromHome
   | DidOpenHomeWidgetLink
-  | DidOpenProjectStatisticsWidgetLink;
+  | DidOpenKeyStatisticsWidgetLink
+  | WillEditEntryFromHome;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

@@ -84,107 +84,6 @@ const LinkCell = styled(Link)`
   padding: ${({ theme }) => theme.spaces[3]};
 `;
 
-const keyStatisticsList = {
-  entries: {
-    label: {
-      id: 'widget.key-statistics.list.entries',
-      defaultMessage: 'Entries',
-    },
-    icon: {
-      component: <Files />,
-      background: 'primary100',
-      color: 'primary600',
-    },
-    link: '/content-manager',
-  },
-  assets: {
-    label: {
-      id: 'widget.key-statistics.list.assets',
-      defaultMessage: 'Assets',
-    },
-    icon: {
-      component: <Images />,
-      background: 'warning100',
-      color: 'warning600',
-    },
-    link: '/plugins/upload',
-  },
-  contentTypes: {
-    label: {
-      id: 'widget.key-statistics.list.contentTypes',
-      defaultMessage: 'Content-Types',
-    },
-    icon: {
-      component: <Layout />,
-      background: 'secondary100',
-      color: 'secondary600',
-    },
-    link: '/plugins/content-type-builder',
-  },
-  components: {
-    label: {
-      id: 'widget.key-statistics.list.components',
-      defaultMessage: 'Components',
-    },
-    icon: {
-      component: <Graph />,
-      background: 'alternative100',
-      color: 'alternative600',
-    },
-    link: '/plugins/content-type-builder',
-  },
-  locales: {
-    label: {
-      id: 'widget.key-statistics.list.locales',
-      defaultMessage: 'Locales',
-    },
-    icon: {
-      component: <Earth />,
-      background: 'success100',
-      color: 'success600',
-    },
-    link: '/settings/internationalization',
-  },
-  admins: {
-    label: {
-      id: 'widget.key-statistics.list.admins',
-      defaultMessage: 'Admins',
-    },
-    icon: {
-      component: <User />,
-      background: 'danger100',
-      color: 'danger600',
-    },
-    link: '/settings/users?pageSize=10&page=1&sort=firstname',
-  },
-  webhooks: {
-    label: {
-      id: 'widget.key-statistics.list.webhooks',
-      defaultMessage: 'Webhooks',
-    },
-    icon: {
-      component: <Webhooks />,
-      background: 'alternative100',
-      color: 'alternative600',
-    },
-    link: '/settings/webhooks',
-  },
-  apiTokens: {
-    label: {
-      id: 'widget.key-statistics.list.apiTokens',
-      defaultMessage: 'API Tokens',
-    },
-    icon: {
-      component: <Key />,
-      background: 'neutral100',
-      color: 'neutral600',
-    },
-    link: '/settings/api-tokens?sort=name:ASC',
-  },
-};
-
-type KeyStatisticsItem = keyof typeof keyStatisticsList;
-
 const KeyStatisticsWidget = () => {
   const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
@@ -199,6 +98,105 @@ const KeyStatisticsWidget = () => {
   if (!countKeyStatistics || !countDocuments) {
     return <Widget.Error />;
   }
+
+  const keyStatisticsList = {
+    entries: {
+      label: {
+        id: 'widget.key-statistics.list.entries',
+        defaultMessage: 'Entries',
+      },
+      icon: {
+        component: <Files />,
+        background: 'primary100',
+        color: 'primary600',
+      },
+      link: '/content-manager',
+    },
+    assets: {
+      label: {
+        id: 'widget.key-statistics.list.assets',
+        defaultMessage: 'Assets',
+      },
+      icon: {
+        component: <Images />,
+        background: 'warning100',
+        color: 'warning600',
+      },
+      link: '/plugins/upload',
+    },
+    contentTypes: {
+      label: {
+        id: 'widget.key-statistics.list.contentTypes',
+        defaultMessage: 'Content-Types',
+      },
+      icon: {
+        component: <Layout />,
+        background: 'secondary100',
+        color: 'secondary600',
+      },
+      link: '/plugins/content-type-builder',
+    },
+    components: {
+      label: {
+        id: 'widget.key-statistics.list.components',
+        defaultMessage: 'Components',
+      },
+      icon: {
+        component: <Graph />,
+        background: 'alternative100',
+        color: 'alternative600',
+      },
+      link: '/plugins/content-type-builder',
+    },
+    locales: {
+      label: {
+        id: 'widget.key-statistics.list.locales',
+        defaultMessage: 'Locales',
+      },
+      icon: {
+        component: <Earth />,
+        background: 'success100',
+        color: 'success600',
+      },
+      link: '/settings/internationalization',
+    },
+    admins: {
+      label: {
+        id: 'widget.key-statistics.list.admins',
+        defaultMessage: 'Admins',
+      },
+      icon: {
+        component: <User />,
+        background: 'danger100',
+        color: 'danger600',
+      },
+      link: '/settings/users?pageSize=10&page=1&sort=firstname',
+    },
+    webhooks: {
+      label: {
+        id: 'widget.key-statistics.list.webhooks',
+        defaultMessage: 'Webhooks',
+      },
+      icon: {
+        component: <Webhooks />,
+        background: 'alternative100',
+        color: 'alternative600',
+      },
+      link: '/settings/webhooks',
+    },
+    apiTokens: {
+      label: {
+        id: 'widget.key-statistics.list.apiTokens',
+        defaultMessage: 'API Tokens',
+      },
+      icon: {
+        component: <Key />,
+        background: 'neutral100',
+        color: 'neutral600',
+      },
+      link: '/settings/api-tokens?sort=name:ASC',
+    },
+  };
 
   const { draft, published, modified } = countDocuments ?? {
     draft: 0,
@@ -219,7 +217,7 @@ const KeyStatisticsWidget = () => {
               to={item.link}
               key={`key-statistics-${key}`}
               data-testid={`stat-${key}`}
-              onClick={() => trackUsage('didOpenProjectStatisticsWidgetLink', { item: key })}
+              onClick={() => trackUsage('didOpenKeyStatisticsWidgetLink', { itemKey: key })}
             >
               <Flex alignItems="center" gap={2}>
                 <Flex

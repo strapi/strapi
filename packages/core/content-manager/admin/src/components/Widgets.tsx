@@ -53,7 +53,7 @@ const RecentDocumentsTable = ({
 
   const handleRowClick = (document: RecentDocument) => () => {
     trackUsage('willEditEntryFromHome', {
-      type,
+      entryType: type,
     });
     const link = getEditViewLink(document);
     navigate(link);

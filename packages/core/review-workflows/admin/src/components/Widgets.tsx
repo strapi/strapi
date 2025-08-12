@@ -39,7 +39,7 @@ const RecentDocumentsTable = ({
   };
 
   const handleRowClick = (document: RecentDocument) => () => {
-    trackUsage('willEditEntryFromHome', { type });
+    trackUsage('willEditEntryFromHome', { entryType: type });
     const link = getEditViewLink(document);
     navigate(link);
   };
@@ -91,7 +91,7 @@ const RecentDocumentsTable = ({
                 <IconButton
                   tag={Link}
                   to={getEditViewLink(document)}
-                  onClick={() => trackUsage('willEditEntryFromHome', { type })}
+                  onClick={() => trackUsage('willEditEntryFromHome', { entryType: type })}
                   label={formatMessage({
                     id: 'content-manager.actions.edit.label',
                     defaultMessage: 'Edit',
