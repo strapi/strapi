@@ -25,7 +25,7 @@ type SelectComponentsProps = {
     };
   }) => void;
   value: string[];
-  targetUid: Internal.UID.ContentType;
+  targetUid: Internal.UID.Schema;
 };
 
 export const SelectComponents = ({
@@ -37,8 +37,16 @@ export const SelectComponents = ({
   targetUid,
 }: SelectComponentsProps) => {
   const { formatMessage } = useIntl();
-  const { componentsGroupedByCategory, contentTypes } = useDataManager();
-  const dzSchema = findAttribute(contentTypes[targetUid].attributes, dynamicZoneTarget);
+  const { componentsGroupedByCategory, contentTypes, components } = useDataManager();
+  
+  const isComponent = targetUid.includes('.') && !targetUid.includes('::');
+  const schema = isComponent ? components[targetUid] : contentTypes[targetUid];
+  
+  if (!schema) {
+    return null;
+  }
+  
+  const dzSchema = findAttribute(schema.attributes, dynamicZoneTarget);
 
   if (!dzSchema) {
     return null;

@@ -47,4 +47,30 @@ export const componentForm = {
 
     return sections;
   },
+  dynamiczone() {
+    return {
+      sections: [
+        {
+          sectionTitle: null,
+          items: [
+            {
+              type: 'pushRight',
+              size: 6,
+              intlLabel: { id: '', defaultMessage: '' },
+              name: 'pushRight',
+            },
+            {
+              name: 'components',
+              type: 'select-components',
+              intlLabel: {
+                id: getTrad('modalForm.attributes.select-components'),
+                defaultMessage: 'Select the components',
+              },
+              isMultiple: true,
+            },
+          ],
+        },
+      ],
+    };
+  },
 };

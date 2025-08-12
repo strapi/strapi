@@ -42,7 +42,7 @@ export const getAttributesToDisplay = (
     const canAddComponentInAnotherComponent =
       !isPickingAttributeForAContentType && !isNestedInAnotherComponent;
     if (canAddComponentInAnotherComponent) {
-      return [defaultAttributes, ['component']];
+      return [defaultAttributes, ['component', 'dynamiczone']];
     }
   }
 
