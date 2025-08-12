@@ -108,7 +108,7 @@ const ContentManagerActions = ({
 
 const Introduction = ({ Step }: StepContentProps) => {
   return (
-    <Step.Root side="top" withArrow={false}>
+    <Step.Root side="top" sideOffset={33} withArrow={false}>
       <Step.Title id="tours.contentManager.Introduction.title" defaultMessage="Content manager" />
       <Step.Content
         id="tours.contentManager.Introduction.content"
