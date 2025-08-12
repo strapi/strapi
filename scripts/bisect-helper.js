@@ -1,4 +1,29 @@
 #!/usr/bin/env node
+/**
+ * Git Bisect Helper (Node)
+ *
+ * What it does
+ * - Interactively prompts for:
+ *   - Test command to run at each checkout (e.g. `yarn test:unit --selectProjects Strapi -- packages/core/strapi/__tests__/version.test.ts`)
+ *   - Known GOOD ref and BAD ref (Enter to use current commit for either)
+ *   - Setup mode between checkouts: none | build (`yarn build`) | setup (`yarn setup`)
+ * - Generates a temporary bash runner that, on each checkout, runs the chosen setup then executes the test command
+ * - Starts a `git bisect` session with your refs and runs `git bisect run <runner>`
+ * - Leaves the repo in a bisected state. Run `git bisect reset` when finished.
+ *
+ * Requirements
+ * - git, bash, Node.js, and yarn available on PATH
+ *
+ * Usage
+ * - Make sure this file is executable: `chmod +x scripts/bisect-helper.js`
+ * - Run: `./scripts/bisect-helper.js`
+ * - Follow prompts. Press Enter on good/bad if you want to mark the current commit.
+ *
+ * Notes
+ * - The test command is base64-encoded into the runner to avoid quoting issues.
+ * - The runner is created in your system temp folder and its path is printed for reference.
+ * - `git bisect run` expects the runner to exit 0 for GOOD and non-zero for BAD; your test command’s exit code is passed through.
+ */
 'use strict';
 
 const fs = require('fs');
