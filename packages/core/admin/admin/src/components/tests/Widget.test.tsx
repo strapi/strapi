@@ -7,7 +7,11 @@ import { Widget } from '../WidgetHelpers';
 describe('Homepage Widget component', () => {
   it('should render the widget with info from props', () => {
     render(
-      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }} icon={Cog}>
+      <WidgetRoot
+        title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
+        icon={Cog}
+        uid="plugin::test.test-widget"
+      >
         actual widget content
       </WidgetRoot>
     );
@@ -19,7 +23,10 @@ describe('Homepage Widget component', () => {
 
   it('should render a spinner while a widget is loading', () => {
     render(
-      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot
+        title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
+        uid="plugin::test.test-widget"
+      >
         <Widget.Loading />
       </WidgetRoot>
     );
@@ -30,7 +37,10 @@ describe('Homepage Widget component', () => {
 
   it('should render an error message when a widget fails to load', () => {
     render(
-      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot
+        title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
+        uid="plugin::test.test-widget"
+      >
         <Widget.Error />
       </WidgetRoot>
     );
@@ -41,7 +51,10 @@ describe('Homepage Widget component', () => {
 
   it('should render a custom error message when provided', () => {
     render(
-      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot
+        title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
+        uid="plugin::test.test-widget"
+      >
         <Widget.Error>Custom error message</Widget.Error>
       </WidgetRoot>
     );
@@ -52,7 +65,10 @@ describe('Homepage Widget component', () => {
 
   it('should render a no data message when a widget has no data', () => {
     render(
-      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot
+        title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
+        uid="plugin::test.test-widget"
+      >
         <Widget.NoData />
       </WidgetRoot>
     );
@@ -62,7 +78,10 @@ describe('Homepage Widget component', () => {
 
   it('should render a custom no data message when provided', () => {
     render(
-      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot
+        title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
+        uid="plugin::test.test-widget"
+      >
         <Widget.NoData>Custom no data message</Widget.NoData>
       </WidgetRoot>
     );
