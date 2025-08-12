@@ -41,14 +41,12 @@ export async function handleCloudLogin(): Promise<boolean> {
     return false;
   }
   const { userChoice } = await inquirer.prompt<{ userChoice: string }>(
-    cloudApiConfig.projectCreation?.userChoice || [
-      {
-        type: 'list',
-        name: 'userChoice',
-        message: `Please log in or sign up.`,
-        choices: ['Login/Sign up', 'Skip'],
-      },
-    ]
+    cloudApiConfig.projectCreation?.userChoice || {
+      type: 'list',
+      name: 'userChoice',
+      message: `Please log in or sign up.`,
+      choices: ['Login/Sign up', 'Skip'],
+    }
   );
 
   if (!userChoice.toLowerCase().includes('skip')) {

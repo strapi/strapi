@@ -13,8 +13,8 @@ export function questionDefaultValuesMapper(
   }>
 ) {
   return (
-    questions: ReadonlyArray<DistinctQuestion<ProjectAnswers>>
-  ): ReadonlyArray<DistinctQuestion<ProjectAnswers>> => {
+    questions: Array<DistinctQuestion<ProjectAnswers>>
+  ): Array<DistinctQuestion<ProjectAnswers>> => {
     return questions.map((question) => {
       const questionName = question.name as keyof ProjectAnswers;
 
@@ -32,7 +32,7 @@ export function questionDefaultValuesMapper(
         // else we consider it as a static value
         return {
           ...question,
-          default: questionDefault,
+          default: questionDefault as any,
         };
       }
       // If the question is not part of the mapper, return the question as is
@@ -46,7 +46,7 @@ export function questionDefaultValuesMapper(
  * @param questions - An array of questions for project creation
  */
 export function getDefaultsFromQuestions(
-  questions: ReadonlyArray<DistinctQuestion<ProjectAnswers>>
+  questions: Array<DistinctQuestion<ProjectAnswers>>
 ): Partial<ProjectAnswers> {
   return questions.reduce((acc, question) => {
     if (question.default && question.name) {
@@ -70,5 +70,5 @@ export function getProjectNodeVersionDefault(question: DistinctQuestion<ProjectA
       return choice.value;
     }
   }
-  return question.default;
+  return question.default as any;
 }
