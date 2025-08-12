@@ -2,7 +2,7 @@
 declare global {
   interface Window {
     __strapi_previewCleanup?: () => void;
-    __strapi_HIGHLIGHT_HOVER_COLOR?: string;
+    STRAPI_HIGHLIGHT_HOVER_COLOR?: string;
   }
 }
 
@@ -17,7 +17,7 @@ const previewScript = (shouldRun = true) => {
    * Params
    * ---------------------------------------------------------------------------------------------*/
   const HIGHLIGHT_PADDING = 2; // in pixels
-  const HIGHLIGHT_HOVER_COLOR = window.__strapi_HIGHLIGHT_HOVER_COLOR ?? '#4945ff'; // dark primary500
+  const HIGHLIGHT_HOVER_COLOR = window.STRAPI_HIGHLIGHT_HOVER_COLOR ?? '#4945ff'; // dark primary500
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
   const OVERLAY_ID = 'strapi-preview-overlay';
   const INTERNAL_EVENTS = {
@@ -69,7 +69,7 @@ const previewScript = (shouldRun = true) => {
     const highlights: HTMLElement[] = [];
     const eventListeners: EventListenersList = [];
 
-    const drawOverlay = (target: Element, highlight: HTMLElement) => {
+    const drawHighlight = (target: Element, highlight: HTMLElement) => {
       if (!highlight) return;
 
       const rect = target.getBoundingClientRect();
@@ -82,7 +82,7 @@ const previewScript = (shouldRun = true) => {
       highlights.forEach((highlight, index) => {
         const element = elements[index];
         if (element && highlight) {
-          drawOverlay(element, highlight);
+          drawHighlight(element, highlight);
         }
       });
     };
@@ -135,7 +135,7 @@ const previewScript = (shouldRun = true) => {
         highlights.push(highlight);
         overlay.appendChild(highlight);
 
-        drawOverlay(element, highlight);
+        drawHighlight(element, highlight);
       }
     });
 
@@ -163,10 +163,10 @@ const previewScript = (shouldRun = true) => {
       highlightManager.updateAllHighlights();
     };
 
-    // Find all scrollable ancestors for all tracked elements
     const scrollableElements = new Set<Element | Window>();
-    scrollableElements.add(window); // Add window as a special case
+    scrollableElements.add(window);
 
+    // Find all scrollable ancestors for all tracked elements
     highlightManager.elements.forEach((element) => {
       let parent = element.parentElement;
       while (parent) {
