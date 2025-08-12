@@ -7,7 +7,7 @@ import { createContext } from '../Context';
 
 import { type Tours, tours as guidedTours } from './Tours';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
-import { migrateTourSteps, migrateTours } from './utils/migrations';
+import { migrateTours } from './utils/migrations';
 
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourProvider
@@ -52,6 +52,10 @@ type Action =
   | {
       type: 'set_completed_actions';
       payload: CompletedActions;
+    }
+  | {
+      type: 'remove_completed_action';
+      payload: ValueOf<CompletedActions>;
     };
 
 type TourState = Record<ValidTourName, { currentStep: number; isCompleted: boolean }>;
@@ -107,6 +111,12 @@ function reducer(state: State, action: Action): State {
       draft.completedActions = [...new Set([...draft.completedActions, ...action.payload])];
     }
 
+    if (action.type === 'remove_completed_action') {
+      draft.completedActions = draft.completedActions.filter(
+        (completedAction) => completedAction !== action.payload
+      );
+    }
+
     if (action.type === 'skip_all_tours') {
       draft.enabled = false;
     }
@@ -136,7 +146,7 @@ const GuidedTourContext = ({
     enabled,
     completedActions: [],
   });
-  const migratedTourState = migrateTourSteps(migrateTours(storedTours));
+  const migratedTourState = migrateTours(storedTours);
   const [state, dispatch] = React.useReducer(reducer, migratedTourState);
 
   // Sync local storage

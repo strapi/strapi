@@ -96,6 +96,8 @@ const GuidedTourTooltipImpl = ({
     };
   }, [isPopoverOpen]);
 
+  const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
+
   const hasApiSchema =
     Object.keys(guidedTourMeta?.data?.schemas ?? {}).filter((key) => key.startsWith('api::'))
       .length > 0;
@@ -103,22 +105,19 @@ const GuidedTourTooltipImpl = ({
   React.useEffect(() => {
     if (hasApiSchema) {
       /**
-       * Fallback sync for:
+       * Fallback sync:
        *
-       * When the user already has a schema (for whatever reason),
-       * allow them to proceed to the content manager tour
+       * When the user already has a schema (ie started project from template with seeded data),
+       * allow them to proceed to the content manager tour.
        *
-       * In the event the save fails in the CTB (as it often does),
-       * ensure the tour can still proceed as it should.
+       * When the CTB fails to restart after saving a schema (as it often does)
        */
       dispatch({
         type: 'set_completed_actions',
         payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       });
     }
-  }, [dispatch, hasApiSchema]);
-
-  const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
+  }, [dispatch, hasApiSchema, step, tourName]);
 
   return (
     <>

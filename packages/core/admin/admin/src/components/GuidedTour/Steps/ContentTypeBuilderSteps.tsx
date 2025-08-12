@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { UID } from '@strapi/types';
 import { useParams } from 'react-router-dom';
 
@@ -99,17 +101,27 @@ const Save = ({ Step, dispatch }: StepContentProps) => (
     />
     <Step.Actions>
       <StepCount tourName="contentTypeBuilder" />
-      <GotItAction onClick={() => dispatch({ type: 'next_step', payload: 'contentTypeBuilder' })} />
+      <GotItAction
+        onClick={() => {
+          // Ensure the completed action is removed
+          // in the event the user already has a schema but is still doing the tour
+          dispatch({
+            type: 'remove_completed_action',
+            payload: GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          });
+          dispatch({ type: 'next_step', payload: 'contentTypeBuilder' });
+        }}
+      />
     </Step.Actions>
   </Step.Root>
 );
 
 const Finish = ({ Step }: StepContentProps) => {
-  const { data } = useGetGuidedTourMetaQuery();
+  const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
   const { '*': routeParams } = useParams();
   // Get the uid from the params
   const uid = routeParams?.split('/').pop();
-  const contentType = uid ? data?.data?.schemas?.[uid as UID.ContentType] : null;
+  const contentType = uid ? guidedTourMeta?.data?.schemas?.[uid as UID.ContentType] : null;
   const contentTypeKindDictionary = {
     collectionType: 'collection-types',
     singleType: 'single-types',

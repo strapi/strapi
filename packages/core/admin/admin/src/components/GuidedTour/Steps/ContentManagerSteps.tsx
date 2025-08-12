@@ -130,7 +130,7 @@ const CreateNewEntry = ({ Step }: StepContentProps) => {
       />
       <Step.Content
         id="tours.contentManager.CreateNewEntry.content"
-        defaultMessage="Create a new entry in your collection type or single type."
+        defaultMessage='Click the "Create new entry" button to create and publish a new entry for this collection type.'
       />
       <Step.Actions>
         <ContentManagerActions showPrevious />
@@ -144,7 +144,7 @@ const Fields = ({ Step }: StepContentProps) => (
     <Step.Title id="tours.contentManager.Fields.title" defaultMessage="Fields" />
     <Step.Content
       id="tours.contentManager.Fields.content"
-      defaultMessage="Fill in the fields with content you want to publish."
+      defaultMessage="First, fill in the fields you created in the Content-Type Builder."
     />
     <Step.Actions>
       <ContentManagerActions showPrevious />
@@ -157,7 +157,7 @@ const Publish = ({ Step }: StepContentProps) => (
     <Step.Title id="tours.contentManager.Publish.title" defaultMessage="Publish" />
     <Step.Content
       id="tours.contentManager.Publish.content"
-      defaultMessage='Click the "Publish" button to make your content available on the content API.'
+      defaultMessage='Then click the "Publish" button to make your content available through the content API.'
     />
     <Step.Actions>
       <ContentManagerActions isActionRequired />
