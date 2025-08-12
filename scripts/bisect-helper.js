@@ -38,6 +38,27 @@ const chmod = promisify(fs.chmod);
 
 const isDebug = Boolean(process.env.DEBUG);
 
+async function printFirstBadFromBisectLog() {
+  try {
+    const { stdout } = await execa('git', ['bisect', 'log']);
+    const lines = stdout.split('\n');
+    const summary = [...lines].reverse().find((l) => l.trim().startsWith('# first bad commit:'));
+    if (summary) {
+      const text = summary.replace(/^#\s*first bad commit:\s*/, '');
+      const match = text.match(/^\[([0-9a-f]{7,40})\]\s+(.*)$/i);
+      if (match) {
+        const short = match[1].slice(0, 10);
+        const subject = match[2];
+        console.log(`FIRST_BAD_COMMIT: ${short} - ${subject}`);
+      } else {
+        console.log(`FIRST_BAD_COMMIT: ${text}`);
+      }
+    }
+  } catch {
+    // ignore
+  }
+}
+
 async function printFinalBadCommitLine() {
   try {
     const [{ stdout: short }, { stdout: subject }] = await Promise.all([
@@ -182,15 +203,15 @@ async function runBisect({ goodRef, badRef, runnerPath }) {
     await execa('git', ['bisect', 'run', runnerPath], { stdio: 'inherit' });
     if (isDebug) {
       console.log('\n[bisect-helper] git bisect run completed.');
-      await printFinalBadCommitLine();
     }
+    await printFirstBadFromBisectLog();
   } catch (err) {
     if (isDebug) {
       console.error(
         `\n[bisect-helper] git bisect run exited with status ${err.exitCode ?? 'unknown'}. See output above for details.`
       );
-      await printFinalBadCommitLine();
     }
+    await printFirstBadFromBisectLog();
   }
 
   if (isDebug) {
