@@ -7,36 +7,15 @@ The Guided Tour provides an interactive onboarding experience that guides new us
 The Guided Tour system is built with a modular architecture consisting of:
 
 - **Context Provider** (`Context.tsx`) - Global state management and persistence
-- **Tour Factory** (`Tours.tsx`) - Tour creation and step management
-- **Step Components** (`Step.tsx`) - Reusable popover components for tour steps
+- **Tour Factory** (`Tours.tsx`) - Tour factory and GuidedTourTooltip
+- **Steps** (`Steps`) - Step factory, reusable step components, and tour specific step components
 - **Overview Component** (`Overview.tsx`) - Homepage tour overview and progress tracking
-
-### Core Files
-
-```
-GuidedTour/
-├── Context.tsx         # State management and React context
-├── Tours.tsx           # Tour definitions and factory functions
-├── Step.tsx            # Step component factory and UI
-├── Overview.tsx        # Homepage overview component
-└── tests/
-    └── reducer.test.ts # Unit tests for state reducer
-```
 
 ## Core Concepts
 
 ### 1. Tours and Steps
 
 Tours are collections of steps that guide users through specific workflows. Each step will display its content in a popover.
-
-#### Tour Metadata
-
-Each tour created with `createTour()` includes a `_meta` property that provides information about the number of steps in the tour (total steps) and then the number of steps that will actually be displayed to the user:
-
-- `_meta.totalStepCount` - The total number of steps defined for the tour
-- `_meta.displayedStepCount` - The number of steps that will actually be displayed (accounting for conditional steps)
-
-This metadata is used internally for step counting and progress tracking.
 
 ```typescript
 const tours = {
@@ -82,12 +61,12 @@ Steps can be conditionally displayed based on user actions:
 
 ### 4. Excluding Steps from Step Count
 
-Some steps (like welcome or completion messages) shouldn't be counted in the "Step X of Y" display. Use `excludeFromStepCount` to exclude them:
+Some steps shouldn't be counted in the step count displayed to the user. Use `excludeFromStepCount` to exclude them:
 
 ```typescript
 {
   name: 'Welcome',
-  excludeFromStepCount: true, // This step won't be counted in "Step X of Y"
+  excludeFromStepCount: true,
   content: (Step) => (
     <Step.Root>
       <Step.Title id="tour.welcome" defaultMessage="Welcome!" />
@@ -97,6 +76,12 @@ Some steps (like welcome or completion messages) shouldn't be counted in the "St
   )
 }
 ```
+
+`createTour()` will add a `_meta` property to the tour object that provides information about the number of steps in the tour (total steps) and then the number of steps that will actually be displayed to the user:
+
+- `_meta.totalStepCount` - The total number of steps defined for the tour
+- `_meta.displayedStepCount` - The total number of steps - the number of steps with `excludeFromStepCount: true`
+
 
 ## Usage Guide
 
