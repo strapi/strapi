@@ -43,6 +43,22 @@ const BlockerWrapper = () => {
   return <Blocker onProceed={resetForm} />;
 };
 
+const FieldsForm = styled(Grid.Item)`
+  order: 1;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    order: 0;
+  }
+`;
+
+const Actions = styled(Grid.Item)`
+  order: 0;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    order: 1;
+  }
+`;
+
 const EditViewPage = () => {
   const location = useLocation();
   const [
@@ -138,7 +154,18 @@ const EditViewPage = () => {
   };
 
   return (
-    <Main paddingLeft={10} paddingRight={10}>
+    <Main
+      paddingLeft={{
+        initial: 6,
+        medium: 7,
+        large: 10,
+      }}
+      paddingRight={{
+        initial: 6,
+        medium: 7,
+        large: 10,
+      }}
+    >
       <Page.Title>{pageTitle}</Page.Title>
       {isSingleType && (
         <tours.contentManager.Introduction>
@@ -204,7 +231,7 @@ const EditViewPage = () => {
               ) : null}
             </Tabs.List>
             <Grid.Root paddingTop={8} gap={4}>
-              <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
+              <FieldsForm col={9} s={12} direction="column" alignItems="stretch">
                 <tours.contentManager.Fields>
                   <Tabs.Content value="draft">
                     <FormLayout layout={layout} document={doc} />
@@ -213,10 +240,10 @@ const EditViewPage = () => {
                 <Tabs.Content value="published">
                   <FormLayout layout={layout} document={doc} />
                 </Tabs.Content>
-              </Grid.Item>
-              <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
+              </FieldsForm>
+              <Actions col={3} s={12} direction="column" alignItems="stretch">
                 <Panels />
-              </Grid.Item>
+              </Actions>
             </Grid.Root>
           </Tabs.Root>
           <BlockerWrapper />

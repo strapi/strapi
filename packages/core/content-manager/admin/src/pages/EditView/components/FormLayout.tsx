@@ -11,10 +11,6 @@ import { InputRenderer } from './InputRenderer';
 
 import type { UseDocument } from '../../../hooks/useDocument';
 
-export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
-  sm: '27.5rem', // 440px
-};
-
 export const ResponsiveGridRoot = styled(Grid.Root)`
   container-type: inline-size;
 `;
@@ -29,7 +25,7 @@ export const ResponsiveGridItem =
   process.env.NODE_ENV !== 'test'
     ? styled(Grid.Item)<{ col: number }>`
         grid-column: span 12;
-        @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+        ${({ theme }) => theme.breakpoints.medium} {
           ${({ col }) => col && `grid-column: span ${col};`}
         }
       `
