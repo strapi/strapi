@@ -70,8 +70,8 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 echo "[bisect-runner] Checkout: $(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
-echo "[bisect-runner] Setup mode: ${SETUP_MODE}"
-case "${SETUP_MODE}" in
+echo "[bisect-runner] Setup mode: \${SETUP_MODE}"
+case "\${SETUP_MODE}" in
   build)
     yarn build
     ;;
@@ -98,11 +98,11 @@ decode_b64() {
   fi
 }
 
-TEST_COMMAND=$(printf %s "${TEST_COMMAND_B64}" | decode_b64)
+TEST_COMMAND=$(printf %s "\${TEST_COMMAND_B64}" | decode_b64)
 
-echo "[bisect-runner] Running test command: ${TEST_COMMAND}"
+echo "[bisect-runner] Running test command: \n\${TEST_COMMAND}"
 # Use bash -lc so complex commands, pipes, and env assignments work
-bash -lc "${TEST_COMMAND}"
+bash -lc "\${TEST_COMMAND}"
 `;
 }
 
