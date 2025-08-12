@@ -103,6 +103,7 @@ class SessionManager {
 
   // Run expired cleanup only every N calls to avoid extra queries
   private cleanupInvocationCounter: number = 0;
+
   private readonly cleanupEveryCalls: number = 50;
 
   constructor(provider: SessionProvider, config: SessionManagerConfig) {

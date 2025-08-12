@@ -27,7 +27,7 @@ describe('SessionManager API Integration', () => {
 
     afterEach(async () => {
       await strapi.db.query(contentTypeUID).deleteMany({
-        where: { user: testUserId },
+        where: { userId: testUserId },
       });
     });
 
@@ -58,7 +58,7 @@ describe('SessionManager API Integration', () => {
         });
 
         expect(session).toMatchObject({
-          user: testUserId,
+          userId: testUserId,
           sessionId: result.sessionId,
           deviceId: testDeviceId,
           origin: testOrigin,
@@ -107,7 +107,7 @@ describe('SessionManager API Integration', () => {
         const expiredSessionId = 'expired-session-123';
         await strapi.db.query(contentTypeUID).create({
           data: {
-            user: testUserId,
+            userId: testUserId,
             sessionId: expiredSessionId,
             deviceId: 'old-device',
             origin: testOrigin,
@@ -130,7 +130,7 @@ describe('SessionManager API Integration', () => {
           expiredIds.map((id) =>
             strapi.db.query(contentTypeUID).create({
               data: {
-                user: testUserId,
+                userId: testUserId,
                 sessionId: id,
                 deviceId: 'old-device',
                 origin: testOrigin,
@@ -143,7 +143,7 @@ describe('SessionManager API Integration', () => {
         await strapi.sessionManager.generateRefreshToken(testUserId, testDeviceId, testOrigin);
 
         const remainingExpired = await strapi.db.query(contentTypeUID).findMany({
-          where: { user: testUserId, expiresAt: { $lt: new Date() } },
+          where: { userId: testUserId, expiresAt: { $lt: new Date() } },
         });
         expect(remainingExpired).toHaveLength(0);
       });
@@ -166,7 +166,7 @@ describe('SessionManager API Integration', () => {
         expect(result1.sessionId).not.toBe(result2.sessionId);
 
         const sessions = await strapi.db.query(contentTypeUID).findMany({
-          where: { user: testUserId },
+          where: { userId: testUserId },
         });
 
         expect(sessions).toHaveLength(2);
@@ -191,7 +191,7 @@ describe('SessionManager API Integration', () => {
         expect(result1.sessionId).not.toBe(result2.sessionId);
 
         const sessions = await strapi.db.query(contentTypeUID).findMany({
-          where: { user: testUserId },
+          where: { userId: testUserId },
         });
 
         expect(sessions).toHaveLength(2);
@@ -278,7 +278,7 @@ describe('SessionManager API Integration', () => {
         expect(result1.sessionId).not.toBe(result2.sessionId);
 
         const sessions = await strapi.db.query(contentTypeUID).findMany({
-          where: { user: testUserId },
+          where: { userId: testUserId },
         });
 
         expect(sessions).toHaveLength(2);
