@@ -18,7 +18,6 @@ const createMiddleware = ({ sendEvent }: { sendEvent: Sender }) => {
 
   const middleware: Core.MiddlewareHandler = async (ctx, next) => {
     const { url, method } = ctx.request;
-    console.log(url);
 
     if (
       !url.includes('.') &&
