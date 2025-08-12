@@ -24,17 +24,17 @@ async function promptInputs() {
     {
       type: 'input',
       name: 'goodRef',
-      message: 'Enter the known GOOD commit or tag:',
-      validate(input) {
-        return input && input.trim().length > 0 ? true : 'Good ref is required';
+      message: 'Enter the known GOOD commit or tag (leave blank to use current):',
+      validate() {
+        return true; // allow blank
       },
     },
     {
       type: 'input',
       name: 'badRef',
-      message: 'Enter the known BAD commit or tag:',
-      validate(input) {
-        return input && input.trim().length > 0 ? true : 'Bad ref is required';
+      message: 'Enter the known BAD commit or tag (leave blank to use current):',
+      validate() {
+        return true; // allow blank
       },
     },
     {
@@ -124,8 +124,16 @@ async function runBisect({ goodRef, badRef, runnerPath }) {
   } catch {}
 
   await execa('git', ['bisect', 'start'], { stdio: 'inherit' });
-  await execa('git', ['bisect', 'bad', badRef], { stdio: 'inherit' });
-  await execa('git', ['bisect', 'good', goodRef], { stdio: 'inherit' });
+  if (badRef && badRef.trim().length > 0) {
+    await execa('git', ['bisect', 'bad', badRef.trim()], { stdio: 'inherit' });
+  } else {
+    await execa('git', ['bisect', 'bad'], { stdio: 'inherit' });
+  }
+  if (goodRef && goodRef.trim().length > 0) {
+    await execa('git', ['bisect', 'good', goodRef.trim()], { stdio: 'inherit' });
+  } else {
+    await execa('git', ['bisect', 'good'], { stdio: 'inherit' });
+  }
 
   try {
     await execa('git', ['bisect', 'run', runnerPath], { stdio: 'inherit' });
