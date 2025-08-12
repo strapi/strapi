@@ -46,14 +46,13 @@ describe('SearchInput', () => {
 
     await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
 
-    await waitFor(
-      () => {
-        expect(new URLSearchParams(getByRole('listitem').textContent ?? '').get('_q')).toBe(
-          'michka'
-        );
-      },
-      { timeout: 600 }
-    ); // Wait for debounce (500ms) + buffer
+    await user.keyboard('[Enter]');
+
+    const searchString = getByRole('listitem').textContent ?? '';
+    const searchParams = new URLSearchParams(searchString);
+
+    expect(searchParams.has('_q')).toBe(true);
+    expect(searchParams.get('_q')).toBe('michka');
   });
 
   it('should clear value and update query params', async () => {
@@ -74,25 +73,15 @@ describe('SearchInput', () => {
 
     await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
 
-    await waitFor(
-      () => {
-        expect(new URLSearchParams(getByRole('listitem').textContent ?? '').get('_q')).toBe(
-          'michka'
-        );
-      },
-      { timeout: 600 }
-    );
+    await user.keyboard('[Enter]');
+
+    expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(true);
 
     await user.click(getByRole('button', { name: 'Clear' }));
 
     expect(getByRole('textbox', { name: 'Search label' })).toHaveValue('');
 
-    await waitFor(
-      () => {
-        expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
-      },
-      { timeout: 600 }
-    );
+    expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
   });
 
   describe('blur behavior', () => {

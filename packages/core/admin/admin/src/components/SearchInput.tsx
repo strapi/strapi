@@ -5,7 +5,6 @@ import { Search as SearchIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { TrackingEvent, useTracking } from '../features/Tracking';
-import { useDebounce } from '../hooks/useDebounce';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 interface SearchInputProps {
@@ -30,7 +29,6 @@ const SearchInput = ({
 
   const [value, setValue] = React.useState(query?._q || '');
   const [isOpen, setIsOpen] = React.useState(!!value);
-  const debouncedSearch = useDebounce(value, 500) || '';
 
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -48,27 +46,25 @@ const SearchInput = ({
     setQuery({ _q: '' }, 'remove');
   };
 
-  const handleSearch = React.useCallback(
-    (term: string) => {
-      if (term) {
-        if (trackedEvent) {
-          trackUsage(trackedEvent, trackedEventDetails);
-        }
-        setQuery({ _q: encodeURIComponent(term), page: 1 });
-      } else {
-        setQuery({ _q: '' }, 'remove');
-      }
-    },
-    [setQuery, trackUsage, trackedEvent, trackedEventDetails]
-  );
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-  React.useEffect(() => {
-    handleSearch(debouncedSearch);
-  }, [debouncedSearch, handleSearch]);
+    // Ensure value is a string
+    if (value) {
+      if (trackedEvent) {
+        trackUsage(trackedEvent, trackedEventDetails);
+      }
+      setQuery({ _q: encodeURIComponent(value), page: 1 });
+    } else {
+      handleToggle();
+      setQuery({ _q: '' }, 'remove');
+    }
+  };
 
   if (isOpen) {
     return (
-      <SearchForm>
+      <SearchForm onSubmit={handleSubmit}>
         <Searchbar
           ref={inputRef}
           name="search"
