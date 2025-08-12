@@ -115,13 +115,12 @@ class SessionManager {
     return crypto.randomBytes(16).toString('hex');
   }
 
-  private maybeCleanupExpired(): void {
+  private async maybeCleanupExpired(): Promise<void> {
     this.cleanupInvocationCounter += 1;
     if (this.cleanupInvocationCounter >= this.cleanupEveryCalls) {
       this.cleanupInvocationCounter = 0;
-      this.provider.deleteExpired().catch(() => {
-        // Intentionally ignore errors
-      });
+
+      await this.provider.deleteExpired();
     }
   }
 
@@ -130,7 +129,7 @@ class SessionManager {
     deviceId: string,
     origin: string
   ): Promise<{ token: string; sessionId: string }> {
-    this.maybeCleanupExpired();
+    await this.maybeCleanupExpired();
 
     const sessionId = this.generateSessionId();
     const expiresAt = new Date(Date.now() + this.config.refreshTokenLifespan * 1000);

@@ -115,13 +115,16 @@ describe('SessionManager API Integration', () => {
           },
         });
 
-        // Generate new refresh token (should clean up expired one)
+        // Bump throttling counter so the next call triggers cleanup once
+        const manager: any = strapi.sessionManager;
+        manager.cleanupInvocationCounter = manager.cleanupEveryCalls - 1;
+
         await strapi.sessionManager.generateRefreshToken(testUserId, testDeviceId, testOrigin);
 
-        const expiredSession = await strapi.db.query(contentTypeUID).findOne({
+        const expiredSessionAfter = await strapi.db.query(contentTypeUID).findOne({
           where: { sessionId: expiredSessionId },
         });
-        expect(expiredSession).toBeNull();
+        expect(expiredSessionAfter).toBeNull();
       });
 
       it('should clean up all expired sessions for the user', async () => {
@@ -140,12 +143,16 @@ describe('SessionManager API Integration', () => {
           )
         );
 
+        // Bump throttling counter so the next call triggers cleanup once
+        const manager: any = strapi.sessionManager;
+        manager.cleanupInvocationCounter = manager.cleanupEveryCalls - 1;
+
         await strapi.sessionManager.generateRefreshToken(testUserId, testDeviceId, testOrigin);
 
-        const remainingExpired = await strapi.db.query(contentTypeUID).findMany({
+        const remainingExpiredAfter = await strapi.db.query(contentTypeUID).findMany({
           where: { userId: testUserId, expiresAt: { $lt: new Date() } },
         });
-        expect(remainingExpired).toHaveLength(0);
+        expect(remainingExpiredAfter).toHaveLength(0);
       });
 
       it('should allow multiple active sessions for different devices', async () => {
