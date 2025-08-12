@@ -111,6 +111,7 @@ export const apiTokensSteps = [
   {
     name: 'Finish',
     content: Finish,
+    excludeFromStepCount: true,
     when: (completedActions: CompletedActions) =>
       completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken),
   },

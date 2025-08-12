@@ -54,10 +54,7 @@ type Action =
       payload: CompletedActions;
     };
 
-type TourState = Record<
-  ValidTourName,
-  { currentStep: number; length: number; isCompleted: boolean }
->;
+type TourState = Record<ValidTourName, { currentStep: number; isCompleted: boolean }>;
 type State = {
   tours: TourState;
   enabled: boolean;
@@ -71,10 +68,8 @@ const [GuidedTourProviderImpl, useGuidedTour] = createContext<{
 
 const getInitialTourState = (tours: Tours) => {
   return Object.keys(tours).reduce((acc, tourName) => {
-    const tourLength = Object.keys(tours[tourName as ValidTourName]).length;
     acc[tourName as ValidTourName] = {
       currentStep: 0,
-      length: tourLength,
       isCompleted: false,
     };
 
@@ -86,7 +81,7 @@ function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
     if (action.type === 'next_step') {
       const currentStep = draft.tours[action.payload].currentStep;
-      const tourLength = draft.tours[action.payload].length;
+      const tourLength = guidedTours[action.payload]._meta.totalStepCount;
 
       if (currentStep >= tourLength) return;
 

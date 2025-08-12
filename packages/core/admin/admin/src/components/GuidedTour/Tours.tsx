@@ -143,6 +143,7 @@ export type TourStep<P extends string> = {
   name: P;
   content: Content;
   when?: (completedActions: CompletedActions) => boolean;
+  excludeFromStepCount?: boolean;
 };
 
 export function createTour<const T extends ReadonlyArray<TourStep<string>>>(
@@ -153,26 +154,38 @@ export function createTour<const T extends ReadonlyArray<TourStep<string>>>(
     [K in T[number]['name']]: React.ComponentType<{ children: React.ReactNode }>;
   };
 
-  const tour = steps.reduce((acc, step, index) => {
-    if (step.name in acc) {
-      throw Error(`The tour: ${tourName} with step: ${step.name} has already been registered`);
+  const tour = steps.reduce(
+    (acc, step, index) => {
+      const name = step.name as keyof Components;
+
+      if (name in acc) {
+        throw Error(`The tour: ${tourName} with step: ${step.name} has already been registered`);
+      }
+
+      (acc as Components)[name] = ({ children }: { children: React.ReactNode }) => {
+        return (
+          <GuidedTourTooltip
+            tourName={tourName as ValidTourName}
+            step={index}
+            content={step.content}
+            when={step.when}
+          >
+            {children}
+          </GuidedTourTooltip>
+        );
+      };
+
+      if (step.excludeFromStepCount) {
+        // Subtract all steps registered to be excluded from the step count
+        acc._meta.displayedStepCount--;
+      }
+
+      return acc;
+    },
+    { _meta: { totalStepCount: steps.length, displayedStepCount: steps.length } } as Components & {
+      _meta: { totalStepCount: number; displayedStepCount: number };
     }
-
-    acc[step.name as keyof Components] = ({ children }: { children: React.ReactNode }) => {
-      return (
-        <GuidedTourTooltip
-          tourName={tourName as ValidTourName}
-          step={index}
-          content={step.content}
-          when={step.when}
-        >
-          {children}
-        </GuidedTourTooltip>
-      );
-    };
-
-    return acc;
-  }, {} as Components);
+  );
 
   return tour;
 }

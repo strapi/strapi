@@ -15,6 +15,7 @@ import { styled } from 'styled-components';
 
 import { useTracking } from '../../../features/Tracking';
 import { useGuidedTour, type ValidTourName } from '../Context';
+import { tours } from '../Tours';
 
 /* -------------------------------------------------------------------------------------------------
  * Common Step Components
@@ -31,15 +32,14 @@ const StepCount = ({
 }) => {
   const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
   const currentStep = displayedCurrentStep ?? state.tours[tourName].currentStep + 1;
-  // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
-  const displayedLength = displayedTourLength ?? state.tours[tourName].length - 1;
+  const displayedStepCount = displayedTourLength ?? tours[tourName]._meta.displayedStepCount;
 
   return (
     <Typography variant="omega" fontSize="12px">
       <FormattedMessage
         id="tours.stepCount"
         defaultMessage="Step {currentStep} of {tourLength}"
-        values={{ currentStep, tourLength: displayedLength }}
+        values={{ currentStep, tourLength: displayedStepCount }}
       />
     </Typography>
   );
@@ -73,7 +73,7 @@ const DefaultActions = ({
   const dispatch = useGuidedTour('GuidedTourPopover', (s) => s.dispatch);
   const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
   const currentStep = state.tours[tourName].currentStep + 1;
-  const actualTourLength = state.tours[tourName].length;
+  const actualTourLength = tours[tourName]._meta.totalStepCount;
 
   const handleSkip = () => {
     trackUsage('didSkipGuidedTour', { name: tourName });

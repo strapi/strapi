@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { CompletedActions, useGuidedTour } from '../Context';
-import { type StepContentProps } from '../Tours';
+import { tours, type StepContentProps } from '../Tours';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 
 import { DefaultActions, DefaultActionsProps, GotItAction, StepCount } from './Step';
@@ -30,12 +30,10 @@ const ContentManagerActions = ({
     return currentStepOffset;
   })();
 
-  // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
-  const tourLengthOffset = state.tours.contentManager.length - 1;
   // For single types we subtract all contentTypeSpecificSteps
   const displayedTourLength = isSingleType
-    ? tourLengthOffset - collectionTypeSpecificSteps.length
-    : tourLengthOffset;
+    ? tours.contentManager._meta.displayedStepCount - collectionTypeSpecificSteps.length
+    : tours.contentManager._meta.displayedStepCount;
 
   const handleNextStep = () => {
     if (isSingleType && state.tours.contentManager.currentStep === 0) {
@@ -210,6 +208,7 @@ export const contentManagerSteps = [
   {
     name: 'Finish',
     content: Finish,
+    excludeFromStepCount: true,
     when: (completedActions: CompletedActions) =>
       completedActions.includes(GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent),
   },

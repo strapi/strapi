@@ -1,32 +1,33 @@
-import { tours } from '../Tours';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 import { migrateTourSteps, migrateTours } from '../utils/migrations';
 
 import type { State } from '../Context';
 
 describe('GuidedTour | migrateTourSteps', () => {
-  it('should selectively update only tours with changed lengths', () => {
+  it('should selectively update only tours with legacy length property', () => {
     const initialState: State = {
       tours: {
         contentTypeBuilder: {
           currentStep: 2,
-          length: 9, // stale length - should trigger migration
+          // @ts-expect-error legacy length property - should trigger migration
+          length: 9,
           isCompleted: false,
         },
         contentManager: {
           currentStep: 1,
-          length: Object.keys(tours.contentManager).length, // Correct length - no migration
           isCompleted: false,
+          // no length property - no migration
         },
         apiTokens: {
           currentStep: 3,
-          length: 8, // stale length - should trigger migration
+          // @ts-expect-error legacy length property - should trigger migration
+          length: 8,
           isCompleted: false,
         },
         strapiCloud: {
           currentStep: 1,
-          length: Object.keys(tours.strapiCloud).length, // Correct length - no migration
           isCompleted: false,
+          // no length property - no migration
         },
       },
       enabled: true,
@@ -35,48 +36,48 @@ describe('GuidedTour | migrateTourSteps', () => {
 
     const migratedState = migrateTourSteps(initialState);
 
-    // Tours with stale lengths should be updated
-    expect(migratedState.tours.contentTypeBuilder.length).toBe(
-      Object.keys(tours.contentTypeBuilder).length
-    );
-    expect(migratedState.tours.apiTokens.length).toBe(Object.keys(tours.apiTokens).length);
+    // Tours with length property should be reset but preserve isCompleted
+    expect(migratedState.tours.contentTypeBuilder.currentStep).toBe(0);
+    expect(migratedState.tours.contentTypeBuilder.isCompleted).toBe(false);
+    expect(migratedState.tours.contentTypeBuilder).not.toHaveProperty('length');
 
-    // Tours with correct lengths should remain unchanged
-    expect(migratedState.tours.contentManager.length).toBe(
-      Object.keys(tours.contentManager).length
-    );
-    expect(migratedState.tours.strapiCloud.length).toBe(Object.keys(tours.strapiCloud).length);
+    expect(migratedState.tours.apiTokens.currentStep).toBe(0);
+    expect(migratedState.tours.apiTokens.isCompleted).toBe(false);
+    expect(migratedState.tours.apiTokens).not.toHaveProperty('length');
 
-    // currentStep should be reset to 0 only for tours that were migrated
-    expect(migratedState.tours.contentTypeBuilder.currentStep).toBe(0); // Was migrated
-    expect(migratedState.tours.apiTokens.currentStep).toBe(0); // Was migrated
+    // Tours without length property should remain unchanged
+    expect(migratedState.tours.contentManager.currentStep).toBe(1);
+    expect(migratedState.tours.contentManager.isCompleted).toBe(false);
 
-    // currentStep should be preserved for tours that were not migrated
-    expect(migratedState.tours.contentManager.currentStep).toBe(1); // Not migrated
-    expect(migratedState.tours.strapiCloud.currentStep).toBe(1); // Not migrated
+    expect(migratedState.tours.strapiCloud.currentStep).toBe(1);
+    expect(migratedState.tours.strapiCloud.isCompleted).toBe(false);
   });
 
-  it('should preserve isCompleted and enabled when migrating, but filter tour-specific actions', () => {
+  it('should preserve isCompleted when migrating tours with length property and filter tour-specific actions', () => {
     const initialState: State = {
       tours: {
         contentTypeBuilder: {
           currentStep: 2,
-          length: 7, // Outdated length - will trigger migration
+          // @ts-expect-error legacy length property - will trigger migration
+          length: 7,
           isCompleted: true,
         },
         contentManager: {
           currentStep: 1,
-          length: 6, // Outdated length - will trigger migration
+          // @ts-expect-error legacy length property - will trigger migration
+          length: 6,
           isCompleted: false,
         },
         apiTokens: {
           currentStep: 3,
-          length: 4, // Outdated length - will trigger migration
+          // @ts-expect-error legacy length property - will trigger migration
+          length: 4,
           isCompleted: false,
         },
         strapiCloud: {
           currentStep: 0,
-          length: 4, // Outdated length - will trigger migration
+          // @ts-expect-error legacy length property - will trigger migration
+          length: 4,
           isCompleted: true,
         },
       },
@@ -86,7 +87,7 @@ describe('GuidedTour | migrateTourSteps', () => {
 
     const migratedState = migrateTourSteps(initialState);
 
-    // currentStep should be reset to 0 for all tours (since all had wrong lengths)
+    // currentStep should be reset to 0 for all tours with length property
     expect(migratedState.tours.contentTypeBuilder.currentStep).toBe(0);
     expect(migratedState.tours.contentManager.currentStep).toBe(0);
     expect(migratedState.tours.apiTokens.currentStep).toBe(0);
@@ -100,42 +101,36 @@ describe('GuidedTour | migrateTourSteps', () => {
 
     // Other state properties should be preserved
     expect(migratedState.enabled).toBe(false);
-    // contentTypeBuilder was migrated, so its actions should be removed
+    // All tours were migrated, so all tour-specific actions should be removed
     expect(migratedState.completedActions).toEqual([]);
 
-    // Lengths should be updated to correct values
-    expect(migratedState.tours.contentTypeBuilder.length).toBe(
-      Object.keys(tours.contentTypeBuilder).length
-    );
-    expect(migratedState.tours.contentManager.length).toBe(
-      Object.keys(tours.contentManager).length
-    );
-    expect(migratedState.tours.apiTokens.length).toBe(Object.keys(tours.apiTokens).length);
-    expect(migratedState.tours.strapiCloud.length).toBe(Object.keys(tours.strapiCloud).length);
+    // Length property should be removed from all migrated tours
+    expect(migratedState.tours.contentTypeBuilder).not.toHaveProperty('length');
+    expect(migratedState.tours.contentManager).not.toHaveProperty('length');
+    expect(migratedState.tours.apiTokens).not.toHaveProperty('length');
+    expect(migratedState.tours.strapiCloud).not.toHaveProperty('length');
   });
 
-  it('should filter out tour-specific completed actions when migrating tours', () => {
+  it('should filter out tour-specific completed actions when migrating tours with length property', () => {
     const initialState: State = {
       tours: {
         contentTypeBuilder: {
           currentStep: 2,
-          length: 7, // Outdated length - will trigger migration
+          // @ts-expect-error legacy length property - will trigger migration
+          length: 7,
           isCompleted: false,
         },
         contentManager: {
           currentStep: 1,
-          length: Object.keys(tours.contentManager).length, // Correct length - no migration
-          isCompleted: false,
+          isCompleted: false, // no length property - no migration
         },
         apiTokens: {
           currentStep: 0,
-          length: Object.keys(tours.apiTokens).length, // Correct length - no migration
-          isCompleted: false,
+          isCompleted: false, // no length property - no migration
         },
         strapiCloud: {
           currentStep: 0,
-          length: Object.keys(tours.strapiCloud).length, // Correct length - no migration
-          isCompleted: false,
+          isCompleted: false, // no length property - no migration
         },
       },
       enabled: true,
@@ -156,35 +151,30 @@ describe('GuidedTour | migrateTourSteps', () => {
       'someOtherAction', // non-tour action preserved
     ]);
 
-    // Verify the contentTypeBuilder tour was actually migrated
-    expect(migratedState.tours.contentTypeBuilder.length).toBe(
-      Object.keys(tours.contentTypeBuilder).length
-    );
+    // Verify the contentTypeBuilder tour was migrated and length property removed
+    expect(migratedState.tours.contentTypeBuilder).not.toHaveProperty('length');
     expect(migratedState.tours.contentTypeBuilder.currentStep).toBe(0);
+    expect(migratedState.tours.contentTypeBuilder.isCompleted).toBe(false);
   });
 
-  it('should not modify tours when their lengths match current definitions', () => {
+  it('should not modify tours when they have no length property', () => {
     const initialState: State = {
       tours: {
         contentTypeBuilder: {
           currentStep: 2,
-          length: Object.keys(tours.contentTypeBuilder).length, // Matches current tour length
-          isCompleted: false,
+          isCompleted: false, // no length property
         },
         contentManager: {
           currentStep: 1,
-          length: Object.keys(tours.contentManager).length, // Matches current tour length
-          isCompleted: false,
+          isCompleted: false, // no length property
         },
         apiTokens: {
           currentStep: 0,
-          length: Object.keys(tours.apiTokens).length, // Matches current tour length
-          isCompleted: false,
+          isCompleted: false, // no length property
         },
         strapiCloud: {
           currentStep: 0,
-          length: Object.keys(tours.strapiCloud).length, // Matches current tour length
-          isCompleted: false,
+          isCompleted: false, // no length property
         },
       },
       enabled: true,
@@ -205,7 +195,6 @@ describe('GuidedTour | migrateTours', () => {
       tours: {
         contentTypeBuilder: {
           currentStep: 2,
-          length: Object.keys(tours.contentTypeBuilder).length,
           isCompleted: false,
         },
         // Missing contentManager, apiTokens, and strapiCloud
@@ -228,17 +217,14 @@ describe('GuidedTour | migrateTours', () => {
     // New tours should be initialized properly
     expect(migratedState.tours.contentManager).toEqual({
       currentStep: 0,
-      length: Object.keys(tours.contentManager).length,
       isCompleted: false,
     });
     expect(migratedState.tours.apiTokens).toEqual({
       currentStep: 0,
-      length: Object.keys(tours.apiTokens).length,
       isCompleted: false,
     });
     expect(migratedState.tours.strapiCloud).toEqual({
       currentStep: 0,
-      length: Object.keys(tours.strapiCloud).length,
       isCompleted: false,
     });
   });
@@ -248,23 +234,19 @@ describe('GuidedTour | migrateTours', () => {
       tours: {
         contentTypeBuilder: {
           currentStep: 2,
-          length: Object.keys(tours.contentTypeBuilder).length,
           isCompleted: false,
         },
         contentManager: {
           currentStep: 1,
-          length: Object.keys(tours.contentManager).length,
           isCompleted: true,
         },
         // @ts-expect-error - simulating removed tour
         removedTour: {
           currentStep: 3,
-          length: 5,
           isCompleted: false,
         },
         anotherRemovedTour: {
           currentStep: 0,
-          length: 2,
           isCompleted: true,
         },
       },
@@ -295,14 +277,12 @@ describe('GuidedTour | migrateTours', () => {
       tours: {
         contentTypeBuilder: {
           currentStep: 2,
-          length: Object.keys(tours.contentTypeBuilder).length,
           isCompleted: false,
         },
         // Missing contentManager, apiTokens, strapiCloud (additions)
         // @ts-expect-error - simulating removed tour
         removedTour: {
           currentStep: 3,
-          length: 5,
           isCompleted: false,
         },
       },
@@ -324,7 +304,6 @@ describe('GuidedTour | migrateTours', () => {
     // New tours should be added with proper initialization
     expect(migratedState.tours.contentManager).toEqual({
       currentStep: 0,
-      length: Object.keys(tours.contentManager).length,
       isCompleted: false,
     });
 
@@ -337,22 +316,18 @@ describe('GuidedTour | migrateTours', () => {
       tours: {
         contentTypeBuilder: {
           currentStep: 2,
-          length: Object.keys(tours.contentTypeBuilder).length,
           isCompleted: false,
         },
         contentManager: {
           currentStep: 1,
-          length: Object.keys(tours.contentManager).length,
           isCompleted: true,
         },
         apiTokens: {
           currentStep: 0,
-          length: Object.keys(tours.apiTokens).length,
           isCompleted: false,
         },
         strapiCloud: {
           currentStep: 0,
-          length: Object.keys(tours.strapiCloud).length,
           isCompleted: false,
         },
       },
@@ -382,7 +357,6 @@ describe('GuidedTour | migrateTours', () => {
       tours: {
         contentTypeBuilder: {
           currentStep: 2,
-          length: Object.keys(tours.contentTypeBuilder).length,
           isCompleted: false,
         },
       },
