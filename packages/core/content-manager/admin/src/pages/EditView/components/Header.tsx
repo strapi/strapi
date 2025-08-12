@@ -73,8 +73,14 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
             : `../${COLLECTION_TYPES}/${params.slug}`
         }
       />
-      <Flex width="100%" justifyContent="space-between" gap="80px" alignItems="flex-start">
-        <Typography variant="alpha" tag="h1">
+      <Flex
+        width="100%"
+        direction={{ initial: 'column', large: 'row' }}
+        justifyContent="space-between"
+        alignItems="flex-start"
+        gap={2}
+      >
+        <Typography variant="alpha" tag="h1" paddingRight={4}>
           {title}
         </Typography>
         <HeaderToolbar />
@@ -134,7 +140,7 @@ const HeaderToolbar = () => {
   const plugins = useStrapiApp('HeaderToolbar', (state) => state.plugins);
 
   return (
-    <Flex gap={2}>
+    <Flex gap={2} paddingTop={2} paddingBottom={2}>
       <DescriptionComponentRenderer
         props={{
           activeTab: status,

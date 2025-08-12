@@ -3,6 +3,13 @@ import { styled } from 'styled-components';
 
 const MainNavWrapper = styled<FlexComponent<'nav'>>(Flex)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+  position: fixed;
+  max-height: 100%;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    position: sticky;
+    height: 100vh;
+  }
 `;
 
 const MainNav = (props: FlexProps<'nav'>) => (
@@ -11,8 +18,6 @@ const MainNav = (props: FlexProps<'nav'>) => (
     tag="nav"
     background="neutral0"
     direction="column"
-    height="100vh"
-    position="sticky"
     top={0}
     zIndex={2}
     width={10}

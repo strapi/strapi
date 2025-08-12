@@ -128,7 +128,18 @@ const EditViewPage = () => {
   };
 
   return (
-    <Main paddingLeft={10} paddingRight={10}>
+    <Main
+      paddingLeft={{
+        initial: 6,
+        medium: 7,
+        large: 10,
+      }}
+      paddingRight={{
+        initial: 6,
+        medium: 7,
+        large: 10,
+      }}
+    >
       <Page.Title>{pageTitle}</Page.Title>
       {isSingleType && (
         <tours.contentManager.Introduction>
