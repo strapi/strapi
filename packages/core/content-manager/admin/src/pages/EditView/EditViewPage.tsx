@@ -142,7 +142,7 @@ const EditViewPage = () => {
       <Page.Title>{pageTitle}</Page.Title>
       <tours.contentManager.Introduction>
         {/* Invisible Anchor */}
-        <Box paddingTop={5} />
+        <Box />
       </tours.contentManager.Introduction>
       <Form
         disabled={hasDraftAndPublished && status === 'published'}

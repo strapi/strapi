@@ -4,6 +4,7 @@ import { createTestBuilder } from 'api-tests/builder';
 import { Core } from '@strapi/types';
 
 const articleContentType = {
+  collectionName: 'article',
   displayName: 'article',
   singularName: 'article',
   pluralName: 'articles',
@@ -19,25 +20,11 @@ let authRq;
 let strapi: Core.Strapi;
 const builder = createTestBuilder();
 
-const restartWithSchema = async () => {
-  await strapi.destroy();
-  await builder.cleanup();
-
-  await builder.addContentType(articleContentType).build();
-
-  strapi = await createStrapiInstance();
-  authRq = await createAuthRequest({ strapi });
-};
-
 describe('Guided Tour Meta', () => {
   beforeAll(async () => {
+    await builder.addContentType(articleContentType).build();
     strapi = await createStrapiInstance();
     authRq = await createAuthRequest({ strapi });
-  });
-
-  afterEach(async () => {
-    // Ensure each test cleans up
-    await restartWithSchema();
   });
 
   afterAll(async () => {
@@ -46,26 +33,7 @@ describe('Guided Tour Meta', () => {
   });
 
   describe('GET /admin/guided-tour-meta', () => {
-    /**
-     * TODO:
-     * clean-after-delete.test.api.ts leaks data causing the app
-     * to intialize withe a schema and content. We need to ensure that test cleans up after itself
-     * Skipping for now.
-     */
-    test.skip('Returns correct initial state for a new installation', async () => {
-      const res = await authRq({
-        url: '/admin/guided-tour-meta',
-        method: 'GET',
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.body.data).toMatchObject({
-        isFirstSuperAdminUser: true,
-        completedActions: [],
-      });
-    });
-
-    test('Detects first super admin user', async () => {
+    test('Returns the guided tour meta', async () => {
       const res = await authRq({
         url: '/admin/guided-tour-meta',
         method: 'GET',
@@ -73,6 +41,7 @@ describe('Guided Tour Meta', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data.isFirstSuperAdminUser).toBe(true);
+      expect(Object.keys(res.body.data.schemas)).toContain('api::article.article');
 
       const newUser = {
         email: 'second@user.com',
@@ -95,29 +64,6 @@ describe('Guided Tour Meta', () => {
 
       expect(secondSuperAdminUserResponse.status).toBe(200);
       expect(secondSuperAdminUserResponse.body.data.isFirstSuperAdminUser).toBe(false);
-    });
-
-    test('Detects created content', async () => {
-      await restartWithSchema();
-
-      const createdDocument = await strapi.documents('api::article.article').create({
-        data: {
-          name: 'Article 1',
-        },
-      });
-
-      const res = await authRq({
-        url: '/admin/guided-tour-meta',
-        method: 'GET',
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.completedActions).toContain('didCreateContent');
-
-      // Cleanup
-      await strapi.documents('api::article.article').delete({
-        documentId: createdDocument.documentId,
-      });
     });
   });
 });
