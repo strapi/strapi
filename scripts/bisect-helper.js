@@ -36,6 +36,8 @@ const execa = require('execa');
 const writeFile = promisify(fs.writeFile);
 const chmod = promisify(fs.chmod);
 
+const isDebug = Boolean(process.env.DEBUG);
+
 async function printFinalBadCommitLine() {
   try {
     const [{ stdout: short }, { stdout: subject }] = await Promise.all([
@@ -106,8 +108,10 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   cd "$(git rev-parse --show-toplevel)"
 fi
 
-echo "[bisect-runner] Checkout: $(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
-echo "[bisect-runner] Setup mode: \${SETUP_MODE}"
+if [[ -n "\${DEBUG:-}" ]]; then
+  echo "[bisect-runner] Checkout: $(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+  echo "[bisect-runner] Setup mode: \${SETUP_MODE}"
+fi
 case "\${SETUP_MODE}" in
   build)
     yarn build
@@ -137,7 +141,9 @@ decode_b64() {
 
 TEST_COMMAND=$(printf %s "\${TEST_COMMAND_B64}" | decode_b64)
 
-echo "[bisect-runner] Running test command: \n\${TEST_COMMAND}"
+if [[ -n "\${DEBUG:-}" ]]; then
+  echo "[bisect-runner] Running test command: \n\${TEST_COMMAND}"
+fi
 # Use bash -lc so complex commands, pipes, and env assignments work
 bash -lc "\${TEST_COMMAND}"
 `;
@@ -174,32 +180,41 @@ async function runBisect({ goodRef, badRef, runnerPath }) {
 
   try {
     await execa('git', ['bisect', 'run', runnerPath], { stdio: 'inherit' });
-    console.log('\nGit bisect run completed. The first bad commit should be shown above.');
-    await printFinalBadCommitLine();
+    if (isDebug) {
+      console.log('\n[bisect-helper] git bisect run completed.');
+      await printFinalBadCommitLine();
+    }
   } catch (err) {
-    console.error(
-      `\nGit bisect run exited with status ${err.exitCode ?? 'unknown'}. See output above for details.`
-    );
-    await printFinalBadCommitLine();
+    if (isDebug) {
+      console.error(
+        `\n[bisect-helper] git bisect run exited with status ${err.exitCode ?? 'unknown'}. See output above for details.`
+      );
+      await printFinalBadCommitLine();
+    }
   }
 
-  console.log('\nNote: Your repository is currently checked out at a commit in the bisect state.');
-  console.log(
-    "      Run 'git bisect reset' when you're done inspecting to return to your previous state."
-  );
-  console.log(`Runner kept at: ${runnerPath}`);
+  if (isDebug) {
+    console.log(
+      '\n[bisect-helper] Note: Your repository is currently checked out at a commit in the bisect state.'
+    );
+    console.log(
+      "[bisect-helper] Run 'git bisect reset' when you're done inspecting to return to your previous state."
+    );
+    console.log(`[bisect-helper] Runner kept at: ${runnerPath}`);
+  }
 }
 
 async function main() {
-  console.log('Git Bisect Helper (Node)');
+  if (isDebug) console.log('[bisect-helper] Git Bisect Helper (Node)');
   const answers = await promptInputs();
   const runnerPath = await createRunnerScript({
     testCommand: answers.testCommand,
     setupMode: answers.setupMode,
   });
-
-  console.log(`\nGenerated runner script at: ${runnerPath}`);
-  console.log('Starting git bisect session...');
+  if (isDebug) {
+    console.log(`\n[bisect-helper] Generated runner script at: ${runnerPath}`);
+    console.log('[bisect-helper] Starting git bisect session...');
+  }
 
   await runBisect({ goodRef: answers.goodRef, badRef: answers.badRef, runnerPath });
 }
