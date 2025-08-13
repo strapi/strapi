@@ -1,4 +1,4 @@
-import { unstable_tours } from '@strapi/admin/strapi-admin';
+import { tours } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -14,10 +14,10 @@ export const EmptyState = () => {
 
   return (
     <>
-      <unstable_tours.contentTypeBuilder.Introduction>
+      <tours.contentTypeBuilder.Introduction>
         {/* Invisible Anchor */}
         <Box paddingTop={5} />
-      </unstable_tours.contentTypeBuilder.Introduction>
+      </tours.contentTypeBuilder.Introduction>
       <Flex justifyContent="center" alignItems="center" height="100%" direction="column">
         <Typography variant="alpha">{pluginName}</Typography>
         <Typography variant="delta">

@@ -84,14 +84,14 @@ const yargs = require('yargs');
     stdio: 'inherit',
   });
 
+  let publishResults;
   if (options.publish) {
-    const publishResults = await releasePublish({
+    publishResults = await releasePublish({
       dryRun: options.dryRun,
       verbose: options.verbose,
       tag: options.tag,
       otp: options.otp,
     });
-    process.exit(Object.values(publishResults).every((result) => result.code === 0) ? 0 : 1);
   }
 
   if (options.changelog && !options.onlyPublish) {
@@ -105,5 +105,11 @@ const yargs = require('yargs');
     });
   }
 
-  process.exit();
+  // Exit with code 0 if all publish results are successful, else 1
+  if (publishResults) {
+    const exitCode = Object.values(publishResults).every((result) => result.code === 0) ? 0 : 1;
+    process.exit(exitCode);
+  } else {
+    process.exit();
+  }
 })();

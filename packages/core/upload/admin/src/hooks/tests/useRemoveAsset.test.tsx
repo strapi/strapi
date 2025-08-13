@@ -1,13 +1,18 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { NotificationsProvider, useNotification } from '@strapi/admin/strapi-admin';
+import { configureStore } from '@reduxjs/toolkit';
+import { adminApi, NotificationsProvider, useNotification } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { server } from '@tests/utils';
 import { rest } from 'msw';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
+import { Provider } from 'react-redux';
 
 import { useRemoveAsset } from '../useRemoveAsset';
+
+import type { AnyAction } from '@reduxjs/toolkit';
+import type { Middleware } from 'redux';
 
 const ASSET_FIXTURE = {
   id: 1,
@@ -19,6 +24,17 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useNotification() {
     return { toggleNotification: notificationStatusMock };
+  },
+  adminApi: {
+    reducerPath: 'adminApi',
+    reducer: (state = {}, action: AnyAction) => state,
+    middleware: (() => (next) => (action) => next(action)) as Middleware,
+    util: {
+      invalidateTags: jest.fn((tags) => ({
+        type: 'adminApi/util/invalidateTags',
+        payload: tags,
+      })),
+    },
   },
 }));
 
@@ -39,17 +55,24 @@ const client = new QueryClient({
   },
 });
 
+const store = configureStore({
+  reducer: { [adminApi.reducerPath]: adminApi.reducer },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(adminApi.middleware),
+});
+
 const ComponentFixture = ({ children }: { children: React.ReactNode }) => {
   return (
-    <QueryClientProvider client={client}>
-      <DesignSystemProvider>
-        <NotificationsProvider>
-          <IntlProvider locale="en" messages={{}}>
-            {children}
-          </IntlProvider>
-        </NotificationsProvider>
-      </DesignSystemProvider>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={client}>
+        <DesignSystemProvider>
+          <NotificationsProvider>
+            <IntlProvider locale="en" messages={{}}>
+              {children}
+            </IntlProvider>
+          </NotificationsProvider>
+        </DesignSystemProvider>
+      </QueryClientProvider>
+    </Provider>
   );
 };
 

@@ -14,7 +14,7 @@ import {
   useRBAC,
   Layouts,
   useTable,
-  unstable_tours,
+  tours,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -230,10 +230,10 @@ const ListViewPage = () => {
   if (!isFetching && results.length === 0) {
     return (
       <>
-        <unstable_tours.contentManager.Introduction>
+        <tours.contentManager.Introduction>
           {/* Invisible Anchor */}
           <Box paddingTop={5} />
-        </unstable_tours.contentManager.Introduction>
+        </tours.contentManager.Introduction>
         <Page.Main>
           <Page.Title>{`${contentTypeTitle}`}</Page.Title>
           <LayoutsHeaderCustom
@@ -302,10 +302,10 @@ const ListViewPage = () => {
 
   return (
     <>
-      <unstable_tours.contentManager.Introduction>
+      <tours.contentManager.Introduction>
         {/* Invisible Anchor */}
         <Box paddingTop={5} />
-      </unstable_tours.contentManager.Introduction>
+      </tours.contentManager.Introduction>
       <Page.Main>
         <Page.Title>{`${contentTypeTitle}`}</Page.Title>
         <LayoutsHeaderCustom

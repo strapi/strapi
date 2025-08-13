@@ -18,11 +18,11 @@ export const validateZod =
   };
 
 const formatZodErrors = (zodError: z.ZodError) => ({
-  errors: zodError.format((issue) => {
+  errors: zodError.issues.map((issue) => {
     return {
       path: issue.path,
       message: issue.message,
-      name: issue.code,
+      name: 'ValidationError',
     };
   }),
   message: 'Validation error',

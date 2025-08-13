@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { Page, useGuidedTour, Layouts } from '@strapi/admin/strapi-admin';
+import { Page, Layouts } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
@@ -28,14 +28,6 @@ const Layout = () => {
 
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
-  const startSection = useGuidedTour('Layout', (state) => state.startSection);
-  const startSectionRef = React.useRef(startSection);
-
-  React.useEffect(() => {
-    if (startSectionRef.current) {
-      startSectionRef.current('contentManager');
-    }
-  }, []);
 
   if (isLoading) {
     return (

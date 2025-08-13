@@ -79,7 +79,14 @@ const extendInvalidatesTags = (
 
 const releaseApi = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease', 'ReleaseSettings', 'Document'],
+    addTagTypes: [
+      'Release',
+      'ReleaseAction',
+      'EntriesInRelease',
+      'ReleaseSettings',
+      'Document',
+      'UpcomingReleasesList',
+    ],
     endpoints: {
       updateDocument(endpoint: AnyEndpointDefinition) {
         extendInvalidatesTags(endpoint, [
@@ -233,7 +240,7 @@ const releaseApi = adminApi
               data,
             };
           },
-          invalidatesTags: [{ type: 'Release', id: 'LIST' }],
+          invalidatesTags: [{ type: 'Release', id: 'LIST' }, 'UpcomingReleasesList'],
         }),
         updateRelease: build.mutation<
           void,
@@ -246,7 +253,10 @@ const releaseApi = adminApi
               data,
             };
           },
-          invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
+          invalidatesTags: (result, error, arg) => [
+            { type: 'Release', id: arg.id },
+            'UpcomingReleasesList',
+          ],
         }),
         createReleaseAction: build.mutation<
           CreateReleaseAction.Response,
@@ -262,6 +272,7 @@ const releaseApi = adminApi
           invalidatesTags: [
             { type: 'Release', id: 'LIST' },
             { type: 'ReleaseAction', id: 'LIST' },
+            'UpcomingReleasesList',
           ],
         }),
         createManyReleaseActions: build.mutation<
@@ -279,6 +290,7 @@ const releaseApi = adminApi
             { type: 'Release', id: 'LIST' },
             { type: 'ReleaseAction', id: 'LIST' },
             { type: 'EntriesInRelease' },
+            'UpcomingReleasesList',
           ],
         }),
         updateReleaseAction: build.mutation<
@@ -298,6 +310,7 @@ const releaseApi = adminApi
             { type: 'ReleaseAction', id: 'LIST' },
             { type: 'Release', id: 'LIST' },
             { type: 'Release', id: arg.params.releaseId },
+            'UpcomingReleasesList',
           ],
           async onQueryStarted({ body, params, query, actionPath }, { dispatch, queryFulfilled }) {
             // We need to mimic the same params received by the getReleaseActions query
@@ -343,6 +356,7 @@ const releaseApi = adminApi
             { type: 'Release', id: arg.params.releaseId },
             { type: 'ReleaseAction', id: 'LIST' },
             { type: 'EntriesInRelease' },
+            'UpcomingReleasesList',
           ],
         }),
         publishRelease: build.mutation<PublishRelease.Response, PublishRelease.Request['params']>({
@@ -355,6 +369,7 @@ const releaseApi = adminApi
           invalidatesTags: (result, error, arg) => [
             { type: 'Release', id: arg.id },
             { type: 'Document', id: `ALL_LIST` },
+            'UpcomingReleasesList',
           ],
         }),
         deleteRelease: build.mutation<DeleteRelease.Response, DeleteRelease.Request['params']>({
@@ -364,7 +379,11 @@ const releaseApi = adminApi
               method: 'DELETE',
             };
           },
-          invalidatesTags: () => [{ type: 'Release', id: 'LIST' }, { type: 'EntriesInRelease' }],
+          invalidatesTags: () => [
+            { type: 'Release', id: 'LIST' },
+            { type: 'EntriesInRelease' },
+            'UpcomingReleasesList',
+          ],
         }),
         getMappedEntriesInReleases: build.query<
           MapEntriesToReleases.Response['data'],
@@ -396,7 +415,7 @@ const releaseApi = adminApi
               data,
             };
           },
-          invalidatesTags: [{ type: 'ReleaseSettings' }],
+          invalidatesTags: [{ type: 'ReleaseSettings' }, 'UpcomingReleasesList'],
         }),
       };
     },

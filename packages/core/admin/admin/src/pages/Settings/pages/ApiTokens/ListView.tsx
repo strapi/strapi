@@ -7,10 +7,9 @@ import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
+import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
-import { tours as unstable_tours } from '../../../../components/UnstableGuidedTour/Tours';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
@@ -69,12 +68,8 @@ export const ListView = () => {
   } = useRBAC(permissions);
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
-  const startSection = useGuidedTour('ListView', (state) => state.startSection);
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  React.useEffect(() => {
-    startSection('apiTokens');
-  }, [startSection]);
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
     navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
@@ -149,7 +144,7 @@ export const ListView = () => {
         })}
         primaryAction={
           canCreate && (
-            <unstable_tours.apiTokens.CreateAnAPIToken>
+            <tours.apiTokens.CreateAnAPIToken>
               <LinkButton
                 tag={Link}
                 data-testid="create-api-token-button"
@@ -167,7 +162,7 @@ export const ListView = () => {
                   defaultMessage: 'Create new API Token',
                 })}
               </LinkButton>
-            </unstable_tours.apiTokens.CreateAnAPIToken>
+            </tours.apiTokens.CreateAnAPIToken>
           )
         }
       />
@@ -175,7 +170,7 @@ export const ListView = () => {
         <Page.NoPermissions />
       ) : (
         <Page.Main aria-busy={isLoading}>
-          <unstable_tours.apiTokens.Introduction>
+          <tours.apiTokens.Introduction>
             <Layouts.Content>
               {apiTokens.length > 0 && (
                 <Table
@@ -219,7 +214,7 @@ export const ListView = () => {
                 />
               ) : null}
             </Layouts.Content>
-          </unstable_tours.apiTokens.Introduction>
+          </tours.apiTokens.Introduction>
         </Page.Main>
       )}
     </>
