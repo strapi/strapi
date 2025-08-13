@@ -5,7 +5,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
   const tool = {
     name: 'admin_roles',
     description:
-      'Manage ADMIN PANEL roles and permissions (for users who access the Strapi admin interface). This is separate from API tokens and content API users. Use this for admin users who need to manage content through the admin panel. Permissions use admin format like "plugin::content-manager.explorer.read".',
+      '🔐 ADMIN PANEL USERS & ROLES: Manage users and roles who access the Strapi admin interface (http://localhost:1337/admin). These are content editors, administrators, and developers who log into the admin panel to create/edit content, manage users, configure plugins, etc. This is COMPLETELY SEPARATE from U&P (Users & Permissions), UP users, content API users, and API tokens. Permissions use admin format like "plugin::content-manager.explorer.read". This controls access to the Strapi admin dashboard, NOT the REST/GraphQL APIs.',
     inputSchema: {
       type: 'object',
       properties: {

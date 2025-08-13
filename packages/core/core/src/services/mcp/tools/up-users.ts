@@ -5,7 +5,7 @@ export const createUPUsersTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
     name: 'up_users',
     description:
-      'Manage CONTENT API USERS (end users who authenticate and access your content API). This is separate from admin users and API tokens. Use this for user registration, authentication, and user-specific content access. These users get JWT tokens and can access content based on their assigned roles.',
+      '👥 U&P / UP / CONTENT REST API / Users and Permissions: Manage end users who authenticate and access your REST API and GraphQL API. These are your customers, members, or any end users who register/login to your site/app and make API calls. They get JWT tokens and can access content through the REST/GraphQL APIs based on their assigned roles. This is COMPLETELY SEPARATE from admin users who access the Strapi admin interface. This controls access to your content APIs, NOT the admin dashboard.',
     inputSchema: {
       type: 'object',
       properties: {

@@ -5,7 +5,7 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
   const tool = {
     name: 'api_tokens',
     description:
-      'Manage API TOKENS for external applications/services to access the Content API. This is separate from admin users and content API users. Use this for server-to-server communication or external apps. Permissions use Content API format like "api::country.country.find".',
+      '🔑 API TOKENS: Create tokens for external applications, mobile apps, or third-party services to access your Strapi content through the REST API and GraphQL API. These are NOT users - they are machine-to-machine authentication tokens. Use this for server-to-server communication, mobile apps, or external integrations. This is COMPLETELY SEPARATE from admin users, U&P users, UP users, and their roles. This controls access to your content APIs, NOT the admin dashboard.',
     inputSchema: {
       type: 'object',
       properties: {

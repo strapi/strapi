@@ -5,7 +5,7 @@ export const createUPRolesTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
     name: 'up_roles',
     description:
-      'Manage CONTENT API ROLES and permissions for content API users. This is separate from admin roles and API tokens. Use this to define what content API users can access. Permissions use Content API format like "api::article.article.find".',
+      '🎭 U&P ROLES / CONTENT API ROLES / UP ROLES: Define what your end users can access and do through the REST API and GraphQL API. These roles control permissions for your actual customers/members (like "premium", "basic", "moderator") who make API calls. This is COMPLETELY SEPARATE from admin roles that control who can access the Strapi admin interface. Permissions use Content API format like "api::article.article.find". This controls access to your content APIs, NOT the admin dashboard.',
     inputSchema: {
       type: 'object',
       properties: {

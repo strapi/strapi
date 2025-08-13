@@ -5,7 +5,7 @@ export const createRoleEditorTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
     name: 'role_editor',
     description:
-      'Easy-to-use role editor for managing ADMIN PANEL role permissions with predefined categories and actions. This is for admin users who access the Strapi admin interface. Use rbac_admin_roles for the same purpose with more detailed control.',
+      '🎛️ ADMIN PANEL ROLE EDITOR: Easy-to-use tool for managing ADMIN PANEL role permissions (for users who access the Strapi admin interface). This is for content editors, administrators, and developers who need to access the admin dashboard. This is COMPLETELY SEPARATE from U&P roles, UP roles, content API roles, and API tokens. This controls access to the Strapi admin dashboard, NOT the REST/GraphQL APIs. Use rbac_admin_roles for the same purpose with more detailed control.',
     inputSchema: {
       type: 'object',
       properties: {
