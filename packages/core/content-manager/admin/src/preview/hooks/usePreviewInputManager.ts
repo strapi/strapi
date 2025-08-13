@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { useField } from '@strapi/admin/strapi-admin';
 
+import { useHasInputPopoverParent } from '../components/InputPopover';
 import { usePreviewContext } from '../pages/Preview';
 import { INTERNAL_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
@@ -18,11 +19,7 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
     (state) => state.setPopoverField,
     false
   );
-  const isSideEditorOpen = usePreviewContext(
-    'usePreviewInputManager',
-    (state) => state.isSideEditorOpen,
-    false
-  );
+  const hasInputPopoverParent = useHasInputPopoverParent();
   const { value } = useField(name);
 
   const isUsingPreview = Boolean(iframe?.current);
@@ -56,16 +53,12 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
 
   return {
     onFocus: () => {
-      // If side editor is open, input renderers are inside popovers in the right location,
-      // so no need for focus highlights as it's clear where the field is used.
-      if (!isSideEditorOpen) return;
+      if (hasInputPopoverParent) return;
 
       sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS, { field: name });
     },
     onBlur: () => {
-      // If side editor is open, input renderers are inside popovers in the right location,
-      // so no need for focus highlights as it's clear where the field is used.
-      if (!isSideEditorOpen) return;
+      if (hasInputPopoverParent) return;
 
       setPopoverField?.(null);
       sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_BLUR, { field: name });
