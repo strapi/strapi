@@ -1,10 +1,11 @@
-import { Flex, FlexComponent, FlexProps } from '@strapi/design-system';
+import { Flex, FlexProps } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-const MainNavWrapper = styled<FlexComponent<'nav'>>(Flex)`
+const MainNavWrapper = styled(Flex)<{ $isMobileShown: boolean }>`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
   position: fixed;
   max-height: 100%;
+  height: ${({ $isMobileShown }) => ($isMobileShown ? '100vh' : 'auto')};
 
   ${({ theme }) => theme.breakpoints.large} {
     position: sticky;
@@ -12,7 +13,7 @@ const MainNavWrapper = styled<FlexComponent<'nav'>>(Flex)`
   }
 `;
 
-const MainNav = (props: FlexProps<'nav'>) => (
+const MainNav = (props: FlexProps<'nav'> & { isMobileShown: boolean }) => (
   <MainNavWrapper
     alignItems="normal"
     tag="nav"
@@ -21,6 +22,7 @@ const MainNav = (props: FlexProps<'nav'>) => (
     top={0}
     zIndex={2}
     width={10}
+    $isMobileShown={props.isMobileShown}
     {...props}
   />
 );
