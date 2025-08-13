@@ -14,6 +14,14 @@ const LocationDisplay = () => {
 };
 
 describe('SearchInput', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should render an icon button by default', () => {
     const { getByRole } = render(<SearchInput label="Search label" />);
 
@@ -46,7 +54,7 @@ describe('SearchInput', () => {
 
     await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
 
-    await user.keyboard('[Enter]');
+    jest.advanceTimersByTime(600);
 
     const searchString = getByRole('listitem').textContent ?? '';
     const searchParams = new URLSearchParams(searchString);
@@ -73,7 +81,7 @@ describe('SearchInput', () => {
 
     await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
 
-    await user.keyboard('[Enter]');
+    jest.advanceTimersByTime(600);
 
     expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(true);
 
@@ -108,7 +116,7 @@ describe('SearchInput', () => {
       // Type the value if any
       if (inputValue) {
         await user.type(textbox, inputValue);
-        await user.keyboard('[Enter]');
+        jest.advanceTimersByTime(600);
       }
 
       // Simulate blur

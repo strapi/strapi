@@ -16,7 +16,7 @@ function createSearchTest(testFunction, description, searchTerm) {
     // Search
     await page.getByRole('button', { name: 'Search', exact: true }).click();
     await page.fill('input[name="search"]', searchTerm);
-    await page.locator('input[name="search"]').press('Enter');
+    await page.waitForTimeout(600);
 
     // Assert
     const tableWithProduct = page.locator('table:has-text("' + searchTerm + '")');
