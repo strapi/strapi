@@ -26,7 +26,7 @@ describe('Authenticated User Controller', () => {
       lastname: 'User',
     };
 
-    const createMockContext = (user = mockUser, overrides = {}) => {
+    const createMockContext = (user = mockUser as any, overrides = {}) => {
       return createContext(
         {},
         {
@@ -48,7 +48,7 @@ describe('Authenticated User Controller', () => {
         dirs: { app: { root: '/app' } },
         config: {
           get: jest.fn((key, defaultValue) => {
-            if (key === 'uuid') return config.projectId || 'test-project-id';
+            if (key === 'uuid') return 'test-project-id';
             return defaultValue;
           }),
         },
