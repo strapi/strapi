@@ -22,7 +22,10 @@ export default defineProvider({
       'admin.auth.refreshTokenLifespan',
       30 * 24 * 60 * 60
     );
-    const accessTokenLifespan = strapi.config.get<number>('admin.auth.accessTokenLifespan', 60 * 60);
+    const accessTokenLifespan = strapi.config.get<number>(
+      'admin.auth.accessTokenLifespan',
+      60 * 60
+    );
 
     const config = {
       jwtSecret,
