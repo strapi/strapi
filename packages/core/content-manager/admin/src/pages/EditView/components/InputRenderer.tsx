@@ -14,6 +14,7 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
+import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
@@ -39,7 +40,12 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
+const InputRenderer = ({
+  visible,
+  hint: providedHint,
+  document,
+  ...inputProps
+}: InputRendererProps) => {
   const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const {
     edit: { components },
@@ -63,6 +69,10 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
 
   const editableFields = idToCheck ? canUpdateFields : canCreateFields;
   const readableFields = idToCheck ? canReadFields : canCreateFields;
+
+  // Everything preview related
+  const previewProps = usePreviewInputManager(inputProps.name);
+  const props = { ...inputProps, ...previewProps };
 
   /**
    * Component fields are always readable and editable,
@@ -103,13 +113,23 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
     const CustomInput = lazyComponentStore[props.attribute.customField];
 
     if (CustomInput) {
-      // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
-      return <CustomInput {...props} {...field} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <>
+          <CustomInput
+            {...props}
+            {...field}
+            // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
+            hint={hint}
+            disabled={fieldIsDisabled}
+          />
+        </>
+      );
     }
 
     return (
       <FormInputRenderer
         {...props}
+        {...previewProps}
         hint={hint}
         // @ts-expect-error – this workaround lets us display that the custom field is missing.
         type={props.attribute.customField}
@@ -124,8 +144,16 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   const addedInputTypes = Object.keys(fields);
   if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
     const CustomInput = fields[props.type];
-    // @ts-expect-error – TODO: fix this type error in the useLibrary hook.
-    return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+    return (
+      <>
+        <CustomInput
+          {...props}
+          // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
+          hint={hint}
+          disabled={fieldIsDisabled}
+        />
+      </>
+    );
   }
 
   /**
@@ -143,7 +171,7 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
           layout={components[props.attribute.component].layout}
           disabled={fieldIsDisabled}
         >
-          {(inputProps) => <InputRenderer {...inputProps} />}
+          {(componentInputProps) => <InputRenderer {...componentInputProps} />}
         </ComponentInput>
       );
     case 'dynamiczone':
@@ -161,6 +189,7 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
       return (
         <FormInputRenderer
           {...props}
+          {...previewProps}
           hint={hint}
           options={props.attribute.enum.map((value) => ({ value }))}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
@@ -174,6 +203,7 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
       return (
         <FormInputRenderer
           {...restProps}
+          {...previewProps}
           hint={hint}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}

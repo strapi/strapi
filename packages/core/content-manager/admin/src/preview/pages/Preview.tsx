@@ -13,6 +13,7 @@ import {
   Flex,
   FocusTrap,
   IconButton,
+  Popover,
   Portal,
   SingleSelect,
   SingleSelectOption,
@@ -28,12 +29,14 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
+import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
 import { handleInvisibleAttributes } from '../../pages/EditView/utils/data';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
 import { INTERNAL_EVENTS, PUBLIC_EVENTS } from '../utils/constants';
+import { getSendMessage } from '../utils/getSendMessage';
 import { previewScript } from '../utils/previewScript';
 
 import type { UID } from '@strapi/types';
@@ -67,6 +70,11 @@ const DEVICES = [
  * PreviewProvider
  * -----------------------------------------------------------------------------------------------*/
 
+interface PopoverField {
+  path: string;
+  position: DOMRect;
+}
+
 interface PreviewContextValue {
   url: string;
   title: string;
@@ -75,9 +83,78 @@ interface PreviewContextValue {
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
   layout: EditLayout;
   onPreview: () => void;
+  isSideEditorOpen: boolean;
+  iframeRef: React.RefObject<HTMLIFrameElement>;
+  popoverField: PopoverField | null;
+  setPopoverField: (value: PopoverField | null) => void;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
+
+/* -------------------------------------------------------------------------------------------------
+ * VisualEditingPopover
+ * -----------------------------------------------------------------------------------------------*/
+
+const VisualEditingPopover = ({
+  documentResponse,
+}: {
+  documentResponse: ReturnType<UseDocument>;
+}) => {
+  const iframeRef = usePreviewContext('VisualEditingPopover', (state) => state.iframeRef);
+  const popoverField = usePreviewContext('VisualEditingPopover', (state) => state.popoverField);
+  const setPopoverField = usePreviewContext(
+    'VisualEditingPopover',
+    (state) => state.setPopoverField
+  );
+
+  if (!popoverField || !documentResponse.schema || !iframeRef.current) {
+    return null;
+  }
+
+  const iframeRect = iframeRef.current.getBoundingClientRect();
+
+  return (
+    <>
+      {popoverField && (
+        <Box
+          position={'fixed'}
+          top={iframeRect.top + 'px'}
+          left={iframeRect.left + 'px'}
+          width={iframeRect.width + 'px'}
+          height={iframeRect.height + 'px'}
+          zIndex={4}
+        />
+      )}
+      <Popover.Root
+        open={popoverField != null}
+        onOpenChange={(open) => !open && setPopoverField(null)}
+      >
+        <Popover.Trigger>
+          <Box
+            id="popover-trigger"
+            position="fixed"
+            width={popoverField.position.width + 'px'}
+            height={popoverField.position.height + 'px'}
+            top={iframeRect.top + popoverField.position.top + 'px'}
+            left={iframeRect.left + popoverField.position.left + 'px'}
+          />
+        </Popover.Trigger>
+        <Popover.Content sideOffset={4}>
+          <Box padding={4} width="400px">
+            <InputRenderer
+              document={documentResponse}
+              attribute={documentResponse.schema.attributes[popoverField.path] as any}
+              label={popoverField.path}
+              name={popoverField.path}
+              type={documentResponse.schema.attributes[popoverField.path].type}
+              visible={true}
+            />
+          </Box>
+        </Popover.Content>
+      </Popover.Root>
+    </>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * PreviewPage
@@ -89,38 +166,13 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
   transition: rotate 0.2s ease-in-out;
 `;
 
-type MessageType =
-  | (typeof INTERNAL_EVENTS)[keyof typeof INTERNAL_EVENTS]
-  | (typeof PUBLIC_EVENTS)[keyof typeof PUBLIC_EVENTS];
-
-/**
- * A function factory so we can generate a new sendMessage everytime we need one.
- * We can't store and reuse a single sendMessage because it needs to have a stable identity
- * as it used in a useEffect function. And we can't rely on useCallback because we need the
- * up-to-date iframe ref, and this would make it stale (refs don't trigger callback reevaluations).
- */
-function getSendMessage(iframe: React.RefObject<HTMLIFrameElement>) {
-  return (type: MessageType, payload?: unknown) => {
-    if (!iframe.current) return;
-
-    const { origin } = new URL(iframe.current.src);
-
-    iframe.current.contentWindow?.postMessage(
-      {
-        type,
-        ...(payload !== undefined && { payload }),
-      },
-      origin
-    );
-  };
-}
-
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
+  const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
 
   // Read all the necessary data from the URL to find the right preview URL
   const {
@@ -147,6 +199,14 @@ const PreviewPage = () => {
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      // Only listen to events from the preview iframe
+      if (iframeRef.current) {
+        const previewOrigin = new URL(iframeRef.current?.src).origin;
+        if (event.origin !== previewOrigin) {
+          return;
+        }
+      }
+
       if (event.data?.type === PUBLIC_EVENTS.PREVIEW_READY) {
         const script = `(${previewScript.toString()})()`;
         const sendMessage = getSendMessage(iframeRef);
@@ -270,6 +330,10 @@ const PreviewPage = () => {
         schema={documentResponse.schema}
         layout={documentLayoutResponse.edit}
         onPreview={onPreview}
+        isSideEditorOpen={isSideEditorOpen}
+        iframeRef={iframeRef}
+        popoverField={popoverField}
+        setPopoverField={setPopoverField}
       >
         <FormContext
           method="PUT"
@@ -305,6 +369,7 @@ const PreviewPage = () => {
             <Flex direction="column" height="100%" alignItems="stretch">
               <Blocker onProceed={resetForm} />
               <PreviewHeader />
+              <VisualEditingPopover documentResponse={documentResponse} />
               <Flex flex={1} overflow="auto" alignItems="stretch">
                 {hasAdvancedPreview && (
                   <Box
