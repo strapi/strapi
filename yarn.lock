@@ -8975,6 +8975,7 @@ __metadata:
     inquirer: "npm:8.2.5"
     is-docker: "npm:2.2.1"
     json-logic-js: "npm:2.0.5"
+    jsonwebtoken: "npm:9.0.0"
     koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     koa-compose: "npm:4.1.0"
