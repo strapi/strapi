@@ -5,7 +5,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
   const tool = {
     name: 'admin_roles',
     description:
-      '🔐 ADMIN PANEL USERS & ROLES: Manage users and roles who access the Strapi admin interface (http://localhost:1337/admin). These are content editors, administrators, and developers who log into the admin panel to create/edit content, manage users, configure plugins, etc. This is COMPLETELY SEPARATE from U&P (Users & Permissions), UP users, content API users, and API tokens. Permissions use admin format like "plugin::content-manager.explorer.read". This controls access to the Strapi admin dashboard, NOT the REST/GraphQL APIs.',
+      '🔐 ADMIN PANEL USERS & ROLES: Manage users and roles who access the Strapi admin interface (http://localhost:1337/admin). These are content editors, administrators, and developers who log into the admin panel to create/edit content, manage users, configure plugins, etc. This is COMPLETELY SEPARATE from U&P (Users & Permissions), UP users, content API users, and API tokens. Permissions use admin format like "plugin::content-manager.explorer.read". This controls access to the Strapi admin dashboard, NOT the REST/GraphQL APIs.\n\n💡 CRITICAL: To create a functional role, ALWAYS use the "permissions" parameter during create_role. Example: create_role with roleName="My Role", roleCode="my-role", permissions=[{"action": "plugin::content-manager.explorer.read", "subject": "api::country.country"}]. The permissions parameter is the way to set permissions during role creation.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -56,7 +56,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
         // Role parameters
         roleId: {
           type: 'string',
-          description: 'Role ID (required for role-specific actions)',
+          description:
+            'Role ID (required for role-specific actions). For update_user, this assigns the role to the user.',
         },
         roleName: {
           type: 'string',
@@ -75,13 +76,27 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           items: {
             type: 'object',
             properties: {
-              action: { type: 'string' },
-              subject: { type: 'string' },
-              properties: { type: 'object' },
-              conditions: { type: 'array', items: { type: 'string' } },
+              action: {
+                type: 'string',
+                description: 'Permission action (e.g., "plugin::content-manager.explorer.read")',
+              },
+              subject: {
+                type: 'string',
+                description: 'Content type or plugin (e.g., "api::country.country")',
+              },
+              properties: {
+                type: 'object',
+                description: 'Permission properties (usually auto-populated)',
+              },
+              conditions: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Permission conditions',
+              },
             },
           },
-          description: 'Array of permission objects',
+          description:
+            '⚠️ CRITICAL: Array of permission objects. Use this parameter during create_role to set permissions. This is the ONLY way to create a functional role with permissions. Example: [{"action": "plugin::content-manager.explorer.read", "subject": "api::country.country"}]',
         },
         // Permission operation types for update_role
         setPermissions: {
@@ -95,7 +110,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
               conditions: { type: 'array', items: { type: 'string' } },
             },
           },
-          description: 'Array of permissions to set (replaces existing permissions)',
+          description:
+            '⚠️ Array of permissions to set (replaces existing permissions). Only use this for update_role, NOT create_role.',
         },
         addPermissions: {
           type: 'array',
@@ -108,7 +124,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
               conditions: { type: 'array', items: { type: 'string' } },
             },
           },
-          description: 'Array of permissions to add (merges with existing permissions)',
+          description:
+            '⚠️ Array of permissions to add (merges with existing permissions). Only use this for update_role, NOT create_role.',
         },
         removePermissions: {
           type: 'array',
@@ -121,7 +138,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
               conditions: { type: 'array', items: { type: 'string' } },
             },
           },
-          description: 'Array of permissions to remove (subtracts from existing permissions)',
+          description:
+            '⚠️ Array of permissions to remove (subtracts from existing permissions). Only use this for update_role, NOT create_role.',
         },
         // Standard filter parameters
         search: {
@@ -524,8 +542,11 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
         if (lastname) userData.lastname = lastname;
         if (username) userData.username = username;
 
-        const userService = strapi.admin.services.user;
-        const newUser = await userService.create(userData);
+        // Create user using database query instead of broken userService
+        const newUser = await strapi.db.query('admin::user').create({
+          data: userData,
+        });
+
         return {
           action: 'create_user',
           user: {
@@ -556,17 +577,60 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
         if (password !== undefined) updateData.password = password;
         if (isActive !== undefined) updateData.isActive = isActive;
 
-        const userService = strapi.admin.services.user;
-        const updatedUser = await userService.update(userId, updateData);
+        // Handle role assignment
+        if (roleId !== undefined) {
+          // First get the current user to check existing roles
+          const currentUser = await strapi.db.query('admin::user').findOne({
+            where: { id: userId },
+            populate: ['roles'],
+          });
+
+          if (currentUser) {
+            // Remove existing roles and assign new role
+            if (currentUser.roles && currentUser.roles.length > 0) {
+              await strapi.db.query('admin::user').update({
+                where: { id: userId },
+                data: { roles: [] },
+              });
+            }
+
+            // Assign the new role
+            await strapi.db.query('admin::user').update({
+              where: { id: userId },
+              data: { roles: [roleId] },
+            });
+          }
+        }
+
+        // Update other user fields using database query
+        if (Object.keys(updateData).length > 0) {
+          await strapi.db.query('admin::user').update({
+            where: { id: userId },
+            data: updateData,
+          });
+        }
+
+        // Get updated user with roles
+        const userWithRoles = await strapi.db.query('admin::user').findOne({
+          where: { id: userId },
+          populate: ['roles'],
+        });
+
         return {
           action: 'update_user',
           user: {
-            id: updatedUser.id,
-            email: updatedUser.email,
-            firstname: updatedUser.firstname,
-            lastname: updatedUser.lastname,
-            username: updatedUser.username,
-            isActive: updatedUser.isActive,
+            id: userWithRoles.id,
+            email: userWithRoles.email,
+            firstname: userWithRoles.firstname,
+            lastname: userWithRoles.lastname,
+            username: userWithRoles.username,
+            isActive: userWithRoles.isActive,
+            roles:
+              userWithRoles?.roles?.map((role: any) => ({
+                id: role.id,
+                name: role.name,
+                code: role.code,
+              })) || [],
           },
           message: 'User updated successfully',
         };
@@ -580,8 +644,10 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
         return { error: 'User ID is required for delete_user action' };
       }
       try {
-        const userService = strapi.admin.services.user;
-        await userService.deleteById(userId);
+        // Delete user using database query instead of broken userService
+        await strapi.db.query('admin::user').delete({
+          where: { id: userId },
+        });
         return {
           action: 'delete_user',
           message: 'User deleted successfully',
@@ -711,6 +777,15 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       if (!roleCode) {
         return { error: 'Role code is required for create_role action' };
       }
+
+      // Warn if no permissions are provided
+      if (!permissions || permissions.length === 0) {
+        return {
+          error:
+            '⚠️ WARNING: No permissions provided! Roles without permissions cannot access any features. Use the "permissions" parameter to set permissions during role creation. Example: permissions=[{"action": "plugin::content-manager.explorer.read", "subject": "api::country.country"}]',
+        };
+      }
+
       try {
         const roleData: any = {
           name: roleName,
@@ -752,8 +827,9 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           permissionsSet: permissionsSet.length > 0 ? permissionsSet : undefined,
           message:
             permissionsSet.length > 0
-              ? `Role created successfully with ${permissionsSet.length} permissions`
+              ? `✅ Role created successfully with ${permissionsSet.length} permissions! Users with this role can now access the specified features.`
               : 'Role created successfully',
+          tip: '💡 To assign this role to a user, use update_user with roleId parameter.',
         };
       } catch (error) {
         return { error: error instanceof Error ? error.message : 'Failed to create role' };
@@ -806,7 +882,20 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
 
           if (addPermissions) {
             const processedPermissions = await processPermissions(addPermissions);
-            await roleService.addPermissions(roleId, processedPermissions);
+            // Create new permissions directly in the database
+            await Promise.all(
+              processedPermissions.map(async (permission) => {
+                return strapi.db.query('admin::permission').create({
+                  data: {
+                    action: permission.action,
+                    subject: permission.subject || null,
+                    properties: permission.properties || {},
+                    conditions: permission.conditions || [],
+                    role: roleId,
+                  },
+                });
+              })
+            );
             permissionsMessage += permissionsMessage
               ? `, added ${addPermissions.length} permissions`
               : `Added ${addPermissions.length} permissions`;
