@@ -5,31 +5,28 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
   const tool = {
     name: 'api_tokens',
     description:
-      '🔑 API TOKENS: Create tokens for external applications, mobile apps, or third-party services to access your Strapi content through the REST API and GraphQL API. These are NOT users - they are machine-to-machine authentication tokens. Use this for server-to-server communication, mobile apps, or external integrations. This is COMPLETELY SEPARATE from admin users, U&P users, UP users, and their roles. This controls access to your content APIs, NOT the admin dashboard.',
+      "🔑 API TOKENS: Create and manage machine-to-machine authentication tokens for external applications, mobile apps, or third-party services to access your Strapi content through the REST API and GraphQL API. These tokens are NOT users - they provide programmatic access to your content APIs. Use this for server-to-server communication, mobile apps, or external integrations. IMPORTANT: This tool uses Strapi's native API token service and automatically handles permission linking.",
     inputSchema: {
       type: 'object',
       properties: {
         action: {
           type: 'string',
           enum: [
-            'get',
-            'update',
-            'add_permissions',
-            'remove_permissions',
-            'list_all',
-            'create',
+            'list_tokens',
+            'create_token',
+            'update_token',
+            'delete_token',
             'list_available_permissions',
           ],
-          description:
-            'Action to perform. Use "list_available_permissions" to see what Content API permissions are available.',
+          description: 'Action to perform',
         },
         tokenId: {
           type: 'string',
-          description: 'Token ID (optional for bulk operations)',
+          description: 'Token ID (required for token-specific actions)',
         },
         name: {
           type: 'string',
-          description: 'Token name (required for create action)',
+          description: 'Token name (required for create_token action)',
         },
         description: {
           type: 'string',
@@ -38,7 +35,8 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
         type: {
           type: 'string',
           enum: ['read-only', 'full-access', 'custom'],
-          description: 'Token type (read-only, full-access, custom)',
+          description:
+            'Token type. IMPORTANT: When updating permissions, you must set type to "custom" for the update to work properly.',
         },
         lifespan: {
           type: 'string',
@@ -49,16 +47,16 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           type: 'array',
           items: { type: 'string' },
           description:
-            'Array of Content API permission strings (required for custom type). Format: "api::<content-type>.<content-type>.<action>". Examples: ["api::country.country.find", "api::country.country.create"]. Do NOT use admin permissions like "plugin::content-manager.explorer.read".',
+            'Array of Content API permission strings (required for custom type). IMPORTANT: Use the exact permission strings returned by list_available_permissions. These are automatically validated and linked by Strapi\'s service. Format: "api::<content-type>.<content-type>.<action>" or "plugin::<plugin>.<action>". Examples: ["api::country.country.find", "api::country.country.create", "plugin::upload.content-api.find"]. TIP: Always run list_available_permissions first to get the correct permission strings.',
         },
-        applyToAll: {
-          type: 'boolean',
-          description: 'Apply operation to all tokens (for bulk operations)',
-        },
-        // Search and filter parameters for list_all action
+        // Standard filter parameters
         search: {
           type: 'string',
-          description: 'Search term to filter by name or description',
+          description: 'General search term for filtering',
+        },
+        idFilter: {
+          type: 'string',
+          description: 'Filter by exact ID',
         },
         nameFilter: {
           type: 'string',
@@ -69,17 +67,9 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           enum: ['read-only', 'full-access', 'custom'],
           description: 'Filter by token type',
         },
-        expired: {
+        expiredFilter: {
           type: 'boolean',
           description: 'Filter by expiration status (true for expired, false for active)',
-        },
-        createdAfter: {
-          type: 'string',
-          description: 'Filter tokens created after this date (ISO string)',
-        },
-        createdBefore: {
-          type: 'string',
-          description: 'Filter tokens created before this date (ISO string)',
         },
         limit: {
           type: 'number',
@@ -91,7 +81,7 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
         },
         sortBy: {
           type: 'string',
-          enum: ['name', 'type', 'createdAt', 'expiresAt'],
+          enum: ['id', 'name', 'type', 'createdAt', 'expiresAt'],
           description: 'Field to sort by',
         },
         sortOrder: {
@@ -123,13 +113,11 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
       type?: string;
       lifespan?: string;
       permissions?: string[];
-      applyToAll?: boolean;
       search?: string;
+      idFilter?: string;
       nameFilter?: string;
       typeFilter?: string;
-      expired?: boolean;
-      createdAfter?: string;
-      createdBefore?: string;
+      expiredFilter?: boolean;
       limit?: number;
       offset?: number;
       sortBy?: string;
@@ -146,13 +134,11 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
       type,
       lifespan,
       permissions,
-      applyToAll,
       search,
+      idFilter,
       nameFilter,
       typeFilter,
-      expired,
-      createdAfter,
-      createdBefore,
+      expiredFilter,
       limit = 20,
       offset,
       sortBy,
@@ -165,38 +151,233 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
       return { error: 'Action parameter is required' };
     }
 
-    if (action === 'get') {
-      if (!tokenId) {
-        return { error: 'Token ID is required for get action' };
+    // Helper function to apply pagination
+    const applyPagination = <T>(items: T[], limit: number, offset?: number): T[] => {
+      let paginated = [...items];
+      if (offset) {
+        paginated = paginated.slice(offset);
       }
+      return paginated.slice(0, limit);
+    };
+
+    // Helper function to check if token is expired
+    const isTokenExpired = (token: any): boolean => {
+      if (!token.expiresAt) return false;
+      return new Date(token.expiresAt) < new Date();
+    };
+
+    // TOKEN MANAGEMENT ACTIONS
+    if (action === 'list_tokens') {
       try {
-        const token = await strapi.db.query('admin::api-token').findOne({
-          where: { id: tokenId },
-        });
-        if (!token) {
-          return { error: 'Token not found' };
+        let tokens: any[] = [];
+        let totalCount = 0;
+
+        // If ID filter is provided, query by specific ID
+        if (idFilter) {
+          // Try both string and number ID matching
+          const idToFind = parseInt(idFilter, 10);
+          if (!Number.isNaN(idToFind)) {
+            let token = await strapi.admin.services['api-token'].getById(idToFind);
+            if (!token) {
+              // Try with string ID
+              token = await strapi.admin.services['api-token'].getById(idFilter);
+            }
+            if (token) {
+              tokens = [token];
+              totalCount = 1;
+            }
+          }
+        } else {
+          // Query all tokens if no ID filter
+          tokens = await strapi.admin.services['api-token'].list();
+          totalCount = tokens.length;
+
+          // Apply specific filters
+          if (nameFilter) {
+            tokens = tokens.filter((token: any) => token.name === nameFilter);
+          }
+
+          if (typeFilter) {
+            tokens = tokens.filter((token: any) => token.type === typeFilter);
+          }
+
+          if (expiredFilter !== undefined) {
+            tokens = tokens.filter((token: any) => isTokenExpired(token) === expiredFilter);
+          }
+
+          // Apply search filter
+          if (search) {
+            const searchLower = search.toLowerCase();
+            tokens = tokens.filter((token: any) => {
+              const searchableFields = ['id', 'name', 'description'];
+              return searchableFields.some((field) => {
+                const value = (token as any)[field];
+                return value && value.toString().toLowerCase().includes(searchLower);
+              });
+            });
+          }
+
+          // Apply sorting
+          if (sortBy) {
+            tokens.sort((a: any, b: any) => {
+              let aVal = a[sortBy];
+              let bVal = b[sortBy];
+
+              // Handle special cases for sorting
+              if (sortBy === 'expiresAt') {
+                aVal = aVal ? new Date(aVal).getTime() : 0;
+                bVal = bVal ? new Date(bVal).getTime() : 0;
+              }
+
+              if (aVal === null || aVal === undefined) aVal = '';
+              if (bVal === null || bVal === undefined) bVal = '';
+
+              const comparison = aVal.toString().localeCompare(bVal.toString());
+              return sortOrder === 'desc' ? -comparison : comparison;
+            });
+          }
         }
-        return {
-          action: 'get',
-          token: {
+
+        // Apply pagination
+        tokens = applyPagination(tokens, limit, offset);
+
+        // Apply progressive disclosure
+        const responseTokens = tokens.map((token: any) => {
+          if (fields && fields.length > 0) {
+            const filtered: any = {};
+            fields.forEach((field) => {
+              if (Object.prototype.hasOwnProperty.call(token, field)) {
+                filtered[field] = token[field];
+              }
+            });
+            return filtered;
+          }
+          if (detailed) {
+            return {
+              id: token.id,
+              name: token.name,
+              description: token.description,
+              type: token.type,
+              lifespan: token.lifespan,
+              expiresAt: token.expiresAt,
+              permissions: token.permissions || {},
+              isExpired: isTokenExpired(token),
+            };
+          }
+          return {
             id: token.id,
             name: token.name,
-            description: token.description,
             type: token.type,
-            lifespan: token.lifespan,
-            expiresAt: token.expiresAt,
-            permissions: token.permissions || {},
+            isExpired: isTokenExpired(token),
+          };
+        });
+
+        return {
+          action: 'list_tokens',
+          tokens: responseTokens,
+          count: tokens.length,
+          totalCount,
+          detailed,
+          fields: fields || null,
+          filters: {
+            search,
+            idFilter,
+            nameFilter,
+            typeFilter,
+            expiredFilter,
+            limit,
+            offset,
+            sortBy,
+            sortOrder,
           },
         };
       } catch (error) {
-        return { error: error instanceof Error ? error.message : 'Failed to get token' };
+        return { error: error instanceof Error ? error.message : 'Failed to list tokens' };
       }
     }
 
-    if (action === 'update') {
-      if (!tokenId && !applyToAll) {
-        return { error: 'Token ID is required for update action, or set applyToAll to true' };
+    if (action === 'create_token') {
+      if (!name) {
+        return { error: 'Token name is required for create_token action' };
       }
+      if (!type) {
+        return { error: 'Token type is required for create_token action' };
+      }
+
+      // Validate permissions format for custom tokens
+      if (type === 'custom' && permissions) {
+        const invalidPermissions = permissions.filter(
+          (perm) => !perm.startsWith('api::') && !perm.startsWith('plugin::')
+        );
+        if (invalidPermissions.length > 0) {
+          return {
+            error: 'Invalid permission format detected',
+            details: `The following permissions don't follow the Content API format: ${invalidPermissions.join(', ')}.`,
+            guidance: `API tokens use Content API permissions (e.g., "api::country.country.find"), NOT admin permissions (e.g., "plugin::content-manager.explorer.read").\n\nFormat: "api::<content-type>.<content-type>.<action>"\nExamples: api::country.country.find, api::article.article.create, api::category.category.update\nCommon actions: find, findOne, create, update, delete, publish`,
+          };
+        }
+      }
+
+      try {
+        // Use Strapi's built-in API token service instead of direct DB queries
+        const tokenData: any = {
+          name,
+          type,
+        };
+        if (description) tokenData.description = description;
+        if (lifespan) {
+          let lifespanMs: number | null = null;
+          if (lifespan !== 'unlimited') {
+            const days = parseInt(lifespan, 10);
+            lifespanMs = days * 24 * 60 * 60 * 1000;
+          }
+          tokenData.lifespan = lifespanMs;
+        }
+        if (type === 'custom' && permissions) {
+          tokenData.permissions = permissions;
+        }
+
+        // Use Strapi's API token service which handles permission creation properly
+        const newToken = await strapi.admin.services['api-token'].create(tokenData);
+
+        return {
+          action: 'create_token',
+          token: {
+            id: newToken.id,
+            name: newToken.name,
+            description: newToken.description,
+            type: newToken.type,
+            lifespan: newToken.lifespan,
+            expiresAt: newToken.expiresAt,
+            permissions: newToken.permissions || {},
+            accessKey: newToken.accessKey, // Include the access key for the user
+          },
+          message: 'Token created successfully',
+        };
+      } catch (error) {
+        return { error: error instanceof Error ? error.message : 'Failed to create token' };
+      }
+    }
+
+    if (action === 'update_token') {
+      if (!tokenId) {
+        return { error: 'Token ID is required for update_token action' };
+      }
+
+      // Validate permissions format for custom tokens
+      if (type === 'custom' && permissions) {
+        const invalidPermissions = permissions.filter(
+          (perm) => !perm.startsWith('api::') && !perm.startsWith('plugin::')
+        );
+        if (invalidPermissions.length > 0) {
+          return {
+            error: 'Invalid permission format detected',
+            details: `The following permissions don't follow the Content API format: ${invalidPermissions.join(', ')}.`,
+            guidance: `API tokens use Content API permissions (e.g., "api::country.country.find"), NOT admin permissions (e.g., "plugin::content-manager.explorer.read").\n\nFormat: "api::<content-type>.<content-type>.<action>"\nExamples: api::country.country.find, api::article.article.create, api::category.category.update\nCommon actions: find, findOne, create, update, delete, publish`,
+          };
+        }
+      }
+
       try {
         const updateData: any = {};
         if (name !== undefined) updateData.name = name;
@@ -217,37 +398,14 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
           updateData.lifespan = lifespanMs;
         }
         if (type === 'custom' && permissions !== undefined) {
-          // Pass permissions as array of strings (not object)
           updateData.permissions = permissions;
         }
 
-        if (applyToAll) {
-          const tokens = await strapi.db.query('admin::api-token').findMany();
-          const results = [];
-          for (const token of tokens) {
-            const updatedToken = await strapi.db.query('admin::api-token').update({
-              where: { id: token.id },
-              data: updateData,
-            });
-            results.push({
-              id: updatedToken.id,
-              name: updatedToken.name,
-              type: updatedToken.type,
-              lifespan: updatedToken.lifespan,
-            });
-          }
-          return {
-            action: 'update',
-            message: `Updated ${results.length} tokens`,
-            tokens: results,
-          };
-        }
-        const updatedToken = await strapi.db.query('admin::api-token').update({
-          where: { id: tokenId },
-          data: updateData,
-        });
+        // Use Strapi's API token service which handles permission updates properly
+        const updatedToken = await strapi.admin.services['api-token'].update(tokenId, updateData);
+
         return {
-          action: 'update',
+          action: 'update_token',
           token: {
             id: updatedToken.id,
             name: updatedToken.name,
@@ -257,404 +415,52 @@ export const createRBACApiTokensTool = (strapi: Core.Strapi): MCPToolHandler => 
             expiresAt: updatedToken.expiresAt,
             permissions: updatedToken.permissions || {},
           },
+          message: 'Token updated successfully',
         };
       } catch (error) {
-        return { error: error instanceof Error ? error.message : 'Failed to update token(s)' };
+        return { error: error instanceof Error ? error.message : 'Failed to update token' };
       }
     }
 
-    if (action === 'add_permissions') {
-      if (!permissions || !Array.isArray(permissions) || permissions.length === 0) {
-        return { error: 'Permissions array is required for add_permissions action' };
+    if (action === 'delete_token') {
+      if (!tokenId) {
+        return { error: 'Token ID is required for delete_token action' };
       }
       try {
-        if (applyToAll) {
-          const tokens = await strapi.db.query('admin::api-token').findMany();
-          const results = [];
-          for (const token of tokens) {
-            const currentPermissions = token.permissions || {};
-            const newPermissions = { ...currentPermissions };
-            permissions.forEach((permission: string) => {
-              newPermissions[permission] = true;
-            });
-            const updatedToken = await strapi.db.query('admin::api-token').update({
-              where: { id: token.id },
-              data: { permissions: newPermissions },
-            });
-            results.push({
-              id: updatedToken.id,
-              name: updatedToken.name,
-              permissions: updatedToken.permissions,
-            });
-          }
-          return {
-            action: 'add_permissions',
-            message: `Added permissions to ${results.length} tokens`,
-            tokens: results,
-          };
-        }
-        if (!tokenId) {
-          return {
-            error: 'Token ID is required for add_permissions action, or set applyToAll to true',
-          };
-        }
-        const token = await strapi.db.query('admin::api-token').findOne({
-          where: { id: tokenId },
-        });
-        if (!token) {
-          return { error: 'Token not found' };
-        }
-        const currentPermissions = token.permissions || {};
-        const newPermissions = { ...currentPermissions };
-        permissions.forEach((permission: string) => {
-          newPermissions[permission] = true;
-        });
-        const updatedToken = await strapi.db.query('admin::api-token').update({
-          where: { id: tokenId },
-          data: { permissions: newPermissions },
-        });
+        await strapi.admin.services['api-token'].revoke(tokenId);
         return {
-          action: 'add_permissions',
-          token: {
-            id: updatedToken.id,
-            name: updatedToken.name,
-            permissions: updatedToken.permissions,
-          },
+          action: 'delete_token',
+          message: 'Token deleted successfully',
         };
       } catch (error) {
-        return { error: error instanceof Error ? error.message : 'Failed to add permissions' };
-      }
-    }
-
-    if (action === 'remove_permissions') {
-      if (!permissions || !Array.isArray(permissions) || permissions.length === 0) {
-        return { error: 'Permissions array is required for remove_permissions action' };
-      }
-      try {
-        if (applyToAll) {
-          const tokens = await strapi.db.query('admin::api-token').findMany();
-          const results = [];
-          for (const token of tokens) {
-            const currentPermissions = token.permissions || {};
-            const newPermissions = { ...currentPermissions };
-            permissions.forEach((permission: string) => {
-              delete newPermissions[permission];
-            });
-            const updatedToken = await strapi.db.query('admin::api-token').update({
-              where: { id: token.id },
-              data: { permissions: newPermissions },
-            });
-            results.push({
-              id: updatedToken.id,
-              name: updatedToken.name,
-              permissions: updatedToken.permissions,
-            });
-          }
-          return {
-            action: 'remove_permissions',
-            message: `Removed permissions from ${results.length} tokens`,
-            tokens: results,
-          };
-        }
-        if (!tokenId) {
-          return {
-            error: 'Token ID is required for remove_permissions action, or set applyToAll to true',
-          };
-        }
-        const token = await strapi.db.query('admin::api-token').findOne({
-          where: { id: tokenId },
-        });
-        if (!token) {
-          return { error: 'Token not found' };
-        }
-        const currentPermissions = token.permissions || {};
-        const newPermissions = { ...currentPermissions };
-        permissions.forEach((permission: string) => {
-          delete newPermissions[permission];
-        });
-        const updatedToken = await strapi.db.query('admin::api-token').update({
-          where: { id: tokenId },
-          data: { permissions: newPermissions },
-        });
-        return {
-          action: 'remove_permissions',
-          token: {
-            id: updatedToken.id,
-            name: updatedToken.name,
-            permissions: updatedToken.permissions,
-          },
-        };
-      } catch (error) {
-        return { error: error instanceof Error ? error.message : 'Failed to remove permissions' };
-      }
-    }
-
-    if (action === 'list_all') {
-      try {
-        let tokens = await strapi.db.query('admin::api-token').findMany();
-
-        // Apply filters
-        if (search) {
-          const searchLower = search.toLowerCase();
-          tokens = tokens.filter(
-            (token: any) =>
-              token.name?.toLowerCase().includes(searchLower) ||
-              token.description?.toLowerCase().includes(searchLower)
-          );
-        }
-
-        if (nameFilter) {
-          tokens = tokens.filter((token: any) => token.name === nameFilter);
-        }
-
-        if (typeFilter) {
-          tokens = tokens.filter((token: any) => token.type === typeFilter);
-        }
-
-        if (expired !== undefined) {
-          const now = new Date();
-          tokens = tokens.filter((token: any) => {
-            if (!token.expiresAt) return !expired; // No expiration = not expired
-            return expired ? new Date(token.expiresAt) < now : new Date(token.expiresAt) >= now;
-          });
-        }
-
-        if (createdAfter) {
-          const afterDate = new Date(createdAfter);
-          tokens = tokens.filter((token: any) => new Date(token.createdAt) >= afterDate);
-        }
-
-        if (createdBefore) {
-          const beforeDate = new Date(createdBefore);
-          tokens = tokens.filter((token: any) => new Date(token.createdAt) <= beforeDate);
-        }
-
-        // Apply sorting
-        if (sortBy) {
-          tokens.sort((a: any, b: any) => {
-            const aVal = a[sortBy] || '';
-            const bVal = b[sortBy] || '';
-            let comparison = 0;
-
-            if (typeof aVal === 'string' && typeof bVal === 'string') {
-              comparison = aVal.localeCompare(bVal);
-            } else if (aVal instanceof Date && bVal instanceof Date) {
-              comparison = aVal.getTime() - bVal.getTime();
-            } else if (aVal < bVal) comparison = -1;
-            else if (aVal > bVal) comparison = 1;
-            else comparison = 0;
-
-            return sortOrder === 'desc' ? -comparison : comparison;
-          });
-        }
-
-        const totalCount = tokens.length;
-
-        // Apply pagination
-        if (offset) {
-          tokens = tokens.slice(offset);
-        }
-        if (limit) {
-          tokens = tokens.slice(0, limit);
-        }
-
-        // Apply progressive disclosure based on detailed and fields flags
-        const responseTokens = tokens.map((token: any) => {
-          if (fields && fields.length > 0) {
-            // Return only specified fields when fields parameter is provided
-            const filtered: any = {};
-            fields.forEach((field) => {
-              if (Object.prototype.hasOwnProperty.call(token, field)) {
-                filtered[field] = token[field];
-              }
-            });
-            return filtered;
-          }
-          if (detailed) {
-            return {
-              id: token.id,
-              name: token.name,
-              description: token.description,
-              type: token.type,
-              lifespan: token.lifespan,
-              expiresAt: token.expiresAt,
-              permissions: token.permissions || {},
-            };
-          }
-          return {
-            id: token.id,
-            name: token.name,
-            type: token.type,
-            permissionsCount: Object.keys(token.permissions || {}).length,
-          };
-        });
-
-        return {
-          action: 'list_all',
-          tokens: responseTokens,
-          count: tokens.length,
-          totalCount,
-          detailed,
-          fields: fields || null,
-          filters: {
-            search,
-            nameFilter,
-            typeFilter,
-            expired,
-            createdAfter,
-            createdBefore,
-            limit,
-            offset,
-            sortBy,
-            sortOrder,
-          },
-        };
-      } catch (error) {
-        return { error: error instanceof Error ? error.message : 'Failed to list tokens' };
+        return { error: error instanceof Error ? error.message : 'Failed to delete token' };
       }
     }
 
     if (action === 'list_available_permissions') {
       try {
-        const actionsMap = await strapi.contentAPI.permissions.getActionsMap();
-        const availablePermissions: string[] = [];
-
-        // Convert the actions map to a flat list of permissions
-        Object.entries(actionsMap).forEach(([api, value]: [string, any]) => {
-          const { controllers } = value;
-          Object.entries(controllers).forEach(([controller, actions]: [string, any]) => {
-            actions.forEach((action: string) => {
-              availablePermissions.push(`${api}.${controller}.${action}`);
-            });
-          });
-        });
+        // Use the same method that Strapi's API token service uses for validation
+        // This ensures we get the exact format that the service expects
+        const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
 
         return {
           action: 'list_available_permissions',
-          permissions: availablePermissions,
-          count: availablePermissions.length,
-          message: `Found ${availablePermissions.length} available Content API permissions`,
-          note: 'These are the permissions that can be used for API tokens. Format: api::<content-type>.<content-type>.<action>',
+          permissions: validPermissions,
+          count: validPermissions.length,
+          message: `Found ${validPermissions.length} available Content API permissions`,
+          note: 'These are the permissions that can be used for API tokens. Use these exact permission strings when creating custom tokens. Copy and paste these strings directly into the permissions array.',
+          examples: validPermissions.slice(0, 4),
         };
       } catch (error) {
         return {
-          error: error instanceof Error ? error.message : 'Failed to list available permissions',
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Failed to list available Content API permissions',
           details:
             'Could not retrieve Content API permissions. This might be due to the content API not being fully initialized.',
-        };
-      }
-    }
-
-    if (action === 'create') {
-      if (!name) {
-        return { error: 'Name is required for create action' };
-      }
-      if (!type) {
-        return { error: 'Type is required for create action' };
-      }
-      if (
-        type === 'custom' &&
-        (!permissions || !Array.isArray(permissions) || permissions.length === 0)
-      ) {
-        return {
-          error: 'Permissions array is required for custom token type',
-          details: `Custom API tokens require Content API permissions. Example:
-{
-  "permissions": ["api::country.country.find", "api::country.country.create"]
-}
-
-Format: "api::<content-type>.<content-type>.<action>"
-Common actions: find, findOne, create, update, delete`,
-        };
-      }
-      if (type !== 'custom' && permissions) {
-        return { error: 'Permissions should not be provided for non-custom token types' };
-      }
-
-      // Validate permission format for custom tokens
-      if (type === 'custom' && Array.isArray(permissions)) {
-        const invalidPermissions = permissions.filter(
-          (perm) => !perm.startsWith('api::') && !perm.startsWith('plugin::')
-        );
-        if (invalidPermissions.length > 0) {
-          return {
-            error: 'Invalid permission format detected',
-            details: `The following permissions don't follow the Content API format: ${invalidPermissions.join(', ')}. 
-            
-Content API permissions should start with 'api::' or 'plugin::' and follow the format 'api::<content-type>.<content-type>.<action>'.
-Examples: api::country.country.find, api::article.article.create, plugin::upload.upload.read`,
-          };
-        }
-      }
-
-      let lifespanMs: number | null = null;
-      if (lifespan && lifespan !== 'unlimited') {
-        const days = parseInt(lifespan, 10);
-        lifespanMs = days * 24 * 60 * 60 * 1000;
-      }
-
-      const tokenAttributes: any = {
-        name,
-        description: description || '',
-        type,
-        lifespan: lifespanMs,
-      };
-
-      if (type === 'custom' && Array.isArray(permissions)) {
-        // Pass permissions as array of strings (not object)
-        tokenAttributes.permissions = permissions;
-      }
-
-      try {
-        const apiTokenService = strapi.admin.services['api-token'];
-        const newToken = await apiTokenService.create(tokenAttributes);
-        return {
-          action: 'create',
-          token: {
-            id: newToken.id,
-            name: newToken.name,
-            description: newToken.description,
-            type: newToken.type,
-            lifespan: newToken.lifespan,
-            expiresAt: newToken.expiresAt,
-            accessKey: newToken.accessKey,
-            permissions: newToken.permissions || {},
-          },
-          message: 'Token created successfully',
-        };
-      } catch (error) {
-        let errorMessage = error instanceof Error ? error.message : 'Failed to create token';
-        let details = error instanceof Error ? error.stack : undefined;
-
-        // Provide more helpful error messages for common permission issues
-        if (errorMessage.includes('Unknown permissions provided:')) {
-          const unknownPermissions = errorMessage.match(/Unknown permissions provided: (.+)/)?.[1];
-          errorMessage = `Invalid permissions for API token. API tokens use Content API permissions (e.g., 'api::country.country.find'), not admin permissions (e.g., 'plugin::content-manager.explorer.read'). Unknown permissions: ${unknownPermissions}`;
-          details = `API Token Permissions Guide:
-          
-1. API tokens use Content API permissions, not admin permissions
-2. Format: 'api::<content-type>.<content-type>.<action>'
-3. Common actions: find, findOne, create, update, delete
-4. Example for countries: 'api::country.country.find'
-5. Example for articles: 'api::article.article.create'
-
-Admin permissions (for roles) vs Content API permissions (for tokens):
-- Admin: 'plugin::content-manager.explorer.read'
-- API Token: 'api::country.country.find'
-
-To get available Content API permissions, check the API routes or use the content API permissions endpoint.`;
-        } else if (errorMessage.includes('Missing permissions attribute for custom token')) {
-          errorMessage =
-            'Custom API tokens require permissions. Please provide a permissions array with Content API permissions.';
-          details = `Example:
-{
-  "permissions": ["api::country.country.find", "api::country.country.create"]
-}`;
-        }
-
-        return {
-          error: errorMessage,
-          details,
+          fallback:
+            'You can manually specify Content API permissions using the format: api::<content-type>.<content-type>.<action>',
         };
       }
     }
