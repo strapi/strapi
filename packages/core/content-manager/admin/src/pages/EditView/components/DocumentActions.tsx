@@ -934,6 +934,7 @@ const UpdateAction: DocumentActionComponent = ({
   model,
   collectionType,
 }) => {
+  const dispatchGuidedTour = useGuidedTour('UpdateAction', (s) => s.dispatch);
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -1166,6 +1167,10 @@ const UpdateAction: DocumentActionComponent = ({
         }
       }
     } finally {
+      dispatchGuidedTour({
+        type: 'set_completed_actions',
+        payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
+      });
       setSubmitting(false);
       if (onPreview) {
         onPreview();
@@ -1207,6 +1212,7 @@ const UpdateAction: DocumentActionComponent = ({
     schema,
     components,
     relationalModalSchema,
+    dispatchGuidedTour,
   ]);
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux
