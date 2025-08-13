@@ -1,14 +1,22 @@
 #!/bin/bash
 
-# Set up nvm
-export NVM_DIR=/Users/ben/.nvm
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+# Get the directory where this script is located (not where it's called from)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Set up nvm (try common locations)
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    export NVM_DIR="$HOME/.nvm"
+    . "$NVM_DIR/nvm.sh"
+elif [ -s "/usr/local/nvm/nvm.sh" ]; then
+    export NVM_DIR="/usr/local/nvm"
+    . "$NVM_DIR/nvm.sh"
+fi
 
 # Use Node.js 20
 nvm use 20 >/dev/null 2>&1
 
-# Change to the project directory
-cd /Users/ben/dev/strapi/strapi-v5/examples/getstarted
+# Change to the project directory (where the script is located)
+cd "$SCRIPT_DIR"
 
 # Start the MCP server
-/Users/ben/.yarn/bin/yarn strapi mcp --endpoint http://localhost:4001/mcp 
+yarn strapi mcp --endpoint http://localhost:4001/mcp 
