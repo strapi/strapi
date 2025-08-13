@@ -1,36 +1,18 @@
 'use strict';
 
+const { createContentApiRoutesFactory } = require('@strapi/utils');
 const authRoutes = require('./auth');
 const userRoutes = require('./user');
 const roleRoutes = require('./role');
 const permissionsRoutes = require('./permissions');
 
-let sharedRoutes;
-
-const ensureSharedRoutes = () => {
-  if (!sharedRoutes) {
-    sharedRoutes = [
-      ...authRoutes(strapi),
-      ...userRoutes(strapi),
-      ...roleRoutes(strapi),
-      ...permissionsRoutes(strapi),
-    ];
-  }
-  return sharedRoutes;
-};
-
-const createContentApiRoutes = () => {
-  return {
-    type: 'content-api',
-    routes: ensureSharedRoutes(),
-  };
-};
-
-Object.defineProperty(createContentApiRoutes, 'routes', {
-  get: ensureSharedRoutes,
-  set(next) {
-    sharedRoutes = next;
-  },
+const createContentApiRoutes = createContentApiRoutesFactory(() => {
+  return [
+    ...authRoutes(strapi),
+    ...userRoutes(strapi),
+    ...roleRoutes(strapi),
+    ...permissionsRoutes(strapi),
+  ];
 });
 
 module.exports = createContentApiRoutes;
