@@ -57,7 +57,6 @@ export declare namespace GetAiToken {
     data: {
       token: string;
       expiresAt?: string;
-      projectId?: string;
     };
     error?: errors.ApplicationError;
   }

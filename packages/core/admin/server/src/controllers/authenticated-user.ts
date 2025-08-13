@@ -98,13 +98,8 @@ export default {
       // Get the current user
       const user = ctx.state.user as AdminUser;
 
-      // Create a secure user identifier
-      // Using a hash of email + id + internal salt for enhanced privacy
-      const internalSalt = strapi.config.get('uuid', 'default-salt');
-      const userIdentifier = crypto
-        .createHash('sha256')
-        .update(`${user.email}:${user.id}:${internalSalt}`)
-        .digest('hex');
+      // Create a secure user identifier using only user ID
+      const userIdentifier = user.id.toString();
 
       // Get project ID
       const projectId = strapi.config.get('uuid');
@@ -180,7 +175,6 @@ export default {
         const data = (await response.json()) as {
           jwt: string;
           expiresAt?: string;
-          projectId?: string;
         };
 
         if (!data.jwt) {
@@ -189,7 +183,6 @@ export default {
 
         strapi.log.info('AI token generated successfully', {
           userId: user.id,
-          projectId: data.projectId,
           expiresAt: data.expiresAt,
         });
 
@@ -199,7 +192,6 @@ export default {
           data: {
             token: data.jwt,
             expiresAt: data.expiresAt, // 1 hour from generation
-            projectId: data.projectId,
           },
         } satisfies GetAiToken.Response;
       } catch (fetchError) {

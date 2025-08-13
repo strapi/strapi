@@ -4,17 +4,18 @@ import createContext from '../../../../../../../tests/helpers/create-context';
 import authenticatedUserController from '../authenticated-user';
 
 describe('Authenticated User Controller', () => {
+  const ORIGINAL_ENV = process.env;
+
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Reset environment variables
-    delete process.env.STRAPI_LICENSE;
-    delete process.env.STRAPI_ADMIN_AI_URL;
-    delete process.env.STRAPI_AI_URL;
-    delete process.env.NODE_ENV;
+    process.env = { ...ORIGINAL_ENV }; // fresh copy for each test
 
     // Reset global fetch
     delete (global as any).fetch;
+  });
+
+  afterAll(() => {
+    process.env = ORIGINAL_ENV; // fully restore after suite
   });
 
   describe('getAiToken', () => {
@@ -70,7 +71,6 @@ describe('Authenticated User Controller', () => {
       const defaultResponse = {
         jwt: 'test-jwt-token',
         expiresAt: '2025-01-01T12:00:00Z',
-        projectId: 'test-project-id',
       };
 
       return jest.fn().mockResolvedValueOnce({
@@ -78,7 +78,6 @@ describe('Authenticated User Controller', () => {
         json: jest.fn().mockResolvedValueOnce({ ...defaultResponse, ...responseData }),
       });
     };
-
 
     test('Should return unauthorized when user is not authenticated', async () => {
       const ctx = createMockContext(null);
@@ -93,6 +92,9 @@ describe('Authenticated User Controller', () => {
       const ctx = createMockContext();
       global.strapi = createMockStrapi() as any;
 
+      // Ensure no license is available
+      delete process.env.STRAPI_LICENSE;
+
       await authenticatedUserController.getAiToken(ctx as any);
 
       expect(ctx.badRequest).toHaveBeenCalledWith(
@@ -103,7 +105,10 @@ describe('Authenticated User Controller', () => {
     test('Should return bad request when AI server URL is not configured', async () => {
       const ctx = createMockContext();
       global.strapi = createMockStrapi() as any;
+
       process.env.STRAPI_LICENSE = 'test-license';
+      delete process.env.STRAPI_AI_URL;
+      delete process.env.STRAPI_ADMIN_AI_URL;
 
       await authenticatedUserController.getAiToken(ctx as any);
 
@@ -150,7 +155,6 @@ describe('Authenticated User Controller', () => {
         data: {
           token: 'test-jwt-token',
           expiresAt: '2025-01-01T12:00:00Z',
-          projectId: 'test-project-id',
         },
       });
     });
