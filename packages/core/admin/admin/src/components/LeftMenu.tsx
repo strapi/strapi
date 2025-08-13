@@ -98,7 +98,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
   return (
-    <MainNav>
+    <MainNav isMobileShown={isMobileShown}>
       <NavBrand handleClick={() => setIsMobileShown(!isMobileShown)} />
 
       <Divider />
