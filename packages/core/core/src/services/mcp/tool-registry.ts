@@ -6,8 +6,7 @@ import {
   createListRoutesTool,
   createRBACApiTokensTool,
   createRBACAdminRolesTool,
-  createRoleEditorTool,
-  createUPUsersTool,
+  createRBACUsersPermissionsTool,
   createMarketplaceTool,
   createDocumentationTool,
 } from './tools';
@@ -26,8 +25,7 @@ export class MCPToolRegistry {
       createListRoutesTool,
       createRBACApiTokensTool,
       createRBACAdminRolesTool,
-      createRoleEditorTool,
-      createUPUsersTool,
+      createRBACUsersPermissionsTool,
       createMarketplaceTool,
       createDocumentationTool,
     ];

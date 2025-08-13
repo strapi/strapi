@@ -1,11 +1,11 @@
 import type { Core } from '@strapi/types';
 import type { MCPToolHandler } from '../types';
 
-export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler => {
+export const createRBACUsersPermissionsTool = (strapi: Core.Strapi): MCPToolHandler => {
   const tool = {
-    name: 'admin_roles',
+    name: 'users_permissions',
     description:
-      '🔐 ADMIN PANEL USERS & ROLES: Manage users and roles who access the Strapi admin interface (http://localhost:1337/admin). These are content editors, administrators, and developers who log into the admin panel to create/edit content, manage users, configure plugins, etc. This is COMPLETELY SEPARATE from U&P (Users & Permissions), UP users, content API users, and API tokens. Permissions use admin format like "plugin::content-manager.explorer.read". This controls access to the Strapi admin dashboard, NOT the REST/GraphQL APIs.',
+      '👥 U&P / UP / CONTENT REST API / Users and Permissions: Manage end users who authenticate and access your REST API and GraphQL API. These are your customers, members, or any end users who register/login to your site/app and make API calls. They get JWT tokens and can access content through the REST/GraphQL APIs based on their assigned roles. This is COMPLETELY SEPARATE from admin users who access the Strapi admin interface. This controls access to your content APIs, NOT the admin dashboard.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -33,25 +33,21 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           type: 'string',
           description: 'User email (required for create_user)',
         },
-        firstname: {
-          type: 'string',
-          description: 'User first name',
-        },
-        lastname: {
-          type: 'string',
-          description: 'User last name',
-        },
         username: {
           type: 'string',
-          description: 'User username',
+          description: 'User username (required for create_user)',
         },
         password: {
           type: 'string',
           description: 'User password (required for create_user)',
         },
-        isActive: {
+        confirmed: {
           type: 'boolean',
-          description: 'Whether user is active',
+          description: 'Whether user is confirmed (for create_user/update_user)',
+        },
+        blocked: {
+          type: 'boolean',
+          description: 'Whether user is blocked (for create_user/update_user)',
         },
         // Role parameters
         roleId: {
@@ -62,13 +58,13 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           type: 'string',
           description: 'Role name (required for create_role)',
         },
-        roleCode: {
-          type: 'string',
-          description: 'Role code (required for create_role)',
-        },
         roleDescription: {
           type: 'string',
           description: 'Role description',
+        },
+        roleType: {
+          type: 'string',
+          description: 'Role type (for create_role/update_role)',
         },
         permissions: {
           type: 'array',
@@ -140,25 +136,21 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           type: 'string',
           description: 'Filter users by username (partial match)',
         },
-        firstnameFilter: {
-          type: 'string',
-          description: 'Filter users by first name (partial match)',
-        },
-        lastnameFilter: {
-          type: 'string',
-          description: 'Filter users by last name (partial match)',
-        },
-        isActiveFilter: {
+        confirmedFilter: {
           type: 'boolean',
-          description: 'Filter users by active status',
+          description: 'Filter users by confirmation status',
+        },
+        blockedFilter: {
+          type: 'boolean',
+          description: 'Filter users by blocked status',
         },
         roleNameFilter: {
           type: 'string',
           description: 'Filter roles by name (partial match)',
         },
-        roleCodeFilter: {
+        roleTypeFilter: {
           type: 'string',
-          description: 'Filter roles by code (partial match)',
+          description: 'Filter roles by type',
         },
         permissionActionFilter: {
           type: 'string',
@@ -182,10 +174,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
             'id',
             'email',
             'username',
-            'firstname',
-            'lastname',
             'name',
-            'code',
+            'type',
             'action',
             'subject',
             'createdAt',
@@ -219,16 +209,15 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       // User parameters
       userId?: string;
       email?: string;
-      firstname?: string;
-      lastname?: string;
       username?: string;
       password?: string;
-      isActive?: boolean;
+      confirmed?: boolean;
+      blocked?: boolean;
       // Role parameters
       roleId?: string;
       roleName?: string;
-      roleCode?: string;
       roleDescription?: string;
+      roleType?: string;
       permissions?: Array<{
         action: string;
         subject?: string;
@@ -258,11 +247,10 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       idFilter?: string;
       emailFilter?: string;
       usernameFilter?: string;
-      firstnameFilter?: string;
-      lastnameFilter?: string;
-      isActiveFilter?: boolean;
+      confirmedFilter?: boolean;
+      blockedFilter?: boolean;
       roleNameFilter?: string;
-      roleCodeFilter?: string;
+      roleTypeFilter?: string;
       permissionActionFilter?: string;
       permissionSubjectFilter?: string;
       limit?: number;
@@ -278,16 +266,15 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       // User parameters
       userId,
       email,
-      firstname,
-      lastname,
       username,
       password,
-      isActive,
+      confirmed,
+      blocked,
       // Role parameters
       roleId,
       roleName,
-      roleCode,
       roleDescription,
+      roleType,
       permissions,
       setPermissions,
       addPermissions,
@@ -297,11 +284,10 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       idFilter,
       emailFilter,
       usernameFilter,
-      firstnameFilter,
-      lastnameFilter,
-      isActiveFilter,
+      confirmedFilter,
+      blockedFilter,
       roleNameFilter,
-      roleCodeFilter,
+      roleTypeFilter,
       permissionActionFilter,
       permissionSubjectFilter,
       limit = 20,
@@ -330,10 +316,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       return Promise.all(
         permissions.map(async (permission) => {
           let properties = permission.properties || {};
-          if (
-            permission.subject &&
-            permission.action.includes('plugin::content-manager.explorer')
-          ) {
+          if (permission.subject && permission.action.includes('api::')) {
             try {
               const contentType = (strapi.contentTypes as any)[permission.subject];
               if (contentType && contentType.attributes) {
@@ -366,15 +349,15 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           // Try both string and number ID matching
           const idToFind = parseInt(idFilter, 10);
           if (!Number.isNaN(idToFind)) {
-            let user = await strapi.db.query('admin::user').findOne({
+            let user = await strapi.db.query('plugin::users-permissions.user').findOne({
               where: { id: idToFind },
-              populate: ['roles'],
+              populate: ['role'],
             });
             if (!user) {
               // Try with string ID
-              user = await strapi.db.query('admin::user').findOne({
+              user = await strapi.db.query('plugin::users-permissions.user').findOne({
                 where: { id: idFilter },
-                populate: ['roles'],
+                populate: ['role'],
               });
             }
             if (user) {
@@ -384,8 +367,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           }
         } else {
           // Query all users if no ID filter
-          users = await strapi.db.query('admin::user').findMany({
-            populate: ['roles'],
+          users = await strapi.db.query('plugin::users-permissions.user').findMany({
+            populate: ['role'],
           });
           totalCount = users.length;
 
@@ -402,29 +385,19 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
             );
           }
 
-          if (firstnameFilter) {
-            const firstnameLower = firstnameFilter.toLowerCase();
-            users = users.filter((user: any) =>
-              user.firstname?.toLowerCase().includes(firstnameLower)
-            );
+          if (confirmedFilter !== undefined) {
+            users = users.filter((user: any) => user.confirmed === confirmedFilter);
           }
 
-          if (lastnameFilter) {
-            const lastnameLower = lastnameFilter.toLowerCase();
-            users = users.filter((user: any) =>
-              user.lastname?.toLowerCase().includes(lastnameLower)
-            );
-          }
-
-          if (isActiveFilter !== undefined) {
-            users = users.filter((user: any) => user.isActive === isActiveFilter);
+          if (blockedFilter !== undefined) {
+            users = users.filter((user: any) => user.blocked === blockedFilter);
           }
 
           // Apply search filter
           if (search) {
             const searchLower = search.toLowerCase();
             users = users.filter((user: any) => {
-              const searchableFields = ['id', 'email', 'username', 'firstname', 'lastname'];
+              const searchableFields = ['id', 'email', 'username'];
               return searchableFields.some((field) => {
                 const value = (user as any)[field];
                 return value && value.toString().toLowerCase().includes(searchLower);
@@ -461,23 +434,25 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
             return {
               id: user.id,
               email: user.email,
-              firstname: user.firstname,
-              lastname: user.lastname,
               username: user.username,
-              isActive: user.isActive,
+              confirmed: user.confirmed,
               blocked: user.blocked,
-              roles: (Array.isArray(user.roles) ? user.roles : []).map((role: any) => ({
-                id: role.id,
-                name: role.name,
-                code: role.code,
-              })),
+              role: user.role
+                ? {
+                    id: user.role.id,
+                    name: user.role.name,
+                    type: user.role.type,
+                  }
+                : null,
             };
           }
           return {
             id: user.id,
             email: user.email,
-            isActive: user.isActive,
-            rolesCount: (Array.isArray(user.roles) ? user.roles : []).length,
+            username: user.username,
+            confirmed: user.confirmed,
+            blocked: user.blocked,
+            roleName: user.role?.name || null,
           };
         });
 
@@ -493,9 +468,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
             idFilter,
             emailFilter,
             usernameFilter,
-            firstnameFilter,
-            lastnameFilter,
-            isActiveFilter,
+            confirmedFilter,
+            blockedFilter,
             limit,
             offset,
             sortBy,
@@ -511,30 +485,33 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       if (!email) {
         return { error: 'Email is required for create_user action' };
       }
+      if (!username) {
+        return { error: 'Username is required for create_user action' };
+      }
       if (!password) {
         return { error: 'Password is required for create_user action' };
       }
       try {
         const userData: any = {
           email,
+          username,
           password,
-          isActive: isActive !== undefined ? isActive : true,
+          confirmed: confirmed !== undefined ? confirmed : true,
+          blocked: blocked !== undefined ? blocked : false,
         };
-        if (firstname) userData.firstname = firstname;
-        if (lastname) userData.lastname = lastname;
-        if (username) userData.username = username;
 
-        const userService = strapi.admin.services.user;
-        const newUser = await userService.create(userData);
+        const newUser = await strapi.db.query('plugin::users-permissions.user').create({
+          data: userData,
+        });
+
         return {
           action: 'create_user',
           user: {
             id: newUser.id,
             email: newUser.email,
-            firstname: newUser.firstname,
-            lastname: newUser.lastname,
             username: newUser.username,
-            isActive: newUser.isActive,
+            confirmed: newUser.confirmed,
+            blocked: newUser.blocked,
           },
           message: 'User created successfully',
         };
@@ -550,23 +527,24 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       try {
         const updateData: any = {};
         if (email !== undefined) updateData.email = email;
-        if (firstname !== undefined) updateData.firstname = firstname;
-        if (lastname !== undefined) updateData.lastname = lastname;
         if (username !== undefined) updateData.username = username;
         if (password !== undefined) updateData.password = password;
-        if (isActive !== undefined) updateData.isActive = isActive;
+        if (confirmed !== undefined) updateData.confirmed = confirmed;
+        if (blocked !== undefined) updateData.blocked = blocked;
 
-        const userService = strapi.admin.services.user;
-        const updatedUser = await userService.update(userId, updateData);
+        const updatedUser = await strapi.db.query('plugin::users-permissions.user').update({
+          where: { id: userId },
+          data: updateData,
+        });
+
         return {
           action: 'update_user',
           user: {
             id: updatedUser.id,
             email: updatedUser.email,
-            firstname: updatedUser.firstname,
-            lastname: updatedUser.lastname,
             username: updatedUser.username,
-            isActive: updatedUser.isActive,
+            confirmed: updatedUser.confirmed,
+            blocked: updatedUser.blocked,
           },
           message: 'User updated successfully',
         };
@@ -580,8 +558,9 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
         return { error: 'User ID is required for delete_user action' };
       }
       try {
-        const userService = strapi.admin.services.user;
-        await userService.deleteById(userId);
+        await strapi.db.query('plugin::users-permissions.user').delete({
+          where: { id: userId },
+        });
         return {
           action: 'delete_user',
           message: 'User deleted successfully',
@@ -602,13 +581,13 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           // Try both string and number ID matching
           const idToFind = parseInt(idFilter, 10);
           if (!Number.isNaN(idToFind)) {
-            let role = await strapi.db.query('admin::role').findOne({
+            let role = await strapi.db.query('plugin::users-permissions.role').findOne({
               where: { id: idToFind },
               populate: ['users', 'permissions'],
             });
             if (!role) {
               // Try with string ID
-              role = await strapi.db.query('admin::role').findOne({
+              role = await strapi.db.query('plugin::users-permissions.role').findOne({
                 where: { id: idFilter },
                 populate: ['users', 'permissions'],
               });
@@ -620,7 +599,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           }
         } else {
           // Query all roles if no ID filter
-          roles = await strapi.db.query('admin::role').findMany({
+          roles = await strapi.db.query('plugin::users-permissions.role').findMany({
             populate: ['users', 'permissions'],
           });
           totalCount = roles.length;
@@ -631,16 +610,15 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
             roles = roles.filter((role: any) => role.name?.toLowerCase().includes(nameLower));
           }
 
-          if (roleCodeFilter) {
-            const codeLower = roleCodeFilter.toLowerCase();
-            roles = roles.filter((role: any) => role.code?.toLowerCase().includes(codeLower));
+          if (roleTypeFilter) {
+            roles = roles.filter((role: any) => role.type === roleTypeFilter);
           }
 
           // Apply search filter
           if (search) {
             const searchLower = search.toLowerCase();
             roles = roles.filter((role: any) => {
-              const searchableFields = ['id', 'name', 'code', 'description'];
+              const searchableFields = ['id', 'name', 'type', 'description'];
               return searchableFields.some((field) => {
                 const value = (role as any)[field];
                 return value && value.toString().toLowerCase().includes(searchLower);
@@ -668,8 +646,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
             return {
               id: role.id,
               name: role.name,
-              code: role.code,
               description: role.description,
+              type: role.type,
               usersCount: role.users?.length || 0,
               permissionsCount: role.permissions?.length || 0,
             };
@@ -677,6 +655,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           return {
             id: role.id,
             name: role.name,
+            type: role.type,
             usersCount: role.users?.length || 0,
             permissionsCount: role.permissions?.length || 0,
           };
@@ -692,7 +671,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
             search,
             idFilter,
             roleNameFilter,
-            roleCodeFilter,
+            roleTypeFilter,
             limit,
             offset,
             sortBy,
@@ -708,18 +687,16 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       if (!roleName) {
         return { error: 'Role name is required for create_role action' };
       }
-      if (!roleCode) {
-        return { error: 'Role code is required for create_role action' };
-      }
       try {
         const roleData: any = {
           name: roleName,
-          code: roleCode,
         };
         if (roleDescription) roleData.description = roleDescription;
+        if (roleType) roleData.type = roleType;
 
-        const roleService = strapi.admin.services.role;
-        const newRole = await roleService.create(roleData);
+        const newRole = await strapi.db.query('plugin::users-permissions.role').create({
+          data: roleData,
+        });
 
         // If permissions are provided, set them immediately
         let permissionsSet: string[] = [];
@@ -727,7 +704,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           const processedPermissions = await processPermissions(permissions);
           await Promise.all(
             processedPermissions.map(async (permission) => {
-              return strapi.db.query('admin::permission').create({
+              return strapi.db.query('plugin::users-permissions.permission').create({
                 data: {
                   action: permission.action,
                   subject: permission.subject || null,
@@ -746,8 +723,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           role: {
             id: newRole.id,
             name: newRole.name,
-            code: newRole.code,
             description: newRole.description,
+            type: newRole.type,
           },
           permissionsSet: permissionsSet.length > 0 ? permissionsSet : undefined,
           message:
@@ -767,16 +744,18 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
       try {
         const updateData: any = {};
         if (roleName !== undefined) updateData.name = roleName;
-        if (roleCode !== undefined) updateData.code = roleCode;
         if (roleDescription !== undefined) updateData.description = roleDescription;
+        if (roleType !== undefined) updateData.type = roleType;
 
-        const roleService = strapi.admin.services.role;
-        const updatedRole = await roleService.update(roleId, updateData);
+        const updatedRole = await strapi.db.query('plugin::users-permissions.role').update({
+          where: { id: roleId },
+          data: updateData,
+        });
 
         // Handle permissions operations
         let permissionsMessage = '';
         if (setPermissions || addPermissions || removePermissions) {
-          const currentRole = await strapi.db.query('admin::role').findOne({
+          const currentRole = await strapi.db.query('plugin::users-permissions.role').findOne({
             where: { id: roleId },
             populate: ['permissions'],
           });
@@ -784,13 +763,14 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           if (setPermissions) {
             // Remove all existing permissions and set new ones
             if (currentRole.permissions && currentRole.permissions.length > 0) {
-              const permissionService = strapi.admin.services.permission;
-              await permissionService.deleteByIds(currentRole.permissions.map((p: any) => p.id));
+              await strapi.db.query('plugin::users-permissions.permission').deleteMany({
+                where: { role: roleId },
+              });
             }
             const processedPermissions = await processPermissions(setPermissions);
             await Promise.all(
               processedPermissions.map(async (permission) => {
-                return strapi.db.query('admin::permission').create({
+                return strapi.db.query('plugin::users-permissions.permission').create({
                   data: {
                     action: permission.action,
                     subject: permission.subject || null,
@@ -806,7 +786,19 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
 
           if (addPermissions) {
             const processedPermissions = await processPermissions(addPermissions);
-            await roleService.addPermissions(roleId, processedPermissions);
+            await Promise.all(
+              processedPermissions.map(async (permission) => {
+                return strapi.db.query('plugin::users-permissions.permission').create({
+                  data: {
+                    action: permission.action,
+                    subject: permission.subject || null,
+                    properties: permission.properties || {},
+                    conditions: permission.conditions || [],
+                    role: roleId,
+                  },
+                });
+              })
+            );
             permissionsMessage += permissionsMessage
               ? `, added ${addPermissions.length} permissions`
               : `Added ${addPermissions.length} permissions`;
@@ -821,8 +813,9 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
             );
 
             if (permissionsToRemove.length > 0) {
-              const permissionService = strapi.admin.services.permission;
-              await permissionService.deleteByIds(permissionsToRemove.map((p: any) => p.id));
+              await strapi.db.query('plugin::users-permissions.permission').deleteMany({
+                where: { id: { $in: permissionsToRemove.map((p: any) => p.id) } },
+              });
               permissionsMessage += permissionsMessage
                 ? `, removed ${permissionsToRemove.length} permissions`
                 : `Removed ${permissionsToRemove.length} permissions`;
@@ -835,8 +828,8 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           role: {
             id: updatedRole.id,
             name: updatedRole.name,
-            code: updatedRole.code,
             description: updatedRole.description,
+            type: updatedRole.type,
           },
           permissionsMessage: permissionsMessage || undefined,
           message: permissionsMessage
@@ -853,8 +846,9 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
         return { error: 'Role ID is required for delete_role action' };
       }
       try {
-        const roleService = strapi.admin.services.role;
-        await roleService.deleteByIds([roleId]);
+        await strapi.db.query('plugin::users-permissions.role').delete({
+          where: { id: roleId },
+        });
         return {
           action: 'delete_role',
           message: 'Role deleted successfully',
@@ -875,13 +869,13 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           // Try both string and number ID matching
           const idToFind = parseInt(idFilter, 10);
           if (!Number.isNaN(idToFind)) {
-            let permission = await strapi.db.query('admin::permission').findOne({
+            let permission = await strapi.db.query('plugin::users-permissions.permission').findOne({
               where: { id: idToFind },
               populate: ['role'],
             });
             if (!permission) {
               // Try with string ID
-              permission = await strapi.db.query('admin::permission').findOne({
+              permission = await strapi.db.query('plugin::users-permissions.permission').findOne({
                 where: { id: idFilter },
                 populate: ['role'],
               });
@@ -893,7 +887,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
           }
         } else {
           // Query all permissions if no ID filter
-          permissions = await strapi.db.query('admin::permission').findMany({
+          permissions = await strapi.db.query('plugin::users-permissions.permission').findMany({
             populate: ['role'],
           });
           totalCount = permissions.length;
@@ -952,7 +946,7 @@ export const createRBACAdminRolesTool = (strapi: Core.Strapi): MCPToolHandler =>
                 ? {
                     id: permission.role.id,
                     name: permission.role.name,
-                    code: permission.role.code,
+                    type: permission.role.type,
                   }
                 : null,
             };
