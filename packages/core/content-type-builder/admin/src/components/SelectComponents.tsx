@@ -38,10 +38,12 @@ export const SelectComponents = ({
 }: SelectComponentsProps) => {
   const { formatMessage } = useIntl();
   const { componentsGroupedByCategory, contentTypes, components } = useDataManager();
-  
+
   const isComponent = targetUid.includes('.') && !targetUid.includes('::');
-  const schema = isComponent ? components[targetUid] : contentTypes[targetUid];
-  
+  const schema = isComponent
+    ? components[targetUid as Internal.UID.Component]
+    : contentTypes[targetUid as Internal.UID.ContentType];
+
   if (!schema) {
     return null;
   }
