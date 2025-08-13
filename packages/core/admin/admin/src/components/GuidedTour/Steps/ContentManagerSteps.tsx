@@ -24,7 +24,7 @@ const ContentManagerActions = ({
   const currentStepOffset = state.tours.contentManager.currentStep + 1;
   const displayedCurrentStep = (() => {
     if (isSingleType && currentStepOffset > collectionTypeSpecificSteps.length) {
-      return currentStepOffset - 1;
+      return currentStepOffset - collectionTypeSpecificSteps.length;
     }
 
     return currentStepOffset;
