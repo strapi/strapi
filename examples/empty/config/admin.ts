@@ -5,6 +5,9 @@ const adminConfig = ({ env }) => ({
   apiToken: {
     salt: env('API_TOKEN_SALT', 'example-salt'),
   },
+  secrets: {
+    encryptionKey: env('ENCRYPTION_KEY', 'example-key'),
+  },
   transfer: {
     token: {
       salt: env('TRANSFER_TOKEN_SALT', 'example-salt'),

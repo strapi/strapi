@@ -8,6 +8,7 @@ import { styled } from 'styled-components';
 import { ContentBox } from '../../../../components/ContentBox';
 import { useGuidedTour } from '../../../../components/GuidedTour/Context';
 import { tours } from '../../../../components/GuidedTour/Tours';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../../../../components/GuidedTour/utils/constants';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useClipboard } from '../../../../hooks/useClipboard';
@@ -29,7 +30,7 @@ export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
 
   const { copy } = useClipboard();
 
-  const handleClick = (token: TokenBoxProps['token']) => async () => {
+  const handleCopyToken = async (token: TokenBoxProps['token']) => {
     if (token) {
       const didCopy = await copy(token);
 
@@ -39,7 +40,7 @@ export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
         });
         dispatch({
           type: 'set_completed_actions',
-          payload: ['didCopyApiToken'],
+          payload: [GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken],
         });
         toggleNotification({
           type: 'success',
@@ -68,8 +69,8 @@ export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
           </Typography>
           <Typography>
             {formatMessage({
-              id: 'Settings.tokens.copy.lastWarning',
-              defaultMessage: "Make sure to copy this token, you won't be able to see it again!",
+              id: 'Settings.apiTokens.copy.lastWarning',
+              defaultMessage: 'Copy your API token',
             })}
           </Typography>
         </Flex>
@@ -82,7 +83,10 @@ export const ApiTokenBox = ({ token, tokenType }: TokenBoxProps) => {
           <Button
             startIcon={<Duplicate />}
             variant="secondary"
-            onClick={handleClick(token)}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              handleCopyToken(token);
+            }}
             marginTop={6}
           >
             {formatMessage({ id: 'Settings.tokens.copy.copy', defaultMessage: 'Copy' })}
