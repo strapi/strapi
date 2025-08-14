@@ -16,7 +16,7 @@ export const EmptyState = () => {
     <>
       <tours.contentTypeBuilder.Introduction>
         {/* Invisible Anchor */}
-        <Box paddingTop={5} />
+        <Box />
       </tours.contentTypeBuilder.Introduction>
       <Flex justifyContent="center" alignItems="center" height="100%" direction="column">
         <Typography variant="alpha">{pluginName}</Typography>

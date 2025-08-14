@@ -9,11 +9,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     async getUpcomingReleases(): Promise<GetUpcomingReleases.Response['data']> {
       const releases = await strapi.db.query('plugin::content-releases.release').findMany({
         filters: {
-          scheduledAt: {
-            $gte: new Date(),
-          },
-          status: {
-            $ne: 'done',
+          releasedAt: {
+            $notNull: false,
           },
         },
         orderBy: [{ scheduledAt: 'asc' }],
