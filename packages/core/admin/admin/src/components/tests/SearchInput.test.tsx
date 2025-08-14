@@ -14,14 +14,6 @@ const LocationDisplay = () => {
 };
 
 describe('SearchInput', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it('should render an icon button by default', () => {
     const { getByRole } = render(<SearchInput label="Search label" />);
 
@@ -54,12 +46,18 @@ describe('SearchInput', () => {
 
     await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
 
-    jest.advanceTimersByTime(600);
+    // Wait for the debounce delay (500ms) to trigger the search
+    await waitFor(
+      () => {
+        const searchString = getByRole('listitem').textContent ?? '';
+        const searchParams = new URLSearchParams(searchString);
+        expect(searchParams.has('_q')).toBe(true);
+      },
+      { timeout: 1000 }
+    );
 
     const searchString = getByRole('listitem').textContent ?? '';
     const searchParams = new URLSearchParams(searchString);
-
-    expect(searchParams.has('_q')).toBe(true);
     expect(searchParams.get('_q')).toBe('michka');
   });
 
@@ -81,9 +79,12 @@ describe('SearchInput', () => {
 
     await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
 
-    jest.advanceTimersByTime(600);
-
-    expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(true);
+    await waitFor(
+      () => {
+        expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(true);
+      },
+      { timeout: 1000 }
+    );
 
     await user.click(getByRole('button', { name: 'Clear' }));
 
@@ -116,7 +117,14 @@ describe('SearchInput', () => {
       // Type the value if any
       if (inputValue) {
         await user.type(textbox, inputValue);
-        jest.advanceTimersByTime(600);
+        await waitFor(
+          () => {
+            const searchString = getByRole('listitem').textContent ?? '';
+            const searchParams = new URLSearchParams(searchString);
+            expect(searchParams.has('_q')).toBe(true);
+          },
+          { timeout: 1000 }
+        );
       }
 
       // Simulate blur
