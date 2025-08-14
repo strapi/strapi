@@ -143,7 +143,7 @@ const EditViewPage = () => {
       {isSingleType && (
         <tours.contentManager.Introduction>
           {/* Invisible Anchor */}
-          <Box paddingTop={5} />
+          <Box />
         </tours.contentManager.Introduction>
       )}
       <Form
