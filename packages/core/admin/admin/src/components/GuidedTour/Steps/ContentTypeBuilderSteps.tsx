@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { UID } from '@strapi/types';
 import { useParams } from 'react-router-dom';
 
