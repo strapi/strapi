@@ -23,10 +23,10 @@ export type CloudCliConfig = {
   tokenUrl: string;
   jwksUrl: string;
   projectCreation: {
-    questions: ReadonlyArray<DistinctQuestion<ProjectAnswers>>;
+    questions: Array<DistinctQuestion<ProjectAnswers>>;
     defaults: Partial<ProjectAnswers>;
     introText: string;
-    userChoice?: object;
+    userChoice?: DistinctQuestion & { name: 'userChoice' };
     reference?: string;
     errors: {
       environmentCreationFailed: BoxedErrorMessage;
