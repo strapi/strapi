@@ -86,11 +86,7 @@ export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.Zo
     strapi.log.debug(`Schema ${transformedId} not found in registry, generating new schema`);
 
     // Determine if this is a built-in schema or user content
-    const isBuiltInSchema =
-      id.startsWith('plugin::') ||
-      id.startsWith('admin') ||
-      transformedId.includes('Admin') ||
-      transformedId.includes('Plugin');
+    const isBuiltInSchema = id.startsWith('plugin::') || id.startsWith('admin');
 
     if (isBuiltInSchema) {
       // Built-in schemas keep at debug level to avoid clutter
@@ -102,7 +98,7 @@ export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.Zo
         .replace('Entry', '')
         .replace(/([A-Z])/g, ' $1')
         .trim();
-      strapi.log.info(`📝 Generating validation schema for "${schemaName}"`);
+      strapi.log.debug(`📝 Generating validation schema for "${schemaName}"`);
     }
 
     // Temporary any placeholder before replacing with the actual schema type
@@ -123,7 +119,7 @@ export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.Zo
         .replace('Entry', '')
         .replace(/([A-Z])/g, ' $1')
         .trim();
-      strapi.log.info(`   ✅ "${schemaName}" schema created with ${fieldCount} fields`);
+      strapi.log.debug(`   ✅ "${schemaName}" schema created with ${fieldCount} fields`);
     }
 
     return schema;
