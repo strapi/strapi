@@ -5,6 +5,7 @@ import { tokenServiceFactory, cloudApiFactory } from '../services';
 import type { CloudCliConfig, CLIContext } from '../types';
 import { apiConfig } from '../config/api';
 import { trackEvent } from '../utils/analytics';
+import { setContext } from '../services/context';
 
 const openModule = import('open');
 
@@ -39,6 +40,7 @@ export default async function loginAction(
       try {
         const userInfo = await cloudApiService.getUserInfo();
         const { email } = userInfo.data.data;
+        setContext({ ...ctx, user: userInfo.data.data });
         if (email) {
           logger.log(`You are already logged into your account (${email}).`);
         } else {
