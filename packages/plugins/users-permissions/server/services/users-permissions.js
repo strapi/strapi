@@ -100,7 +100,8 @@ module.exports = ({ strapi }) => ({
       }
     });
 
-    return actionMap;
+    // Return a deeply cloned version to avoid circular references
+    return _.cloneDeep(actionMap);
   },
 
   async getRoutes() {
