@@ -146,7 +146,7 @@ const PreviewPage = () => {
         sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
       }
 
-      if (event.data?.type === INTERNAL_EVENTS.WILL_EDIT_FIELD) {
+      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT) {
         setPopoverField?.(event.data.payload);
       }
     };

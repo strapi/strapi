@@ -28,7 +28,7 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
     }
 
     const sendMessage = getSendMessage(iframe);
-    sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_TYPING, { field: name, value });
+    sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value });
   }, [name, value, iframe]);
 
   const sendMessage = getSendMessage(iframe);

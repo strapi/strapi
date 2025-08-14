@@ -26,8 +26,8 @@ const previewScript = (shouldRun = true) => {
   const INTERNAL_EVENTS = {
     STRAPI_FIELD_FOCUS: 'strapiFieldFocus',
     STRAPI_FIELD_BLUR: 'strapiFieldBlur',
-    STRAPI_FIELD_TYPING: 'strapiFieldTyping',
-    WILL_EDIT_FIELD: 'willEditField',
+    STRAPI_FIELD_CHANGE: 'strapiFieldChange',
+    STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
   } as const;
 
   /**
@@ -130,7 +130,7 @@ const previewScript = (shouldRun = true) => {
           const sourceAttribute = element.getAttribute(SOURCE_ATTRIBUTE);
           if (sourceAttribute) {
             const rect = element.getBoundingClientRect();
-            sendMessage(INTERNAL_EVENTS.WILL_EDIT_FIELD, {
+            sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
               path: sourceAttribute,
               position: {
                 top: rect.top,
@@ -224,7 +224,7 @@ const previewScript = (shouldRun = true) => {
         window.addEventListener('scroll', updateOnScroll);
         window.addEventListener('resize', updateOnScroll);
       } else {
-        (element as Element).addEventListener('scroll', updateOnScroll);
+        element.addEventListener('scroll', updateOnScroll);
       }
     });
 
@@ -237,7 +237,7 @@ const previewScript = (shouldRun = true) => {
 
   const setupEventHandlers = (highlightManager: HighlightManager) => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_TYPING) {
+      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
         const { field, value } = event.data.payload;
         if (field) {
           const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
@@ -284,7 +284,7 @@ const previewScript = (shouldRun = true) => {
 
     // Add the message handler to the cleanup list
     const messageEventListener = {
-      element: window as any,
+      element: window,
       type: 'message' as keyof HTMLElementEventMap,
       handler: handleMessage as EventListener,
     };
