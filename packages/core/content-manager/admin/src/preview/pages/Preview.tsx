@@ -34,7 +34,7 @@ import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
-import { PUBLIC_EVENTS } from '../utils/constants';
+import { PUBLIC_EVENTS, INTERNAL_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
 import { previewScript } from '../utils/previewScript';
 
@@ -144,6 +144,10 @@ const PreviewPage = () => {
         const script = `(${previewScript.toString()})()`;
         const sendMessage = getSendMessage(iframeRef);
         sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
+      }
+
+      if (event.data?.type === INTERNAL_EVENTS.WILL_EDIT_FIELD) {
+        setPopoverField?.(event.data.payload);
       }
     };
 

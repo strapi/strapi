@@ -22,32 +22,14 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
   const hasInputPopoverParent = useHasInputPopoverParent();
   const { value } = useField(name);
 
-  const isUsingPreview = Boolean(iframe?.current);
-
   React.useEffect(() => {
-    if (!isUsingPreview || !iframe) {
+    if (!iframe) {
       return;
     }
 
     const sendMessage = getSendMessage(iframe);
     sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_TYPING, { field: name, value });
-  }, [name, value, isUsingPreview, iframe]);
-
-  React.useEffect(() => {
-    if (!isUsingPreview) {
-      return;
-    }
-
-    const handleMessage = ({ data }: MessageEvent) => {
-      if (data?.type === INTERNAL_EVENTS.WILL_EDIT_FIELD && data.payload?.path === name) {
-        setPopoverField?.(data.payload);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-
-    return () => window.removeEventListener('message', handleMessage);
-  }, [name, setPopoverField, isUsingPreview]);
+  }, [name, value, iframe]);
 
   const sendMessage = getSendMessage(iframe);
 
