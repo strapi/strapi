@@ -15,7 +15,7 @@ import { GotItAction, StepCount } from './Step';
  * -----------------------------------------------------------------------------------------------*/
 
 const Introduction = ({ Step }: StepContentProps) => (
-  <Step.Root side="bottom" withArrow={false}>
+  <Step.Root sideOffset={33} withArrow={false}>
     <Step.Title
       id="tours.contentTypeBuilder.Introduction.title"
       defaultMessage="Content-Type Builder"
