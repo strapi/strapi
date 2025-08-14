@@ -7,7 +7,7 @@ import { createContext } from '../Context';
 
 import { type Tours, tours as guidedTours } from './Tours';
 import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
-import { migrateTourSteps } from './utils/migrations';
+import { migrateTours } from './utils/migrations';
 
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourProvider
@@ -33,23 +33,34 @@ type Action =
       payload: ValidTourName;
     }
   | {
-      type: 'skip_tour';
-      payload: ValidTourName;
+      type: 'go_to_step';
+      payload: {
+        tourName: ValidTourName;
+        step: number;
+      };
     }
   | {
-      type: 'set_completed_actions';
-      payload: CompletedActions;
+      type: 'skip_tour';
+      payload: ValidTourName;
     }
   | {
       type: 'skip_all_tours';
     }
   | {
       type: 'reset_all_tours';
+    }
+  | {
+      type: 'set_completed_actions';
+      payload: CompletedActions;
+    }
+  | {
+      type: 'remove_completed_action';
+      payload: ValueOf<CompletedActions>;
     };
 
-type Tour = Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>;
+type TourState = Record<ValidTourName, { currentStep: number; isCompleted: boolean }>;
 type State = {
-  tours: Tour;
+  tours: TourState;
   enabled: boolean;
   completedActions: CompletedActions;
 };
@@ -61,22 +72,20 @@ const [GuidedTourProviderImpl, useGuidedTour] = createContext<{
 
 const getInitialTourState = (tours: Tours) => {
   return Object.keys(tours).reduce((acc, tourName) => {
-    const tourLength = Object.keys(tours[tourName as ValidTourName]).length;
     acc[tourName as ValidTourName] = {
       currentStep: 0,
-      length: tourLength,
       isCompleted: false,
     };
 
     return acc;
-  }, {} as Tour);
+  }, {} as TourState);
 };
 
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
     if (action.type === 'next_step') {
       const currentStep = draft.tours[action.payload].currentStep;
-      const tourLength = draft.tours[action.payload].length;
+      const tourLength = guidedTours[action.payload]._meta.totalStepCount;
 
       if (currentStep >= tourLength) return;
 
@@ -102,6 +111,12 @@ function reducer(state: State, action: Action): State {
       draft.completedActions = [...new Set([...draft.completedActions, ...action.payload])];
     }
 
+    if (action.type === 'remove_completed_action') {
+      draft.completedActions = draft.completedActions.filter(
+        (completedAction) => completedAction !== action.payload
+      );
+    }
+
     if (action.type === 'skip_all_tours') {
       draft.enabled = false;
     }
@@ -110,6 +125,10 @@ function reducer(state: State, action: Action): State {
       draft.enabled = true;
       draft.tours = getInitialTourState(guidedTours);
       draft.completedActions = [];
+    }
+
+    if (action.type === 'go_to_step') {
+      draft.tours[action.payload.tourName].currentStep = action.payload.step;
     }
   });
 }
@@ -127,7 +146,7 @@ const GuidedTourContext = ({
     enabled,
     completedActions: [],
   });
-  const migratedTourState = migrateTourSteps(storedTours);
+  const migratedTourState = migrateTours(storedTours);
   const [state, dispatch] = React.useReducer(reducer, migratedTourState);
 
   // Sync local storage

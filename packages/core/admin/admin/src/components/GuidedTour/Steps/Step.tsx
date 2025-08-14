@@ -10,12 +10,120 @@ import {
   FlexProps,
 } from '@strapi/design-system';
 import { FormattedMessage, type MessageDescriptor } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { To, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { useTracking } from '../../features/Tracking';
+import { useTracking } from '../../../features/Tracking';
+import { useGuidedTour, type ValidTourName } from '../Context';
+import { tours } from '../Tours';
 
-import { useGuidedTour, type ValidTourName } from './Context';
+/* -------------------------------------------------------------------------------------------------
+ * Common Step Components
+ * -----------------------------------------------------------------------------------------------*/
+
+const StepCount = ({
+  tourName,
+  displayedCurrentStep,
+  displayedTourLength,
+}: {
+  tourName: ValidTourName;
+  displayedCurrentStep?: number;
+  displayedTourLength?: number;
+}) => {
+  const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
+  const currentStep = displayedCurrentStep ?? state.tours[tourName].currentStep + 1;
+  const displayedStepCount = displayedTourLength ?? tours[tourName]._meta.displayedStepCount;
+
+  return (
+    <Typography variant="omega" fontSize="12px">
+      <FormattedMessage
+        id="tours.stepCount"
+        defaultMessage="Step {currentStep} of {tourLength}"
+        values={{ currentStep, tourLength: displayedStepCount }}
+      />
+    </Typography>
+  );
+};
+
+const GotItAction = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <Button onClick={onClick}>
+      <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
+    </Button>
+  );
+};
+
+export type DefaultActionsProps = {
+  showSkip?: boolean;
+  showPrevious?: boolean;
+  to?: To;
+  onNextStep?: () => void;
+  onPreviousStep?: () => void;
+  tourName: ValidTourName;
+};
+const DefaultActions = ({
+  showSkip,
+  showPrevious,
+  to,
+  tourName,
+  onNextStep,
+  onPreviousStep,
+}: DefaultActionsProps) => {
+  const { trackUsage } = useTracking();
+  const dispatch = useGuidedTour('GuidedTourPopover', (s) => s.dispatch);
+  const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
+  const currentStep = state.tours[tourName].currentStep + 1;
+  const actualTourLength = tours[tourName]._meta.totalStepCount;
+
+  const handleSkip = () => {
+    trackUsage('didSkipGuidedTour', { name: tourName });
+    dispatch({ type: 'skip_tour', payload: tourName });
+  };
+
+  const handleNextStep = () => {
+    if (currentStep === actualTourLength) {
+      trackUsage('didCompleteGuidedTour', { name: tourName });
+    }
+
+    if (onNextStep) {
+      onNextStep();
+    } else {
+      dispatch({ type: 'next_step', payload: tourName });
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (onPreviousStep) {
+      onPreviousStep();
+    } else {
+      dispatch({ type: 'previous_step', payload: tourName });
+    }
+  };
+
+  return (
+    <Flex gap={2}>
+      {showSkip && (
+        <Button variant="tertiary" onClick={handleSkip}>
+          <FormattedMessage id="tours.skip" defaultMessage="Skip" />
+        </Button>
+      )}
+      {!showSkip && showPrevious && (
+        <Button variant="tertiary" onClick={handlePreviousStep}>
+          <FormattedMessage id="tours.previous" defaultMessage="Previous" />
+        </Button>
+      )}
+      {to ? (
+        <LinkButton tag={NavLink} to={to} onClick={handleNextStep}>
+          <FormattedMessage id="tours.next" defaultMessage="Next" />
+        </LinkButton>
+      ) : (
+        <Button onClick={handleNextStep}>
+          <FormattedMessage id="tours.next" defaultMessage="Next" />
+        </Button>
+      )}
+    </Flex>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Step factory
@@ -76,23 +184,6 @@ const PopoverArrow = styled(Popover.Arrow)`
   fill: ${({ theme }) => theme.colors.neutral0};
   transform: translateY(-16px) rotate(-90deg);
 `;
-
-export const StepCount = ({ tourName }: { tourName: ValidTourName }) => {
-  const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
-  const currentStep = state.tours[tourName].currentStep + 1;
-  // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
-  const displayedLength = state.tours[tourName].length - 1;
-
-  return (
-    <Typography variant="omega" fontSize="12px">
-      <FormattedMessage
-        id="tours.stepCount"
-        defaultMessage="Step {currentStep} of {tourLength}"
-        values={{ currentStep, tourLength: displayedLength }}
-      />
-    </Typography>
-  );
-};
 
 const createStepComponents = (tourName: ValidTourName): Step => ({
   Root: React.forwardRef(({ withArrow = true, ...props }, ref) => {
@@ -164,32 +255,6 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     children,
     ...flexProps
   }) => {
-    const { trackUsage } = useTracking();
-    const dispatch = useGuidedTour('GuidedTourPopover', (s) => s.dispatch);
-    const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
-    const currentStep = state.tours[tourName].currentStep + 1;
-    const actualTourLength = state.tours[tourName].length;
-
-    const handleSkipAction = () => {
-      trackUsage('didSkipGuidedTour', { name: tourName });
-      dispatch({ type: 'skip_tour', payload: tourName });
-    };
-
-    const handleNextStep = (e: React.MouseEvent) => {
-      e.stopPropagation();
-
-      if (currentStep === actualTourLength) {
-        trackUsage('didCompleteGuidedTour', { name: tourName });
-      }
-
-      dispatch({ type: 'next_step', payload: tourName });
-    };
-
-    const handlePreviousStep = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      dispatch({ type: 'previous_step', payload: tourName });
-    };
-
     return (
       <ActionsContainer
         width="100%"
@@ -203,27 +268,12 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         ) : (
           <>
             {showStepCount && <StepCount tourName={tourName} />}
-            <Flex gap={2}>
-              {showSkip && (
-                <Button variant="tertiary" onClick={handleSkipAction}>
-                  <FormattedMessage id="tours.skip" defaultMessage="Skip" />
-                </Button>
-              )}
-              {!showSkip && showPrevious && (
-                <Button variant="tertiary" onClick={handlePreviousStep}>
-                  <FormattedMessage id="tours.previous" defaultMessage="Previous" />
-                </Button>
-              )}
-              {to ? (
-                <LinkButton tag={NavLink} to={to} onClick={handleNextStep}>
-                  <FormattedMessage id="tours.next" defaultMessage="Next" />
-                </LinkButton>
-              ) : (
-                <Button onClick={handleNextStep}>
-                  <FormattedMessage id="tours.next" defaultMessage="Next" />
-                </Button>
-              )}
-            </Flex>
+            <DefaultActions
+              tourName={tourName}
+              showSkip={showSkip}
+              showPrevious={!showSkip && showPrevious}
+              to={to}
+            />
           </>
         )}
       </ActionsContainer>
@@ -232,4 +282,4 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
 });
 
 export type { Step };
-export { createStepComponents };
+export { createStepComponents, GotItAction, StepCount, DefaultActions };

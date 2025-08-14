@@ -95,14 +95,16 @@ test.describe('Guided tour', () => {
     );
     await expect(page.getByRole('dialog', { name: 'Content Manager' })).toBeVisible();
     await nextButton.click();
+    await expect(page.getByRole('dialog', { name: 'Create new entry' })).toBeVisible();
+    await nextButton.click();
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }));
     await expect(page.getByRole('dialog', { name: 'Fields' })).toBeVisible();
     await nextButton.click();
     await expect(page.getByRole('dialog', { name: 'Publish' })).toBeVisible();
     await gotItButton.click();
-    await expect(
-      page.getByRole('dialog', { name: "It's time to create API tokens!" })
-    ).toBeVisible();
+    await page.getByRole('textbox', { name: 'Title' }).fill('Test');
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    await expect(page.getByRole('dialog', { name: 'Time to setup API tokens!' })).toBeVisible();
     await clickAndWait(page, page.getByRole('link', { name: 'Next' }));
 
     await expect(page).toHaveURL(/.*\/admin\/settings\/api-tokens.*/);
