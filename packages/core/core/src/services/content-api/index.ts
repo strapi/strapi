@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { sanitize, validate } from '@strapi/utils';
 
 import type { Core, UID } from '@strapi/types';
@@ -18,52 +17,71 @@ const transformRoutePrefixFor = (pluginName: string) => (route: Core.Route) => {
 const filterContentAPI = (route: Core.Route) => route.info.type === 'content-api';
 
 /**
+ * Clean route object to remove circular references for JSON serialization
+ */
+const cleanRouteForSerialization = (route: Core.Route) => {
+  const { request, response, ...cleanRoute } = route;
+
+  // Remove request and response objects that may contain circular references
+  return cleanRoute;
+};
+
+/**
  * Create a content API container that holds logic, tools and utils. (eg: permissions, ...)
  */
 const createContentAPI = (strapi: Core.Strapi) => {
   const getRoutesMap = async () => {
     const routesMap: Record<string, Core.Route[]> = {};
 
-    _.forEach(strapi.apis, (api, apiName) => {
-      const routes = _.flatMap(api.routes, (route) => {
-        if ('routes' in route) {
-          return route.routes;
-        }
+    Object.entries(strapi.apis).forEach(([apiName, api]) => {
+      const routes = Object.values(api.routes)
+        .flatMap((route) => {
+          if ('routes' in route) {
+            return route.routes;
+          }
 
-        return route;
-      }).filter(filterContentAPI);
+          return route;
+        })
+        .filter(filterContentAPI);
 
       if (routes.length === 0) {
         return;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
-      routesMap[`api::${apiName}`] = routes.map((route) => ({
-        ...route,
-        path: `${apiPrefix}${route.path}`,
-      }));
+      routesMap[`api::${apiName}`] = routes.map((route) =>
+        // Apply clean for all routes
+        cleanRouteForSerialization({
+          ...route,
+          path: `${apiPrefix}${route.path}`,
+        })
+      );
     });
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    Object.entries(strapi.plugins).forEach(([pluginName, plugin]) => {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
+      let routes;
       if (Array.isArray(plugin.routes)) {
-        return plugin.routes.map(transformPrefix).filter(filterContentAPI);
+        routes = plugin.routes.map(transformPrefix).filter(filterContentAPI);
+      } else {
+        routes = Object.values(plugin.routes)
+          .flatMap((route) => route.routes.map(transformPrefix))
+          .filter(filterContentAPI);
       }
-
-      const routes = _.flatMap(plugin.routes, (route) => route.routes.map(transformPrefix)).filter(
-        filterContentAPI
-      );
 
       if (routes.length === 0) {
         return;
       }
 
       const apiPrefix = strapi.config.get('api.rest.prefix');
-      routesMap[`plugin::${pluginName}`] = routes.map((route) => ({
-        ...route,
-        path: `${apiPrefix}${route.path}`,
-      }));
+      routesMap[`plugin::${pluginName}`] = routes.map((route) =>
+        // Apply clean for all routes
+        cleanRouteForSerialization({
+          ...route,
+          path: `${apiPrefix}${route.path}`,
+        })
+      );
     });
 
     return routesMap;
