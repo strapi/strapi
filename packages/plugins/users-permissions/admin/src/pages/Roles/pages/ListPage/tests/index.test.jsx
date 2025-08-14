@@ -8,6 +8,13 @@ import { useLocation } from 'react-router-dom';
 
 import { RolesListPage } from '../index';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 jest.mock('@strapi/strapi/admin', () => ({
   ...jest.requireActual('@strapi/strapi/admin'),
   useRBAC: jest.fn().mockImplementation(() => ({

@@ -3,7 +3,6 @@ import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '..
 import { resetFiles } from '../../utils/file-reset';
 import { waitForRestart } from '../../utils/restart';
 import { sharedSetup } from '../../utils/setup';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -43,7 +42,6 @@ describeOnCondition(edition === 'EE')('History', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('history-spec', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
       importData: 'with-admin.tar',
       resetAlways: true, // NOTE: this makes tests extremely slow, but it's necessary to ensure isolation between tests

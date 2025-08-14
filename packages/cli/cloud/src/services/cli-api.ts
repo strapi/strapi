@@ -7,7 +7,7 @@ import { getLocalConfig } from '../config/local';
 
 import packageJson from '../../package.json';
 
-export const VERSION = 'v2';
+export const VERSION = 'v3';
 
 export type ProjectInfo = {
   id: string;
@@ -80,6 +80,12 @@ export type CreateTrialResponse = {
   licenseKey: string;
 };
 
+export type CreateProjectResponse = {
+  name: string;
+  environmentInternalName: string;
+  url?: string;
+};
+
 export interface CloudApiService {
   deploy(
     deployInput: {
@@ -94,7 +100,7 @@ export interface CloudApiService {
   ): Promise<AxiosResponse<DeployResponse>>;
 
   createProject(createProjectInput: ProjectInput): Promise<{
-    data: ProjectInput;
+    data: CreateProjectResponse;
     status: number;
   }>;
 
@@ -172,8 +178,7 @@ export async function cloudApiFactory(
         data: {
           id: response.data.id,
           name: response.data.name,
-          nodeVersion: response.data.nodeVersion,
-          region: response.data.region,
+          environmentInternalName: response.data.environmentInternalName,
         },
         status: response.status,
       };

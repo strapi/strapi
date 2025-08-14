@@ -130,6 +130,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   flex: 1;
   font-size: 1.4rem;
   line-height: 2.2rem;
+  min-height: 2.2rem;
 }
 
 .c14 {

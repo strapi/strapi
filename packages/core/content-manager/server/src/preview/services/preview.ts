@@ -12,6 +12,12 @@ const createPreviewService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async getPreviewUrl(uid: UID.ContentType, params: HandlerParams) {
+      const isConfigured = config.isConfigured();
+
+      if (!isConfigured) {
+        throw new errors.NotFoundError('Preview config not found');
+      }
+
       const handler = config.getPreviewHandler();
 
       try {

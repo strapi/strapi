@@ -1,4 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
+
 import * as React from 'react';
 
 import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
@@ -24,7 +25,7 @@ import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-router-dom';
 
-import { GuidedTourProvider } from '../src/components/GuidedTour/Provider';
+import { GuidedTourContext } from '../src/components/GuidedTour/Context';
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
 import { RBAC } from '../src/core/apis/rbac';
@@ -108,11 +109,13 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
           <StrapiAppProvider
             components={{}}
             rbac={new RBAC()}
-            widgets={{
-              widgets: {},
-              getAll: jest.fn(),
-              register: jest.fn(),
-            }}
+            widgets={
+              {
+                widgets: [],
+                getAll: jest.fn(),
+                register: jest.fn(),
+              } as any
+            }
             customFields={{
               customFields: {},
               get: jest.fn().mockReturnValue({
@@ -157,7 +160,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                         }}
                       >
                         <NotificationsProvider>
-                          <GuidedTourProvider>
+                          <GuidedTourContext enabled={false}>
                             <ConfigurationContextProvider
                               showReleaseNotification={false}
                               logos={{
@@ -180,7 +183,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                                 {children}
                               </AppInfoProvider>
                             </ConfigurationContextProvider>
-                          </GuidedTourProvider>
+                          </GuidedTourContext>
                         </NotificationsProvider>
                       </Theme>
                     </LanguageProvider>

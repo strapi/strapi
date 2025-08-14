@@ -1,6 +1,7 @@
 import { forwardRef, memo, useState } from 'react';
 
-import { Box, Flex, IconButton, Typography, Link } from '@strapi/design-system';
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
+import { Box, Flex, IconButton, Typography, Link, Badge, Dialog } from '@strapi/design-system';
 import { ChevronDown, Drag, Lock, Pencil, Trash } from '@strapi/icons';
 import get from 'lodash/get';
 import upperFirst from 'lodash/upperFirst';
@@ -9,6 +10,7 @@ import { Link as NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { Curve } from '../icons/Curve';
+import { checkDependentRows } from '../utils/conditions';
 import { getAttributeDisplayedType } from '../utils/getAttributeDisplayedType';
 import { getRelationType } from '../utils/getRelationType';
 import { getTrad } from '../utils/getTrad';
@@ -102,6 +104,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
   const { onOpenModalEditField, onOpenModalEditCustomField } = useFormModalNavigation();
 
   const { formatMessage } = useIntl();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const isDeleted = item.status === 'REMOVED';
 
@@ -114,6 +117,33 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
   const isPluginContentType = get(targetContentType, 'plugin');
 
   const src = 'target' in item && item.target ? 'relation' : ico;
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const dependentRows = checkDependentRows(contentTypes, item.name);
+    if (dependentRows.length > 0) {
+      setShowConfirmDialog(true);
+    } else {
+      removeAttribute({
+        forTarget: type.modelType,
+        targetUid: type.uid,
+        attributeToRemoveName: item.name,
+      });
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    removeAttribute({
+      forTarget: type.modelType,
+      targetUid: type.uid,
+      attributeToRemoveName: item.name,
+    });
+    setShowConfirmDialog(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowConfirmDialog(false);
+  };
 
   const handleClick = () => {
     if (isMorph) {
@@ -217,6 +247,9 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                   repeatable={'repeatable' in item && item.repeatable}
                   multiple={'multiple' in item && item.multiple}
                 />
+                {'conditions' in item &&
+                  item.conditions &&
+                  Object.keys(item.conditions).length > 0 && <Badge margin={4}>conditional</Badge>}
                 {item.type === 'relation' && (
                   <>
                     &nbsp;({getRelationType(item.relation, item.targetAttribute)})&nbsp;
@@ -298,14 +331,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                     </IconButton>
                   )}
                   <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeAttribute({
-                        forTarget: type.modelType,
-                        targetUid: type.uid,
-                        attributeToRemoveName: item.name,
-                      });
-                    }}
+                    onClick={handleDelete}
                     label={`${formatMessage({
                       id: 'global.delete',
                       defaultMessage: 'Delete',
@@ -315,6 +341,32 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                   >
                     <Trash />
                   </IconButton>
+                  <Dialog.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                    <ConfirmDialog onConfirm={handleConfirmDelete} onCancel={handleCancelDelete}>
+                      <Box>
+                        <Typography>
+                          {formatMessage({
+                            id: getTrad(
+                              'popUpWarning.bodyMessage.delete-attribute-with-conditions'
+                            ),
+                            defaultMessage:
+                              'The following fields have conditions that depend on this field: ',
+                          })}
+                          <Typography fontWeight="bold">
+                            {checkDependentRows(contentTypes, item.name)
+                              .map(({ attribute }) => attribute)
+                              .join(', ')}
+                          </Typography>
+                          {formatMessage({
+                            id: getTrad(
+                              'popUpWarning.bodyMessage.delete-attribute-with-conditions-end'
+                            ),
+                            defaultMessage: '. Are you sure you want to delete it?',
+                          })}
+                        </Typography>
+                      </Box>
+                    </ConfirmDialog>
+                  </Dialog.Root>
                 </>
               ) : (
                 <Flex padding={2}>

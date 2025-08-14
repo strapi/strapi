@@ -63,7 +63,6 @@ test.describe('Update a new component', () => {
       resetFiles: true,
       importData: 'with-admin.tar',
       login: true,
-      skipTour: true,
       afterSetup: async () => {
         const options = {
           name: 'SomeComponent',

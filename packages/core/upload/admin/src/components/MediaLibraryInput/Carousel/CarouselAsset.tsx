@@ -53,12 +53,21 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
   }
 
   if (asset.mime?.includes(AssetType.Image)) {
+    const assetUrl = createAssetUrl(asset, true);
+    if (!assetUrl) return null;
+
+    // Adding a param to the url to bust the cache and force the refresh of the image when replaced
+    // Only add updatedAt parameter if the URL is not signed to prevent signature invalidation
+    const cacheBustedUrl = asset.isUrlSigned
+      ? assetUrl
+      : `${assetUrl}${assetUrl.includes('?') ? '&' : '?'}updatedAt=${asset.updatedAt}`;
+
     return (
       <Box
         tag="img"
         maxHeight="100%"
         maxWidth="100%"
-        src={createAssetUrl(asset, true)}
+        src={cacheBustedUrl}
         alt={asset.alternativeText || asset.name}
       />
     );

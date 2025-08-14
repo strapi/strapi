@@ -7,7 +7,7 @@ import {
   useRBAC,
   isFetchError,
 } from '@strapi/admin/strapi-admin';
-import { Flex, Typography, Menu, AccessibleIcon } from '@strapi/design-system';
+import { Menu, AccessibleIcon } from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -18,30 +18,16 @@ import { Release } from '../../../shared/contracts/releases';
 import { PERMISSIONS } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
 
-const StyledMenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger' }>`
-  &:hover {
-    background: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}100`]};
-
-    svg {
-      fill: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}600`]};
-    }
-
-    a {
-      color: ${({ theme }) => theme.colors.neutral800};
-    }
-  }
-
-  svg {
-    color: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}500`]};
-  }
-
-  span {
-    color: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}800`]};
-  }
-
+// TODO: has to be fixed in the DS - https://github.com/strapi/design-system/issues/1934
+const StyledMenuLink = styled(Menu.Item)`
   span,
-  a {
-    width: 100%;
+  &:hover span {
+    color: ${({ theme }) => theme.colors['neutral800']};
+  }
+
+  svg path,
+  &:hover svg path {
+    fill: ${({ theme }) => theme.colors['neutral500']};
   }
 `;
 
@@ -102,17 +88,12 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
   }
 
   return (
-    <StyledMenuItem $variant="danger" onSelect={handleDeleteAction}>
-      <Flex gap={2}>
-        <Cross width="1.6rem" height="1.6rem" />
-        <Typography textColor="danger600" variant="omega">
-          {formatMessage({
-            id: 'content-releases.content-manager-edit-view.remove-from-release',
-            defaultMessage: 'Remove from release',
-          })}
-        </Typography>
-      </Flex>
-    </StyledMenuItem>
+    <Menu.Item variant="danger" startIcon={<Cross />} onSelect={handleDeleteAction}>
+      {formatMessage({
+        id: 'content-releases.content-manager-edit-view.remove-from-release',
+        defaultMessage: 'Remove from release',
+      })}
+    </Menu.Item>
   );
 };
 
@@ -164,7 +145,7 @@ const ReleaseActionEntryLinkItem = ({
   }
 
   return (
-    <StyledMenuItem
+    <StyledMenuLink
       /* @ts-expect-error inference isn't working in DS */
       tag={NavLink}
       isLink
@@ -172,17 +153,13 @@ const ReleaseActionEntryLinkItem = ({
         pathname: `/content-manager/collection-types/${contentTypeUid}/${documentId}`,
         search: locale && `?plugins[i18n][locale]=${locale}`,
       }}
+      startIcon={<Pencil />}
     >
-      <Flex gap={2}>
-        <Pencil width="1.6rem" height="1.6rem" />
-        <Typography variant="omega">
-          {formatMessage({
-            id: 'content-releases.content-manager-edit-view.edit-entry',
-            defaultMessage: 'Edit entry',
-          })}
-        </Typography>
-      </Flex>
-    </StyledMenuItem>
+      {formatMessage({
+        id: 'content-releases.content-manager-edit-view.edit-entry',
+        defaultMessage: 'Edit entry',
+      })}
+    </StyledMenuLink>
   );
 };
 
@@ -197,18 +174,18 @@ const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    /* @ts-expect-error inference isn't working in DS */
-    <StyledMenuItem tag={NavLink} isLink to={`/plugins/content-releases/${releaseId}`}>
-      <Flex gap={2}>
-        <Pencil width="1.6rem" height="1.6rem" />
-        <Typography textColor="neutral800" variant="omega">
-          {formatMessage({
-            id: 'content-releases.content-manager-edit-view.edit-release',
-            defaultMessage: 'Edit release',
-          })}
-        </Typography>
-      </Flex>
-    </StyledMenuItem>
+    <StyledMenuLink
+      /* @ts-expect-error inference isn't working in DS */
+      tag={NavLink}
+      isLink
+      to={`/plugins/content-releases/${releaseId}`}
+      startIcon={<Pencil />}
+    >
+      {formatMessage({
+        id: 'content-releases.content-manager-edit-view.edit-release',
+        defaultMessage: 'Edit release',
+      })}
+    </StyledMenuLink>
   );
 };
 

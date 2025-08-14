@@ -22,6 +22,7 @@ type AnySchema =
 
 interface ValidationOptions {
   status: 'draft' | 'published' | null;
+  removedAttributes?: string[];
 }
 
 const arrayValidator = (attribute: Schema['attributes'][string], options: ValidationOptions) => ({
@@ -46,7 +47,7 @@ const arrayValidator = (attribute: Schema['attributes'][string], options: Valida
     return true;
   },
 });
-
+const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /**
  * TODO: should we create a Map to store these based on the hash of the schema?
  */
@@ -55,14 +56,35 @@ const createYupSchema = (
   components: ComponentsDictionary = {},
   options: ValidationOptions = { status: null }
 ): yup.ObjectSchema<any> => {
-  const createModelSchema = (attributes: Schema['attributes']): yup.ObjectSchema<any> =>
+  const createModelSchema = (
+    attributes: Schema['attributes'],
+    removedAttributes: string[] = []
+  ): yup.ObjectSchema<any> =>
     yup
       .object()
       .shape(
         Object.entries(attributes).reduce<ObjectShape>((acc, [name, attribute]) => {
+          const getNestedPathsForAttribute = (removed: string[], attrName: string): string[] => {
+            const prefix = `${attrName}.`;
+            const bracketRegex = new RegExp(`^${escapeRegex(attrName)}\\[\\d+\\]\\.`);
+
+            return removed
+              .filter((p) => p.startsWith(prefix) || bracketRegex.test(p))
+              .map((p) =>
+                p.startsWith(prefix) ? p.slice(prefix.length) : p.replace(bracketRegex, '')
+              );
+          };
+
           if (DOCUMENT_META_FIELDS.includes(name)) {
             return acc;
           }
+
+          if (removedAttributes?.includes(name)) {
+            // If the attribute is not visible, we don't want to validate it
+            return acc;
+          }
+
+          const nestedRemoved = getNestedPathsForAttribute(removedAttributes, name);
 
           /**
            * These validations won't apply to every attribute
@@ -89,13 +111,13 @@ const createYupSchema = (
                 return {
                   ...acc,
                   [name]: transformSchema(
-                    yup.array().of(createModelSchema(attributes).nullable(false))
+                    yup.array().of(createModelSchema(attributes, nestedRemoved).nullable(false))
                   ).test(arrayValidator(attribute, options)),
                 };
               } else {
                 return {
                   ...acc,
-                  [name]: transformSchema(createModelSchema(attributes).nullable()),
+                  [name]: transformSchema(createModelSchema(attributes, nestedRemoved).nullable()),
                 };
               }
             }
@@ -120,7 +142,7 @@ const createYupSchema = (
                           return validation;
                         }
 
-                        return validation.concat(createModelSchema(attributes));
+                        return validation.concat(createModelSchema(attributes, nestedRemoved));
                       }
                     ) as unknown as yup.ObjectSchema<any>
                   )
@@ -171,7 +193,7 @@ const createYupSchema = (
        */
       .default(null);
 
-  return createModelSchema(attributes);
+  return createModelSchema(attributes, options.removedAttributes);
 };
 
 const createAttributeSchema = (
@@ -229,12 +251,15 @@ const createAttributeSchema = (
         }
       });
     case 'password':
+      return yup.string().nullable();
     case 'richtext':
     case 'string':
     case 'text':
       return yup.string();
     case 'uid':
-      return yup.string().matches(/^[A-Za-z0-9-_.~]*$/);
+      return yup
+        .string()
+        .matches(attribute.regex ? new RegExp(attribute.regex) : /^[A-Za-z0-9-_.~]*$/);
     default:
       /**
        * This allows any value.
@@ -270,7 +295,7 @@ const addNullableValidation: ValidationFn = () => (schema) => {
 };
 
 const addRequiredValidation: ValidationFn = (attribute, options) => (schema) => {
-  if (options.status === 'draft' || !attribute.required) {
+  if (options.status === 'draft' || !attribute.required || attribute.type === 'password') {
     return schema;
   }
 

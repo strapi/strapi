@@ -318,6 +318,16 @@ export const server: SetupServer = setupServer(
         })
       );
     }),
+    rest.get('/admin/guided-tour-meta', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            isFirstSuperAdminUser: false,
+            completedActions: [],
+          },
+        })
+      );
+    }),
     /**
      * WEBHOOKS
      */

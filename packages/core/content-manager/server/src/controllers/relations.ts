@@ -35,8 +35,8 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   const canReadMainField = permissionChecker.can.read(null, mainField);
 
   if (!isMainFieldListable || !canReadMainField) {
-    // Default to 'id' if the actual main field shouldn't be displayed
-    return 'id';
+    // Default to 'documentId' if the actual main field shouldn't be displayed
+    return 'documentId';
   }
 
   // Edge cases

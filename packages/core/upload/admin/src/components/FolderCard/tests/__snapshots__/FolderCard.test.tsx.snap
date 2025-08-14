@@ -103,8 +103,8 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   flex: 0 0 2rem;
 }
 
-.c5[data-state='checked'],
-.c5[data-state='indeterminate'] {
+.c5[data-state='checked']:not([data-disabled]),
+.c5[data-state='indeterminate']:not([data-disabled]) {
   border: 1px solid #4945ff;
   background-color: #4945ff;
 }

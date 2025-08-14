@@ -1,7 +1,13 @@
 import * as React from 'react';
+import { useState } from 'react';
 
-import { useStrapiApp, useTracking, useNotification } from '@strapi/admin/strapi-admin';
-import { Button, Divider, Flex, Modal, Tabs } from '@strapi/design-system';
+import {
+  useStrapiApp,
+  useTracking,
+  useNotification,
+  ConfirmDialog,
+} from '@strapi/admin/strapi-admin';
+import { Button, Divider, Flex, Modal, Tabs, Box, Typography, Dialog } from '@strapi/design-system';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
@@ -44,6 +50,7 @@ import { SingularName } from '../SingularName';
 import { TabForm } from '../TabForm';
 import { TextareaEnum } from '../TextareaEnum';
 
+import { ConditionForm } from './attributes/ConditionForm';
 import { forms } from './forms/forms';
 import { actions, initialState, type State as FormModalState } from './reducer';
 import { canEditContentType } from './utils/canEditContentType';
@@ -128,6 +135,54 @@ export const FormModal = () => {
   } = reducerState;
 
   const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
+
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState<any>(null);
+
+  const checkFieldNameChanges = () => {
+    // Only check when editing an attribute
+    if (actionType !== 'edit' || modalType !== 'attribute') {
+      return false;
+    }
+
+    const oldName = initialData.name;
+    const oldEnum = initialData.enum;
+    const newEnum = modifiedData.enum;
+
+    // Get all attributes from the content type schema
+    const contentTypeAttributes = type?.attributes || [];
+
+    // Find all fields that reference this field in their conditions
+    const referencedFields = contentTypeAttributes.filter((attr: any) => {
+      if (!attr.conditions) return false;
+
+      const condition = attr.conditions.visible;
+      if (!condition) return false;
+
+      const [[, conditions]] = Object.entries(condition);
+      const [fieldVar, value] = conditions as [{ var: string }, any];
+
+      // Check if this condition references our field
+      if (fieldVar.var !== oldName) return false;
+
+      // If it's an enum field, also check if the value is being deleted/changed
+      if (oldEnum && newEnum) {
+        const deletedOrChangedValues = oldEnum.filter(
+          (oldValue: string) => !newEnum.includes(oldValue)
+        );
+        return deletedOrChangedValues.includes(value);
+      }
+
+      return true;
+    });
+
+    // If any fields reference this field, return them
+    if (referencedFields.length > 0) {
+      return referencedFields;
+    }
+
+    return false;
+  };
 
   React.useEffect(() => {
     if (isOpen) {
@@ -400,7 +455,7 @@ export const FormModal = () => {
     ({
       target: { name, value, type, ...rest },
     }: {
-      target: { name: string; value: string; type: string };
+      target: { name: string; value: string | string[]; type: string };
     }) => {
       const namesThatCanResetToNullValue = [
         'enumName',
@@ -416,6 +471,9 @@ export const FormModal = () => {
 
       if (namesThatCanResetToNullValue.includes(name) && value === '') {
         val = null;
+      } else if (name === 'enum') {
+        // For enum values, ensure we're working with an array
+        val = Array.isArray(value) ? value : [value];
       } else {
         val = value;
       }
@@ -451,9 +509,7 @@ export const FormModal = () => {
     [dispatch, formErrors]
   );
 
-  const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
-    e.preventDefault();
-
+  const submitForm = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
     try {
       await checkFormValidity();
 
@@ -683,8 +739,22 @@ export const FormModal = () => {
             targetUid,
           });
         } else {
+          // Ensure conditions are explicitly set to undefined if they were removed
+          // Explicitly set conditions to undefined when they're removed to distinguish between:
+          // 1. missing property: "don't change existing conditions" (partial update)
+          // 2. undefined property: "delete conditions" (explicit removal)
+          // This allows the backend to detect user intent:
+          // { name: "field" } vs { name: "field", conditions: undefined }
+          // without this, deleted conditions would be preserved by the backend's
+          // reuseUnsetPreviousProperties function.
+          const attributeData = { ...modifiedData };
+          if (!('conditions' in modifiedData) || modifiedData.conditions === undefined) {
+            // Explicitly add the conditions key with undefined value
+            attributeData.conditions = undefined;
+          }
+
           editAttribute({
-            attributeToSet: modifiedData,
+            attributeToSet: attributeData,
             forTarget,
             targetUid,
             name: initialData.name,
@@ -822,6 +892,20 @@ export const FormModal = () => {
     }
   };
 
+  const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
+    e.preventDefault();
+
+    // Check for field name changes when clicking Finish
+    const referencedFields = checkFieldNameChanges();
+    if (referencedFields) {
+      setPendingSubmit({ e, shouldContinue });
+      setShowWarningDialog(true);
+      return;
+    }
+
+    await submitForm(e, shouldContinue);
+  };
+
   const handleConfirmClose = () => {
     // eslint-disable-next-line no-alert
     const confirm = window.confirm(
@@ -929,6 +1013,7 @@ export const FormModal = () => {
       'text-plural': PluralName,
       'text-singular': SingularName,
       'textarea-enum': TextareaEnum,
+      'condition-form': ConditionForm,
       ...inputsFromPlugins,
     },
     componentToCreate,
@@ -942,6 +1027,7 @@ export const FormModal = () => {
     isCreating,
     targetUid,
     forTarget,
+    contentTypeSchema: type,
   };
 
   const advancedForm = formToDisplay.advanced({
@@ -992,6 +1078,79 @@ export const FormModal = () => {
   return (
     <Modal.Root open={isOpen} onOpenChange={handleClosed}>
       <Modal.Content>
+        <Dialog.Root open={showWarningDialog} onOpenChange={setShowWarningDialog}>
+          <Dialog.Trigger />
+          <ConfirmDialog
+            onConfirm={() => {
+              if (pendingSubmit) {
+                const { e, shouldContinue } = pendingSubmit;
+                setShowWarningDialog(false);
+                setPendingSubmit(null);
+                submitForm(e, shouldContinue);
+              }
+            }}
+            onCancel={() => {
+              setShowWarningDialog(false);
+              setPendingSubmit(null);
+            }}
+          >
+            {(() => {
+              const referencedFields = checkFieldNameChanges();
+              if (!referencedFields) return null;
+
+              const fieldNames = referencedFields.map((field: any) => field.name).join(', ');
+              const isEnum = initialData.enum && modifiedData.enum;
+
+              if (isEnum) {
+                const oldEnum = initialData.enum;
+                const newEnum = modifiedData.enum;
+                const deletedOrChangedValues = oldEnum.filter(
+                  (value: string) => !newEnum.includes(value)
+                );
+
+                return (
+                  <Box>
+                    <Typography>
+                      {formatMessage({
+                        id: 'form.attribute.condition.enum-change-warning',
+                        defaultMessage:
+                          'The following fields have conditions that depend on this field: ',
+                      })}
+                      <Typography fontWeight="bold">{fieldNames}</Typography>
+                      {formatMessage({
+                        id: 'form.attribute.condition.enum-change-warning-values',
+                        defaultMessage: '. Changing or removing the enum values ',
+                      })}
+                      <Typography fontWeight="bold">{deletedOrChangedValues.join(', ')}</Typography>
+                      {formatMessage({
+                        id: 'form.attribute.condition.enum-change-warning-end',
+                        defaultMessage: ' will break these conditions. Do you want to proceed?',
+                      })}
+                    </Typography>
+                  </Box>
+                );
+              }
+
+              return (
+                <Box>
+                  <Typography>
+                    {formatMessage({
+                      id: 'form.attribute.condition.field-change-warning',
+                      defaultMessage:
+                        'The following fields have conditions that depend on this field: ',
+                    })}
+                    <Typography fontWeight="bold">{fieldNames}</Typography>
+                    {formatMessage({
+                      id: 'form.attribute.condition.field-change-warning-end',
+                      defaultMessage:
+                        '. Renaming it will break these conditions. Do you want to proceed?',
+                    })}
+                  </Typography>
+                </Box>
+              );
+            })()}
+          </ConfirmDialog>
+        </Dialog.Root>
         <FormModalHeader
           actionType={actionType}
           attributeName={attributeName}

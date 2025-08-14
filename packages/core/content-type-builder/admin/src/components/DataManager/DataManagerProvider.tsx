@@ -1,13 +1,13 @@
 import * as React from 'react';
 
 import {
-  useGuidedTour,
   useTracking,
   useStrapiApp,
   useNotification,
   useAppInfo,
   useFetchClient,
   useAuth,
+  adminApi,
 } from '@strapi/admin/strapi-admin';
 import groupBy from 'lodash/groupBy';
 import isEqual from 'lodash/isEqual';
@@ -53,7 +53,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
-  const { setCurrentStep, setStepState } = useGuidedTour('DataManagerProvider', (state) => state);
   const serverRestartWatcher = useServerRestartWatcher();
 
   const getPlugin = useStrapiApp('DataManagerProvider', (state) => state.getPlugin);
@@ -161,20 +160,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       {} as ContentTypes
     );
 
-    const requestData = stateToRequestData({
+    const { requestData, trackingEventProperties } = stateToRequestData({
       components: state.current.components,
       contentTypes: mutatedCTs,
     });
 
     const isSendingContentTypes = Object.keys(state.current.contentTypes).length > 0;
-    const isSendingComponents = Object.keys(state.current.components).length > 0;
-
-    if (isSendingContentTypes) {
-      trackUsage('willSaveContentType');
-    }
-    if (isSendingComponents) {
-      trackUsage('willSaveComponent');
-    }
 
     lockAppWithAutoreload();
 
@@ -182,44 +173,30 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await fetchClient.post(`/content-type-builder/update-schema`, { data: requestData });
 
       if (isSendingContentTypes) {
-        setStepState('contentTypeBuilder.success', true);
         trackUsage('didCreateGuidedTourCollectionType');
-        setCurrentStep(null);
-      }
-
-      if (isSendingContentTypes) {
-        trackUsage('didSaveContentType');
-
-        // trackUsage('didEditNameOfContentType');
-      }
-      if (isSendingComponents) {
-        trackUsage('didSaveComponent');
       }
 
       // Make sure the server has restarted
       await serverRestartWatcher();
-
+      // Invalidate the guided tour meta and homepage key statistics widget query cache
+      dispatch(adminApi.util.invalidateTags(['GuidedTourMeta', 'HomepageKeyStatistics']));
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
       // Update the app's permissions
       await updatePermissions();
     } catch (err) {
-      // if (isSendingContentTypes) {
-      //   trackUsage('didNotSaveContentType');
-      // }
-
-      if (isSendingComponents) {
-        trackUsage('didNotSaveComponent');
-      }
-
       console.error({ err });
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
+
+      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: false });
     } finally {
-      setIsSaving(true);
+      setIsSaving(false);
       unlockAppWithAutoreload();
+
+      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: true });
     }
   };
 

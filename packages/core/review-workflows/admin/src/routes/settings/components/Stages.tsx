@@ -24,7 +24,6 @@ import {
   VisuallyHidden,
   useComposedRefs,
   Menu,
-  MenuItem,
   Field,
   Dialog,
 } from '@strapi/design-system';
@@ -281,21 +280,24 @@ const Stage = ({
                       <Menu.Content popoverPlacement="bottom-end" zIndex={2}>
                         <Menu.SubRoot>
                           {canUpdate && (
-                            <MenuItem onClick={handleCloneClick}>
+                            <Menu.Item onClick={handleCloneClick}>
                               {formatMessage({
                                 id: 'Settings.review-workflows.stage.delete',
                                 defaultMessage: 'Duplicate stage',
                               })}
-                            </MenuItem>
+                            </Menu.Item>
                           )}
 
                           {canDelete && (
-                            <DeleteMenuItem onClick={() => removeFieldRow('stages', index)}>
+                            <Menu.Item
+                              onClick={() => removeFieldRow('stages', index)}
+                              variant="danger"
+                            >
                               {formatMessage({
                                 id: 'Settings.review-workflows.stage.delete',
                                 defaultMessage: 'Delete',
                               })}
-                            </DeleteMenuItem>
+                            </Menu.Item>
                           )}
                         </Menu.SubRoot>
                       </Menu.Content>
@@ -379,10 +381,6 @@ const Stage = ({
 const AccordionRoot = styled(Accordion.Root)<{ $error?: boolean }>`
   border: 1px solid
     ${({ theme, $error }) => ($error ? theme.colors.danger600 : theme.colors.neutral200)};
-`;
-
-const DeleteMenuItem = styled(MenuItem)`
-  color: ${({ theme }) => theme.colors.danger600};
 `;
 
 // Removing the font-size from the child-span aligns the

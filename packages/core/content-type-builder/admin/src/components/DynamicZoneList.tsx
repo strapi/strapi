@@ -37,18 +37,6 @@ const StyledAddIcon = styled(Plus)<{ disabled?: boolean }>`
   }
 `;
 
-const ScrollableStack = styled(Flex)`
-  width: 100%;
-  overflow-x: auto;
-
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`;
-
 const ComponentStack = styled(Flex)`
   flex-shrink: 0;
   width: 14rem;
@@ -83,7 +71,7 @@ export const DynamicZoneList = ({
     <ComponentRow className="dynamiczone-row" $isFromDynamicZone>
       <Box>
         <Box padding={2} paddingLeft="104px">
-          <ScrollableStack gap={2}>
+          <Flex role="tablist" gap={2} wrap="wrap">
             {isInDevelopmentMode && (
               <button
                 type="button"
@@ -108,25 +96,23 @@ export const DynamicZoneList = ({
                 </ComponentStack>
               </button>
             )}
-            <Flex role="tablist" gap={2}>
-              {components.map((component, index) => {
-                return (
-                  <ComponentCard
-                    key={component}
-                    dzName={name || ''}
-                    index={index}
-                    component={component}
-                    isActive={activeTab === index}
-                    isInDevelopmentMode={isInDevelopmentMode}
-                    onClick={() => toggle(index)}
-                    forTarget={forTarget}
-                    targetUid={targetUid}
-                    disabled={disabled}
-                  />
-                );
-              })}
-            </Flex>
-          </ScrollableStack>
+            {components.map((component, index) => {
+              return (
+                <ComponentCard
+                  key={component}
+                  dzName={name || ''}
+                  index={index}
+                  component={component}
+                  isActive={activeTab === index}
+                  isInDevelopmentMode={isInDevelopmentMode}
+                  onClick={() => toggle(index)}
+                  forTarget={forTarget}
+                  targetUid={targetUid}
+                  disabled={disabled}
+                />
+              );
+            })}
+          </Flex>
         </Box>
         <Box>
           {components.map((component, index) => {

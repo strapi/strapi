@@ -24,6 +24,13 @@ const ASSET_FIXTURES = [
   },
 ];
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const setup = (props?: Partial<CarouselAssetsProps>) =>
   render(
     <CarouselAssets

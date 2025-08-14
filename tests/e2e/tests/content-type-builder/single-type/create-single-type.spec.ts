@@ -11,7 +11,6 @@ test.describe('Create single type with all field types', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-st', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
       importData: 'with-admin.tar',
     });

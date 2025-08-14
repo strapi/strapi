@@ -9,7 +9,6 @@ import {
 } from '@strapi/design-system';
 import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
 import { styled } from 'styled-components';
-
 /* -------------------------------------------------------------------------------------------------
  * Link
  * -----------------------------------------------------------------------------------------------*/
@@ -39,10 +38,9 @@ const MainNavLinkWrapper = styled(RouterLink)`
   }
 `;
 
-const LinkImpl = ({ children, ...props }: LinkProps) => {
-  return <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>;
-};
-
+const LinkImpl = ({ children, ...props }: LinkProps) => (
+  <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>
+);
 /* -------------------------------------------------------------------------------------------------
  * Tooltip
  * -----------------------------------------------------------------------------------------------*/

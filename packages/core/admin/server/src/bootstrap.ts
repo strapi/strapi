@@ -4,6 +4,7 @@ import { async } from '@strapi/utils';
 import { getService } from './utils';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
+import constants from './services/constants';
 
 const defaultAdminAuthSettings = {
   providers: {
@@ -88,21 +89,9 @@ const createDefaultAPITokensIfNeeded = async () => {
   const apiTokenCount = await apiTokenService.count();
 
   if (usersCount === 0 && apiTokenCount === 0) {
-    await apiTokenService.create({
-      name: 'Read Only',
-      description:
-        'A default API token with read-only permissions, only used for accessing resources',
-      type: 'read-only',
-      lifespan: null,
-    });
-
-    await apiTokenService.create({
-      name: 'Full Access',
-      description:
-        'A default API token with full access permissions, used for accessing or modifying resources',
-      type: 'full-access',
-      lifespan: null,
-    });
+    for (const token of constants.DEFAULT_API_TOKENS) {
+      await apiTokenService.create(token);
+    }
   }
 };
 

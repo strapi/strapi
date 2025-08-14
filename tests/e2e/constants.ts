@@ -15,6 +15,10 @@ export const ALLOWED_CONTENT_TYPES = [
   'api::match.match',
   'api::upcoming-match.upcoming-match',
   'api::unique.unique',
+  'api::condition.condition',
+  'api::country.country',
+  'api::cat.cat',
+  'api::dog.dog',
   'plugin::content-manager.history-version',
   /**
    * I18N
@@ -47,3 +51,6 @@ export const ADMIN_PASSWORD = 'Testing123!';
 
 export const EDITOR_EMAIL_ADDRESS = 'editor@testing.com';
 export const EDITOR_PASSWORD = 'Testing123!';
+
+export const AUTHOR_EMAIL_ADDRESS = 'author@testing.com';
+export const AUTHOR_PASSWORD = 'Testing123!';

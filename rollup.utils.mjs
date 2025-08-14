@@ -9,7 +9,6 @@ import dynamicImportVars from '@rollup/plugin-dynamic-import-vars';
 import commonjs from '@rollup/plugin-commonjs';
 import image from '@rollup/plugin-image';
 import html from 'rollup-plugin-html';
-import postcss from 'rollup-plugin-postcss';
 
 const isExernal = (id) => !path.isAbsolute(id) && !id.startsWith('.');
 
@@ -17,14 +16,8 @@ const basePlugins = () => [
   image(),
   html(),
   json(),
-  postcss({
-    extensions: ['.css'],
-    inject: true,
-    minimize: true,
-    extract: true,
-  }),
   nodeResolve({
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.css'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   }),
   commonjs({
     ignoreDynamicRequires: true,

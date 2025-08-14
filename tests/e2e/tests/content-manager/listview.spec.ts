@@ -9,11 +9,25 @@ test.describe('List View', () => {
     await login({ page });
   });
 
+  test('A user can filter entries', async ({ page }) => {
+    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.getByRole('link', { name: 'Article' }).click();
+
+    await page.getByRole('button', { name: 'Filters' }).click();
+    await page.getByRole('combobox', { name: 'Select field' }).click();
+    await page.getByRole('option', { name: 'documentId' }).click();
+    // va0x2nt206hluydibmsoiquc => documentId for article "Why I prefer football over soccer"
+    await page.getByRole('textbox', { name: 'documentId' }).fill('va0x2nt206hluydibmsoiquc');
+    await page.getByRole('button', { name: 'Add filter' }).click();
+    await expect(page.getByText('documentId is va0x2nt206hluydibmsoiquc')).toBeVisible();
+    // There should be 2 rows, 1 for the header and 1 for the Article entry
+    await expect(page.getByRole('row')).toHaveCount(2);
+  });
+
   test('A user should be able to navigate to the ListView of the content manager and see some entries', async ({
     page,
   }) => {
     await page.getByRole('link', { name: 'Content Manager' }).click();
-
     await expect(page).toHaveTitle('Article | Strapi');
     await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
     await expect(page.getByRole('link', { name: /Create new entry/ }).first()).toBeVisible();

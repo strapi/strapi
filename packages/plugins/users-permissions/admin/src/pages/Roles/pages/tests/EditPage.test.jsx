@@ -10,6 +10,13 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { EditPage } from '../EditPage';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const render = () => ({
   ...renderRTL(<Route path="/settings/users-permissions/roles/:id" element={<EditPage />} />, {
     wrapper({ children }) {

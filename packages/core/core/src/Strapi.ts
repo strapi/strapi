@@ -29,6 +29,7 @@ import createAuth from './services/auth';
 import createCustomFields from './services/custom-fields';
 import createContentAPI from './services/content-api';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
+import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 
@@ -301,6 +302,7 @@ class Strapi extends Container implements Core.Strapi {
           numberOfAllContentTypes: _.size(this.contentTypes), // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
           numberOfComponents: _.size(this.components),
           numberOfDynamicZones: getNumberOfDynamicZones(),
+          numberOfConditionalFields: getNumberOfConditionalFields(),
           numberOfCustomControllers: Object.values<Core.Controller>(this.controllers).filter(
             // TODO: Fix this at the content API loader level to prevent future types issues
             (controller) => controller !== undefined && factories.isCustomController(controller)
