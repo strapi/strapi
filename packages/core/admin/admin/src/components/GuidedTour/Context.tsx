@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { produce } from 'immer';
 
+import { useTracking } from '../../features/Tracking';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
@@ -63,6 +64,7 @@ type State = {
   tours: TourState;
   enabled: boolean;
   completedActions: CompletedActions;
+  completedAt: Date | null;
 };
 
 const [GuidedTourProviderImpl, useGuidedTour] = createContext<{
@@ -81,17 +83,26 @@ const getInitialTourState = (tours: Tours) => {
   }, {} as TourState);
 };
 
+const getCompletedTours = (tours: TourState): ValidTourName[] => {
+  return Object.keys(tours).filter(
+    (tourName) => tours[tourName as ValidTourName].isCompleted
+  ) as ValidTourName[];
+};
+
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
     if (action.type === 'next_step') {
       const currentStep = draft.tours[action.payload].currentStep;
       const tourLength = guidedTours[action.payload]._meta.totalStepCount;
 
-      if (currentStep >= tourLength) return;
-
       const nextStep = currentStep + 1;
       draft.tours[action.payload].currentStep = nextStep;
-      draft.tours[action.payload].isCompleted = nextStep === tourLength;
+      draft.tours[action.payload].isCompleted = nextStep >= tourLength;
+
+      const completedTours = getCompletedTours(draft.tours);
+      if (completedTours.length === Object.keys(draft.tours).length) {
+        draft.completedAt = new Date();
+      }
     }
 
     if (action.type === 'previous_step') {
@@ -141,10 +152,12 @@ const GuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
+  const { trackUsage } = useTracking();
   const [storedTours, setStoredTours] = usePersistentState<State>(STORAGE_KEY, {
     tours: getInitialTourState(guidedTours),
     enabled,
     completedActions: [],
+    completedAt: null,
   });
   const migratedTourState = migrateTours(storedTours);
   const [state, dispatch] = React.useReducer(reducer, migratedTourState);
@@ -154,6 +167,24 @@ const GuidedTourContext = ({
     setStoredTours(state);
   }, [state, setStoredTours]);
 
+  // Dispatch tracking event one time the moment all tours have been completed
+  const hasTrackedCompletion = React.useRef(false);
+  const completedTours = getCompletedTours(state.tours);
+  React.useEffect(() => {
+    if (
+      completedTours.length === Object.keys(state.tours).length &&
+      state.completedAt &&
+      !hasTrackedCompletion.current
+    ) {
+      const completedAtDate = new Date(state.completedAt);
+      const timeSinceCompletion = Date.now() - completedAtDate.getTime();
+      if (timeSinceCompletion < 2000) {
+        trackUsage('didCompleteGuidedTour', { name: 'all' });
+        hasTrackedCompletion.current = true;
+      }
+    }
+  }, [completedTours, state.completedAt, state.tours, trackUsage]);
+
   return (
     <GuidedTourProviderImpl state={state} dispatch={dispatch}>
       {children}
@@ -162,4 +193,4 @@ const GuidedTourContext = ({
 };
 
 export type { Action, State, ValidTourName };
-export { GuidedTourContext, useGuidedTour, reducer };
+export { GuidedTourContext, useGuidedTour, reducer, getCompletedTours };
