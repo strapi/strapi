@@ -1,4 +1,4 @@
-import { cloneDeep, merge } from 'lodash';
+import { merge } from 'lodash';
 import { Database } from '@strapi/database';
 import {
   LoadedContentTypeModel,
@@ -281,7 +281,7 @@ function mergeContentType(
   changes: ContentTypeChange
 ): LoadedContentTypeModel {
   // Deep clone the original object to avoid modifying it
-  const clonedContentType = cloneDeep(contentType);
+  const clonedContentType = structuredClone(contentType);
   return merge(clonedContentType, changes);
 }
 

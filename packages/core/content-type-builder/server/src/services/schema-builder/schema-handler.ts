@@ -34,7 +34,7 @@ export default function createSchemaHandler(infos: Infos) {
       } as Struct.ContentTypeSchema),
   };
 
-  const state = _.cloneDeep(initialState);
+  const state = structuredClone(initialState);
 
   // always keep it the same to rollback
   Object.freeze(initialState.schema);
@@ -82,13 +82,13 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     get schema() {
-      return _.cloneDeep(state.schema);
+      return structuredClone(state.schema);
     },
 
     setSchema(val: Struct.ContentTypeSchema) {
       modified = true;
 
-      state.schema = _.cloneDeep(val);
+      state.schema = structuredClone(val);
       return this;
     },
 
