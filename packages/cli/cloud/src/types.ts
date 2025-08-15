@@ -42,7 +42,7 @@ export type CloudCliConfig = {
   buildLogsMaxRetries: string;
   notificationsConnectionTimeout: string;
   maxProjectFileSize: string;
-  featureFlags: {
+  featureFlags?: {
     cloudLoginPromptEnabled: boolean;
     growthSsoTrialEnabled: boolean;
     asyncProjectCreationEnabled: boolean;
