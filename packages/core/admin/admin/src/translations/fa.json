@@ -848,5 +848,11 @@
   "tours.profile.description": "در هر زمان می‌توانید تور راهنما را بازنشانی کنید.",
   "tours.profile.reset": "بازنشانی تور راهنما",
   "tours.profile.notification.success.reset": "تور راهنما بازنشانی شد",
-  "widget.profile.title": "پروفایل"
+  "widget.profile.title": "پروفایل",
+  "settings.page.purchase.description": "فرآیند بازبینی محتوای خود را مدیریت کنید",
+  "settings.page.purchase.perks1": "مراحل بازبینی قابل سفارشی‌سازی",
+  "settings.page.purchase.perks2": "مدیریت دسترسی کاربران",
+  "settings.page.purchase.perks3": "پشتیبانی از وبهوک‌ها",
+  "Settings.review-workflows.list.page.title": "جریان‌های بازبینی",
+  "review-workflows.plugin.name": "جریان‌های بازبینی"
 }
