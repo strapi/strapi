@@ -1,5 +1,5 @@
 {
-  "plugin.description.long": "Send Strapi error events to Sentry.",
-  "plugin.description.short": "Send Strapi error events to Sentry.",
+  "plugin.description.long": "ارسال رویدادهای خطای استرپی به Sentry.",
+  "plugin.description.short": "ارسال خطاها به Sentry.",
   "plugin.name": "Sentry"
 }
