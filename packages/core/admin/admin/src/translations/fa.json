@@ -750,7 +750,7 @@
   "global.plugins.email": "ایمیل",
   "global.plugins.email.description": "برنامه خود را برای ارسال ایمیل پیکربندی کنید.",
   "global.plugins.graphql": "GraphQL",
-  "global.plugins.graphql.description": "افزودن یک endpoint برای GraphQL همراه با متدهای پیش‌فرض API.",
+  "global.plugins.graphql.description": "افزودن نقطه دسترسی (endpoint) برای GraphQL همراه با متدهای پیش‌فرض API.",
   "global.plugins.i18n": "چندزبانه‌سازی",
   "global.plugins.i18n.description": "امکان ایجاد، خواندن و ویرایش محتوا به زبان‌های مختلف از طریق پنل مدیریت و API را فراهم می‌کند.",
   "global.plugins.sentry": "Sentry",

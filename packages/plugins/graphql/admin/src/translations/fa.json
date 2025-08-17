@@ -1,5 +1,5 @@
 {
-  "plugin.description.long": "Adds GraphQL endpoint with default API methods.",
-  "plugin.description.short": "Adds GraphQL endpoint with default API methods.",
+  "plugin.description.long": "افزودن نقطه دسترسی (endpoint) برای GraphQL همراه با متدهای پیش‌فرض API.",
+  "plugin.description.short": "افزودن نقطه دسترسی (endpoint) برای GraphQL همراه با متدهای پیش‌فرض API.",
   "plugin.name": "GraphQL"
 }
