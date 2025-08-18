@@ -9,8 +9,6 @@ import { Outlet } from 'react-router-dom';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
 
-import { GuidedTourModal } from '../components/GuidedTour/Modal';
-import { useGuidedTour } from '../components/GuidedTour/Provider';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
@@ -29,10 +27,6 @@ import { hashAdminUserEmail } from '../utils/users';
 const { version: strapiVersion } = packageInfo;
 
 const AdminLayout = () => {
-  const setGuidedTourVisibility = useGuidedTour(
-    'AdminLayout',
-    (state) => state.setGuidedTourVisibility
-  );
   const { formatMessage } = useIntl();
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
   const [userId, setUserId] = React.useState<string>();
@@ -64,18 +58,6 @@ const AdminLayout = () => {
         });
     }
   }, [showReleaseNotification]);
-
-  const userRoles = useAuth('AuthenticatedApp', (state) => state.user?.roles);
-
-  React.useEffect(() => {
-    if (userRoles) {
-      const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
-
-      if (isUserSuperAdmin && appInfo?.autoReload) {
-        setGuidedTourVisibility(true);
-      }
-    }
-  }, [userRoles, appInfo?.autoReload, setGuidedTourVisibility]);
 
   React.useEffect(() => {
     hashAdminUserEmail(userInfo).then((id) => {
@@ -132,7 +114,6 @@ const AdminLayout = () => {
               <Box flex={1}>
                 <UpsellBanner />
                 <Outlet />
-                <GuidedTourModal />
               </Box>
             </Flex>
           </Box>

@@ -19,7 +19,4 @@ if [[ -z "$distTag" ]]; then
 fi
 
 ## publish packages
-yarn release --version "$version" --publish false --git-commit false --git-tag false --changelog false --dry-run false "$@"
-./node_modules/.bin/nx run-many --target=clean --nx-ignore-cycles
-./node_modules/.bin/nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
-yarn release --only-publish --tag "$distTag" --dry-run false
+yarn release --version "$version" --tag "$distTag" --git-commit false --git-tag false --changelog false --dry-run false "$@"

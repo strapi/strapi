@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import { useInitQuery } from '../services/admin';
+
 const usePersistentState = <T>(key: string, defaultValue: T) => {
   const [value, setValue] = useState<T>(() => {
     const stickyValue = window.localStorage.getItem(key);
@@ -23,4 +25,14 @@ const usePersistentState = <T>(key: string, defaultValue: T) => {
   return [value, setValue] as const;
 };
 
-export { usePersistentState };
+// Same as usePersistentState, but scoped to the current instance of Strapi
+// useful for storing state that should not be shared across different instances of Strapi running on localhost
+const useScopedPersistentState = <T>(key: string, defaultValue: T) => {
+  const { data: initData } = useInitQuery();
+  const { uuid } = initData ?? {};
+
+  const namespacedKey = `${key}:${uuid}`;
+  return usePersistentState<T>(namespacedKey, defaultValue);
+};
+
+export { usePersistentState, useScopedPersistentState };

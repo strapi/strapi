@@ -15,7 +15,6 @@ test.describe('Edit single type', () => {
     await resetFiles();
     await sharedSetup('ctb-edit-st', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
       importData: 'with-admin.tar',
     });

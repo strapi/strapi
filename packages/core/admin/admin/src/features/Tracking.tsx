@@ -2,11 +2,12 @@ import * as React from 'react';
 
 import axios, { AxiosResponse } from 'axios';
 
-import { Tours } from '../components/UnstableGuidedTour/Tours';
+import { Tours } from '../components/GuidedTour/Tours';
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
 import { useAuth } from './Auth';
+import { useStrapiApp } from './StrapiApp';
 
 export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
@@ -42,10 +43,38 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const token = useAuth('App', (state) => state.token);
   const { data: initData } = useInitQuery();
   const { uuid } = initData ?? {};
+  const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
 
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
+  React.useEffect(() => {
+    if (uuid && data) {
+      const event = 'didInitializeAdministration';
+      try {
+        fetch(`${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`, {
+          method: 'POST',
+          body: JSON.stringify({
+            // This event is anonymous
+            event,
+            userId: '',
+            eventPropeties: {},
+            groupProperties: {
+              ...data,
+              projectId: uuid,
+              registeredWidgets: getAllWidgets().map((widget) => widget.uid),
+            },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Strapi-Event': event,
+          },
+        });
+      } catch {
+        // silence is golden
+      }
+    }
+  }, [data, uuid, getAllWidgets]);
   const value = React.useMemo(
     () => ({
       uuid,
@@ -146,8 +175,8 @@ export interface EventWithoutProperties {
     | 'willEditEditLayout'
     | 'willEditEmailTemplates'
     | 'willEditEntryFromButton'
-    | 'willEditEntryFromHome'
     | 'willEditEntryFromList'
+    | 'willEditReleaseFromHome'
     | 'willEditFieldOfContentType'
     | 'willEditMediaLibraryConfig'
     | 'willEditNameOfContentType'
@@ -157,6 +186,7 @@ export interface EventWithoutProperties {
     | 'willEditStage'
     | 'willFilterEntries'
     | 'willInstallPlugin'
+    | 'willOpenAuditLogDetailsFromHome'
     | 'willUnpublishEntry'
     | 'willSaveComponent'
     | 'willSaveContentType'
@@ -380,6 +410,27 @@ interface DidStartGuidedTour {
   };
 }
 
+interface WillEditEntryFromHome {
+  name: 'willEditEntryFromHome';
+  properties: {
+    entryType: 'edited' | 'published' | 'assigned';
+  };
+}
+
+interface DidOpenHomeWidgetLink {
+  name: 'didOpenHomeWidgetLink';
+  properties: {
+    widgetUID: string;
+  };
+}
+
+interface DidOpenKeyStatisticsWidgetLink {
+  name: 'didOpenKeyStatisticsWidgetLink';
+  properties: {
+    itemKey: string;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
@@ -405,7 +456,10 @@ type EventsWithProperties =
   | DidUpdateCTBSchema
   | DidSkipGuidedTour
   | DidCompleteGuidedTour
-  | DidStartGuidedTour;
+  | DidStartGuidedTour
+  | DidOpenHomeWidgetLink
+  | DidOpenKeyStatisticsWidgetLink
+  | WillEditEntryFromHome;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {
@@ -457,7 +511,7 @@ const useTracking = (): UseTrackingReturn => {
       try {
         if (uuid && !window.strapi.telemetryDisabled) {
           const res = await axios.post<string>(
-            'https://analytics.strapi.io/api/v2/track',
+            `${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`,
             {
               event,
               userId,

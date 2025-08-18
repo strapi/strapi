@@ -1,5 +1,5 @@
 /* eslint-disable import/no-default-export */
-import { useTracking, Layouts } from '@strapi/admin/strapi-admin';
+import { useTracking, Layouts, tours } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { Information, Pencil, Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
@@ -127,6 +127,7 @@ const ListView = () => {
           defaultMessage: 'Edit',
         })}
       </Button>
+
       <Button
         startIcon={<Plus />}
         variant="secondary"
@@ -143,6 +144,10 @@ const ListView = () => {
 
   return (
     <>
+      <tours.contentTypeBuilder.Introduction>
+        {/* Invisible Anchor */}
+        <Box />
+      </tours.contentTypeBuilder.Introduction>
       {isDeleted && (
         <Flex background="danger100" justifyContent={'center'} padding={4}>
           <Flex gap={2}>

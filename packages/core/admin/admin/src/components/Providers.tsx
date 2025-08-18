@@ -10,10 +10,9 @@ import { NotificationsProvider } from '../features/Notifications';
 import { StrapiAppProvider } from '../features/StrapiApp';
 import { TrackingProvider } from '../features/Tracking';
 
-import { GuidedTourProvider } from './GuidedTour/Provider';
+import { GuidedTourContext } from './GuidedTour/Context';
 import { LanguageProvider } from './LanguageProvider';
 import { Theme } from './Theme';
-import { UnstableGuidedTourContext } from './UnstableGuidedTour/Context';
 
 import type { Store } from '../core/store/configure';
 import type { StrapiApp } from '../StrapiApp';
@@ -33,6 +32,8 @@ interface ProvidersProps {
 }
 
 const Providers = ({ children, strapi, store }: ProvidersProps) => {
+  const isGuidedTourEnabled = process.env.NODE_ENV !== 'test';
+
   return (
     <StrapiAppProvider
       components={strapi.library.components}
@@ -57,17 +58,15 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                 <Theme themes={strapi.configurations.themes}>
                   <NotificationsProvider>
                     <TrackingProvider>
-                      <GuidedTourProvider>
-                        <UnstableGuidedTourContext>
-                          <ConfigurationProvider
-                            defaultAuthLogo={strapi.configurations.authLogo}
-                            defaultMenuLogo={strapi.configurations.menuLogo}
-                            showReleaseNotification={strapi.configurations.notifications.releases}
-                          >
-                            {children}
-                          </ConfigurationProvider>
-                        </UnstableGuidedTourContext>
-                      </GuidedTourProvider>
+                      <GuidedTourContext enabled={isGuidedTourEnabled}>
+                        <ConfigurationProvider
+                          defaultAuthLogo={strapi.configurations.authLogo}
+                          defaultMenuLogo={strapi.configurations.menuLogo}
+                          showReleaseNotification={strapi.configurations.notifications.releases}
+                        >
+                          {children}
+                        </ConfigurationProvider>
+                      </GuidedTourContext>
                     </TrackingProvider>
                   </NotificationsProvider>
                 </Theme>

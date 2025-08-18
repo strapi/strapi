@@ -8,6 +8,8 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
+import type { WidgetArgs } from '@strapi/admin/strapi-admin';
+
 // NOTE: we have to preload it to ensure chunks will have it available as global
 import 'prismjs';
 
@@ -45,23 +47,8 @@ export default {
 
     app.registerPlugin(cm.config);
 
-    // Register homepage widgets
-    app.widgets.register([
-      {
-        icon: PuzzlePiece,
-        title: {
-          id: `${PLUGIN_ID}.widget.chart-entries.title`,
-          defaultMessage: 'Entries',
-        },
-        component: async () => {
-          const { ChartEntriesWidget } = await import('./components/Widgets');
-          return ChartEntriesWidget;
-        },
-        pluginId: PLUGIN_ID,
-        id: 'chart-entries',
-        permissions: [{ action: 'plugin::content-manager.explorer.read' }],
-      },
-      {
+    app.widgets.register((widgets: WidgetArgs[]) => {
+      const lastEditedWidget: WidgetArgs = {
         icon: Pencil,
         title: {
           id: `${PLUGIN_ID}.widget.last-edited.title`,
@@ -74,8 +61,8 @@ export default {
         pluginId: PLUGIN_ID,
         id: 'last-edited-entries',
         permissions: [{ action: 'plugin::content-manager.explorer.read' }],
-      },
-      {
+      };
+      const lastPublishedWidget: WidgetArgs = {
         icon: CheckCircle,
         title: {
           id: `${PLUGIN_ID}.widget.last-published.title`,
@@ -88,8 +75,36 @@ export default {
         pluginId: PLUGIN_ID,
         id: 'last-published-entries',
         permissions: [{ action: 'plugin::content-manager.explorer.read' }],
-      },
-    ]);
+      };
+      const entriesWidget: WidgetArgs = {
+        icon: PuzzlePiece,
+        title: {
+          id: `${PLUGIN_ID}.widget.chart-entries.title`,
+          defaultMessage: 'Entries',
+        },
+        component: async () => {
+          const { ChartEntriesWidget } = await import('./components/Widgets');
+          return ChartEntriesWidget;
+        },
+        pluginId: PLUGIN_ID,
+        id: 'chart-entries',
+        permissions: [{ action: 'plugin::content-manager.explorer.read' }],
+      };
+
+      const profileInfoIndex = widgets.findIndex(
+        (widget) => widget.id === 'profile-info' && widget.pluginId === 'admin'
+      );
+
+      // Insert chart-entries after the profile-info widget
+      if (profileInfoIndex !== -1) {
+        const newWidgets: WidgetArgs[] = [...widgets];
+        newWidgets.splice(profileInfoIndex + 1, 0, entriesWidget);
+        return [lastEditedWidget, lastPublishedWidget, ...newWidgets];
+      }
+
+      // Fallback: add to the end if the target widget aren't found
+      return [lastEditedWidget, lastPublishedWidget, ...widgets, entriesWidget];
+    });
   },
   bootstrap(app: any) {
     if (typeof historyAdmin.bootstrap === 'function') {

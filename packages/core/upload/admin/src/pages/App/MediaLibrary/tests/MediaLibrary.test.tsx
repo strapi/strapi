@@ -1,9 +1,10 @@
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams, NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 
 import { viewOptions } from '../../../../constants';
@@ -96,14 +97,25 @@ const renderML = () => ({
         },
       });
 
+      // Create a simple Redux store with the adminApi reducer
+      const store = {
+        getState: () => ({}),
+        dispatch: jest.fn(),
+        subscribe: jest.fn(),
+      };
+
       return (
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en" messages={{}}>
-            <DesignSystemProvider>
-              <MemoryRouter>{children}</MemoryRouter>
-            </DesignSystemProvider>
-          </IntlProvider>
-        </QueryClientProvider>
+        <Provider store={store as any}>
+          <QueryClientProvider client={queryClient}>
+            <IntlProvider locale="en" messages={{}}>
+              <DesignSystemProvider>
+                <NotificationsProvider>
+                  <MemoryRouter>{children}</MemoryRouter>
+                </NotificationsProvider>
+              </DesignSystemProvider>
+            </IntlProvider>
+          </QueryClientProvider>
+        </Provider>
       );
     },
   }),

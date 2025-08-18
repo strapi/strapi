@@ -25,8 +25,12 @@ export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
 
-export { useGuidedTour } from './components/GuidedTour/Provider';
-export { tours as unstable_tours } from './components/UnstableGuidedTour/Tours';
+/** @internal */
+export { tours } from './components/GuidedTour/Tours';
+/** @internal */
+export { useGuidedTour } from './components/GuidedTour/Context';
+/** @internal */
+export { GUIDED_TOUR_REQUIRED_ACTIONS } from './components/GuidedTour/utils/constants';
 
 /**
  * Features
@@ -55,6 +59,7 @@ export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
 export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useAdminUsers } from './services/users';
+export { useGetCountDocumentsQuery } from './services/homepage';
 
 /**
  * Types
@@ -71,7 +76,7 @@ export type {
   Entity,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
-export type { Widget as WidgetType } from './core/apis/Widgets';
+export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';
 
 /**
  * Utils
