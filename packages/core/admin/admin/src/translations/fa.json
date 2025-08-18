@@ -854,5 +854,10 @@
   "settings.page.purchase.perks2": "مدیریت دسترسی کاربران",
   "settings.page.purchase.perks3": "پشتیبانی از وبهوک‌ها",
   "Settings.review-workflows.list.page.title": "جریان‌های بازبینی",
-  "review-workflows.plugin.name": "جریان‌های بازبینی"
+  "review-workflows.plugin.name": "جریان‌های بازبینی",
+  "pages.Releases.title": "انتشار‌ها",
+  "pages.PurchaseRelease.description": "گروه‌بندی محتوا و انتشار به‌روزرسانی‌ها به‌صورت یکجا",
+  "pages.PurchaseRelease.perks1": "افزودن چندین ورودی به انتشار‌ها",
+  "pages.PurchaseRelease.perks2": "شناسایی سریع ورودی‌های دارای خطا",
+  "pages.PurchaseRelease.perks3": "زمان‌بندی انتشار یا انتشار دستی"
 }
