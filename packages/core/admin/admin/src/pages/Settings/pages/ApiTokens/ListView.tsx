@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { Box, EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import * as qs from 'qs';
@@ -130,6 +130,12 @@ export const ListView = () => {
 
   return (
     <>
+      {apiTokens.length > 0 && (
+        <tours.apiTokens.Introduction>
+          {/* Invisible Anchor */}
+          <Box />
+        </tours.apiTokens.Introduction>
+      )}
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -144,25 +150,23 @@ export const ListView = () => {
         })}
         primaryAction={
           canCreate && (
-            <tours.apiTokens.CreateAnAPIToken>
-              <LinkButton
-                tag={Link}
-                data-testid="create-api-token-button"
-                startIcon={<Plus />}
-                size="S"
-                onClick={() =>
-                  trackUsage('willAddTokenFromList', {
-                    tokenType: API_TOKEN_TYPE,
-                  })
-                }
-                to="/settings/api-tokens/create"
-              >
-                {formatMessage({
-                  id: 'Settings.apiTokens.create',
-                  defaultMessage: 'Create new API Token',
-                })}
-              </LinkButton>
-            </tours.apiTokens.CreateAnAPIToken>
+            <LinkButton
+              tag={Link}
+              data-testid="create-api-token-button"
+              startIcon={<Plus />}
+              size="S"
+              onClick={() =>
+                trackUsage('willAddTokenFromList', {
+                  tokenType: API_TOKEN_TYPE,
+                })
+              }
+              to="/settings/api-tokens/create"
+            >
+              {formatMessage({
+                id: 'Settings.apiTokens.create',
+                defaultMessage: 'Create new API Token',
+              })}
+            </LinkButton>
           )
         }
       />
@@ -170,51 +174,49 @@ export const ListView = () => {
         <Page.NoPermissions />
       ) : (
         <Page.Main aria-busy={isLoading}>
-          <tours.apiTokens.Introduction>
-            <Layouts.Content>
-              {apiTokens.length > 0 && (
-                <Table
-                  permissions={{ canRead, canDelete, canUpdate }}
-                  headers={headers}
-                  isLoading={isLoading}
-                  onConfirmDelete={handleDelete}
-                  tokens={apiTokens}
-                  tokenType={API_TOKEN_TYPE}
-                />
-              )}
-              {canCreate && apiTokens.length === 0 ? (
-                <EmptyStateLayout
-                  icon={<EmptyDocuments width="16rem" />}
-                  content={formatMessage({
-                    id: 'Settings.apiTokens.addFirstToken',
-                    defaultMessage: 'Add your first API Token',
-                  })}
-                  action={
-                    <LinkButton
-                      tag={Link}
-                      variant="secondary"
-                      startIcon={<Plus />}
-                      to="/settings/api-tokens/create"
-                    >
-                      {formatMessage({
-                        id: 'Settings.apiTokens.addNewToken',
-                        defaultMessage: 'Add new API Token',
-                      })}
-                    </LinkButton>
-                  }
-                />
-              ) : null}
-              {!canCreate && apiTokens.length === 0 ? (
-                <EmptyStateLayout
-                  icon={<EmptyDocuments width="16rem" />}
-                  content={formatMessage({
-                    id: 'Settings.apiTokens.emptyStateLayout',
-                    defaultMessage: 'You don’t have any content yet...',
-                  })}
-                />
-              ) : null}
-            </Layouts.Content>
-          </tours.apiTokens.Introduction>
+          <Layouts.Content>
+            {apiTokens.length > 0 && (
+              <Table
+                permissions={{ canRead, canDelete, canUpdate }}
+                headers={headers}
+                isLoading={isLoading}
+                onConfirmDelete={handleDelete}
+                tokens={apiTokens}
+                tokenType={API_TOKEN_TYPE}
+              />
+            )}
+            {canCreate && apiTokens.length === 0 ? (
+              <EmptyStateLayout
+                icon={<EmptyDocuments width="16rem" />}
+                content={formatMessage({
+                  id: 'Settings.apiTokens.addFirstToken',
+                  defaultMessage: 'Add your first API Token',
+                })}
+                action={
+                  <LinkButton
+                    tag={Link}
+                    variant="secondary"
+                    startIcon={<Plus />}
+                    to="/settings/api-tokens/create"
+                  >
+                    {formatMessage({
+                      id: 'Settings.apiTokens.addNewToken',
+                      defaultMessage: 'Add new API Token',
+                    })}
+                  </LinkButton>
+                }
+              />
+            ) : null}
+            {!canCreate && apiTokens.length === 0 ? (
+              <EmptyStateLayout
+                icon={<EmptyDocuments width="16rem" />}
+                content={formatMessage({
+                  id: 'Settings.apiTokens.emptyStateLayout',
+                  defaultMessage: 'You don’t have any content yet...',
+                })}
+              />
+            ) : null}
+          </Layouts.Content>
         </Page.Main>
       )}
     </>
