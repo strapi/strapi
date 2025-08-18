@@ -8,6 +8,7 @@ export { buildValidParams } from './utils/api';
 
 export { RelativeTime } from './components/RelativeTime';
 export { DocumentStatus } from './pages/EditView/components/DocumentStatus';
+export { InputRenderer } from './pages/EditView/components/InputRenderer';
 export {
   useDocument as unstable_useDocument,
   useContentManagerContext as unstable_useContentManagerContext,

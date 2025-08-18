@@ -1,11 +1,21 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { Flex, VisuallyHidden } from '@strapi/design-system';
-import { Earth, EarthStriked } from '@strapi/icons';
-import { MessageDescriptor, useIntl } from 'react-intl';
+import { InputRenderer } from '@strapi/content-manager/strapi-admin';
+import {
+  Flex,
+  VisuallyHidden,
+  Modal,
+  Button,
+  Typography,
+  Popover,
+  Tooltip,
+} from '@strapi/design-system';
+import { Earth } from '@strapi/icons';
+import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
 
 import type { EditFieldLayout, EditLayout } from '@strapi/content-manager/strapi-admin';
@@ -53,21 +63,13 @@ const addLabelActionToField = (field: EditFieldLayout) => {
     ? field.attribute.pluginOptions.i18n.localized
     : true || ['uid', 'relation'].includes(field.attribute.type);
 
-  const labelActionProps = {
-    title: {
-      id: isFieldLocalized
-        ? getTranslation('Field.localized')
-        : getTranslation('Field.not-localized'),
-      defaultMessage: isFieldLocalized
-        ? 'This value is unique for the selected locale'
-        : 'This value is the same across all locales',
-    },
-    renderIcon: (props: { 'aria-hidden': boolean; focusable: boolean }) => <Earth {...props} />,
-  };
+  if (!isFieldLocalized) {
+    return field;
+  }
 
   return {
     ...field,
-    labelAction: isFieldLocalized ? <LabelAction {...labelActionProps} /> : null,
+    labelAction: <LabelAction field={field} />,
   };
 };
 
@@ -90,36 +92,60 @@ const doesFieldHaveI18nPluginOpt = (
  * LabelAction
  * -----------------------------------------------------------------------------------------------*/
 
-interface LabelActionProps {
-  title: MessageDescriptor;
-  renderIcon: (props: { 'aria-hidden': boolean; focusable: boolean }) => React.ReactNode;
-}
-
-const LabelAction = ({ title, renderIcon }: LabelActionProps) => {
+const LabelAction = ({ field }: { field: EditFieldLayout }) => {
   const { formatMessage } = useIntl();
+  const { data: locales = [] } = useGetLocalesQuery();
+
+  console.log('locales', locales);
+
+  if (!Array.isArray(locales) || locales.length <= 1) {
+    return null;
+  }
 
   return (
-    <Span tag="span">
-      <VisuallyHidden tag="span">{formatMessage(title)}</VisuallyHidden>
-      {renderIcon({
-        'aria-hidden': true,
-        focusable: false, // See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable
-      })}
-    </Span>
+    <Modal.Root>
+      <Tooltip delayDuration={100} label={'See this field in other locales'}>
+        <Modal.Trigger>
+          <Flex
+            borderRadius="100px"
+            background="neutral200"
+            paddingLeft={1}
+            paddingRight={1}
+            gap="2px"
+            color="neutral500"
+            tag="button"
+            cursor="pointer"
+          >
+            <Earth aria-hidden />
+            <Typography variant="pi">+{locales.length - 1}</Typography>
+          </Flex>
+        </Modal.Trigger>
+      </Tooltip>
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>{field.name} — All locales</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Flex direction="column" gap={4} alignItems="stretch">
+            {locales.map((locale) => (
+              <InputRenderer {...field} label={locale.name} document={{} as any} key={locale.id} />
+            ))}
+          </Flex>
+        </Modal.Body>
+        <Modal.Footer>
+          <Modal.Close>
+            <Button variant="tertiary">
+              {formatMessage({
+                id: 'global.cancel',
+                defaultMessage: 'Cancel',
+              })}
+            </Button>
+          </Modal.Close>
+          <Button>Save all</Button>
+        </Modal.Footer>
+      </Modal.Content>
+    </Modal.Root>
   );
 };
-
-const Span = styled(Flex)`
-  svg {
-    width: 12px;
-    height: 12px;
-
-    fill: ${({ theme }) => theme.colors.neutral500};
-
-    path {
-      fill: ${({ theme }) => theme.colors.neutral500};
-    }
-  }
-`;
 
 export { mutateEditViewHook };
