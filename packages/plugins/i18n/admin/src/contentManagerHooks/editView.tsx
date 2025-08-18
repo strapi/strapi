@@ -62,7 +62,7 @@ const addLabelActionToField = (field: EditFieldLayout) => {
         ? 'This value is unique for the selected locale'
         : 'This value is the same across all locales',
     },
-    icon: isFieldLocalized ? <Earth /> : null,
+    renderIcon: (props: { 'aria-hidden': boolean; focusable: boolean }) => <Earth {...props} />,
   };
 
   return {
@@ -92,16 +92,16 @@ const doesFieldHaveI18nPluginOpt = (
 
 interface LabelActionProps {
   title: MessageDescriptor;
-  icon: React.ReactNode;
+  renderIcon: (props: { 'aria-hidden': boolean; focusable: boolean }) => React.ReactNode;
 }
 
-const LabelAction = ({ title, icon }: LabelActionProps) => {
+const LabelAction = ({ title, renderIcon }: LabelActionProps) => {
   const { formatMessage } = useIntl();
 
   return (
     <Span tag="span">
       <VisuallyHidden tag="span">{formatMessage(title)}</VisuallyHidden>
-      {React.cloneElement(icon as React.ReactElement, {
+      {renderIcon({
         'aria-hidden': true,
         focusable: false, // See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable
       })}
