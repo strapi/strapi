@@ -8,6 +8,16 @@ const writeFileSafe = async (filePath, contents) => {
   await fs.writeFile(filePath, contents);
 };
 
+const pluginExtensionSource = `
+    module.exports = (plugin) => {
+      plugin.routes["content-api"].routes = plugin.routes["content-api"].routes.map((route) => {
+        return route;
+      });
+      
+      return plugin;
+    };
+`;
+
 describe('Plugin route extension backward compatibility', () => {
   let strapi;
 
@@ -15,30 +25,11 @@ describe('Plugin route extension backward compatibility', () => {
     const appRoot = path.resolve(__dirname, '../../../../test-apps/api');
 
     const upExtPath = path.join(appRoot, 'src/extensions/users-permissions/strapi-server.js');
-    const upExtSource = `
-    module.exports = (plugin) => {
-      plugin.routes["content-api"].routes = plugin.routes["content-api"].routes.map((route) => {
-        return route;
-      });
-      
-      return plugin;
-    };
-`;
-
     const i18nExtPath = path.join(appRoot, 'src/extensions/i18n/strapi-server.js');
-    const i18nExtSource = `
-    module.exports = (plugin) => {
-      plugin.routes["content-api"].routes = plugin.routes["content-api"].routes.map((route) => {
-        return route;
-      });
-      
-      return plugin;
-    };
-`;
 
     await Promise.all([
-      writeFileSafe(upExtPath, upExtSource),
-      writeFileSafe(i18nExtPath, i18nExtSource),
+      writeFileSafe(upExtPath, pluginExtensionSource),
+      writeFileSafe(i18nExtPath, pluginExtensionSource),
     ]);
 
     strapi = await createStrapiInstance();
