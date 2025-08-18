@@ -12,6 +12,7 @@ import { Widget } from '../../components/WidgetHelpers';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
+import { useTracking } from '../../features/Tracking';
 
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
 import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
@@ -23,14 +24,20 @@ import type { WidgetType } from '@strapi/admin/strapi-admin';
  * WidgetRoot
  * -----------------------------------------------------------------------------------------------*/
 
-interface WidgetRootProps extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link'> {
+interface WidgetRootProps
+  extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
   children: React.ReactNode;
 }
 
-export const WidgetRoot = ({ title, icon = PuzzlePiece, children, link }: WidgetRootProps) => {
+export const WidgetRoot = ({ title, icon = PuzzlePiece, children, link, uid }: WidgetRootProps) => {
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const id = React.useId();
   const Icon = icon;
+
+  const handleClickOnLink = () => {
+    trackUsage('didOpenHomeWidgetLink', { widgetUID: uid });
+  };
 
   return (
     <Flex
@@ -61,6 +68,7 @@ export const WidgetRoot = ({ title, icon = PuzzlePiece, children, link }: Widget
             style={{ textDecoration: 'none' }}
             textAlign="right"
             to={link.href}
+            onClick={handleClickOnLink}
           >
             {formatMessage(link.label)}
           </Typography>
@@ -157,7 +165,12 @@ const HomePageCE = () => {
             <Grid.Root gap={5}>
               {filteredWidgets.map((widget) => (
                 <Grid.Item col={6} s={12} key={widget.uid}>
-                  <WidgetRoot title={widget.title} icon={widget.icon} link={widget.link}>
+                  <WidgetRoot
+                    title={widget.title}
+                    icon={widget.icon}
+                    link={widget.link}
+                    uid={widget.uid}
+                  >
                     <WidgetComponent component={widget.component} />
                   </WidgetRoot>
                 </Grid.Item>

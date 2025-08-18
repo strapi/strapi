@@ -32,7 +32,7 @@ const tours = {
     {
       name: 'Introduction',
       content: (Step) => (
-        <Step.Root side="bottom" withArrow={false}>
+        <Step.Root side="bottom" sideOffset={33} withArrow={false}>
           <Step.Title
             id="tours.contentTypeBuilder.Introduction.title"
             defaultMessage="Content-Type Builder"
@@ -118,7 +118,7 @@ const tours = {
       name: 'Introduction',
       when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
       content: (Step) => (
-        <Step.Root side="top" withArrow={false}>
+        <Step.Root side="top" sideOffset={33} withArrow={false}>
           <Step.Title
             id="tours.contentManager.Introduction.title"
             defaultMessage="Content manager"

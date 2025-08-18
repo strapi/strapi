@@ -139,7 +139,7 @@ export const TabForm = ({
                               )}
                             </Typography>
                           )}
-                          <Tooltip description={noFieldsMessage}>
+                          <Tooltip label={noFieldsMessage}>
                             <Button
                               marginTop={
                                 currentCondition && Object.keys(currentCondition).length > 0 ? 0 : 4

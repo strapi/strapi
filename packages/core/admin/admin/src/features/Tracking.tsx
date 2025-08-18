@@ -175,7 +175,6 @@ export interface EventWithoutProperties {
     | 'willEditEditLayout'
     | 'willEditEmailTemplates'
     | 'willEditEntryFromButton'
-    | 'willEditEntryFromHome'
     | 'willEditEntryFromList'
     | 'willEditReleaseFromHome'
     | 'willEditFieldOfContentType'
@@ -187,7 +186,7 @@ export interface EventWithoutProperties {
     | 'willEditStage'
     | 'willFilterEntries'
     | 'willInstallPlugin'
-    | 'willOpenAuditLogDetails'
+    | 'willOpenAuditLogDetailsFromHome'
     | 'willUnpublishEntry'
     | 'willSaveComponent'
     | 'willSaveContentType'
@@ -411,6 +410,27 @@ interface DidStartGuidedTour {
   };
 }
 
+interface WillEditEntryFromHome {
+  name: 'willEditEntryFromHome';
+  properties: {
+    entryType: 'edited' | 'published' | 'assigned';
+  };
+}
+
+interface DidOpenHomeWidgetLink {
+  name: 'didOpenHomeWidgetLink';
+  properties: {
+    widgetUID: string;
+  };
+}
+
+interface DidOpenKeyStatisticsWidgetLink {
+  name: 'didOpenKeyStatisticsWidgetLink';
+  properties: {
+    itemKey: string;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
@@ -436,7 +456,10 @@ type EventsWithProperties =
   | DidUpdateCTBSchema
   | DidSkipGuidedTour
   | DidCompleteGuidedTour
-  | DidStartGuidedTour;
+  | DidStartGuidedTour
+  | DidOpenHomeWidgetLink
+  | DidOpenKeyStatisticsWidgetLink
+  | WillEditEntryFromHome;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

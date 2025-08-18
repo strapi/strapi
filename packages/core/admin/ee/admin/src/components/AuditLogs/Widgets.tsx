@@ -30,7 +30,7 @@ const LastActivityTable = ({ items }: { items: AuditLog[] }) => {
   };
 
   const handleRowClick = (document: AuditLog) => () => {
-    trackUsage('willOpenAuditLogDetails');
+    trackUsage('willOpenAuditLogDetailsFromHome');
     const link = getAuditLogDetailsLink(document);
     navigate(link);
   };
@@ -74,7 +74,7 @@ const LastActivityTable = ({ items }: { items: AuditLog[] }) => {
                   <IconButton
                     tag={Link}
                     to={getAuditLogDetailsLink(item)}
-                    onClick={() => trackUsage('willOpenAuditLogDetails')}
+                    onClick={() => trackUsage('willOpenAuditLogDetailsFromHome')}
                     label={formatMessage({
                       id: 'global.details',
                       defaultMessage: 'Details',

@@ -145,7 +145,7 @@ const ListView = () => {
     <>
       <tours.contentTypeBuilder.Introduction>
         {/* Invisible Anchor */}
-        <Box paddingTop={5} />
+        <Box />
       </tours.contentTypeBuilder.Introduction>
       {isDeleted && (
         <Flex background="danger100" justifyContent={'center'} padding={4}>

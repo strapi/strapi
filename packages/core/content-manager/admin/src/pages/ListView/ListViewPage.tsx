@@ -232,7 +232,7 @@ const ListViewPage = () => {
       <>
         <tours.contentManager.Introduction>
           {/* Invisible Anchor */}
-          <Box paddingTop={5} />
+          <Box />
         </tours.contentManager.Introduction>
         <Page.Main>
           <Page.Title>{`${contentTypeTitle}`}</Page.Title>
@@ -304,7 +304,7 @@ const ListViewPage = () => {
     <>
       <tours.contentManager.Introduction>
         {/* Invisible Anchor */}
-        <Box paddingTop={5} />
+        <Box />
       </tours.contentManager.Introduction>
       <Page.Main>
         <Page.Title>{`${contentTypeTitle}`}</Page.Title>
