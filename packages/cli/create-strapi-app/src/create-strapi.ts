@@ -257,7 +257,7 @@ async function createApp(scope: Scope) {
   }
 
   if (isABTestEnabled) {
-    await trackUsage({ event: 'didEnabledABTest', scope });
+    await trackUsage({ event: 'didEnableABTest', scope });
   }
 }
 
