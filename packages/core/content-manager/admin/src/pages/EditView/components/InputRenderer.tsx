@@ -114,15 +114,13 @@ const InputRenderer = ({
 
     if (CustomInput) {
       return (
-        <>
-          <CustomInput
-            {...props}
-            {...field}
-            // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
-            hint={hint}
-            disabled={fieldIsDisabled}
-          />
-        </>
+        <CustomInput
+          {...props}
+          {...field}
+          // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
+          hint={hint}
+          disabled={fieldIsDisabled}
+        />
       );
     }
 
@@ -145,14 +143,12 @@ const InputRenderer = ({
   if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
     const CustomInput = fields[props.type];
     return (
-      <>
-        <CustomInput
-          {...props}
-          // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
-          hint={hint}
-          disabled={fieldIsDisabled}
-        />
-      </>
+      <CustomInput
+        {...props}
+        // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
+        hint={hint}
+        disabled={fieldIsDisabled}
+      />
     );
   }
 
