@@ -107,6 +107,120 @@ const LocaleOption = ({
   );
 };
 
+// Global state for AI pre-fill dialog
+let setGlobalDialogState: ((state: { isOpen: boolean; localeCode: string | null }) => void) | null =
+  null;
+
+const AIPreFillDialogManager = () => {
+  const { formatMessage } = useIntl();
+  const [{ query }, setQuery] = useQueryParams<I18nBaseQuery>();
+  const { data: locales = [] } = useGetLocalesQuery();
+  const [dialogState, setDialogState] = React.useState<{
+    isOpen: boolean;
+    localeCode: string | null;
+  }>({
+    isOpen: false,
+    localeCode: null,
+  });
+
+  React.useEffect(() => {
+    setGlobalDialogState = setDialogState;
+    return () => {
+      setGlobalDialogState = null;
+    };
+  }, []);
+
+  const selectedLocale = Array.isArray(locales)
+    ? locales.find((locale) => locale.code === dialogState.localeCode)
+    : undefined;
+
+  const handleClose = React.useCallback(() => {
+    setDialogState({ isOpen: false, localeCode: null });
+  }, []);
+
+  const handleCreateEmpty = React.useCallback(() => {
+    if (dialogState.localeCode) {
+      setQuery({
+        plugins: {
+          ...query.plugins,
+          i18n: {
+            locale: dialogState.localeCode,
+          },
+        },
+      });
+    }
+    handleClose();
+  }, [dialogState.localeCode, query.plugins, setQuery, handleClose]);
+
+  const handlePreFillWithAI = React.useCallback(() => {
+    if (dialogState.localeCode) {
+      // TODO: Implement AI pre-fill logic here
+      setQuery({
+        plugins: {
+          ...query.plugins,
+          i18n: {
+            locale: dialogState.localeCode,
+          },
+        },
+      });
+    }
+    handleClose();
+  }, [dialogState.localeCode, query.plugins, setQuery, handleClose]);
+
+  if (!dialogState.isOpen || !selectedLocale) {
+    return null;
+  }
+
+  return (
+    <Modal.Root open={dialogState.isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>
+            {formatMessage({
+              id: getTranslation('CMEditViewLocalePicker.ai-prefill.title'),
+              defaultMessage: 'AI Pre-fill New Locale',
+            })}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Flex direction="column" gap={3}>
+            <Magic width="24px" height="24px" fill="primary600" />
+            <Typography textAlign="center">
+              {formatMessage(
+                {
+                  id: getTranslation('CMEditViewLocalePicker.ai-prefill.body'),
+                  defaultMessage:
+                    'You are creating a new entry for <bold>{locale}</bold>. Would you like to pre-fill it with AI-translated content from the current locale?',
+                },
+                {
+                  bold: (chunks: React.ReactNode) => <b>{chunks}</b>,
+                  locale: selectedLocale.name,
+                }
+              )}
+            </Typography>
+          </Flex>
+        </Modal.Body>
+        <Modal.Footer>
+          <Flex gap={2} width="100%">
+            <Button flex="auto" variant="tertiary" onClick={handleCreateEmpty}>
+              {formatMessage({
+                id: getTranslation('CMEditViewLocalePicker.ai-prefill.cancel'),
+                defaultMessage: 'Create Empty',
+              })}
+            </Button>
+            <Button flex="auto" variant="success" onClick={handlePreFillWithAI}>
+              {formatMessage({
+                id: getTranslation('CMEditViewLocalePicker.ai-prefill.confirm'),
+                defaultMessage: 'Pre-fill with AI',
+              })}
+            </Button>
+          </Flex>
+        </Modal.Footer>
+      </Modal.Content>
+    </Modal.Root>
+  );
+};
+
 const LocalePickerAction = ({
   document,
   meta,
@@ -126,18 +240,43 @@ const LocalePickerAction = ({
     params: { locale: currentDesiredLocale },
   });
 
+  const currentLocale = Array.isArray(locales)
+    ? locales.find((locale) => locale.code === currentDesiredLocale)
+    : undefined;
+
+  const allCurrentLocales = React.useMemo(
+    () => [
+      { status: getDocumentStatus(document, meta), locale: currentLocale?.code },
+      ...(document?.localizations ?? []),
+    ],
+    [document, meta, currentLocale?.code]
+  );
+
   const handleSelect = React.useCallback(
     (value: string) => {
-      setQuery({
-        plugins: {
-          ...query.plugins,
-          i18n: {
-            locale: value,
+      const selectedLocale = Array.isArray(locales)
+        ? locales.find((locale) => locale.code === value)
+        : undefined;
+      const entryExists = allCurrentLocales.some((doc) => doc.locale === value);
+
+      if (!entryExists && selectedLocale) {
+        // Show AI pre-fill dialog for new locales
+        if (setGlobalDialogState) {
+          setGlobalDialogState({ isOpen: true, localeCode: value });
+        }
+      } else {
+        // Direct navigation for existing locales
+        setQuery({
+          plugins: {
+            ...query.plugins,
+            i18n: {
+              locale: value,
+            },
           },
-        },
-      });
+        });
+      }
     },
-    [query.plugins, setQuery]
+    [query.plugins, setQuery, locales, allCurrentLocales]
   );
 
   React.useEffect(() => {
@@ -154,15 +293,6 @@ const LocalePickerAction = ({
       handleSelect(defaultLocale.code);
     }
   }, [handleSelect, hasI18n, locales, currentDesiredLocale]);
-
-  const currentLocale = Array.isArray(locales)
-    ? locales.find((locale) => locale.code === currentDesiredLocale)
-    : undefined;
-
-  const allCurrentLocales = [
-    { status: getDocumentStatus(document, meta), locale: currentLocale?.code },
-    ...(document?.localizations ?? []),
-  ];
 
   if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
     return null;
@@ -932,4 +1062,5 @@ export {
   LocalePickerAction,
   FillFromAnotherLocaleAction,
   AITranslateFromAnotherLocaleAction,
+  AIPreFillDialogManager,
 };

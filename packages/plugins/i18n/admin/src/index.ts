@@ -9,6 +9,7 @@ import {
   LocalePickerAction,
   FillFromAnotherLocaleAction,
   AITranslateFromAnotherLocaleAction,
+  AIPreFillDialogManager,
 } from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
@@ -108,6 +109,12 @@ export default {
     contentManager.injectComponent('listView', 'deleteModalAdditionalInfos', {
       name: 'i18n-delete-bullets-in-modal',
       Component: DeleteModalAdditionalInfo,
+    });
+
+    // Inject AI pre-fill dialog manager
+    contentManager.injectComponent('editView', 'right-links', {
+      name: 'ai-prefill-dialog-manager',
+      Component: AIPreFillDialogManager,
     });
 
     const ctbPlugin = app.getPlugin('content-type-builder');
