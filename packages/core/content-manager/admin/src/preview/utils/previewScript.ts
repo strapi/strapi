@@ -121,10 +121,14 @@ const previewScript = (shouldRun = true) => {
 
         // Move hover detection to the underlying element
         const mouseEnterHandler = () => {
-          highlight.style.outlineColor = HIGHLIGHT_HOVER_COLOR;
+          if (!highlightManager.focusedHighlights.includes(highlight)) {
+            highlight.style.outlineColor = HIGHLIGHT_HOVER_COLOR;
+          }
         };
         const mouseLeaveHandler = () => {
-          highlight.style.outlineColor = 'transparent';
+          if (!highlightManager.focusedHighlights.includes(highlight)) {
+            highlight.style.outlineColor = 'transparent';
+          }
         };
         const doubleClickHandler = () => {
           const sourceAttribute = element.getAttribute(SOURCE_ATTRIBUTE);
@@ -237,46 +241,59 @@ const previewScript = (shouldRun = true) => {
 
   const setupEventHandlers = (highlightManager: HighlightManager) => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
-        const { field, value } = event.data.payload;
-        if (field) {
-          const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
-          matchingElements.forEach((element) => {
-            if (element instanceof HTMLElement) {
-              element.textContent = value || '';
-            }
-          });
-        }
-      } else if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS) {
-        const { field } = event.data.payload;
-        if (field) {
-          highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
-            highlight.style.outlineColor = 'transparent';
-          });
-          highlightManager.focusedHighlights.length = 0;
+      if (!event.data?.type) return;
 
-          highlightManager.setFocusedField(field);
-          const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
-          matchingElements.forEach((element) => {
-            const highlight =
-              highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];
-            if (highlight) {
-              highlight.style.outlineColor = HIGHLIGHT_ACTIVE_COLOR;
-              highlight.style.outlineWidth = '3px';
-              highlightManager.focusedHighlights.push(highlight);
-            }
-          });
-        }
-      } else if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_BLUR) {
+      // The user typed in an input, reflect the change in the preview
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
+        const { field, value } = event.data.payload;
+        if (!field) return;
+
+        const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
+        matchingElements.forEach((element) => {
+          if (element instanceof HTMLElement) {
+            element.textContent = value || '';
+          }
+        });
+        return;
+      }
+
+      // The user focused a new input, update the highlights in the preview
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS) {
         const { field } = event.data.payload;
-        if (field === highlightManager.getFocusedField()) {
-          highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
-            highlight.style.outlineColor = 'transparent';
-            highlight.style.outlineWidth = '2px';
-          });
-          highlightManager.focusedHighlights.length = 0;
-          highlightManager.setFocusedField(null);
-        }
+        if (!field) return;
+
+        // Clear existing focused highlights
+        highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
+          highlight.style.outlineColor = 'transparent';
+        });
+        highlightManager.focusedHighlights.length = 0;
+
+        // Set new focused field and highlight matching elements
+        highlightManager.setFocusedField(field);
+        const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
+        matchingElements.forEach((element) => {
+          const highlight =
+            highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];
+          if (highlight) {
+            highlight.style.outlineColor = HIGHLIGHT_ACTIVE_COLOR;
+            highlight.style.outlineWidth = '3px';
+            highlightManager.focusedHighlights.push(highlight);
+          }
+        });
+        return;
+      }
+
+      // The user is no longer focusing an input, remove the highlights
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_BLUR) {
+        const { field } = event.data.payload;
+        if (field !== highlightManager.getFocusedField()) return;
+
+        highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
+          highlight.style.outlineColor = 'transparent';
+          highlight.style.outlineWidth = '2px';
+        });
+        highlightManager.focusedHighlights.length = 0;
+        highlightManager.setFocusedField(null);
       }
     };
 
