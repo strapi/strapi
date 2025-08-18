@@ -47,7 +47,7 @@
   "list.assets-empty.title-withSearch": "هیچ عنصری با فیلترهای اعمال شده وجود ندارد",
   "list.assets.empty": "مخزن رسانه خالی است",
   "list.assets.empty-upload": "اولین فایل‌های خود را بارگذاری کنید...",
-  "list.assets.empty-no-permissions": "دسترسی برای مشاهده وجود ندارد",
+  "list.assets.empty.no-permissions": "دسترسی برای مشاهده وجود ندارد",
   "list.assets.loading-asset": "در حال بارگذاری پیش‌نمایش رسانه: {path}",
   "list.assets.not-supported-content": "پیش‌نمایشی در دسترس نیست",
   "list.assets.preview-asset": "پیش‌نمایش ویدئو در مسیر {path}",
