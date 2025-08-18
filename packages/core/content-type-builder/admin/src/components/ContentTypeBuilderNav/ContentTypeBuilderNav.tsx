@@ -187,6 +187,10 @@ export const ContentTypeBuilderNav = () => {
           children={undefined}
           name={'search'}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+          aria-label={formatMessage({
+            id: getTrad('search.placeholder'),
+            defaultMessage: 'Search',
+          })}
         />
       </Flex>
       <SubNav.Sections>
