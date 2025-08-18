@@ -1,6 +1,8 @@
 import type { Core } from '@strapi/types';
 import * as z from 'zod/v4';
 
+import { createContentApiRoutesFactory } from '@strapi/utils';
+
 const ctUIDRegexp = /^((strapi|admin)::[\w-]+|(api|plugin)::[\w-]+\.[\w-]+)$/;
 const componentUIDRegexp = /^[\w-]+\.[\w-]+$/;
 
@@ -118,47 +120,46 @@ const formattedComponentSchema = z.object({
   schema: componentSchemaBase,
 });
 
-export default (): Core.RouterInput => {
-  return {
-    type: 'content-api',
-    routes: [
-      {
-        method: 'GET',
-        path: '/content-types',
-        handler: 'content-types.getContentTypes',
-        request: {
-          query: { kind: z.enum(['collectionType', 'singleType']) },
+const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'] => {
+  return [
+    {
+      method: 'GET',
+      path: '/content-types',
+      handler: 'content-types.getContentTypes',
+      request: {
+        query: { kind: z.enum(['collectionType', 'singleType']) },
+      },
+      response: z.object({ data: z.array(formattedContentTypeSchema) }),
+    },
+    {
+      method: 'GET',
+      path: '/content-types/:uid',
+      handler: 'content-types.getContentType',
+      request: {
+        params: {
+          uid: z.string().regex(ctUIDRegexp),
         },
-        response: z.object({ data: z.array(formattedContentTypeSchema) }),
       },
-      {
-        method: 'GET',
-        path: '/content-types/:uid',
-        handler: 'content-types.getContentType',
-        request: {
-          params: {
-            uid: z.string().regex(ctUIDRegexp),
-          },
+      response: z.object({ data: formattedContentTypeSchema }),
+    },
+    {
+      method: 'GET',
+      path: '/components',
+      handler: 'components.getComponents',
+      response: z.object({ data: z.array(formattedComponentSchema) }),
+    },
+    {
+      method: 'GET',
+      path: '/components/:uid',
+      handler: 'components.getComponent',
+      request: {
+        params: {
+          uid: z.string().regex(componentUIDRegexp),
         },
-        response: z.object({ data: formattedContentTypeSchema }),
       },
-      {
-        method: 'GET',
-        path: '/components',
-        handler: 'components.getComponents',
-        response: z.object({ data: z.array(formattedComponentSchema) }),
-      },
-      {
-        method: 'GET',
-        path: '/components/:uid',
-        handler: 'components.getComponent',
-        request: {
-          params: {
-            uid: z.string().regex(componentUIDRegexp),
-          },
-        },
-        response: z.object({ data: formattedComponentSchema }),
-      },
-    ],
-  };
-};
+      response: z.object({ data: formattedComponentSchema }),
+    },
+  ];
+});
+
+export default createRoutes;

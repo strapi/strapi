@@ -10,7 +10,6 @@ import * as token from '../services/token';
 import * as apiToken from '../services/api-token';
 import * as projectSettings from '../services/project-settings';
 import * as transfer from '../services/transfer';
-import { createGuidedTourService } from '../services/guided-tour';
 import { homepageService } from '../services/homepage';
 
 type S = {

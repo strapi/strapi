@@ -187,15 +187,12 @@ export default {
   },
 
   async getGuidedTourMeta(ctx: Context) {
-    const [isFirstSuperAdminUser, completedActions] = await Promise.all([
-      getService('user').isFirstSuperAdminUser(ctx.state.user.id),
-      getService('guided-tour').getCompletedActions(),
-    ]);
+    const isFirstSuperAdminUser = await getService('user').isFirstSuperAdminUser(ctx.state.user.id);
 
     return {
       data: {
         isFirstSuperAdminUser,
-        completedActions,
+        schemas: strapi.contentTypes,
       },
     } satisfies GetGuidedTourMeta.Response;
   },
