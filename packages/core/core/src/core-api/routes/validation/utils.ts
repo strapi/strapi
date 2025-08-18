@@ -24,14 +24,17 @@ export const safeGlobalRegistrySet = (id: Internal.UID.Schema, schema: z.ZodType
 
     const transformedId = transformUidToValidOpenApiName(id);
 
-    if (idMap.has(transformedId)) {
+    const isReplacing = idMap.has(transformedId);
+
+    if (isReplacing) {
       // Remove existing schema to prevent conflicts
-      strapi.log.debug(`Replacing existing schema ${transformedId} in registry`);
       idMap.delete(transformedId);
     }
 
     // Register the new schema with the transformed ID
-    strapi.log.debug(`Registering schema ${transformedId} in global registry`);
+    strapi.log.debug(
+      `${isReplacing ? 'Replacing' : 'Registering'} schema ${transformedId} in global registry`
+    );
     z.globalRegistry.add(schema, { id: transformedId });
   } catch (error) {
     strapi.log.error(
