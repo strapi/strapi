@@ -8,7 +8,6 @@ import {
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
-  AITranslateFromAnotherLocaleAction,
   AIPreFillDialogManager,
 } from './components/CMHeaderActions';
 import {
@@ -72,11 +71,7 @@ export default {
 
     const contentManager = app.getPlugin('content-manager');
 
-    contentManager.apis.addDocumentHeaderAction([
-      LocalePickerAction,
-      FillFromAnotherLocaleAction,
-      AITranslateFromAnotherLocaleAction,
-    ]);
+    contentManager.apis.addDocumentHeaderAction([LocalePickerAction, FillFromAnotherLocaleAction]);
     contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
       actions.splice(indexOfDeleteAction, 0, DeleteLocaleAction);
