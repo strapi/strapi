@@ -220,6 +220,25 @@ type HandleOptions = {
 type RemovedFieldPath = string;
 
 /**
+ * @internal
+ * @description Finds the initial value for a component or dynamic zone item (based on its __temp_key__ and not its index).
+ * @param initialValue - The initial values object.
+ * @param item - The item to find the initial value for.
+ * @returns The initial value for the item.
+ */
+const getItemInitialValue = (initialValue: AnyData, item: AnyData) => {
+  if (initialValue && Array.isArray(initialValue)) {
+    const matchingInitialItem = initialValue.find(
+      (initialItem) => initialItem.__temp_key__ === item.__temp_key__
+    );
+    if (matchingInitialItem) {
+      return matchingInitialItem;
+    }
+  }
+  return {};
+};
+
+/**
  * Removes values from the data object if their corresponding attribute has a
  * visibility condition that evaluates to false.
  *
@@ -267,16 +286,7 @@ const handleInvisibleAttributes = (
 
       if (attrDef.repeatable && Array.isArray(value)) {
         result[attrName] = value.map((item) => {
-          // Find the initial value for this component using __temp_key__ instead of index
-          let componentInitialValue = {};
-          if (initialValue && Array.isArray(initialValue)) {
-            const matchingInitialItem = initialValue.find(
-              (initialItem) => initialItem.__temp_key__ === item.__temp_key__
-            );
-            if (matchingInitialItem) {
-              componentInitialValue = matchingInitialItem;
-            }
-          }
+          const componentInitialValue = getItemInitialValue(initialValue, item);
 
           return handleInvisibleAttributes(
             item,
@@ -316,16 +326,7 @@ const handleInvisibleAttributes = (
         const compUID = dzItem?.__component;
         const compSchema = components[compUID];
 
-        // Find the initial value for this component using __temp_key__ instead of index
-        let componentInitialValue = {};
-        if (initialValue && Array.isArray(initialValue)) {
-          const matchingInitialItem = initialValue.find(
-            (item) => item.__temp_key__ === dzItem.__temp_key__
-          );
-          if (matchingInitialItem) {
-            componentInitialValue = matchingInitialItem;
-          }
-        }
+        const componentInitialValue = getItemInitialValue(initialValue, dzItem);
 
         const cleaned = handleInvisibleAttributes(
           dzItem,
