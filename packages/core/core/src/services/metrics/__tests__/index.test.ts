@@ -9,6 +9,7 @@ describe('metrics', () => {
   });
   test('Initializes a middleware', () => {
     const use = jest.fn();
+    const add = jest.fn();
 
     const metricsInstance = metrics({
       config: {
@@ -32,6 +33,9 @@ describe('metrics', () => {
       requestContext: {
         get: jest.fn(() => ({})),
       },
+      cron: {
+        add,
+      },
       fetch,
     } as any);
 
@@ -44,6 +48,7 @@ describe('metrics', () => {
 
   test('Does not init middleware if disabled', () => {
     const use = jest.fn();
+    const add = jest.fn();
 
     const metricsInstance = metrics({
       config: {
@@ -66,6 +71,9 @@ describe('metrics', () => {
       },
       requestContext: {
         get: jest.fn(() => ({})),
+      },
+      cron: {
+        add,
       },
       fetch,
     } as any);
@@ -99,6 +107,9 @@ describe('metrics', () => {
       },
       requestContext: {
         get: jest.fn(() => ({})),
+      },
+      cron: {
+        add: jest.fn(),
       },
       fetch,
     } as any);
@@ -146,6 +157,9 @@ describe('metrics', () => {
         app: {
           root: process.cwd(),
         },
+      },
+      cron: {
+        add: jest.fn(),
       },
       requestContext: {
         get: jest.fn(() => ({})),

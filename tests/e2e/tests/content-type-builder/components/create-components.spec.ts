@@ -12,7 +12,6 @@ test.describe('Create a new component', () => {
       resetFiles: true,
       importData: 'with-admin.tar',
       login: true,
-      skipTour: true,
       afterSetup: async () => {},
     });
   });

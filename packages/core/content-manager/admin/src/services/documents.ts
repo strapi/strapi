@@ -45,7 +45,12 @@ const documentApi = contentManagerApi.injectEndpoints({
           return [];
         }
 
-        return [{ type: 'Document', id: `${model}_LIST` }, 'RecentDocumentList', 'CountDocuments'];
+        return [
+          { type: 'Document', id: `${model}_LIST` },
+          'RecentDocumentList',
+          'CountDocuments',
+          'UpcomingReleasesList',
+        ];
       },
     }),
     cloneDocument: builder.mutation<
@@ -68,6 +73,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         { type: 'UidAvailability', id: model },
         'RecentDocumentList',
         'CountDocuments',
+        'UpcomingReleasesList',
       ],
     }),
     /**
@@ -95,6 +101,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         { type: 'UidAvailability', id: model },
         'RecentDocumentList',
         'CountDocuments',
+        'UpcomingReleasesList',
       ],
       transformResponse: (response: Create.Response, meta, arg): Create.Response => {
         /**
@@ -136,6 +143,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_LIST` : model },
         'RecentDocumentList',
         'CountDocuments',
+        'UpcomingReleasesList',
       ],
     }),
     deleteManyDocuments: builder.mutation<
@@ -154,6 +162,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         { type: 'Document', id: `${model}_LIST` },
         'RecentDocumentList',
         'CountDocuments',
+        'UpcomingReleasesList',
       ],
     }),
     discardDocument: builder.mutation<
@@ -186,6 +195,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           { type: 'UidAvailability', id: model },
           'RecentDocumentList',
           'CountDocuments',
+          'UpcomingReleasesList',
         ];
       },
     }),
@@ -339,8 +349,8 @@ const documentApi = contentManagerApi.injectEndpoints({
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
           'RecentDocumentList',
-          'GuidedTourMeta',
           'CountDocuments',
+          'UpcomingReleasesList',
         ];
       },
     }),
@@ -361,6 +371,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           ...documentIds.map((id) => ({ type: 'Document' as const, id: `${model}_${id}` })),
           'RecentDocumentList',
           'CountDocuments',
+          'UpcomingReleasesList',
         ];
       },
     }),
@@ -391,6 +402,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           { type: 'UidAvailability', id: model },
           'RecentDocumentList',
           'CountDocuments',
+          'UpcomingReleasesList',
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
@@ -453,6 +465,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           'RecentDocumentList',
           'CountDocuments',
+          'UpcomingReleasesList',
         ];
       },
     }),
@@ -475,6 +488,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         ...documentIds.map((id) => ({ type: 'Document' as const, id: `${model}_${id}` })),
         'RecentDocumentList',
         'CountDocuments',
+        'UpcomingReleasesList',
       ],
     }),
   }),

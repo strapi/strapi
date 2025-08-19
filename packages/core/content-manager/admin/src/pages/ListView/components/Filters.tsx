@@ -215,7 +215,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
       onChange={handleFilterChange}
     >
       <Filters.Trigger />
-      <Filters.Popover />
+      <Filters.Popover zIndex={499} />
       <Filters.List />
     </Filters.Root>
   );

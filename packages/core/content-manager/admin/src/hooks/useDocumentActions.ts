@@ -6,7 +6,6 @@ import {
   useTracking,
   type TrackingEvent,
   useAPIErrorHandler,
-  useGuidedTour,
 } from '@strapi/admin/strapi-admin';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -201,7 +200,6 @@ const useDocumentActions: UseDocumentActions = () => {
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
-  const setCurrentStep = useGuidedTour('useDocumentActions', (state) => state.setCurrentStep);
 
   // Get metadata from context providers for tracking purposes
   const previewContext = usePreviewContext('useDocumentActions', () => true, false);
@@ -618,8 +616,6 @@ const useDocumentActions: UseDocumentActions = () => {
           }),
         });
 
-        setCurrentStep('contentManager.success');
-
         return res.data;
       } catch (err) {
         toggleNotification({
@@ -638,7 +634,6 @@ const useDocumentActions: UseDocumentActions = () => {
       formatMessage,
       fromPreview,
       fromRelationModal,
-      setCurrentStep,
       toggleNotification,
       trackUsage,
     ]
