@@ -32,29 +32,29 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
 
   return (
     <>
-      {popoverField && (
-        <Box
-          position={'fixed'}
-          top={iframeRect.top + 'px'}
-          left={iframeRect.left + 'px'}
-          width={iframeRect.width + 'px'}
-          height={iframeRect.height + 'px'}
-          zIndex={4}
-        />
-      )}
+      {/**
+       * Overlay an empty div on top of the iframe while the popover is open so it can
+       * intercept clicks. Without it, we wouldn't be able to close the popover by clicking outside,
+       * because the click would be detected by the iframe window, not by the admin.
+       **/}
+      <Box
+        position={'fixed'}
+        top={iframeRect.top + 'px'}
+        left={iframeRect.left + 'px'}
+        width={iframeRect.width + 'px'}
+        height={iframeRect.height + 'px'}
+        zIndex={4}
+      />
       <InputPopoverProvider>
-        <Popover.Root
-          open={popoverField != null}
-          onOpenChange={(open) => !open && setPopoverField(null)}
-        >
+        <Popover.Root open={true} onOpenChange={(open) => !open && setPopoverField(null)}>
           <Popover.Trigger>
             <Box
-              id="popover-trigger"
               position="fixed"
               width={popoverField.position.width + 'px'}
               height={popoverField.position.height + 'px'}
-              top={iframeRect.top + popoverField.position.top + 'px'}
-              left={iframeRect.left + popoverField.position.left + 'px'}
+              top={0}
+              left={0}
+              transform={`translate(${iframeRect.left + popoverField.position.left}px, ${iframeRect.top + popoverField.position.top}px)`}
             />
           </Popover.Trigger>
           <Popover.Content sideOffset={4}>
