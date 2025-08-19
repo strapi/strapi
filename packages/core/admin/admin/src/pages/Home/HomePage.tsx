@@ -106,6 +106,21 @@ export const WidgetRoot = ({
   const originalIndex = findWidget(id).index;
   const [isDraggingFromHandle, setIsDraggingFromHandle] = React.useState(false);
 
+  // Debounced move widget to reduce glitching during drag
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const debouncedMoveWidget = React.useCallback(
+    (id: string, atIndex: number) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        moveWidget(id, atIndex);
+      }, 16);
+    },
+    [moveWidget]
+  );
+
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: 'widget',
@@ -136,11 +151,11 @@ export const WidgetRoot = ({
       hover({ id: draggedId }: Item) {
         if (draggedId !== id) {
           const { index: overIndex } = findWidget(id);
-          moveWidget(draggedId, overIndex);
+          debouncedMoveWidget(draggedId, overIndex);
         }
       },
     }),
-    [findWidget, moveWidget]
+    [findWidget, debouncedMoveWidget]
   );
 
   const opacity = isDragging ? 0 : 1;
