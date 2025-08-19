@@ -10,6 +10,9 @@ import {
   Typography,
   Popover,
   Tooltip,
+  Checkbox,
+  Badge,
+  Box,
 } from '@strapi/design-system';
 import { Earth } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -123,14 +126,25 @@ const LabelAction = ({ field }: { field: EditFieldLayout }) => {
       </Tooltip>
       <Modal.Content>
         <Modal.Header>
-          <Modal.Title>{field.name} — All locales</Modal.Title>
+          <Modal.Title>{field.name} — All localizations</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Flex direction="column" gap={4} alignItems="stretch">
             {locales.map((locale) => (
-              <InputRenderer {...field} label={locale.name} document={{} as any} key={locale.id} />
+              <Flex key={locale.id} direction="column" alignItems="flex-start" width="100%" gap={1}>
+                <Badge size="S">{locale.name}</Badge>
+                <Flex key={locale.id} gap={2} width="100%">
+                  <Checkbox defaultChecked={true} />
+                  <Box flex={1}>
+                    <InputRenderer {...field} label={''} document={{} as any} />
+                  </Box>
+                </Flex>
+              </Flex>
             ))}
           </Flex>
+          <Button variant="secondary" marginTop={4}>
+            Translate selected localizations with AI
+          </Button>
         </Modal.Body>
         <Modal.Footer>
           <Modal.Close>
