@@ -48,23 +48,16 @@ const SearchInput = ({
     setQuery({ _q: '' }, 'remove');
   };
 
-  const handleSearch = React.useCallback(
-    (term: string) => {
-      if (term) {
-        if (trackedEvent) {
-          trackUsage(trackedEvent, trackedEventDetails);
-        }
-        setQuery({ _q: encodeURIComponent(term), page: 1 });
-      } else {
-        setQuery({ _q: '' }, 'remove');
-      }
-    },
-    [setQuery, trackUsage, trackedEvent, trackedEventDetails]
-  );
-
   React.useEffect(() => {
-    handleSearch(debouncedSearch);
-  }, [debouncedSearch, handleSearch]);
+    if (debouncedSearch) {
+      if (trackedEvent) {
+        trackUsage(trackedEvent, trackedEventDetails);
+      }
+      setQuery({ _q: encodeURIComponent(debouncedSearch), page: 1 });
+    } else {
+      setQuery({ _q: '' }, 'remove');
+    }
+  }, [debouncedSearch, trackedEvent, trackedEventDetails, setQuery, trackUsage]);
 
   if (isOpen) {
     return (
