@@ -64,7 +64,6 @@ type State = {
   tours: TourState;
   enabled: boolean;
   completedActions: CompletedActions;
-  completedAt: Date | null;
 };
 
 const [GuidedTourProviderImpl, useGuidedTour] = createContext<{
@@ -89,6 +88,8 @@ const getCompletedTours = (tours: TourState): ValidTourName[] => {
   ) as ValidTourName[];
 };
 
+const areAllToursComplete = (tours: TourState) => Object.values(tours).every((t) => t.isCompleted);
+
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
     if (action.type === 'next_step') {
@@ -98,11 +99,6 @@ function reducer(state: State, action: Action): State {
       const nextStep = currentStep + 1;
       draft.tours[action.payload].currentStep = nextStep;
       draft.tours[action.payload].isCompleted = nextStep >= tourLength;
-
-      const completedTours = getCompletedTours(draft.tours);
-      if (completedTours.length === Object.keys(draft.tours).length) {
-        draft.completedAt = new Date();
-      }
     }
 
     if (action.type === 'previous_step') {
@@ -157,7 +153,6 @@ const GuidedTourContext = ({
     tours: getInitialTourState(guidedTours),
     enabled,
     completedActions: [],
-    completedAt: null,
   });
   const migratedTourState = migrateTours(storedTours);
   const [state, dispatch] = React.useReducer(reducer, migratedTourState);
@@ -167,23 +162,22 @@ const GuidedTourContext = ({
     setStoredTours(state);
   }, [state, setStoredTours]);
 
-  // Dispatch tracking event one time the moment all tours have been completed
-  const hasTrackedCompletion = React.useRef(false);
-  const completedTours = getCompletedTours(state.tours);
+  // Derive all completed tours from state
+  const currentAllCompletedState = areAllToursComplete(state.tours);
+  // Store completed state in ref to survive a re-render,
+  // when current state changes this will persist and be used for comparison
+  const previousAllCompletedStateRef = React.useRef(currentAllCompletedState);
   React.useEffect(() => {
-    if (
-      completedTours.length === Object.keys(state.tours).length &&
-      state.completedAt &&
-      !hasTrackedCompletion.current
-    ) {
-      const completedAtDate = new Date(state.completedAt);
-      const timeSinceCompletion = Date.now() - completedAtDate.getTime();
-      if (timeSinceCompletion < 2000) {
-        trackUsage('didCompleteGuidedTour', { name: 'all' });
-        hasTrackedCompletion.current = true;
-      }
+    const previousAllCompletedState = previousAllCompletedStateRef.current;
+    // When the previous state was not complete but the current state is now complete, fire the event
+    if (!previousAllCompletedState && currentAllCompletedState) {
+      console.log('hey');
+      trackUsage('didCompleteGuidedTour', { name: 'all' });
     }
-  }, [completedTours, state.completedAt, state.tours, trackUsage]);
+
+    // When the current state has all tours completed so will the previous state, the tracking event won't fire again
+    previousAllCompletedStateRef.current = currentAllCompletedState;
+  }, [currentAllCompletedState, trackUsage]);
 
   return (
     <GuidedTourProviderImpl state={state} dispatch={dispatch}>
