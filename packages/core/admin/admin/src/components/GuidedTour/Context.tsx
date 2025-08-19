@@ -171,7 +171,6 @@ const GuidedTourContext = ({
     const previousAllCompletedState = previousAllCompletedStateRef.current;
     // When the previous state was not complete but the current state is now complete, fire the event
     if (!previousAllCompletedState && currentAllCompletedState) {
-      console.log('hey');
       trackUsage('didCompleteGuidedTour', { name: 'all' });
     }
 
