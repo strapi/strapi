@@ -44,8 +44,8 @@ const SearchInput = ({
   }, [isOpen]);
 
   const handleClear = () => {
-    setValue('');
     setQuery({ _q: '' }, 'remove');
+    setValue('');
   };
 
   React.useEffect(() => {

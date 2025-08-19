@@ -90,7 +90,12 @@ describe('SearchInput', () => {
 
     expect(getByRole('textbox', { name: 'Search label' })).toHaveValue('');
 
-    expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
+    await waitFor(
+      () => {
+        expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
+      },
+      { timeout: 1000 }
+    );
   });
 
   describe('blur behavior', () => {
@@ -106,7 +111,18 @@ describe('SearchInput', () => {
         expectedToBeInDocument: true,
       },
     ])('$name', async ({ inputValue, expectedToBeInDocument }) => {
-      const { user, getByRole, queryByRole } = render(<SearchInput label="Search label" />);
+      const { user, getByRole, queryByRole } = render(<SearchInput label="Search label" />, {
+        renderOptions: {
+          wrapper({ children }) {
+            return (
+              <>
+                {children}
+                <LocationDisplay />
+              </>
+            );
+          },
+        },
+      });
 
       // Open the search input
       await user.click(getByRole('button', { name: 'Search' }));
@@ -119,9 +135,9 @@ describe('SearchInput', () => {
         await user.type(textbox, inputValue);
         await waitFor(
           () => {
-            const searchString = getByRole('listitem').textContent ?? '';
-            const searchParams = new URLSearchParams(searchString);
-            expect(searchParams.has('_q')).toBe(true);
+            expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(
+              true
+            );
           },
           { timeout: 1000 }
         );
