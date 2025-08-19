@@ -32,13 +32,15 @@ interface TransformOptions {
    * @deprecated this option is deprecated and will be removed in the next major version
    */
   useJsonAPIFormat?: boolean;
+  encodeSourceMaps?: boolean;
 }
 
-const transformResponse = (
+const transformResponse = async (
   resource: any,
   meta: unknown = {},
   opts: TransformOptions = {
     useJsonAPIFormat: false,
+    encodeSourceMaps: false,
   }
 ) => {
   if (isNil(resource)) {
@@ -49,8 +51,15 @@ const transformResponse = (
     throw new Error('Entry must be an object or an array of objects');
   }
 
+  const data = opts.useJsonAPIFormat ? transformEntry(resource, opts?.contentType) : resource;
+
+  // Apply source map encoding if requested and content type is provided
+  if (opts.encodeSourceMaps && opts.contentType) {
+    await strapi.get('content-source-maps').encodeSourceMaps(data, opts.contentType);
+  }
+
   return {
-    data: opts.useJsonAPIFormat ? transformEntry(resource, opts?.contentType) : resource,
+    data,
     meta,
   };
 };

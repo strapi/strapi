@@ -32,6 +32,7 @@ function createController({
       return transformResponse(data, meta, {
         contentType,
         useJsonAPIFormat: ctx?.headers?.['strapi-response-format'] === 'v4',
+        encodeSourceMaps: ctx?.query?.encodeSourceMaps === 'true',
       });
     },
 

@@ -29,6 +29,7 @@ const previewLoader = async ({ params }) => {
     const searchParams = new URLSearchParams({
       locale,
       status,
+      encodeSourceMaps: 'true',
     });
     const route = collectionType === 'collection-types' ? `${apiName}/${documentId}` : apiName;
 
