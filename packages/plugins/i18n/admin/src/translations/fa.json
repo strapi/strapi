@@ -72,5 +72,6 @@
   "plugin.schema.i18n.localized.description-content-type": "امکان ترجمه یک ورودی به زبان‌های مختلف را فراهم می‌کند",
   "plugin.schema.i18n.localized.description-field": "این فیلد می‌تواند در هر زبان مقدار متفاوتی داشته باشد",
   "plugin.schema.i18n.localized.label-content-type": "چندزبانه‌سازی",
-  "plugin.schema.i18n.localized.label-field": "فعال‌سازی چندزبانه‌سازی برای این فیلد"
+  "plugin.schema.i18n.localized.label-field": "فعال‌سازی چندزبانه‌سازی برای این فیلد",
+  "Settings.locales.modal.create.name.label.description": "زبان با این نام در پنل مدیریت نمایش داده می‌شود"
 }
