@@ -232,5 +232,9 @@
   "IconPicker.remove.tooltip": "حذف آیکون انتخاب‌شده",
   "IconPicker.remove.button": "دکمه حذف آیکون انتخاب‌شده",
   "IconPicker.emptyState.label": "هیچ آیکونی پیدا نشد",
-  "IconPicker.icon.label": "انتخاب آیکون {icon}"
+  "IconPicker.icon.label": "انتخاب آیکون {icon}",
+  "form.attribute.condition.if": "اگر",
+  "ComponentIconPicker.search.placeholder": "جستجوی آیکون",
+  "contentType.draftAndPublish.label": "پیش‌نویس و انتشار",
+  "contentType.draftAndPublish.description": "امکان نوشتن نسخه پیش‌نویس یک ورودی، پیش از انتشار را فراهم می‌کند"
 }
