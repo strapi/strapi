@@ -237,7 +237,13 @@ const ListViewPage = () => {
         <Page.Main>
           <Page.Title>{`${contentTypeTitle}`}</Page.Title>
           <LayoutsHeaderCustom
-            primaryAction={canCreate ? <CreateButton /> : null}
+            primaryAction={
+              canCreate ? (
+                <tours.contentManager.CreateNewEntry>
+                  <CreateButton />
+                </tours.contentManager.CreateNewEntry>
+              ) : null
+            }
             subtitle={formatMessage(
               {
                 id: getTranslation('pages.ListView.header-subtitle'),
@@ -309,7 +315,13 @@ const ListViewPage = () => {
       <Page.Main>
         <Page.Title>{`${contentTypeTitle}`}</Page.Title>
         <LayoutsHeaderCustom
-          primaryAction={canCreate ? <CreateButton /> : null}
+          primaryAction={
+            canCreate ? (
+              <tours.contentManager.CreateNewEntry>
+                <CreateButton />
+              </tours.contentManager.CreateNewEntry>
+            ) : null
+          }
           subtitle={formatMessage(
             {
               id: getTranslation('pages.ListView.header-subtitle'),

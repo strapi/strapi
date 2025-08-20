@@ -205,11 +205,12 @@ const EditViewPage = () => {
             </Tabs.List>
             <Grid.Root paddingTop={8} gap={4}>
               <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
-                <tours.contentManager.Fields>
-                  <Tabs.Content value="draft">
-                    <FormLayout layout={layout} document={doc} />
-                  </Tabs.Content>
-                </tours.contentManager.Fields>
+                <Tabs.Content value="draft">
+                  <tours.contentManager.Fields>
+                    <Box />
+                  </tours.contentManager.Fields>
+                  <FormLayout layout={layout} document={doc} />
+                </Tabs.Content>
                 <Tabs.Content value="published">
                   <FormLayout layout={layout} document={doc} />
                 </Tabs.Content>
