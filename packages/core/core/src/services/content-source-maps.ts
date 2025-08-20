@@ -36,15 +36,23 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
       return res;
     },
 
-    async encodeEntry(entryRootId: any, entryRootModel: string, entryData: any, model: any) {
+    async encodeEntry(options: {
+      entryRootId: any;
+      entryRootModel: string;
+      entryData: any;
+      model: any;
+    }): Promise<any> {
+      const { entryRootId, entryRootModel, entryData, model } = options;
+
       if (typeof entryData !== 'object' || entryData === null || entryData === undefined) {
-        return;
+        return entryData;
       }
 
-      Object.keys(entryData).forEach((key) => {
+      const encodedData = { ...entryData };
+
+      Object.keys(entryData).forEach(async (key) => {
         const value = entryData[key];
 
-        // Skip encoding if the value is null or undefined
         if (value === null || value === undefined) {
           return;
         }
@@ -56,93 +64,129 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
         }
 
         if (ENCODABLE_TYPES.includes(attribute.type)) {
-          entryData[key] = this.encodeField(
+          encodedData[key] = this.encodeField(
             value,
             // TODO: smarter metadata than just the key
             key
           );
-
-          return;
         }
 
         if (attribute.type === 'component') {
           const componentModel = strapi.getModel(attribute.component);
 
           if (Array.isArray(value)) {
-            return value.forEach((item) => {
-              return this.encodeEntry(entryRootId, entryRootModel, item, componentModel);
-            });
+            encodedData[key] = await Promise.all(
+              value.map((item) =>
+                this.encodeEntry({
+                  entryRootId,
+                  entryRootModel,
+                  entryData: item,
+                  model: componentModel,
+                })
+              )
+            );
           }
 
-          return this.encodeEntry(entryRootId, entryRootModel, value, componentModel);
+          encodedData[key] = await this.encodeEntry({
+            entryRootId,
+            entryRootModel,
+            entryData: value,
+            model: componentModel,
+          });
         }
 
         if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
-          return value.forEach((item) => {
-            return this.encodeEntry(
-              entryRootId,
-              entryRootModel,
-              item,
-              strapi.getModel(item.__component)
-            );
-          });
+          encodedData[key] = await Promise.all(
+            value.map((item) =>
+              this.encodeEntry({
+                entryRootId,
+                entryRootModel,
+                entryData: item,
+                model: strapi.getModel(item.__component),
+              })
+            )
+          );
         }
 
         if (attribute.type === 'relation') {
           const relatedModel = strapi.getModel(attribute.target);
 
           if (Array.isArray(value)) {
-            return value.forEach((item: any) => {
-              return this.encodeEntry(
-                item.id,
-                relatedModel.uid,
-                item,
-                strapi.getModel(attribute.target)
-              );
-            });
+            encodedData[key] = await Promise.all(
+              value.map((item: any) =>
+                this.encodeEntry({
+                  entryRootId: item.id,
+                  entryRootModel: relatedModel.uid,
+                  entryData: item,
+                  model: strapi.getModel(attribute.target),
+                })
+              )
+            );
           }
 
-          return this.encodeEntry(
-            value.id,
-            relatedModel.uid,
-            value,
-            strapi.getModel(attribute.target)
-          );
+          encodedData[key] = await this.encodeEntry({
+            entryRootId: value.id,
+            entryRootModel: relatedModel.uid,
+            entryData: value,
+            model: strapi.getModel(attribute.target),
+          });
         }
 
         if (attribute.type === 'media') {
           const fileModel = strapi.getModel('plugin::upload.file');
 
           if (Array.isArray(value.data)) {
-            return value.data.forEach((item: any) => {
-              return this.encodeEntry(entryRootId, entryRootModel, item, fileModel);
+            const encodedMediaData = await Promise.all(
+              value.data.map((item: any) =>
+                this.encodeEntry({
+                  entryRootId,
+                  entryRootModel,
+                  entryData: item,
+                  model: fileModel,
+                })
+              )
+            );
+            encodedData[key] = { ...value, data: encodedMediaData };
+          } else {
+            const encodedMediaItem = await this.encodeEntry({
+              entryRootId,
+              entryRootModel,
+              entryData: value.data,
+              model: fileModel,
             });
+            encodedData[key] = { ...value, data: encodedMediaItem };
           }
-
-          return this.encodeEntry(entryRootId, entryRootModel, value.data, fileModel);
         }
       });
+
+      return encodedData;
     },
 
-    async encodeSourceMaps(
-      data: any,
-      contentType: Struct.ContentTypeSchema,
-      rootId?: any,
-      rootModel?: string
-    ): Promise<void> {
+    async encodeSourceMaps(options: {
+      data: any;
+      contentType: Struct.ContentTypeSchema;
+      rootId?: any;
+      rootModel?: string;
+    }): Promise<any> {
+      const { data, contentType, rootId, rootModel } = options;
+
       if (Array.isArray(data)) {
-        data.forEach((item) => this.encodeSourceMaps(item, contentType));
-        return;
+        return Promise.all(data.map((item) => this.encodeSourceMaps({ data: item, contentType })));
       }
 
       if (typeof data !== 'object' || data === null) {
-        return;
+        return data;
       }
 
       const actualRootId = rootId || data.id;
       const actualRootModel = rootModel || contentType.uid;
 
-      await this.encodeEntry(actualRootId, actualRootModel, data, contentType);
+      return this.encodeEntry({
+        entryRootId: actualRootId,
+        entryRootModel: actualRootModel,
+        entryData: data,
+        model: contentType,
+      });
     },
   };
 };
