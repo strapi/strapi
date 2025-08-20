@@ -311,5 +311,7 @@
   "widget.last-edited.single-type": "تک‌نوع",
   "widget.last-edited.no-data": "هیچ ورودی ویرایش‌شده‌ای وجود ندارد",
   "widget.last-published.title": "آخرین ورودی‌های منتشرشده",
-  "widget.last-published.no-data": "هیچ ورودی منتشرشده‌ای وجود ندارد"
+  "widget.last-published.no-data": "هیچ ورودی منتشرشده‌ای وجود ندارد",
+  "containers.ListPage.selectedEntriesModal.title": "انتشار ورودی‌ها",
+  "plugin.name": "مدیریت محتوا"
 }
