@@ -31,6 +31,36 @@ import type { WidgetWithUID } from '../../core/apis/Widgets';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
+ * GapDropZone
+ * -----------------------------------------------------------------------------------------------*/
+
+interface GapDropZoneProps {
+  insertIndex: number;
+  moveWidget: (id: string, to: number) => void;
+  onDropWidget: (widgetId: string, insertIndex: number) => void;
+}
+
+const GapDropZone = ({ insertIndex, moveWidget, onDropWidget }: GapDropZoneProps) => {
+  const [, drop] = useDrop(
+    () => ({
+      accept: 'widget',
+      drop: (item: { id: string }) => {
+        onDropWidget(item.id, insertIndex);
+      },
+      hover({ id: draggedId }: { id: string }) {
+        moveWidget(draggedId, insertIndex);
+      },
+      collect: (monitor) => ({
+        isOver: monitor.isOver(),
+      }),
+    }),
+    [insertIndex, moveWidget, onDropWidget]
+  );
+
+  return <Box ref={drop} height="100%" width="100%" />;
+};
+
+/* -------------------------------------------------------------------------------------------------
  * TrashBinButton
  * -----------------------------------------------------------------------------------------------*/
 
@@ -82,6 +112,7 @@ interface WidgetRootProps extends Pick<WidgetType, 'title' | 'icon' | 'link'> {
   setColumnWidths: (
     widths: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)
   ) => void;
+  gridRef: React.RefObject<HTMLDivElement | null>;
 }
 
 interface Item {
@@ -100,7 +131,9 @@ export const WidgetRoot = ({
   setDisplayTrashBin,
   columnWidths,
   setColumnWidths,
+  gridRef,
 }: WidgetRootProps) => {
+  const nodeRef = React.useRef<HTMLDivElement | null>(null);
   const { formatMessage } = useIntl();
   const Icon = icon;
   const originalIndex = findWidget(id).index;
@@ -174,8 +207,9 @@ export const WidgetRoot = ({
       gap={4}
       padding={6}
       aria-labelledby={id}
-      ref={(node: HTMLElement | null) => {
+      ref={(node: HTMLDivElement | null) => {
         if (node) {
+          nodeRef.current = node;
           drag(drop(node));
         }
       }}
@@ -205,6 +239,10 @@ export const WidgetRoot = ({
           cursor="grab"
           style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
           onMouseDown={() => setIsDraggingFromHandle(true)}
+          display={{
+            initial: 'none',
+            large: 'block',
+          }}
         >
           <Drag display="block" />
         </Box>
@@ -219,6 +257,10 @@ export const WidgetRoot = ({
         right={0}
         padding={2}
         alignItems="center"
+        display={{
+          initial: 'none',
+          large: 'block',
+        }}
         style={{ cursor: 'col-resize' }}
         onMouseDown={(e) => {
           const startX = e.clientX;
@@ -226,7 +268,8 @@ export const WidgetRoot = ({
 
           const handleMouseMove = (moveEvent: MouseEvent) => {
             const deltaX = moveEvent.clientX - startX;
-            const threshold = 100;
+            const parentWidth = gridRef?.current?.clientWidth;
+            const threshold = parentWidth ? Math.round(parentWidth / 12) : 100; // Base the threshold on 1/12 of the grid width
             const newWidth = Math.max(1, Math.min(12, startWidth + Math.round(deltaX / threshold)));
 
             if (newWidth >= 4) {
@@ -295,6 +338,7 @@ const HomePageCE = () => {
   const [displayAddNewWidget, setDisplayAddNewWidget] = React.useState(false);
   const [selectedWidgetToAdd, setSelectedWidgetToAdd] = React.useState('');
   const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
+  const gridRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     const checkWidgetsPermissions = async () => {
@@ -357,7 +401,13 @@ const HomePageCE = () => {
     }
   };
 
+  const handleDropWidget = (widgetId: string, insertIndex: number) => {
+    // Move the widget to the specified position
+    moveWidget(widgetId, insertIndex);
+  };
+
   const [, drop] = useDrop(() => ({ accept: 'widget' }));
+  let accumulator = 0;
 
   return (
     <Main>
@@ -378,7 +428,7 @@ const HomePageCE = () => {
       <FreeTrialWelcomeModal />
       <FreeTrialEndedModal />
       <Layouts.Content>
-        <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
+        <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10} ref={gridRef}>
           <GuidedTourHomepageOverview />
           {loading ? (
             <Box position="absolute" top={0} left={0} right={0} bottom={0}>
@@ -386,23 +436,48 @@ const HomePageCE = () => {
             </Box>
           ) : (
             <Grid.Root gap={5} ref={drop}>
-              {filteredWidgets.map((widget) => (
-                <Grid.Item col={columnWidths[widget.uid] || 6} s={12} key={widget.uid}>
-                  <WidgetRoot
-                    id={widget.uid}
-                    title={widget.title}
-                    icon={widget.icon}
-                    link={widget.link}
-                    findWidget={findWidget}
-                    moveWidget={moveWidget}
-                    setDisplayTrashBin={setDisplayTrashBin}
-                    columnWidths={columnWidths}
-                    setColumnWidths={setColumnWidths}
-                  >
-                    <WidgetComponent component={widget.component} />
-                  </WidgetRoot>
-                </Grid.Item>
-              ))}
+              {filteredWidgets.map((widget, index) => {
+                const currentWidgetWidth = columnWidths[widget.uid] || 6;
+                const nextWidgetWidth = columnWidths[filteredWidgets[index + 1]?.uid] || 6;
+                if (accumulator + currentWidgetWidth > 12) {
+                  accumulator = 0; // New row
+                }
+                accumulator += currentWidgetWidth;
+                const nextAccumulator = accumulator + nextWidgetWidth;
+                return (
+                  <>
+                    <Grid.Item col={columnWidths[widget.uid] || 6} s={12} key={widget.uid}>
+                      <WidgetRoot
+                        id={widget.uid}
+                        title={widget.title}
+                        icon={widget.icon}
+                        link={widget.link}
+                        findWidget={findWidget}
+                        moveWidget={moveWidget}
+                        setDisplayTrashBin={setDisplayTrashBin}
+                        columnWidths={columnWidths}
+                        setColumnWidths={setColumnWidths}
+                        gridRef={gridRef}
+                      >
+                        <WidgetComponent component={widget.component} />
+                      </WidgetRoot>
+                    </Grid.Item>
+                    {nextAccumulator > 12 && accumulator < 12 && (
+                      <Grid.Item
+                        col={12 - accumulator}
+                        display={{ initial: 'none', large: 'block' }}
+                        key={`${widget.uid}-empty-box`}
+                      >
+                        <GapDropZone
+                          insertIndex={index}
+                          moveWidget={moveWidget}
+                          onDropWidget={handleDropWidget}
+                        />
+                      </Grid.Item>
+                    )}
+                  </>
+                );
+              })}
               {filteredWidgets.length < listAuthorizedWidgets.length && (
                 <Grid.Item col={6} s={12} key="add-new-widget">
                   <Flex
