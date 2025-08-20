@@ -31,11 +31,7 @@ const apiTokensService = adminApi
           data: body,
         }),
         transformResponse: (response: ApiToken.Create.Response) => response.data,
-        invalidatesTags: [
-          { type: 'ApiToken' as const, id: 'LIST' },
-          'GuidedTourMeta',
-          'HomepageKeyStatistics',
-        ],
+        invalidatesTags: [{ type: 'ApiToken' as const, id: 'LIST' }, 'HomepageKeyStatistics'],
       }),
       deleteAPIToken: builder.mutation<
         ApiToken.Revoke.Response['data'],

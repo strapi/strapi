@@ -29,3 +29,4 @@ export * from './validation';
 export * from './route-serialization';
 
 export * from './primitives';
+export * from './content-api-router';

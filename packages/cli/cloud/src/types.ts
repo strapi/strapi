@@ -53,7 +53,12 @@ export interface CLIContext {
   cwd: string;
   logger: Logger;
   promptExperiment?: string;
+  user?: User;
 }
+
+export type User = {
+  id: string;
+};
 
 export type StrapiCloudCommand = (params: {
   command: Command;
@@ -74,4 +79,5 @@ export type StrapiCloudCommandInfo = {
 
 export type TrackPayload = Record<string, unknown>;
 
+// eslint-disable-next-line import/no-cycle
 export type * from './services/cli-api';
