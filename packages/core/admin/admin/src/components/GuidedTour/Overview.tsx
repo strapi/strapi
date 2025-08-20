@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Box, Button, Dialog, Flex, Link, ProgressBar, Typography } from '@strapi/design-system';
 import { CheckCircle, ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -9,6 +11,7 @@ import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { ConfirmDialog } from '../ConfirmDialog';
 
 import { type ValidTourName, useGuidedTour } from './Context';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 
 /* -------------------------------------------------------------------------------------------------
  * Styled
@@ -100,7 +103,7 @@ const TASK_CONTENT = [
     },
     title: {
       id: 'tours.overview.apiTokens.label',
-      defaultMessage: 'Create and copy an API token',
+      defaultMessage: 'Copy an API token',
     },
     done: DONE_LABEL,
   },
@@ -153,10 +156,6 @@ export const GuidedTourHomepageOverview = () => {
   const completionPercentage =
     tourNames.length > 0 ? Math.round((completedTours.length / tourNames.length) * 100) : 0;
 
-  if (!guidedTourMeta?.data.isFirstSuperAdminUser || !enabled) {
-    return null;
-  }
-
   const handleConfirmDialog = () => {
     trackUsage('didSkipGuidedTour', { name: 'all' });
     dispatch({ type: 'skip_all_tours' });
@@ -166,6 +165,10 @@ export const GuidedTourHomepageOverview = () => {
     trackUsage('didCompleteGuidedTour', { name: tourName });
     dispatch({ type: 'skip_tour', payload: tourName });
   };
+
+  if (!guidedTourMeta?.data.isFirstSuperAdminUser || !enabled) {
+    return null;
+  }
 
   return (
     <Container tag="section" gap={0}>
@@ -227,9 +230,12 @@ export const GuidedTourHomepageOverview = () => {
           {TASK_CONTENT.map((task) => {
             const tourName = task.tourName as ValidTourName;
             const tour = tours[tourName];
+
             const isLinkDisabled =
               tourName !== 'contentTypeBuilder' &&
-              !completedActions.includes('didCreateContentTypeSchema');
+              !completedActions.includes(
+                GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema
+              );
 
             return (
               <TourTaskContainer

@@ -1,4 +1,6 @@
-import { type Action, type ExtendedCompletedActions, reducer } from '../Context';
+import { type Action, reducer } from '../Context';
+import { tours } from '../Tours';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 
 describe('GuidedTour | reducer', () => {
   describe('next_step', () => {
@@ -8,26 +10,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -40,26 +38,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -71,26 +65,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
-            length: 1,
           },
           contentManager: {
             currentStep: 2,
             isCompleted: false,
-            length: 1,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -103,57 +93,50 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 2,
             isCompleted: false,
-            length: 1,
           },
           contentManager: {
             currentStep: 2,
             isCompleted: false,
-            length: 1,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
 
     it('should mark tour as completed when reaching the last step', () => {
+      const totalStepCount = tours.contentTypeBuilder._meta.totalStepCount;
       const initialState = {
         tours: {
           contentTypeBuilder: {
-            currentStep: 0,
+            currentStep: totalStepCount - 1,
             isCompleted: false,
-            length: 1,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -164,28 +147,24 @@ describe('GuidedTour | reducer', () => {
       const expectedState = {
         tours: {
           contentTypeBuilder: {
-            currentStep: 1,
+            currentStep: totalStepCount,
             isCompleted: true,
-            length: 1,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -199,26 +178,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -231,26 +206,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: true,
-            length: 3,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -262,26 +233,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           contentManager: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -294,26 +261,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: true,
-            length: 3,
           },
           contentManager: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -327,31 +290,30 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
         type: 'set_completed_actions',
-        payload: ['didCreateContentTypeSchema', 'didCreateContent'] as ExtendedCompletedActions,
+        payload: [
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent,
+        ],
       };
 
       const expectedState = {
@@ -359,29 +321,25 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCreateContent',
-        ] as ExtendedCompletedActions,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent,
+        ],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -393,34 +351,33 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-        ] as ExtendedCompletedActions,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+        ],
       };
 
       const action: Action = {
         type: 'set_completed_actions',
-        payload: ['didCreateContentTypeSchema', 'didCreateApiToken'] as ExtendedCompletedActions,
+        payload: [
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
+        ],
       };
 
       const expectedState = {
@@ -428,30 +385,26 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-          'didCreateApiToken',
-        ] as ExtendedCompletedActions,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
+        ],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -463,31 +416,27 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       const action: Action = {
         type: 'set_completed_actions',
-        payload: [] as ExtendedCompletedActions,
+        payload: [],
       };
 
       const expectedState = {
@@ -495,26 +444,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -526,31 +471,27 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: true,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 2,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: false,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       const action: Action = {
         type: 'set_completed_actions',
-        payload: ['didCopyApiToken'] as ExtendedCompletedActions,
+        payload: [GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken],
       };
 
       const expectedState = {
@@ -558,26 +499,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: true,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 2,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: false,
-        completedActions: ['didCopyApiToken'] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -591,26 +528,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: true,
-            length: 2,
           },
           apiTokens: {
             currentStep: 2,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       const action: Action = {
@@ -622,26 +555,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: true,
-            length: 2,
           },
           apiTokens: {
             currentStep: 2,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: false,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -653,30 +582,26 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-          'didCreateApiToken',
-        ] as ExtendedCompletedActions,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
+        ],
       };
 
       const action: Action = {
@@ -688,30 +613,26 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 2,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 3,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: false,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-          'didCreateApiToken',
-        ] as ExtendedCompletedActions,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
+        ],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -719,36 +640,32 @@ describe('GuidedTour | reducer', () => {
   });
 
   describe('reset_all_tours', () => {
-    it('should reset when all tours have been completed', () => {
+    it('should reset all tours', () => {
       const initialState = {
         tours: {
           contentTypeBuilder: {
-            currentStep: 5,
+            currentStep: 8,
             isCompleted: true,
-            length: 5,
           },
           contentManager: {
             currentStep: 4,
             isCompleted: true,
-            length: 4,
           },
           apiTokens: {
             currentStep: 4,
             isCompleted: true,
-            length: 4,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: true,
-            length: 0,
           },
         },
         enabled: true,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-          'didCreateApiToken',
-        ] as ExtendedCompletedActions,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.createToken,
+        ],
       };
 
       const action: Action = {
@@ -760,26 +677,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 5,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -791,26 +704,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 2,
             isCompleted: false,
-            length: 5,
           },
           contentManager: {
             currentStep: 4,
             isCompleted: true,
-            length: 4,
           },
           apiTokens: {
             currentStep: 1,
             isCompleted: false,
-            length: 4,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: ['didCreateContentTypeSchema'] as ExtendedCompletedActions,
+        completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
       const action: Action = {
@@ -822,26 +731,22 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 5,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -853,29 +758,25 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 3,
             isCompleted: false,
-            length: 5,
           },
           contentManager: {
             currentStep: 2,
             isCompleted: false,
-            length: 4,
           },
           apiTokens: {
             currentStep: 4,
             isCompleted: true,
-            length: 4,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: false,
         completedActions: [
-          'didCreateContentTypeSchema',
-          'didCopyApiToken',
-        ] as ExtendedCompletedActions,
+          GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+          GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
+        ],
       };
 
       const action: Action = {
@@ -887,26 +788,134 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
-            length: 5,
           },
           contentManager: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
           },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
-            length: 4,
           },
           strapiCloud: {
             currentStep: 0,
             isCompleted: false,
-            length: 0,
           },
         },
         enabled: true,
-        completedActions: [] as ExtendedCompletedActions,
+        completedActions: [],
+      };
+
+      expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+  });
+
+  describe('previous_step', () => {
+    it('should decrement the step count for the specified tour', () => {
+      const initialState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 2,
+            isCompleted: false,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+        },
+        enabled: true,
+        completedActions: [],
+      };
+
+      const action: Action = {
+        type: 'previous_step',
+        payload: 'contentTypeBuilder',
+      };
+
+      const expectedState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 1,
+            isCompleted: false,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+        },
+        enabled: true,
+        completedActions: [],
+      };
+
+      expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+
+    it('should not decrement below 0', () => {
+      const initialState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+        },
+        enabled: true,
+        completedActions: [],
+      };
+
+      const action: Action = {
+        type: 'previous_step',
+        payload: 'contentTypeBuilder',
+      };
+
+      const expectedState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+        },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);

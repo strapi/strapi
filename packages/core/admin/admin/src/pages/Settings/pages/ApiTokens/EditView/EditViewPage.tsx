@@ -21,7 +21,7 @@ import { useGetPermissionsQuery, useGetRoutesQuery } from '../../../../../servic
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import { FormHead } from '../../../components/Tokens/FormHead';
-import { TokenBox, ApiTokenBox } from '../../../components/Tokens/TokenBox';
+import { ApiTokenBox } from '../../../components/Tokens/TokenBox';
 
 import {
   ApiTokenPermissionsContextValue,
@@ -50,6 +50,7 @@ export const EditView = () => {
         }
       : null
   );
+
   const [showToken, setShowToken] = React.useState(Boolean(locationState?.apiToken?.accessKey));
   const hideTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const { trackUsage } = useTracking();
