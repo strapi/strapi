@@ -220,6 +220,25 @@ type HandleOptions = {
 type RemovedFieldPath = string;
 
 /**
+ * @internal
+ * @description Finds the initial value for a component or dynamic zone item (based on its __temp_key__ and not its index).
+ * @param initialValue - The initial values object.
+ * @param item - The item to find the initial value for.
+ * @returns The initial value for the item.
+ */
+const getItemInitialValue = (initialValue: AnyData, item: AnyData) => {
+  if (initialValue && Array.isArray(initialValue)) {
+    const matchingInitialItem = initialValue.find(
+      (initialItem) => initialItem.__temp_key__ === item.__temp_key__
+    );
+    if (matchingInitialItem) {
+      return matchingInitialItem;
+    }
+  }
+  return {};
+};
+
+/**
  * Removes values from the data object if their corresponding attribute has a
  * visibility condition that evaluates to false.
  *
@@ -266,19 +285,20 @@ const handleInvisibleAttributes = (
       }
 
       if (attrDef.repeatable && Array.isArray(value)) {
-        result[attrName] = value.map(
-          (item, index) =>
-            handleInvisibleAttributes(
-              item,
-              {
-                schema: compSchema,
-                initialValues: initialValue?.[index] ?? {},
-                components,
-              },
-              [...path, `${attrName}[${index}]`],
-              removedAttributes
-            ).data
-        );
+        result[attrName] = value.map((item) => {
+          const componentInitialValue = getItemInitialValue(initialValue, item);
+
+          return handleInvisibleAttributes(
+            item,
+            {
+              schema: compSchema,
+              initialValues: componentInitialValue,
+              components,
+            },
+            [...path, `${attrName}[${item.__temp_key__}]`],
+            removedAttributes
+          ).data;
+        });
       } else {
         result[attrName] = handleInvisibleAttributes(
           value,
@@ -302,18 +322,20 @@ const handleInvisibleAttributes = (
         continue;
       }
 
-      result[attrName] = currentValue.map((dzItem, index) => {
+      result[attrName] = currentValue.map((dzItem) => {
         const compUID = dzItem?.__component;
         const compSchema = components[compUID];
+
+        const componentInitialValue = getItemInitialValue(initialValue, dzItem);
 
         const cleaned = handleInvisibleAttributes(
           dzItem,
           {
             schema: compSchema,
-            initialValues: initialValue?.[index] ?? {},
+            initialValues: componentInitialValue,
             components,
           },
-          [...path, `${attrName}[${index}]`],
+          [...path, `${attrName}[${dzItem.__temp_key__}]`],
           removedAttributes
         ).data;
 
