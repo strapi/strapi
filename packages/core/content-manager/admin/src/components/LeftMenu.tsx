@@ -126,7 +126,7 @@ const LeftMenu = () => {
           size="S"
           // eslint-disable-next-line react/no-children-prop
           children={undefined}
-          name={'search'}
+          name={'search_contentType'}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         />
       </Flex>

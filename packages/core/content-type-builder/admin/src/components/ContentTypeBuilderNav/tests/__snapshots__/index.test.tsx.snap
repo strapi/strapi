@@ -599,7 +599,7 @@ border:1px solid #eaeaef .c19:focus-within .c24 {
                 aria-label="Search"
                 class="c26"
                 id=":r2:"
-                name="search"
+                name="search_contentType"
                 placeholder="Search"
                 value=""
               />
