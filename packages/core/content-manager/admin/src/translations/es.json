@@ -185,5 +185,6 @@
   "popUpWarning.warning.publish-question": "¿Aún quieres publicarlo?",
   "popUpwarning.warning.has-draft-relations.button-confirm": "Si, publicar",
   "widget.chart-entries.title": "Entradas",
+  "widget.chart-entries.title.singular": "Entrada",
   "widget.chart-entries.tooltip": "{count} {label}"
 }

@@ -305,8 +305,11 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
             $textColor="neutral600"
           >
             {formatMessage({
-              id: 'content-manager.widget.chart-entries.title',
-              defaultMessage: 'entries',
+              id:
+                total < 2
+                  ? 'content-manager.widget.chart-entries.title.singular'
+                  : 'content-manager.widget.chart-entries.title',
+              defaultMessage: total < 2 ? 'entry' : 'entries',
             })}
           </TextChart>
         </text>
