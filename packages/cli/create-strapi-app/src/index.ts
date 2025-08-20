@@ -161,7 +161,7 @@ async function run(args: string[]): Promise<void> {
       'styled-components': '^6.0.0',
     },
     shouldCreateGrowthSsoTrial,
-    isABTestEnabled: false
+    isABTestEnabled: false,
   };
 
   if (options.template !== undefined) {
