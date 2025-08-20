@@ -1,6 +1,10 @@
 /*
  * Utility to sanitize content API route objects for safe JSON serialization.
  * Removes Zod validation fields (request/response) for safe serialization.
+ *
+ * NOTE: some content API routes are returned to the admin panel e.g. to
+ * populate the users and permissions roles page. We need to ensure that the
+ * routes can be serialized to JSON without errors.
  */
 
 export const sanitizeRouteForSerialization = ({
