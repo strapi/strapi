@@ -136,5 +136,19 @@
   "config.note": "توجه: می‌توانید این مقدار را در مخزن رسانه بازنویسی کنید.",
   "config.popUpWarning.warning.updateAllSettings": "این کار تمام تنظیمات شما را تغییر خواهد داد",
   "view-switch.list": "نمای لیست",
-  "view-switch.grid": "نمای شبکه‌ای"
+  "view-switch.grid": "نمای شبکه‌ای",
+  "modal.upload-list.sub-header.add-folder": "افزودن پوشه",
+  "config.title": "پیکربندی نما - مخزن رسانه",
+  "form.input.label.folder-name": "نام",
+  "form.input.label.folder-location": "مسیر",
+  "form.input.label.file-location": "مسیر",
+  "modal.folder.create.title": "افزودن پوشه جدید",
+  "modal.folder.edit.title": "ویرایش پوشه",
+  "modal.folder.create.submit": "ایجاد",
+  "modal.folder.edit.submit": "ذخیره",
+  "modal.folder.create.delete": "حذف پوشه",
+  "modal.folder.create.creation-date": "تاریخ ایجاد",
+  "modal.folder.create.elements": "عناصر",
+  "modal.folder-notification-created-success": "پوشه با موفقیت ایجاد شد",
+  "modal.folder-notification-edited-success": "پوشه با موفقیت ویرایش شد"
 }
