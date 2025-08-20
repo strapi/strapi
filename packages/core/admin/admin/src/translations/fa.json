@@ -859,5 +859,17 @@
   "pages.PurchaseRelease.description": "گروه‌بندی محتوا و انتشار به‌روزرسانی‌ها به‌صورت یکجا",
   "pages.PurchaseRelease.perks1": "افزودن چندین ورودی به انتشار‌ها",
   "pages.PurchaseRelease.perks2": "شناسایی سریع ورودی‌های دارای خطا",
-  "pages.PurchaseRelease.perks3": "زمان‌بندی انتشار یا انتشار دستی"
+  "pages.PurchaseRelease.perks3": "زمان‌بندی انتشار یا انتشار دستی",
+  "popUpWarning.bodyMessage.contentType.unpublish.all": "آیا مطمئن هستید که می‌خواهید این ورودی‌ها را لغو انتشار کنید؟",
+  "popUpWarning.bodyMessage.contentType.delete.all": "آیا مطمئن هستید که می‌خواهید این ورودی‌ها را حذف کنید؟",
+  "containers.SettingPage.editSettings.description": "فیلدها را برای ساخت چیدمان بکشید و رها کنید",
+  "containers.list.displayedFields": "فیلدهای نمایش داده شده",
+  "components.Blocks.blocks.bulletList": "فهرست نقطه‌ای",
+  "components.Blocks.blocks.numberList": "فهرست عددی",
+  "cancel": "لغو",
+  "modal.folder.move.submit": "انتقال",
+  "global.move": "انتقال",
+  "form.attribute.condition.apply": "اعمال شرط",
+  "attribute.component.description": "گروهی از فیلدها که می‌توانید آن را تکرار یا دوباره استفاده کنید",
+  "Settings.roles.form.input.url": "آدرس اینترنتی (URL)"
 }
