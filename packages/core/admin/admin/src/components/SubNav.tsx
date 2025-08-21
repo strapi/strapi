@@ -131,7 +131,7 @@ const GuidedTourTooltip = ({
     case 'models':
       return (
         <tours.contentTypeBuilder.CollectionTypes>
-          {children}
+          <tours.contentTypeBuilder.YourTurn>{children}</tours.contentTypeBuilder.YourTurn>
         </tours.contentTypeBuilder.CollectionTypes>
       );
     case 'singleTypes':

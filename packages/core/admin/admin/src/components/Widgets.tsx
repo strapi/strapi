@@ -1,4 +1,4 @@
-import { useAuth } from '@strapi/admin/strapi-admin';
+import { useAuth, useTracking } from '@strapi/admin/strapi-admin';
 import { Avatar, Badge, Box, Flex, Typography } from '@strapi/design-system';
 import { Earth, Images, User, Key, Files, Layout, Graph, Webhooks } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -85,6 +85,7 @@ const LinkCell = styled(Link)`
 `;
 
 const KeyStatisticsWidget = () => {
+  const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
   const { data: countDocuments, isLoading: isLoadingCountDocuments } = useGetCountDocumentsQuery();
   const { data: countKeyStatistics, isLoading: isLoadingKeyStatistics } =
@@ -216,6 +217,7 @@ const KeyStatisticsWidget = () => {
               to={item.link}
               key={`key-statistics-${key}`}
               data-testid={`stat-${key}`}
+              onClick={() => trackUsage('didOpenKeyStatisticsWidgetLink', { itemKey: key })}
             >
               <Flex alignItems="center" gap={2}>
                 <Flex
