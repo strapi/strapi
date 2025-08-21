@@ -108,7 +108,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
           );
         }
 
-        if (attribute.type === 'relation') {
+        if (attribute.type === 'relation' && 'target' in attribute) {
           const relatedModel = strapi.getModel(attribute.target);
 
           if (Array.isArray(value)) {
