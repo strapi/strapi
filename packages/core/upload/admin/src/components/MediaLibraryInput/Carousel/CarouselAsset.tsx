@@ -57,7 +57,10 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
     if (!assetUrl) return null;
 
     // Adding a param to the url to bust the cache and force the refresh of the image when replaced
-    const cacheBustedUrl = `${assetUrl}${assetUrl.includes('?') ? '&' : '?'}updatedAt=${asset.updatedAt}`;
+    // Only add updatedAt parameter if the URL is not signed to prevent signature invalidation
+    const cacheBustedUrl = asset.isUrlSigned
+      ? assetUrl
+      : `${assetUrl}${assetUrl.includes('?') ? '&' : '?'}updatedAt=${asset.updatedAt}`;
 
     return (
       <Box

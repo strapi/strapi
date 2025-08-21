@@ -251,6 +251,7 @@ const createAttributeSchema = (
         }
       });
     case 'password':
+      return yup.string().nullable();
     case 'richtext':
     case 'string':
     case 'text':
@@ -294,7 +295,7 @@ const addNullableValidation: ValidationFn = () => (schema) => {
 };
 
 const addRequiredValidation: ValidationFn = (attribute, options) => (schema) => {
-  if (options.status === 'draft' || !attribute.required) {
+  if (options.status === 'draft' || !attribute.required || attribute.type === 'password') {
     return schema;
   }
 

@@ -81,6 +81,11 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
 
+    isConfigured() {
+      const config = strapi.config.get('admin.preview') as PreviewConfig;
+      return config?.enabled === false || config?.config?.handler != null;
+    },
+
     isEnabled() {
       const config = strapi.config.get('admin.preview') as PreviewConfig;
 
@@ -113,8 +118,6 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
      * Utility to get the preview handler from the configuration
      */
     getPreviewHandler(): PreviewConfig['config']['handler'] {
-      const config = strapi.config.get('admin.preview') as PreviewConfig;
-
       const emptyHandler = () => {
         return undefined;
       };
@@ -122,6 +125,8 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (!this.isEnabled()) {
         return emptyHandler;
       }
+
+      const config = strapi.config.get('admin.preview') as PreviewConfig;
 
       return config?.config?.handler || emptyHandler;
     },

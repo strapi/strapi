@@ -5,56 +5,39 @@ import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
 
+import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
-import { UnstableGuidedTourOverview } from '../../components/UnstableGuidedTour/Overview';
 import { Widget } from '../../components/WidgetHelpers';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
+import { useTracking } from '../../features/Tracking';
 
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
 import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
-import { GuidedTour } from './components/GuidedTour';
 
+import type { WidgetWithUID } from '../../core/apis/Widgets';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
  * WidgetRoot
  * -----------------------------------------------------------------------------------------------*/
 
-interface WidgetRootProps extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link'> {
+interface WidgetRootProps
+  extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
   children: React.ReactNode;
 }
 
-export const WidgetRoot = ({
-  title,
-  icon = PuzzlePiece,
-  permissions = [],
-  children,
-  link,
-}: WidgetRootProps) => {
+export const WidgetRoot = ({ title, icon = PuzzlePiece, children, link, uid }: WidgetRootProps) => {
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const id = React.useId();
   const Icon = icon;
 
-  const [permissionStatus, setPermissionStatus] = React.useState<
-    'loading' | 'granted' | 'forbidden'
-  >('loading');
-  const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
-  React.useEffect(() => {
-    const checkPermissions = async () => {
-      const matchingPermissions = await checkUserHasPermissions(permissions);
-      const shouldGrant = matchingPermissions.length >= permissions.length;
-      setPermissionStatus(shouldGrant ? 'granted' : 'forbidden');
-    };
-
-    if (!permissions || permissions.length === 0) {
-      setPermissionStatus('granted');
-    } else {
-      checkPermissions();
-    }
-  }, [checkUserHasPermissions, permissions]);
+  const handleClickOnLink = () => {
+    trackUsage('didOpenHomeWidgetLink', { widgetUID: uid });
+  };
 
   return (
     <Flex
@@ -85,15 +68,14 @@ export const WidgetRoot = ({
             style={{ textDecoration: 'none' }}
             textAlign="right"
             to={link.href}
+            onClick={handleClickOnLink}
           >
             {formatMessage(link.label)}
           </Typography>
         )}
       </Flex>
       <Box width="100%" height="261px" overflow="auto" tag="main">
-        {permissionStatus === 'loading' && <Widget.Loading />}
-        {permissionStatus === 'forbidden' && <Widget.NoPermissions />}
-        {permissionStatus === 'granted' && children}
+        {children}
       </Box>
     </Flex>
   );
@@ -133,8 +115,27 @@ const HomePageCE = () => {
   const { formatMessage } = useIntl();
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
-
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
+  const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
+  const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const checkWidgetsPermissions = async () => {
+      const allWidgets = getAllWidgets();
+      const authorizedWidgets = await Promise.all(
+        allWidgets.map(async (widget) => {
+          if (!widget.permissions || widget.permissions.length === 0) return true;
+          const matchingPermissions = await checkUserHasPermissions(widget.permissions);
+          return matchingPermissions.length >= widget.permissions.length;
+        })
+      );
+      setFilteredWidgets(allWidgets.filter((_, i) => authorizedWidgets[i]));
+      setLoading(false);
+    };
+
+    checkWidgetsPermissions();
+  }, [checkUserHasPermissions, getAllWidgets]);
 
   return (
     <Main>
@@ -155,27 +156,27 @@ const HomePageCE = () => {
       <FreeTrialEndedModal />
       <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
-          {window.strapi.future.isEnabled('unstableGuidedTour') ? (
-            <UnstableGuidedTourOverview />
+          <GuidedTourHomepageOverview />
+          {loading ? (
+            <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+              <Page.Loading />
+            </Box>
           ) : (
-            <GuidedTour />
-          )}
-          <Grid.Root gap={5}>
-            {getAllWidgets().map((widget) => {
-              return (
+            <Grid.Root gap={5}>
+              {filteredWidgets.map((widget) => (
                 <Grid.Item col={6} s={12} key={widget.uid}>
                   <WidgetRoot
                     title={widget.title}
                     icon={widget.icon}
-                    permissions={widget.permissions}
                     link={widget.link}
+                    uid={widget.uid}
                   >
                     <WidgetComponent component={widget.component} />
                   </WidgetRoot>
                 </Grid.Item>
-              );
-            })}
-          </Grid.Root>
+              ))}
+            </Grid.Root>
+          )}
         </Flex>
       </Layouts.Content>
     </Main>

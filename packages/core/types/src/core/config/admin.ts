@@ -35,6 +35,10 @@ export interface TransferProp {
   token: TransferTokenProp;
 }
 
+export interface FirstPublisedAtFieldProp {
+  enabled: boolean;
+}
+
 export interface FlagsProp {
   nps?: boolean | undefined;
   promoteEE?: boolean | undefined;
@@ -51,5 +55,6 @@ export interface Admin {
   url?: string;
   forgotPassword?: ForgotPasswordProp;
   rateLimit?: RateLimitProp;
+  firstPublishedAtField?: FirstPublisedAtFieldProp;
   flags?: FlagsProp;
 }

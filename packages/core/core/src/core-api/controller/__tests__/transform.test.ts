@@ -134,8 +134,8 @@ describe('Transforms', () => {
   });
 
   test('Leaves nil values untouched', () => {
-    expect(transforms.transformResponse()).toBeUndefined();
-    expect(transforms.transformResponse(null)).toBe(null);
+    expect(transforms.transformResponse(undefined)).toBeUndefined();
+    expect(transforms.transformResponse(null)).toBeNull();
   });
 
   test('Throws if entry is not and object or an array of object', () => {

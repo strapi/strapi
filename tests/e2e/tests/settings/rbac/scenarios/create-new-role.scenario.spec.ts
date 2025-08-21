@@ -30,7 +30,6 @@ test.describe('RBAC - Full Role Management Flow', () => {
       login: true,
       resetFiles: true,
       importData: 'with-admin.tar',
-      skipTour: true,
     });
   });
 

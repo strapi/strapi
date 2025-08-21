@@ -67,6 +67,14 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
       return Promise.resolve(res);
     }),
   }),
+  adminApi: {
+    util: {
+      invalidateTags: jest.fn((tags) => ({
+        type: 'adminApi/util/invalidateTags',
+        payload: tags,
+      })),
+    },
+  },
 }));
 
 function setup(...args: Parameters<typeof useBulkRemove>) {

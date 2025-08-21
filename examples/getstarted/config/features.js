@@ -1,5 +1,1 @@
-module.exports = ({ env }) => ({
-  future: {
-    unstableGuidedTour: false,
-  },
-});
+module.exports = ({ env }) => ({});

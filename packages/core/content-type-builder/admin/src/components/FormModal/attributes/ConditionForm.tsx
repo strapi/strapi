@@ -73,11 +73,12 @@ const convertFromJsonLogic = (jsonLogic: JsonLogicValue): LocalValue => {
   const [[operator, conditions]] = Object.entries(jsonLogic.visible);
   const [fieldVar, value] = conditions as [{ var: string }, any];
 
+  // Assume 'visible' implies 'show' for now; adjust if backend uses 'hidden' key
   return {
     dependsOn: fieldVar.var,
     operator: operator === '==' ? 'is' : 'isNot',
     value: value,
-    action: operator === '==' ? 'show' : 'hide',
+    action: 'show', // Default to 'show' for 'visible'; adjust based on backend logic
   };
 };
 
@@ -95,10 +96,15 @@ const convertToJsonLogic = (value: LocalValue): JsonLogicValue | null => {
 
   try {
     rulesEngine.validate(condition);
-    const action = value.action === 'show' ? '==' : '!=';
+    // Determine JSON Logic operator based on operator and action
+    const operator =
+      (value.operator === 'is' && value.action === 'show') ||
+      (value.operator === 'isNot' && value.action === 'hide')
+        ? '=='
+        : '!=';
     return {
       visible: {
-        [action]: [{ var: value.dependsOn }, value.value],
+        [operator]: [{ var: value.dependsOn }, value.value],
       },
     };
   } catch (error) {
@@ -138,11 +144,15 @@ export const ConditionForm = ({
     };
     try {
       rulesEngine.validate(condition);
-      const action = updatedValue.action === 'show' ? '==' : '!=';
+      const operator =
+        (updatedValue.operator === 'is' && updatedValue.action === 'show') ||
+        (updatedValue.operator === 'isNot' && updatedValue.action === 'hide')
+          ? '=='
+          : '!=';
       const jsonLogic = updatedValue.dependsOn
         ? {
             visible: {
-              [action]: [{ var: updatedValue.dependsOn }, updatedValue.value],
+              [operator]: [{ var: updatedValue.dependsOn }, updatedValue.value],
             },
           }
         : null;
@@ -155,7 +165,7 @@ export const ConditionForm = ({
         });
       }
     } catch {
-      // Do nothing if invalid
+      // Optionally, show an error to the user
     }
   };
 
@@ -330,6 +340,7 @@ export const ConditionForm = ({
                 </SingleSelect>
               </Field.Root>
             </Box>
+
             <Box minWidth={0} flex={1}>
               <Field.Root name={`${name}.value`}>
                 <SingleSelect

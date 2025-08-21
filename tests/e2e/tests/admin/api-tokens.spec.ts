@@ -15,15 +15,13 @@ const createAPIToken = async (page, tokenName, duration, type) => {
   await page.getByRole('option', { name: type }).click();
 
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByText('Copy this token for use elsewhere')).toBeVisible();
-  await expect(page.getByText('Expiration date:')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Copy' })).toBeVisible();
 };
 
 test.describe('API Tokens', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-st', page, {
       login: true,
-      skipTour: true,
       resetFiles: true,
       importData: 'with-admin.tar',
     });

@@ -88,14 +88,17 @@ const verifySingularAndPluralNames: z.SuperRefinement<Record<string, unknown>> =
   }
 };
 
-const maxLengthGreaterThanMinLength: z.SuperRefinement<Record<string, unknown>> = (value, ctx) => {
+export const maxLengthGreaterThanMinLength: z.SuperRefinement<Record<string, unknown>> = (
+  value,
+  ctx
+) => {
   if (
     !isNil(value.maxLength) &&
     !isNil(value.minLength) &&
     isNumber(value.maxLength) &&
     isNumber(value.minLength)
   ) {
-    if (value.maxLength <= value.minLength) {
+    if (value.maxLength < value.minLength) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'maxLength must be greater or equal to minLength',
@@ -105,9 +108,9 @@ const maxLengthGreaterThanMinLength: z.SuperRefinement<Record<string, unknown>> 
   }
 };
 
-const maxGreaterThanMin: z.SuperRefinement<Record<string, unknown>> = (value, ctx) => {
+export const maxGreaterThanMin: z.SuperRefinement<Record<string, unknown>> = (value, ctx) => {
   if (!isNil(value.max) && !isNil(value.min) && isNumber(value.max) && isNumber(value.min)) {
-    if (value.max <= value.min) {
+    if (value.max < value.min) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'max must be greater or equal to min',

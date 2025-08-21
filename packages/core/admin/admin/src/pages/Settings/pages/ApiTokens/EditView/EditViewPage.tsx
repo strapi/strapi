@@ -5,7 +5,6 @@ import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
-import { useGuidedTour } from '../../../../../components/GuidedTour/Provider';
 import { Layouts } from '../../../../../components/Layouts/Layout';
 import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
@@ -22,7 +21,7 @@ import { useGetPermissionsQuery, useGetRoutesQuery } from '../../../../../servic
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
 import { API_TOKEN_TYPE } from '../../../components/Tokens/constants';
 import { FormHead } from '../../../components/Tokens/FormHead';
-import { TokenBox, UnstableApiTokenBox } from '../../../components/Tokens/TokenBox';
+import { ApiTokenBox } from '../../../components/Tokens/TokenBox';
 
 import {
   ApiTokenPermissionsContextValue,
@@ -51,10 +50,10 @@ export const EditView = () => {
         }
       : null
   );
+
   const [showToken, setShowToken] = React.useState(Boolean(locationState?.apiToken?.accessKey));
   const hideTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const { trackUsage } = useTracking();
-  const setCurrentStep = useGuidedTour('EditView', (state) => state.setCurrentStep);
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
   } = useRBAC(permissions.settings?.['api-tokens']);
@@ -244,7 +243,6 @@ export const EditView = () => {
           state: { apiToken: res.data },
           replace: true,
         });
-        setCurrentStep('apiTokens.success');
       } else {
         const res = await updateToken({
           id: id!,
@@ -392,14 +390,7 @@ export const EditView = () => {
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     {apiToken?.accessKey && showToken && (
                       <>
-                        {window.strapi.future.isEnabled('unstableGuidedTour') ? (
-                          <UnstableApiTokenBox
-                            token={apiToken.accessKey}
-                            tokenType={API_TOKEN_TYPE}
-                          />
-                        ) : (
-                          <TokenBox token={apiToken.accessKey} tokenType={API_TOKEN_TYPE} />
-                        )}
+                        <ApiTokenBox token={apiToken.accessKey} tokenType={API_TOKEN_TYPE} />
                       </>
                     )}
 
