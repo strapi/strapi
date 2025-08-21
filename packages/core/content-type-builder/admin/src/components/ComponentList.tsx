@@ -21,6 +21,8 @@ export const ComponentList = ({
   const { components } = useDataManager();
   const type = get(components, component);
 
+  if (!type) return;
+
   return (
     <ComponentRow $isChildOfDynamicZone={isFromDynamicZone} className="component-row">
       <List

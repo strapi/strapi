@@ -36,4 +36,7 @@ module.exports = ({ env }) => ({
       },
     },
   },
+  ai: {
+    enabled: true,
+  },
 });
