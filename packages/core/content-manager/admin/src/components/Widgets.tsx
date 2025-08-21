@@ -304,13 +304,13 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
             fontWeight="normal"
             $textColor="neutral600"
           >
-            {formatMessage({
-              id:
-                total < 2
-                  ? 'content-manager.widget.chart-entries.title.singular'
-                  : 'content-manager.widget.chart-entries.title',
-              defaultMessage: total < 2 ? 'entry' : 'entries',
-            })}
+            {formatMessage(
+              {
+                id: 'content-manager.widget.chart-entries.count.label',
+                defaultMessage: '{count, plural, =0 {entries} one {entry} other {entries}}',
+              },
+              { count: total }
+            )}
           </TextChart>
         </text>
       </svg>
