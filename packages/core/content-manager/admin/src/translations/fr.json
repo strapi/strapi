@@ -46,6 +46,7 @@
   "components.SettingsViewWrapper.pluginHeader.description.edit-settings": "Définissez l'apparence de la vue edit.",
   "components.SettingsViewWrapper.pluginHeader.description.list-settings": "Définir les paramètres de la vue liste.",
   "components.SettingsViewWrapper.pluginHeader.title": "Configurer la vue - {name}",
+  "components.SideNav.trigger.kind.default": "Sélectionner un type de contenu",
   "components.TableDelete.delete": "Tout supprimer",
   "components.TableDelete.deleteSelected": "Supprimer les éléments sélectionnés",
   "components.TableDelete.label": "{number, plural, one {# entrée sélectionnée} other {# entrées sélectionnées}}",

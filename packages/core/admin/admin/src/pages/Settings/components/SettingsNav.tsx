@@ -8,6 +8,7 @@ import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLi
 import { SubNav } from '../../../components/SubNav';
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
+import { useSubNav } from '../../../hooks/useSubNav';
 
 type LinkId =
   | 'content-releases'
@@ -33,6 +34,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
   const { license } = useLicenseLimits();
+  const { closeSideNav } = useSubNav();
 
   const availableFeatureNames = license?.features.map((feature) => feature.name);
 
@@ -70,6 +72,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
 
   const handleClickOnLink = (destination: string) => () => {
     trackUsage('willNavigate', { from: pathname, to: destination });
+    closeSideNav();
   };
 
   return (

@@ -8,6 +8,7 @@ import { useIntl } from 'react-intl';
 import { Outlet } from 'react-router-dom';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
+import { styled } from 'styled-components';
 
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
@@ -25,6 +26,14 @@ import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
 
 const { version: strapiVersion } = packageInfo;
+
+const ContentContainer = styled(Box)`
+  padding-top: 5.6rem;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding-top: 0;
+  }
+`;
 
 const AdminLayout = () => {
   const { formatMessage } = useIntl();
@@ -111,10 +120,10 @@ const AdminLayout = () => {
                 generalSectionLinks={generalSectionLinks}
                 pluginsSectionLinks={pluginsSectionLinks}
               />
-              <Box flex={1}>
+              <ContentContainer flex={1}>
                 <UpsellBanner />
                 <Outlet />
-              </Box>
+              </ContentContainer>
             </Flex>
           </Box>
         </DndProvider>

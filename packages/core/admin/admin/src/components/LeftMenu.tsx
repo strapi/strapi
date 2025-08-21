@@ -65,9 +65,18 @@ const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode
 
 const MenuDetails = styled.div<{ $isMobileShown: boolean }>`
   flex: 1;
+  display: flex;
+  overflow-x: auto;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+`;
+
+const LinkContainer = styled(Flex)<{ $isMobileShown?: boolean }>`
   display: ${({ $isMobileShown }) => ($isMobileShown ? 'flex' : 'none')};
-  flex-direction: column;
-  overflow-y: auto;
 
   ${({ theme }) => theme.breakpoints.large} {
     display: flex;
@@ -107,8 +116,15 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         <NavListWrapper
           tag="ul"
           gap={3}
-          direction="column"
+          direction={{
+            initial: 'row',
+            large: 'column',
+          }}
           flex={1}
+          paddingLeft={{
+            initial: 3,
+            large: 0,
+          }}
           paddingTop={3}
           paddingBottom={3}
         >
@@ -126,7 +142,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
                 const labelValue = formatMessage(link.intlLabel);
                 return (
-                  <Flex tag="li" key={link.to}>
+                  <LinkContainer tag="li" key={link.to} $isMobileShown={link.mobile}>
                     <GuidedTourTooltip to={link.to}>
                       <NavLink.Tooltip label={labelValue}>
                         <NavLink.Link
@@ -159,7 +175,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                         </NavLink.Link>
                       </NavLink.Tooltip>
                     </GuidedTourTooltip>
-                  </Flex>
+                  </LinkContainer>
                 );
               })
             : null}

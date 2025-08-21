@@ -10,14 +10,14 @@ const ContentLayout = ({ children }: ContentLayoutProps) => {
   return (
     <Box
       paddingLeft={{
-        initial: 6,
-        small: 8,
-        medium: 10,
+        initial: 4,
+        medium: 6,
+        large: 10,
       }}
       paddingRight={{
-        initial: 6,
-        small: 8,
-        medium: 10,
+        initial: 4,
+        medium: 6,
+        large: 10,
       }}
     >
       {children}

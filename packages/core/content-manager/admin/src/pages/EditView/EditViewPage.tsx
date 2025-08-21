@@ -130,13 +130,13 @@ const EditViewPage = () => {
   return (
     <Main
       paddingLeft={{
-        initial: 6,
-        medium: 7,
+        initial: 4,
+        medium: 6,
         large: 10,
       }}
       paddingRight={{
-        initial: 6,
-        medium: 7,
+        initial: 4,
+        medium: 6,
         large: 10,
       }}
     >

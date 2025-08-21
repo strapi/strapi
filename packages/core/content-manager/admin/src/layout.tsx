@@ -72,6 +72,13 @@ const Layout = () => {
     );
   }
 
+  const selectedModel = models.find(({ uid }) => uid === contentTypeMatch?.params.uid);
+
+  const contentType = formatMessage({
+    id: getTranslation(`components.SideNav.trigger.kind.${contentTypeMatch?.params.kind}`),
+    defaultMessage: 'Content Type',
+  });
+
   return (
     <>
       <Page.Title>
@@ -80,7 +87,17 @@ const Layout = () => {
           defaultMessage: 'Content Manager',
         })}
       </Page.Title>
-      <Layouts.Root sideNav={<LeftMenu />}>
+      <Layouts.Root
+        sideNav={<LeftMenu />}
+        sideNavLabel={
+          selectedModel?.info.displayName
+            ? `${contentType}: ${selectedModel?.info.displayName}`
+            : formatMessage({
+                id: getTranslation('components.SideNav.trigger.kind.default'),
+                defaultMessage: 'Select Content Type',
+              })
+        }
+      >
         <DragLayer renderItem={renderDraglayerItem} />
         <Outlet />
       </Layouts.Root>

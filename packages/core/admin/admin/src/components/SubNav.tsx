@@ -1,15 +1,23 @@
 import { useId, useState } from 'react';
 
-import { Box, SubNav as DSSubNav, Flex, Typography, IconButton } from '@strapi/design-system';
-import { ChevronDown, Plus } from '@strapi/icons';
+import {
+  Box,
+  SubNav as DSSubNav,
+  Flex,
+  Typography,
+  IconButton,
+  SubNavHeader,
+} from '@strapi/design-system';
+import { ChevronDown, Cross, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
+
+import { useSubNav } from '../hooks/useSubNav';
 
 import { tours } from './GuidedTour/Tours';
 
 const Main = styled(DSSubNav)`
   background-color: ${({ theme }) => theme.colors.neutral0};
-  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
 
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -86,20 +94,24 @@ const Link = (
   );
 };
 
-const StyledHeader = styled(Box)`
-  height: 56px;
-  display: flex;
-  align-items: center;
-  padding-left: ${({ theme }) => theme.spaces[5]};
-`;
-
 const Header = ({ label }: { label: string }) => {
+  const { closeSideNav } = useSubNav();
   return (
-    <StyledHeader>
-      <Typography variant="beta" tag="h2">
-        {label}
-      </Typography>
-    </StyledHeader>
+    <SubNavHeader
+      label={label}
+      additionalAction={
+        <Box
+          display={{
+            initial: 'block',
+            medium: 'none',
+          }}
+        >
+          <IconButton label="Close subnav" onClick={closeSideNav}>
+            <Cross />
+          </IconButton>
+        </Box>
+      }
+    />
   );
 };
 

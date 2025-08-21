@@ -67,14 +67,14 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
       <Box
         ref={ref}
         paddingLeft={{
-          initial: 6,
-          small: 8,
-          medium: 10,
+          initial: 4,
+          medium: 6,
+          large: 10,
         }}
         paddingRight={{
-          initial: 6,
-          small: 8,
-          medium: 10,
+          initial: 4,
+          medium: 6,
+          large: 10,
         }}
         paddingBottom={8}
         paddingTop={navigationAction ? 6 : 8}

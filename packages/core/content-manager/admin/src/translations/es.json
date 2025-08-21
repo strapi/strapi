@@ -43,6 +43,7 @@
   "components.SettingsViewWrapper.pluginHeader.description.edit-settings": "Personaliza cómo se verá la vista de edición.",
   "components.SettingsViewWrapper.pluginHeader.description.list-settings": "Defina la configuración de la vista de lista.",
   "components.SettingsViewWrapper.pluginHeader.title": "Configurar la vista - {name}",
+  "components.SideNav.trigger.kind.default": "Seleccionar Tipo de Contenido",
   "components.TableDelete.delete": "Eliminar todo",
   "components.TableDelete.deleteSelected": "Eliminar seleccionados",
   "components.TableDelete.label": "{number, plural, one {# entrada seleccionada} other {# entradas seleccionads}}",

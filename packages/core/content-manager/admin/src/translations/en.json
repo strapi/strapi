@@ -65,6 +65,7 @@
   "components.SettingsViewWrapper.pluginHeader.description.edit-settings": "Customize how the edit view will look like.",
   "components.SettingsViewWrapper.pluginHeader.description.list-settings": "Define the settings of the list view.",
   "components.SettingsViewWrapper.pluginHeader.title": "Configure the view — {name}",
+  "components.SideNav.trigger.kind.default": "Select Content Type",
   "bulk-publish.already-published": "Already Published",
   "bulk-unpublish.already-unpublished": "Already Unpublished",
   "bulk-publish.modified": "Ready to publish changes",
