@@ -99,5 +99,8 @@
   "pages.ReleaseDetails.entry-validation.review-stage.not-enabled": "این ورودی به هیچ جریان بازبینی متصل نیست.",
   "pages.ReleaseDetails.entry-validation.review-stage.not-ready": "این ورودی در مرحله لازم برای انتشار نیست. ({stageName})",
   "pages.ReleaseDetails.entry-validation.review-stage.ready": "این ورودی در مرحله لازم برای انتشار قرار دارد. ({stageName})",
-  "pages.ReleaseDetails.entry-validation.review-stage.stage-not-required": "مرحله‌ای برای انتشار مورد نیاز نیست."
+  "pages.ReleaseDetails.entry-validation.review-stage.stage-not-required": "مرحله‌ای برای انتشار مورد نیاز نیست.",
+  "widget.upcoming-releases.link": "باز کردن انتشارها",
+  "widget.upcoming-releases.title": "انتشارهای پیش‌ِرو",
+  "widget.upcoming-releases.no-data": "هیچ انتشاری وجود ندارد"
 }
