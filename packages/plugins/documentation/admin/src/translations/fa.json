@@ -13,7 +13,7 @@
   "containers.HomePage.form.password": "رمز عبور",
   "containers.HomePage.form.password.inputDescription": "رمز عبور برای دسترسی به مستندات را تعیین کنید",
   "containers.HomePage.form.restrictedAccess": "دسترسی محدود",
-  "containers.HomePage.form.restrictedAccess.inputDescription": "نقطه دسترسی (اندپوینت) مستندات را خصوصی کنید. به‌طور پیش‌فرض دسترسی عمومی است",
+  "containers.HomePage.form.restrictedAccess.inputDescription": "نقطه دسترسی (Endpoint) مستندات را خصوصی کنید. به‌طور پیش‌فرض دسترسی عمومی است",
   "containers.HomePage.form.showGeneratedFiles": "نمایش فایل‌های تولیدشده",
   "containers.HomePage.form.showGeneratedFiles.inputDescription": "وقتی می‌خواهید فایل‌های تولیدشده را بازنویسی کنید مفید است. \nافزونه فایل‌ها را بر اساس مدل و پلاگین تولید می‌کند. \nبا فعال‌سازی این گزینه، سفارشی‌سازی مستندات آسان‌تر خواهد شد",
   "error.deleteDoc.versionMissing": "نسخه‌ای که می‌خواهید حذف کنید وجود ندارد.",
@@ -31,12 +31,13 @@
   "pages.PluginPage.table.version": "نسخه",
   "pages.SettingsPage.header.description": "تنظیمات افزونه مستندات را پیکربندی کنید",
   "pages.SettingsPage.header.save": "ذخیره",
-  "pages.SettingsPage.toggle.hint": "نقطه دسترسی (اندپوینت) مستندات را خصوصی کنید",
+  "pages.SettingsPage.toggle.hint": "نقطه دسترسی (Endpoint) مستندات را خصوصی کنید",
   "pages.SettingsPage.toggle.label": "دسترسی محدود",
   "plugin.description.long": "یک سند OpenAPI ایجاد کنید و API خود را با Swagger UI مشاهده کنید.",
   "plugin.description.short": "ایجاد سند OpenAPI و مشاهده API با Swagger UI.",
   "plugin.name": "مستندات",
   "Input.error.contain.lowercase": "رمز عبور باید حداقل یک حرف کوچک داشته باشد",
   "Input.error.contain.number": "رمز عبور باید حداقل یک عدد داشته باشد",
-  "Input.error.contain.uppercase": "رمز عبور باید حداقل یک حرف بزرگ داشته باشد"
+  "Input.error.contain.uppercase": "رمز عبور باید حداقل یک حرف بزرگ داشته باشد",
+  "pages.SettingsPage.Button.save": "ذخیره"
 }
