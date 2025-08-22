@@ -28,3 +28,4 @@ export * from './zod';
 export * from './validation';
 
 export * from './primitives';
+export * from './content-api-router';
