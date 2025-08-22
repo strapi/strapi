@@ -78,5 +78,6 @@
   "popUpWarning.button.cancel": "لغو",
   "popUpWarning.button.confirm": "تأیید",
   "popUpWarning.title": "لطفاً تأیید کنید",
-  "popUpWarning.warning.cancel": "آیا مطمئن هستید که می‌خواهید تغییرات خود را لغو کنید؟"
+  "popUpWarning.warning.cancel": "آیا مطمئن هستید که می‌خواهید تغییرات خود را لغو کنید؟",
+  "List.button.roles": "افزودن نقش جدید"
 }
