@@ -123,22 +123,22 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
                   })
                 )
               );
+            } else {
+              encodedData[key] = await this.encodeEntry({
+                entryRootId: value.id,
+                entryRootModel: relatedModel.uid,
+                entryData: value,
+                model: strapi.getModel(attribute.target),
+              });
             }
-
-            encodedData[key] = await this.encodeEntry({
-              entryRootId: value.id,
-              entryRootModel: relatedModel.uid,
-              entryData: value,
-              model: strapi.getModel(attribute.target),
-            });
           }
 
           if (attribute.type === 'media') {
             const fileModel = strapi.getModel('plugin::upload.file');
 
-            if (Array.isArray(value.data)) {
-              const encodedMediaData = await Promise.all(
-                value.data.map((item: any) =>
+            if (Array.isArray(value)) {
+              encodedData[key] = await Promise.all(
+                value.map((item: any) =>
                   this.encodeEntry({
                     entryRootId,
                     entryRootModel,
@@ -147,15 +147,13 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
                   })
                 )
               );
-              encodedData[key] = { ...value, data: encodedMediaData };
             } else {
-              const encodedMediaItem = await this.encodeEntry({
+              encodedData[key] = await this.encodeEntry({
                 entryRootId,
                 entryRootModel,
                 entryData: value.data,
                 model: fileModel,
               });
-              encodedData[key] = { ...value, data: encodedMediaItem };
             }
           }
         })
