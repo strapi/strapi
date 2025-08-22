@@ -1,7 +1,7 @@
 /* eslint-disable import/no-default-export */
 /* eslint-disable check-file/filename-naming-convention  */
 /* eslint-disable check-file/no-index */
-import { lazy, Suspense, useEffect, useRef } from 'react';
+import { lazy, Suspense } from 'react';
 
 import { Page, Layouts, useAppInfo } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';

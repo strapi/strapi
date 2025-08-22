@@ -36,10 +36,7 @@ export const UploadProjectToChatProvider = ({ children }: { children: React.Reac
   const [isCodeUploadOpen, setIsCodeUploadOpen] = useState(false);
   const [submitOnFinish, setSubmitOnFinish] = useState(false);
 
-  const { openChat } = useStrapiChat();
-
   const openCodeUpload = (submitOnFinish?: boolean) => {
-    // openChat();
     setIsCodeUploadOpen(true);
     setSubmitOnFinish(submitOnFinish ?? false);
   };
@@ -96,16 +93,16 @@ const DropZone = ({ importType, onAddFiles, error }: DropZoneProps) => {
   /**
    * Recursively reads a directory and its contents
    */
-  const readDirectory = async (entry: any): Promise<File[]> => {
+  const readDirectory = async (entry: FileSystemDirectoryEntry): Promise<File[]> => {
     const reader = entry.createReader();
-    const getEntries = (): Promise<any[]> => {
+    const getEntries = (): Promise<FileSystemEntry[]> => {
       return new Promise((resolve, reject) => {
         reader.readEntries(resolve, reject);
       });
     };
 
     const files: File[] = [];
-    let entries: any[] = [];
+    let entries: FileSystemEntry[] = [];
 
     // Read entries in batches until no more entries are left
     do {

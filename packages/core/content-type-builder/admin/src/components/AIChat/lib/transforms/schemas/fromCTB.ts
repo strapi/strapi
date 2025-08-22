@@ -6,7 +6,7 @@ const transformAttributesFromCTBToChat = (attributes: AnyAttribute[]) => {
   return attributes.reduce(
     (acc, attribute) => {
       // @ts-expect-error - injected from previous ai messages
-      const { name, status, action, ...rest } = attribute;
+      const { name, ...rest } = attribute;
 
       return {
         ...acc,

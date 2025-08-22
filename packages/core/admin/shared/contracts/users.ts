@@ -76,3 +76,21 @@ export declare namespace GetOwnPermissions {
     error?: errors.ApplicationError;
   }
 }
+
+/**
+ * GET /users/me/ai-token - Get AI token for the current admin user
+ */
+export declare namespace GetAiToken {
+  export interface Request {
+    query: {};
+    body: {};
+  }
+
+  export interface Response {
+    data: {
+      token: string;
+      expiresAt?: string;
+    };
+    error?: errors.ApplicationError;
+  }
+}

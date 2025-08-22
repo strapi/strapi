@@ -1,7 +1,5 @@
 import { useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
-
 import { Attachment } from '../lib/types/attachments';
 
 /**================================================================================

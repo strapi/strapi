@@ -7,9 +7,9 @@
 import { useState } from 'react';
 
 import { Message, useChat } from '@ai-sdk/react';
-import { useAppInfo } from '@strapi/admin/strapi-admin';
+import { useAppInfo, getFetchClient } from '@strapi/admin/strapi-admin';
 
-import { STRAPI_AI_CHAT_URL, STRAPI_AI_TOKEN, STRAPI_AI_URL } from '../lib/constants';
+import { STRAPI_AI_CHAT_URL, STRAPI_AI_URL } from '../lib/constants';
 import { Attachment } from '../lib/types/attachments';
 import { Schema } from '../lib/types/schema';
 
@@ -150,6 +150,69 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
     const [error, setError] = useState<string | null>(null);
 
     /**
+     * Get AI token - try fallback first, then dynamic fetching
+     */
+    const getAIToken = async (): Promise<string | null> => {
+      try {
+        // Check for fallback STRAPI_AI_TOKEN first
+        const fallbackToken = window.strapi?.aiLicenseKey;
+        if (fallbackToken) {
+          return fallbackToken;
+        }
+
+        // Use the admin's working AI token endpoint
+        const getAdminToken = () => {
+          const STORAGE_KEYS = { TOKEN: 'jwtToken' };
+
+          const fromLocalStorage = localStorage.getItem(STORAGE_KEYS.TOKEN);
+
+          if (fromLocalStorage) {
+            try {
+              const parsed = JSON.parse(fromLocalStorage);
+              return parsed;
+            } catch (e) {
+              return fromLocalStorage;
+            }
+          }
+
+          // Also try cookies as fallback
+          const fromCookie = document.cookie
+            .split(';')
+            .find((row) => row.trim().startsWith('jwtToken='));
+
+          return fromCookie ? fromCookie.split('=')[1] : null;
+        };
+
+        const adminToken = getAdminToken();
+
+        if (!adminToken) {
+          return null;
+        }
+
+        const response = await fetch('/admin/users/me/ai-token', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${adminToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          await response.text();
+          return null;
+        }
+
+        const data = await response.json();
+
+        const token = data?.token || data?.data?.token;
+
+        return token || null;
+      } catch (error) {
+        return null;
+      }
+    };
+
+    /**
      * Make a type-safe API call to the specified Strapi AI endpoint
      */
     const fetchData = async (
@@ -159,8 +222,15 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
       setError(null);
 
       try {
+        // Get fresh AI token
+        const aiToken = await getAIToken();
+        if (!aiToken) {
+          setError('No AI token available. Please ensure you have Enterprise Edition license.');
+          return null;
+        }
+
         const headers = {
-          Authorization: `Bearer ${STRAPI_AI_TOKEN}`,
+          Authorization: `Bearer ${aiToken}`,
           'X-Strapi-Version': strapiVersion || 'latest',
           'X-Strapi-User': userId || 'unknown',
           'X-Strapi-Project-Id': projectId || 'unknown',
@@ -171,7 +241,9 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
           headers['Content-Type'] = 'application/json';
         }
 
-        const response = await fetch(`${STRAPI_AI_URL}${endpoint}`, {
+        const fullUrl = `${STRAPI_AI_URL}${endpoint}`;
+
+        const response = await fetch(fullUrl, {
           method: 'POST',
           headers,
           body: options.formData ? options.formData : JSON.stringify(options.body || {}),
@@ -220,15 +292,67 @@ export const useAIChat: typeof useChat = (props) => {
   const projectId = useAppInfo('useAIFetch', (state) => state.projectId);
   const userId = useAppInfo('useAIChat-user', (state) => state.userId);
 
+  // Custom fetch function that gets AI token dynamically
+  const customFetch = async (input: string | URL | Request, options: RequestInit = {}) => {
+    try {
+      // Check for fallback STRAPI_AI_TOKEN first
+      const fallbackToken = window.strapi?.aiLicenseKey;
+
+      if (fallbackToken) {
+        const headers = {
+          ...options.headers,
+          Authorization: `Bearer ${fallbackToken}`,
+          'X-Strapi-Version': strapiVersion || 'latest',
+          'X-Strapi-User': userId || 'unknown',
+          'X-Strapi-Project-Id': projectId || 'unknown',
+        };
+
+        return fetch(input, {
+          ...options,
+          headers,
+        });
+      }
+
+      // Use Strapi's fetch client which handles authentication properly
+      try {
+        const { get } = getFetchClient();
+
+        const { data } = await get('/admin/users/me/ai-token');
+
+        const aiToken = data?.token || data?.data?.token;
+
+        if (!aiToken) {
+          throw new Error(
+            'No AI token available. Please ensure you have Enterprise Edition license.'
+          );
+        }
+
+        // Make the actual request with the AI token
+        const headers = {
+          ...options.headers,
+          Authorization: `Bearer ${aiToken}`,
+          'X-Strapi-Version': strapiVersion || 'latest',
+          'X-Strapi-User': userId || 'unknown',
+          'X-Strapi-Project-Id': projectId || 'unknown',
+        };
+
+        const aiResponse = await fetch(input, {
+          ...options,
+          headers,
+        });
+
+        return aiResponse;
+      } catch (error) {
+        throw new Error('Failed to get AI token from admin endpoint');
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return useChat({
     ...props,
     api: STRAPI_AI_CHAT_URL,
-    headers: {
-      Authorization: `Bearer ${STRAPI_AI_TOKEN}`,
-      'X-Strapi-Version': strapiVersion || 'latest',
-      'X-Strapi-User': userId || 'unknown',
-      'X-Strapi-Project-Id': projectId || 'unknown',
-      ...(props?.headers || {}),
-    },
+    fetch: customFetch,
   });
 };
