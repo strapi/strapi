@@ -260,6 +260,69 @@ class Database {
     await this.lifecycles.clear();
     await this.connection.destroy();
   }
+
+  /**
+   * Find the parent entry of a component instance.
+   *
+   * Given a component model, a specific component instance id, and the list of
+   * possible parent content types (those that can embed this component),
+   * this function checks each parent's *_cmps join table to see if the component
+   * instance is linked to a parent entity.
+   *
+   * - Returns the parent uid, parent table name, and parent id if found.
+   * - Returns null if no parent relationship exists.
+   *
+   * * */
+  async findComponentParent(
+    component: any,
+    componentId: number | string,
+    componentParents: any[],
+    opts?: { trx?: Knex.Transaction } // optional transaction to run queries under
+  ): Promise<{ uid?: string; table: string; parentId: number | string } | null> {
+    // Defensive: if the component model has no uid, we can't match against component_type
+    if (!component?.uid) return null;
+
+    // Helper: schemaBuilder aware of both schema and trx
+    const schemaBuilder = this.getSchemaConnection(opts?.trx);
+
+    // Helper: attach trx to any query builder if trx is provided
+    const withTrx = <T extends Knex.QueryBuilder>(qb: T) =>
+      opts?.trx ? qb.transacting(opts.trx) : qb;
+
+    // Iterate over every candidate parent CT that can embed this component
+    for (const parent of componentParents) {
+      const cmpsTable = `${parent.collectionName}_cmps`; // convention: <collection>_cmps
+
+      try {
+        // Check that the join table actually exists (important across dialects / test fixtures)
+        const exists = await schemaBuilder.hasTable(cmpsTable);
+        if (!exists) continue;
+
+        // Query the join table for a row linking this componentId + type to a parent entity
+        const row = await withTrx(this.getConnection(cmpsTable))
+          .where({
+            cmp_id: componentId,
+            component_type: component.uid,
+          })
+          .first<{ entity_id: number | string }>('entity_id');
+
+        // If found, return the parent content type uid + table + parent id
+        if (row) {
+          return {
+            uid: parent.uid, // e.g. 'api::article.article'
+            table: parent.collectionName, // e.g. 'articles'
+            parentId: row.entity_id, // the parent entry id
+          };
+        }
+      } catch {
+        // Gracefully handle invalid table names / schema issues and move to next parent
+        continue;
+      }
+    }
+
+    // If no parent found across all candidates, return null
+    return null;
+  }
 }
 
 export { Database, errors };
