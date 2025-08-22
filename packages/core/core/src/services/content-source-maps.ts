@@ -5,15 +5,28 @@ const ENCODABLE_TYPES = [
   'string',
   'text',
   'richtext',
-  'uid',
-  'enumeration',
-  'email',
+  'biginteger',
   'date',
-  'datetime',
   'time',
+  'datetime',
   'timestamp',
+  'boolean',
+  'enumeration',
+  'json',
+  'media',
+  'email',
+  'password',
+  'uid',
+  /**
+   * We cannot modify the response shape, so types that aren't based on string cannot be encoded:
+   * - json: object
+   * - blocks: object, will require a custom implementation in a dedicated PR
+   * - integer, float and decimal: number
+   * - boolean: boolean (believe it or not)
+   */
 ];
 
+// TODO: use a centralized store for these fields that would be shared with the CM and CTB
 const EXCLUDED_FIELDS = [
   'id',
   'documentId',
