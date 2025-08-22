@@ -1,13 +1,14 @@
 /* eslint-disable import/no-default-export */
 /* eslint-disable check-file/filename-naming-convention  */
 /* eslint-disable check-file/no-index */
-import { lazy, Suspense, useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 
 import { Page, Layouts, useAppInfo } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
 import { Chat } from '../../components/AIChat/Chat';
+import { prefetchAIToken } from '../../components/AIChat/hooks/useAIFetch';
 import { ChatProvider } from '../../components/AIChat/providers/ChatProvider';
 import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
@@ -29,6 +30,11 @@ const App = () => {
   });
 
   const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
+
+  // Prefetch AI token on initial load
+  useEffect(() => {
+    prefetchAIToken();
+  }, []);
 
   return (
     <Page.Protect permissions={PERMISSIONS.main}>

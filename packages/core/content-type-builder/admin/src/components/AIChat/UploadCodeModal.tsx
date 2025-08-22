@@ -36,10 +36,7 @@ export const UploadProjectToChatProvider = ({ children }: { children: React.Reac
   const [isCodeUploadOpen, setIsCodeUploadOpen] = useState(false);
   const [submitOnFinish, setSubmitOnFinish] = useState(false);
 
-  const { openChat } = useStrapiChat();
-
   const openCodeUpload = (submitOnFinish?: boolean) => {
-    // openChat();
     setIsCodeUploadOpen(true);
     setSubmitOnFinish(submitOnFinish ?? false);
   };
@@ -96,24 +93,25 @@ const DropZone = ({ importType, onAddFiles, error }: DropZoneProps) => {
   /**
    * Recursively reads a directory and its contents
    */
-  const readDirectory = async (entry: any): Promise<File[]> => {
+  const readDirectory = async (entry: FileSystemDirectoryEntry): Promise<File[]> => {
     const reader = entry.createReader();
-    const getEntries = (): Promise<any[]> => {
+    const getEntries = (): Promise<FileSystemEntry[]> => {
       return new Promise((resolve, reject) => {
         reader.readEntries(resolve, reject);
       });
     };
 
     const files: File[] = [];
-    let entries: any[] = [];
+    let entries: FileSystemEntry[] = [];
 
     // Read entries in batches until no more entries are left
     do {
       entries = await getEntries();
       for (const entry of entries) {
         if (entry.isFile) {
+          const fileEntry = entry as FileSystemFileEntry;
           const file = await new Promise<File>((resolve, reject) => {
-            entry.file(resolve, reject);
+            fileEntry.file(resolve, reject);
           });
 
           // Store the full path including the directory structure
@@ -125,7 +123,8 @@ const DropZone = ({ importType, onAddFiles, error }: DropZoneProps) => {
           files.push(file);
         } else if (entry.isDirectory) {
           // Recursively process subdirectories
-          const subFiles = await readDirectory(entry);
+          const dirEntry = entry as FileSystemDirectoryEntry;
+          const subFiles = await readDirectory(dirEntry);
           files.push(...subFiles);
         }
       }
@@ -154,12 +153,13 @@ const DropZone = ({ importType, onAddFiles, error }: DropZoneProps) => {
 
         if (entry) {
           if (entry.isDirectory) {
-            const files = await readDirectory(entry);
+            const dirEntry = entry as FileSystemDirectoryEntry;
+            const files = await readDirectory(dirEntry);
             allFiles.push(...files);
           } else if (entry.isFile) {
+            const fileEntry = entry as FileSystemFileEntry;
             const file = await new Promise<File>((resolve, reject) => {
-              // @ts-expect-error - fix
-              entry.file(resolve, reject);
+              fileEntry.file(resolve, reject);
             });
             allFiles.push(file);
           }

@@ -18,7 +18,6 @@ interface UseClipboardPasteProps {
 export const useClipboardPasteImages = ({
   onAddFiles,
   isEnabled = false,
-  accept = { 'image/*': [] },
 }: UseClipboardPasteProps) => {
   const handlePaste = useCallback(
     async (e: ClipboardEvent) => {
