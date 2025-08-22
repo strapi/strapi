@@ -1,21 +1,21 @@
 import type { Core } from '@strapi/types';
+import { createContentApiRoutesFactory } from '@strapi/utils';
 import { EmailRouteValidator } from './validation';
 
-export default (): Core.RouterInput => {
+const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'] => {
   const validator = new EmailRouteValidator(strapi);
 
-  return {
-    type: 'content-api',
-    routes: [
-      {
-        method: 'POST',
-        path: '/',
-        handler: 'email.send',
-        request: {
-          body: { 'application/json': validator.sendEmailInput },
-        },
-        response: validator.emailResponse,
+  return [
+    {
+      method: 'POST',
+      path: '/',
+      handler: 'email.send',
+      request: {
+        body: { 'application/json': validator.sendEmailInput },
       },
-    ],
-  };
-};
+      response: validator.emailResponse,
+    },
+  ];
+});
+
+export default createRoutes;

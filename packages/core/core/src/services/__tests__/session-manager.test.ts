@@ -26,6 +26,7 @@ describe('SessionManager Factory', () => {
       findOne: jest.fn(),
       findMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     };
 
     mockDb = {
@@ -62,17 +63,32 @@ describe('SessionManager Factory', () => {
     const deviceId = 'device456';
     const origin = 'admin';
 
-    it('should clean up expired sessions first', async () => {
+    it('should periodically clean up expired sessions', async () => {
+      // First 49 calls should not trigger cleanup
+      for (let i = 0; i < 49; i += 1) {
+        await sessionManager.generateRefreshToken(userId, deviceId, origin);
+      }
+
+      expect(mockQuery.deleteMany).not.toHaveBeenCalledWith({
+        where: { expiresAt: { $lt: expect.any(Date) } },
+      });
+
+      // 50th call should trigger cleanup asynchronously
       await sessionManager.generateRefreshToken(userId, deviceId, origin);
 
-      expect(mockQuery.delete).toHaveBeenCalledWith({
+      // allow the promise to run
+      await new Promise((resolve) => {
+        setImmediate(resolve);
+      });
+
+      expect(mockQuery.deleteMany).toHaveBeenCalledWith({
         where: { expiresAt: { $lt: expect.any(Date) } },
       });
     });
 
     it('should create session in database with correct data', async () => {
       mockQuery.create.mockResolvedValue({
-        user: userId,
+        userId,
         sessionId: 'abcdef1234567890',
         deviceId,
         origin,
@@ -83,7 +99,7 @@ describe('SessionManager Factory', () => {
 
       expect(mockQuery.create).toHaveBeenCalledWith({
         data: {
-          user: userId,
+          userId,
           sessionId: 'abcdef1234567890',
           deviceId,
           origin,
@@ -116,6 +132,7 @@ describe('SessionManager Factory', () => {
 
       expect(mockJwt.sign).toHaveBeenCalledWith(expectedPayload, config.jwtSecret, {
         expiresIn: config.refreshTokenLifespan,
+        algorithm: 'HS256',
       });
     });
 
@@ -350,6 +367,7 @@ describe('DatabaseSessionProvider', () => {
       findOne: jest.fn(),
       findMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     };
 
     mockDb = {
@@ -366,7 +384,7 @@ describe('DatabaseSessionProvider', () => {
   describe('create', () => {
     it('should create session and return result', async () => {
       const sessionData: SessionData = {
-        user: 'user123',
+        userId: 'user123',
         sessionId: 'session456',
         deviceId: 'device789',
         origin: 'admin',
@@ -389,7 +407,7 @@ describe('DatabaseSessionProvider', () => {
       const sessionId = 'session123';
       const expectedResult = {
         id: '1',
-        user: 'user123',
+        userId: 'user123',
         sessionId,
         deviceId: 'device456',
         origin: 'admin',
@@ -419,7 +437,7 @@ describe('DatabaseSessionProvider', () => {
       const expectedResults = [
         {
           id: '1',
-          user: userId,
+          userId,
           sessionId: 'session1',
           deviceId: 'device1',
           origin: 'admin',
@@ -427,7 +445,7 @@ describe('DatabaseSessionProvider', () => {
         },
         {
           id: '2',
-          user: userId,
+          userId,
           sessionId: 'session2',
           deviceId: 'device2',
           origin: 'admin',
@@ -439,7 +457,7 @@ describe('DatabaseSessionProvider', () => {
 
       const result = await provider.findByIdentifier(userId);
 
-      expect(mockQuery.findMany).toHaveBeenCalledWith({ where: { user: userId } });
+      expect(mockQuery.findMany).toHaveBeenCalledWith({ where: { userId } });
       expect(result).toEqual(expectedResults);
     });
   });
@@ -460,7 +478,7 @@ describe('DatabaseSessionProvider', () => {
 
       await provider.deleteByIdentifier(userId);
 
-      expect(mockQuery.delete).toHaveBeenCalledWith({ where: { user: userId } });
+      expect(mockQuery.deleteMany).toHaveBeenCalledWith({ where: { userId } });
     });
   });
 
@@ -468,7 +486,7 @@ describe('DatabaseSessionProvider', () => {
     it('should delete expired sessions', async () => {
       await provider.deleteExpired();
 
-      expect(mockQuery.delete).toHaveBeenCalledWith({
+      expect(mockQuery.deleteMany).toHaveBeenCalledWith({
         where: { expiresAt: { $lt: expect.any(Date) } },
       });
     });

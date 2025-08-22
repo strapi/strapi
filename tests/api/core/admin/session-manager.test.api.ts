@@ -2,6 +2,7 @@
 
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createUtils } from 'api-tests/utils';
+import jwt from 'jsonwebtoken';
 
 const contentTypeUID = 'admin::session';
 
@@ -26,7 +27,7 @@ describe('SessionManager API Integration', () => {
 
     afterEach(async () => {
       await strapi.db.query(contentTypeUID).deleteMany({
-        where: { user: testUserId },
+        where: { userId: testUserId },
       });
     });
 
@@ -58,7 +59,7 @@ describe('SessionManager API Integration', () => {
         });
 
         expect(session).toMatchObject({
-          user: testUserId,
+          userId: testUserId,
           sessionId: result.sessionId,
           deviceId: testDeviceId,
           origin: testOrigin,
@@ -77,11 +78,37 @@ describe('SessionManager API Integration', () => {
         expect(typeof result.token).toBe('string');
       });
 
+      it('should include correct claims in the JWT and match DB/sessionId', async () => {
+        const result = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        const { secret } = strapi.config.get('admin.auth', { secret: '' });
+        const decoded = jwt.verify(result.token, secret, { algorithms: ['HS256'] }) as {
+          userId: string;
+          sessionId: string;
+          type: string;
+          iat: number;
+          exp: number;
+        };
+
+        expect(decoded.userId).toBe(testUserId);
+        expect(decoded.sessionId).toBe(result.sessionId);
+        expect(decoded.type).toBe('refresh');
+
+        const session = await strapi.db.query(contentTypeUID).findOne({
+          where: { sessionId: result.sessionId },
+        });
+        expect(session?.sessionId).toBe(result.sessionId);
+      });
+
       it('should clean up expired sessions before creating new ones', async () => {
         const expiredSessionId = 'expired-session-123';
         await strapi.db.query(contentTypeUID).create({
           data: {
-            user: testUserId,
+            userId: testUserId,
             sessionId: expiredSessionId,
             deviceId: 'old-device',
             origin: testOrigin,
@@ -89,13 +116,44 @@ describe('SessionManager API Integration', () => {
           },
         });
 
-        // Generate new refresh token (should clean up expired one)
+        // Bump throttling counter so the next call triggers cleanup once
+        const manager: any = strapi.sessionManager;
+        manager.cleanupInvocationCounter = manager.cleanupEveryCalls - 1;
+
         await strapi.sessionManager.generateRefreshToken(testUserId, testDeviceId, testOrigin);
 
-        const expiredSession = await strapi.db.query(contentTypeUID).findOne({
+        const expiredSessionAfter = await strapi.db.query(contentTypeUID).findOne({
           where: { sessionId: expiredSessionId },
         });
-        expect(expiredSession).toBeNull();
+        expect(expiredSessionAfter).toBeNull();
+      });
+
+      it('should clean up all expired sessions for the user', async () => {
+        const expiredIds = ['expired-1', 'expired-2', 'expired-3'];
+        await Promise.all(
+          expiredIds.map((id) =>
+            strapi.db.query(contentTypeUID).create({
+              data: {
+                userId: testUserId,
+                sessionId: id,
+                deviceId: 'old-device',
+                origin: testOrigin,
+                expiresAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+              },
+            })
+          )
+        );
+
+        // Bump throttling counter so the next call triggers cleanup once
+        const manager: any = strapi.sessionManager;
+        manager.cleanupInvocationCounter = manager.cleanupEveryCalls - 1;
+
+        await strapi.sessionManager.generateRefreshToken(testUserId, testDeviceId, testOrigin);
+
+        const remainingExpiredAfter = await strapi.db.query(contentTypeUID).findMany({
+          where: { userId: testUserId, expiresAt: { $lt: new Date() } },
+        });
+        expect(remainingExpiredAfter).toHaveLength(0);
       });
 
       it('should allow multiple active sessions for different devices', async () => {
@@ -116,7 +174,7 @@ describe('SessionManager API Integration', () => {
         expect(result1.sessionId).not.toBe(result2.sessionId);
 
         const sessions = await strapi.db.query(contentTypeUID).findMany({
-          where: { user: testUserId },
+          where: { userId: testUserId },
         });
 
         expect(sessions).toHaveLength(2);
@@ -141,7 +199,7 @@ describe('SessionManager API Integration', () => {
         expect(result1.sessionId).not.toBe(result2.sessionId);
 
         const sessions = await strapi.db.query(contentTypeUID).findMany({
-          where: { user: testUserId },
+          where: { userId: testUserId },
         });
 
         expect(sessions).toHaveLength(2);
@@ -165,6 +223,33 @@ describe('SessionManager API Integration', () => {
 
         expect(Math.abs(actualExpiration - expectedExpiration)).toBeLessThan(1_000);
       });
+
+      it('should have JWT exp aligned with configured TTL and match DB expiresAt', async () => {
+        const startTimeSec = Math.floor(Date.now() / 1000);
+        const result = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        const { secret } = strapi.config.get('admin.auth', { secret: '' });
+        const decoded = jwt.verify(result.token, secret, { algorithms: ['HS256'] }) as {
+          iat: number;
+          exp: number;
+        };
+
+        // TTL is 30 days in seconds by default in the provider config
+        const ttlSeconds = 30 * 24 * 60 * 60;
+        expect(Math.abs(decoded.exp - decoded.iat - ttlSeconds)).toBeLessThan(2);
+
+        const session = await strapi.db.query(contentTypeUID).findOne({
+          where: { sessionId: result.sessionId },
+        });
+        const expMs = decoded.exp * 1000;
+        const dbExpiresMs = new Date(session.expiresAt).getTime();
+        expect(Math.abs(expMs - dbExpiresMs)).toBeLessThan(1_000);
+        expect(decoded.iat).toBeGreaterThanOrEqual(startTimeSec - 2);
+      });
     });
 
     describe('generateSessionId', () => {
@@ -177,6 +262,11 @@ describe('SessionManager API Integration', () => {
         expect(sessionId1).not.toBe(sessionId2);
         expect(typeof sessionId1).toBe('string');
         expect(typeof sessionId2).toBe('string');
+      });
+
+      it('should generate a 32-character lowercase hex session ID', () => {
+        const sessionId = strapi.sessionManager.generateSessionId();
+        expect(sessionId).toMatch(/^[a-f0-9]{32}$/);
       });
     });
 
@@ -284,6 +374,32 @@ describe('SessionManager API Integration', () => {
         expect(result).toEqual({
           isValid: false,
         });
+      });
+    });
+
+    describe('multiple sessions with same device and origin', () => {
+      it('should allow multiple active sessions with same deviceId and same origin', async () => {
+        const result1 = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+        const result2 = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        expect(result1.sessionId).not.toBe(result2.sessionId);
+
+        const sessions = await strapi.db.query(contentTypeUID).findMany({
+          where: { userId: testUserId },
+        });
+
+        expect(sessions).toHaveLength(2);
+        expect(
+          sessions.every((s: any) => s.deviceId === testDeviceId && s.origin === testOrigin)
+        ).toBe(true);
       });
     });
   });

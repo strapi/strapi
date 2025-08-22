@@ -16,7 +16,7 @@ export default {
     },
   },
   attributes: {
-    user: {
+    userId: {
       type: 'string',
       required: true,
       configurable: false,
