@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SchemaChange, SchemaChangeAnnotation, ToolAnnotation } from '../types/annotations';
+import { SchemaChange, ToolAnnotation } from '../types/annotations';
 import { AssistantMessage, MarkerContent, Message, Status, UserMessage } from '../types/messages';
 
 import type { Message as RawMessage, ToolInvocation } from 'ai';

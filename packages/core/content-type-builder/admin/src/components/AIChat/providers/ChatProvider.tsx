@@ -9,7 +9,6 @@ import { FeedbackProvider } from '../FeedbackModal';
 import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
 import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
-import { STRAPI_AI_TOKEN } from '../lib/constants';
 import { transformMessages } from '../lib/transforms/messages';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
 import { Attachment } from '../lib/types/attachments';
@@ -152,11 +151,13 @@ export const BaseChatProvider = ({
     }
   }, [chat.status, messages, trackUsage]);
   const isAiEnabled = window.strapi.ai?.enabled !== false;
+  const isEE = window.strapi?.isEE;
+  const hasAiToken = !!window.strapi?.aiLicenseKey; // Fallback to STRAPI_AI_TOKEN
 
   return (
     <ChatContext.Provider
       value={{
-        isChatEnabled: !!STRAPI_AI_TOKEN && isAiEnabled,
+        isChatEnabled: (!!isEE || hasAiToken) && isAiEnabled,
         ...chat,
         messages,
         rawMessages: chat.messages,

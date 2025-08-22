@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { css, styled, DefaultTheme, IStyledComponent } from 'styled-components';
+import { styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * Input Context

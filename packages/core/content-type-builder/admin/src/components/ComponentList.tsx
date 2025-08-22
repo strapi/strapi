@@ -1,4 +1,3 @@
-import { Box } from '@strapi/design-system';
 import get from 'lodash/get';
 
 import { ComponentRow } from './ComponentRow';

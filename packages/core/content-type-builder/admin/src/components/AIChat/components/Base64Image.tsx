@@ -1,6 +1,6 @@
 import { useState, useEffect, ImgHTMLAttributes } from 'react';
 
-import { Flex, Loader, Typography } from '@strapi/design-system';
+import { Flex, Loader } from '@strapi/design-system';
 import { CrossCircle } from '@strapi/icons';
 
 const blobToBase64 = (blob: Blob): Promise<string | ArrayBuffer | null> => {
