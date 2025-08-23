@@ -9,6 +9,8 @@ import { Button, Flex, Grid, Modal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
+import { useEffect } from 'react';
+
 import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '../../constants/attributes';
 import { useGetInitialDataQuery } from '../../services/init';
 import { capitalise } from '../../utils/strings';
@@ -26,7 +28,7 @@ import type { Schema } from '@strapi/types';
 
 const FIELD_SCHEMA = yup.object().shape({
   label: yup.string().required().nullable(),
-  description: yup.string(),
+  description: yup.string().nullable(),
   editable: yup.boolean(),
   size: yup.number().required(),
 });
@@ -47,7 +49,12 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
 
   const { value, onChange } =
     useField<ConfigurationFormData['layout'][number]['children'][number]>(name);
-
+  useEffect(() => {
+    if (value && 'description' in value && value.description === null) {
+      const updatedValue = Object.assign({}, value, { description: '' });
+      onChange(name, updatedValue);
+    }
+  }, [value, name, onChange]);
   const { data: mainFieldOptions } = useGetInitialDataQuery(undefined, {
     selectFromResult: (res) => {
       if (attribute?.type !== 'relation' || !res.data) {
