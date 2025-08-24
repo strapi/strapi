@@ -81,6 +81,13 @@ export default function createSchemaHandler(infos: Infos) {
       return this;
     },
 
+    setFilename(val: string) {
+      modified = true;
+
+      state.filename = val;
+      return this;
+    },
+
     get schema() {
       return _.cloneDeep(state.schema);
     },
