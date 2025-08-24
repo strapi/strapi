@@ -92,7 +92,12 @@ const toTypeLiteral = (data) => {
   }
 
   if (isNumber(data)) {
-    return factory.createNumericLiteral(data);
+    return data < 0
+      ? factory.createPrefixUnaryExpression(
+          ts.SyntaxKind.MinusToken,
+          factory.createNumericLiteral(-data)
+        )
+      : factory.createNumericLiteral(data);
   }
 
   if (isBoolean(data)) {
