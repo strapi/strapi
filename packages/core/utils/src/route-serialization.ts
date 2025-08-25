@@ -24,7 +24,7 @@ export const sanitizeRoutesMapForSerialization = (
   Object.entries(map).reduce(
     (acc, [key, value]) => ({
       ...acc,
-      ...(Array.isArray(value) && { [key]: sanitizeRoutesArrayForSerialization(value) }),
+      [key]: Array.isArray(value) ? sanitizeRoutesArrayForSerialization(value) : value,
     }),
     {}
   );
