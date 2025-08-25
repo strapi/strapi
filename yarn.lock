@@ -8730,6 +8730,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/blocks-react-renderer@npm:1.0.2":
+  version: 1.0.2
+  resolution: "@strapi/blocks-react-renderer@npm:1.0.2"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10c0/4fa75836cfde327da5665336e22d475949757df85ab3680ca0c8eb77b1d46fc5e9f75b420554a397c478608de52d109a259e99242b8282313ebc70fd82dafe79
+  languageName: node
+  linkType: hard
+
 "@strapi/cloud-cli@npm:5.22.0, @strapi/cloud-cli@workspace:packages/cli/cloud":
   version: 0.0.0-use.local
   resolution: "@strapi/cloud-cli@workspace:packages/cli/cloud"
@@ -18890,6 +18900,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "getstarted@workspace:examples/getstarted"
   dependencies:
+    "@strapi/blocks-react-renderer": "npm:1.0.2"
     "@strapi/icons": "npm:2.0.0-rc.29"
     "@strapi/plugin-color-picker": "workspace:*"
     "@strapi/plugin-documentation": "workspace:*"
