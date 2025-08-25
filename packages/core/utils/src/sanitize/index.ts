@@ -1,5 +1,5 @@
 import { CurriedFunction1 } from 'lodash';
-import { isArray, cloneDeep, omit } from 'lodash/fp';
+import { isArray, omit } from 'lodash/fp';
 
 import { constants, getNonWritableAttributes } from '../content-types';
 import { pipe as pipeAsync } from '../async';
@@ -104,7 +104,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     }
     const { filters, sort, fields, populate } = query;
 
-    const sanitizedQuery = cloneDeep(query);
+    const sanitizedQuery = structuredClone(query);
 
     if (filters) {
       Object.assign(sanitizedQuery, { filters: await sanitizeFilters(filters, schema, { auth }) });
