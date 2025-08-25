@@ -27,6 +27,7 @@ export type EnvironmentDetails = {
   name: string;
   hasLiveDeployment: boolean;
   hasPendingDeployment: boolean;
+  value: unknown;
 };
 
 export type ProjectInput = Omit<ProjectInfo, 'id'>;

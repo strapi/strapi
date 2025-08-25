@@ -80,7 +80,7 @@
     "glob": "10.3.10",
     "global-agent": "3.0.0",
     "http-errors": "2.0.0",
-    "inquirer": "8.2.5",
+    "inquirer": "12.9.1",
     "is-docker": "2.2.1",
     "json-logic-js": "2.0.5",
     "koa": "2.16.1",
