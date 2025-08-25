@@ -4,6 +4,7 @@ declare global {
     __strapi_previewCleanup?: () => void;
     STRAPI_HIGHLIGHT_HOVER_COLOR?: string;
     STRAPI_HIGHLIGHT_ACTIVE_COLOR?: string;
+    STRAPI_DISABLE_STEGA_DECODING?: boolean;
   }
 }
 
@@ -21,6 +22,7 @@ const previewScript = (shouldRun = true) => {
   const HIGHLIGHT_HOVER_COLOR = window.STRAPI_HIGHLIGHT_HOVER_COLOR ?? '#4945ff'; // dark primary500
   const HIGHLIGHT_ACTIVE_COLOR = window.STRAPI_HIGHLIGHT_ACTIVE_COLOR ?? '#7b79ff'; // dark primary600
 
+  const DISABLE_STEGA_DECODING = window.STRAPI_DISABLE_STEGA_DECODING ?? false;
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
   const OVERLAY_ID = 'strapi-preview-overlay';
   const INTERNAL_EVENTS = {
@@ -53,6 +55,36 @@ const previewScript = (shouldRun = true) => {
   /* -----------------------------------------------------------------------------------------------
    * Functionality pieces
    * ---------------------------------------------------------------------------------------------*/
+
+  const setupStegaDecoding = async () => {
+    if (DISABLE_STEGA_DECODING) {
+      return;
+    }
+
+    const { vercelStegaDecode: stegaDecode } = await import(
+      // @ts-expect-error it's not a local dependency
+      // eslint-disable-next-line import/no-unresolved
+      'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
+    );
+
+    const allElements = document.querySelectorAll('*');
+
+    Array.from(allElements).forEach((element) => {
+      const directTextContent = Array.from(element.childNodes)
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent || '')
+        .join('');
+
+      if (directTextContent) {
+        try {
+          const result = stegaDecode(directTextContent);
+          if (result) {
+            element.setAttribute(SOURCE_ATTRIBUTE, result.key);
+          }
+        } catch (error) {}
+      }
+    });
+  };
 
   const createOverlaySystem = () => {
     // Clean up before creating a new overlay so we can safely call previewScript multiple times
@@ -121,12 +153,12 @@ const previewScript = (shouldRun = true) => {
 
         // Move hover detection to the underlying element
         const mouseEnterHandler = () => {
-          if (!highlightManager.focusedHighlights.includes(highlight)) {
+          if (!focusedHighlights.includes(highlight)) {
             highlight.style.outlineColor = HIGHLIGHT_HOVER_COLOR;
           }
         };
         const mouseLeaveHandler = () => {
-          if (!highlightManager.focusedHighlights.includes(highlight)) {
+          if (!focusedHighlights.includes(highlight)) {
             highlight.style.outlineColor = 'transparent';
           }
         };
@@ -340,11 +372,13 @@ const previewScript = (shouldRun = true) => {
    * Orchestration
    * ---------------------------------------------------------------------------------------------*/
 
-  const overlay = createOverlaySystem();
-  const highlightManager = createHighlightManager(overlay);
-  const observers = setupObservers(highlightManager);
-  const eventHandlers = setupEventHandlers(highlightManager);
-  createCleanupSystem(overlay, observers, eventHandlers);
+  setupStegaDecoding().then(() => {
+    const overlay = createOverlaySystem();
+    const highlightManager = createHighlightManager(overlay);
+    const observers = setupObservers(highlightManager);
+    const eventHandlers = setupEventHandlers(highlightManager);
+    createCleanupSystem(overlay, observers, eventHandlers);
+  });
 };
 
 export { previewScript };

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useParams, useLoaderData, useRevalidator } from 'react-router-dom';
 
-// @ts-ignore
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
 import { Grid, Flex, Typography, JSONInput, Box } from '@strapi/design-system';
 
@@ -130,7 +129,7 @@ const PreviewComponent = () => {
                           {key}
                         </Typography>
                         <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                          <Typography data-strapi-source={key}>
+                          <Typography>
                             {typeof value === 'object' && value !== null
                               ? JSON.stringify(value, null, 2)
                               : String(value)}
