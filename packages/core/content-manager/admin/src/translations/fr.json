@@ -208,6 +208,7 @@
   "history.restore.success.title": "Version restaurée.",
   "history.restore.success.message": "Le contenu de la version restaurée n'a pas encore été publié.",
   "widget.chart-entries.title": "Entrées",
+  "widget.chart-entries.count.label": "{count, plural, =0 {entrées} one {entrée} other {entrées}}",
   "widget.chart-entries.tooltip": "{count} {label}",
   "widget.last-edited.title": "Dernières entrées éditées",
   "widget.last-edited.single-type": "Types uniques",
