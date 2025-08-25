@@ -38,7 +38,7 @@ export const GridWrapper = styled(Flex)<{ $isOverlay?: boolean; $isDragging?: bo
 
   opacity: ${({ $isDragging }) => ($isDragging ? 0 : 1)};
   align-items: center;
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 export type AttributeRowProps = {
   item: {

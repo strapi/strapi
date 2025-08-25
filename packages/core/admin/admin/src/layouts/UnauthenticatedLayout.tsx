@@ -17,12 +17,12 @@ import { setLocale } from '../reducer';
 const Wrapper = styled<BoxComponent>(Box)`
   margin: 0 auto;
   width: 100%;
-  max-width: 552px;
+  width: 552px;
 `;
 
 export const Column = styled<FlexComponent>(Flex)`
   flex-direction: column;
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 const LocaleToggle = () => {
   const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
@@ -59,14 +59,8 @@ export const LayoutContent = ({ children }: LayoutContentProps) => (
     hasRadius
     paddingTop={9}
     paddingBottom={9}
-    paddingLeft={{
-      initial: 6,
-      small: 10,
-    }}
-    paddingRight={{
-      initial: 6,
-      small: 10,
-    }}
+    paddingLeft={10}
+    paddingRight={10}
     background="neutral0"
   >
     {children}
@@ -81,28 +75,11 @@ export const UnauthenticatedLayout = ({ children }: UnauthenticatedLayoutProps) 
   return (
     <div>
       <Flex tag="header" justifyContent="flex-end">
-        <Box
-          paddingTop={6}
-          paddingRight={{
-            initial: 6,
-            small: 8,
-          }}
-        >
+        <Box paddingTop={6} paddingRight={8}>
           <LocaleToggle />
         </Box>
       </Flex>
-      <Box
-        paddingTop={2}
-        paddingBottom={11}
-        marginLeft={{
-          initial: 6,
-          small: 8,
-        }}
-        marginRight={{
-          initial: 6,
-          small: 8,
-        }}
-      >
+      <Box paddingTop={2} paddingBottom={11}>
         {children}
       </Box>
     </div>

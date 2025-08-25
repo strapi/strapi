@@ -48,7 +48,7 @@ const ButtonContainer = styled<BoxComponent>(Box)<{ $hasConditions?: boolean }>`
  * and as such we need it to have a className already assigned.
  * Therefore we wrapped the implementation in a styled function.
  */
-const ConditionsButton = styled(ConditionsButtonImpl)``;
+const ConditionsButton = styled(ConditionsButtonImpl)`` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 export { ConditionsButton };
 export type { ConditionsButtonProps };

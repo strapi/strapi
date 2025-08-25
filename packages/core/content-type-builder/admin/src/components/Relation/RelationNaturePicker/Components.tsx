@@ -13,7 +13,7 @@ const Wrapper = styled<BoxComponent>(Box)`
     background-color: ${({ theme }) => theme.colors.primary600};
     z-index: 0;
   }
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 const IconWrapper = styled<BoxComponent<'button'>>(Box)<{ $isSelected: boolean }>`
   background: ${({ theme, $isSelected }) => theme.colors[$isSelected ? 'primary100' : 'neutral0']};
@@ -44,13 +44,13 @@ const IconWrapper = styled<BoxComponent<'button'>>(Box)<{ $isSelected: boolean }
   display: flex;
   justify-content: center;
   align-items: center;
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 const InfosWrapper = styled<FlexComponent>(Flex)`
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-`;
+` as any;
 
 export { IconWrapper, InfosWrapper, Wrapper };

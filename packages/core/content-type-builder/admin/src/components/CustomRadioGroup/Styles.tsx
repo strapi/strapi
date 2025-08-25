@@ -67,6 +67,6 @@ const Wrapper = styled(Flex)`
       }
     }
   }
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 export { Wrapper };

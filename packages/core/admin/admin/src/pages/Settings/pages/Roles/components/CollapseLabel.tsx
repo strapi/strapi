@@ -6,6 +6,6 @@ const CollapseLabel = styled<FlexComponent>(Flex)<{ $isCollapsable: boolean }>`
   overflow: hidden;
   flex: 1;
   ${({ $isCollapsable }) => $isCollapsable && 'cursor: pointer;'}
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 export { CollapseLabel };

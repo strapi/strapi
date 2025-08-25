@@ -30,7 +30,7 @@ const { version: strapiVersion } = packageInfo;
 const ContentContainer = styled(Box)`
   padding-top: 5.6rem;
 
-  ${({ theme }) => theme.breakpoints.medium} {
+  ${({ theme }) => theme.breakpoints.large} {
     padding-top: 0;
   }
 `;

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { darkTheme, lightTheme } from '@strapi/design-system';
+import { darkTheme, lightTheme, type StrapiTheme } from '@strapi/design-system';
 import { Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
@@ -30,6 +30,7 @@ import {
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 
+import type { ThemeConfig } from '../tests/styled-components';
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
 
 const {
@@ -99,13 +100,22 @@ class StrapiApp {
 
   translations: StrapiApp['configurations']['translations'] = {};
 
-  configurations = {
+  configurations: {
+    authLogo: string;
+    head: { favicon: string };
+    locales: string[];
+    menuLogo: string;
+    notifications: { releases: boolean };
+    themes: ThemeConfig;
+    translations: Record<string, Record<string, string>>;
+    tutorials: boolean;
+  } = {
     authLogo: Logo,
     head: { favicon: '' },
     locales: ['en'],
     menuLogo: Logo,
     notifications: { releases: true },
-    themes: { light: lightTheme, dark: darkTheme },
+    themes: { light: lightTheme as StrapiTheme, dark: darkTheme as StrapiTheme },
     translations: {},
     tutorials: true,
   };
@@ -395,7 +405,7 @@ class StrapiApp {
 
   async loadAdminTrads() {
     const adminLocales = await Promise.all(
-      this.configurations.locales.map(async (locale) => {
+      this.configurations.locales.map(async (locale: string) => {
         try {
           const { default: data } = await import(`./translations/${locale}.js`);
 
@@ -462,7 +472,7 @@ class StrapiApp {
 
     const translations = this.configurations.locales.reduce<{
       [locale: string]: Translation['data'];
-    }>((acc, current) => {
+    }>((acc: { [locale: string]: Translation['data'] }, current: string) => {
       acc[current] = {
         ...adminTranslations[current],
         ...(mergedTrads[current] || {}),

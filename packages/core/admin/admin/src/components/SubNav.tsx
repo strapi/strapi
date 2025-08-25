@@ -25,7 +25,7 @@ const Main = styled(DSSubNav)`
   &::-webkit-scrollbar {
     display: none;
   }
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 const StyledLink = styled(NavLink)`
   display: flex;
@@ -65,7 +65,7 @@ const StyledLink = styled(NavLink)`
   &:focus-visible {
     outline-offset: -2px;
   }
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 const Link = (
   props: Omit<React.ComponentProps<typeof StyledLink>, 'label'> & {
@@ -94,22 +94,27 @@ const Link = (
   );
 };
 
+const CloseButton = styled(IconButton)`
+  display: block;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    display: none;
+  }
+`;
+
 const Header = ({ label }: { label: string }) => {
   const { closeSideNav } = useSubNav();
   return (
     <SubNavHeader
       label={label}
       additionalAction={
-        <Box
-          display={{
-            initial: 'block',
-            medium: 'none',
-          }}
+        <CloseButton
+          onClick={closeSideNav}
+          label="Close side navigation" // TODO: translate
+          type="button"
         >
-          <IconButton label="Close subnav" onClick={closeSideNav}>
-            <Cross />
-          </IconButton>
-        </Box>
+          <Cross display="block" />
+        </CloseButton>
       }
     />
   );
@@ -293,7 +298,14 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
   );
 };
 
-export const SubNav = {
+export const SubNav: {
+  Main: typeof Main;
+  Header: typeof Header;
+  Link: typeof Link;
+  Sections: typeof Sections;
+  Section: typeof Section;
+  SubSection: typeof SubSection;
+} = {
   Main,
   Header,
   Link,

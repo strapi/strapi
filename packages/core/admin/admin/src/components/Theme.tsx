@@ -3,17 +3,16 @@ import * as React from 'react';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
-import { DefaultTheme, createGlobalStyle } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
 
 import { useTypedSelector } from '../core/store/hooks';
 import { setAvailableThemes } from '../reducer';
 
+import type { ThemeConfig } from '../../tests/styled-components';
+
 interface ThemeProps {
   children: React.ReactNode;
-  themes: {
-    dark: DefaultTheme;
-    light: DefaultTheme;
-  };
+  themes: ThemeConfig;
 }
 
 const Theme = ({ children, themes }: ThemeProps) => {

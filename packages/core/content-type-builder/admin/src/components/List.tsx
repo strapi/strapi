@@ -36,7 +36,7 @@ export const ListGrid = styled(Box)`
   white-space: nowrap;
   list-style: none;
   list-style-type: none;
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.
 
 type ListProps = {
   addComponentToDZ?: () => void;

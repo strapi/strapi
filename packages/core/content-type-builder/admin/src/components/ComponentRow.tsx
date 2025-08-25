@@ -40,4 +40,4 @@ export const ComponentRow = styled(Box)<{
   &.dynamiczone-row > ul:first-of-type {
     padding: 0;
   }
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.

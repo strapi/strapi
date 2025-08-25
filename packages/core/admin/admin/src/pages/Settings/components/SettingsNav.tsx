@@ -1,4 +1,4 @@
-import { Badge, Divider } from '@strapi/design-system';
+import { Badge, SubNavSections, SubNavSection } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -78,10 +78,9 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   return (
     <SubNav.Main aria-label={label}>
       <SubNav.Header label={label} />
-      <Divider background="neutral150" marginBottom={5} />
-      <SubNav.Sections>
+      <SubNavSections>
         {sections.map((section) => (
-          <SubNav.Section key={section.id} label={formatMessage(section.intlLabel)}>
+          <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
             {section.links.map((link) => {
               return (
                 <SubNav.Link
@@ -118,9 +117,9 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                 />
               );
             })}
-          </SubNav.Section>
+          </SubNavSection>
         ))}
-      </SubNav.Sections>
+      </SubNavSections>
     </SubNav.Main>
   );
 };

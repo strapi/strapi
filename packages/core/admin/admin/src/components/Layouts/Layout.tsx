@@ -27,7 +27,7 @@ const GridContainer = styled(Box)<{ $hasSideNav: boolean; $isSideNavMobileVisibl
 const SideNavContainer = styled(Flex)<{ $isSideNavMobileVisible: boolean }>`
   display: block;
   position: fixed;
-  top: 0;
+  top: 5.6rem;
   left: 0;
   height: 100vh;
   width: 100vw;
@@ -37,36 +37,27 @@ const SideNavContainer = styled(Flex)<{ $isSideNavMobileVisible: boolean }>`
   transform: ${({ $isSideNavMobileVisible }) =>
     $isSideNavMobileVisible ? 'translateX(0)' : 'translateX(-100%)'};
   transition: transform 0.3s ease-in-out;
+  z-index: 1;
 
   ${({ theme }) => theme.breakpoints.medium} {
     position: sticky;
-    top: 5.7rem;
-    height: calc(100vh - 5.7rem);
+    top: 0;
     width: auto;
     box-shadow: none;
     transform: none;
     border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
   }
   ${({ theme }) => theme.breakpoints.large} {
-    height: 100vh;
-    top: 0;
     border-top: none;
   }
 `;
 
 const OverflowingItem = styled(Box)<{ $isSideNavMobileVisible: boolean }>`
   overflow-x: hidden;
-  transform: ${({ $isSideNavMobileVisible }) =>
-    $isSideNavMobileVisible ? 'translateX(100%)' : 'translateX(0)'};
-  transition: transform 0.3s ease-in-out;
 
   ${({ theme }) => theme.breakpoints.medium} {
-    padding-top: 5.7rem;
     transform: none;
     width: auto;
-  }
-  ${({ theme }) => theme.breakpoints.large} {
-    padding-top: 0;
   }
 `;
 

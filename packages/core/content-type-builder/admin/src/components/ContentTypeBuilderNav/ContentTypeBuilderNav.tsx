@@ -1,19 +1,20 @@
 import { Fragment, useState, useEffect } from 'react';
 
-import { ConfirmDialog, SubNav, tours, useGuidedTour } from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, SubNav, tours } from '@strapi/admin/strapi-admin';
 import {
   Box,
   TextInput,
   Button,
   Flex,
   Typography,
-  Divider,
   Menu,
   VisuallyHidden,
   Dialog,
   IconButton,
+  SubNavSections,
+  SubNavSection,
 } from '@strapi/design-system';
-import { ArrowClockwise, Cross, More, Search } from '@strapi/icons';
+import { ArrowClockwise, Cross, More, Plus, Search } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -34,6 +35,31 @@ const DiscardAllMenuItem = styled(Menu.Item)`
     background: ${({ theme, disabled }) => !disabled && theme.colors.danger100};
   }
 `;
+
+const GuidedTourTooltip = ({
+  sectionId,
+  children,
+}: {
+  sectionId?: string;
+  children: React.ReactNode;
+}) => {
+  switch (sectionId) {
+    case 'models':
+      return (
+        <tours.contentTypeBuilder.CollectionTypes>
+          <tours.contentTypeBuilder.YourTurn>{children}</tours.contentTypeBuilder.YourTurn>
+        </tours.contentTypeBuilder.CollectionTypes>
+      );
+    case 'singleTypes':
+      return (
+        <tours.contentTypeBuilder.SingleTypes>{children}</tours.contentTypeBuilder.SingleTypes>
+      );
+    case 'components':
+      return <tours.contentTypeBuilder.Components>{children}</tours.contentTypeBuilder.Components>;
+    default:
+      return children;
+  }
+};
 
 export const ContentTypeBuilderNav = () => {
   const { menu, search } = useContentTypeBuilderMenu();
@@ -99,8 +125,15 @@ export const ContentTypeBuilderNav = () => {
   return (
     <SubNav.Main aria-label={pluginName}>
       <SubNav.Header label={pluginName} />
-      <Divider background="neutral150" />
-      <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
+      <Flex
+        paddingTop={5}
+        paddingBottom={1}
+        paddingLeft={5}
+        paddingRight={5}
+        gap={3}
+        direction={'column'}
+        alignItems={'stretch'}
+      >
         <tours.contentTypeBuilder.Save>
           <Flex gap={2}>
             <Button
@@ -204,71 +237,76 @@ export const ContentTypeBuilderNav = () => {
           size="S"
         />
       </Flex>
-      <SubNav.Sections>
+      <SubNavSections>
         {menu.map((section) => (
           <Fragment key={section.name}>
-            <SubNav.Section
-              label={formatMessage({
-                id: section.title.id,
-                defaultMessage: section.title.defaultMessage,
-              })}
-              link={
-                section.customLink && {
-                  label: formatMessage({
-                    id: section.customLink?.id,
-                    defaultMessage: section.customLink?.defaultMessage,
-                  }),
-                  onClik: section.customLink?.onClick,
-                }
-              }
-              sectionId={section.name}
-            >
-              {section.links.map((link) => {
-                const linkLabel = formatMessage({ id: link.name, defaultMessage: link.title });
-
-                if ('links' in link) {
-                  return (
-                    <SubNav.SubSection key={link.name} label={link.title}>
-                      {link.links.map((subLink) => {
-                        const label = formatMessage({
-                          id: subLink.name,
-                          defaultMessage: subLink.title,
-                        });
-
-                        return (
-                          <SubNav.Link
-                            to={subLink.to}
-                            key={subLink.name}
-                            label={label}
-                            endAction={
-                              <Box tag="span" textAlign="center" width={'24px'}>
-                                <Status status={subLink.status} />
-                              </Box>
-                            }
-                          />
-                        );
+            <GuidedTourTooltip sectionId={section.name}>
+              <SubNavSection
+                label={formatMessage({
+                  id: section.title.id,
+                  defaultMessage: section.title.defaultMessage,
+                })}
+                badgeLabel={section.linksCount ? section.linksCount.toString() : undefined}
+                additionalAction={
+                  section.customLink && (
+                    <IconButton
+                      label={formatMessage({
+                        id: section.customLink.id,
+                        defaultMessage: section.customLink.defaultMessage,
                       })}
-                    </SubNav.SubSection>
-                  );
+                      variant="ghost"
+                      withTooltip
+                      onClick={section.customLink.onClick}
+                      size="XS"
+                    >
+                      <Plus />
+                    </IconButton>
+                  )
                 }
+              >
+                {section.links.map((link) => {
+                  const linkLabel = formatMessage({ id: link.name, defaultMessage: link.title });
 
-                return (
-                  <SubNav.Link
-                    to={link.to}
-                    key={link.name}
-                    label={linkLabel}
-                    endAction={
-                      <Box tag="span" textAlign="center" width={'24px'}>
-                        <Status status={link.status} />
-                      </Box>
-                    }
-                  />
-                );
-              })}
-            </SubNav.Section>
+                  if ('links' in link) {
+                    return link.links.map((subLink) => {
+                      const label = formatMessage({
+                        id: subLink.name,
+                        defaultMessage: subLink.title,
+                      });
+
+                      return (
+                        <SubNav.Link
+                          to={subLink.to}
+                          key={subLink.name}
+                          label={label}
+                          endAction={
+                            <Box tag="span" textAlign="center" width={'24px'}>
+                              <Status status={subLink.status} />
+                            </Box>
+                          }
+                        />
+                      );
+                    });
+                  }
+
+                  return (
+                    <SubNav.Link
+                      to={link.to}
+                      key={link.name}
+                      label={linkLabel}
+                      endAction={
+                        <Box tag="span" textAlign="center" width={'24px'}>
+                          <Status status={link.status} />
+                        </Box>
+                      }
+                    />
+                  );
+                })}
+              </SubNavSection>
+            </GuidedTourTooltip>
           </Fragment>
         ))}
-      </SubNav.Sections>
+      </SubNavSections>
       <Dialog.Root
         open={discardConfirmationModalIsOpen}
         onOpenChange={setDiscardConfirmationModalIsOpen}

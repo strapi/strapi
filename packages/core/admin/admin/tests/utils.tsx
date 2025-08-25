@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
-import { darkTheme, lightTheme } from '@strapi/design-system';
+import { darkTheme, lightTheme, type StrapiTheme } from '@strapi/design-system';
 import {
   fireEvent,
   renderHook as renderHookRTL,
@@ -155,8 +155,8 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                     <LanguageProvider messages={{}}>
                       <Theme
                         themes={{
-                          dark: darkTheme,
-                          light: lightTheme,
+                          dark: darkTheme as StrapiTheme,
+                          light: lightTheme as StrapiTheme,
                         }}
                       >
                         <NotificationsProvider>

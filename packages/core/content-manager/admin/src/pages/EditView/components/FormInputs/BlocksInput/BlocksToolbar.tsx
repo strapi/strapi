@@ -456,7 +456,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
 
   return (
     <ToolbarButton
-      icon={block.icon}
+      icon={block.icon as React.ComponentType<React.SVGProps<SVGSVGElement>>}
       name={format}
       label={block.label}
       isActive={isListActive()}
@@ -546,7 +546,7 @@ const LinkButton = ({
 
   return (
     <ToolbarButton
-      icon={Link}
+      icon={Link as React.ComponentType<React.SVGProps<SVGSVGElement>>}
       name="link"
       label={label}
       isActive={isLinkActive()}
@@ -617,7 +617,7 @@ const BlocksToolbar = () => {
           <ToolbarButton
             key={name}
             name={name}
-            icon={modifier.icon}
+            icon={modifier.icon as React.ComponentType<React.SVGProps<SVGSVGElement>>}
             label={modifier.label}
             isActive={modifier.checkIsActive(editor)}
             handleClick={handleSelect}

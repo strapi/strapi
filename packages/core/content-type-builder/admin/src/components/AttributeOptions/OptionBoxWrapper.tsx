@@ -11,4 +11,4 @@ export const OptionBoxWrapper = styled(Box)`
     background: ${({ theme }) => theme.colors.primary100};
     border: 1px solid ${({ theme }) => theme.colors.primary200};
   }
-`;
+` as any; // TODO: Put here to be able to link the design-system locally. To fix.

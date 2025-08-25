@@ -76,8 +76,14 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           medium: 6,
           large: 10,
         }}
-        paddingBottom={8}
-        paddingTop={navigationAction ? 6 : 8}
+        paddingBottom={{
+          initial: 4,
+          medium: 8,
+        }}
+        paddingTop={{
+          initial: 4,
+          medium: navigationAction ? 6 : 8,
+        }}
         background="neutral100"
         data-strapi-header
       >
@@ -120,9 +126,9 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
     threshold: 0,
   });
 
-  useResizeObserver(containerRef, () => {
-    if (containerRef.current) {
-      setHeaderSize(containerRef.current.getBoundingClientRect());
+  useResizeObserver([containerRef, baseHeaderLayoutRef], () => {
+    if (baseHeaderLayoutRef.current) {
+      setHeaderSize(baseHeaderLayoutRef.current.getBoundingClientRect());
     }
   });
 
@@ -132,9 +138,27 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
     }
   }, [baseHeaderLayoutRef]);
 
+  // Update header size on window resize
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (baseHeaderLayoutRef.current) {
+        setHeaderSize(baseHeaderLayoutRef.current.getBoundingClientRect());
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <>
-      <div style={{ height: headerSize?.height }} ref={containerRef}>
+      <div
+        style={{
+          height: headerSize?.height,
+          minHeight: headerSize?.height,
+        }}
+        ref={containerRef}
+      >
         {isVisible && <BaseHeaderLayout ref={baseHeaderLayoutRef} {...props} />}
       </div>
 

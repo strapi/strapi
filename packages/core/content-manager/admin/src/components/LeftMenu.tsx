@@ -1,7 +1,14 @@
 import * as React from 'react';
 
 import { useQueryParams, SubNav, useSubNav } from '@strapi/admin/strapi-admin';
-import { Flex, TextInput, useCollator, useFilter } from '@strapi/design-system';
+import {
+  Flex,
+  TextInput,
+  useCollator,
+  useFilter,
+  SubNavSections,
+  SubNavSection,
+} from '@strapi/design-system';
 import { Cross, Search } from '@strapi/icons';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -114,7 +121,15 @@ const LeftMenu = () => {
   return (
     <SubNav.Main aria-label={label}>
       <SubNav.Header label={label} />
-      <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
+      <Flex
+        paddingTop={5}
+        paddingBottom={1}
+        paddingLeft={5}
+        paddingRight={5}
+        gap={3}
+        direction={'column'}
+        alignItems={'stretch'}
+      >
         <TextInput
           startAction={<Search fill="neutral500" />}
           value={search}
@@ -128,10 +143,10 @@ const LeftMenu = () => {
           size="S"
         />
       </Flex>
-      <SubNav.Sections>
+      <SubNavSections>
         {menu.map((section) => {
           return (
-            <SubNav.Section key={section.id} label={section.title}>
+            <SubNavSection key={section.id} label={section.title}>
               {section.links.map((link) => {
                 return (
                   <SubNav.Link
@@ -148,10 +163,10 @@ const LeftMenu = () => {
                   />
                 );
               })}
-            </SubNav.Section>
+            </SubNavSection>
           );
         })}
-      </SubNav.Sections>
+      </SubNavSections>
     </SubNav.Main>
   );
 };
