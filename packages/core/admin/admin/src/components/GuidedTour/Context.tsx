@@ -88,7 +88,7 @@ const getCompletedTours = (tours: TourState): ValidTourName[] => {
   ) as ValidTourName[];
 };
 
-const areAllToursComplete = (tours: TourState) => Object.values(tours).every((t) => t.isCompleted);
+const areAllToursCompleted = (tours: TourState) => Object.values(tours).every((t) => t.isCompleted);
 
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
@@ -163,7 +163,7 @@ const GuidedTourContext = ({
   }, [state, setStoredTours]);
 
   // Derive all completed tours from state
-  const currentAllCompletedState = areAllToursComplete(state.tours);
+  const currentAllCompletedState = areAllToursCompleted(state.tours);
   // Store completed state in ref to survive a re-render,
   // when current state changes this will persist and be used for comparison
   const previousAllCompletedStateRef = React.useRef(currentAllCompletedState);
