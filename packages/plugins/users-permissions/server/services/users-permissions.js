@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const template = require('lodash/template');
 const { filter, map, pipe, prop } = require('lodash/fp');
 const urlJoin = require('url-join');
 const {
@@ -38,63 +38,71 @@ module.exports = ({ strapi }) => ({
     const actionMap = {};
 
     const isContentApi = (action) => {
-      if (!_.has(action, Symbol.for('__type__'))) {
+      if (!(Symbol.for('__type__') in action)) {
         return false;
       }
 
       return action[Symbol.for('__type__')].includes('content-api');
     };
 
-    _.forEach(strapi.apis, (api, apiName) => {
-      const controllers = _.reduce(
-        api.controllers,
-        (acc, controller, controllerName) => {
-          const contentApiActions = _.pickBy(controller, isContentApi);
+    Object.entries(strapi.apis).forEach(([apiName, api]) => {
+      const controllers = Object.entries(api.controllers).reduce(
+        (acc, [controllerName, controller]) => {
+          const contentApiActions = Object.fromEntries(
+            Object.entries(controller).filter(([, action]) => isContentApi(action))
+          );
 
-          if (_.isEmpty(contentApiActions)) {
+          if (Object.keys(contentApiActions).length === 0) {
             return acc;
           }
 
-          acc[controllerName] = _.mapValues(contentApiActions, () => {
-            return {
-              enabled: defaultEnable,
-              policy: '',
-            };
-          });
+          acc[controllerName] = Object.fromEntries(
+            Object.keys(contentApiActions).map((key) => [
+              key,
+              {
+                enabled: defaultEnable,
+                policy: '',
+              },
+            ])
+          );
 
           return acc;
         },
         {}
       );
 
-      if (!_.isEmpty(controllers)) {
+      if (Object.keys(controllers).length > 0) {
         actionMap[`api::${apiName}`] = { controllers };
       }
     });
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
-      const controllers = _.reduce(
-        plugin.controllers,
-        (acc, controller, controllerName) => {
-          const contentApiActions = _.pickBy(controller, isContentApi);
+    Object.entries(strapi.plugins).forEach(([pluginName, plugin]) => {
+      const controllers = Object.entries(plugin.controllers).reduce(
+        (acc, [controllerName, controller]) => {
+          const contentApiActions = Object.fromEntries(
+            Object.entries(controller).filter(([, action]) => isContentApi(action))
+          );
 
-          if (_.isEmpty(contentApiActions)) {
+          if (Object.keys(contentApiActions).length === 0) {
             return acc;
           }
 
-          acc[controllerName] = _.mapValues(contentApiActions, () => {
-            return {
-              enabled: defaultEnable,
-              policy: '',
-            };
-          });
+          acc[controllerName] = Object.fromEntries(
+            Object.keys(contentApiActions).map((key) => [
+              key,
+              {
+                enabled: defaultEnable,
+                policy: '',
+              },
+            ])
+          );
 
           return acc;
         },
         {}
       );
 
-      if (!_.isEmpty(controllers)) {
+      if (Object.keys(controllers).length > 0) {
         actionMap[`plugin::${pluginName}`] = { controllers };
       }
     });
@@ -105,46 +113,62 @@ module.exports = ({ strapi }) => ({
   async getRoutes() {
     const routesMap = {};
 
-    _.forEach(strapi.apis, (api, apiName) => {
-      const routes = _.flatMap(api.routes, (route) => {
-        if (_.has(route, 'routes')) {
-          return route.routes;
-        }
+    /**
+     * Clean route object to remove circular references for JSON serialization
+     */
+    const cleanRouteForSerialization = (route) => {
+      const { request, response, ...cleanedRoute } = route;
 
-        return route;
-      }).filter((route) => route.info.type === 'content-api');
+      // Remove request and response objects that may contain circular references
+      return cleanedRoute;
+    };
 
-      if (routes.length === 0) {
-        return;
+    Object.entries(strapi.apis).forEach(([apiName, api]) => {
+      const routes = Object.values(api.routes)
+        .flatMap((route) => {
+          if ('routes' in route) {
+            return route.routes;
+          }
+
+          return route;
+        })
+        .filter((route) => route.info.type === 'content-api');
+
+      if (routes.length > 0) {
+        const apiPrefix = strapi.config.get('api.rest.prefix');
+        routesMap[`api::${apiName}`] = routes.map((route) =>
+          // Apply clean for all routes
+          cleanRouteForSerialization({
+            ...route,
+            path: urlJoin(apiPrefix, route.path),
+          })
+        );
       }
-
-      const apiPrefix = strapi.config.get('api.rest.prefix');
-      routesMap[`api::${apiName}`] = routes.map((route) => ({
-        ...route,
-        path: urlJoin(apiPrefix, route.path),
-      }));
     });
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    Object.entries(strapi.plugins).forEach(([pluginName, plugin]) => {
       const transformPrefix = transformRoutePrefixFor(pluginName);
 
-      const routes = _.flatMap(plugin.routes, (route) => {
-        if (_.has(route, 'routes')) {
-          return route.routes.map(transformPrefix);
-        }
+      const routes = Object.values(plugin.routes)
+        .flatMap((route) => {
+          if ('routes' in route) {
+            return route.routes.map(transformPrefix);
+          }
 
-        return transformPrefix(route);
-      }).filter((route) => route.info.type === 'content-api');
+          return transformPrefix(route);
+        })
+        .filter((route) => route.info.type === 'content-api');
 
-      if (routes.length === 0) {
-        return;
+      if (routes.length > 0) {
+        const apiPrefix = strapi.config.get('api.rest.prefix');
+        routesMap[`plugin::${pluginName}`] = routes.map((route) =>
+          // Apply clean for all routes
+          cleanRouteForSerialization({
+            ...route,
+            path: urlJoin(apiPrefix, route.path),
+          })
+        );
       }
-
-      const apiPrefix = strapi.config.get('api.rest.prefix');
-      routesMap[`plugin::${pluginName}`] = routes.map((route) => ({
-        ...route,
-        path: urlJoin(apiPrefix, route.path),
-      }));
     });
 
     return routesMap;
@@ -154,19 +178,19 @@ module.exports = ({ strapi }) => ({
     const roles = await strapi.db.query('plugin::users-permissions.role').findMany();
     const dbPermissions = await strapi.db.query('plugin::users-permissions.permission').findMany();
 
-    const permissionsFoundInDB = _.uniq(_.map(dbPermissions, 'action'));
+    const permissionsFoundInDB = [...new Set(dbPermissions.map((permission) => permission.action))];
 
-    const appActions = _.flatMap(strapi.apis, (api, apiName) => {
-      return _.flatMap(api.controllers, (controller, controllerName) => {
-        return _.keys(controller).map((actionName) => {
+    const appActions = Object.entries(strapi.apis).flatMap(([apiName, api]) => {
+      return Object.entries(api.controllers).flatMap(([controllerName, controller]) => {
+        return Object.keys(controller).map((actionName) => {
           return `api::${apiName}.${controllerName}.${actionName}`;
         });
       });
     });
 
-    const pluginsActions = _.flatMap(strapi.plugins, (plugin, pluginName) => {
-      return _.flatMap(plugin.controllers, (controller, controllerName) => {
-        return _.keys(controller).map((actionName) => {
+    const pluginsActions = Object.entries(strapi.plugins).flatMap(([pluginName, plugin]) => {
+      return Object.entries(plugin.controllers).flatMap(([controllerName, controller]) => {
+        return Object.keys(controller).map((actionName) => {
           return `plugin::${pluginName}.${controllerName}.${actionName}`;
         });
       });
@@ -174,7 +198,7 @@ module.exports = ({ strapi }) => ({
 
     const allActions = [...appActions, ...pluginsActions];
 
-    const toDelete = _.difference(permissionsFoundInDB, allActions);
+    const toDelete = permissionsFoundInDB.filter((action) => !allActions.includes(action));
 
     await Promise.all(
       toDelete.map((action) => {
@@ -243,7 +267,7 @@ module.exports = ({ strapi }) => ({
     const interpolate = createStrictInterpolationRegExp(allowedTemplateVariables, 'g');
 
     try {
-      return _.template(layout, { interpolate, evaluate: false, escape: false })(data);
+      return template(layout, { interpolate, evaluate: false, escape: false })(data);
     } catch (e) {
       throw new errors.ApplicationError('Invalid email template');
     }
