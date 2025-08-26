@@ -176,7 +176,7 @@ describe('SessionManager Factory', () => {
       };
 
       const mockSession = {
-        user: userId,
+        userId,
         sessionId,
         deviceId,
         origin,
