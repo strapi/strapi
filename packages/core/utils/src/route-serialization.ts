@@ -20,11 +20,11 @@ export const sanitizeRoutesArrayForSerialization = (routes: unknown[]): Record<s
 
 export const sanitizeRoutesMapForSerialization = (
   map: Record<string, unknown[]>
-): Record<string, Record<string, unknown>[]> =>
+): Record<string, unknown> =>
   Object.entries(map).reduce(
     (acc, [key, value]) => ({
       ...acc,
-      ...(Array.isArray(value) && { [key]: sanitizeRoutesArrayForSerialization(value) }),
+      [key]: Array.isArray(value) ? sanitizeRoutesArrayForSerialization(value) : value,
     }),
     {}
   );
