@@ -61,23 +61,34 @@ const previewScript = (shouldRun = true) => {
       return;
     }
 
-    const { vercelStegaDecode: stegaDecode } = await import(
+    const { vercelStegaDecode: stegaDecode, vercelStegaClean: stegaClean } = await import(
       // @ts-expect-error it's not a local dependency
       // eslint-disable-next-line import/no-unresolved
       'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
     );
 
     const processElementForStega = (element: Element) => {
-      const directTextContent = Array.from(element.childNodes)
-        .filter((node) => node.nodeType === Node.TEXT_NODE)
-        .map((node) => node.textContent || '')
-        .join('');
+      const directTextNodes = Array.from(element.childNodes).filter(
+        (node) => node.nodeType === Node.TEXT_NODE
+      );
+
+      const directTextContent = directTextNodes.map((node) => node.textContent || '').join('');
 
       if (directTextContent) {
         try {
           const result = stegaDecode(directTextContent);
           if (result) {
             element.setAttribute(SOURCE_ATTRIBUTE, result.key);
+
+            // Remove encoded part from DOM text content (to avoid breaking links for example)
+            directTextNodes.forEach((node) => {
+              if (node.textContent) {
+                const cleanedText = stegaClean(node.textContent);
+                if (cleanedText !== node.textContent) {
+                  node.textContent = cleanedText;
+                }
+              }
+            });
           }
         } catch (error) {}
       }
