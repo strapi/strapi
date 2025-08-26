@@ -426,6 +426,9 @@ const previewScript = (shouldRun = true) => {
             element.textContent = value || '';
           }
         });
+
+        // Update highlight dimensions since the new text content may affect them
+        highlightManager.updateAllHighlights();
         return;
       }
 
