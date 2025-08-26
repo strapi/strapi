@@ -1,19 +1,33 @@
 import { vercelStegaCombine } from '@vercel/stega';
-import type { Core, Struct } from '@strapi/types';
+import type { Core, Struct, UID } from '@strapi/types';
+import { traverseEntity } from '@strapi/utils';
 
 const ENCODABLE_TYPES = [
   'string',
   'text',
   'richtext',
-  'uid',
-  'enumeration',
-  'email',
+  'biginteger',
   'date',
-  'datetime',
   'time',
+  'datetime',
   'timestamp',
+  'boolean',
+  'enumeration',
+  'json',
+  'media',
+  'email',
+  'password',
+  'uid',
+  /**
+   * We cannot modify the response shape, so types that aren't based on string cannot be encoded:
+   * - json: object
+   * - blocks: object, will require a custom implementation in a dedicated PR
+   * - integer, float and decimal: number
+   * - boolean: boolean (believe it or not)
+   */
 ];
 
+// TODO: use a centralized store for these fields that would be shared with the CM and CTB
 const EXCLUDED_FIELDS = [
   'id',
   'documentId',
@@ -26,6 +40,11 @@ const EXCLUDED_FIELDS = [
   'publishedAt',
 ];
 
+interface EncodingInfo {
+  data: any;
+  schema: Struct.Schema;
+}
+
 const createContentSourceMapsService = (strapi: Core.Strapi) => {
   return {
     encodeField(text: string, key: string): string {
@@ -36,144 +55,34 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
       return res;
     },
 
-    async encodeEntry(options: {
-      entryRootId: any;
-      entryRootModel: string;
-      entryData: any;
-      model: any;
-    }): Promise<any> {
-      const { entryRootId, entryRootModel, entryData, model } = options;
-
-      if (typeof entryData !== 'object' || entryData === null || entryData === undefined) {
-        return entryData;
+    async encodeEntry({ data, schema }: EncodingInfo): Promise<any> {
+      if (typeof data !== 'object' || data === null || data === undefined) {
+        return data;
       }
 
-      const encodedData = { ...entryData };
-
-      await Promise.all(
-        Object.keys(entryData).map(async (key) => {
-          const value = entryData[key];
-
-          if (value === null || value === undefined) {
-            return;
-          }
-
-          const attribute = model.attributes[key];
-
+      return traverseEntity(
+        ({ key, value, attribute }, { set }) => {
           if (!attribute || EXCLUDED_FIELDS.includes(key)) {
             return;
           }
 
-          if (ENCODABLE_TYPES.includes(attribute.type)) {
-            encodedData[key] = this.encodeField(
-              value,
-              // TODO: smarter metadata than just the key
-              key
-            );
+          if (ENCODABLE_TYPES.includes(attribute.type) && typeof value === 'string') {
+            set(key, this.encodeField(value, key) as any);
           }
-
-          if (attribute.type === 'component') {
-            const componentModel = strapi.getModel(attribute.component);
-
-            if (Array.isArray(value)) {
-              encodedData[key] = await Promise.all(
-                value.map((item) =>
-                  this.encodeEntry({
-                    entryRootId,
-                    entryRootModel,
-                    entryData: item,
-                    model: componentModel,
-                  })
-                )
-              );
-            }
-
-            encodedData[key] = await this.encodeEntry({
-              entryRootId,
-              entryRootModel,
-              entryData: value,
-              model: componentModel,
-            });
-          }
-
-          if (attribute.type === 'dynamiczone' && Array.isArray(value)) {
-            encodedData[key] = await Promise.all(
-              value.map((item) =>
-                this.encodeEntry({
-                  entryRootId,
-                  entryRootModel,
-                  entryData: item,
-                  model: strapi.getModel(item.__component),
-                })
-              )
-            );
-          }
-
-          if (attribute.type === 'relation' && 'target' in attribute) {
-            const relatedModel = strapi.getModel(attribute.target);
-
-            if (Array.isArray(value)) {
-              encodedData[key] = await Promise.all(
-                value.map((item: any) =>
-                  this.encodeEntry({
-                    entryRootId: item.id,
-                    entryRootModel: relatedModel.uid,
-                    entryData: item,
-                    model: strapi.getModel(attribute.target),
-                  })
-                )
-              );
-            } else {
-              encodedData[key] = await this.encodeEntry({
-                entryRootId: value.id,
-                entryRootModel: relatedModel.uid,
-                entryData: value,
-                model: strapi.getModel(attribute.target),
-              });
-            }
-          }
-
-          if (attribute.type === 'media') {
-            const fileModel = strapi.getModel('plugin::upload.file');
-
-            if (Array.isArray(value)) {
-              encodedData[key] = await Promise.all(
-                value.map((item: any) =>
-                  this.encodeEntry({
-                    entryRootId,
-                    entryRootModel,
-                    entryData: item,
-                    model: fileModel,
-                  })
-                )
-              );
-            } else {
-              encodedData[key] = await this.encodeEntry({
-                entryRootId,
-                entryRootModel,
-                entryData: value.data,
-                model: fileModel,
-              });
-            }
-          }
-        })
+        },
+        {
+          schema,
+          getModel: (uid) => strapi.getModel(uid as UID.Schema),
+        },
+        data
       );
-
-      return encodedData;
     },
 
-    async encodeSourceMaps(options: {
-      data: any;
-      contentType: Struct.ContentTypeSchema;
-      rootId?: any;
-      rootModel?: string;
-    }): Promise<any> {
-      const { data, contentType, rootId, rootModel } = options;
-
+    async encodeSourceMaps({ data, schema }: EncodingInfo): Promise<any> {
       try {
         if (Array.isArray(data)) {
           return await Promise.all(
-            data.map((item) => this.encodeSourceMaps({ data: item, contentType }))
+            data.map((item) => this.encodeSourceMaps({ data: item, schema }))
           );
         }
 
@@ -181,15 +90,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
           return data;
         }
 
-        const actualRootId = rootId || data.id;
-        const actualRootModel = rootModel || contentType.uid;
-
-        return await this.encodeEntry({
-          entryRootId: actualRootId,
-          entryRootModel: actualRootModel,
-          entryData: data,
-          model: contentType,
-        });
+        return await this.encodeEntry({ data, schema });
       } catch (error) {
         strapi.log.error('Error encoding source maps:', error);
         return data;

@@ -25,7 +25,7 @@ const previewLoader = async ({ params }) => {
     const headers = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiToken}`,
-      'encode-source-maps': 'true',
+      'strapi-encode-source-maps': 'true',
     };
     const searchParams = new URLSearchParams({
       locale,

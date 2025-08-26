@@ -58,7 +58,7 @@ const transformResponse = async (
 
   const applySourceMapEncoding = async (data: any) =>
     opts.encodeSourceMaps && opts.contentType
-      ? strapi.get('content-source-maps').encodeSourceMaps({ data, contentType: opts.contentType })
+      ? strapi.get('content-source-maps').encodeSourceMaps({ data, schema: opts.contentType })
       : data;
 
   // Process data through transformation pipeline
