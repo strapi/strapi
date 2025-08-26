@@ -1,8 +1,14 @@
-import { Button, IconButton, IconButtonComponent, IconButtonGroup } from '@strapi/design-system';
+import {
+  Button,
+  IconButton,
+  IconButtonComponent,
+  IconButtonGroup,
+  type FlexComponent,
+} from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 // NAV BUTTONS
-export const MainButtons = styled(IconButtonGroup)`
+export const MainButtons = styled<FlexComponent>(IconButtonGroup)`
   margin-left: ${({ theme }) => theme.spaces[4]};
 `;
 
@@ -12,7 +18,7 @@ export const MoreButton = styled<IconButtonComponent>(IconButton)`
 
 // NAV
 
-export const IconButtonGroupMargin = styled(IconButtonGroup)`
+export const IconButtonGroupMargin = styled<FlexComponent>(IconButtonGroup)`
   margin-right: ${({ theme }) => `${theme.spaces[2]}`};
 `;
 

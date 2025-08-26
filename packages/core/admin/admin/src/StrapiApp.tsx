@@ -1,13 +1,12 @@
 import * as React from 'react';
 
-import { darkTheme, lightTheme } from '@strapi/design-system';
+import { darkTheme, lightTheme, type StrapiTheme } from '@strapi/design-system';
 import { Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import { RouterProvider } from 'react-router-dom';
-import { DefaultTheme } from 'styled-components';
 
 import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/admin/src/constants';
 
@@ -46,7 +45,7 @@ interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>
     locales?: string[];
     menu?: { logo: string };
     notifications?: { releases: boolean };
-    theme?: { light: DefaultTheme; dark: DefaultTheme };
+    theme?: { light: StrapiTheme; dark: StrapiTheme };
     translations?: Record<string, Record<string, string>>;
     tutorials?: boolean;
   };
