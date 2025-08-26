@@ -1,5 +1,5 @@
 import { vercelStegaCombine } from '@vercel/stega';
-import type { Core, Struct } from '@strapi/types';
+import type { Core, Struct, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 
 const ENCODABLE_TYPES = [
@@ -40,6 +40,11 @@ const EXCLUDED_FIELDS = [
   'publishedAt',
 ];
 
+interface EncodingInfo {
+  data: any;
+  schema: Struct.Schema;
+}
+
 const createContentSourceMapsService = (strapi: Core.Strapi) => {
   return {
     encodeField(text: string, key: string): string {
@@ -50,16 +55,9 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
       return res;
     },
 
-    async encodeEntry(options: {
-      entryRootId: any;
-      entryRootModel: string;
-      entryData: any;
-      model: any;
-    }): Promise<any> {
-      const { entryData, model } = options;
-
-      if (typeof entryData !== 'object' || entryData === null || entryData === undefined) {
-        return entryData;
+    async encodeEntry({ data, schema }: EncodingInfo): Promise<any> {
+      if (typeof data !== 'object' || data === null || data === undefined) {
+        return data;
       }
 
       return traverseEntity(
@@ -73,25 +71,18 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
           }
         },
         {
-          schema: model,
-          getModel: (uid: string) => strapi.getModel(uid as any),
+          schema,
+          getModel: (uid) => strapi.getModel(uid as UID.Schema),
         },
-        entryData
+        data
       );
     },
 
-    async encodeSourceMaps(options: {
-      data: any;
-      contentType: Struct.ContentTypeSchema;
-      rootId?: any;
-      rootModel?: string;
-    }): Promise<any> {
-      const { data, contentType, rootId, rootModel } = options;
-
+    async encodeSourceMaps({ data, schema }: EncodingInfo): Promise<any> {
       try {
         if (Array.isArray(data)) {
           return await Promise.all(
-            data.map((item) => this.encodeSourceMaps({ data: item, contentType }))
+            data.map((item) => this.encodeSourceMaps({ data: item, schema }))
           );
         }
 
@@ -99,15 +90,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
           return data;
         }
 
-        const actualRootId = rootId || data.id;
-        const actualRootModel = rootModel || contentType.uid;
-
-        return await this.encodeEntry({
-          entryRootId: actualRootId,
-          entryRootModel: actualRootModel,
-          entryData: data,
-          model: contentType,
-        });
+        return await this.encodeEntry({ data, schema });
       } catch (error) {
         strapi.log.error('Error encoding source maps:', error);
         return data;
