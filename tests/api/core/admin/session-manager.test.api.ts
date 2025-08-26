@@ -293,7 +293,7 @@ describe('SessionManager API Integration', () => {
         });
 
         expect(session).toBeTruthy();
-        expect(session.user).toBe(testUserId);
+        expect(session.userId).toBe(testUserId);
       });
 
       it('should reject malformed tokens', async () => {
@@ -366,7 +366,7 @@ describe('SessionManager API Integration', () => {
         // Manually modify session in database to have different user
         await strapi.db.query(contentTypeUID).update({
           where: { sessionId: tokenResult.sessionId },
-          data: { user: 'different-user-id' },
+          data: { userId: 'different-user-id' },
         });
 
         const result = await strapi.sessionManager.validateRefreshToken(tokenResult.token);
