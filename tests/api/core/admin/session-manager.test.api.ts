@@ -36,6 +36,7 @@ describe('SessionManager API Integration', () => {
         expect(strapi.sessionManager).toBeDefined();
         expect(typeof strapi.sessionManager.generateRefreshToken).toBe('function');
         expect(typeof strapi.sessionManager.generateSessionId).toBe('function');
+        expect(typeof strapi.sessionManager.validateRefreshToken).toBe('function');
       });
     });
 
@@ -266,6 +267,113 @@ describe('SessionManager API Integration', () => {
       it('should generate a 32-character lowercase hex session ID', () => {
         const sessionId = strapi.sessionManager.generateSessionId();
         expect(sessionId).toMatch(/^[a-f0-9]{32}$/);
+      });
+    });
+
+    describe('validateRefreshToken', () => {
+      it('should validate a valid refresh token', async () => {
+        const tokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        const validationResult = await strapi.sessionManager.validateRefreshToken(
+          tokenResult.token
+        );
+
+        expect(validationResult).toEqual({
+          isValid: true,
+          userId: testUserId,
+          sessionId: tokenResult.sessionId,
+        });
+
+        const session = await strapi.db.query(contentTypeUID).findOne({
+          where: { sessionId: tokenResult.sessionId },
+        });
+
+        expect(session).toBeTruthy();
+        expect(session.userId).toBe(testUserId);
+      });
+
+      it('should reject malformed tokens', async () => {
+        const result = await strapi.sessionManager.validateRefreshToken('invalid-jwt-token');
+
+        expect(result).toEqual({
+          isValid: false,
+        });
+      });
+
+      it('should reject token when session not found in database', async () => {
+        const tokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        await strapi.db.query(contentTypeUID).delete({
+          where: { sessionId: tokenResult.sessionId },
+        });
+
+        const result = await strapi.sessionManager.validateRefreshToken(tokenResult.token);
+
+        expect(result).toEqual({
+          isValid: false,
+        });
+      });
+
+      it('should reject expired session and clean up database', async () => {
+        const tokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        // Update the session to be expired
+        const pastDate = new Date(Date.now() - 60 * 60 * 1000); // Expired 1 hour ago
+
+        await strapi.db.query(contentTypeUID).update({
+          where: { sessionId: tokenResult.sessionId },
+          data: { expiresAt: pastDate },
+        });
+
+        const updatedSession = await strapi.db.query(contentTypeUID).findOne({
+          where: { sessionId: tokenResult.sessionId },
+        });
+        expect(new Date(updatedSession.expiresAt)).toEqual(pastDate);
+
+        const result = await strapi.sessionManager.validateRefreshToken(tokenResult.token);
+
+        expect(result).toEqual({
+          isValid: false,
+        });
+
+        // Verify expired session was cleaned up from database
+        const cleanedSession = await strapi.db.query(contentTypeUID).findOne({
+          where: { sessionId: tokenResult.sessionId },
+        });
+        expect(cleanedSession).toBeNull();
+      });
+
+      it('should reject token when user ID mismatch', async () => {
+        // Generate token for one user
+        const tokenResult = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
+
+        // Manually modify session in database to have different user
+        await strapi.db.query(contentTypeUID).update({
+          where: { sessionId: tokenResult.sessionId },
+          data: { userId: 'different-user-id' },
+        });
+
+        const result = await strapi.sessionManager.validateRefreshToken(tokenResult.token);
+
+        expect(result).toEqual({
+          isValid: false,
+        });
       });
     });
 

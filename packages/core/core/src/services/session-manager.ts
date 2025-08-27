@@ -40,6 +40,18 @@ export interface AccessTokenPayload {
 
 export type TokenPayload = RefreshTokenPayload | AccessTokenPayload;
 
+export interface ValidateRefreshTokenResult {
+  isValid: boolean;
+  userId?: string;
+  sessionId?: string;
+  error?:
+    | 'invalid_token'
+    | 'token_expired'
+    | 'session_not_found'
+    | 'session_expired'
+    | 'wrong_token_type';
+}
+
 class DatabaseSessionProvider implements SessionProvider {
   private db: Database;
 
@@ -172,6 +184,43 @@ class SessionManager {
       return { isValid: true, payload: payload as AccessTokenPayload };
     } catch (err) {
       return { isValid: false, payload: null };
+    }
+  }
+
+  async validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult> {
+    try {
+      const payload = jwt.verify(token, this.config.jwtSecret) as RefreshTokenPayload;
+
+      if (payload.type !== 'refresh') {
+        return { isValid: false };
+      }
+
+      const session = await this.provider.findBySessionId(payload.sessionId);
+      if (!session) {
+        return { isValid: false };
+      }
+
+      if (new Date(session.expiresAt) <= new Date()) {
+        // Clean up expired session
+        await this.provider.deleteBySessionId(payload.sessionId);
+        return { isValid: false };
+      }
+
+      if (session.userId !== payload.userId) {
+        return { isValid: false };
+      }
+
+      return {
+        isValid: true,
+        userId: payload.userId,
+        sessionId: payload.sessionId,
+      };
+    } catch (error: any) {
+      if (error instanceof jwt.JsonWebTokenError) {
+        return { isValid: false };
+      }
+
+      throw error;
     }
   }
 }
