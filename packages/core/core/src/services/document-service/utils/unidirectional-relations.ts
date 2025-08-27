@@ -144,7 +144,7 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
                 if (!parent?.uid) return true;
 
                 // Keep when: parent is *not* Draft & Publish
-                const parentSchema = strapi.contentTypes[parent.uid];
+                const parentSchema = strapi.contentTypes[parent.uid as UID.ContentType];
                 return !(parentSchema?.options?.draftAndPublish === true);
               })
             );

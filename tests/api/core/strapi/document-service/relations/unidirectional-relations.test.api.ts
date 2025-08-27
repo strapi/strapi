@@ -24,15 +24,22 @@ const populate = {
   compo: {
     populate: {
       tag: true,
+      tags: true,
     },
   },
 };
 
 const componentModel = {
+  collectionName: 'components_compo',
   attributes: {
     tag: {
       type: 'relation',
       relation: 'oneToOne',
+      target: TAG_UID,
+    },
+    tags: {
+      type: 'relation',
+      relation: 'oneToMany',
       target: TAG_UID,
     },
   },
@@ -163,5 +170,67 @@ describe('Document Service unidirectional relations', () => {
       tags: [{ id: tag1Id }, { id: tag2Id }],
       compo: { tag: { id: tag1Id } },
     });
+  });
+
+  it('Should not create orphaned relations for a draft and publish content-type', async () => {
+    const joinTableName = 'components_default_compos_tags_lnk';
+
+    // Step 1: Create Product with component tag relation (draft)
+    const testProduct = await strapi.documents(PRODUCT_UID).create({
+      data: {
+        name: 'GhostRelationBugTest',
+        compo: {
+          tags: [{ documentId: 'Tag3' }], // Component relation to Tag (still in draft)
+        },
+      },
+    });
+
+    // Check join table after step 1
+    let result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    let joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    console.log('After step 1 (create product): ', joinTableRows.length, 'entries');
+    expect(joinTableRows.length).toBe(1); // Should be 1 on both branches
+
+    // Step 2: Publish Tag FIRST - this triggers ghost relation creation
+    await strapi.documents(TAG_UID).publish({ documentId: 'Tag3' });
+
+    // Check join table after step 2
+    result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    console.log('After step 2 (publish tag): ', joinTableRows.length, 'entries');
+    console.log('Join table content:', JSON.stringify(joinTableRows, null, 2));
+
+    expect(joinTableRows.length).toBe(1);
+
+    // Step 3: Publish Product - creates published component version
+    await strapi.documents(PRODUCT_UID).publish({ documentId: testProduct.documentId });
+
+    // Check join table after step 3
+    result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    console.log('After step 3 (publish product): ', joinTableRows.length, 'entries');
+    console.log('Join table content:', JSON.stringify(joinTableRows, null, 2));
+
+    expect(joinTableRows.length).toBe(2);
+
+    // TODO: this still passes on develop when it should fail, no idea why same story using the rest api
+
+    // // Step 4: Remove relation via UI (simulate what UI does)
+    // await strapi.documents(PRODUCT_UID).update({
+    //   documentId: testProduct.documentId,
+    //   data: { compo: { tags: [] } } // UI removes relations this way
+    // });
+
+    // // Step 5: Publish product after removing relations
+    // await strapi.documents(PRODUCT_UID).publish({ documentId: testProduct.documentId });
+
+    // // Check final join table state
+    // result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    // joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    // console.log('After step 5 (remove + publish): ', joinTableRows.length, 'entries');
+    // console.log('Final join table content:', JSON.stringify(joinTableRows, null, 2));
+
+    // // This should FAIL on develop (2 entries - cleanup broken) and PASS with fix (0 entries)
+    // expect(joinTableRows.length).toBe(0);
   });
 });
