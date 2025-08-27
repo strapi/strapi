@@ -6,8 +6,9 @@
 
 import { useState } from 'react';
 
-import { Message, useChat } from '@ai-sdk/react';
+import { UIMessage, useChat } from '@ai-sdk/react';
 import { useAppInfo } from '@strapi/admin/strapi-admin';
+import { DefaultChatTransport } from 'ai';
 
 import { STRAPI_AI_CHAT_URL, STRAPI_AI_TOKEN, STRAPI_AI_URL } from '../lib/constants';
 import { Attachment } from '../lib/types/attachments';
@@ -74,7 +75,7 @@ namespace SendFeedback {
       feedback?: string;
       reasons?: FeedbackReasonIds[];
       messageId: string;
-      messages: Message[];
+      messages: UIMessage[];
       schemas: Schema[];
     };
   }
@@ -222,13 +223,16 @@ export const useAIChat: typeof useChat = (props) => {
 
   return useChat({
     ...props,
-    api: STRAPI_AI_CHAT_URL,
-    headers: {
-      Authorization: `Bearer ${STRAPI_AI_TOKEN}`,
-      'X-Strapi-Version': strapiVersion || 'latest',
-      'X-Strapi-User': userId || 'unknown',
-      'X-Strapi-Project-Id': projectId || 'unknown',
-      ...(props?.headers || {}),
-    },
+    transport: new DefaultChatTransport({
+      api: STRAPI_AI_CHAT_URL,
+      headers: {
+        Authorization: `Bearer ${STRAPI_AI_TOKEN}`,
+        'X-Strapi-Version': strapiVersion || 'latest',
+        'X-Strapi-User': userId || 'unknown',
+        'X-Strapi-Project-Id': projectId || 'unknown',
+      },
+
+      credentials: 'include',
+    }),
   });
 };

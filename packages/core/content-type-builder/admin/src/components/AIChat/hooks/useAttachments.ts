@@ -32,7 +32,7 @@ export function useAttachments() {
    * Update an attachment
    */
   const updateAttachment = useCallback(
-    (attachment: Attachment) => {
+    (attachment: { id: string } & Partial<Attachment>) => {
       setAttachments((prev: Attachment[]) =>
         prev.map((a) => (a.id === attachment.id ? { ...a, ...attachment } : a))
       );
@@ -89,9 +89,10 @@ export function useAttachments() {
       for (const file of limitedFiles) {
         const pendingAttachment: Attachment = {
           id: generateId(),
+          type: 'file',
           status: 'loading',
-          name: file.name,
-          contentType: file.type,
+          filename: file.name,
+          mediaType: file.type,
           url: '',
         };
 
