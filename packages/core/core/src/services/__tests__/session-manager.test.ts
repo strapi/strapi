@@ -155,6 +155,73 @@ describe('SessionManager Factory', () => {
     });
   });
 
+  describe('validateAccessToken', () => {
+    const userId = 'user123';
+    const sessionId = 'abcdef1234567890';
+
+    beforeEach(() => {
+      mockCrypto.randomBytes.mockReturnValue(Buffer.from(sessionId, 'hex') as any);
+    });
+
+    it('returns valid with payload for a correct access token', () => {
+      const payload = {
+        userId,
+        sessionId,
+        type: 'access' as const,
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      };
+
+      mockJwt.verify.mockReturnValue(payload as any);
+
+      const result = sessionManager.validateAccessToken('access.jwt');
+
+      expect(mockJwt.verify).toHaveBeenCalledWith('access.jwt', config.jwtSecret, {
+        algorithms: ['HS256'],
+      });
+      expect(result).toEqual({ isValid: true, payload });
+    });
+
+    it('returns invalid when jwt.verify throws TokenExpiredError', () => {
+      // Emulate jsonwebtoken TokenExpiredError by throwing any error
+      const error = new Error('jwt expired');
+      (error as any).name = 'TokenExpiredError';
+      mockJwt.verify.mockImplementation(() => {
+        throw error;
+      });
+
+      const result = sessionManager.validateAccessToken('expired.jwt');
+
+      expect(result).toEqual({ isValid: false, payload: null });
+    });
+
+    it('returns invalid when token type is not access', () => {
+      const refreshPayload = {
+        userId,
+        sessionId,
+        type: 'refresh' as const,
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      };
+      mockJwt.verify.mockReturnValue(refreshPayload as any);
+
+      const result = sessionManager.validateAccessToken('refresh.jwt');
+
+      expect(result).toEqual({ isValid: false, payload: null });
+    });
+
+    it('returns invalid when jwt.verify throws with invalid signature', () => {
+      const error = new Error('invalid signature');
+      mockJwt.verify.mockImplementation(() => {
+        throw error;
+      });
+
+      const result = sessionManager.validateAccessToken('bad.jwt');
+
+      expect(result).toEqual({ isValid: false, payload: null });
+    });
+  });
+
   describe('createSessionManager factory', () => {
     it('should create session manager with database provider', () => {
       const manager = createSessionManager({ db: mockDb, config });

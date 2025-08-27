@@ -155,6 +155,25 @@ class SessionManager {
 
     return { token, sessionId };
   }
+
+  validateAccessToken(
+    token: string
+  ): { isValid: true; payload: AccessTokenPayload } | { isValid: false; payload: null } {
+    try {
+      const payload = jwt.verify(token, this.config.jwtSecret, {
+        algorithms: ['HS256'],
+      }) as TokenPayload;
+
+      // Ensure this is an access token
+      if (!payload || payload.type !== 'access') {
+        return { isValid: false, payload: null };
+      }
+
+      return { isValid: true, payload: payload as AccessTokenPayload };
+    } catch (err) {
+      return { isValid: false, payload: null };
+    }
+  }
 }
 
 const createDatabaseProvider = (db: Database, contentType: string): SessionProvider => {
