@@ -9,6 +9,7 @@ export interface SessionProvider {
   deleteBySessionId(sessionId: string): Promise<void>;
   deleteByIdentifier(userId: string): Promise<void>;
   deleteExpired(): Promise<void>;
+  deleteByCriteria(criteria: { userId: string; origin: string; deviceId?: string }): Promise<void>;
 }
 
 export interface SessionData {
@@ -98,6 +99,22 @@ class DatabaseSessionProvider implements SessionProvider {
   async deleteExpired(): Promise<void> {
     await this.db.query(this.contentType).deleteMany({
       where: { expiresAt: { $lt: new Date() } },
+    });
+  }
+
+  async deleteByCriteria(criteria: {
+    userId: string;
+    origin: string;
+    deviceId?: string;
+  }): Promise<void> {
+    const { userId, origin, deviceId } = criteria;
+
+    await this.db.query(this.contentType).deleteMany({
+      where: {
+        userId,
+        origin,
+        ...(deviceId ? { deviceId } : {}),
+      },
     });
   }
 }
@@ -203,6 +220,10 @@ class SessionManager {
 
       throw error;
     }
+  }
+
+  async invalidateRefreshToken(origin: string, userId: string, deviceId?: string): Promise<void> {
+    await this.provider.deleteByCriteria({ userId, origin, deviceId });
   }
 }
 
