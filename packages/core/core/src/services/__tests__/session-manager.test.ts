@@ -67,7 +67,7 @@ describe('SessionManager Factory', () => {
       await sessionManager.generateRefreshToken(userId, deviceId, origin);
 
       expect(mockQuery.delete).toHaveBeenCalledWith({
-        where: { user: userId, expiresAt: { $lt: expect.any(Date) } },
+        where: { userId, expiresAt: { $lt: expect.any(Date) } },
       });
     });
 
@@ -255,7 +255,7 @@ describe('SessionManager Factory', () => {
       };
 
       const expiredSession = {
-        user: userId,
+        userId,
         sessionId,
         deviceId,
         origin,
@@ -283,7 +283,7 @@ describe('SessionManager Factory', () => {
       };
 
       const mismatchedSession = {
-        user: 'different-user-id',
+        userId: 'different-user-id',
         sessionId,
         deviceId,
         origin,

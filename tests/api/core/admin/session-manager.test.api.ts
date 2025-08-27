@@ -508,7 +508,7 @@ describe('SessionManager API Integration', () => {
         // Manually modify session in database to have different user
         await strapi.db.query(contentTypeUID).update({
           where: { sessionId: refreshTokenResult.sessionId },
-          data: { user: 'different-user-id' },
+          data: { userId: 'different-user-id' },
         });
 
         const result = await strapi.sessionManager.generateAccessToken(refreshTokenResult.token);
