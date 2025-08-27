@@ -181,7 +181,7 @@ class SessionManager {
         return { isValid: false, payload: null };
       }
 
-      return { isValid: true, payload: payload as AccessTokenPayload };
+      return { isValid: true, payload };
     } catch (err) {
       return { isValid: false, payload: null };
     }

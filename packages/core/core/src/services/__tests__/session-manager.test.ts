@@ -167,7 +167,7 @@ describe('SessionManager Factory', () => {
       const payload = {
         userId,
         sessionId,
-        type: 'access' as const,
+        type: 'access',
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600,
       };
@@ -185,7 +185,7 @@ describe('SessionManager Factory', () => {
     it('returns invalid when jwt.verify throws TokenExpiredError', () => {
       // Emulate jsonwebtoken TokenExpiredError by throwing any error
       const error = new Error('jwt expired');
-      (error as any).name = 'TokenExpiredError';
+      error.name = 'TokenExpiredError';
       mockJwt.verify.mockImplementation(() => {
         throw error;
       });
@@ -199,7 +199,7 @@ describe('SessionManager Factory', () => {
       const refreshPayload = {
         userId,
         sessionId,
-        type: 'refresh' as const,
+        type: 'refresh',
         iat: Math.floor(Date.now() / 1000),
         exp: Math.floor(Date.now() / 1000) + 3600,
       };
