@@ -3,7 +3,7 @@ import { Fragment, useState, useEffect } from 'react';
 import { ConfirmDialog, SubNav, tours, useGuidedTour } from '@strapi/admin/strapi-admin';
 import {
   Box,
-  TextInput,
+  Searchbar,
   Button,
   Flex,
   Typography,
@@ -11,9 +11,8 @@ import {
   Menu,
   VisuallyHidden,
   Dialog,
-  IconButton,
 } from '@strapi/design-system';
-import { ArrowClockwise, Cross, More, Search } from '@strapi/icons';
+import { ArrowClockwise, Cross, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -177,31 +176,23 @@ export const ContentTypeBuilderNav = () => {
           </Flex>
         </tours.contentTypeBuilder.Save>
 
-        <TextInput
-          startAction={<Search fill="neutral500" />}
+        <Searchbar
           value={search.value}
           onChange={(e) => search.onChange(e.target.value)}
-          aria-label="Search"
+          onClear={() => search.onChange('')}
           placeholder={formatMessage({
             id: getTrad('search.placeholder'),
             defaultMessage: 'Search',
           })}
-          endAction={
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                search.onChange('');
-              }}
-              label="clear"
-              variant="ghost"
-              type="button"
-              style={{ padding: 0 }}
-            >
-              <Cross />
-            </IconButton>
-          }
           size="S"
+          // eslint-disable-next-line react/no-children-prop
+          children={undefined}
+          name={'search_contentType'}
+          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+          aria-label={formatMessage({
+            id: getTrad('search.placeholder'),
+            defaultMessage: 'Search',
+          })}
         />
       </Flex>
       <SubNav.Sections>
