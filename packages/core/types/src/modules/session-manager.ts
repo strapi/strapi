@@ -1,3 +1,7 @@
+export type ValidateRefreshTokenResult =
+  | { isValid: true; userId: string; sessionId: string }
+  | { isValid: false };
+
 export interface SessionManagerService {
   generateSessionId(): string;
   generateRefreshToken(
@@ -5,4 +9,5 @@ export interface SessionManagerService {
     deviceId: string,
     origin: string
   ): Promise<{ token: string; sessionId: string }>;
+  validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult>;
 }

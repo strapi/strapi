@@ -155,6 +155,195 @@ describe('SessionManager Factory', () => {
     });
   });
 
+  describe('validateRefreshToken', () => {
+    const userId = 'user123';
+    const sessionId = 'session456';
+    const deviceId = 'device789';
+    const origin = 'admin';
+
+    beforeEach(() => {
+      mockCrypto.randomBytes.mockReturnValue(Buffer.from('abcdef1234567890', 'hex') as any);
+      mockJwt.sign.mockReturnValue('test-jwt-token' as any);
+    });
+
+    it('should validate a valid refresh token successfully', async () => {
+      const mockPayload = {
+        userId,
+        sessionId,
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour from now
+        iat: Math.floor(Date.now() / 1000),
+      };
+
+      const mockSession = {
+        userId,
+        sessionId,
+        deviceId,
+        origin,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 hour from now
+      };
+
+      mockJwt.verify.mockReturnValue(mockPayload);
+      mockQuery.findOne.mockResolvedValue(mockSession);
+
+      const result = await sessionManager.validateRefreshToken('valid-token');
+
+      expect(mockJwt.verify).toHaveBeenCalledWith('valid-token', config.jwtSecret);
+      expect(mockQuery.findOne).toHaveBeenCalledWith({ where: { sessionId } });
+
+      expect(result).toEqual({
+        isValid: true,
+        userId,
+        sessionId,
+      });
+    });
+
+    it('should reject token with wrong type', async () => {
+      const mockPayload = {
+        userId,
+        sessionId,
+        type: 'access', // Wrong type
+        exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour from now
+        iat: Math.floor(Date.now() / 1000),
+      };
+
+      mockJwt.verify.mockReturnValue(mockPayload);
+
+      const result = await sessionManager.validateRefreshToken('access-token');
+
+      expect(result).toEqual({
+        isValid: false,
+      });
+
+      expect(mockQuery.findOne).not.toHaveBeenCalled();
+    });
+
+    it('should reject token when session not found', async () => {
+      const mockPayload = {
+        userId,
+        sessionId,
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour from now
+        iat: Math.floor(Date.now() / 1000),
+      };
+
+      mockJwt.verify.mockReturnValue(mockPayload);
+      mockQuery.findOne.mockResolvedValue(null);
+
+      const result = await sessionManager.validateRefreshToken('valid-token');
+
+      expect(result).toEqual({
+        isValid: false,
+      });
+    });
+
+    it('should reject and clean up expired session', async () => {
+      const mockPayload = {
+        userId,
+        sessionId,
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour from now
+        iat: Math.floor(Date.now() / 1000),
+      };
+
+      const expiredSession = {
+        user: userId,
+        sessionId,
+        deviceId,
+        origin,
+        expiresAt: new Date(Date.now() - 1000), // Expired 1 second ago
+      };
+
+      mockJwt.verify.mockReturnValue(mockPayload);
+      mockQuery.findOne.mockResolvedValue(expiredSession);
+
+      const result = await sessionManager.validateRefreshToken('valid-token');
+
+      expect(result).toEqual({
+        isValid: false,
+      });
+      expect(mockQuery.delete).toHaveBeenCalledWith({ where: { sessionId } });
+    });
+
+    it('should reject token when user ID mismatch', async () => {
+      const mockPayload = {
+        userId,
+        sessionId,
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour from now
+        iat: Math.floor(Date.now() / 1000),
+      };
+
+      const mismatchedSession = {
+        user: 'different-user-id',
+        sessionId,
+        deviceId,
+        origin,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 hour from now
+      };
+
+      mockJwt.verify.mockReturnValue(mockPayload);
+      mockQuery.findOne.mockResolvedValue(mismatchedSession);
+
+      const result = await sessionManager.validateRefreshToken('valid-token');
+
+      expect(result).toEqual({
+        isValid: false,
+      });
+    });
+
+    it('should handle JWT verification errors', async () => {
+      const jwtError = new (jwt as any).JsonWebTokenError('jwt malformed');
+      mockJwt.verify.mockImplementation(() => {
+        throw jwtError;
+      });
+
+      const result = await sessionManager.validateRefreshToken('invalid-token');
+
+      expect(result).toEqual({
+        isValid: false,
+      });
+    });
+
+    it('should handle JWT token expired errors', async () => {
+      // Create a mock error that appears to be a JsonWebTokenError with TokenExpiredError name
+      const expiredError = new Error('jwt expired');
+      expiredError.name = 'TokenExpiredError';
+
+      // Make it appear to be an instance of JsonWebTokenError for our error handling
+      Object.setPrototypeOf(expiredError, jwt.JsonWebTokenError.prototype);
+
+      mockJwt.verify.mockImplementation(() => {
+        throw expiredError;
+      });
+
+      const result = await sessionManager.validateRefreshToken('expired-token');
+
+      expect(result).toEqual({
+        isValid: false,
+      });
+    });
+
+    it('should propagate unexpected errors', async () => {
+      const unexpectedError = new Error('Unexpected database error');
+      mockQuery.findOne.mockRejectedValue(unexpectedError);
+
+      const mockPayload = {
+        userId,
+        sessionId,
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour from now
+        iat: Math.floor(Date.now() / 1000),
+      };
+
+      mockJwt.verify.mockReturnValue(mockPayload);
+
+      await expect(sessionManager.validateRefreshToken('valid-token')).rejects.toThrow(
+        'Unexpected database error'
+      );
+    });
+  });
+
   describe('createSessionManager factory', () => {
     it('should create session manager with database provider', () => {
       const manager = createSessionManager({ db: mockDb, config });
