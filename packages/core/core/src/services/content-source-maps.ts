@@ -17,13 +17,13 @@ const ENCODABLE_TYPES = [
   'media',
   'email',
   'password',
-  'uid',
   /**
    * We cannot modify the response shape, so types that aren't based on string cannot be encoded:
    * - json: object
    * - blocks: object, will require a custom implementation in a dedicated PR
    * - integer, float and decimal: number
    * - boolean: boolean (believe it or not)
+   * - uid: can be stringified but would mess up URLs
    */
 ];
 
