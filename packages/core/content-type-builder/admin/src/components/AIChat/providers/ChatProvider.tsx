@@ -10,7 +10,6 @@ import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
 import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
 import { STRAPI_AI_TOKEN } from '../lib/constants';
-import { transformMessages } from '../lib/transforms/messages';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
 import { Attachment } from '../lib/types/attachments';
 import { Message } from '../lib/types/messages';
@@ -53,6 +52,7 @@ export const BaseChatProvider = ({
   const [chatId, setChatId] = useState<string | undefined>(undefined);
   const [isChatOpen, setIsChatOpen] = useState(defaultOpen);
   const [openCount, setOpenCount] = useState(0);
+  const [input, setInput] = useState('');
 
   // Files
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -80,16 +80,19 @@ export const BaseChatProvider = ({
     ] as Schema[];
   }, [contentTypes, components]);
 
-  const chat = useAIChat({
+  const {
+    id,
+    messages,
+    sendMessage: _sendMessage,
+    status,
+    regenerate: _regenerate,
+    error,
+    stop,
+    setMessages,
+    ...chat
+  } = useAIChat({
     id: chatId?.toString(),
-    sendExtraMessageFields: true,
     experimental_throttle: 100,
-    body: {
-      schemas,
-      metadata: {
-        lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
-      },
-    },
   });
 
   /* -------------------------------------------------------------------------------------------------
@@ -98,36 +101,79 @@ export const BaseChatProvider = ({
 
   // Messages are transformed into an easier to use format
   // TODO: Make this more efficient only computing new streamed parts
-  const messages = useMemo(() => {
-    return transformMessages(chat.messages, chat);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chat.messages]);
+  // const messages = useMemo(() => {
+  //   return transformMessages(chat.messages, chat);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [chat.messages]);
 
-  const handleSubmit = async (event: Parameters<typeof chat.handleSubmit>[0]) => {
-    chat.handleSubmit(event, {
-      experimental_attachments: attachments
-        // Transform to ai/sdk format and remove any attachments that are not yet ready
-        .filter((attachment) => attachment.status !== 'loading')
-        .map((attachment) => ({
-          name: attachment.name,
-          url: attachment.url,
-          contentType: attachment.contentType,
-        })),
-      allowEmptySubmit: true,
+  // const handleSubmit = async (event: Parameters<typeof chat.handleSubmit>[0]) => {
+  //   chat.handleSubmit(event, {
+  //     experimental_attachments: attachments
+  //       // Transform to ai/sdk format and remove any attachments that are not yet ready
+  //       .filter((attachment) => attachment.status !== 'loading')
+  //       .map((attachment) => ({
+  //         name: attachment.name,
+  //         url: attachment.url,
+  //         contentType: attachment.contentType,
+  //       })),
+  //     allowEmptySubmit: true,
+  //     body: {
+  //       schemas,
+  //       metadata: {
+  //         lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
+  //       },
+  //     },
+  //   });
+  //   setAttachments([]);
+  // };
+
+  // NOTE: body is using state variables, so they can not be passed as a prop in useChat
+  const sendMessage: typeof _sendMessage = async (message, options) => {
+    if (status === 'streaming' || status === 'submitted') {
+      return;
+    }
+
+    return _sendMessage(message, {
+      ...options,
       body: {
+        ...options?.body,
         schemas,
         metadata: {
           lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
         },
       },
     });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (status === 'streaming' || status === 'submitted') {
+      return;
+    }
+
+    if (!input.trim() || attachments.length === 0) {
+      return;
+    }
+
+    const files = attachments.map(
+      (attachment) =>
+        ({
+          type: 'file',
+          filename: attachment.filename,
+          mediaType: attachment.mediaType,
+          url: attachment.url,
+        }) as const
+    );
+    sendMessage({ text: input, files });
+    setInput('');
     setAttachments([]);
   };
 
   /* -------------------------------------------------------------------------------------------------
    * Chat title
    * -----------------------------------------------------------------------------------------------*/
-  const { title, generateTitle, resetTitle } = useChatTitle({ chatId: chat.id, messages });
+  const { title, generateTitle, resetTitle } = useChatTitle({ chatId: id, messages });
 
   // Automatically generate title when we have at least 1 message (user query)
   useEffect(() => {
@@ -137,12 +183,12 @@ export const BaseChatProvider = ({
   }, [messages.length, title, generateTitle]);
 
   useEffect(() => {
-    if (chat.status === 'error') {
+    if (status === 'error') {
       trackUsage('didAnswerMessage', {
         successful: false,
       });
     } else if (
-      chat.status === 'ready' &&
+      status === 'ready' &&
       messages.length > 0 &&
       messages[messages.length - 1]?.role === 'assistant'
     ) {
@@ -150,7 +196,7 @@ export const BaseChatProvider = ({
         successful: true,
       });
     }
-  }, [chat.status, messages, trackUsage]);
+  }, [status, messages, trackUsage]);
   const isAiEnabled = window.strapi.ai?.enabled !== false;
 
   return (
@@ -159,10 +205,10 @@ export const BaseChatProvider = ({
         isChatEnabled: !!STRAPI_AI_TOKEN && isAiEnabled,
         ...chat,
         messages,
-        rawMessages: chat.messages,
+        rawMessages: messages,
         handleSubmit,
         reset: () => {
-          chat.stop();
+          stop();
           setChatId(generateRandomId());
           trackUsage('didStartNewChat');
           resetTitle();
