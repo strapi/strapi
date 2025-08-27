@@ -281,10 +281,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
                   })
                   .first()
               : await strapiDBConnection(tableName)
-                  .select('document_id')
-                  .from(`${tableName}`)
                   .countDistinct('document_id as count')
-                  .groupBy('document_id')
+                  .from(`${tableName}`)
                   .first();
             countDocuments.published += Number(publishedDocuments?.count) || 0;
 

@@ -3,6 +3,7 @@ declare global {
   interface Window {
     __strapi_previewCleanup?: () => void;
     STRAPI_HIGHLIGHT_HOVER_COLOR?: string;
+    STRAPI_HIGHLIGHT_ACTIVE_COLOR?: string;
   }
 }
 
@@ -18,10 +19,15 @@ const previewScript = (shouldRun = true) => {
    * ---------------------------------------------------------------------------------------------*/
   const HIGHLIGHT_PADDING = 2; // in pixels
   const HIGHLIGHT_HOVER_COLOR = window.STRAPI_HIGHLIGHT_HOVER_COLOR ?? '#4945ff'; // dark primary500
+  const HIGHLIGHT_ACTIVE_COLOR = window.STRAPI_HIGHLIGHT_ACTIVE_COLOR ?? '#7b79ff'; // dark primary600
+
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
   const OVERLAY_ID = 'strapi-preview-overlay';
   const INTERNAL_EVENTS = {
-    DUMMY_EVENT: 'dummyEvent',
+    STRAPI_FIELD_FOCUS: 'strapiFieldFocus',
+    STRAPI_FIELD_BLUR: 'strapiFieldBlur',
+    STRAPI_FIELD_CHANGE: 'strapiFieldChange',
+    STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
   } as const;
 
   /**
@@ -32,6 +38,17 @@ const previewScript = (shouldRun = true) => {
   if (!shouldRun) {
     return { INTERNAL_EVENTS };
   }
+
+  /* -----------------------------------------------------------------------------------------------
+   * Utils
+   * ---------------------------------------------------------------------------------------------*/
+
+  const sendMessage = (
+    type: (typeof INTERNAL_EVENTS)[keyof typeof INTERNAL_EVENTS],
+    payload: unknown
+  ) => {
+    window.parent.postMessage({ type, payload }, '*');
+  };
 
   /* -----------------------------------------------------------------------------------------------
    * Functionality pieces
@@ -59,15 +76,17 @@ const previewScript = (shouldRun = true) => {
   };
 
   type EventListenersList = Array<{
-    element: HTMLElement;
-    type: keyof HTMLElementEventMap;
+    element: HTMLElement | Window;
+    type: keyof HTMLElementEventMap | 'message';
     handler: EventListener;
   }>;
 
   const createHighlightManager = (overlay: HTMLElement) => {
     const elements = window.document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
-    const highlights: HTMLElement[] = [];
     const eventListeners: EventListenersList = [];
+    const highlights: HTMLElement[] = [];
+    const focusedHighlights: HTMLElement[] = [];
+    let focusedField: string | null = null;
 
     const drawHighlight = (target: Element, highlight: HTMLElement) => {
       if (!highlight) return;
@@ -102,15 +121,31 @@ const previewScript = (shouldRun = true) => {
 
         // Move hover detection to the underlying element
         const mouseEnterHandler = () => {
-          highlight.style.outlineColor = HIGHLIGHT_HOVER_COLOR;
+          if (!highlightManager.focusedHighlights.includes(highlight)) {
+            highlight.style.outlineColor = HIGHLIGHT_HOVER_COLOR;
+          }
         };
         const mouseLeaveHandler = () => {
-          highlight.style.outlineColor = 'transparent';
+          if (!highlightManager.focusedHighlights.includes(highlight)) {
+            highlight.style.outlineColor = 'transparent';
+          }
         };
         const doubleClickHandler = () => {
-          // TODO: handle for real
-          // eslint-disable-next-line no-console
-          console.log('Double click on highlight', element);
+          const sourceAttribute = element.getAttribute(SOURCE_ATTRIBUTE);
+          if (sourceAttribute) {
+            const rect = element.getBoundingClientRect();
+            sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
+              path: sourceAttribute,
+              position: {
+                top: rect.top,
+                left: rect.left,
+                right: rect.right,
+                bottom: rect.bottom,
+                width: rect.width,
+                height: rect.height,
+              },
+            });
+          }
         };
         const mouseDownHandler = (event: MouseEvent) => {
           // Prevent default multi click to select behavior
@@ -143,6 +178,12 @@ const previewScript = (shouldRun = true) => {
       elements,
       updateAllHighlights,
       eventListeners,
+      highlights,
+      focusedHighlights,
+      setFocusedField: (field: string | null) => {
+        focusedField = field;
+      },
+      getFocusedField: () => focusedField,
     };
   };
 
@@ -187,7 +228,7 @@ const previewScript = (shouldRun = true) => {
         window.addEventListener('scroll', updateOnScroll);
         window.addEventListener('resize', updateOnScroll);
       } else {
-        (element as Element).addEventListener('scroll', updateOnScroll);
+        element.addEventListener('scroll', updateOnScroll);
       }
     });
 
@@ -199,8 +240,73 @@ const previewScript = (shouldRun = true) => {
   };
 
   const setupEventHandlers = (highlightManager: HighlightManager) => {
-    // TODO: The listeners for postMessage events will go here
-    return highlightManager.eventListeners;
+    const handleMessage = (event: MessageEvent) => {
+      if (!event.data?.type) return;
+
+      // The user typed in an input, reflect the change in the preview
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_CHANGE) {
+        const { field, value } = event.data.payload;
+        if (!field) return;
+
+        const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
+        matchingElements.forEach((element) => {
+          if (element instanceof HTMLElement) {
+            element.textContent = value || '';
+          }
+        });
+        return;
+      }
+
+      // The user focused a new input, update the highlights in the preview
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS) {
+        const { field } = event.data.payload;
+        if (!field) return;
+
+        // Clear existing focused highlights
+        highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
+          highlight.style.outlineColor = 'transparent';
+        });
+        highlightManager.focusedHighlights.length = 0;
+
+        // Set new focused field and highlight matching elements
+        highlightManager.setFocusedField(field);
+        const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
+        matchingElements.forEach((element) => {
+          const highlight =
+            highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];
+          if (highlight) {
+            highlight.style.outlineColor = HIGHLIGHT_ACTIVE_COLOR;
+            highlight.style.outlineWidth = '3px';
+            highlightManager.focusedHighlights.push(highlight);
+          }
+        });
+        return;
+      }
+
+      // The user is no longer focusing an input, remove the highlights
+      if (event.data.type === INTERNAL_EVENTS.STRAPI_FIELD_BLUR) {
+        const { field } = event.data.payload;
+        if (field !== highlightManager.getFocusedField()) return;
+
+        highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
+          highlight.style.outlineColor = 'transparent';
+          highlight.style.outlineWidth = '2px';
+        });
+        highlightManager.focusedHighlights.length = 0;
+        highlightManager.setFocusedField(null);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    // Add the message handler to the cleanup list
+    const messageEventListener = {
+      element: window,
+      type: 'message' as keyof HTMLElementEventMap,
+      handler: handleMessage as EventListener,
+    };
+
+    return [...highlightManager.eventListeners, messageEventListener];
   };
 
   const createCleanupSystem = (
