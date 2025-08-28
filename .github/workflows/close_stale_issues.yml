@@ -24,12 +24,13 @@ jobs:
         with:
           debug-only: true # Dry run to confirm the workflow is working
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+          ascending: true # Start with oldest issues first
           only-labels: 'stale-before-2021' # Only process issues with this label
           exempt-issue-labels: 'issue: security,severity: critical,severity: high' # Don't close issues with this label
           exempt-all-milestones: true # Don't close issues that are part of a milestone
           days-before-stale: 0 # Mark as stale immediately
           days-before-close: 0 # Close immediately
-          operations-per-run: 5
+          operations-per-run: 100
           stale-issue-message: |
             👋 Hello there!
 
