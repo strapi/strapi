@@ -93,7 +93,9 @@ export const CarouselAssets = React.forwardRef(
                 asset={currentAsset}
                 onDeleteAsset={disabled ? undefined : onDeleteAsset}
                 onAddAsset={disabled ? undefined : onAddAsset}
-                onEditAsset={onEditAsset ? () => setIsEditingAsset(true) : undefined}
+                onEditAsset={
+                  disabled ? undefined : onEditAsset ? () => setIsEditingAsset(true) : undefined
+                }
               />
             ) : undefined
           }
