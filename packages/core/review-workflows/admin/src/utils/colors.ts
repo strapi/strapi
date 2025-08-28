@@ -26,9 +26,9 @@ const getStageColorByHex = (hex?: string) => {
   // there are multiple colors with the same hex code in the design tokens. In order to find
   // the correct one we have to find all matching colors and then check, which ones are usable
   // for stages.
-  const themeColors = Object.entries(lightTheme.colors).filter(
-    ([, value]) => (value as string).toUpperCase() === hex.toUpperCase()
-  ) as [string, string][];
+  const themeColors: [string, (keyof typeof STAGE_COLORS)[]][] = Object.entries(
+    lightTheme.colors
+  ).filter(([, value]) => value.toUpperCase() === hex.toUpperCase());
 
   const themeColorName = themeColors.reduce(
     (acc, [name]) => {

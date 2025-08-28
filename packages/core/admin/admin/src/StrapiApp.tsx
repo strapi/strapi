@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { darkTheme, lightTheme, type StrapiTheme } from '@strapi/design-system';
+import { darkTheme, lightTheme } from '@strapi/design-system';
 import { Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
@@ -30,6 +30,7 @@ import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
+import type { DefaultTheme } from 'styled-components';
 
 const {
   INJECT_COLUMN_IN_TABLE,
@@ -45,7 +46,7 @@ interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>
     locales?: string[];
     menu?: { logo: string };
     notifications?: { releases: boolean };
-    theme?: { light: StrapiTheme; dark: StrapiTheme };
+    theme?: { light: DefaultTheme; dark: DefaultTheme };
     translations?: Record<string, Record<string, string>>;
     tutorials?: boolean;
   };

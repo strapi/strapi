@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { DesignSystemProvider, type StrapiTheme } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
-import { createGlobalStyle } from 'styled-components';
+import { type DefaultTheme, createGlobalStyle } from 'styled-components';
 
 import { useTypedSelector } from '../core/store/hooks';
 import { setAvailableThemes } from '../reducer';
@@ -11,8 +11,8 @@ import { setAvailableThemes } from '../reducer';
 interface ThemeProps {
   children: React.ReactNode;
   themes: {
-    dark: StrapiTheme;
-    light: StrapiTheme;
+    dark: DefaultTheme;
+    light: DefaultTheme;
   };
 }
 
