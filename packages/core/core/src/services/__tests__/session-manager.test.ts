@@ -63,14 +63,6 @@ describe('SessionManager Factory', () => {
     const deviceId = 'device456';
     const origin = 'admin';
 
-    it('should clean up expired sessions first', async () => {
-      await sessionManager.generateRefreshToken(userId, deviceId, origin);
-
-      expect(mockQuery.delete).toHaveBeenCalledWith({
-        where: { userId, expiresAt: { $lt: expect.any(Date) } },
-      });
-    });
-
     it('should periodically clean up expired sessions', async () => {
       // First 49 calls should not trigger cleanup
       for (let i = 0; i < 49; i += 1) {
@@ -394,6 +386,7 @@ describe('SessionManager Factory', () => {
         config.jwtSecret,
         {
           expiresIn: config.accessTokenLifespan,
+          algorithm: 'HS256',
         }
       );
       expect(result).toEqual({

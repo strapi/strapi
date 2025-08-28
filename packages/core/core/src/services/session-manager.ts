@@ -148,12 +148,6 @@ class SessionManager {
     deviceId: string,
     origin: string
   ): Promise<{ token: string; sessionId: string }> {
-    if (typeof this.provider?.deleteExpiredByIdentifier === 'function') {
-      await this.provider.deleteExpiredByIdentifier(userId);
-    } else {
-      await this.provider.deleteExpired();
-    }
-
     await this.maybeCleanupExpired();
 
     const sessionId = this.generateSessionId();
@@ -215,15 +209,21 @@ class SessionManager {
       if (error instanceof jwt.JsonWebTokenError) {
         if (error.name === 'TokenExpiredError') {
           try {
-            const expiredPayload = jwt.verify(token, this.config.jwtSecret, {
+            const verifyResult = jwt.verify(token, this.config.jwtSecret, {
               // Validate signature but ignore exp to retrieve session information
-              ignoreExpiration: true as any,
-            }) as RefreshTokenPayload;
+              ignoreExpiration: true,
+            });
 
+            // Type guard to ensure we have an object payload, not a string
+            if (typeof verifyResult === 'string') {
+              return { isValid: false };
+            }
+
+            const expiredPayload = verifyResult as RefreshTokenPayload;
             if (expiredPayload?.sessionId) {
               await this.provider.deleteBySessionId(expiredPayload.sessionId);
             }
-          } catch (_) {
+          } catch {
             // If we cannot recover payload safely, skip cleanup
           }
         }
@@ -248,6 +248,7 @@ class SessionManager {
     };
 
     const token = jwt.sign(payload, this.config.jwtSecret, {
+      algorithm: 'HS256',
       expiresIn: this.config.accessTokenLifespan,
     });
 
