@@ -771,7 +771,7 @@
   "content-manager.form.Input.filters": "启用筛选器",
   "content-manager.form.Input.hint.character.unit": "{maxValue, plural, one { 个字符} other { 个字符}}",
   "content-manager.form.Input.hint.minMaxDivider": " / ",
-  "content-manager.form.Input.hint.text": "{min, select, undefined {} other {最小. {min}}}{divider}{max, select, undefined {} other {最大. {max}}}{unit}{br}{description}",
+  "content-manager.form.Input.hint.text": "{min, select, undefined {} other {最小. {min}}}{divider}{max, select, undefined {} other {最大. {max}}}",
   "content-manager.form.Input.label": "标签",
   "content-manager.form.Input.label.inputDescription": "此值会覆盖表头中显示的标签",
   "content-manager.form.Input.pageEntries": "每页条目数",
