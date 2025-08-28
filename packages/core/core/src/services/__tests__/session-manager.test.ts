@@ -443,7 +443,7 @@ describe('SessionManager Factory', () => {
       mockJwt.sign.mockReturnValue('access-jwt-token' as any);
       await sessionManager.generateAccessToken(refreshToken);
 
-      // Verify the algorithm is explicitly set to HS256
+      // Verify the algorithm is set to the configured algorithm (default HS256)
       expect(mockJwt.sign).toHaveBeenCalledWith(
         expect.any(Object),
         config.jwtSecret,

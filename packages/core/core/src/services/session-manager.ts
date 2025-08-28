@@ -185,7 +185,7 @@ class SessionManager {
   ): { isValid: true; payload: AccessTokenPayload } | { isValid: false; payload: null } {
     try {
       const payload = jwt.verify(token, this.config.jwtSecret, {
-        algorithms: ['HS256'],
+        algorithms: [this.config.algorithm ?? 'HS256'],
       }) as TokenPayload;
 
       // Ensure this is an access token
