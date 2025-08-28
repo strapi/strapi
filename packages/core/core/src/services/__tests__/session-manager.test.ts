@@ -255,7 +255,9 @@ describe('SessionManager Factory', () => {
 
       const result = await sessionManager.validateRefreshToken('valid-token');
 
-      expect(mockJwt.verify).toHaveBeenCalledWith('valid-token', config.jwtSecret);
+      expect(mockJwt.verify).toHaveBeenCalledWith('valid-token', config.jwtSecret, {
+        algorithms: ['HS256'],
+      });
       expect(mockQuery.findOne).toHaveBeenCalledWith({ where: { sessionId } });
 
       expect(result).toEqual({
@@ -314,7 +316,7 @@ describe('SessionManager Factory', () => {
       };
 
       const expiredSession = {
-        user: userId,
+        userId,
         sessionId,
         deviceId,
         origin,
@@ -342,7 +344,7 @@ describe('SessionManager Factory', () => {
       };
 
       const mismatchedSession = {
-        user: 'different-user-id',
+        userId: 'different-user-id',
         sessionId,
         deviceId,
         origin,
@@ -380,15 +382,29 @@ describe('SessionManager Factory', () => {
       // Make it appear to be an instance of JsonWebTokenError for our error handling
       Object.setPrototypeOf(expiredError, jwt.JsonWebTokenError.prototype);
 
-      mockJwt.verify.mockImplementation(() => {
+      const sessionId = 'session456';
+      const userId = 'user123';
+
+      // First call throws TokenExpiredError
+      mockJwt.verify.mockImplementationOnce(() => {
         throw expiredError;
+      });
+
+      // Second call ignores expiration and returns payload for cleanup
+      mockJwt.verify.mockImplementationOnce(() => {
+        return {
+          userId,
+          sessionId,
+          type: 'refresh',
+          exp: Math.floor(Date.now() / 1000) - 10,
+          iat: Math.floor(Date.now() / 1000) - 20,
+        } as any;
       });
 
       const result = await sessionManager.validateRefreshToken('expired-token');
 
-      expect(result).toEqual({
-        isValid: false,
-      });
+      expect(result).toEqual({ isValid: false });
+      expect(mockQuery.delete).toHaveBeenCalledWith({ where: { sessionId } });
     });
 
     it('should propagate unexpected errors', async () => {
@@ -408,6 +424,108 @@ describe('SessionManager Factory', () => {
       await expect(sessionManager.validateRefreshToken('valid-token')).rejects.toThrow(
         'Unexpected database error'
       );
+    });
+  });
+
+  describe('generateAccessToken', () => {
+    it('should use correct algorithm and expiration time for access token', async () => {
+      const refreshToken = 'valid-refresh-token';
+      const userId = 'user123';
+      const sessionId = 'session456';
+      // Mock validateRefreshToken to return success
+      const mockValidateResult = {
+        isValid: true,
+        userId,
+        sessionId,
+      };
+      sessionManager.validateRefreshToken = jest.fn().mockResolvedValue(mockValidateResult);
+
+      mockJwt.sign.mockReturnValue('access-jwt-token' as any);
+      await sessionManager.generateAccessToken(refreshToken);
+
+      // Verify the algorithm is explicitly set to HS256
+      expect(mockJwt.sign).toHaveBeenCalledWith(
+        expect.any(Object),
+        config.jwtSecret,
+        expect.objectContaining({
+          algorithm: 'HS256',
+          expiresIn: config.accessTokenLifespan,
+        })
+      );
+
+      // Verify the expiration time matches the config
+      const signCall = mockJwt.sign.mock.calls[0];
+      const options = signCall[2];
+      expect(options.expiresIn).toBe(config.accessTokenLifespan);
+      expect(options.algorithm).toBe('HS256');
+    });
+
+    it('should generate access token for valid refresh token', async () => {
+      const refreshToken = 'valid-refresh-token';
+      const userId = 'user123';
+      const sessionId = 'session456';
+
+      // Mock validateRefreshToken to return success
+      const mockValidateResult = {
+        isValid: true,
+        userId,
+        sessionId,
+      };
+
+      sessionManager.validateRefreshToken = jest.fn().mockResolvedValue(mockValidateResult);
+      mockJwt.sign.mockReturnValue('access-jwt-token');
+
+      const result = await sessionManager.generateAccessToken(refreshToken);
+
+      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken);
+      expect(mockJwt.sign).toHaveBeenCalledWith(
+        {
+          userId,
+          sessionId,
+          type: 'access',
+        },
+        config.jwtSecret,
+        {
+          expiresIn: config.accessTokenLifespan,
+          algorithm: 'HS256',
+        }
+      );
+      expect(result).toEqual({
+        token: 'access-jwt-token',
+      });
+    });
+
+    it('should return error for invalid refresh token', async () => {
+      const refreshToken = 'invalid-refresh-token';
+
+      // Mock validateRefreshToken to return failure
+      const mockValidateResult = {
+        isValid: false,
+      };
+
+      sessionManager.validateRefreshToken = jest.fn().mockResolvedValue(mockValidateResult);
+
+      const result = await sessionManager.generateAccessToken(refreshToken);
+
+      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken);
+      expect(mockJwt.sign).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        error: 'invalid_refresh_token',
+      });
+    });
+
+    it('should propagate errors from validateRefreshToken', async () => {
+      const refreshToken = 'valid-refresh-token';
+      const error = new Error('Database connection failed');
+
+      sessionManager.validateRefreshToken = jest.fn().mockRejectedValue(error);
+
+      await expect(sessionManager.generateAccessToken(refreshToken)).rejects.toThrow(
+        'Database connection failed'
+      );
+
+      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken);
+      expect(mockJwt.sign).not.toHaveBeenCalled();
     });
   });
 

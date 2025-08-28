@@ -19,4 +19,5 @@ export interface SessionManagerService {
         payload: null;
       };
   validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult>;
+  generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }>;
 }

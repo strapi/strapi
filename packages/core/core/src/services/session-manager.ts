@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import type { Algorithm, VerifyOptions } from 'jsonwebtoken';
 import type { Database } from '@strapi/database';
 
 export interface SessionProvider {
@@ -8,6 +9,7 @@ export interface SessionProvider {
   findByIdentifier(userId: string): Promise<SessionData[]>;
   deleteBySessionId(sessionId: string): Promise<void>;
   deleteByIdentifier(userId: string): Promise<void>;
+  deleteExpiredByIdentifier(userId: string): Promise<void>;
   deleteExpired(): Promise<void>;
 }
 
@@ -100,12 +102,22 @@ class DatabaseSessionProvider implements SessionProvider {
       where: { expiresAt: { $lt: new Date() } },
     });
   }
+
+  async deleteExpiredByIdentifier(userId: string): Promise<void> {
+    await this.db.query(this.contentType).delete({
+      where: { userId, expiresAt: { $lt: new Date() } },
+    });
+  }
 }
 
 export interface SessionManagerConfig {
   jwtSecret: string;
   refreshTokenLifespan: number; // default 30 days
   accessTokenLifespan: number; // default 1 hour
+  /**
+   * JWT signing/verification algorithm. Defaults to 'HS256' when not provided.
+   */
+  algorithm?: Algorithm;
 }
 
 class SessionManager {
@@ -162,7 +174,7 @@ class SessionManager {
 
     const token = jwt.sign(payload, this.config.jwtSecret, {
       expiresIn: this.config.refreshTokenLifespan,
-      algorithm: 'HS256',
+      algorithm: this.config.algorithm ?? 'HS256',
     });
 
     return { token, sessionId };
@@ -189,7 +201,15 @@ class SessionManager {
 
   async validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult> {
     try {
-      const payload = jwt.verify(token, this.config.jwtSecret) as RefreshTokenPayload;
+      const verifyOptions: VerifyOptions = {
+        algorithms: [this.config.algorithm ?? 'HS256'],
+      };
+
+      const payload = jwt.verify(
+        token,
+        this.config.jwtSecret,
+        verifyOptions
+      ) as RefreshTokenPayload;
 
       if (payload.type !== 'refresh') {
         return { isValid: false };
@@ -216,12 +236,56 @@ class SessionManager {
         sessionId: payload.sessionId,
       };
     } catch (error: any) {
+      // If the token is expired, verify signature ignoring expiration to safely extract payload
+      // and clean up the corresponding session in database.
       if (error instanceof jwt.JsonWebTokenError) {
+        if (error.name === 'TokenExpiredError') {
+          try {
+            const verifyResult = jwt.verify(token, this.config.jwtSecret, {
+              // Validate signature but ignore exp to retrieve session information
+              ignoreExpiration: true,
+              algorithms: [this.config.algorithm ?? 'HS256'],
+            });
+
+            // Type guard to ensure we have an object payload, not a string
+            if (typeof verifyResult === 'string') {
+              return { isValid: false };
+            }
+
+            const expiredPayload = verifyResult as RefreshTokenPayload;
+            if (expiredPayload?.sessionId) {
+              await this.provider.deleteBySessionId(expiredPayload.sessionId);
+            }
+          } catch {
+            // If we cannot recover payload safely, skip cleanup
+          }
+        }
         return { isValid: false };
       }
 
       throw error;
     }
+  }
+
+  async generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }> {
+    const validation = await this.validateRefreshToken(refreshToken);
+
+    if (!validation.isValid) {
+      return { error: 'invalid_refresh_token' };
+    }
+
+    const payload: Omit<AccessTokenPayload, 'iat' | 'exp'> = {
+      userId: validation.userId!,
+      sessionId: validation.sessionId!,
+      type: 'access',
+    };
+
+    const token = jwt.sign(payload, this.config.jwtSecret, {
+      algorithm: this.config.algorithm ?? 'HS256',
+      expiresIn: this.config.accessTokenLifespan,
+    });
+
+    return { token };
   }
 }
 
