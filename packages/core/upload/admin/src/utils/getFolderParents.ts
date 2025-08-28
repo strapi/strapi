@@ -23,7 +23,11 @@ export const getFolderParents = (folders: FolderStructureValue[], currentFolderI
   while (parent !== undefined) {
     // eslint-disable-next-line no-loop-func
     const parentToStore = flatFolders.find(({ value }) => value === parent);
-    parents.push({ id: parentToStore?.value, label: parentToStore?.label });
+    parents.push({
+      id: parentToStore?.value,
+      label: parentToStore?.label,
+      path: parentToStore?.path,
+    });
     parent = parentToStore?.parent;
   }
 
