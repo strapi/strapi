@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
 import { Chat } from '../../components/AIChat/Chat';
-import { prefetchAIToken } from '../../components/AIChat/hooks/useAIFetch';
+import { prefetchAIToken } from '../../components/AIChat/lib/aiClient';
 import { ChatProvider } from '../../components/AIChat/providers/ChatProvider';
 import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';

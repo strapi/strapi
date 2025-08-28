@@ -153,13 +153,11 @@ const DropZone = ({ importType, onAddFiles, error }: DropZoneProps) => {
 
         if (entry) {
           if (entry.isDirectory) {
-            const dirEntry = entry as FileSystemDirectoryEntry;
-            const files = await readDirectory(dirEntry);
+            const files = await readDirectory(entry as FileSystemDirectoryEntry);
             allFiles.push(...files);
           } else if (entry.isFile) {
-            const fileEntry = entry as FileSystemFileEntry;
             const file = await new Promise<File>((resolve, reject) => {
-              fileEntry.file(resolve, reject);
+              (entry as FileSystemFileEntry).file(resolve, reject);
             });
             allFiles.push(file);
           }
