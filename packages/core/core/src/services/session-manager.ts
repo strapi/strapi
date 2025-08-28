@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import type { Algorithm, VerifyOptions } from 'jsonwebtoken';
 import type { Database } from '@strapi/database';
 
 export interface SessionProvider {
@@ -113,6 +114,10 @@ export interface SessionManagerConfig {
   jwtSecret: string;
   refreshTokenLifespan: number; // default 30 days
   accessTokenLifespan: number; // default 1 hour
+  /**
+   * JWT signing/verification algorithm. Defaults to 'HS256' when not provided.
+   */
+  algorithm?: Algorithm;
 }
 
 class SessionManager {
@@ -169,7 +174,7 @@ class SessionManager {
 
     const token = jwt.sign(payload, this.config.jwtSecret, {
       expiresIn: this.config.refreshTokenLifespan,
-      algorithm: 'HS256',
+      algorithm: this.config.algorithm ?? 'HS256',
     });
 
     return { token, sessionId };
@@ -177,7 +182,15 @@ class SessionManager {
 
   async validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult> {
     try {
-      const payload = jwt.verify(token, this.config.jwtSecret) as RefreshTokenPayload;
+      const verifyOptions: VerifyOptions = {
+        algorithms: [this.config.algorithm ?? 'HS256'],
+      };
+
+      const payload = jwt.verify(
+        token,
+        this.config.jwtSecret,
+        verifyOptions
+      ) as RefreshTokenPayload;
 
       if (payload.type !== 'refresh') {
         return { isValid: false };
@@ -212,6 +225,7 @@ class SessionManager {
             const verifyResult = jwt.verify(token, this.config.jwtSecret, {
               // Validate signature but ignore exp to retrieve session information
               ignoreExpiration: true,
+              algorithms: [this.config.algorithm ?? 'HS256'],
             });
 
             // Type guard to ensure we have an object payload, not a string
@@ -248,7 +262,7 @@ class SessionManager {
     };
 
     const token = jwt.sign(payload, this.config.jwtSecret, {
-      algorithm: 'HS256',
+      algorithm: this.config.algorithm ?? 'HS256',
       expiresIn: this.config.accessTokenLifespan,
     });
 
