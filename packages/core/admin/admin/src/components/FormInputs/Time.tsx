@@ -25,7 +25,7 @@ const TimeInput = forwardRef<HTMLInputElement, InputProps>(
           onChange={(time) => {
             field.onChange(name, `${time}:00.000`);
           }}
-          onClear={() => field.onChange(name, undefined)}
+          onClear={() => field.onChange(name, null as any)}
           value={field.value ?? ''}
           {...props}
         />
