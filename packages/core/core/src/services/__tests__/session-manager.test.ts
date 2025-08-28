@@ -361,6 +361,38 @@ describe('SessionManager Factory', () => {
   });
 
   describe('generateAccessToken', () => {
+    it('should use correct algorithm and expiration time for access token', async () => {
+      const refreshToken = 'valid-refresh-token';
+      const userId = 'user123';
+      const sessionId = 'session456';
+      // Mock validateRefreshToken to return success
+      const mockValidateResult = {
+        isValid: true,
+        userId,
+        sessionId,
+      };
+      sessionManager.validateRefreshToken = jest.fn().mockResolvedValue(mockValidateResult);
+
+      mockJwt.sign.mockReturnValue('access-jwt-token' as any);
+      await sessionManager.generateAccessToken(refreshToken);
+
+      // Verify the algorithm is explicitly set to HS256
+      expect(mockJwt.sign).toHaveBeenCalledWith(
+        expect.any(Object),
+        config.jwtSecret,
+        expect.objectContaining({
+          algorithm: 'HS256',
+          expiresIn: config.accessTokenLifespan,
+        })
+      );
+
+      // Verify the expiration time matches the config
+      const signCall = mockJwt.sign.mock.calls[0];
+      const options = signCall[2];
+      expect(options.expiresIn).toBe(config.accessTokenLifespan);
+      expect(options.algorithm).toBe('HS256');
+    });
+
     it('should generate access token for valid refresh token', async () => {
       const refreshToken = 'valid-refresh-token';
       const userId = 'user123';
