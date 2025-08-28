@@ -300,6 +300,58 @@ const previewScript = (shouldRun = true) => {
 
   type HighlightManager = ReturnType<typeof createHighlightManager>;
 
+  /**
+   * We need to track scroll in all the element parents in order to keep the highlight position
+   * in sync with the element position. Listening to window scroll is not enough because the
+   * element can be inside one or more scrollable containers.
+   */
+  const setupScrollManagement = (highlightManager: HighlightManager) => {
+    const updateOnScroll = () => {
+      highlightManager.updateAllHighlights();
+    };
+
+    const scrollableElements = new Set<Element | Window>();
+    scrollableElements.add(window);
+
+    // Find all scrollable ancestors for all tracked elements and set up scroll listeners
+    highlightManager.elements.forEach((element) => {
+      let parent = element.parentElement;
+      while (parent) {
+        const computedStyle = window.getComputedStyle(parent);
+        const overflow = computedStyle.overflow + computedStyle.overflowX + computedStyle.overflowY;
+
+        if (overflow.includes('scroll') || overflow.includes('auto')) {
+          scrollableElements.add(parent);
+        }
+
+        parent = parent.parentElement;
+      }
+    });
+
+    // Add scroll listeners to all scrollable elements
+    scrollableElements.forEach((element) => {
+      if (element === window) {
+        window.addEventListener('scroll', updateOnScroll);
+        window.addEventListener('resize', updateOnScroll);
+      } else {
+        element.addEventListener('scroll', updateOnScroll);
+      }
+    });
+
+    const cleanup = () => {
+      scrollableElements.forEach((element) => {
+        if (element === window) {
+          window.removeEventListener('scroll', updateOnScroll);
+          window.removeEventListener('resize', updateOnScroll);
+        } else {
+          (element as Element).removeEventListener('scroll', updateOnScroll);
+        }
+      });
+    };
+
+    return { cleanup };
+  };
+
   const setupObservers = (
     highlightManager: HighlightManager,
     stegaObserver: MutationObserver | undefined
@@ -366,64 +418,10 @@ const previewScript = (shouldRun = true) => {
       attributeFilter: [SOURCE_ATTRIBUTE],
     });
 
-    const updateOnScroll = () => {
-      highlightManager.updateAllHighlights();
-    };
-
-    const scrollableElements = new Set<Element | Window>();
-    scrollableElements.add(window);
-
-    /**
-     * We need to find all the parents that are scrollable in order to keep the highlight positions
-     * up to date with the element position. Because the element position changes on the screen when
-     * one of the parents (not just the window) is scrolled.
-     */
-    const findScrollableAncestors = () => {
-      // Clear existing scrollable elements (except window)
-      scrollableElements.forEach((element) => {
-        if (element !== window) {
-          (element as Element).removeEventListener('scroll', updateOnScroll);
-        }
-      });
-      scrollableElements.clear();
-      scrollableElements.add(window);
-
-      // Find all scrollable ancestors for all tracked elements
-      highlightManager.elements.forEach((element) => {
-        let parent = element.parentElement;
-        while (parent) {
-          const computedStyle = window.getComputedStyle(parent);
-          const overflow =
-            computedStyle.overflow + computedStyle.overflowX + computedStyle.overflowY;
-
-          if (overflow.includes('scroll') || overflow.includes('auto')) {
-            scrollableElements.add(parent);
-          }
-
-          parent = parent.parentElement;
-        }
-      });
-
-      // Add scroll listeners to all scrollable elements
-      scrollableElements.forEach((element) => {
-        if (element === window) {
-          window.addEventListener('scroll', updateOnScroll);
-          window.addEventListener('resize', updateOnScroll);
-        } else {
-          element.addEventListener('scroll', updateOnScroll);
-        }
-      });
-    };
-
-    // Initial setup of scrollable elements
-    findScrollableAncestors();
-
     return {
       resizeObserver,
       highlightObserver,
       stegaObserver,
-      updateOnScroll,
-      scrollableElements,
     };
   };
 
@@ -503,6 +501,7 @@ const previewScript = (shouldRun = true) => {
   const createCleanupSystem = (
     overlay: HTMLElement,
     observers: ReturnType<typeof setupObservers>,
+    scrollManager: ReturnType<typeof setupScrollManagement>,
     eventHandlers: EventListenersList
   ) => {
     window.__strapi_previewCleanup = () => {
@@ -510,15 +509,8 @@ const previewScript = (shouldRun = true) => {
       observers.highlightObserver.disconnect();
       observers.stegaObserver?.disconnect();
 
-      // Remove all scroll listeners
-      observers.scrollableElements.forEach((element) => {
-        if (element === window) {
-          window.removeEventListener('scroll', observers.updateOnScroll);
-          window.removeEventListener('resize', observers.updateOnScroll);
-        } else {
-          (element as Element).removeEventListener('scroll', observers.updateOnScroll);
-        }
-      });
+      // Clean up scroll listeners
+      scrollManager.cleanup();
 
       // Remove highlight event listeners
       eventHandlers.forEach(({ element, type, handler }) => {
@@ -537,8 +529,9 @@ const previewScript = (shouldRun = true) => {
     const overlay = createOverlaySystem();
     const highlightManager = createHighlightManager(overlay);
     const observers = setupObservers(highlightManager, stegaObserver);
+    const scrollManager = setupScrollManagement(highlightManager);
     const eventHandlers = setupEventHandlers(highlightManager);
-    createCleanupSystem(overlay, observers, eventHandlers);
+    createCleanupSystem(overlay, observers, scrollManager, eventHandlers);
   });
 };
 
