@@ -188,7 +188,9 @@ describe('SessionManager Factory', () => {
 
       const result = await sessionManager.validateRefreshToken('valid-token');
 
-      expect(mockJwt.verify).toHaveBeenCalledWith('valid-token', config.jwtSecret);
+      expect(mockJwt.verify).toHaveBeenCalledWith('valid-token', config.jwtSecret, {
+        algorithms: ['HS256'],
+      });
       expect(mockQuery.findOne).toHaveBeenCalledWith({ where: { sessionId } });
 
       expect(result).toEqual({
