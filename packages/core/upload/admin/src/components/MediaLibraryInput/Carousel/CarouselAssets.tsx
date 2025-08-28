@@ -65,6 +65,7 @@ export const CarouselAssets = React.forwardRef(
     const [isEditingAsset, setIsEditingAsset] = React.useState(false);
 
     const currentAsset = assets[selectedAssetIndex];
+    const canEditMedia = !disabled && onEditAsset;
 
     return (
       <>
@@ -93,9 +94,7 @@ export const CarouselAssets = React.forwardRef(
                 asset={currentAsset}
                 onDeleteAsset={disabled ? undefined : onDeleteAsset}
                 onAddAsset={disabled ? undefined : onAddAsset}
-                onEditAsset={
-                  disabled ? undefined : onEditAsset ? () => setIsEditingAsset(true) : undefined
-                }
+                onEditAsset={canEditMedia ? () => setIsEditingAsset(true) : undefined}
               />
             ) : undefined
           }
