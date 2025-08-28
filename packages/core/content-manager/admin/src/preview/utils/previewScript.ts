@@ -67,7 +67,7 @@ const previewScript = (shouldRun = true) => {
       'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
     );
 
-    const processElementForStega = (element: Element) => {
+    const applyStegaToElement = (element: Element) => {
       const directTextNodes = Array.from(element.childNodes).filter(
         (node) => node.nodeType === Node.TEXT_NODE
       );
@@ -96,7 +96,7 @@ const previewScript = (shouldRun = true) => {
 
     // Process all existing elements
     const allElements = document.querySelectorAll('*');
-    Array.from(allElements).forEach(processElementForStega);
+    Array.from(allElements).forEach(applyStegaToElement);
 
     // Create observer for new elements and text changes
     const observer = new MutationObserver((mutations) => {
@@ -107,17 +107,17 @@ const previewScript = (shouldRun = true) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as Element;
               // Process the added element
-              processElementForStega(element);
+              applyStegaToElement(element);
               // Process all child elements
               const childElements = element.querySelectorAll('*');
-              Array.from(childElements).forEach(processElementForStega);
+              Array.from(childElements).forEach(applyStegaToElement);
             }
           });
         }
 
         // Handle text content changes
         if (mutation.type === 'characterData' && mutation.target.parentElement) {
-          processElementForStega(mutation.target.parentElement);
+          applyStegaToElement(mutation.target.parentElement);
         }
       });
     });
@@ -159,7 +159,7 @@ const previewScript = (shouldRun = true) => {
   }>;
 
   const createHighlightManager = (overlay: HTMLElement) => {
-    const elementToHighlight = new Map<Element, HTMLElement>();
+    const elementsToHighlight = new Map<Element, HTMLElement>();
     const eventListeners: EventListenersList = [];
     const focusedHighlights: HTMLElement[] = [];
     let focusedField: string | null = null;
@@ -174,14 +174,15 @@ const previewScript = (shouldRun = true) => {
     };
 
     const updateAllHighlights = () => {
-      elementToHighlight.forEach((highlight, element) => {
+      elementsToHighlight.forEach((highlight, element) => {
         drawHighlight(element, highlight);
       });
     };
 
     const createHighlightForElement = (element: HTMLElement) => {
-      if (elementToHighlight.has(element)) {
-        return; // Already has a highlight
+      if (elementsToHighlight.has(element)) {
+        // Already has a highlight
+        return;
       }
 
       const highlight = document.createElement('div');
@@ -243,18 +244,18 @@ const previewScript = (shouldRun = true) => {
         { element, type: 'mousedown', handler: mouseDownHandler as EventListener }
       );
 
-      elementToHighlight.set(element, highlight);
+      elementsToHighlight.set(element, highlight);
       overlay.appendChild(highlight);
       drawHighlight(element, highlight);
     };
 
     const removeHighlightForElement = (element: Element) => {
-      const highlight = elementToHighlight.get(element);
+      const highlight = elementsToHighlight.get(element);
 
       if (!highlight) return;
 
       highlight.remove();
-      elementToHighlight.delete(element);
+      elementsToHighlight.delete(element);
 
       // Remove event listeners for this element
       const listenersToRemove = eventListeners.filter((listener) => listener.element === element);
@@ -280,10 +281,10 @@ const previewScript = (shouldRun = true) => {
 
     return {
       get elements() {
-        return Array.from(elementToHighlight.keys());
+        return Array.from(elementsToHighlight.keys());
       },
       get highlights() {
-        return Array.from(elementToHighlight.values());
+        return Array.from(elementsToHighlight.values());
       },
       updateAllHighlights,
       eventListeners,
@@ -372,6 +373,11 @@ const previewScript = (shouldRun = true) => {
     const scrollableElements = new Set<Element | Window>();
     scrollableElements.add(window);
 
+    /**
+     * We need to find all the parents that are scrollable in order to keep the highlight positions
+     * up to date with the element position. Because the element position changes on the screen when
+     * one of the parents (not just the window) is scrolled.
+     */
     const findScrollableAncestors = () => {
       // Clear existing scrollable elements (except window)
       scrollableElements.forEach((element) => {
@@ -418,7 +424,6 @@ const previewScript = (shouldRun = true) => {
       stegaObserver,
       updateOnScroll,
       scrollableElements,
-      findScrollableAncestors,
     };
   };
 
