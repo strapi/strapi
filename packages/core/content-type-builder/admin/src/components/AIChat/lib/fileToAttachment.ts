@@ -16,8 +16,9 @@ export async function fileToAttachment(file: File): Promise<Attachment> {
   return {
     id: generateId(),
     status: 'ready',
-    name,
-    contentType: type,
+    filename: name,
+    mediaType: type,
     url: dataUrl,
+    type: 'file',
   };
 }

@@ -348,9 +348,10 @@ const CodeConfirmationStep = ({ projectName, isLoading, error }: CodeConfirmatio
           attachment={{
             id: generateId(),
             status: isLoading ? 'loading' : 'ready',
-            name: projectName || '',
+            filename: projectName || '',
             url: '',
-            contentType: STRAPI_CODE_MIME_TYPE,
+            type: 'file',
+            mediaType: STRAPI_CODE_MIME_TYPE,
           }}
           error={error}
           minWidth="256px"
@@ -376,7 +377,7 @@ export const UploadCodeModal = () => {
   });
 
   const { isCodeUploadOpen, closeCodeUpload, submitOnFinish } = useUploadProjectToChat();
-  const { setMessages, reload, openChat, input, setInput } = useStrapiChat();
+  const { sendMessage, openChat, input, setInput } = useStrapiChat();
 
   const handleCancel = () => {
     setProjectName(null);
@@ -389,22 +390,16 @@ export const UploadCodeModal = () => {
     openChat();
 
     if (projectAttachment && submitOnFinish) {
-      setMessages(() => [
-        {
-          role: 'user',
-          content: 'Create schemas from my uploaded project',
-          id: 'first-message',
-          experimental_attachments: [projectAttachment],
-          parts: [
-            {
-              type: 'text',
-              text: 'Create schemas from my uploaded project',
-            },
-          ],
-        },
-      ]);
-
-      reload();
+      sendMessage({
+        role: 'user',
+        parts: [
+          {
+            type: 'text',
+            text: 'Create schemas from my uploaded project',
+          },
+          projectAttachment,
+        ],
+      });
     } else if (projectAttachment) {
       // If input is empty, set a predefined message
       if (!input) {

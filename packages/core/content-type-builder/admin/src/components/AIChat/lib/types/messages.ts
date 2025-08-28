@@ -1,6 +1,6 @@
 import { SchemaChange } from './annotations';
 
-import type { Attachment } from 'ai';
+import type { FileUIPart } from 'ai';
 
 export type Status = 'loading' | 'success' | 'error';
 
@@ -29,7 +29,7 @@ export type UserMessage = {
   revisionId?: string;
   role: 'user';
   contents: TextContent[];
-  attachments: Attachment[];
+  attachments: FileUIPart[];
   project?: string;
 };
 

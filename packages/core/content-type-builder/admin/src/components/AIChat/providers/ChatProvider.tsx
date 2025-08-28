@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+  type ReactNode,
+  type ChangeEvent,
+} from 'react';
 
-import { useChat } from '@ai-sdk/react';
+import { UIMessage, useChat } from '@ai-sdk/react';
 import { useTracking } from '@strapi/admin/strapi-admin';
 
 import { useDataManager } from '../../DataManager/useDataManager';
@@ -22,9 +30,11 @@ import { SchemaChatProvider } from './SchemaProvider';
 interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   isChatEnabled: boolean;
   title?: string;
-  messages: Message[];
-  rawMessages: ReturnType<typeof useChat>['messages'];
+  messages: UIMessage[];
   handleSubmit: (event: any) => void;
+  input: string;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
   reset: () => void;
   schemas: Schema[];
   // Chat window
@@ -85,10 +95,7 @@ export const BaseChatProvider = ({
     messages,
     sendMessage: _sendMessage,
     status,
-    regenerate: _regenerate,
-    error,
     stop,
-    setMessages,
     ...chat
   } = useAIChat({
     id: chatId?.toString(),
@@ -132,7 +139,7 @@ export const BaseChatProvider = ({
     if (status === 'streaming' || status === 'submitted') {
       return;
     }
-
+    console.log('sendMessage');
     return _sendMessage(message, {
       ...options,
       body: {
@@ -152,11 +159,13 @@ export const BaseChatProvider = ({
       return;
     }
 
-    if (!input.trim() || attachments.length === 0) {
+    const readyAttachments = attachments.filter((a) => a.status !== 'loading');
+
+    if (!input.trim() || readyAttachments.length !== 0) {
       return;
     }
 
-    const files = attachments.map(
+    const files = readyAttachments.map(
       (attachment) =>
         ({
           type: 'file',
@@ -198,15 +207,21 @@ export const BaseChatProvider = ({
     }
   }, [status, messages, trackUsage]);
   const isAiEnabled = window.strapi.ai?.enabled !== false;
-
+  console.log(messages, status);
   return (
     <ChatContext.Provider
       value={{
         isChatEnabled: !!STRAPI_AI_TOKEN && isAiEnabled,
+        id,
+        status,
+        stop,
+        sendMessage,
         ...chat,
         messages,
-        rawMessages: messages,
         handleSubmit,
+        input,
+        setInput,
+        handleInputChange: (e) => setInput(e.target.value),
         reset: () => {
           stop();
           setChatId(generateRandomId());

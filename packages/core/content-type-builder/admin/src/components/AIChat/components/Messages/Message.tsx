@@ -131,7 +131,7 @@ const UserMessage = ({ message }: { message: UserMessageType }) => {
 
       {/* Attachments */}
       {message.attachments.map((attachment, idx) => (
-        <AttachmentPreview key={`${attachment.name}-${idx}`} attachment={attachment as any} />
+        <AttachmentPreview key={`${attachment.filename}-${idx}`} attachment={attachment as any} />
       ))}
     </AnimatedBox>
   );

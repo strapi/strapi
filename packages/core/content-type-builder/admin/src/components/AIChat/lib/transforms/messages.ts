@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { SchemaChange, SchemaChangeAnnotation, ToolAnnotation } from '../types/annotations';
 import { AssistantMessage, MarkerContent, Message, Status, UserMessage } from '../types/messages';
 
-import type { Message as RawMessage, ToolInvocation } from 'ai';
+import type { UIMessage as RawMessage, ToolCallPart } from 'ai';
 
 export type TransformOptions = {
   isLoading?: boolean;
@@ -84,7 +86,6 @@ function transformAssistantMessage(
   const status = getMessageStatus(message, isLastMessage, options);
   const assistantMessage: AssistantMessage = {
     id: message.id,
-    // @ts-expect-error - revisionId does exist but is not typed from the ai/sdk side
     revisionId: message.revisionId,
     role: 'assistant',
     schemaChanges: [],

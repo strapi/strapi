@@ -1,8 +1,6 @@
 import { useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
-
-import { Attachment } from '../lib/types/attachments';
+import type { Attachment } from '../lib/types/attachments';
 
 /**================================================================================
  * Constants
@@ -256,9 +254,10 @@ export function useFigmaUpload({ onSuccess, onError }: UseFigmaUploadOptions = {
         ([id, url]) =>
           ({
             id,
+            type: 'file',
+            filename: frameNameMap.get(id),
+            mediaType: 'image/png',
             url,
-            name: frameNameMap.get(id),
-            contentType: 'image/png',
             status: 'ready',
           }) satisfies FigmaImage
       );

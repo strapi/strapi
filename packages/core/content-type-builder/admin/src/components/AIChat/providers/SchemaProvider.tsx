@@ -30,25 +30,25 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
     if (!latestMessage) return;
     if (latestMessage.role !== 'assistant') return;
 
-    const schemaChanges = latestMessage.schemaChanges;
-    const lastRevisedChange = schemaChanges.findIndex(
-      (c: SchemaChange) => c.revisionId === lastRevisedId
-    );
+    // const schemaChanges = latestMessage.schemaChanges;
+    // const lastRevisedChange = schemaChanges.findIndex(
+    //   (c: SchemaChange) => c.revisionId === lastRevisedId
+    // );
 
-    const newSchemaChanges = schemaChanges.slice(lastRevisedChange + 1);
-    if (!newSchemaChanges.length) return;
+    // const newSchemaChanges = schemaChanges.slice(lastRevisedChange + 1);
+    // if (!newSchemaChanges.length) return;
 
-    newSchemaChanges.forEach((change: SchemaChange) => {
-      const oldSchema =
-        contentTypes[change.schema.uid as any] || components[change.schema.uid as any];
-      const newSchema = transformChatToCTB(change.schema, oldSchema);
-      applyChange({
-        action: TYPE_TO_ACTION[change.type]!,
-        schema: newSchema,
-      });
-    });
+    // newSchemaChanges.forEach((change: SchemaChange) => {
+    //   const oldSchema =
+    //     contentTypes[change.schema.uid as any] || components[change.schema.uid as any];
+    //   const newSchema = transformChatToCTB(change.schema, oldSchema);
+    //   applyChange({
+    //     action: TYPE_TO_ACTION[change.type]!,
+    //     schema: newSchema,
+    //   });
+    // });
 
-    setLastRevisedId(newSchemaChanges.at(-1)!.revisionId);
+    // setLastRevisedId(newSchemaChanges.at(-1)!.revisionId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
