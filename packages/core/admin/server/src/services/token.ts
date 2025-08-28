@@ -1,12 +1,14 @@
 import crypto from 'crypto';
 import _ from 'lodash';
 import jwt from 'jsonwebtoken';
+import type { Algorithm, VerifyOptions } from 'jsonwebtoken';
 import type { AdminUser } from '../../../shared/contracts/shared';
 
 const defaultJwtOptions = { expiresIn: '30d' };
 
 export type TokenOptions = {
   expiresIn?: string;
+  algorithm?: Algorithm;
   [key: string]: unknown;
 };
 
@@ -56,10 +58,14 @@ const createJwtToken = (user: { id: AdminUser['id'] }) => {
 const decodeJwtToken = (
   token: string
 ): { payload: TokenPayload; isValid: true } | { payload: null; isValid: false } => {
-  const { secret } = getTokenOptions();
+  const { secret, options } = getTokenOptions();
 
   try {
-    const payload = jwt.verify(token, secret) as TokenPayload;
+    const verifyOptions: VerifyOptions = options?.algorithm
+      ? { algorithms: [options.algorithm] }
+      : {};
+
+    const payload = jwt.verify(token, secret, verifyOptions) as TokenPayload;
     return { payload, isValid: true };
   } catch (err) {
     return { payload: null, isValid: false };
