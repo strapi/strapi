@@ -77,8 +77,8 @@ const previewScript = (shouldRun = true) => {
       if (directTextContent) {
         try {
           const result = stegaDecode(directTextContent);
-          if (result) {
-            element.setAttribute(SOURCE_ATTRIBUTE, result.key);
+          if (result && 'strapiSource' in result) {
+            element.setAttribute(SOURCE_ATTRIBUTE, result.strapiSource);
 
             // Remove encoded part from DOM text content (to avoid breaking links for example)
             directTextNodes.forEach((node) => {
@@ -456,7 +456,9 @@ const previewScript = (shouldRun = true) => {
 
         // Set new focused field and highlight matching elements
         highlightManager.setFocusedField(field);
-        const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
+        const matchingElements = document.querySelectorAll(
+          `[${SOURCE_ATTRIBUTE}*="field=${field}"]`
+        );
         matchingElements.forEach((element) => {
           const highlight =
             highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];

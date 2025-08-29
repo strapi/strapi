@@ -6,6 +6,7 @@ import {
   useRBAC,
   createContext,
   Form as FormContext,
+  type FieldContentSourceMap,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -38,7 +39,7 @@ import { PUBLIC_EVENTS, INTERNAL_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
 import { previewScript } from '../utils/previewScript';
 
-import type { UID } from '@strapi/types';
+import type { Struct, UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Constants
@@ -69,8 +70,7 @@ const DEVICES = [
  * PreviewProvider
  * -----------------------------------------------------------------------------------------------*/
 
-interface PopoverField {
-  path: string;
+interface PopoverField extends FieldContentSourceMap {
   position: DOMRect;
 }
 
@@ -98,6 +98,30 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
   rotate: ${(props) => (props.$isSideEditorOpen ? '0deg' : '180deg')};
   transition: rotate 0.2s ease-in-out;
 `;
+
+// TODO: move to util file and write unit tests
+function parseFieldMetaData(strapiSource: string): FieldContentSourceMap | null {
+  const url = new URL(strapiSource);
+  const path = url.searchParams.get('path');
+  const type = url.searchParams.get('type');
+  const documentId = url.searchParams.get('documentId');
+  const locale = url.searchParams.get('locale');
+  const model = url.searchParams.get('model');
+  const kind = url.searchParams.get('kind');
+
+  if (!path || !type || !documentId || !model || !kind) {
+    return null;
+  }
+
+  return {
+    path,
+    type: type as Struct.SchemaAttributes[string]['type'],
+    documentId,
+    locale: locale ?? null,
+    model: model as UID.Schema | undefined,
+    kind: kind as Struct.ContentTypeKind | undefined,
+  };
+}
 
 const PreviewPage = () => {
   const location = useLocation();
@@ -147,7 +171,10 @@ const PreviewPage = () => {
       }
 
       if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT) {
-        setPopoverField?.(event.data.payload);
+        const fieldMetaData = parseFieldMetaData(event.data.payload.path);
+        if (fieldMetaData) {
+          setPopoverField({ ...fieldMetaData, position: event.data.payload.position });
+        }
       }
     };
 

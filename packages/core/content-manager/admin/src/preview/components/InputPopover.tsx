@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { createContext } from '@strapi/admin/strapi-admin';
 import { Box, Popover } from '@strapi/design-system';
+import get from 'lodash/get';
 
 import { type UseDocument } from '../../hooks/useDocument';
 import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
@@ -29,6 +30,27 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
   }
 
   const iframeRect = iframeRef.current.getBoundingClientRect();
+
+  const attributeSchema = (() => {
+    const fieldParts = popoverField.path.split('.');
+
+    if (fieldParts.length === 1) {
+      // Regular attribute, its schema is available directly
+      return get(documentResponse.schema.attributes, popoverField.path);
+    }
+
+    // Nested attribute, check if it's inside a component first
+    const [componentName, attributeName] = fieldParts;
+    const componentAttribute = documentResponse.schema.attributes[componentName];
+    if (componentAttribute && 'component' in componentAttribute) {
+      const componentSchema = get(documentResponse.components, componentAttribute.component);
+      return componentSchema.attributes[attributeName];
+    }
+  })();
+
+  if (!attributeSchema) {
+    return null;
+  }
 
   return (
     <>
@@ -61,10 +83,11 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
             <Box padding={4} width="400px">
               <InputRenderer
                 document={documentResponse}
-                attribute={documentResponse.schema.attributes[popoverField.path] as any}
+                attribute={attributeSchema as any}
+                // TODO: retrieve the proper label from the layout
                 label={popoverField.path}
                 name={popoverField.path}
-                type={documentResponse.schema.attributes[popoverField.path].type}
+                type={attributeSchema.type}
                 visible={true}
               />
             </Box>
