@@ -10,5 +10,5 @@ export interface SessionManagerService {
     origin: string
   ): Promise<{ token: string; sessionId: string }>;
   validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult>;
-  invalidateRefreshToken(origin: string, identifierId: string, deviceId?: string): Promise<void>;
+  generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }>;
 }

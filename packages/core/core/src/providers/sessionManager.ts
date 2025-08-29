@@ -1,9 +1,13 @@
+import type { Algorithm } from 'jsonwebtoken';
 import { defineProvider } from './provider';
 import { createSessionManager } from '../services/session-manager';
 
 interface AdminAuthConfig {
   secret?: string;
-  options?: Record<string, unknown>;
+  options?: {
+    algorithm?: Algorithm;
+    [key: string]: unknown;
+  };
 }
 
 export default defineProvider({
@@ -31,6 +35,7 @@ export default defineProvider({
       jwtSecret,
       refreshTokenLifespan,
       accessTokenLifespan,
+      algorithm: adminAuth.options?.algorithm,
     };
 
     strapi.add('sessionManager', () =>
