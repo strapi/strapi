@@ -1,6 +1,7 @@
 import type { Knex } from 'knex';
 
 import path from 'node:path';
+
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
@@ -11,11 +12,22 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
-import type { Model } from './types';
+import type { Model, JoinTable } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
 
 export { isKnexQuery } from './utils/knex';
+
+// Minimal schema interfaces to match @strapi/types without circular dependency
+interface ComponentSchema {
+  uid: string;
+  modelName: string;
+}
+
+interface ContentTypeSchema {
+  uid: string;
+  collectionName?: string;
+}
 
 interface Settings {
   forceMigration?: boolean;
@@ -260,7 +272,61 @@ class Database {
     await this.lifecycles.clear();
     await this.connection.destroy();
   }
+
+  /**
+   * Find the parent entry of a component instance.
+   *
+   * Given a component model, a specific component instance id, and the list of
+   * possible parent content types (those that can embed this component),
+   * this function checks each parent's *_cmps join table to see if the component
+   * instance is linked to a parent entity.
+   *
+   * - Returns the parent uid, parent table name, and parent id if found.
+   * - Returns null if no parent relationship exists.
+   */
+  async findComponentParent(
+    componentSchema: ComponentSchema,
+    componentId: number | string,
+    parentSchemasForComponent: ContentTypeSchema[],
+    opts?: { trx?: Knex.Transaction }
+  ): Promise<{ uid: string; table: string; parentId: number | string } | null> {
+    if (!componentSchema?.uid) return null;
+
+    const schemaBuilder = this.getSchemaConnection(opts?.trx);
+    const withTrx = <T extends Knex.QueryBuilder>(qb: T) =>
+      opts?.trx ? qb.transacting(opts.trx) : qb;
+
+    for (const parent of parentSchemasForComponent) {
+      if (!parent.collectionName) continue;
+
+      const joinTableName = `${parent.collectionName}_cmps`;
+
+      try {
+        const tableExists = await schemaBuilder.hasTable(joinTableName);
+        if (!tableExists) continue;
+
+        const parentRow = await withTrx(this.getConnection(joinTableName))
+          .where({
+            cmp_id: componentId,
+            component_type: componentSchema.uid,
+          })
+          .first<{ entity_id: number | string }>('entity_id');
+
+        if (parentRow) {
+          return {
+            uid: parent.uid,
+            table: parent.collectionName,
+            parentId: parentRow.entity_id,
+          };
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    return null;
+  }
 }
 
 export { Database, errors };
-export type { Model, Identifiers, Migration };
+export type { Model, JoinTable, Identifiers, Migration };
