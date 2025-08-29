@@ -26,6 +26,7 @@ export * as relations from './relations';
 export * as hooks from './hooks';
 export * from './zod';
 export * from './validation';
+export * from './route-serialization';
 
 export * from './primitives';
 export * from './content-api-router';

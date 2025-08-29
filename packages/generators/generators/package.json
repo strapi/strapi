@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generators",
-  "version": "5.22.0",
+  "version": "5.23.1",
   "description": "Interactive API generator.",
   "keywords": [
     "strapi",
@@ -49,8 +49,8 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/typescript-utils": "5.22.0",
-    "@strapi/utils": "5.22.0",
+    "@strapi/typescript-utils": "5.23.1",
+    "@strapi/utils": "5.23.1",
     "chalk": "4.1.2",
     "copyfiles": "2.4.1",
     "fs-extra": "11.2.0",
@@ -60,8 +60,8 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.22.0",
-    "tsconfig": "5.22.0"
+    "eslint-config-custom": "5.23.1",
+    "tsconfig": "5.23.1"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",

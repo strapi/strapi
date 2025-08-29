@@ -1,6 +1,6 @@
 {
   "name": "@strapi/i18n",
-  "version": "5.22.0",
+  "version": "5.23.1",
   "description": "Create read and update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
@@ -59,7 +59,7 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.0.0-rc.29",
     "@strapi/icons": "2.0.0-rc.29",
-    "@strapi/utils": "5.22.0",
+    "@strapi/utils": "5.23.1",
     "lodash": "4.17.21",
     "qs": "6.11.1",
     "react-intl": "6.6.2",
@@ -68,10 +68,10 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.22.0",
-    "@strapi/admin-test-utils": "5.22.0",
-    "@strapi/content-manager": "5.22.0",
-    "@strapi/types": "5.22.0",
+    "@strapi/admin": "5.23.1",
+    "@strapi/admin-test-utils": "5.23.1",
+    "@strapi/content-manager": "5.23.1",
+    "@strapi/types": "5.23.1",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
     "msw": "1.3.0",

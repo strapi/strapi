@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "5.22.0",
+  "version": "5.23.1",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -61,10 +61,10 @@
     "@types/http-errors": "2.0.4",
     "@types/koa": "2.13.4",
     "@types/node": "18.19.24",
-    "eslint-config-custom": "5.22.0",
+    "eslint-config-custom": "5.23.1",
     "koa": "2.16.1",
     "koa-body": "6.0.1",
-    "tsconfig": "5.22.0"
+    "tsconfig": "5.23.1"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
