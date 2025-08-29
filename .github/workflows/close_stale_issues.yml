@@ -28,8 +28,11 @@ jobs:
           only-labels: 'stale-before-2021' # Only process issues with this label
           exempt-issue-labels: 'issue: security,severity: critical,severity: high' # Don't close issues with this label
           exempt-all-milestones: true # Don't close issues that are part of a milestone
+          exempt-all-assignees: false # Close even if they are assigned
           days-before-stale: 0 # Mark as stale immediately
           days-before-close: 0 # Close immediately
+          days-before-pr-stale: -1 # dont apply to PRs
+          days-before-pr-close: -1 # PRs disabled
           operations-per-run: 100
           stale-issue-message: |
             👋 Hello there!
