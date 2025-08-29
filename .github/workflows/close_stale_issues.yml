@@ -22,7 +22,7 @@ jobs:
       - name: Close stale issues
         uses: actions/stale@v3
         with:
-          debug-only: true # Dry run to confirm the workflow is working
+          # debug-only: true # Dry run to confirm the workflow is working
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           ascending: true # Start with oldest issues first
           only-labels: 'stale-before-2021' # Only process issues with this label
