@@ -428,6 +428,24 @@ describe('SessionManager Factory', () => {
     });
   });
 
+  describe('invalidateRefreshToken', () => {
+    it('should delete sessions by origin and userId', async () => {
+      await sessionManager.invalidateRefreshToken('admin', 'user123');
+
+      expect(mockQuery.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'user123', origin: 'admin' },
+      });
+    });
+
+    it('should delete sessions by origin, userId and deviceId when provided', async () => {
+      await sessionManager.invalidateRefreshToken('admin', 'user123', 'device456');
+
+      expect(mockQuery.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'user123', origin: 'admin', deviceId: 'device456' },
+      });
+    });
+  });
+
   describe('generateAccessToken', () => {
     it('should use correct algorithm and expiration time for access token', async () => {
       const refreshToken = 'valid-refresh-token';
