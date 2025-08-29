@@ -21,7 +21,7 @@ const createMiddleware = ({ sendEvent }: { sendEvent: Sender }) => {
 
     if (
       !url.includes('.') &&
-      url.includes(strapi.config.get('api.rest.prefix') &&
+      url.includes(strapi.config.get('api.rest.prefix')) &&
       ['GET', 'PUT', 'POST', 'DELETE'].includes(method)
     ) {
       if (Date.now() > state.expires) {
