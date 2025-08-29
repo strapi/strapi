@@ -3,15 +3,11 @@ import { keyBy, omit } from 'lodash/fp';
 
 import type { UID, Schema } from '@strapi/types';
 
+import type { JoinTable } from '@strapi/database';
+
 interface LoadContext {
   oldVersions: { id: string; locale: string }[];
   newVersions: { id: string; locale: string }[];
-}
-
-interface JoinTable {
-  name: string;
-  joinColumn: { name: string };
-  inverseJoinColumn: { name: string };
 }
 
 interface RelationUpdate {

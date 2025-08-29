@@ -12,7 +12,7 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
-import type { Model } from './types';
+import type { Model, JoinTable } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
 
@@ -329,4 +329,4 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, Identifiers, Migration };
+export type { Model, JoinTable, Identifiers, Migration };
