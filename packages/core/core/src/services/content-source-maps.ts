@@ -17,13 +17,13 @@ const ENCODABLE_TYPES = [
   'media',
   'email',
   'password',
-  'uid',
   /**
    * We cannot modify the response shape, so types that aren't based on string cannot be encoded:
    * - json: object
    * - blocks: object, will require a custom implementation in a dedicated PR
    * - integer, float and decimal: number
    * - boolean: boolean (believe it or not)
+   * - uid: can be stringified but would mess up URLs
    */
 ];
 
@@ -45,6 +45,10 @@ interface EncodingInfo {
   schema: Struct.Schema;
 }
 
+const isObject = (value: unknown): value is Record<string, any> => {
+  return typeof value === 'object' && value !== null;
+};
+
 const createContentSourceMapsService = (strapi: Core.Strapi) => {
   return {
     encodeField(text: string, key: string): string {
@@ -56,7 +60,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
     },
 
     async encodeEntry({ data, schema }: EncodingInfo): Promise<any> {
-      if (typeof data !== 'object' || data === null || data === undefined) {
+      if (!isObject(data) || data === undefined) {
         return data;
       }
 
@@ -86,7 +90,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
           );
         }
 
-        if (typeof data !== 'object' || data === null) {
+        if (!isObject(data)) {
           return data;
         }
 
