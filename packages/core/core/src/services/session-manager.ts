@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import type { Algorithm, VerifyOptions } from 'jsonwebtoken';
 import type { Database } from '@strapi/database';
+import { DEFAULT_ALGORITHM } from '../constants';
 
 export interface SessionProvider {
   create(session: SessionData): Promise<SessionData>;
@@ -174,7 +175,7 @@ class SessionManager {
 
     const token = jwt.sign(payload, this.config.jwtSecret, {
       expiresIn: this.config.refreshTokenLifespan,
-      algorithm: this.config.algorithm ?? 'HS256',
+      algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
     });
 
     return { token, sessionId };
@@ -185,7 +186,7 @@ class SessionManager {
   ): { isValid: true; payload: AccessTokenPayload } | { isValid: false; payload: null } {
     try {
       const payload = jwt.verify(token, this.config.jwtSecret, {
-        algorithms: [this.config.algorithm ?? 'HS256'],
+        algorithms: [this.config.algorithm ?? DEFAULT_ALGORITHM],
       }) as TokenPayload;
 
       // Ensure this is an access token
@@ -202,7 +203,7 @@ class SessionManager {
   async validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult> {
     try {
       const verifyOptions: VerifyOptions = {
-        algorithms: [this.config.algorithm ?? 'HS256'],
+        algorithms: [this.config.algorithm ?? DEFAULT_ALGORITHM],
       };
 
       const payload = jwt.verify(
@@ -244,7 +245,7 @@ class SessionManager {
             const verifyResult = jwt.verify(token, this.config.jwtSecret, {
               // Validate signature but ignore exp to retrieve session information
               ignoreExpiration: true,
-              algorithms: [this.config.algorithm ?? 'HS256'],
+              algorithms: [this.config.algorithm ?? DEFAULT_ALGORITHM],
             });
 
             // Type guard to ensure we have an object payload, not a string
@@ -281,7 +282,7 @@ class SessionManager {
     };
 
     const token = jwt.sign(payload, this.config.jwtSecret, {
-      algorithm: this.config.algorithm ?? 'HS256',
+      algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
       expiresIn: this.config.accessTokenLifespan,
     });
 
