@@ -7,6 +7,7 @@ import {
   SessionData,
   SessionManagerConfig,
 } from '../session-manager';
+import { DEFAULT_ALGORITHM } from '../../constants';
 
 jest.mock('crypto');
 jest.mock('jsonwebtoken');
@@ -132,7 +133,7 @@ describe('SessionManager Factory', () => {
 
       expect(mockJwt.sign).toHaveBeenCalledWith(expectedPayload, config.jwtSecret, {
         expiresIn: config.refreshTokenLifespan,
-        algorithm: 'HS256',
+        algorithm: DEFAULT_ALGORITHM,
       });
     });
 
@@ -152,6 +153,73 @@ describe('SessionManager Factory', () => {
       await expect(sessionManager.generateRefreshToken(userId, deviceId, origin)).rejects.toThrow(
         'Database connection failed'
       );
+    });
+  });
+
+  describe('validateAccessToken', () => {
+    const userId = 'user123';
+    const sessionId = 'abcdef1234567890';
+
+    beforeEach(() => {
+      mockCrypto.randomBytes.mockReturnValue(Buffer.from(sessionId, 'hex') as any);
+    });
+
+    it('returns valid with payload for a correct access token', () => {
+      const payload = {
+        userId,
+        sessionId,
+        type: 'access',
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      };
+
+      mockJwt.verify.mockReturnValue(payload as any);
+
+      const result = sessionManager.validateAccessToken('access.jwt');
+
+      expect(mockJwt.verify).toHaveBeenCalledWith('access.jwt', config.jwtSecret, {
+        algorithms: [DEFAULT_ALGORITHM],
+      });
+      expect(result).toEqual({ isValid: true, payload });
+    });
+
+    it('returns invalid when jwt.verify throws TokenExpiredError', () => {
+      // Emulate jsonwebtoken TokenExpiredError by throwing any error
+      const error = new Error('jwt expired');
+      error.name = 'TokenExpiredError';
+      mockJwt.verify.mockImplementation(() => {
+        throw error;
+      });
+
+      const result = sessionManager.validateAccessToken('expired.jwt');
+
+      expect(result).toEqual({ isValid: false, payload: null });
+    });
+
+    it('returns invalid when token type is not access', () => {
+      const refreshPayload = {
+        userId,
+        sessionId,
+        type: 'refresh',
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      };
+      mockJwt.verify.mockReturnValue(refreshPayload as any);
+
+      const result = sessionManager.validateAccessToken('refresh.jwt');
+
+      expect(result).toEqual({ isValid: false, payload: null });
+    });
+
+    it('returns invalid when jwt.verify throws with invalid signature', () => {
+      const error = new Error('invalid signature');
+      mockJwt.verify.mockImplementation(() => {
+        throw error;
+      });
+
+      const result = sessionManager.validateAccessToken('bad.jwt');
+
+      expect(result).toEqual({ isValid: false, payload: null });
     });
   });
 
@@ -189,7 +257,7 @@ describe('SessionManager Factory', () => {
       const result = await sessionManager.validateRefreshToken('valid-token');
 
       expect(mockJwt.verify).toHaveBeenCalledWith('valid-token', config.jwtSecret, {
-        algorithms: ['HS256'],
+        algorithms: [DEFAULT_ALGORITHM],
       });
       expect(mockQuery.findOne).toHaveBeenCalledWith({ where: { sessionId } });
 
@@ -376,12 +444,12 @@ describe('SessionManager Factory', () => {
       mockJwt.sign.mockReturnValue('access-jwt-token' as any);
       await sessionManager.generateAccessToken(refreshToken);
 
-      // Verify the algorithm is explicitly set to HS256
+      // Verify the algorithm is set to the configured algorithm
       expect(mockJwt.sign).toHaveBeenCalledWith(
         expect.any(Object),
         config.jwtSecret,
         expect.objectContaining({
-          algorithm: 'HS256',
+          algorithm: DEFAULT_ALGORITHM,
           expiresIn: config.accessTokenLifespan,
         })
       );
@@ -390,7 +458,7 @@ describe('SessionManager Factory', () => {
       const signCall = mockJwt.sign.mock.calls[0];
       const options = signCall[2];
       expect(options.expiresIn).toBe(config.accessTokenLifespan);
-      expect(options.algorithm).toBe('HS256');
+      expect(options.algorithm).toBe(DEFAULT_ALGORITHM);
     });
 
     it('should generate access token for valid refresh token', async () => {
@@ -420,7 +488,7 @@ describe('SessionManager Factory', () => {
         config.jwtSecret,
         {
           expiresIn: config.accessTokenLifespan,
-          algorithm: 'HS256',
+          algorithm: DEFAULT_ALGORITHM,
         }
       );
       expect(result).toEqual({
