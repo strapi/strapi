@@ -90,7 +90,7 @@ const MessageContent = ({
       <MarkdownStyles>
         <Markdown
           components={{
-            a: ({ node, ...props }) => <a target="_blank" rel="noopener noreferrer" {...props} />,
+            a: ({ ...props }) => <a target="_blank" rel="noopener noreferrer" {...props} />,
           }}
         >
           {content.text}
@@ -131,7 +131,10 @@ const UserMessage = ({ message }: { message: UserMessageType }) => {
 
       {/* Attachments */}
       {message.attachments.map((attachment, idx) => (
-        <AttachmentPreview key={`${attachment.name}-${idx}`} attachment={attachment as any} />
+        <AttachmentPreview
+          key={`${attachment.name}-${idx}`}
+          attachment={{ ...attachment, id: `${idx}`, status: 'ready' } as any}
+        />
       ))}
     </AnimatedBox>
   );

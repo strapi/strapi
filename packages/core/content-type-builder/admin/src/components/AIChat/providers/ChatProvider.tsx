@@ -6,10 +6,10 @@ import { useTracking } from '@strapi/admin/strapi-admin';
 
 import { useDataManager } from '../../DataManager/useDataManager';
 import { FeedbackProvider } from '../FeedbackModal';
+import { useAIAvailability } from '../hooks/useAIAvailability';
 import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
 import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
-import { STRAPI_AI_TOKEN } from '../lib/constants';
 import { transformMessages } from '../lib/transforms/messages';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
 import { Attachment } from '../lib/types/attachments';
@@ -151,12 +151,12 @@ export const BaseChatProvider = ({
       });
     }
   }, [chat.status, messages, trackUsage]);
-  const isAiEnabled = window.strapi.ai?.enabled !== false;
+  const isChatAvailable = useAIAvailability();
 
   return (
     <ChatContext.Provider
       value={{
-        isChatEnabled: !!STRAPI_AI_TOKEN && isAiEnabled,
+        isChatEnabled: isChatAvailable,
         ...chat,
         messages,
         rawMessages: chat.messages,
