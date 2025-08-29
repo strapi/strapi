@@ -188,7 +188,7 @@ describe('Document Service unidirectional relations', () => {
     // Check join table after step 1
     let result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
     let joinTableRows = Array.isArray(result) ? result : result.rows || result;
-    console.log('After step 1 (create product): ', joinTableRows.length, 'entries');
+
     expect(joinTableRows.length).toBe(1); // Should be 1 on both branches
 
     // Step 2: Publish Tag FIRST - this triggers ghost relation creation
@@ -197,8 +197,6 @@ describe('Document Service unidirectional relations', () => {
     // Check join table after step 2
     result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
     joinTableRows = Array.isArray(result) ? result : result.rows || result;
-    console.log('After step 2 (publish tag): ', joinTableRows.length, 'entries');
-    console.log('Join table content:', JSON.stringify(joinTableRows, null, 2));
 
     expect(joinTableRows.length).toBe(1);
 
@@ -208,29 +206,7 @@ describe('Document Service unidirectional relations', () => {
     // Check join table after step 3
     result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
     joinTableRows = Array.isArray(result) ? result : result.rows || result;
-    console.log('After step 3 (publish product): ', joinTableRows.length, 'entries');
-    console.log('Join table content:', JSON.stringify(joinTableRows, null, 2));
 
     expect(joinTableRows.length).toBe(2);
-
-    // TODO: this still passes on develop when it should fail, no idea why same story using the rest api
-
-    // // Step 4: Remove relation via UI (simulate what UI does)
-    // await strapi.documents(PRODUCT_UID).update({
-    //   documentId: testProduct.documentId,
-    //   data: { compo: { tags: [] } } // UI removes relations this way
-    // });
-
-    // // Step 5: Publish product after removing relations
-    // await strapi.documents(PRODUCT_UID).publish({ documentId: testProduct.documentId });
-
-    // // Check final join table state
-    // result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
-    // joinTableRows = Array.isArray(result) ? result : result.rows || result;
-    // console.log('After step 5 (remove + publish): ', joinTableRows.length, 'entries');
-    // console.log('Final join table content:', JSON.stringify(joinTableRows, null, 2));
-
-    // // This should FAIL on develop (2 entries - cleanup broken) and PASS with fix (0 entries)
-    // expect(joinTableRows.length).toBe(0);
   });
 });

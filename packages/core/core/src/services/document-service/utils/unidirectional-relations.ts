@@ -8,13 +8,115 @@ interface LoadContext {
   newVersions: { id: string; locale: string }[];
 }
 
+interface JoinTable {
+  name: string;
+  joinColumn: { name: string };
+  inverseJoinColumn: { name: string };
+}
+
+interface RelationUpdate {
+  joinTable: JoinTable;
+  relations: Record<string, any>[];
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * Component Helper Functions
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * Finds content types that contain the given component and have draft & publish enabled.
+ */
+const getParentSchemasForComponent = (componentSchema: Schema.Component): Schema.ContentType[] => {
+  return Object.values(strapi.contentTypes).filter((contentType: any) => {
+    if (!contentType.options?.draftAndPublish) return false;
+
+    return Object.values(contentType.attributes).some((attr: any) => {
+      return (
+        (attr.type === 'component' && attr.component === componentSchema.uid) ||
+        (attr.type === 'dynamiczone' && attr.components?.includes(componentSchema.uid))
+      );
+    });
+  });
+};
+
+/**
+ * Determines if a component relation should be propagated to a new document version
+ * when a document with draft and publish is updated.
+ */
+const shouldPropagateRelationToNewVersion = async (
+  componentRelation: Record<string, any>,
+  componentSchema: Schema.Component,
+  parentSchemasForComponent: Schema.ContentType[],
+  trx: any
+): Promise<boolean> => {
+  const componentId = componentRelation[`${componentSchema.modelName}_id`];
+
+  const parent = await strapi.db.findComponentParent(
+    componentSchema,
+    componentId,
+    parentSchemasForComponent,
+    { trx }
+  );
+
+  // Keep relation if component has no parent entry
+  if (!parent?.uid) {
+    return true;
+  }
+
+  const parentContentType = strapi.contentTypes[parent.uid as UID.ContentType];
+
+  // Keep relation if parent doesn't have draft & publish enabled
+  if (!parentContentType?.options?.draftAndPublish) {
+    return true;
+  }
+
+  // Discard relation if parent has draft & publish enabled
+  return false;
+};
+
+/**
+ * Filters component relations to only include those that should be propagated to new document versions.
+ * Only relations that are NOT linked to a draft & publish parent type are kept.
+ */
+const filterComponentRelations = async (
+  relations: Record<string, any>[],
+  componentSchema: Schema.Component,
+  trx: any
+): Promise<Record<string, any>[]> => {
+  // Exit if no relations to filter
+  if (relations.length === 0) {
+    return relations;
+  }
+
+  const componentParents = getParentSchemasForComponent(componentSchema);
+
+  // Exit if no draft & publish parent types exist
+  if (componentParents.length === 0) {
+    return relations;
+  }
+
+  const relationsToPropagate = [];
+  for (const relation of relations) {
+    if (
+      await shouldPropagateRelationToNewVersion(relation, componentSchema, componentParents, trx)
+    ) {
+      relationsToPropagate.push(relation);
+    }
+  }
+
+  return relationsToPropagate;
+};
+
 /**
  * Loads lingering relations that need to be updated when overriding a published or draft entry.
  * This is necessary because the relations are uni-directional and the target entry is not aware of the source entry.
  * This is not the case for bi-directional relations, where the target entry is also linked to the source entry.
  */
-const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadContext) => {
-  const updates = [] as any;
+const load = async (
+  uid: UID.ContentType,
+  { oldVersions, newVersions }: LoadContext
+): Promise<RelationUpdate[]> => {
+  const updates: RelationUpdate[] = [];
 
   // Iterate all components and content types to find relations that need to be updated
   await strapi.db.transaction(async ({ trx }) => {
@@ -85,79 +187,10 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
             .whereIn(targetColumnName, ids)
             .transacting(trx);
 
-          let filteredRelations = newVersionsRelations;
-          if (model.modelType === 'component') {
-            /**
-             * Step 1 — Collect candidate parent content types
-             *
-             * A "parent" here means a content type that embeds this component
-             * (either as a single component field or inside a dynamic zone).
-             * We only care about parents that have Draft & Publish enabled.
-             */
-            const componentParents = Object.values(strapi.contentTypes).filter(
-              (contentType: any) => {
-                if (!contentType.options?.draftAndPublish) return false;
-                // Check if this component is used in any attribute of the content type
-                const checkAttributes = (attributes: any): boolean => {
-                  return Object.values(attributes).some((attr: any) => {
-                    // Case A: simple component field
-                    if (attr.type === 'component' && attr.component === model.uid) {
-                      return true;
-                    }
-                    // Case B: dynamic zone containing this component
-                    if (attr.type === 'dynamiczone' && attr.components?.includes(model.uid)) {
-                      return true;
-                    }
-                    return false;
-                  });
-                };
-                return checkAttributes(contentType.attributes);
-              }
-            );
-
-            /**
-             * Step 2 — Decide which relations to keep
-             *
-             * For every relation (join-table row for this component), we check:
-             *  - Does this component instance have a parent entry?
-             *  - If yes, is that parent Draft & Publish enabled?
-             *
-             * If the parent exists *and* has D&P enabled → we discard the relation.
-             * Otherwise (no parent or parent without D&P) → we keep it.
-             *
-             * This ensures we don’t propagate links into published parents
-             * incorrectly during draft/publish operations.
-             */
-            const keepFlags = await Promise.all(
-              newVersionsRelations.map(async (relation) => {
-                const compId = relation[`${model.modelName}_id`];
-
-                // IMPORTANT: make sure findComponentParent accepts and uses trx internally
-                const parent = await strapi.db.findComponentParent(
-                  model,
-                  compId,
-                  componentParents,
-                  { trx }
-                );
-
-                // keep when: no parent OR parent is NOT D&P
-                if (!parent?.uid) return true;
-
-                // Keep when: parent is *not* Draft & Publish
-                const parentSchema = strapi.contentTypes[parent.uid as UID.ContentType];
-                return !(parentSchema?.options?.draftAndPublish === true);
-              })
-            );
-
-            /**
-             * Step 3 — Apply the keep flags to get the final set of relations.
-             * This ensures filteredRelations contains only relations that are safe
-             * to propagate forward into publish/discard updates.
-             */
-            filteredRelations = newVersionsRelations.filter((_, i) => keepFlags[i]);
-          }
-          console.log(filteredRelations);
-          console.log(newVersionsRelations);
+          const filteredRelations =
+            model.modelType === 'component'
+              ? await filterComponentRelations(newVersionsRelations, model, trx)
+              : newVersionsRelations;
 
           if (filteredRelations.length > 0) {
             // when publishing a draft that doesn't have a published version yet,
@@ -165,11 +198,11 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
             // when discarding a published version, if no drafts exists
             const discardToAdd = filteredRelations
               .filter((relation) => {
-                const matchingOldVerion = oldVersionsRelations.find((oldRelation) => {
+                const matchingOldVersion = oldVersionsRelations.find((oldRelation) => {
                   return oldRelation[sourceColumnName] === relation[sourceColumnName];
                 });
 
-                return !matchingOldVerion;
+                return !matchingOldVersion;
               })
               .map(omit('id'));
 
