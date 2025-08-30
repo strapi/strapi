@@ -107,7 +107,7 @@
     "fs-extra": "11.2.0",
     "highlight.js": "^10.4.1",
     "immer": "9.0.21",
-    "inquirer": "8.2.5",
+    "inquirer": "12.9.1",
     "invariant": "^2.2.4",
     "is-localhost-ip": "2.0.0",
     "json-logic-js": "2.0.5",
