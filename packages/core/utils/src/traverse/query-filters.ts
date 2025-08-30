@@ -1,4 +1,4 @@
-import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
+import { curry, isObject, isEmpty, isArray, isNil, omit } from 'lodash/fp';
 
 import traverseFactory, { type Parent } from './factory';
 
@@ -32,7 +32,7 @@ const filters = traverseFactory()
   )
   // Parse object values
   .parse(isObj, () => ({
-    transform: cloneDeep,
+    transform: structuredClone<Record<string, unknown>>,
 
     remove(key, data) {
       return omit(key, data);

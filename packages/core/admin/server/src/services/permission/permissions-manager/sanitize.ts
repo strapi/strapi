@@ -14,7 +14,6 @@ import {
   pick,
   getOr,
   isObject,
-  cloneDeep,
 } from 'lodash/fp';
 
 import type { UID } from '@strapi/types';
@@ -101,7 +100,7 @@ export default ({ action, ability, model }: any) => {
     );
 
     return async (query: any) => {
-      const sanitizedQuery = cloneDeep(query);
+      const sanitizedQuery = structuredClone(query);
 
       if (query.filters) {
         Object.assign(sanitizedQuery, { filters: await sanitizeFilters(query.filters) });
