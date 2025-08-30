@@ -2,7 +2,12 @@ import * as React from 'react';
 
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { fireEvent, render as renderRTL, waitForElementToBeRemoved } from '@testing-library/react';
+import {
+  fireEvent,
+  render as renderRTL,
+  waitForElementToBeRemoved,
+  waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -23,6 +28,9 @@ const render = () => ({
       const client = new QueryClient({
         defaultOptions: {
           queries: {
+            retry: false,
+          },
+          mutations: {
             retry: false,
           },
         },
@@ -111,6 +119,10 @@ describe('Roles – EditPage', () => {
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
+    await waitFor(() => {
+      expect(getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
+    });
+
     await user.type(getByRole('textbox', { name: 'Name' }), 'test');
     await user.type(getByRole('textbox', { name: 'Description' }), 'testing');
     await user.click(
@@ -118,6 +130,11 @@ describe('Roles – EditPage', () => {
         name: 'Address Define all allowed actions for the api::address plugin.',
       })
     );
+
+    await waitFor(() => {
+      expect(getByRole('checkbox', { name: 'create' })).toBeInTheDocument();
+    });
+
     await user.click(getByRole('checkbox', { name: 'create' }));
 
     const button = await findByRole('button', { name: 'Save' });

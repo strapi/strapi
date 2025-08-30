@@ -25,10 +25,12 @@ const previewLoader = async ({ params }) => {
     const headers = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiToken}`,
+      'strapi-encode-source-maps': 'true',
     };
     const searchParams = new URLSearchParams({
       locale,
       status,
+      populate: '*',
     });
     const route = collectionType === 'collection-types' ? `${apiName}/${documentId}` : apiName;
 
