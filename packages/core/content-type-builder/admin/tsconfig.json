@@ -1,6 +1,6 @@
 {
   "extends": "tsconfig/client.json",
-  "include": ["src"],
+  "include": ["src", "./custom.d.ts"],
   "compilerOptions": {
     "rootDir": "../",
     "baseUrl": "."

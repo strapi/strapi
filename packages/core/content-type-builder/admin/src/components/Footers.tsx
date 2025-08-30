@@ -17,7 +17,7 @@ const IconBox = styled(Box)`
   }
 
   svg path {
-    fill: ${({ theme, color }) => theme.colors[`${color}600`]};
+    fill: ${({ theme, color }) => theme.colors[`${color}600` as keyof typeof theme.colors]};
   }
 `;
 
