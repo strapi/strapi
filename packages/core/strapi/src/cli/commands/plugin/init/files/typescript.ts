@@ -16,7 +16,6 @@ const ADMIN = {
             esModuleInterop: true,
             allowSyntheticDefaultImports: true,
             strict: true,
-            forceConsistentCasingInFileNames: true,
             resolveJsonModule: true,
             noEmit: true,
             jsx: 'react-jsx',
@@ -62,7 +61,6 @@ const SERVER = {
 
             "strict": false,
             "skipLibCheck": true,
-            "forceConsistentCasingInFileNames": true,
 
             "incremental": true,
             "esModuleInterop": true,
