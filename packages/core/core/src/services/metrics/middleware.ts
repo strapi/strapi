@@ -10,7 +10,7 @@ function nextResetDate(): number {
   return Date.now() + 24 * 60 * 60 * 1000; // Now + 24 hours.
 }
 
-const createMiddleware = ({ sendEvent }: { sendEvent: Sender }) => {
+const createMiddleware = ({ sendEvent, strapi }: { sendEvent: Sender; strapi: Core.Strapi }) => {
   const state: State = {
     expires: nextResetDate(),
     counter: 0,
