@@ -20,7 +20,6 @@ import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
 import { STRAPI_AI_TOKEN } from '../lib/constants';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
 import { Attachment } from '../lib/types/attachments';
-import { Message } from '../lib/types/messages';
 import { Schema } from '../lib/types/schema';
 import { UploadProjectToChatProvider } from '../UploadCodeModal';
 import { UploadFigmaToChatProvider } from '../UploadFigmaModal';
@@ -59,7 +58,7 @@ export const BaseChatProvider = ({
   children: ReactNode;
   defaultOpen?: boolean;
 }) => {
-  const [chatId, setChatId] = useState<string | undefined>(undefined);
+  const [chatId, setChatId] = useState<string | undefined>(generateRandomId());
   const [isChatOpen, setIsChatOpen] = useState(defaultOpen);
   const [openCount, setOpenCount] = useState(0);
   const [input, setInput] = useState('');
@@ -106,40 +105,12 @@ export const BaseChatProvider = ({
    * AI SDK chat overrides
    * -----------------------------------------------------------------------------------------------*/
 
-  // Messages are transformed into an easier to use format
-  // TODO: Make this more efficient only computing new streamed parts
-  // const messages = useMemo(() => {
-  //   return transformMessages(chat.messages, chat);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [chat.messages]);
-
-  // const handleSubmit = async (event: Parameters<typeof chat.handleSubmit>[0]) => {
-  //   chat.handleSubmit(event, {
-  //     experimental_attachments: attachments
-  //       // Transform to ai/sdk format and remove any attachments that are not yet ready
-  //       .filter((attachment) => attachment.status !== 'loading')
-  //       .map((attachment) => ({
-  //         name: attachment.name,
-  //         url: attachment.url,
-  //         contentType: attachment.contentType,
-  //       })),
-  //     allowEmptySubmit: true,
-  //     body: {
-  //       schemas,
-  //       metadata: {
-  //         lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
-  //       },
-  //     },
-  //   });
-  //   setAttachments([]);
-  // };
-
   // NOTE: body is using state variables, so they can not be passed as a prop in useChat
   const sendMessage: typeof _sendMessage = async (message, options) => {
     if (status === 'streaming' || status === 'submitted') {
       return;
     }
-    console.log('sendMessage');
+
     return _sendMessage(message, {
       ...options,
       body: {
@@ -207,7 +178,6 @@ export const BaseChatProvider = ({
     }
   }, [status, messages, trackUsage]);
   const isAiEnabled = window.strapi.ai?.enabled !== false;
-  console.log(messages, status);
   return (
     <ChatContext.Provider
       value={{

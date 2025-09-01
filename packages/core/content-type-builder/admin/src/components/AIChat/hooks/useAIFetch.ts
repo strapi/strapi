@@ -231,7 +231,6 @@ export const useAIChat: typeof useChat = (props) => {
         'X-Strapi-User': userId || 'unknown',
         'X-Strapi-Project-Id': projectId || 'unknown',
       },
-
       credentials: 'include',
     }),
   });

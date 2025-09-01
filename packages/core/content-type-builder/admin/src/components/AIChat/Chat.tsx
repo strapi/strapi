@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { UIMessage } from '@ai-sdk/react';
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system';
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
@@ -24,9 +23,10 @@ import {
 } from './hooks/useAIFetch';
 import { useAttachments } from './hooks/useAttachments';
 import { useTranslations } from './hooks/useTranslations';
+import { AIMessage } from './lib/types/messages';
 import { useStrapiChat } from './providers/ChatProvider';
 import { useUploadProjectToChat } from './UploadCodeModal';
-import { UploadFigmaModal, useUploadFigmaToChat } from './UploadFigmaModal';
+import { useUploadFigmaToChat } from './UploadFigmaModal';
 
 /* -------------------------------------------------------------------------------------------------
  * Chat Message Suggestions
@@ -139,7 +139,7 @@ const ChatError = () => {
  * Chat Messages
  * -----------------------------------------------------------------------------------------------*/
 const ChatContent: React.FC<{
-  messages: UIMessage[];
+  messages: AIMessage[];
 }> = ({ messages }) => {
   const messageEndRef = useRef<HTMLDivElement>(null);
   const { status } = useStrapiChat();
@@ -158,10 +158,16 @@ const ChatContent: React.FC<{
   return (
     <>
       <Flex direction="column" gap={5}>
-        {messages.map(
-          (message) => JSON.stringify(message)
-          // <ChatMessage key={message.id} message={message} />
-        )}
+        {messages.map((message, idx) => (
+          <ChatMessage
+            key={message.id}
+            message={message}
+            // Chat loading and message is the last one
+            isLoading={
+              (status === 'streaming' || status === 'submitted') && idx === messages.length - 1
+            }
+          />
+        ))}
         {status === 'error' && <ChatError />}
       </Flex>
       <div ref={messageEndRef} />

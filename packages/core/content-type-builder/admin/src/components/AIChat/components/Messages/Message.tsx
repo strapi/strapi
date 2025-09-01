@@ -8,10 +8,10 @@ import { styled } from 'styled-components';
 import { useFeedbackModal } from '../../FeedbackModal';
 import { useFeedback } from '../../hooks/useFeedback';
 import {
-  Message as TMessage,
-  MessageContent,
-  UserMessage as UserMessageType,
+  AIMessage,
+  type UserMessage as UserMessageType,
   AssistantMessage as AssistantMessageType,
+  type MarkerContent as MarkerContentType,
 } from '../../lib/types/messages';
 import { AnimatedBox } from '../AnimatedBox';
 import { AttachmentPreview } from '../Attachments/AttachmentPreview';
@@ -79,13 +79,84 @@ const MarkdownStyles = styled(Typography)`
   }
 `;
 
+// ---------------------------
+// Tool: schemaGenerationTool helpers
+// ---------------------------
+
+type SchemaToolSchema = {
+  action?: 'create' | 'update' | 'remove';
+  uid?: string;
+  name?: string;
+  category?: string;
+  kind?: 'collectionType' | 'singleType' | 'component';
+  modelType?: 'component' | 'collectionType' | 'singleType';
+};
+
+type SchemaToolPart = {
+  type: 'tool-schemaGenerationTool';
+  input?: { schemas?: SchemaToolSchema[] };
+  output?: { schemas?: SchemaToolSchema[]; error?: unknown };
+  toolCallId?: string;
+};
+
+const isSchemaToolPart = (part: any): part is SchemaToolPart =>
+  part && typeof part === 'object' && part.type === 'tool-schemaGenerationTool';
+
+const capitalize = (s?: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
+
+const getSchemaLink = (schema: SchemaToolSchema): string | undefined => {
+  const isComponent = (schema.kind ?? schema.modelType) === 'component';
+  if (!schema.uid) return undefined;
+  return isComponent
+    ? `/plugins/content-type-builder/component-categories/${schema.category ?? ''}/${schema.uid}`
+    : `/plugins/content-type-builder/content-types/${schema.uid}`;
+};
+
+const toMarkerFromSchemaTool = (part: SchemaToolPart): MarkerContentType => {
+  const outSchemas = part.output?.schemas ?? [];
+  const inSchemas = part.input?.schemas ?? [];
+
+  const schemas = (outSchemas.length ? outSchemas : inSchemas) as SchemaToolSchema[];
+  const numSchemas = schemas.length;
+
+  const state: 'loading' | 'success' | 'error' = part.output
+    ? part.output.error
+      ? 'error'
+      : 'success'
+    : 'loading';
+
+  const steps = schemas.map((schema, index) => ({
+    id: `${part.toolCallId ?? 'schemaGenerationTool'}-${schema.uid ?? schema.name ?? index}`,
+    description: capitalize(schema.name ?? schema.uid ?? 'Schema'),
+    status:
+      schema.action === 'create' || schema.action === 'update' || schema.action === 'remove'
+        ? schema.action
+        : ('update' as const),
+    link: getSchemaLink(schema),
+  }));
+
+  const title =
+    state === 'success'
+      ? `Updated ${numSchemas} schema${numSchemas === 1 ? '' : 's'}`
+      : state === 'error'
+        ? `Failed to update schema${numSchemas === 1 ? '' : 's'}`
+        : 'Updating schemas';
+
+  return {
+    type: 'marker',
+    title,
+    state,
+    steps,
+  };
+};
+
 const MessageContent = ({
-  content,
+  part,
 }: {
-  content: MessageContent;
+  part: AIMessage['parts'][number];
   status?: 'loading' | 'success' | 'error';
 }) => {
-  if (content.type === 'text') {
+  if (part.type === 'text') {
     return (
       <MarkdownStyles>
         <Markdown
@@ -93,23 +164,25 @@ const MessageContent = ({
             a: ({ node, ...props }) => <a target="_blank" rel="noopener noreferrer" {...props} />,
           }}
         >
-          {content.text}
+          {part.text}
         </Markdown>
       </MarkdownStyles>
     );
   }
 
-  if (content.type === 'marker') {
-    return <Marker {...content} />;
+  if (isSchemaToolPart(part)) {
+    const marker = toMarkerFromSchemaTool(part);
+    return <Marker {...marker} />;
   }
 
   return null;
 };
 
 const UserMessage = ({ message }: { message: UserMessageType }) => {
-  const hasText = message.contents.some(
+  const hasText = message.parts.some(
     (content) => content.type === 'text' && content.text.trim() !== ''
   );
+  const attachments = message.parts.filter((content) => content.type === 'file');
 
   return (
     <AnimatedBox
@@ -122,7 +195,7 @@ const UserMessage = ({ message }: { message: UserMessageType }) => {
     >
       {hasText ? (
         <Box background="neutral150" borderStyle="none" padding={['10px', '16px']} hasRadius>
-          {message.contents.map((content, index) => {
+          {message.parts.map((content, index) => {
             if (content.type !== 'text') return null;
             return <Typography key={index}>{content.text}</Typography>;
           })}
@@ -130,23 +203,30 @@ const UserMessage = ({ message }: { message: UserMessageType }) => {
       ) : null}
 
       {/* Attachments */}
-      {message.attachments.map((attachment, idx) => (
+      {attachments.map((attachment, idx) => (
+        // @ts-expect-error - attachment type is not being narrowed
         <AttachmentPreview key={`${attachment.filename}-${idx}`} attachment={attachment as any} />
       ))}
     </AnimatedBox>
   );
 };
 
-const AssistantMessage = ({ message }: { message: AssistantMessageType }) => {
+const AssistantMessage = ({
+  message,
+  isLoading,
+}: {
+  message: AssistantMessageType;
+  isLoading?: boolean;
+}) => {
   const { upvoteMessage } = useFeedback();
   const { openFeedbackModal } = useFeedbackModal();
 
   return (
     <Box style={{ alignSelf: 'flex-start' }} maxWidth="90%">
-      {message.contents.map((content, index) => (
-        <MessageContent key={index} content={content} />
+      {message.parts.map((content, index) => (
+        <MessageContent key={index} part={content} />
       ))}
-      {message.status !== 'loading' ? (
+      {isLoading ? (
         <Flex gap={1}>
           <IconButton
             label="Upvote"
@@ -171,18 +251,24 @@ const AssistantMessage = ({ message }: { message: AssistantMessageType }) => {
   );
 };
 
-export const ChatMessage: React.FC<{ message: TMessage }> = ({ message }) => {
+export const ChatMessage = ({
+  message,
+  isLoading,
+}: {
+  message: AIMessage;
+  isLoading?: boolean;
+}) => {
   /**
    * IMPORTANT: Messages are rendered using react-markdown (heavy compute)
    * This memoizes messages so only the new streamed ones are re-rendered.
    *
    * Else, every new streamed character would re-render the entire chat.
    */
-  return useMemo(() => {
-    if (message.role === 'user') {
-      return <UserMessage message={message} />;
-    }
-    return <AssistantMessage message={message} />;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [message.revisionId]); // Only re-render if message id changes
+  // return useMemo(() => {
+  if (message.role === 'user') {
+    return <UserMessage message={message as UserMessageType} />;
+  }
+  return <AssistantMessage message={message as AssistantMessageType} />;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [message.id]); // Only re-render if message id changes
 };
