@@ -444,6 +444,25 @@ describe('SessionManager Factory', () => {
         where: { userId: 'user123', origin: 'admin', deviceId: 'device456' },
       });
     });
+
+    it("should not include deviceId in 'where' when not provided", async () => {
+      await sessionManager.invalidateRefreshToken('admin', 'user123');
+
+      expect(mockQuery.deleteMany).toHaveBeenCalledTimes(1);
+      const callArg = mockQuery.deleteMany.mock.calls[0][0];
+      expect(callArg.where.deviceId).toBeUndefined();
+      expect(callArg.where).toEqual({ userId: 'user123', origin: 'admin' });
+    });
+
+    it('should only delete for the provided origin and userId (no over-deletion)', async () => {
+      await sessionManager.invalidateRefreshToken('admin', 'user123');
+
+      expect(mockQuery.deleteMany).toHaveBeenCalledTimes(1);
+      const callArg = mockQuery.deleteMany.mock.calls[0][0];
+      expect(Object.keys(callArg.where).sort()).toEqual(['origin', 'userId']);
+      expect(callArg.where.userId).toBe('user123');
+      expect(callArg.where.origin).toBe('admin');
+    });
   });
 
   describe('generateAccessToken', () => {
@@ -676,11 +695,11 @@ describe('DatabaseSessionProvider', () => {
     });
   });
 
-  describe('deleteByIdentifier', () => {
+  describe('deleteBy', () => {
     it('should delete sessions by user identifier', async () => {
       const userId = 'user123';
 
-      await provider.deleteByIdentifier(userId);
+      await provider.deleteBy({ userId });
 
       expect(mockQuery.deleteMany).toHaveBeenCalledWith({ where: { userId } });
     });
