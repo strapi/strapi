@@ -1,4 +1,4 @@
-name: Label Pre-2021 Issues
+name: Label Pre-2024 Issues
 on:
   workflow_dispatch: # Allows manual triggering from the Github UI
 
@@ -14,8 +14,8 @@ jobs:
       - name: Label old issues
         run: |
           # Set the cutoff date (issues created before this date will be labeled)
-          CUTOFF_DATE="2021-01-01"
-          LABEL="stale-before-2021"
+          CUTOFF_DATE="2024-01-01"
+          LABEL="stale-before-2024"
 
           echo "Labeling issues created before $CUTOFF_DATE with $LABEL"
 
