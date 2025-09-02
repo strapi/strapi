@@ -143,8 +143,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
           const arrayPath = {
             ...newPath,
             rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `[${i}]`
-              : `${newPath.rawWithIndices}[${i}]`,
+              ? `${i}`
+              : `${newPath.rawWithIndices}.${i}`,
           };
           res[i] = await method(visitor, arrayPath, value[i]);
         }
@@ -164,8 +164,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
           const arrayPath = {
             ...newPath,
             rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `[${i}]`
-              : `${newPath.rawWithIndices}[${i}]`,
+              ? `${i}`
+              : `${newPath.rawWithIndices}.${i}`,
           };
           res[i] = await traverseMediaTarget(visitor, arrayPath, value[i]);
         }
@@ -186,8 +186,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
           const arrayPath = {
             ...newPath,
             rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `[${i}]`
-              : `${newPath.rawWithIndices}[${i}]`,
+              ? `${i}`
+              : `${newPath.rawWithIndices}.${i}`,
           };
           res[i] = await traverseComponent(visitor, arrayPath, targetSchema, value[i]);
         }
@@ -204,9 +204,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       for (let i = 0; i < value.length; i += 1) {
         const arrayPath = {
           ...newPath,
-          rawWithIndices: isNil(newPath.rawWithIndices)
-            ? `[${i}]`
-            : `${newPath.rawWithIndices}[${i}]`,
+          rawWithIndices: isNil(newPath.rawWithIndices) ? `${i}` : `${newPath.rawWithIndices}.${i}`,
         };
         res[i] = await visitDynamicZoneEntry(visitor, arrayPath, value[i]);
       }

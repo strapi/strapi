@@ -7,16 +7,30 @@ type PathPart = { name: string; index?: number };
 
 // Helper function to parse path with array indices and return clean attribute names
 export const parsePathWithIndices = (path: string): PathPart[] => {
-  // Split by dots, then remove array indices from each part. For example:
-  // input "components[4].field.relations[2].name"
+  // Split by dots, then parse array indices from each part. For example:
+  // input "components.4.field.relations.2.name"
   // output [{name: "components", index: 4}, {name: "field"}, {name: "relations", index: 2}, {name: "name"}]
-  return path.split('.').map((part) => {
-    const match = part.match(/(\w+)\[(\d+)\]/);
-    if (match) {
-      return { name: match[1], index: parseInt(match[2], 10) };
-    }
-    return { name: part };
-  });
+  return path
+    .split('.')
+    .map((part) => {
+      const numericIndex = parseInt(part, 10);
+      if (!isNaN(numericIndex) && part === numericIndex.toString()) {
+        // This part is a pure numeric index, return it as an index for the previous part
+        return { name: '', index: numericIndex };
+      }
+      return { name: part };
+    })
+    .reduce((acc: PathPart[], part, index, array) => {
+      if (part.name === '' && part.index !== undefined) {
+        // This is an index, attach it to the previous part
+        if (acc.length > 0) {
+          acc[acc.length - 1].index = part.index;
+        }
+      } else {
+        acc.push(part);
+      }
+      return acc;
+    }, []);
 };
 
 export function getAttributeSchemaFromPath({

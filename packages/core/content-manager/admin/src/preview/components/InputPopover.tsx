@@ -7,11 +7,7 @@ import { type UseDocument } from '../../hooks/useDocument';
 import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
 import { usePreviewContext } from '../pages/Preview';
 import { INTERNAL_EVENTS } from '../utils/constants';
-import {
-  parseFieldMetaData,
-  getAttributeSchemaFromPath,
-  parsePathWithIndices,
-} from '../utils/fieldUtils';
+import { parseFieldMetaData, getAttributeSchemaFromPath } from '../utils/fieldUtils';
 
 /**
  * No need for actual data in the context. It's just to let children check if they're rendered
@@ -106,10 +102,6 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
 
   const iframeRect = iframeRef.current.getBoundingClientRect();
 
-  const dotFormatName = parsePathWithIndices(popoverField.path)
-    .map((part) => (part.index === undefined ? part.name : `${part.name}.${part.index}`))
-    .join('.');
-
   return (
     <>
       {/**
@@ -145,7 +137,7 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
                 attribute={popoverField.attribute}
                 // TODO: retrieve the proper label from the layout
                 label={popoverField.path}
-                name={dotFormatName}
+                name={popoverField.path}
                 type={popoverField.attribute.type}
                 visible={true}
               />

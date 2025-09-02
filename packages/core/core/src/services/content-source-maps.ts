@@ -75,8 +75,6 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
         strapiSource.searchParams.set('locale', locale);
       }
 
-      console.log('src', strapiSource.toString());
-
       return vercelStegaCombine(text, { strapiSource: strapiSource.toString() });
     },
 
@@ -92,7 +90,6 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
           }
 
           if (ENCODABLE_TYPES.includes(attribute.type) && typeof value === 'string') {
-            console.log('PATH', path);
             set(
               key,
               this.encodeField(value, {
