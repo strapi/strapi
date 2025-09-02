@@ -60,7 +60,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
        * users for fields that don't support sourcemap encoding.
        * The "URL" doesn't need to go anywhere, it's just a way to format the information.
        */
-      const strapiSource = new URL(baseUrl);
+      const strapiSource = new URL(baseUrl ?? 'https://strapi.io');
       strapiSource.searchParams.set('documentId', documentId);
       strapiSource.searchParams.set('type', type);
       strapiSource.searchParams.set('path', path);
