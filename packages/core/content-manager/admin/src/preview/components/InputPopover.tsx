@@ -1,12 +1,17 @@
 import * as React from 'react';
 
-import { createContext } from '@strapi/admin/strapi-admin';
+import { createContext, useNotification } from '@strapi/admin/strapi-admin';
 import { Box, Popover } from '@strapi/design-system';
 
 import { type UseDocument } from '../../hooks/useDocument';
 import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
 import { usePreviewContext } from '../pages/Preview';
-import { parsePathWithIndices, getAttributeSchema } from '../utils/fieldUtils';
+import { INTERNAL_EVENTS } from '../utils/constants';
+import {
+  parseFieldMetaData,
+  getAttributeSchemaFromPath,
+  parsePathWithIndices,
+} from '../utils/fieldUtils';
 
 /**
  * No need for actual data in the context. It's just to let children check if they're rendered
@@ -17,6 +22,75 @@ interface InputPopoverContextValue {}
 const [InputPopoverProvider, useInputPopoverContext] =
   createContext<InputPopoverContextValue>('InputPopover');
 
+/**
+ * We receive window events sent from the user's preview via the injected script.
+ * We listen to the ones here that target a specific field (currently just the one to focus a field)
+ */
+function useIframeFieldMessages() {
+  const { toggleNotification } = useNotification();
+  const iframe = usePreviewContext('useIframeFieldMessages', (state) => state.iframeRef);
+  const document = usePreviewContext('useIframeFieldMessages', (state) => state.document);
+  const schema = usePreviewContext('useIframeFieldMessages', (state) => state.schema);
+  const components = usePreviewContext('useIframeFieldMessages', (state) => state.components);
+  const setPopoverField = usePreviewContext(
+    'useIframeFieldMessages',
+    (state) => state.setPopoverField
+  );
+
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Only listen to events from the preview iframe
+      if (iframe.current) {
+        const previewOrigin = new URL(iframe.current?.src).origin;
+        if (event.origin !== previewOrigin) {
+          return;
+        }
+      }
+
+      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT) {
+        const fieldMetaData = parseFieldMetaData(event.data.payload.path);
+
+        if (!fieldMetaData) return;
+
+        /**
+         * Ignore (for now) content that comes from separate API requests than the one for the
+         * current document. This doesn't do anything about fields that may come from relations to
+         * the current document however.
+         */
+        if (fieldMetaData.documentId !== document.documentId) {
+          toggleNotification({
+            type: 'warning',
+            message: 'This field comes from a different document',
+          });
+          return;
+        }
+
+        try {
+          const attribute = getAttributeSchemaFromPath({
+            path: fieldMetaData.path,
+            components,
+            schema,
+            document,
+          });
+
+          // We're able to handle the field, set it in context so the popover can pick it up
+          setPopoverField({ ...fieldMetaData, position: event.data.payload.position, attribute });
+        } catch (error) {
+          if (error instanceof Error) {
+            toggleNotification({ type: 'warning', message: error.message });
+          }
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [components, document, iframe, schema, setPopoverField, toggleNotification]);
+}
+
 const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDocument> }) => {
   const iframeRef = usePreviewContext('VisualEditingPopover', (state) => state.iframeRef);
   const popoverField = usePreviewContext('VisualEditingPopover', (state) => state.popoverField);
@@ -24,23 +98,17 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
     'VisualEditingPopover',
     (state) => state.setPopoverField
   );
+  useIframeFieldMessages();
 
-  if (!popoverField || !documentResponse.schema || !iframeRef.current) {
+  if (!popoverField || !iframeRef.current) {
     return null;
   }
 
   const iframeRect = iframeRef.current.getBoundingClientRect();
 
-  const pathParts = parsePathWithIndices(popoverField.path);
-  const attributeSchema = getAttributeSchema({
-    pathParts,
-    schema: documentResponse.schema,
-    components: documentResponse.components,
-  });
-
-  if (!attributeSchema) {
-    return null;
-  }
+  const dotFormatName = parsePathWithIndices(popoverField.path)
+    .map((part) => (part.index === undefined ? part.name : `${part.name}.${part.index}`))
+    .join('.');
 
   return (
     <>
@@ -71,14 +139,14 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
           </Popover.Trigger>
           <Popover.Content sideOffset={4}>
             <Box padding={4} width="400px">
-              {/* @ts-expect-error the "type" property clashes for some reason */}
+              {/* @ts-expect-error the types of `attribute` clash for some reason */}
               <InputRenderer
                 document={documentResponse}
-                attribute={attributeSchema}
+                attribute={popoverField.attribute}
                 // TODO: retrieve the proper label from the layout
                 label={popoverField.path}
-                name={popoverField.path.replace('[', '.').replace(']', '')}
-                type={attributeSchema.type}
+                name={dotFormatName}
+                type={popoverField.attribute.type}
                 visible={true}
               />
             </Box>

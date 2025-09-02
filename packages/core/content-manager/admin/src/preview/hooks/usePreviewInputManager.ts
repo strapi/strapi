@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 import { useField } from '@strapi/admin/strapi-admin';
+import { Schema } from '@strapi/types';
 
 import { useHasInputPopoverParent } from '../components/InputPopover';
 import { usePreviewContext } from '../pages/Preview';
 import { INTERNAL_EVENTS } from '../utils/constants';
-import { parsePathWithIndices, getAttributeSchema } from '../utils/fieldUtils';
 import { getSendMessage } from '../utils/getSendMessage';
 
 type PreviewInputProps = Pick<
@@ -13,28 +13,19 @@ type PreviewInputProps = Pick<
   'onFocus' | 'onBlur'
 >;
 
-export function usePreviewInputManager(name: string): PreviewInputProps {
+export function usePreviewInputManager(
+  name: string,
+  attribute: Schema.Attribute.AnyAttribute
+): PreviewInputProps {
   const iframe = usePreviewContext('usePreviewInputManager', (state) => state.iframeRef, false);
   const setPopoverField = usePreviewContext(
     'usePreviewInputManager',
     (state) => state.setPopoverField,
     false
   );
-  const schema = usePreviewContext('usePreviewInputManager', (state) => state.schema, false);
-  const components = usePreviewContext(
-    'usePreviewInputManager',
-    (state) => state.components,
-    false
-  );
   const hasInputPopoverParent = useHasInputPopoverParent();
   const { value } = useField(name);
-
-  // Parse the field path and resolve the attribute to check if it's a component structure
-  const pathParts = parsePathWithIndices(name);
-
-  const attributeSchema =
-    schema && components ? getAttributeSchema({ pathParts, schema, components }) : null;
-  const type = attributeSchema?.type;
+  const { type } = attribute;
 
   React.useEffect(() => {
     if (!iframe || !type) {
@@ -45,7 +36,6 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
      * Only send message if the field is not a data structure (component, dynamic zone)
      * because we already send events for their fields
      */
-    // TODO: add relations
     if (!['component', 'dynamiczone'].includes(type)) {
       const sendMessage = getSendMessage(iframe);
       sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value });

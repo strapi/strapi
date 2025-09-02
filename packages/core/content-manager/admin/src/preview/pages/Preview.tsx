@@ -7,6 +7,7 @@ import {
   createContext,
   Form as FormContext,
   type FieldContentSourceMap,
+  useNotification,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -35,11 +36,11 @@ import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
-import { PUBLIC_EVENTS, INTERNAL_EVENTS } from '../utils/constants';
+import { PUBLIC_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
 import { previewScript } from '../utils/previewScript';
 
-import type { Struct, UID } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Constants
@@ -72,6 +73,7 @@ const DEVICES = [
 
 interface PopoverField extends FieldContentSourceMap {
   position: DOMRect;
+  attribute: Schema.Attribute.AnyAttribute;
 }
 
 interface PreviewContextValue {
@@ -100,30 +102,6 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
   transition: rotate 0.2s ease-in-out;
 `;
 
-// TODO: move to util file and write unit tests
-function parseFieldMetaData(strapiSource: string): FieldContentSourceMap | null {
-  const url = new URL(strapiSource);
-  const path = url.searchParams.get('path');
-  const type = url.searchParams.get('type');
-  const documentId = url.searchParams.get('documentId');
-  const locale = url.searchParams.get('locale');
-  const model = url.searchParams.get('model');
-  const kind = url.searchParams.get('kind');
-
-  if (!path || !type || !documentId || !model) {
-    return null;
-  }
-
-  return {
-    path,
-    type: type as Struct.SchemaAttributes[string]['type'],
-    documentId,
-    locale: locale ?? null,
-    model: model as UID.Schema | undefined,
-    kind: kind as Struct.ContentTypeKind | undefined,
-  };
-}
-
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
@@ -131,6 +109,7 @@ const PreviewPage = () => {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
   const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
+  const { toggleNotification } = useNotification();
 
   // Read all the necessary data from the URL to find the right preview URL
   const {
@@ -170,13 +149,6 @@ const PreviewPage = () => {
         const sendMessage = getSendMessage(iframeRef);
         sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
       }
-
-      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT) {
-        const fieldMetaData = parseFieldMetaData(event.data.payload.path);
-        if (fieldMetaData) {
-          setPopoverField({ ...fieldMetaData, position: event.data.payload.position });
-        }
-      }
     };
 
     window.addEventListener('message', handleMessage);
@@ -184,7 +156,7 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, []);
+  }, [documentId, toggleNotification]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
