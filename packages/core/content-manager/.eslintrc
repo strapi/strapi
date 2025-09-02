@@ -1,9 +1,0 @@
-{
-  "root": true,
-  "overrides": [
-    {
-      "files": ["**/*"],
-      "extends": ["custom/back"]
-    }
-  ]
-}

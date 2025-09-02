@@ -1,7 +1,0 @@
-examples/**
-.gitignore
-.gitattributes
-LICENSE
-README.md
-.npmignore
-dist/
