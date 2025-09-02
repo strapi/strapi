@@ -2,11 +2,11 @@ import * as React from 'react';
 
 import { createContext } from '@strapi/admin/strapi-admin';
 import { Box, Popover } from '@strapi/design-system';
-import get from 'lodash/get';
 
 import { type UseDocument } from '../../hooks/useDocument';
 import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
 import { usePreviewContext } from '../pages/Preview';
+import { parsePathWithIndices, getAttributeSchema } from '../utils/fieldUtils';
 
 /**
  * No need for actual data in the context. It's just to let children check if they're rendered
@@ -31,22 +31,12 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
 
   const iframeRect = iframeRef.current.getBoundingClientRect();
 
-  const attributeSchema = (() => {
-    const fieldParts = popoverField.path.split('.');
-
-    if (fieldParts.length === 1) {
-      // Regular attribute, its schema is available directly
-      return get(documentResponse.schema.attributes, popoverField.path);
-    }
-
-    // Nested attribute, check if it's inside a component first
-    const [componentName, attributeName] = fieldParts;
-    const componentAttribute = documentResponse.schema.attributes[componentName];
-    if (componentAttribute && 'component' in componentAttribute) {
-      const componentSchema = get(documentResponse.components, componentAttribute.component);
-      return componentSchema.attributes[attributeName];
-    }
-  })();
+  const pathParts = parsePathWithIndices(popoverField.path);
+  const attributeSchema = getAttributeSchema({
+    pathParts,
+    schema: documentResponse.schema,
+    components: documentResponse.components,
+  });
 
   if (!attributeSchema) {
     return null;
@@ -81,12 +71,13 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
           </Popover.Trigger>
           <Popover.Content sideOffset={4}>
             <Box padding={4} width="400px">
+              {/* @ts-expect-error the "type" property clashes for some reason */}
               <InputRenderer
                 document={documentResponse}
-                attribute={attributeSchema as any}
+                attribute={attributeSchema}
                 // TODO: retrieve the proper label from the layout
                 label={popoverField.path}
-                name={popoverField.path}
+                name={popoverField.path.replace('[', '.').replace(']', '')}
                 type={attributeSchema.type}
                 visible={true}
               />

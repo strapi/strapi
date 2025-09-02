@@ -96,7 +96,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
             set(
               key,
               this.encodeField(value, {
-                path: path.raw!,
+                path: path.rawWithIndices!,
                 type: attribute.type,
                 kind: schema.kind,
                 model: schema.uid as UID.Schema,

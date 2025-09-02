@@ -80,6 +80,7 @@ interface PreviewContextValue {
   document: NonNullable<ReturnType<UseDocument>['document']>;
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
+  components: NonNullable<ReturnType<UseDocument>['components']>;
   layout: EditLayout;
   onPreview: () => void;
   iframeRef: React.RefObject<HTMLIFrameElement>;
@@ -109,7 +110,7 @@ function parseFieldMetaData(strapiSource: string): FieldContentSourceMap | null 
   const model = url.searchParams.get('model');
   const kind = url.searchParams.get('kind');
 
-  if (!path || !type || !documentId || !model || !kind) {
+  if (!path || !type || !documentId || !model) {
     return null;
   }
 
@@ -292,6 +293,7 @@ const PreviewPage = () => {
         title={documentTitle}
         meta={documentResponse.meta}
         schema={documentResponse.schema}
+        components={documentResponse.components}
         layout={documentLayoutResponse.edit}
         onPreview={onPreview}
         iframeRef={iframeRef}
@@ -507,3 +509,4 @@ const ProtectedPreviewPage = () => {
 };
 
 export { ProtectedPreviewPage, usePreviewContext };
+export type { PreviewContextValue };
