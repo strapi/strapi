@@ -529,8 +529,9 @@ const shouldPropagateComponentRelationToNewVersion = async (
 ): Promise<boolean> => {
   // Get the component ID column name using the actual component model name
   const componentIdColumn = strapi.db.metadata.identifiers.getJoinColumnAttributeIdName(
-    componentSchema.modelName
+    _.snakeCase(componentSchema.modelName)
   );
+
   const componentId = componentRelation[componentIdColumn];
 
   const parent = await findComponentParent(
