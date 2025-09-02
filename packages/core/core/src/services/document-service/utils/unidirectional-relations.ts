@@ -15,93 +15,17 @@ interface RelationUpdate {
   relations: Record<string, any>[];
 }
 
-/* -------------------------------------------------------------------------------------------------
- * Component Helper Functions
- * -----------------------------------------------------------------------------------------------*/
-
-/**
- * Finds content types that contain the given component and have draft & publish enabled.
- */
-const getParentSchemasForComponent = (componentSchema: Schema.Component): Schema.ContentType[] => {
-  return Object.values(strapi.contentTypes).filter((contentType: any) => {
-    if (!contentType.options?.draftAndPublish) return false;
-
-    return Object.values(contentType.attributes).some((attr: any) => {
-      return (
-        (attr.type === 'component' && attr.component === componentSchema.uid) ||
-        (attr.type === 'dynamiczone' && attr.components?.includes(componentSchema.uid))
-      );
-    });
-  });
-};
-
-/**
- * Determines if a component relation should be propagated to a new document version
- * when a document with draft and publish is updated.
- */
-const shouldPropagateRelationToNewVersion = async (
-  componentRelation: Record<string, any>,
-  componentSchema: Schema.Component,
-  parentSchemasForComponent: Schema.ContentType[],
-  trx: any
-): Promise<boolean> => {
-  const componentId = componentRelation[`${componentSchema.modelName}_id`];
-
-  const parent = await strapi.db.findComponentParent(
-    componentSchema,
-    componentId,
-    parentSchemasForComponent,
-    { trx }
-  );
-
-  // Keep relation if component has no parent entry
-  if (!parent?.uid) {
-    return true;
-  }
-
-  const parentContentType = strapi.contentTypes[parent.uid as UID.ContentType];
-
-  // Keep relation if parent doesn't have draft & publish enabled
-  if (!parentContentType?.options?.draftAndPublish) {
-    return true;
-  }
-
-  // Discard relation if parent has draft & publish enabled
-  return false;
-};
-
-/**
- * Filters component relations to only include those that should be propagated to new document versions.
- * Only relations that are NOT linked to a draft & publish parent type are kept.
- */
-const filterComponentRelations = async (
-  relations: Record<string, any>[],
-  componentSchema: Schema.Component,
-  trx: any
-): Promise<Record<string, any>[]> => {
-  // Exit if no relations to filter
-  if (relations.length === 0) {
-    return relations;
-  }
-
-  const componentParents = getParentSchemasForComponent(componentSchema);
-
-  // Exit if no draft & publish parent types exist
-  if (componentParents.length === 0) {
-    return relations;
-  }
-
-  const relationsToPropagate = [];
-  for (const relation of relations) {
-    if (
-      await shouldPropagateRelationToNewVersion(relation, componentSchema, componentParents, trx)
-    ) {
-      relationsToPropagate.push(relation);
-    }
-  }
-
-  return relationsToPropagate;
-};
+interface RelationFilterOptions {
+  /**
+   * Function to determine if a relation should be propagated to new document versions
+   * This replaces the hardcoded component-specific logic
+   */
+  shouldPropagateRelation?: (
+    relation: Record<string, any>,
+    model: Schema.Component | Schema.ContentType,
+    trx: any
+  ) => Promise<boolean>;
+}
 
 /**
  * Loads lingering relations that need to be updated when overriding a published or draft entry.
@@ -110,7 +34,8 @@ const filterComponentRelations = async (
  */
 const load = async (
   uid: UID.ContentType,
-  { oldVersions, newVersions }: LoadContext
+  { oldVersions, newVersions }: LoadContext,
+  options: RelationFilterOptions = {}
 ): Promise<RelationUpdate[]> => {
   const updates: RelationUpdate[] = [];
 
@@ -183,10 +108,18 @@ const load = async (
             .whereIn(targetColumnName, ids)
             .transacting(trx);
 
-          const filteredRelations =
-            model.modelType === 'component'
-              ? await filterComponentRelations(newVersionsRelations, model, trx)
-              : newVersionsRelations;
+          let filteredRelations = newVersionsRelations;
+
+          // Apply custom filtering if provided
+          if (options.shouldPropagateRelation) {
+            const relationsToPropagate = [];
+            for (const relation of newVersionsRelations) {
+              if (await options.shouldPropagateRelation(relation, model, trx)) {
+                relationsToPropagate.push(relation);
+              }
+            }
+            filteredRelations = relationsToPropagate;
+          }
 
           if (filteredRelations.length > 0) {
             // when publishing a draft that doesn't have a published version yet,
@@ -200,7 +133,7 @@ const load = async (
 
                 return !matchingOldVersion;
               })
-              .map(omit('id'));
+              .map(omit(strapi.db.metadata.identifiers.ID_COLUMN));
 
             updates.push({ joinTable, relations: discardToAdd });
           }
@@ -214,6 +147,10 @@ const load = async (
 
 /**
  * Updates uni directional relations to target the right entries when overriding published or draft entries.
+ *
+ * This function:
+ * 1. Creates new relations pointing to the new entry versions
+ * 2. Precisely deletes only the old relations being replaced to prevent orphaned links
  *
  * @param oldEntries The old entries that are being overridden
  * @param newEntries The new entries that are overriding the old ones
@@ -251,6 +188,23 @@ const sync = async (
         return { ...relation, [column]: newId };
       });
 
+      // Delete the old relations BEFORE inserting new ones
+      // This prevents orphaned draft relations while being precise about what we delete
+      if (relations.length > 0) {
+        // Delete the old relations by matching their exact foreign key values
+        for (const relation of relations) {
+          const sourceColumn = joinTable.joinColumn.name;
+          const targetColumn = joinTable.inverseJoinColumn.name;
+
+          await trx(joinTable.name)
+            .where({
+              [sourceColumn]: relation[sourceColumn],
+              [targetColumn]: relation[targetColumn],
+            })
+            .del();
+        }
+      }
+
       // Insert those relations into the join table
       await trx.batchInsert(joinTable.name, newRelations, 1000);
     }
@@ -258,3 +212,4 @@ const sync = async (
 };
 
 export { load, sync };
+export type { RelationFilterOptions };
