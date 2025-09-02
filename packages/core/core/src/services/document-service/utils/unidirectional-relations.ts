@@ -108,9 +108,7 @@ const load = async (
             .whereIn(targetColumnName, ids)
             .transacting(trx);
 
-          // TODO: Reconsider this name and remove the mutable variable
-          let filteredRelations = newVersionsRelations;
-          // Apply custom filtering if provided
+          let versionRelations = newVersionsRelations;
           if (options.shouldPropagateRelation) {
             const relationsToPropagate = [];
             for (const relation of newVersionsRelations) {
@@ -118,14 +116,14 @@ const load = async (
                 relationsToPropagate.push(relation);
               }
             }
-            filteredRelations = relationsToPropagate;
+            versionRelations = relationsToPropagate;
           }
 
-          if (filteredRelations.length > 0) {
+          if (versionRelations.length > 0) {
             // when publishing a draft that doesn't have a published version yet,
             // copy the links to the draft over to the published version
             // when discarding a published version, if no drafts exists
-            const discardToAdd = filteredRelations
+            const discardToAdd = versionRelations
               .filter((relation) => {
                 const matchingOldVersion = oldVersionsRelations.find((oldRelation) => {
                   return oldRelation[sourceColumnName] === relation[sourceColumnName];
@@ -187,23 +185,6 @@ const sync = async (
         const newId = oldEntriesMap[relation[column]];
         return { ...relation, [column]: newId };
       });
-
-      // Delete the old relations BEFORE inserting new ones
-      // This prevents orphaned draft relations while being precise about what we delete
-      if (relations.length > 0) {
-        // Delete the old relations by matching their exact foreign key values
-        for (const relation of relations) {
-          const sourceColumn = joinTable.joinColumn.name;
-          const targetColumn = joinTable.inverseJoinColumn.name;
-
-          await trx(joinTable.name)
-            .where({
-              [sourceColumn]: relation[sourceColumn],
-              [targetColumn]: relation[targetColumn],
-            })
-            .del();
-        }
-      }
 
       // Insert those relations into the join table
       await trx.batchInsert(joinTable.name, newRelations, 1000);
