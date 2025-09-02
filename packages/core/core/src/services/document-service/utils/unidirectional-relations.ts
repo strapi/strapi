@@ -108,8 +108,9 @@ const load = async (
             .whereIn(targetColumnName, ids)
             .transacting(trx);
 
-          let filteredRelations = newVersionsRelations;
 
+          // TODO: Reconsider this name and remove the mutable variable
+          let filteredRelations = newVersionsRelations;
           // Apply custom filtering if provided
           if (options.shouldPropagateRelation) {
             const relationsToPropagate = [];
