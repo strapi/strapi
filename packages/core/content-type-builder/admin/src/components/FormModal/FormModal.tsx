@@ -6,6 +6,8 @@ import {
   useTracking,
   useNotification,
   ConfirmDialog,
+  useGuidedTour,
+  GUIDED_TOUR_REQUIRED_ACTIONS,
 } from '@strapi/admin/strapi-admin';
 import { Button, Divider, Flex, Modal, Tabs, Box, Typography, Dialog } from '@strapi/design-system';
 import get from 'lodash/get';
@@ -104,6 +106,8 @@ export const FormModal = () => {
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI: any = ctbPlugin?.apis.forms;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
+
+  const dispatchGuidedTour = useGuidedTour('FormModal', (s) => s.dispatch);
 
   const {
     addAttribute,
@@ -1073,6 +1077,10 @@ export const FormModal = () => {
     if (checkIsEditingFieldName()) {
       trackUsage('didEditFieldNameOnContentType');
     }
+    dispatchGuidedTour({
+      type: 'set_completed_actions',
+      payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.addField],
+    });
   };
 
   return (
