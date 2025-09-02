@@ -21,7 +21,7 @@ export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtil
 export interface Path {
   raw: string | null;
   attribute: string | null;
-  rawWithIndices: string | null;
+  rawWithIndices?: string | null;
 }
 
 export interface TraverseOptions {
