@@ -97,6 +97,8 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
       return attributes.booleanToSchema(attribute);
     case 'component':
       return attributes.componentToSchema(attribute);
+    case 'customField':
+      return attributes.customFieldToSchema(attribute);
     case 'date':
       return attributes.dateToSchema(attribute);
     case 'datetime':
@@ -190,6 +192,8 @@ export const mapAttributeToInputSchema = (
       return attributes.booleanToInputSchema(attribute);
     case 'component':
       return attributes.componentToInputSchema(attribute);
+    case 'customField':
+      return attributes.customFieldToInputSchema(attribute);
     case 'date':
       return attributes.dateToInputSchema(attribute);
     case 'datetime':

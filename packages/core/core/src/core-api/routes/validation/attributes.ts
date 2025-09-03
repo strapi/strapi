@@ -97,6 +97,21 @@ export const componentToSchema = (
 };
 
 /**
+ * Converts a customField attribute to a Zod schema.
+ * @param attribute - The CustomField attribute object from the Strapi schema.
+ * @returns A Zod schema representing the custom field.
+ */
+export const customFieldToSchema = (attribute: Schema.Attribute.CustomField): z.Schema => {
+  const { required } = attribute;
+
+  const schema = augmentSchema(z.any(), [
+    maybeRequired(required),
+  ]);
+
+  return schema.describe('A custom field');
+};
+
+/**
  * Converts a date attribute to a Zod schema.
  * @param attribute - The Date attribute object from the Strapi schema.
  * @returns A Zod schema representing the date field.
@@ -454,6 +469,21 @@ export const componentToInputSchema = (
   ]);
 
   return schema.describe('A component field');
+};
+
+/**
+ * Converts a customField attribute to a Zod schema for input validation.
+ * @param attribute - The CustomField attribute object from the Strapi schema.
+ * @returns A Zod schema for input validation of the custom field.
+ */
+export const customFieldToInputSchema = (attribute: Schema.Attribute.CustomField) => {
+  const { required } = attribute;
+
+  const schema = augmentSchema(z.any(), [
+    maybeRequired(required),
+  ]);
+
+  return schema.describe('A custom field');
 };
 
 /**
