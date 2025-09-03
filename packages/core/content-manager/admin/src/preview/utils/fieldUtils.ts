@@ -20,7 +20,7 @@ export const parsePathWithIndices = (path: string): PathPart[] => {
       }
       return { name: part };
     })
-    .reduce((acc: PathPart[], part, index, array) => {
+    .reduce((acc: PathPart[], part) => {
       if (part.name === '' && part.index !== undefined) {
         // This is an index, attach it to the previous part
         if (acc.length > 0) {

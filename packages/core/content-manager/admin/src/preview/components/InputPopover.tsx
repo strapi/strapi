@@ -9,6 +9,10 @@ import { usePreviewContext } from '../pages/Preview';
 import { INTERNAL_EVENTS } from '../utils/constants';
 import { parseFieldMetaData, getAttributeSchemaFromPath } from '../utils/fieldUtils';
 
+/* -------------------------------------------------------------------------------------------------
+ * Context utils
+ * -----------------------------------------------------------------------------------------------*/
+
 /**
  * No need for actual data in the context. It's just to let children check if they're rendered
  * inside of a preview InputPopover without relying on prop drilling.
@@ -18,26 +22,35 @@ interface InputPopoverContextValue {}
 const [InputPopoverProvider, useInputPopoverContext] =
   createContext<InputPopoverContextValue>('InputPopover');
 
-/**
- * We receive window events sent from the user's preview via the injected script.
- * We listen to the ones here that target a specific field (currently just the one to focus a field)
- */
-function useIframeFieldMessages() {
+function useHasInputPopoverParent() {
+  const context = useInputPopoverContext('useHasInputPopoverParent', () => true, false);
+
+  // useContext will return undefined if the called is not wrapped in the provider
+  return context !== undefined;
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * InputPopover
+ * -----------------------------------------------------------------------------------------------*/
+
+const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDocument> }) => {
+  const iframeRef = usePreviewContext('InputPopover', (state) => state.iframeRef);
+  const popoverField = usePreviewContext('InputPopover', (state) => state.popoverField);
+  const setPopoverField = usePreviewContext('InputPopover', (state) => state.setPopoverField);
+  const document = usePreviewContext('InputPopover', (state) => state.document);
+  const schema = usePreviewContext('InputPopover', (state) => state.schema);
+  const components = usePreviewContext('InputPopover', (state) => state.components);
   const { toggleNotification } = useNotification();
-  const iframe = usePreviewContext('useIframeFieldMessages', (state) => state.iframeRef);
-  const document = usePreviewContext('useIframeFieldMessages', (state) => state.document);
-  const schema = usePreviewContext('useIframeFieldMessages', (state) => state.schema);
-  const components = usePreviewContext('useIframeFieldMessages', (state) => state.components);
-  const setPopoverField = usePreviewContext(
-    'useIframeFieldMessages',
-    (state) => state.setPopoverField
-  );
 
   React.useEffect(() => {
+    /**
+     * We receive window events sent from the user's preview via the injected script.
+     * We listen to the ones here that target a specific field.
+     */
     const handleMessage = (event: MessageEvent) => {
       // Only listen to events from the preview iframe
-      if (iframe.current) {
-        const previewOrigin = new URL(iframe.current?.src).origin;
+      if (iframeRef.current) {
+        const previewOrigin = new URL(iframeRef.current?.src).origin;
         if (event.origin !== previewOrigin) {
           return;
         }
@@ -46,7 +59,14 @@ function useIframeFieldMessages() {
       if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT) {
         const fieldMetaData = parseFieldMetaData(event.data.payload.path);
 
-        if (!fieldMetaData) return;
+        // TODO: check if notification better
+        if (!fieldMetaData) {
+          toggleNotification({
+            type: 'warning',
+            message: 'Incomplete strapiSource attribute',
+          });
+          return;
+        }
 
         /**
          * Ignore (for now) content that comes from separate API requests than the one for the
@@ -84,18 +104,7 @@ function useIframeFieldMessages() {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [components, document, iframe, schema, setPopoverField, toggleNotification]);
-}
-
-const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDocument> }) => {
-  const iframeRef = usePreviewContext('VisualEditingPopover', (state) => state.iframeRef);
-  const popoverField = usePreviewContext('VisualEditingPopover', (state) => state.popoverField);
-  const setPopoverField = usePreviewContext(
-    'VisualEditingPopover',
-    (state) => state.setPopoverField
-  );
-  useIframeFieldMessages();
-
+  }, [components, document, iframeRef, schema, setPopoverField, toggleNotification]);
   if (!popoverField || !iframeRef.current) {
     return null;
   }
@@ -148,12 +157,5 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
     </>
   );
 };
-
-function useHasInputPopoverParent() {
-  const context = useInputPopoverContext('useHasInputPopoverParent', () => true, false);
-
-  // useContext will return undefined if the called is not wrapped in the provider
-  return context !== undefined;
-}
 
 export { InputPopover, useHasInputPopoverParent };
