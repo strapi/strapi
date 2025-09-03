@@ -305,10 +305,15 @@ describe('Homepage API', () => {
         },
       });
 
-      // Publish author (draftAndPublish is false, so created documents are published by default)
+      // Publish authors (draftAndPublish is false, so created documents are published by default)
       await strapi.documents(authorUid).create({
         data: {
-          name: 'Paul McCartney',
+          name: 'Stephen King',
+        },
+      });
+      await strapi.documents(authorUid).create({
+        data: {
+          name: 'Michael Crichton',
         },
       });
 
@@ -322,7 +327,7 @@ describe('Homepage API', () => {
       expect(response.body.data).toMatchObject({
         draft: 1,
         modified: 1,
-        published: 1,
+        published: 2,
       });
     });
 
