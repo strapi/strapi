@@ -47,8 +47,6 @@ interface EncodingInfo {
 }
 
 const createContentSourceMapsService = (strapi: Core.Strapi) => {
-  const baseUrl = strapi.config.get('server.url') as string;
-
   return {
     encodeField(
       text: string,
@@ -58,21 +56,20 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
        * Combine all metadata into into a one string so we only have to deal with one data-atribute
        * on the frontend. Make it human readable because that data-attribute may be set manually by
        * users for fields that don't support sourcemap encoding.
-       * The "URL" doesn't need to go anywhere, it's just a way to format the information.
        */
-      const strapiSource = new URL(baseUrl ?? 'https://strapi.io');
-      strapiSource.searchParams.set('documentId', documentId);
-      strapiSource.searchParams.set('type', type);
-      strapiSource.searchParams.set('path', path);
+      const strapiSource = new URLSearchParams();
+      strapiSource.set('documentId', documentId);
+      strapiSource.set('type', type);
+      strapiSource.set('path', path);
 
       if (model) {
-        strapiSource.searchParams.set('model', model);
+        strapiSource.set('model', model);
       }
       if (kind) {
-        strapiSource.searchParams.set('kind', kind);
+        strapiSource.set('kind', kind);
       }
       if (locale) {
-        strapiSource.searchParams.set('locale', locale);
+        strapiSource.set('locale', locale);
       }
 
       return vercelStegaCombine(text, { strapiSource: strapiSource.toString() });
@@ -112,20 +109,22 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
     },
 
     async encodeSourceMaps({ data, schema }: EncodingInfo): Promise<any> {
-      // try {
-      if (Array.isArray(data)) {
-        return Promise.all(data.map((item) => this.encodeSourceMaps({ data: item, schema })));
-      }
+      try {
+        if (Array.isArray(data)) {
+          return await Promise.all(
+            data.map((item) => this.encodeSourceMaps({ data: item, schema }))
+          );
+        }
 
-      if (typeof data !== 'object' || data === null) {
+        if (typeof data !== 'object' || data === null) {
+          return data;
+        }
+
+        return await this.encodeEntry({ data, schema });
+      } catch (error) {
+        strapi.log.error('Error encoding source maps:', error);
         return data;
       }
-
-      return this.encodeEntry({ data, schema });
-      // } catch (error) {
-      //   strapi.log.error('Error encoding source maps:', error);
-      //   return data;
-      // }
     },
   };
 };

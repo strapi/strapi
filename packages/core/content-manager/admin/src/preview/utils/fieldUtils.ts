@@ -105,13 +105,13 @@ export function getAttributeSchemaFromPath({
 }
 
 export function parseFieldMetaData(strapiSource: string): FieldContentSourceMap | null {
-  const url = new URL(strapiSource);
-  const path = url.searchParams.get('path');
-  const type = url.searchParams.get('type');
-  const documentId = url.searchParams.get('documentId');
-  const locale = url.searchParams.get('locale');
-  const model = url.searchParams.get('model');
-  const kind = url.searchParams.get('kind');
+  const searchParams = new URLSearchParams(strapiSource);
+  const path = searchParams.get('path');
+  const type = searchParams.get('type');
+  const documentId = searchParams.get('documentId');
+  const locale = searchParams.get('locale');
+  const model = searchParams.get('model');
+  const kind = searchParams.get('kind');
 
   if (!path || !type || !documentId || !model) {
     return null;
