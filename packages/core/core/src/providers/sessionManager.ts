@@ -23,11 +23,11 @@ export default defineProvider({
     }
 
     const refreshTokenLifespan = strapi.config.get<number>(
-      'admin.auth.refreshTokenLifespan',
+      'admin.auth.sessions.refreshTokenLifespan',
       30 * 24 * 60 * 60
     );
     const accessTokenLifespan = strapi.config.get<number>(
-      'admin.auth.accessTokenLifespan',
+      'admin.auth.sessions.accessTokenLifespan',
       60 * 60
     );
 

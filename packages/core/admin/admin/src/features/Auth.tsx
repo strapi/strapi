@@ -17,6 +17,7 @@ import {
   useLogoutMutation,
   useRenewTokenMutation,
 } from '../services/auth';
+import { getOrCreateDeviceId } from '../utils/deviceId';
 
 import type {
   Permission as PermissionContract,
@@ -170,7 +171,7 @@ const AuthProvider = ({
 
   const login = React.useCallback<AuthContextValue['login']>(
     async ({ rememberMe, ...body }) => {
-      const res = await loginMutation(body);
+      const res = await loginMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
 
       /**
        * There will always be a `data` key in the response
@@ -193,7 +194,7 @@ const AuthProvider = ({
   );
 
   const logout = React.useCallback(async () => {
-    await logoutMutation();
+    await logoutMutation({ deviceId: getOrCreateDeviceId() });
     clearStateAndLogout();
   }, [clearStateAndLogout, logoutMutation]);
 

@@ -223,6 +223,62 @@ describe('SessionManager Factory', () => {
     });
   });
 
+  describe('isSessionActive', () => {
+    const userId = 'user-abc';
+    const sessionId = 'abcdef1234567890abcdef1234567890';
+    const deviceId = 'device-xyz';
+    const origin = 'admin';
+
+    beforeEach(() => {
+      mockCrypto.randomBytes.mockReturnValue(
+        Buffer.from('1234567890abcdef1234567890abcdef', 'hex') as any
+      );
+      sessionManager = createSessionManager({ db: mockDb, config });
+    });
+
+    it('returns false when session does not exist', async () => {
+      mockQuery.findOne.mockResolvedValue(null);
+
+      const result = await sessionManager.isSessionActive(sessionId);
+
+      expect(mockDb.query).toHaveBeenCalled();
+      expect(result).toBe(false);
+    });
+
+    it('returns false and deletes when session is expired', async () => {
+      const expired = new Date(Date.now() - 1000);
+      mockQuery.findOne.mockResolvedValue({
+        userId,
+        sessionId,
+        deviceId,
+        origin,
+        expiresAt: expired,
+      });
+      mockQuery.delete.mockResolvedValue(undefined);
+
+      const result = await sessionManager.isSessionActive(sessionId);
+
+      expect(result).toBe(false);
+      expect(mockQuery.delete).toHaveBeenCalledWith({ where: { sessionId } });
+    });
+
+    it('returns true when session exists and is not expired', async () => {
+      const future = new Date(Date.now() + 60 * 1000);
+      mockQuery.findOne.mockResolvedValue({
+        userId,
+        sessionId,
+        deviceId,
+        origin,
+        expiresAt: future,
+      });
+
+      const result = await sessionManager.isSessionActive(sessionId);
+
+      expect(result).toBe(true);
+      expect(mockQuery.delete).not.toHaveBeenCalled();
+    });
+  });
+
   describe('validateRefreshToken', () => {
     const userId = 'user123';
     const sessionId = 'session456';

@@ -9,15 +9,44 @@ export declare namespace Login {
     query: {
       user: Pick<AdminUser, 'email' | 'password'>;
     };
-    body: Pick<AdminUser, 'email' | 'password'>;
+    body: Pick<AdminUser, 'email' | 'password'> & {
+      deviceId?: string;
+      rememberMe?: boolean;
+    };
+  }
+
+  export interface Response {
+    data: {
+      // Primary token for the client to use. When sessions are enabled this
+      // is the short‑lived access token; otherwise it is the legacy token.
+      token: string;
+      // Explicit access token (duplicated when sessions are enabled)
+      accessToken?: string;
+      // Issued refresh token for non-cookie clients (optional)
+      refreshToken?: string;
+      // Provided only when sessions are enabled to ease migration.
+      legacyToken?: string;
+      user: Omit<SanitizedAdminUser, 'permissions'>;
+    };
+    errors?: errors.ApplicationError | errors.NotImplementedError;
+  }
+}
+
+/**
+ * /access-token - Exchange a refresh cookie for an access token
+ */
+export declare namespace AccessTokenExchange {
+  export interface Request {
+    body?: {
+      refreshToken?: string;
+    };
   }
 
   export interface Response {
     data: {
       token: string;
-      user: Omit<SanitizedAdminUser, 'permissions'>;
     };
-    errors?: errors.ApplicationError | errors.NotImplementedError;
+    errors?: errors.ApplicationError | errors.UnauthorizedError;
   }
 }
 
@@ -67,12 +96,18 @@ export declare namespace Register {
     body: {
       registrationToken: string;
       userInfo: Pick<AdminUser, 'firstname' | 'lastname' | 'email' | 'password'>;
+      deviceId?: string;
+      rememberMe?: boolean;
     };
   }
 
   export interface Response {
     data: {
+      // Primary token (access when sessions are enabled; legacy otherwise)
       token: string;
+      accessToken?: string;
+      refreshToken?: string;
+      legacyToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
     errors?: errors.ApplicationError | errors.YupValidationError;
@@ -84,12 +119,19 @@ export declare namespace Register {
  */
 export declare namespace RegisterAdmin {
   export interface Request {
-    body: Pick<AdminUser, 'email' | 'firstname' | 'lastname' | 'password'>;
+    body: Pick<AdminUser, 'email' | 'firstname' | 'lastname' | 'password'> & {
+      deviceId?: string;
+      rememberMe?: boolean;
+    };
   }
 
   export interface Response {
     data: {
+      // Primary token (access when sessions are enabled; legacy otherwise)
       token: string;
+      accessToken?: string;
+      refreshToken?: string;
+      legacyToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
     errors?: errors.ApplicationError | errors.YupValidationError;
