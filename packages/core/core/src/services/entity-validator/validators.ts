@@ -338,7 +338,7 @@ const addUniqueValidator = <T extends yup.AnySchema>(
     return true;
   };
 
-  return validator.test('unique', 'This attribute must be unique', async (value) => {
+  return validator.test('unique', 'This attribute must be unique', async (value: any) => {
     /**
      * If the attribute value is `null` or an empty string we want to skip the unique validation.
      * Otherwise it'll only accept a single entry with that value in the database.
@@ -407,7 +407,7 @@ const stringValidator = (
   >,
   options: ValidatorOptions
 ) => {
-  let schema = yup.string().transform((val, originalVal) => originalVal);
+  let schema = yup.string().transform((val:any, originalVal:any) => originalVal);
 
   schema = addMinLengthValidator(schema, metas, options);
   schema = addMaxLengthValidator(schema, metas);
@@ -451,10 +451,25 @@ export const uidValidator = (
   return schema.matches(/^[A-Za-z0-9-_.~]*$/);
 };
 
-export const enumerationValidator = ({ attr }: { attr: Schema.Attribute.Enumeration }) => {
-  return yup
+export const enumerationValidator = (
+  metas: ValidatorMetas<Schema.Attribute.Enumeration>,
+  options: ValidatorOptions
+) => {
+  const allowedValues = Array.isArray(metas.attr.enum) ? metas.attr.enum : [metas.attr.enum];
+
+  if (metas.attr.required === false || metas.attr.required === undefined) {
+    let schema = yup
+      .mixed()
+      .nullable()
+      .oneOf([...allowedValues, null, undefined, '']);
+    return addUniqueValidator(schema, metas, options);
+  }
+
+  let schema = yup
     .string()
-    .oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null as any));
+    .required('This field is required')
+    .oneOf(allowedValues);
+  return addUniqueValidator(schema, metas, options);
 };
 
 export const integerValidator = (
