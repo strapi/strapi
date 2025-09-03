@@ -65,7 +65,10 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
       justifyContent="center"
       padding={3}
       borderStyle="solid"
-      borderWidth="1px 0 0 0"
+      borderWidth={{
+        initial: 0,
+        large: '1px 0 0 0',
+      }}
       borderColor="neutral150"
       {...props}
     >

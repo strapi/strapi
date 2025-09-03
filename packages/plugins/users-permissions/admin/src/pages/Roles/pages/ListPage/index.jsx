@@ -153,7 +153,7 @@ export const RolesListPage = () => {
   }
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -253,7 +253,7 @@ export const RolesListPage = () => {
           <ConfirmDialog onConfirm={handleConfirmDelete} />
         </Dialog.Root>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 

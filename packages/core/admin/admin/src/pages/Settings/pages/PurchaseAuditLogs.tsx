@@ -13,7 +13,7 @@ const PurchaseAuditLogs = () => {
 
   const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Layouts.Header
           title={formatMessage({ id: 'global.auditLogs', defaultMessage: 'Audit Logs' })}
@@ -132,7 +132,7 @@ const PurchaseAuditLogs = () => {
           </Grid.Root>
         </Box>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

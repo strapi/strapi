@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Divider, Flex, FlexComponent, useCollator } from '@strapi/design-system';
+import { Box, Divider, Flex, FlexComponent, ScrollArea, useCollator } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { type To, useLocation } from 'react-router-dom';
@@ -63,7 +63,30 @@ const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode
   }
 };
 
+const MenuDetails = styled.div<{ $isMobileShown: boolean }>`
+  flex: 1;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  overflow-x: auto;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+`;
+
+const LinkContainer = styled(Flex)<{ $isMobileShown?: boolean }>`
+  display: ${({ $isMobileShown }) => ($isMobileShown ? 'flex' : 'none')};
+
+  ${({ theme }) => theme.breakpoints.large} {
+    display: flex;
+  }
+`;
+
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
+  const [isMobileShown, setIsMobileShown] = React.useState(false);
   const user = useAuth('AuthenticatedApp', (state) => state.user);
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
@@ -76,6 +99,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const initials = getInitials(user);
 
   const handleClickOnLink = (destination: string) => {
+    setIsMobileShown(false);
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
@@ -85,66 +109,90 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
   return (
-    <MainNav>
-      <NavBrand />
+    <MainNav isMobileShown={isMobileShown}>
+      <NavBrand handleClick={() => setIsMobileShown(!isMobileShown)} />
 
       <Divider />
 
-      <NavListWrapper tag="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3}>
-        {listLinks.length > 0
-          ? listLinks.map((link) => {
-              const LinkIcon = link.icon;
-              const badgeContentLock = link?.licenseOnly ? (
-                <Lightning fill="primary600" />
-              ) : undefined;
+      <MenuDetails $isMobileShown={isMobileShown}>
+        <Box marginLeft={{ initial: 'auto', large: 0 }} overflow="hidden">
+          <ScrollArea>
+            <NavListWrapper
+              tag="ul"
+              gap={3}
+              direction={{
+                initial: 'row',
+                large: 'column',
+              }}
+              flex={1}
+              paddingLeft={{
+                initial: 3,
+                large: 0,
+              }}
+              paddingRight={{
+                initial: 3,
+                large: 0,
+              }}
+              paddingTop={3}
+              paddingBottom={3}
+            >
+              {listLinks.length > 0
+                ? listLinks.map((link) => {
+                    const LinkIcon = link.icon;
+                    const badgeContentLock = link?.licenseOnly ? (
+                      <Lightning fill="primary600" />
+                    ) : undefined;
 
-              const badgeContentNumeric =
-                link.notificationsCount && link.notificationsCount > 0
-                  ? link.notificationsCount.toString()
-                  : undefined;
+                    const badgeContentNumeric =
+                      link.notificationsCount && link.notificationsCount > 0
+                        ? link.notificationsCount.toString()
+                        : undefined;
 
-              const labelValue = formatMessage(link.intlLabel);
-              return (
-                <Flex tag="li" key={link.to}>
-                  <GuidedTourTooltip to={link.to}>
-                    <NavLink.Tooltip label={labelValue}>
-                      <NavLink.Link
-                        to={link.to}
-                        onClick={() => handleClickOnLink(link.to)}
-                        aria-label={labelValue}
-                      >
-                        <NavLink.Icon label={labelValue}>
-                          <LinkIcon width="20" height="20" fill="neutral500" />
-                        </NavLink.Icon>
-                        {badgeContentLock ? (
-                          <NavLinkBadgeLock
-                            label="locked"
-                            textColor="neutral500"
-                            paddingLeft={0}
-                            paddingRight={0}
-                          >
-                            {badgeContentLock}
-                          </NavLinkBadgeLock>
-                        ) : badgeContentNumeric ? (
-                          <NavLinkBadgeCounter
-                            label={badgeContentNumeric}
-                            backgroundColor="primary600"
-                            width="2.3rem"
-                            color="neutral0"
-                          >
-                            {badgeContentNumeric}
-                          </NavLinkBadgeCounter>
-                        ) : null}
-                      </NavLink.Link>
-                    </NavLink.Tooltip>
-                  </GuidedTourTooltip>
-                </Flex>
-              );
-            })
-          : null}
-      </NavListWrapper>
-      <TrialCountdown />
-      <NavUser initials={initials}>{userDisplayName}</NavUser>
+                    const labelValue = formatMessage(link.intlLabel);
+                    return (
+                      <LinkContainer tag="li" key={link.to} $isMobileShown={link.mobile}>
+                        <GuidedTourTooltip to={link.to}>
+                          <NavLink.Tooltip label={labelValue}>
+                            <NavLink.Link
+                              to={link.to}
+                              onClick={() => handleClickOnLink(link.to)}
+                              aria-label={labelValue}
+                            >
+                              <NavLink.Icon label={labelValue}>
+                                <LinkIcon width="20" height="20" fill="neutral500" />
+                              </NavLink.Icon>
+                              {badgeContentLock ? (
+                                <NavLinkBadgeLock
+                                  label="locked"
+                                  textColor="neutral500"
+                                  paddingLeft={0}
+                                  paddingRight={0}
+                                >
+                                  {badgeContentLock}
+                                </NavLinkBadgeLock>
+                              ) : badgeContentNumeric ? (
+                                <NavLinkBadgeCounter
+                                  label={badgeContentNumeric}
+                                  backgroundColor="primary600"
+                                  width="2.3rem"
+                                  color="neutral0"
+                                >
+                                  {badgeContentNumeric}
+                                </NavLinkBadgeCounter>
+                              ) : null}
+                            </NavLink.Link>
+                          </NavLink.Tooltip>
+                        </GuidedTourTooltip>
+                      </LinkContainer>
+                    );
+                  })
+                : null}
+            </NavListWrapper>
+          </ScrollArea>
+        </Box>
+        <TrialCountdown />
+        <NavUser initials={initials}>{userDisplayName}</NavUser>
+      </MenuDetails>
     </MainNav>
   );
 };

@@ -27,6 +27,7 @@ const admin: Plugin.Config.AdminInput = {
       permissions: PERMISSIONS.main,
       Component: () => import('./pages/App/App').then((mod) => ({ default: mod.Upload })),
       position: 4,
+      mobile: true,
     });
 
     app.addSettingsLink('global', {

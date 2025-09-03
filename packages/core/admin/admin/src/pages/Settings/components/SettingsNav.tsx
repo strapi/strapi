@@ -1,4 +1,4 @@
-import { Badge, Divider } from '@strapi/design-system';
+import { Badge, Divider, ScrollArea } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLi
 import { SubNav } from '../../../components/SubNav';
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
+import { useSubNav } from '../../../hooks/useSubNav';
 
 type LinkId =
   | 'content-releases'
@@ -33,6 +34,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
   const { license } = useLicenseLimits();
+  const { closeSideNav } = useSubNav();
 
   const availableFeatureNames = license?.features.map((feature) => feature.name);
 
@@ -70,54 +72,59 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
 
   const handleClickOnLink = (destination: string) => () => {
     trackUsage('willNavigate', { from: pathname, to: destination });
+    closeSideNav();
   };
 
   return (
     <SubNav.Main aria-label={label}>
       <SubNav.Header label={label} />
-      <Divider background="neutral150" marginBottom={5} />
-      <SubNav.Sections>
-        {sections.map((section) => (
-          <SubNav.Section key={section.id} label={formatMessage(section.intlLabel)}>
-            {section.links.map((link) => {
-              return (
-                <SubNav.Link
-                  to={link.to}
-                  onClick={handleClickOnLink(link.to)}
-                  key={link.id}
-                  label={formatMessage(link.intlLabel)}
-                  endAction={
-                    <>
-                      {link?.licenseOnly && (
-                        <Lightning
-                          fill={
-                            (availableFeatureNames || []).includes(
-                              linksIdsToLicenseFeaturesNames[link.id]
-                            )
-                              ? 'primary600'
-                              : 'neutral300'
-                          }
-                          width="1.5rem"
-                          height="1.5rem"
-                        />
-                      )}
-                      {link?.hasNotification && (
-                        <StyledBadge
-                          aria-label="Notification"
-                          backgroundColor="primary600"
-                          textColor="neutral0"
-                        >
-                          1
-                        </StyledBadge>
-                      )}
-                    </>
-                  }
-                />
-              );
-            })}
-          </SubNav.Section>
-        ))}
-      </SubNav.Sections>
+      <Divider />
+      <ScrollArea>
+        <SubNav.Sections>
+          {sections.map((section) => (
+            <SubNav.Section key={section.id} label={formatMessage(section.intlLabel)}>
+              {section.links.map((link) => {
+                return (
+                  <SubNav.Link
+                    to={link.to}
+                    onClick={handleClickOnLink(link.to)}
+                    key={link.id}
+                    label={formatMessage(link.intlLabel)}
+                    endAction={
+                      <>
+                        {link?.licenseOnly && (
+                          <Lightning
+                            fill={
+                              (availableFeatureNames || []).includes(
+                                linksIdsToLicenseFeaturesNames[link.id]
+                              )
+                                ? 'primary600'
+                                : 'neutral300'
+                            }
+                            width="1.5rem"
+                            height="1.5rem"
+                          />
+                        )}
+                        {link?.hasNotification && (
+                          <StyledBadge
+                            aria-label="Notification"
+                            backgroundColor="primary600"
+                            textColor="neutral0"
+                          >
+                            1
+                          </StyledBadge>
+                        )}
+                      </>
+                    }
+                  >
+                    {formatMessage(link.intlLabel)}
+                  </SubNav.Link>
+                );
+              })}
+            </SubNav.Section>
+          ))}
+        </SubNav.Sections>
+      </ScrollArea>
     </SubNav.Main>
   );
 };

@@ -13,7 +13,7 @@ const PurchaseSingleSignOn = () => {
 
   const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Layouts.Header
           title={formatMessage({
@@ -134,7 +134,7 @@ const PurchaseSingleSignOn = () => {
           </Grid.Root>
         </Box>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

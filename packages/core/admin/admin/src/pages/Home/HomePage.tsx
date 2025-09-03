@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Grid, Main, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, Typography } from '@strapi/design-system';
 import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
@@ -138,7 +138,7 @@ const HomePageCE = () => {
   }, [checkUserHasPermissions, getAllWidgets]);
 
   return (
-    <Main>
+    <Layouts.Root>
       <Page.Title>
         {formatMessage({ id: 'HomePage.head.title', defaultMessage: 'Homepage' })}
       </Page.Title>
@@ -179,7 +179,7 @@ const HomePageCE = () => {
           )}
         </Flex>
       </Layouts.Content>
-    </Main>
+    </Layouts.Root>
   );
 };
 

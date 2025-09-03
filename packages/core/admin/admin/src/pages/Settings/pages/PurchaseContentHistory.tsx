@@ -13,7 +13,7 @@ const PurchaseContentHistory = () => {
 
   const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Layouts.Header
           title={formatMessage({
@@ -136,7 +136,7 @@ const PurchaseContentHistory = () => {
           </Grid.Root>
         </Box>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

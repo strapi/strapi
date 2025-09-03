@@ -34,6 +34,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         to: '/',
         permissions: [],
         position: 0,
+        mobile: true,
       },
       {
         icon: ShoppingCart,
@@ -44,6 +45,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         to: '/marketplace',
         permissions: permissions.marketplace?.main ?? [],
         position: 7,
+        mobile: false,
       },
       {
         icon: Cog,
@@ -57,6 +59,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         permissions: [],
         notificationsCount: 0,
         position: 9,
+        mobile: true,
       },
     ],
     pluginsSectionLinks: [],
