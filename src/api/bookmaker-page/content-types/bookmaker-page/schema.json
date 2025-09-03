@@ -1,0 +1,91 @@
+{
+  "kind": "collectionType",
+  "collectionName": "bookmaker_pages",
+  "info": {
+    "singularName": "bookmaker-page",
+    "pluralName": "bookmaker-pages",
+    "displayName": "BookmakerPage"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "shortDescription": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "description": {
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "rewiew": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "registrationSteps": {
+      "type": "richtext",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "url": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "bookmaker": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::bookmaker.bookmaker",
+      "inversedBy": "bookmaker_pages"
+    },
+    "bookmaker_bonnuses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::bookmaker-bonnus.bookmaker-bonnus",
+      "mappedBy": "bookmaker_page"
+    },
+    "payment_methods": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::payment-method.payment-method",
+      "inversedBy": "bookmaker_pages"
+    },
+    "country": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::country.country",
+      "inversedBy": "bookmaker_pages"
+    }
+  }
+}

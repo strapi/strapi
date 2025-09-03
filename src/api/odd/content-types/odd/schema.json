@@ -1,0 +1,76 @@
+{
+  "kind": "collectionType",
+  "collectionName": "odds",
+  "info": {
+    "singularName": "odd",
+    "pluralName": "odds",
+    "displayName": "Odd"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "active": {
+      "type": "boolean",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "betOn": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "ratio": {
+      "type": "decimal",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "stake": {
+      "type": "decimal",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "oddStatus": {
+      "type": "enumeration",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "enum": [
+        "Finished",
+        "Waiting_for_match",
+        "Canceled"
+      ]
+    },
+    "odd_option": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::odd-option.odd-option",
+      "inversedBy": "odds"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "odds"
+    }
+  }
+}

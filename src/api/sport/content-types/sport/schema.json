@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sports",
+  "info": {
+    "singularName": "sport",
+    "pluralName": "sports",
+    "displayName": "Sport"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "bookmaker": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::bookmaker.bookmaker",
+      "inversedBy": "sports"
+    },
+    "leagues": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::league.league",
+      "mappedBy": "sport"
+    }
+  }
+}

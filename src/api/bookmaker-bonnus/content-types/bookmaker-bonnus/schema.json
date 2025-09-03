@@ -1,0 +1,57 @@
+{
+  "kind": "collectionType",
+  "collectionName": "bookmaker_bonnuses",
+  "info": {
+    "singularName": "bookmaker-bonnus",
+    "pluralName": "bookmaker-bonnuses",
+    "displayName": "BookmakerBonnus"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "bonnusType": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "name": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "description": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "url": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "bookmaker_page": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::bookmaker-page.bookmaker-page",
+      "inversedBy": "bookmaker_bonnuses"
+    }
+  }
+}

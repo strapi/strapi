@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "odd_options",
+  "info": {
+    "singularName": "odd-option",
+    "pluralName": "odd-options",
+    "displayName": "OddOption"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "betOn": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "ratio": {
+      "type": "decimal",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "match": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::match.match",
+      "inversedBy": "odd_options"
+    },
+    "odds": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::odd.odd",
+      "mappedBy": "odd_option"
+    }
+  }
+}

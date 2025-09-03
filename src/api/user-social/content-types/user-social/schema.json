@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_socials",
+  "info": {
+    "singularName": "user-social",
+    "pluralName": "user-socials",
+    "displayName": "UserSocial"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "url": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "followers": {
+      "type": "decimal",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "user_socials"
+    }
+  }
+}
