@@ -81,7 +81,7 @@ const DynamicComponent = ({
     const [category] = componentUid.split('.');
     const { icon, displayName } = (dynamicComponentsByCategory[category] ?? []).find(
       (component) => component.uid === componentUid
-    ) ?? { icon: null, displayName: null, uid: null };
+    ) ?? { icon: null, displayName: null };
 
     return {
       icon,
