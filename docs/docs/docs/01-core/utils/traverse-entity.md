@@ -113,7 +113,7 @@ Tracks the traversal path:
 
 - **`raw`**: The traversal path on the entity
 - **`attribute`**: The same traversal path on the schema if the attibute exists
-- **`rawWithIndices`**: The traversal path on the entity including array indices using bracket notation (e.g., `components[4].field.relations[2].name`)
+- **`rawWithIndices`**: The traversal path on the entity including array indices using dot notation (e.g., `components.4.field.relations.2.name`)
 
 ### Parent
 
