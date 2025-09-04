@@ -123,6 +123,6 @@ export function parseFieldMetaData(strapiSource: string): FieldContentSourceMap 
     documentId,
     locale: locale ?? null,
     model: model as UID.Schema | undefined,
-    kind: kind as Struct.ContentTypeKind | undefined,
+    kind: kind ? (kind as Struct.ContentTypeKind) : undefined,
   };
 }
