@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 /**
  * Returns a stable device identifier for session-based authentication flows.
  * Uses localStorage to persist a UUID between sessions on the same browser.
@@ -17,9 +15,8 @@ export const getOrCreateDeviceId = (): string => {
     // Ignore storage errors and fallback to ephemeral id
   }
 
+  // Use Web Crypto API which is available in modern browsers
   const generated = crypto.randomUUID();
-  // TODO not needed?
-  // : generateRandomHex32();
 
   window.localStorage.setItem(storageKey, generated);
 
