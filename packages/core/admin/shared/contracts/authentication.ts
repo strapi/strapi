@@ -103,7 +103,6 @@ export declare namespace Register {
 
   export interface Response {
     data: {
-      // Primary token (access when sessions are enabled; legacy otherwise)
       token: string;
       accessToken?: string;
       refreshToken?: string;
@@ -127,7 +126,6 @@ export declare namespace RegisterAdmin {
 
   export interface Response {
     data: {
-      // Primary token (access when sessions are enabled; legacy otherwise)
       token: string;
       accessToken?: string;
       refreshToken?: string;

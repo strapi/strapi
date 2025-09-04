@@ -14,7 +14,6 @@ import {
   validateResetPasswordInput,
   validateRenewTokenInput,
   validateAccessTokenExchangeInput,
-  // Validates optional session-related fields for login requests
   validateLoginOptionalSessionInput,
 } from '../validation/authentication';
 
@@ -67,10 +66,8 @@ const getSessionManager = (): Modules.SessionManager.SessionManagerService | nul
   return manager ?? null;
 };
 
-const generateDeviceId = (): string =>
-  typeof crypto.randomUUID === 'function'
-    ? crypto.randomUUID()
-    : crypto.randomBytes(16).toString('hex');
+// TODO do we need a fallback device ID if the client hasn't provided one?
+const generateDeviceId = (): string => crypto.randomUUID();
 
 export default {
   login: compose([
