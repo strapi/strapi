@@ -21,6 +21,7 @@ const previewScript = (shouldRun = true) => {
   const HIGHLIGHT_PADDING = 2; // in pixels
   const HIGHLIGHT_HOVER_COLOR = window.STRAPI_HIGHLIGHT_HOVER_COLOR ?? '#4945ff'; // dark primary500
   const HIGHLIGHT_ACTIVE_COLOR = window.STRAPI_HIGHLIGHT_ACTIVE_COLOR ?? '#7b79ff'; // dark primary600
+  const DOUBLE_CLICK_TIMEOUT = 300; // milliseconds to wait for potential double-click
 
   const DISABLE_STEGA_DECODING = window.STRAPI_DISABLE_STEGA_DECODING ?? false;
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
@@ -167,6 +168,7 @@ const previewScript = (shouldRun = true) => {
     const elementsToHighlight = new Map<Element, HTMLElement>();
     const eventListeners: EventListenersList = [];
     const focusedHighlights: HTMLElement[] = [];
+    const pendingClicks = new Map<Element, number>(); // number is timeout id
     let focusedField: string | null = null;
 
     const drawHighlight = (target: Element, highlight: HTMLElement) => {
@@ -194,7 +196,7 @@ const previewScript = (shouldRun = true) => {
       highlight.style.cssText = `
         position: absolute;
         outline: 2px solid transparent;
-        pointer-events: none;
+        pointer-events: auto;
         border-radius: 2px;
         background-color: transparent;
         will-change: transform;
@@ -212,7 +214,61 @@ const previewScript = (shouldRun = true) => {
           highlight.style.outlineColor = 'transparent';
         }
       };
-      const doubleClickHandler = () => {
+      const clickHandler = (event: MouseEvent) => {
+        // Skip if this is a re-dispatched event from our delayed handler to avoid infinite loops
+        if ((event as any).__strapi_redispatched) {
+          return;
+        }
+
+        // Prevent the immediate action for interactive elements
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Clear any existing timeout for this element
+        const existingTimeout = pendingClicks.get(element);
+        if (existingTimeout) {
+          window.clearTimeout(existingTimeout);
+          pendingClicks.delete(element);
+        }
+
+        // Set up a delayed single-click handler
+        const timeout = window.setTimeout(() => {
+          pendingClicks.delete(element);
+          // Re-trigger the click on the underlying element after the double-click timeout
+          // Create a new event to dispatch with a marker to prevent re-handling
+          const newEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            detail: 1,
+            button: event.button,
+            buttons: event.buttons,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            ctrlKey: event.ctrlKey,
+            altKey: event.altKey,
+            shiftKey: event.shiftKey,
+            metaKey: event.metaKey,
+          });
+          (newEvent as any).__strapi_redispatched = true;
+          element.dispatchEvent(newEvent);
+        }, DOUBLE_CLICK_TIMEOUT);
+
+        pendingClicks.set(element, timeout);
+      };
+
+      const doubleClickHandler = (event: MouseEvent) => {
+        // Prevent the default behavior on double-click
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Clear any pending single-click action
+        const existingTimeout = pendingClicks.get(element);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
+          pendingClicks.delete(element);
+        }
+
         const sourceAttribute = element.getAttribute(SOURCE_ATTRIBUTE);
         if (sourceAttribute) {
           const rect = element.getBoundingClientRect();
@@ -229,6 +285,7 @@ const previewScript = (shouldRun = true) => {
           });
         }
       };
+
       const mouseDownHandler = (event: MouseEvent) => {
         // Prevent default multi click to select behavior
         if (event.detail >= 2) {
@@ -236,17 +293,19 @@ const previewScript = (shouldRun = true) => {
         }
       };
 
-      element.addEventListener('mouseenter', mouseEnterHandler);
-      element.addEventListener('mouseleave', mouseLeaveHandler);
-      element.addEventListener('dblclick', doubleClickHandler);
-      element.addEventListener('mousedown', mouseDownHandler);
+      highlight.addEventListener('mouseenter', mouseEnterHandler);
+      highlight.addEventListener('mouseleave', mouseLeaveHandler);
+      highlight.addEventListener('click', clickHandler);
+      highlight.addEventListener('dblclick', doubleClickHandler);
+      highlight.addEventListener('mousedown', mouseDownHandler);
 
       // Store event listeners for cleanup
       eventListeners.push(
-        { element, type: 'mouseenter', handler: mouseEnterHandler },
-        { element, type: 'mouseleave', handler: mouseLeaveHandler },
-        { element, type: 'dblclick', handler: doubleClickHandler },
-        { element, type: 'mousedown', handler: mouseDownHandler as EventListener }
+        { element: highlight, type: 'mouseenter', handler: mouseEnterHandler },
+        { element: highlight, type: 'mouseleave', handler: mouseLeaveHandler },
+        { element: highlight, type: 'click', handler: clickHandler as EventListener },
+        { element: highlight, type: 'dblclick', handler: doubleClickHandler as EventListener },
+        { element: highlight, type: 'mousedown', handler: mouseDownHandler as EventListener }
       );
 
       elementsToHighlight.set(element, highlight);
@@ -259,20 +318,27 @@ const previewScript = (shouldRun = true) => {
 
       if (!highlight) return;
 
+      // Clear any pending click timeout for this element
+      const pendingTimeout = pendingClicks.get(element);
+      if (pendingTimeout) {
+        clearTimeout(pendingTimeout);
+        pendingClicks.delete(element);
+      }
+
       highlight.remove();
       elementsToHighlight.delete(element);
 
-      // Remove event listeners for this element
-      const listenersToRemove = eventListeners.filter((listener) => listener.element === element);
+      // Remove event listeners for this highlight
+      const listenersToRemove = eventListeners.filter((listener) => listener.element === highlight);
       listenersToRemove.forEach(({ element, type, handler }) => {
         element.removeEventListener(type, handler);
       });
 
-      // Mutate eventListeners to remove listeners for this element
+      // Mutate eventListeners to remove listeners for this highlight
       eventListeners.splice(
         0,
         eventListeners.length,
-        ...eventListeners.filter((listener) => listener.element !== element)
+        ...eventListeners.filter((listener) => listener.element !== highlight)
       );
     };
 
@@ -300,6 +366,10 @@ const previewScript = (shouldRun = true) => {
         focusedField = field;
       },
       getFocusedField: () => focusedField,
+      clearAllPendingClicks: () => {
+        pendingClicks.forEach((timeout) => clearTimeout(timeout));
+        pendingClicks.clear();
+      },
     };
   };
 
@@ -508,7 +578,8 @@ const previewScript = (shouldRun = true) => {
     overlay: HTMLElement,
     observers: ReturnType<typeof setupObservers>,
     scrollManager: ReturnType<typeof setupScrollManagement>,
-    eventHandlers: EventListenersList
+    eventHandlers: EventListenersList,
+    highlightManager: HighlightManager
   ) => {
     window.__strapi_previewCleanup = () => {
       observers.resizeObserver.disconnect();
@@ -517,6 +588,9 @@ const previewScript = (shouldRun = true) => {
 
       // Clean up scroll listeners
       scrollManager.cleanup();
+
+      // Clear all pending click timeouts
+      highlightManager.clearAllPendingClicks();
 
       // Remove highlight event listeners
       eventHandlers.forEach(({ element, type, handler }) => {
@@ -537,7 +611,7 @@ const previewScript = (shouldRun = true) => {
     const observers = setupObservers(highlightManager, stegaObserver);
     const scrollManager = setupScrollManagement(highlightManager);
     const eventHandlers = setupEventHandlers(highlightManager);
-    createCleanupSystem(overlay, observers, scrollManager, eventHandlers);
+    createCleanupSystem(overlay, observers, scrollManager, eventHandlers, highlightManager);
   });
 };
 
