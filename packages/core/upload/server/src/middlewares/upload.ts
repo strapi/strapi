@@ -15,6 +15,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return;
     }
 
+    // Ensure proper error handling for other cases
+    if (!strapi.server.app.onerror) {
+      console.error('Unhandled error:', err);
+      return;
+    }
+
     strapi.server.app.onerror(err);
   });
 
