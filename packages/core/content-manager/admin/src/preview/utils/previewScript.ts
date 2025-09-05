@@ -463,7 +463,10 @@ const previewScript = (shouldRun = true) => {
 
         // Set new focused field and highlight matching elements
         highlightManager.setFocusedField(field);
-        getElementsByPath(field).forEach((element) => {
+        getElementsByPath(field).forEach((element, index) => {
+          if (index === 0) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
           const highlight =
             highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];
           if (highlight) {
