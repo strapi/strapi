@@ -51,7 +51,7 @@ const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs 
 const addLabelActionToField = (field: EditFieldLayout) => {
   const isFieldLocalized = doesFieldHaveI18nPluginOpt(field.attribute.pluginOptions)
     ? field.attribute.pluginOptions.i18n.localized
-    : true || ['uid', 'relation'].includes(field.attribute.type);
+    : false;
 
   const labelActionProps = {
     title: {
