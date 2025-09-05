@@ -16,7 +16,7 @@ const FIELD_MAPPING: Record<string, string> = {
 interface FolderNodeWithChildren extends Omit<FolderNode, 'children'> {
   children: FolderNodeWithChildren[];
   label?: string;
-  value: string | number | null;
+  value: string | number;
 }
 
 export const useFolderStructure = ({ enabled = true } = {}) => {
@@ -33,7 +33,7 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
 
     return [
       {
-        value: null,
+        value: '',
         label: formatMessage({
           id: getTrad('form.input.label.folder-location-default-label'),
           defaultMessage: 'Media Library',
