@@ -284,7 +284,7 @@ class SessionManager {
     }
 
     const payload: Omit<AccessTokenPayload, 'iat' | 'exp'> = {
-      userId: validation.userId!,
+      userId: String(validation.userId!),
       sessionId: validation.sessionId!,
       type: 'access',
     };
@@ -295,6 +295,26 @@ class SessionManager {
     });
 
     return { token };
+  }
+
+  /**
+   * Returns true when a session exists and is not expired.
+   * If the session exists but is expired, it will be deleted as part of this check.
+   */
+  async isSessionActive(sessionId: string): Promise<boolean> {
+    const session = await this.provider.findBySessionId(sessionId);
+    if (!session) {
+      return false;
+    }
+
+    if (new Date(session.expiresAt) <= new Date()) {
+      // Clean up expired session eagerly
+      await this.provider.deleteBySessionId(sessionId);
+
+      return false;
+    }
+
+    return true;
   }
 }
 

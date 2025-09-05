@@ -20,4 +20,6 @@ export interface SessionManagerService {
       };
   validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult>;
   generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }>;
+  invalidateRefreshToken(origin: string, userId: string, deviceId?: string): Promise<void>;
+  isSessionActive(sessionId: string): Promise<boolean>;
 }

@@ -28,6 +28,7 @@ import {
   useRegisterUserMutation,
 } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { getOrCreateDeviceId } from '../../../utils/deviceId';
 import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
@@ -233,7 +234,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },
     setFormErrors: FormHelpers<RegisterFormValues>['setErrors']
   ) => {
-    const res = await registerAdmin(body);
+    const res = await registerAdmin({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
       dispatch(login({ token: res.data.token }));
@@ -267,7 +268,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     { news, ...body }: RegisterUser.Request['body'] & { news: boolean },
     setFormErrors: FormHelpers<RegisterFormValues>['setErrors']
   ) => {
-    const res = await registerUser(body);
+    const res = await registerUser({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
       dispatch(login({ token: res.data.token }));

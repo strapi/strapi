@@ -1,4 +1,6 @@
 import type { Context, Next } from 'koa';
+import crypto from 'crypto';
+import type { Modules } from '@strapi/types';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
@@ -10,7 +12,8 @@ import {
   validateRegistrationInfoQuery,
   validateForgotPasswordInput,
   validateResetPasswordInput,
-  validateRenewTokenInput,
+  validateAccessTokenExchangeInput,
+  validateLoginOptionalSessionInput,
 } from '../validation/authentication';
 
 import type {
@@ -25,8 +28,73 @@ import { AdminUser } from '../../../shared/contracts/shared';
 
 const { ApplicationError, ValidationError } = errors;
 
+const refreshCookieName = 'strapi_admin_refresh';
+
+const getRefreshCookieOptions = () => {
+  const isProduction = strapi.config.get('environment') === 'production';
+  const domain: string | undefined =
+    strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
+  const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
+
+  const sameSite: boolean | 'lax' | 'strict' | 'none' =
+    strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
+
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    overwrite: true,
+    domain,
+    path,
+    sameSite,
+  };
+};
+
+/**
+ * Returns refresh token TTL in seconds.
+ */
+const getRefreshTokenTTLSeconds = (): number =>
+  Number(strapi.config.get('admin.auth.sessions.refreshTokenLifespan', 30 * 24 * 60 * 60));
+
+const getSessionManager = (): Modules.SessionManager.SessionManagerService | null => {
+  const manager = strapi.sessionManager as Modules.SessionManager.SessionManagerService | undefined;
+
+  return manager ?? null;
+};
+
+// TODO do we need a fallback device ID if the client hasn't provided one?
+const generateDeviceId = (): string => crypto.randomUUID();
+
+/**
+ * Extracts device parameters from a request body, returning a normalized
+ * deviceId and rememberMe flag. Generates a deviceId if not provided.
+ */
+const extractDeviceParams = (requestBody: unknown): { deviceId: string; rememberMe: boolean } => {
+  const body = (requestBody ?? {}) as { deviceId?: string; rememberMe?: boolean };
+  const deviceId = body.deviceId || generateDeviceId();
+  const rememberMe = Boolean(body.rememberMe);
+
+  return { deviceId, rememberMe };
+};
+
+/**
+ * Reads a refresh token from either the request cookie or body.
+ * Prefers the explicit body value when present.
+ */
+const readRefreshTokenFromRequest = (ctx: Context): string | null => {
+  const cookieToken = ctx.cookies.get(refreshCookieName);
+  const body = (ctx.request.body ?? {}) as { refreshToken?: string };
+
+  return body?.refreshToken || cookieToken || null;
+};
+
 export default {
   login: compose([
+    // Validate optional session-related fields (deviceId, rememberMe) without
+    // constraining credential fields handled by passport
+    async (ctx: Context, next: Next) => {
+      await validateLoginOptionalSessionInput(ctx.request.body ?? {});
+      return next();
+    },
     (ctx: Context, next: Next) => {
       return passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) {
@@ -57,34 +125,86 @@ export default {
         return next();
       })(ctx, next);
     },
-    (ctx: Context) => {
+    async (ctx: Context) => {
       const { user } = ctx.state as { user: AdminUser };
 
-      ctx.body = {
-        data: {
-          token: getService('token').createJwtToken(user),
-          user: getService('user').sanitizeUser(ctx.state.user), // TODO: fetch more detailed info
-        },
-      } satisfies Login.Response;
+      try {
+        const sessionManager = getSessionManager();
+        if (!sessionManager) {
+          return ctx.internalServerError();
+        }
+        const userId = String(user.id);
+        const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
+
+        const { token: refreshToken } = await sessionManager.generateRefreshToken(
+          userId,
+          deviceId,
+          'admin'
+        );
+
+        const cookieOptions = getRefreshCookieOptions();
+        const optsWithExpiry = rememberMe
+          ? {
+              ...cookieOptions,
+              expires: new Date(Date.now() + getRefreshTokenTTLSeconds() * 1000),
+            }
+          : cookieOptions;
+
+        ctx.cookies.set(refreshCookieName, refreshToken, optsWithExpiry);
+
+        const accessResult = await sessionManager.generateAccessToken(refreshToken);
+        if ('error' in accessResult) {
+          return ctx.internalServerError();
+        }
+
+        const { token: accessToken } = accessResult;
+
+        ctx.body = {
+          data: {
+            token: accessToken,
+            accessToken,
+            refreshToken,
+            user: getService('user').sanitizeUser(ctx.state.user),
+          },
+        } satisfies Login.Response;
+      } catch (error) {
+        strapi.log.error('Failed to create admin refresh session', error);
+        return ctx.internalServerError();
+      }
     },
   ]),
 
   async renewToken(ctx: Context) {
-    await validateRenewTokenInput(ctx.request.body);
+    // Mark endpoint as deprecated and provide guidance for the new endpoint
+    ctx.set('Deprecation', 'true');
+    ctx.set('Link', '</admin/access-token>; rel="alternate"');
+    ctx.set('Warning', '299 - "Deprecated admin endpoint: use /admin/access-token"');
+    strapi.log.warn('DEPRECATED /admin/renew-token used. Prefer /admin/access-token.');
+    // Always behave as an alias for /admin/access-token (sessions-only).
+    try {
+      await validateAccessTokenExchangeInput(ctx.request.body ?? {});
 
-    const { token } = ctx.request.body as RenewToken.Request['body'];
+      const sessionManager = getSessionManager();
+      if (!sessionManager) {
+        return ctx.internalServerError();
+      }
 
-    const { isValid, payload } = getService('token').decodeJwtToken(token);
+      const refreshToken = readRefreshTokenFromRequest(ctx);
+      if (!refreshToken) {
+        return ctx.unauthorized('Missing refresh token');
+      }
 
-    if (!isValid) {
-      throw new ValidationError('Invalid token');
+      const result = await sessionManager.generateAccessToken(refreshToken);
+      if ('error' in result) {
+        return ctx.unauthorized('Invalid refresh token');
+      }
+
+      const { token } = result;
+      ctx.body = { data: { token } } satisfies RenewToken.Response;
+    } catch (err) {
+      strapi.log.error('Failed to renew via refresh token', err as any);
+      return ctx.internalServerError();
     }
-
-    ctx.body = {
-      data: {
-        token: getService('token').createJwtToken({ id: payload.id }),
-      },
-    } satisfies RenewToken.Response;
   },
 
   async registrationInfo(ctx: Context) {
@@ -108,12 +228,49 @@ export default {
 
     const user = await getService('user').register(input);
 
-    ctx.body = {
-      data: {
-        token: getService('token').createJwtToken(user),
-        user: getService('user').sanitizeUser(user),
-      },
-    } satisfies Register.Response;
+    try {
+      const sessionManager = getSessionManager();
+      if (!sessionManager) {
+        return ctx.internalServerError();
+      }
+      const userId = String(user.id);
+      const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
+
+      const { token: refreshToken } = await sessionManager.generateRefreshToken(
+        userId,
+        deviceId,
+        'admin'
+      );
+
+      const cookieOptions = getRefreshCookieOptions();
+      const optsWithExpiry = rememberMe
+        ? {
+            ...cookieOptions,
+            expires: new Date(Date.now() + getRefreshTokenTTLSeconds() * 1000),
+          }
+        : cookieOptions;
+
+      ctx.cookies.set(refreshCookieName, refreshToken, optsWithExpiry);
+
+      const accessResult = await sessionManager.generateAccessToken(refreshToken);
+      if ('error' in accessResult) {
+        return ctx.internalServerError();
+      }
+
+      const { token: accessToken } = accessResult;
+
+      ctx.body = {
+        data: {
+          token: accessToken,
+          accessToken,
+          refreshToken,
+          user: getService('user').sanitizeUser(user),
+        },
+      } satisfies Register.Response;
+    } catch (error) {
+      strapi.log.error('Failed to create admin refresh session during register', error);
+      return ctx.internalServerError();
+    }
   },
 
   async registerAdmin(ctx: Context) {
@@ -144,12 +301,49 @@ export default {
 
     strapi.telemetry.send('didCreateFirstAdmin');
 
-    ctx.body = {
-      data: {
-        token: getService('token').createJwtToken(user),
-        user: getService('user').sanitizeUser(user),
-      },
-    };
+    try {
+      const sessionManager = getSessionManager();
+      if (!sessionManager) {
+        return ctx.internalServerError();
+      }
+      const userId = String(user.id);
+      const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
+
+      const { token: refreshToken } = await sessionManager.generateRefreshToken(
+        userId,
+        deviceId,
+        'admin'
+      );
+
+      const cookieOptions = getRefreshCookieOptions();
+      const optsWithExpiry = rememberMe
+        ? {
+            ...cookieOptions,
+            expires: new Date(Date.now() + getRefreshTokenTTLSeconds() * 1000),
+          }
+        : cookieOptions;
+
+      ctx.cookies.set(refreshCookieName, refreshToken, optsWithExpiry);
+
+      const accessResult = await sessionManager.generateAccessToken(refreshToken);
+      if ('error' in accessResult) {
+        return ctx.internalServerError();
+      }
+
+      const { token: accessToken } = accessResult;
+
+      ctx.body = {
+        data: {
+          token: accessToken,
+          accessToken,
+          refreshToken,
+          user: getService('user').sanitizeUser(user),
+        },
+      };
+    } catch (error) {
+      strapi.log.error('Failed to create admin refresh session during register-admin', error);
+      return ctx.internalServerError();
+    }
   },
 
   async forgotPassword(ctx: Context) {
@@ -169,17 +363,98 @@ export default {
 
     const user = await getService('auth').resetPassword(input);
 
-    ctx.body = {
-      data: {
-        token: getService('token').createJwtToken(user),
-        user: getService('user').sanitizeUser(user),
-      },
-    } satisfies ResetPassword.Response;
+    // Issue a new admin refresh session and access token after password reset.
+    try {
+      const sessionManager = getSessionManager();
+      if (!sessionManager) {
+        return ctx.internalServerError();
+      }
+
+      const userId = String(user.id);
+      const deviceId = generateDeviceId();
+
+      const { token: refreshToken } = await sessionManager.generateRefreshToken(
+        userId,
+        deviceId,
+        'admin'
+      );
+
+      // No rememberMe flow here; expire with session by default
+      const cookieOptions = getRefreshCookieOptions();
+      ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
+
+      const accessResult = await sessionManager.generateAccessToken(refreshToken);
+      if ('error' in accessResult) {
+        return ctx.internalServerError();
+      }
+
+      const { token } = accessResult;
+
+      ctx.body = {
+        data: {
+          token,
+          user: getService('user').sanitizeUser(user),
+        },
+      } satisfies ResetPassword.Response;
+    } catch (err) {
+      strapi.log.error('Failed to create admin refresh session during reset-password', err as any);
+      return ctx.internalServerError();
+    }
   },
 
-  logout(ctx: Context) {
+  async accessToken(ctx: Context) {
+    // Validate optional body to support non-cookie clients
+    await validateAccessTokenExchangeInput(ctx.request.body ?? {});
+
+    // Optionally accept refreshToken in request body for non-cookie clients
+    const refreshToken = readRefreshTokenFromRequest(ctx);
+
+    if (!refreshToken) {
+      return ctx.unauthorized('Missing refresh token');
+    }
+
+    try {
+      const sessionManager = getSessionManager();
+      if (!sessionManager) {
+        return ctx.internalServerError();
+      }
+
+      const result = await sessionManager.generateAccessToken(refreshToken);
+      if ('error' in result) {
+        return ctx.unauthorized('Invalid refresh token');
+      }
+
+      const { token } = result;
+      ctx.body = { data: { token } };
+    } catch (err) {
+      strapi.log.error('Failed to generate access token from refresh token', err as any);
+      return ctx.internalServerError();
+    }
+  },
+
+  async logout(ctx: Context) {
     const sanitizedUser = getService('user').sanitizeUser(ctx.state.user);
     strapi.eventHub.emit('admin.logout', { user: sanitizedUser });
+
+    const bodyDeviceId = ctx.request.body?.deviceId as string | undefined;
+    const deviceId = typeof bodyDeviceId === 'string' ? bodyDeviceId : undefined;
+
+    // Clear cookie regardless of token validity
+    ctx.cookies.set(refreshCookieName, '', {
+      ...getRefreshCookieOptions(),
+      expires: new Date(0),
+    });
+
+    try {
+      const sessionManager = getSessionManager();
+      if (sessionManager) {
+        const userId = String(ctx.state.user.id);
+        await sessionManager.invalidateRefreshToken('admin', userId, deviceId);
+      }
+    } catch (err) {
+      strapi.log.error('Failed to revoke admin sessions during logout', err as any);
+    }
+
     ctx.body = { data: {} };
   },
 };

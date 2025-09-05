@@ -14,7 +14,11 @@ describe('Admin Auth End to End', () => {
   let strapi;
   let utils;
   beforeAll(async () => {
-    strapi = await createStrapiInstance();
+    strapi = await createStrapiInstance({
+      async bootstrap({ strapi: s }) {
+        s.config.set('admin.rateLimit.enabled', false);
+      },
+    });
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);
 
@@ -150,7 +154,7 @@ describe('Admin Auth End to End', () => {
   });
 
   describe('Renew token', () => {
-    test('Renew token', async () => {
+    test('Renew token (alias of access-token via cookie)', async () => {
       const authRes = await rq({
         url: '/admin/login',
         method: 'POST',
@@ -158,14 +162,14 @@ describe('Admin Auth End to End', () => {
       });
 
       expect(authRes.statusCode).toBe(200);
-      const { token } = authRes.body.data;
+      const setCookies = authRes.headers['set-cookie'] || [];
+      const refreshCookie = setCookies.find((c) => c.startsWith('strapi_admin_refresh='));
+      const cookiePair = refreshCookie.split(';')[0];
 
       const res = await rq({
         url: '/admin/renew-token',
         method: 'POST',
-        body: {
-          token,
-        },
+        headers: { Cookie: cookiePair },
       });
 
       expect(res.statusCode).toBe(200);
@@ -174,52 +178,25 @@ describe('Admin Auth End to End', () => {
       });
     });
 
-    test('Fails on invalid token', async () => {
+    test('Fails on invalid refresh token in body', async () => {
       const res = await rq({
         url: '/admin/renew-token',
         method: 'POST',
         body: {
-          token: 'invalid-token',
+          refreshToken: 'invalid.jwt',
         },
       });
 
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
-        data: null,
-        error: {
-          status: 400,
-          name: 'ValidationError',
-          message: 'Invalid token',
-          details: {},
-        },
-      });
+      expect(res.statusCode).toBe(401);
     });
 
-    test('Fails on missing token', async () => {
+    test('Fails on missing refresh token (no cookie, no body)', async () => {
       const res = await rq({
         url: '/admin/renew-token',
         method: 'POST',
-        body: {},
       });
 
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
-        data: null,
-        error: {
-          status: 400,
-          message: 'token is a required field',
-          name: 'ValidationError',
-          details: {
-            errors: [
-              {
-                message: 'token is a required field',
-                name: 'ValidationError',
-                path: ['token'],
-              },
-            ],
-          },
-        },
-      });
+      expect(res.statusCode).toBe(401);
     });
   });
 

@@ -4,14 +4,28 @@ const _ = require('lodash');
 
 const createUtils = (strapi) => {
   const login = async (userInfo) => {
-    const sanitizedUserInfo = _.pick(userInfo, ['email', 'id']);
-    const user = await strapi.db.query('admin::user').findOne({ where: sanitizedUserInfo });
-    if (!user) {
-      throw new Error('User not found');
-    }
-    const token = strapi.service('admin::token').createJwtToken(user);
+    const sanitizedUserInfo = _.pick(userInfo, ['email', 'password']);
 
-    return { token, user };
+    // Perform HTTP login to obtain access token using the session manager
+    const agent = require('supertest').agent(strapi.server.httpServer);
+    const res = await agent.post('/admin/login').type('application/json').send(sanitizedUserInfo);
+
+    if (res.statusCode !== 200) {
+      throw new Error(`Admin login failed: ${res.statusCode}`);
+    }
+
+    const token = res.body?.data?.token;
+    if (!token) {
+      throw new Error('Admin login did not return an access token');
+    }
+
+    // Retrieve the current user via API to mirror real client flow
+    const me = await agent.get('/admin/users/me').auth(token, { type: 'bearer' });
+    if (me.statusCode !== 200) {
+      throw new Error(`Fetching /admin/users/me failed: ${me.statusCode}`);
+    }
+
+    return { token, user: me.body?.data };
   };
 
   const findUser = strapi.service('admin::user').findOne;

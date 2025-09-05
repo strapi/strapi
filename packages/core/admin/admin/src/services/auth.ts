@@ -77,10 +77,11 @@ const authService = adminApi
         },
         invalidatesTags: ['Me'],
       }),
-      logout: builder.mutation<void, void>({
-        query: () => ({
+      logout: builder.mutation<void, { deviceId?: string } | void>({
+        query: (body) => ({
           method: 'POST',
           url: '/admin/logout',
+          data: body,
         }),
       }),
       resetPassword: builder.mutation<
@@ -105,6 +106,7 @@ const authService = adminApi
         transformResponse(res: RenewToken.Response) {
           return res.data;
         },
+        // NOTE: Deprecated route. server aliases to /admin/access-token in sessions-only mode.
       }),
       getRegistrationInfo: builder.query<
         RegistrationInfo.Response['data'],

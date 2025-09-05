@@ -10,6 +10,15 @@ export default [
   },
   {
     method: 'POST',
+    path: '/access-token',
+    handler: 'authentication.accessToken',
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
+  },
+  {
+    method: 'POST',
     path: '/renew-token',
     handler: 'authentication.renewToken',
     config: { auth: false },
