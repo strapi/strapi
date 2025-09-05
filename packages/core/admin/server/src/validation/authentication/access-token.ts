@@ -7,6 +7,10 @@ const schema = yup
   .shape({
     refreshToken: yup.string().optional(),
   })
-  .noUnknown();
+  // Allow unknown keys so legacy clients passing `{ token }` to /renew-token
+  // don't fail schema validation in the alias route.
+  // TODO: session manager is the default auth flow - there should be no legacy calls
+  // being made from the admin ??
+  .noUnknown(false);
 
 export default validateYupSchema(schema);
