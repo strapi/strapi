@@ -3,13 +3,13 @@
  */
 import { useState, useCallback } from 'react';
 
-import { Message } from '../lib/types/messages';
-
 import { useFetchGenerateTitle } from './useAIFetch';
+
+import type { UIMessage } from '@ai-sdk/react';
 
 interface UseChatTitleProps {
   chatId: string;
-  messages: Message[];
+  messages: UIMessage[];
 }
 
 export const useChatTitle = ({ chatId, messages }: UseChatTitleProps) => {
@@ -26,7 +26,7 @@ export const useChatTitle = ({ chatId, messages }: UseChatTitleProps) => {
       return;
     }
 
-    const firstMessageContent = firstMessage.contents
+    const firstMessageContent = firstMessage.parts
       .map((content) => (content.type === 'text' ? content.text : ''))
       .join('\n');
 

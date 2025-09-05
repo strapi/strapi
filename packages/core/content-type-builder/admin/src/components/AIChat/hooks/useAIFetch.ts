@@ -6,8 +6,9 @@
 
 import { useState } from 'react';
 
-import { Message, useChat } from '@ai-sdk/react';
+import { UIMessage, useChat } from '@ai-sdk/react';
 import { useAppInfo } from '@strapi/admin/strapi-admin';
+import { DefaultChatTransport } from 'ai';
 
 import { fetchAI, makeChatFetch, safeParseJson } from '../lib/aiClient';
 import { STRAPI_AI_CHAT_URL, STRAPI_AI_URL } from '../lib/constants';
@@ -75,7 +76,7 @@ namespace SendFeedback {
       feedback?: string;
       reasons?: FeedbackReasonIds[];
       messageId: string;
-      messages: Message[];
+      messages: UIMessage[];
       schemas: Schema[];
     };
   }
@@ -217,7 +218,9 @@ export const useAIChat: typeof useChat = (props) => {
 
   return useChat({
     ...props,
-    api: STRAPI_AI_CHAT_URL,
-    fetch: customFetch,
+    transport: new DefaultChatTransport({
+      api: STRAPI_AI_CHAT_URL,
+      fetch: customFetch,
+    }),
   });
 };

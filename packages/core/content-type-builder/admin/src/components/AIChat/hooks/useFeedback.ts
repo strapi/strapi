@@ -9,7 +9,7 @@ import { useTranslations } from './useTranslations';
 
 export const useFeedback = () => {
   const { fetch: sendFeedback, isPending, error } = useFetchSendFeedback();
-  const { id, rawMessages: messages, schemas } = useStrapiChat();
+  const { id, messages, schemas } = useStrapiChat();
   const { toggleNotification } = useNotification();
   const { trackUsage } = useTracking();
   const { t } = useTranslations();
