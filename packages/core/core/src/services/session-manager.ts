@@ -284,7 +284,7 @@ class SessionManager {
     }
 
     const payload: Omit<AccessTokenPayload, 'iat' | 'exp'> = {
-      userId: validation.userId!,
+      userId: String(validation.userId!),
       sessionId: validation.sessionId!,
       type: 'access',
     };

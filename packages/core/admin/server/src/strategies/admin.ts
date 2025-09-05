@@ -44,10 +44,12 @@ export const authenticate = async (ctx: Context) => {
     return { authenticated: false };
   }
 
-  // Coerce user id to DB column type to avoid undefined SQL bindings
   const rawUserId = result.payload.userId;
   const numericUserId = Number(rawUserId);
-  const userId = Number.isFinite(numericUserId) ? numericUserId : (rawUserId as unknown as string);
+  const userId =
+    Number.isFinite(numericUserId) && String(numericUserId) === rawUserId
+      ? numericUserId
+      : rawUserId;
 
   const user = await strapi.db
     .query('admin::user')
