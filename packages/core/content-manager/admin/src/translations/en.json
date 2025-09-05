@@ -253,6 +253,7 @@
   "preview.device.select": "Select device type",
   "preview.device.desktop": "Desktop",
   "preview.device.mobile": "Mobile",
+  "preview.info.single-click-hint": "Double click to edit",
   "relation.create": "Create a relation",
   "relation.add": "Add or create a relation",
   "relation.disconnect": "Remove",

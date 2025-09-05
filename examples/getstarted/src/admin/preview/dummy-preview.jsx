@@ -64,9 +64,10 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
     );
   }
 
+  // Use the email type to test clickable preview elements
   if (fieldName === 'email') {
     return (
-      <Button variant="tertiary" onClick={() => window.alert('Clicked, the button was')}>
+      <Button variant="tertiary" onClick={() => window.alert('Sending email!')}>
         {value}
       </Button>
     );

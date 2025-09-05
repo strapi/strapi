@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { createContext, useNotification } from '@strapi/admin/strapi-admin';
 import { Box, Popover } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
 
 import { type UseDocument } from '../../hooks/useDocument';
 import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
@@ -40,7 +41,9 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
   const document = usePreviewContext('InputPopover', (state) => state.document);
   const schema = usePreviewContext('InputPopover', (state) => state.schema);
   const components = usePreviewContext('InputPopover', (state) => state.components);
+
   const { toggleNotification } = useNotification();
+  const { formatMessage } = useIntl();
 
   React.useEffect(() => {
     /**
@@ -97,6 +100,16 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
           }
         }
       }
+
+      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_SINGLE_CLICK_HINT) {
+        toggleNotification({
+          type: 'info',
+          message: formatMessage({
+            id: 'content-manager.preview.info.single-click-hint',
+            defaultMessage: 'Double click to edit',
+          }),
+        });
+      }
     };
 
     window.addEventListener('message', handleMessage);
@@ -104,7 +117,7 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [components, document, iframeRef, schema, setPopoverField, toggleNotification]);
+  }, [components, document, iframeRef, schema, setPopoverField, toggleNotification, formatMessage]);
   if (!popoverField || !iframeRef.current) {
     return null;
   }

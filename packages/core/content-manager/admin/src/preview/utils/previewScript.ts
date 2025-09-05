@@ -32,6 +32,7 @@ const previewScript = (shouldRun = true) => {
     STRAPI_FIELD_BLUR: 'strapiFieldBlur',
     STRAPI_FIELD_CHANGE: 'strapiFieldChange',
     STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
+    STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
   } as const;
 
   /**
@@ -249,6 +250,10 @@ const previewScript = (shouldRun = true) => {
         // Set up a delayed single-click handler
         const timeout = window.setTimeout(() => {
           pendingClicks.delete(element);
+
+          // Send single-click hint notification
+          sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_SINGLE_CLICK_HINT, null);
+
           // Re-trigger the click on the underlying element after the double-click timeout
           // Create a new event to dispatch with a marker to prevent re-handling
           const newEvent = new MouseEvent('click', {
