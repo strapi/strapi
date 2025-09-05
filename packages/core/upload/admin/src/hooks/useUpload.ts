@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { useFetchClient, FetchClient } from '@strapi/admin/strapi-admin';
+import { useFetchClient, FetchClient, adminApi } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
+import { useDispatch } from 'react-redux';
 
 import { File, RawFile, CreateFile } from '../../../shared/contracts/files';
 import { pluginId } from '../pluginId';
@@ -47,6 +48,7 @@ const uploadAsset = (
 };
 
 export const useUpload = () => {
+  const dispatch = useDispatch();
   const [progress, setProgress] = React.useState(0);
   const queryClient = useQueryClient();
   const abortController = new AbortController();
@@ -65,6 +67,7 @@ export const useUpload = () => {
       onSuccess() {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
         queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        dispatch(adminApi.util.invalidateTags(['HomepageKeyStatistics']));
       },
     }
   );

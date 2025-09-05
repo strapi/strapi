@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Box, Button, Dialog, Flex, Link, ProgressBar, Typography } from '@strapi/design-system';
 import { CheckCircle, ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -8,7 +10,8 @@ import { useTracking } from '../../features/Tracking';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { ConfirmDialog } from '../ConfirmDialog';
 
-import { type ValidTourName, useGuidedTour } from './Context';
+import { type ValidTourName, useGuidedTour, getCompletedTours } from './Context';
+import { GUIDED_TOUR_REQUIRED_ACTIONS } from './utils/constants';
 
 /* -------------------------------------------------------------------------------------------------
  * Styled
@@ -100,7 +103,7 @@ const TASK_CONTENT = [
     },
     title: {
       id: 'tours.overview.apiTokens.label',
-      defaultMessage: 'Create and copy an API token',
+      defaultMessage: 'Copy an API token',
     },
     done: DONE_LABEL,
   },
@@ -142,30 +145,34 @@ export const GuidedTourHomepageOverview = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const tours = useGuidedTour('Overview', (s) => s.state.tours);
+  const tourState = useGuidedTour('Overview', (s) => s.state.tours);
   const dispatch = useGuidedTour('Overview', (s) => s.dispatch);
   const enabled = useGuidedTour('Overview', (s) => s.state.enabled);
   const completedActions = useGuidedTour('Overview', (s) => s.state.completedActions);
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
 
-  const tourNames = Object.keys(tours) as ValidTourName[];
-  const completedTours = tourNames.filter((tourName) => tours[tourName].isCompleted);
+  const tourNames = Object.keys(tourState) as ValidTourName[];
+  const completedTours = getCompletedTours(tourState);
   const completionPercentage =
     tourNames.length > 0 ? Math.round((completedTours.length / tourNames.length) * 100) : 0;
-
-  if (!guidedTourMeta?.data.isFirstSuperAdminUser || !enabled) {
-    return null;
-  }
 
   const handleConfirmDialog = () => {
     trackUsage('didSkipGuidedTour', { name: 'all' });
     dispatch({ type: 'skip_all_tours' });
   };
 
-  const handleClickStrapiCloud = (tourName: ValidTourName) => {
-    trackUsage('didCompleteGuidedTour', { name: tourName });
-    dispatch({ type: 'skip_tour', payload: tourName });
+  const handleStartTour = (tourName: ValidTourName) => {
+    trackUsage('didStartGuidedTour', { name: tourName, fromHomepage: true });
+
+    if (tourName === 'strapiCloud') {
+      trackUsage('didCompleteGuidedTour', { name: tourName });
+      dispatch({ type: 'next_step', payload: tourName });
+    }
   };
+
+  if (!guidedTourMeta?.data.isFirstSuperAdminUser || !enabled) {
+    return null;
+  }
 
   return (
     <Container tag="section" gap={0}>
@@ -194,7 +201,15 @@ export const GuidedTourHomepageOverview = () => {
           paddingBottom={8}
           gap={2}
         >
-          <Typography variant="pi">{completionPercentage}%</Typography>
+          <Typography variant="pi">
+            {formatMessage(
+              {
+                id: 'tours.overview.completed',
+                defaultMessage: '{completed}% completed',
+              },
+              { completed: completionPercentage }
+            )}
+          </Typography>
           <StyledProgressBar value={completionPercentage} />
         </Flex>
         <Dialog.Root>
@@ -226,10 +241,13 @@ export const GuidedTourHomepageOverview = () => {
         <Box tag="ul" width="100%" borderColor="neutral150" marginTop={4} hasRadius>
           {TASK_CONTENT.map((task) => {
             const tourName = task.tourName as ValidTourName;
-            const tour = tours[tourName];
+            const tour = tourState[tourName];
+
             const isLinkDisabled =
               tourName !== 'contentTypeBuilder' &&
-              !completedActions.includes('didCreateContentTypeSchema');
+              !completedActions.includes(
+                GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema
+              );
 
             return (
               <TourTaskContainer
@@ -264,7 +282,7 @@ export const GuidedTourHomepageOverview = () => {
                         isExternal
                         disabled={isLinkDisabled}
                         href={task.link.to}
-                        onClick={() => handleClickStrapiCloud(task.tourName as ValidTourName)}
+                        onClick={() => handleStartTour(task.tourName as ValidTourName)}
                       >
                         {formatMessage(task.link.label)}
                       </Link>
@@ -275,7 +293,7 @@ export const GuidedTourHomepageOverview = () => {
                         to={task.link.to}
                         tag={NavLink}
                         onClick={() =>
-                          trackUsage('didStartGuidedTourFromHomepage', { name: tourName })
+                          trackUsage('didStartGuidedTour', { name: tourName, fromHomepage: true })
                         }
                       >
                         {formatMessage(task.link.label)}

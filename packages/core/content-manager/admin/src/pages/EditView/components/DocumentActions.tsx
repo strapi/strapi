@@ -7,6 +7,8 @@ import {
   useAPIErrorHandler,
   useQueryParams,
   tours,
+  useGuidedTour,
+  GUIDED_TOUR_REQUIRED_ACTIONS,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -598,6 +600,8 @@ const PublishAction: DocumentActionComponent = ({
   );
   const rootDocumentMeta = useRelationModal('PublishAction', (state) => state.rootDocumentMeta);
 
+  const dispatchGuidedTour = useGuidedTour('PublishAction', (s) => s.dispatch);
+
   const { currentDocumentMeta } = useDocumentContext('PublishAction');
   const [updateDocumentMutation] = useUpdateDocumentMutation();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -759,6 +763,10 @@ const PublishAction: DocumentActionComponent = ({
       // Reset form if successful
       if ('data' in res) {
         resetForm();
+        dispatchGuidedTour({
+          type: 'set_completed_actions',
+          payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
+        });
       }
 
       if ('data' in res && collectionType !== SINGLE_TYPES) {
@@ -926,6 +934,7 @@ const UpdateAction: DocumentActionComponent = ({
   model,
   collectionType,
 }) => {
+  const dispatchGuidedTour = useGuidedTour('UpdateAction', (s) => s.dispatch);
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -1158,6 +1167,10 @@ const UpdateAction: DocumentActionComponent = ({
         }
       }
     } finally {
+      dispatchGuidedTour({
+        type: 'set_completed_actions',
+        payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
+      });
       setSubmitting(false);
       if (onPreview) {
         onPreview();
@@ -1199,6 +1212,7 @@ const UpdateAction: DocumentActionComponent = ({
     schema,
     components,
     relationalModalSchema,
+    dispatchGuidedTour,
   ]);
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux

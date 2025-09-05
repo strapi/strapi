@@ -46,7 +46,7 @@ export const EmptyState = () => {
       <EmptyDocuments width="160px" height="88px" />
       <tours.contentTypeBuilder.Introduction>
         {/* Invisible Anchor */}
-        <Box paddingTop={5} />
+        <Box />
       </tours.contentTypeBuilder.Introduction>
       <Flex gap={2} alignItems="center" direction="column">
         <Typography variant="beta" textAlign="center">
