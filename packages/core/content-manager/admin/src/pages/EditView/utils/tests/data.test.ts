@@ -174,7 +174,7 @@ describe('data', () => {
                 repeatable: true,
                 required: false,
                 min: 2,
-              }
+              },
             },
           },
           initialValues: {
