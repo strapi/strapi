@@ -7,8 +7,12 @@ import { useIntl } from 'react-intl';
 import { type UseDocument } from '../../hooks/useDocument';
 import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
 import { usePreviewContext } from '../pages/Preview';
-import { INTERNAL_EVENTS } from '../utils/constants';
-import { parseFieldMetaData, getAttributeSchemaFromPath } from '../utils/fieldUtils';
+import { INTERNAL_EVENTS, PREVIEW_ERROR_MESSAGES } from '../utils/constants';
+import {
+  parseFieldMetaData,
+  getAttributeSchemaFromPath,
+  PreviewFieldError,
+} from '../utils/fieldUtils';
 
 /* -------------------------------------------------------------------------------------------------
  * Context utils
@@ -62,12 +66,9 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
       if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT) {
         const fieldMetaData = parseFieldMetaData(event.data.payload.path);
 
-        // TODO: check if notification better
         if (!fieldMetaData) {
-          toggleNotification({
-            type: 'warning',
-            message: 'Incomplete strapiSource attribute',
-          });
+          const { type, message } = PREVIEW_ERROR_MESSAGES.INCOMPLETE_STRAPI_SOURCE;
+          toggleNotification({ type, message: formatMessage(message) });
           return;
         }
 
@@ -77,10 +78,8 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
          * the current document however.
          */
         if (fieldMetaData.documentId !== document.documentId) {
-          toggleNotification({
-            type: 'warning',
-            message: 'This field comes from a different document',
-          });
+          const { type, message } = PREVIEW_ERROR_MESSAGES.DIFFERENT_DOCUMENT;
+          toggleNotification({ type, message: formatMessage(message) });
           return;
         }
 
@@ -95,8 +94,11 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
           // We're able to handle the field, set it in context so the popover can pick it up
           setPopoverField({ ...fieldMetaData, position: event.data.payload.position, attribute });
         } catch (error) {
-          if (error instanceof Error) {
-            toggleNotification({ type: 'warning', message: error.message });
+          if (error instanceof PreviewFieldError) {
+            const { type, message } = PREVIEW_ERROR_MESSAGES[error.messageKey];
+            toggleNotification({ type, message: formatMessage(message) });
+          } else if (error instanceof Error) {
+            toggleNotification({ type: 'danger', message: error.message });
           }
         }
       }
