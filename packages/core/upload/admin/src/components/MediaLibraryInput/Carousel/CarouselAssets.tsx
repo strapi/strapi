@@ -34,6 +34,8 @@ export interface CarouselAssetsProps {
   onEditAsset?: (asset: FileAsset) => void;
   onNext: () => void;
   onPrevious: () => void;
+  onClickAsset: (asset: FileAsset, event?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  onDoubleClickAsset: (asset: FileAsset, event?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   required?: boolean;
   selectedAssetIndex: number;
   trackedLocation?: string;
@@ -55,6 +57,8 @@ export const CarouselAssets = React.forwardRef(
       onEditAsset,
       onNext,
       onPrevious,
+      onClickAsset,
+      onDoubleClickAsset,
       required = false,
       selectedAssetIndex,
       trackedLocation,
@@ -125,6 +129,12 @@ export const CarouselAssets = React.forwardRef(
                   },
                   { n: index + 1, m: assets.length }
                 )}
+                onClick={(event) => onClickAsset(asset, event)}
+                onDoubleClick={(event) => {  
+                  setIsEditingAsset(true);
+                  onDoubleClickAsset(asset, event);
+                }}
+                aria-selected={currentAsset.id === asset.id}
               >
                 <CarouselAsset asset={asset} />
               </CarouselSlide>
