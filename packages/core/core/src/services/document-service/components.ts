@@ -598,4 +598,6 @@ export {
   deleteComponents,
   deleteComponent,
   createComponentRelationFilter,
+  findComponentParent,
+  getParentSchemasForComponent,
 };
