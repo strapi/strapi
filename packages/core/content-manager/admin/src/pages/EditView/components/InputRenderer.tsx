@@ -181,21 +181,39 @@ const InputRenderer = ({
     /**
      * Enumerations are a special case because they require options.
      */
-    case 'enumeration':
+    case 'enumeration': {
+      const field = useField(props.name);
+      const { value: fieldValue, onChange } = field;
+
+      const {
+        attribute: _enumAttr,
+        unique: _enumUnique,
+        mainField: _enumMainField,
+        customField,
+        ...restProps
+      } = props as any;
+
+      const handleChange = (nextValue: string | null) => {
+        onChange({
+          target: { name: props.name, value: nextValue }
+        } as React.ChangeEvent<any>);
+      };
+
       return (
         <FormInputRenderer
-          {...props}
-          {...previewProps}
+          {...restProps}
+          value={fieldValue}
+          onChange={handleChange}
           hint={hint}
-          options={props.attribute.enum.map((value) => ({ value }))}
-          // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
-          type={props.customField ? 'custom-field' : props.type}
+          options={props.attribute.enum.map((value: string) => ({ value }))}
+          type={customField ? 'custom-field' : props.type as any}
           disabled={fieldIsDisabled}
         />
       );
+    }
     default:
       // These props are not needed for the generic form input renderer.
-      const { unique: _unique, mainField: _mainField, ...restProps } = props;
+      const { unique: _unique, mainField: _mainField, attribute: _attribute, ...restProps } = props;
       return (
         <FormInputRenderer
           {...restProps}
