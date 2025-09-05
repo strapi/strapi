@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import { Typography, Box, IconButton, Flex } from '@strapi/design-system';
 import { ThumbUp, ThumbDown } from '@strapi/icons';
 import Markdown from 'react-markdown';
@@ -65,7 +63,7 @@ const MarkdownStyles = styled(Typography)`
 
   /* links */
   a {
-    color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary500};
     background-color: ${({ theme }) => theme.colors.neutral100};
     padding: 0.2em 0.4em;
     border-radius: ${({ theme }) => theme.borderRadius};
@@ -204,8 +202,11 @@ const UserMessage = ({ message }: { message: UserMessageType }) => {
 
       {/* Attachments */}
       {attachments.map((attachment, idx) => (
-        // @ts-expect-error - attachment type is not being narrowed
-        <AttachmentPreview key={`${attachment.filename}-${idx}`} attachment={attachment as any} />
+        <AttachmentPreview
+          key={`${attachment.type === 'file' ? attachment.filename : attachment.type}-${idx}`}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          attachment={{ ...attachment, status: 'ready' } as any}
+        />
       ))}
     </AnimatedBox>
   );

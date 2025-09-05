@@ -10,7 +10,8 @@ import { UIMessage, useChat } from '@ai-sdk/react';
 import { useAppInfo } from '@strapi/admin/strapi-admin';
 import { DefaultChatTransport } from 'ai';
 
-import { STRAPI_AI_CHAT_URL, STRAPI_AI_TOKEN, STRAPI_AI_URL } from '../lib/constants';
+import { fetchAI, makeChatFetch, safeParseJson } from '../lib/aiClient';
+import { STRAPI_AI_CHAT_URL, STRAPI_AI_URL } from '../lib/constants';
 import { Attachment } from '../lib/types/attachments';
 import { Schema } from '../lib/types/schema';
 
@@ -151,7 +152,7 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
     const [error, setError] = useState<string | null>(null);
 
     /**
-     * Make a type-safe API call to the specified Strapi AI endpoint
+     * Make a type-safe API call to the specified Strapi AI endpoint with retry logic
      */
     const fetchData = async (
       options: Omit<RequestInit, 'body'> & Partial<RequestType<T>> & { formData?: FormData } = {}
@@ -160,30 +161,23 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
       setError(null);
 
       try {
-        const headers = {
-          Authorization: `Bearer ${STRAPI_AI_TOKEN}`,
-          'X-Strapi-Version': strapiVersion || 'latest',
-          'X-Strapi-User': userId || 'unknown',
-          'X-Strapi-Project-Id': projectId || 'unknown',
-          ...options.headers,
-        } as Record<string, string>;
+        const fullUrl = `${STRAPI_AI_URL}${endpoint}`;
+        const isJson = !!options.body && !options.formData;
 
-        if (options.body) {
-          headers['Content-Type'] = 'application/json';
-        }
-
-        const response = await fetch(`${STRAPI_AI_URL}${endpoint}`, {
+        const response = await fetchAI(fullUrl, {
           method: 'POST',
-          headers,
-          body: options.formData ? options.formData : JSON.stringify(options.body || {}),
+          headers: isJson
+            ? { 'Content-Type': 'application/json', ...(options.headers || {}) }
+            : options.headers,
+          body: options.formData
+            ? options.formData
+            : isJson
+              ? JSON.stringify(options.body || {})
+              : undefined,
+          ctx: { strapiVersion, projectId, userId },
         });
 
-        const body = await response.json();
-
-        if (!response.ok && body.error) {
-          setError(body.error);
-          return body;
-        }
+        const body = await safeParseJson(response);
 
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
@@ -211,7 +205,6 @@ export const useFetchGenerateTitle = createAIFetchHook('/schemas/chat/generate-t
 export const useFetchUploadProject = createAIFetchHook('/schemas/chat/attachment');
 export const useFetchSendFeedback = createAIFetchHook('/schemas/chat/feedback');
 export const useFetchUploadMedia = createAIFetchHook('/media/upload');
-export const useAIFetch = (endpoint: keyof AIEndpoints) => createAIFetchHook(endpoint);
 
 /**
  * Hook wrapper for AI SDK's useChat with Strapi-specific configuration
@@ -221,17 +214,13 @@ export const useAIChat: typeof useChat = (props) => {
   const projectId = useAppInfo('useAIFetch', (state) => state.projectId);
   const userId = useAppInfo('useAIChat-user', (state) => state.userId);
 
+  const customFetch = makeChatFetch({ strapiVersion, projectId, userId });
+
   return useChat({
     ...props,
     transport: new DefaultChatTransport({
       api: STRAPI_AI_CHAT_URL,
-      headers: {
-        Authorization: `Bearer ${STRAPI_AI_TOKEN}`,
-        'X-Strapi-Version': strapiVersion || 'latest',
-        'X-Strapi-User': userId || 'unknown',
-        'X-Strapi-Project-Id': projectId || 'unknown',
-      },
-      credentials: 'include',
+      fetch: customFetch,
     }),
   });
 };

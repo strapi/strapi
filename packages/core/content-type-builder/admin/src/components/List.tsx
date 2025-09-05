@@ -14,7 +14,7 @@ import {
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useTracking } from '@strapi/admin/strapi-admin';
+import { tours, useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, EmptyStateLayout } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -158,12 +158,14 @@ export const List = ({
     return (
       <EmptyStateLayout
         action={
-          <Button onClick={onClickAddField} size="L" startIcon={<Plus />} variant="secondary">
-            {formatMessage({
-              id: getTrad('table.button.no-fields'),
-              defaultMessage: 'Add new field',
-            })}
-          </Button>
+          <tours.contentTypeBuilder.AddFields>
+            <Button onClick={onClickAddField} size="L" startIcon={<Plus />} variant="secondary">
+              {formatMessage({
+                id: getTrad('table.button.no-fields'),
+                defaultMessage: 'Add new field',
+              })}
+            </Button>
+          </tours.contentTypeBuilder.AddFields>
         }
         content={formatMessage(
           type.modelType === 'contentType'

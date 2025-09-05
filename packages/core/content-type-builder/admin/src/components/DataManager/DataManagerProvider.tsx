@@ -8,6 +8,8 @@ import {
   useFetchClient,
   useAuth,
   adminApi,
+  useGuidedTour,
+  GUIDED_TOUR_REQUIRED_ACTIONS,
 } from '@strapi/admin/strapi-admin';
 import groupBy from 'lodash/groupBy';
 import isEqual from 'lodash/isEqual';
@@ -41,6 +43,7 @@ const selectState = (state: Record<string, unknown>) =>
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
   const state = useSelector(selectState);
+  const dispatchGuidedTour = useGuidedTour('DataManagerProvider', (s) => s.dispatch);
 
   const {
     components,
@@ -178,9 +181,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
       // Make sure the server has restarted
       await serverRestartWatcher();
-      // Invalidate the guided tour meta query cache
-      // @ts-expect-error typescript is unable to infer the tag types defined on adminApi
-      dispatch(adminApi.util.invalidateTags(['GuidedTourMeta']));
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
       // Update the app's permissions
@@ -196,6 +196,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } finally {
       setIsSaving(false);
       unlockAppWithAutoreload();
+
+      dispatch(adminApi.util.invalidateTags(['GuidedTourMeta', 'HomepageKeyStatistics']));
+      dispatchGuidedTour({
+        type: 'set_completed_actions',
+        payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
+      });
 
       trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: true });
     }

@@ -274,7 +274,7 @@ const LoadingDots = ({ children }: { children: string }) => {
   );
 };
 
-const ChatInput = (props: any) => {
+const ChatInput = (props: React.FormHTMLAttributes<HTMLFormElement>) => {
   const { input, handleSubmit, handleInputChange, messages, status, stop, attachments } =
     useStrapiChat();
   const { t } = useTranslations();

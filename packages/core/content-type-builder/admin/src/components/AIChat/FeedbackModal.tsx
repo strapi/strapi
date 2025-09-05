@@ -14,8 +14,6 @@ import {
 } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { getTrad } from '../../utils';
-
 import { useFeedback } from './hooks/useFeedback';
 import { useTranslations } from './hooks/useTranslations';
 

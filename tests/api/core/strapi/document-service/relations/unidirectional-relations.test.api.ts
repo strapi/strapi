@@ -24,15 +24,22 @@ const populate = {
   compo: {
     populate: {
       tag: true,
+      tags: true,
     },
   },
 };
 
 const componentModel = {
+  collectionName: 'components_compo',
   attributes: {
     tag: {
       type: 'relation',
       relation: 'oneToOne',
+      target: TAG_UID,
+    },
+    tags: {
+      type: 'relation',
+      relation: 'oneToMany',
       target: TAG_UID,
     },
   },
@@ -163,5 +170,115 @@ describe('Document Service unidirectional relations', () => {
       tags: [{ id: tag1Id }, { id: tag2Id }],
       compo: { tag: { id: tag1Id } },
     });
+  });
+
+  it('Should not create orphaned relations for a draft and publish content-type when updating from the parent side', async () => {
+    const joinTableName = 'components_default_compos_tags_lnk';
+
+    // Step 1: Create Product with component tag relation (draft)
+    const testProduct = await strapi.documents(PRODUCT_UID).create({
+      data: {
+        name: 'GhostRelationBugTest',
+        compo: {
+          tags: [{ documentId: 'Tag3' }], // Component relation to Tag (still in draft)
+        },
+      },
+    });
+
+    // Check join table after step 1
+    let result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    let joinTableRows = Array.isArray(result) ? result : result.rows || result;
+
+    // 1 entry is created for draft to draft
+    expect(joinTableRows.length).toBe(1);
+
+    // Step 2: Publish Tag FIRST - this triggers ghost relation creation
+    await strapi.documents(TAG_UID).publish({ documentId: 'Tag3' });
+
+    // Check join table after step 2
+    result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+
+    // No new entry should be created in the join table
+    expect(joinTableRows.length).toBe(1);
+
+    // Step 3: Publish Product - creates published component version
+    await strapi.documents(PRODUCT_UID).publish({ documentId: testProduct.documentId });
+
+    // Check join table after step 3
+    result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+
+    // 1 entry should be created (2 total) in the join table for published to published
+    expect(joinTableRows.length).toBe(2);
+
+    // Cleanup - Delete the entry
+    await strapi.documents(PRODUCT_UID).delete({ documentId: testProduct.documentId });
+
+    result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    expect(joinTableRows.length).toBe(0);
+  });
+
+  it('Should not create orphaned relations for a draft and publish content-type when updating from the relation side', async () => {
+    const joinTableName = 'components_default_compos_tags_lnk';
+
+    // Step 1: Create and publish a tag
+    await strapi.documents(TAG_UID).create({
+      data: {
+        name: 'Tag4',
+        documentId: 'Tag4',
+      },
+    });
+    const tag = await strapi.documents(TAG_UID).publish({ documentId: 'Tag4' });
+    const tagId = tag.entries[0].id;
+
+    // Step 2: Create Product with component tag relation (published)
+    const testProduct = await strapi.documents(PRODUCT_UID).create({
+      data: {
+        name: 'GhostRelationBugTest',
+        compo: {
+          tags: [{ id: tagId }], // Component relation to Tag (published)
+        },
+      },
+    });
+
+    // Step 3: Poublish the product
+    await strapi.documents(PRODUCT_UID).publish({ documentId: testProduct.documentId });
+
+    // Check join table after step 1
+    let result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    let joinTableRows = Array.isArray(result) ? result : result.rows || result;
+
+    // Expect 2 entries (draft to draft, published to published)
+    expect(joinTableRows.length).toBe(2);
+
+    // Step 4: Update the tag and publish
+    await strapi.documents(TAG_UID).update({ documentId: 'Tag4', name: 'Tag4 update' });
+    await strapi.documents(TAG_UID).publish({ documentId: 'Tag4' });
+
+    // Check join table after step 4
+    result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+
+    // No new entry should be created in the join table
+    expect(joinTableRows.length).toBe(2);
+
+    // Step 5: Republish the parent
+    await strapi.documents(PRODUCT_UID).publish({ documentId: testProduct.documentId });
+
+    // Check join table after step 5
+    result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+
+    // No new entry should be created in the join table
+    expect(joinTableRows.length).toBe(2);
+
+    // Cleanup - Delete the entry
+    await strapi.documents(PRODUCT_UID).delete({ documentId: testProduct.documentId });
+
+    result = await strapi.db.connection.raw(`SELECT * FROM ${joinTableName}`);
+    joinTableRows = Array.isArray(result) ? result : result.rows || result;
+    expect(joinTableRows.length).toBe(0);
   });
 });

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Widget, useTracking } from '@strapi/admin/strapi-admin';
+import { Widget, useTracking, useGetCountDocumentsQuery } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -18,19 +18,27 @@ import { Link, useNavigate } from 'react-router-dom';
 import { styled, DefaultTheme } from 'styled-components';
 
 import { DocumentStatus } from '../pages/EditView/components/DocumentStatus';
-import { useGetRecentDocumentsQuery, useGetCountDocumentsQuery } from '../services/homepage';
+import { useGetRecentDocumentsQuery } from '../services/homepage';
 
 import { RelativeTime } from './RelativeTime';
 
 import type { RecentDocument } from '../../../shared/contracts/homepage';
 
-const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 'block' })`
+const CellTypography = styled(Typography)`
+  display: block;
+  max-width: 14.4rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
-const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) => {
+const RecentDocumentsTable = ({
+  documents,
+  type,
+}: {
+  documents: RecentDocument[];
+  type: 'edited' | 'published';
+}) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
@@ -44,7 +52,9 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
   };
 
   const handleRowClick = (document: RecentDocument) => () => {
-    trackUsage('willEditEntryFromHome');
+    trackUsage('willEditEntryFromHome', {
+      entryType: type,
+    });
     const link = getEditViewLink(document);
     navigate(link);
   };
@@ -93,7 +103,7 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
                 <IconButton
                   tag={Link}
                   to={getEditViewLink(document)}
-                  onClick={() => trackUsage('willEditEntryFromHome')}
+                  onClick={() => trackUsage('willEditEntryFromHome', { type })}
                   label={formatMessage({
                     id: 'content-manager.actions.edit.label',
                     defaultMessage: 'Edit',
@@ -138,7 +148,7 @@ const LastEditedWidget = () => {
     );
   }
 
-  return <RecentDocumentsTable documents={data} />;
+  return <RecentDocumentsTable documents={data} type="edited" />;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -168,7 +178,7 @@ const LastPublishedWidget = () => {
     );
   }
 
-  return <RecentDocumentsTable documents={data} />;
+  return <RecentDocumentsTable documents={data} type="published" />;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -294,10 +304,13 @@ const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
             fontWeight="normal"
             $textColor="neutral600"
           >
-            {formatMessage({
-              id: 'content-manager.widget.chart-entries.title',
-              defaultMessage: 'entries',
-            })}
+            {formatMessage(
+              {
+                id: 'content-manager.widget.chart-entries.count.label',
+                defaultMessage: '{count, plural, =0 {entries} one {entry} other {entries}}',
+              },
+              { count: total }
+            )}
           </TextChart>
         </text>
       </svg>
