@@ -21,7 +21,7 @@ describe('Admin Access Token Exchange', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({
       bootstrap: async ({ strapi: s }: any) => {
-        s.config.set('admin.auth.sessions.enabled', true);
+        s.config.set('admin.rateLimit.enabled', false);
       },
     });
   });
@@ -135,27 +135,5 @@ describe('Admin Access Token Exchange', () => {
       headers: { Cookie: `${cookieName}=invalid.jwt` },
     });
     expect(res.statusCode).toBe(401);
-  });
-});
-
-describe('Admin Access Token Exchange (sessions disabled)', () => {
-  let strapi: any;
-
-  beforeAll(async () => {
-    // Sessions disabled is the default; we ensure it explicitly
-    strapi = await createStrapiInstance({
-      bootstrap: async ({ strapi: s }: any) => {
-        s.config.set('admin.auth.sessions.enabled', false);
-      },
-    });
-  });
-
-  afterAll(async () => {
-    await strapi.destroy();
-  });
-
-  it('returns 404 when sessions are disabled', async () => {
-    const res = await createRequest({ strapi }).post('/admin/access-token');
-    expect(res.statusCode).toBe(404);
   });
 });

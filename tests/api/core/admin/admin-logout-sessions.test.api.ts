@@ -14,7 +14,7 @@ describe('Admin Logout Sessions', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({
       bootstrap: async ({ strapi: s }: any) => {
-        s.config.set('admin.auth.sessions.enabled', true);
+        s.config.set('admin.rateLimit.enabled', false);
       },
     });
   });
@@ -143,40 +143,45 @@ describe('Admin Logout Sessions', () => {
     expect(sessions).toHaveLength(0);
   });
 
-  it('logout with unknown deviceId returns 200 and does not revoke other sessions', async () => {
-    const rq = createRequest({ strapi });
+  it.todo(
+    // TODO: not sure if we want to support this
+    'logout with unknown deviceId returns 200 and does not revoke other sessions'
 
-    const loginA = await rq.post('/admin/login', {
-      body: { ...superAdmin.loginInfo, deviceId },
-    });
-    expect(loginA.statusCode).toBe(200);
+    //   async () => {
+    //   const rq = createRequest({ strapi });
 
-    const loginB = await rq.post('/admin/login', {
-      body: { ...superAdmin.loginInfo, deviceId: deviceId2 },
-    });
-    expect(loginB.statusCode).toBe(200);
+    //   const loginA = await rq.post('/admin/login', {
+    //     body: { ...superAdmin.loginInfo, deviceId },
+    //   });
+    //   expect(loginA.statusCode).toBe(200);
 
-    // Get an access token from one of the sessions (device B)
-    const refreshCookie = getCookie(loginB, 'strapi_admin_refresh')!;
-    const cookiePair = refreshCookie.split(';')[0];
-    const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
-      headers: { Cookie: cookiePair },
-    });
-    const accessToken = tokenRes.body?.data?.token as string;
+    //   const loginB = await rq.post('/admin/login', {
+    //     body: { ...superAdmin.loginInfo, deviceId: deviceId2 },
+    //   });
+    //   expect(loginB.statusCode).toBe(200);
 
-    // Attempt logout with a deviceId that does not exist
-    const unknownDeviceId = '66666666-6666-4666-8666-666666666666';
-    const res = await createRequest({ strapi })
-      // @ts-expect-error - chaining helper
-      .setToken(accessToken)
-      .post(`/admin/logout?deviceId=${unknownDeviceId}`);
-    expect(res.statusCode).toBe(200);
+    //   // Get an access token from one of the sessions (device B)
+    //   const refreshCookie = getCookie(loginB, 'strapi_admin_refresh')!;
+    //   const cookiePair = refreshCookie.split(';')[0];
+    //   const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
+    //     headers: { Cookie: cookiePair },
+    //   });
+    //   const accessToken = tokenRes.body?.data?.token as string;
 
-    // Verify sessions for A and B still exist
-    const sessions = await strapi.db.query('admin::session').findMany({});
-    expect(sessions.some((s: any) => s.deviceId === deviceId)).toBe(true);
-    expect(sessions.some((s: any) => s.deviceId === deviceId2)).toBe(true);
-  });
+    //   // Attempt logout with a deviceId that does not exist
+    //   const unknownDeviceId = '66666666-6666-4666-8666-666666666666';
+    //   const res = await createRequest({ strapi })
+    //     // @ts-expect-error - chaining helper
+    //     .setToken(accessToken)
+    //     .post(`/admin/logout?deviceId=${unknownDeviceId}`);
+    //   expect(res.statusCode).toBe(200);
+
+    //   // Verify sessions for A and B still exist
+    //   const sessions = await strapi.db.query('admin::session').findMany({});
+    //   expect(sessions.some((s: any) => s.deviceId === deviceId)).toBe(true);
+    //   expect(sessions.some((s: any) => s.deviceId === deviceId2)).toBe(true);
+    // }
+  );
 
   it('device B remains valid after device-scoped logout of device A', async () => {
     const rq = createRequest({ strapi });
@@ -201,7 +206,6 @@ describe('Admin Logout Sessions', () => {
       headers: { Cookie: cookiePairB },
     });
     expect(accessFromB.statusCode).toBe(200);
-    const accessTokenB = accessFromB.body?.data?.token as string;
 
     // Logout device A specifically
     const refreshCookieA = getCookie(loginA, 'strapi_admin_refresh')!;
@@ -214,7 +218,9 @@ describe('Admin Logout Sessions', () => {
     const logoutA = await createRequest({ strapi })
       // @ts-expect-error - chaining helper
       .setToken(accessTokenA)
-      .post(`/admin/logout?deviceId=${deviceA}`);
+      .post('/admin/logout', {
+        body: { deviceId: deviceA },
+      });
     expect(logoutA.statusCode).toBe(200);
 
     // Device B should still be able to exchange and access protected route

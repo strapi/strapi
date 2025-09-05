@@ -106,8 +106,7 @@ const authService = adminApi
         transformResponse(res: RenewToken.Response) {
           return res.data;
         },
-        // NOTE: This endpoint is deprecated when sessions are enabled; the server
-        // will handle it as an alias to /admin/access-token.
+        // NOTE: Deprecated route. server aliases to /admin/access-token in sessions-only mode.
       }),
       getRegistrationInfo: builder.query<
         RegistrationInfo.Response['data'],

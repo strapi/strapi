@@ -13,18 +13,14 @@ describe('admin strategy with sessions enabled', () => {
   const cookieName = 'strapi_admin_refresh';
 
   beforeAll(async () => {
-    strapi = await createStrapiInstance({
-      bootstrap: async ({ strapi: s }: any) => {
-        s.config.set('admin.auth.sessions.enabled', true);
-      },
-    });
+    strapi = await createStrapiInstance();
   });
 
   afterAll(async () => {
     await strapi.destroy();
   });
 
-  it('accepts a valid access token and rejects legacy token', async () => {
+  it('accepts a valid access token', async () => {
     const rq = createRequest({ strapi });
 
     // Login to create refresh cookie, then exchange to get access token
@@ -51,14 +47,6 @@ describe('admin strategy with sessions enabled', () => {
       .setToken(accessToken)
       .get('/admin/users/me');
     expect(okWithAccess.statusCode).toBe(200);
-
-    // Legacy token should be available under legacyToken BUT rejected when sessions are enabled
-    const legacy = loginRes.body?.data?.legacyToken as string;
-    const failWithLegacy = await createRequest({ strapi })
-      // @ts-expect-error - helper chaining
-      .setToken(legacy)
-      .get('/admin/users/me');
-    expect(failWithLegacy.statusCode).toBe(401);
   });
 
   it('rejects access token if session was revoked', async () => {
@@ -152,7 +140,6 @@ describe('admin strategy with short access token lifespan (expiry)', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({
       bootstrap: async ({ strapi: s }: any) => {
-        s.config.set('admin.auth.sessions.enabled', true);
         s.config.set('admin.auth.sessions.accessTokenLifespan', 1); // 1 second
       },
     });

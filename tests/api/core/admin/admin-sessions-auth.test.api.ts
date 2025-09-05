@@ -17,12 +17,7 @@ describe('Admin Sessions Auth', () => {
   const cookieName = 'strapi_admin_refresh';
 
   beforeAll(async () => {
-    // Enable admin sessions for these tests via bootstrap
-    strapi = await createStrapiInstance({
-      bootstrap: async ({ strapi: s }: any) => {
-        s.config.set('admin.auth.sessions.enabled', true);
-      },
-    });
+    strapi = await createStrapiInstance();
 
     rq = createRequest({ strapi });
     utils = createUtils(strapi);
