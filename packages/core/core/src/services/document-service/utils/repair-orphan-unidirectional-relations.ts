@@ -1,60 +1,6 @@
-import type { Database } from '../..';
-import type { Attribute, RelationalAttribute, JoinTable, MorphJoinTable } from '../../types';
-
-/**
- * Finds the parent entity that contains a specific component instance
- * by querying ALL component join tables (since we can't detect components in metadata)
- */
-const findComponentParent = async (
-  db: Database,
-  componentModel: any,
-  componentId: string
-): Promise<{ table: string; parentId: string } | null> => {
-  try {
-    // Get all models to find potential parents
-    const mdValues = db.metadata.values();
-    const allModels = Array.from(mdValues);
-
-    for (const model of allModels) {
-      // Check if this model has a component join table
-      const cmpsTableName = `${model.tableName}_cmps`;
-
-      try {
-        const hasTable = await db.connection.schema.hasTable(cmpsTableName);
-        if (!hasTable) {
-          continue;
-        }
-
-        // Query for this component instance in this parent's component join table
-        const parentRow = await db
-          .connection(cmpsTableName)
-          .where({
-            cmp_id: componentId,
-            component_type: componentModel.uid,
-          })
-          .first();
-
-        if (parentRow) {
-          const result = {
-            table: model.tableName,
-            parentId: parentRow.entity_id,
-          };
-
-          return result;
-        }
-      } catch (error) {
-        // Continue to next parent if query fails
-        continue;
-      }
-    }
-
-    // No parent found
-    return null;
-  } catch (error) {
-    db.logger.debug(`Error finding component parent: ${error}`);
-    return null;
-  }
-};
+import type { Database } from '@strapi/database';
+import type { Schema } from '@strapi/types';
+import { findComponentParent, getParentSchemasForComponent } from '../components';
 
 /**
  * Removes orphaned unidirectional relations from component join tables.
@@ -63,17 +9,21 @@ const findComponentParent = async (
  * with draft/publish functionality where join table entries persist after
  * relations are removed in the UI, causing API/admin interface inconsistencies.
  *
- * @param db - The database object containing metadata and a Knex connection.
+ * This repair function aligns with the prevention logic in document-service/utils/unidirectional-relations.ts
+ * and reuses the same component parent detection utilities.
  */
-export const removeOrphanUnidirectionalRelations = async (db: Database) => {
+export const repairOrphanUnidirectionalRelations = async (): Promise<number> => {
   let totalCleaned = 0;
 
+  const db: Database = strapi.db;
   const mdValues = db.metadata.values();
   const mdArray = Array.from(mdValues);
 
   if (mdArray.length === 0) {
     return 0;
   }
+
+  db.logger.debug('Starting orphan unidirectional relations repair');
 
   for (const model of mdArray) {
     const unidirectionalRelations = getUnidirectionalRelations(model.attributes || {});
@@ -83,10 +33,7 @@ export const removeOrphanUnidirectionalRelations = async (db: Database) => {
         const cleaned = await cleanComponentJoinTable(
           db,
           relation.joinTable.name,
-          relation as RelationalAttribute & {
-            joinTable: JoinTable | MorphJoinTable;
-            target: string;
-          },
+          relation,
           model
         );
         totalCleaned += cleaned;
@@ -102,71 +49,42 @@ export const removeOrphanUnidirectionalRelations = async (db: Database) => {
 };
 
 /**
+ * Identifies unidirectional relations (relations without inversedBy or mappedBy)
+ * Uses same logic as prevention fix in unidirectional-relations.ts:54-61
+ */
+const getUnidirectionalRelations = (attributes: Record<string, any>): any[] => {
+  return Object.values(attributes).filter((attribute) => {
+    if (attribute.type !== 'relation') {
+      return false;
+    }
+
+    // Check if it's unidirectional (no inversedBy or mappedBy) - same as prevention logic
+    return !attribute.inversedBy && !attribute.mappedBy;
+  });
+};
+
+/**
  * Type guard to check if a relation has a joinTable property
  */
-const hasJoinTable = (
-  relation: RelationalAttribute
-): relation is RelationalAttribute & { joinTable: JoinTable | MorphJoinTable } => {
+const hasJoinTable = (relation: any): boolean => {
   return 'joinTable' in relation && relation.joinTable != null;
 };
 
 /**
  * Type guard to check if a relation has a target property
  */
-const hasTarget = (
-  relation: RelationalAttribute
-): relation is RelationalAttribute & { target: string } => {
+const hasTarget = (relation: any): boolean => {
   return 'target' in relation && typeof relation.target === 'string';
 };
 
 /**
- * Identifies unidirectional relations (relations without inversedBy or mappedBy)
- */
-const getUnidirectionalRelations = (
-  attributes: Record<string, Attribute>
-): RelationalAttribute[] => {
-  return Object.values(attributes).filter((attribute): attribute is RelationalAttribute => {
-    if (attribute.type !== 'relation') {
-      return false;
-    }
-
-    const relAttribute = attribute as RelationalAttribute;
-
-    // Check if it's unidirectional (no inversedBy or mappedBy)
-    return !('inversedBy' in relAttribute) && !('mappedBy' in relAttribute);
-  });
-};
-
-/**
- * Checks if a table supports draft/publish by looking for entries with published_at IS NULL
- * Non-D&P content types always have published_at with a value
- * D&P content types can have published_at IS NULL (draft entries)
- */
-const supportsDraftAndPublish = async (db: Database, tableName: string): Promise<boolean> => {
-  try {
-    const hasColumn = await db.connection.schema.hasColumn(tableName, 'published_at');
-    if (!hasColumn) {
-      return false;
-    }
-
-    // Check if there are any entries where published_at is null (indicates D&P)
-    const draftEntries = await db.connection(tableName).where('published_at', null).limit(1);
-
-    const supportsDraftPublish = draftEntries.length > 0;
-
-    return supportsDraftPublish;
-  } catch (error) {
-    return false;
-  }
-};
-
-/**
  * Cleans ghost relations with publication state mismatches from a join table
+ * Uses schema-based draft/publish checking like prevention fix
  */
 const cleanComponentJoinTable = async (
   db: Database,
   joinTableName: string,
-  relation: RelationalAttribute & { joinTable: JoinTable | MorphJoinTable; target: string },
+  relation: any,
   sourceModel: any
 ): Promise<number> => {
   try {
@@ -177,8 +95,9 @@ const cleanComponentJoinTable = async (
       return 0;
     }
 
-    // For component relations, only check if target supports draft/publish
-    const targetSupportsDraftPublish = await supportsDraftAndPublish(db, targetModel.tableName);
+    // Check if target supports draft/publish using schema-based approach (like prevention fix)
+    const targetContentType = strapi.contentTypes[relation.target as keyof typeof strapi.contentTypes];
+    const targetSupportsDraftPublish = targetContentType?.options?.draftAndPublish || false;
 
     if (!targetSupportsDraftPublish) {
       return 0;
@@ -213,20 +132,19 @@ const cleanComponentJoinTable = async (
 
 /**
  * Finds join table entries with publication state mismatches
- * Now includes instance-level parent checking to only process entries from D&P parents
+ * Uses existing component parent detection from document service
  */
 const findPublicationStateMismatches = async (
   db: Database,
   joinTableName: string,
-  relation: RelationalAttribute & { joinTable: JoinTable | MorphJoinTable; target: string },
+  relation: any,
   targetModel: any,
   sourceModel: any
 ): Promise<number[]> => {
   try {
-    // Get join column names from the relation metadata
-    const joinTable = relation.joinTable as JoinTable;
-    const sourceColumn = joinTable.joinColumn.name;
-    const targetColumn = joinTable.inverseJoinColumn.name;
+    // Get join column names using proper functions (addressing PR feedback)
+    const sourceColumn = relation.joinTable.joinColumn.name;
+    const targetColumn = relation.joinTable.inverseJoinColumn.name;
 
     // Get all join entries with their target entities
     const query = db
@@ -252,7 +170,6 @@ const findPublicationStateMismatches = async (
       if (!entriesBySource[sourceId]) {
         entriesBySource[sourceId] = [];
       }
-
       entriesBySource[sourceId].push(entry);
     }
 
@@ -266,33 +183,56 @@ const findPublicationStateMismatches = async (
       sourceModel.uid?.includes('.');
 
     // Check for draft/publish inconsistencies
-    // Only remove relations where same component points to both draft and published versions
     for (const [sourceId, entries] of Object.entries(entriesBySource)) {
-      if (entries.length <= 1) continue;
+      // Skip entries with single relations
+      if (entries.length <= 1) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
-      // For component join tables, check if the parent of this component instance supports D&P
+      // For component join tables, check if THIS specific component instance's parent supports D&P
       if (isComponentJoinTable && isComponentModel) {
         try {
-          // Find the parent entity that contains this component instance
-          const parentInfo = await findComponentParent(db, sourceModel, sourceId);
-
-          if (parentInfo) {
-            const parentSupportsDP = await supportsDraftAndPublish(db, parentInfo.table);
-            db.logger.debug(`Parent ${parentInfo.table} supports D&P: ${parentSupportsDP}`);
-            if (!parentSupportsDP) {
-              // Parent doesn't support D&P, skip
-              continue;
-            }
-          } else {
-            // No parent found for component, skip
+          const componentSchema = strapi.components[sourceModel.uid] as Schema.Component;
+          if (!componentSchema) {
+            // eslint-disable-next-line no-continue
             continue;
           }
+
+          // Get the parent schemas that could contain this component
+          const parentSchemas = getParentSchemasForComponent(componentSchema);
+          if (parentSchemas.length === 0) {
+            // No potential parents - skip this component instance
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          // Find the actual parent for THIS specific component instance
+          const parent = await findComponentParent(componentSchema, sourceId, parentSchemas);
+          if (!parent) {
+            // No parent found for this component instance - skip
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          // Check if THIS component instance's parent supports draft/publish
+          const parentContentType = strapi.contentTypes[parent.uid as keyof typeof strapi.contentTypes];
+          if (!parentContentType?.options?.draftAndPublish) {
+            // This component instance's parent does NOT support D&P - skip cleanup
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          // If we reach here, this component instance's parent DOES support D&P
+          // Continue to process this component instance for ghost relations
         } catch (error) {
-          // Skip on error
+          // Skip this component instance on error
+          // eslint-disable-next-line no-continue
           continue;
         }
       }
 
+      // Find ghost relations (same logic as original but with improved parent checking)
       for (const entry of entries) {
         if (entry.target_published_at === null) {
           // This is a draft target - find its published version

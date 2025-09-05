@@ -6,6 +6,7 @@ import { destroyOnSignal, resolveWorkingDirectories, createUpdateNotifier } from
 
 export { default as compileStrapi } from './compile';
 export * as factories from './factories';
+export { repairOrphanUnidirectionalRelations } from './services/document-service/utils/repair-orphan-unidirectional-relations';
 
 export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi => {
   const strapi = new Strapi({
