@@ -168,10 +168,16 @@ describe('Utils', () => {
     });
 
     test('Number', () => {
-      const node = toTypeLiteral(42);
+      const nodePositive = toTypeLiteral(42);
+      const nodeNegative = toTypeLiteral(-42);
 
-      expect(node.kind).toBe(ts.SyntaxKind.FirstLiteralToken);
-      expect(node.text).toBe('42');
+      expect(nodePositive.kind).toBe(ts.SyntaxKind.FirstLiteralToken);
+      expect(nodePositive.text).toBe('42');
+
+      expect(nodeNegative.kind).toBe(ts.SyntaxKind.PrefixUnaryExpression);
+      expect(nodeNegative.operator).toBe(ts.SyntaxKind.MinusToken);
+      expect(nodeNegative.operand.kind).toBe(ts.SyntaxKind.FirstLiteralToken);
+      expect(nodeNegative.operand.text).toBe('42');
     });
 
     test('Boolean', () => {
