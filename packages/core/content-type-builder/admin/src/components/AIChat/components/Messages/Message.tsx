@@ -65,7 +65,7 @@ const MarkdownStyles = styled(Typography)`
 
   /* links */
   a {
-    color: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.primary500};
     background-color: ${({ theme }) => theme.colors.neutral100};
     padding: 0.2em 0.4em;
     border-radius: ${({ theme }) => theme.borderRadius};
