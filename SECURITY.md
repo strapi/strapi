@@ -6,16 +6,16 @@ As of September 2025 (and until this document is updated), only the v4.x.x and v
 
 **Note**: The v4.x.x LTS version will only receive high/critical severity fixes until April 2026. Any Medium/Low severity issues will not be fixed unless specific exceptions are made.
 
-| Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes                          |
-| ------- | ----------- | -------------- | -------------- | ---------------------- | ------------------------------ |
-| 5.x.x   | GA / Stable | September 2024 | Further Notice | Further Notice         | LTS                            |
-| 5.x.x   | RC          | N/A            | September 2024 | N/A                    | End Of Life                    |
-| 5.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life                    |
-| 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life                    |
-| 4.x.x   | GA / Stable | November 2021  | October 2025   | April 2026             | Maintanence Period             |
-| 4.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life                    |
-| 4.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life                    |
-| 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life                    |
+| Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes              |
+| ------- | ----------- | -------------- | -------------- | ---------------------- | ------------------ |
+| 5.x.x   | GA / Stable | September 2024 | Further Notice | Further Notice         | LTS                |
+| 5.x.x   | RC          | N/A            | September 2024 | N/A                    | End Of Life        |
+| 5.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life        |
+| 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life        |
+| 4.x.x   | GA / Stable | November 2021  | October 2025   | April 2026             | Maintanence Period |
+| 4.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life        |
+| 4.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life        |
+| 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life        |
 
 ## Reporting a Vulnerability
 
@@ -54,13 +54,13 @@ Pursuant to the [CNA Operational Rules](https://www.cve.org/resourcessupport/all
   > 4.1.3 Well-documented or commonly understood non-default configuration or runtime changes made by an authorized user SHOULD NOT be determined to be Vulnerabilities.
 - Conditions or behaviors that do not lead to a security impact (CNA Operational Rule 4.1.2)
   > 4.1.2 Conditions or behaviors that do not lead to a security impact SHOULD NOT be determined to be Vulnerabilities. Examples of security impacts include an increase in access for an attacker, a decrease in availability of a target, or another violation of security policy.
-  
+
 In addition to the above stated rules, we will also apply some generic rules as well:
 
 - Any intentions to make threats against any team member, employee, or representative of Strapi or its partners
 - Any intentions to extort or otherwise blackmail a team member, employee, or representative of Strapi or its partners
 - Any vulnerability report made with malicious intent (such as overwhelming security resource personnel)
-  
+
 If any of these cases apply to a vulnerability report then the report will be immediately rejected and closed. In cases where applicable we will also report these people to any applicable authorities or security program groups.
 
 ## Security Process Summary
