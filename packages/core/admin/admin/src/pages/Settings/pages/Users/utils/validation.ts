@@ -9,15 +9,8 @@ const COMMON_USER_SCHEMA = {
   firstname: yup.string().trim().required({
     id: translatedErrors.required.id,
     defaultMessage: 'This field is required',
-  })
-  .max(50, {
-    id: 'Auth.form.firstname.maxLength',
-    defaultMessage: 'First name must be at most 50 characters',
   }),
-  lastname: yup.string().nullable().max(50, {
-    id: 'Auth.form.lastname.maxLength',
-    defaultMessage: 'Last name must be at most 50 characters',
-  }),
+  lastname: yup.string().nullable(),
   email: yup.string().email(translatedErrors.email).lowercase().required({
     id: translatedErrors.required.id,
     defaultMessage: 'This field is required',
