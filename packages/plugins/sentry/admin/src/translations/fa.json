@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "ارسال رویدادهای خطای استرپی به Sentry.",
+  "plugin.description.short": "ارسال خطاها به Sentry.",
+  "plugin.name": "Sentry"
+}
