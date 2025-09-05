@@ -1,5 +1,5 @@
 import { testData } from '../../../../tests/data';
-import { removeProhibitedFields } from '../data';
+import { handleInvisibleAttributes, removeProhibitedFields } from '../data';
 
 const defaultFieldsValues = {
   name: 'name',
@@ -105,6 +105,122 @@ describe('data', () => {
           },
         ],
         updatedAt: '2020-04-28T13:22:13.033Z',
+      });
+    });
+  });
+
+  describe('handleInvisibleAttributes', () => {
+    it('should remove deleted components', () => {
+      const result = handleInvisibleAttributes(
+        {
+          documentId: 'xfwixs09jhwes2rw77cib73o',
+          notrepeat_req: {
+            id: 1,
+            name: 'toto',
+          },
+          notrepeat_optional: null,
+          repeat_req: [
+            {
+              id: 3,
+              name: 'foobar',
+            },
+          ],
+          repeat_req_min: [],
+        },
+        {
+          schema: {
+            uid: 'api::foo.bar',
+            kind: 'collectionType',
+            modelType: 'contentType',
+            modelName: 'bar',
+            globalId: 'FooBar',
+            info: {
+              displayName: 'FooBar',
+              singularName: 'foobar',
+              pluralName: 'foobars',
+              description: '',
+            },
+            options: {
+              draftAndPublish: false,
+            },
+            pluginOptions: {},
+            attributes: {
+              documentId: {
+                type: 'string',
+              },
+              id: {
+                type: 'integer',
+              },
+              notrepeat_req: {
+                type: 'component',
+                component: 'blog.test-como',
+                repeatable: false,
+                required: true,
+              },
+              notrepeat_optional: {
+                type: 'component',
+                component: 'blog.test-como',
+                repeatable: false,
+              },
+              repeat_req: {
+                type: 'component',
+                component: 'blog.test-como',
+                repeatable: true,
+                required: true,
+              },
+              repeat_req_min: {
+                type: 'component',
+                component: 'blog.test-como',
+                repeatable: true,
+                required: false,
+                min: 2,
+              }
+            },
+          },
+          initialValues: {
+            documentId: 'xfwixs09jhwes2rw77cib73o',
+            city: 'city x',
+            categories: {
+              connect: [],
+              disconnect: [],
+            },
+            notrepeat_req: {
+              id: 1,
+              name: 'toto',
+            },
+            notrepeat_optional: {
+              id: 4,
+              name: 'I will be deleted',
+            },
+            repeat_req: [
+              {
+                id: 3,
+                name: 'wow',
+              },
+            ],
+            repeat_req_min: [],
+          },
+          components: {},
+        }
+      );
+
+      expect(result).toEqual({
+        data: {
+          documentId: 'xfwixs09jhwes2rw77cib73o',
+          notrepeat_req: {
+            id: 1,
+            name: 'toto',
+          },
+          notrepeat_optional: null,
+          repeat_req: [
+            {
+              id: 3,
+              name: 'foobar',
+            },
+          ],
+          repeat_req_min: [],
+        },
+        removedAttributes: [],
       });
     });
   });
