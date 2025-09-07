@@ -3,6 +3,7 @@ import {
   getAttributeSchemaFromPath,
   parseFieldMetaData,
   PreviewFieldError,
+  stringifyPathParts,
 } from '../fieldUtils';
 
 import type { Schema, Modules } from '@strapi/types';
@@ -442,6 +443,104 @@ describe('fieldUtils', () => {
         const result = parseFieldMetaData(strapiSource);
 
         expect(result?.kind).toBe(kind);
+      });
+    });
+  });
+
+  describe('stringifyPathParts', () => {
+    it('should convert simple path parts without indices', () => {
+      const pathParts = [{ name: 'field' }];
+      const result = stringifyPathParts(pathParts);
+      expect(result).toBe('field');
+    });
+
+    it('should convert nested path parts without indices', () => {
+      const pathParts = [{ name: 'field' }, { name: 'subfield' }, { name: 'name' }];
+      const result = stringifyPathParts(pathParts);
+      expect(result).toBe('field.subfield.name');
+    });
+
+    it('should convert path parts with array indices', () => {
+      const pathParts = [{ name: 'components', index: 4 }, { name: 'field' }];
+      const result = stringifyPathParts(pathParts);
+      expect(result).toBe('components.4.field');
+    });
+
+    it('should convert complex path parts with multiple indices', () => {
+      const pathParts = [
+        { name: 'components', index: 4 },
+        { name: 'field' },
+        { name: 'relations', index: 2 },
+        { name: 'name' },
+      ];
+      const result = stringifyPathParts(pathParts);
+      expect(result).toBe('components.4.field.relations.2.name');
+    });
+
+    it('should handle empty array', () => {
+      const pathParts: any[] = [];
+      const result = stringifyPathParts(pathParts);
+      expect(result).toBe('');
+    });
+
+    it('should handle path parts with zero index', () => {
+      const pathParts = [{ name: 'components', index: 0 }, { name: 'title' }];
+      const result = stringifyPathParts(pathParts);
+      expect(result).toBe('components.0.title');
+    });
+
+    it('should handle path parts with empty field name', () => {
+      const pathParts = [{ name: '' }];
+      const result = stringifyPathParts(pathParts);
+      expect(result).toBe('');
+    });
+
+    it('should handle path parts with empty field name and index', () => {
+      const pathParts = [{ name: '', index: 0 }];
+      const result = stringifyPathParts(pathParts);
+      expect(result).toBe('.0');
+    });
+
+    it('should handle mixed path parts', () => {
+      const pathParts = [
+        { name: 'root' },
+        { name: 'array', index: 5 },
+        { name: 'nested' },
+        { name: 'items', index: 0 },
+        { name: 'value' },
+      ];
+      const result = stringifyPathParts(pathParts);
+      expect(result).toBe('root.array.5.nested.items.0.value');
+    });
+
+    it('should be inverse of parsePathWithIndices for simple cases', () => {
+      const originalPath = 'field.subfield.name';
+      const parsed = parsePathWithIndices(originalPath);
+      const stringified = stringifyPathParts(parsed);
+      expect(stringified).toBe(originalPath);
+    });
+
+    it('should be inverse of parsePathWithIndices for complex cases', () => {
+      const originalPath = 'components.4.field.relations.2.name';
+      const parsed = parsePathWithIndices(originalPath);
+      const stringified = stringifyPathParts(parsed);
+      expect(stringified).toBe(originalPath);
+    });
+
+    it('should handle round-trip conversion for various paths', () => {
+      const testPaths = [
+        'simple',
+        'nested.field',
+        'array.0',
+        'array.0.field',
+        'deep.nested.array.5.field.name',
+        'components.1.relations.0.title',
+      ];
+
+      testPaths.forEach((originalPath) => {
+        const parsed = parsePathWithIndices(originalPath);
+        const stringified = stringifyPathParts(parsed);
+        expect(stringified).toBe(originalPath);
       });
     });
   });

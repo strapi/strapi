@@ -118,6 +118,17 @@ export function getAttributeSchemaFromPath({
   return visitor(parsePathWithIndices(path), schema.attributes, document);
 }
 
+export const stringifyPathParts = (pathParts: PathPart[]): string => {
+  return pathParts
+    .map((part) => {
+      if (part.index !== undefined) {
+        return `${part.name}.${part.index}`;
+      }
+      return part.name;
+    })
+    .join('.');
+};
+
 export function parseFieldMetaData(strapiSource: string): FieldContentSourceMap | null {
   const searchParams = new URLSearchParams(strapiSource);
   const path = searchParams.get('path');
