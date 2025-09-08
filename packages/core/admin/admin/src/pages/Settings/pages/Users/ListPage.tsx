@@ -146,7 +146,7 @@ const ListPageCE = () => {
             />
             <Filters.Root options={FILTERS}>
               <Filters.Trigger />
-              <Filters.Popover />
+              <Filters.Popover zIndex={499} />
               <Filters.List />
             </Filters.Root>
           </>

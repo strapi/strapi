@@ -1,15 +1,14 @@
 import * as React from 'react';
 
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { User } from '@strapi/icons';
+import { Clock, User, TrendUp } from '@strapi/icons';
 import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import { RouterProvider } from 'react-router-dom';
-import { DefaultTheme } from 'styled-components';
 
-import { ADMIN_PERMISSIONS_EE } from '../../ee/admin/src/constants';
+import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/admin/src/constants';
 
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
@@ -31,6 +30,7 @@ import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
+import type { DefaultTheme } from 'styled-components';
 
 const {
   INJECT_COLUMN_IN_TABLE,
@@ -339,6 +339,20 @@ class StrapiApp {
           href: '/me',
         },
       },
+      {
+        icon: TrendUp,
+        title: {
+          id: 'widget.key-statistics.title',
+          defaultMessage: 'Project statistics',
+        },
+        component: async () => {
+          const { KeyStatisticsWidget } = await import('./components/Widgets');
+          return KeyStatisticsWidget;
+        },
+        pluginId: 'admin',
+        id: 'key-statistics',
+        roles: ['strapi-super-admin'],
+      },
     ]);
 
     Object.keys(this.appPlugins).forEach((plugin) => {
@@ -347,6 +361,35 @@ class StrapiApp {
 
     if (isFunction(customRegister)) {
       customRegister(this);
+    }
+
+    // Register Audit Logs widget at the end of the widgets array
+    if (window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)) {
+      this.widgets.register([
+        {
+          icon: Clock,
+          title: {
+            id: 'widget.last-activity.title',
+            defaultMessage: 'Last activity',
+          },
+          component: async () => {
+            const { AuditLogsWidget } = await import(
+              '../../ee/admin/src/components/AuditLogs/Widgets'
+            );
+            return AuditLogsWidget;
+          },
+          pluginId: 'admin',
+          id: 'audit-logs',
+          link: {
+            label: {
+              id: 'widget.last-activity.link',
+              defaultMessage: 'Open Audit Logs',
+            },
+            href: `/settings/audit-logs?pageSize=${AUDIT_LOGS_DEFAULT_PAGE_SIZE}&page=1&sort=date:DESC`,
+          },
+          permissions: [{ action: 'admin::audit-logs.read' }],
+        },
+      ]);
     }
   }
 
