@@ -309,10 +309,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     ]);
 
     // Load any unidirectional relation targetting the old published entries
-    const relationsToSync = await unidirectionalRelations.load(uid, {
-      newVersions: draftsToPublish,
-      oldVersions: oldPublishedVersions,
-    });
+    const relationsToSync = await unidirectionalRelations.load(
+      uid,
+      {
+        newVersions: draftsToPublish,
+        oldVersions: oldPublishedVersions,
+      },
+      {
+        shouldPropagateRelation: components.createComponentRelationFilter(),
+      }
+    );
 
     const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
       newVersions: draftsToPublish,
@@ -399,10 +405,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     ]);
 
     // Load any unidirectional relation targeting the old drafts
-    const relationsToSync = await unidirectionalRelations.load(uid, {
-      newVersions: versionsToDraft,
-      oldVersions: oldDrafts,
-    });
+    const relationsToSync = await unidirectionalRelations.load(
+      uid,
+      {
+        newVersions: versionsToDraft,
+        oldVersions: oldDrafts,
+      },
+      {
+        shouldPropagateRelation: components.createComponentRelationFilter(),
+      }
+    );
 
     const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
       newVersions: versionsToDraft,
