@@ -17,7 +17,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           ascending: true # Start with oldest issues first
           only-labels: 'stale-q1-q2-2024' # Only process issues with this label
-          exempt-issue-labels: 'issue: security,severity: critical,severity: high' # Don't close issues with this label
+          exempt-issue-labels: 'issue: security,severity: critical,severity: high,status: confirmed' # Don't close issues with these label
           exempt-all-milestones: true # Don't close issues that are part of a milestone
           exempt-all-assignees: false # Close even if they are assigned
           days-before-stale: 0 # Mark as stale immediately
