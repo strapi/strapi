@@ -7,7 +7,6 @@ import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import { RouterProvider } from 'react-router-dom';
-import { DefaultTheme } from 'styled-components';
 
 import { ADMIN_PERMISSIONS_EE, AUDIT_LOGS_DEFAULT_PAGE_SIZE } from '../../ee/admin/src/constants';
 
@@ -31,6 +30,7 @@ import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
+import type { DefaultTheme } from 'styled-components';
 
 const {
   INJECT_COLUMN_IN_TABLE,
