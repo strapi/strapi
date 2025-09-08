@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { describeOnCondition, findAndClose } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose } from '../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -139,12 +139,10 @@ describeOnCondition(edition === 'EE')('settings', () => {
     await expect(requiredStageCombobox).toBeVisible();
     await expect(requiredStageCombobox.locator('span').first()).toHaveText('Done');
 
-    // Navigate to Content Manager to check validation is working
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-
     // Go to the entry
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Author' }).click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
+
     await page.getByRole('gridcell', { name: 'Ted Lasso' }).click();
     await page.getByRole('textbox', { name: 'Name' }).fill('Ted Laso');
 

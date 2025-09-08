@@ -34,6 +34,7 @@ const renderAdmin = async (
      */
     backendURL: createAbsoluteUrl(process.env.STRAPI_ADMIN_BACKEND_URL),
     isEE: false,
+    isTrial: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
     future: {
       isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => {
@@ -62,6 +63,7 @@ const renderAdmin = async (
 
   interface ProjectType extends Pick<Window['strapi'], 'flags'> {
     isEE: boolean;
+    isTrial: boolean;
     features: {
       name: string;
     }[];
@@ -70,11 +72,12 @@ const renderAdmin = async (
   try {
     const {
       data: {
-        data: { isEE, features, flags },
+        data: { isEE, isTrial, features, flags },
       },
     } = await get<{ data: ProjectType }>('/admin/project-type');
 
     window.strapi.isEE = isEE;
+    window.strapi.isTrialLicense = isTrial;
     window.strapi.flags = flags;
     window.strapi.features = {
       ...window.strapi.features,

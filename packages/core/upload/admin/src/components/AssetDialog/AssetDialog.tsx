@@ -146,6 +146,10 @@ export const AssetContent = ({
   const isLoading = isLoadingPermissions || isLoadingAssets || isLoadingFolders;
   const hasError = errorAssets || errorFolders;
 
+  const [activeTab, setActiveTab] = React.useState(
+    selectedAssets.length > 0 ? 'selected' : 'browse'
+  );
+
   if (isLoading) {
     return (
       <>
@@ -253,7 +257,7 @@ export const AssetContent = ({
         </Modal.Title>
       </Modal.Header>
 
-      <TabsRoot variant="simple" defaultValue={selectedAssets.length > 0 ? 'selected' : 'browse'}>
+      <TabsRoot variant="simple" value={activeTab} onValueChange={setActiveTab}>
         <Flex paddingLeft={8} paddingRight={8} paddingTop={6} justifyContent="space-between">
           <Tabs.List>
             <Tabs.Trigger value="browse">

@@ -4,24 +4,23 @@ import { adminApi } from './api';
 
 const homepageService = adminApi
   .enhanceEndpoints({
-    // TODO: remove when the CM widgets are moved to the CM package, the type already exists there
-    addTagTypes: ['RecentDocumentList'],
+    addTagTypes: ['CountDocuments'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
-      getRecentDocuments: builder.query<
-        Homepage.GetRecentDocuments.Response['data'],
-        Homepage.GetRecentDocuments.Request['query']
-      >({
-        query: (params) => `/admin/homepage/recent-documents?action=${params.action}`,
-        transformResponse: (response: Homepage.GetRecentDocuments.Response) => response.data,
-        providesTags: (res, _err, { action }) => [
-          { type: 'RecentDocumentList' as const, id: action },
-        ],
+      getKeyStatistics: builder.query<Homepage.GetKeyStatistics.Response['data'], void>({
+        query: () => '/admin/homepage/key-statistics',
+        transformResponse: (response: Homepage.GetKeyStatistics.Response) => response.data,
+        providesTags: (_, _err) => ['HomepageKeyStatistics'],
+      }),
+      getCountDocuments: builder.query<Homepage.GetCountDocuments.Response['data'], void>({
+        query: () => '/content-manager/homepage/count-documents',
+        transformResponse: (response: Homepage.GetCountDocuments.Response) => response.data,
+        providesTags: (_, _err) => ['CountDocuments'],
       }),
     }),
   });
 
-const { useGetRecentDocumentsQuery } = homepageService;
+const { useGetKeyStatisticsQuery, useGetCountDocumentsQuery } = homepageService;
 
-export { useGetRecentDocumentsQuery };
+export { useGetKeyStatisticsQuery, useGetCountDocumentsQuery };

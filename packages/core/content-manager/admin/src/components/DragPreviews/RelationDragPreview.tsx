@@ -6,7 +6,7 @@ import {
   DisconnectButton,
   LinkEllipsis,
   FlexWrapper,
-} from '../../pages/EditView/components/FormInputs/Relations';
+} from '../../pages/EditView/components/FormInputs/Relations/Relations';
 
 import type { Data } from '@strapi/types';
 

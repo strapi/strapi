@@ -420,7 +420,7 @@ export default {
       const isUpdate = !isCreate;
       if (isUpdate) {
         // check if the document exists
-        const documentExists = documentManager.exists(model, id)!;
+        const documentExists = await documentManager.exists(model, id);
 
         if (!documentExists) {
           throw new errors.NotFoundError('Document not found');

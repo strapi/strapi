@@ -22,11 +22,23 @@ export default function createComponentBuilder() {
       }, {});
     },
 
+    createComponentAttributes(this: any, uid: string, attributes: any) {
+      if (!this.components.has(uid)) {
+        throw new ApplicationError('component.notFound');
+      }
+
+      return this.components.get(uid).setAttributes(this.convertAttributes(attributes));
+    },
+
     /**
      * create a component in the tmpComponent map
      */
     createComponent(this: any, infos: any) {
-      const uid = this.createComponentUID(infos);
+      if (infos.uid && infos.uid !== this.createComponentUID(infos)) {
+        throw new ApplicationError('component.invalidUID');
+      }
+
+      const uid = infos.uid ?? this.createComponentUID(infos);
 
       if (this.components.has(uid)) {
         throw new ApplicationError('component.alreadyExists');
@@ -56,8 +68,7 @@ export default function createComponentBuilder() {
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
         .set('pluginOptions', infos.pluginOptions)
-        .set('config', infos.config)
-        .setAttributes(this.convertAttributes(infos.attributes));
+        .set('config', infos.config);
 
       if (this.components.size === 0) {
         strapi.telemetry.send('didCreateFirstComponent');
@@ -66,6 +77,8 @@ export default function createComponentBuilder() {
       }
 
       this.components.set(uid, handler);
+
+      this.createComponentAttributes(uid, infos.attributes);
 
       return handler;
     },

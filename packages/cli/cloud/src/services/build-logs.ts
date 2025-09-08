@@ -11,8 +11,8 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
       let retries = 0;
 
       const connect = (url: string) => {
-        const spinner = logger.spinner('Connecting to server to get build logs');
-        spinner.start();
+        const logsSpinner = logger.spinner('Connecting to the server to get build logs\n').start();
+        logsSpinner.indent = 1;
         const es = new EventSource(`${url}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -28,8 +28,8 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
         const resetTimeout = () => {
           clearExistingTimeout();
           timeoutId = setTimeout(() => {
-            if (spinner.isSpinning) {
-              spinner.fail(
+            if (logsSpinner.isSpinning) {
+              logsSpinner.fail(
                 'We were unable to connect to the server to get build logs at this time. This could be due to a temporary issue.'
               );
             }
@@ -49,8 +49,8 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
         });
 
         es.addEventListener('log', (event) => {
-          if (spinner.isSpinning) {
-            spinner.succeed();
+          if (logsSpinner.isSpinning) {
+            logsSpinner.succeed();
           }
           resetTimeout();
           const data = JSON.parse(event.data);
@@ -60,7 +60,9 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
         es.onerror = async () => {
           retries += 1;
           if (retries > MAX_RETRIES) {
-            spinner.fail('We were unable to connect to the server to get build logs at this time.');
+            logsSpinner.fail(
+              'We were unable to connect to the server to get build logs at this time.'
+            );
             es.close();
             clearExistingTimeout(); // Important to clear the event loop from remaining timeout - avoid to wait for nothing while the timeout is running
             reject(new Error('Max retries reached'));

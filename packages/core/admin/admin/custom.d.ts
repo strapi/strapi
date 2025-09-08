@@ -5,7 +5,6 @@ import { type StrapiTheme } from '@strapi/design-system';
 import type { Modules } from '@strapi/types';
 
 declare module 'styled-components' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface DefaultTheme extends StrapiTheme {}
 }
 
@@ -21,6 +20,7 @@ interface BrowserStrapi {
     REVIEW_WORKFLOWS: 'review-workflows';
     isEnabled: (featureName?: string) => boolean;
   };
+  isTrialLicense: boolean;
   flags: {
     promoteEE?: boolean;
     nps?: boolean;

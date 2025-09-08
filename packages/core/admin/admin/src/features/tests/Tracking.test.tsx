@@ -52,13 +52,13 @@ describe('useTracking', () => {
   it('should call axios.post with all attributes by default when calling trackUsage()', async () => {
     const { result } = setup();
 
-    const res = await result.current.trackUsage('didAccessAuthenticatedAdministration');
+    const res = await result.current.trackUsage('didSaveContentType');
 
     expect(axios.post).toBeCalledWith(
       'https://analytics.strapi.io/api/v2/track',
       {
         userId: 'someTestUserId',
-        event: 'didAccessAuthenticatedAdministration',
+        event: 'didSaveContentType',
         eventProperties: {},
         groupProperties: {
           useTypescriptOnServer: true,
@@ -70,16 +70,14 @@ describe('useTracking', () => {
       {
         headers: {
           'Content-Type': 'application/json',
-          'X-Strapi-Event': 'didAccessAuthenticatedAdministration',
+          'X-Strapi-Event': 'didSaveContentType',
         },
       }
     );
 
-    expect(res).toMatchInlineSnapshot(`
-      {
-        "success": true,
-      }
-    `);
+    expect(res).toEqual({
+      success: true,
+    });
   });
 
   it('should not fire axios.post if strapi.telemetryDisabled is true', async () => {
@@ -87,7 +85,7 @@ describe('useTracking', () => {
 
     const { result } = setup();
 
-    await result.current.trackUsage('didAccessAuthenticatedAdministration');
+    await result.current.trackUsage('didSaveContentType');
 
     expect(axios.post).not.toBeCalled();
 
@@ -99,7 +97,7 @@ describe('useTracking', () => {
 
     const { result } = setup();
 
-    const res = await result.current.trackUsage('didAccessAuthenticatedAdministration');
+    const res = await result.current.trackUsage('didSaveContentType');
 
     expect(axios.post).toHaveBeenCalled();
     expect(res).toEqual(null);
@@ -116,7 +114,7 @@ describe('useTracking', () => {
 
     const { result } = setup();
 
-    await result.current.trackUsage('didAccessAuthenticatedAdministration');
+    await result.current.trackUsage('didSaveContentType');
 
     expect(axios.post).not.toBeCalled();
   });
