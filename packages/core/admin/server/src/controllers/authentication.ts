@@ -21,7 +21,6 @@ import type {
   Login,
   Register,
   RegistrationInfo,
-  RenewToken,
   ResetPassword,
 } from '../../../shared/contracts/authentication';
 import { AdminUser } from '../../../shared/contracts/shared';
@@ -78,7 +77,8 @@ const extractDeviceParams = (requestBody: unknown): { deviceId: string; remember
 
 /**
  * Reads a refresh token from either the request cookie or body.
- * Prefers the explicit body value when present.
+ * Primary flow: HTTP-only cookie (secure)
+ * Fallback: Request body (for non-cookie clients)
  */
 const readRefreshTokenFromRequest = (ctx: Context): string | null => {
   const cookieToken = ctx.cookies.get(refreshCookieName);
@@ -173,39 +173,6 @@ export default {
       }
     },
   ]),
-
-  async renewToken(ctx: Context) {
-    // Mark endpoint as deprecated and provide guidance for the new endpoint
-    ctx.set('Deprecation', 'true');
-    ctx.set('Link', '</admin/access-token>; rel="alternate"');
-    ctx.set('Warning', '299 - "Deprecated admin endpoint: use /admin/access-token"');
-    strapi.log.warn('DEPRECATED /admin/renew-token used. Prefer /admin/access-token.');
-    // Always behave as an alias for /admin/access-token (sessions-only).
-    try {
-      await validateAccessTokenExchangeInput(ctx.request.body ?? {});
-
-      const sessionManager = getSessionManager();
-      if (!sessionManager) {
-        return ctx.internalServerError();
-      }
-
-      const refreshToken = readRefreshTokenFromRequest(ctx);
-      if (!refreshToken) {
-        return ctx.unauthorized('Missing refresh token');
-      }
-
-      const result = await sessionManager.generateAccessToken(refreshToken);
-      if ('error' in result) {
-        return ctx.unauthorized('Invalid refresh token');
-      }
-
-      const { token } = result;
-      ctx.body = { data: { token } } satisfies RenewToken.Response;
-    } catch (err) {
-      strapi.log.error('Failed to renew via refresh token', err as any);
-      return ctx.internalServerError();
-    }
-  },
 
   async registrationInfo(ctx: Context) {
     await validateRegistrationInfoQuery(ctx.request.query);

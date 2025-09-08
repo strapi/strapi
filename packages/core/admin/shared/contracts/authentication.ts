@@ -35,26 +35,10 @@ export declare namespace Login {
 export declare namespace AccessTokenExchange {
   export interface Request {
     body?: {
-      refreshToken?: string;
-    };
-  }
-
-  export interface Response {
-    data: {
-      token: string;
-    };
-    errors?: errors.ApplicationError | errors.UnauthorizedError;
-  }
-}
-
-/**
- * /renew-token - Renew an admin user's token
- */
-export declare namespace RenewToken {
-  export interface Request {
-    body: {
-      // Deprecated: renew-token acts as an alias of access-token; body is ignored unless providing refreshToken for non-cookie clients
-      token?: string;
+      /**
+       * Optional refresh token for non-cookie clients.
+       * If not provided, backend will read from HTTP-only cookie.
+       */
       refreshToken?: string;
     };
   }

@@ -19,12 +19,6 @@ export default [
   },
   {
     method: 'POST',
-    path: '/renew-token',
-    handler: 'authentication.renewToken',
-    config: { auth: false },
-  },
-  {
-    method: 'POST',
     path: '/register-admin',
     handler: 'authentication.registerAdmin',
     config: { auth: false },

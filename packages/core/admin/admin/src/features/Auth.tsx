@@ -15,7 +15,7 @@ import {
   useLazyCheckPermissionsQuery,
   useLoginMutation,
   useLogoutMutation,
-  useRenewTokenMutation,
+  useAccessTokenExchangeMutation,
 } from '../services/auth';
 import { getOrCreateDeviceId } from '../utils/deviceId';
 
@@ -114,7 +114,7 @@ const AuthProvider = ({
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
-  const [renewTokenMutation] = useRenewTokenMutation();
+  const [accessTokenExchangeMutation] = useAccessTokenExchangeMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const clearStateAndLogout = React.useCallback(() => {
@@ -124,13 +124,12 @@ const AuthProvider = ({
   }, [dispatch, navigate]);
 
   /**
-   * Fetch data from storages on mount and store it in our state.
-   * It's not normally stored in session storage unless the user
-   * does click "remember me" when they login. We also need to renew the token.
+   * Exchange refresh token for new access token on app initialization.
+   * Uses cookie-based flow where refresh token is automatically read from a cookie.
    */
   React.useEffect(() => {
     if (token && !_disableRenewToken) {
-      renewTokenMutation({ token }).then((res) => {
+      accessTokenExchangeMutation({}).then((res) => {
         if ('data' in res) {
           dispatch(
             loginAction({
@@ -142,7 +141,7 @@ const AuthProvider = ({
         }
       });
     }
-  }, [token, dispatch, renewTokenMutation, clearStateAndLogout, _disableRenewToken]);
+  }, [token, dispatch, accessTokenExchangeMutation, clearStateAndLogout, _disableRenewToken]);
 
   React.useEffect(() => {
     if (user) {

@@ -1,6 +1,6 @@
 import { ProvidersOptions } from '../../../shared/contracts/admin';
 import {
-  type RenewToken,
+  type AccessTokenExchange,
   type Login,
   type ResetPassword,
   type RegisterAdmin,
@@ -97,16 +97,18 @@ const authService = adminApi
           return res.data;
         },
       }),
-      renewToken: builder.mutation<RenewToken.Response['data'], RenewToken.Request['body']>({
+      accessTokenExchange: builder.mutation<
+        AccessTokenExchange.Response['data'],
+        AccessTokenExchange.Request['body']
+      >({
         query: (body) => ({
           method: 'POST',
-          url: '/admin/renew-token',
+          url: '/admin/access-token',
           data: body,
         }),
-        transformResponse(res: RenewToken.Response) {
+        transformResponse(res: AccessTokenExchange.Response) {
           return res.data;
         },
-        // NOTE: Deprecated route. server aliases to /admin/access-token in sessions-only mode.
       }),
       getRegistrationInfo: builder.query<
         RegistrationInfo.Response['data'],
@@ -203,7 +205,7 @@ const {
   useLazyCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
-  useRenewTokenMutation,
+  useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
   useResetPasswordMutation,
@@ -223,7 +225,7 @@ export {
   useLazyCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
-  useRenewTokenMutation,
+  useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
   useResetPasswordMutation,
