@@ -7,7 +7,7 @@ const schema = yup
   .shape({
     refreshToken: yup.string().optional(),
   })
-  // Allow unknown keys so legacy clients passing `{ token }` to /renew-token
+  // Allow unknown keys so legacy clients passing `{ token }`
   // don't fail schema validation in the alias route.
   // TODO: session manager is the default auth flow - there should be no legacy calls
   // being made from the admin ??

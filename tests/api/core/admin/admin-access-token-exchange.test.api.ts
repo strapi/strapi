@@ -4,10 +4,6 @@ import { createStrapiInstance, superAdmin } from 'api-tests/strapi';
 import { createRequest } from 'api-tests/request';
 import jwt from 'jsonwebtoken';
 
-/**
- * Tests for /admin/access-token route behavior.
- */
-
 describe('Admin Access Token Exchange', () => {
   let strapi: any;
 
@@ -46,11 +42,11 @@ describe('Admin Access Token Exchange', () => {
     const refreshCookie = setCookies.find((c) => c.startsWith(`strapi_admin_refresh=`));
     expect(refreshCookie).toBeDefined();
 
-    const cookiePair = refreshCookie!.split(';')[0]; // name=value
+    const cookiePair = refreshCookie!.split(';')[0];
 
     const cookieRq = createRequest({ strapi });
 
-    // Our test agent does not persist cookies across calls, so we forward the cookie header explicitly.
+    // Forward the cookie header explicitly.
     const res = await cookieRq.post('/admin/access-token', { headers: { Cookie: cookiePair } });
     expect(res.statusCode).toBe(200);
 
@@ -82,7 +78,6 @@ describe('Admin Access Token Exchange', () => {
   });
 
   it('returns 200 with access token when refreshToken is supplied in body (no cookie)', async () => {
-    // Login to obtain a valid refresh token in the response body
     const loginRes = await createRequest({ strapi }).post('/admin/login', {
       body: superAdmin.loginInfo,
     });
@@ -106,7 +101,6 @@ describe('Admin Access Token Exchange', () => {
   });
 
   it('uses body refreshToken over cookie when both are present', async () => {
-    // Perform a login to get both a cookie and a body refresh token
     const loginRes = await createRequest({ strapi }).post('/admin/login', {
       body: superAdmin.loginInfo,
     });
@@ -115,7 +109,6 @@ describe('Admin Access Token Exchange', () => {
     const cookie = getCookie(loginRes, cookieName);
     expect(cookie).toBeDefined();
 
-    // Valid refresh token from body
     const validRefreshToken = loginRes.body?.data?.refreshToken as string;
     expect(validRefreshToken).toEqual(expect.any(String));
 

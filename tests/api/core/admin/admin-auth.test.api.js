@@ -153,53 +153,6 @@ describe('Admin Auth End to End', () => {
     });
   });
 
-  describe('Renew token', () => {
-    test('Renew token (alias of access-token via cookie)', async () => {
-      const authRes = await rq({
-        url: '/admin/login',
-        method: 'POST',
-        body: superAdmin.loginInfo,
-      });
-
-      expect(authRes.statusCode).toBe(200);
-      const setCookies = authRes.headers['set-cookie'] || [];
-      const refreshCookie = setCookies.find((c) => c.startsWith('strapi_admin_refresh='));
-      const cookiePair = refreshCookie.split(';')[0];
-
-      const res = await rq({
-        url: '/admin/renew-token',
-        method: 'POST',
-        headers: { Cookie: cookiePair },
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toEqual({
-        token: expect.any(String),
-      });
-    });
-
-    test('Fails on invalid refresh token in body', async () => {
-      const res = await rq({
-        url: '/admin/renew-token',
-        method: 'POST',
-        body: {
-          refreshToken: 'invalid.jwt',
-        },
-      });
-
-      expect(res.statusCode).toBe(401);
-    });
-
-    test('Fails on missing refresh token (no cookie, no body)', async () => {
-      const res = await rq({
-        url: '/admin/renew-token',
-        method: 'POST',
-      });
-
-      expect(res.statusCode).toBe(401);
-    });
-  });
-
   describe('GET /registration-info', () => {
     const registrationToken = 'foobar';
     let user;
