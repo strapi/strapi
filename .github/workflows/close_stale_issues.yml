@@ -10,7 +10,6 @@ jobs:
   close-inactive:
     runs-on: ubuntu-latest
     steps:
-
       - name: Close stale issues
         uses: actions/stale@v9
         with:
