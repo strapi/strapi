@@ -45,6 +45,7 @@ const getRefreshCookieOptions = () => {
     domain,
     path,
     sameSite,
+    maxAge: undefined,
   };
 };
 
@@ -144,8 +145,13 @@ export default {
           ? {
               ...cookieOptions,
               expires: new Date(Date.now() + getRefreshTokenTTLSeconds() * 1000),
+              maxAge: getRefreshTokenTTLSeconds() * 1000,
             }
-          : cookieOptions;
+          : {
+              ...cookieOptions,
+              expires: undefined,
+              maxAge: undefined,
+            };
 
         ctx.cookies.set(refreshCookieName, refreshToken, optsWithExpiry);
 
@@ -211,8 +217,13 @@ export default {
         ? {
             ...cookieOptions,
             expires: new Date(Date.now() + getRefreshTokenTTLSeconds() * 1000),
+            maxAge: getRefreshTokenTTLSeconds() * 1000,
           }
-        : cookieOptions;
+        : {
+            ...cookieOptions,
+            expires: undefined,
+            maxAge: undefined,
+          };
 
       ctx.cookies.set(refreshCookieName, refreshToken, optsWithExpiry);
 
@@ -284,9 +295,13 @@ export default {
         ? {
             ...cookieOptions,
             expires: new Date(Date.now() + getRefreshTokenTTLSeconds() * 1000),
+            maxAge: getRefreshTokenTTLSeconds() * 1000,
           }
-        : cookieOptions;
-
+        : {
+            ...cookieOptions,
+            expires: undefined,
+            maxAge: undefined,
+          };
       ctx.cookies.set(refreshCookieName, refreshToken, optsWithExpiry);
 
       const accessResult = await sessionManager.generateAccessToken(refreshToken);
