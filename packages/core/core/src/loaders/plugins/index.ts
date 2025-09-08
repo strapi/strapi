@@ -112,7 +112,7 @@ export default async function loadPlugins(strapi: Core.Strapi) {
       serverEntrypointPath = join(enabledPlugin.pathToPlugin, resolvedExport);
     } catch (e) {
       throw new Error(
-        `Error loading the plugin ${pluginName} because ${pluginName} is not installed. Please either install the plugin or remove it's configuration.`
+        `Error loading the plugin ${pluginName} because ${pluginName} is not installed. Please either install the plugin or remove its configuration.`
       );
     }
 
