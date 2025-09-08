@@ -146,7 +146,7 @@ const ListPageCE = () => {
             />
             <Filters.Root options={FILTERS}>
               <Filters.Trigger />
-              <Filters.Popover />
+              <Filters.Popover zIndex={499} />
               <Filters.List />
             </Filters.Root>
           </>
@@ -288,14 +288,10 @@ const TABLE_HEADERS: Array<
     cellFormatter({ isActive }) {
       return (
         <Flex>
-          <Status
-            size="S"
-            borderWidth={0}
-            background="transparent"
-            color="neutral800"
-            variant={isActive ? 'success' : 'danger'}
-          >
-            <Typography>{isActive ? 'Active' : 'Inactive'}</Typography>
+          <Status size="S" variant={isActive ? 'success' : 'danger'}>
+            <Typography tag="span" variant="omega" fontWeight="bold">
+              {isActive ? 'Active' : 'Inactive'}
+            </Typography>
           </Status>
         </Flex>
       );

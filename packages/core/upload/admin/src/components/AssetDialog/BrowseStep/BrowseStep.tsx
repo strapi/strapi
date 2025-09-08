@@ -454,7 +454,7 @@ export const BrowseStep = ({
       )}
 
       {pagination.pageCount > 0 && (
-        <Flex justifyContent="space-between" paddingTop={4}>
+        <Flex justifyContent="space-between" paddingTop={4} position="relative" zIndex={1}>
           <PageSize
             pageSize={queryObject.pageSize! as number}
             onChangePageSize={onChangePageSize}

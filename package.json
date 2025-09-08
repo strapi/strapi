@@ -56,7 +56,7 @@
     "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
     "test:api": "node tests/scripts/run-api-tests.js",
     "test:api:clean": "rimraf ./coverage",
-    "test:clean": "yarn test:api:clean ; yarn test:e2e:clean ; yarn test:cli:clean",
+    "test:clean": "run-s -c test:api:clean test:e2e:clean test:cli:clean",
     "test:cli": "node tests/scripts/run-cli-tests.js",
     "test:cli:clean": "node tests/scripts/run-cli-tests.js clean",
     "test:cli:debug": "node tests/scripts/run-cli-tests.js --debug",
@@ -82,12 +82,15 @@
     "test:unit:watch": "run test:unit --watch"
   },
   "resolutions": {
-    "@types/koa": "2.13.4"
+    "@types/koa": "2.13.4",
+    "@babel/core": "7.26.10",
+    "@babel/runtime": "7.26.10",
+    "@babel/runtime-corejs3": "7.26.10"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.12",
-    "@babel/eslint-parser": "^7.25.1",
-    "@babel/preset-react": "7.18.6",
+    "@babel/core": "7.26.10",
+    "@babel/eslint-parser": "^7.27.0",
+    "@babel/preset-react": "7.26.3",
     "@commitlint/cli": "19.2.0",
     "@commitlint/config-conventional": "19.1.0",
     "@commitlint/prompt-cli": "19.2.0",

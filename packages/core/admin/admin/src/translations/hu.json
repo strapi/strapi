@@ -372,6 +372,7 @@
   "app.components.LeftMenu.logout": "Kijelentkezés",
   "app.components.LeftMenu.logo.alt": "Alkalmazás logó",
   "app.components.LeftMenu.plugins": "Bővítmények",
+  "app.components.LeftMenu.trialCountdown": "A próbaidőszak végére {date}.",
   "app.components.LeftMenu.navbrand.title": "Strapi Műszerfal",
   "app.components.LeftMenu.navbrand.workplace": "Munkaterület",
   "app.components.LeftMenuFooter.help": "Segítség",

@@ -50,6 +50,11 @@ export interface BaseSchema {
   collectionName?: string;
 
   /**
+   * What plugin this schema belongs to if any
+   */
+  plugin?: string;
+
+  /**
    * Contains information related to naming and display characteristics of the Schema.
    */
   info: SchemaInfo;

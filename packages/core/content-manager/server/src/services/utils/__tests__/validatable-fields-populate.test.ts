@@ -38,6 +38,15 @@ describe('getPopulateForValidation', () => {
         },
       },
     },
+    media: {
+      modelName: 'Fake media model',
+      attributes: {
+        mediaAttrName: {
+          required: true,
+          type: 'media',
+        },
+      },
+    },
   } as any;
 
   beforeEach(() => {
@@ -65,6 +74,22 @@ describe('getPopulateForValidation', () => {
 
     expect(result).toEqual({
       fields: ['title'], // Only scalar fields requiring validation
+    });
+  });
+
+  test('with media model', () => {
+    const uid = 'media';
+
+    const result = getPopulateForValidation(uid as any);
+
+    expect(result).toEqual({
+      populate: {
+        mediaAttrName: {
+          populate: {
+            folder: true,
+          },
+        },
+      },
     });
   });
 

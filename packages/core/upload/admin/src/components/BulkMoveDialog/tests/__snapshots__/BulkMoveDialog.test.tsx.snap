@@ -200,7 +200,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 
 .c14 {
   min-width: 100%;
-  padding-inline: 4px;
 }
 
 .c3 {
@@ -208,6 +207,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   position: fixed;
   inset: 0;
   z-index: 300;
+  will-change: opacity;
 }
 
 .c4 {
@@ -229,16 +229,25 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   z-index: 310;
 }
 
+.c4 >form {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .c7 {
   border-bottom: solid 1px #eaeaef;
 }
 
 .c13 {
-  padding-inline: 40px;
+  padding-inline: 32px;
 }
 
 .c13>div {
   padding-block: 40px;
+  margin: 0 -2px 0 -2px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 
 .c13>div>div {

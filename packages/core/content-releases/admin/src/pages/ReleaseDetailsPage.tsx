@@ -29,7 +29,7 @@ import {
   LinkButton,
   Dialog,
   SimpleMenu,
-  MenuItem,
+  Menu,
 } from '@strapi/design-system';
 import { More, Pencil, Trash } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -75,38 +75,6 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
   border-bottom-left-radius: ${({ theme }) => theme.borderRadius};
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
-
-const StyledMenuItem = styled(MenuItem)<{
-  disabled?: boolean;
-  $variant?: 'neutral' | 'danger';
-}>`
-  svg path {
-    fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
-  }
-  span {
-    color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
-  }
-
-  &:hover {
-    background: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}100`]};
-  }
-`;
-
-const PencilIcon = styled(Pencil)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
-  path {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-`;
-
-const TrashIcon = styled(Trash)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
-  path {
-    fill: ${({ theme }) => theme.colors.danger600};
-  }
 `;
 
 interface ReleaseDetailsLayoutProps {
@@ -287,32 +255,27 @@ const ReleaseDetailsLayout = ({
                 })}
                 popoverPlacement="bottom-end"
               >
-                <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
-                  <Flex alignItems="center" gap={2} hasRadius width="100%">
-                    <PencilIcon />
-                    <Typography ellipsis>
-                      {formatMessage({
-                        id: 'content-releases.header.actions.edit',
-                        defaultMessage: 'Edit',
-                      })}
-                    </Typography>
-                  </Flex>
-                </StyledMenuItem>
-                <StyledMenuItem
+                <Menu.Item
+                  disabled={!canUpdate}
+                  onSelect={toggleEditReleaseModal}
+                  startIcon={<Pencil />}
+                >
+                  {formatMessage({
+                    id: 'content-releases.header.actions.edit',
+                    defaultMessage: 'Edit',
+                  })}
+                </Menu.Item>
+                <Menu.Item
                   disabled={!canDelete}
                   onSelect={toggleWarningSubmit}
-                  $variant="danger"
+                  variant="danger"
+                  startIcon={<Trash />}
                 >
-                  <Flex alignItems="center" gap={2} hasRadius width="100%">
-                    <TrashIcon />
-                    <Typography ellipsis textColor="danger600">
-                      {formatMessage({
-                        id: 'content-releases.header.actions.delete',
-                        defaultMessage: 'Delete',
-                      })}
-                    </Typography>
-                  </Flex>
-                </StyledMenuItem>
+                  {formatMessage({
+                    id: 'content-releases.header.actions.delete',
+                    defaultMessage: 'Delete',
+                  })}
+                </Menu.Item>
                 <ReleaseInfoWrapper
                   direction="column"
                   justifyContent="center"

@@ -1,5 +1,1 @@
-module.exports = ({ env }) => ({
-  future: {
-    unstablePreviewSideEditor: true,
-  },
-});
+module.exports = ({ env }) => ({});

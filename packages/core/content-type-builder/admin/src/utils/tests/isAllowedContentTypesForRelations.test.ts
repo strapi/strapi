@@ -4,90 +4,54 @@ import type { ContentType } from '../../types';
 
 describe('CTB | utils | isAllowedContentTypesForRelations', () => {
   it('should be falsy if the model is a single type', () => {
-    const contentType: ContentType = {
-      visible: true,
-      name: 'plugin::users-permissions.user',
-      title: 'User',
-      plugin: 'users-permissions',
-      uid: 'plugin::users-permissions.user',
-      to: '/plugins/content-type-builder/content-types/plugin::users-permissions.user',
-      kind: 'singleType',
-      restrictRelationsTo: null,
-    };
-
-    expect(isAllowedContentTypesForRelations(contentType)).toBeFalsy();
+    expect(
+      isAllowedContentTypesForRelations({
+        kind: 'singleType',
+        restrictRelationsTo: null,
+      })
+    ).toBeFalsy();
   });
 
   it('should be falsy if the restricted relations is an empty array', () => {
-    const contentType: ContentType = {
-      visible: true,
-      name: 'plugin::users-permissions.user',
-      title: 'User',
-      plugin: 'users-permissions',
-      uid: 'plugin::users-permissions.user',
-      to: '/plugins/content-type-builder/content-types/plugin::users-permissions.user',
-      kind: 'collectionType',
-      restrictRelationsTo: [],
-    };
-
-    expect(isAllowedContentTypesForRelations(contentType)).toBeFalsy();
+    expect(
+      isAllowedContentTypesForRelations({
+        kind: 'collectionType',
+        restrictRelationsTo: [],
+      })
+    ).toBeFalsy();
   });
 
   it('should be truthy if the model is a collection type and the restricted relations is null', () => {
-    const contentType: ContentType = {
-      visible: true,
-      name: 'plugin::users-permissions.user',
-      title: 'User',
-      plugin: 'users-permissions',
-      uid: 'plugin::users-permissions.user',
-      to: '/plugins/content-type-builder/content-types/plugin::users-permissions.user',
-      kind: 'collectionType',
-      restrictRelationsTo: null,
-    };
-
-    expect(isAllowedContentTypesForRelations(contentType)).toBeTruthy();
+    expect(
+      isAllowedContentTypesForRelations({
+        kind: 'collectionType',
+        restrictRelationsTo: null,
+      })
+    ).toBeTruthy();
   });
 
   it('should be truthy if the model is a collection type and the restricted relations is not empty array', () => {
-    const contentType: ContentType = {
-      visible: true,
-      name: 'plugin::users-permissions.user',
-      title: 'User',
-      plugin: 'users-permissions',
-      uid: 'plugin::users-permissions.user',
-      to: '/plugins/content-type-builder/content-types/plugin::users-permissions.user',
-      kind: 'collectionType',
-      restrictRelationsTo: ['oneWay', 'manyWay'],
-    };
-
-    expect(isAllowedContentTypesForRelations(contentType)).toBeTruthy();
+    expect(
+      isAllowedContentTypesForRelations({
+        kind: 'collectionType',
+        restrictRelationsTo: ['oneWay', 'manyWay'],
+      })
+    ).toBeTruthy();
   });
 
   it('should be falsy if restrictRelationsTo is undefined', () => {
-    const contentType: ContentType = {
-      visible: true,
-      name: 'plugin::users-permissions.user',
-      title: 'User',
-      plugin: 'users-permissions',
-      uid: 'plugin::users-permissions.user',
-      to: '/plugins/content-type-builder/content-types/plugin::users-permissions.user',
-      kind: 'collectionType',
-    };
-
-    expect(isAllowedContentTypesForRelations(contentType)).toBeFalsy();
+    expect(
+      isAllowedContentTypesForRelations({
+        kind: 'collectionType',
+      })
+    ).toBeFalsy();
   });
 
   it('should be falsy if kind is undefined', () => {
-    const contentType: ContentType = {
-      visible: true,
-      name: 'plugin::users-permissions.user',
-      title: 'User',
-      plugin: 'users-permissions',
-      uid: 'plugin::users-permissions.user',
-      to: '/plugins/content-type-builder/content-types/plugin::users-permissions.user',
-      restrictRelationsTo: ['oneWay', 'manyWay'],
-    };
-
-    expect(isAllowedContentTypesForRelations(contentType)).toBeFalsy();
+    expect(
+      isAllowedContentTypesForRelations({
+        restrictRelationsTo: ['oneWay', 'manyWay'],
+      })
+    ).toBeFalsy();
   });
 });

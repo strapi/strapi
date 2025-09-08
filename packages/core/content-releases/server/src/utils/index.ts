@@ -55,7 +55,8 @@ export const isEntryValid = async (
     );
 
     const workflowsService = strapi.plugin('review-workflows').service('workflows');
-    const workflow = await workflowsService.getAssignedWorkflow(contentTypeUid, {
+    // Workflows service may not be available depending on the license
+    const workflow = await workflowsService?.getAssignedWorkflow(contentTypeUid, {
       populate: 'stageRequiredToPublish',
     });
 
