@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Grid, Main, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, Main, ScrollArea, Typography } from '@strapi/design-system';
 import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
@@ -19,6 +19,7 @@ import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
 
 import type { WidgetWithUID } from '../../core/apis/Widgets';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
+import { useWidgetResize } from '../../hooks/useWidgetResize';
 
 /* -------------------------------------------------------------------------------------------------
  * WidgetRoot
@@ -27,17 +28,38 @@ import type { WidgetType } from '@strapi/admin/strapi-admin';
 interface WidgetRootProps
   extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
   children: React.ReactNode;
+  columnWidths: Record<string, number>;
+  setColumnWidths: (
+    widths: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)
+  ) => void;
 }
 
-export const WidgetRoot = ({ title, icon = PuzzlePiece, children, link, uid }: WidgetRootProps) => {
+export const WidgetRoot = ({
+  title,
+  icon = PuzzlePiece,
+  children,
+  link,
+  uid,
+  columnWidths,
+  setColumnWidths
+}: WidgetRootProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const id = React.useId();
   const Icon = icon;
+  const columnWidth = columnWidths[uid] || 6;
 
   const handleClickOnLink = () => {
     trackUsage('didOpenHomeWidgetLink', { widgetUID: uid });
   };
+
+  const { handleMouseDown } = useWidgetResize({
+    columnWidth,
+    onWidthChange: (newWidth) => setColumnWidths((prev) => ({
+      ...prev,
+      [uid]: newWidth,
+    })),
+  });
 
   return (
     <Flex
@@ -52,6 +74,7 @@ export const WidgetRoot = ({ title, icon = PuzzlePiece, children, link, uid }: W
       gap={4}
       padding={6}
       aria-labelledby={id}
+      position="relative"
     >
       <Flex direction="row" gap={2} justifyContent="space-between" width="100%" tag="header">
         <Flex gap={2}>
@@ -74,9 +97,23 @@ export const WidgetRoot = ({ title, icon = PuzzlePiece, children, link, uid }: W
           </Typography>
         )}
       </Flex>
-      <Box width="100%" height="261px" overflow="auto" tag="main">
-        {children}
-      </Box>
+      <ScrollArea>
+        <Box width="100%" height="261px" overflow="auto" tag="main">
+          {children}
+        </Box>
+      </ScrollArea>
+      <Flex
+        position="absolute"
+        top={0}
+        bottom={0}
+        right={0}
+        padding={2}
+        alignItems="center"
+        style={{ cursor: 'col-resize' }}
+        onMouseDown={handleMouseDown}
+      >
+        <Box background="neutral150" height="24px" width="2px" borderRadius={1} />
+      </Flex>
     </Flex>
   );
 };
@@ -85,7 +122,13 @@ export const WidgetRoot = ({ title, icon = PuzzlePiece, children, link, uid }: W
  * UnstableHomePageCe
  * -----------------------------------------------------------------------------------------------*/
 
-const WidgetComponent = ({ component }: { component: () => Promise<React.ComponentType> }) => {
+const WidgetComponent = ({
+  component,
+  columnWidth
+}: {
+  component: () => Promise<React.ComponentType>;
+  columnWidth: number;
+}) => {
   const [loadedComponent, setLoadedComponent] = React.useState<React.ComponentType | null>(null);
 
   React.useEffect(() => {
@@ -104,7 +147,7 @@ const WidgetComponent = ({ component }: { component: () => Promise<React.Compone
     return <Widget.Loading />;
   }
 
-  return <Component />;
+  return <Component {...({ columnWidth } as any)} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -119,6 +162,7 @@ const HomePageCE = () => {
   const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
   const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
 
   React.useEffect(() => {
     const checkWidgetsPermissions = async () => {
@@ -164,14 +208,19 @@ const HomePageCE = () => {
           ) : (
             <Grid.Root gap={5}>
               {filteredWidgets.map((widget) => (
-                <Grid.Item col={6} s={12} key={widget.uid}>
+                <Grid.Item col={columnWidths[widget.uid] || 6} s={12} key={widget.uid}>
                   <WidgetRoot
                     title={widget.title}
                     icon={widget.icon}
                     link={widget.link}
                     uid={widget.uid}
+                    columnWidths={columnWidths}
+                    setColumnWidths={setColumnWidths}
                   >
-                    <WidgetComponent component={widget.component} />
+                    <WidgetComponent
+                      component={widget.component}
+                      columnWidth={columnWidths[widget.uid] || 6}
+                    />
                   </WidgetRoot>
                 </Grid.Item>
               ))}
