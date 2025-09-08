@@ -23,6 +23,7 @@ export const getOrCreateDeviceId = (): string => {
   return generated;
 };
 
+// TODO: do we need this as a fallback ?
 const _generateRandomHex32 = (): string => {
   const bytes = new Uint8Array(16);
 

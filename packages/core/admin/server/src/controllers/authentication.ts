@@ -13,7 +13,7 @@ import {
   validateForgotPasswordInput,
   validateResetPasswordInput,
   validateAccessTokenExchangeInput,
-  validateLoginOptionalSessionInput,
+  validateLoginSessionInput,
 } from '../validation/authentication';
 
 import type {
@@ -48,9 +48,6 @@ const getRefreshCookieOptions = () => {
   };
 };
 
-/**
- * Returns refresh token TTL in seconds.
- */
 const getRefreshTokenTTLSeconds = (): number =>
   Number(strapi.config.get('admin.auth.sessions.refreshTokenLifespan', 30 * 24 * 60 * 60));
 
@@ -89,10 +86,10 @@ const readRefreshTokenFromRequest = (ctx: Context): string | null => {
 
 export default {
   login: compose([
-    // Validate optional session-related fields (deviceId, rememberMe) without
+    // Validate session-related fields (deviceId, rememberMe) without
     // constraining credential fields handled by passport
     async (ctx: Context, next: Next) => {
-      await validateLoginOptionalSessionInput(ctx.request.body ?? {});
+      await validateLoginSessionInput(ctx.request.body ?? {});
       return next();
     },
     (ctx: Context, next: Next) => {

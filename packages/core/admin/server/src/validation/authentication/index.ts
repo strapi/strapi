@@ -9,4 +9,4 @@ export { validateRegistrationInput, validateAdminRegistrationInput, validateRegi
 export { default as validateForgotPasswordInput } from './forgot-password';
 export { default as validateResetPasswordInput } from './reset-password';
 export { default as validateAccessTokenExchangeInput } from './access-token';
-export { default as validateLoginOptionalSessionInput } from './login';
+export { default as validateLoginSessionInput } from './login';

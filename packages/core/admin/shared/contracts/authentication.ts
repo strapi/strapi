@@ -19,9 +19,7 @@ export declare namespace Login {
     data: {
       // Primary token for the client to use. This is the short‑lived access token.
       token: string;
-      // Explicit access token (alias of token)
       accessToken?: string;
-      // Issued refresh token for non-cookie clients (optional)
       refreshToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };

@@ -6,7 +6,7 @@ import { createUtils } from 'api-tests/utils';
 import jwt from 'jsonwebtoken';
 
 /**
- * Tests for admin authentication when session-based auth is enabled.
+ * Tests for session based admin authentication
  * Focus: login/register issuing refresh cookie + access/refresh in body, and access-token exchange.
  */
 describe('Admin Sessions Auth', () => {

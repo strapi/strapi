@@ -19,7 +19,7 @@ const createUtils = (strapi) => {
       throw new Error('Admin login did not return an access token');
     }
 
-    // Retrieve the current user via API to mirror real client flow
+    // Retrieve the current user via API
     const me = await agent.get('/admin/users/me').auth(token, { type: 'bearer' });
     if (me.statusCode !== 200) {
       throw new Error(`Fetching /admin/users/me failed: ${me.statusCode}`);

@@ -3,9 +3,6 @@
 import { createStrapiInstance, superAdmin } from 'api-tests/strapi';
 import { createRequest } from 'api-tests/request';
 
-/**
- * Tests for logout flows with session manager.
- */
 describe('Admin Logout Sessions', () => {
   let strapi: any;
 
@@ -45,7 +42,7 @@ describe('Admin Logout Sessions', () => {
 
     // Use only Authorization header (no cookie) for logout
 
-    // @ts-expect-error - We don't have the type for this
+    // @ts-expect-error - helper chaining
     const freshRq = createRequest({ strapi }).setToken(accessToken);
     const res = await freshRq.post('/admin/logout');
     expect(res.statusCode).toBe(200);

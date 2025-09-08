@@ -4,10 +4,7 @@ import { createStrapiInstance } from 'api-tests/strapi';
 import { createRequest } from 'api-tests/request';
 import jwt from 'jsonwebtoken';
 
-/**
- * API tests for admin strategy behavior when sessions are enabled.
- */
-describe('admin strategy with sessions enabled', () => {
+describe('admin strategy', () => {
   let strapi: any;
 
   const cookieName = 'strapi_admin_refresh';
@@ -60,10 +57,11 @@ describe('admin strategy with sessions enabled', () => {
     const refreshCookie = setCookies.find((c) => c.startsWith(`${cookieName}=`));
     const cookiePair = refreshCookie!.split(';')[0];
 
-    // @ts-expect-error - TODO
-    const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
-      headers: { Cookie: cookiePair },
-    });
+    const tokenRes = await createRequest({ strapi })
+      // @ts-expect-error - helper chaining
+      .post('/admin/access-token', {
+        headers: { Cookie: cookiePair },
+      });
     const accessToken = tokenRes.body?.data?.token as string;
 
     // Revoke all sessions for admin via logout
@@ -74,8 +72,10 @@ describe('admin strategy with sessions enabled', () => {
     expect(logoutRes.statusCode).toBe(200);
 
     // Now the access token should be rejected by strategy
-    // @ts-expect-error - TODO
-    const res = await createRequest({ strapi }).setToken(accessToken).get('/admin/users/me');
+    const res = await createRequest({ strapi })
+      // @ts-expect-error - helper chaining
+      .setToken(accessToken)
+      .get('/admin/users/me');
     expect(res.statusCode).toBe(401);
   });
 

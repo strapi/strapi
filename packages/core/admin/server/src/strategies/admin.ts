@@ -2,9 +2,6 @@ import type { Context } from 'koa';
 import type { Modules } from '@strapi/types';
 import { getService } from '../utils';
 
-/**
- * Returns the session manager instance if available, else null.
- */
 const getSessionManager = (): Modules.SessionManager.SessionManagerService | null => {
   const manager = strapi.sessionManager as Modules.SessionManager.SessionManagerService | undefined;
 
