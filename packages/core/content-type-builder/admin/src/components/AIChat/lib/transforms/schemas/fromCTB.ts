@@ -1,5 +1,4 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import { Schema } from '../../types/schema';
 
 import type { ContentType, Component, AnyAttribute } from '../../../../../types';
