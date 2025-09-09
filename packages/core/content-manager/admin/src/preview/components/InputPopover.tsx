@@ -140,6 +140,7 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
         width={iframeRect.width + 'px'}
         height={iframeRect.height + 'px'}
         zIndex={4}
+        onClick={() => iframeRef.current?.focus()}
       />
       <InputPopoverProvider>
         <Popover.Root open={true} onOpenChange={(open) => !open && setPopoverField(null)}>
