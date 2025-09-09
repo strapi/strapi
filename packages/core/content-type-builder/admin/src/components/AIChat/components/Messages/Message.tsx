@@ -261,15 +261,12 @@ export const ChatMessage = ({
 }) => {
   /**
    * IMPORTANT: Messages are rendered using react-markdown (heavy compute)
-   * This memoizes messages so only the new streamed ones are re-rendered.
-   *
-   * Else, every new streamed character would re-render the entire chat.
+   * Component re-renders on each message update, but AI SDK v5 provides
+   * throttling (experimental_throttle: 100ms) which batches updates and reduces
+   * re-render frequency during streaming.
    */
-  // return useMemo(() => {
   if (message.role === 'user') {
     return <UserMessage message={message as UserMessageType} />;
   }
   return <AssistantMessage message={message as AssistantMessageType} />;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [message.id]); // Only re-render if message id changes
 };
