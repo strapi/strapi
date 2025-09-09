@@ -110,7 +110,7 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
   }
 
   if (typeof value === 'object' && value !== null) {
-    const entries = Object.entries(value);
+    const entries = filterAttributes(value);
 
     return (
       <ToggleableContainer
