@@ -252,7 +252,7 @@ const FigmaImageDisplayStep = ({
               <Grid.Item key={frame.id} col={6} padding={'1px'}>
                 <ImagePreview
                   imageUrl={frame.url}
-                  imageName={frame.name || `Frame ${index + 1}`}
+                  imageName={frame.filename || `Frame ${index + 1}`}
                   selected={isSelected}
                   onSelect={() => handleFrameSelection(frame.id)}
                 />
@@ -276,7 +276,7 @@ export const UploadFigmaModal = () => {
 
   const { addAttachments } = useAttachments();
   const { isFigmaUploadOpen, closeFigmaUpload, submitOnFinish } = useUploadFigmaToChat();
-  const { input, setInput, setMessages, reload, openChat } = useStrapiChat();
+  const { input, setInput, setMessages, sendMessage, openChat } = useStrapiChat();
   const { processFigmaUrl, isLoading, error } = useFigmaUpload({
     onSuccess: (images) => {
       setFigmaImages(images);
@@ -322,22 +322,15 @@ export const UploadFigmaModal = () => {
     openChat();
 
     if (submitOnFinish) {
-      // Autosubmit a message to chat with attachments
-      setMessages(() => [
-        {
-          role: 'user',
-          content: 'Create schemas from the attached images',
-          id: 'first-message',
-          experimental_attachments: selectedFigmaImages,
-          parts: [
-            {
-              type: 'text',
-              text: 'Create schemas from the attached images',
-            },
-          ],
-        },
-      ]);
-      reload();
+      // Auto-submit a message to chat with attachments
+      sendMessage({
+        role: 'user',
+        parts: [
+          { type: 'text', text: 'Create schemas from the attached images' },
+          ...selectedFigmaImages,
+        ],
+      });
+
       closeFigmaUpload();
     } else {
       // If input is empty, set a predefined message

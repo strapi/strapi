@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+  type ReactNode,
+  type ChangeEvent,
+} from 'react';
 
-import { useChat } from '@ai-sdk/react';
+import { UIMessage, useChat } from '@ai-sdk/react';
 import { useTracking } from '@strapi/admin/strapi-admin';
 
 import { useDataManager } from '../../DataManager/useDataManager';
@@ -10,10 +18,8 @@ import { useAIAvailability } from '../hooks/useAIAvailability';
 import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
 import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
-import { transformMessages } from '../lib/transforms/messages';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
 import { Attachment } from '../lib/types/attachments';
-import { Message } from '../lib/types/messages';
 import { Schema } from '../lib/types/schema';
 import { UploadProjectToChatProvider } from '../UploadCodeModal';
 import { UploadFigmaToChatProvider } from '../UploadFigmaModal';
@@ -23,9 +29,11 @@ import { SchemaChatProvider } from './SchemaProvider';
 interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   isChatEnabled: boolean;
   title?: string;
-  messages: Message[];
-  rawMessages: ReturnType<typeof useChat>['messages'];
+  messages: UIMessage[];
   handleSubmit: (event: any) => void;
+  input: string;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
   reset: () => void;
   schemas: Schema[];
   // Chat window
@@ -50,9 +58,10 @@ export const BaseChatProvider = ({
   children: ReactNode;
   defaultOpen?: boolean;
 }) => {
-  const [chatId, setChatId] = useState<string | undefined>(undefined);
+  const [chatId, setChatId] = useState<string | undefined>(generateRandomId());
   const [isChatOpen, setIsChatOpen] = useState(defaultOpen);
   const [openCount, setOpenCount] = useState(0);
+  const [input, setInput] = useState('');
 
   // Files
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -80,54 +89,71 @@ export const BaseChatProvider = ({
     ] as Schema[];
   }, [contentTypes, components]);
 
-  const chat = useAIChat({
+  const {
+    id,
+    messages,
+    sendMessage: _sendMessage,
+    status,
+    stop,
+    ...chat
+  } = useAIChat({
     id: chatId?.toString(),
-    sendExtraMessageFields: true,
     experimental_throttle: 100,
-    body: {
-      schemas,
-      metadata: {
-        lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
-      },
-    },
   });
 
   /* -------------------------------------------------------------------------------------------------
    * AI SDK chat overrides
    * -----------------------------------------------------------------------------------------------*/
 
-  // Messages are transformed into an easier to use format
-  // TODO: Make this more efficient only computing new streamed parts
-  const messages = useMemo(() => {
-    return transformMessages(chat.messages, chat);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chat.messages]);
+  // NOTE: body is using state variables, so they can not be passed as a prop in useChat
+  const sendMessage: typeof _sendMessage = async (message, options) => {
+    if (status === 'streaming' || status === 'submitted') {
+      return;
+    }
 
-  const handleSubmit = async (event: Parameters<typeof chat.handleSubmit>[0]) => {
-    chat.handleSubmit(event, {
-      experimental_attachments: attachments
-        // Transform to ai/sdk format and remove any attachments that are not yet ready
-        .filter((attachment) => attachment.status !== 'loading')
-        .map((attachment) => ({
-          name: attachment.name,
-          url: attachment.url,
-          contentType: attachment.contentType,
-        })),
-      allowEmptySubmit: true,
+    return _sendMessage(message, {
+      ...options,
       body: {
+        ...options?.body,
         schemas,
         metadata: {
           lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
         },
       },
     });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (status === 'streaming' || status === 'submitted') {
+      return;
+    }
+
+    const readyAttachments = attachments.filter((a) => a.status !== 'loading');
+
+    if (!input.trim() || readyAttachments.length !== 0) {
+      return;
+    }
+
+    const files = readyAttachments.map(
+      (attachment) =>
+        ({
+          type: 'file',
+          filename: attachment.filename,
+          mediaType: attachment.mediaType,
+          url: attachment.url,
+        }) as const
+    );
+    sendMessage({ text: input, files });
+    setInput('');
     setAttachments([]);
   };
 
   /* -------------------------------------------------------------------------------------------------
    * Chat title
    * -----------------------------------------------------------------------------------------------*/
-  const { title, generateTitle, resetTitle } = useChatTitle({ chatId: chat.id, messages });
+  const { title, generateTitle, resetTitle } = useChatTitle({ chatId: id, messages });
 
   // Automatically generate title when we have at least 1 message (user query)
   useEffect(() => {
@@ -137,12 +163,12 @@ export const BaseChatProvider = ({
   }, [messages.length, title, generateTitle]);
 
   useEffect(() => {
-    if (chat.status === 'error') {
+    if (status === 'error') {
       trackUsage('didAnswerMessage', {
         successful: false,
       });
     } else if (
-      chat.status === 'ready' &&
+      status === 'ready' &&
       messages.length > 0 &&
       messages[messages.length - 1]?.role === 'assistant'
     ) {
@@ -150,19 +176,26 @@ export const BaseChatProvider = ({
         successful: true,
       });
     }
-  }, [chat.status, messages, trackUsage]);
+  }, [status, messages, trackUsage]);
+
   const isChatAvailable = useAIAvailability();
 
   return (
     <ChatContext.Provider
       value={{
         isChatEnabled: isChatAvailable,
+        id,
+        status,
+        stop,
+        sendMessage,
         ...chat,
         messages,
-        rawMessages: chat.messages,
         handleSubmit,
+        input,
+        setInput,
+        handleInputChange: (e) => setInput(e.target.value),
         reset: () => {
-          chat.stop();
+          stop();
           setChatId(generateRandomId());
           trackUsage('didStartNewChat');
           resetTitle();

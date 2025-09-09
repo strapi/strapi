@@ -1,4 +1,4 @@
-import type { Attachment as AIAttachment } from 'ai';
+import type { FileUIPart } from 'ai';
 
 export type Project = {
   id: string;
@@ -14,4 +14,4 @@ export type Project = {
 export type Attachment = {
   id: string;
   status: 'loading' | 'ready';
-} & AIAttachment;
+} & FileUIPart;

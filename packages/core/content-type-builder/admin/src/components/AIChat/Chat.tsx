@@ -23,7 +23,7 @@ import {
 } from './hooks/useAIFetch';
 import { useAttachments } from './hooks/useAttachments';
 import { useTranslations } from './hooks/useTranslations';
-import { Message } from './lib/types/messages';
+import { AIMessage } from './lib/types/messages';
 import { useStrapiChat } from './providers/ChatProvider';
 import { useUploadProjectToChat } from './UploadCodeModal';
 import { useUploadFigmaToChat } from './UploadFigmaModal';
@@ -38,7 +38,7 @@ const ResponsiveFlex = styled(Flex)`
 `;
 
 const ChatSuggestions = () => {
-  const { append } = useStrapiChat();
+  const { sendMessage } = useStrapiChat();
   const { t } = useTranslations();
   const { trackUsage } = useTracking();
 
@@ -75,10 +75,7 @@ const ChatSuggestions = () => {
                   promptType: SUGGESTION_TO_PROMPT_TYPE[suggestion],
                 });
 
-                append({
-                  role: 'user',
-                  content: suggestion,
-                });
+                sendMessage({ text: suggestion });
               }}
             >
               <Typography fontWeight="regular">{suggestion}</Typography>
@@ -142,7 +139,7 @@ const ChatError = () => {
  * Chat Messages
  * -----------------------------------------------------------------------------------------------*/
 const ChatContent: React.FC<{
-  messages: Message[];
+  messages: AIMessage[];
 }> = ({ messages }) => {
   const messageEndRef = useRef<HTMLDivElement>(null);
   const { status } = useStrapiChat();
@@ -161,8 +158,15 @@ const ChatContent: React.FC<{
   return (
     <>
       <Flex direction="column" gap={5}>
-        {messages.map((message) => (
-          <ChatMessage key={message.id} message={message} />
+        {messages.map((message, idx) => (
+          <ChatMessage
+            key={message.id}
+            message={message}
+            // Chat loading and message is the last one
+            isLoading={
+              (status === 'streaming' || status === 'submitted') && idx === messages.length - 1
+            }
+          />
         ))}
         {status === 'error' && <ChatError />}
       </Flex>
@@ -182,7 +186,7 @@ const ChatAttachmentList = () => {
   return (
     <Input.Attachments>
       {attachments.map((attachment, index) => (
-        <Box key={attachment.name} maxWidth={'250px'}>
+        <Box key={attachment.filename} maxWidth={'250px'}>
           <AttachmentPreview
             attachment={attachment}
             onRemove={() => removeAttachmentByIndex(index)}

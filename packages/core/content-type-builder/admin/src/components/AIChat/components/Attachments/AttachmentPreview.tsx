@@ -32,17 +32,17 @@ const ImageAttachment = ({
   ...props
 }: AttachmentPreviewProps & Omit<AttachmentRootProps, 'children'>) => {
   return (
-    <FullScreenImage.Root src={attachment.url} alt={attachment.name || 'image'}>
+    <FullScreenImage.Root src={attachment.url} alt={attachment.filename || 'image'}>
       <FullScreenImage.Trigger asChild>
         <Attachment.Root {...props}>
           <Attachment.Preview>
             {attachment.status === 'loading' ? (
               <Loader small />
             ) : (
-              <ImageThumbnail src={attachment.url} alt={attachment.name} />
+              <ImageThumbnail src={attachment.url} alt={attachment.filename} />
             )}
           </Attachment.Preview>
-          <Attachment.Title>{attachment.name || 'unknown'}</Attachment.Title>
+          <Attachment.Title>{attachment.filename || 'unknown'}</Attachment.Title>
           {onRemove && <Attachment.Remove onClick={onRemove} />}
         </Attachment.Root>
       </FullScreenImage.Trigger>
@@ -64,7 +64,7 @@ const CodeAttachment = ({
       <Attachment.Preview>
         {attachment.status === 'loading' ? <Loader small /> : <Folder height={24} width={24} />}
       </Attachment.Preview>
-      <Attachment.Title>{attachment.name || 'unknown'}</Attachment.Title>
+      <Attachment.Title>{attachment.filename || 'unknown'}</Attachment.Title>
       {onRemove && <Attachment.Remove onClick={onRemove} />}
     </Attachment.Root>
   );
@@ -79,11 +79,11 @@ export const AttachmentPreview = ({
   onRemove,
   ...props
 }: AttachmentPreviewProps & Omit<AttachmentRootProps, 'children'>) => {
-  if (attachment.contentType?.startsWith('image/')) {
+  if (attachment.mediaType?.startsWith('image/')) {
     return <ImageAttachment attachment={attachment} onRemove={onRemove} {...props} />;
   }
 
-  if (attachment.contentType === STRAPI_CODE_MIME_TYPE) {
+  if (attachment.mediaType === STRAPI_CODE_MIME_TYPE) {
     return <CodeAttachment attachment={attachment} onRemove={onRemove} {...props} />;
   }
 
