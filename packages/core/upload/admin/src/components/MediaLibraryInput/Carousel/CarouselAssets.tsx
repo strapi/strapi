@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { CarouselInput, CarouselSlide } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { useTheme } from 'styled-components';
 
 import { getTrad } from '../../../utils/getTrad';
 import { EditAssetDialog } from '../../EditAssetDialog/EditAssetContent';
@@ -66,10 +67,28 @@ export const CarouselAssets = React.forwardRef(
 
     const currentAsset = assets[selectedAssetIndex];
 
+    const internalRef = React.useRef<HTMLDivElement>(null);
+    const parentRef = forwardedRef
+      ? (forwardedRef as React.RefObject<HTMLDivElement>)
+      : internalRef;
+
+    const theme = useTheme();
+
+    React.useEffect(() => {
+      if (parentRef.current) {
+        const firstChild = parentRef.current.firstElementChild as HTMLElement | null;
+        if (firstChild) {
+          firstChild.style.backgroundColor = disabled ? theme.colors.neutral150 : '';
+          firstChild.style.border = disabled ? theme.colors.neutral200 : '';
+        }
+      }
+    }, [disabled, parentRef, theme.colors.neutral150, theme.colors.neutral200]);
+
     return (
       <>
         <CarouselInput
-          ref={forwardedRef as React.Ref<HTMLDivElement>}
+          style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
+          ref={parentRef}
           label={label}
           labelAction={labelAction}
           secondaryLabel={currentAsset?.name}
