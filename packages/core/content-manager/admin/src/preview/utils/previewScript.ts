@@ -52,6 +52,10 @@ const previewScript = (shouldRun = true) => {
     window.parent.postMessage({ type, payload }, '*');
   };
 
+  const getElementsByPath = (path: string) => {
+    return document.querySelectorAll(`[${SOURCE_ATTRIBUTE}*="path=${path}"]`);
+  };
+
   /* -----------------------------------------------------------------------------------------------
    * Functionality pieces
    * ---------------------------------------------------------------------------------------------*/
@@ -76,9 +80,10 @@ const previewScript = (shouldRun = true) => {
 
       if (directTextContent) {
         try {
+          // TODO: check if we can call split instead of decode+clean
           const result = stegaDecode(directTextContent);
-          if (result) {
-            element.setAttribute(SOURCE_ATTRIBUTE, result.key);
+          if (result && 'strapiSource' in result) {
+            element.setAttribute(SOURCE_ATTRIBUTE, result.strapiSource);
 
             // Remove encoded part from DOM text content (to avoid breaking links for example)
             directTextNodes.forEach((node) => {
@@ -434,8 +439,7 @@ const previewScript = (shouldRun = true) => {
         const { field, value } = event.data.payload;
         if (!field) return;
 
-        const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
-        matchingElements.forEach((element) => {
+        getElementsByPath(field).forEach((element) => {
           if (element instanceof HTMLElement) {
             element.textContent = value || '';
           }
@@ -459,8 +463,10 @@ const previewScript = (shouldRun = true) => {
 
         // Set new focused field and highlight matching elements
         highlightManager.setFocusedField(field);
-        const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
-        matchingElements.forEach((element) => {
+        getElementsByPath(field).forEach((element, index) => {
+          if (index === 0) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
           const highlight =
             highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];
           if (highlight) {

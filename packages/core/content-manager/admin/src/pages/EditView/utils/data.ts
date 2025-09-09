@@ -277,7 +277,7 @@ const handleInvisibleAttributes = (
     // 🔹 Handle components
     if (attrDef.type === 'component') {
       const compSchema = components[attrDef.component];
-      const value = currentValue ?? initialValue;
+      const value = currentValue === undefined ? initialValue : currentValue;
 
       if (!value) {
         result[attrName] = attrDef.repeatable ? [] : null;

@@ -2,20 +2,20 @@
 
 ## Supported Versions
 
-As of September 2024 (and until this document is updated), only the v4.x.x and v5.x.x _GA_ or _STABLE_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
+As of September 2025 (and until this document is updated), only the v4.x.x and v5.x.x _GA_ or _STABLE_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
 
 **Note**: The v4.x.x LTS version will only receive high/critical severity fixes until April 2026. Any Medium/Low severity issues will not be fixed unless specific exceptions are made.
 
-| Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes                          |
-| ------- | ----------- | -------------- | -------------- | ---------------------- | ------------------------------ |
-| 5.x.x   | GA / Stable | September 2024 | Further Notice | Further Notice         | LTS                            |
-| 5.x.x   | RC          | N/A            | September 2024 | N/A                    | Not Supported                  |
-| 5.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported                  |
-| 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | Not Supported                  |
-| 4.x.x   | GA / Stable | November 2021  | October 2025   | April 2026             | LTS (High/Critical fixes only) |
-| 4.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported                  |
-| 4.x.x   | Alpha       | N/A            | N/A            | N/A                    | Not Supported                  |
-| 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life                    |
+| Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes              |
+| ------- | ----------- | -------------- | -------------- | ---------------------- | ------------------ |
+| 5.x.x   | GA / Stable | September 2024 | Further Notice | Further Notice         | LTS                |
+| 5.x.x   | RC          | N/A            | September 2024 | N/A                    | End Of Life        |
+| 5.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life        |
+| 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life        |
+| 4.x.x   | GA / Stable | November 2021  | October 2025   | April 2026             | Maintanence Period |
+| 4.x.x   | Beta        | N/A            | N/A            | N/A                    | End Of Life        |
+| 4.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life        |
+| 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life        |
 
 ## Reporting a Vulnerability
 
@@ -41,6 +41,27 @@ You will receive a response from us within 72 hours. If the issue is confirmed, 
 Please note that we follow a very strict internal and public disclosure policy, typically a patch will be issued and included in a release. We then will place a warning that a security vulnerability has been patched and delay detailed disclosure from 2 to 8 weeks depending on the severity of the issue. If you have any resources such as blog posts that you intend to publish on and would like us to include these in our disclosure please advise us ASAP.
 
 Before doing any public disclosure we do ask that you speak to us first to ensure we are not releasing too much information before a patch is available and time has been given to users to upgrade their projects.
+
+## Specific Exclusions
+
+Pursuant to the [CNA Operational Rules](https://www.cve.org/resourcessupport/allresources/cnarules) there are certain exclusions that apply that SHOULD NOT be reported to us as vulnerabilities, these include but are not limited to:
+
+- Vulnerable packages and/or libraries that have vulnerabilities in them (CNA Operational Rule 4.1.12) but are used by Strapi UNLESS there is significant proof that the libraries cause a new vulnerability within Strapi (CNA Operational Rule 4.1.14):
+  > 4.1.12 The act of updating Product dependencies MUST NOT be determined to be a Vulnerability, regardless of whether the dependencies have Vulnerabilities. For example, updating a library to address a Vulnerability in that library MUST NOT be determined to be a new Vulnerability in a Product that uses the library, and a Vulnerability advisory for the Product SHOULD reference the CVE ID for the Vulnerability in the library.
+- End of Life versions of Strapi (CNA Operational Rule 4.1.13)
+  > 4.1.13 The state of a Product being EOL, by itself, MUST NOT be determined to be a Vulnerability.
+- If the vulnerability is the result of improper configuration made by an authorized user assuming they are either well-documented or well-understood (CNA Operational Rule 4.1.3)
+  > 4.1.3 Well-documented or commonly understood non-default configuration or runtime changes made by an authorized user SHOULD NOT be determined to be Vulnerabilities.
+- Conditions or behaviors that do not lead to a security impact (CNA Operational Rule 4.1.2)
+  > 4.1.2 Conditions or behaviors that do not lead to a security impact SHOULD NOT be determined to be Vulnerabilities. Examples of security impacts include an increase in access for an attacker, a decrease in availability of a target, or another violation of security policy.
+
+In addition to the above stated rules, we will also apply some generic rules as well:
+
+- Any intentions to make threats against any team member, employee, or representative of Strapi or its partners
+- Any intentions to extort or otherwise blackmail a team member, employee, or representative of Strapi or its partners
+- Any vulnerability report made with malicious intent (such as overwhelming security resource personnel)
+
+If any of these cases apply to a vulnerability report then the report will be immediately rejected and closed. In cases where applicable we will also report these people to any applicable authorities or security program groups.
 
 ## Security Process Summary
 
