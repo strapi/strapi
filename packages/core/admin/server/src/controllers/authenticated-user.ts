@@ -57,6 +57,9 @@ export default {
   },
 
   async getAiToken(ctx: Context) {
+    const ERROR_PREFIX = 'AI token request failed:';
+    const USER_ERROR_MESSAGE = 'AI token request failed. Check server logs for details.';
+
     try {
       // Security check: Ensure user is authenticated and has proper permissions
       if (!ctx.state.user) {
@@ -65,7 +68,8 @@ export default {
 
       // Check if EE features are enabled first
       if (!strapi.ee?.isEE) {
-        return ctx.badRequest('Enterprise Edition features are not enabled');
+        strapi.log.error(`${ERROR_PREFIX} Enterprise Edition features are not enabled`);
+        return ctx.internalServerError(USER_ERROR_MESSAGE);
       }
 
       // Get the EE license
@@ -82,17 +86,19 @@ export default {
       }
 
       if (!eeLicense) {
-        return ctx.badRequest(
-          'No EE license found. Please ensure STRAPI_LICENSE environment variable is set or license.txt file exists.'
+        strapi.log.error(
+          `${ERROR_PREFIX} No EE license found. Please ensure STRAPI_LICENSE environment variable is set or license.txt file exists.`
         );
+        return ctx.internalServerError(USER_ERROR_MESSAGE);
       }
 
       const aiServerUrl = process.env.STRAPI_ADMIN_AI_URL || process.env.STRAPI_AI_URL;
 
       if (!aiServerUrl) {
-        return ctx.badRequest(
-          'AI server URL not configured. Please set STRAPI_ADMIN_AI_URL or STRAPI_AI_URL environment variable.'
+        strapi.log.error(
+          `${ERROR_PREFIX} AI server URL not configured. Please set STRAPI_ADMIN_AI_URL or STRAPI_AI_URL environment variable.`
         );
+        return ctx.internalServerError(USER_ERROR_MESSAGE);
       }
 
       // Get the current user
@@ -104,18 +110,14 @@ export default {
       // Get project ID
       const projectId = strapi.config.get('uuid');
       if (!projectId) {
-        return ctx.badRequest('Project ID not configured');
+        strapi.log.error(`${ERROR_PREFIX} Project ID not configured`);
+        return ctx.internalServerError(USER_ERROR_MESSAGE);
       }
 
-      strapi.log.info('Making request to AI server:', {
-        url: `${aiServerUrl}/auth/getAiJWT`,
-        projectId,
-        hasEeLicense: !!eeLicense,
-        userEmail: user.email,
-      });
+      strapi.log.http('Contacting AI Server for token generation');
 
       try {
-        // Call the AI server's getAiJWT endpoint (now on public server)
+        // Call the AI server's getAiJWT endpoint
         const response = await fetch(`${aiServerUrl}/auth/getAiJWT`, {
           method: 'POST',
           headers: {
@@ -141,44 +143,31 @@ export default {
             errorData = { error: errorText || 'Failed to parse error response' };
           }
 
-          strapi.log.error('AI token request failed:', {
+          strapi.log.error(`${ERROR_PREFIX} ${errorData?.error || 'Unknown error'}`, {
             status: response.status,
             statusText: response.statusText,
             error: errorData,
             errorText,
             projectId,
-            aiServerUrl,
           });
 
-          // Return more specific error messages
-          if (response.status === 401) {
-            // This shouldn't happen with the public endpoint
-            const message =
-              process.env.NODE_ENV === 'development'
-                ? `AI server request failed. Response: ${errorText || 'No response body'}.`
-                : 'AI server request failed.';
-            return ctx.unauthorized(message);
-          }
-          if (response.status === 403) {
-            return ctx.forbidden('License validation failed. Check your EE license.');
-          }
-          if (response.status === 404) {
-            return ctx.notFound(`AI service endpoint not found at ${aiServerUrl}`);
-          }
-
-          // Include more detail in error for debugging
-          return ctx.badRequest(
-            `Failed to obtain AI token. Server responded with: ${response.status} ${errorText || response.statusText}`
-          );
+          return ctx.internalServerError(USER_ERROR_MESSAGE);
         }
 
-        const data = (await response.json()) as {
-          jwt: string;
-          expiresAt?: string;
-        };
+        let data;
+        try {
+          data = (await response.json()) as {
+            jwt: string;
+            expiresAt?: string;
+          };
+        } catch (parseError) {
+          strapi.log.error(`${ERROR_PREFIX} Failed to parse AI server response`, parseError);
+          return ctx.internalServerError(USER_ERROR_MESSAGE);
+        }
 
         if (!data.jwt) {
-          throw new Error('Invalid response: missing JWT token');
+          strapi.log.error(`${ERROR_PREFIX} Invalid response: missing JWT token`);
+          return ctx.internalServerError(USER_ERROR_MESSAGE);
         }
 
         strapi.log.info('AI token generated successfully', {
@@ -196,15 +185,18 @@ export default {
         } satisfies GetAiToken.Response;
       } catch (fetchError) {
         if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-          strapi.log.error('AI token request timeout');
-          return ctx.requestTimeout('Request to AI server timed out');
+          strapi.log.error(`${ERROR_PREFIX} Request to AI server timed out`);
+          return ctx.internalServerError(USER_ERROR_MESSAGE);
         }
 
         throw fetchError;
       }
     } catch (error) {
-      strapi.log.error('Failed to get AI token:', error);
-      ctx.internalServerError('An unexpected error occurred while obtaining the AI token');
+      strapi.log.error(
+        `${ERROR_PREFIX} ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error
+      );
+      return ctx.internalServerError(USER_ERROR_MESSAGE);
     }
   },
 };
