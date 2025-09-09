@@ -59,7 +59,7 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
   if (fieldName === 'blocks') {
     return (
       <Flex direction="column" alignItems="flex-start" fontSize="1.4rem" gap={2}>
-        <BlocksRenderer content={value} />
+        {value ? <BlocksRenderer content={value} /> : 'null'}
       </Flex>
     );
   }
