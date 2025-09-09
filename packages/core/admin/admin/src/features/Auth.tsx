@@ -15,7 +15,6 @@ import {
   useLazyCheckPermissionsQuery,
   useLoginMutation,
   useLogoutMutation,
-  useAccessTokenExchangeMutation,
 } from '../services/auth';
 import { getOrCreateDeviceId } from '../utils/deviceId';
 
@@ -114,7 +113,6 @@ const AuthProvider = ({
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
-  const [accessTokenExchangeMutation] = useAccessTokenExchangeMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const clearStateAndLogout = React.useCallback(() => {
@@ -122,26 +120,6 @@ const AuthProvider = ({
     dispatch(logoutAction());
     navigate('/auth/login');
   }, [dispatch, navigate]);
-
-  /**
-   * Exchange refresh token for new access token on app initialization.
-   * Uses cookie-based flow where refresh token is automatically read from a cookie.
-   */
-  React.useEffect(() => {
-    if (token && !_disableRenewToken) {
-      accessTokenExchangeMutation({}).then((res) => {
-        if ('data' in res) {
-          dispatch(
-            loginAction({
-              token: res.data.token,
-            })
-          );
-        } else {
-          clearStateAndLogout();
-        }
-      });
-    }
-  }, [token, dispatch, accessTokenExchangeMutation, clearStateAndLogout, _disableRenewToken]);
 
   React.useEffect(() => {
     if (user) {
