@@ -55,6 +55,7 @@ describe('Authenticated User Controller', () => {
         log: {
           info: jest.fn(),
           error: jest.fn(),
+          http: jest.fn(),
         },
         ...config,
       };
@@ -88,23 +89,30 @@ describe('Authenticated User Controller', () => {
       expect(ctx.unauthorized).toHaveBeenCalledWith('Authentication required');
     });
 
-    test('Should return bad request when no EE license is found', async () => {
+    test('Should return internal server error when no EE license is found', async () => {
       const ctx = createMockContext();
-      global.strapi = createMockStrapi() as any;
+      const mockStrapi = createMockStrapi() as any;
+      global.strapi = mockStrapi;
 
       // Ensure no license is available
       delete process.env.STRAPI_LICENSE;
 
       await authenticatedUserController.getAiToken(ctx as any);
 
-      expect(ctx.badRequest).toHaveBeenCalledWith(
-        'No EE license found. Please ensure STRAPI_LICENSE environment variable is set or license.txt file exists.'
+      expect(ctx.internalServerError).toHaveBeenCalledWith(
+        'AI token request failed. Check server logs for details.'
+      );
+
+      // Check that the specific error was logged
+      expect(mockStrapi.log.error).toHaveBeenCalledWith(
+        'AI token request failed: No EE license found. Please ensure STRAPI_LICENSE environment variable is set or license.txt file exists.'
       );
     });
 
-    test('Should return bad request when AI server URL is not configured', async () => {
+    test('Should return internal server error when AI server URL is not configured', async () => {
       const ctx = createMockContext();
-      global.strapi = createMockStrapi() as any;
+      const mockStrapi = createMockStrapi() as any;
+      global.strapi = mockStrapi;
 
       process.env.STRAPI_LICENSE = 'test-license';
       delete process.env.STRAPI_AI_URL;
@@ -112,28 +120,42 @@ describe('Authenticated User Controller', () => {
 
       await authenticatedUserController.getAiToken(ctx as any);
 
-      expect(ctx.badRequest).toHaveBeenCalledWith(
-        'AI server URL not configured. Please set STRAPI_ADMIN_AI_URL or STRAPI_AI_URL environment variable.'
+      expect(ctx.internalServerError).toHaveBeenCalledWith(
+        'AI token request failed. Check server logs for details.'
+      );
+
+      // Check that the specific error was logged
+      expect(mockStrapi.log.error).toHaveBeenCalledWith(
+        'AI token request failed: AI server URL not configured. Please set STRAPI_ADMIN_AI_URL or STRAPI_AI_URL environment variable.'
       );
     });
 
-    test('Should return bad request when project ID is not configured', async () => {
+    test('Should return internal server error when project ID is not configured', async () => {
       const ctx = createMockContext();
-      global.strapi = createMockStrapi({
+      const mockStrapi = createMockStrapi({
         config: {
           get: jest.fn((key) => (key === 'uuid' ? null : 'default-value')),
         },
       }) as any;
+      global.strapi = mockStrapi;
       setupValidEnvironment();
 
       await authenticatedUserController.getAiToken(ctx as any);
 
-      expect(ctx.badRequest).toHaveBeenCalledWith('Project ID not configured');
+      expect(ctx.internalServerError).toHaveBeenCalledWith(
+        'AI token request failed. Check server logs for details.'
+      );
+
+      // Check that the specific error was logged
+      expect(mockStrapi.log.error).toHaveBeenCalledWith(
+        'AI token request failed: Project ID not configured'
+      );
     });
 
     test('Should successfully return AI token when all conditions are met', async () => {
       const ctx = createMockContext();
-      global.strapi = createMockStrapi() as any;
+      const mockStrapi = createMockStrapi() as any;
+      global.strapi = mockStrapi;
       setupValidEnvironment();
 
       global.fetch = createSuccessfulFetch();
@@ -156,6 +178,13 @@ describe('Authenticated User Controller', () => {
           token: 'test-jwt-token',
           expiresAt: '2025-01-01T12:00:00Z',
         },
+      });
+
+      // Check that the appropriate log messages were called
+      expect(mockStrapi.log.http).toHaveBeenCalledWith('Contacting AI Server for token generation');
+      expect(mockStrapi.log.info).toHaveBeenCalledWith('AI token generated successfully', {
+        userId: 1,
+        expiresAt: '2025-01-01T12:00:00Z',
       });
     });
   });
