@@ -61,15 +61,6 @@ describe('Admin Access Token Exchange', () => {
     });
   });
 
-  it('returns 401 with invalid refresh token in body', async () => {
-    const cleanRq = createRequest({ strapi });
-    const res = await cleanRq.post('/admin/access-token', {
-      body: { refreshToken: 'invalid.jwt' },
-    });
-
-    expect(res.statusCode).toBe(401);
-  });
-
   it('returns 401 for missing token (no cookie and no body)', async () => {
     const rq = createRequest({ strapi });
     const res = await rq.post('/admin/access-token');
@@ -77,50 +68,103 @@ describe('Admin Access Token Exchange', () => {
     expect(res.statusCode).toBe(401);
   });
 
-  it('returns 200 with access token when refreshToken is supplied in body (no cookie)', async () => {
-    const loginRes = await createRequest({ strapi }).post('/admin/login', {
-      body: superAdmin.loginInfo,
-    });
+  it('returns 401 when idle window elapsed since parent token creation', async () => {
+    const rq = createRequest({ strapi });
+    const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
     expect(loginRes.statusCode).toBe(200);
 
     const refreshToken = loginRes.body?.data?.refreshToken as string;
-    expect(refreshToken).toEqual(expect.any(String));
+    const refreshCookie = getCookie(loginRes, cookieName)!;
+    const pair = refreshCookie.split(';')[0];
+
+    const payload = decode(refreshToken);
+    const sessionId = payload.sessionId as string;
+
+    await strapi.db.query('admin::session').update({
+      where: { sessionId },
+      data: { createdAt: new Date(Date.now() - (7 * 24 * 60 * 60 * 1000 + 60 * 1000)) },
+    });
 
     const res = await createRequest({ strapi }).post('/admin/access-token', {
-      body: { refreshToken },
+      headers: { Cookie: pair },
     });
-    expect(res.statusCode).toBe(200);
-    expect(res.body?.data?.token).toEqual(expect.any(String));
-
-    const payload = decode(res.body.data.token);
-    expect(payload).toMatchObject({
-      type: 'access',
-      userId: expect.any(String),
-      sessionId: expect.any(String),
-    });
+    expect(res.statusCode).toBe(401);
   });
 
-  it('uses body refreshToken over cookie when both are present', async () => {
-    const loginRes = await createRequest({ strapi }).post('/admin/login', {
-      body: superAdmin.loginInfo,
+  it('returns 401 when max family window elapsed', async () => {
+    const rq = createRequest({ strapi });
+    const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+    expect(loginRes.statusCode).toBe(200);
+
+    const refreshToken = loginRes.body?.data?.refreshToken as string;
+    const refreshCookie = getCookie(loginRes, cookieName)!;
+    const pair = refreshCookie.split(';')[0];
+    const payload = decode(refreshToken);
+    const sessionId = payload.sessionId as string;
+
+    await strapi.db.query('admin::session').update({
+      where: { sessionId },
+      data: { absoluteExpiresAt: new Date(Date.now() - 1000) },
+    });
+
+    const res = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: pair },
+    });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('rotates refresh token and preserves remember-me cookie persistence', async () => {
+    const rq = createRequest({ strapi });
+
+    // Login with rememberMe=true -> persistent cookie expected
+    const loginRes = await rq.post('/admin/login', {
+      body: { ...superAdmin.loginInfo, rememberMe: true },
     });
     expect(loginRes.statusCode).toBe(200);
 
-    const cookie = getCookie(loginRes, cookieName);
-    expect(cookie).toBeDefined();
+    const initialCookie = getCookie(loginRes, cookieName)!;
+    expect(initialCookie).toMatch(/expires=/i);
 
-    const validRefreshToken = loginRes.body?.data?.refreshToken as string;
-    expect(validRefreshToken).toEqual(expect.any(String));
-
-    // Intentionally send an invalid cookie alongside a valid body token
-    const headers = { Cookie: `${cookieName}=invalid.jwt` };
-    const res = await createRequest({ strapi }).post('/admin/access-token', {
-      headers,
-      body: { refreshToken: validRefreshToken },
+    // Exchange for an access token (this should rotate refresh token)
+    const pair = initialCookie.split(';')[0];
+    const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: pair },
     });
+    expect(tokenRes.statusCode).toBe(200);
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body?.data?.token).toEqual(expect.any(String));
+    // Set-Cookie should carry a persistent expiry after rotation
+    const rotatedCookie = getCookie(tokenRes, cookieName)!;
+    expect(rotatedCookie).toBeDefined();
+    expect(rotatedCookie).toMatch(/expires=/i);
+    // Token string in cookie should change after rotation
+    expect(rotatedCookie.split(';')[0]).not.toBe(pair);
+  });
+
+  it('rotates refresh token and keeps session cookie when rememberMe=false', async () => {
+    const rq = createRequest({ strapi });
+
+    // Login without rememberMe -> session cookie expected
+    const loginRes = await rq.post('/admin/login', {
+      body: { ...superAdmin.loginInfo, rememberMe: false },
+    });
+    expect(loginRes.statusCode).toBe(200);
+
+    const cookie = getCookie(loginRes, cookieName)!;
+    expect(cookie).toBeDefined();
+    expect(cookie).not.toMatch(/expires=/i);
+
+    // Exchange for an access token; rotated cookie should also be a session cookie
+    const pair = cookie.split(';')[0];
+    const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: pair },
+    });
+    expect(tokenRes.statusCode).toBe(200);
+
+    const rotated = getCookie(tokenRes, cookieName)!;
+    expect(rotated).toBeDefined();
+    expect(rotated).not.toMatch(/expires=/i);
+    // Token string in cookie should change after rotation
+    expect(rotated.split(';')[0]).not.toBe(pair);
   });
 
   it('returns 401 when refresh cookie is invalid', async () => {

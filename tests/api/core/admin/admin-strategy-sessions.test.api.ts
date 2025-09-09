@@ -40,7 +40,6 @@ describe('admin strategy', () => {
     // Hitting an authenticated admin route should work with access token
     const accessToken = tokenRes.body?.data?.token as string;
     const okWithAccess = await createRequest({ strapi })
-      // @ts-expect-error - helper chaining
       .setToken(accessToken)
       .get('/admin/users/me');
     expect(okWithAccess.statusCode).toBe(200);
@@ -57,11 +56,9 @@ describe('admin strategy', () => {
     const refreshCookie = setCookies.find((c) => c.startsWith(`${cookieName}=`));
     const cookiePair = refreshCookie!.split(';')[0];
 
-    const tokenRes = await createRequest({ strapi })
-      // @ts-expect-error - helper chaining
-      .post('/admin/access-token', {
-        headers: { Cookie: cookiePair },
-      });
+    const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: cookiePair },
+    });
     const accessToken = tokenRes.body?.data?.token as string;
 
     // Revoke all sessions for admin via logout
@@ -72,10 +69,7 @@ describe('admin strategy', () => {
     expect(logoutRes.statusCode).toBe(200);
 
     // Now the access token should be rejected by strategy
-    const res = await createRequest({ strapi })
-      // @ts-expect-error - helper chaining
-      .setToken(accessToken)
-      .get('/admin/users/me');
+    const res = await createRequest({ strapi }).setToken(accessToken).get('/admin/users/me');
     expect(res.statusCode).toBe(401);
   });
 
@@ -89,10 +83,7 @@ describe('admin strategy', () => {
     const refreshToken = loginRes.body?.data?.refreshToken as string;
     expect(refreshToken).toEqual(expect.any(String));
 
-    const res = await createRequest({ strapi })
-      // @ts-expect-error - helper chaining
-      .setToken(refreshToken)
-      .get('/admin/users/me');
+    const res = await createRequest({ strapi }).setToken(refreshToken).get('/admin/users/me');
     expect(res.statusCode).toBe(401);
   });
 
@@ -125,10 +116,7 @@ describe('admin strategy', () => {
     });
 
     // Now access should be rejected
-    const res = await createRequest({ strapi })
-      // @ts-expect-error - helper chaining
-      .setToken(accessToken)
-      .get('/admin/users/me');
+    const res = await createRequest({ strapi }).setToken(accessToken).get('/admin/users/me');
     expect(res.statusCode).toBe(401);
   });
 });
@@ -168,7 +156,7 @@ describe('admin strategy with short access token lifespan (expiry)', () => {
     // // Wait for TTL to elapse
     // await new Promise((r) => setTimeout(r, 1200));
     // const res = await createRequest({ strapi })
-    //   // @ts-expect-error - helper chaining
+    //
     //   .setToken(accessToken)
     //   .get('/admin/users/me');
     // expect(res.statusCode).toBe(401);

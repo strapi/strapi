@@ -12,7 +12,6 @@ import {
   validateRegistrationInfoQuery,
   validateForgotPasswordInput,
   validateResetPasswordInput,
-  validateAccessTokenExchangeInput,
   validateLoginSessionInput,
 } from '../validation/authentication';
 
@@ -49,8 +48,52 @@ const getRefreshCookieOptions = () => {
   };
 };
 
-const getRefreshTokenTTLSeconds = (): number =>
-  Number(strapi.config.get('admin.auth.sessions.refreshTokenLifespan', 30 * 24 * 60 * 60));
+const getLifespansForFamilyType = (
+  familyType: 'refresh' | 'session'
+): { idleSeconds: number; maxSeconds: number } => {
+  if (familyType === 'refresh') {
+    const idleSeconds = Number(
+      strapi.config.get('admin.auth.sessions.idleRefreshTokenLifespan', 7 * 24 * 60 * 60)
+    );
+    const maxSeconds = Number(
+      strapi.config.get('admin.auth.sessions.maxRefreshTokenLifespan', 30 * 24 * 60 * 60)
+    );
+
+    return { idleSeconds, maxSeconds };
+  }
+
+  const idleSeconds = Number(strapi.config.get('admin.auth.sessions.idleSessionLifespan', 60 * 60));
+  const maxSeconds = Number(
+    strapi.config.get('admin.auth.sessions.maxSessionLifespan', 7 * 24 * 60 * 60)
+  );
+
+  return { idleSeconds, maxSeconds };
+};
+
+/**
+ * Builds cookie options applying an expiration policy based on family type.
+ * - refresh (remember me): persistent cookie; Expires is min(now+idle, absoluteMax)
+ * - session (non-remember): session cookie; no Expires/Max-Age
+ */
+const buildCookieOptionsWithExpiry = (
+  familyType: 'refresh' | 'session',
+  absoluteExpiresAtISO?: string
+) => {
+  const base = getRefreshCookieOptions();
+  if (familyType === 'session') {
+    return base;
+  }
+
+  const { idleSeconds } = getLifespansForFamilyType('refresh');
+  const now = Date.now();
+  const idleExpiry = now + idleSeconds * 1000;
+  const absoluteExpiry = absoluteExpiresAtISO
+    ? new Date(absoluteExpiresAtISO).getTime()
+    : idleExpiry;
+  const chosen = new Date(Math.min(idleExpiry, absoluteExpiry));
+
+  return { ...base, expires: chosen, maxAge: Math.max(0, chosen.getTime() - now) };
+};
 
 const getSessionManager = (): Modules.SessionManager.SessionManagerService | null => {
   const manager = strapi.sessionManager as Modules.SessionManager.SessionManagerService | undefined;
@@ -58,13 +101,8 @@ const getSessionManager = (): Modules.SessionManager.SessionManagerService | nul
   return manager ?? null;
 };
 
-// TODO do we need a fallback device ID if the client hasn't provided one?
 const generateDeviceId = (): string => crypto.randomUUID();
 
-/**
- * Extracts device parameters from a request body, returning a normalized
- * deviceId and rememberMe flag. Generates a deviceId if not provided.
- */
 const extractDeviceParams = (requestBody: unknown): { deviceId: string; rememberMe: boolean } => {
   const body = (requestBody ?? {}) as { deviceId?: string; rememberMe?: boolean };
   const deviceId = body.deviceId || generateDeviceId();
@@ -73,22 +111,9 @@ const extractDeviceParams = (requestBody: unknown): { deviceId: string; remember
   return { deviceId, rememberMe };
 };
 
-/**
- * Reads a refresh token from either the request cookie or body.
- * Primary flow: HTTP-only cookie (secure)
- * Fallback: Request body (for non-cookie clients)
- */
-const readRefreshTokenFromRequest = (ctx: Context): string | null => {
-  const cookieToken = ctx.cookies.get(refreshCookieName);
-  const body = (ctx.request.body ?? {}) as { refreshToken?: string };
-
-  return body?.refreshToken || cookieToken || null;
-};
-
 export default {
   login: compose([
-    // Validate session-related fields (deviceId, rememberMe) without
-    // constraining credential fields handled by passport
+    // Validate session-related fields (deviceId, rememberMe) before passport
     async (ctx: Context, next: Next) => {
       await validateLoginSessionInput(ctx.request.body ?? {});
       return next();
@@ -134,26 +159,16 @@ export default {
         const userId = String(user.id);
         const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
 
-        const { token: refreshToken } = await sessionManager.generateRefreshToken(
-          userId,
-          deviceId,
-          'admin'
+        const { token: refreshToken, absoluteExpiresAt } =
+          await sessionManager.generateRefreshToken(userId, deviceId, 'admin', {
+            familyType: rememberMe ? 'refresh' : 'session',
+          });
+
+        const cookieOptions = buildCookieOptionsWithExpiry(
+          rememberMe ? 'refresh' : 'session',
+          absoluteExpiresAt
         );
-
-        const cookieOptions = getRefreshCookieOptions();
-        const optsWithExpiry = rememberMe
-          ? {
-              ...cookieOptions,
-              expires: new Date(Date.now() + getRefreshTokenTTLSeconds() * 1000),
-              maxAge: getRefreshTokenTTLSeconds() * 1000,
-            }
-          : {
-              ...cookieOptions,
-              expires: undefined,
-              maxAge: undefined,
-            };
-
-        ctx.cookies.set(refreshCookieName, refreshToken, optsWithExpiry);
+        ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
 
         const accessResult = await sessionManager.generateAccessToken(refreshToken);
         if ('error' in accessResult) {
@@ -206,26 +221,18 @@ export default {
       const userId = String(user.id);
       const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
 
-      const { token: refreshToken } = await sessionManager.generateRefreshToken(
+      const { token: refreshToken, absoluteExpiresAt } = await sessionManager.generateRefreshToken(
         userId,
         deviceId,
-        'admin'
+        'admin',
+        { familyType: rememberMe ? 'refresh' : 'session' }
       );
 
-      const cookieOptions = getRefreshCookieOptions();
-      const optsWithExpiry = rememberMe
-        ? {
-            ...cookieOptions,
-            expires: new Date(Date.now() + getRefreshTokenTTLSeconds() * 1000),
-            maxAge: getRefreshTokenTTLSeconds() * 1000,
-          }
-        : {
-            ...cookieOptions,
-            expires: undefined,
-            maxAge: undefined,
-          };
-
-      ctx.cookies.set(refreshCookieName, refreshToken, optsWithExpiry);
+      const cookieOptions = buildCookieOptionsWithExpiry(
+        rememberMe ? 'refresh' : 'session',
+        absoluteExpiresAt
+      );
+      ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
 
       const accessResult = await sessionManager.generateAccessToken(refreshToken);
       if ('error' in accessResult) {
@@ -284,25 +291,18 @@ export default {
       const userId = String(user.id);
       const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
 
-      const { token: refreshToken } = await sessionManager.generateRefreshToken(
+      const { token: refreshToken, absoluteExpiresAt } = await sessionManager.generateRefreshToken(
         userId,
         deviceId,
-        'admin'
+        'admin',
+        { familyType: rememberMe ? 'refresh' : 'session' }
       );
 
-      const cookieOptions = getRefreshCookieOptions();
-      const optsWithExpiry = rememberMe
-        ? {
-            ...cookieOptions,
-            expires: new Date(Date.now() + getRefreshTokenTTLSeconds() * 1000),
-            maxAge: getRefreshTokenTTLSeconds() * 1000,
-          }
-        : {
-            ...cookieOptions,
-            expires: undefined,
-            maxAge: undefined,
-          };
-      ctx.cookies.set(refreshCookieName, refreshToken, optsWithExpiry);
+      const cookieOptions = buildCookieOptionsWithExpiry(
+        rememberMe ? 'refresh' : 'session',
+        absoluteExpiresAt
+      );
+      ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
 
       const accessResult = await sessionManager.generateAccessToken(refreshToken);
       if ('error' in accessResult) {
@@ -352,14 +352,14 @@ export default {
       const userId = String(user.id);
       const deviceId = generateDeviceId();
 
-      const { token: refreshToken } = await sessionManager.generateRefreshToken(
+      const { token: refreshToken, absoluteExpiresAt } = await sessionManager.generateRefreshToken(
         userId,
         deviceId,
         'admin'
       );
 
-      // No rememberMe flow here; expire with session by default
-      const cookieOptions = getRefreshCookieOptions();
+      // No rememberMe flow here; expire with session by default (session cookie)
+      const cookieOptions = buildCookieOptionsWithExpiry('session', absoluteExpiresAt);
       ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
 
       const accessResult = await sessionManager.generateAccessToken(refreshToken);
@@ -382,11 +382,7 @@ export default {
   },
 
   async accessToken(ctx: Context) {
-    // Validate optional body to support non-cookie clients
-    await validateAccessTokenExchangeInput(ctx.request.body ?? {});
-
-    // Optionally accept refreshToken in request body for non-cookie clients
-    const refreshToken = readRefreshTokenFromRequest(ctx);
+    const refreshToken = ctx.cookies.get(refreshCookieName);
 
     if (!refreshToken) {
       return ctx.unauthorized('Missing refresh token');
@@ -398,12 +394,22 @@ export default {
         return ctx.internalServerError();
       }
 
-      const result = await sessionManager.generateAccessToken(refreshToken);
+      // Single-use renewal: rotate on access exchange, then create access token
+      // from the new refresh token
+      const rotation = await sessionManager.rotateRefreshToken(refreshToken);
+      if ('error' in rotation) {
+        return ctx.unauthorized('Invalid refresh token');
+      }
+
+      const result = await sessionManager.generateAccessToken(rotation.token);
       if ('error' in result) {
         return ctx.unauthorized('Invalid refresh token');
       }
 
       const { token } = result;
+      // Preserve session-vs-remember mode using rotation.type and rotation.absoluteExpiresAt
+      const opts = buildCookieOptionsWithExpiry(rotation.type, rotation.absoluteExpiresAt);
+      ctx.cookies.set(refreshCookieName, rotation.token, opts);
       ctx.body = { data: { token } };
     } catch (err) {
       strapi.log.error('Failed to generate access token from refresh token', err as any);

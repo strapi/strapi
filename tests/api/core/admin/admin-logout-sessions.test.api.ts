@@ -42,7 +42,6 @@ describe('Admin Logout Sessions', () => {
 
     // Use only Authorization header (no cookie) for logout
 
-    // @ts-expect-error - helper chaining
     const freshRq = createRequest({ strapi }).setToken(accessToken);
     const res = await freshRq.post('/admin/logout');
     expect(res.statusCode).toBe(200);
@@ -79,7 +78,6 @@ describe('Admin Logout Sessions', () => {
     const accessToken = tokenRes.body?.data?.token as string;
 
     const res = await createRequest({ strapi })
-      // @ts-expect-error - helper chaining
       .setToken(accessToken)
       .post('/admin/logout', { body: { deviceId } });
     expect(res.statusCode).toBe(200);
@@ -107,28 +105,14 @@ describe('Admin Logout Sessions', () => {
     const maybeCookie = getCookie(loginResB, cookieName);
 
     let accessToken: string;
-    if (maybeCookie) {
-      const pair = maybeCookie.split(';')[0];
-      const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
-        headers: { Cookie: pair },
-      });
-      expect(tokenRes.statusCode).toBe(200);
-      accessToken = tokenRes.body?.data?.token as string;
-    } else {
-      const refreshTokenInBody = loginResB.body?.data?.refreshToken as string;
-      expect(refreshTokenInBody).toEqual(expect.any(String));
+    const pair = maybeCookie!.split(';')[0];
+    const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
+      headers: { Cookie: pair },
+    });
+    expect(tokenRes.statusCode).toBe(200);
+    accessToken = tokenRes.body?.data?.token as string;
 
-      const tokenRes = await createRequest({ strapi }).post('/admin/access-token', {
-        body: { refreshToken: refreshTokenInBody },
-      });
-      expect(tokenRes.statusCode).toBe(200);
-      accessToken = tokenRes.body?.data?.token as string;
-    }
-
-    const res = await createRequest({ strapi })
-      // @ts-expect-error - helper chaining
-      .setToken(accessToken)
-      .post('/admin/logout');
+    const res = await createRequest({ strapi }).setToken(accessToken).post('/admin/logout');
     expect(res.statusCode).toBe(200);
 
     // Derive userId from the access token payload
@@ -227,10 +211,7 @@ describe('Admin Logout Sessions', () => {
     expect(newAccessFromB.statusCode).toBe(200);
     const newAccessTokenB = newAccessFromB.body?.data?.token as string;
 
-    const me = await createRequest({ strapi })
-      // @ts-expect-error - helper chaining
-      .setToken(newAccessTokenB)
-      .get('/admin/users/me');
+    const me = await createRequest({ strapi }).setToken(newAccessTokenB).get('/admin/users/me');
     expect(me.statusCode).toBe(200);
   });
 });

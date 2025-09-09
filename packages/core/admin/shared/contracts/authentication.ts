@@ -32,13 +32,7 @@ export declare namespace Login {
  */
 export declare namespace AccessTokenExchange {
   export interface Request {
-    body?: {
-      /**
-       * Optional refresh token for non-cookie clients.
-       * If not provided, backend will read from HTTP-only cookie.
-       */
-      refreshToken?: string;
-    };
+    body?: {};
   }
 
   export interface Response {
@@ -150,8 +144,9 @@ export declare namespace ResetPassword {
  */
 export declare namespace Logout {
   export interface Request {
-    query: {
-      token: string;
+    query: {};
+    body: {
+      deviceId?: string;
     };
   }
   export interface Response {

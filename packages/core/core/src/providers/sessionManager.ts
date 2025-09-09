@@ -22,19 +22,34 @@ export default defineProvider({
       );
     }
 
-    const refreshTokenLifespan = strapi.config.get<number>(
-      'admin.auth.sessions.refreshTokenLifespan',
-      30 * 24 * 60 * 60
-    );
     const accessTokenLifespan = strapi.config.get<number>(
       'admin.auth.sessions.accessTokenLifespan',
+      30 * 60
+    );
+    const maxRefreshTokenLifespan = strapi.config.get<number>(
+      'admin.auth.sessions.maxRefreshTokenLifespan',
+      30 * 24 * 60 * 60
+    );
+    const idleRefreshTokenLifespan = strapi.config.get<number>(
+      'admin.auth.sessions.idleRefreshTokenLifespan',
+      7 * 24 * 60 * 60
+    );
+    const maxSessionLifespan = strapi.config.get<number>(
+      'admin.auth.sessions.maxSessionLifespan',
+      7 * 24 * 60 * 60
+    );
+    const idleSessionLifespan = strapi.config.get<number>(
+      'admin.auth.sessions.idleSessionLifespan',
       60 * 60
     );
 
     const config = {
       jwtSecret,
-      refreshTokenLifespan,
       accessTokenLifespan,
+      maxRefreshTokenLifespan,
+      idleRefreshTokenLifespan,
+      maxSessionLifespan,
+      idleSessionLifespan,
       algorithm: adminAuth.options?.algorithm,
     };
 
