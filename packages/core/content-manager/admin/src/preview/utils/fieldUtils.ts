@@ -1,7 +1,21 @@
 import { type FieldContentSourceMap } from '@strapi/admin/strapi-admin';
 
+import type { PREVIEW_ERROR_MESSAGES } from './constants';
 import type { PreviewContextValue } from '../pages/Preview';
 import type { Modules, Schema, Struct, UID } from '@strapi/types';
+
+type PreviewErrorMessage = keyof typeof PREVIEW_ERROR_MESSAGES;
+
+// Generic error class for preview field operations
+export class PreviewFieldError extends Error {
+  public readonly messageKey: PreviewErrorMessage;
+
+  constructor(messageKey: PreviewErrorMessage) {
+    super(messageKey);
+    this.name = 'PreviewFieldError';
+    this.messageKey = messageKey;
+  }
+}
 
 type PathPart = { name: string; index?: number };
 
@@ -61,11 +75,11 @@ export function getAttributeSchemaFromPath({
     const currentAttribute = currentAttributes[currentPart.name];
 
     if (!currentAttribute) {
-      throw new Error('Invalid field path');
+      throw new PreviewFieldError('INVALID_FIELD_PATH');
     }
 
     if (currentAttribute.type === 'relation') {
-      throw new Error('Relations not handled');
+      throw new PreviewFieldError('RELATIONS_NOT_HANDLED');
     }
 
     if (currentAttribute.type === 'component') {
@@ -73,7 +87,7 @@ export function getAttributeSchemaFromPath({
       if (currentAttribute.repeatable) {
         // We must have the index, otherwise we don't know what data to use
         if (currentPart.index === undefined) {
-          throw new Error('Invalid field path');
+          throw new PreviewFieldError('INVALID_FIELD_PATH');
         }
         return visitor(
           remainingParts,
@@ -89,7 +103,7 @@ export function getAttributeSchemaFromPath({
     if (currentAttribute.type === 'dynamiczone') {
       // We must have the index, otherwise we don't know what component we're dealing with
       if (currentPart.index === undefined) {
-        throw new Error('Invalid field path');
+        throw new PreviewFieldError('INVALID_FIELD_PATH');
       }
 
       const componentData = currentData[currentPart.name][currentPart.index];
