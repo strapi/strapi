@@ -38,6 +38,10 @@ describe('SessionManager API Integration', () => {
         expect(typeof strapi.sessionManager.generateSessionId).toBe('function');
         expect(typeof strapi.sessionManager.validateRefreshToken).toBe('function');
         expect(typeof strapi.sessionManager.generateAccessToken).toBe('function');
+        expect(typeof strapi.sessionManager.validateRefreshToken).toBe('function');
+        expect(typeof strapi.sessionManager.rotateRefreshToken).toBe('function');
+        expect(typeof strapi.sessionManager.invalidateRefreshToken).toBe('function');
+        expect(typeof strapi.sessionManager.isSessionActive).toBe('function');
       });
     });
 

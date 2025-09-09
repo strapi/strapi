@@ -35,7 +35,6 @@ export const authenticate = async (ctx: Context) => {
     return { authenticated: false };
   }
 
-  // Enforce session still exists and is not expired via session manager.
   const isActive = await manager.isSessionActive(result.payload.sessionId);
   if (!isActive) {
     return { authenticated: false };

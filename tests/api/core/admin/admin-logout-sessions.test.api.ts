@@ -41,7 +41,6 @@ describe('Admin Logout Sessions', () => {
     const accessToken = tokenRes.body?.data?.token as string;
 
     // Use only Authorization header (no cookie) for logout
-
     const freshRq = createRequest({ strapi }).setToken(accessToken);
     const res = await freshRq.post('/admin/logout');
     expect(res.statusCode).toBe(200);
@@ -197,7 +196,6 @@ describe('Admin Logout Sessions', () => {
     const accessTokenA = accessFromA.body?.data?.token as string;
 
     const logoutA = await createRequest({ strapi })
-      // @ts-expect-error - chaining helper
       .setToken(accessTokenA)
       .post('/admin/logout', {
         body: { deviceId: deviceA },

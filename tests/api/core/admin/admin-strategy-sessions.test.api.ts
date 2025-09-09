@@ -63,8 +63,6 @@ describe('admin strategy', () => {
 
     // Revoke all sessions for admin via logout
     // const legacy = loginRes.body?.data?.token as string;
-
-    // @ts-expect-error - TODO
     const logoutRes = await createRequest({ strapi }).setToken(accessToken).post('/admin/logout');
     expect(logoutRes.statusCode).toBe(200);
 

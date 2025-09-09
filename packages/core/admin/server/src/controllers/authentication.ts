@@ -409,6 +409,7 @@ export default {
       const { token } = result;
       // Preserve session-vs-remember mode using rotation.type and rotation.absoluteExpiresAt
       const opts = buildCookieOptionsWithExpiry(rotation.type, rotation.absoluteExpiresAt);
+
       ctx.cookies.set(refreshCookieName, rotation.token, opts);
       ctx.body = { data: { token } };
     } catch (err) {
