@@ -1,7 +1,15 @@
 import * as React from 'react';
 
-import { Box, Flex, Grid, Main, ScrollArea, Typography } from '@strapi/design-system';
-import { PuzzlePiece } from '@strapi/icons';
+import {
+  Box,
+  Flex,
+  Grid,
+  Main,
+  Typography,
+  ScrollArea
+} from '@strapi/design-system';
+import { Drag, PuzzlePiece } from '@strapi/icons';
+import { useDrag, useDrop } from 'react-dnd';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
 
@@ -20,6 +28,10 @@ import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
 import type { WidgetWithUID } from '../../core/apis/Widgets';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 import { useWidgetResize } from '../../hooks/useWidgetResize';
+import { useWidgetLayout } from '../../hooks/useWidgetLayout';
+import { useWidgetManagement } from '../../hooks/useWidgetManagement';
+import { GapDropZone } from '../../components/Widgets';
+
 
 /* -------------------------------------------------------------------------------------------------
  * WidgetRoot
@@ -32,7 +44,15 @@ interface WidgetRootProps
   setColumnWidths: (
     widths: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)
   ) => void;
+  findWidget: (id: string) => { index: number };
+  moveWidget: (id: string, to: number) => void;
 }
+
+interface Item {
+  id: string;
+  originalIndex: number;
+}
+
 
 export const WidgetRoot = ({
   title,
@@ -41,13 +61,71 @@ export const WidgetRoot = ({
   link,
   uid,
   columnWidths,
-  setColumnWidths
+  setColumnWidths,
+  findWidget,
+  moveWidget,
 }: WidgetRootProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const id = React.useId();
   const Icon = icon;
   const columnWidth = columnWidths[uid] || 6;
+  const originalIndex = findWidget(uid).index;
+  const [isDraggingFromHandle, setIsDraggingFromHandle] = React.useState(false);
+
+  // Smooth move widget using requestAnimationFrame
+  const smoothMoveWidget = React.useCallback(
+    (id: string, atIndex: number) => {
+      requestAnimationFrame(() => {
+        moveWidget(id, atIndex);
+      });
+    },
+    [moveWidget]
+  );
+
+  const [{ isDragging }, drag] = useDrag(
+    () => ({
+      type: 'widget',
+      item: () => {
+        return { id: uid, originalIndex };
+      },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+      end: (item, monitor) => {
+        const { id: droppedId, originalIndex } = item;
+        const didDrop = monitor.didDrop();
+        if (!didDrop) {
+          moveWidget(droppedId, originalIndex);
+        }
+        setIsDraggingFromHandle(false);
+      },
+      canDrag: () => isDraggingFromHandle,
+    }),
+    [uid, originalIndex, moveWidget, isDraggingFromHandle]
+  );
+
+  const [{ isOver }, drop] = useDrop<Item, void, { isOver: boolean }>(
+    () => ({
+      accept: 'widget',
+      hover({ id: draggedId }: Item) {
+        if (draggedId !== uid) {
+          const { index: overIndex } = findWidget(uid);
+          const { index: draggedIndex } = findWidget(draggedId);
+
+          // Only move if the dragged item is actually changing position
+          if (draggedIndex !== overIndex) {
+            smoothMoveWidget(draggedId, overIndex);
+          }
+        }
+      },
+      collect: monitor => ({
+        isOver: !!monitor.isOver(),
+      }),
+    }),
+    [findWidget, smoothMoveWidget, uid]
+  );
+
+  const opacity = isDragging ? 0 : 1;
 
   const handleClickOnLink = () => {
     trackUsage('didOpenHomeWidgetLink', { widgetUID: uid });
@@ -67,19 +145,29 @@ export const WidgetRoot = ({
       hasRadius
       direction="column"
       alignItems="flex-start"
-      background="neutral0"
-      borderColor="neutral150"
+      background={isOver ? "primary100" : "neutral0"}
+      borderColor={isOver ? "primary500" : "neutral150"}
       shadow="tableShadow"
       tag="section"
       gap={4}
       padding={6}
-      aria-labelledby={id}
       position="relative"
+      aria-labelledby={uid}
+      ref={(node: HTMLElement | null) => {
+        if (node) {
+          drag(drop(node));
+        }
+      }}
+      style={{
+        opacity,
+        zIndex: isDragging ? 1000 : 1,
+        transition: isDragging ? 'none' : 'all 0.2s ease-in-out',
+      }}
     >
-      <Flex direction="row" gap={2} justifyContent="space-between" width="100%" tag="header">
-        <Flex gap={2}>
+      <Flex direction="row" gap={2} width="100%" tag="header" alignItems="center">
+        <Flex gap={2} marginRight="auto">
           <Icon fill="neutral500" aria-hidden />
-          <Typography textColor="neutral500" variant="sigma" tag="h2" id={id}>
+          <Typography textColor="neutral500" variant="sigma" tag="h2" id={uid}>
             {formatMessage(title)}
           </Typography>
         </Flex>
@@ -96,6 +184,12 @@ export const WidgetRoot = ({
             {formatMessage(link.label)}
           </Typography>
         )}
+        <Box
+          cursor="grab"
+          onMouseDown={() => setIsDraggingFromHandle(true)}
+        >
+          <Drag display="block" />
+        </Box>
       </Flex>
       <ScrollArea>
         <Box width="100%" height="261px" overflow="auto" tag="main">
@@ -181,6 +275,20 @@ const HomePageCE = () => {
     checkWidgetsPermissions();
   }, [checkUserHasPermissions, getAllWidgets]);
 
+  // Use custom hook for widget management
+  const { findWidget, moveWidget, handleDropWidget } = useWidgetManagement({
+    filteredWidgets,
+    setFilteredWidgets,
+  });
+
+  const [, drop] = useDrop(() => ({ accept: 'widget' }));
+
+  // Use custom hook for widget layout calculation
+  const { widgetLayout } = useWidgetLayout({
+    filteredWidgets,
+    columnWidths,
+  });
+
   return (
     <Main>
       <Page.Title>
@@ -195,6 +303,7 @@ const HomePageCE = () => {
           id: 'HomePage.header.subtitle',
           defaultMessage: 'Welcome to your administration panel',
         })}
+        primaryAction={null}
       />
       <FreeTrialWelcomeModal />
       <FreeTrialEndedModal />
@@ -206,23 +315,37 @@ const HomePageCE = () => {
               <Page.Loading />
             </Box>
           ) : (
-            <Grid.Root gap={5}>
-              {filteredWidgets.map((widget) => (
-                <Grid.Item col={columnWidths[widget.uid] || 6} s={12} key={widget.uid}>
-                  <WidgetRoot
-                    title={widget.title}
-                    icon={widget.icon}
-                    link={widget.link}
-                    uid={widget.uid}
-                    columnWidths={columnWidths}
-                    setColumnWidths={setColumnWidths}
-                  >
-                    <WidgetComponent
-                      component={widget.component}
-                      columnWidth={columnWidths[widget.uid] || 6}
-                    />
-                  </WidgetRoot>
-                </Grid.Item>
+            <Grid.Root gap={5} ref={drop}>
+              {widgetLayout.map(({ widget, index, shouldShowDropZone, dropZoneWidth }) => (
+                <React.Fragment key={widget.uid}>
+                  <Grid.Item col={columnWidths[widget.uid] || 6} s={12}>
+                    <WidgetRoot
+                      uid={widget.uid}
+                      title={widget.title}
+                      icon={widget.icon}
+                      link={widget.link}
+                      findWidget={findWidget}
+                      moveWidget={moveWidget}
+                      columnWidths={columnWidths}
+                      setColumnWidths={setColumnWidths}
+                    >
+                      <WidgetComponent component={widget.component} columnWidth={columnWidths[widget.uid] || 6} />
+                    </WidgetRoot>
+                  </Grid.Item>
+                  {shouldShowDropZone && (
+                    <Grid.Item
+                      col={dropZoneWidth}
+                      display={{ initial: 'none', large: 'block' }}
+                      key={`${widget.uid}-empty-box`}
+                    >
+                      <GapDropZone
+                        insertIndex={index + 1}
+                        moveWidget={moveWidget}
+                        onDropWidget={handleDropWidget}
+                      />
+                    </Grid.Item>
+                  )}
+                </React.Fragment>
               ))}
             </Grid.Root>
           )}
