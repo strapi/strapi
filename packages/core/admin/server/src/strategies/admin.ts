@@ -1,5 +1,12 @@
 import type { Context } from 'koa';
+import type { Modules } from '@strapi/types';
 import { getService } from '../utils';
+
+const getSessionManager = (): Modules.SessionManager.SessionManagerService | null => {
+  const manager = strapi.sessionManager as Modules.SessionManager.SessionManagerService | undefined;
+
+  return manager ?? null;
+};
 
 /** @type {import('.').AuthenticateFunction} */
 export const authenticate = async (ctx: Context) => {
@@ -16,15 +23,33 @@ export const authenticate = async (ctx: Context) => {
   }
 
   const token = parts[1];
-  const { payload, isValid } = getService('token').decodeJwtToken(token);
 
-  if (!isValid) {
+  // Validate access tokens via session manager and require an active session
+  const manager = getSessionManager();
+  if (!manager) {
     return { authenticated: false };
   }
 
+  const result = manager.validateAccessToken(token);
+  if (!result.isValid) {
+    return { authenticated: false };
+  }
+
+  const isActive = await manager.isSessionActive(result.payload.sessionId);
+  if (!isActive) {
+    return { authenticated: false };
+  }
+
+  const rawUserId = result.payload.userId;
+  const numericUserId = Number(rawUserId);
+  const userId =
+    Number.isFinite(numericUserId) && String(numericUserId) === rawUserId
+      ? numericUserId
+      : rawUserId;
+
   const user = await strapi.db
     .query('admin::user')
-    .findOne({ where: { id: payload.id }, populate: ['roles'] });
+    .findOne({ where: { id: userId }, populate: ['roles'] });
 
   if (!user || !(user.isActive === true)) {
     return { authenticated: false };

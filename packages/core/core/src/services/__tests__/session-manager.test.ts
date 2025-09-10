@@ -23,7 +23,13 @@ describe('SessionManager Factory', () => {
 
   beforeEach(() => {
     mockQuery = {
-      create: jest.fn(),
+      create: jest.fn((data: SessionData) => {
+        return {
+          ...data,
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + config.idleRefreshTokenLifespan * 1000),
+        };
+      }),
       findOne: jest.fn(),
       findMany: jest.fn(),
       delete: jest.fn(),
@@ -36,9 +42,12 @@ describe('SessionManager Factory', () => {
 
     config = {
       jwtSecret: 'test-secret',
-      refreshTokenLifespan: 30 * 24 * 60 * 60, // 30 days
-      accessTokenLifespan: 60 * 60, // 1 hour
-    };
+      accessTokenLifespan: 60 * 60,
+      maxRefreshTokenLifespan: 30 * 24 * 60 * 60, // 30 days
+      idleRefreshTokenLifespan: 7 * 24 * 60 * 60, // 7 days
+      maxSessionLifespan: 7 * 24 * 60 * 60, // 7 days
+      idleSessionLifespan: 60 * 60, // 1 hour
+    } as SessionManagerConfig;
 
     sessionManager = createSessionManager({ db: mockDb, config });
 
@@ -71,7 +80,7 @@ describe('SessionManager Factory', () => {
       }
 
       expect(mockQuery.deleteMany).not.toHaveBeenCalledWith({
-        where: { expiresAt: { $lt: expect.any(Date) } },
+        where: { absoluteExpiresAt: { $lt: expect.any(Date) } },
       });
 
       // 50th call should trigger cleanup asynchronously
@@ -83,7 +92,7 @@ describe('SessionManager Factory', () => {
       });
 
       expect(mockQuery.deleteMany).toHaveBeenCalledWith({
-        where: { expiresAt: { $lt: expect.any(Date) } },
+        where: { absoluteExpiresAt: { $lt: expect.any(Date) } },
       });
     });
 
@@ -94,6 +103,7 @@ describe('SessionManager Factory', () => {
         deviceId,
         origin,
         expiresAt: expect.any(Date),
+        createdAt: new Date(),
       });
 
       await sessionManager.generateRefreshToken(userId, deviceId, origin);
@@ -104,7 +114,13 @@ describe('SessionManager Factory', () => {
           sessionId: 'abcdef1234567890',
           deviceId,
           origin,
+          parentId: null,
+          childId: null,
+          familyId: 'abcdef1234567890',
+          type: 'refresh',
+          status: 'active',
           expiresAt: expect.any(Date),
+          absoluteExpiresAt: expect.any(Date),
         },
       });
     });
@@ -116,33 +132,57 @@ describe('SessionManager Factory', () => {
 
       const createCall = mockQuery.create.mock.calls[0][0];
       const expiresAt = createCall.data.expiresAt.getTime();
-      const expectedExpiration = startTime + config.refreshTokenLifespan * 1000;
+      const expectedExpiration = startTime + config.idleRefreshTokenLifespan * 1000;
 
       // Allow for small timing differences (within 1 second)
       expect(Math.abs(expiresAt - expectedExpiration)).toBeLessThan(1000);
     });
 
     it('should generate JWT with correct payload', async () => {
+      mockQuery.create.mockResolvedValue({
+        userId,
+        sessionId: 'abcdef1234567890',
+        deviceId,
+        origin,
+        createdAt: new Date(1_700_000_000_000),
+        expiresAt: new Date(1_700_000_000_000 + config.idleRefreshTokenLifespan * 1000),
+      });
+
       await sessionManager.generateRefreshToken(userId, deviceId, origin);
 
-      const expectedPayload = {
+      const expectedPayload = expect.objectContaining({
         userId,
         sessionId: 'abcdef1234567890',
         type: 'refresh',
-      };
+        iat: expect.any(Number),
+        exp: expect.any(Number),
+      });
 
       expect(mockJwt.sign).toHaveBeenCalledWith(expectedPayload, config.jwtSecret, {
-        expiresIn: config.refreshTokenLifespan,
         algorithm: DEFAULT_ALGORITHM,
+        noTimestamp: true,
       });
     });
 
     it('should return token and sessionId', async () => {
+      mockQuery.create.mockResolvedValue({
+        userId,
+        sessionId: 'abcdef1234567890',
+        deviceId,
+        origin,
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + config.idleRefreshTokenLifespan * 1000),
+        absoluteExpiresAt: new Date(Date.now() + config.maxRefreshTokenLifespan * 1000),
+        familyId: 'abcdef1234567890',
+      });
+
       const result = await sessionManager.generateRefreshToken(userId, deviceId, origin);
 
       expect(result).toEqual({
         token: 'test-jwt-token',
         sessionId: 'abcdef1234567890',
+        absoluteExpiresAt: expect.any(String),
+        familyId: 'abcdef1234567890',
       });
     });
 
@@ -223,6 +263,59 @@ describe('SessionManager Factory', () => {
     });
   });
 
+  describe('isSessionActive', () => {
+    const userId = 'user-abc';
+    const sessionId = 'abcdef1234567890abcdef1234567890';
+    const deviceId = 'device-xyz';
+    const origin = 'admin';
+
+    beforeEach(() => {
+      sessionManager = createSessionManager({ db: mockDb, config });
+    });
+
+    it('returns false when session does not exist', async () => {
+      mockQuery.findOne.mockResolvedValue(null);
+
+      const result = await sessionManager.isSessionActive(sessionId);
+
+      expect(mockDb.query).toHaveBeenCalled();
+      expect(result).toBe(false);
+    });
+
+    it('returns false and deletes when session is expired', async () => {
+      const expired = new Date(Date.now() - 1000);
+      mockQuery.findOne.mockResolvedValue({
+        userId,
+        sessionId,
+        deviceId,
+        origin,
+        expiresAt: expired,
+      });
+      mockQuery.delete.mockResolvedValue(undefined);
+
+      const result = await sessionManager.isSessionActive(sessionId);
+
+      expect(result).toBe(false);
+      expect(mockQuery.delete).toHaveBeenCalledWith({ where: { sessionId } });
+    });
+
+    it('returns true when session exists and is not expired', async () => {
+      const future = new Date(Date.now() + 60 * 1000);
+      mockQuery.findOne.mockResolvedValue({
+        userId,
+        sessionId,
+        deviceId,
+        origin,
+        expiresAt: future,
+      });
+
+      const result = await sessionManager.isSessionActive(sessionId);
+
+      expect(result).toBe(true);
+      expect(mockQuery.delete).not.toHaveBeenCalled();
+    });
+  });
+
   describe('validateRefreshToken', () => {
     const userId = 'user123';
     const sessionId = 'session456';
@@ -234,7 +327,7 @@ describe('SessionManager Factory', () => {
       mockJwt.sign.mockReturnValue('test-jwt-token' as any);
     });
 
-    it('should validate a valid refresh token successfully', async () => {
+    it('should validate a valid refresh token successfully (active session)', async () => {
       const mockPayload = {
         userId,
         sessionId,
@@ -248,7 +341,8 @@ describe('SessionManager Factory', () => {
         sessionId,
         deviceId,
         origin,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 hour from now
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        status: 'active',
       };
 
       mockJwt.verify.mockReturnValue(mockPayload);
@@ -307,7 +401,7 @@ describe('SessionManager Factory', () => {
       });
     });
 
-    it('should reject and clean up expired session', async () => {
+    it('should reject expired session', async () => {
       const mockPayload = {
         userId,
         sessionId,
@@ -332,7 +426,8 @@ describe('SessionManager Factory', () => {
       expect(result).toEqual({
         isValid: false,
       });
-      expect(mockQuery.delete).toHaveBeenCalledWith({ where: { sessionId } });
+      // validateRefreshToken should not delete; cleanup is handled by other paths
+      expect(mockQuery.delete).not.toHaveBeenCalled();
     });
 
     it('should reject token when user ID mismatch', async () => {
@@ -349,7 +444,8 @@ describe('SessionManager Factory', () => {
         sessionId,
         deviceId,
         origin,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 hour from now
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        status: 'active',
       };
 
       mockJwt.verify.mockReturnValue(mockPayload);
@@ -405,7 +501,8 @@ describe('SessionManager Factory', () => {
       const result = await sessionManager.validateRefreshToken('expired-token');
 
       expect(result).toEqual({ isValid: false });
-      expect(mockQuery.delete).toHaveBeenCalledWith({ where: { sessionId } });
+      // No DB deletion for JWT errors on validate path
+      expect(mockQuery.delete).not.toHaveBeenCalled();
     });
 
     it('should propagate unexpected errors', async () => {
@@ -654,37 +751,6 @@ describe('DatabaseSessionProvider', () => {
     });
   });
 
-  describe('findByIdentifier', () => {
-    it('should find sessions by user identifier', async () => {
-      const userId = 'user123';
-      const expectedResults = [
-        {
-          id: '1',
-          userId,
-          sessionId: 'session1',
-          deviceId: 'device1',
-          origin: 'admin',
-          expiresAt: new Date(),
-        },
-        {
-          id: '2',
-          userId,
-          sessionId: 'session2',
-          deviceId: 'device2',
-          origin: 'admin',
-          expiresAt: new Date(),
-        },
-      ];
-
-      mockQuery.findMany.mockResolvedValue(expectedResults);
-
-      const result = await provider.findByIdentifier(userId);
-
-      expect(mockQuery.findMany).toHaveBeenCalledWith({ where: { userId } });
-      expect(result).toEqual(expectedResults);
-    });
-  });
-
   describe('deleteBySessionId', () => {
     it('should delete session by sessionId', async () => {
       const sessionId = 'session123';
@@ -706,11 +772,11 @@ describe('DatabaseSessionProvider', () => {
   });
 
   describe('deleteExpired', () => {
-    it('should delete expired sessions', async () => {
+    it('should delete families that exceeded absolute expiration', async () => {
       await provider.deleteExpired();
 
       expect(mockQuery.deleteMany).toHaveBeenCalledWith({
-        where: { expiresAt: { $lt: expect.any(Date) } },
+        where: { absoluteExpiresAt: { $lt: expect.any(Date) } },
       });
     });
   });

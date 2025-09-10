@@ -29,6 +29,21 @@ export default {
       configurable: false,
       private: true,
     },
+    parentId: {
+      type: 'string',
+      configurable: false,
+      private: true,
+    },
+    familyId: {
+      type: 'string',
+      configurable: false,
+      private: true,
+    },
+    childId: {
+      type: 'string',
+      configurable: false,
+      private: true,
+    },
     deviceId: {
       type: 'string',
       required: true,
@@ -44,6 +59,21 @@ export default {
     expiresAt: {
       type: 'datetime',
       required: true,
+      configurable: false,
+      private: true,
+    },
+    absoluteExpiresAt: {
+      type: 'datetime',
+      configurable: false,
+      private: true,
+    },
+    status: {
+      type: 'string',
+      configurable: false,
+      private: true,
+    },
+    type: {
+      type: 'string',
       configurable: false,
       private: true,
     },

@@ -9,8 +9,20 @@ const createUtils = (strapi) => {
     if (!user) {
       throw new Error('User not found');
     }
-    const token = strapi.service('admin::token').createJwtToken(user);
 
+    const userId = String(user.id);
+    const deviceId = '00000000-0000-4000-8000-000000000001';
+
+    const refresh = await strapi.sessionManager.generateRefreshToken(userId, deviceId, 'admin', {
+      familyType: 'session',
+    });
+
+    const access = await strapi.sessionManager.generateAccessToken(refresh.token);
+    if (!('token' in access)) {
+      throw new Error('Failed to generate admin access token');
+    }
+
+    const token = access.token;
     return { token, user };
   };
 

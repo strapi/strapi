@@ -7,8 +7,9 @@ export interface SessionManagerService {
   generateRefreshToken(
     userId: string,
     deviceId: string,
-    origin: string
-  ): Promise<{ token: string; sessionId: string }>;
+    origin: string,
+    options?: { familyType?: 'refresh' | 'session' }
+  ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string; familyId: string }>;
   validateAccessToken(token: string):
     | {
         isValid: true;
@@ -20,5 +21,16 @@ export interface SessionManagerService {
       };
   validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult>;
   generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }>;
-  invalidateRefreshToken(origin: string, identifierId: string, deviceId?: string): Promise<void>;
+  rotateRefreshToken(refreshToken: string): Promise<
+    | {
+        token: string;
+        sessionId: string;
+        absoluteExpiresAt: string;
+        familyId: string;
+        type: 'refresh' | 'session';
+      }
+    | { error: string }
+  >;
+  invalidateRefreshToken(origin: string, userId: string, deviceId?: string): Promise<void>;
+  isSessionActive(sessionId: string): Promise<boolean>;
 }
