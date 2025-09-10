@@ -18,7 +18,11 @@ export const getOrCreateDeviceId = (): string => {
   // Use Web Crypto API which is available in modern browsers
   const generated = crypto.randomUUID();
 
-  window.localStorage.setItem(storageKey, generated);
+  try {
+    window.localStorage.setItem(storageKey, generated);
+  } catch {
+    // no-op
+  }
 
   return generated;
 };
