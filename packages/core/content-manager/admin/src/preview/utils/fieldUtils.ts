@@ -65,18 +65,31 @@ export function getFieldAncestors({
   document: Modules.Documents.AnyDocument;
 }): FieldAncestor[] {
   const pathParts = parsePathWithIndices(path);
-  const ancestors: FieldAncestor[] = [];
 
   const visitor = (
     remainingPathParts: PathPart[],
-    currentAttributes: Schema.Attributes,
-    currentData: unknown,
-    currentPath: PathPart[] = []
-  ): void => {
+    currentAncestors: FieldAncestor[],
+    currentData: any
+  ): FieldAncestor[] => {
     const [currentPart, ...restParts] = remainingPathParts;
 
     if (!currentPart) {
-      return;
+      return currentAncestors;
+    }
+
+    // Determine current attributes based on ancestors
+    let currentAttributes: Schema.Attributes;
+    if (currentAncestors.length === 0) {
+      currentAttributes = schema.attributes;
+    } else {
+      const lastAncestor = currentAncestors[currentAncestors.length - 1];
+      if (lastAncestor.attribute.type === 'component') {
+        currentAttributes = components[lastAncestor.attribute.component].attributes;
+      } else if (lastAncestor.attribute.type === 'dynamiczone') {
+        currentAttributes = components[currentData.__component].attributes;
+      } else {
+        throw new PreviewFieldError('INVALID_FIELD_PATH');
+      }
     }
 
     const currentAttribute = currentAttributes[currentPart.name];
@@ -89,46 +102,45 @@ export function getFieldAncestors({
       throw new PreviewFieldError('RELATIONS_NOT_HANDLED');
     }
 
-    const currentFullPath = [...currentPath, currentPart];
-    ancestors.push({
+    const currentFullPath = [...currentAncestors.flatMap((a) => a.pathParts), currentPart];
+    const newAncestor: FieldAncestor = {
       attribute: currentAttribute,
       path: stringifyPathParts(currentFullPath),
       pathParts: currentFullPath,
-    });
+    };
+
+    const updatedAncestors = [...currentAncestors, newAncestor];
+
+    if (restParts.length === 0) {
+      return updatedAncestors;
+    }
 
     if (currentAttribute.type === 'component') {
-      const componentAttributes = components[currentAttribute.component].attributes;
       if (currentAttribute.repeatable) {
         if (currentPart.index === undefined) {
           throw new PreviewFieldError('INVALID_FIELD_PATH');
         }
-        visitor(
+        return visitor(
           restParts,
-          componentAttributes,
-          (currentData as any)[currentPart.name][currentPart.index],
-          currentFullPath
+          updatedAncestors,
+          currentData[currentPart.name][currentPart.index]
         );
       } else {
-        visitor(
-          restParts,
-          componentAttributes,
-          (currentData as any)[currentPart.name],
-          currentFullPath
-        );
+        return visitor(restParts, updatedAncestors, currentData[currentPart.name]);
       }
     } else if (currentAttribute.type === 'dynamiczone') {
       if (currentPart.index === undefined) {
         throw new PreviewFieldError('INVALID_FIELD_PATH');
       }
 
-      const componentData = (currentData as any)[currentPart.name][currentPart.index];
-      const componentAttributes = components[componentData.__component].attributes;
-      visitor(restParts, componentAttributes, componentData, currentFullPath);
+      const componentData = currentData[currentPart.name][currentPart.index];
+      return visitor(restParts, updatedAncestors, componentData);
     }
+
+    return updatedAncestors;
   };
 
-  visitor(pathParts, schema.attributes, document);
-  return ancestors;
+  return visitor(pathParts, [], document);
 }
 
 export function getAttributeSchemaFromPath({

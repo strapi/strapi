@@ -163,52 +163,52 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
         zIndex={4}
       />
       <InputPopoverProvider>
-        <Popover.Root
-          open={true}
-          onOpenChange={(open) => {
-            if (!open) {
-              // TODO: fix this
-              // TODO: fix array
-              // setPopoverField(null);
-              // setAncestors([]);
-              setCurrentDepth(0);
-            }
-          }}
-        >
-          <Popover.Trigger>
-            <Box
-              position="fixed"
-              width={popoverField.position.width + 'px'}
-              height={popoverField.position.height + 'px'}
-              top={0}
-              left={0}
-              transform={`translate(${iframeRect.left + popoverField.position.left}px, ${iframeRect.top + popoverField.position.top}px)`}
-            />
-          </Popover.Trigger>
-          <Popover.Content sideOffset={4}>
-            <Flex direction="column" gap={2} alignItems="stretch" padding={4} width="400px">
-              {/* @ts-expect-error the types of `attribute` clash for some reason */}
-              <InputRenderer
-                document={documentResponse}
-                attribute={popoverField.attribute}
-                // TODO: retrieve the proper label from the layout
-                label={popoverField.path}
-                name={popoverField.path}
-                type={popoverField.attribute.type}
-                visible={true}
+        {/* Avoid showing the popover and modal at the same time because one closes the other */}
+        {!focusedAncestor && (
+          <Popover.Root
+            open={true}
+            onOpenChange={(open) => {
+              if (!open) {
+                setPopoverField(null);
+                setAncestors([]);
+                setCurrentDepth(0);
+              }
+            }}
+          >
+            <Popover.Trigger>
+              <Box
+                position="fixed"
+                width={popoverField.position.width + 'px'}
+                height={popoverField.position.height + 'px'}
+                top={0}
+                left={0}
+                transform={`translate(${iframeRect.left + popoverField.position.left}px, ${iframeRect.top + popoverField.position.top}px)`}
               />
-              {isNested && (
-                <Box>
-                  <TextButton onClick={handleOpenParent}>Open parent</TextButton>
-                </Box>
-              )}
-            </Flex>
-          </Popover.Content>
-        </Popover.Root>
+            </Popover.Trigger>
+            <Popover.Content sideOffset={4}>
+              <Flex direction="column" gap={2} alignItems="stretch" padding={4} width="400px">
+                {/* @ts-expect-error the types of `attribute` clash for some reason */}
+                <InputRenderer
+                  document={documentResponse}
+                  attribute={popoverField.attribute}
+                  // TODO: retrieve the proper label from the layout
+                  label={popoverField.path}
+                  name={popoverField.path}
+                  type={popoverField.attribute.type}
+                  visible={true}
+                />
+                {isNested && (
+                  <Box>
+                    <TextButton onClick={handleOpenParent}>Edit parent</TextButton>
+                  </Box>
+                )}
+              </Flex>
+            </Popover.Content>
+          </Popover.Root>
+        )}
         <Modal.Root
           open={!!focusedAncestor}
           onOpenChange={(open) => {
-            console.log('onOpenChange', open);
             if (!open) {
               // Reset to the target field when closing modal
               setCurrentDepth(ancestors.length - 1);
@@ -219,7 +219,9 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
             {/* Nullish check is only for TS type narrowing */}
             {focusedAncestor && (
               <>
-                <Modal.Header>Edit {focusedAncestor.path}</Modal.Header>
+                <Modal.Header>
+                  <Modal.Title>Edit {ancestors.at(-1)?.pathParts.at(-1)?.name} parent</Modal.Title>
+                </Modal.Header>
                 <Modal.Body>
                   {/* @ts-expect-error the types of `attribute` clash for some reason */}
                   <InputRenderer
@@ -234,12 +236,7 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
                   <Box paddingTop={2}>
                     {currentDepth > 0 && (
                       <TextButton onClick={() => setCurrentDepth(currentDepth - 1)}>
-                        Open parent
-                      </TextButton>
-                    )}
-                    {currentDepth < ancestors.length - 1 && (
-                      <TextButton onClick={() => setCurrentDepth(currentDepth + 1)}>
-                        Back to field
+                        Edit parent
                       </TextButton>
                     )}
                   </Box>
