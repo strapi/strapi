@@ -113,7 +113,6 @@ const extractDeviceParams = (requestBody: unknown): { deviceId: string; remember
 
 export default {
   login: compose([
-    // Validate session-related fields (deviceId, rememberMe) before passport
     async (ctx: Context, next: Next) => {
       await validateLoginSessionInput(ctx.request.body ?? {});
       return next();
