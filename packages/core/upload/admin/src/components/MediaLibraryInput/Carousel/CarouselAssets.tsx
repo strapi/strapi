@@ -79,7 +79,6 @@ export const CarouselAssets = React.forwardRef(
         const firstChild = parentRef.current.firstElementChild as HTMLElement | null;
         if (firstChild) {
           firstChild.style.backgroundColor = disabled ? theme.colors.neutral150 : '';
-          firstChild.style.border = disabled ? theme.colors.neutral200 : '';
         }
       }
     }, [disabled, parentRef, theme.colors.neutral150, theme.colors.neutral200]);
