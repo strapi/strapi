@@ -15,9 +15,7 @@ export const getOrCreateDeviceId = (): string => {
     // Ignore storage errors and fallback to ephemeral id
   }
 
-  // Use Web Crypto API which is available in modern browsers
   const generated = crypto.randomUUID();
-
   try {
     window.localStorage.setItem(storageKey, generated);
   } catch {
@@ -25,18 +23,4 @@ export const getOrCreateDeviceId = (): string => {
   }
 
   return generated;
-};
-
-// TODO: do we need this as a fallback ?
-const _generateRandomHex32 = (): string => {
-  const bytes = new Uint8Array(16);
-
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    crypto.getRandomValues(bytes);
-  } else {
-    for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
-  }
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
 };

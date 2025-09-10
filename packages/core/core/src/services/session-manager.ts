@@ -7,9 +7,7 @@ import { DEFAULT_ALGORITHM } from '../constants';
 export interface SessionProvider {
   create(session: SessionData): Promise<SessionData>;
   findBySessionId(sessionId: string): Promise<SessionData | null>;
-  findByIdentifier(userId: string): Promise<SessionData[]>;
   updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void>;
-  findByParentId(parentId: string): Promise<SessionData | null>;
   deleteBySessionId(sessionId: string): Promise<void>;
   deleteExpiredFamilies(): Promise<void>;
   deleteBy(criteria: { userId?: string; origin?: string; deviceId?: string }): Promise<void>;
@@ -86,21 +84,8 @@ class DatabaseSessionProvider implements SessionProvider {
     return result as SessionData | null;
   }
 
-  async findByIdentifier(userId: string): Promise<SessionData[]> {
-    const results = await this.db.query(this.contentType).findMany({
-      where: { userId },
-    });
-    return results as SessionData[];
-  }
-
   async updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void> {
     await this.db.query(this.contentType).update({ where: { sessionId }, data });
-  }
-
-  async findByParentId(parentId: string): Promise<SessionData | null> {
-    const result = await this.db.query(this.contentType).findOne({ where: { parentId } });
-
-    return (result as SessionData) || null;
   }
 
   async deleteBySessionId(sessionId: string): Promise<void> {

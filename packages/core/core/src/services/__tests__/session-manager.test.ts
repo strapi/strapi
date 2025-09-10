@@ -270,9 +270,6 @@ describe('SessionManager Factory', () => {
     const origin = 'admin';
 
     beforeEach(() => {
-      mockCrypto.randomBytes.mockReturnValue(
-        Buffer.from('1234567890abcdef1234567890abcdef', 'hex') as any
-      );
       sessionManager = createSessionManager({ db: mockDb, config });
     });
 
@@ -404,7 +401,7 @@ describe('SessionManager Factory', () => {
       });
     });
 
-    it('should reject expired session (no cleanup on validate path)', async () => {
+    it('should reject expired session', async () => {
       const mockPayload = {
         userId,
         sessionId,
@@ -751,37 +748,6 @@ describe('DatabaseSessionProvider', () => {
       const result = await provider.findBySessionId('nonexistent');
 
       expect(result).toBeNull();
-    });
-  });
-
-  describe('findByIdentifier', () => {
-    it('should find sessions by user identifier', async () => {
-      const userId = 'user123';
-      const expectedResults = [
-        {
-          id: '1',
-          userId,
-          sessionId: 'session1',
-          deviceId: 'device1',
-          origin: 'admin',
-          expiresAt: new Date(),
-        },
-        {
-          id: '2',
-          userId,
-          sessionId: 'session2',
-          deviceId: 'device2',
-          origin: 'admin',
-          expiresAt: new Date(),
-        },
-      ];
-
-      mockQuery.findMany.mockResolvedValue(expectedResults);
-
-      const result = await provider.findByIdentifier(userId);
-
-      expect(mockQuery.findMany).toHaveBeenCalledWith({ where: { userId } });
-      expect(result).toEqual(expectedResults);
     });
   });
 
