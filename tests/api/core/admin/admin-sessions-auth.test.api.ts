@@ -39,7 +39,7 @@ describe('Admin Sessions Auth', () => {
 
   describe('POST /admin/login (sessions enabled)', () => {
     const deviceId = '11111111-1111-4111-8111-111111111111';
-    it('returns access token as primary token, also accessToken and refreshToken; sets refresh cookie (rememberMe=true)', async () => {
+    it('returns access token as primary token, also accessToken; sets refresh cookie (rememberMe=true)', async () => {
       const body = {
         email: superAdmin.loginInfo.email,
         password: superAdmin.loginInfo.password,
@@ -54,7 +54,9 @@ describe('Admin Sessions Auth', () => {
       // Primary token should be access token when sessions are enabled
       expect(res.body.data.token).toEqual(expect.any(String));
       expect(res.body.data.accessToken).toEqual(expect.any(String));
-      expect(res.body.data.refreshToken).toEqual(expect.any(String));
+
+      // refreshToken should not be in response body, only in cookie
+      expect(res.body.data.refreshToken).toBeUndefined();
 
       // Cookie assertions
       const cookie = getCookie(res, cookieName);
@@ -65,6 +67,9 @@ describe('Admin Sessions Auth', () => {
       // rememberMe=true should set an Expires
       expect(cookie).toMatch(/expires=/i);
 
+      // Extract refresh token from cookie
+      const refreshToken = cookie!.split(';')[0].split('=')[1];
+
       // Decode and validate tokens
       const accessPayload = decode(res.body.data.accessToken);
       expect(accessPayload).toMatchObject({
@@ -73,7 +78,7 @@ describe('Admin Sessions Auth', () => {
         sessionId: expect.any(String),
       });
 
-      const refreshPayload = decode(res.body.data.refreshToken);
+      const refreshPayload = decode(refreshToken);
       expect(refreshPayload).toMatchObject({
         type: 'refresh',
         userId: accessPayload.userId,
