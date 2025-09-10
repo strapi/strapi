@@ -771,9 +771,9 @@ describe('DatabaseSessionProvider', () => {
     });
   });
 
-  describe('deleteExpiredFamilies', () => {
+  describe('deleteExpired', () => {
     it('should delete families that exceeded absolute expiration', async () => {
-      await provider.deleteExpiredFamilies();
+      await provider.deleteExpired();
 
       expect(mockQuery.deleteMany).toHaveBeenCalledWith({
         where: { absoluteExpiresAt: { $lt: expect.any(Date) } },

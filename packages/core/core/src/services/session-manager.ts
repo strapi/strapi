@@ -9,7 +9,7 @@ export interface SessionProvider {
   findBySessionId(sessionId: string): Promise<SessionData | null>;
   updateBySessionId(sessionId: string, data: Partial<SessionData>): Promise<void>;
   deleteBySessionId(sessionId: string): Promise<void>;
-  deleteExpiredFamilies(): Promise<void>;
+  deleteExpired(): Promise<void>;
   deleteBy(criteria: { userId?: string; origin?: string; deviceId?: string }): Promise<void>;
 }
 
@@ -94,7 +94,7 @@ class DatabaseSessionProvider implements SessionProvider {
     });
   }
 
-  async deleteExpiredFamilies(): Promise<void> {
+  async deleteExpired(): Promise<void> {
     await this.db.query(this.contentType).deleteMany({
       where: { absoluteExpiresAt: { $lt: new Date() } },
     });
@@ -148,7 +148,7 @@ class SessionManager {
     if (this.cleanupInvocationCounter >= this.cleanupEveryCalls) {
       this.cleanupInvocationCounter = 0;
 
-      await this.provider.deleteExpiredFamilies();
+      await this.provider.deleteExpired();
     }
   }
 
