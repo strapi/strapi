@@ -114,7 +114,7 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
         type: 'success',
         message: formatMessage({
           id: getTranslation('Settings.locales.modal.edit.success'),
-          defaultMessage: 'Updated locale',
+          defaultMessage: 'Locale successfully edited',
         }),
       });
 
