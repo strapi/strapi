@@ -181,7 +181,6 @@ export default {
           data: {
             token: accessToken,
             accessToken,
-            refreshToken,
             user: getService('user').sanitizeUser(ctx.state.user),
           },
         } satisfies Login.Response;
@@ -245,7 +244,6 @@ export default {
         data: {
           token: accessToken,
           accessToken,
-          refreshToken,
           user: getService('user').sanitizeUser(user),
         },
       } satisfies Register.Response;
@@ -315,7 +313,6 @@ export default {
         data: {
           token: accessToken,
           accessToken,
-          refreshToken,
           user: getService('user').sanitizeUser(user),
         },
       };

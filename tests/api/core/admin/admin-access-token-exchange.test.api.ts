@@ -73,9 +73,9 @@ describe('Admin Access Token Exchange', () => {
     const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
     expect(loginRes.statusCode).toBe(200);
 
-    const refreshToken = loginRes.body?.data?.refreshToken as string;
     const refreshCookie = getCookie(loginRes, cookieName)!;
     const pair = refreshCookie.split(';')[0];
+    const refreshToken = pair.split('=')[1];
 
     const payload = decode(refreshToken);
     const sessionId = payload.sessionId as string;
@@ -96,9 +96,9 @@ describe('Admin Access Token Exchange', () => {
     const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
     expect(loginRes.statusCode).toBe(200);
 
-    const refreshToken = loginRes.body?.data?.refreshToken as string;
     const refreshCookie = getCookie(loginRes, cookieName)!;
     const pair = refreshCookie.split(';')[0];
+    const refreshToken = pair.split('=')[1];
     const payload = decode(refreshToken);
     const sessionId = payload.sessionId as string;
 

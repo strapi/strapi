@@ -78,8 +78,11 @@ describe('admin strategy', () => {
     });
     expect(loginRes.statusCode).toBe(200);
 
-    const refreshToken = loginRes.body?.data?.refreshToken as string;
-    expect(refreshToken).toEqual(expect.any(String));
+    // Extract refresh token from cookie instead of response body
+    const setCookies: string[] = loginRes.headers['set-cookie'] || [];
+    const refreshCookie = setCookies.find((c) => c.startsWith(`strapi_admin_refresh=`));
+    expect(refreshCookie).toBeDefined();
+    const refreshToken = refreshCookie!.split(';')[0].split('=')[1];
 
     const res = await createRequest({ strapi }).setToken(refreshToken).get('/admin/users/me');
     expect(res.statusCode).toBe(401);

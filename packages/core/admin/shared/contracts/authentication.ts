@@ -20,7 +20,6 @@ export declare namespace Login {
       // Primary token for the client to use. This is the short‑lived access token.
       token: string;
       accessToken?: string;
-      refreshToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
     errors?: errors.ApplicationError | errors.NotImplementedError;
@@ -80,7 +79,6 @@ export declare namespace Register {
     data: {
       token: string;
       accessToken?: string;
-      refreshToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
     errors?: errors.ApplicationError | errors.YupValidationError;
@@ -102,7 +100,6 @@ export declare namespace RegisterAdmin {
     data: {
       token: string;
       accessToken?: string;
-      refreshToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
     errors?: errors.ApplicationError | errors.YupValidationError;
