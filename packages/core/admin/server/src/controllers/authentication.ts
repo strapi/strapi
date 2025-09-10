@@ -113,7 +113,6 @@ const extractDeviceParams = (requestBody: unknown): { deviceId: string; remember
 
 export default {
   login: compose([
-    // Validate session-related fields (deviceId, rememberMe) before passport
     async (ctx: Context, next: Next) => {
       await validateLoginSessionInput(ctx.request.body ?? {});
       return next();
@@ -352,7 +351,8 @@ export default {
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager.generateRefreshToken(
         userId,
         deviceId,
-        'admin'
+        'admin',
+        { familyType: 'session' }
       );
 
       // No rememberMe flow here; expire with session by default (session cookie)
