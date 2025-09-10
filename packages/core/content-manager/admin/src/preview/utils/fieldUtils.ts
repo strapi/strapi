@@ -47,6 +47,90 @@ export const parsePathWithIndices = (path: string): PathPart[] => {
     }, []);
 };
 
+export interface FieldAncestor {
+  attribute: Schema.Attribute.AnyAttribute;
+  path: string;
+  pathParts: PathPart[];
+}
+
+export function getFieldAncestors({
+  path,
+  schema,
+  components,
+  document,
+}: {
+  path: string;
+  schema: PreviewContextValue['schema'] | PreviewContextValue['components'][string];
+  components: PreviewContextValue['components'];
+  document: Modules.Documents.AnyDocument;
+}): FieldAncestor[] {
+  const pathParts = parsePathWithIndices(path);
+  const ancestors: FieldAncestor[] = [];
+
+  const visitor = (
+    remainingPathParts: PathPart[],
+    currentAttributes: Schema.Attributes,
+    currentData: unknown,
+    currentPath: PathPart[] = []
+  ): void => {
+    const [currentPart, ...restParts] = remainingPathParts;
+
+    if (!currentPart) {
+      return;
+    }
+
+    const currentAttribute = currentAttributes[currentPart.name];
+
+    if (!currentAttribute) {
+      throw new PreviewFieldError('INVALID_FIELD_PATH');
+    }
+
+    if (currentAttribute.type === 'relation') {
+      throw new PreviewFieldError('RELATIONS_NOT_HANDLED');
+    }
+
+    const currentFullPath = [...currentPath, currentPart];
+    ancestors.push({
+      attribute: currentAttribute,
+      path: stringifyPathParts(currentFullPath),
+      pathParts: currentFullPath,
+    });
+
+    if (currentAttribute.type === 'component') {
+      const componentAttributes = components[currentAttribute.component].attributes;
+      if (currentAttribute.repeatable) {
+        if (currentPart.index === undefined) {
+          throw new PreviewFieldError('INVALID_FIELD_PATH');
+        }
+        visitor(
+          restParts,
+          componentAttributes,
+          (currentData as any)[currentPart.name][currentPart.index],
+          currentFullPath
+        );
+      } else {
+        visitor(
+          restParts,
+          componentAttributes,
+          (currentData as any)[currentPart.name],
+          currentFullPath
+        );
+      }
+    } else if (currentAttribute.type === 'dynamiczone') {
+      if (currentPart.index === undefined) {
+        throw new PreviewFieldError('INVALID_FIELD_PATH');
+      }
+
+      const componentData = (currentData as any)[currentPart.name][currentPart.index];
+      const componentAttributes = components[componentData.__component].attributes;
+      visitor(restParts, componentAttributes, componentData, currentFullPath);
+    }
+  };
+
+  visitor(pathParts, schema.attributes, document);
+  return ancestors;
+}
+
 export function getAttributeSchemaFromPath({
   path,
   schema,
@@ -58,64 +142,8 @@ export function getAttributeSchemaFromPath({
   components: PreviewContextValue['components'];
   document: Modules.Documents.AnyDocument;
 }): Schema.Attribute.AnyAttribute {
-  /**
-   * Create the function that will be recursively called.
-   * We don't do recursion on getAttributeSchemaFromPath itself because:
-   * - it takes a path string, not the parsed array that's better for recursion
-   * - even when several levels deep, we still need access to the root schema and components
-   */
-  const visitor = (
-    currentPathParts: PathPart[],
-    currentAttributes: Schema.Attributes,
-    currentData: any
-  ): Schema.Attribute.AnyAttribute => {
-    const [currentPart, ...remainingParts] = currentPathParts;
-
-    // Get the data and schema for the current path
-    const currentAttribute = currentAttributes[currentPart.name];
-
-    if (!currentAttribute) {
-      throw new PreviewFieldError('INVALID_FIELD_PATH');
-    }
-
-    if (currentAttribute.type === 'relation') {
-      throw new PreviewFieldError('RELATIONS_NOT_HANDLED');
-    }
-
-    if (currentAttribute.type === 'component') {
-      const componentAttributes = components[currentAttribute.component].attributes;
-      if (currentAttribute.repeatable) {
-        // We must have the index, otherwise we don't know what data to use
-        if (currentPart.index === undefined) {
-          throw new PreviewFieldError('INVALID_FIELD_PATH');
-        }
-        return visitor(
-          remainingParts,
-          componentAttributes,
-          currentData[currentPart.name][currentPart.index]
-        );
-      }
-
-      // Non repeatable component
-      return visitor(remainingParts, componentAttributes, currentData[currentPart.name]);
-    }
-
-    if (currentAttribute.type === 'dynamiczone') {
-      // We must have the index, otherwise we don't know what component we're dealing with
-      if (currentPart.index === undefined) {
-        throw new PreviewFieldError('INVALID_FIELD_PATH');
-      }
-
-      const componentData = currentData[currentPart.name][currentPart.index];
-      const componentAttributes = components[componentData.__component].attributes;
-      return visitor(remainingParts, componentAttributes, componentData);
-    }
-
-    // Plain regular field. It ends the recursion
-    return currentAttributes[currentPart.name];
-  };
-
-  return visitor(parsePathWithIndices(path), schema.attributes, document);
+  const ancestors = getFieldAncestors({ path, schema, components, document });
+  return ancestors[ancestors.length - 1].attribute;
 }
 
 export const stringifyPathParts = (pathParts: PathPart[]): string => {

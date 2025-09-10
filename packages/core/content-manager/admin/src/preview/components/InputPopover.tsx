@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { createContext, useNotification } from '@strapi/admin/strapi-admin';
-import { Box, Popover } from '@strapi/design-system';
+import { Box, Flex, Modal, Popover, TextButton } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { type UseDocument } from '../../hooks/useDocument';
@@ -10,8 +10,9 @@ import { usePreviewContext } from '../pages/Preview';
 import { INTERNAL_EVENTS, PREVIEW_ERROR_MESSAGES } from '../utils/constants';
 import {
   parseFieldMetaData,
-  getAttributeSchemaFromPath,
+  getFieldAncestors,
   PreviewFieldError,
+  FieldAncestor,
 } from '../utils/fieldUtils';
 
 /* -------------------------------------------------------------------------------------------------
@@ -46,6 +47,8 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
   const schema = usePreviewContext('InputPopover', (state) => state.schema);
   const components = usePreviewContext('InputPopover', (state) => state.components);
 
+  const [ancestors, setAncestors] = React.useState<FieldAncestor[]>([]);
+  const [currentDepth, setCurrentDepth] = React.useState<number>(0);
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
 
@@ -84,12 +87,18 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
         }
 
         try {
-          const attribute = getAttributeSchemaFromPath({
+          const fieldAncestors = getFieldAncestors({
             path: fieldMetaData.path,
             components,
             schema,
             document,
           });
+
+          const attribute = fieldAncestors[fieldAncestors.length - 1].attribute;
+
+          // Set ancestors and current depth to the target field (last in ancestors array)
+          setAncestors(fieldAncestors);
+          setCurrentDepth(fieldAncestors.length - 1);
 
           // We're able to handle the field, set it in context so the popover can pick it up
           setPopoverField({ ...fieldMetaData, position: event.data.payload.position, attribute });
@@ -120,11 +129,23 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
       window.removeEventListener('message', handleMessage);
     };
   }, [components, document, iframeRef, schema, setPopoverField, toggleNotification, formatMessage]);
+
   if (!popoverField || !iframeRef.current) {
     return null;
   }
 
   const iframeRect = iframeRef.current.getBoundingClientRect();
+
+  const isNested = ancestors.length > 1;
+  const focusedAncestor =
+    (isNested && currentDepth !== ancestors.length - 1 && ancestors.at(currentDepth)) || null;
+
+  console.log({ focusedAncestor, currentDepth, ancestors });
+
+  const handleOpenParent = () => {
+    // Navigate to the parent level (one step up the hierarchy)
+    setCurrentDepth(Math.max(0, currentDepth - 1));
+  };
 
   return (
     <>
@@ -142,7 +163,18 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
         zIndex={4}
       />
       <InputPopoverProvider>
-        <Popover.Root open={true} onOpenChange={(open) => !open && setPopoverField(null)}>
+        <Popover.Root
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) {
+              // TODO: fix this
+              // TODO: fix array
+              // setPopoverField(null);
+              // setAncestors([]);
+              setCurrentDepth(0);
+            }
+          }}
+        >
           <Popover.Trigger>
             <Box
               position="fixed"
@@ -154,7 +186,7 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
             />
           </Popover.Trigger>
           <Popover.Content sideOffset={4}>
-            <Box padding={4} width="400px">
+            <Flex direction="column" gap={2} alignItems="stretch" padding={4} width="400px">
               {/* @ts-expect-error the types of `attribute` clash for some reason */}
               <InputRenderer
                 document={documentResponse}
@@ -165,9 +197,57 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
                 type={popoverField.attribute.type}
                 visible={true}
               />
-            </Box>
+              {isNested && (
+                <Box>
+                  <TextButton onClick={handleOpenParent}>Open parent</TextButton>
+                </Box>
+              )}
+            </Flex>
           </Popover.Content>
         </Popover.Root>
+        <Modal.Root
+          open={!!focusedAncestor}
+          onOpenChange={(open) => {
+            console.log('onOpenChange', open);
+            if (!open) {
+              // Reset to the target field when closing modal
+              setCurrentDepth(ancestors.length - 1);
+            }
+          }}
+        >
+          <Modal.Content>
+            {/* Nullish check is only for TS type narrowing */}
+            {focusedAncestor && (
+              <>
+                <Modal.Header>Edit {focusedAncestor.path}</Modal.Header>
+                <Modal.Body>
+                  {/* @ts-expect-error the types of `attribute` clash for some reason */}
+                  <InputRenderer
+                    document={documentResponse}
+                    attribute={focusedAncestor.attribute}
+                    // TODO: retrieve the proper label from the layout
+                    label={focusedAncestor.path}
+                    name={focusedAncestor.path}
+                    type={focusedAncestor.attribute.type}
+                    visible={true}
+                  />
+                  <Box paddingTop={2}>
+                    {currentDepth > 0 && (
+                      <TextButton onClick={() => setCurrentDepth(currentDepth - 1)}>
+                        Open parent
+                      </TextButton>
+                    )}
+                    {currentDepth < ancestors.length - 1 && (
+                      <TextButton onClick={() => setCurrentDepth(currentDepth + 1)}>
+                        Back to field
+                      </TextButton>
+                    )}
+                  </Box>
+                </Modal.Body>
+              </>
+            )}
+          </Modal.Content>
+        </Modal.Root>
       </InputPopoverProvider>
     </>
   );
