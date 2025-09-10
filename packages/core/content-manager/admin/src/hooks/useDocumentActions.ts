@@ -6,11 +6,12 @@ import {
   useTracking,
   type TrackingEvent,
   useAPIErrorHandler,
-  useGuidedTour,
 } from '@strapi/admin/strapi-admin';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { useRelationModal } from '../pages/EditView/components/FormInputs/Relations/RelationModal';
+import { usePreviewContext } from '../preview/pages/Preview';
 import {
   useAutoCloneDocumentMutation,
   useCloneDocumentMutation,
@@ -71,6 +72,7 @@ type UseDocumentActions = (
   autoClone: (args: {
     model: string;
     sourceId: string;
+    locale?: string;
   }) => Promise<OperationResponse<AutoClone.Response>>;
   clone: (
     args: {
@@ -192,13 +194,18 @@ type IUseDocumentActs = ReturnType<UseDocumentActions>;
  *
  * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document-operations} for more information
  */
-const useDocumentActions: UseDocumentActions = (fromPreview = false, fromRelationModal = false) => {
+const useDocumentActions: UseDocumentActions = () => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
-  const setCurrentStep = useGuidedTour('useDocumentActions', (state) => state.setCurrentStep);
+
+  // Get metadata from context providers for tracking purposes
+  const previewContext = usePreviewContext('useDocumentActions', () => true, false);
+  const relationContext = useRelationModal('useDocumentActions', () => true, false);
+  const fromPreview = previewContext != undefined;
+  const fromRelationModal = relationContext != undefined;
 
   const [deleteDocument, { isLoading: isDeleting }] = useDeleteDocumentMutation();
   const _delete: IUseDocumentActs['delete'] = React.useCallback(
@@ -594,8 +601,12 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false, fromRelatio
 
           return { error: res.error };
         }
-
-        trackUsage('didCreateEntry', { ...trackerProperty, documentId: res.data.data.documentId });
+        trackUsage('didCreateEntry', {
+          ...trackerProperty,
+          documentId: res.data.data.documentId,
+          fromPreview,
+          fromRelationModal,
+        });
 
         toggleNotification({
           type: 'success',
@@ -604,8 +615,6 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false, fromRelatio
             defaultMessage: 'Saved document',
           }),
         });
-
-        setCurrentStep('contentManager.success');
 
         return res.data;
       } catch (err) {
@@ -619,16 +628,25 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false, fromRelatio
         throw err;
       }
     },
-    [createDocument, formatAPIError, formatMessage, setCurrentStep, toggleNotification, trackUsage]
+    [
+      createDocument,
+      formatAPIError,
+      formatMessage,
+      fromPreview,
+      fromRelationModal,
+      toggleNotification,
+      trackUsage,
+    ]
   );
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();
   const autoClone: IUseDocumentActs['autoClone'] = React.useCallback(
-    async ({ model, sourceId }) => {
+    async ({ model, sourceId, locale }) => {
       try {
         const res = await autoCloneDocument({
           model,
           sourceId,
+          params: locale ? { locale } : undefined,
         });
 
         if ('error' in res) {
@@ -660,7 +678,8 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false, fromRelatio
   const clone: IUseDocumentActs['clone'] = React.useCallback(
     async ({ model, documentId, params }, body, trackerProperty) => {
       try {
-        const { id: _id, ...restBody } = body;
+        // Omit id and documentId so they are not copied to the clone
+        const { id: _id, documentId: _documentId, ...restBody } = body;
 
         /**
          * If we're cloning we want to post directly to this endpoint

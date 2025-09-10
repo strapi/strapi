@@ -8,7 +8,6 @@ import { Navigate, useParams, NavLink } from 'react-router-dom';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
-import { DocumentContextProvider } from '../../features/DocumentContext';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
@@ -212,15 +211,8 @@ const HistoryPage = () => {
             labelledBy={headerId}
           >
             <VersionHeader headerId={headerId} />
-            <DocumentContextProvider
-              initialDocument={{
-                documentId: documentId || '',
-                model: slug,
-                collectionType: collectionType || '',
-              }}
-            >
-              <VersionContent />
-            </DocumentContextProvider>
+
+            <VersionContent />
           </Main>
           <VersionsList />
         </Flex>

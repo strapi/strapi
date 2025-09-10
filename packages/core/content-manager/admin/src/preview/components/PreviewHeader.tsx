@@ -16,7 +16,6 @@ import { Link, type To } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
-import { useDocumentContext } from '../../features/DocumentContext';
 import { DocumentActionButton } from '../../pages/EditView/components/DocumentActions';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
@@ -156,8 +155,8 @@ const PreviewHeader = () => {
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const onPreview = usePreviewContext('PreviewHeader', (state) => state.onPreview);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
-  const onPreview = useDocumentContext('PreviewHeader', (state) => state.onPreview);
 
   const [{ query }] = useQueryParams<{
     status?: 'draft' | 'published';
@@ -182,11 +181,9 @@ const PreviewHeader = () => {
     activeTab: query.status ?? null,
     collectionType: schema.kind === 'collectionType' ? 'collection-types' : 'single-types',
     model: schema.uid,
-    documentId: document.documentId,
+    documentId: schema.kind === 'collectionType' ? document.documentId : undefined,
     document,
     meta,
-    onPreview,
-    fromPreview: true,
   } satisfies DocumentActionProps;
 
   return (

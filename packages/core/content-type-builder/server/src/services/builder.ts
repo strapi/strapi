@@ -12,6 +12,7 @@ export const reservedAttributes = [
   'created_at',
   'updated_at',
   'published_at',
+  // V6: we will need to add first_published_at when it becomes the default behaviour
   'created_by_id',
   'updated_by_id',
   // does not actually conflict because the fields are called *_by_id but we'll leave it to avoid confusion

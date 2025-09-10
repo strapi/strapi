@@ -3,14 +3,14 @@ import type { Page } from '@playwright/test';
 import { login as loginFunc } from './login';
 import { resetFiles as resetFilesFunc } from './file-reset';
 import { resetDatabaseAndImportDataFromPath } from './dts-import';
-import { navToHeader, skipCtbTour } from './shared';
+import { navToHeader } from './shared';
 
 export type SharedSetupOptions = {
   login?: boolean; // Whether to log in to the application
-  skipTour?: boolean; // Whether to skip the CTB tour or not
   resetFiles?: boolean; // Whether to reset files before tests
   importData?: string; // Path to the data to be imported into the database (null if no import is needed)
   afterSetup?: ({ page }: { page: Page }) => Promise<void>; // An async function for custom setup logic that runs after the main setup
+  resetAlways?: boolean; // Whether to reset the setup always, even if the setup has already been run
 };
 
 // A cache to store which setups have been run for a given id
@@ -28,7 +28,7 @@ const setupRegistry: Record<string, boolean> = {};
  *   - resetFiles: Whether to reset files before tests.
  *   - importData: Path to the data to be imported into the database.
  *   - afterSetup: A custom function that runs once after the setup is complete.
- *   - skipTour: navigate to CTB and click 'skip tour'. This will fail if a login is not performed first.
+
  *
  * WARNING:
  * Using `sharedSetup` in this way introduces a risk of tests becoming dependent
@@ -41,11 +41,12 @@ const setupRegistry: Record<string, boolean> = {};
 export const sharedSetup = async (
   id: string,
   page: Page,
-  { login, resetFiles, importData, afterSetup, skipTour }: SharedSetupOptions
+  { login, resetFiles, importData, afterSetup, resetAlways }: SharedSetupOptions
 ) => {
-  let run = !setupRegistry[id];
+  let firstRun = !setupRegistry[id];
+  const extraRun = !firstRun && resetAlways;
 
-  if (run) {
+  if (firstRun || extraRun) {
     setupRegistry[id] = true;
 
     // Run one-time setup steps
@@ -55,6 +56,10 @@ export const sharedSetup = async (
     if (importData) {
       await resetDatabaseAndImportDataFromPath(importData);
     }
+
+    if (extraRun) {
+      await page.reload();
+    }
   }
 
   // This part always runs, regardless of setup being initialized
@@ -63,13 +68,7 @@ export const sharedSetup = async (
     await loginFunc({ page });
   }
 
-  if (skipTour) {
-    // Go to CTB first to skip the tour
-    await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
-    await skipCtbTour(page);
-  }
-
-  if (run) {
+  if (firstRun) {
     // Run any custom one-time setup logic passed via afterSetup
     if (afterSetup) {
       await afterSetup({ page });

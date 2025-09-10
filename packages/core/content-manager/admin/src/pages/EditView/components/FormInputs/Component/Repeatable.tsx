@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useField, useNotification, useForm } from '@strapi/admin/strapi-admin';
+import { useField, useNotification, useForm, createRulesEngine } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -18,7 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocumentContext } from '../../../../../features/DocumentContext';
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
@@ -51,7 +51,7 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const currentDocument = useDocumentContext('RepeatableComponent', (state) => state.document);
+  const { currentDocument } = useDocumentContext('RepeatableComponent');
   const components = currentDocument.components;
 
   const {
@@ -66,6 +66,8 @@ const RepeatableComponent = ({
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
+
+  const rulesEngine = createRulesEngine();
 
   React.useEffect(() => {
     const hasNestedErrors = rawError && Array.isArray(rawError) && rawError.length > 0;
@@ -244,8 +246,9 @@ const RepeatableComponent = ({
         onValueChange={handleValueChange}
         aria-describedby={ariaDescriptionId}
       >
-        {value.map(({ __temp_key__: key, id }, index) => {
+        {value.map(({ __temp_key__: key, id, ...currentComponentValues }, index) => {
           const nameWithIndex = `${name}.${index}`;
+
           return (
             <ComponentProvider
               key={key}
@@ -273,9 +276,21 @@ const RepeatableComponent = ({
                 __temp_key__={key}
               >
                 {layout.map((row, index) => {
+                  const visibleFields = row.filter(({ ...field }) => {
+                    const condition = field.attribute.conditions?.visible;
+                    if (condition) {
+                      return rulesEngine.evaluate(condition, currentComponentValues);
+                    }
+
+                    return true;
+                  });
+
+                  if (visibleFields.length === 0) {
+                    return null; // Skip rendering the entire grid row
+                  }
                   return (
                     <ResponsiveGridRoot gap={4} key={index}>
-                      {row.map(({ size, ...field }) => {
+                      {visibleFields.map(({ size, ...field }) => {
                         /**
                          * Layouts are built from schemas so they don't understand the complete
                          * schema tree, for components we append the parent name to the field name
@@ -439,6 +454,7 @@ const Component = ({
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
               <IconButton
+                disabled={disabled}
                 variant="ghost"
                 onClick={onDeleteComponent}
                 label={formatMessage({
@@ -449,6 +465,7 @@ const Component = ({
                 <Trash />
               </IconButton>
               <IconButton
+                disabled={disabled}
                 ref={composedAccordionRefs}
                 variant="ghost"
                 onClick={(e) => e.stopPropagation()}

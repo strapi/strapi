@@ -1,15 +1,10 @@
-import type { Plugin } from '@strapi/types';
-
-const info = { pluginName: 'admin', type: 'admin' };
-
 export default [
   {
     method: 'GET',
-    info,
-    path: '/homepage/recent-documents',
-    handler: 'homepage.getRecentDocuments',
+    path: '/homepage/key-statistics',
+    handler: 'homepage.getKeyStatistics',
     config: {
       policies: ['admin::isAuthenticatedAdmin'],
     },
   },
-] satisfies Plugin.LoadedPlugin['routes'][string]['routes'];
+];

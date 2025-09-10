@@ -1,293 +1,317 @@
-import { render, screen, fireEvent } from '@tests/utils';
-import { useNavigate } from 'react-router-dom';
+import { DocumentMeta } from '../../../../../../hooks/useDocumentContext';
+import { reducer, type State, type Action } from '../RelationModal';
 
-import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
-import { RelationModalForm } from '../RelationModal';
-
-const relationContext = {
-  initialDocument: {
-    documentId: 'abcdefg',
-    model: 'api::test.test',
+describe('Document Modal Reducer', () => {
+  // Sample documents for testing
+  const doc1: DocumentMeta = {
+    documentId: 'doc1',
+    model: 'api::articles.article',
     collectionType: 'collection-types',
-  },
-};
+  };
+  const doc2: DocumentMeta = {
+    documentId: 'doc2',
+    model: 'api::products.product',
+    collectionType: 'collection-types',
+  };
+  const doc3: DocumentMeta = {
+    documentId: 'doc3',
+    model: 'api::categories.category',
+    collectionType: 'collection-types',
+    params: { locale: 'en' },
+  };
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(),
-}));
+  // Initial state for most tests
+  const initialState: State = {
+    documentHistory: [],
+    confirmDialogIntent: null,
+    isModalOpen: false,
+    hasUnsavedChanges: false,
+  };
 
-jest.mock('../../../../../../services/documents', () => ({
-  useLazyGetDocumentQuery: jest.fn(() => [jest.fn()]),
-}));
+  // State with history
+  const stateWithHistory: State = {
+    documentHistory: [doc1, doc2],
+    confirmDialogIntent: null,
+    isModalOpen: true,
+    hasUnsavedChanges: false,
+  };
 
-const mockNavigate = jest.fn();
-(useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+  // State with unsaved changes
+  const stateWithUnsavedChanges: State = {
+    ...stateWithHistory,
+    hasUnsavedChanges: true,
+  };
 
-jest.mock('../../../../../../hooks/useDocument', () => ({
-  useDoc: jest.fn(() => ({})),
-  useDocument: jest.fn(() => ({
-    isLoading: false,
-    components: {},
-    document: {
-      category: {
-        count: 1,
-      },
-      createdAt: '2025-02-10T09:44:42.354Z',
-      createdBy: {
-        firstname: 'John',
-        id: '1',
-        lastname: 'Doe',
-        username: 'johndoe',
-      },
-      documentId: 'abcdefg',
-      id: 1,
-      locale: null,
-      name: 'test',
-      updatedAt: '2025-02-10T09:44:42.354Z',
-      updatedBy: {
-        firstname: 'John',
-        id: '1',
-        lastname: 'Doe',
-        username: 'johndoe',
-      },
-    },
-    getTitle: jest.fn().mockReturnValue('Test'),
-    getInitialFormValues: jest.fn().mockReturnValue({
-      name: 'test',
-      category: {
-        connect: [],
-        disconnect: [],
-      },
-    }),
-    meta: {
-      availableLocales: [],
-      availableStatus: [],
-    },
-    schema: {
-      options: {
-        draftAndPublish: false,
-      },
-    },
-  })),
-}));
-
-jest.mock('../../../../../../hooks/useDocumentLayout', () => ({
-  useDocLayout: jest.fn(() => ({
-    edit: {
-      components: {},
-    },
-  })),
-  useDocumentLayout: jest.fn().mockReturnValue({
-    edit: {
-      components: {},
-      layout: [
-        [
-          [
-            {
-              attribute: { pluginOptions: {}, type: 'string' },
-              disabled: false,
-              hint: '',
-              label: 'name',
-              name: 'name',
-              mainField: undefined,
-              placeholder: '',
-              required: false,
-              type: 'string',
-              unique: false,
-              visible: true,
-              size: 6,
-            },
-            {
-              attribute: {
-                relation: 'oneToOne',
-                relationType: 'oneToOne',
-                target: 'api::category.category',
-                targetModel: 'api::category.category',
-                type: 'relation',
-              },
-              disabled: false,
-              hint: '',
-              label: 'category',
-              mainField: {
-                name: 'name',
-                type: 'string',
-              },
-              name: 'category',
-              required: false,
-              size: 6,
-              type: 'relation',
-              visible: true,
-              unique: false,
-            },
-          ],
-        ],
-      ],
-      settings: {
-        mainField: 'name',
-      },
-    },
-    error: false,
-    isLoading: false,
-    list: {
-      layout: [
-        {
-          attribute: {
-            type: 'integer',
-          },
-          label: 'id',
-          name: 'id',
-          searchable: true,
-          sortable: true,
+  describe('GO_TO_RELATION action', () => {
+    it('should add document to history and open modal when no unsaved changes', () => {
+      const action: Action = {
+        type: 'GO_TO_RELATION',
+        payload: {
+          document: doc1,
+          shouldBypassConfirmation: false,
         },
-        {
-          attribute: {
-            pluginOptions: {},
-            type: 'string',
-          },
-          label: 'name',
-          name: 'name',
-          searchable: true,
-          sortable: true,
+      };
+
+      const result = reducer(initialState, action);
+
+      expect(result).toEqual({
+        documentHistory: [doc1],
+        confirmDialogIntent: null,
+        isModalOpen: true,
+        hasUnsavedChanges: false,
+      });
+    });
+
+    it('should add document to existing history', () => {
+      const action: Action = {
+        type: 'GO_TO_RELATION',
+        payload: {
+          document: doc3,
+          shouldBypassConfirmation: false,
         },
-        {
-          attribute: {
-            relation: 'oneToOne',
-            relationType: 'oneToOne',
-            target: 'api::category.category',
-            targetModel: 'api::category.category',
-            type: 'relation',
-          },
-          label: 'category',
-          name: 'category',
-          mainField: {
-            name: 'name',
-            type: 'string',
-          },
-          searchable: true,
-          sortable: true,
+      };
+
+      const result = reducer(stateWithHistory, action);
+
+      expect(result).toEqual({
+        documentHistory: [doc1, doc2, doc3],
+        confirmDialogIntent: null,
+        isModalOpen: true,
+        hasUnsavedChanges: false,
+      });
+    });
+
+    it('should show confirmation dialog when unsaved changes exist', () => {
+      const action: Action = {
+        type: 'GO_TO_RELATION',
+        payload: {
+          document: doc3,
+          shouldBypassConfirmation: false,
         },
-      ],
-    },
-  }),
-}));
+      };
 
-jest.mock('@strapi/admin/strapi-admin', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin'),
-  useRBAC: jest.fn(() => ({
-    isLoading: false,
-    allowedActions: { canUpdate: true, canDelete: true, canPublish: true },
-  })),
-  useStrapiApp: jest.fn((name, getter) =>
-    getter({
-      customFields: {
-        get: jest.fn(),
-      },
-      plugins: {
-        'content-manager': {
-          initializer: jest.fn(),
-          injectionZones: {},
-          isReady: true,
-          name: 'content-manager',
-          pluginId: 'content-manager',
-          injectComponent: jest.fn(),
-          getInjectedComponents: jest.fn(),
-          apis: {
-            getDocumentActions: () => [],
-            getHeaderActions: () => [],
-          },
+      const result = reducer(stateWithUnsavedChanges, action);
+
+      expect(result).toEqual({
+        ...stateWithUnsavedChanges,
+        confirmDialogIntent: doc3,
+      });
+    });
+
+    it('should bypass confirmation when shouldBypassConfirmation is true', () => {
+      const action: Action = {
+        type: 'GO_TO_RELATION',
+        payload: {
+          document: doc3,
+          shouldBypassConfirmation: true,
         },
-      },
-    })
-  ),
-}));
+      };
 
-const relation = {
-  documentId: 'abcdefg',
-  model: 'api::test.test',
-  collectionType: 'collection-types',
-  params: {},
-};
+      const result = reducer(stateWithUnsavedChanges, action);
 
-describe('<RelationModal />', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
+      expect(result).toEqual({
+        documentHistory: [doc1, doc2, doc3],
+        confirmDialogIntent: null,
+        isModalOpen: true,
+        hasUnsavedChanges: true,
+      });
+    });
   });
 
-  it('renders the trigger button correctly', () => {
-    render(
-      <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
-      </DocumentContextProvider>
-    );
+  describe('GO_BACK action', () => {
+    it('should remove the last document from history when no unsaved changes', () => {
+      const action: Action = {
+        type: 'GO_BACK',
+        payload: {
+          shouldBypassConfirmation: false,
+        },
+      };
 
-    expect(screen.getByText('Open Modal')).toBeInTheDocument();
+      const result = reducer(stateWithHistory, action);
+
+      expect(result).toEqual({
+        documentHistory: [doc1],
+        confirmDialogIntent: null,
+        isModalOpen: true,
+        hasUnsavedChanges: false,
+      });
+    });
+
+    it('should show confirmation dialog when unsaved changes exist', () => {
+      const action: Action = {
+        type: 'GO_BACK',
+        payload: {
+          shouldBypassConfirmation: false,
+        },
+      };
+
+      const result = reducer(stateWithUnsavedChanges, action);
+
+      expect(result).toEqual({
+        ...stateWithUnsavedChanges,
+        confirmDialogIntent: 'back',
+      });
+    });
+
+    it('should bypass confirmation when shouldBypassConfirmation is true', () => {
+      const action: Action = {
+        type: 'GO_BACK',
+        payload: {
+          shouldBypassConfirmation: true,
+        },
+      };
+
+      const result = reducer(stateWithUnsavedChanges, action);
+
+      expect(result).toEqual({
+        documentHistory: [doc1],
+        confirmDialogIntent: null,
+        isModalOpen: true,
+        hasUnsavedChanges: true,
+      });
+    });
   });
 
-  it('does not render the modal by default', () => {
-    render(
-      <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
-      </DocumentContextProvider>
-    );
+  describe('GO_FULL_PAGE action', () => {
+    it('should clear confirmDialogIntent when no unsaved changes', () => {
+      const action: Action = {
+        type: 'GO_FULL_PAGE',
+      };
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      const result = reducer(stateWithHistory, action);
+
+      expect(result).toEqual(initialState);
+    });
+
+    it('should show navigate confirmation dialog when unsaved changes exist', () => {
+      const action: Action = {
+        type: 'GO_FULL_PAGE',
+      };
+
+      const result = reducer(stateWithUnsavedChanges, action);
+
+      expect(result).toEqual({
+        ...stateWithUnsavedChanges,
+        confirmDialogIntent: 'navigate',
+      });
+    });
   });
 
-  it('opens the modal when clicking the trigger button', () => {
-    render(
-      <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
-      </DocumentContextProvider>
-    );
+  describe('CANCEL_CONFIRM_DIALOG action', () => {
+    it('should clear the confirmation dialog intent', () => {
+      const stateWithDialog: State = {
+        ...stateWithUnsavedChanges,
+        confirmDialogIntent: 'close',
+      };
 
-    const button = screen.getByText('Open Modal');
-    fireEvent.click(button);
+      const action: Action = {
+        type: 'CANCEL_CONFIRM_DIALOG',
+      };
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('Edit a relation')).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', {
-        name: 'Test',
-        level: 2,
-      })
-    ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+      const result = reducer(stateWithDialog, action);
+
+      expect(result).toEqual({
+        ...stateWithDialog,
+        confirmDialogIntent: null,
+      });
+    });
   });
 
-  it('closes the modal when clicking the cancel button', () => {
-    render(
-      <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
-      </DocumentContextProvider>
-    );
+  describe('CLOSE_MODAL action', () => {
+    it('should clear history and close modal when no unsaved changes', () => {
+      const action: Action = {
+        type: 'CLOSE_MODAL',
+        payload: {
+          shouldBypassConfirmation: false,
+        },
+      };
 
-    const button = screen.getByText('Open Modal');
-    fireEvent.click(button);
+      const result = reducer(stateWithHistory, action);
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+      expect(result).toEqual({
+        documentHistory: [],
+        confirmDialogIntent: null,
+        isModalOpen: false,
+        hasUnsavedChanges: false,
+      });
+    });
 
-    const cancelButton = screen.getByRole('button', { name: /cancel/i });
-    fireEvent.click(cancelButton);
+    it('should show close confirmation dialog when unsaved changes exist', () => {
+      const action: Action = {
+        type: 'CLOSE_MODAL',
+        payload: {
+          shouldBypassConfirmation: false,
+        },
+      };
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      const result = reducer(stateWithUnsavedChanges, action);
+
+      expect(result).toEqual({
+        ...stateWithUnsavedChanges,
+        confirmDialogIntent: 'close',
+      });
+    });
+
+    it('should bypass confirmation when shouldBypassConfirmation is true', () => {
+      const action: Action = {
+        type: 'CLOSE_MODAL',
+        payload: {
+          shouldBypassConfirmation: true,
+        },
+      };
+
+      const result = reducer(stateWithUnsavedChanges, action);
+
+      expect(result).toEqual({
+        documentHistory: [],
+        confirmDialogIntent: null,
+        isModalOpen: false,
+        hasUnsavedChanges: false,
+      });
+    });
   });
 
-  it('navigates to full page when "Go to entry" is clicked', () => {
-    render(
-      <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
-      </DocumentContextProvider>
-    );
+  describe('SET_HAS_UNSAVED_CHANGES action', () => {
+    it('should set hasUnsavedChanges to true', () => {
+      const action: Action = {
+        type: 'SET_HAS_UNSAVED_CHANGES',
+        payload: {
+          hasUnsavedChanges: true,
+        },
+      };
 
-    fireEvent.click(screen.getByText('Open Modal'));
+      const result = reducer(stateWithHistory, action);
 
-    const goToEntryButton = screen.getByRole('button', { name: /go to entry/i });
-    fireEvent.click(goToEntryButton);
+      expect(result).toEqual({
+        ...stateWithHistory,
+        hasUnsavedChanges: true,
+      });
+    });
 
-    expect(mockNavigate).toHaveBeenCalledWith(
-      '/content-manager/collection-types/api::test.test/abcdefg'
-    );
+    it('should set hasUnsavedChanges to false', () => {
+      const action: Action = {
+        type: 'SET_HAS_UNSAVED_CHANGES',
+        payload: {
+          hasUnsavedChanges: false,
+        },
+      };
+
+      const result = reducer(stateWithUnsavedChanges, action);
+
+      expect(result).toEqual({
+        ...stateWithUnsavedChanges,
+        hasUnsavedChanges: false,
+      });
+    });
+  });
+
+  describe('Unknown action', () => {
+    it('should return the current state for unknown action types', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const action = { type: 'UNKNOWN_ACTION' } as any;
+      const result = reducer(stateWithHistory, action);
+
+      expect(result).toBe(stateWithHistory);
+    });
   });
 });

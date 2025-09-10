@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useForm, useField } from '@strapi/admin/strapi-admin';
+import { useForm, useField, createRulesEngine } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
   Box,
@@ -9,7 +9,6 @@ import {
   IconButton,
   useComposedRefs,
   Menu,
-  MenuItem,
   BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
@@ -19,7 +18,7 @@ import { styled } from 'styled-components';
 
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocumentContext } from '../../../../../features/DocumentContext';
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
@@ -58,26 +57,12 @@ const DynamicComponent = ({
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
-  const documentMeta = useDocumentContext('DynamicComponent', (state) => state.meta);
-  const rootDocumentMeta = useDocumentContext(
-    'DynamicComponent',
-    (state) => state.rootDocumentMeta
-  );
+  const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
+  const rulesEngine = createRulesEngine();
 
   const {
-    edit: { components: rootComponents },
-  } = useDocumentLayout(rootDocumentMeta.model);
-  const {
-    edit: { components: relatedComponents },
-  } = useDocumentLayout(documentMeta.model);
-
-  // Merge the root level components and related components
-  const components = React.useMemo(
-    () => ({ ...rootComponents, ...relatedComponents }),
-    [rootComponents, relatedComponents]
-  );
-
-  const document = useDocumentContext('DynamicComponent', (state) => state.document);
+    edit: { components },
+  } = useDocumentLayout(currentDocumentMeta.model);
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
@@ -192,9 +177,9 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index)}>
+                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index)}>
                       {displayName}
-                    </MenuItem>
+                    </Menu.Item>
                   ))}
                 </React.Fragment>
               ))}
@@ -212,9 +197,9 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
+                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
                       {displayName}
-                    </MenuItem>
+                    </Menu.Item>
                   ))}
                 </React.Fragment>
               ))}
@@ -254,55 +239,70 @@ const DynamicComponent = ({
                 <AccordionContentRadius background="neutral0">
                   <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
                     <Grid.Root gap={4}>
-                      {components[componentUid]?.layout?.map((row, rowInd) => (
-                        <Grid.Item
-                          col={12}
-                          key={rowInd}
-                          s={12}
-                          xs={12}
-                          direction="column"
-                          alignItems="stretch"
-                        >
-                          <ResponsiveGridRoot gap={4}>
-                            {row.map(({ size, ...field }) => {
-                              const fieldName = `${name}.${index}.${field.name}`;
+                      {components[componentUid]?.layout?.map((row, rowInd) => {
+                        const visibleFields = row.filter(({ ...field }) => {
+                          const condition = field.attribute.conditions?.visible;
 
-                              const fieldWithTranslatedLabel = {
-                                ...field,
-                                label: formatMessage({
-                                  id: `content-manager.components.${componentUid}.${field.name}`,
-                                  defaultMessage: field.label,
-                                }),
-                              };
+                          if (condition) {
+                            return rulesEngine.evaluate(condition, value);
+                          }
 
-                              return (
-                                <ResponsiveGridItem
-                                  col={size}
-                                  key={fieldName}
-                                  s={12}
-                                  xs={12}
-                                  direction="column"
-                                  alignItems="stretch"
-                                >
-                                  {children ? (
-                                    children({
-                                      ...fieldWithTranslatedLabel,
-                                      document,
-                                      name: fieldName,
-                                    })
-                                  ) : (
-                                    <InputRenderer
-                                      {...fieldWithTranslatedLabel}
-                                      document={document}
-                                      name={fieldName}
-                                    />
-                                  )}
-                                </ResponsiveGridItem>
-                              );
-                            })}
-                          </ResponsiveGridRoot>
-                        </Grid.Item>
-                      ))}
+                          return true;
+                        });
+
+                        if (visibleFields.length === 0) {
+                          return null; // Skip rendering the entire grid row
+                        }
+                        return (
+                          <Grid.Item
+                            col={12}
+                            key={rowInd}
+                            s={12}
+                            xs={12}
+                            direction="column"
+                            alignItems="stretch"
+                          >
+                            <ResponsiveGridRoot gap={4}>
+                              {visibleFields.map(({ size, ...field }) => {
+                                const fieldName = `${name}.${index}.${field.name}`;
+
+                                const fieldWithTranslatedLabel = {
+                                  ...field,
+                                  label: formatMessage({
+                                    id: `content-manager.components.${componentUid}.${field.name}`,
+                                    defaultMessage: field.label,
+                                  }),
+                                };
+
+                                return (
+                                  <ResponsiveGridItem
+                                    col={size}
+                                    key={fieldName}
+                                    s={12}
+                                    xs={12}
+                                    direction="column"
+                                    alignItems="stretch"
+                                  >
+                                    {children ? (
+                                      children({
+                                        ...fieldWithTranslatedLabel,
+                                        document: currentDocument,
+                                        name: fieldName,
+                                      })
+                                    ) : (
+                                      <InputRenderer
+                                        {...fieldWithTranslatedLabel}
+                                        document={currentDocument}
+                                        name={fieldName}
+                                      />
+                                    )}
+                                  </ResponsiveGridItem>
+                                );
+                              })}
+                            </ResponsiveGridRoot>
+                          </Grid.Item>
+                        );
+                      })}
                     </Grid.Root>
                   </Box>
                 </AccordionContentRadius>

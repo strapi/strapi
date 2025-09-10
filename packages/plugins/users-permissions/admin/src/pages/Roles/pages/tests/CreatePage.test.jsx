@@ -10,6 +10,13 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { CreatePage } from '../CreatePage';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const render = () => ({
   ...renderRTL(<Route path="/settings/users-permissions/roles/new" element={<CreatePage />} />, {
     wrapper({ children }) {

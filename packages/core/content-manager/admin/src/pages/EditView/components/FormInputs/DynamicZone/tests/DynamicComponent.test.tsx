@@ -2,19 +2,9 @@ import { Form } from '@strapi/admin/strapi-admin';
 import { screen, fireEvent, render as renderRTL } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
 import { DynamicComponent, DynamicComponentProps } from '../DynamicComponent';
 
 import { dynamicComponentsByCategory } from './fixtures';
-
-const relationContext = {
-  initialDocument: {
-    documentId: 'abcdefg',
-    model: 'api::address.address',
-    collectionType: 'collection-types',
-  },
-  setCurrentDocument: jest.fn(),
-};
 
 /**
  * We _could_ unmock this and use it, but it requires more
@@ -77,7 +67,7 @@ describe('DynamicComponent', () => {
                   method="POST"
                   onSubmit={jest.fn()}
                 >
-                  <DocumentContextProvider {...relationContext}>{children}</DocumentContextProvider>
+                  {children}
                 </Form>
               }
             />

@@ -8,6 +8,7 @@ import {
   act,
   screen,
   type RenderOptions,
+  fireEvent,
 } from '@strapi/admin/strapi-admin/test';
 
 import { PERMISSIONS, PERMISSIONS_SETTINGS } from '../src/constants';
@@ -23,4 +24,4 @@ const render = (
     },
   });
 
-export { render, waitFor, act, screen, server };
+export { render, waitFor, act, screen, server, fireEvent };

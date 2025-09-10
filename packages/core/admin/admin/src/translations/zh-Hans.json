@@ -456,6 +456,7 @@
   "app.components.LeftMenu.navbrand.title": "Strapi控制面板",
   "app.components.LeftMenu.navbrand.workplace": "工作区",
   "app.components.LeftMenu.plugins": "插件",
+  "app.components.LeftMenu.trialCountdown": "您的试用期将于 {date} 结束。",
   "app.components.LeftMenuFooter.help": "帮助",
   "app.components.LeftMenuFooter.poweredBy": "技术支持 ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "集合类型",
