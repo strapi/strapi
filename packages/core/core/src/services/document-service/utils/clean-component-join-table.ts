@@ -3,85 +3,10 @@ import type { Schema } from '@strapi/types';
 import { findComponentParent, getParentSchemasForComponent } from '../components';
 
 /**
- * Removes orphaned unidirectional relations from component join tables.
- *
- * This function specifically targets "ghost/orphaned relations" that occur in components
- * with draft/publish functionality where join table entries persist after
- * relations are removed in the UI, causing API/admin interface inconsistencies.
- *
- * This repair function aligns with the prevention logic in document-service/utils/unidirectional-relations.ts
- * and reuses the same component parent detection utilities.
- */
-export const repairOrphanUnidirectionalRelations = async (): Promise<number> => {
-  let totalCleaned = 0;
-
-  const db: Database = strapi.db;
-  const mdValues = db.metadata.values();
-  const mdArray = Array.from(mdValues);
-
-  if (mdArray.length === 0) {
-    return 0;
-  }
-
-  db.logger.debug('Starting orphan unidirectional relations repair');
-
-  for (const model of mdArray) {
-    const unidirectionalRelations = getUnidirectionalRelations(model.attributes || {});
-
-    for (const relation of unidirectionalRelations) {
-      if (hasJoinTable(relation) && hasTarget(relation)) {
-        const cleaned = await cleanComponentJoinTable(
-          db,
-          relation.joinTable.name,
-          relation,
-          model
-        );
-        totalCleaned += cleaned;
-      }
-    }
-  }
-
-  db.logger.debug(
-    `Orphan unidirectional relations repair completed. Cleaned ${totalCleaned} orphaned entries.`
-  );
-
-  return totalCleaned;
-};
-
-/**
- * Identifies unidirectional relations (relations without inversedBy or mappedBy)
- * Uses same logic as prevention fix in unidirectional-relations.ts:54-61
- */
-const getUnidirectionalRelations = (attributes: Record<string, any>): any[] => {
-  return Object.values(attributes).filter((attribute) => {
-    if (attribute.type !== 'relation') {
-      return false;
-    }
-
-    // Check if it's unidirectional (no inversedBy or mappedBy) - same as prevention logic
-    return !attribute.inversedBy && !attribute.mappedBy;
-  });
-};
-
-/**
- * Type guard to check if a relation has a joinTable property
- */
-const hasJoinTable = (relation: any): boolean => {
-  return 'joinTable' in relation && relation.joinTable != null;
-};
-
-/**
- * Type guard to check if a relation has a target property
- */
-const hasTarget = (relation: any): boolean => {
-  return 'target' in relation && typeof relation.target === 'string';
-};
-
-/**
  * Cleans ghost relations with publication state mismatches from a join table
  * Uses schema-based draft/publish checking like prevention fix
  */
-const cleanComponentJoinTable = async (
+export const cleanComponentJoinTable = async (
   db: Database,
   joinTableName: string,
   relation: any,
@@ -96,7 +21,8 @@ const cleanComponentJoinTable = async (
     }
 
     // Check if target supports draft/publish using schema-based approach (like prevention fix)
-    const targetContentType = strapi.contentTypes[relation.target as keyof typeof strapi.contentTypes];
+    const targetContentType =
+      strapi.contentTypes[relation.target as keyof typeof strapi.contentTypes];
     const targetSupportsDraftPublish = targetContentType?.options?.draftAndPublish || false;
 
     if (!targetSupportsDraftPublish) {
@@ -216,7 +142,8 @@ const findPublicationStateMismatches = async (
           }
 
           // Check if THIS component instance's parent supports draft/publish
-          const parentContentType = strapi.contentTypes[parent.uid as keyof typeof strapi.contentTypes];
+          const parentContentType =
+            strapi.contentTypes[parent.uid as keyof typeof strapi.contentTypes];
           if (!parentContentType?.options?.draftAndPublish) {
             // This component instance's parent does NOT support D&P - skip cleanup
             // eslint-disable-next-line no-continue
