@@ -36,7 +36,7 @@ export const AssetPreview = React.forwardRef<
 
   if (mime.includes(AssetType.Image)) {
     return (
-      <img ref={ref as React.ForwardedRef<HTMLImageElement>} src={url} alt={name} {...props} />
+      <img ref={ref as React.ForwardedRef<HTMLImageElement>} src={url} alt={name} {...props} crossOrigin="anonymous" />
     );
   }
 
