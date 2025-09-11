@@ -29,16 +29,6 @@ export default {
       configurable: false,
       private: true,
     },
-    parentId: {
-      type: 'string',
-      configurable: false,
-      private: true,
-    },
-    familyId: {
-      type: 'string',
-      configurable: false,
-      private: true,
-    },
     childId: {
       type: 'string',
       configurable: false,

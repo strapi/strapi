@@ -19,9 +19,8 @@ export interface SessionData {
   sessionId: string;
   deviceId: string;
   origin: string;
-  parentId?: string | null;
   childId?: string | null;
-  familyId?: string | null;
+
   type?: 'refresh' | 'session';
   status?: 'active' | 'rotated' | 'revoked';
   expiresAt: Date;
@@ -157,7 +156,7 @@ class SessionManager {
     deviceId: string,
     origin: string,
     options?: { familyType?: 'refresh' | 'session' }
-  ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string; familyId: string }> {
+  ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }> {
     await this.maybeCleanupExpired();
 
     const sessionId = this.generateSessionId();
@@ -182,9 +181,7 @@ class SessionManager {
       sessionId,
       deviceId,
       origin,
-      parentId: null,
       childId: null,
-      familyId: sessionId,
       type: familyType,
       status: 'active',
       expiresAt,
@@ -211,7 +208,6 @@ class SessionManager {
       token,
       sessionId,
       absoluteExpiresAt: absoluteExpiresAt.toISOString(),
-      familyId: record.familyId!,
     };
   }
 
@@ -318,7 +314,6 @@ class SessionManager {
         token: string;
         sessionId: string;
         absoluteExpiresAt: string;
-        familyId: string;
         type: 'refresh' | 'session';
       }
     | { error: string }
@@ -372,7 +367,6 @@ class SessionManager {
             token: childToken,
             sessionId: child.sessionId,
             absoluteExpiresAt,
-            familyId: String(child.familyId ?? child.sessionId),
             type: child.type ?? 'refresh',
           };
         }
@@ -407,9 +401,7 @@ class SessionManager {
         sessionId: childSessionId,
         deviceId: current.deviceId,
         origin: current.origin,
-        parentId: current.sessionId,
         childId: null,
-        familyId: current.familyId ?? current.sessionId,
         type: familyType,
         status: 'active',
         expiresAt: childExpiresAt,
@@ -449,7 +441,6 @@ class SessionManager {
         token: childToken,
         sessionId: childSessionId,
         absoluteExpiresAt,
-        familyId: String(childRecord.familyId ?? childRecord.sessionId),
         type: familyType,
       };
     } catch {

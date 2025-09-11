@@ -114,9 +114,7 @@ describe('SessionManager Factory', () => {
           sessionId: 'abcdef1234567890',
           deviceId,
           origin,
-          parentId: null,
           childId: null,
-          familyId: 'abcdef1234567890',
           type: 'refresh',
           status: 'active',
           expiresAt: expect.any(Date),
@@ -173,7 +171,6 @@ describe('SessionManager Factory', () => {
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + config.idleRefreshTokenLifespan * 1000),
         absoluteExpiresAt: new Date(Date.now() + config.maxRefreshTokenLifespan * 1000),
-        familyId: 'abcdef1234567890',
       });
 
       const result = await sessionManager.generateRefreshToken(userId, deviceId, origin);
@@ -182,7 +179,6 @@ describe('SessionManager Factory', () => {
         token: 'test-jwt-token',
         sessionId: 'abcdef1234567890',
         absoluteExpiresAt: expect.any(String),
-        familyId: 'abcdef1234567890',
       });
     });
 

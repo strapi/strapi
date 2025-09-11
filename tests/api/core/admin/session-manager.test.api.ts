@@ -379,8 +379,11 @@ describe('SessionManager API Integration', () => {
 
     describe('generateAccessToken', () => {
       it('should rotate refresh token and return same child on reuse', async () => {
-        const { token: parentToken, sessionId: parentId } =
-          await strapi.sessionManager.generateRefreshToken(testUserId, testDeviceId, testOrigin);
+        const { token: parentToken } = await strapi.sessionManager.generateRefreshToken(
+          testUserId,
+          testDeviceId,
+          testOrigin
+        );
 
         // First rotation
         const r1 = await strapi.sessionManager.rotateRefreshToken(parentToken);
@@ -395,12 +398,6 @@ describe('SessionManager API Integration', () => {
           if ('token' in r2) {
             expect(r2.sessionId).toBe(childSession1);
             expect(r2.token).toBe(childToken1);
-
-            // And child should have parent linkage
-            const child = await strapi.db.query(contentTypeUID).findOne({
-              where: { sessionId: childSession1 },
-            });
-            expect(child?.parentId).toBe(parentId);
           }
         }
       });
@@ -597,7 +594,7 @@ describe('SessionManager API Integration', () => {
         expect(rotation).toEqual({ error: 'max_window_elapsed' });
       });
 
-      it('retains familyId across rotations and marks parent as rotated', async () => {
+      it('marks parent as rotated and sets childId', async () => {
         const r = await strapi.sessionManager.generateRefreshToken(
           testUserId,
           testDeviceId,
@@ -607,9 +604,6 @@ describe('SessionManager API Integration', () => {
         const rotation = await strapi.sessionManager.rotateRefreshToken(r.token);
         expect('token' in rotation).toBe(true);
         if ('token' in rotation) {
-          // familyId should remain equal to the root sessionId
-          expect(rotation.familyId).toBe(r.sessionId);
-
           const parent = await strapi.db.query(contentTypeUID).findOne({
             where: { sessionId: r.sessionId },
           });

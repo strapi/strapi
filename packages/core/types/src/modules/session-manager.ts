@@ -9,7 +9,7 @@ export interface SessionManagerService {
     deviceId: string,
     origin: string,
     options?: { familyType?: 'refresh' | 'session' }
-  ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string; familyId: string }>;
+  ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }>;
   validateAccessToken(token: string):
     | {
         isValid: true;
@@ -26,7 +26,6 @@ export interface SessionManagerService {
         token: string;
         sessionId: string;
         absoluteExpiresAt: string;
-        familyId: string;
         type: 'refresh' | 'session';
       }
     | { error: string }
