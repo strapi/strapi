@@ -21,7 +21,7 @@ module.exports = ({ nexus, strapi }) => {
     type: nonNull(responseName),
 
     args: {
-      id: nonNull('ID'),
+      documentId: nonNull('ID'),
       data: nonNull(userInputName),
     },
 
@@ -30,7 +30,7 @@ module.exports = ({ nexus, strapi }) => {
     async resolve(parent, args, context) {
       const { koaContext } = context;
 
-      koaContext.params = { id: args.id };
+      koaContext.params = { documentId: args.documentId };
       koaContext.request.body = toPlainObject(args.data);
 
       await strapi.plugin('users-permissions').controller('user').update(koaContext);

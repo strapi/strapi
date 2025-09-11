@@ -62,13 +62,17 @@ module.exports = ({ strapi }) => ({
 
   /**
    * Promise to edit a/an user.
-   * @param {string} userId
+   * @param {string|number} identifier - The userId or documentId
    * @param {object} params
    * @return {Promise}
    */
-  async edit(userId, params = {}) {
+  async edit(identifier, params = {}) {
+      const whereCondition = typeof identifier === 'number' || /^\d+$/.test(identifier)
+      ? { id: identifier }
+      : { documentId: identifier };
+
     return strapi.db.query(USER_MODEL_UID).update({
-      where: { id: userId },
+      where: whereCondition,
       data: await this.ensureHashedPasswords(params),
       populate: ['role'],
     });
@@ -76,15 +80,20 @@ module.exports = ({ strapi }) => ({
 
   /**
    * Promise to fetch a/an user.
+   * @param {string|number} identifier 
+   * @param {object} params 
    * @return {Promise}
    */
-  fetch(id, params) {
+  fetch(identifier, params) {
     const query = strapi.get('query-params').transform(USER_MODEL_UID, params ?? {});
+    const whereCondition = typeof identifier === 'number' || /^\d+$/.test(identifier)
+      ? { id: identifier }
+      : { documentId: identifier };
 
     return strapi.db.query(USER_MODEL_UID).findOne({
       ...query,
       where: {
-        $and: [{ id }, query.where || {}],
+        $and: [whereCondition, query.where || {}],
       },
     });
   },
@@ -109,10 +118,21 @@ module.exports = ({ strapi }) => ({
 
   /**
    * Promise to remove a/an user.
+   * @param {object|string|number} params 
    * @return {Promise}
    */
   async remove(params) {
-    return strapi.db.query(USER_MODEL_UID).delete({ where: params });
+    let whereCondition;
+    
+    if (typeof params === 'object' && !Array.isArray(params)) {
+      whereCondition = params;
+    } else {
+      whereCondition = typeof params === 'number' || /^\d+$/.test(params)
+        ? { id: params }
+        : { documentId: params };
+    }
+
+    return strapi.db.query(USER_MODEL_UID).delete({ where: whereCondition });
   },
 
   validatePassword(password, hash) {
@@ -181,5 +201,31 @@ module.exports = ({ strapi }) => ({
         text: settings.message,
         html: settings.message,
       });
+  },
+
+  /**
+   * Promise to fetch a/an user by documentId.
+   * @param {string} documentId - The document ID
+   * @param {object} params - Query parameters
+   * @return {Promise}
+   */
+  fetchByDocumentId(documentId, params) {
+    const query = strapi.get('query-params').transform(USER_MODEL_UID, params ?? {});
+
+    return strapi.db.query(USER_MODEL_UID).findOne({
+      ...query,
+      where: {
+        $and: [{ documentId }, query.where || {}],
+      },
+    });
+  },
+
+  /**
+   * Promise to remove a/an user by documentId.
+   * @param {string} documentId - The document ID
+   * @return {Promise}
+   */
+  async removeByDocumentId(documentId) {
+    return strapi.db.query(USER_MODEL_UID).delete({ where: { documentId } });
   },
 });
