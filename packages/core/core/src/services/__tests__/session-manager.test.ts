@@ -190,6 +190,35 @@ describe('SessionManager Factory', () => {
         'Database connection failed'
       );
     });
+
+    it('should create session without deviceId when undefined', async () => {
+      mockQuery.create.mockResolvedValue({
+        userId,
+        sessionId: 'abcdef1234567890',
+        origin,
+        expiresAt: expect.any(Date),
+        createdAt: new Date(),
+      });
+
+      await sessionManager.generateRefreshToken(userId, undefined, origin);
+
+      expect(mockQuery.create).toHaveBeenCalledWith({
+        data: {
+          userId,
+          sessionId: 'abcdef1234567890',
+          origin,
+          childId: null,
+          type: 'refresh',
+          status: 'active',
+          expiresAt: expect.any(Date),
+          absoluteExpiresAt: expect.any(Date),
+        },
+      });
+
+      // Verify deviceId is not included when undefined
+      const createCall = mockQuery.create.mock.calls[0][0];
+      expect(createCall.data.deviceId).toBeUndefined();
+    });
   });
 
   describe('validateAccessToken', () => {
@@ -608,7 +637,7 @@ describe('SessionManager Factory', () => {
 
       const result = await sessionManager.generateAccessToken(refreshToken);
 
-      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken);
+      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken, undefined);
       expect(mockJwt.sign).toHaveBeenCalledWith(
         {
           userId,
@@ -638,7 +667,7 @@ describe('SessionManager Factory', () => {
 
       const result = await sessionManager.generateAccessToken(refreshToken);
 
-      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken);
+      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken, undefined);
       expect(mockJwt.sign).not.toHaveBeenCalled();
       expect(result).toEqual({
         error: 'invalid_refresh_token',
@@ -655,7 +684,7 @@ describe('SessionManager Factory', () => {
         'Database connection failed'
       );
 
-      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken);
+      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken, undefined);
       expect(mockJwt.sign).not.toHaveBeenCalled();
     });
   });
@@ -703,6 +732,24 @@ describe('DatabaseSessionProvider', () => {
         userId: 'user123',
         sessionId: 'session456',
         deviceId: 'device789',
+        origin: 'admin',
+        expiresAt: new Date(),
+      };
+
+      const expectedResult = { ...sessionData, id: '1' };
+      mockQuery.create.mockResolvedValue(expectedResult);
+
+      const result = await provider.create(sessionData);
+
+      expect(mockDb.query).toHaveBeenCalledWith(contentType);
+      expect(mockQuery.create).toHaveBeenCalledWith({ data: sessionData });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should create session without deviceId', async () => {
+      const sessionData: SessionData = {
+        userId: 'user123',
+        sessionId: 'session456',
         origin: 'admin',
         expiresAt: new Date(),
       };

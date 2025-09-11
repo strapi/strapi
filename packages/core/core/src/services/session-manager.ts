@@ -17,7 +17,7 @@ export interface SessionData {
   id?: string;
   userId: string; // User ID stored as string (key-value store)
   sessionId: string;
-  deviceId: string;
+  deviceId?: string; // Optional for origins that don't need device tracking
   origin: string;
   childId?: string | null;
 
@@ -123,19 +123,21 @@ export interface SessionManagerConfig {
   algorithm?: Algorithm;
 }
 
+export type ConfigResolver = (origin?: string) => SessionManagerConfig;
+
 class SessionManager {
   private provider: SessionProvider;
 
-  private config: SessionManagerConfig;
+  private configResolver: ConfigResolver;
 
   // Run expired cleanup only every N calls to avoid extra queries
   private cleanupInvocationCounter: number = 0;
 
   private readonly cleanupEveryCalls: number = 50;
 
-  constructor(provider: SessionProvider, config: SessionManagerConfig) {
+  constructor(provider: SessionProvider, configResolver: ConfigResolver) {
     this.provider = provider;
-    this.config = config;
+    this.configResolver = configResolver;
   }
 
   generateSessionId(): string {
@@ -153,23 +155,20 @@ class SessionManager {
 
   async generateRefreshToken(
     userId: string,
-    deviceId: string,
+    deviceId: string | undefined,
     origin: string,
     options?: { familyType?: 'refresh' | 'session' }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }> {
     await this.maybeCleanupExpired();
 
+    const config = this.configResolver(origin);
     const sessionId = this.generateSessionId();
     const familyType = options?.familyType ?? 'refresh';
     const isRefresh = familyType === 'refresh';
 
-    const idleLifespan = isRefresh
-      ? this.config.idleRefreshTokenLifespan
-      : this.config.idleSessionLifespan;
+    const idleLifespan = isRefresh ? config.idleRefreshTokenLifespan : config.idleSessionLifespan;
 
-    const maxLifespan = isRefresh
-      ? this.config.maxRefreshTokenLifespan
-      : this.config.maxSessionLifespan;
+    const maxLifespan = isRefresh ? config.maxRefreshTokenLifespan : config.maxSessionLifespan;
 
     const now = Date.now();
     const expiresAt = new Date(now + idleLifespan * 1000);
@@ -179,7 +178,7 @@ class SessionManager {
     const record = await this.provider.create({
       userId,
       sessionId,
-      deviceId,
+      ...(deviceId && { deviceId }),
       origin,
       childId: null,
       type: familyType,
@@ -199,8 +198,8 @@ class SessionManager {
       exp: expiresAtSeconds,
     };
 
-    const token = jwt.sign(payload, this.config.jwtSecret, {
-      algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
+    const token = jwt.sign(payload, config.jwtSecret, {
+      algorithm: config.algorithm ?? DEFAULT_ALGORITHM,
       noTimestamp: true,
     });
 
@@ -212,11 +211,13 @@ class SessionManager {
   }
 
   validateAccessToken(
-    token: string
+    token: string,
+    origin?: string
   ): { isValid: true; payload: AccessTokenPayload } | { isValid: false; payload: null } {
     try {
-      const payload = jwt.verify(token, this.config.jwtSecret, {
-        algorithms: [this.config.algorithm ?? DEFAULT_ALGORITHM],
+      const config = this.configResolver(origin);
+      const payload = jwt.verify(token, config.jwtSecret, {
+        algorithms: [config.algorithm ?? DEFAULT_ALGORITHM],
       }) as TokenPayload;
 
       // Ensure this is an access token
@@ -230,17 +231,14 @@ class SessionManager {
     }
   }
 
-  async validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult> {
+  async validateRefreshToken(token: string, origin?: string): Promise<ValidateRefreshTokenResult> {
     try {
+      const config = this.configResolver(origin);
       const verifyOptions: VerifyOptions = {
-        algorithms: [this.config.algorithm ?? DEFAULT_ALGORITHM],
+        algorithms: [config.algorithm ?? DEFAULT_ALGORITHM],
       };
 
-      const payload = jwt.verify(
-        token,
-        this.config.jwtSecret,
-        verifyOptions
-      ) as RefreshTokenPayload;
+      const payload = jwt.verify(token, config.jwtSecret, verifyOptions) as RefreshTokenPayload;
 
       if (payload.type !== 'refresh') {
         return { isValid: false };
@@ -288,8 +286,11 @@ class SessionManager {
     await this.provider.deleteBy({ userId, origin, deviceId });
   }
 
-  async generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }> {
-    const validation = await this.validateRefreshToken(refreshToken);
+  async generateAccessToken(
+    refreshToken: string,
+    origin?: string
+  ): Promise<{ token: string } | { error: string }> {
+    const validation = await this.validateRefreshToken(refreshToken, origin);
 
     if (!validation.isValid) {
       return { error: 'invalid_refresh_token' };
@@ -301,15 +302,19 @@ class SessionManager {
       type: 'access',
     };
 
-    const token = jwt.sign(payload, this.config.jwtSecret, {
-      algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
-      expiresIn: this.config.accessTokenLifespan,
+    const config = this.configResolver(origin);
+    const token = jwt.sign(payload, config.jwtSecret, {
+      algorithm: config.algorithm ?? DEFAULT_ALGORITHM,
+      expiresIn: config.accessTokenLifespan,
     });
 
     return { token };
   }
 
-  async rotateRefreshToken(refreshToken: string): Promise<
+  async rotateRefreshToken(
+    refreshToken: string,
+    origin?: string
+  ): Promise<
     | {
         token: string;
         sessionId: string;
@@ -319,8 +324,9 @@ class SessionManager {
     | { error: string }
   > {
     try {
-      const payload = jwt.verify(refreshToken, this.config.jwtSecret, {
-        algorithms: [this.config.algorithm ?? DEFAULT_ALGORITHM],
+      const config = this.configResolver(origin);
+      const payload = jwt.verify(refreshToken, config.jwtSecret, {
+        algorithms: [config.algorithm ?? DEFAULT_ALGORITHM],
       }) as RefreshTokenPayload;
 
       if (!payload || payload.type !== 'refresh') {
@@ -348,8 +354,8 @@ class SessionManager {
             exp: childExp,
           };
 
-          const childToken = jwt.sign(childPayload, this.config.jwtSecret, {
-            algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
+          const childToken = jwt.sign(childPayload, config.jwtSecret, {
+            algorithm: config.algorithm ?? DEFAULT_ALGORITHM,
             noTimestamp: true,
           });
 
@@ -375,9 +381,7 @@ class SessionManager {
       const now = Date.now();
       const familyType = current.type ?? 'refresh';
       const idleLifespan =
-        familyType === 'refresh'
-          ? this.config.idleRefreshTokenLifespan
-          : this.config.idleSessionLifespan;
+        familyType === 'refresh' ? config.idleRefreshTokenLifespan : config.idleSessionLifespan;
 
       // Enforce idle window since creation of the current token
       if (current.createdAt && now - new Date(current.createdAt).getTime() > idleLifespan * 1000) {
@@ -399,7 +403,7 @@ class SessionManager {
       const childRecord = await this.provider.create({
         userId: current.userId,
         sessionId: childSessionId,
-        deviceId: current.deviceId,
+        ...(current.deviceId && { deviceId: current.deviceId }),
         origin: current.origin,
         childId: null,
         type: familyType,
@@ -417,8 +421,8 @@ class SessionManager {
         iat: childIat,
         exp: childExp,
       };
-      const childToken = jwt.sign(payloadOut, this.config.jwtSecret, {
-        algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
+      const childToken = jwt.sign(payloadOut, config.jwtSecret, {
+        algorithm: config.algorithm ?? DEFAULT_ALGORITHM,
         noTimestamp: true,
       });
 
@@ -473,9 +477,17 @@ const createDatabaseProvider = (db: Database, contentType: string): SessionProvi
   return new DatabaseSessionProvider(db, contentType);
 };
 
-const createSessionManager = ({ db, config }: { db: Database; config: SessionManagerConfig }) => {
+const createSessionManager = ({
+  db,
+  config,
+}: {
+  db: Database;
+  config: SessionManagerConfig | ConfigResolver;
+}) => {
   const provider = createDatabaseProvider(db, 'admin::session');
-  return new SessionManager(provider, config);
+  const configResolver = typeof config === 'function' ? config : () => config;
+
+  return new SessionManager(provider, configResolver);
 };
 
 export { createSessionManager, createDatabaseProvider };
