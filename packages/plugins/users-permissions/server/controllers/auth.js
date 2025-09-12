@@ -88,17 +88,13 @@ module.exports = ({ strapi }) => ({
 
       const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
       if (mode === 'refresh') {
-        const refresh = await strapi.sessionManager.generateRefreshToken(
-          String(user.id),
-          undefined,
-          'users-permissions',
-          { familyType: 'refresh' }
-        );
+        const refresh = await strapi
+          .sessionManager('users-permissions')
+          .generateRefreshToken(String(user.id), undefined, { familyType: 'refresh' });
 
-        const access = await strapi.sessionManager.generateAccessToken(
-          refresh.token,
-          'users-permissions'
-        );
+        const access = await strapi
+          .sessionManager('users-permissions')
+          .generateAccessToken(refresh.token);
         if ('error' in access) {
           throw new ApplicationError('Invalid credentials');
         }
@@ -126,17 +122,13 @@ module.exports = ({ strapi }) => ({
 
       const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
       if (mode === 'refresh') {
-        const refresh = await strapi.sessionManager.generateRefreshToken(
-          String(user.id),
-          undefined,
-          'users-permissions',
-          { familyType: 'refresh' }
-        );
+        const refresh = await strapi
+          .sessionManager('users-permissions')
+          .generateRefreshToken(String(user.id), undefined, { familyType: 'refresh' });
 
-        const access = await strapi.sessionManager.generateAccessToken(
-          refresh.token,
-          'users-permissions'
-        );
+        const access = await strapi
+          .sessionManager('users-permissions')
+          .generateAccessToken(refresh.token);
         if ('error' in access) {
           throw new ApplicationError('Invalid credentials');
         }
@@ -188,14 +180,13 @@ module.exports = ({ strapi }) => ({
     const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
     if (mode === 'refresh') {
       const deviceId = crypto.randomUUID();
-      const refresh = await strapi.sessionManager.generateRefreshToken(
-        String(user.id),
-        deviceId,
-        'users-permissions',
-        { familyType: 'refresh' }
-      );
+      const refresh = await strapi
+        .sessionManager('users-permissions')
+        .generateRefreshToken(String(user.id), deviceId, { familyType: 'refresh' });
 
-      const access = await strapi.sessionManager.generateAccessToken(refresh.token);
+      const access = await strapi
+        .sessionManager('users-permissions')
+        .generateAccessToken(refresh.token);
       if ('error' in access) {
         throw new ApplicationError('Invalid credentials');
       }
@@ -241,14 +232,13 @@ module.exports = ({ strapi }) => ({
     const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
     if (mode === 'refresh') {
       const deviceId = crypto.randomUUID();
-      const refresh = await strapi.sessionManager.generateRefreshToken(
-        String(user.id),
-        deviceId,
-        'users-permissions',
-        { familyType: 'refresh' }
-      );
+      const refresh = await strapi
+        .sessionManager('users-permissions')
+        .generateRefreshToken(String(user.id), deviceId, { familyType: 'refresh' });
 
-      const access = await strapi.sessionManager.generateAccessToken(refresh.token);
+      const access = await strapi
+        .sessionManager('users-permissions')
+        .generateAccessToken(refresh.token);
       if ('error' in access) {
         throw new ApplicationError('Invalid credentials');
       }
@@ -276,18 +266,16 @@ module.exports = ({ strapi }) => ({
       return ctx.badRequest('Missing refresh token');
     }
 
-    const rotation = await strapi.sessionManager.rotateRefreshToken(
-      refreshToken,
-      'users-permissions'
-    );
+    const rotation = await strapi
+      .sessionManager('users-permissions')
+      .rotateRefreshToken(refreshToken);
     if ('error' in rotation) {
       return ctx.unauthorized('Invalid refresh token');
     }
 
-    const result = await strapi.sessionManager.generateAccessToken(
-      rotation.token,
-      'users-permissions'
-    );
+    const result = await strapi
+      .sessionManager('users-permissions')
+      .generateAccessToken(rotation.token);
     if ('error' in result) {
       return ctx.unauthorized('Invalid refresh token');
     }
@@ -533,14 +521,13 @@ module.exports = ({ strapi }) => ({
     const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
     if (mode === 'refresh') {
       const deviceId = crypto.randomUUID();
-      const refresh = await strapi.sessionManager.generateRefreshToken(
-        String(user.id),
-        deviceId,
-        'users-permissions',
-        { familyType: 'refresh' }
-      );
+      const refresh = await strapi
+        .sessionManager('users-permissions')
+        .generateRefreshToken(String(user.id), deviceId, { familyType: 'refresh' });
 
-      const access = await strapi.sessionManager.generateAccessToken(refresh.token);
+      const access = await strapi
+        .sessionManager('users-permissions')
+        .generateAccessToken(refresh.token);
       if ('error' in access) {
         throw new ApplicationError('Invalid credentials');
       }

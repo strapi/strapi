@@ -158,10 +158,11 @@ export default {
         const userId = String(user.id);
         const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
 
-        const { token: refreshToken, absoluteExpiresAt } =
-          await sessionManager.generateRefreshToken(userId, deviceId, 'admin', {
-            familyType: rememberMe ? 'refresh' : 'session',
-          });
+        const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
+          'admin'
+        ).generateRefreshToken(userId, deviceId, {
+          familyType: rememberMe ? 'refresh' : 'session',
+        });
 
         const cookieOptions = buildCookieOptionsWithExpiry(
           rememberMe ? 'refresh' : 'session',
@@ -169,7 +170,7 @@ export default {
         );
         ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
 
-        const accessResult = await sessionManager.generateAccessToken(refreshToken);
+        const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
         if ('error' in accessResult) {
           return ctx.internalServerError();
         }
@@ -219,12 +220,9 @@ export default {
       const userId = String(user.id);
       const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
 
-      const { token: refreshToken, absoluteExpiresAt } = await sessionManager.generateRefreshToken(
-        userId,
-        deviceId,
-        'admin',
-        { familyType: rememberMe ? 'refresh' : 'session' }
-      );
+      const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
+        'admin'
+      ).generateRefreshToken(userId, deviceId, { familyType: rememberMe ? 'refresh' : 'session' });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -232,7 +230,7 @@ export default {
       );
       ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
 
-      const accessResult = await sessionManager.generateAccessToken(refreshToken);
+      const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
       if ('error' in accessResult) {
         return ctx.internalServerError();
       }
@@ -288,12 +286,9 @@ export default {
       const userId = String(user.id);
       const { deviceId, rememberMe } = extractDeviceParams(ctx.request.body);
 
-      const { token: refreshToken, absoluteExpiresAt } = await sessionManager.generateRefreshToken(
-        userId,
-        deviceId,
-        'admin',
-        { familyType: rememberMe ? 'refresh' : 'session' }
-      );
+      const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
+        'admin'
+      ).generateRefreshToken(userId, deviceId, { familyType: rememberMe ? 'refresh' : 'session' });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -301,7 +296,7 @@ export default {
       );
       ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
 
-      const accessResult = await sessionManager.generateAccessToken(refreshToken);
+      const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
       if ('error' in accessResult) {
         return ctx.internalServerError();
       }
@@ -348,18 +343,15 @@ export default {
       const userId = String(user.id);
       const deviceId = generateDeviceId();
 
-      const { token: refreshToken, absoluteExpiresAt } = await sessionManager.generateRefreshToken(
-        userId,
-        deviceId,
-        'admin',
-        { familyType: 'session' }
-      );
+      const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
+        'admin'
+      ).generateRefreshToken(userId, deviceId, { familyType: 'session' });
 
       // No rememberMe flow here; expire with session by default (session cookie)
       const cookieOptions = buildCookieOptionsWithExpiry('session', absoluteExpiresAt);
       ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
 
-      const accessResult = await sessionManager.generateAccessToken(refreshToken);
+      const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
       if ('error' in accessResult) {
         return ctx.internalServerError();
       }
@@ -393,12 +385,12 @@ export default {
 
       // Single-use renewal: rotate on access exchange, then create access token
       // from the new refresh token
-      const rotation = await sessionManager.rotateRefreshToken(refreshToken);
+      const rotation = await sessionManager('admin').rotateRefreshToken(refreshToken);
       if ('error' in rotation) {
         return ctx.unauthorized('Invalid refresh token');
       }
 
-      const result = await sessionManager.generateAccessToken(rotation.token);
+      const result = await sessionManager('admin').generateAccessToken(rotation.token);
       if ('error' in result) {
         return ctx.unauthorized('Invalid refresh token');
       }
@@ -432,7 +424,7 @@ export default {
       const sessionManager = getSessionManager();
       if (sessionManager) {
         const userId = String(ctx.state.user.id);
-        await sessionManager.invalidateRefreshToken('admin', userId, deviceId);
+        await sessionManager('admin').invalidateRefreshToken(userId, deviceId);
       }
     } catch (err) {
       strapi.log.error('Failed to revoke admin sessions during logout', err as any);

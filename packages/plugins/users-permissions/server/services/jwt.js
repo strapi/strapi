@@ -38,17 +38,13 @@ module.exports = ({ strapi }) => ({
       }
 
       const issueRefreshToken = async () => {
-        const refresh = await strapi.sessionManager.generateRefreshToken(
-          userId,
-          undefined,
-          'users-permissions',
-          { familyType: 'refresh' }
-        );
+        const refresh = await strapi
+          .sessionManager('users-permissions')
+          .generateRefreshToken(userId, undefined, { familyType: 'refresh' });
 
-        const access = await strapi.sessionManager.generateAccessToken(
-          refresh.token,
-          'users-permissions'
-        );
+        const access = await strapi
+          .sessionManager('users-permissions')
+          .generateAccessToken(refresh.token);
         if ('error' in access) {
           throw new Error('Failed to generate access token');
         }
@@ -72,7 +68,7 @@ module.exports = ({ strapi }) => ({
 
     if (mode === 'refresh') {
       // Accept only access tokens minted by the SessionManager for UP
-      const result = strapi.sessionManager.validateAccessToken(token, 'users-permissions');
+      const result = strapi.sessionManager('users-permissions').validateAccessToken(token);
       if (!result.isValid || result.payload.type !== 'access') {
         throw new Error('Invalid token.');
       }

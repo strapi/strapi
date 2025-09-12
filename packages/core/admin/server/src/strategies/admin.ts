@@ -30,7 +30,7 @@ export const authenticate = async (ctx: Context) => {
     return { authenticated: false };
   }
 
-  const result = manager.validateAccessToken(token);
+  const result = manager('admin').validateAccessToken(token);
   if (!result.isValid) {
     return { authenticated: false };
   }

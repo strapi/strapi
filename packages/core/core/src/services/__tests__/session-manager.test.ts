@@ -49,7 +49,8 @@ describe('SessionManager Factory', () => {
       idleSessionLifespan: 60 * 60, // 1 hour
     } as SessionManagerConfig;
 
-    sessionManager = createSessionManager({ db: mockDb, config });
+    sessionManager = createSessionManager({ db: mockDb });
+    sessionManager.defineOrigin('admin', config);
 
     mockCrypto.randomBytes.mockReturnValue(Buffer.from('abcdef1234567890', 'hex') as any);
     mockJwt.sign.mockReturnValue('test-jwt-token' as any);
@@ -76,7 +77,7 @@ describe('SessionManager Factory', () => {
     it('should periodically clean up expired sessions', async () => {
       // First 49 calls should not trigger cleanup
       for (let i = 0; i < 49; i += 1) {
-        await sessionManager.generateRefreshToken(userId, deviceId, origin);
+        await sessionManager('admin').generateRefreshToken(userId, deviceId);
       }
 
       expect(mockQuery.deleteMany).not.toHaveBeenCalledWith({
@@ -84,7 +85,7 @@ describe('SessionManager Factory', () => {
       });
 
       // 50th call should trigger cleanup asynchronously
-      await sessionManager.generateRefreshToken(userId, deviceId, origin);
+      await sessionManager('admin').generateRefreshToken(userId, deviceId);
 
       // allow the promise to run
       await new Promise((resolve) => {
@@ -106,7 +107,7 @@ describe('SessionManager Factory', () => {
         createdAt: new Date(),
       });
 
-      await sessionManager.generateRefreshToken(userId, deviceId, origin);
+      await sessionManager('admin').generateRefreshToken(userId, deviceId);
 
       expect(mockQuery.create).toHaveBeenCalledWith({
         data: {
@@ -126,7 +127,7 @@ describe('SessionManager Factory', () => {
     it('should calculate correct expiration date', async () => {
       const startTime = Date.now();
 
-      await sessionManager.generateRefreshToken(userId, deviceId, origin);
+      await sessionManager('admin').generateRefreshToken(userId, deviceId);
 
       const createCall = mockQuery.create.mock.calls[0][0];
       const expiresAt = createCall.data.expiresAt.getTime();
@@ -146,7 +147,7 @@ describe('SessionManager Factory', () => {
         expiresAt: new Date(1_700_000_000_000 + config.idleRefreshTokenLifespan * 1000),
       });
 
-      await sessionManager.generateRefreshToken(userId, deviceId, origin);
+      await sessionManager('admin').generateRefreshToken(userId, deviceId);
 
       const expectedPayload = expect.objectContaining({
         userId,
@@ -173,7 +174,7 @@ describe('SessionManager Factory', () => {
         absoluteExpiresAt: new Date(Date.now() + config.maxRefreshTokenLifespan * 1000),
       });
 
-      const result = await sessionManager.generateRefreshToken(userId, deviceId, origin);
+      const result = await sessionManager('admin').generateRefreshToken(userId, deviceId);
 
       expect(result).toEqual({
         token: 'test-jwt-token',
@@ -186,7 +187,7 @@ describe('SessionManager Factory', () => {
       const error = new Error('Database connection failed');
       mockQuery.create.mockRejectedValue(error);
 
-      await expect(sessionManager.generateRefreshToken(userId, deviceId, origin)).rejects.toThrow(
+      await expect(sessionManager('admin').generateRefreshToken(userId, deviceId)).rejects.toThrow(
         'Database connection failed'
       );
     });
@@ -200,7 +201,7 @@ describe('SessionManager Factory', () => {
         createdAt: new Date(),
       });
 
-      await sessionManager.generateRefreshToken(userId, undefined, origin);
+      await sessionManager('admin').generateRefreshToken(userId, undefined);
 
       expect(mockQuery.create).toHaveBeenCalledWith({
         data: {
@@ -240,7 +241,7 @@ describe('SessionManager Factory', () => {
 
       mockJwt.verify.mockReturnValue(payload as any);
 
-      const result = sessionManager.validateAccessToken('access.jwt');
+      const result = sessionManager('admin').validateAccessToken('access.jwt');
 
       expect(mockJwt.verify).toHaveBeenCalledWith('access.jwt', config.jwtSecret, {
         algorithms: [DEFAULT_ALGORITHM],
@@ -256,7 +257,7 @@ describe('SessionManager Factory', () => {
         throw error;
       });
 
-      const result = sessionManager.validateAccessToken('expired.jwt');
+      const result = sessionManager('admin').validateAccessToken('expired.jwt');
 
       expect(result).toEqual({ isValid: false, payload: null });
     });
@@ -271,7 +272,7 @@ describe('SessionManager Factory', () => {
       };
       mockJwt.verify.mockReturnValue(refreshPayload as any);
 
-      const result = sessionManager.validateAccessToken('refresh.jwt');
+      const result = sessionManager('admin').validateAccessToken('refresh.jwt');
 
       expect(result).toEqual({ isValid: false, payload: null });
     });
@@ -282,7 +283,7 @@ describe('SessionManager Factory', () => {
         throw error;
       });
 
-      const result = sessionManager.validateAccessToken('bad.jwt');
+      const result = sessionManager('admin').validateAccessToken('bad.jwt');
 
       expect(result).toEqual({ isValid: false, payload: null });
     });
@@ -295,7 +296,8 @@ describe('SessionManager Factory', () => {
     const origin = 'admin';
 
     beforeEach(() => {
-      sessionManager = createSessionManager({ db: mockDb, config });
+      sessionManager = createSessionManager({ db: mockDb });
+      sessionManager.defineOrigin('admin', config);
     });
 
     it('returns false when session does not exist', async () => {
@@ -373,7 +375,7 @@ describe('SessionManager Factory', () => {
       mockJwt.verify.mockReturnValue(mockPayload);
       mockQuery.findOne.mockResolvedValue(mockSession);
 
-      const result = await sessionManager.validateRefreshToken('valid-token');
+      const result = await sessionManager('admin').validateRefreshToken('valid-token');
 
       expect(mockJwt.verify).toHaveBeenCalledWith('valid-token', config.jwtSecret, {
         algorithms: [DEFAULT_ALGORITHM],
@@ -398,7 +400,7 @@ describe('SessionManager Factory', () => {
 
       mockJwt.verify.mockReturnValue(mockPayload);
 
-      const result = await sessionManager.validateRefreshToken('access-token');
+      const result = await sessionManager('admin').validateRefreshToken('access-token');
 
       expect(result).toEqual({
         isValid: false,
@@ -419,7 +421,7 @@ describe('SessionManager Factory', () => {
       mockJwt.verify.mockReturnValue(mockPayload);
       mockQuery.findOne.mockResolvedValue(null);
 
-      const result = await sessionManager.validateRefreshToken('valid-token');
+      const result = await sessionManager('admin').validateRefreshToken('valid-token');
 
       expect(result).toEqual({
         isValid: false,
@@ -446,7 +448,7 @@ describe('SessionManager Factory', () => {
       mockJwt.verify.mockReturnValue(mockPayload);
       mockQuery.findOne.mockResolvedValue(expiredSession);
 
-      const result = await sessionManager.validateRefreshToken('valid-token');
+      const result = await sessionManager('admin').validateRefreshToken('valid-token');
 
       expect(result).toEqual({
         isValid: false,
@@ -476,7 +478,7 @@ describe('SessionManager Factory', () => {
       mockJwt.verify.mockReturnValue(mockPayload);
       mockQuery.findOne.mockResolvedValue(mismatchedSession);
 
-      const result = await sessionManager.validateRefreshToken('valid-token');
+      const result = await sessionManager('admin').validateRefreshToken('valid-token');
 
       expect(result).toEqual({
         isValid: false,
@@ -489,7 +491,7 @@ describe('SessionManager Factory', () => {
         throw jwtError;
       });
 
-      const result = await sessionManager.validateRefreshToken('invalid-token');
+      const result = await sessionManager('admin').validateRefreshToken('invalid-token');
 
       expect(result).toEqual({
         isValid: false,
@@ -523,7 +525,7 @@ describe('SessionManager Factory', () => {
         } as any;
       });
 
-      const result = await sessionManager.validateRefreshToken('expired-token');
+      const result = await sessionManager('admin').validateRefreshToken('expired-token');
 
       expect(result).toEqual({ isValid: false });
       // No DB deletion for JWT errors on validate path
@@ -544,7 +546,7 @@ describe('SessionManager Factory', () => {
 
       mockJwt.verify.mockReturnValue(mockPayload);
 
-      await expect(sessionManager.validateRefreshToken('valid-token')).rejects.toThrow(
+      await expect(sessionManager('admin').validateRefreshToken('valid-token')).rejects.toThrow(
         'Unexpected database error'
       );
     });
@@ -552,7 +554,7 @@ describe('SessionManager Factory', () => {
 
   describe('invalidateRefreshToken', () => {
     it('should delete sessions by origin and userId', async () => {
-      await sessionManager.invalidateRefreshToken('admin', 'user123');
+      await sessionManager('admin').invalidateRefreshToken('user123');
 
       expect(mockQuery.deleteMany).toHaveBeenCalledWith({
         where: { userId: 'user123', origin: 'admin' },
@@ -560,7 +562,7 @@ describe('SessionManager Factory', () => {
     });
 
     it('should delete sessions by origin, userId and deviceId when provided', async () => {
-      await sessionManager.invalidateRefreshToken('admin', 'user123', 'device456');
+      await sessionManager('admin').invalidateRefreshToken('user123', 'device456');
 
       expect(mockQuery.deleteMany).toHaveBeenCalledWith({
         where: { userId: 'user123', origin: 'admin', deviceId: 'device456' },
@@ -568,7 +570,7 @@ describe('SessionManager Factory', () => {
     });
 
     it("should not include deviceId in 'where' when not provided", async () => {
-      await sessionManager.invalidateRefreshToken('admin', 'user123');
+      await sessionManager('admin').invalidateRefreshToken('user123');
 
       expect(mockQuery.deleteMany).toHaveBeenCalledTimes(1);
       const callArg = mockQuery.deleteMany.mock.calls[0][0];
@@ -577,7 +579,7 @@ describe('SessionManager Factory', () => {
     });
 
     it('should only delete for the provided origin and userId (no over-deletion)', async () => {
-      await sessionManager.invalidateRefreshToken('admin', 'user123');
+      await sessionManager('admin').invalidateRefreshToken('user123');
 
       expect(mockQuery.deleteMany).toHaveBeenCalledTimes(1);
       const callArg = mockQuery.deleteMany.mock.calls[0][0];
@@ -598,10 +600,12 @@ describe('SessionManager Factory', () => {
         userId,
         sessionId,
       };
-      sessionManager.validateRefreshToken = jest.fn().mockResolvedValue(mockValidateResult);
+      sessionManager('admin').validateRefreshToken = jest
+        .fn()
+        .mockResolvedValue(mockValidateResult);
 
       mockJwt.sign.mockReturnValue('access-jwt-token' as any);
-      await sessionManager.generateAccessToken(refreshToken);
+      await sessionManager('admin').generateAccessToken(refreshToken);
 
       // Verify the algorithm is set to the configured algorithm
       expect(mockJwt.sign).toHaveBeenCalledWith(
@@ -632,12 +636,14 @@ describe('SessionManager Factory', () => {
         sessionId,
       };
 
-      sessionManager.validateRefreshToken = jest.fn().mockResolvedValue(mockValidateResult);
+      sessionManager('admin').validateRefreshToken = jest
+        .fn()
+        .mockResolvedValue(mockValidateResult);
       mockJwt.sign.mockReturnValue('access-jwt-token');
 
-      const result = await sessionManager.generateAccessToken(refreshToken);
+      const result = await sessionManager('admin').generateAccessToken(refreshToken);
 
-      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken, undefined);
+      expect(sessionManager('admin').validateRefreshToken).toHaveBeenCalledWith(refreshToken);
       expect(mockJwt.sign).toHaveBeenCalledWith(
         {
           userId,
@@ -663,11 +669,13 @@ describe('SessionManager Factory', () => {
         isValid: false,
       };
 
-      sessionManager.validateRefreshToken = jest.fn().mockResolvedValue(mockValidateResult);
+      sessionManager('admin').validateRefreshToken = jest
+        .fn()
+        .mockResolvedValue(mockValidateResult);
 
-      const result = await sessionManager.generateAccessToken(refreshToken);
+      const result = await sessionManager('admin').generateAccessToken(refreshToken);
 
-      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken, undefined);
+      expect(sessionManager('admin').validateRefreshToken).toHaveBeenCalledWith(refreshToken);
       expect(mockJwt.sign).not.toHaveBeenCalled();
       expect(result).toEqual({
         error: 'invalid_refresh_token',
@@ -678,24 +686,25 @@ describe('SessionManager Factory', () => {
       const refreshToken = 'valid-refresh-token';
       const error = new Error('Database connection failed');
 
-      sessionManager.validateRefreshToken = jest.fn().mockRejectedValue(error);
+      sessionManager('admin').validateRefreshToken = jest.fn().mockRejectedValue(error);
 
-      await expect(sessionManager.generateAccessToken(refreshToken)).rejects.toThrow(
+      await expect(sessionManager('admin').generateAccessToken(refreshToken)).rejects.toThrow(
         'Database connection failed'
       );
 
-      expect(sessionManager.validateRefreshToken).toHaveBeenCalledWith(refreshToken, undefined);
+      expect(sessionManager('admin').validateRefreshToken).toHaveBeenCalledWith(refreshToken);
       expect(mockJwt.sign).not.toHaveBeenCalled();
     });
   });
 
   describe('createSessionManager factory', () => {
     it('should create session manager with database provider', () => {
-      const manager = createSessionManager({ db: mockDb, config });
+      const manager = createSessionManager({ db: mockDb });
 
       expect(manager).toBeDefined();
-      expect(typeof manager.generateRefreshToken).toBe('function');
       expect(typeof manager.generateSessionId).toBe('function');
+      expect(typeof manager.defineOrigin).toBe('function');
+      expect(typeof manager('admin')).toBe('object');
     });
   });
 });
