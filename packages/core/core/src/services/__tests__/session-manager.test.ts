@@ -372,7 +372,7 @@ describe('SessionManager Factory', () => {
         status: 'active',
       };
 
-      mockJwt.verify.mockReturnValue(mockPayload);
+      mockJwt.verify.mockReturnValue(mockPayload as any);
       mockQuery.findOne.mockResolvedValue(mockSession);
 
       const result = await sessionManager('admin').validateRefreshToken('valid-token');
@@ -398,7 +398,7 @@ describe('SessionManager Factory', () => {
         iat: Math.floor(Date.now() / 1000),
       };
 
-      mockJwt.verify.mockReturnValue(mockPayload);
+      mockJwt.verify.mockReturnValue(mockPayload as any);
 
       const result = await sessionManager('admin').validateRefreshToken('access-token');
 
@@ -418,7 +418,7 @@ describe('SessionManager Factory', () => {
         iat: Math.floor(Date.now() / 1000),
       };
 
-      mockJwt.verify.mockReturnValue(mockPayload);
+      mockJwt.verify.mockReturnValue(mockPayload as any);
       mockQuery.findOne.mockResolvedValue(null);
 
       const result = await sessionManager('admin').validateRefreshToken('valid-token');
@@ -445,7 +445,7 @@ describe('SessionManager Factory', () => {
         expiresAt: new Date(Date.now() - 1000), // Expired 1 second ago
       };
 
-      mockJwt.verify.mockReturnValue(mockPayload);
+      mockJwt.verify.mockReturnValue(mockPayload as any);
       mockQuery.findOne.mockResolvedValue(expiredSession);
 
       const result = await sessionManager('admin').validateRefreshToken('valid-token');
@@ -475,7 +475,7 @@ describe('SessionManager Factory', () => {
         status: 'active',
       };
 
-      mockJwt.verify.mockReturnValue(mockPayload);
+      mockJwt.verify.mockReturnValue(mockPayload as any);
       mockQuery.findOne.mockResolvedValue(mismatchedSession);
 
       const result = await sessionManager('admin').validateRefreshToken('valid-token');
@@ -544,7 +544,7 @@ describe('SessionManager Factory', () => {
         iat: Math.floor(Date.now() / 1000),
       };
 
-      mockJwt.verify.mockReturnValue(mockPayload);
+      mockJwt.verify.mockReturnValue(mockPayload as any);
 
       await expect(sessionManager('admin').validateRefreshToken('valid-token')).rejects.toThrow(
         'Unexpected database error'
@@ -594,15 +594,23 @@ describe('SessionManager Factory', () => {
       const refreshToken = 'valid-refresh-token';
       const userId = 'user123';
       const sessionId = 'session456';
-      // Mock validateRefreshToken to return success
-      const mockValidateResult = {
-        isValid: true,
+
+      // Drive validateRefreshToken to succeed via jwt and db mocks
+      mockJwt.verify.mockReturnValue({
         userId,
         sessionId,
-      };
-      sessionManager('admin').validateRefreshToken = jest
-        .fn()
-        .mockResolvedValue(mockValidateResult);
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      } as any);
+      mockQuery.findOne.mockResolvedValue({
+        userId,
+        sessionId,
+        origin: 'admin',
+        status: 'active',
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        absoluteExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
 
       mockJwt.sign.mockReturnValue('access-jwt-token' as any);
       await sessionManager('admin').generateAccessToken(refreshToken);
@@ -629,21 +637,25 @@ describe('SessionManager Factory', () => {
       const userId = 'user123';
       const sessionId = 'session456';
 
-      // Mock validateRefreshToken to return success
-      const mockValidateResult = {
-        isValid: true,
+      mockJwt.verify.mockReturnValue({
         userId,
         sessionId,
-      };
-
-      sessionManager('admin').validateRefreshToken = jest
-        .fn()
-        .mockResolvedValue(mockValidateResult);
-      mockJwt.sign.mockReturnValue('access-jwt-token');
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      } as any);
+      mockQuery.findOne.mockResolvedValue({
+        userId,
+        sessionId,
+        origin: 'admin',
+        status: 'active',
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+        absoluteExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+      mockJwt.sign.mockReturnValue('access-jwt-token' as any);
 
       const result = await sessionManager('admin').generateAccessToken(refreshToken);
 
-      expect(sessionManager('admin').validateRefreshToken).toHaveBeenCalledWith(refreshToken);
       expect(mockJwt.sign).toHaveBeenCalledWith(
         {
           userId,
@@ -663,19 +675,18 @@ describe('SessionManager Factory', () => {
 
     it('should return error for invalid refresh token', async () => {
       const refreshToken = 'invalid-refresh-token';
-
-      // Mock validateRefreshToken to return failure
-      const mockValidateResult = {
-        isValid: false,
-      };
-
-      sessionManager('admin').validateRefreshToken = jest
-        .fn()
-        .mockResolvedValue(mockValidateResult);
+      // Cause validateRefreshToken to fail by returning no session
+      mockJwt.verify.mockReturnValue({
+        userId: 'user123',
+        sessionId: 'session456',
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      } as any);
+      mockQuery.findOne.mockResolvedValue(null);
 
       const result = await sessionManager('admin').generateAccessToken(refreshToken);
 
-      expect(sessionManager('admin').validateRefreshToken).toHaveBeenCalledWith(refreshToken);
       expect(mockJwt.sign).not.toHaveBeenCalled();
       expect(result).toEqual({
         error: 'invalid_refresh_token',
@@ -686,13 +697,21 @@ describe('SessionManager Factory', () => {
       const refreshToken = 'valid-refresh-token';
       const error = new Error('Database connection failed');
 
-      sessionManager('admin').validateRefreshToken = jest.fn().mockRejectedValue(error);
+      // Make validateRefreshToken throw by causing DB to reject
+      mockJwt.verify.mockReturnValue({
+        userId: 'user123',
+        sessionId: 'session456',
+        type: 'refresh',
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+      } as any);
+      mockQuery.findOne.mockRejectedValue(error);
 
       await expect(sessionManager('admin').generateAccessToken(refreshToken)).rejects.toThrow(
         'Database connection failed'
       );
 
-      expect(sessionManager('admin').validateRefreshToken).toHaveBeenCalledWith(refreshToken);
+      expect(mockJwt.sign).not.toHaveBeenCalled();
       expect(mockJwt.sign).not.toHaveBeenCalled();
     });
   });

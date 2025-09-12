@@ -1,24 +1,32 @@
 'use strict';
 
+/* eslint-env jest */
+
 const jwtService = require('../jwt');
+const {
+  createMockSessionManager,
+} = require('../../../../../../tests/helpers/create-session-manager-mock');
 
 describe('JWT Service', () => {
   let strapi;
   let service;
   let mockSessionManager;
+  let sessionManagerCallable;
 
   beforeEach(() => {
-    mockSessionManager = {
-      generateRefreshToken: jest.fn(),
-      generateAccessToken: jest.fn(),
-      validateAccessToken: jest.fn(),
-    };
+    ({ sessionManager: sessionManagerCallable, originApi: mockSessionManager } =
+      createMockSessionManager({
+        // Only override methods used in this test suite
+        generateRefreshToken: jest.fn(),
+        generateAccessToken: jest.fn(),
+        validateAccessToken: jest.fn(),
+      }));
 
     strapi = {
       config: {
         get: jest.fn(),
       },
-      sessionManager: mockSessionManager,
+      sessionManager: sessionManagerCallable,
       db: {
         query: jest.fn(),
       },
@@ -50,13 +58,9 @@ describe('JWT Service', () => {
       expect(mockSessionManager.generateRefreshToken).toHaveBeenCalledWith(
         '123',
         undefined, // deviceId should be undefined
-        'users-permissions',
         { familyType: 'refresh' }
       );
-      expect(mockSessionManager.generateAccessToken).toHaveBeenCalledWith(
-        'refresh-token-123',
-        'users-permissions'
-      );
+      expect(mockSessionManager.generateAccessToken).toHaveBeenCalledWith('refresh-token-123');
       expect(result).toBe('access-token-123');
     });
 
@@ -70,24 +74,16 @@ describe('JWT Service', () => {
 
       const result = await service.issue(payload);
 
-      expect(mockSessionManager.generateRefreshToken).toHaveBeenCalledWith(
-        'user-456',
-        undefined,
-        'users-permissions',
-        { familyType: 'refresh' }
-      );
+      expect(mockSessionManager.generateRefreshToken).toHaveBeenCalledWith('user-456', undefined, {
+        familyType: 'refresh',
+      });
       expect(result).toBe('access-token-456');
     });
 
-    it('should throw error when no user id provided', async () => {
+    it('should throw error when no user id provided', () => {
       const payload = {};
 
-      try {
-        await service.issue(payload);
-        fail('Should have thrown an error');
-      } catch (error) {
-        expect(error.message).toBe('Cannot issue token: missing user id');
-      }
+      expect(() => service.issue(payload)).toThrow('Cannot issue token: missing user id');
     });
 
     it('should throw error when access token generation fails', async () => {
@@ -98,12 +94,7 @@ describe('JWT Service', () => {
       mockSessionManager.generateRefreshToken.mockResolvedValue(mockRefreshToken);
       mockSessionManager.generateAccessToken.mockResolvedValue(mockAccessTokenError);
 
-      try {
-        await service.issue(payload);
-        fail('Should have thrown an error');
-      } catch (error) {
-        expect(error.message).toBe('Failed to generate access token');
-      }
+      await expect(service.issue(payload)).rejects.toThrow('Failed to generate access token');
     });
   });
 
@@ -134,10 +125,7 @@ describe('JWT Service', () => {
 
       const result = await service.verify(token);
 
-      expect(mockSessionManager.validateAccessToken).toHaveBeenCalledWith(
-        token,
-        'users-permissions'
-      );
+      expect(mockSessionManager.validateAccessToken).toHaveBeenCalledWith(token);
       expect(strapi.db.query).toHaveBeenCalledWith('plugin::users-permissions.user');
       expect(strapi.db.query().findOne).toHaveBeenCalledWith({
         where: { id: 123 },
