@@ -1,9 +1,53 @@
-import { createJwtToken, getTokenOptions, decodeJwtToken, createToken } from '../token';
+import {
+  createJwtToken,
+  getTokenOptions,
+  decodeJwtToken,
+  createToken,
+  expiresInToSeconds,
+} from '../token';
 
 const delay = (time: any) =>
   new Promise((resolve) => {
     setTimeout(resolve, time);
   });
+
+describe('expiresInToSeconds', () => {
+  const secret = 'test-123';
+
+  test('returns undefined for null/undefined', () => {
+    expect(expiresInToSeconds(undefined as any, secret)).toBeUndefined();
+    expect(expiresInToSeconds(null as any, secret)).toBeUndefined();
+  });
+
+  test('accepts numeric seconds', () => {
+    expect(expiresInToSeconds(3600, secret)).toBe(3600);
+  });
+
+  test('accepts numeric string seconds', () => {
+    expect(expiresInToSeconds('180', secret)).toBe(180);
+  });
+
+  test("parses '30d' correctly (approx in seconds)", () => {
+    const seconds = expiresInToSeconds('30d', secret);
+    expect(typeof seconds).toBe('number');
+    expect(seconds).toBe(30 * 24 * 60 * 60);
+  });
+
+  test("parses shorthand like '12h', '15m', '45s'", () => {
+    expect(expiresInToSeconds('12h', secret)).toBe(12 * 60 * 60);
+    expect(expiresInToSeconds('15m', secret)).toBe(15 * 60);
+    expect(expiresInToSeconds('45s', secret)).toBe(45);
+  });
+
+  test("parses '1w' as 7 days", () => {
+    expect(expiresInToSeconds('1w', secret)).toBe(7 * 24 * 60 * 60);
+  });
+
+  test('returns undefined for invalid strings', () => {
+    expect(expiresInToSeconds('bad', secret)).toBeUndefined();
+    expect(expiresInToSeconds({} as any, secret)).toBeUndefined();
+  });
+});
 
 describe('Token', () => {
   describe('token options', () => {

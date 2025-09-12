@@ -82,3 +82,28 @@ For security reasons, prefer storing the secret in an environment variable and r
 };
 
 export { createToken, createJwtToken, getTokenOptions, decodeJwtToken, checkSecretIsDefined };
+
+/**
+ * Convert an expiresIn value (string or number) into seconds using jsonwebtoken semantics.
+ * Returns undefined when value is not set or invalid.
+ */
+export const expiresInToSeconds = (expiresIn: unknown, secret: string): number | undefined => {
+  if (expiresIn == null) return undefined;
+  if (typeof expiresIn === 'number' && Number.isFinite(expiresIn)) {
+    return Math.max(0, Math.floor(expiresIn));
+  }
+  if (typeof expiresIn !== 'string') return undefined;
+
+  try {
+    const token = jwt.sign({ __t: true }, secret, { expiresIn });
+    const decoded = jwt.decode(token) as { exp?: number; iat?: number } | null;
+    if (!decoded || typeof decoded.exp !== 'number') return undefined;
+    if (typeof decoded.iat === 'number') {
+      return Math.max(0, decoded.exp - decoded.iat);
+    }
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    return Math.max(0, decoded.exp - nowSeconds);
+  } catch {
+    return undefined;
+  }
+};

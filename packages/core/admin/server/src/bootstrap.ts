@@ -2,6 +2,7 @@ import { merge, map, difference, uniq } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
+import { getTokenOptions, expiresInToSeconds } from './services/token';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
 import constants from './services/constants';
@@ -96,12 +97,18 @@ const createDefaultAPITokensIfNeeded = async () => {
 };
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  // Fallback for backward compatibility: if the new maxRefreshTokenLifespan is not set,
+  // reuse the legacy admin.auth.options.expiresIn value (previously the sole JWT lifespan)
+  const { secret, options } = getTokenOptions();
+  const legacyMaxRefreshFallback =
+    expiresInToSeconds(options?.expiresIn, secret) ?? 30 * 24 * 60 * 60; // default 30 days
+
   strapi.sessionManager.defineOrigin('admin', {
     jwtSecret: strapi.config.get('admin.auth.secret'),
     accessTokenLifespan: strapi.config.get('admin.auth.sessions.accessTokenLifespan', 30 * 60),
     maxRefreshTokenLifespan: strapi.config.get(
       'admin.auth.sessions.maxRefreshTokenLifespan',
-      30 * 24 * 60 * 60
+      legacyMaxRefreshFallback
     ),
     idleRefreshTokenLifespan: strapi.config.get(
       'admin.auth.sessions.idleRefreshTokenLifespan',
@@ -109,7 +116,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     ),
     maxSessionLifespan: strapi.config.get(
       'admin.auth.sessions.maxSessionLifespan',
-      7 * 24 * 60 * 60
+      legacyMaxRefreshFallback
     ),
     idleSessionLifespan: strapi.config.get('admin.auth.sessions.idleSessionLifespan', 60 * 60),
   });
