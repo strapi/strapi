@@ -26,10 +26,7 @@ describe('Admin Auth Strategy', () => {
       const generateUserAbility = jest.fn(() => 'ability');
 
       // Mock the new callable SessionManager API
-      const { sessionManager } = createMockSessionManager(
-        { validateAccessToken },
-        { isSessionActive }
-      );
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
 
       global.strapi = {
         sessionManager: sessionManager as any,
@@ -95,10 +92,7 @@ describe('Admin Auth Strategy', () => {
       const ctx = createContext({}, { request });
 
       // Mock the new callable SessionManager API
-      const { sessionManager } = createMockSessionManager(
-        { validateAccessToken },
-        { isSessionActive }
-      );
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
 
       global.strapi = {
         sessionManager: sessionManager as any,
@@ -121,10 +115,7 @@ describe('Admin Auth Strategy', () => {
       const findOne = jest.fn(() => ({ isActive: false }));
 
       // Mock the new callable SessionManager API
-      const { sessionManager } = createMockSessionManager(
-        { validateAccessToken },
-        { isSessionActive }
-      );
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
 
       global.strapi = {
         sessionManager: sessionManager as any,
@@ -148,10 +139,7 @@ describe('Admin Auth Strategy', () => {
       const findOne = jest.fn(() => null);
 
       // Mock the new callable SessionManager API
-      const { sessionManager } = createMockSessionManager(
-        { validateAccessToken },
-        { isSessionActive }
-      );
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
 
       global.strapi = {
         sessionManager: sessionManager as any,
