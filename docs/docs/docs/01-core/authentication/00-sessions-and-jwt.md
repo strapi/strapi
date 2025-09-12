@@ -28,7 +28,7 @@ Each origin stores session rows in `admin::session` (hidden content-type) using 
 
 ### Public API (per origin)
 
-- `generateRefreshToken(userId, deviceId?, { familyType?: 'refresh' | 'session' })`
+- `generateRefreshToken(userId, deviceId?, { type?: 'refresh' | 'session' })`
 - `rotateRefreshToken(refreshToken)`
 - `generateAccessToken(refreshToken)`
 - `validateAccessToken(token)`
