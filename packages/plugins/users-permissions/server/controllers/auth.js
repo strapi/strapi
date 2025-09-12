@@ -280,7 +280,7 @@ module.exports = ({ strapi }) => ({
       return ctx.unauthorized('Invalid refresh token');
     }
 
-    return ctx.send({ jwt: result.token });
+    return ctx.send({ jwt: result.token, refreshToken: rotation.token });
   },
   async logout(ctx) {
     const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
