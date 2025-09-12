@@ -41,7 +41,7 @@ const createTelemetryInstance = (strapi: Core.Strapi) => {
           },
         });
 
-        strapi.server.use(createMiddleware({ sendEvent }));
+        strapi.server.use(createMiddleware({ sendEvent, strapi }));
       }
     },
 

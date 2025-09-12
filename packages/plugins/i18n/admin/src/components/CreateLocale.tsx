@@ -130,7 +130,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
         type: 'success',
         message: formatMessage({
           id: getTranslation('Settings.locales.modal.create.success'),
-          defaultMessage: 'Created locale',
+          defaultMessage: 'Locale successfully added',
         }),
       });
 

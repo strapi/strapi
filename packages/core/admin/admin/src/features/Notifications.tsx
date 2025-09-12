@@ -148,38 +148,18 @@ const Notification = ({
     }
   }, [blockTransition, handleClose, timeout]);
 
-  let variant: AlertVariant;
-  let alertTitle: string;
-
-  if (type === 'info') {
-    variant = 'default';
-    alertTitle = formatMessage({
-      id: 'notification.default.title',
-      defaultMessage: 'Information:',
-    });
-  } else if (type === 'danger') {
-    variant = 'danger';
-    alertTitle = formatMessage({
-      id: 'notification.warning.title',
-      defaultMessage: 'Warning:',
-    });
-  } else if (type === 'warning') {
-    variant = 'warning';
-    alertTitle = formatMessage({
-      id: 'notification.warning.title',
-      defaultMessage: 'Warning:',
-    });
-  } else {
-    variant = 'success';
-    alertTitle = formatMessage({
-      id: 'notification.success.title',
-      defaultMessage: 'Success:',
-    });
-  }
-
-  if (title) {
-    alertTitle = title;
-  }
+  const getVariant = (): AlertVariant => {
+    switch (type) {
+      case 'info':
+        return 'default';
+      case 'danger':
+        return 'danger';
+      case 'warning':
+        return 'warning';
+      default:
+        return 'success';
+    }
+  };
 
   return (
     <Alert
@@ -195,8 +175,8 @@ const Notification = ({
         id: 'global.close',
         defaultMessage: 'Close',
       })}
-      title={alertTitle}
-      variant={variant}
+      title={title}
+      variant={getVariant()}
     >
       {message}
     </Alert>

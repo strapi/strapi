@@ -74,6 +74,7 @@ export type {
   SanitizedAdminRole,
   AdminRole,
   Entity,
+  FieldContentSourceMap,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';

@@ -14,6 +14,7 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
+import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
@@ -55,6 +56,8 @@ const InputRenderer = ({
     document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
+  const isInPreviewPopover = useHasInputPopoverParent();
+  const shouldIgnorePermissions = isInDynamicZone || isInPreviewPopover;
 
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
   const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
@@ -71,7 +74,7 @@ const InputRenderer = ({
   const readableFields = idToCheck ? canReadFields : canCreateFields;
 
   // Everything preview related
-  const previewProps = usePreviewInputManager(inputProps.name);
+  const previewProps = usePreviewInputManager(inputProps.name, inputProps.attribute);
   const props = { ...inputProps, ...previewProps };
 
   /**
@@ -98,12 +101,12 @@ const InputRenderer = ({
   /**
    * If the user can't read the field then we don't want to ever render it.
    */
-  if (!canUserReadField && !isInDynamicZone) {
+  if (!canUserReadField && !shouldIgnorePermissions) {
     return <NotAllowedInput hint={hint} {...props} />;
   }
 
   const fieldIsDisabled =
-    (!canUserEditField && !isInDynamicZone) || props.disabled || isFormDisabled;
+    (!canUserEditField && !shouldIgnorePermissions) || props.disabled || isFormDisabled;
 
   /**
    * Because a custom field has a unique prop but the type could be confused with either
