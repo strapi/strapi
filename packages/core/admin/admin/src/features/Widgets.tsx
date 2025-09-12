@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography, ScrollArea, Menu, IconButton } from '@strapi/design-system';
-import { Drag, PuzzlePiece, More } from '@strapi/icons';
+import { Drag, PuzzlePiece, More, Trash } from '@strapi/icons';
 import { useDrag, useDrop } from 'react-dnd';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
@@ -29,6 +29,7 @@ interface WidgetRootProps
   ) => void;
   findWidget: (id: string) => { index: number };
   moveWidget: (id: string, to: number) => void;
+  deleteWidget: (id: string) => void;
 }
 
 interface Item {
@@ -46,6 +47,7 @@ export const WidgetRoot = ({
   setColumnWidths,
   findWidget,
   moveWidget,
+  deleteWidget,
 }: WidgetRootProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
@@ -150,6 +152,10 @@ export const WidgetRoot = ({
     handleResizeSelect(value, resizeTo, () => setIsMenuOpen(false));
   };
 
+  const handleDeleteWidget = () => {
+    deleteWidget(uid);
+  };
+
   return (
     <Flex
       width="100%"
@@ -252,6 +258,12 @@ export const WidgetRoot = ({
                 )}
               </Menu.SubContent>
             </Menu.SubRoot>
+            <Menu.Item onClick={handleDeleteWidget} variant="danger" startIcon={<Trash />}>
+              {formatMessage({
+                id: 'content-releases.header.actions.delete',
+                defaultMessage: 'Delete',
+              })}
+            </Menu.Item>
           </Menu.Content>
         </Menu.Root>
       </Flex>

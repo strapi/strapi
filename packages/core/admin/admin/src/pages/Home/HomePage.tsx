@@ -267,6 +267,7 @@ const HomePageCE = () => {
     findWidget,
     moveWidget,
     handleDropWidget,
+    deleteWidget,
     widgetLayout,
     columnWidths,
     setColumnWidths,
@@ -318,7 +319,8 @@ const HomePageCE = () => {
                         moveWidget={moveWidget}
                         columnWidths={columnWidths}
                         setColumnWidths={setColumnWidths}
-                      >
+                        deleteWidget={deleteWidget}
+                    >
                         <WidgetComponent
                           component={widget.component}
                           columnWidth={columnWidths[widget.uid] || 6}
