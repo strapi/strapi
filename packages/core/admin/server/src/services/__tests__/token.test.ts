@@ -1,5 +1,3 @@
-import { describe, test, expect, jest } from '@jest/globals';
-/* eslint-env jest */
 import {
   createJwtToken,
   getTokenOptions,
