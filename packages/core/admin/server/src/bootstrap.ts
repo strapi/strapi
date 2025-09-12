@@ -96,6 +96,24 @@ const createDefaultAPITokensIfNeeded = async () => {
 };
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  strapi.sessionManager.defineOrigin('admin', {
+    jwtSecret: strapi.config.get('admin.auth.secret'),
+    accessTokenLifespan: strapi.config.get('admin.auth.sessions.accessTokenLifespan', 30 * 60),
+    maxRefreshTokenLifespan: strapi.config.get(
+      'admin.auth.sessions.maxRefreshTokenLifespan',
+      30 * 24 * 60 * 60
+    ),
+    idleRefreshTokenLifespan: strapi.config.get(
+      'admin.auth.sessions.idleRefreshTokenLifespan',
+      7 * 24 * 60 * 60
+    ),
+    maxSessionLifespan: strapi.config.get(
+      'admin.auth.sessions.maxSessionLifespan',
+      7 * 24 * 60 * 60
+    ),
+    idleSessionLifespan: strapi.config.get('admin.auth.sessions.idleSessionLifespan', 60 * 60),
+  });
+
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();

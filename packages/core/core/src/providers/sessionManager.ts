@@ -22,58 +22,9 @@ export default defineProvider({
       );
     }
 
-    // Configuration resolver providing origin-specific configurations
-    const configResolver = (origin?: string) => {
-      if (origin === 'users-permissions') {
-        const upConfig: any = strapi.config.get('plugin::users-permissions');
-        return {
-          jwtSecret: upConfig.jwtSecret || jwtSecret,
-          accessTokenLifespan: upConfig.sessions?.accessTokenLifespan || 7 * 24 * 60 * 60,
-          maxRefreshTokenLifespan: upConfig.sessions?.maxRefreshTokenLifespan || 60 * 24 * 60 * 60,
-          idleRefreshTokenLifespan: upConfig.sessions?.idleRefreshTokenLifespan || 7 * 24 * 60 * 60,
-          maxSessionLifespan: upConfig.sessions?.maxRefreshTokenLifespan || 60 * 24 * 60 * 60,
-          idleSessionLifespan: upConfig.sessions?.idleRefreshTokenLifespan || 7 * 24 * 60 * 60,
-          algorithm: adminAuth.options?.algorithm,
-        };
-      }
-
-      // Default admin configuration
-      const accessTokenLifespan = strapi.config.get<number>(
-        'admin.auth.sessions.accessTokenLifespan',
-        30 * 60
-      );
-      const maxRefreshTokenLifespan = strapi.config.get<number>(
-        'admin.auth.sessions.maxRefreshTokenLifespan',
-        30 * 24 * 60 * 60
-      );
-      const idleRefreshTokenLifespan = strapi.config.get<number>(
-        'admin.auth.sessions.idleRefreshTokenLifespan',
-        7 * 24 * 60 * 60
-      );
-      const maxSessionLifespan = strapi.config.get<number>(
-        'admin.auth.sessions.maxSessionLifespan',
-        7 * 24 * 60 * 60
-      );
-      const idleSessionLifespan = strapi.config.get<number>(
-        'admin.auth.sessions.idleSessionLifespan',
-        60 * 60
-      );
-
-      return {
-        jwtSecret,
-        accessTokenLifespan,
-        maxRefreshTokenLifespan,
-        idleRefreshTokenLifespan,
-        maxSessionLifespan,
-        idleSessionLifespan,
-        algorithm: adminAuth.options?.algorithm,
-      };
-    };
-
     strapi.add('sessionManager', () =>
       createSessionManager({
         db: strapi.db,
-        config: configResolver,
       })
     );
   },
