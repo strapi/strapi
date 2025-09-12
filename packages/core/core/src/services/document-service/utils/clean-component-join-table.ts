@@ -101,8 +101,8 @@ const findPublicationStateMismatches = async (
 
     const ghostEntries: number[] = [];
 
-    // Check if this is a component join table
-    const isComponentJoinTable = joinTableName.match(/^components_.*_.*_lnk$/);
+    // Check if this is a join table (ends with _lnk)
+    const isRelationJoinTable = joinTableName.endsWith('_lnk');
     const isComponentModel =
       !sourceModel.uid?.startsWith('api::') &&
       !sourceModel.uid?.startsWith('plugin::') &&
@@ -117,7 +117,7 @@ const findPublicationStateMismatches = async (
       }
 
       // For component join tables, check if THIS specific component instance's parent supports D&P
-      if (isComponentJoinTable && isComponentModel) {
+      if (isRelationJoinTable && isComponentModel) {
         try {
           const componentSchema = strapi.components[sourceModel.uid] as Schema.Component;
           if (!componentSchema) {
