@@ -57,6 +57,7 @@ export const WidgetRoot = ({
   const [isDraggingFromHandle, setIsDraggingFromHandle] = React.useState(false);
   const [dragStarted, setDragStarted] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
 
   // Smooth move widget using requestAnimationFrame
   const smoothMoveWidget = React.useCallback(
@@ -175,6 +176,8 @@ export const WidgetRoot = ({
           drag(drop(node));
         }
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={{
         opacity,
         zIndex: isDragging ? 1000 : 1,
@@ -272,18 +275,20 @@ export const WidgetRoot = ({
           {children}
         </Box>
       </ScrollArea>
-      <Flex
-        position="absolute"
-        top={0}
-        bottom={0}
-        right={0}
-        padding={2}
-        alignItems="center"
-        style={{ cursor: 'col-resize' }}
-        onMouseDown={handleMouseDown}
-      >
-        <Box background="neutral150" height="24px" width="2px" borderRadius={1} />
-      </Flex>
+      {isHovered && (
+        <Flex
+          position="absolute"
+          top={0}
+          bottom={0}
+          right={0}
+          padding={2}
+          alignItems="center"
+          style={{ cursor: 'col-resize' }}
+          onMouseDown={handleMouseDown}
+        >
+          <Box background="neutral150" height="24px" width="2px" borderRadius={1} />
+        </Flex>
+      )}
     </Flex>
   );
 };
