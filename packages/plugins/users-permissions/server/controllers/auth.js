@@ -295,11 +295,12 @@ module.exports = ({ strapi }) => ({
 
     const deviceId = ctx.request.body?.deviceId;
     try {
-      await strapi.sessionManager.invalidateRefreshToken(
-        'users-permissions',
-        String(ctx.state.user.id),
-        typeof deviceId === 'string' ? deviceId : undefined
-      );
+      await strapi
+        .sessionManager('users-permissions')
+        .invalidateRefreshToken(
+          String(ctx.state.user.id),
+          typeof deviceId === 'string' ? deviceId : undefined
+        );
     } catch (err) {
       strapi.log.error('UP logout failed', err);
     }

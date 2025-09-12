@@ -15,11 +15,11 @@ const createMockSessionManager = (originApiOverrides = {}, rootOverrides = {}) =
     validateRefreshToken: jest.fn(),
     rotateRefreshToken: jest.fn(),
     invalidateRefreshToken: jest.fn(),
+    isSessionActive: jest.fn(),
     ...originApiOverrides,
   };
 
   const sessionManager = Object.assign(jest.fn().mockReturnValue(originApi), {
-    isSessionActive: jest.fn(),
     defineOrigin: jest.fn(),
     hasOrigin: jest.fn(),
     generateSessionId: jest.fn(),

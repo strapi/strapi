@@ -162,6 +162,14 @@ class OriginSessionManager {
   async invalidateRefreshToken(userId: string, deviceId?: string): Promise<void> {
     return this.sessionManager.invalidateRefreshToken(this.origin, userId, deviceId);
   }
+
+  /**
+   * Returns true when a session exists and is not expired for this origin.
+   * If the session exists but is expired, it will be deleted as part of this check.
+   */
+  async isSessionActive(sessionId: string): Promise<boolean> {
+    return this.sessionManager.isSessionActive(sessionId, this.origin);
+  }
 }
 
 class SessionManager {
@@ -559,9 +567,13 @@ class SessionManager {
    * Returns true when a session exists and is not expired.
    * If the session exists but is expired, it will be deleted as part of this check.
    */
-  async isSessionActive(sessionId: string): Promise<boolean> {
+  async isSessionActive(sessionId: string, origin: string): Promise<boolean> {
     const session = await this.provider.findBySessionId(sessionId);
     if (!session) {
+      return false;
+    }
+
+    if (session.origin !== origin) {
       return false;
     }
 
@@ -598,11 +610,22 @@ const createSessionManager = ({
     return new OriginSessionManager(sessionManager, origin);
   };
 
-  // Copy all methods from sessionManager to the callable version
-  Object.setPrototypeOf(fluentApi, sessionManager);
-  Object.assign(fluentApi, sessionManager);
+  // Attach only the public SessionManagerService API to the callable
+  const api = fluentApi as unknown as any;
+  api.generateSessionId = sessionManager.generateSessionId.bind(sessionManager);
+  api.defineOrigin = sessionManager.defineOrigin.bind(sessionManager);
+  api.hasOrigin = sessionManager.hasOrigin.bind(sessionManager);
+  // Note: isSessionActive is origin-scoped and exposed on OriginSessionManager only
 
-  return fluentApi as SessionManager & ((origin: string) => OriginSessionManager);
+  // Forward the cleanupThreshold getter (used in tests)
+  Object.defineProperty(api, 'cleanupThreshold', {
+    get() {
+      return sessionManager.cleanupThreshold;
+    },
+    enumerable: true,
+  });
+
+  return api as SessionManager & ((origin: string) => OriginSessionManager);
 };
 
 export { createSessionManager, createDatabaseProvider };

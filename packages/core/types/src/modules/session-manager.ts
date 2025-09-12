@@ -29,13 +29,13 @@ export interface OriginSessionManagerService {
       };
   validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult>;
   invalidateRefreshToken(userId: string, deviceId?: string): Promise<void>;
+  isSessionActive(sessionId: string): Promise<boolean>;
 }
 
 export interface SessionManagerService {
   generateSessionId(): string;
   defineOrigin(origin: string, config: any): void;
   hasOrigin(origin: string): boolean;
-  isSessionActive(sessionId: string): Promise<boolean>;
   // Fluent API
   (origin: string): OriginSessionManagerService;
 }

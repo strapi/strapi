@@ -303,7 +303,7 @@ describe('SessionManager Factory', () => {
     it('returns false when session does not exist', async () => {
       mockQuery.findOne.mockResolvedValue(null);
 
-      const result = await sessionManager.isSessionActive(sessionId);
+      const result = await sessionManager('admin').isSessionActive(sessionId);
 
       expect(mockDb.query).toHaveBeenCalled();
       expect(result).toBe(false);
@@ -320,7 +320,7 @@ describe('SessionManager Factory', () => {
       });
       mockQuery.delete.mockResolvedValue(undefined);
 
-      const result = await sessionManager.isSessionActive(sessionId);
+      const result = await sessionManager('admin').isSessionActive(sessionId);
 
       expect(result).toBe(false);
       expect(mockQuery.delete).toHaveBeenCalledWith({ where: { sessionId } });
@@ -336,7 +336,7 @@ describe('SessionManager Factory', () => {
         expiresAt: future,
       });
 
-      const result = await sessionManager.isSessionActive(sessionId);
+      const result = await sessionManager('admin').isSessionActive(sessionId);
 
       expect(result).toBe(true);
       expect(mockQuery.delete).not.toHaveBeenCalled();

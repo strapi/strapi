@@ -37,13 +37,13 @@ describe('SessionManager API Integration', () => {
         expect(typeof strapi.sessionManager.generateSessionId).toBe('function');
         expect(typeof strapi.sessionManager.defineOrigin).toBe('function');
         expect(typeof strapi.sessionManager.hasOrigin).toBe('function');
-        expect(typeof strapi.sessionManager.isSessionActive).toBe('function');
         expect(typeof strapi.sessionManager('admin')).toBe('object');
         expect(typeof strapi.sessionManager('admin').generateRefreshToken).toBe('function');
         expect(typeof strapi.sessionManager('admin').validateRefreshToken).toBe('function');
         expect(typeof strapi.sessionManager('admin').generateAccessToken).toBe('function');
         expect(typeof strapi.sessionManager('admin').rotateRefreshToken).toBe('function');
         expect(typeof strapi.sessionManager('admin').invalidateRefreshToken).toBe('function');
+        expect(typeof strapi.sessionManager('admin').isSessionActive).toBe('function');
       });
     });
 
