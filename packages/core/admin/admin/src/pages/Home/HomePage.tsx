@@ -14,6 +14,7 @@ import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useTracking } from '../../features/Tracking';
+import { useWidgets } from '../../features/Widgets';
 
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
 import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
@@ -21,8 +22,6 @@ import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
 import type { WidgetWithUID } from '../../core/apis/Widgets';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 import { useWidgetResize } from '../../hooks/useWidgetResize';
-import { useWidgetLayout } from '../../hooks/useWidgetLayout';
-import { useWidgetManagement } from '../../hooks/useWidgetManagement';
 import { GapDropZone } from '../../components/Widgets';
 
 /* -------------------------------------------------------------------------------------------------
@@ -245,7 +244,6 @@ const HomePageCE = () => {
   const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
   const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
 
   React.useEffect(() => {
     const checkWidgetsPermissions = async () => {
@@ -265,18 +263,20 @@ const HomePageCE = () => {
   }, [checkUserHasPermissions, getAllWidgets]);
 
   // Use custom hook for widget management
-  const { findWidget, moveWidget, handleDropWidget } = useWidgetManagement({
+  const {
+    findWidget,
+    moveWidget,
+    handleDropWidget,
+    widgetLayout,
+    columnWidths,
+    setColumnWidths,
+    WidgetRoot,
+  } = useWidgets({
     filteredWidgets,
     setFilteredWidgets,
   });
 
   const [, drop] = useDrop(() => ({ accept: 'widget' }));
-
-  // Use custom hook for widget layout calculation
-  const { widgetLayout } = useWidgetLayout({
-    filteredWidgets,
-    columnWidths,
-  });
 
   return (
     <Layouts.Root>
