@@ -99,9 +99,8 @@ const createDefaultAPITokensIfNeeded = async () => {
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Fallback for backward compatibility: if the new maxRefreshTokenLifespan is not set,
   // reuse the legacy admin.auth.options.expiresIn value (previously the sole JWT lifespan)
-  const { secret, options } = getTokenOptions();
-  const legacyMaxRefreshFallback =
-    expiresInToSeconds(options?.expiresIn, secret) ?? 30 * 24 * 60 * 60; // default 30 days
+  const { options } = getTokenOptions();
+  const legacyMaxRefreshFallback = expiresInToSeconds(options?.expiresIn) ?? 30 * 24 * 60 * 60; // default 30 days
 
   // Warn if using deprecated legacy expiresIn for new session settings
   const hasLegacyExpires = options?.expiresIn != null;
