@@ -96,7 +96,6 @@ const createDefaultAPITokensIfNeeded = async () => {
 };
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  // Define admin origin configuration for sessionManager
   strapi.sessionManager.defineOrigin('admin', {
     jwtSecret: strapi.config.get('admin.auth.secret'),
     accessTokenLifespan: strapi.config.get('admin.auth.sessions.accessTokenLifespan', 30 * 60),
