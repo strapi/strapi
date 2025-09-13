@@ -14,7 +14,7 @@ const createUtils = (strapi) => {
     const deviceId = '00000000-0000-4000-8000-000000000001';
 
     const refresh = await strapi.sessionManager('admin').generateRefreshToken(userId, deviceId, {
-      familyType: 'session',
+      type: 'session',
     });
 
     const access = await strapi.sessionManager('admin').generateAccessToken(refresh.token);

@@ -58,7 +58,7 @@ describe('JWT Service', () => {
       expect(mockSessionManager.generateRefreshToken).toHaveBeenCalledWith(
         '123',
         undefined, // deviceId should be undefined
-        { familyType: 'refresh' }
+        { type: 'refresh' }
       );
       expect(mockSessionManager.generateAccessToken).toHaveBeenCalledWith('refresh-token-123');
       expect(result).toBe('access-token-123');
@@ -75,7 +75,7 @@ describe('JWT Service', () => {
       const result = await service.issue(payload);
 
       expect(mockSessionManager.generateRefreshToken).toHaveBeenCalledWith('user-456', undefined, {
-        familyType: 'refresh',
+        type: 'refresh',
       });
       expect(result).toBe('access-token-456');
     });

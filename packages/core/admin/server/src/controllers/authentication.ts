@@ -48,10 +48,10 @@ const getRefreshCookieOptions = () => {
   };
 };
 
-const getLifespansForFamilyType = (
-  familyType: 'refresh' | 'session'
+const getLifespansForType = (
+  type: 'refresh' | 'session'
 ): { idleSeconds: number; maxSeconds: number } => {
-  if (familyType === 'refresh') {
+  if (type === 'refresh') {
     const idleSeconds = Number(
       strapi.config.get('admin.auth.sessions.idleRefreshTokenLifespan', 7 * 24 * 60 * 60)
     );
@@ -71,20 +71,20 @@ const getLifespansForFamilyType = (
 };
 
 /**
- * Builds cookie options applying an expiration policy based on family type.
+ * Builds cookie options applying an expiration policy based on session type.
  * - refresh (remember me): persistent cookie; Expires is min(now+idle, absoluteMax)
  * - session (non-remember): session cookie; no Expires/Max-Age
  */
 const buildCookieOptionsWithExpiry = (
-  familyType: 'refresh' | 'session',
+  type: 'refresh' | 'session',
   absoluteExpiresAtISO?: string
 ) => {
   const base = getRefreshCookieOptions();
-  if (familyType === 'session') {
+  if (type === 'session') {
     return base;
   }
 
-  const { idleSeconds } = getLifespansForFamilyType('refresh');
+  const { idleSeconds } = getLifespansForType('refresh');
   const now = Date.now();
   const idleExpiry = now + idleSeconds * 1000;
   const absoluteExpiry = absoluteExpiresAtISO
@@ -161,7 +161,7 @@ export default {
         const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
           'admin'
         ).generateRefreshToken(userId, deviceId, {
-          familyType: rememberMe ? 'refresh' : 'session',
+          type: rememberMe ? 'refresh' : 'session',
         });
 
         const cookieOptions = buildCookieOptionsWithExpiry(
@@ -222,7 +222,7 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { familyType: rememberMe ? 'refresh' : 'session' });
+      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -288,7 +288,7 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { familyType: rememberMe ? 'refresh' : 'session' });
+      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -345,7 +345,7 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { familyType: 'session' });
+      ).generateRefreshToken(userId, deviceId, { type: 'session' });
 
       // No rememberMe flow here; expire with session by default (session cookie)
       const cookieOptions = buildCookieOptionsWithExpiry('session', absoluteExpiresAt);

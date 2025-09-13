@@ -6,7 +6,7 @@ export interface OriginSessionManagerService {
   generateRefreshToken(
     userId: string,
     deviceId: string | undefined,
-    options?: { familyType?: 'refresh' | 'session' }
+    options?: { type?: 'refresh' | 'session' }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }>;
   generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }>;
   rotateRefreshToken(refreshToken: string): Promise<

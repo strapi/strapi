@@ -40,7 +40,7 @@ module.exports = ({ strapi }) => ({
       const issueRefreshToken = async () => {
         const refresh = await strapi
           .sessionManager('users-permissions')
-          .generateRefreshToken(userId, undefined, { familyType: 'refresh' });
+          .generateRefreshToken(userId, undefined, { type: 'refresh' });
 
         const access = await strapi
           .sessionManager('users-permissions')

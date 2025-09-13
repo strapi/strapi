@@ -128,7 +128,7 @@ class OriginSessionManager {
   async generateRefreshToken(
     userId: string,
     deviceId: string | undefined,
-    options?: { familyType?: 'refresh' | 'session' }
+    options?: { type?: 'refresh' | 'session' }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }> {
     return this.sessionManager.generateRefreshToken(userId, deviceId, this.origin, options);
   }
@@ -238,7 +238,7 @@ class SessionManager {
     userId: string,
     deviceId: string | undefined,
     origin: string,
-    options?: { familyType?: 'refresh' | 'session' }
+    options?: { type?: 'refresh' | 'session' }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }> {
     if (!origin || typeof origin !== 'string') {
       throw new Error(
@@ -250,8 +250,8 @@ class SessionManager {
 
     const config = this.getConfigForOrigin(origin);
     const sessionId = this.generateSessionId();
-    const familyType = options?.familyType ?? 'refresh';
-    const isRefresh = familyType === 'refresh';
+    const tokenType = options?.type ?? 'refresh';
+    const isRefresh = tokenType === 'refresh';
 
     const idleLifespan = isRefresh ? config.idleRefreshTokenLifespan : config.idleSessionLifespan;
 
@@ -268,7 +268,7 @@ class SessionManager {
       ...(deviceId && { deviceId }),
       origin,
       childId: null,
-      type: familyType,
+      type: tokenType,
       status: 'active',
       expiresAt,
       absoluteExpiresAt,
@@ -490,9 +490,9 @@ class SessionManager {
       }
 
       const now = Date.now();
-      const familyType = current.type ?? 'refresh';
+      const tokenType = current.type ?? 'refresh';
       const idleLifespan =
-        familyType === 'refresh' ? config.idleRefreshTokenLifespan : config.idleSessionLifespan;
+        tokenType === 'refresh' ? config.idleRefreshTokenLifespan : config.idleSessionLifespan;
 
       // Enforce idle window since creation of the current token
       if (current.createdAt && now - new Date(current.createdAt).getTime() > idleLifespan * 1000) {
@@ -517,7 +517,7 @@ class SessionManager {
         ...(current.deviceId && { deviceId: current.deviceId }),
         origin: current.origin,
         childId: null,
-        type: familyType,
+        type: tokenType,
         status: 'active',
         expiresAt: childExpiresAt,
         absoluteExpiresAt: current.absoluteExpiresAt ?? new Date(absolute),
@@ -556,7 +556,7 @@ class SessionManager {
         token: childToken,
         sessionId: childSessionId,
         absoluteExpiresAt,
-        type: familyType,
+        type: tokenType,
       };
     } catch {
       return { error: 'invalid_refresh_token' };
