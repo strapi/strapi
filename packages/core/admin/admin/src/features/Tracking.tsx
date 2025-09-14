@@ -399,14 +399,15 @@ interface DidSkipGuidedTour {
 interface DidCompleteGuidedTour {
   name: 'didCompleteGuidedTour';
   properties: {
-    name: keyof Tours;
+    name: keyof Tours | 'all';
   };
 }
 
 interface DidStartGuidedTour {
-  name: 'didStartGuidedTourFromHomepage';
+  name: 'didStartGuidedTour';
   properties: {
     name: keyof Tours;
+    fromHomepage?: boolean;
   };
 }
 

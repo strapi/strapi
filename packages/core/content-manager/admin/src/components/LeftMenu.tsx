@@ -1,8 +1,7 @@
 import * as React from 'react';
 
 import { useQueryParams, SubNav } from '@strapi/admin/strapi-admin';
-import { Divider, Flex, TextInput, useCollator, useFilter } from '@strapi/design-system';
-import { Cross, Search } from '@strapi/icons';
+import { Divider, Flex, Searchbar, useCollator, useFilter } from '@strapi/design-system';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 
@@ -59,7 +58,7 @@ const LeftMenu = () => {
           /**
            * Filter by the search value
            */
-          .filter((link) => contains(link.title, search))
+          .filter((link) => contains(link.title, search.trim()))
           /**
            * Sort correctly using the language
            */
@@ -81,8 +80,8 @@ const LeftMenu = () => {
     setSearch('');
   };
 
-  const handleChangeSearch = ({ target: { value } }: { target: { value: string } }) => {
-    setSearch(value);
+  const handleChangeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
   };
 
   const label = formatMessage({
@@ -116,17 +115,19 @@ const LeftMenu = () => {
       <SubNav.Header label={label} />
       <Divider background="neutral150" />
       <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
-        <TextInput
-          startAction={<Search fill="neutral500" />}
+        <Searchbar
           value={search}
           onChange={handleChangeSearch}
-          aria-label="Search"
+          onClear={handleClear}
           placeholder={formatMessage({
             id: 'content-manager.components.LeftMenu.Search.label',
             defaultMessage: 'Search for a content type',
           })}
-          endAction={<Cross onClick={handleClear} fill="neutral500" cursor="pointer" />}
           size="S"
+          // eslint-disable-next-line react/no-children-prop
+          children={undefined}
+          name={'search_contentType'}
+          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         />
       </Flex>
       <SubNav.Sections>

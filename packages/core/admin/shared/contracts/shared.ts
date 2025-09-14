@@ -1,4 +1,4 @@
-import type { Data } from '@strapi/types';
+import type { Data, Struct, UID } from '@strapi/types';
 
 export interface Entity {
   id: Data.ID;
@@ -64,4 +64,13 @@ export interface Pagination {
   pageSize: number;
   pageCount: number;
   total: number;
+}
+
+export interface FieldContentSourceMap {
+  path: string;
+  type: Struct.SchemaAttributes[string]['type'];
+  documentId: string;
+  locale: string | null;
+  model?: UID.Schema;
+  kind?: Struct.ContentTypeKind;
 }
