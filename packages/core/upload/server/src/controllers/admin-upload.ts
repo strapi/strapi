@@ -86,7 +86,26 @@ export default {
     }
 
     const data = await validateUploadBody(body);
-    const uploadedFiles = await uploadService.upload({ data, files }, { user });
+    const fileInfosArray = Array.isArray(data.fileInfo) ? data.fileInfo : [data.fileInfo];
+
+    const filesArray = Array.isArray(files) ? files : [files];
+    const metadataResults = await getService('aiMetadata').processFiles(filesArray);
+
+    const mergedData = {
+      ...data,
+      fileInfo: filesArray.map((_, index) => {
+        return {
+          ...fileInfosArray[index],
+          alternativeText: metadataResults[index].altText,
+          caption: metadataResults[index].caption,
+        };
+      }),
+    };
+
+    const uploadedFiles = await uploadService.upload(
+      { data: mergedData, files: filesArray },
+      { user }
+    );
 
     // Sign file urls for private providers
     const signedFiles = await async.map(uploadedFiles, getService('file').signFileUrls);

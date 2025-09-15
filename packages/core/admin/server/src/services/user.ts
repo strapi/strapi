@@ -401,10 +401,9 @@ const getLanguagesInUse = async (): Promise<string[]> => {
 };
 
 /**
- * Generate an AI token for the given user
- * @param user - The user to generate the token for
+ * Generate an AI token for the user performing the request
  */
-const getAiToken = async (user: AdminUser): Promise<{ token: string; expiresAt?: string }> => {
+const getAiToken = async (): Promise<{ token: string; expiresAt?: string }> => {
   const ERROR_PREFIX = 'AI token request failed:';
 
   // Check if EE features are enabled first
@@ -443,6 +442,12 @@ const getAiToken = async (user: AdminUser): Promise<{ token: string; expiresAt?:
   }
 
   // Create a secure user identifier using only user ID
+  const user = strapi.requestContext.get()?.state?.user as AdminUser | undefined;
+  if (!user) {
+    strapi.log.error(`${ERROR_PREFIX} No authenticated user in request context`);
+    throw new Error('AI token request failed. Check server logs for details.');
+  }
+
   const userIdentifier = user.id.toString();
 
   // Get project ID
