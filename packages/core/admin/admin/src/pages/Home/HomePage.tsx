@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Box, Flex, Grid, Main, Typography, ScrollArea } from '@strapi/design-system';
-import { Drag, PuzzlePiece } from '@strapi/icons';
+import { Box, Button, Flex, Grid, Main, Typography, ScrollArea } from '@strapi/design-system';
+import { Drag, PuzzlePiece, Plus } from '@strapi/icons';
 import { useDrag, useDrop } from 'react-dnd';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
@@ -16,6 +16,7 @@ import { useStrapiApp } from '../../features/StrapiApp';
 import { useTracking } from '../../features/Tracking';
 import { useWidgets } from '../../features/Widgets';
 
+import { AddWidgetModal } from './components/AddWidgetModal';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
 import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
 
@@ -204,7 +205,7 @@ export const WidgetRoot = ({
  * UnstableHomePageCe
  * -----------------------------------------------------------------------------------------------*/
 
-const WidgetComponent = ({
+export const WidgetComponent = ({
   component,
   columnWidth,
 }: {
@@ -243,6 +244,7 @@ const HomePageCE = () => {
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
   const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
   const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
+  const [allAvailableWidgets, setAllAvailableWidgets] = React.useState<WidgetWithUID[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -255,7 +257,9 @@ const HomePageCE = () => {
           return matchingPermissions.length >= widget.permissions.length;
         })
       );
-      setFilteredWidgets(allWidgets.filter((_, i) => authorizedWidgets[i]));
+      const authorizedWidgetsList = allWidgets.filter((_, i) => authorizedWidgets[i]);
+      setFilteredWidgets(authorizedWidgetsList);
+      setAllAvailableWidgets(authorizedWidgetsList);
       setLoading(false);
     };
 
@@ -268,6 +272,7 @@ const HomePageCE = () => {
     moveWidget,
     handleDropWidget,
     deleteWidget,
+    addWidget,
     widgetLayout,
     columnWidths,
     setColumnWidths,
@@ -278,6 +283,18 @@ const HomePageCE = () => {
   });
 
   const [, drop] = useDrop(() => ({ accept: 'widget' }));
+
+  // Add Widget Modal state
+  const [isAddWidgetModalOpen, setIsAddWidgetModalOpen] = React.useState(false);
+
+  const handleAddWidget = (widget: WidgetWithUID) => {
+    addWidget(widget);
+    // Set default width for the new widget
+    setColumnWidths((prev) => ({
+      ...prev,
+      [widget.uid]: 6,
+    }));
+  };
 
   return (
     <Layouts.Root>
@@ -294,11 +311,30 @@ const HomePageCE = () => {
             id: 'HomePage.header.subtitle',
             defaultMessage: 'Welcome to your administration panel',
           })}
-          primaryAction={null}
+          primaryAction={
+          <Button
+            variant="tertiary"
+            size="S"
+            startIcon={<Plus />}
+            onClick={() => setIsAddWidgetModalOpen(true)}
+          >
+            {formatMessage({
+              id: 'HomePage.addWidget.button',
+              defaultMessage: 'Add Widget',
+            })}
+          </Button>
+        }
         />
         <FreeTrialWelcomeModal />
         <FreeTrialEndedModal />
-        <Layouts.Content>
+        <AddWidgetModal
+        isOpen={isAddWidgetModalOpen}
+        onClose={() => setIsAddWidgetModalOpen(false)}
+        onAddWidget={handleAddWidget}
+        currentWidgets={filteredWidgets}
+        availableWidgets={allAvailableWidgets}
+      />
+      <Layouts.Content>
           <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
             <GuidedTourHomepageOverview />
             {loading ? (
