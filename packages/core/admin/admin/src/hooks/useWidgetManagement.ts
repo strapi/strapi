@@ -87,11 +87,27 @@ export const useWidgetManagement = ({
     [filteredWidgets, setFilteredWidgets]
   );
 
+  const addWidget = useCallback(
+    (widget: WidgetWithUID) => {
+      setFilteredWidgets(
+        produce(filteredWidgets, (draft) => {
+          // Check if widget is already added
+          const index = draft.findIndex((w) => w.uid === widget.uid);
+          if (index === -1) {
+            draft.push(widget);
+          }
+        })
+      );
+    },
+    [filteredWidgets, setFilteredWidgets]
+  );
+
   return {
     findWidget,
     moveWidget,
     handleDropWidget,
     deleteWidget,
+    addWidget,
   };
 };
 

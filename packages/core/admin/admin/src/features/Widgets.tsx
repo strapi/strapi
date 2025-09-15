@@ -312,10 +312,12 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
   const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
 
   // Use custom hook for widget management
-  const { findWidget, moveWidget, handleDropWidget, deleteWidget } = useWidgetManagement({
-    filteredWidgets,
-    setFilteredWidgets,
-  });
+  const { findWidget, moveWidget, handleDropWidget, deleteWidget, addWidget } = useWidgetManagement(
+    {
+      filteredWidgets,
+      setFilteredWidgets,
+    }
+  );
 
   // Use custom hook for widget layout calculation
   const { widgetLayout } = useWidgetLayout({
@@ -328,6 +330,7 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     moveWidget,
     handleDropWidget,
     deleteWidget,
+    addWidget,
     widgetLayout,
     columnWidths,
     setColumnWidths,
