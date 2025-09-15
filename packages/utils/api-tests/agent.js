@@ -5,6 +5,25 @@ const qs = require('qs');
 const request = require('supertest');
 const { createUtils } = require('./utils');
 
+const getAuthorizationHeader = (headers) =>
+  headers ? headers.Authorization || headers.authorization : undefined;
+
+const applyHeadersToRequest = (rq, headers) => {
+  if (!headers) return;
+  const authHeader = getAuthorizationHeader(headers);
+  if (typeof authHeader === 'string') {
+    const parts = authHeader.split(/\s+/);
+    const token = parts.length === 2 ? parts[1] : parts[0];
+    if (token) {
+      rq.auth(token, { type: 'bearer' });
+    }
+  }
+  const { Authorization, authorization, ...rest } = headers;
+  if (Object.keys(rest).length > 0) {
+    rq.set(rest);
+  }
+};
+
 const createAgent = (strapi, initialState = {}) => {
   const state = clone(initialState);
   const utils = createUtils(strapi);
@@ -22,32 +41,10 @@ const createAgent = (strapi, initialState = {}) => {
       rq.auth(state.token, { type: 'bearer' });
     }
     if (headers) {
-      const authHeader = headers.Authorization || headers.authorization;
-      if (typeof authHeader === 'string') {
-        const parts = authHeader.split(/\s+/);
-        const token = parts.length === 2 ? parts[1] : parts[0];
-        if (token) {
-          rq.auth(token, { type: 'bearer' });
-        }
-      }
-      const { Authorization, authorization, ...rest } = headers;
-      if (Object.keys(rest).length > 0) {
-        rq.set(rest);
-      }
+      applyHeadersToRequest(rq, headers);
     } else if (has('headers', state)) {
       const stateHeaders = state.headers;
-      const authHeader = stateHeaders.Authorization || stateHeaders.authorization;
-      if (typeof authHeader === 'string') {
-        const parts = authHeader.split(/\s+/);
-        const token = parts.length === 2 ? parts[1] : parts[0];
-        if (token) {
-          rq.auth(token, { type: 'bearer' });
-        }
-      }
-      const { Authorization, authorization, ...rest } = stateHeaders;
-      if (Object.keys(rest).length > 0) {
-        rq.set(rest);
-      }
+      applyHeadersToRequest(rq, stateHeaders);
     }
 
     if (queryString) {
