@@ -13,18 +13,42 @@ const createAgent = (strapi, initialState = {}) => {
     const { method, url, body, formData, qs: queryString, headers } = options;
     const supertestAgent = request.agent(strapi.server.httpServer);
 
-    if (has('token', state)) {
-      supertestAgent.auth(state.token, { type: 'bearer' });
-    }
-    if (headers) {
-      supertestAgent.set(headers);
-    } else if (has('headers', state)) {
-      supertestAgent.set(state.headers);
-    }
-
     const fullUrl = concat(state.urlPrefix, url).join('');
 
     const rq = supertestAgent[method.toLowerCase()](fullUrl);
+
+    // Apply authentication and headers on the request itself
+    if (has('token', state)) {
+      rq.auth(state.token, { type: 'bearer' });
+    }
+    if (headers) {
+      const authHeader = headers.Authorization || headers.authorization;
+      if (typeof authHeader === 'string') {
+        const parts = authHeader.split(/\s+/);
+        const token = parts.length === 2 ? parts[1] : parts[0];
+        if (token) {
+          rq.auth(token, { type: 'bearer' });
+        }
+      }
+      const { Authorization, authorization, ...rest } = headers;
+      if (Object.keys(rest).length > 0) {
+        rq.set(rest);
+      }
+    } else if (has('headers', state)) {
+      const stateHeaders = state.headers;
+      const authHeader = stateHeaders.Authorization || stateHeaders.authorization;
+      if (typeof authHeader === 'string') {
+        const parts = authHeader.split(/\s+/);
+        const token = parts.length === 2 ? parts[1] : parts[0];
+        if (token) {
+          rq.auth(token, { type: 'bearer' });
+        }
+      }
+      const { Authorization, authorization, ...rest } = stateHeaders;
+      if (Object.keys(rest).length > 0) {
+        rq.set(rest);
+      }
+    }
 
     if (queryString) {
       rq.query(qs.stringify(queryString));

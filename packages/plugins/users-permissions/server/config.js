@@ -1,5 +1,13 @@
 'use strict';
 
+const {
+  DEFAULT_ACCESS_TOKEN_LIFESPAN,
+  DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN,
+  DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
+  DEFAULT_MAX_SESSION_LIFESPAN,
+  DEFAULT_IDLE_SESSION_LIFESPAN,
+} = require('./services/constants');
+
 module.exports = {
   default: ({ env }) => ({
     jwtSecret: env('JWT_SECRET'),
@@ -11,18 +19,39 @@ module.exports = {
      * - "legacy-support": use plugin JWTs (backward compatible)
      * - "refresh": use SessionManager (access/refresh tokens)
      */
-    jwtManagement: env('UP_JWT_MANAGEMENT', 'legacy-support'),
+    jwtManagement: env('STRAPI_PLUGINS_USERS_PERMISSIONS_JWT_MANAGEMENT', 'legacy-support'),
     sessions: {
-      accessTokenLifespan: env.int('UP_SESSIONS_ACCESS_TTL', 7 * 24 * 60 * 60), // 1 week
-      maxRefreshTokenLifespan: env.int('UP_SESSIONS_MAX_REFRESH_TTL', 30 * 24 * 60 * 60), // 30 days
-      idleRefreshTokenLifespan: env.int('UP_SESSIONS_IDLE_REFRESH_TTL', 7 * 24 * 60 * 60), // 7 days
-      httpOnly: env.bool('UP_SESSIONS_HTTPONLY', false),
+      accessTokenLifespan: env.int(
+        'STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_ACCESS_TTL',
+        DEFAULT_ACCESS_TOKEN_LIFESPAN
+      ),
+      maxRefreshTokenLifespan: env.int(
+        'STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_MAX_REFRESH_TTL',
+        DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN
+      ),
+      idleRefreshTokenLifespan: env.int(
+        'STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_IDLE_REFRESH_TTL',
+        DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN
+      ),
+      // Optional session-type windows for Content API (used when type: 'session')
+      maxSessionLifespan: env.int(
+        'STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_MAX_SESSION_TTL',
+        DEFAULT_MAX_SESSION_LIFESPAN
+      ),
+      idleSessionLifespan: env.int(
+        'STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_IDLE_SESSION_TTL',
+        DEFAULT_IDLE_SESSION_LIFESPAN
+      ),
+      httpOnly: env.bool('STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_HTTPONLY', false),
       cookie: {
-        name: env('UP_SESSIONS_COOKIE_NAME', 'strapi_up_refresh'),
-        sameSite: env('UP_SESSIONS_COOKIE_SAMESITE', 'lax'),
-        path: env('UP_SESSIONS_COOKIE_PATH', '/'),
-        domain: env('UP_SESSIONS_COOKIE_DOMAIN'),
-        secure: env.bool('UP_SESSIONS_COOKIE_SECURE', process.env.NODE_ENV === 'production'),
+        name: env('STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_COOKIE_NAME', 'strapi_up_refresh'),
+        sameSite: env('STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_COOKIE_SAMESITE', 'lax'),
+        path: env('STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_COOKIE_PATH', '/'),
+        domain: env('STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_COOKIE_DOMAIN'),
+        secure: env.bool(
+          'STRAPI_PLUGINS_USERS_PERMISSIONS_SESSIONS_COOKIE_SECURE',
+          process.env.NODE_ENV === 'production'
+        ),
       },
     },
     ratelimit: {
