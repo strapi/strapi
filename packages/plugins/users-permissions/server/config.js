@@ -21,9 +21,17 @@ module.exports = {
      */
     jwtManagement: env('UP_JWT_MANAGEMENT', 'legacy-support'),
     sessions: {
-      accessTokenLifespan: env.int('UP_SESSIONS_ACCESS_TTL', 7 * 24 * 60 * 60), // 1 week
-      maxRefreshTokenLifespan: env.int('UP_SESSIONS_MAX_REFRESH_TTL', 30 * 24 * 60 * 60), // 30 days
-      idleRefreshTokenLifespan: env.int('UP_SESSIONS_IDLE_REFRESH_TTL', 7 * 24 * 60 * 60), // 7 days
+      accessTokenLifespan: env.int('UP_SESSIONS_ACCESS_TTL', DEFAULT_ACCESS_TOKEN_LIFESPAN),
+      maxRefreshTokenLifespan: env.int(
+        'UP_SESSIONS_MAX_REFRESH_TTL',
+        DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN
+      ),
+      idleRefreshTokenLifespan: env.int(
+        'UP_SESSIONS_IDLE_REFRESH_TTL',
+        DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN
+      ),
+      maxSessionLifespan: env.int('UP_SESSIONS_MAX_SESSION_TTL', DEFAULT_MAX_SESSION_LIFESPAN),
+      idleSessionLifespan: env.int('UP_SESSIONS_IDLE_SESSION_TTL', DEFAULT_IDLE_SESSION_LIFESPAN),
       httpOnly: env.bool('UP_SESSIONS_HTTPONLY', false),
       cookie: {
         name: env('UP_SESSIONS_COOKIE_NAME', 'strapi_up_refresh'),
