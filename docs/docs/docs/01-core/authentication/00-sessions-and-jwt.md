@@ -95,12 +95,14 @@ When `jwtManagement` is `refresh`:
   - `POST /api/auth/refresh` — body `{ refreshToken }`, returns `{ jwt }` and rotates the refresh token
   - `POST /api/auth/logout` — revokes sessions for the authenticated user; optional `{ deviceId }` in body to revoke only one device
 
-Configuration and env keys:
+Configuration keys:
 
-- `plugin::users-permissions.jwtManagement` (env `UP_JWT_MANAGEMENT`): `'legacy-support' | 'refresh'`
-- `plugin::users-permissions.sessions.accessTokenLifespan` (env `UP_SESSIONS_ACCESS_TTL`)
-- `plugin::users-permissions.sessions.maxRefreshTokenLifespan` (env `UP_SESSIONS_MAX_REFRESH_TTL`)
-- `plugin::users-permissions.sessions.idleRefreshTokenLifespan` (env `UP_SESSIONS_IDLE_REFRESH_TTL`)
+- `plugin::users-permissions.jwtManagement`: `'legacy-support' | 'refresh'`
+- `plugin::users-permissions.sessions.accessTokenLifespan`
+- `plugin::users-permissions.sessions.maxRefreshTokenLifespan`
+- `plugin::users-permissions.sessions.idleRefreshTokenLifespan`
+  - `plugin::users-permissions.sessions.maxSessionLifespan`
+  - `plugin::users-permissions.sessions.idleSessionLifespan`
 
 Key files:
 
