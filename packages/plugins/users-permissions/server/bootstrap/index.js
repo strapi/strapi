@@ -113,6 +113,17 @@ module.exports = async ({ strapi }) => {
 
   await getService('users-permissions').initialize();
 
+  // Define users-permissions origin configuration for sessionManager
+  const upConfig = strapi.config.get('plugin::users-permissions');
+  strapi.sessionManager.defineOrigin('users-permissions', {
+    jwtSecret: upConfig.jwtSecret || strapi.config.get('admin.auth.secret'),
+    accessTokenLifespan: upConfig.sessions?.accessTokenLifespan || 7 * 24 * 60 * 60,
+    maxRefreshTokenLifespan: upConfig.sessions?.maxRefreshTokenLifespan || 30 * 24 * 60 * 60,
+    idleRefreshTokenLifespan: upConfig.sessions?.idleRefreshTokenLifespan || 7 * 24 * 60 * 60,
+    maxSessionLifespan: upConfig.sessions?.maxRefreshTokenLifespan || 60 * 24 * 60 * 60,
+    idleSessionLifespan: upConfig.sessions?.idleRefreshTokenLifespan || 7 * 24 * 60 * 60,
+  });
+
   if (!strapi.config.get('plugin::users-permissions.jwtSecret')) {
     if (process.env.NODE_ENV !== 'development') {
       throw new Error(

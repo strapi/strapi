@@ -6,6 +6,25 @@ module.exports = {
     jwt: {
       expiresIn: '30d',
     },
+    /**
+     * JWT management mode for the Content API authentication
+     * - "legacy-support": use plugin JWTs (backward compatible)
+     * - "refresh": use SessionManager (access/refresh tokens)
+     */
+    jwtManagement: env('UP_JWT_MANAGEMENT', 'legacy-support'),
+    sessions: {
+      accessTokenLifespan: env.int('UP_SESSIONS_ACCESS_TTL', 7 * 24 * 60 * 60), // 1 week
+      maxRefreshTokenLifespan: env.int('UP_SESSIONS_MAX_REFRESH_TTL', 30 * 24 * 60 * 60), // 30 days
+      idleRefreshTokenLifespan: env.int('UP_SESSIONS_IDLE_REFRESH_TTL', 7 * 24 * 60 * 60), // 7 days
+      httpOnly: env.bool('UP_SESSIONS_HTTPONLY', false),
+      cookie: {
+        name: env('UP_SESSIONS_COOKIE_NAME', 'strapi_up_refresh'),
+        sameSite: env('UP_SESSIONS_COOKIE_SAMESITE', 'lax'),
+        path: env('UP_SESSIONS_COOKIE_PATH', '/'),
+        domain: env('UP_SESSIONS_COOKIE_DOMAIN'),
+        secure: env.bool('UP_SESSIONS_COOKIE_SECURE', process.env.NODE_ENV === 'production'),
+      },
+    },
     ratelimit: {
       interval: 60000,
       max: 10,

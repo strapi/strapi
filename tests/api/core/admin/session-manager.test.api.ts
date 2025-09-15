@@ -34,24 +34,24 @@ describe('SessionManager API Integration', () => {
     describe('strapi.sessionManager access', () => {
       it('should be accessible via strapi.sessionManager', () => {
         expect(strapi.sessionManager).toBeDefined();
-        expect(typeof strapi.sessionManager.generateRefreshToken).toBe('function');
         expect(typeof strapi.sessionManager.generateSessionId).toBe('function');
-        expect(typeof strapi.sessionManager.validateRefreshToken).toBe('function');
-        expect(typeof strapi.sessionManager.generateAccessToken).toBe('function');
-        expect(typeof strapi.sessionManager.validateRefreshToken).toBe('function');
-        expect(typeof strapi.sessionManager.rotateRefreshToken).toBe('function');
-        expect(typeof strapi.sessionManager.invalidateRefreshToken).toBe('function');
-        expect(typeof strapi.sessionManager.isSessionActive).toBe('function');
+        expect(typeof strapi.sessionManager.defineOrigin).toBe('function');
+        expect(typeof strapi.sessionManager.hasOrigin).toBe('function');
+        expect(typeof strapi.sessionManager('admin')).toBe('object');
+        expect(typeof strapi.sessionManager('admin').generateRefreshToken).toBe('function');
+        expect(typeof strapi.sessionManager('admin').validateRefreshToken).toBe('function');
+        expect(typeof strapi.sessionManager('admin').generateAccessToken).toBe('function');
+        expect(typeof strapi.sessionManager('admin').rotateRefreshToken).toBe('function');
+        expect(typeof strapi.sessionManager('admin').invalidateRefreshToken).toBe('function');
+        expect(typeof strapi.sessionManager('admin').isSessionActive).toBe('function');
       });
     });
 
     describe('generateRefreshToken', () => {
       it('should create a session in the database', async () => {
-        const result = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const result = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         expect(result).toMatchObject({
           token: expect.any(String),
@@ -73,22 +73,18 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should generate a valid JWT token', async () => {
-        const result = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const result = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         expect(result.token).toBeTruthy();
         expect(typeof result.token).toBe('string');
       });
 
       it('should include correct claims in the JWT and match DB/sessionId', async () => {
-        const result = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const result = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         const { secret } = strapi.config.get('admin.auth', { secret: '' });
         const decoded = jwt.verify(result.token, secret, { algorithms: ['HS256'] }) as {
@@ -122,11 +118,11 @@ describe('SessionManager API Integration', () => {
           },
         });
 
-        // Bump throttling counter so the next call triggers cleanup once
-        const manager: any = strapi.sessionManager;
-        manager.cleanupInvocationCounter = manager.cleanupEveryCalls - 1;
-
-        await strapi.sessionManager.generateRefreshToken(testUserId, testDeviceId, testOrigin);
+        // Trigger cleanup by performing enough calls to reach the threshold
+        const threshold = strapi.sessionManager.cleanupThreshold;
+        for (let i = 0; i < threshold; i += 1) {
+          await strapi.sessionManager('admin').generateRefreshToken(testUserId, testDeviceId);
+        }
 
         const after = await strapi.db.query(contentTypeUID).findOne({
           where: { sessionId: expiredSessionId },
@@ -151,11 +147,11 @@ describe('SessionManager API Integration', () => {
           )
         );
 
-        // Bump throttling counter so the next call triggers cleanup once
-        const manager: any = strapi.sessionManager;
-        manager.cleanupInvocationCounter = manager.cleanupEveryCalls - 1;
-
-        await strapi.sessionManager.generateRefreshToken(testUserId, testDeviceId, testOrigin);
+        // Trigger cleanup by performing enough calls to reach the threshold
+        const threshold = strapi.sessionManager.cleanupThreshold;
+        for (let i = 0; i < threshold; i += 1) {
+          await strapi.sessionManager('admin').generateRefreshToken(testUserId, testDeviceId);
+        }
 
         const remaining = await strapi.db.query(contentTypeUID).findMany({
           where: { userId: testUserId, absoluteExpiresAt: { $lt: new Date() } },
@@ -167,16 +163,12 @@ describe('SessionManager API Integration', () => {
         const device1 = 'device-1';
         const device2 = 'device-2';
 
-        const result1 = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          device1,
-          testOrigin
-        );
-        const result2 = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          device2,
-          testOrigin
-        );
+        const result1 = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, device1);
+        const result2 = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, device2);
 
         expect(result1.sessionId).not.toBe(result2.sessionId);
 
@@ -192,16 +184,12 @@ describe('SessionManager API Integration', () => {
         const origin1 = 'admin';
         const origin2 = 'users-permissions';
 
-        const result1 = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          origin1
-        );
-        const result2 = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          origin2
-        );
+        const result1 = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
+        const result2 = await strapi
+          .sessionManager('users-permissions')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         expect(result1.sessionId).not.toBe(result2.sessionId);
 
@@ -215,11 +203,9 @@ describe('SessionManager API Integration', () => {
 
       it('should set refresh idle expiration (default 7 days) for refresh family', async () => {
         const startTime = Date.now();
-        const result = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const result = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         const session = await strapi.db.query(contentTypeUID).findOne({
           where: { sessionId: result.sessionId },
@@ -233,11 +219,9 @@ describe('SessionManager API Integration', () => {
 
       it.skip('should have JWT exp aligned with idle lifespan and match DB expiresAt', async () => {
         const startTimeSec = Math.floor(Date.now() / 1000);
-        const result = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const result = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         const { secret } = strapi.config.get('admin.auth', { secret: '' });
         const decoded = jwt.verify(result.token, secret, { algorithms: ['HS256'] }) as {
@@ -278,15 +262,13 @@ describe('SessionManager API Integration', () => {
 
     describe('validateRefreshToken', () => {
       it('should validate a valid refresh token', async () => {
-        const tokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const tokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
-        const validationResult = await strapi.sessionManager.validateRefreshToken(
-          tokenResult.token
-        );
+        const validationResult = await strapi
+          .sessionManager('admin')
+          .validateRefreshToken(tokenResult.token);
 
         expect(validationResult).toEqual({
           isValid: true,
@@ -303,7 +285,9 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should reject malformed tokens', async () => {
-        const result = await strapi.sessionManager.validateRefreshToken('invalid-jwt-token');
+        const result = await strapi
+          .sessionManager('admin')
+          .validateRefreshToken('invalid-jwt-token');
 
         expect(result).toEqual({
           isValid: false,
@@ -311,17 +295,15 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should reject token when session not found in database', async () => {
-        const tokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const tokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         await strapi.db.query(contentTypeUID).delete({
           where: { sessionId: tokenResult.sessionId },
         });
 
-        const result = await strapi.sessionManager.validateRefreshToken(tokenResult.token);
+        const result = await strapi.sessionManager('admin').validateRefreshToken(tokenResult.token);
 
         expect(result).toEqual({
           isValid: false,
@@ -329,11 +311,9 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should reject expired session', async () => {
-        const tokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const tokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         // Update the session to be expired
         const pastDate = new Date(Date.now() - 60 * 60 * 1000); // Expired 1 hour ago
@@ -348,7 +328,7 @@ describe('SessionManager API Integration', () => {
         });
         expect(new Date(updatedSession.expiresAt)).toEqual(pastDate);
 
-        const result = await strapi.sessionManager.validateRefreshToken(tokenResult.token);
+        const result = await strapi.sessionManager('admin').validateRefreshToken(tokenResult.token);
 
         expect(result).toEqual({
           isValid: false,
@@ -357,11 +337,9 @@ describe('SessionManager API Integration', () => {
 
       it('should reject token when user ID mismatch', async () => {
         // Generate token for one user
-        const tokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const tokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         // Manually modify session in database to have different user
         await strapi.db.query(contentTypeUID).update({
@@ -369,7 +347,7 @@ describe('SessionManager API Integration', () => {
           data: { userId: 'different-user-id' },
         });
 
-        const result = await strapi.sessionManager.validateRefreshToken(tokenResult.token);
+        const result = await strapi.sessionManager('admin').validateRefreshToken(tokenResult.token);
 
         expect(result).toEqual({
           isValid: false,
@@ -379,21 +357,19 @@ describe('SessionManager API Integration', () => {
 
     describe('generateAccessToken', () => {
       it('should rotate refresh token and return same child on reuse', async () => {
-        const { token: parentToken } = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const { token: parentToken } = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         // First rotation
-        const r1 = await strapi.sessionManager.rotateRefreshToken(parentToken);
+        const r1 = await strapi.sessionManager('admin').rotateRefreshToken(parentToken);
         expect('token' in r1).toBe(true);
         if ('token' in r1) {
           const childToken1 = r1.token;
           const childSession1 = r1.sessionId;
 
           // Second rotation with the same parent should return the same child
-          const r2 = await strapi.sessionManager.rotateRefreshToken(parentToken);
+          const r2 = await strapi.sessionManager('admin').rotateRefreshToken(parentToken);
           expect('token' in r2).toBe(true);
           if ('token' in r2) {
             expect(r2.sessionId).toBe(childSession1);
@@ -403,15 +379,13 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should generate access token for valid refresh token', async () => {
-        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const refreshTokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
-        const accessTokenResult = await strapi.sessionManager.generateAccessToken(
-          refreshTokenResult.token
-        );
+        const accessTokenResult = await strapi
+          .sessionManager('admin')
+          .generateAccessToken(refreshTokenResult.token);
 
         expect(accessTokenResult).toHaveProperty('token');
         expect(accessTokenResult).not.toHaveProperty('error');
@@ -419,15 +393,13 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should generate access token with correct JWT payload', async () => {
-        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const refreshTokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
-        const accessTokenResult = await strapi.sessionManager.generateAccessToken(
-          refreshTokenResult.token
-        );
+        const accessTokenResult = await strapi
+          .sessionManager('admin')
+          .generateAccessToken(refreshTokenResult.token);
 
         expect(accessTokenResult).toHaveProperty('token');
 
@@ -446,7 +418,9 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should return error for invalid refresh token', async () => {
-        const result = await strapi.sessionManager.generateAccessToken('invalid-jwt-token');
+        const result = await strapi
+          .sessionManager('admin')
+          .generateAccessToken('invalid-jwt-token');
 
         expect(result).toEqual({
           error: 'invalid_refresh_token',
@@ -454,11 +428,9 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should return error for expired refresh token', async () => {
-        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const refreshTokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         // Update the session to be expired
         await strapi.db.query(contentTypeUID).update({
@@ -466,7 +438,9 @@ describe('SessionManager API Integration', () => {
           data: { expiresAt: new Date(Date.now() - 60 * 60 * 1000) }, // 1 hour ago
         });
 
-        const result = await strapi.sessionManager.generateAccessToken(refreshTokenResult.token);
+        const result = await strapi
+          .sessionManager('admin')
+          .generateAccessToken(refreshTokenResult.token);
 
         expect(result).toEqual({
           error: 'invalid_refresh_token',
@@ -474,18 +448,18 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should return error when refresh token session not found', async () => {
-        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const refreshTokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         // Delete the session from database
         await strapi.db.query(contentTypeUID).delete({
           where: { sessionId: refreshTokenResult.sessionId },
         });
 
-        const result = await strapi.sessionManager.generateAccessToken(refreshTokenResult.token);
+        const result = await strapi
+          .sessionManager('admin')
+          .generateAccessToken(refreshTokenResult.token);
 
         expect(result).toEqual({
           error: 'invalid_refresh_token',
@@ -494,23 +468,21 @@ describe('SessionManager API Integration', () => {
 
       it('should return error for access token passed as refresh token', async () => {
         // First generate a refresh token and then an access token
-        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const refreshTokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
-        const accessTokenResult = await strapi.sessionManager.generateAccessToken(
-          refreshTokenResult.token
-        );
+        const accessTokenResult = await strapi
+          .sessionManager('admin')
+          .generateAccessToken(refreshTokenResult.token);
 
         // Ensure we got a token, not an error
         expect(accessTokenResult).toHaveProperty('token');
 
         // Try to use the access token to generate another access token (should fail)
-        const result = await strapi.sessionManager.generateAccessToken(
-          (accessTokenResult as { token: string }).token
-        );
+        const result = await strapi
+          .sessionManager('admin')
+          .generateAccessToken((accessTokenResult as { token: string }).token);
 
         expect(result).toEqual({
           error: 'invalid_refresh_token',
@@ -518,11 +490,9 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should return error when user ID mismatch in session', async () => {
-        const refreshTokenResult = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const refreshTokenResult = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         // Manually modify session in database to have different user
         await strapi.db.query(contentTypeUID).update({
@@ -530,7 +500,9 @@ describe('SessionManager API Integration', () => {
           data: { userId: 'different-user-id' },
         });
 
-        const result = await strapi.sessionManager.generateAccessToken(refreshTokenResult.token);
+        const result = await strapi
+          .sessionManager('admin')
+          .generateAccessToken(refreshTokenResult.token);
 
         expect(result).toEqual({
           error: 'invalid_refresh_token',
@@ -538,19 +510,19 @@ describe('SessionManager API Integration', () => {
       });
 
       it('should work with multiple valid refresh tokens', async () => {
-        const refreshToken1 = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          'device-1',
-          testOrigin
-        );
-        const refreshToken2 = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          'device-2',
-          testOrigin
-        );
+        const refreshToken1 = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, 'device-1');
+        const refreshToken2 = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, 'device-2');
 
-        const accessToken1 = await strapi.sessionManager.generateAccessToken(refreshToken1.token);
-        const accessToken2 = await strapi.sessionManager.generateAccessToken(refreshToken2.token);
+        const accessToken1 = await strapi
+          .sessionManager('admin')
+          .generateAccessToken(refreshToken1.token);
+        const accessToken2 = await strapi
+          .sessionManager('admin')
+          .generateAccessToken(refreshToken2.token);
 
         expect(accessToken1).toHaveProperty('token');
         expect(accessToken2).toHaveProperty('token');
@@ -560,11 +532,9 @@ describe('SessionManager API Integration', () => {
 
     describe('rotateRefreshToken', () => {
       it('enforces idle window (returns idle_window_elapsed)', async () => {
-        const r = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const r = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         // Make createdAt older than idleRefreshTokenLifespan (7d) by 1 minute
         const past = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000 + 60 * 1000));
@@ -573,16 +543,14 @@ describe('SessionManager API Integration', () => {
           data: { createdAt: past },
         });
 
-        const rotation = await strapi.sessionManager.rotateRefreshToken(r.token);
+        const rotation = await strapi.sessionManager('admin').rotateRefreshToken(r.token);
         expect(rotation).toEqual({ error: 'idle_window_elapsed' });
       });
 
       it('enforces max family window (returns max_window_elapsed)', async () => {
-        const r = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const r = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         // Force absoluteExpiresAt in the past
         await strapi.db.query(contentTypeUID).update({
@@ -590,18 +558,16 @@ describe('SessionManager API Integration', () => {
           data: { absoluteExpiresAt: new Date(Date.now() - 1000) },
         });
 
-        const rotation = await strapi.sessionManager.rotateRefreshToken(r.token);
+        const rotation = await strapi.sessionManager('admin').rotateRefreshToken(r.token);
         expect(rotation).toEqual({ error: 'max_window_elapsed' });
       });
 
       it('marks parent as rotated and sets childId', async () => {
-        const r = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const r = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
-        const rotation = await strapi.sessionManager.rotateRefreshToken(r.token);
+        const rotation = await strapi.sessionManager('admin').rotateRefreshToken(r.token);
         expect('token' in rotation).toBe(true);
         if ('token' in rotation) {
           const parent = await strapi.db.query(contentTypeUID).findOne({
@@ -615,16 +581,12 @@ describe('SessionManager API Integration', () => {
 
     describe('multiple sessions with same device and origin', () => {
       it('should allow multiple active sessions with same deviceId and same origin', async () => {
-        const result1 = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
-        const result2 = await strapi.sessionManager.generateRefreshToken(
-          testUserId,
-          testDeviceId,
-          testOrigin
-        );
+        const result1 = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
+        const result2 = await strapi
+          .sessionManager('admin')
+          .generateRefreshToken(testUserId, testDeviceId);
 
         expect(result1.sessionId).not.toBe(result2.sessionId);
 

@@ -86,6 +86,46 @@ module.exports = ({ strapi }) => ({
         throw new ApplicationError('Your account has been blocked by an administrator');
       }
 
+      const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+      if (mode === 'refresh') {
+        const { deviceId } = ctx.request.body || {};
+        const refresh = await strapi
+          .sessionManager('users-permissions')
+          .generateRefreshToken(
+            String(user.id),
+            typeof deviceId === 'string' ? deviceId : undefined,
+            { type: 'refresh' }
+          );
+
+        const access = await strapi
+          .sessionManager('users-permissions')
+          .generateAccessToken(refresh.token);
+        if ('error' in access) {
+          throw new ApplicationError('Invalid credentials');
+        }
+
+        const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+        const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
+        if (upSessions?.httpOnly || requestHttpOnly) {
+          const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
+          const cookieOptions = {
+            httpOnly: true,
+            secure: Boolean(upSessions.cookie?.secure),
+            sameSite: upSessions.cookie?.sameSite ?? 'lax',
+            path: upSessions.cookie?.path ?? '/',
+            domain: upSessions.cookie?.domain,
+            overwrite: true,
+          };
+          ctx.cookies.set(cookieName, refresh.token, cookieOptions);
+          return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
+        }
+        return ctx.send({
+          jwt: access.token,
+          refreshToken: refresh.token,
+          user: await sanitizeUser(user, ctx),
+        });
+      }
+
       return ctx.send({
         jwt: getService('jwt').issue({ id: user.id }),
         user: await sanitizeUser(user, ctx),
@@ -98,6 +138,46 @@ module.exports = ({ strapi }) => ({
 
       if (user.blocked) {
         throw new ForbiddenError('Your account has been blocked by an administrator');
+      }
+
+      const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+      if (mode === 'refresh') {
+        const { deviceId } = ctx.request.body || {};
+        const refresh = await strapi
+          .sessionManager('users-permissions')
+          .generateRefreshToken(
+            String(user.id),
+            typeof deviceId === 'string' ? deviceId : undefined,
+            { type: 'refresh' }
+          );
+
+        const access = await strapi
+          .sessionManager('users-permissions')
+          .generateAccessToken(refresh.token);
+        if ('error' in access) {
+          throw new ApplicationError('Invalid credentials');
+        }
+
+        const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+        const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
+        if (upSessions?.httpOnly || requestHttpOnly) {
+          const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
+          const cookieOptions = {
+            httpOnly: true,
+            secure: Boolean(upSessions.cookie?.secure),
+            sameSite: upSessions.cookie?.sameSite ?? 'lax',
+            path: upSessions.cookie?.path ?? '/',
+            domain: upSessions.cookie?.domain,
+            overwrite: true,
+          };
+          ctx.cookies.set(cookieName, refresh.token, cookieOptions);
+          return ctx.send({ jwt: access.token, user: await sanitizeUser(user, ctx) });
+        }
+        return ctx.send({
+          jwt: access.token,
+          refreshToken: refresh.token,
+          user: await sanitizeUser(user, ctx),
+        });
       }
 
       return ctx.send({
@@ -137,7 +217,28 @@ module.exports = ({ strapi }) => ({
 
     await getService('user').edit(user.id, { password });
 
-    ctx.send({
+    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    if (mode === 'refresh') {
+      const deviceId = crypto.randomUUID();
+      const refresh = await strapi
+        .sessionManager('users-permissions')
+        .generateRefreshToken(String(user.id), deviceId, { type: 'refresh' });
+
+      const access = await strapi
+        .sessionManager('users-permissions')
+        .generateAccessToken(refresh.token);
+      if ('error' in access) {
+        throw new ApplicationError('Invalid credentials');
+      }
+
+      return ctx.send({
+        jwt: access.token,
+        refreshToken: refresh.token,
+        user: await sanitizeUser(user, ctx),
+      });
+    }
+
+    return ctx.send({
       jwt: getService('jwt').issue({ id: user.id }),
       user: await sanitizeUser(user, ctx),
     });
@@ -168,13 +269,105 @@ module.exports = ({ strapi }) => ({
       password,
     });
 
-    // Update the user.
-    ctx.send({
+    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    if (mode === 'refresh') {
+      const deviceId = crypto.randomUUID();
+      const refresh = await strapi
+        .sessionManager('users-permissions')
+        .generateRefreshToken(String(user.id), deviceId, { type: 'refresh' });
+
+      const access = await strapi
+        .sessionManager('users-permissions')
+        .generateAccessToken(refresh.token);
+      if ('error' in access) {
+        throw new ApplicationError('Invalid credentials');
+      }
+
+      return ctx.send({
+        jwt: access.token,
+        refreshToken: refresh.token,
+        user: await sanitizeUser(user, ctx),
+      });
+    }
+
+    return ctx.send({
       jwt: getService('jwt').issue({ id: user.id }),
       user: await sanitizeUser(user, ctx),
     });
   },
+  async refresh(ctx) {
+    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    if (mode !== 'refresh') {
+      return ctx.notFound();
+    }
 
+    const { refreshToken } = ctx.request.body || {};
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      return ctx.badRequest('Missing refresh token');
+    }
+
+    const rotation = await strapi
+      .sessionManager('users-permissions')
+      .rotateRefreshToken(refreshToken);
+    if ('error' in rotation) {
+      return ctx.unauthorized('Invalid refresh token');
+    }
+
+    const result = await strapi
+      .sessionManager('users-permissions')
+      .generateAccessToken(rotation.token);
+    if ('error' in result) {
+      return ctx.unauthorized('Invalid refresh token');
+    }
+
+    const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+    const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
+    if (upSessions?.httpOnly || requestHttpOnly) {
+      const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
+      const cookieOptions = {
+        httpOnly: true,
+        secure: Boolean(upSessions.cookie?.secure),
+        sameSite: upSessions.cookie?.sameSite ?? 'lax',
+        path: upSessions.cookie?.path ?? '/',
+        domain: upSessions.cookie?.domain,
+        overwrite: true,
+      };
+      ctx.cookies.set(cookieName, rotation.token, cookieOptions);
+      return ctx.send({ jwt: result.token });
+    }
+    return ctx.send({ jwt: result.token, refreshToken: rotation.token });
+  },
+  async logout(ctx) {
+    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    if (mode !== 'refresh') {
+      return ctx.notFound();
+    }
+
+    // Invalidate all sessions for the authenticated user, or by deviceId if provided
+    if (!ctx.state.user) {
+      return ctx.unauthorized('Missing authentication');
+    }
+
+    const deviceId = ctx.request.body?.deviceId;
+    try {
+      await strapi
+        .sessionManager('users-permissions')
+        .invalidateRefreshToken(
+          String(ctx.state.user.id),
+          typeof deviceId === 'string' ? deviceId : undefined
+        );
+    } catch (err) {
+      strapi.log.error('UP logout failed', err);
+    }
+
+    const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+    const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
+    if (upSessions?.httpOnly || requestHttpOnly) {
+      const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
+      ctx.cookies.set(cookieName, '', { expires: new Date(0) });
+    }
+    return ctx.send({ ok: true });
+  },
   async connect(ctx, next) {
     const grant = require('grant').koa();
 
@@ -387,12 +580,25 @@ module.exports = ({ strapi }) => ({
       return ctx.send({ user: sanitizedUser });
     }
 
-    const jwt = getService('jwt').issue(_.pick(user, ['id']));
+    const mode = strapi.config.get('plugin::users-permissions.jwtManagement', 'legacy-support');
+    if (mode === 'refresh') {
+      const deviceId = crypto.randomUUID();
+      const refresh = await strapi
+        .sessionManager('users-permissions')
+        .generateRefreshToken(String(user.id), deviceId, { type: 'refresh' });
 
-    return ctx.send({
-      jwt,
-      user: sanitizedUser,
-    });
+      const access = await strapi
+        .sessionManager('users-permissions')
+        .generateAccessToken(refresh.token);
+      if ('error' in access) {
+        throw new ApplicationError('Invalid credentials');
+      }
+
+      return ctx.send({ jwt: access.token, refreshToken: refresh.token, user: sanitizedUser });
+    }
+
+    const jwt = getService('jwt').issue(_.pick(user, ['id']));
+    return ctx.send({ jwt, user: sanitizedUser });
   },
 
   async emailConfirmation(ctx, next, returnUser) {

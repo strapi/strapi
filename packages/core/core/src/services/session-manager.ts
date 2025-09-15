@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import type { Algorithm, VerifyOptions } from 'jsonwebtoken';
+import type { VerifyOptions } from 'jsonwebtoken';
 import type { Database } from '@strapi/database';
 import { DEFAULT_ALGORITHM } from '../constants';
 
@@ -17,7 +17,7 @@ export interface SessionData {
   id?: string;
   userId: string; // User ID stored as string (key-value store)
   sessionId: string;
-  deviceId: string;
+  deviceId?: string; // Optional for origins that don't need device tracking
   origin: string;
   childId?: string | null;
 
@@ -117,25 +117,101 @@ export interface SessionManagerConfig {
   idleRefreshTokenLifespan: number;
   maxSessionLifespan: number;
   idleSessionLifespan: number;
+}
+
+class OriginSessionManager {
+  constructor(
+    private sessionManager: SessionManager,
+    private origin: string
+  ) {}
+
+  async generateRefreshToken(
+    userId: string,
+    deviceId: string | undefined,
+    options?: { type?: 'refresh' | 'session' }
+  ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }> {
+    return this.sessionManager.generateRefreshToken(userId, deviceId, this.origin, options);
+  }
+
+  async generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }> {
+    return this.sessionManager.generateAccessToken(refreshToken, this.origin);
+  }
+
+  async rotateRefreshToken(refreshToken: string): Promise<
+    | {
+        token: string;
+        sessionId: string;
+        absoluteExpiresAt: string;
+        type: 'refresh' | 'session';
+      }
+    | { error: string }
+  > {
+    return this.sessionManager.rotateRefreshToken(refreshToken, this.origin);
+  }
+
+  validateAccessToken(
+    token: string
+  ): { isValid: true; payload: AccessTokenPayload } | { isValid: false; payload: null } {
+    return this.sessionManager.validateAccessToken(token, this.origin);
+  }
+
+  async validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult> {
+    return this.sessionManager.validateRefreshToken(token, this.origin);
+  }
+
+  async invalidateRefreshToken(userId: string, deviceId?: string): Promise<void> {
+    return this.sessionManager.invalidateRefreshToken(this.origin, userId, deviceId);
+  }
+
   /**
-   * JWT signing/verification algorithm. Defaults to 'HS256' when not provided.
+   * Returns true when a session exists and is not expired for this origin.
+   * If the session exists but is expired, it will be deleted as part of this check.
    */
-  algorithm?: Algorithm;
+  async isSessionActive(sessionId: string): Promise<boolean> {
+    return this.sessionManager.isSessionActive(sessionId, this.origin);
+  }
 }
 
 class SessionManager {
   private provider: SessionProvider;
 
-  private config: SessionManagerConfig;
+  // Store origin-specific configurations
+  private originConfigs: Map<string, SessionManagerConfig> = new Map();
 
   // Run expired cleanup only every N calls to avoid extra queries
   private cleanupInvocationCounter: number = 0;
 
   private readonly cleanupEveryCalls: number = 50;
 
-  constructor(provider: SessionProvider, config: SessionManagerConfig) {
+  constructor(provider: SessionProvider) {
     this.provider = provider;
-    this.config = config;
+  }
+
+  /**
+   * Define configuration for a specific origin
+   */
+  defineOrigin(origin: string, config: SessionManagerConfig): void {
+    this.originConfigs.set(origin, config);
+  }
+
+  /**
+   * Check if an origin is defined
+   */
+  hasOrigin(origin: string): boolean {
+    return this.originConfigs.has(origin);
+  }
+
+  /**
+   * Get configuration for a specific origin, throw error if not defined
+   */
+  private getConfigForOrigin(origin: string): SessionManagerConfig {
+    const originConfig = this.originConfigs.get(origin);
+    if (originConfig) {
+      return originConfig;
+    }
+    throw new Error(
+      `SessionManager: Origin '${origin}' is not defined. Please define it using defineOrigin('${origin}', config).`
+    );
   }
 
   generateSessionId(): string {
@@ -151,25 +227,35 @@ class SessionManager {
     }
   }
 
+  /**
+   * Get the cleanup every calls threshold
+   */
+  get cleanupThreshold(): number {
+    return this.cleanupEveryCalls;
+  }
+
   async generateRefreshToken(
     userId: string,
-    deviceId: string,
+    deviceId: string | undefined,
     origin: string,
-    options?: { familyType?: 'refresh' | 'session' }
+    options?: { type?: 'refresh' | 'session' }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }> {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(
+        'SessionManager: Origin parameter is required and must be a non-empty string'
+      );
+    }
+
     await this.maybeCleanupExpired();
 
+    const config = this.getConfigForOrigin(origin);
     const sessionId = this.generateSessionId();
-    const familyType = options?.familyType ?? 'refresh';
-    const isRefresh = familyType === 'refresh';
+    const tokenType = options?.type ?? 'refresh';
+    const isRefresh = tokenType === 'refresh';
 
-    const idleLifespan = isRefresh
-      ? this.config.idleRefreshTokenLifespan
-      : this.config.idleSessionLifespan;
+    const idleLifespan = isRefresh ? config.idleRefreshTokenLifespan : config.idleSessionLifespan;
 
-    const maxLifespan = isRefresh
-      ? this.config.maxRefreshTokenLifespan
-      : this.config.maxSessionLifespan;
+    const maxLifespan = isRefresh ? config.maxRefreshTokenLifespan : config.maxSessionLifespan;
 
     const now = Date.now();
     const expiresAt = new Date(now + idleLifespan * 1000);
@@ -179,10 +265,10 @@ class SessionManager {
     const record = await this.provider.create({
       userId,
       sessionId,
-      deviceId,
+      ...(deviceId && { deviceId }),
       origin,
       childId: null,
-      type: familyType,
+      type: tokenType,
       status: 'active',
       expiresAt,
       absoluteExpiresAt,
@@ -199,8 +285,8 @@ class SessionManager {
       exp: expiresAtSeconds,
     };
 
-    const token = jwt.sign(payload, this.config.jwtSecret, {
-      algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
+    const token = jwt.sign(payload, config.jwtSecret, {
+      algorithm: DEFAULT_ALGORITHM,
       noTimestamp: true,
     });
 
@@ -212,11 +298,19 @@ class SessionManager {
   }
 
   validateAccessToken(
-    token: string
+    token: string,
+    origin: string
   ): { isValid: true; payload: AccessTokenPayload } | { isValid: false; payload: null } {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(
+        'SessionManager: Origin parameter is required and must be a non-empty string'
+      );
+    }
+
     try {
-      const payload = jwt.verify(token, this.config.jwtSecret, {
-        algorithms: [this.config.algorithm ?? DEFAULT_ALGORITHM],
+      const config = this.getConfigForOrigin(origin);
+      const payload = jwt.verify(token, config.jwtSecret, {
+        algorithms: [DEFAULT_ALGORITHM],
       }) as TokenPayload;
 
       // Ensure this is an access token
@@ -230,17 +324,20 @@ class SessionManager {
     }
   }
 
-  async validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult> {
+  async validateRefreshToken(token: string, origin: string): Promise<ValidateRefreshTokenResult> {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(
+        'SessionManager: Origin parameter is required and must be a non-empty string'
+      );
+    }
+
     try {
+      const config = this.getConfigForOrigin(origin);
       const verifyOptions: VerifyOptions = {
-        algorithms: [this.config.algorithm ?? DEFAULT_ALGORITHM],
+        algorithms: [DEFAULT_ALGORITHM],
       };
 
-      const payload = jwt.verify(
-        token,
-        this.config.jwtSecret,
-        verifyOptions
-      ) as RefreshTokenPayload;
+      const payload = jwt.verify(token, config.jwtSecret, verifyOptions) as RefreshTokenPayload;
 
       if (payload.type !== 'refresh') {
         return { isValid: false };
@@ -288,8 +385,17 @@ class SessionManager {
     await this.provider.deleteBy({ userId, origin, deviceId });
   }
 
-  async generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }> {
-    const validation = await this.validateRefreshToken(refreshToken);
+  async generateAccessToken(
+    refreshToken: string,
+    origin: string
+  ): Promise<{ token: string } | { error: string }> {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(
+        'SessionManager: Origin parameter is required and must be a non-empty string'
+      );
+    }
+
+    const validation = await this.validateRefreshToken(refreshToken, origin);
 
     if (!validation.isValid) {
       return { error: 'invalid_refresh_token' };
@@ -301,15 +407,19 @@ class SessionManager {
       type: 'access',
     };
 
-    const token = jwt.sign(payload, this.config.jwtSecret, {
-      algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
-      expiresIn: this.config.accessTokenLifespan,
+    const config = this.getConfigForOrigin(origin);
+    const token = jwt.sign(payload, config.jwtSecret, {
+      algorithm: DEFAULT_ALGORITHM,
+      expiresIn: config.accessTokenLifespan,
     });
 
     return { token };
   }
 
-  async rotateRefreshToken(refreshToken: string): Promise<
+  async rotateRefreshToken(
+    refreshToken: string,
+    origin: string
+  ): Promise<
     | {
         token: string;
         sessionId: string;
@@ -318,9 +428,16 @@ class SessionManager {
       }
     | { error: string }
   > {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(
+        'SessionManager: Origin parameter is required and must be a non-empty string'
+      );
+    }
+
     try {
-      const payload = jwt.verify(refreshToken, this.config.jwtSecret, {
-        algorithms: [this.config.algorithm ?? DEFAULT_ALGORITHM],
+      const config = this.getConfigForOrigin(origin);
+      const payload = jwt.verify(refreshToken, config.jwtSecret, {
+        algorithms: [DEFAULT_ALGORITHM],
       }) as RefreshTokenPayload;
 
       if (!payload || payload.type !== 'refresh') {
@@ -348,8 +465,8 @@ class SessionManager {
             exp: childExp,
           };
 
-          const childToken = jwt.sign(childPayload, this.config.jwtSecret, {
-            algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
+          const childToken = jwt.sign(childPayload, config.jwtSecret, {
+            algorithm: DEFAULT_ALGORITHM,
             noTimestamp: true,
           });
 
@@ -373,11 +490,9 @@ class SessionManager {
       }
 
       const now = Date.now();
-      const familyType = current.type ?? 'refresh';
+      const tokenType = current.type ?? 'refresh';
       const idleLifespan =
-        familyType === 'refresh'
-          ? this.config.idleRefreshTokenLifespan
-          : this.config.idleSessionLifespan;
+        tokenType === 'refresh' ? config.idleRefreshTokenLifespan : config.idleSessionLifespan;
 
       // Enforce idle window since creation of the current token
       if (current.createdAt && now - new Date(current.createdAt).getTime() > idleLifespan * 1000) {
@@ -399,10 +514,10 @@ class SessionManager {
       const childRecord = await this.provider.create({
         userId: current.userId,
         sessionId: childSessionId,
-        deviceId: current.deviceId,
+        ...(current.deviceId && { deviceId: current.deviceId }),
         origin: current.origin,
         childId: null,
-        type: familyType,
+        type: tokenType,
         status: 'active',
         expiresAt: childExpiresAt,
         absoluteExpiresAt: current.absoluteExpiresAt ?? new Date(absolute),
@@ -417,8 +532,8 @@ class SessionManager {
         iat: childIat,
         exp: childExp,
       };
-      const childToken = jwt.sign(payloadOut, this.config.jwtSecret, {
-        algorithm: this.config.algorithm ?? DEFAULT_ALGORITHM,
+      const childToken = jwt.sign(payloadOut, config.jwtSecret, {
+        algorithm: DEFAULT_ALGORITHM,
         noTimestamp: true,
       });
 
@@ -441,7 +556,7 @@ class SessionManager {
         token: childToken,
         sessionId: childSessionId,
         absoluteExpiresAt,
-        type: familyType,
+        type: tokenType,
       };
     } catch {
       return { error: 'invalid_refresh_token' };
@@ -452,9 +567,13 @@ class SessionManager {
    * Returns true when a session exists and is not expired.
    * If the session exists but is expired, it will be deleted as part of this check.
    */
-  async isSessionActive(sessionId: string): Promise<boolean> {
+  async isSessionActive(sessionId: string, origin: string): Promise<boolean> {
     const session = await this.provider.findBySessionId(sessionId);
     if (!session) {
+      return false;
+    }
+
+    if (session.origin !== origin) {
       return false;
     }
 
@@ -473,9 +592,40 @@ const createDatabaseProvider = (db: Database, contentType: string): SessionProvi
   return new DatabaseSessionProvider(db, contentType);
 };
 
-const createSessionManager = ({ db, config }: { db: Database; config: SessionManagerConfig }) => {
+const createSessionManager = ({
+  db,
+}: {
+  db: Database;
+}): SessionManager & ((origin: string) => OriginSessionManager) => {
   const provider = createDatabaseProvider(db, 'admin::session');
-  return new SessionManager(provider, config);
+  const sessionManager = new SessionManager(provider);
+
+  // Add callable functionality
+  const fluentApi = (origin: string): OriginSessionManager => {
+    if (!origin || typeof origin !== 'string') {
+      throw new Error(
+        'SessionManager: Origin parameter is required and must be a non-empty string'
+      );
+    }
+    return new OriginSessionManager(sessionManager, origin);
+  };
+
+  // Attach only the public SessionManagerService API to the callable
+  const api = fluentApi as unknown as any;
+  api.generateSessionId = sessionManager.generateSessionId.bind(sessionManager);
+  api.defineOrigin = sessionManager.defineOrigin.bind(sessionManager);
+  api.hasOrigin = sessionManager.hasOrigin.bind(sessionManager);
+  // Note: isSessionActive is origin-scoped and exposed on OriginSessionManager only
+
+  // Forward the cleanupThreshold getter (used in tests)
+  Object.defineProperty(api, 'cleanupThreshold', {
+    get() {
+      return sessionManager.cleanupThreshold;
+    },
+    enumerable: true,
+  });
+
+  return api as SessionManager & ((origin: string) => OriginSessionManager);
 };
 
 export { createSessionManager, createDatabaseProvider };

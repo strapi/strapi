@@ -30,12 +30,12 @@ export const authenticate = async (ctx: Context) => {
     return { authenticated: false };
   }
 
-  const result = manager.validateAccessToken(token);
+  const result = manager('admin').validateAccessToken(token);
   if (!result.isValid) {
     return { authenticated: false };
   }
 
-  const isActive = await manager.isSessionActive(result.payload.sessionId);
+  const isActive = await manager('admin').isSessionActive(result.payload.sessionId);
   if (!isActive) {
     return { authenticated: false };
   }

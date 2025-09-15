@@ -13,11 +13,11 @@ const createUtils = (strapi) => {
     const userId = String(user.id);
     const deviceId = '00000000-0000-4000-8000-000000000001';
 
-    const refresh = await strapi.sessionManager.generateRefreshToken(userId, deviceId, 'admin', {
-      familyType: 'session',
+    const refresh = await strapi.sessionManager('admin').generateRefreshToken(userId, deviceId, {
+      type: 'session',
     });
 
-    const access = await strapi.sessionManager.generateAccessToken(refresh.token);
+    const access = await strapi.sessionManager('admin').generateAccessToken(refresh.token);
     if (!('token' in access)) {
       throw new Error('Failed to generate admin access token');
     }

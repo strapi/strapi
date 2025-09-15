@@ -1,6 +1,9 @@
+/* eslint-env jest */
 /* eslint-disable import/no-relative-packages */
 // @ts-expect-error - test purposes
 import createContext from '../../../../../../../tests/helpers/create-context';
+// @ts-expect-error - test purposes
+import { createMockSessionManager } from '../../../../../../../tests/helpers/create-session-manager-mock';
 import adminAuthStrategy from '../admin';
 
 describe('Admin Auth Strategy', () => {
@@ -22,8 +25,11 @@ describe('Admin Auth Strategy', () => {
       const findOne = jest.fn(() => user);
       const generateUserAbility = jest.fn(() => 'ability');
 
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
       global.strapi = {
-        sessionManager: { validateAccessToken, isSessionActive },
+        sessionManager: sessionManager as any,
         admin: {
           services: {
             permission: { engine: { generateUserAbility } },
@@ -64,8 +70,11 @@ describe('Admin Auth Strategy', () => {
       const validateAccessToken = jest.fn(() => ({ isValid: false, payload: null }));
       const ctx = createContext({}, { request });
 
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken });
+
       global.strapi = {
-        sessionManager: { validateAccessToken },
+        sessionManager: sessionManager as any,
       } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
@@ -82,8 +91,11 @@ describe('Admin Auth Strategy', () => {
       const isSessionActive = jest.fn(async () => false);
       const ctx = createContext({}, { request });
 
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
       global.strapi = {
-        sessionManager: { validateAccessToken, isSessionActive },
+        sessionManager: sessionManager as any,
       } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
@@ -102,8 +114,11 @@ describe('Admin Auth Strategy', () => {
       const ctx = createContext({}, { request });
       const findOne = jest.fn(() => ({ isActive: false }));
 
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
       global.strapi = {
-        sessionManager: { validateAccessToken, isSessionActive },
+        sessionManager: sessionManager as any,
         db: { query: jest.fn(() => ({ findOne })) },
       } as any;
 
@@ -123,8 +138,11 @@ describe('Admin Auth Strategy', () => {
       const ctx = createContext({}, { request });
       const findOne = jest.fn(() => null);
 
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
       global.strapi = {
-        sessionManager: { validateAccessToken, isSessionActive },
+        sessionManager: sessionManager as any,
         db: { query: jest.fn(() => ({ findOne })) },
       } as any;
 

@@ -2,24 +2,12 @@ export type ValidateRefreshTokenResult =
   | { isValid: true; userId: string; sessionId: string }
   | { isValid: false };
 
-export interface SessionManagerService {
-  generateSessionId(): string;
+export interface OriginSessionManagerService {
   generateRefreshToken(
     userId: string,
-    deviceId: string,
-    origin: string,
-    options?: { familyType?: 'refresh' | 'session' }
+    deviceId: string | undefined,
+    options?: { type?: 'refresh' | 'session' }
   ): Promise<{ token: string; sessionId: string; absoluteExpiresAt: string }>;
-  validateAccessToken(token: string):
-    | {
-        isValid: true;
-        payload: { userId: string; sessionId: string; type: 'access'; exp: number; iat: number };
-      }
-    | {
-        isValid: false;
-        payload: null;
-      };
-  validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult>;
   generateAccessToken(refreshToken: string): Promise<{ token: string } | { error: string }>;
   rotateRefreshToken(refreshToken: string): Promise<
     | {
@@ -30,6 +18,24 @@ export interface SessionManagerService {
       }
     | { error: string }
   >;
-  invalidateRefreshToken(origin: string, userId: string, deviceId?: string): Promise<void>;
+  validateAccessToken(token: string):
+    | {
+        isValid: true;
+        payload: { userId: string; sessionId: string; type: 'access'; exp: number; iat: number };
+      }
+    | {
+        isValid: false;
+        payload: null;
+      };
+  validateRefreshToken(token: string): Promise<ValidateRefreshTokenResult>;
+  invalidateRefreshToken(userId: string, deviceId?: string): Promise<void>;
   isSessionActive(sessionId: string): Promise<boolean>;
+}
+
+export interface SessionManagerService {
+  generateSessionId(): string;
+  defineOrigin(origin: string, config: any): void;
+  hasOrigin(origin: string): boolean;
+  // Fluent API
+  (origin: string): OriginSessionManagerService;
 }
