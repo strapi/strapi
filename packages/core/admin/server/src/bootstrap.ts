@@ -100,7 +100,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Fallback for backward compatibility: if the new maxRefreshTokenLifespan is not set,
   // reuse the legacy admin.auth.options.expiresIn value (previously the sole JWT lifespan)
   const { options } = getTokenOptions();
-  const legacyFromExpires = expiresInToSeconds(options?.expiresIn);
+  const legacyMaxRefreshFallback = expiresInToSeconds(options?.expiresIn) ?? 30 * 24 * 60 * 60; // default 30 days
 
   // Warn if using deprecated legacy expiresIn for new session settings
   const hasLegacyExpires = options?.expiresIn != null;
@@ -115,26 +115,20 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   strapi.sessionManager.defineOrigin('admin', {
     jwtSecret: strapi.config.get('admin.auth.secret'),
-    accessTokenLifespan: strapi.config.get(
-      'admin.auth.sessions.accessTokenLifespan',
-      constants.DEFAULT_ACCESS_TOKEN_LIFESPAN
-    ),
+    accessTokenLifespan: strapi.config.get('admin.auth.sessions.accessTokenLifespan', 30 * 60),
     maxRefreshTokenLifespan: strapi.config.get(
       'admin.auth.sessions.maxRefreshTokenLifespan',
-      legacyFromExpires ?? constants.DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN
+      legacyMaxRefreshFallback
     ),
     idleRefreshTokenLifespan: strapi.config.get(
       'admin.auth.sessions.idleRefreshTokenLifespan',
-      constants.DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN
+      7 * 24 * 60 * 60
     ),
     maxSessionLifespan: strapi.config.get(
       'admin.auth.sessions.maxSessionLifespan',
-      legacyFromExpires ?? constants.DEFAULT_MAX_SESSION_LIFESPAN
+      legacyMaxRefreshFallback
     ),
-    idleSessionLifespan: strapi.config.get(
-      'admin.auth.sessions.idleSessionLifespan',
-      constants.DEFAULT_IDLE_SESSION_LIFESPAN
-    ),
+    idleSessionLifespan: strapi.config.get('admin.auth.sessions.idleSessionLifespan', 60 * 60),
   });
 
   await registerAdminConditions();

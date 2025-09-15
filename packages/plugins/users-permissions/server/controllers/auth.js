@@ -345,19 +345,7 @@ module.exports = ({ strapi }) => ({
 
     // Invalidate all sessions for the authenticated user, or by deviceId if provided
     if (!ctx.state.user) {
-      // Fallback: derive user from Authorization header if permissions middleware didn't run
-      try {
-        const tokenPayload = await getService('jwt').getToken(ctx);
-        if (tokenPayload && tokenPayload.id) {
-          ctx.state.user = { id: tokenPayload.id };
-        }
-      } catch (e) {
-        // ignore and let the usual unauthorized response happen
-      }
-
-      if (!ctx.state.user) {
-        return ctx.unauthorized('Missing authentication');
-      }
+      return ctx.unauthorized('Missing authentication');
     }
 
     const deviceId = ctx.request.body?.deviceId;

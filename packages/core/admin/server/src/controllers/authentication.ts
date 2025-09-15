@@ -177,7 +177,7 @@ export default {
           'admin'
         ).generateRefreshToken(userId, deviceId, {
           type: rememberMe ? 'refresh' : 'session',
-        } as any);
+        });
 
         const cookieOptions = buildCookieOptionsWithExpiry(
           rememberMe ? 'refresh' : 'session',
@@ -237,7 +237,7 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' } as any);
+      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -303,7 +303,7 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' } as any);
+      ).generateRefreshToken(userId, deviceId, { type: rememberMe ? 'refresh' : 'session' });
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
@@ -360,7 +360,7 @@ export default {
 
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
-      ).generateRefreshToken(userId, deviceId, { type: 'session' } as any);
+      ).generateRefreshToken(userId, deviceId, { type: 'session' });
 
       // No rememberMe flow here; expire with session by default (session cookie)
       const cookieOptions = buildCookieOptionsWithExpiry('session', absoluteExpiresAt);
