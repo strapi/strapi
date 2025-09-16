@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { useField } from '@strapi/admin/strapi-admin';
+import { Schema } from '@strapi/types';
 
 import { useHasInputPopoverParent } from '../components/InputPopover';
 import { usePreviewContext } from '../pages/Preview';
@@ -12,7 +13,10 @@ type PreviewInputProps = Pick<
   'onFocus' | 'onBlur'
 >;
 
-export function usePreviewInputManager(name: string): PreviewInputProps {
+export function usePreviewInputManager(
+  name: string,
+  attribute: Schema.Attribute.AnyAttribute
+): PreviewInputProps {
   const iframe = usePreviewContext('usePreviewInputManager', (state) => state.iframeRef, false);
   const setPopoverField = usePreviewContext(
     'usePreviewInputManager',
@@ -21,15 +25,22 @@ export function usePreviewInputManager(name: string): PreviewInputProps {
   );
   const hasInputPopoverParent = useHasInputPopoverParent();
   const { value } = useField(name);
+  const { type } = attribute;
 
   React.useEffect(() => {
-    if (!iframe) {
+    if (!iframe || !type) {
       return;
     }
 
-    const sendMessage = getSendMessage(iframe);
-    sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value });
-  }, [name, value, iframe]);
+    /**
+     * Only send message if the field is not a data structure (component, dynamic zone)
+     * because we already send events for their fields
+     */
+    if (!['component', 'dynamiczone'].includes(type)) {
+      const sendMessage = getSendMessage(iframe);
+      sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_CHANGE, { field: name, value });
+    }
+  }, [name, value, iframe, type]);
 
   const sendMessage = getSendMessage(iframe);
 

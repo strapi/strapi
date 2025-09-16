@@ -1,6 +1,7 @@
 import { vercelStegaCombine } from '@vercel/stega';
 import type { Core, Struct, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
+import type { FieldContentSourceMap } from '@strapi/admin/strapi-admin';
 
 const ENCODABLE_TYPES = [
   'string',
@@ -17,13 +18,13 @@ const ENCODABLE_TYPES = [
   'media',
   'email',
   'password',
-  'uid',
   /**
    * We cannot modify the response shape, so types that aren't based on string cannot be encoded:
    * - json: object
    * - blocks: object, will require a custom implementation in a dedicated PR
    * - integer, float and decimal: number
    * - boolean: boolean (believe it or not)
+   * - uid: can be stringified but would mess up URLs
    */
 ];
 
@@ -45,29 +46,62 @@ interface EncodingInfo {
   schema: Struct.Schema;
 }
 
+const isObject = (value: unknown): value is Record<string, any> => {
+  return typeof value === 'object' && value !== null;
+};
+
 const createContentSourceMapsService = (strapi: Core.Strapi) => {
   return {
-    encodeField(text: string, key: string): string {
-      const res = vercelStegaCombine(text, {
-        // TODO: smarter metadata than just the key
-        key,
-      });
-      return res;
+    encodeField(
+      text: string,
+      { kind, model, documentId, type, path, locale }: FieldContentSourceMap
+    ) {
+      /**
+       * Combine all metadata into into a one string so we only have to deal with one data-atribute
+       * on the frontend. Make it human readable because that data-attribute may be set manually by
+       * users for fields that don't support sourcemap encoding.
+       */
+      const strapiSource = new URLSearchParams();
+      strapiSource.set('documentId', documentId);
+      strapiSource.set('type', type);
+      strapiSource.set('path', path);
+
+      if (model) {
+        strapiSource.set('model', model);
+      }
+      if (kind) {
+        strapiSource.set('kind', kind);
+      }
+      if (locale) {
+        strapiSource.set('locale', locale);
+      }
+
+      return vercelStegaCombine(text, { strapiSource: strapiSource.toString() });
     },
 
     async encodeEntry({ data, schema }: EncodingInfo): Promise<any> {
-      if (typeof data !== 'object' || data === null || data === undefined) {
+      if (!isObject(data) || data === undefined) {
         return data;
       }
 
       return traverseEntity(
-        ({ key, value, attribute }, { set }) => {
+        ({ key, value, attribute, schema, path }, { set }) => {
           if (!attribute || EXCLUDED_FIELDS.includes(key)) {
             return;
           }
 
           if (ENCODABLE_TYPES.includes(attribute.type) && typeof value === 'string') {
-            set(key, this.encodeField(value, key) as any);
+            set(
+              key,
+              this.encodeField(value, {
+                path: path.rawWithIndices!,
+                type: attribute.type,
+                kind: schema.kind,
+                model: schema.uid as UID.Schema,
+                locale: data.locale,
+                documentId: data.documentId,
+              }) as any
+            );
           }
         },
         {
@@ -86,7 +120,7 @@ const createContentSourceMapsService = (strapi: Core.Strapi) => {
           );
         }
 
-        if (typeof data !== 'object' || data === null) {
+        if (!isObject(data)) {
           return data;
         }
 
