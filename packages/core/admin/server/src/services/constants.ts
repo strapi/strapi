@@ -48,12 +48,6 @@ const constants = {
     DAYS_30: 30 * DAY_IN_MS,
     DAYS_90: 90 * DAY_IN_MS,
   },
-  // Admin session/token default lifespans (seconds)
-  DEFAULT_ACCESS_TOKEN_LIFESPAN: 10 * 60,
-  DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN: 30 * 24 * 60 * 60,
-  DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN: 14 * 24 * 60 * 60,
-  DEFAULT_MAX_SESSION_LIFESPAN: 1 * 24 * 60 * 60,
-  DEFAULT_IDLE_SESSION_LIFESPAN: 2 * 60 * 60,
 };
 
 export default constants;
