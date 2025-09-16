@@ -45,7 +45,7 @@ test.describe('Settings', () => {
     await page.getByRole('option', { name: 'Italian (it)' }).click();
     await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Locale successfully added');
+    await findAndClose(page, 'Locale successfully added');
 
     /**
      * Next, we'll navigate to our shop single type & add the a localised version of this document.
@@ -127,7 +127,7 @@ test.describe('Settings', () => {
      * Successfully publish the entry once the data is valid.
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
   });
 
   test('As a user I want to delete an existing locale and have the content deleted as well', async ({
@@ -158,7 +158,7 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'Delete French (fr) locale' }).click();
 
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await findAndClose(page, 'Success:Locale successfully deleted');
+    await findAndClose(page, 'Locale successfully deleted');
 
     /**
      * Finally, go back to the list view, the english articles should be there,
@@ -206,7 +206,7 @@ test.describe('Settings', () => {
     await page.getByRole('gridcell', { name: 'English (en)', exact: true }).click();
     await page.getByRole('textbox', { name: 'Locale display name' }).fill('UK English');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Locale successfully edited');
+    await findAndClose(page, 'Locale successfully edited');
 
     /**
      * Lets go back to the list view and assert that the changes are reflected.

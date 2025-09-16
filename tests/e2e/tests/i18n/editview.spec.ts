@@ -105,7 +105,7 @@ test.describe('Edit view', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
@@ -224,7 +224,7 @@ test.describe('Edit view', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
@@ -285,7 +285,7 @@ test.describe('Edit view', () => {
     // header is behind the permissions component.
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Logout and login as editor
@@ -308,7 +308,7 @@ test.describe('Edit view', () => {
     await page.getByRole('link', { name: 'Create new entry' }).click();
     await page.getByLabel('title').fill('the richmond way');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Verify we cannot create a new entry in the french locale as editors do
@@ -333,7 +333,7 @@ test.describe('Edit view', () => {
     await page.getByRole('link', { name: 'Create new entry' }).click();
     await page.getByLabel('title').fill('trent crimm');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Create a Spanish (es) locale for the entry
@@ -342,7 +342,7 @@ test.describe('Edit view', () => {
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
     await page.getByLabel('title').fill('dani rojas');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Delete the Spanish (es) locale entry
@@ -350,7 +350,7 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await findAndClose(page, 'Success:Deleted');
+    await findAndClose(page, 'Deleted');
 
     /**
      * Navigate to our homepage single-type and create a new entry
@@ -360,7 +360,7 @@ test.describe('Edit view', () => {
     await page.waitForURL(HOMEPAGE_LIST_URL);
     await page.getByLabel('title').fill('football is life');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Create a Spanish (es) locale for the homepage entry
@@ -369,7 +369,7 @@ test.describe('Edit view', () => {
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
     await page.getByLabel('title').fill('el fútbol también es muerte.');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Delete the Spanish (es) locale homepage entry
@@ -377,7 +377,7 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await findAndClose(page, 'Success:Deleted');
+    await findAndClose(page, 'Deleted');
   });
 
   test('As a user I want to publish multiple locales of my document', async ({ page, browser }) => {
@@ -427,7 +427,7 @@ test.describe('Edit view', () => {
      * Save the spanish draft
      */
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Open the bulk locale publish modal
@@ -486,7 +486,7 @@ test.describe('Edit view', () => {
      * Publish the english article
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
@@ -512,13 +512,13 @@ test.describe('Edit view', () => {
      * Save the spanish draft
      */
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Publish the spanish article
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Open the bulk locale unpublish modal
