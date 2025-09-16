@@ -16,8 +16,6 @@ import type { Core } from '@strapi/types';
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 
-const dbg = (..._args: any[]) => {};
-
 // Local cleaner used for tests to have full control and avoid coupling to core internals
 const testCleaner = async (
   db: any,
@@ -26,14 +24,8 @@ const testCleaner = async (
   sourceModel: any
 ): Promise<number> => {
   try {
-    dbg('cleaner:start', {
-      joinTableName,
-      target: relation?.target,
-      sourceModel: sourceModel?.uid,
-    });
     const targetModel = db.metadata.get(relation.target);
     if (!targetModel) {
-      dbg('cleaner:skip:no-target-model');
       return 0;
     }
 
@@ -41,7 +33,6 @@ const testCleaner = async (
     const targetCt = (strapi as any).contentTypes?.[relation.target];
     const targetSupportsDP = !!targetCt?.options?.draftAndPublish;
     if (!targetSupportsDP) {
-      dbg('cleaner:skip:target-without-dp');
       return 0;
     }
 
@@ -64,7 +55,6 @@ const testCleaner = async (
         `${joinTableName}.${targetColumn}`,
         `${targetModel.tableName}.id`
       );
-    dbg('cleaner:rows-fetched', rows.length);
 
     // Group by component instance (source)
     const bySource: Record<string, any[]> = {};
@@ -73,7 +63,6 @@ const testCleaner = async (
       bySource[key] = bySource[key] || [];
       bySource[key].push(r);
     }
-    dbg('cleaner:sources', Object.keys(bySource).length);
 
     // Resolve table names for our parents to detect D&P support
     const productMd = db.metadata.get(PRODUCT_UID);
@@ -112,7 +101,6 @@ const testCleaner = async (
         parentSupportsDP = false;
       }
       if (!parentSupportsDP) {
-        dbg('cleaner:skip:parent-without-dp', { sourceId });
         continue;
       }
 
@@ -133,15 +121,12 @@ const testCleaner = async (
       }
     }
 
-    dbg('cleaner:toDelete', toDelete.length);
     if (toDelete.length > 0) {
       await db.connection(joinTableName).whereIn('id', toDelete).del();
     }
 
-    dbg('cleaner:end', toDelete.length);
     return toDelete.length;
   } catch (err) {
-    dbg('cleaner:error', err);
     return 0;
   }
 };
@@ -265,7 +250,6 @@ const selectBySource = async (table: string, sourceColumn: string, sourceId: num
 
 describe('Unidirectional join-table repair (components)', () => {
   beforeAll(async () => {
-    dbg('beforeAll:start');
     await builder
       .addContentTypes([tagModel])
       .addComponent(componentModel)
@@ -273,32 +257,26 @@ describe('Unidirectional join-table repair (components)', () => {
       .build();
 
     strapi = await createStrapiInstance({ logLevel: 'error' });
-    dbg('beforeAll:strapi-ready');
 
     // Seed baseline tag used across tests (draft+published)
     await strapi.db
       .query(TAG_UID)
       .create({ data: { documentId: 'GTagR', name: 'GhostTagR', publishedAt: null } });
     await strapi.documents(TAG_UID).publish({ documentId: 'GTagR' });
-    dbg('beforeAll:seed-done');
   });
 
   afterAll(async () => {
-    dbg('afterAll:start');
     await strapi.destroy();
     await builder.cleanup();
-    dbg('afterAll:done');
   });
 
   it('Removes duplicate published row when both draft and published exist for one component instance', async () => {
     const { joinTableName, sourceColumn, targetColumn } = getCompoTagsRelationInfo();
-    dbg('test1:join-table', joinTableName);
 
     // Get draft & published tag IDs for documentId GTagR
     const tagVersions = await strapi.db.query(TAG_UID).findMany({ where: { documentId: 'GTagR' } });
     const draftTag = tagVersions.find((t: any) => t.publishedAt === null)!;
     const publishedTag = tagVersions.find((t: any) => t.publishedAt !== null)!;
-    dbg('test1:tags', { draft: draftTag?.id, published: publishedTag?.id });
 
     // Create draft product with a component relation to the draft tag
     const product = await strapi.documents(PRODUCT_UID).create({
@@ -308,11 +286,10 @@ describe('Unidirectional join-table repair (components)', () => {
       },
       status: 'draft',
     });
-    dbg('test1:product-created', product.documentId);
 
     // There should be a single draft relation row for the component instance
     let rows = await selectAll(joinTableName);
-    dbg('test1:rows-after-create', rows.length);
+
     expect(rows.length).toBe(1);
     const draftRow = rows[0];
     expect(draftRow[targetColumn]).toBe(draftTag.id);
@@ -325,19 +302,18 @@ describe('Unidirectional join-table repair (components)', () => {
     await strapi.db.connection(joinTableName).insert(insertRow);
 
     rows = await selectBySource(joinTableName, sourceColumn, sourceId);
-    dbg('test1:rows-after-dup', rows.length);
+
     expect(rows.length).toBe(2);
     const targetIds = rows.map((r) => r[targetColumn]).sort();
     expect(targetIds).toEqual([draftTag.id, publishedTag.id].sort());
 
-    dbg('test1:repair:start');
     const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
-    dbg('test1:repair:removed', removed);
+
     expect(removed).toBeGreaterThanOrEqual(1);
 
     // Only the published duplicate should be removed; the draft relation must remain
     rows = await selectBySource(joinTableName, sourceColumn, sourceId);
-    dbg('test1:rows-after-repair', rows.length);
+
     expect(rows.length).toBe(1);
     expect(rows[0][targetColumn]).toBe(draftTag.id);
 
@@ -347,30 +323,26 @@ describe('Unidirectional join-table repair (components)', () => {
 
   it('Does not delete single relations (safety) for draft-only or published-only', async () => {
     const { joinTableName, sourceColumn, targetColumn } = getCompoTagsRelationInfo();
-    dbg('test2:join-table', joinTableName);
 
     const tagVersions = await strapi.db.query(TAG_UID).findMany({ where: { documentId: 'GTagR' } });
     const draftTag = tagVersions.find((t: any) => t.publishedAt === null)!;
     const publishedTag = tagVersions.find((t: any) => t.publishedAt !== null)!;
-    dbg('test2:tags', { draft: draftTag?.id, published: publishedTag?.id });
 
     // Draft-only relation: product in draft referencing draft tag
     const draftOnly = await strapi.documents(PRODUCT_UID).create({
       data: { name: 'Draft-only', rcompo: { rtags: [{ documentId: 'GTagR', status: 'draft' }] } },
       status: 'draft',
     });
-    dbg('test2:draft-only-created', draftOnly.documentId);
 
     // Published-only relation: product in draft referencing published tag by id
     const publishedOnly = await strapi.documents(PRODUCT_UID).create({
       data: { name: 'Published-only', rcompo: { rtags: [{ id: publishedTag.id }] } },
       status: 'draft',
     });
-    dbg('test2:published-only-created', publishedOnly.documentId);
 
     // Collect rows per component instance
     const rowsAll = await selectAll(joinTableName);
-    dbg('test2:rows-all', rowsAll.length);
+
     const compoIdsByName: Record<string, number> = {};
     // Find the two component instances by correlating to tag ids present
     // We find component instances having a single row pointing to draftTag or publishedTag respectively
@@ -380,7 +352,7 @@ describe('Unidirectional join-table repair (components)', () => {
       bySource[sid] = bySource[sid] || [];
       bySource[sid].push(row);
     }
-    dbg('test2:sources', Object.keys(bySource).length);
+
     const sources = Object.entries(bySource).filter(([, v]) => v.length === 1);
     expect(sources.length).toBeGreaterThanOrEqual(2);
 
@@ -392,16 +364,14 @@ describe('Unidirectional join-table repair (components)', () => {
     )![0] as unknown as number;
     compoIdsByName['draft'] = Number(draftOnlySource);
     compoIdsByName['published'] = Number(publishedOnlySource);
-    dbg('test2:identified-sources', compoIdsByName);
 
-    dbg('test2:repair:start');
     const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
-    dbg('test2:repair:removed', removed);
+
     expect(removed).toBeGreaterThanOrEqual(0);
 
     // Ensure both single relations are untouched
     const draftRows = await selectBySource(joinTableName, sourceColumn, compoIdsByName['draft']);
-    dbg('test2:draft-rows', draftRows.length);
+
     expect(draftRows.length).toBe(1);
     expect(draftRows[0][targetColumn]).toBe(draftTag.id);
 
@@ -410,7 +380,7 @@ describe('Unidirectional join-table repair (components)', () => {
       sourceColumn,
       compoIdsByName['published']
     );
-    dbg('test2:published-rows', publishedRows.length);
+
     expect(publishedRows.length).toBe(1);
     expect(publishedRows[0][targetColumn]).toBe(publishedTag.id);
 
@@ -421,12 +391,10 @@ describe('Unidirectional join-table repair (components)', () => {
 
   it("Does not delete when component's parent does not support D&P (safety)", async () => {
     const { joinTableName, sourceColumn, targetColumn } = getCompoTagsRelationInfo();
-    dbg('test3:join-table', joinTableName);
 
     const tagVersions = await strapi.db.query(TAG_UID).findMany({ where: { documentId: 'GTagR' } });
     const draftTag = tagVersions.find((t: any) => t.publishedAt === null)!;
     const publishedTag = tagVersions.find((t: any) => t.publishedAt !== null)!;
-    dbg('test3:tags', { draft: draftTag?.id, published: publishedTag?.id });
 
     // Create a Box (no D&P) with component relation to a draft tag via documents service
     const boxEntry = await strapi.documents(BOX_UID).create({
@@ -438,7 +406,6 @@ describe('Unidirectional join-table repair (components)', () => {
         },
       },
     });
-    dbg('test3:box-created');
 
     // Find the component instance id directly from the join table using the draft target
     const rowForDraft = await strapi.db
@@ -446,13 +413,13 @@ describe('Unidirectional join-table repair (components)', () => {
       .select('*')
       .where(targetColumn, draftTag.id)
       .first();
-    dbg('test3:row-for-draft', rowForDraft);
+
     expect(rowForDraft).toBeDefined();
     const sourceId = rowForDraft[sourceColumn];
 
     // Confirm at least one join row exists for this component instance
     let rows = await selectBySource(joinTableName, sourceColumn, sourceId);
-    dbg('test3:rows-after-box', rows.length);
+
     expect(rows.length).toBeGreaterThanOrEqual(1);
     const draftRow = rowForDraft;
 
@@ -461,21 +428,19 @@ describe('Unidirectional join-table repair (components)', () => {
     delete (duplicate as any).id;
     duplicate[targetColumn] = publishedTag.id;
     await strapi.db.connection(joinTableName).insert(duplicate);
-    dbg('test3:dup-inserted-for-source', sourceId);
 
     rows = await selectBySource(joinTableName, sourceColumn, sourceId);
-    dbg('test3:rows-after-dup', rows.length);
+
     expect(rows.length).toBe(2);
 
     // Run repair - should skip because parent (BOX) has no draftAndPublish
-    dbg('test3:repair:start');
     const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
-    dbg('test3:repair:removed', removed);
+
     expect(removed).toBeGreaterThanOrEqual(0);
 
     // Both rows must remain
     rows = await selectBySource(joinTableName, sourceColumn, sourceId);
-    dbg('test3:rows-after-repair', rows.length);
+
     expect(rows.length).toBe(2);
 
     // Cleanup created box entry
