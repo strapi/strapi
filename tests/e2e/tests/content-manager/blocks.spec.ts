@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../../helpers/dts-import';
 import { navToHeader } from '../../utils/shared';
 
 const EDIT_URL = /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { navToHeader } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../helpers/dts-import';
 
 test.describe('Edit View CTB', () => {
   test.beforeEach(async ({ page }) => {

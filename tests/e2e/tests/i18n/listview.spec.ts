@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../helpers/dts-import';
 import { login } from '../../utils/login';
 
 test.describe('List view', () => {

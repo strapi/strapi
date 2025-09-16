@@ -7,7 +7,7 @@ import {
   navToHeader,
 } from '../../utils/shared';
 import { createContent, FieldValue, verifyFields } from '../../utils/content-creation';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../../helpers/dts-import';
 import { login } from '../../utils/login';
 
 test.describe('Adding content', () => {

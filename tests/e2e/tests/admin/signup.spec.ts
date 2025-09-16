@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { ADMIN_EMAIL_ADDRESS, TITLE_HOME } from '../../constants';
+import { ADMIN_EMAIL_ADDRESS, TITLE_HOME } from '../../helpers/constants';
 
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../helpers/dts-import';
 import { fillValidSignUpForm } from '../../utils/signup';
 
 test.describe('Sign Up', () => {

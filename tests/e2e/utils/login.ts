@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../constants';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../helpers/constants';
 
 /**
  * Log in to an e2e test app

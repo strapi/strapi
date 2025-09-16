@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { clickAndWait, describeOnCondition, navToHeader } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../helpers/dts-import';
 import { login } from '../../utils/login';
 import { findAndClose } from '../../utils/shared';
 

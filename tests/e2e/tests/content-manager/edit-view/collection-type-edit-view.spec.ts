@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from.*helpers/dts-import';
 import { findAndClose } from '../../../utils/shared';
-import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
+import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from.*helpers/constants';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {

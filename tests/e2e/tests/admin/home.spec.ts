@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../helpers/dts-import';
 import { clickAndWait, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
-import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
+import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../helpers/constants';
 
 test.describe('Home as super admin', () => {
   test.beforeEach(async ({ page }) => {
