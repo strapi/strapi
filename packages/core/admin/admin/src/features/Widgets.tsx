@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography, ScrollArea, Menu, IconButton } from '@strapi/design-system';
+import { Box, Flex, Typography, ScrollArea, IconButton } from '@strapi/design-system';
 import { Drag, PuzzlePiece, More, Trash } from '@strapi/icons';
 import { useDrag, useDrop } from 'react-dnd';
 import { useIntl } from 'react-intl';
@@ -9,7 +9,6 @@ import { Link as ReactRouterLink } from 'react-router-dom';
 import { useWidgetLayout } from '../hooks/useWidgetLayout';
 import { useWidgetManagement } from '../hooks/useWidgetManagement';
 import { useDragResize } from '../hooks/useWidgetResize';
-import { createResizeMenuItems, handleResizeSelect } from '../utils/widgetResizeUtils';
 
 import { useTracking } from './Tracking';
 
@@ -55,8 +54,6 @@ export const WidgetRoot = ({
   const columnWidth = columnWidths[uid] || 6;
   const originalIndex = findWidget(uid).index;
   const [isDraggingFromHandle, setIsDraggingFromHandle] = React.useState(false);
-  const [dragStarted, setDragStarted] = React.useState(false);
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
 
   // Smooth move widget using requestAnimationFrame
@@ -71,7 +68,6 @@ export const WidgetRoot = ({
     () => ({
       type: 'widget',
       item: () => {
-        setDragStarted(true);
         return { id: uid, originalIndex };
       },
       collect: (monitor) => ({
@@ -84,7 +80,6 @@ export const WidgetRoot = ({
           moveWidget(droppedId, originalIndex);
         }
         setIsDraggingFromHandle(false);
-        setDragStarted(false);
       },
       canDrag: () => isDraggingFromHandle,
     }),
@@ -125,22 +120,8 @@ export const WidgetRoot = ({
     setIsDraggingFromHandle(true);
   };
 
-  const handleDragIconClick = (e: React.MouseEvent) => {
-    // Only handle left mouse button
-    if (e.button !== 0) return;
-
-    // If mouse didn't move much and no drag started, it's a click
-    if (!dragStarted) {
-      setIsMenuOpen(true);
-    } else {
-      // It was a drag, prevent the menu from opening
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
-
   // Resize Logic
-  const { handleMouseDown, resizeTo } = useDragResize({
+  const { handleMouseDown } = useDragResize({
     columnWidth,
     onWidthChange: (newWidth) =>
       setColumnWidths((prev) => ({
@@ -148,10 +129,6 @@ export const WidgetRoot = ({
         [uid]: newWidth,
       })),
   });
-
-  const handleResizeSelectWrapper = (value: string | number) => {
-    handleResizeSelect(value, resizeTo, () => setIsMenuOpen(false));
-  };
 
   const handleDeleteWidget = () => {
     deleteWidget(uid);
@@ -184,7 +161,7 @@ export const WidgetRoot = ({
         transition: isDragging ? 'none' : 'all 0.2s ease-in-out',
       }}
     >
-      <Flex direction="row" gap={2} width="100%" tag="header" alignItems="center">
+      <Flex direction="row" gap={2} width="100%" tag="header" alignItems="center" minHeight="22px">
         <Flex gap={2} marginRight="auto">
           <Icon fill="neutral500" aria-hidden />
           <Typography textColor="neutral500" variant="sigma" tag="h2" id={uid}>
@@ -204,71 +181,34 @@ export const WidgetRoot = ({
             {formatMessage(link.label)}
           </Typography>
         )}
-        <IconButton
-          variant="tertiary"
-          size="S"
-          onMouseDown={handleDragIconMouseDown}
-          onClick={handleDragIconClick}
-          label={formatMessage({
-            id: 'HomePage.widget.drag-menu',
-            defaultMessage: 'Click to open menu, drag to move',
-          })}
-          style={{ cursor: 'grab' }}
-          withTooltip={true}
-        >
-          <Drag />
-        </IconButton>
-        <Menu.Root
-          key="more-menu"
-          defaultOpen={false}
-          open={isMenuOpen}
-          onOpenChange={setIsMenuOpen}
-        >
-          <Menu.Trigger
-            variant="tertiary"
-            size="S"
-            label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
-            startIcon={<More />}
-            endIcon={null}
-            style={{
-              position: 'absolute',
-              opacity: 0,
-              pointerEvents: 'none',
-              top: '25px',
-              right: '0',
-            }}
-          />
-          <Menu.Content onCloseAutoFocus={(e) => e.preventDefault()} maxHeight="100%" zIndex={2}>
-            <Menu.SubRoot>
-              <Menu.SubTrigger>
-                {formatMessage({
-                  id: 'content-releases.header.actions.resize',
-                  defaultMessage: 'Resize',
-                })}
-              </Menu.SubTrigger>
-              <Menu.SubContent>
-                {createResizeMenuItems(columnWidth, formatMessage, handleResizeSelectWrapper).map(
-                  (item) => (
-                    <Menu.Item
-                      key={item.key}
-                      onClick={item.onClick}
-                      startIcon={<item.startIcon />}
-                      disabled={item.isCurrentWidth}
-                    >
-                      {item.label}
-                    </Menu.Item>
-                  )
-                )}
-              </Menu.SubContent>
-            </Menu.SubRoot>
-            <Menu.Item onClick={handleDeleteWidget} variant="danger" startIcon={<Trash />}>
-              {formatMessage({
-                id: 'content-releases.header.actions.delete',
+        {isHovered && (
+          <Flex gap={2}>
+            <IconButton
+              variant="danger-light"
+              size="XS"
+              onClick={handleDeleteWidget}
+              label={formatMessage({
+                id: 'HomePage.widget.delete',
                 defaultMessage: 'Delete',
               })}
-            </Menu.Item>
-          </Menu.Content>
-        </Menu.Root>
+              cursor="pointer"
+            >
+              <Trash />
+            </IconButton>
+            <IconButton
+              variant="tertiary"
+              size="XS"
+              onMouseDown={handleDragIconMouseDown}
+              label={formatMessage({
+                id: 'HomePage.widget.drag',
+                defaultMessage: 'Drag to move',
+              })}
+              cursor="grab"
+            >
+              <Drag />
+            </IconButton>
+          </Flex>
+        )}
       </Flex>
       <ScrollArea>
         <Box width="100%" height="261px" overflow="auto" tag="main">
@@ -286,7 +226,7 @@ export const WidgetRoot = ({
           style={{ cursor: 'col-resize' }}
           onMouseDown={handleMouseDown}
         >
-          <Box background="neutral150" height="24px" width="2px" borderRadius={1} />
+          <Box background="neutral150" height="64px" width="2px" borderRadius={1} />
         </Flex>
       )}
     </Flex>
