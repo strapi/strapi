@@ -69,17 +69,6 @@ export const useWidgetResize = ({
     }
   }, [debouncedDragWidth, columnWidth, onWidthChange, minWidth, maxWidth, isDragging]);
 
-  // Programmatic resize (instant, no debouncing)
-  const resizeTo = useCallback(
-    (newWidth: number) => {
-      if (isValidWidth(newWidth, minWidth, maxWidth)) {
-        setDragWidth(newWidth);
-        onWidthChange(newWidth);
-      }
-    },
-    [minWidth, maxWidth, onWidthChange]
-  );
-
   // Update width during drag operations
   const updateWidth = useCallback(
     (newWidth: number) => {
@@ -95,7 +84,6 @@ export const useWidgetResize = ({
   const endDrag = useCallback(() => setIsDragging(false), []);
 
   return {
-    resizeTo,
     updateWidth,
     startDrag,
     endDrag,
@@ -116,7 +104,7 @@ export const useDragResize = ({
   onDragStart,
   onDragEnd,
 }: UseWidgetResizeOptions & UseDragResizeOptions) => {
-  const { updateWidth, resizeTo, startDrag, endDrag } = useWidgetResize({
+  const { updateWidth, startDrag, endDrag } = useWidgetResize({
     columnWidth,
     onWidthChange,
     minWidth,
@@ -184,5 +172,5 @@ export const useDragResize = ({
     ]
   );
 
-  return { handleMouseDown, resizeTo };
+  return { handleMouseDown };
 };
