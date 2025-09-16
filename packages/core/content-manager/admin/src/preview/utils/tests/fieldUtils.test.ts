@@ -2,6 +2,7 @@ import {
   parsePathWithIndices,
   getAttributeSchemaFromPath,
   parseFieldMetaData,
+  PreviewFieldError,
 } from '../fieldUtils';
 
 import type { Schema, Modules } from '@strapi/types';
@@ -188,7 +189,18 @@ describe('fieldUtils', () => {
           components: mockComponents,
           document: mockDocument,
         });
-      }).toThrow('Invalid field path');
+      }).toThrow(PreviewFieldError);
+
+      try {
+        getAttributeSchemaFromPath({
+          path: 'nonexistent',
+          schema: mockSchema,
+          components: mockComponents,
+          document: mockDocument,
+        });
+      } catch (error: any) {
+        expect(error.messageKey).toBe('INVALID_FIELD_PATH');
+      }
     });
 
     it('should throw error for relation field', () => {
@@ -199,7 +211,18 @@ describe('fieldUtils', () => {
           components: mockComponents,
           document: mockDocument,
         });
-      }).toThrow('Relations not handled');
+      }).toThrow(PreviewFieldError);
+
+      try {
+        getAttributeSchemaFromPath({
+          path: 'relation',
+          schema: mockSchema,
+          components: mockComponents,
+          document: mockDocument,
+        });
+      } catch (error: any) {
+        expect(error.messageKey).toBe('RELATIONS_NOT_HANDLED');
+      }
     });
 
     it('should throw error for repeatable component without index', () => {
@@ -210,7 +233,18 @@ describe('fieldUtils', () => {
           components: mockComponents,
           document: mockDocument,
         });
-      }).toThrow('Invalid field path');
+      }).toThrow(PreviewFieldError);
+
+      try {
+        getAttributeSchemaFromPath({
+          path: 'components.title',
+          schema: mockSchema,
+          components: mockComponents,
+          document: mockDocument,
+        });
+      } catch (error: any) {
+        expect(error.messageKey).toBe('INVALID_FIELD_PATH');
+      }
     });
 
     it('should throw error for dynamic zone without index', () => {
@@ -221,7 +255,18 @@ describe('fieldUtils', () => {
           components: mockComponents,
           document: mockDocument,
         });
-      }).toThrow('Invalid field path');
+      }).toThrow(PreviewFieldError);
+
+      try {
+        getAttributeSchemaFromPath({
+          path: 'dynamicZone.title',
+          schema: mockSchema,
+          components: mockComponents,
+          document: mockDocument,
+        });
+      } catch (error: any) {
+        expect(error.messageKey).toBe('INVALID_FIELD_PATH');
+      }
     });
 
     it('should handle nested component paths', () => {
