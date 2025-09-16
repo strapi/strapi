@@ -3,11 +3,10 @@ import type { Modules } from '@strapi/types';
 
 export const REFRESH_COOKIE_NAME = 'strapi_admin_refresh';
 
-const DEFAULT_ACCESS_TOKEN_LIFESPAN = 10 * 60;
-const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;
-const DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN = 14 * 24 * 60 * 60;
-const DEFAULT_MAX_SESSION_LIFESPAN = 1 * 24 * 60 * 60;
-const DEFAULT_IDLE_SESSION_LIFESPAN = 2 * 60 * 60;
+export const DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN = 30 * 24 * 60 * 60;
+export const DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN = 14 * 24 * 60 * 60;
+export const DEFAULT_MAX_SESSION_LIFESPAN = 1 * 24 * 60 * 60;
+export const DEFAULT_IDLE_SESSION_LIFESPAN = 2 * 60 * 60;
 
 export const getRefreshCookieOptions = () => {
   const isProduction = strapi.config.get('environment') === 'production';
