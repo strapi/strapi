@@ -59,7 +59,7 @@ export const cleanComponentJoinTable = async (
 const findContentTypeParentForComponentInstance = async (
   componentSchema: Schema.Component,
   componentId: number | string
-) => {
+): Promise<{ uid: string; table: string; parentId: number | string } | null> => {
   // Get the parent schemas that could contain this component
   const parentSchemas = getParentSchemasForComponent(componentSchema);
   if (parentSchemas.length === 0) {
