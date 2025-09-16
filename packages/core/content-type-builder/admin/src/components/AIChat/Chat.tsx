@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
+import { tours, useTracking, useGuidedTour } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system';
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
 import { styled } from 'styled-components';
@@ -350,6 +350,25 @@ const Chat = () => {
     useStrapiChat();
   const { attachFiles } = useAttachments();
   const { t } = useTranslations();
+  const state = useGuidedTour('Chat', (s) => s.state);
+
+  // Auto-open chat when AIChat guided tour step is active
+  useEffect(() => {
+    const isAIChatStepActive =
+      state.tours.contentTypeBuilder?.currentStep === 1 && // AIChat is step 1 in contentTypeBuilderStepsAI
+      !state.tours.contentTypeBuilder?.isCompleted &&
+      state.enabled;
+
+    if (isAIChatStepActive && !isChatOpen && openChat) {
+      openChat();
+    }
+  }, [
+    state.tours.contentTypeBuilder?.currentStep,
+    state.tours.contentTypeBuilder?.isCompleted,
+    state.enabled,
+    isChatOpen,
+    openChat,
+  ]);
 
   // Labels
   const openChatLabel = t('chat.tooltips.open-chat', 'Open chat');
@@ -399,12 +418,14 @@ const Chat = () => {
         </Panel.Header>
 
         <Panel.Body>
-          {!messages.length ? (
-            <Typography variant="pi" textColor="neutral600">
-              {mistakesDisclaimer}
-            </Typography>
-          ) : null}
-          <ChatContent messages={messages} />
+          <tours.contentTypeBuilder.AIChat>
+            {!messages.length ? (
+              <Typography variant="pi" textColor="neutral600">
+                {mistakesDisclaimer}
+              </Typography>
+            ) : null}
+            <ChatContent messages={messages} />
+          </tours.contentTypeBuilder.AIChat>
         </Panel.Body>
 
         <Panel.Footer>

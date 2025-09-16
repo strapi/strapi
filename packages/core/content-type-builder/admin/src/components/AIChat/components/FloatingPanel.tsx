@@ -52,7 +52,7 @@ const FixedWrapper = styled(Box)<{ $position: PanelPosition }>`
   position: fixed;
   display: flex;
   flex-direction: column;
-  z-index: 10;
+  z-index: 11;
   align-items: ${({ $position }) => ($position.includes('right') ? 'flex-end' : 'flex-start')};
   ${({ $position, theme }) =>
     Object.entries(PANEL_POSITIONS[$position]).reduce(
