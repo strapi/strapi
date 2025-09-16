@@ -56,6 +56,38 @@ export const cleanComponentJoinTable = async (
   }
 };
 
+const findContentTypeParentForComponentInstance = async (
+  componentSchema: Schema.Component,
+  componentId: number | string
+) => {
+  // Get the parent schemas that could contain this component
+  const parentSchemas = getParentSchemasForComponent(componentSchema);
+  if (parentSchemas.length === 0) {
+    // No potential parents
+    return null;
+  }
+
+  // Find the actual parent for THIS specific component instance
+  const parent = await findComponentParent(componentSchema, componentId, parentSchemas);
+  if (!parent) {
+    // No parent found for this component instance
+    return null;
+  }
+
+  if (strapi.components[parent.uid as keyof typeof strapi.components]) {
+    // If the parent is a component, we need to check its parents recursively
+    const parentComponentSchema = strapi.components[parent.uid as keyof typeof strapi.components];
+    return findContentTypeParentForComponentInstance(parentComponentSchema, parent.parentId);
+  }
+
+  if (strapi.contentTypes[parent.uid as keyof typeof strapi.contentTypes]) {
+    // Found a content type parent
+    return parent;
+  }
+
+  return null;
+};
+
 /**
  * Finds join table entries with publication state mismatches
  * Uses existing component parent detection from document service
@@ -125,19 +157,8 @@ const findPublicationStateMismatches = async (
             continue;
           }
 
-          // Get the parent schemas that could contain this component
-          const parentSchemas = getParentSchemasForComponent(componentSchema);
-          if (parentSchemas.length === 0) {
-            // No potential parents - skip this component instance
-            // eslint-disable-next-line no-continue
-            continue;
-          }
-
-          // Find the actual parent for THIS specific component instance
-          const parent = await findComponentParent(componentSchema, sourceId, parentSchemas);
+          const parent = await findContentTypeParentForComponentInstance(componentSchema, sourceId);
           if (!parent) {
-            // No parent found for this component instance - skip
-            // eslint-disable-next-line no-continue
             continue;
           }
 
