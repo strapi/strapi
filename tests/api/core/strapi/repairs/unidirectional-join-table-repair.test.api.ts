@@ -139,6 +139,19 @@ const PRODUCT_UID = 'api::repair-product.repair-product';
 const BOX_UID = 'api::repair-box.repair-box';
 const ARTICLE_UID = 'api::repair-article.repair-article';
 const REPAIR_COMPONENT_UID = 'default.repair-compo';
+const REPAIR_INNER_COMPONENT_UID = 'default.repair-inner';
+
+const innerComponentModel = {
+  collectionName: 'components_repair_inner',
+  attributes: {
+    rtags: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: TAG_UID,
+    },
+  },
+  displayName: 'repair-inner',
+};
 
 const componentModel = {
   collectionName: 'components_repair_compo',
@@ -152,6 +165,10 @@ const componentModel = {
       type: 'relation',
       relation: 'oneToMany',
       target: TAG_UID,
+    },
+    inner: {
+      type: 'component',
+      component: REPAIR_INNER_COMPONENT_UID,
     },
   },
   displayName: 'repair-compo',
@@ -222,6 +239,22 @@ const getCompoTagsRelationInfo = () => {
   return { joinTableName, sourceColumn, targetColumn } as const;
 };
 
+// Helper to locate InnerComponent->rtags join table and its column names from metadata
+const getInnerCompoTagsRelationInfo = () => {
+  const componentMd: any = (strapi as any).db.metadata.get(REPAIR_INNER_COMPONENT_UID);
+  if (!componentMd) {
+    throw new Error('Repair inner component metadata not found');
+  }
+  const relation: any = componentMd.attributes?.rtags;
+  if (!relation?.joinTable) {
+    throw new Error('Repair inner component rtags relation not found');
+  }
+  const joinTableName = relation.joinTable.name;
+  const sourceColumn = relation.joinTable.joinColumn.name;
+  const targetColumn = relation.joinTable.inverseJoinColumn.name;
+  return { joinTableName, sourceColumn, targetColumn } as const;
+};
+
 // Helper to locate Article->tags join table and its column names from metadata
 const getArticleTagsRelationInfo = () => {
   const articleMd: any = (strapi as any).db.metadata.get(ARTICLE_UID);
@@ -252,6 +285,7 @@ describe('Unidirectional join-table repair (components)', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes([tagModel])
+      .addComponent(innerComponentModel)
       .addComponent(componentModel)
       .addContentTypes([productModel, boxModel, articleModel])
       .build();
@@ -298,6 +332,57 @@ describe('Unidirectional join-table repair (components)', () => {
     const sourceId = draftRow[sourceColumn];
     const insertRow = { ...draftRow };
     delete (insertRow as any).id;
+    insertRow[targetColumn] = publishedTag.id;
+    await strapi.db.connection(joinTableName).insert(insertRow);
+
+    rows = await selectBySource(joinTableName, sourceColumn, sourceId);
+
+    expect(rows.length).toBe(2);
+    const targetIds = rows.map((r) => r[targetColumn]).sort();
+    expect(targetIds).toEqual([draftTag.id, publishedTag.id].sort());
+
+    const removed = await strapi.db.repair.processUnidirectionalJoinTables(testCleaner);
+
+    expect(removed).toBeGreaterThanOrEqual(1);
+
+    // Only the published duplicate should be removed; the draft relation must remain
+    rows = await selectBySource(joinTableName, sourceColumn, sourceId);
+
+    expect(rows.length).toBe(1);
+    expect(rows[0][targetColumn]).toBe(draftTag.id);
+
+    // Cleanup created product
+    await strapi.documents(PRODUCT_UID).delete({ documentId: product.documentId });
+  });
+
+  it('Repairs duplicates for nested component relations (inner component -> tags)', async () => {
+    const { joinTableName, sourceColumn, targetColumn } = getInnerCompoTagsRelationInfo();
+
+    // Get draft & published tag IDs for documentId GTagR
+    const tagVersions = await strapi.db.query(TAG_UID).findMany({ where: { documentId: 'GTagR' } });
+    const draftTag = tagVersions.find((t: any) => t.publishedAt === null)!;
+    const publishedTag = tagVersions.find((t: any) => t.publishedAt !== null)!;
+
+    // Create draft product with a nested component relation to the draft tag
+    const product = await strapi.documents(PRODUCT_UID).create({
+      data: {
+        name: 'Product-nested-ghost',
+        rcompo: { inner: { rtags: [{ documentId: 'GTagR', status: 'draft' }] } },
+      },
+      status: 'draft',
+    });
+
+    // There should be a single draft relation row for the INNER component instance
+    let rows = await selectAll(joinTableName);
+
+    expect(rows.length).toBe(1);
+    const draftRow = rows[0];
+    expect(draftRow[targetColumn]).toBe(draftTag.id);
+
+    // Insert an unintended duplicate pointing to the published tag for the same INNER source
+    const sourceId = draftRow[sourceColumn];
+    const insertRow = { ...draftRow } as any;
+    delete insertRow.id;
     insertRow[targetColumn] = publishedTag.id;
     await strapi.db.connection(joinTableName).insert(insertRow);
 
