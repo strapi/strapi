@@ -24,6 +24,7 @@ const Main = styled(DSSubNav)`
   display: flex;
   flex-direction: column;
   border-right: 0;
+  box-shadow: none;
 
   ${({ theme }) => theme.breakpoints.medium} {
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
@@ -147,7 +148,6 @@ const Sections = ({ children, ...props }: { children: React.ReactNode[]; [key: s
 const GuidedTourTooltip = ({
   sectionId,
   children,
-  badgeLabel,
 }: {
   sectionId?: string;
   children: React.ReactNode;

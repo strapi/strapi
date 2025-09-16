@@ -1,20 +1,18 @@
 import * as React from 'react';
 
 import { Box, Divider, Flex, FlexComponent, ScrollArea, useCollator } from '@strapi/design-system';
-import { Lightning } from '@strapi/icons';
+import { Cross, List } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { type To, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { useAuth } from '../features/Auth';
 import { useTracking } from '../features/Tracking';
 import { Menu, MenuItem } from '../hooks/useMenu';
-import { getDisplayName, getInitials } from '../utils/users';
 
-import { tours } from './GuidedTour/Tours';
 import { MainNav } from './MainNav/MainNav';
+import { MainNavIcons } from './MainNav/MainNavLinks';
 import { NavBrand } from './MainNav/NavBrand';
-import { NavLink } from './MainNav/NavLink';
+import { NavBurgerMenu } from './MainNav/NavBurgerMenu';
 import { NavUser } from './MainNav/NavUser';
 import { TrialCountdown } from './MainNav/TrialCountdown';
 
@@ -32,41 +30,15 @@ const sortLinks = (links: MenuItem[]) => {
   });
 };
 
-const NavLinkBadgeCounter = styled(NavLink.Badge)`
-  span {
-    color: ${({ theme }) => theme.colors.neutral0};
-  }
-`;
-
-const NavLinkBadgeLock = styled(NavLink.Badge)`
-  background-color: transparent;
-`;
-
 const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
   overflow-y: auto;
 `;
 
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
 
-const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode }) => {
-  const normalizedTo = to.toString().replace(/\//g, '');
-
-  switch (normalizedTo) {
-    case 'content-manager':
-      return <tours.contentTypeBuilder.Finish>{children}</tours.contentTypeBuilder.Finish>;
-    case '':
-      return <tours.apiTokens.Finish>{children}</tours.apiTokens.Finish>;
-    case 'settings':
-      return <tours.contentManager.Finish>{children}</tours.contentManager.Finish>;
-    default:
-      return children;
-  }
-};
-
-const MenuDetails = styled.div<{ $isMobileShown: boolean }>`
+const MenuDetails = styled(Flex)`
   flex: 1;
-  display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   justify-content: space-between;
   overflow-x: auto;
 
@@ -77,29 +49,17 @@ const MenuDetails = styled.div<{ $isMobileShown: boolean }>`
   }
 `;
 
-const LinkContainer = styled(Flex)<{ $isMobileShown?: boolean }>`
-  display: ${({ $isMobileShown }) => ($isMobileShown ? 'flex' : 'none')};
-
-  ${({ theme }) => theme.breakpoints.large} {
-    display: flex;
-  }
-`;
-
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
-  const [isMobileShown, setIsMobileShown] = React.useState(false);
-  const user = useAuth('AuthenticatedApp', (state) => state.user);
+  const [isBurgerMenuShown, setIsBurgerMenuShown] = React.useState(false);
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
-  const userDisplayName = getDisplayName(user);
   const { formatMessage, locale } = useIntl();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
 
-  const initials = getInitials(user);
-
   const handleClickOnLink = (destination: string) => {
-    setIsMobileShown(false);
+    setIsBurgerMenuShown(false);
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
@@ -109,13 +69,13 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
   return (
-    <MainNav isMobileShown={isMobileShown}>
-      <NavBrand handleClick={() => setIsMobileShown(!isMobileShown)} />
+    <>
+      <MainNav>
+        <NavBrand />
 
-      <Divider />
+        <Divider />
 
-      <MenuDetails $isMobileShown={isMobileShown}>
-        <Box marginLeft={{ initial: 'auto', large: 0 }} overflow="hidden">
+        <MenuDetails>
           <ScrollArea>
             <NavListWrapper
               tag="ul"
@@ -124,6 +84,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                 initial: 'row',
                 large: 'column',
               }}
+              justifyContent="center"
               flex={1}
               paddingLeft={{
                 initial: 3,
@@ -136,64 +97,54 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
               paddingTop={3}
               paddingBottom={3}
             >
-              {listLinks.length > 0
-                ? listLinks.map((link) => {
-                    const LinkIcon = link.icon;
-                    const badgeContentLock = link?.licenseOnly ? (
-                      <Lightning fill="primary600" />
-                    ) : undefined;
-
-                    const badgeContentNumeric =
-                      link.notificationsCount && link.notificationsCount > 0
-                        ? link.notificationsCount.toString()
-                        : undefined;
-
-                    const labelValue = formatMessage(link.intlLabel);
-                    return (
-                      <LinkContainer tag="li" key={link.to} $isMobileShown={link.mobile}>
-                        <GuidedTourTooltip to={link.to}>
-                          <NavLink.Tooltip label={labelValue}>
-                            <NavLink.Link
-                              to={link.to}
-                              onClick={() => handleClickOnLink(link.to)}
-                              aria-label={labelValue}
-                            >
-                              <NavLink.Icon label={labelValue}>
-                                <LinkIcon width="20" height="20" fill="neutral500" />
-                              </NavLink.Icon>
-                              {badgeContentLock ? (
-                                <NavLinkBadgeLock
-                                  label="locked"
-                                  textColor="neutral500"
-                                  paddingLeft={0}
-                                  paddingRight={0}
-                                >
-                                  {badgeContentLock}
-                                </NavLinkBadgeLock>
-                              ) : badgeContentNumeric ? (
-                                <NavLinkBadgeCounter
-                                  label={badgeContentNumeric}
-                                  backgroundColor="primary600"
-                                  width="2.3rem"
-                                  color="neutral0"
-                                >
-                                  {badgeContentNumeric}
-                                </NavLinkBadgeCounter>
-                              ) : null}
-                            </NavLink.Link>
-                          </NavLink.Tooltip>
-                        </GuidedTourTooltip>
-                      </LinkContainer>
-                    );
-                  })
-                : null}
+              <MainNavIcons
+                listLinks={listLinks.filter((link) => link.mobileNavigation?.top)}
+                handleClickOnLink={handleClickOnLink}
+              />
             </NavListWrapper>
           </ScrollArea>
+          <TrialCountdown />
+          <Box
+            display={{
+              initial: 'none',
+              large: 'flex',
+            }}
+            borderStyle="solid"
+            borderWidth={{
+              initial: 0,
+              large: '1px 0 0 0',
+            }}
+            borderColor="neutral150"
+            padding={3}
+          >
+            <NavUser />
+          </Box>
+        </MenuDetails>
+
+        <Box
+          padding={3}
+          display={{
+            initial: 'flex',
+            large: 'none',
+          }}
+        >
+          <Flex
+            height="3.2rem"
+            width="3.2rem"
+            justifyContent="center"
+            alignItems="center"
+            onClick={() => setIsBurgerMenuShown(!isBurgerMenuShown)}
+          >
+            {!isBurgerMenuShown ? <List /> : <Cross />}
+          </Flex>
         </Box>
-        <TrialCountdown />
-        <NavUser initials={initials}>{userDisplayName}</NavUser>
-      </MenuDetails>
-    </MainNav>
+      </MainNav>
+      <NavBurgerMenu
+        isShown={isBurgerMenuShown}
+        listLinks={listLinks.filter((link) => link.mobileNavigation?.burger)}
+        handleClickOnLink={handleClickOnLink}
+      />
+    </>
   );
 };
 

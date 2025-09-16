@@ -33,7 +33,6 @@ const SideNavContainer = styled(Flex)<{ $isSideNavMobileVisible: boolean }>`
   width: 100vw;
   z-index: 3;
   background: ${({ theme }) => theme.colors.neutral0};
-  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
   transform: ${({ $isSideNavMobileVisible }) =>
     $isSideNavMobileVisible ? 'translateX(0)' : 'translateX(-100%)'};
   transition: transform 0.3s ease-in-out;

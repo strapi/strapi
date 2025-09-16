@@ -31,7 +31,10 @@ export default {
       },
       permissions: [],
       position: 1,
-      mobile: true,
+      mobileNavigation: {
+        top: true,
+        burger: false,
+      },
     });
 
     app.router.addRoute({

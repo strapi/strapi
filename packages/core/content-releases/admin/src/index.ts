@@ -37,7 +37,10 @@ const admin: Plugin.Config.AdminInput = {
         Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
         permissions: PERMISSIONS.main,
         position: 2,
-        mobile: true,
+        mobileNavigation: {
+          top: true,
+          burger: false,
+        },
       });
 
       // Insert the releases container into the CM's sidebar on the Edit View

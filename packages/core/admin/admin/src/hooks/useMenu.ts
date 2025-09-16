@@ -34,7 +34,10 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         to: '/',
         permissions: [],
         position: 0,
-        mobile: true,
+        mobileNavigation: {
+          top: true,
+          burger: false,
+        },
       },
       {
         icon: ShoppingCart,
@@ -45,7 +48,10 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         to: '/marketplace',
         permissions: permissions.marketplace?.main ?? [],
         position: 7,
-        mobile: false,
+        mobileNavigation: {
+          top: false,
+          burger: false,
+        },
       },
       {
         icon: Cog,
@@ -59,7 +65,10 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         permissions: [],
         notificationsCount: 0,
         position: 9,
-        mobile: true,
+        mobileNavigation: {
+          top: false,
+          burger: true,
+        },
       },
     ],
     pluginsSectionLinks: [],

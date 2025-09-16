@@ -29,7 +29,10 @@ interface MenuItem {
   exact?: boolean;
   position?: number;
   licenseOnly?: boolean;
-  mobile?: boolean;
+  mobileNavigation?: {
+    top?: boolean;
+    burger?: boolean;
+  };
 }
 
 interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCount'> {

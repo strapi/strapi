@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useAuth } from '../../features/Auth';
+import { getInitials, getDisplayName } from '../../utils/users';
 
 const MenuTrigger = styled(Menu.Trigger)`
   height: ${({ theme }) => theme.spaces[7]};
@@ -41,15 +42,16 @@ const StyledTypography = styled(Typography)`
 `;
 
 export interface NavUserProps {
-  initials: string;
-  children: React.ReactNode;
+  showDisplayName?: boolean;
 }
 
-export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
+export const NavUser = ({ showDisplayName = false, ...props }: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const user = useAuth('User', (state) => state.user);
   const logout = useAuth('Logout', (state) => state.logout);
+  const initials = getInitials(user);
+  const userDisplayName = getDisplayName(user);
 
   const handleProfile = () => {
     navigate('/me');
@@ -61,27 +63,23 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   };
 
   return (
-    <Flex
-      justifyContent="center"
-      padding={3}
-      borderStyle="solid"
-      borderWidth={{
-        initial: 0,
-        large: '1px 0 0 0',
-      }}
-      borderColor="neutral150"
-      {...props}
-    >
+    <Flex {...props}>
       <Menu.Root>
-        <MenuTrigger endIcon={null} fullWidth justifyContent="center">
-          <Avatar.Item delayMs={0} fallback={initials} />
-          <VisuallyHidden tag="span">{children}</VisuallyHidden>
-        </MenuTrigger>
+        <Flex gap={3}>
+          <MenuTrigger endIcon={null} fullWidth justifyContent="center">
+            <Avatar.Item delayMs={0} fallback={initials} />
+          </MenuTrigger>
+          {showDisplayName ? (
+            <Typography variant="omega">{userDisplayName}</Typography>
+          ) : (
+            <VisuallyHidden tag="span">{userDisplayName}</VisuallyHidden>
+          )}
+        </Flex>
 
         <MenuContent popoverPlacement="top-start" zIndex={3}>
           <UserInfo direction="column" gap={0} alignItems="flex-start">
             <Typography variant="omega" fontWeight="bold" textTransform="none">
-              {children}
+              {userDisplayName}
             </Typography>
             <StyledTypography variant="pi" textColor="neutral600">
               {user?.email}

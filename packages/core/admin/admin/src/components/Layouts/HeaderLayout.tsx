@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
 
@@ -27,10 +28,14 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     if (sticky) {
       return (
         <Box
+          display={{
+            initial: 'none',
+            large: 'block',
+          }}
           paddingLeft={6}
           paddingRight={6}
-          paddingTop={3}
-          paddingBottom={3}
+          paddingTop={2}
+          paddingBottom={2}
           position="fixed"
           top={0}
           right={0}
@@ -38,6 +43,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           shadow="tableShadow"
           width={`${width}px`}
           zIndex={3}
+          minHeight="5.7rem"
           data-strapi-header-sticky
         >
           <Flex justifyContent="space-between">

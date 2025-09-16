@@ -14,20 +14,13 @@ const BrandIconWrapper = styled<FlexComponent>(Flex)`
   }
 `;
 
-export const NavBrand = ({ handleClick }: { handleClick: () => void }) => {
+export const NavBrand = () => {
   const { formatMessage } = useIntl();
   const {
     logos: { menu },
   } = useConfiguration('LeftMenu');
   return (
-    <Box
-      padding={3}
-      onClick={handleClick}
-      display={{
-        initial: 'none',
-        large: 'block',
-      }}
-    >
+    <Box padding={3}>
       <BrandIconWrapper direction="column" justifyContent="center" width="3.2rem" height="3.2rem">
         <img
           src={menu.custom?.url || menu.default}
