@@ -8,6 +8,7 @@ export type * as ContentAPI from './content-api';
 export type * as CoreStore from './core-store';
 export type * as Cron from './cron';
 export type * as CustomFields from './custom-fields';
+export type * as CustomBlocks from './custom-blocks';
 export type * as EntityValidator from './entity-validator';
 export type * as EventHub from './event-hub';
 export type * as Features from './features';

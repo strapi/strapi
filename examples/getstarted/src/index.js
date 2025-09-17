@@ -7,7 +7,25 @@ module.exports = {
    *
    * This gives you an opportunity to extend code.
    */
-  register({ strapi }) {},
+  register({ strapi }) {
+    // Register the callout custom block for backend validation
+    const { yup } = require('@strapi/utils');
+
+    // Register the callout block with a function-based validator
+    strapi.customBlocks.register({
+      name: 'callout',
+      validator: ({ inlineNodeValidator }) => {
+        return yup.object().shape({
+          type: yup.string().equals(['callout']).required(),
+          children: yup
+            .array()
+            .of(inlineNodeValidator)
+            .min(1, 'Callout must have at least one child element')
+            .required(),
+        });
+      },
+    });
+  },
 
   /**
    * An asynchronous bootstrap function that runs before

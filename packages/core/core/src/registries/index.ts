@@ -8,6 +8,7 @@ export { default as controllers } from './controllers';
 export { default as modules } from './modules';
 export { default as plugins } from './plugins';
 export { default as customFields } from './custom-fields';
+export { default as customBlocks } from './custom-blocks';
 export { default as apis } from './apis';
 export { default as sanitizers } from './sanitizers';
 export { default as validators } from './validators';

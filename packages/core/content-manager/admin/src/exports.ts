@@ -39,3 +39,10 @@ export type {
   HeaderActionDescription,
   HeaderActionProps,
 } from './content-manager';
+
+export type {
+  CustomBlockConfig,
+  SelectorCustomBlock,
+  NonSelectorCustomBlock,
+  BaseCustomBlock,
+} from './core/BlocksRegistry';

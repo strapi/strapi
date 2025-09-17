@@ -22,6 +22,7 @@ import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolb
 import {
   type BlocksStore,
   type SelectorBlockKey,
+  type SelectorBlock,
   isSelectorBlockKey,
   useBlocksEditorContext,
 } from './BlocksEditor';
@@ -173,7 +174,7 @@ const BlocksDropdown = () => {
   const [blockSelected, setBlockSelected] = React.useState<SelectorBlockKey>('paragraph');
 
   const handleSelect = (optionKey: unknown) => {
-    if (!isSelectorBlockKey(optionKey)) {
+    if (!isSelectorBlockKey(optionKey, blocks)) {
       return;
     }
 
@@ -284,7 +285,8 @@ const BlocksDropdown = () => {
     }
   }, [editor.selection, editor, blocks, blockSelected]);
 
-  const Icon = blocks[blockSelected].icon;
+  const selectedBlock = blocks[blockSelected] as SelectorBlock;
+  const Icon = selectedBlock.icon;
 
   return (
     <>
@@ -292,7 +294,7 @@ const BlocksDropdown = () => {
         <SingleSelect
           startIcon={<Icon />}
           onChange={handleSelect}
-          placeholder={formatMessage(blocks[blockSelected].label)}
+          placeholder={formatMessage(selectedBlock.label)}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
           aria-label={formatMessage({
@@ -301,15 +303,18 @@ const BlocksDropdown = () => {
           })}
           disabled={disabled}
         >
-          {blockKeysToInclude.map((key) => (
-            <BlockOption
-              key={key}
-              value={key}
-              label={blocks[key].label}
-              icon={blocks[key].icon}
-              blockSelected={blockSelected}
-            />
-          ))}
+          {blockKeysToInclude.map((key) => {
+            const block = blocks[key] as SelectorBlock;
+            return (
+              <BlockOption
+                key={key}
+                value={key}
+                label={block.label}
+                icon={block.icon}
+                blockSelected={blockSelected}
+              />
+            );
+          })}
         </SingleSelect>
       </SelectWrapper>
       {modalElement}
