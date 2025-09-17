@@ -138,9 +138,26 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
   );
 };
 
+const Entry = ({ data }) => {
+  return (
+    <Grid.Root gap={5} tag="dl">
+      {filterAttributes(data).map(([key, value]) => (
+        <Grid.Item key={key} col={6} s={12} direction="column" alignItems="start">
+          <Typography variant="sigma" textColor="neutral600" tag="dt">
+            {key}
+          </Typography>
+          <Flex gap={3} direction="column" alignItems="start" tag="dd">
+            <NestedValue value={value} fieldName={key} />
+          </Flex>
+        </Grid.Item>
+      ))}
+    </Grid.Root>
+  );
+};
+
 const PreviewComponent = () => {
   const { apiName, documentId, locale, status: documentStatus } = useParams();
-  const data = useLoaderData();
+  const { main, unrelated } = useLoaderData();
   const revalidator = useRevalidator();
 
   React.useEffect(() => {
@@ -168,16 +185,12 @@ const PreviewComponent = () => {
 
     window.addEventListener('message', handleMessage);
 
+    window.parent?.postMessage({ type: 'previewReady' }, '*');
+
     return () => {
       window.removeEventListener('message', handleMessage);
     };
   }, []);
-
-  React.useEffect(() => {
-    if (data) {
-      window.parent?.postMessage({ type: 'previewReady' }, '*');
-    }
-  }, [data]);
 
   return (
     <Box
@@ -249,24 +262,21 @@ const PreviewComponent = () => {
                 Rest API data
               </Typography>
               {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
-              {data ? (
+              {main ? (
                 <>
-                  <Grid.Root gap={5} tag="dl">
-                    {filterAttributes(data).map(([key, value]) => (
-                      <Grid.Item key={key} col={6} s={12} direction="column" alignItems="start">
-                        <Typography variant="sigma" textColor="neutral600" tag="dt">
-                          {key}
-                        </Typography>
-                        <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                          <NestedValue value={value} fieldName={key} />
-                        </Flex>
-                      </Grid.Item>
-                    ))}
-                  </Grid.Root>
-                  <JSONInput value={JSON.stringify(data, null, 2)} disabled />
+                  <Entry data={main} />
+                  <JSONInput value={JSON.stringify(main, null, 2)} disabled />
                 </>
               ) : (
                 <Typography textColor="neutral600">No data found</Typography>
+              )}
+              {unrelated && (
+                <>
+                  <Typography variant="delta" tag="h3">
+                    Unrelated API data
+                  </Typography>
+                  <Entry data={unrelated} />
+                </>
               )}
             </Flex>
           </Layouts.Content>
