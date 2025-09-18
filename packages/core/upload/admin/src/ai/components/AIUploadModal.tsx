@@ -1,6 +1,8 @@
 import * as React from 'react';
 
+import { createContext } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Modal } from '@strapi/design-system';
+import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -34,24 +36,30 @@ const StyledModalBody = styled(Modal.Body)`
 
 const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const { formatMessage } = useIntl();
-  const [uploadedAssets, setUploadedAssets] = React.useState<File[]>([]);
-  const [assetsToUploadLength, setAssetsToUploadLength] = React.useState(0);
+  const state = useAIUploadModalContext('ModalContent', (s) => s.state);
+  const dispatch = useAIUploadModalContext('ModalContent', (s) => s.dispatch);
   const { upload, isLoading } = useUpload();
 
   const handleCaptionChange = (assetId: number, caption: string) => {
-    setUploadedAssets((prev) =>
-      prev.map((asset) => (asset.id === assetId ? { ...asset, caption } : asset))
-    );
+    dispatch({
+      type: 'set_uploaded_assets',
+      payload: state.uploadedAssets.map((asset) =>
+        asset.id === assetId ? { ...asset, caption } : asset
+      ),
+    });
   };
 
   const handleAltTextChange = (assetId: number, altText: string) => {
-    setUploadedAssets((prev) =>
-      prev.map((asset) => (asset.id === assetId ? { ...asset, alternativeText: altText } : asset))
-    );
+    dispatch({
+      type: 'set_uploaded_assets',
+      payload: state.uploadedAssets.map((asset) =>
+        asset.id === assetId ? { ...asset, alternativeText: altText } : asset
+      ),
+    });
   };
 
   const resetState = () => {
-    setUploadedAssets([]);
+    dispatch({ type: 'set_uploaded_assets', payload: [] });
   };
 
   const handleDone = () => {
@@ -66,7 +74,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   };
 
   const handleUpload = async (assets: FileWithRawFile[]) => {
-    setAssetsToUploadLength(assets.length);
+    dispatch({ type: 'set_assets_to_upload_length', payload: assets.length });
 
     try {
       const uploadPromises = assets.map(async (asset) => {
@@ -79,14 +87,14 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
 
       const results = await Promise.all(uploadPromises);
       const uploadedFiles = results.flat().filter(Boolean);
-      setUploadedAssets(uploadedFiles);
+      dispatch({ type: 'set_uploaded_assets', payload: uploadedFiles });
     } catch (error) {
       // TODO: toast error
       console.error('Upload failed:', error);
     }
   };
 
-  if (assetsToUploadLength === 0) {
+  if (state.assetsToUploadLength === 0) {
     return (
       <Modal.Content>
         <AddAssetStep onClose={onClose} onAddAsset={handleUpload} />
@@ -94,7 +102,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
     );
   }
 
-  if (isLoading || (assetsToUploadLength > 0 && uploadedAssets.length === 0)) {
+  if (isLoading || (state.assetsToUploadLength > 0 && state.uploadedAssets.length === 0)) {
     return (
       <Modal.Content>
         <Modal.Header>
@@ -106,7 +114,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
           </Modal.Title>
         </Modal.Header>
         <StyledModalBody>
-          <AIAssetCardSkeletons count={assetsToUploadLength} />
+          <AIAssetCardSkeletons count={state.assetsToUploadLength} />
         </StyledModalBody>
       </Modal.Content>
     );
@@ -122,14 +130,14 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
               defaultMessage:
                 '{count, plural, one {# Asset uploaded} other {# Assets uploaded}} time to review AI generated content',
             },
-            { count: uploadedAssets.length }
+            { count: state.uploadedAssets.length }
           )}
         </Modal.Title>
       </Modal.Header>
 
       <StyledModalBody>
         <Flex gap={6} direction="column" alignItems="stretch">
-          {uploadedAssets.map((asset) => (
+          {state.uploadedAssets.map((asset) => (
             <AIAssetCard
               key={asset.id}
               asset={asset}
@@ -165,10 +173,51 @@ interface AIUploadModalProps {
   onClose: () => void;
 }
 
+type State = {
+  uploadedAssets: File[];
+  assetsToUploadLength: number;
+};
+
+type Action =
+  | {
+      type: 'set_uploaded_assets';
+      payload: File[];
+    }
+  | {
+      type: 'set_assets_to_upload_length';
+      payload: number;
+    };
+
+const [AIUploadModalContext, useAIUploadModalContext] = createContext<{
+  state: State;
+  dispatch: React.Dispatch<Action>;
+}>('AIUploadModalContext');
+
+const reducer = (state: State, action: Action): State => {
+  return produce(state, (draft: State) => {
+    if (action.type === 'set_uploaded_assets') {
+      draft.uploadedAssets = action.payload;
+    }
+
+    if (action.type === 'set_assets_to_upload_length') {
+      draft.assetsToUploadLength = action.payload;
+    }
+  });
+};
+
 export const AIUploadModal = ({ open, onClose }: AIUploadModalProps) => {
+  const [state, dispatch] = React.useReducer(reducer, {
+    uploadedAssets: [],
+    assetsToUploadLength: 0,
+  });
+
   return (
-    <Modal.Root open={open} onOpenChange={onClose}>
-      <ModalContent onClose={onClose} />
-    </Modal.Root>
+    <AIUploadModalContext state={state} dispatch={dispatch}>
+      <Modal.Root open={open} onOpenChange={onClose}>
+        <ModalContent onClose={onClose} />
+      </Modal.Root>
+    </AIUploadModalContext>
   );
 };
+
+export { useAIUploadModalContext };

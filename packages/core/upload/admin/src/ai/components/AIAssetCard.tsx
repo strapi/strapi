@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Card,
@@ -17,14 +18,20 @@ import {
   Grid,
   TextInput,
   Typography,
+  IconButton,
+  Dialog,
+  Modal,
 } from '@strapi/design-system';
-import { Sparkle } from '@strapi/icons';
+import { Pencil, Sparkle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { AudioPreview } from '../../components/AssetCard/AudioPreview';
 import { VideoPreview } from '../../components/AssetCard/VideoPreview';
+import { type Asset, EditAssetContent } from '../../components/EditAssetDialog/EditAssetContent';
 import { AssetType } from '../../constants';
+import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
+import { useRemoveAsset } from '../../hooks/useRemoveAsset';
 import {
   formatBytes,
   formatDuration,
@@ -33,6 +40,8 @@ import {
   prefixFileUrlWithBackendUrl,
 } from '../../utils';
 import { typeFromMime } from '../../utils/typeFromMime';
+
+import { useAIUploadModalContext } from './AIUploadModal';
 
 import type { File } from '../../../../shared/contracts/files';
 
@@ -56,6 +65,94 @@ const CardContainer = styled(Box)`
     }
   }
 `;
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetCardActions
+ * -----------------------------------------------------------------------------------------------*/
+
+const AssetCardActions = ({ asset }: { asset: File }) => {
+  const { formatMessage } = useIntl();
+  const dispatch = useAIUploadModalContext('AssetCardActions', (s) => s.dispatch);
+  const state = useAIUploadModalContext('AssetCardActions', (s) => s.state);
+  const { canUpdate, canCopyLink, canDownload } = useMediaLibraryPermissions();
+
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+
+  const { removeAsset } = useRemoveAsset(() => {});
+
+  const handleConfirm = async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event?.preventDefault();
+    await removeAsset(asset.id);
+    dispatch({
+      type: 'set_uploaded_assets',
+      payload: state.uploadedAssets.filter((a) => a.id !== asset.id),
+    });
+  };
+
+  const handlePropagationClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+  };
+
+  const handleEditAsset = (editedAsset?: File | null) => {
+    if (editedAsset) {
+      const assetToReplace = state.uploadedAssets.find((a) => a.id === editedAsset.id);
+      const updatedAssets = assetToReplace
+        ? state.uploadedAssets.toSpliced(
+            state.uploadedAssets.indexOf(assetToReplace),
+            1,
+            editedAsset
+          )
+        : state.uploadedAssets;
+
+      dispatch({
+        type: 'set_uploaded_assets',
+        payload: updatedAssets,
+      });
+
+      setIsEditModalOpen(false);
+    }
+  };
+
+  return (
+    <CardActionsContainer onClick={handlePropagationClick} position="end">
+      <Dialog.Root>
+        <Dialog.Trigger>
+          <IconButton
+            label={formatMessage({
+              id: getTrad('control-card.remove-selection'),
+              defaultMessage: 'Remove from selection',
+            })}
+          >
+            <Trash />
+          </IconButton>
+        </Dialog.Trigger>
+        <ConfirmDialog onConfirm={handleConfirm} />
+      </Dialog.Root>
+
+      <Modal.Root open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <Modal.Trigger>
+          <IconButton
+            label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
+          >
+            <Pencil />
+          </IconButton>
+        </Modal.Trigger>
+        <Modal.Content>
+          <EditAssetContent
+            // Is Local must be set to false to trigger the correct branch of logic in the EditAssetContent on submit
+            asset={{ ...asset, isLocal: false } as Asset}
+            onClose={(arg) => handleEditAsset(arg as File)}
+            canUpdate={canUpdate}
+            canCopyLink={canCopyLink}
+            canDownload={canDownload}
+            omitFields={['caption', 'alternativeText']}
+            omitActions={['replace']}
+          />
+        </Modal.Content>
+      </Modal.Root>
+    </CardActionsContainer>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Asset
@@ -205,6 +302,7 @@ export const AIAssetCard = ({ asset, onCaptionChange, onAltTextChange }: AssetCa
         <Grid.Item col={5} alignItems="stretch">
           <StyledCard width="100%" height="100%" shadow="none" borderRadius={0} padding={0}>
             <CardHeader style={{ borderStyle: 'none' }}>
+              <AssetCardActions asset={asset} />
               <Asset
                 assetType={assetType}
                 thumbnailUrl={thumbnailUrl}
