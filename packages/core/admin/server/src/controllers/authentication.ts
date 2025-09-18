@@ -1,11 +1,18 @@
 import type { Context, Next } from 'koa';
-import crypto from 'crypto';
-import type { Modules } from '@strapi/types';
 import passport from 'koa-passport';
 import compose from 'koa-compose';
 import '@strapi/types';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
+import {
+  REFRESH_COOKIE_NAME,
+  buildCookieOptionsWithExpiry,
+  getSessionManager,
+  extractDeviceParams,
+  generateDeviceId,
+  getRefreshCookieOptions,
+} from '../../../shared/utils/session-auth';
+
 import {
   validateRegistrationInput,
   validateAdminRegistrationInput,
@@ -23,108 +30,8 @@ import type {
   ResetPassword,
 } from '../../../shared/contracts/authentication';
 import { AdminUser } from '../../../shared/contracts/shared';
-import constants from '../services/constants';
 
 const { ApplicationError, ValidationError } = errors;
-
-const refreshCookieName = 'strapi_admin_refresh';
-
-const getRefreshCookieOptions = () => {
-  const isProduction = strapi.config.get('environment') === 'production';
-  const domain: string | undefined =
-    strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
-  const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
-
-  const sameSite: boolean | 'lax' | 'strict' | 'none' =
-    strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
-
-  return {
-    httpOnly: true,
-    secure: isProduction,
-    overwrite: true,
-    domain,
-    path,
-    sameSite,
-    maxAge: undefined,
-  };
-};
-
-const getLifespansForType = (
-  type: 'refresh' | 'session'
-): { idleSeconds: number; maxSeconds: number } => {
-  if (type === 'refresh') {
-    const idleSeconds = Number(
-      strapi.config.get(
-        'admin.auth.sessions.idleRefreshTokenLifespan',
-        constants.DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN
-      )
-    );
-    const maxSeconds = Number(
-      strapi.config.get(
-        'admin.auth.sessions.maxRefreshTokenLifespan',
-        constants.DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN
-      )
-    );
-
-    return { idleSeconds, maxSeconds };
-  }
-
-  const idleSeconds = Number(
-    strapi.config.get(
-      'admin.auth.sessions.idleSessionLifespan',
-      constants.DEFAULT_IDLE_SESSION_LIFESPAN
-    )
-  );
-  const maxSeconds = Number(
-    strapi.config.get(
-      'admin.auth.sessions.maxSessionLifespan',
-      constants.DEFAULT_MAX_SESSION_LIFESPAN
-    )
-  );
-
-  return { idleSeconds, maxSeconds };
-};
-
-/**
- * Builds cookie options applying an expiration policy based on session type.
- * - refresh (remember me): persistent cookie; Expires is min(now+idle, absoluteMax)
- * - session (non-remember): session cookie; no Expires/Max-Age
- */
-const buildCookieOptionsWithExpiry = (
-  type: 'refresh' | 'session',
-  absoluteExpiresAtISO?: string
-) => {
-  const base = getRefreshCookieOptions();
-  if (type === 'session') {
-    return base;
-  }
-
-  const { idleSeconds } = getLifespansForType('refresh');
-  const now = Date.now();
-  const idleExpiry = now + idleSeconds * 1000;
-  const absoluteExpiry = absoluteExpiresAtISO
-    ? new Date(absoluteExpiresAtISO).getTime()
-    : idleExpiry;
-  const chosen = new Date(Math.min(idleExpiry, absoluteExpiry));
-
-  return { ...base, expires: chosen, maxAge: Math.max(0, chosen.getTime() - now) };
-};
-
-const getSessionManager = (): Modules.SessionManager.SessionManagerService | null => {
-  const manager = strapi.sessionManager as Modules.SessionManager.SessionManagerService | undefined;
-
-  return manager ?? null;
-};
-
-const generateDeviceId = (): string => crypto.randomUUID();
-
-const extractDeviceParams = (requestBody: unknown): { deviceId: string; rememberMe: boolean } => {
-  const body = (requestBody ?? {}) as { deviceId?: string; rememberMe?: boolean };
-  const deviceId = body.deviceId || generateDeviceId();
-  const rememberMe = Boolean(body.rememberMe);
-
-  return { deviceId, rememberMe };
-};
 
 export default {
   login: compose([
@@ -183,7 +90,7 @@ export default {
           rememberMe ? 'refresh' : 'session',
           absoluteExpiresAt
         );
-        ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
+        ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
 
         const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
         if ('error' in accessResult) {
@@ -243,7 +150,7 @@ export default {
         rememberMe ? 'refresh' : 'session',
         absoluteExpiresAt
       );
-      ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
+      ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
 
       const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
       if ('error' in accessResult) {
@@ -309,7 +216,7 @@ export default {
         rememberMe ? 'refresh' : 'session',
         absoluteExpiresAt
       );
-      ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
+      ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
 
       const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
       if ('error' in accessResult) {
@@ -364,7 +271,7 @@ export default {
 
       // No rememberMe flow here; expire with session by default (session cookie)
       const cookieOptions = buildCookieOptionsWithExpiry('session', absoluteExpiresAt);
-      ctx.cookies.set(refreshCookieName, refreshToken, cookieOptions);
+      ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
 
       const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
       if ('error' in accessResult) {
@@ -386,7 +293,7 @@ export default {
   },
 
   async accessToken(ctx: Context) {
-    const refreshToken = ctx.cookies.get(refreshCookieName);
+    const refreshToken = ctx.cookies.get(REFRESH_COOKIE_NAME);
 
     if (!refreshToken) {
       return ctx.unauthorized('Missing refresh token');
@@ -414,7 +321,7 @@ export default {
       // Preserve session-vs-remember mode using rotation.type and rotation.absoluteExpiresAt
       const opts = buildCookieOptionsWithExpiry(rotation.type, rotation.absoluteExpiresAt);
 
-      ctx.cookies.set(refreshCookieName, rotation.token, opts);
+      ctx.cookies.set(REFRESH_COOKIE_NAME, rotation.token, opts);
       ctx.body = { data: { token } };
     } catch (err) {
       strapi.log.error('Failed to generate access token from refresh token', err as any);
@@ -430,7 +337,7 @@ export default {
     const deviceId = typeof bodyDeviceId === 'string' ? bodyDeviceId : undefined;
 
     // Clear cookie regardless of token validity
-    ctx.cookies.set(refreshCookieName, '', {
+    ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
       ...getRefreshCookieOptions(),
       expires: new Date(0),
     });

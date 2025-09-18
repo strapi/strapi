@@ -201,7 +201,7 @@ describe('SessionManager API Integration', () => {
         expect(sessions.map((s) => s.origin)).toEqual(expect.arrayContaining([origin1, origin2]));
       });
 
-      it('should set refresh idle expiration (default 7 days) for refresh family', async () => {
+      it('should set refresh idle expiration (default 14 days) for refresh family', async () => {
         const startTime = Date.now();
         const result = await strapi
           .sessionManager('admin')
@@ -211,7 +211,7 @@ describe('SessionManager API Integration', () => {
           where: { sessionId: result.sessionId },
         });
 
-        const expectedExpiration = startTime + 7 * 24 * 60 * 60 * 1000;
+        const expectedExpiration = startTime + 14 * 24 * 60 * 60 * 1000;
         const actualExpiration = new Date(session.expiresAt).getTime();
 
         expect(Math.abs(actualExpiration - expectedExpiration)).toBeLessThan(1_000);
@@ -536,8 +536,8 @@ describe('SessionManager API Integration', () => {
           .sessionManager('admin')
           .generateRefreshToken(testUserId, testDeviceId);
 
-        // Make createdAt older than idleRefreshTokenLifespan (7d) by 1 minute
-        const past = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000 + 60 * 1000));
+        // Make createdAt older than idleRefreshTokenLifespan (14d) by 1 minute
+        const past = new Date(Date.now() - (14 * 24 * 60 * 60 * 1000 + 60 * 1000));
         await strapi.db.query(contentTypeUID).update({
           where: { sessionId: r.sessionId },
           data: { createdAt: past },
