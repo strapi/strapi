@@ -1,6 +1,7 @@
 import { UID } from '@strapi/types';
 import { useParams } from 'react-router-dom';
 
+import { useAIAvailability } from '../../../hooks/useAIAvailability';
 import { useGetGuidedTourMetaQuery } from '../../../services/admin';
 import { CompletedActions, useGuidedTour } from '../Context';
 import { tours, type StepContentProps } from '../Tours';
@@ -15,7 +16,7 @@ const ContentTypeBuilderActions = ({
   const state = useGuidedTour('ContentTypeBuilderActions', (s) => s.state);
   const dispatch = useGuidedTour('ContentTypeBuilderActions', (s) => s.dispatch);
 
-  const isAIEnabled = !!window.strapi?.isEE && window.strapi.ai?.enabled !== false;
+  const isAIEnabled = useAIAvailability();
 
   const currentStepOffset = state.tours.contentTypeBuilder.currentStep + 1;
   const displayedCurrentStep = (() => {
