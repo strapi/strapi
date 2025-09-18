@@ -32,6 +32,9 @@ const controller = {
     } = strapi.service('admin::constants');
 
     const modelDef = strapi.contentType(model);
+    if (!modelDef) {
+      return ctx.notFound(`Content type ${model} not found`);
+    }
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(model);
 
     if (!isLocalizedContentType(modelDef)) {

@@ -121,7 +121,8 @@ function transformEntry(
     const attribute = type && type.attributes[key];
 
     if (attribute && attribute.type === 'relation' && isEntry(property) && 'target' in attribute) {
-      const data = transformEntry(property, strapi.contentType(attribute.target));
+      const targetType = strapi.contentType(attribute.target);
+      const data = transformEntry(property, targetType ?? undefined);
 
       attributeValues[key] = { data };
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {
@@ -135,7 +136,8 @@ function transformEntry(
         return transformComponent(subProperty, strapi.components[subProperty.__component]);
       });
     } else if (attribute && attribute.type === 'media' && isEntry(property)) {
-      const data = transformEntry(property, strapi.contentType('plugin::upload.file'));
+      const fileType = strapi.contentType('plugin::upload.file');
+      const data = transformEntry(property, fileType ?? undefined);
 
       attributeValues[key] = { data };
     } else {

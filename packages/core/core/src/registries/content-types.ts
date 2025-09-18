@@ -46,7 +46,15 @@ const contentTypesRegistry = () => {
     /**
      * Registers a contentType
      */
-    set(uid: UID.ContentType, contentType: Struct.ContentTypeSchema) {
+    set(
+      uid: UID.ContentType,
+      contentType: Struct.ContentTypeSchema,
+      options?: { force?: boolean }
+    ) {
+      if (has(uid, contentTypes) && !options?.force) {
+        throw new Error(`Content-type ${uid} has already been registered.`);
+      }
+
       contentTypes[uid] = contentType;
       return this;
     },
@@ -54,13 +62,13 @@ const contentTypesRegistry = () => {
     /**
      * Registers a map of contentTypes for a specific namespace
      */
-    add(namespace: string, newContentTypes: ContentTypesInput) {
+    add(namespace: string, newContentTypes: ContentTypesInput, options?: { force?: boolean }) {
       validateKeySameToSingularName(newContentTypes);
 
       for (const rawCtName of Object.keys(newContentTypes)) {
         const uid = addNamespace(rawCtName, namespace);
 
-        if (has(uid, contentTypes)) {
+        if (has(uid, contentTypes) && !options?.force) {
           throw new Error(`Content-type ${uid} has already been registered.`);
         }
 
@@ -79,6 +87,19 @@ const contentTypesRegistry = () => {
       }
 
       extendFn(currentContentType);
+
+      return this;
+    },
+
+    /**
+     * Removes all content types for a specific namespace (e.g. api::blog)
+     */
+    removeNamespace(namespace: string) {
+      for (const uid of Object.keys(contentTypes)) {
+        if (hasNamespace(uid, namespace)) {
+          delete contentTypes[uid];
+        }
+      }
 
       return this;
     },

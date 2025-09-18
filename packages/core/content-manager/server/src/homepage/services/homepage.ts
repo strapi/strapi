@@ -66,36 +66,44 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     allowedContentTypeUids: RecentDocument['contentTypeUid'][],
     configurations: ContentTypeConfiguration[]
   ): ContentTypeMeta[] => {
-    return allowedContentTypeUids.map((uid) => {
-      const configuration = configurations.find((config) => config.uid === uid);
-      const contentType = strapi.contentType(uid);
-      const fields = ['documentId', 'updatedAt'];
+    return allowedContentTypeUids
+      .map((uid) => {
+        const configuration = configurations.find((config) => config.uid === uid);
+        const contentType = strapi.contentType(uid);
 
-      // Add fields required to get the status if D&P is enabled
-      const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
-      if (hasDraftAndPublish) {
-        fields.push('publishedAt');
-      }
+        // Skip content-types that are not currently registered (e.g., during soft reload)
+        if (!contentType) {
+          return null;
+        }
 
-      // Only add the main field if it's defined
-      if (configuration?.settings.mainField) {
-        fields.push(configuration.settings.mainField);
-      }
+        const fields = ['documentId', 'updatedAt'];
 
-      // Only add locale if it's localized
-      const isLocalized = (contentType.pluginOptions?.i18n as any)?.localized;
-      if (isLocalized) {
-        fields.push('locale');
-      }
+        // Add fields required to get the status if D&P is enabled
+        const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
+        if (hasDraftAndPublish) {
+          fields.push('publishedAt');
+        }
 
-      return {
-        fields,
-        mainField: configuration!.settings.mainField,
-        contentType,
-        hasDraftAndPublish,
-        uid,
-      };
-    });
+        // Only add the main field if it's defined
+        if (configuration?.settings.mainField) {
+          fields.push(configuration.settings.mainField);
+        }
+
+        // Only add locale if it's localized
+        const isLocalized = (contentType.pluginOptions?.i18n as any)?.localized;
+        if (isLocalized) {
+          fields.push('locale');
+        }
+
+        return {
+          fields,
+          mainField: configuration?.settings.mainField ?? 'documentId',
+          contentType,
+          hasDraftAndPublish,
+          uid,
+        } as ContentTypeMeta;
+      })
+      .filter((meta): meta is ContentTypeMeta => meta !== null);
   };
 
   const formatDocuments = (

@@ -115,7 +115,10 @@ const policiesRegistry = () => {
     /**
      * Registers a policy
      */
-    set(uid: string, policy: Core.Policy) {
+    set(uid: string, policy: Core.Policy, options?: { force?: boolean }) {
+      if (policies.has(uid) && !options?.force) {
+        throw new Error(`Policy ${uid} has already been registered.`);
+      }
       policies.set(uid, policy);
       return this;
     },
@@ -123,12 +126,16 @@ const policiesRegistry = () => {
     /**
      * Registers a map of policies for a specific namespace
      */
-    add(namespace: string, newPolicies: Record<string, Core.Policy>) {
+    add(
+      namespace: string,
+      newPolicies: Record<string, Core.Policy>,
+      options?: { force?: boolean }
+    ) {
       for (const policyName of Object.keys(newPolicies)) {
         const policy = newPolicies[policyName];
         const uid = addNamespace(policyName, namespace);
 
-        if (has(uid, policies)) {
+        if (policies.has(uid) && !options?.force) {
           throw new Error(`Policy ${uid} has already been registered.`);
         }
 
@@ -148,6 +155,19 @@ const policiesRegistry = () => {
           config: (typeof policyConfig === 'object' && policyConfig.config) || {},
         };
       });
+    },
+
+    /**
+     * Removes all policies for a specific namespace
+     */
+    removeNamespace(namespace: string) {
+      for (const uid of Array.from(policies.keys())) {
+        if (hasNamespace(uid, namespace)) {
+          policies.delete(uid);
+        }
+      }
+
+      return this;
     },
   };
 };

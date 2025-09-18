@@ -6,6 +6,7 @@ const strapiServerSchema = yup
     bootstrap: yup.mixed().isFunction(),
     destroy: yup.mixed().isFunction(),
     register: yup.mixed().isFunction(),
+    softReset: yup.mixed().isFunction(),
     config: yup.object(),
     routes: yup.lazy((value) => {
       if (Array.isArray(value)) {

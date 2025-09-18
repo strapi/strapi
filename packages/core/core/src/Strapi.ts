@@ -44,6 +44,12 @@ class Strapi extends Container implements Core.Strapi {
 
   internal_config: Record<string, unknown> = {};
 
+  // Soft reset state for gating requests
+  private softResetState: {
+    running: boolean;
+    waiters: Array<() => void>;
+  } = { running: false, waiters: [] };
+
   constructor(opts: StrapiOptions) {
     super();
 
@@ -229,6 +235,179 @@ class Strapi extends Container implements Core.Strapi {
 
   get validators() {
     return this.get('validators');
+  }
+
+  // Wait for an ongoing soft reset to complete, with timeout
+  async waitForSoftReset(timeoutMs = 1500) {
+    if (!this.softResetState.running) {
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(() => {
+        resolve();
+      }, timeoutMs);
+
+      this.softResetState.waiters.push(() => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+  }
+
+  private beginSoftReset() {
+    this.softResetState.running = true;
+  }
+
+  private endSoftReset() {
+    this.softResetState.running = false;
+    const waiters = this.softResetState.waiters.splice(0);
+    waiters.forEach((resolve) => resolve());
+  }
+
+  /**
+   * Soft reset application state after schema/file changes without process restart.
+   * - Reload application context (APIs, components, middlewares, etc.)
+   * - Re-initialize database models and sync schema
+   * - Rebuild routes and refresh content API permissions
+   */
+  async softReset() {
+    this.beginSoftReset();
+    this.log.info('softReset: starting');
+
+    // 1) Clear registries that can be safely rebuilt
+    this.log.debug('softReset: clearing registries');
+    try {
+      this.get('components').clear?.();
+      this.get('apis').clear?.();
+      this.get('content-types').removeNamespace?.('api::');
+      this.get('controllers').removeNamespace?.('api::');
+      this.get('services').removeNamespace?.('api::');
+      this.get('policies').removeNamespace?.('api::');
+      this.get('middlewares').removeNamespace?.('api::');
+      // clear global-scoped registries loaded by loaders
+      this.get('middlewares').removeNamespace?.('global::');
+      this.get('policies').removeNamespace?.('global::');
+      // clear internal strapi-scoped registries loaded by loaders
+      this.get('middlewares').removeNamespace?.('strapi::');
+      this.get('policies').removeNamespace?.('strapi::');
+      // clear plugin-scoped registries and types
+      this.get('content-types').removeNamespace?.('plugin::');
+      this.get('controllers').removeNamespace?.('plugin::');
+      this.get('services').removeNamespace?.('plugin::');
+      this.get('policies').removeNamespace?.('plugin::');
+      this.get('middlewares').removeNamespace?.('plugin::');
+      this.get('plugins').clear?.();
+      // plugins/APIs are loaded into modules; clear them so loaders can re-add
+      this.get('modules').removePrefix?.('plugin::');
+      this.get('modules').removePrefix?.('api::');
+    } catch (e) {
+      this.log.error('softReset: error clearing registries');
+      this.log.error(e);
+      throw e;
+    }
+
+    // 2) Reload application context (APIs, components, middlewares, policies, controllers from disk and memory)
+    this.log.debug('softReset: reloading application context');
+    try {
+      const { loadApplicationContext } = await import('./loaders');
+      await loadApplicationContext(this);
+    } catch (e) {
+      this.log.error('softReset: error loading application context');
+      this.log.error(e);
+      throw e;
+    }
+
+    // 3) Rebuild models and sync DB schema
+    this.log.debug('softReset: rebuilding models and syncing DB schema');
+    try {
+      const models = [
+        ...utils.transformContentTypesToModels(
+          [...Object.values(this.contentTypes), ...Object.values(this.components)],
+          this.db.metadata.identifiers
+        ),
+        ...this.get('models').get(),
+      ];
+
+      await this.db.init({ models });
+
+      let oldContentTypes;
+      if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
+        oldContentTypes = await this.store.get({
+          type: 'strapi',
+          name: 'content_types',
+          key: 'schema',
+        });
+      }
+
+      await this.hook('strapi::content-types.beforeSync').call({
+        oldContentTypes,
+        contentTypes: this.contentTypes,
+      });
+
+      const status = await this.db.schema.sync();
+      if (status === 'CHANGED') {
+        await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+      }
+
+      await this.hook('strapi::content-types.afterSync').call({
+        oldContentTypes,
+        contentTypes: this.contentTypes,
+      });
+
+      await this.store.set({
+        type: 'strapi',
+        name: 'content_types',
+        key: 'schema',
+        value: this.contentTypes,
+      });
+    } catch (e) {
+      this.log.error('softReset: error during DB model rebuild/sync');
+      this.log.error(e);
+      // Ensure routing remains valid if DB sync failed
+      try {
+        this.server.initRouting();
+      } catch {}
+      throw e;
+    }
+
+    // 4) Rebuild routing and permissions
+    this.log.debug('softReset: rebuilding routing and permissions (skipping middleware re-mount)');
+    try {
+      this.server.initRouting();
+    } catch (e) {
+      this.log.error('softReset: error rebuilding routing/permissions');
+      this.log.error(e);
+      throw e;
+    }
+
+    this.log.info('softReset: completed successfully');
+    // Dev TS: regenerate types to keep editors in sync
+    try {
+      const autogen = this.config.get('typescript.autogenerate');
+      if (this.config.get('autoReload') && autogen !== false) {
+        await tsUtils.generators.generate({
+          strapi: this,
+          pwd: this.dirs.app.root,
+          rootDir: undefined,
+          logger: { silent: true, debug: false },
+          artifacts: { contentTypes: true, components: true },
+        });
+      }
+    } catch (e) {
+      this.log.warn('softReset: type generation failed');
+      this.log.warn(e as any);
+    }
+    // Notify modules & plugins
+    try {
+      await this.get('modules').softReset?.();
+    } catch (e) {
+      this.log.warn('softReset: module softReset lifecycles errored');
+      this.log.warn(e as any);
+    }
+
+    this.endSoftReset();
+    return this;
   }
 
   async start() {
