@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import { Field, TextInput } from '@strapi/design-system';
+import pluralize from 'pluralize';
 import { useIntl } from 'react-intl';
 
 import { nameToSlug } from '../utils/nameToSlug';
@@ -34,7 +35,21 @@ export const SingularName = ({
 
   useEffect(() => {
     if (displayName && displayName !== previousDisplayName.current) {
-      const newValue = nameToSlug(displayName);
+      // Always convert display name to singular form, then to slug
+      let singularDisplayName = displayName;
+      
+      try {
+        // Check if the display name is plural and convert to singular
+        if (pluralize.isPlural(displayName)) {
+          singularDisplayName = pluralize.singular(displayName);
+        }
+        // If it's already singular, use as-is
+      } catch (err) {
+        // If pluralize fails, use the original display name
+        singularDisplayName = displayName;
+      }
+      
+      const newValue = nameToSlug(singularDisplayName);
       onChangeRef.current({ target: { name, value: newValue } });
       previousValue.current = newValue;
       previousDisplayName.current = displayName;

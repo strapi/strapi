@@ -41,7 +41,21 @@ export const PluralName = ({
 
   useEffect(() => {
     if (displayName && displayName !== previousDisplayName.current) {
-      const baseValue = nameToSlug(displayName);
+      // Always start from singular form of display name, then pluralize
+      let singularDisplayName = displayName;
+      
+      try {
+        // Convert display name to singular first
+        if (pluralize.isPlural(displayName)) {
+          singularDisplayName = pluralize.singular(displayName);
+        }
+      } catch (err) {
+        // If pluralize fails, use the original display name
+        singularDisplayName = displayName;
+      }
+      
+      // Convert to slug and then pluralize
+      const baseValue = nameToSlug(singularDisplayName);
       let newValue = baseValue;
 
       try {
