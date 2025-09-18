@@ -240,7 +240,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
 
       const doUpload = async (file: InputFile, fileInfo: FileInfo) => {
-        console.log('file info', fileInfo);
         const fileData = await enhanceAndValidateFile(file, fileInfo, metas);
         return uploadFileAndPersist(fileData, { user });
       };
