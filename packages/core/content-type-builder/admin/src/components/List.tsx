@@ -125,19 +125,33 @@ export const List = ({
     setActiveId(active.id);
   }
 
-  function handleDragEnd(event: DragEndEvent) {
+  async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
     setActiveId(null);
 
     if (over) {
       if (active.id !== over.id) {
-        moveAttribute({
+        await moveAttribute({
           forTarget: type.modelType,
           targetUid: type.uid,
           from: active.data.current!.index,
           to: over.data.current!.index,
         });
+        try {
+          window.dispatchEvent(
+            new CustomEvent('ctb:attributesReordered', {
+              detail: {
+                uid: type.uid,
+                from: active.data.current!.index,
+                to: over.data.current!.index,
+              },
+            })
+          );
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn('ctb:attributesReordered dispatch failed', err);
+        }
       }
     }
   }

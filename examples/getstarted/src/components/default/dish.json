@@ -6,13 +6,18 @@
     "icon": "address-book"
   },
   "attributes": {
-    "name": {
-      "type": "string",
-      "required": false,
-      "default": "My super dish"
+    "categories": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::category.category"
     },
     "description": {
       "type": "text"
+    },
+    "name": {
+      "type": "string",
+      "default": "My super dish",
+      "required": false
     },
     "price": {
       "type": "float"
@@ -23,11 +28,6 @@
     },
     "very_long_description": {
       "type": "richtext"
-    },
-    "categories": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::category.category"
     }
   }
 }

@@ -8,12 +8,16 @@
   "attributes": {
     "label": {
       "type": "string",
-      "required": true,
-      "default": "something"
+      "default": "something",
+      "required": true
     },
     "time": {
       "type": "string"
     },
-    "dishrep": { "type": "component", "repeatable": true, "component": "default.dish" }
+    "dishrep": {
+      "type": "component",
+      "component": "default.dish",
+      "repeatable": true
+    }
   }
 }

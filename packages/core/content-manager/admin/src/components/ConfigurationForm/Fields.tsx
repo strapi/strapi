@@ -113,6 +113,127 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
   const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
 
+  const attributesRef = React.useRef(attributes);
+  const fieldSizesRef = React.useRef(fieldSizes);
+  const metadatasRef = React.useRef(metadatas);
+
+  React.useEffect(() => {
+    attributesRef.current = attributes;
+  }, [attributes]);
+
+  React.useEffect(() => {
+    fieldSizesRef.current = fieldSizes;
+  }, [fieldSizes]);
+
+  React.useEffect(() => {
+    metadatasRef.current = metadatas;
+  }, [metadatas]);
+
+  const makeKey = React.useCallback(
+    () => `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`,
+    []
+  );
+
+  const buildRowForAttribute = React.useCallback(
+    (name: string) => {
+      const attrs = attributesRef.current ?? {};
+      const sizes = fieldSizesRef.current ?? {};
+      const metas = metadatasRef.current ?? {};
+
+      const type = attrs[name]?.type;
+      const size = type ? (sizes[type] ?? GRID_COLUMNS) : GRID_COLUMNS;
+
+      const meta = metas[name] as
+        | Partial<{
+            label?: string;
+            placeholder?: string;
+            mainField?: any;
+            hint?: string;
+            disabled?: boolean;
+          }>
+        | undefined;
+
+      return {
+        __temp_key__: makeKey(),
+        children: [
+          {
+            name,
+            size,
+            label: meta?.label ?? name,
+            placeholder: meta?.placeholder ?? '',
+            mainField: meta?.mainField ?? undefined,
+            description: meta?.hint ?? '',
+            editable: meta?.disabled === undefined ? true : !meta.disabled,
+            __temp_key__: makeKey(),
+          },
+        ],
+      } as ConfigurationFormData['layout'][number];
+    },
+    [makeKey]
+  );
+
+  React.useEffect(() => {
+    const handler = () => {
+      try {
+        const attrs = attributesRef.current ?? {};
+
+        const rows = Object.keys(attrs)
+          .filter((name) => name !== 'id' && !name.startsWith('_'))
+          .map((name) => buildRowForAttribute(name));
+
+        if (rows.length > 0) {
+          onChange('layout', rows as ConfigurationFormData['layout']);
+        }
+      } catch (err) {
+        console.warn('ctb:attributesReordered handler failed', err);
+      }
+    };
+
+    window.addEventListener('ctb:attributesReordered', handler);
+    return () => window.removeEventListener('ctb:attributesReordered', handler);
+  }, [onChange, buildRowForAttribute]);
+
+  React.useEffect(() => {
+    try {
+      const rows = Object.keys(attributes ?? {})
+        .filter((name) => name !== 'id' && !name.startsWith('_'))
+        .map((name) => {
+          const type = attributes[name]?.type;
+          const size = type ? (fieldSizes?.[type] ?? GRID_COLUMNS) : GRID_COLUMNS;
+          const meta = (metadatas?.[name] ?? {}) as Partial<{
+            label?: string;
+            placeholder?: string;
+            mainField?: any;
+            hint?: string;
+            disabled?: boolean;
+          }>;
+
+          return {
+            __temp_key__: makeKey(),
+            children: [
+              {
+                name,
+                size,
+                label: meta?.label ?? name,
+                placeholder: meta?.placeholder ?? '',
+                mainField: meta?.mainField ?? undefined,
+                description: meta?.hint ?? '',
+                editable: meta?.disabled === undefined ? true : !meta.disabled,
+                __temp_key__: makeKey(),
+              },
+            ],
+          } as ConfigurationFormData['layout'][number];
+        });
+
+      if (rows.length > 0) {
+        onChange('layout', rows as ConfigurationFormData['layout']);
+      }
+    } catch (err) {
+      console.warn('initial layout sync failed', err);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
 
   /**

@@ -6,17 +6,16 @@
     "icon": "angry"
   },
   "attributes": {
-    "label": {
-      "type": "string",
-      "default": "toto"
+    "end_date": {
+      "type": "date",
+      "required": true
     },
     "start_date": {
       "type": "date",
       "required": true
     },
-    "end_date": {
-      "type": "date",
-      "required": true
+    "label": {
+      "type": "string"
     },
     "media": {
       "type": "media",
@@ -24,8 +23,8 @@
       "required": false
     },
     "dish": {
-      "component": "default.dish",
       "type": "component",
+      "component": "default.dish",
       "repeatable": true,
       "required": true,
       "min": 2

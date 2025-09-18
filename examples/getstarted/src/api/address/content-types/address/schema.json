@@ -17,22 +17,24 @@
       "type": "string",
       "maxLength": 2
     },
+    "cover": {
+      "type": "media",
+      "multiple": false,
+      "required": false
+    },
     "categories": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::category.category",
       "inversedBy": "addresses"
     },
-    "cover": {
-      "type": "media",
-      "multiple": false,
-      "required": false
-    },
     "images": {
       "type": "media",
       "multiple": true,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "city": {
       "type": "string",
