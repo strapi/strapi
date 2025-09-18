@@ -57,9 +57,19 @@ type Action =
   | {
       type: 'remove_completed_action';
       payload: ValueOf<CompletedActions>;
+    }
+  | {
+      type: 'set_tour_type';
+      payload: {
+        tourName: ValidTourName;
+        tourType: string;
+      };
     };
 
-type TourState = Record<ValidTourName, { currentStep: number; isCompleted: boolean }>;
+type TourState = Record<
+  ValidTourName,
+  { currentStep: number; isCompleted: boolean; tourType?: string }
+>;
 type State = {
   tours: TourState;
   enabled: boolean;
@@ -76,6 +86,7 @@ const getInitialTourState = (tours: Tours) => {
     acc[tourName as ValidTourName] = {
       currentStep: 0,
       isCompleted: false,
+      tourType: undefined,
     };
 
     return acc;
@@ -136,6 +147,18 @@ function reducer(state: State, action: Action): State {
 
     if (action.type === 'go_to_step') {
       draft.tours[action.payload.tourName].currentStep = action.payload.step;
+    }
+
+    if (action.type === 'set_tour_type') {
+      const { tourName, tourType } = action.payload;
+      const currentTour = draft.tours[tourName];
+
+      // If tour type changes and tour is not completed, reset to step 0
+      if (currentTour.tourType && currentTour.tourType !== tourType && !currentTour.isCompleted) {
+        currentTour.currentStep = 0;
+      }
+
+      currentTour.tourType = tourType;
     }
   });
 }

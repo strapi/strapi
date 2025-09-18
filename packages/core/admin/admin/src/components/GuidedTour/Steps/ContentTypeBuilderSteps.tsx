@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { UID } from '@strapi/types';
 import { useParams } from 'react-router-dom';
 
@@ -31,7 +33,7 @@ const ContentTypeBuilderActions = ({
     return currentStepOffset;
   })();
 
-  // For single types we subtract all contentTypeSpecificSteps
+  // When AI is enabled, we subtract the no AI steps and vice versa
   const displayedTourLength = isAIEnabled
     ? tours.contentTypeBuilder._meta.displayedStepCount - contentTypeBuilderStepsNoAI.length
     : tours.contentTypeBuilder._meta.displayedStepCount - contentTypeBuilderStepsAI.length;
