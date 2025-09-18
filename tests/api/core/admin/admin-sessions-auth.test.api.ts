@@ -147,4 +147,110 @@ describe('Admin Sessions Auth', () => {
       expect(res.statusCode).toBe(401);
     });
   });
+
+  describe('Session Invalidation on User Operations', () => {
+    let testUser: any;
+    let superAdminToken: string;
+
+    beforeAll(async () => {
+      // Login as super admin to perform user operations
+      const loginRes = await rq.post('/admin/login', { body: superAdmin.loginInfo });
+      superAdminToken = loginRes.body.data.token;
+    });
+
+    beforeEach(async () => {
+      // Create a test user using utils (proper way)
+      testUser = await utils.createUser({
+        email: 'testuser@example.com',
+        firstname: 'Test',
+        lastname: 'User',
+        password: 'TestPass123',
+      });
+    });
+
+    afterEach(async () => {
+      // Cleanup: delete test user if it still exists
+      if (testUser) {
+        try {
+          await utils.deleteUserById(testUser.id);
+        } catch (e) {
+          // User might already be deleted in test
+        }
+      }
+    });
+
+    it('invalidates all sessions when user is deleted', async () => {
+      // Login as test user to create sessions
+      const loginRes1 = await rq.post('/admin/login', {
+        body: {
+          email: 'testuser@example.com',
+          password: 'TestPass123',
+        },
+      });
+      expect(loginRes1.statusCode).toBe(200);
+
+      const userToken = loginRes1.body.data.token;
+
+      // Verify user session is active
+      const profileRes = await rq.get('/admin/users/me', {
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
+      expect(profileRes.statusCode).toBe(200);
+
+      // Delete the user (should invalidate all sessions)
+      await utils.deleteUserById(testUser.id);
+
+      // Try to use the user's token - should be invalid now
+      const invalidProfileRes = await rq.get('/admin/users/me', {
+        headers: { Authorization: `Bearer ${userToken}` },
+      });
+      expect(invalidProfileRes.statusCode).toBe(401);
+
+      testUser = null; // Prevent cleanup attempt
+    });
+
+    it('bulk user deletion invalidates all affected user sessions', async () => {
+      // Create another test user using utils
+      const testUser2 = await utils.createUser({
+        email: 'testuser2@example.com',
+        firstname: 'Test2',
+        lastname: 'User2',
+        password: 'TestPass123',
+      });
+
+      // Login as both users
+      const loginRes1 = await rq.post('/admin/login', {
+        body: { email: 'testuser@example.com', password: 'TestPass123' },
+      });
+      const loginRes2 = await rq.post('/admin/login', {
+        body: { email: 'testuser2@example.com', password: 'TestPass123' },
+      });
+
+      const token1 = loginRes1.body.data.token;
+      const token2 = loginRes2.body.data.token;
+
+      // Verify both sessions work
+      expect(
+        (await rq.get('/admin/users/me', { headers: { Authorization: `Bearer ${token1}` } }))
+          .statusCode
+      ).toBe(200);
+      expect(
+        (await rq.get('/admin/users/me', { headers: { Authorization: `Bearer ${token2}` } }))
+          .statusCode
+      ).toBe(200);
+
+      // Bulk delete users using utils
+      await utils.deleteUsersById([testUser.id, testUser2.id]);
+
+      // Both tokens should now be invalid
+      expect(
+        (await rq.get('/admin/users/me', { headers: { Authorization: `Bearer ${token1}` } }))
+          .statusCode
+      ).toBe(401);
+      expect(
+        (await rq.get('/admin/users/me', { headers: { Authorization: `Bearer ${token2}` } }))
+          .statusCode
+      ).toBe(401);
+    });
+  });
 });
