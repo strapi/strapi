@@ -9,7 +9,10 @@ const getAuthorizationHeader = (headers) =>
   headers ? headers.Authorization || headers.authorization : undefined;
 
 const applyHeadersToRequest = (rq, headers) => {
-  if (!headers) return;
+  if (!headers) {
+    return;
+  }
+
   const authHeader = getAuthorizationHeader(headers);
   if (typeof authHeader === 'string') {
     const parts = authHeader.split(/\s+/);
@@ -18,6 +21,7 @@ const applyHeadersToRequest = (rq, headers) => {
       rq.auth(token, { type: 'bearer' });
     }
   }
+
   const { Authorization, authorization, ...rest } = headers;
   if (Object.keys(rest).length > 0) {
     rq.set(rest);
@@ -36,7 +40,6 @@ const createAgent = (strapi, initialState = {}) => {
 
     const rq = supertestAgent[method.toLowerCase()](fullUrl);
 
-    // Apply authentication and headers on the request itself
     if (has('token', state)) {
       rq.auth(state.token, { type: 'bearer' });
     }

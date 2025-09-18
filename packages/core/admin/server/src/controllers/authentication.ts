@@ -265,6 +265,9 @@ export default {
       const userId = String(user.id);
       const deviceId = generateDeviceId();
 
+      // Invalidate all existing sessions before creating a new one
+      await sessionManager('admin').invalidateRefreshToken(userId);
+
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
       ).generateRefreshToken(userId, deviceId, { type: 'session' });
