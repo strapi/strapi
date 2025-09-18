@@ -36,6 +36,5 @@ export interface SessionManagerService {
   generateSessionId(): string;
   defineOrigin(origin: string, config: any): void;
   hasOrigin(origin: string): boolean;
-  // Fluent API
   (origin: string): OriginSessionManagerService;
 }

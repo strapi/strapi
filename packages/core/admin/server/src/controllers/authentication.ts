@@ -265,6 +265,9 @@ export default {
       const userId = String(user.id);
       const deviceId = generateDeviceId();
 
+      // Invalidate all existing sessions before creating a new one
+      await sessionManager('admin').invalidateRefreshToken(userId);
+
       const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
         'admin'
       ).generateRefreshToken(userId, deviceId, { type: 'session' });
@@ -339,6 +342,11 @@ export default {
     // Clear cookie regardless of token validity
     ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
       ...getRefreshCookieOptions(),
+      expires: new Date(0),
+    });
+
+    // Clear legacy cookie names
+    ctx.cookies.set('jwtToken', '', {
       expires: new Date(0),
     });
 
