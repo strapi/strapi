@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 import { readFile } from 'node:fs/promises';
-import type { File } from 'formidable';
 import { z } from 'zod';
+import { InputFile } from '../types';
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_ADMIN_AI_URL || process.env.STRAPI_AI_URL;
@@ -16,7 +16,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       return isAIEnabled && isEE;
     },
 
-    async processFiles(files: File[]) {
+    async processFiles(files: InputFile[]) {
       const userService = strapi.service('admin::user');
       const formData = new FormData();
 
