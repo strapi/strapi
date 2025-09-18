@@ -345,11 +345,6 @@ export default {
       expires: new Date(0),
     });
 
-    // Clear legacy cookie names
-    ctx.cookies.set('jwtToken', '', {
-      expires: new Date(0),
-    });
-
     try {
       const sessionManager = getSessionManager();
       if (sessionManager) {
