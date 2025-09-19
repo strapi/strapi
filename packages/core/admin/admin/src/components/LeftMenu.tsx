@@ -97,10 +97,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
               paddingTop={3}
               paddingBottom={3}
             >
-              <MainNavIcons
-                listLinks={listLinks.filter((link) => link.mobileNavigation?.top)}
-                handleClickOnLink={handleClickOnLink}
-              />
+              <MainNavIcons listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
             </NavListWrapper>
           </ScrollArea>
           <TrialCountdown />

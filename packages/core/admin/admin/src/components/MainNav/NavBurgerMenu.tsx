@@ -45,7 +45,7 @@ const NavBurgerMenu = ({ isShown, handleClickOnLink, listLinks }: NavBurgerMenuP
         <ul>
           <MainNavBurgerMenuLinks listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
           <li>
-            <NavUser showDisplayName />
+            <NavUser closeBurgerMenu={handleClickOnLink} showDisplayName />
           </li>
         </ul>
       </ScrollArea>

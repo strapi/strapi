@@ -19,6 +19,7 @@ const GridContainer = styled(Box)<{ $hasSideNav: boolean; $isSideNavMobileVisibl
   grid-template-columns: 1fr;
   overflow: hidden;
   height: 100vh;
+
   ${({ theme }) => theme.breakpoints.medium} {
     grid-template-columns: ${({ $hasSideNav }) => ($hasSideNav ? `auto 1fr` : '1fr')};
   }
@@ -62,12 +63,6 @@ const OverflowingItem = styled(Box)`
   }
   ${({ theme }) => theme.breakpoints.large} {
     padding-top: 0;
-  }
-`;
-
-const OpenCloseSideNav = styled(Box)`
-  ${({ theme }) => theme.breakpoints.large} {
-    display: none;
   }
 `;
 

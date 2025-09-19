@@ -19,8 +19,16 @@ const PurchaseAuditLogs = () => {
           title={formatMessage({ id: 'global.auditLogs', defaultMessage: 'Audit Logs' })}
         />
         <Box
-          marginLeft={10}
-          marginRight={10}
+          marginLeft={{
+            initial: 4,
+            medium: 6,
+            large: 10,
+          }}
+          marginRight={{
+            initial: 4,
+            medium: 6,
+            large: 10,
+          }}
           shadow="filterShadow"
           hasRadius
           background="neutral0"

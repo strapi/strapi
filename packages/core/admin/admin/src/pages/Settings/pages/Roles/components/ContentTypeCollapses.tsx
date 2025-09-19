@@ -64,6 +64,7 @@ const ContentTypeCollapses = ({
             display="inline-flex"
             alignItems="stretch"
             minWidth="100%"
+            overflow="hidden"
             borderColor={isActive ? 'primary600' : undefined}
           >
             <Collapse

@@ -34,6 +34,14 @@ const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode
   }
 };
 
+const MainNavIconWrapper = styled(Flex)<{ $mobile?: boolean }>`
+  display: ${({ $mobile }) => ($mobile ? 'flex' : 'none')};
+
+  ${({ theme }) => theme.breakpoints.large} {
+    display: flex;
+  }
+`;
+
 const MainNavIcons = ({
   listLinks,
   handleClickOnLink,
@@ -54,7 +62,7 @@ const MainNavIcons = ({
 
         const labelValue = formatMessage(link.intlLabel);
         return (
-          <Flex tag="li" key={link.to}>
+          <MainNavIconWrapper tag="li" key={link.to} $mobile={link.mobileNavigation?.top}>
             <GuidedTourTooltip to={link.to}>
               <NavLink.Tooltip label={labelValue}>
                 <NavLink.Link
@@ -87,7 +95,7 @@ const MainNavIcons = ({
                 </NavLink.Link>
               </NavLink.Tooltip>
             </GuidedTourTooltip>
-          </Flex>
+          </MainNavIconWrapper>
         );
       })
     : null;

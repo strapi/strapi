@@ -28,8 +28,16 @@ const Banner = ({ isTrialEndedRecently }: { isTrialEndedRecently: boolean }) => 
         width="100%"
         paddingTop={2}
         paddingBottom={2}
-        paddingLeft={10}
-        paddingRight={10}
+        paddingLeft={{
+          initial: 4,
+          medium: 6,
+          large: 10,
+        }}
+        paddingRight={{
+          initial: 4,
+          medium: 6,
+          large: 10,
+        }}
         gap={2}
       >
         <Box>

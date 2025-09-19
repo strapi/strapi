@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Flex, Menu, VisuallyHidden, Avatar, Typography, Badge } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +6,7 @@ import { styled } from 'styled-components';
 import { useAuth } from '../../features/Auth';
 import { getInitials, getDisplayName } from '../../utils/users';
 
-const MenuTrigger = styled(Menu.Trigger)`
+const MenuIcon = styled(Flex)`
   height: ${({ theme }) => theme.spaces[7]};
   width: ${({ theme }) => theme.spaces[7]};
   border: none;
@@ -43,9 +41,14 @@ const StyledTypography = styled(Typography)`
 
 export interface NavUserProps {
   showDisplayName?: boolean;
+  closeBurgerMenu?: (destination: string) => void;
 }
 
-export const NavUser = ({ showDisplayName = false, ...props }: NavUserProps) => {
+export const NavUser = ({
+  showDisplayName = false,
+  closeBurgerMenu = () => {},
+  ...props
+}: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const user = useAuth('User', (state) => state.user);
@@ -54,27 +57,33 @@ export const NavUser = ({ showDisplayName = false, ...props }: NavUserProps) => 
   const userDisplayName = getDisplayName(user);
 
   const handleProfile = () => {
-    navigate('/me');
+    const redirection = '/me';
+    navigate(redirection);
+    closeBurgerMenu(redirection);
   };
 
   const handleLogout = () => {
+    const redirection = '/auth/login';
     logout();
-    navigate('/auth/login');
+    navigate(redirection);
+    closeBurgerMenu(redirection);
   };
 
   return (
     <Flex {...props}>
       <Menu.Root>
-        <Flex gap={3}>
-          <MenuTrigger endIcon={null} fullWidth justifyContent="center">
-            <Avatar.Item delayMs={0} fallback={initials} />
-          </MenuTrigger>
-          {showDisplayName ? (
-            <Typography variant="omega">{userDisplayName}</Typography>
-          ) : (
-            <VisuallyHidden tag="span">{userDisplayName}</VisuallyHidden>
-          )}
-        </Flex>
+        <Menu.Trigger endIcon={null} fullWidth justifyContent="flex-start" paddingLeft={0}>
+          <Flex alignItems="center" gap={3}>
+            <MenuIcon justifyContent="center">
+              <Avatar.Item delayMs={0} fallback={initials} />
+            </MenuIcon>
+            {showDisplayName ? (
+              <Typography variant="omega">{userDisplayName}</Typography>
+            ) : (
+              <VisuallyHidden tag="span">{userDisplayName}</VisuallyHidden>
+            )}
+          </Flex>
+        </Menu.Trigger>
 
         <MenuContent popoverPlacement="top-start" zIndex={3}>
           <UserInfo direction="column" gap={0} alignItems="flex-start">

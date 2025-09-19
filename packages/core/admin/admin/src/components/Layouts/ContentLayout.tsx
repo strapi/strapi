@@ -8,7 +8,18 @@ interface ContentLayoutProps {
 
 const ContentLayout = ({ children }: ContentLayoutProps) => {
   return (
-    <Box paddingLeft={10} paddingRight={10}>
+    <Box
+      paddingLeft={{
+        initial: 4,
+        medium: 6,
+        large: 10,
+      }}
+      paddingRight={{
+        initial: 4,
+        medium: 6,
+        large: 10,
+      }}
+    >
       {children}
     </Box>
   );

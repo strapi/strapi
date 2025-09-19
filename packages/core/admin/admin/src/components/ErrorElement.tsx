@@ -36,17 +36,35 @@ ${error.stack}
 
     return (
       <Main height="100%">
-        <Flex alignItems="center" height="100%" justifyContent="center">
+        <Flex
+          alignItems="center"
+          height="100%"
+          justifyContent="center"
+          paddingLeft={{
+            initial: 6,
+            small: 8,
+            medium: 10,
+          }}
+          paddingRight={{
+            initial: 6,
+            small: 8,
+            medium: 10,
+          }}
+        >
           <Flex
             gap={7}
-            padding={7}
+            padding={{
+              initial: 6,
+              small: 7,
+              medium: 8,
+            }}
             direction="column"
-            width="35%"
+            width="100%"
+            maxWidth="512px"
             shadow="tableShadow"
             borderColor="neutral150"
             background="neutral0"
             hasRadius
-            maxWidth="512px"
           >
             <Flex direction="column" gap={2}>
               <WarningCircle width="32px" height="32px" fill="danger600" />
