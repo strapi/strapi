@@ -101,7 +101,13 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       if (oldHash !== hash) {
         debug('Schema changed');
 
-        return this.syncSchema(oldSchema.schema);
+        if (!db.config.settings.strictSyncSchema) {
+          debug('Syncing schema keeping not Strapi managed elements');
+          return this.syncSchema(oldSchema.schema);
+        }
+
+        return this.syncSchema();
+
       }
 
       debug('Schema unchanged');
