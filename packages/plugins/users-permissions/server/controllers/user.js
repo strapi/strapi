@@ -99,10 +99,9 @@ module.exports = {
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
-    const { id } = ctx.params;
+    const { documentId } = ctx.params;
     const { email, username, password } = ctx.request.body;
-
-    const user = await getService('user').fetch(id);
+    const user = await getService('user').fetchByDocumentId(documentId);
     if (!user) {
       throw new NotFoundError(`User not found`);
     }
@@ -118,7 +117,7 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { username } });
 
-      if (userWithSameUsername && _.toString(userWithSameUsername.id) !== _.toString(id)) {
+      if (userWithSameUsername && _.toString(userWithSameUsername.id) !== _.toString(user.id)) {
         throw new ApplicationError('Username already taken');
       }
     }
@@ -128,7 +127,7 @@ module.exports = {
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: email.toLowerCase() } });
 
-      if (userWithSameEmail && _.toString(userWithSameEmail.id) !== _.toString(id)) {
+      if (userWithSameEmail && _.toString(userWithSameEmail.id) !== _.toString(user.id)) {
         throw new ApplicationError('Email already taken');
       }
       ctx.request.body.email = ctx.request.body.email.toLowerCase();
@@ -161,11 +160,11 @@ module.exports = {
    * @return {Object}
    */
   async findOne(ctx) {
-    const { id } = ctx.params;
+    const { documentId } = ctx.params;
     await validateQuery(ctx.query, ctx);
     const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-    let data = await getService('user').fetch(id, sanitizedQuery);
+    let data = await getService('user').fetchByDocumentId(documentId, sanitizedQuery);
 
     if (data) {
       data = await sanitizeOutput(data, ctx);
@@ -190,9 +189,9 @@ module.exports = {
    * @return {Object}
    */
   async destroy(ctx) {
-    const { id } = ctx.params;
+    const { documentId } = ctx.params;
 
-    const data = await getService('user').remove({ id });
+    const data = await getService('user').removeByDocumentId(documentId);
     const sanitizedUser = await sanitizeOutput(data, ctx);
 
     ctx.send(sanitizedUser);
