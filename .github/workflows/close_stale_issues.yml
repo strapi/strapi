@@ -13,7 +13,6 @@ jobs:
       - name: Close stale issues
         uses: actions/stale@v9
         with:
-          debug-only: true # Dry run to confirm the workflow is working
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           ascending: true # Start with oldest issues first
           only-labels: 'stale-q1-q2-2024' # Only process issues with this label
