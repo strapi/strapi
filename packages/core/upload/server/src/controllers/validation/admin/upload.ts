@@ -41,12 +41,16 @@ export type UploadBody =
   | yup.InferType<typeof multiUploadSchema>;
 
 const bulkUpdatesSchema = yup.object({
-  updates: yup.array().of(
-    yup.object({
-      id: yup.number().required(),
-      fileInfo: fileInfoSchema.required(),
-    })
-  ).min(1).required(),
+  updates: yup
+    .array()
+    .of(
+      yup.object({
+        id: yup.number().required(),
+        fileInfo: fileInfoSchema.required(),
+      })
+    )
+    .min(1)
+    .required(),
 });
 
 export const validateBulkUpdateBody = validateYupSchema(bulkUpdatesSchema);
