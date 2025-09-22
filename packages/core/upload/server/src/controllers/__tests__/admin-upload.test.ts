@@ -20,7 +20,7 @@ const mockFindEntityAndCheckPermissions =
     typeof findEntityAndCheckPermissionsModule.findEntityAndCheckPermissions
   >;
 
-describe('Admin Upload Controller', () => {
+describe('Admin Upload Controller - AI Service Connection', () => {
   let mockContext: Partial<Context>;
   let ctxBulk: Partial<Context>;
 
@@ -79,7 +79,6 @@ describe('Admin Upload Controller', () => {
       log: { warn: jest.fn() },
     } as any;
 
-    // --- default validator behavior ---
     mockValidateUploadBody.mockResolvedValue({
       fileInfo: { name: 'test.jpg', alternativeText: '', caption: '', folder: null },
     } as any);
@@ -88,14 +87,12 @@ describe('Admin Upload Controller', () => {
       updates: [],
     } as any);
 
-    // By default, each permission check returns a pm with sanitizeOutput
     mockFindEntityAndCheckPermissions.mockResolvedValue({
       pm: {
         sanitizeOutput: jest.fn((data) => Promise.resolve({ ...data, cleaned: true })),
       },
     } as any);
 
-    // --- contexts ---
     mockContext = {
       state: { userAbility: {}, user: { id: 1 } },
       request: {
