@@ -26,7 +26,6 @@ const getAdminEE = () => {
     controllers,
     routes,
   };
-
   // Only add the other audit-logs APIs if the feature is enabled by the user and the license
   if (
     strapi.config.get('admin.auditLogs.enabled', true) &&

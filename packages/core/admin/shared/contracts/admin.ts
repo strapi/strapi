@@ -235,3 +235,28 @@ export declare namespace GetGuidedTourMeta {
     error?: errors.ApplicationError;
   }
 }
+
+/**
+ * GET /ai-usage - Get AI usage
+ */
+export declare namespace GetAiUsage {
+  export interface Request {
+    query: {};
+    body: {};
+  }
+
+  export interface Response {
+    cmsAiCreditsUsed: number;
+    subscription: {
+      subscriptionId: string;
+      planPriceId: string;
+      subscriptionStatus: string;
+      isActiveSubscription: boolean;
+      cmsAiEnabled: boolean;
+      cmsAiCreditsBase: number;
+      cmsAiCreditsMaxUsage: number;
+      currentTermStart: string;
+      currentTermEnd: string;
+    };
+  }
+}
