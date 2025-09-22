@@ -1,20 +1,13 @@
 import { Flex, Typography, Grid, ProgressBar } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useQueryParams } from '../../../../../../../../admin/src/hooks/useQueryParams';
 import { useGetAIUsageQuery } from '../../../../../services/ai';
 
 export const AIUsage = () => {
   const { formatMessage } = useIntl();
-  const [{ query }] = useQueryParams();
-  const { data, isLoading, error } = useGetAIUsageQuery(
-    {
-      ...query,
-    },
-    {
-      refetchOnMountOrArgChange: true,
-    }
-  );
+  const { data, isLoading, error } = useGetAIUsageQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
 
   if (isLoading) {
     return null;
