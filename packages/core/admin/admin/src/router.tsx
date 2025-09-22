@@ -62,6 +62,16 @@ const getInitialRoutes = (): RouteObject[] => [
     },
   },
   {
+    path: 'settings/navigation',
+    lazy: async () => {
+      const { SettingsNav } = await import('./pages/Settings/components/SettingsNav');
+
+      return {
+        Component: SettingsNav,
+      };
+    },
+  },
+  {
     path: 'settings/*',
     lazy: async () => {
       const { Layout } = await import('./pages/Settings/Layout');

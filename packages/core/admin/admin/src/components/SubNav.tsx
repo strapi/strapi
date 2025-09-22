@@ -12,11 +12,11 @@ import { ChevronDown, Cross, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { useSubNav } from '../hooks/useSubNav';
+import { useHistory } from '../features/BackButton';
 
 import { tours } from './GuidedTour/Tours';
 
-const Main = styled(DSSubNav)`
+const MainSubNav = styled(DSSubNav)`
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -25,11 +25,24 @@ const Main = styled(DSSubNav)`
   flex-direction: column;
   border-right: 0;
   box-shadow: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
 
   ${({ theme }) => theme.breakpoints.medium} {
+    position: sticky;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
   }
 `;
+
+const Main = ({ children, ...props }: { children: React.ReactNode }) => (
+  <MainSubNav data-strapi-sidenav {...props}>
+    {children}
+  </MainSubNav>
+);
 
 const StyledLink = styled(NavLink)`
   display: flex;
@@ -75,12 +88,13 @@ const Link = (
   props: Omit<React.ComponentProps<typeof StyledLink>, 'label'> & {
     label: React.ReactNode;
     endAction?: React.ReactNode;
+    handleClick?: () => void;
   }
 ) => {
-  const { closeSideNav } = useSubNav();
-  const { label, endAction, ...rest } = props;
+  const { label, endAction, handleClick, ...rest } = props;
+
   return (
-    <StyledLink {...rest} onClick={closeSideNav}>
+    <StyledLink {...rest} onClick={handleClick}>
       <Box width={'100%'} paddingLeft={3} paddingRight={3} borderRadius={1}>
         <Flex justifyContent="space-between" width="100%" gap={1}>
           <Typography
@@ -111,14 +125,14 @@ const CloseButton = styled(IconButton)`
 `;
 
 const Header = ({ label }: { label: string }) => {
-  const { closeSideNav } = useSubNav();
+  const goBack = useHistory('CloseNavButton', (state) => state.goBack);
   return (
     <StyledHeader justifyContent="space-between" paddingLeft={5} paddingRight={5}>
       <Typography variant="beta" tag="h2">
         {label}
       </Typography>
       <CloseButton
-        onClick={closeSideNav}
+        onClick={goBack}
         label="Close side navigation" // TODO: translate
         type="button"
       >

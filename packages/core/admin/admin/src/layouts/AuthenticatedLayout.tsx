@@ -8,6 +8,7 @@ import { useIntl } from 'react-intl';
 import { Outlet } from 'react-router-dom';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
+import { styled } from 'styled-components';
 
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
@@ -25,6 +26,14 @@ import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
 
 const { version: strapiVersion } = packageInfo;
+
+const ContentWrapper = styled(Box)`
+  padding-top: 5.6rem;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding-top: 0;
+  }
+`;
 
 const AdminLayout = () => {
   const { formatMessage } = useIntl();
@@ -73,6 +82,8 @@ const AdminLayout = () => {
     isLoading: isLoadingMenu,
     generalSectionLinks,
     pluginsSectionLinks,
+    topMobileNavigation,
+    burgerMobileNavigation,
   } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName));
 
   const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
@@ -102,7 +113,7 @@ const AdminLayout = () => {
       <NpsSurvey />
       <PluginsInitializer>
         <DndProvider backend={HTML5Backend}>
-          <Box background="neutral100">
+          <ContentWrapper background="neutral100">
             <SkipToContent>
               {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
             </SkipToContent>
@@ -110,13 +121,15 @@ const AdminLayout = () => {
               <LeftMenu
                 generalSectionLinks={generalSectionLinks}
                 pluginsSectionLinks={pluginsSectionLinks}
+                topMobileNavigation={topMobileNavigation}
+                burgerMobileNavigation={burgerMobileNavigation}
               />
               <Box flex={1}>
                 <UpsellBanner />
                 <Outlet />
               </Box>
             </Flex>
-          </Box>
+          </ContentWrapper>
         </DndProvider>
       </PluginsInitializer>
     </AppInfoProvider>

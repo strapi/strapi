@@ -22,10 +22,6 @@ export default {
       permissions: PERMISSIONS.main,
       Component: () => import('./pages/App'),
       position: 5,
-      mobileNavigation: {
-        top: false,
-        burger: false,
-      },
     });
 
     app.registerPlugin({

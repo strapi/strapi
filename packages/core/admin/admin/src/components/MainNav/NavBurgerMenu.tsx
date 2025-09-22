@@ -1,4 +1,6 @@
-import { Box, Flex, ScrollArea } from '@strapi/design-system';
+import * as React from 'react';
+
+import { Box, ScrollArea } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { MenuItem } from '../../core/apis/router';
@@ -25,7 +27,9 @@ const NavBurgerMenuWrapper = styled(Box)<{ $isShown: boolean }>`
   transition: transform 0.2s ease-in-out;
 
   ${({ theme }) => theme.breakpoints.medium} {
-    left: 23.2rem;
+    &.with-sidenav {
+      left: 23.2rem;
+    }
   }
   ${({ theme }) => theme.breakpoints.large} {
     display: none;
@@ -33,21 +37,41 @@ const NavBurgerMenuWrapper = styled(Box)<{ $isShown: boolean }>`
 `;
 
 const NavBurgerMenu = ({ isShown, handleClickOnLink, listLinks }: NavBurgerMenuProps) => {
+  const [hasSideNav, setHasSideNav] = React.useState(false);
+
+  const checkSideNav = React.useCallback(() => {
+    const sideNavElement = document.querySelector('[data-strapi-sidenav]');
+    setHasSideNav(!!sideNavElement);
+  }, []);
+
+  React.useEffect(() => {
+    const mutationObs = new MutationObserver(checkSideNav);
+
+    // Initial check
+    checkSideNav();
+
+    // Observe document for side nav changes
+    mutationObs.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['data-strapi-sidenav'],
+    });
+
+    return () => {
+      mutationObs.disconnect();
+    };
+  }, [checkSideNav]);
+
   return (
-    <NavBurgerMenuWrapper
-      $isShown={isShown}
-      paddingLeft={6}
-      paddingRight={6}
-      paddingTop={3}
-      paddingBottom={6}
-    >
+    <NavBurgerMenuWrapper $isShown={isShown} className={hasSideNav ? 'with-sidenav' : ''}>
       <ScrollArea>
-        <ul>
+        <Box tag="ul" paddingLeft={6} paddingRight={6} paddingTop={3} paddingBottom={6}>
           <MainNavBurgerMenuLinks listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
-          <li>
+          <Box paddingTop={4} tag="li">
             <NavUser closeBurgerMenu={handleClickOnLink} showDisplayName />
-          </li>
-        </ul>
+          </Box>
+        </Box>
       </ScrollArea>
     </NavBurgerMenuWrapper>
   );

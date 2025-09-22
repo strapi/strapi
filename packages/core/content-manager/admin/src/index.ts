@@ -31,9 +31,16 @@ export default {
       },
       permissions: [],
       position: 1,
-      mobileNavigation: {
-        top: true,
-        burger: false,
+    });
+
+    app.router.addRoute({
+      path: 'content-manager/navigation',
+      lazy: async () => {
+        const { LeftMenu } = await import('./components/LeftMenu');
+
+        return {
+          Component: LeftMenu,
+        };
       },
     });
 

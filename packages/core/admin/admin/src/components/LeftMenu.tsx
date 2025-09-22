@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useTracking } from '../features/Tracking';
-import { Menu, MenuItem } from '../hooks/useMenu';
+import { Menu, MenuItem, MobileMenuItem } from '../hooks/useMenu';
 
 import { MainNav } from './MainNav/MainNav';
 import { MainNavIcons } from './MainNav/MainNavLinks';
@@ -34,7 +34,11 @@ const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
   overflow-y: auto;
 `;
 
-interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
+interface LeftMenuProps
+  extends Pick<
+    Menu,
+    'generalSectionLinks' | 'pluginsSectionLinks' | 'topMobileNavigation' | 'burgerMobileNavigation'
+  > {}
 
 const MenuDetails = styled(Flex)`
   flex: 1;
@@ -49,7 +53,12 @@ const MenuDetails = styled(Flex)`
   }
 `;
 
-const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
+const LeftMenu = ({
+  generalSectionLinks,
+  pluginsSectionLinks,
+  topMobileNavigation,
+  burgerMobileNavigation,
+}: LeftMenuProps) => {
   const [isBurgerMenuShown, setIsBurgerMenuShown] = React.useState(false);
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
@@ -68,6 +77,42 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   );
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
+  /**
+   * Return filtered mobile navigation links (used for both top and burger menu)
+   */
+  const mapMobileNavigationLinks = React.useCallback(
+    (mobileNavLinks: MobileMenuItem[]): MenuItem[] =>
+      mobileNavLinks
+        .map((mobileLink) => {
+          const linkFound = listLinks.find((link) => link.to === mobileLink.to);
+          return linkFound ? { ...linkFound, to: mobileLink.link || linkFound.to } : null;
+        })
+        .filter((link) => link !== null) as MenuItem[],
+    [listLinks]
+  );
+
+  /**
+   * Mobile top navigation
+   */
+  const topMobileNavigationLinks = mapMobileNavigationLinks(topMobileNavigation);
+
+  /**
+   * Mobile burger menu
+   */
+  const excludedPluginsFromBurgerMenu = [
+    'content-manager',
+    'content-type-builder',
+    'upload',
+    'content-releases',
+  ];
+  const burgerMenuPluginsLinks = pluginsSectionLinks.filter(
+    (plugin) => !excludedPluginsFromBurgerMenu.some((link) => plugin.to.includes(link))
+  );
+  const burgerMobileNavigationLinks = [
+    ...mapMobileNavigationLinks(burgerMobileNavigation),
+    ...burgerMenuPluginsLinks,
+  ];
+
   return (
     <>
       <MainNav>
@@ -77,28 +122,46 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
         <MenuDetails>
           <ScrollArea>
-            <NavListWrapper
-              tag="ul"
-              gap={3}
-              direction={{
-                initial: 'row',
-                large: 'column',
+            <Box
+              display={{
+                initial: 'flex',
+                large: 'none',
               }}
-              justifyContent="center"
-              flex={1}
-              paddingLeft={{
-                initial: 3,
-                large: 0,
-              }}
-              paddingRight={{
-                initial: 3,
-                large: 0,
-              }}
-              paddingTop={3}
-              paddingBottom={3}
             >
-              <MainNavIcons listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
-            </NavListWrapper>
+              <NavListWrapper
+                tag="ul"
+                gap={3}
+                justifyContent="center"
+                flex={1}
+                paddingLeft={3}
+                paddingRight={3}
+                paddingTop={3}
+                paddingBottom={3}
+              >
+                <MainNavIcons
+                  listLinks={topMobileNavigationLinks}
+                  handleClickOnLink={handleClickOnLink}
+                />
+              </NavListWrapper>
+            </Box>
+            <Box
+              display={{
+                initial: 'none',
+                large: 'flex',
+              }}
+            >
+              <NavListWrapper
+                tag="ul"
+                gap={3}
+                direction="column"
+                justifyContent="center"
+                flex={1}
+                paddingTop={3}
+                paddingBottom={3}
+              >
+                <MainNavIcons listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
+              </NavListWrapper>
+            </Box>
           </ScrollArea>
           <TrialCountdown />
           <Box
@@ -138,7 +201,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
       </MainNav>
       <NavBurgerMenu
         isShown={isBurgerMenuShown}
-        listLinks={listLinks.filter((link) => link.mobileNavigation?.burger)}
+        listLinks={burgerMobileNavigationLinks}
         handleClickOnLink={handleClickOnLink}
       />
     </>

@@ -34,14 +34,6 @@ const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode
   }
 };
 
-const MainNavIconWrapper = styled(Flex)<{ $mobile?: boolean }>`
-  display: ${({ $mobile }) => ($mobile ? 'flex' : 'none')};
-
-  ${({ theme }) => theme.breakpoints.large} {
-    display: flex;
-  }
-`;
-
 const MainNavIcons = ({
   listLinks,
   handleClickOnLink,
@@ -50,6 +42,7 @@ const MainNavIcons = ({
   handleClickOnLink: (value: string) => void;
 }) => {
   const { formatMessage } = useIntl();
+
   return listLinks.length > 0
     ? listLinks.map((link) => {
         const LinkIcon = link.icon;
@@ -61,45 +54,50 @@ const MainNavIcons = ({
             : undefined;
 
         const labelValue = formatMessage(link.intlLabel);
+
         return (
-          <MainNavIconWrapper tag="li" key={link.to} $mobile={link.mobileNavigation?.top}>
+          <Flex tag="li" key={link.to}>
             <GuidedTourTooltip to={link.to}>
-              <NavLink.Tooltip label={labelValue}>
-                <NavLink.Link
-                  to={link.to}
-                  onClick={() => handleClickOnLink(link.to)}
-                  aria-label={labelValue}
-                >
-                  <NavLink.Icon label={labelValue}>
-                    <LinkIcon width="20" height="20" fill="neutral500" />
-                  </NavLink.Icon>
-                  {badgeContentLock ? (
-                    <NavLinkBadgeLock
-                      label="locked"
-                      textColor="neutral500"
-                      paddingLeft={0}
-                      paddingRight={0}
-                    >
-                      {badgeContentLock}
-                    </NavLinkBadgeLock>
-                  ) : badgeContentNumeric ? (
-                    <NavLinkBadgeCounter
-                      label={badgeContentNumeric}
-                      backgroundColor="primary600"
-                      width="2.3rem"
-                      color="neutral0"
-                    >
-                      {badgeContentNumeric}
-                    </NavLinkBadgeCounter>
-                  ) : null}
-                </NavLink.Link>
-              </NavLink.Tooltip>
+              <NavLink.Link
+                to={link.to}
+                onClick={() => handleClickOnLink(link.to)}
+                aria-label={labelValue}
+              >
+                <NavLink.Icon label={labelValue}>
+                  <LinkIcon width="20" height="20" fill="neutral500" />
+                </NavLink.Icon>
+                {badgeContentLock ? (
+                  <NavLinkBadgeLock
+                    label="locked"
+                    textColor="neutral500"
+                    paddingLeft={0}
+                    paddingRight={0}
+                  >
+                    {badgeContentLock}
+                  </NavLinkBadgeLock>
+                ) : badgeContentNumeric ? (
+                  <NavLinkBadgeCounter
+                    label={badgeContentNumeric}
+                    backgroundColor="primary600"
+                    width="2.3rem"
+                    color="neutral0"
+                  >
+                    {badgeContentNumeric}
+                  </NavLinkBadgeCounter>
+                ) : null}
+              </NavLink.Link>
             </GuidedTourTooltip>
-          </MainNavIconWrapper>
+          </Flex>
         );
       })
     : null;
 };
+
+const IconContainer = styled(Box)`
+  svg {
+    display: block;
+  }
+`;
 
 const MainNavBurgerMenuLinks = ({
   listLinks,
@@ -109,6 +107,7 @@ const MainNavBurgerMenuLinks = ({
   handleClickOnLink: (value: string) => void;
 }) => {
   const { formatMessage } = useIntl();
+
   return listLinks.length > 0
     ? listLinks.map((link) => {
         const LinkIcon = link.icon;
@@ -120,17 +119,18 @@ const MainNavBurgerMenuLinks = ({
             : undefined;
 
         const labelValue = formatMessage(link.intlLabel);
+
         return (
-          <Flex paddingTop={3} paddingBottom={3} alignItems="center" tag="li" key={link.to}>
+          <Flex paddingTop={4} alignItems="center" tag="li" key={link.to}>
             <GuidedTourTooltip to={link.to}>
               <NavLink.Link
                 to={link.to}
                 onClick={() => handleClickOnLink(link.to)}
                 aria-label={labelValue}
               >
-                <Box marginRight="0.6rem">
+                <IconContainer marginRight="0.6rem">
                   <LinkIcon width="20" height="20" fill="neutral500" />
-                </Box>
+                </IconContainer>
                 <Typography marginLeft={3}>{labelValue}</Typography>
                 {badgeContentLock ? (
                   <NavLinkBadgeLock

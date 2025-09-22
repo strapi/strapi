@@ -12,10 +12,16 @@ import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
  * -----------------------------------------------------------------------------------------------*/
 
 export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'>;
+export type MobileMenuItem = {
+  to: string;
+  link?: string;
+};
 
 export interface Menu {
   generalSectionLinks: MenuItem[];
   pluginsSectionLinks: MenuItem[];
+  topMobileNavigation: MobileMenuItem[];
+  burgerMobileNavigation: MobileMenuItem[];
   isLoading: boolean;
 }
 
@@ -34,10 +40,6 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         to: '/',
         permissions: [],
         position: 0,
-        mobileNavigation: {
-          top: true,
-          burger: false,
-        },
       },
       {
         icon: ShoppingCart,
@@ -48,10 +50,6 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         to: '/marketplace',
         permissions: permissions.marketplace?.main ?? [],
         position: 7,
-        mobileNavigation: {
-          top: false,
-          burger: false,
-        },
       },
       {
         icon: Cog,
@@ -65,13 +63,30 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         permissions: [],
         notificationsCount: 0,
         position: 9,
-        mobileNavigation: {
-          top: false,
-          burger: true,
-        },
       },
     ],
     pluginsSectionLinks: [],
+    topMobileNavigation: [
+      {
+        to: '/',
+      },
+      {
+        to: 'content-manager',
+        link: '/content-manager/navigation',
+      },
+      {
+        to: 'plugins/content-releases',
+      },
+      {
+        to: 'plugins/upload',
+      },
+    ],
+    burgerMobileNavigation: [
+      {
+        to: '/settings',
+        link: '/settings/navigation',
+      },
+    ],
     isLoading: true,
   });
   const generalSectionLinksRef = React.useRef(menuWithUserPermissions.generalSectionLinks);

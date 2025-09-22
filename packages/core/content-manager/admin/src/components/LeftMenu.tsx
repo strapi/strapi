@@ -8,10 +8,12 @@ import {
   useFilter,
   Divider,
   ScrollArea,
+  Loader,
 } from '@strapi/design-system';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 
+import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
 import { useContentTypeSchema } from '../hooks/useContentTypeSchema';
 import { useTypedSelector } from '../modules/hooks';
 import { getTranslation } from '../utils/translations';
@@ -22,6 +24,9 @@ const LeftMenu = () => {
   const [search, setSearch] = React.useState('');
   const [{ query }] = useQueryParams<{ plugins?: object }>();
   const { formatMessage, locale } = useIntl();
+
+  // Initialize Content Manager data to ensure links are available
+  const { isLoading } = useContentManagerInitData();
 
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager'].app.collectionTypeLinks
@@ -116,6 +121,19 @@ const LeftMenu = () => {
 
     return query.plugins;
   };
+
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <SubNav.Main aria-label={label}>
+        <SubNav.Header label={label} />
+        <Divider />
+        <Flex padding={4} justifyContent="center">
+          <Loader />
+        </Flex>
+      </SubNav.Main>
+    );
+  }
 
   return (
     <SubNav.Main aria-label={label}>

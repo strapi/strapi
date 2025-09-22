@@ -58,7 +58,6 @@ export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
 export { useElementOnScreen } from './hooks/useElementOnScreen';
-export { useSubNav } from './hooks/useSubNav';
 export { useAdminUsers } from './services/users';
 export { useGetCountDocumentsQuery } from './services/homepage';
 /** @internal */

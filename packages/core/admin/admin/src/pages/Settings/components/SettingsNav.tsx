@@ -6,9 +6,9 @@ import { styled } from 'styled-components';
 
 import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { SubNav } from '../../../components/SubNav';
+import { useHistory } from '../../../features/BackButton';
 import { useTracking } from '../../../features/Tracking';
-import { SettingsMenu } from '../../../hooks/useSettingsMenu';
-import { useSubNav } from '../../../hooks/useSubNav';
+import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 
 type LinkId =
   | 'content-releases'
@@ -19,22 +19,20 @@ type LinkId =
 
 type FeatureName = 'cms-content-releases' | 'review-workflows' | 'sso' | 'audit-logs';
 
-interface SettingsNavProps {
-  menu: SettingsMenu;
-}
-
 const StyledBadge = styled(Badge)`
   border-radius: 50%;
   padding: ${({ theme }) => theme.spaces[2]};
   height: 2rem;
 `;
 
-const SettingsNav = ({ menu }: SettingsNavProps) => {
+const SettingsNav = () => {
+  const { menu } = useSettingsMenu();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
   const { license } = useLicenseLimits();
-  const { closeSideNav } = useSubNav();
+
+  const goBack = useHistory('CloseNavButton', (state) => state.goBack);
 
   const availableFeatureNames = license?.features.map((feature) => feature.name);
 
@@ -60,6 +58,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
           id: link.id as LinkId,
           title: link.intlLabel,
           name: link.id,
+          to: link.to.startsWith('/') ? link.to : `/settings/${link.to}`,
         };
       }),
     };
@@ -72,7 +71,6 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
 
   const handleClickOnLink = (destination: string) => () => {
     trackUsage('willNavigate', { from: pathname, to: destination });
-    closeSideNav();
   };
 
   return (
@@ -130,4 +128,3 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
 };
 
 export { SettingsNav };
-export type { SettingsNavProps };

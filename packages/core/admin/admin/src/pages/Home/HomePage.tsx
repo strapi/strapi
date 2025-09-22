@@ -155,7 +155,7 @@ const HomePageCE = () => {
       <FreeTrialWelcomeModal />
       <FreeTrialEndedModal />
       <Layouts.Content>
-        <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
+        <Flex direction="column" alignItems="stretch" gap={8}>
           <GuidedTourHomepageOverview />
           {loading ? (
             <Box position="absolute" top={0} left={0} right={0} bottom={0}>

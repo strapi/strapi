@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import { ConfirmDialog, SubNav, tours } from '@strapi/admin/strapi-admin';
 import {
@@ -35,35 +35,9 @@ const DiscardAllMenuItem = styled(Menu.Item)`
   }
 `;
 
-const GuidedTourTooltip = ({
-  sectionId,
-  children,
-}: {
-  sectionId?: string;
-  children: React.ReactNode;
-}) => {
-  switch (sectionId) {
-    case 'models':
-      return (
-        <tours.contentTypeBuilder.CollectionTypes>
-          <tours.contentTypeBuilder.YourTurn>{children}</tours.contentTypeBuilder.YourTurn>
-        </tours.contentTypeBuilder.CollectionTypes>
-      );
-    case 'singleTypes':
-      return (
-        <tours.contentTypeBuilder.SingleTypes>{children}</tours.contentTypeBuilder.SingleTypes>
-      );
-    case 'components':
-      return <tours.contentTypeBuilder.Components>{children}</tours.contentTypeBuilder.Components>;
-    default:
-      return children;
-  }
-};
-
 export const ContentTypeBuilderNav = () => {
   const { menu, search } = useContentTypeBuilderMenu();
   const { saveSchema, isModified, history, isInDevelopmentMode } = useDataManager();
-
   const { formatMessage } = useIntl();
 
   const [menuIsOpen, setMenuIsOpen] = useState(false);
@@ -224,70 +198,67 @@ export const ContentTypeBuilderNav = () => {
         </Flex>
         <SubNav.Sections>
           {menu.map((section) => (
-            <Fragment key={section.name}>
-              <GuidedTourTooltip sectionId={section.name}>
-                <SubNav.Section
-                  label={formatMessage({
-                    id: section.title.id,
-                    defaultMessage: section.title.defaultMessage,
-                  })}
-                  badgeLabel={section.linksCount ? section.linksCount.toString() : undefined}
-                  link={
-                    section.customLink && {
-                      label: formatMessage({
-                        id: section.customLink?.id,
-                        defaultMessage: section.customLink?.defaultMessage,
-                      }),
-                      onClick: section.customLink?.onClick,
+            <SubNav.Section
+              key={section.name}
+              label={formatMessage({
+                id: section.title.id,
+                defaultMessage: section.title.defaultMessage,
+              })}
+              badgeLabel={section.linksCount ? section.linksCount.toString() : undefined}
+              link={
+                section.customLink && {
+                  label: formatMessage({
+                    id: section.customLink?.id,
+                    defaultMessage: section.customLink?.defaultMessage,
+                  }),
+                  onClick: section.customLink?.onClick,
+                }
+              }
+              sectionId={section.name}
+            >
+              {section.links.map((link) => {
+                const linkLabel = formatMessage({ id: link.name, defaultMessage: link.title });
+
+                if ('links' in link) {
+                  return (
+                    <SubNav.SubSection key={link.name} label={linkLabel}>
+                      {link.links.map((subLink) => {
+                        const label = formatMessage({
+                          id: subLink.name,
+                          defaultMessage: subLink.title,
+                        });
+
+                        return (
+                          <SubNav.Link
+                            to={subLink.to}
+                            key={subLink.name}
+                            label={label}
+                            endAction={
+                              <Box tag="span" textAlign="center" width={'24px'}>
+                                <Status status={subLink.status} />
+                              </Box>
+                            }
+                          />
+                        );
+                      })}
+                    </SubNav.SubSection>
+                  );
+                }
+
+                return (
+                  <SubNav.Link
+                    to={link.to}
+                    key={link.name}
+                    label={linkLabel}
+                    endAction={
+                      <Box tag="span" textAlign="center" width={'24px'}>
+                        <Status status={link.status} />
+                      </Box>
                     }
-                  }
-                  sectionId={section.name}
-                >
-                  {section.links.map((link) => {
-                    const linkLabel = formatMessage({ id: link.name, defaultMessage: link.title });
-
-                    if ('links' in link) {
-                      return (
-                        <SubNav.SubSection key={link.name} label={linkLabel}>
-                          {link.links.map((subLink) => {
-                            const label = formatMessage({
-                              id: subLink.name,
-                              defaultMessage: subLink.title,
-                            });
-
-                            return (
-                              <SubNav.Link
-                                to={subLink.to}
-                                key={subLink.name}
-                                label={label}
-                                endAction={
-                                  <Box tag="span" textAlign="center" width={'24px'}>
-                                    <Status status={subLink.status} />
-                                  </Box>
-                                }
-                              />
-                            );
-                          })}
-                        </SubNav.SubSection>
-                      );
-                    }
-
-                    return (
-                      <SubNav.Link
-                        to={link.to}
-                        key={link.name}
-                        label={linkLabel}
-                        endAction={
-                          <Box tag="span" textAlign="center" width={'24px'}>
-                            <Status status={link.status} />
-                          </Box>
-                        }
-                      />
-                    );
-                  })}
-                </SubNav.Section>
-              </GuidedTourTooltip>
-            </Fragment>
+                  />
+                );
+              })}
+            </SubNav.Section>
           ))}
         </SubNav.Sections>
       </ScrollArea>

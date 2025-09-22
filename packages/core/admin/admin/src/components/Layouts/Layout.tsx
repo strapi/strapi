@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex } from '@strapi/design-system';
+import { Box, Flex } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { ActionLayout } from './ActionLayout';
@@ -32,11 +32,12 @@ const SideNavContainer = styled(Flex)<{ $isSideNavMobileVisible: boolean }>`
   left: 0;
   height: 100vh;
   width: 100vw;
-  z-index: 3;
+  z-index: 4;
   background: ${({ theme }) => theme.colors.neutral0};
   transform: ${({ $isSideNavMobileVisible }) =>
     $isSideNavMobileVisible ? 'translateX(0)' : 'translateX(-100%)'};
   transition: transform 0.3s ease-in-out;
+
   ${({ theme }) => theme.breakpoints.medium} {
     width: 23.2rem;
     top: 5.6rem;
@@ -55,14 +56,10 @@ const SideNavContainer = styled(Flex)<{ $isSideNavMobileVisible: boolean }>`
 
 const OverflowingItem = styled(Box)`
   overflow-x: hidden;
-  padding-top: 5.6rem;
 
   ${({ theme }) => theme.breakpoints.medium} {
     transform: none;
     width: auto;
-  }
-  ${({ theme }) => theme.breakpoints.large} {
-    padding-top: 0;
   }
 `;
 
@@ -100,16 +97,6 @@ const RootLayout = ({ sideNav, children }: LayoutProps) => {
           large: 10,
         }}
       >
-        {sideNav && (
-          <Box display={{ initial: 'block', medium: 'none' }} padding={4}>
-            <Button
-              variant="tertiary"
-              onClick={() => setIsSideNavMobileVisible(!isSideNavMobileVisible)}
-            >
-              {isSideNavMobileVisible ? 'Close Side navigation' : 'Open Side navigation'}
-            </Button>
-          </Box>
-        )}
         {children}
       </OverflowingItem>
     </GridContainer>
