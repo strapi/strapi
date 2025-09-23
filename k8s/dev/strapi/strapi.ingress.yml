@@ -1,0 +1,28 @@
+# =============================================================#
+# Ingress Strapi API
+# =============================================================#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ing-strapi
+  namespace: tipsoption-dev
+  annotations:
+    alb.ingress.group.name: "tipsoption-group"
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:eu-west-1:973145121826:certificate/6d6fd96b-6f6e-4512-a94e-53409e949d5c"
+    alb.ingress.kubernetes.io/subnets: "subnet-012b6741c5e9f3b5a,subnet-0a385a48a78ba1f9f"
+    alb.ingress.kubernetes.io/target-type: "ip"
+spec:
+  ingressClassName: alb
+  rules:
+    - host: strapi.dev.tipsoption.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: svc-strapi
+                port:
+                  number: 1337

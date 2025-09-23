@@ -33,7 +33,7 @@ spec:
             secretName: strapi-secret
       containers:
         - name: strapi
-          image: 973145121826.dkr.ecr.eu-west-1.amazonaws.com/tipsoption:strapi-0.0.2
+          image: 973145121826.dkr.ecr.eu-west-1.amazonaws.com/tipsoption:strapi-latest
           ports:
             - containerPort: 1337
               name: http
@@ -98,26 +98,26 @@ spec:
                   key: pwd
             - name: STRAPI_LOG_LEVEL
               value: "info"
-          startupProbe:
-            httpGet:
-              path: /admin
-              port: http
-            periodSeconds: 10
-            failureThreshold: 10
-            initialDelaySeconds: 60
-          livenessProbe:
-            httpGet:
-              path: /admin
-              port: http
-            periodSeconds: 30
-            failureThreshold: 3
+          # startupProbe:
+          #   httpGet:
+          #     path: /admin
+          #     port: http
+          #   periodSeconds: 15
+          #   failureThreshold: 20
+          #   initialDelaySeconds: 120
+          # livenessProbe:
+          #   httpGet:
+          #     path: /admin
+          #     port: http
+          #   periodSeconds: 30
+          #   failureThreshold: 3
           resources:
             requests:
-              cpu: "25m"
-              memory: "256Mi"
-              ephemeral-storage: 128Mi
-            limits:
-              cpu: "100m"
-              memory: "768Mi"
+              cpu: "200m"
+              memory: "1Gi"
               ephemeral-storage: 256Mi
+            limits:
+              cpu: "500m"
+              memory: "2Gi"
+              ephemeral-storage: 512Mi
 # =============================================================#
