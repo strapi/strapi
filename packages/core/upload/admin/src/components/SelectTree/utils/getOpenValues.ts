@@ -1,10 +1,10 @@
 interface Option {
-  value: number | string | null;
+  value: number | string;
   parent?: number | string | null;
 }
 
 interface DefaultValue {
-  value?: number | string | null;
+  value?: number | string;
 }
 
 export function getOpenValues(options: Option[], defaultValue: DefaultValue = {}) {
