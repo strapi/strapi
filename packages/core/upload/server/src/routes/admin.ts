@@ -1,221 +1,58 @@
+const isAuthenticated = 'admin::isAuthenticatedAdmin';
+
+const withPermissions = (actions: string[]) => ({
+  name: 'admin::hasPermissions',
+  config: { actions },
+});
+
+// Common policy sets
+const authOnly = [isAuthenticated];
+
+const canReadSettings = [isAuthenticated, withPermissions(['plugin::upload.settings.read'])];
+const canReadAssets = [isAuthenticated, withPermissions(['plugin::upload.read'])];
+const canUpdateAssets = [isAuthenticated, withPermissions(['plugin::upload.assets.update'])];
+const canCreateAssets = [isAuthenticated, withPermissions(['plugin::upload.assets.create'])];
+
+type Route = {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  path: string;
+  handler: string;
+  config: { policies: unknown[] };
+};
+
+const makeRoute = (
+  method: Route['method'],
+  path: string,
+  handler: string,
+  policies: unknown[]
+): Route => ({
+  method,
+  path,
+  handler,
+  config: { policies },
+});
+
 export const routes = {
   type: 'admin',
   routes: [
-    {
-      method: 'GET',
-      path: '/settings',
-      handler: 'admin-settings.getSettings',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.settings.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'PUT',
-      path: '/settings',
-      handler: 'admin-settings.updateSettings',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.settings.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'POST',
-      path: '/',
-      handler: 'admin-upload.upload',
-      config: {
-        policies: ['admin::isAuthenticatedAdmin'],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/files',
-      handler: 'admin-file.find',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/files/:id',
-      handler: 'admin-file.findOne',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'DELETE',
-      path: '/files/:id',
-      handler: 'admin-file.destroy',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.assets.update'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/folders/:id',
-      handler: 'admin-folder.findOne',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/folders',
-      handler: 'admin-folder.find',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'POST',
-      path: '/folders',
-      handler: 'admin-folder.create',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.assets.create'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'PUT',
-      path: '/folders/:id',
-      handler: 'admin-folder.update',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.assets.update'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
-      path: '/folder-structure',
-      handler: 'admin-folder.getStructure',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'POST',
-      path: '/actions/bulk-delete',
-      handler: 'admin-folder-file.deleteMany',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.assets.update'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'POST',
-      path: '/actions/bulk-move',
-      handler: 'admin-folder-file.moveMany',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.assets.update'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'POST',
-      path: '/actions/bulk-update',
-      handler: 'admin-upload.bulkUpdateFileInfo',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['plugin::upload.assets.update'],
-            },
-          },
-        ],
-      },
-    },
+    makeRoute('GET', '/settings', 'admin-settings.getSettings', canReadSettings),
+    makeRoute('PUT', '/settings', 'admin-settings.updateSettings', canReadSettings),
+
+    makeRoute('POST', '/', 'admin-upload.upload', authOnly),
+
+    makeRoute('GET', '/files', 'admin-file.find', canReadAssets),
+    makeRoute('GET', '/files/:id', 'admin-file.findOne', canReadAssets),
+    makeRoute('DELETE', '/files/:id', 'admin-file.destroy', canUpdateAssets),
+
+    makeRoute('GET', '/folders/:id', 'admin-folder.findOne', canReadAssets),
+    makeRoute('GET', '/folders', 'admin-folder.find', canReadAssets),
+    makeRoute('POST', '/folders', 'admin-folder.create', canCreateAssets),
+    makeRoute('PUT', '/folders/:id', 'admin-folder.update', canUpdateAssets),
+
+    makeRoute('GET', '/folder-structure', 'admin-folder.getStructure', canReadAssets),
+
+    makeRoute('POST', '/actions/bulk-delete', 'admin-folder-file.deleteMany', canUpdateAssets),
+    makeRoute('POST', '/actions/bulk-move', 'admin-folder-file.moveMany', canUpdateAssets),
+    makeRoute('POST', '/actions/bulk-update', 'admin-upload.bulkUpdateFileInfo', canUpdateAssets),
   ],
 };
