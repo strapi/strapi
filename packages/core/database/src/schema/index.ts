@@ -107,7 +107,6 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
         }
 
         return this.syncSchema();
-
       }
 
       debug('Schema unchanged');
