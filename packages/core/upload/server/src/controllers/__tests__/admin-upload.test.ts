@@ -48,14 +48,14 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
     mockGetService.mockImplementation((serviceName: string) => {
       if (serviceName === 'aiMetadata') return mockAiMetadataService;
-      if (serviceName === 'upload') return uploadService as any;
+      if (serviceName === 'upload') return uploadService;
       if (serviceName === 'file') {
         return {
           upload: jest.fn().mockResolvedValue([{}]),
           signFileUrls: jest.fn((f: any) => Promise.resolve(f)),
         };
       }
-      return {} as any;
+      return {};
     });
 
     const pm = {
@@ -63,7 +63,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       sanitizeOutput: jest.fn((data) => Promise.resolve(data)),
     };
 
-    (global as any).strapi = {
+    global.strapi = {
       service: jest.fn().mockReturnValue({
         createPermissionsManager: jest.fn().mockReturnValue(pm),
       }),
@@ -79,11 +79,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
     mockValidateUploadBody.mockResolvedValue({
       fileInfo: { name: 'test.jpg', alternativeText: '', caption: '', folder: null },
-    } as any);
+    });
 
     mockValidateBulkUpdateBody.mockResolvedValue({
       updates: [],
-    } as any);
+    });
 
     mockFindEntityAndCheckPermissions.mockResolvedValue({
       pm: {
@@ -102,7 +102,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
     ctxBulk = {
       state: { userAbility: {}, user: { id: 42 } },
-      request: { body: {} } as any,
+      request: { body: {} },
     } as any;
   });
 
@@ -189,7 +189,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       expect(mockFindEntityAndCheckPermissions).toHaveBeenCalledTimes(2);
 
-      expect((ctxBulk as any).body).toEqual([
+      expect(ctxBulk.body).toEqual([
         { id: 1, caption: 'A', cleaned: true },
         { id: 2, alternativeText: 'B', cleaned: true },
       ]);
@@ -200,7 +200,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       await adminUploadController.bulkUpdateFileInfo(ctxBulk as Context);
 
-      expect((ctxBulk as any).body).toEqual([]);
+      expect(ctxBulk.body).toEqual([]);
       expect(uploadService.updateFileInfo).not.toHaveBeenCalled();
       expect(mockFindEntityAndCheckPermissions).not.toHaveBeenCalled();
     });
@@ -239,7 +239,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         { id: 10, caption: 'X' },
         { action: ACTIONS.read }
       );
-      expect((ctxBulk as any).body).toEqual([{ ok: true, id: 10, caption: 'X' }]);
+      expect(ctxBulk.body).toEqual([{ ok: true, id: 10, caption: 'X' }]);
     });
 
     it('passes the authenticated user to updateFileInfo', async () => {
