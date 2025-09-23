@@ -24,8 +24,8 @@ export const HomepageLayoutWriteSchema = z
   .object({
     version: z.number().int().min(1).optional(),
     widgets: z.array(WidgetEntrySchema).max(100),
+    updatedAt: z.string().datetime().optional(),
   })
   .strict();
-
 
 export type HomepageLayoutWrite = z.infer<typeof HomepageLayoutWriteSchema>;

@@ -9,12 +9,12 @@ import {
 
 const DEFAULT_WIDTH = 6 as const;
 const keyFor = (userId: number) => `homepage-layout:${userId}`;
-const adminStore = strapi.store({ type: 'core', name: 'admin' });
 
 const isContentTypeVisible = (model: any) =>
   model?.pluginOptions?.['content-type-builder']?.visible !== false;
 
 export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const adminStore = strapi.store({ type: 'core', name: 'admin' });
   const getKeyStatistics = async () => {
     const contentTypes = Object.entries(strapi.contentTypes).filter(([, contentType]) => {
       return isContentTypeVisible(contentType);
@@ -63,7 +63,6 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       ? HomepageLayoutSchema.parse(currentRaw)
       : null;
 
-    // Final order: replace only if provided
     const widgetsNext = write.widgets ?? current?.widgets ?? [];
 
     // Normalize widths (fill defaults where missing)
@@ -76,9 +75,9 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     const next: HomepageLayout = {
-      version: 1,
+      version: write.version ?? 1,
       widgets: normalizedWidgets,
-      updatedAt: new Date().toISOString(),
+      updatedAt: write.updatedAt ?? new Date().toISOString(),
     };
 
     await adminStore.set({ key, value: next });
