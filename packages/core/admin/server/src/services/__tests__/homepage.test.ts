@@ -106,7 +106,7 @@ describe('homepageService', () => {
           { uid: 'x', width: 4 },
           { uid: 'y', width: 8 },
         ],
-        updatedAt
+        updatedAt,
       });
 
       expect(updated.version).toBe(1);
