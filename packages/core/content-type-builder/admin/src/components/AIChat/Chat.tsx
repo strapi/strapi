@@ -355,9 +355,9 @@ const Chat = () => {
   // Auto-open chat when AIChat guided tour step is active
   useEffect(() => {
     const isAIChatStepActive =
+      state.enabled &&
       state.tours.contentTypeBuilder?.currentStep === 1 && // AIChat is step 1 in contentTypeBuilderStepsAI
-      !state.tours.contentTypeBuilder?.isCompleted &&
-      state.enabled;
+      !state.tours.contentTypeBuilder?.isCompleted;
 
     if (isAIChatStepActive && !isChatOpen && openChat) {
       openChat();

@@ -62,7 +62,7 @@ type Action =
       type: 'set_tour_type';
       payload: {
         tourName: ValidTourName;
-        tourType: string;
+        tourType: 'ContentTypeBuilderAI' | 'ContentTypeBuilderNoAI';
       };
     };
 
