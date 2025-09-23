@@ -1,37 +1,3 @@
-/*import { z } from "zod";
-
-export const WidgetUIDSchema = z.string().min(1);
-export const WidthSchema = z.number().int().min(1).max(12);
-
-// Incoming payload from the client (no version/updatedAt).
-// We also PRUNE widths whose keys are not present in `order`.
-export const UserLayoutWriteSchema = z
-  .object({
-    order: z.array(WidgetUIDSchema).max(100),
-    widths: z.record(WidgetUIDSchema, WidthSchema),
-  })
-  .strict()
-  // TODO Araks: do we need to delete orphaned widths?
-  .transform((data) => {
-    const allowed = new Set(data.order);
-    const pruned: Record<string, number> = {};
-    for (const [uid, w] of Object.entries(data.widths)) {
-      if (allowed.has(uid)) pruned[uid] = w;
-    }
-    return { ...data, widths: pruned };
-  });
-
-export const UserLayoutSchema = z
-  .object({
-    version: z.number().int().min(0),
-    order: z.array(WidgetUIDSchema).max(100),
-    widths: z.record(WidgetUIDSchema, WidthSchema),
-    updatedAt: z.string().datetime(),
-  })
-  .strict();
-
-export type UserLayoutWrite = z.infer<typeof UserLayoutWriteSchema>;
-export type UserLayout = z.infer<typeof UserLayoutSchema>;*/
 import { z } from "zod";
 
 export const WidgetUIDSchema = z.string().min(1);
