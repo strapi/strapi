@@ -4,7 +4,7 @@ import adminUploadController from '../admin-upload';
 import { getService } from '../../utils';
 import { validateBulkUpdateBody, validateUploadBody } from '../validation/admin/upload';
 import * as findEntityAndCheckPermissionsModule from '../utils/find-entity-and-check-permissions';
-import { ACTIONS } from '../../../src/constants';
+import { ACTIONS } from '../../constants';
 
 jest.mock('../../utils');
 jest.mock('../validation/admin/upload');
