@@ -47,7 +47,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     };
 
     mockGetService.mockImplementation((serviceName: string) => {
-      if (serviceName === 'aiMetadata') return mockAiMetadataService as any;
+      if (serviceName === 'aiMetadata') return mockAiMetadataService;
       if (serviceName === 'upload') return uploadService as any;
       if (serviceName === 'file') {
         return {
