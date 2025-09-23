@@ -74,14 +74,25 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
         data-strapi-header
       >
         {navigationAction ? <Box paddingBottom={2}>{navigationAction}</Box> : null}
-        <Flex justifyContent="space-between">
+        <Flex justifyContent="space-between" alignItems="center">
           <Flex minWidth={0}>
-            <Typography tag="h1" variant="alpha" {...props}>
+            <Typography 
+              tag="h1" 
+              variant="alpha" 
+              style={{ 
+                wordBreak: 'break-word', 
+                overflowWrap: 'break-word',
+                maxWidth: '100%',
+              }}
+              {...props}
+            >
               {title}
             </Typography>
             {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
           </Flex>
-          {primaryAction}
+          {primaryAction ? <Box paddingLeft={4} style={{ 
+              }}>{primaryAction}</Box> : null}
+
         </Flex>
         {isSubtitleString ? (
           <Typography variant="epsilon" textColor="neutral600" tag="p">
