@@ -24,10 +24,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
   let mockContext: Partial<Context>;
   let ctxBulk: Partial<Context>;
 
-  let mockAiMetadataService: {
-    isEnabled: jest.Mock;
-    processFiles: jest.Mock;
-  };
+  let mockAiMetadataService: any;
 
   let uploadService: {
     upload: jest.Mock;
@@ -54,8 +51,9 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       if (serviceName === 'upload') return uploadService as any;
       if (serviceName === 'file') {
         return {
+          upload: jest.fn().mockResolvedValue([{}]),
           signFileUrls: jest.fn((f: any) => Promise.resolve(f)),
-        } as any;
+        };
       }
       return {} as any;
     });
