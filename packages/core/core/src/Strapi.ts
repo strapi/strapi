@@ -141,6 +141,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('telemetry');
   }
 
+  get sessionManager(): Modules.SessionManager.SessionManagerService {
+    return this.get('sessionManager');
+  }
+
   get store(): Modules.CoreStore.CoreStore {
     return this.get('coreStore');
   }
