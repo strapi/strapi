@@ -21,6 +21,7 @@ export { isKnexQuery } from './utils/knex';
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
+  strictSyncSchema?: boolean;
   [key: string]: unknown;
 }
 
@@ -71,6 +72,7 @@ class Database {
       settings: {
         forceMigration: true,
         runMigrations: true,
+        strictSyncSchema: true,
         ...(config.settings ?? {}),
       },
     };
