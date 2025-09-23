@@ -6,6 +6,7 @@ import type { CLIContext, CloudCliConfig, TrackPayload } from '../types';
 import { getLocalConfig } from '../config/local';
 
 import packageJson from '../../package.json';
+import { getContext } from './context';
 
 export const VERSION = 'v3';
 
@@ -307,6 +308,10 @@ export async function cloudApiFactory(
     },
 
     track(event, payload = {}) {
+      const ctx = getContext();
+      if (ctx?.user?.id) {
+        axiosCloudAPI.defaults.headers['x-user-id'] = ctx.user.id;
+      }
       return axiosCloudAPI.post<void>('/track', {
         event,
         payload,

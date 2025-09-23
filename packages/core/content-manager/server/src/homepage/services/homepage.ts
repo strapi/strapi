@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
@@ -270,7 +271,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
             const publishedDocuments = meta.hasDraftAndPublish
               ? await strapiDBConnection(tableName)
-                  .select('draft.document_id')
+                  .countDistinct('draft.document_id as count')
                   .from(`${tableName} as draft`)
                   .join(`${tableName} as published`, function () {
                     this.on('draft.document_id', '=', 'published.document_id')
@@ -278,14 +279,10 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
                       .andOnNull('draft.published_at')
                       .andOnNotNull('published.published_at');
                   })
-                  .countDistinct('draft.document_id as count')
-                  .groupBy('draft.document_id')
                   .first()
               : await strapiDBConnection(tableName)
-                  .select('document_id')
-                  .from(`${tableName}`)
                   .countDistinct('document_id as count')
-                  .groupBy('document_id')
+                  .from(`${tableName}`)
                   .first();
             countDocuments.published += Number(publishedDocuments?.count) || 0;
 

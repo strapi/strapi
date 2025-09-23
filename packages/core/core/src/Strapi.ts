@@ -32,9 +32,12 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import getNumberOfConditionalFields from './services/utils/conditional-fields';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
+import { createContentSourceMapsService } from './services/content-source-maps';
 
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
+
+import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
@@ -136,6 +139,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get telemetry(): Modules.Metrics.TelemetryService {
     return this.get('telemetry');
+  }
+
+  get sessionManager(): Modules.SessionManager.SessionManagerService {
+    return this.get('sessionManager');
   }
 
   get store(): Modules.CoreStore.CoreStore {
@@ -287,7 +294,8 @@ class Strapi extends Container implements Core.Strapi {
           })
         );
       })
-      .add('reload', () => createReloader(this));
+      .add('reload', () => createReloader(this))
+      .add('content-source-maps', () => createContentSourceMapsService(this));
   }
 
   sendStartupTelemetry() {
@@ -446,6 +454,20 @@ class Strapi extends Container implements Core.Strapi {
     // if schemas have changed, run repairs
     if (status === 'CHANGED') {
       await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+    }
+
+    const alreadyRanComponentRepair = await this.store.get({
+      type: 'strapi',
+      key: 'unidirectional-join-table-repair-ran',
+    });
+
+    if (!alreadyRanComponentRepair) {
+      await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
+      await this.store.set({
+        type: 'strapi',
+        key: 'unidirectional-join-table-repair-ran',
+        value: true,
+      });
     }
 
     if (this.EE) {
