@@ -18,9 +18,30 @@ const homepageService = adminApi
         transformResponse: (response: Homepage.GetCountDocuments.Response) => response.data,
         providesTags: (_, _err) => ['CountDocuments'],
       }),
+      getHomepageLayout: builder.query<Homepage.GetHomepageLayout.Response['data'], void>({
+        query: () => '/admin/homepage/layout',
+        transformResponse: (r: Homepage.GetHomepageLayout.Response) => r.data,
+      }),
+      updateHomepageLayout: builder.mutation<
+        Homepage.UpdateHomepageLayout.Response['data'],
+        Homepage.UpdateHomepageLayout.Request['body']
+      >({
+        query: (body) => ({ url: '/admin/homepage/layout', method: 'PUT', body }),
+        transformResponse: (r: Homepage.UpdateHomepageLayout.Response) => r.data,
+      }),
     }),
   });
 
-const { useGetKeyStatisticsQuery, useGetCountDocumentsQuery } = homepageService;
-
-export { useGetKeyStatisticsQuery, useGetCountDocumentsQuery };
+  const {
+    useGetKeyStatisticsQuery,
+    useGetCountDocumentsQuery,
+    useGetHomepageLayoutQuery,
+    useUpdateHomepageLayoutMutation,
+  } = homepageService;
+  
+  export {
+    useGetKeyStatisticsQuery,
+    useGetCountDocumentsQuery,
+    useGetHomepageLayoutQuery,
+    useUpdateHomepageLayoutMutation,
+  };
