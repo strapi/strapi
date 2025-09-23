@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 import { getService } from '../utils';
-import { UserLayout, UserLayoutWrite } from './validation/schema';
+import { HomepageLayout, HomepageLayoutWrite } from './validation/schema';
 
 export default {
   async getKeyStatistics(): Promise<{
@@ -9,22 +9,19 @@ export default {
     const homepageService = getService('homepage');
     return { data: await homepageService.getKeyStatistics() };
   },
-  async getUserLayout(ctx: Context): Promise<{ data: UserLayout } | null> {
+  async getHomepageLayout(ctx: Context): Promise<{ data: HomepageLayout | null }> {
     const homepageService = getService('homepage');
     const userId = ctx.state.user?.id;
-    if (!userId) ctx.throw(401, 'Unauthorized');
 
-    const data = await homepageService.getUserLayout(userId);
-    if (!data) return null;
+    const data = await homepageService.getHomepageLayout(userId);
     return { data };
   },
-  async updateUserLayout(ctx: Context): Promise<{ data: UserLayout }> {
+  async updateHomepageLayout(ctx: Context): Promise<{ data: HomepageLayout }> {
     const homepageService = getService('homepage');
     const userId = ctx.state.user?.id;
-    if (!userId) ctx.throw(401, 'Unauthorized');
 
-    const body = ctx.request.body as UserLayoutWrite;
-    const data = await homepageService.updateUserLayout(userId, body);
+    const body = ctx.request.body as HomepageLayoutWrite;
+    const data = await homepageService.updateHomepageLayout(userId, body);
     return { data };
   },
 };

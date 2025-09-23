@@ -10,17 +10,19 @@ export const WidthSchema = z.union([
   z.literal(12),
 ]);
 
-export const UserLayoutSchema = z.object({
-  version: z.number().int().min(0),
+const widthsFieldSchema = z.record(WidgetUIDSchema, WidthSchema);
+
+export const HomepageLayoutSchema = z.object({
+  version: z.number().int().min(1),
   order: z.array(WidgetUIDSchema).max(100),
-  widths: z.record(WidgetUIDSchema, WidthSchema),
+  widths: widthsFieldSchema,
   updatedAt: z.string().datetime(),
 }).strict();
 
-export type UserLayout = z.infer<typeof UserLayoutSchema>;
+export type WidthsField = z.infer<typeof widthsFieldSchema>;
+export type HomepageLayout = z.infer<typeof HomepageLayoutSchema>;
 
-// PATCH accepts partial changes
-export const UserLayoutWriteSchema = z.object({
+export const HomepageLayoutWriteSchema = z.object({
   order: z.array(WidgetUIDSchema).max(100).optional(),
   widths: z.record(WidgetUIDSchema, WidthSchema).optional(),
 })
@@ -29,4 +31,4 @@ export const UserLayoutWriteSchema = z.object({
     message: "At least one of 'order' or 'widths' is required",
   });
 
-export type UserLayoutWrite = z.infer<typeof UserLayoutWriteSchema>;
+export type HomepageLayoutWrite = z.infer<typeof HomepageLayoutWriteSchema>;

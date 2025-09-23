@@ -1,10 +1,10 @@
 import { Core } from '@strapi/types';
 import { getService } from '../utils';
-import { UserLayout, UserLayoutSchema, UserLayoutWrite, UserLayoutWriteSchema } from '../../src/controllers/validation/schema';
+import { HomepageLayout, HomepageLayoutSchema, HomepageLayoutWrite, HomepageLayoutWriteSchema, WidthsField } from '../../src/controllers/validation/schema';
 
-const STORE = { type: "core", name: "admin" } as const;
 const DEFAULT_WIDTH = 6 as const;
 const keyFor = (userId: number) => `homepage-layout:${userId}`;
+const adminStore = strapi.store({ type: "core", name: "admin" });
 
 const isContentTypeVisible = (model: any) =>
   model?.pluginOptions?.['content-type-builder']?.visible !== false;
@@ -37,59 +37,57 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     };
   };
 
-  const getUserLayout = async (
+  const getHomepageLayout = async (
     userId: number
-  ): Promise<UserLayout | null> => {
-    const store = await strapi.store(STORE);
+  ): Promise<HomepageLayout | null> => {
     const key = keyFor(userId);
 
-    const value = (await store.get({ key })) as unknown;
+    const value = (await adminStore.get({ key }));
     if (!value) {
       // nothing saved yet
       return null;
     }
 
-    return UserLayoutSchema.parse(value);
+    return HomepageLayoutSchema.parse(value);
   };
 
-  const updateUserLayout = async (
+  const updateHomepageLayout = async (
     userId: number,
     input: unknown
-  ): Promise<UserLayout> => {
-    const write: UserLayoutWrite = UserLayoutWriteSchema.parse(input);
+  ): Promise<HomepageLayout> => {
+    const write: HomepageLayoutWrite = HomepageLayoutWriteSchema.parse(input);
 
-    const store = await strapi.store(STORE);
     const key = keyFor(userId);
 
-    const currentRaw = (await store.get({ key })) as unknown;
-    const current: UserLayout | null = currentRaw
-      ? UserLayoutSchema.parse(currentRaw)
+    const currentRaw = (await adminStore.get({ key }));
+    const current: HomepageLayout | null = currentRaw
+      ? HomepageLayoutSchema.parse(currentRaw)
       : null;
 
     // Final order: replace only if provided
     const orderNext = write.order ?? current?.order ?? [];
 
     // Build widths ONLY for UIDs present in the final order (prunes removed)
-    const widthsNext = {} as any;
+    const widthsNext = {} as WidthsField;
     for (const uid of orderNext) {
       const incoming = write.widths?.[uid];
       const existing = current?.widths[uid];
       widthsNext[uid] = (incoming ?? existing ?? DEFAULT_WIDTH);
     }
 
-    const next: UserLayout = {
-      version: (current?.version ?? 0) + 1,
+    const next: HomepageLayout = {
+      version: 1,
       order: orderNext,
       widths: widthsNext,
       updatedAt: new Date().toISOString(),
     };
 
-    await store.set({ key, value: next });
+    await adminStore.set({ key, value: next });
     return next;
   };
   return {
     getKeyStatistics,
-    getUserLayout,
-    updateUserLayout,
+    getHomepageLayout,
+    updateHomepageLayout,
   };
 };

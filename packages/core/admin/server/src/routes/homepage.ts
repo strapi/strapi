@@ -10,13 +10,13 @@ export default [
   {
     method: 'GET',
     path: '/homepage/layout',
-    handler: 'homepage.getUserLayout',
+    handler: 'homepage.getHomepageLayout',
     config: { policies: ['admin::isAuthenticatedAdmin'] },
   },
   {
     method: 'PUT',
     path: '/homepage/layout',
-    handler: 'homepage.updateUserLayout',
+    handler: 'homepage.updateHomepageLayout',
     config: { policies: ['admin::isAuthenticatedAdmin'] },
   },
 ];
