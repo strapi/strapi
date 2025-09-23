@@ -32,16 +32,16 @@ const homepageService = adminApi
     }),
   });
 
-  const {
-    useGetKeyStatisticsQuery,
-    useGetCountDocumentsQuery,
-    useGetHomepageLayoutQuery,
-    useUpdateHomepageLayoutMutation,
-  } = homepageService;
-  
-  export {
-    useGetKeyStatisticsQuery,
-    useGetCountDocumentsQuery,
-    useGetHomepageLayoutQuery,
-    useUpdateHomepageLayoutMutation,
-  };
+const {
+  useGetKeyStatisticsQuery,
+  useGetCountDocumentsQuery,
+  useGetHomepageLayoutQuery,
+  useUpdateHomepageLayoutMutation,
+} = homepageService;
+
+export {
+  useGetKeyStatisticsQuery,
+  useGetCountDocumentsQuery,
+  useGetHomepageLayoutQuery,
+  useUpdateHomepageLayoutMutation,
+};

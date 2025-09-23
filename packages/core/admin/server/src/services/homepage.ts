@@ -1,10 +1,15 @@
 import { Core } from '@strapi/types';
 import { getService } from '../utils';
-import { HomepageLayout, HomepageLayoutSchema, HomepageLayoutWrite, HomepageLayoutWriteSchema, WidthsField } from '../../src/controllers/validation/schema';
+import {
+  HomepageLayout,
+  HomepageLayoutSchema,
+  HomepageLayoutWrite,
+  HomepageLayoutWriteSchema,
+} from '../../src/controllers/validation/schema';
 
 const DEFAULT_WIDTH = 6 as const;
 const keyFor = (userId: number) => `homepage-layout:${userId}`;
-const adminStore = strapi.store({ type: "core", name: "admin" });
+const adminStore = strapi.store({ type: 'core', name: 'admin' });
 
 const isContentTypeVisible = (model: any) =>
   model?.pluginOptions?.['content-type-builder']?.visible !== false;
@@ -37,12 +42,9 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     };
   };
 
-  const getHomepageLayout = async (
-    userId: number
-  ): Promise<HomepageLayout | null> => {
+  const getHomepageLayout = async (userId: number): Promise<HomepageLayout | null> => {
     const key = keyFor(userId);
-
-    const value = (await adminStore.get({ key }));
+    const value = await adminStore.get({ key });
     if (!value) {
       // nothing saved yet
       return null;
@@ -51,34 +53,31 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     return HomepageLayoutSchema.parse(value);
   };
 
-  const updateHomepageLayout = async (
-    userId: number,
-    input: unknown
-  ): Promise<HomepageLayout> => {
+  const updateHomepageLayout = async (userId: number, input: unknown): Promise<HomepageLayout> => {
     const write: HomepageLayoutWrite = HomepageLayoutWriteSchema.parse(input);
 
     const key = keyFor(userId);
 
-    const currentRaw = (await adminStore.get({ key }));
+    const currentRaw = await adminStore.get({ key });
     const current: HomepageLayout | null = currentRaw
       ? HomepageLayoutSchema.parse(currentRaw)
       : null;
 
     // Final order: replace only if provided
-    const orderNext = write.order ?? current?.order ?? [];
+    const widgetsNext = write.widgets ?? current?.widgets ?? [];
 
-    // Build widths ONLY for UIDs present in the final order (prunes removed)
-    const widthsNext = {} as WidthsField;
-    for (const uid of orderNext) {
-      const incoming = write.widths?.[uid];
-      const existing = current?.widths[uid];
-      widthsNext[uid] = (incoming ?? existing ?? DEFAULT_WIDTH);
-    }
+    // Normalize widths (fill defaults where missing)
+    const normalizedWidgets = widgetsNext.map((w) => {
+      const prev = current?.widgets.find((cw) => cw.uid === w.uid);
+      return {
+        uid: w.uid,
+        width: w.width ?? prev?.width ?? DEFAULT_WIDTH,
+      };
+    });
 
     const next: HomepageLayout = {
       version: 1,
-      order: orderNext,
-      widths: widthsNext,
+      widgets: normalizedWidgets,
       updatedAt: new Date().toISOString(),
     };
 
