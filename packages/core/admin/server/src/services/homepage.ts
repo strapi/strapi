@@ -5,7 +5,7 @@ import {
   HomepageLayoutSchema,
   HomepageLayoutWrite,
   HomepageLayoutWriteSchema,
-} from '../../src/controllers/validation/schema';
+} from '../controllers/validation/schema';
 
 const DEFAULT_WIDTH = 6 as const;
 const keyFor = (userId: number) => `homepage-layout:${userId}`;
