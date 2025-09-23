@@ -65,6 +65,7 @@
   "error.validation.enum-duplicate": "Duplicate values are not allowed (only alphanumeric characters are taken into account).",
   "error.validation.enum-empty-string": "Empty strings are not allowed",
   "error.validation.enum-regex": "At least one value is invalid. Values should have at least one alphabetical character preceding the first occurence of a number.",
+  "error.validation.enum-reserved-keyword": "Values cannot be GraphQL reserved keywords (true, false, null, undefined)",
   "error.validation.minSupMax": "Min can't be superior to max",
   "error.validation.positive": "Must be a positive number",
   "error.validation.regex": "Regex pattern is invalid",
