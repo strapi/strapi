@@ -5,7 +5,11 @@ const cronTasks = require('./src/cron-tasks');
 module.exports = ({ env }) => ({
   host: env('HOST', '0.0.0.0'),
   port: env.int('PORT', 1337),
-  url: 'http://localhost:1337',
+  url: env('PUBLIC_URL', 'http://localhost:1337'),
+  proxy: {
+    enabled: env.bool('IS_PROXIED', true),
+    trustProxy: true,
+  },
   cron: {
     enabled: true,
     tasks: cronTasks,

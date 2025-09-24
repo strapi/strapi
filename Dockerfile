@@ -48,5 +48,6 @@ ENV DATABASE_CLIENT=postgres
 EXPOSE 1337
 
 # Inicia la aplicación Strapi de ejemplo en modo desarrollo
-CMD ["yarn", "develop"]
+# Rebuild admin panel con nuevas variables de entorno
+CMD ["sh", "-c", "yarn build && yarn develop"]
 # ==============================================================#

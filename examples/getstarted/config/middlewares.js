@@ -11,12 +11,29 @@ module.exports = [
       contentSecurityPolicy: {
         useDefaults: true,
         directives: {
-          'frame-src': ["'self'"], // URLs that will be loaded in an iframe (e.g. Content Preview)
+          'connect-src': ["'self'", 'https:', 'strapi.dev.tipsoption.com'],
+          'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+          'media-src': ["'self'", 'data:', 'blob:', 'https:'],
+          'frame-src': ["'self'", 'strapi.dev.tipsoption.com'],
         },
       },
     },
   },
-  'strapi::cors',
+  {
+    name: 'strapi::cors',
+    config: {
+      enabled: true,
+      headers: '*',
+      origin: [
+        'http://localhost:1337',
+        'https://strapi.dev.tipsoption.com',
+        'https://*.tipsoption.com',
+        process.env.PUBLIC_URL || 'https://strapi.dev.tipsoption.com'
+      ],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+      keepHeaderOnError: true,
+    },
+  },
   'strapi::poweredBy',
   'strapi::query',
   'strapi::body',

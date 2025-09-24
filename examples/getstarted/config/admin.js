@@ -1,5 +1,13 @@
 module.exports = ({ env }) => ({
+  url: env('ADMIN_PATH', '/admin'),
+  serveAdminPanel: env.bool('SERVE_ADMIN', true),
   // autoOpen: false,
+  vite: {
+    server: {
+      allowedHosts: 'all', // Permite todos los hosts
+      host: '0.0.0.0'
+    }
+  },
   auth: {
     secret: env('ADMIN_JWT_SECRET', 'example-token'),
   },
