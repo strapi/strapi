@@ -42,6 +42,20 @@
       "allowedTypes": [
         "images"
       ]
+    },
+    "rating": {
+      "type": "decimal",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "casino_pages": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::casino-page.casino-page",
+      "mappedBy": "casino"
     }
   }
 }

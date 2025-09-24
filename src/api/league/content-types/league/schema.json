@@ -39,6 +39,22 @@
         }
       }
     },
+    "key": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "sportId": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "sport": {
       "type": "relation",
       "relation": "manyToOne",
@@ -49,6 +65,12 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::match.match",
+      "mappedBy": "league"
+    },
+    "countries": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::country.country",
       "mappedBy": "league"
     }
   }

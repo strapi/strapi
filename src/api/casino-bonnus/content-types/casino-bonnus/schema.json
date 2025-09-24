@@ -16,12 +16,16 @@
   },
   "attributes": {
     "bonnusType": {
-      "type": "string",
+      "type": "enumeration",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "enum": [
+        "deposit bonuses",
+        "no deposit bonuses"
+      ]
     },
     "name": {
       "type": "string",
@@ -46,6 +50,33 @@
           "localized": true
         }
       }
+    },
+    "amount": {
+      "type": "decimal",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "amountCurrency": {
+      "type": "enumeration",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "enum": [
+        "EUR",
+        "COP",
+        "USD"
+      ]
+    },
+    "casino_page": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::casino-page.casino-page",
+      "inversedBy": "casino_bonnuses"
     }
   }
 }
