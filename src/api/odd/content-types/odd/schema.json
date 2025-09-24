@@ -60,6 +60,14 @@
         "Canceled"
       ]
     },
+    "apiMatchId": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "odd_option": {
       "type": "relation",
       "relation": "manyToOne",

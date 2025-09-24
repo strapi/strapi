@@ -43,6 +43,12 @@
       "relation": "manyToMany",
       "target": "api::bookmaker-page.bookmaker-page",
       "mappedBy": "payment_methods"
+    },
+    "casino_pages": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::casino-page.casino-page",
+      "mappedBy": "payment_methods"
     }
   }
 }

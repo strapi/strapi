@@ -34,6 +34,14 @@
       "allowedTypes": [
         "images"
       ]
+    },
+    "picture": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }
