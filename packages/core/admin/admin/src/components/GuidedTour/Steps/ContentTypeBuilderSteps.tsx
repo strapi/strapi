@@ -12,9 +12,8 @@ import { GUIDED_TOUR_REQUIRED_ACTIONS } from '../utils/constants';
 import { GotItAction, StepCount, DefaultActions, DefaultActionsProps } from './Step';
 
 const ContentTypeBuilderActions = ({
-  CustomActions,
   ...props
-}: Omit<DefaultActionsProps, 'tourName'> & { CustomActions?: React.ReactNode }) => {
+}: Omit<DefaultActionsProps, 'tourName'> & { children?: React.ReactNode }) => {
   const state = useGuidedTour('ContentTypeBuilderActions', (s) => s.state);
   const dispatch = useGuidedTour('ContentTypeBuilderActions', (s) => s.dispatch);
 
@@ -98,7 +97,7 @@ const ContentTypeBuilderActions = ({
         displayedCurrentStep={displayedCurrentStep}
         displayedTourLength={displayedTourLength}
       />
-      {CustomActions || (
+      {props.children || (
         <DefaultActions
           tourName="contentTypeBuilder"
           onNextStep={handleNextStep}
@@ -209,14 +208,11 @@ const AddFields = ({ Step, dispatch }: StepContentProps) => (
       defaultMessage="Add the fields your content needs such as text, media and relations."
     />
     <Step.Actions>
-      <ContentTypeBuilderActions
-        showPrevious
-        CustomActions={
-          <GotItAction
-            onClick={() => dispatch({ type: 'next_step', payload: 'contentTypeBuilder' })}
-          />
-        }
-      />
+      <ContentTypeBuilderActions showPrevious>
+        <GotItAction
+          onClick={() => dispatch({ type: 'next_step', payload: 'contentTypeBuilder' })}
+        />
+      </ContentTypeBuilderActions>
     </Step.Actions>
   </Step.Root>
 );
@@ -229,22 +225,19 @@ const Save = ({ Step, dispatch }: StepContentProps) => (
       defaultMessage="Save the changes you made here before leaving this page."
     />
     <Step.Actions>
-      <ContentTypeBuilderActions
-        showPrevious
-        CustomActions={
-          <GotItAction
-            onClick={() => {
-              // Ensure the completed action is removed
-              // in the event the user already has a schema but is still doing the tour
-              dispatch({
-                type: 'remove_completed_action',
-                payload: GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
-              });
-              dispatch({ type: 'next_step', payload: 'contentTypeBuilder' });
-            }}
-          />
-        }
-      />
+      <ContentTypeBuilderActions showPrevious>
+        <GotItAction
+          onClick={() => {
+            // Ensure the completed action is removed
+            // in the event the user already has a schema but is still doing the tour
+            dispatch({
+              type: 'remove_completed_action',
+              payload: GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
+            });
+            dispatch({ type: 'next_step', payload: 'contentTypeBuilder' });
+          }}
+        />
+      </ContentTypeBuilderActions>
     </Step.Actions>
   </Step.Root>
 );
