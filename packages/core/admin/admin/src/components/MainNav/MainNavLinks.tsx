@@ -1,7 +1,7 @@
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { type To } from 'react-router-dom';
+import { type To, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { MenuItem } from '../../hooks/useMenu';
@@ -42,6 +42,7 @@ const MainNavIcons = ({
   handleClickOnLink: (value: string) => void;
 }) => {
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
 
   return listLinks.length > 0
     ? listLinks.map((link) => {
@@ -55,12 +56,20 @@ const MainNavIcons = ({
 
         const labelValue = formatMessage(link.intlLabel);
 
+        const navigationTarget = link.navigationLink || link.to;
+
         return (
           <Flex tag="li" key={link.to}>
             <GuidedTourTooltip to={link.to}>
               <NavLink.Link
                 to={link.to}
-                onClick={() => handleClickOnLink(link.to)}
+                onClick={(e) => {
+                  if (link.navigationLink) {
+                    e.preventDefault();
+                    navigate(navigationTarget);
+                  }
+                  handleClickOnLink(navigationTarget);
+                }}
                 aria-label={labelValue}
               >
                 <NavLink.Icon label={labelValue}>
@@ -107,6 +116,7 @@ const MainNavBurgerMenuLinks = ({
   handleClickOnLink: (value: string) => void;
 }) => {
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
 
   return listLinks.length > 0
     ? listLinks.map((link) => {
@@ -120,12 +130,22 @@ const MainNavBurgerMenuLinks = ({
 
         const labelValue = formatMessage(link.intlLabel);
 
+        const navigationTarget = link.navigationLink || link.to;
+
         return (
-          <Flex paddingTop={4} alignItems="center" tag="li" key={link.to}>
+          <Flex paddingTop={3} alignItems="center" tag="li" key={link.to}>
             <GuidedTourTooltip to={link.to}>
               <NavLink.Link
                 to={link.to}
-                onClick={() => handleClickOnLink(link.to)}
+                onClick={(e) => {
+                  if (link.navigationLink) {
+                    e.preventDefault();
+                    handleClickOnLink(navigationTarget);
+                    navigate(navigationTarget);
+                  } else {
+                    handleClickOnLink(navigationTarget);
+                  }
+                }}
                 aria-label={labelValue}
               >
                 <IconContainer marginRight="0.6rem">

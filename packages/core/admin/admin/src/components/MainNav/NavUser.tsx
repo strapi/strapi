@@ -73,7 +73,7 @@ export const NavUser = ({
     <Flex {...props}>
       <Menu.Root>
         <Menu.Trigger endIcon={null} fullWidth justifyContent="flex-start" paddingLeft={0}>
-          <Flex alignItems="center" gap={3}>
+          <Flex alignItems="center" justifyContent="center" gap={3}>
             <MenuIcon justifyContent="center">
               <Avatar.Item delayMs={0} fallback={initials} />
             </MenuIcon>

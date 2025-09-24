@@ -11,7 +11,9 @@ import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
  * useMenu
  * -----------------------------------------------------------------------------------------------*/
 
-export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'>;
+export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'> & {
+  navigationLink?: string;
+};
 export type MobileMenuItem = {
   to: string;
   link?: string;

@@ -85,7 +85,8 @@ const LeftMenu = ({
       mobileNavLinks
         .map((mobileLink) => {
           const linkFound = listLinks.find((link) => link.to === mobileLink.to);
-          return linkFound ? { ...linkFound, to: mobileLink.link || linkFound.to } : null;
+          if (!linkFound) return null;
+          return mobileLink.link ? { ...linkFound, navigationLink: mobileLink.link } : linkFound;
         })
         .filter((link) => link !== null) as MenuItem[],
     [listLinks]

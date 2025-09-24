@@ -8,7 +8,6 @@ import { useIntl } from 'react-intl';
 import { Outlet } from 'react-router-dom';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
-import { styled } from 'styled-components';
 
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
@@ -26,14 +25,6 @@ import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
 
 const { version: strapiVersion } = packageInfo;
-
-const ContentWrapper = styled(Box)`
-  padding-top: 5.6rem;
-
-  ${({ theme }) => theme.breakpoints.medium} {
-    padding-top: 0;
-  }
-`;
 
 const AdminLayout = () => {
   const { formatMessage } = useIntl();
@@ -113,11 +104,17 @@ const AdminLayout = () => {
       <NpsSurvey />
       <PluginsInitializer>
         <DndProvider backend={HTML5Backend}>
-          <ContentWrapper background="neutral100">
+          <Box background="neutral100">
             <SkipToContent>
               {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
             </SkipToContent>
-            <Flex alignItems="flex-start">
+            <Flex
+              alignItems="flex-start"
+              paddingTop={{
+                initial: '5.6rem',
+                large: 0,
+              }}
+            >
               <LeftMenu
                 generalSectionLinks={generalSectionLinks}
                 pluginsSectionLinks={pluginsSectionLinks}
@@ -129,7 +126,7 @@ const AdminLayout = () => {
                 <Outlet />
               </Box>
             </Flex>
-          </ContentWrapper>
+          </Box>
         </DndProvider>
       </PluginsInitializer>
     </AppInfoProvider>

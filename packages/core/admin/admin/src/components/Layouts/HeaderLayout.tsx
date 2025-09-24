@@ -138,9 +138,9 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
     threshold: 0,
   });
 
-  useResizeObserver(containerRef, () => {
-    if (containerRef.current) {
-      setHeaderSize(containerRef.current.getBoundingClientRect());
+  useResizeObserver([containerRef, baseHeaderLayoutRef], () => {
+    if (baseHeaderLayoutRef.current) {
+      setHeaderSize(baseHeaderLayoutRef.current.getBoundingClientRect());
     }
   });
 
