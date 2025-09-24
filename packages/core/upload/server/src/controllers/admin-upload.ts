@@ -5,11 +5,38 @@ import type { Context } from 'koa';
 
 import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
-import { validateUploadBody } from './validation/admin/upload';
+import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
 import { FileInfo } from '../types';
 
 export default {
+  async bulkUpdateFileInfo(ctx: Context) {
+    const {
+      state: { userAbility, user },
+      request: { body },
+    } = ctx;
+
+    const { updates } = await validateBulkUpdateBody(body);
+    const uploadService = getService('upload');
+
+    const results = await async.map(
+      updates,
+      async ({ id, fileInfo }: { id: number; fileInfo: FileInfo }) => {
+        const { pm } = await findEntityAndCheckPermissions(
+          userAbility,
+          ACTIONS.update,
+          FILE_MODEL_UID,
+          id
+        );
+
+        const updated = await uploadService.updateFileInfo(id, fileInfo as any, { user });
+        return pm.sanitizeOutput(updated, { action: ACTIONS.read });
+      }
+    );
+
+    ctx.body = results;
+  },
+
   async updateFileInfo(ctx: Context) {
     const {
       state: { userAbility, user },
