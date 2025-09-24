@@ -73,6 +73,34 @@ spec:
               value: "0.0.0.0"
             - name: PORT
               value: "1337"
+            - name: URL
+              value: "https://strapi.dev.tipsoption.com"
+            - name: PUBLIC_URL
+              value: "https://strapi.dev.tipsoption.com"
+            - name: STRAPI_ADMIN_BACKEND_URL
+              value: "https://strapi.dev.tipsoption.com"
+            - name: STRAPI_ADMIN_CLIENT_URL
+              value: "https://strapi.dev.tipsoption.com"
+            - name: STRAPI_ADMIN_CLIENT_PREVIEW_SECRET
+              value: "preview-secret-key"
+            - name: BROWSER_URL
+              value: "https://strapi.dev.tipsoption.com"
+            - name: SERVER_URL
+              value: "https://strapi.dev.tipsoption.com"
+            - name: ADMIN_URL
+              value: "https://strapi.dev.tipsoption.com/admin"
+            - name: PUBLIC_URL
+              value: "https://strapi.dev.tipsoption.com"
+            - name: IS_PROXIED
+              value: "true"
+            - name: ADMIN_PATH
+              value: "/admin"
+            - name: STRAPI_DISABLE_UPDATE_NOTIFICATION
+              value: "true"
+            - name: STRAPI_HIDE_STARTUP_MESSAGE
+              value: "true"
+            - name: ALLOWED_HOST
+              value: "strapi.dev.tipsoption.com"
             - name: DB
               value: postgres
             - name: DATABASE_CLIENT
