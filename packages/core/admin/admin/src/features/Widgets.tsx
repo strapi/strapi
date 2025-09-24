@@ -1,19 +1,19 @@
 import * as React from 'react';
 
 import { Box, Flex, Typography, ScrollArea, IconButton } from '@strapi/design-system';
-import { Drag, PuzzlePiece, More, Trash } from '@strapi/icons';
-import { useDrag, useDrop } from 'react-dnd';
+import { PuzzlePiece, Trash, Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
 
-import { useWidgetLayout } from '../hooks/useWidgetLayout';
 import { useWidgetManagement } from '../hooks/useWidgetManagement';
-import { useDragResize } from '../hooks/useWidgetResize';
+import { useGapDropZonePosition } from '../hooks/useGapDropZonePosition';
+import { InterWidgetResizeHandle } from '../components/ResizeIndicator';
 
 import { useTracking } from './Tracking';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
+import { useDrag } from 'react-dnd';
 
 /* -------------------------------------------------------------------------------------------------
  * WidgetRoot Component
@@ -27,13 +27,15 @@ interface WidgetRootProps
     widths: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)
   ) => void;
   findWidget: (id: string) => { index: number };
-  moveWidget: (id: string, to: number) => void;
+  moveWidget: (
+    id: string,
+    atIndex: number,
+    targetRowIndex?: number,
+    isHorizontalDrop?: boolean
+  ) => void;
   deleteWidget: (id: string) => void;
-}
-
-interface Item {
-  id: string;
-  originalIndex: number;
+  onDragStart?: (widgetId: string) => void;
+  onDragEnd?: () => void;
 }
 
 export const WidgetRoot = ({
@@ -42,97 +44,44 @@ export const WidgetRoot = ({
   children,
   link,
   uid,
-  columnWidths,
-  setColumnWidths,
   findWidget,
-  moveWidget,
   deleteWidget,
+  onDragStart,
+  onDragEnd,
 }: WidgetRootProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const Icon = icon;
-  const columnWidth = columnWidths[uid] || 6;
-  const originalIndex = findWidget(uid).index;
-  const [isDraggingFromHandle, setIsDraggingFromHandle] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
-
-  // Smooth move widget using requestAnimationFrame
-  const smoothMoveWidget = React.useCallback(
-    (id: string, atIndex: number) => {
-      requestAnimationFrame(() => moveWidget(id, atIndex));
-    },
-    [moveWidget]
-  );
-
-  const [{ isDragging }, drag] = useDrag(
-    () => ({
-      type: 'widget',
-      item: () => {
-        return { id: uid, originalIndex };
-      },
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging(),
-      }),
-      end: (item, monitor) => {
-        const { id: droppedId, originalIndex } = item;
-        const didDrop = monitor.didDrop();
-        if (!didDrop) {
-          moveWidget(droppedId, originalIndex);
-        }
-        setIsDraggingFromHandle(false);
-      },
-      canDrag: () => isDraggingFromHandle,
-    }),
-    [uid, originalIndex, moveWidget, isDraggingFromHandle]
-  );
-
-  const [{ isOver }, drop] = useDrop<Item, void, { isOver: boolean }>(
-    () => ({
-      accept: 'widget',
-      hover({ id: draggedId }: Item) {
-        if (draggedId !== uid) {
-          const { index: overIndex } = findWidget(uid);
-          const { index: draggedIndex } = findWidget(draggedId);
-
-          // Only move if the dragged item is actually changing position
-          if (draggedIndex !== overIndex) {
-            smoothMoveWidget(draggedId, overIndex);
-          }
-        }
-      },
-      collect: (monitor) => ({
-        isOver: !!monitor.isOver(),
-      }),
-    }),
-    [findWidget, smoothMoveWidget, uid]
-  );
-
-  const opacity = isDragging ? 0 : 1;
 
   const handleClickOnLink = () => {
     trackUsage('didOpenHomeWidgetLink', { widgetUID: uid });
   };
 
-  const handleDragIconMouseDown = (e: React.MouseEvent) => {
-    // Only handle left mouse button
-    if (e.button !== 0) return;
-
-    setIsDraggingFromHandle(true);
-  };
-
-  // Resize Logic
-  const { handleMouseDown } = useDragResize({
-    columnWidth,
-    onWidthChange: (newWidth) =>
-      setColumnWidths((prev) => ({
-        ...prev,
-        [uid]: newWidth,
-      })),
-  });
-
   const handleDeleteWidget = () => {
     deleteWidget(uid);
   };
+
+  const handleDragStart = () => {
+    onDragStart?.(uid);
+  };
+
+  const [, drag] = useDrag(
+    () => ({
+      type: 'widget',
+      item: () => {
+        onDragStart?.(uid);
+        return { id: uid, originalIndex: findWidget(uid).index };
+      },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+      end: () => {
+        onDragEnd?.();
+      },
+    }),
+    [uid, findWidget, onDragStart, onDragEnd]
+  );
 
   return (
     <Flex
@@ -140,8 +89,8 @@ export const WidgetRoot = ({
       hasRadius
       direction="column"
       alignItems="flex-start"
-      background={isOver ? 'primary100' : 'neutral0'}
-      borderColor={isOver ? 'primary500' : 'neutral150'}
+      background={'neutral0'}
+      borderColor={'neutral150'}
       shadow="tableShadow"
       tag="section"
       gap={4}
@@ -150,15 +99,14 @@ export const WidgetRoot = ({
       aria-labelledby={uid}
       ref={(node: HTMLElement | null) => {
         if (node) {
-          drag(drop(node));
+          node.setAttribute('data-widget-id', uid);
         }
+        drag(node);
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        opacity,
-        zIndex: isDragging ? 1000 : 1,
-        transition: isDragging ? 'none' : 'all 0.2s ease-in-out',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
       <Flex direction="row" gap={2} width="100%" tag="header" alignItems="center" minHeight="22px">
@@ -198,7 +146,7 @@ export const WidgetRoot = ({
             <IconButton
               variant="tertiary"
               size="XS"
-              onMouseDown={handleDragIconMouseDown}
+              onMouseDown={handleDragStart}
               label={formatMessage({
                 id: 'HomePage.widget.drag',
                 defaultMessage: 'Drag to move',
@@ -215,20 +163,6 @@ export const WidgetRoot = ({
           {children}
         </Box>
       </ScrollArea>
-      {isHovered && (
-        <Flex
-          position="absolute"
-          top={0}
-          bottom={0}
-          right={0}
-          padding={2}
-          alignItems="center"
-          style={{ cursor: 'col-resize' }}
-          onMouseDown={handleMouseDown}
-        >
-          <Box background="neutral150" height="64px" width="2px" borderRadius={1} />
-        </Flex>
-      )}
     </Flex>
   );
 };
@@ -250,32 +184,49 @@ interface UseWidgetsOptions {
  */
 export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOptions) => {
   const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
+  const [isDraggingWidget, setIsDraggingWidget] = React.useState(false);
+  const [draggedWidgetId, setDraggedWidgetId] = React.useState<string | undefined>();
 
   // Use custom hook for widget management
-  const { findWidget, moveWidget, handleDropWidget, deleteWidget, addWidget } = useWidgetManagement(
-    {
+  const { findWidget, deleteWidget, addWidget, moveWidget, handleInterWidgetResize } =
+    useWidgetManagement({
       filteredWidgets,
       setFilteredWidgets,
-    }
-  );
+      columnWidths,
+      setColumnWidths,
+    });
 
-  // Use custom hook for widget layout calculation
-  const { widgetLayout } = useWidgetLayout({
+  // Drag state callbacks
+  const handleDragStart = React.useCallback((widgetId: string) => {
+    setIsDraggingWidget(true);
+    setDraggedWidgetId(widgetId);
+  }, []);
+
+  const handleDragEnd = React.useCallback(() => {
+    setIsDraggingWidget(false);
+    setDraggedWidgetId(undefined);
+  }, []);
+
+  // Use GapDropZone positioning hook
+  const { gapDropZonePositions } = useGapDropZonePosition({
     filteredWidgets,
     columnWidths,
+    isDraggingWidget,
+    draggedWidgetId,
   });
 
   return {
     findWidget,
-    moveWidget,
-    handleDropWidget,
     deleteWidget,
     addWidget,
-    widgetLayout,
+    moveWidget,
     columnWidths,
     setColumnWidths,
     WidgetRoot,
+    handleInterWidgetResize,
+    gapDropZonePositions,
+    isDraggingWidget,
+    handleDragStart,
+    handleDragEnd,
   };
 };
-
-export type { WidgetRootProps };
