@@ -16,12 +16,16 @@
   },
   "attributes": {
     "bonnusType": {
-      "type": "string",
+      "type": "enumeration",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "enum": [
+        "deposit bonuses",
+        "no deposit bonuses"
+      ]
     },
     "name": {
       "type": "string",
@@ -46,6 +50,27 @@
           "localized": true
         }
       }
+    },
+    "amount": {
+      "type": "decimal",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "amountCurrency": {
+      "type": "enumeration",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "enum": [
+        "USD",
+        "EUR",
+        "COP"
+      ]
     },
     "bookmaker_page": {
       "type": "relation",

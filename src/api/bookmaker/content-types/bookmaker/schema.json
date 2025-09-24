@@ -43,6 +43,22 @@
         "images"
       ]
     },
+    "rating": {
+      "type": "decimal",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "apiBookmakerId": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "bookmaker_pages": {
       "type": "relation",
       "relation": "oneToMany",
