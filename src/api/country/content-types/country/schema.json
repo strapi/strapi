@@ -21,7 +21,9 @@
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "minLength": 2,
+      "maxLength": 2
     },
     "name": {
       "type": "string",
@@ -36,6 +38,18 @@
       "relation": "oneToMany",
       "target": "api::bookmaker-page.bookmaker-page",
       "mappedBy": "country"
+    },
+    "casino_pages": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::casino-page.casino-page",
+      "mappedBy": "country"
+    },
+    "league": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::league.league",
+      "inversedBy": "countries"
     }
   }
 }

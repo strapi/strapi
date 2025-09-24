@@ -47,6 +47,14 @@
         }
       }
     },
+    "apiMatchId": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "league": {
       "type": "relation",
       "relation": "manyToOne",

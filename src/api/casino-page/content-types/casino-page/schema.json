@@ -55,14 +55,6 @@
         }
       }
     },
-    "rating": {
-      "type": "decimal",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
     "url": {
       "type": "string",
       "pluginOptions": {
@@ -70,6 +62,39 @@
           "localized": true
         }
       }
+    },
+    "casino": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::casino.casino",
+      "inversedBy": "casino_pages"
+    },
+    "country": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::country.country",
+      "inversedBy": "casino_pages"
+    },
+    "casino_bonnuses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::casino-bonnus.casino-bonnus",
+      "mappedBy": "casino_page"
+    },
+    "payment_methods": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::payment-method.payment-method",
+      "inversedBy": "casino_pages"
+    },
+    "isRecommended": {
+      "type": "boolean",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "default": false
     }
   }
 }
