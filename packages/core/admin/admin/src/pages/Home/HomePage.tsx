@@ -2,18 +2,19 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Main } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
-import { useDrop } from 'react-dnd';
 import { useIntl } from 'react-intl';
 
 import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { Widget } from '../../components/WidgetHelpers';
-import { GapDropZone } from '../../components/Widgets';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useWidgets } from '../../features/Widgets';
+import { useWidgetLayout } from '../../hooks/useWidgetLayout';
+import { InterWidgetResizeHandle } from '../../components/ResizeIndicator';
+import { GapDropZone } from '../../components/GapDropZone';
 
 import { AddWidgetModal } from './components/AddWidgetModal';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
@@ -66,6 +67,7 @@ const HomePageCE = () => {
   const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
   const [allAvailableWidgets, setAllAvailableWidgets] = React.useState<WidgetWithUID[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [isAddWidgetModalOpen, setIsAddWidgetModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     const checkWidgetsPermissions = async () => {
@@ -89,32 +91,26 @@ const HomePageCE = () => {
   // Use custom hook for widget management
   const {
     findWidget,
-    moveWidget,
-    handleDropWidget,
     deleteWidget,
     addWidget,
-    widgetLayout,
+    moveWidget,
     columnWidths,
     setColumnWidths,
     WidgetRoot,
+    handleInterWidgetResize,
+    gapDropZonePositions,
+    handleDragStart,
+    handleDragEnd,
   } = useWidgets({
     filteredWidgets,
     setFilteredWidgets,
   });
 
-  const [, drop] = useDrop(() => ({ accept: 'widget' }));
-
-  // Add Widget Modal state
-  const [isAddWidgetModalOpen, setIsAddWidgetModalOpen] = React.useState(false);
-
   const handleAddWidget = (widget: WidgetWithUID) => {
     addWidget(widget);
-    // Set default width for the new widget
-    setColumnWidths((prev) => ({
-      ...prev,
-      [widget.uid]: 6,
-    }));
   };
+
+  const widgetLayout = useWidgetLayout(filteredWidgets, columnWidths);
 
   return (
     <Main>
@@ -161,43 +157,67 @@ const HomePageCE = () => {
               <Page.Loading />
             </Box>
           ) : (
-            <Grid.Root gap={5} ref={drop}>
-              {widgetLayout.map(({ widget, index, shouldShowDropZone, dropZoneWidth }) => (
-                <React.Fragment key={widget.uid}>
-                  <Grid.Item col={columnWidths[widget.uid] || 6} s={12}>
-                    <WidgetRoot
-                      uid={widget.uid}
-                      title={widget.title}
-                      icon={widget.icon}
-                      link={widget.link}
-                      findWidget={findWidget}
-                      moveWidget={moveWidget}
-                      columnWidths={columnWidths}
-                      setColumnWidths={setColumnWidths}
-                      deleteWidget={deleteWidget}
-                    >
-                      <WidgetComponent
-                        component={widget.component}
-                        columnWidth={columnWidths[widget.uid] || 6}
-                      />
-                    </WidgetRoot>
-                  </Grid.Item>
-                  {shouldShowDropZone && (
-                    <Grid.Item
-                      col={dropZoneWidth}
-                      display={{ initial: 'none', large: 'block' }}
-                      key={`${widget.uid}-empty-box`}
-                    >
-                      <GapDropZone
-                        insertIndex={index + 1}
-                        moveWidget={moveWidget}
-                        onDropWidget={handleDropWidget}
-                      />
-                    </Grid.Item>
-                  )}
-                </React.Fragment>
-              ))}
-            </Grid.Root>
+            <Box position="relative" data-grid-container>
+              <Grid.Root gap={5}>
+                {widgetLayout.map(
+                  ({
+                    widget,
+                    isLastInRow,
+                    rightWidgetId,
+                    widgetWidth,
+                    rightWidgetWidth,
+                    canResize,
+                  }) => (
+                    <React.Fragment key={widget.uid}>
+                      <Grid.Item col={widgetWidth} s={12}>
+                        <WidgetRoot
+                          uid={widget.uid}
+                          title={widget.title}
+                          icon={widget.icon}
+                          link={widget.link}
+                          findWidget={findWidget}
+                          moveWidget={moveWidget}
+                          columnWidths={columnWidths}
+                          setColumnWidths={setColumnWidths}
+                          deleteWidget={deleteWidget}
+                          onDragStart={handleDragStart}
+                          onDragEnd={handleDragEnd}
+                        >
+                          <WidgetComponent component={widget.component} columnWidth={widgetWidth} />
+                        </WidgetRoot>
+                      </Grid.Item>
+
+                      {!isLastInRow && canResize && rightWidgetId && (
+                        <InterWidgetResizeHandle
+                          key={`resize-${widget.uid}`}
+                          leftWidgetId={widget.uid}
+                          rightWidgetId={rightWidgetId}
+                          leftWidgetWidth={widgetWidth}
+                          rightWidgetWidth={rightWidgetWidth}
+                          onResize={handleInterWidgetResize}
+                          filteredWidgets={filteredWidgets}
+                        />
+                      )}
+                    </React.Fragment>
+                  )
+                )}
+              </Grid.Root>
+
+              {/* Render GapDropZones with calculated positions */}
+              {gapDropZonePositions.map((gapDropZone, index) => {
+                return (
+                  <GapDropZone
+                    key={`gap-drop-zone-${index}`}
+                    insertIndex={gapDropZone.insertIndex}
+                    position={gapDropZone.position}
+                    isVisible={gapDropZone.isVisible}
+                    type={gapDropZone.type}
+                    moveWidget={moveWidget}
+                    targetRowIndex={gapDropZone.targetRowIndex}
+                  />
+                );
+              })}
+            </Box>
           )}
         </Flex>
       </Layouts.Content>

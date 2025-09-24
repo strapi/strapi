@@ -1,71 +1,46 @@
-/**
- * useWidgetLayout Hook
- *
- * Custom hook for calculating widget layout and drop zones
- * for the homepage widget grid system.
- */
-
 import { useMemo } from 'react';
+
+import { isLastWidgetInRow, canResizeBetweenWidgets, getWidgetWidth } from '../utils/widgetUtils';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
 
-interface WidgetLayoutItem {
+export interface WidgetLayout {
   widget: WidgetWithUID;
   index: number;
-  currentWidgetWidth: number;
-  shouldShowDropZone: boolean;
-  dropZoneWidth: number;
-}
-
-interface UseWidgetLayoutOptions {
-  filteredWidgets: WidgetWithUID[];
-  columnWidths: Record<string, number>;
+  isLastInRow: boolean;
+  rightWidgetId: string | undefined;
+  widgetWidth: number;
+  rightWidgetWidth: number;
+  canResize: boolean;
 }
 
 /**
- *
- * Custom hook for calculating widget layout and drop zones
- *
- * @param options - Configuration for widget layout
- * @returns Calculated widget layout data
+ * Custom hook to calculate widget layout data for rendering
+ * Pre-calculates all layout-related data to optimize performance
  */
-export const useWidgetLayout = ({ filteredWidgets, columnWidths }: UseWidgetLayoutOptions) => {
+export const useWidgetLayout = (
+  filteredWidgets: WidgetWithUID[],
+  columnWidths: Record<string, number>
+): WidgetLayout[] => {
   const widgetLayout = useMemo(() => {
-    return filteredWidgets.reduce(
-      (acc, widget, index) => {
-        const currentWidgetWidth = columnWidths[widget.uid] || 6;
-        const nextWidgetWidth = columnWidths[filteredWidgets[index + 1]?.uid] || 6;
+    return filteredWidgets.map((widget, index) => {
+      const rightWidgetId = filteredWidgets[index + 1]?.uid;
+      const widgetWidth = getWidgetWidth(columnWidths, widget.uid);
+      const rightWidgetWidth = getWidgetWidth(columnWidths, rightWidgetId);
 
-        // Calculate current row width
-        const currentRowWidth =
-          acc.currentRowWidth + currentWidgetWidth > 12
-            ? currentWidgetWidth
-            : acc.currentRowWidth + currentWidgetWidth;
-
-        const nextAccumulator = currentRowWidth + nextWidgetWidth;
-        const shouldShowDropZone = nextAccumulator > 12 && currentRowWidth < 12;
-
-        acc.layout.push({
-          widget,
-          index,
-          currentWidgetWidth,
-          shouldShowDropZone,
-          dropZoneWidth: 12 - currentRowWidth,
-        });
-
-        acc.currentRowWidth = currentRowWidth;
-        return acc;
-      },
-      {
-        layout: [] as WidgetLayoutItem[],
-        currentRowWidth: 0,
-      }
-    ).layout;
+      return {
+        widget,
+        index,
+        isLastInRow: isLastWidgetInRow(index, filteredWidgets, columnWidths),
+        rightWidgetId,
+        widgetWidth,
+        rightWidgetWidth,
+        canResize:
+          rightWidgetId &&
+          canResizeBetweenWidgets(widget.uid, rightWidgetId, columnWidths, filteredWidgets),
+      };
+    });
   }, [filteredWidgets, columnWidths]);
 
-  return {
-    widgetLayout,
-  };
+  return widgetLayout;
 };
-
-export type { WidgetLayoutItem };

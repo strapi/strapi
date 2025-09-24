@@ -249,34 +249,4 @@ const KeyStatisticsWidget = () => {
   );
 };
 
-/* -------------------------------------------------------------------------------------------------
- * GapDropZone
- * -----------------------------------------------------------------------------------------------*/
-
-interface GapDropZoneProps {
-  insertIndex: number;
-  moveWidget: (id: string, to: number) => void;
-  onDropWidget: (widgetId: string, insertIndex: number) => void;
-}
-
-const GapDropZone = ({ insertIndex, moveWidget, onDropWidget }: GapDropZoneProps) => {
-  const [, drop] = useDrop(
-    () => ({
-      accept: 'widget',
-      drop: (item: { id: string }) => {
-        onDropWidget(item.id, insertIndex);
-      },
-      hover({ id: draggedId }: { id: string }) {
-        moveWidget(draggedId, insertIndex);
-      },
-      collect: (monitor) => ({
-        isOver: monitor.isOver(),
-      }),
-    }),
-    [insertIndex, moveWidget, onDropWidget]
-  );
-
-  return <Box ref={drop} height="100%" width="100%" />;
-};
-
-export { ProfileWidget, KeyStatisticsWidget, GapDropZone };
+export { ProfileWidget, KeyStatisticsWidget };
