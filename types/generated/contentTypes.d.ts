@@ -373,6 +373,124 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAdvertisementAdvertisement
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'advertisements';
+  info: {
+    displayName: 'Advertisement';
+    pluralName: 'advertisements';
+    singularName: 'advertisement';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    horizontalImage: Schema.Attribute.Media<'images'> &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::advertisement.advertisement'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    verticalImage: Schema.Attribute.Media<'images'> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+  };
+}
+
+export interface ApiAtricleAtricle extends Struct.CollectionTypeSchema {
+  collectionName: 'atricles';
+  info: {
+    displayName: 'Atricle';
+    pluralName: 'atricles';
+    singularName: 'atricle';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    image: Schema.Attribute.Media<'images'> &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::atricle.atricle'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    url: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+  };
+}
+
 export interface ApiBookmakerBonnusBookmakerBonnus
   extends Struct.CollectionTypeSchema {
   collectionName: 'bookmaker_bonnuses';
@@ -390,7 +508,21 @@ export interface ApiBookmakerBonnusBookmakerBonnus
     };
   };
   attributes: {
-    bonnusType: Schema.Attribute.String &
+    amount: Schema.Attribute.Decimal &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    amountCurrency: Schema.Attribute.Enumeration<['USD', 'EUR', 'COP']> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    bonnusType: Schema.Attribute.Enumeration<
+      ['deposit bonuses', 'no deposit bonuses']
+    > &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -468,6 +600,13 @@ export interface ApiBookmakerPageBookmakerPage
           localized: true;
         };
       }>;
+    isRecommended: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -530,6 +669,12 @@ export interface ApiBookmakerBookmaker extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    apiBookmakerId: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     bookmaker_pages: Schema.Attribute.Relation<
       'oneToMany',
       'api::bookmaker-page.bookmaker-page'
@@ -555,6 +700,12 @@ export interface ApiBookmakerBookmaker extends Struct.CollectionTypeSchema {
         };
       }>;
     publishedAt: Schema.Attribute.DateTime;
+    rating: Schema.Attribute.Decimal &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     sports: Schema.Attribute.Relation<'oneToMany', 'api::sport.sport'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -585,12 +736,30 @@ export interface ApiCasinoBonnusCasinoBonnus
     };
   };
   attributes: {
-    bonnusType: Schema.Attribute.String &
+    amount: Schema.Attribute.Decimal &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
       }>;
+    amountCurrency: Schema.Attribute.Enumeration<['EUR', 'COP', 'USD']> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    bonnusType: Schema.Attribute.Enumeration<
+      ['deposit bonuses', 'no deposit bonuses']
+    > &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    casino_page: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::casino-page.casino-page'
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -640,6 +809,12 @@ export interface ApiCasinoPageCasinoPage extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    casino: Schema.Attribute.Relation<'manyToOne', 'api::casino.casino'>;
+    casino_bonnuses: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::casino-bonnus.casino-bonnus'
+    >;
+    country: Schema.Attribute.Relation<'manyToOne', 'api::country.country'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -649,6 +824,13 @@ export interface ApiCasinoPageCasinoPage extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    isRecommended: Schema.Attribute.Boolean &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -660,13 +842,11 @@ export interface ApiCasinoPageCasinoPage extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    payment_methods: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::payment-method.payment-method'
+    >;
     publishedAt: Schema.Attribute.DateTime;
-    rating: Schema.Attribute.Decimal &
-      Schema.Attribute.SetPluginOptions<{
-        i18n: {
-          localized: true;
-        };
-      }>;
     registrationSteps: Schema.Attribute.RichText &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -713,6 +893,10 @@ export interface ApiCasinoCasino extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    casino_pages: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::casino-page.casino-page'
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -731,6 +915,12 @@ export interface ApiCasinoCasino extends Struct.CollectionTypeSchema {
         };
       }>;
     publishedAt: Schema.Attribute.DateTime;
+    rating: Schema.Attribute.Decimal &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -763,15 +953,24 @@ export interface ApiCountryCountry extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::bookmaker-page.bookmaker-page'
     >;
+    casino_pages: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::casino-page.casino-page'
+    >;
     code: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
         };
+      }> &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 2;
+        minLength: 2;
       }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    league: Schema.Attribute.Relation<'manyToOne', 'api::league.league'>;
     locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -812,10 +1011,17 @@ export interface ApiLeagueLeague extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    countries: Schema.Attribute.Relation<'oneToMany', 'api::country.country'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    key: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -832,6 +1038,12 @@ export interface ApiLeagueLeague extends Struct.CollectionTypeSchema {
       }>;
     publishedAt: Schema.Attribute.DateTime;
     sport: Schema.Attribute.Relation<'manyToOne', 'api::sport.sport'>;
+    sportId: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -854,6 +1066,12 @@ export interface ApiMatchMatch extends Struct.CollectionTypeSchema {
     };
   };
   attributes: {
+    apiMatchId: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     away_team: Schema.Attribute.Relation<'oneToOne', 'api::team.team'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -964,6 +1182,12 @@ export interface ApiOddOdd extends Struct.CollectionTypeSchema {
           localized: true;
         };
       }>;
+    apiMatchId: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     betOn: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
@@ -1030,6 +1254,10 @@ export interface ApiPaymentMethodPaymentMethod
     bookmaker_pages: Schema.Attribute.Relation<
       'manyToMany',
       'api::bookmaker-page.bookmaker-page'
+    >;
+    casino_pages: Schema.Attribute.Relation<
+      'manyToMany',
+      'api::casino-page.casino-page'
     >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1125,6 +1353,12 @@ export interface ApiTeamTeam extends Struct.CollectionTypeSchema {
         };
       }>;
     name: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    picture: Schema.Attribute.String &
       Schema.Attribute.SetPluginOptions<{
         i18n: {
           localized: true;
@@ -1705,6 +1939,8 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::advertisement.advertisement': ApiAdvertisementAdvertisement;
+      'api::atricle.atricle': ApiAtricleAtricle;
       'api::bookmaker-bonnus.bookmaker-bonnus': ApiBookmakerBonnusBookmakerBonnus;
       'api::bookmaker-page.bookmaker-page': ApiBookmakerPageBookmakerPage;
       'api::bookmaker.bookmaker': ApiBookmakerBookmaker;
