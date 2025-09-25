@@ -148,7 +148,7 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
     const strapiVersion = useAppInfo('useAIFetch', (state) => state.strapiVersion);
     const projectId = useAppInfo('useAIFetch', (state) => state.projectId);
     const userId = useAppInfo('useAIFetch-user', (state) => state.userId);
-    const aiUsage = useGetAIUsageQuery({}, { refetchOnMountOrArgChange: true });
+    const aiUsage = useGetAIUsageQuery(undefined, { refetchOnMountOrArgChange: true });
 
     const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
