@@ -117,11 +117,11 @@ describe('homepageService', () => {
 
       expect(updated.version).toBe(1);
       expect(updated.widgets).toEqual([
-          { uid: 'x', width: 6, row: 0 },
-          { uid: 'y', width: 6, row: 0 },
-          { uid: 'z', width: 6, row: 1 },
-          { uid: 'a', width: 6, row: 1 },
-          { uid: 'b', width: 12, row: 2 },
+        { uid: 'x', width: 6, row: 0 },
+        { uid: 'y', width: 6, row: 0 },
+        { uid: 'z', width: 6, row: 1 },
+        { uid: 'a', width: 6, row: 1 },
+        { uid: 'b', width: 12, row: 2 },
       ]);
       expect(updated.updatedAt).toBe(updatedAt);
 
