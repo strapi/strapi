@@ -2,26 +2,39 @@
 
 exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 .c0 {
-  margin-inline-start: -250px;
-  top: 4.6rem;
+  margin-block-start: 16px;
+  top: 5.6rem;
   left: 50%;
-  width: 50rem;
+  width: 100%;
+  max-width: 50rem;
   z-index: 700;
+  transform: translateX(-50%);
   position: fixed;
 }
 
 .c7 {
+  padding-inline-start: 20px;
+  padding-inline-end: 20px;
+}
+
+.c11 {
+  border-radius: 4px;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.c16 {
   background: #eaeaef;
 }
 
-.c9 {
+.c20 {
   padding-block-start: 20px;
   padding-inline-end: 20px;
-  padding-block-end: 20px;
+  padding-block-end: 0;
   padding-inline-start: 20px;
 }
 
-.c12 {
+.c23 {
   padding-inline-start: 16px;
   padding-inline-end: 16px;
   width: 100%;
@@ -30,7 +43,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   flex: 1;
 }
 
-.c16 {
+.c27 {
   padding-block-start: 4px;
   padding-inline-start: 7px;
   padding-inline-end: 7px;
@@ -38,81 +51,102 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   cursor: pointer;
 }
 
-.c27 {
+.c37 {
+  padding-block-start: 16px;
   padding-block-end: 16px;
 }
 
-.c29 {
-  padding-inline-start: 20px;
-  padding-inline-end: 20px;
-}
-
-.c30 {
+.c40 {
   position: relative;
 }
 
-.c34 {
-  border-radius: 4px;
-  display: inline-flex;
-  cursor: pointer;
+.c41 {
+  padding-inline-end: 4px;
 }
 
-.c37 {
+.c44 {
+  padding-inline-start: 8px;
+  padding-inline-end: 8px;
+  min-width: 20px;
+  background: #eaeaef;
+}
+
+.c49 {
   margin-inline-start: 8px;
   margin-inline-end: 8px;
 }
 
-.c41 {
+.c53 {
   padding-inline-start: 12px;
   padding-inline-end: 12px;
   width: 100%;
   border-radius: 4px;
 }
 
-.c42 {
+.c54 {
   width: 100%;
 }
 
-.c44 {
+.c56 {
   width: 100%;
   overflow: hidden;
 }
 
-.c46 {
+.c58 {
   width: 24px;
   text-align: center;
 }
 
-.c48 {
+.c60 {
   padding-inline-start: 8px;
 }
 
-.c51 {
-  padding-block-end: 56px;
+.c63 {
+  padding-block-end: 16px;
 }
 
 .c1 {
-  gap: 8px;
+  gap: 16px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c10 {
+.c3 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c8 {
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c12 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c21 {
   gap: 12px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c11 {
+.c22 {
   gap: 8px;
   align-items: center;
   flex-direction: row;
   display: flex;
 }
 
-.c13 {
+.c24 {
   gap: 8px;
   align-items: center;
   justify-content: center;
@@ -120,14 +154,14 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   display: inline-flex;
 }
 
-.c20 {
+.c30 {
   gap: 4px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c21 {
+.c31 {
   gap: 8px;
   align-items: center;
   justify-content: space-between;
@@ -135,35 +169,15 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c28 {
+.c38 {
   gap: 20px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c31 {
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: row;
-  display: flex;
-}
-
-.c32 {
-  align-items: center;
-  flex-direction: row;
-  display: flex;
-}
-
-.c35 {
-  align-items: center;
-  justify-content: center;
-  flex-direction: row;
-  display: flex;
-}
-
-.c38 {
-  gap: 2px;
+.c39 {
+  gap: 8px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
@@ -172,26 +186,47 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 .c43 {
   gap: 4px;
   align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c45 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c50 {
+  gap: 2px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c55 {
+  gap: 4px;
+  align-items: center;
   justify-content: space-between;
   flex-direction: row;
   display: flex;
 }
 
-.c6 {
+.c10 {
   font-weight: 600;
   font-size: 1.8rem;
   line-height: 1.22;
   color: currentcolor;
 }
 
-.c15 {
+.c26 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: currentcolor;
   font-weight: 600;
 }
 
-.c33 {
+.c42 {
   font-weight: 600;
   font-size: 1.1rem;
   line-height: 1.45;
@@ -199,21 +234,30 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c45 {
+.c47 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+  line-height: 1rem;
+}
+
+.c57 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: currentcolor;
   line-height: 32px;
 }
 
-.c49 {
+.c61 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: #32324d;
   font-weight: 500;
 }
 
-.c18 {
+.c15 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -224,7 +268,12 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c14 {
+.c46 {
+  border-radius: 4px;
+  padding-block: 0.7rem;
+}
+
+.c25 {
   height: 3.2rem;
   text-decoration: none;
   border: 1px solid #4945ff;
@@ -232,24 +281,24 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: #ffffff;
 }
 
-.c14:hover {
+.c25:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c14:active {
+.c25:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c14[aria-disabled='true'] {
+.c25[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c17 {
+.c28 {
   height: 3.2rem;
   text-decoration: none;
   border: 1px solid #dcdce4;
@@ -257,22 +306,48 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c17:hover {
+.c28:hover {
   background-color: #f6f6f9;
 }
 
-.c17:active {
+.c28:active {
   background-color: #eaeaef;
 }
 
-.c17[aria-disabled='true'] {
+.c28[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c36 {
+.c13 {
+  text-decoration: none;
+  padding-block: 0.7rem;
+  padding-inline: 0.7rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+  color: #8e8ea9;
+}
+
+.c13:hover {
+  background-color: #f6f6f9;
+  color: #666687;
+}
+
+.c13:active {
+  background-color: #eaeaef;
+}
+
+.c13[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c48 {
   text-decoration: none;
   padding-block: 0.2rem;
   padding-inline: 0.2rem;
@@ -281,26 +356,26 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c36 svg {
+.c48 svg {
   fill: #8e8ea9;
 }
 
-.c36:hover {
+.c48:hover {
   background-color: #f6f6f9;
 }
 
-.c36:active {
+.c48:active {
   background-color: #eaeaef;
 }
 
-.c36[aria-disabled='true'] {
+.c48[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c26 {
+.c36 {
   border: none;
   border-radius: 4px;
   color: #32324d;
@@ -315,21 +390,21 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-block: 4px;
 }
 
-.c26::placeholder {
+.c36::placeholder {
   color: #666687;
   opacity: 1;
 }
 
-.c26[aria-disabled='true'] {
+.c36[aria-disabled='true'] {
   color: inherit;
 }
 
-.c26:focus {
+.c36:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c22 {
+.c32 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -341,34 +416,45 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c22:focus-within {
+.c32:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c8 {
+.c18 {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+}
+
+.c19 {
+  min-width: 100%;
+}
+
+.c17 {
   height: 1px;
   border: none;
   flex-shrink: 0;
 }
 
-.c25 {
+.c35 {
   font-size: 1rem;
 }
 
-.c25 path {
+.c35 path {
   fill: #8e8ea9;
 }
 
-.c19 {
+.c29 {
   border-radius: 4px;
 }
 
-border:1px solid #eaeaef .c19:focus-within .c24 {
+border:1px solid #eaeaef .c29:focus-within .c34 {
   fill: #4945ff;
 }
 
-.c23 {
+.c33 {
   border: 1px solid #eaeaef height:16px;
   padding: 0 0 0 8px;
   color: #32324d;
@@ -378,16 +464,16 @@ border:1px solid #eaeaef .c19:focus-within .c24 {
   transition-duration: 0.2s;
 }
 
-.c23:hover button {
+.c33:hover button {
   cursor: pointer;
 }
 
-.c23:focus-within {
+.c33:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c3 {
+.c5 {
   width: 23.2rem;
   background: #f6f6f9;
   position: sticky;
@@ -399,26 +485,38 @@ border:1px solid #eaeaef .c19:focus-within .c24 {
 }
 
 .c2 {
+  max-width: 100%;
   display: grid;
-  grid-template-columns: auto 1fr;
-}
-
-.c52 {
-  overflow-x: hidden;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+  height: calc(100vh - 5.6rem);
 }
 
 .c4 {
-  background-color: #ffffff;
-  border-right: 1px solid #eaeaef;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.c4::-webkit-scrollbar {
   display: none;
+  background: #ffffff;
 }
 
-.c40 {
+.c64 {
+  overflow-x: hidden;
+}
+
+.c6 {
+  width: 100%;
+  height: calc(100vh - 5.7rem);
+  overflow: hidden;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  border-right: 0;
+  box-shadow: none;
+  position: fixed;
+  top: 5.7rem;
+  left: 0;
+  z-index: 2;
+}
+
+.c52 {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -427,32 +525,33 @@ border:1px solid #eaeaef .c19:focus-within .c24 {
   color: #32324d;
 }
 
-.c40.active>div {
+.c52.active>div {
   background-color: #f0f0ff;
   color: #271fe0;
   font-weight: 500;
 }
 
-.c40:hover.active>div {
+.c52:hover.active>div {
   background-color: #f0f0ff;
 }
 
-.c40:hover>div {
+.c52:hover>div {
   background-color: #f6f6f9;
 }
 
-.c40:focus-visible {
+.c52:focus-visible {
   outline-offset: -2px;
 }
 
-.c5 {
-  height: 56px;
-  display: flex;
-  align-items: center;
-  padding-left: 20px;
+.c9 {
+  flex: 0 0 5.6rem;
 }
 
-.c47 {
+.c14 {
+  display: block;
+}
+
+.c59 {
   cursor: pointer;
   width: 100%;
   border: none;
@@ -460,7 +559,6 @@ border:1px solid #eaeaef .c19:focus-within .c24 {
   background: transparent;
   display: flex;
   align-items: center;
-  height: 32px;
   border-radius: 4px;
   padding-left: 12px;
   padding-right: 12px;
@@ -468,29 +566,94 @@ border:1px solid #eaeaef .c19:focus-within .c24 {
   padding-bottom: 8px;
 }
 
-.c47:hover {
+.c59:hover {
   background-color: #f6f6f9;
 }
 
-.c50 .c39>div {
+.c62 .c51>div {
   padding-left: 36px;
 }
 
+@media (min-width: 768px) {
+  .c63 {
+    padding-block-end: 24px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c63 {
+    padding-block-end: 56px;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .c25 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c28 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c13 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c48 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 768px) {
+  .c2 {
+    grid-template-columns: auto 1fr;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c2 {
+    height: 100vh;
+  }
+}
+
+@media (min-width: 768px) {
+  .c4 {
+    display: block;
+    box-shadow: none;
+    transform: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .c64 {
+    transform: none;
+    width: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .c6 {
+    position: sticky;
+    top: 0;
+    border-right: 1px solid #eaeaef;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c6 {
+    height: 100vh;
+  }
+}
+
+@media (min-width: 768px) {
   .c14 {
-    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c17 {
-    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c36 {
-    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: none;
   }
 }
 
@@ -501,559 +664,648 @@ border:1px solid #eaeaef .c19:focus-within .c24 {
   <div
     class="c2"
   >
-    <nav
-      aria-label="Content-Type Builder"
+    <div
       class="c3 c4"
     >
-      <div
-        class="c5"
-      >
-        <h2
-          class="c6"
-        >
-          Content-Type Builder
-        </h2>
-      </div>
-      <div
-        class="c7 c8"
-        data-orientation="horizontal"
-        role="separator"
-      />
-      <div
-        class="c9 c10"
+      <nav
+        aria-label="Content-Type Builder"
+        class="c5 c6"
+        data-strapi-sidenav="true"
       >
         <div
-          class="c11"
+          class="c7 c8 c9"
         >
-          <button
-            aria-disabled="false"
-            class="c12 c13 c14"
-            type="submit"
+          <h2
+            class="c10"
           >
-            <span
-              class="c15"
-            >
-              Save
-            </span>
-          </button>
+            Content-Type Builder
+          </h2>
           <button
             aria-disabled="false"
-            aria-expanded="false"
-            aria-haspopup="menu"
-            class="c16 c13 c17"
+            class="c11 c12 c13 c14"
             data-state="closed"
-            id="radix-:r0:"
             type="button"
           >
+            <svg
+              aria-hidden="true"
+              display="block"
+              fill="currentColor"
+              focusable="false"
+              height="16"
+              viewBox="0 0 32 32"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+              />
+            </svg>
             <span
               class="c15"
             >
-              <svg
-                aria-hidden="true"
-                fill="#8e8ea9"
-                focusable="false"
-                height="16"
-                viewBox="0 0 32 32"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M18 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0M7.5 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4m17 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
-                />
-              </svg>
-              <span
-                class="c18"
-              >
-                More actions
-              </span>
+              Close side navigation
             </span>
           </button>
         </div>
         <div
-          class="c19"
+          class="c16 c17"
+          data-orientation="horizontal"
+          role="separator"
+        />
+        <div
+          class="c18"
+          dir="ltr"
+          style="position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
         >
+          <style>
+            [data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
+          </style>
           <div
-            class="c20"
+            class="c19"
+            data-radix-scroll-area-viewport=""
+            style="overflow-x: scroll; overflow-y: scroll;"
           >
-            <span
-              class="c18"
-            />
             <div
-              class="c21 c22 c23"
+              style="min-width: 100%; display: table;"
             >
-              <svg
-                aria-hidden="true"
-                class="c24 c25"
-                fill="currentColor"
-                height="16"
-                viewBox="0 0 32 32"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="c20 c21"
               >
-                <path
-                  d="M29.061 26.939 23.125 21A11.515 11.515 0 1 0 21 23.125l5.941 5.942a1.503 1.503 0 0 0 2.125-2.125zM5.5 14a8.5 8.5 0 1 1 8.5 8.5A8.51 8.51 0 0 1 5.5 14"
-                />
-              </svg>
-              <input
-                aria-disabled="false"
-                aria-label="Search"
-                class="c26"
-                id=":r2:"
-                name="search_contentType"
-                placeholder="Search"
-                value=""
-              />
+                <div
+                  class="c22"
+                >
+                  <button
+                    aria-disabled="false"
+                    class="c23 c24 c25"
+                    type="submit"
+                  >
+                    <span
+                      class="c26"
+                    >
+                      Save
+                    </span>
+                  </button>
+                  <button
+                    aria-disabled="false"
+                    aria-expanded="false"
+                    aria-haspopup="menu"
+                    class="c27 c24 c28"
+                    data-state="closed"
+                    id="radix-:r1:"
+                    type="button"
+                  >
+                    <span
+                      class="c26"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="#8e8ea9"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M18 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0M7.5 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4m17 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
+                        />
+                      </svg>
+                      <span
+                        class="c15"
+                      >
+                        More actions
+                      </span>
+                    </span>
+                  </button>
+                </div>
+                <div
+                  class="c29"
+                >
+                  <div
+                    class="c30"
+                  >
+                    <span
+                      class="c15"
+                    />
+                    <div
+                      class="c31 c32 c33"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="c34 c35"
+                        fill="currentColor"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M29.061 26.939 23.125 21A11.515 11.515 0 1 0 21 23.125l5.941 5.942a1.503 1.503 0 0 0 2.125-2.125zM5.5 14a8.5 8.5 0 1 1 8.5 8.5A8.51 8.51 0 0 1 5.5 14"
+                        />
+                      </svg>
+                      <input
+                        aria-disabled="false"
+                        aria-label="Search"
+                        class="c36"
+                        id=":r3:"
+                        name="search_contentType"
+                        placeholder="Search"
+                        value=""
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c37"
+              >
+                <ol
+                  class="c38"
+                >
+                  <li>
+                    <div
+                      class="c39"
+                    >
+                      <div
+                        class="c7"
+                      >
+                        <div
+                          class="c40 c31"
+                        >
+                          <div
+                            class="c3"
+                          >
+                            <div
+                              class="c41"
+                            >
+                              <span
+                                class="c42"
+                              >
+                                Collection Types
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            class="c43"
+                          >
+                            <div
+                              class="c44 c45 c46"
+                            >
+                              <span
+                                class="c47"
+                              >
+                                2
+                              </span>
+                            </div>
+                            <button
+                              aria-disabled="false"
+                              class="c11 c12 c48"
+                              data-state="closed"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                fill="currentColor"
+                                focusable="false"
+                                height="16"
+                                viewBox="0 0 32 32"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                                />
+                              </svg>
+                              <span
+                                class="c15"
+                              >
+                                Create new collection type
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <ol
+                        class="c49 c50"
+                        id=":r4:"
+                      >
+                        <li>
+                          <a
+                            class="c51 c52"
+                            href="/plugins/content-type-builder/content-types/application::address.address"
+                          >
+                            <div
+                              class="c53"
+                            >
+                              <div
+                                class="c54 c55"
+                              >
+                                <div
+                                  class="c56 c57"
+                                  style="text-overflow: ellipsis; white-space: nowrap;"
+                                >
+                                  address
+                                </div>
+                                <div
+                                  class="c22"
+                                >
+                                  <span
+                                    class="c58"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            class="c51 c52"
+                            href="/plugins/content-type-builder/content-types/application::category.category"
+                          >
+                            <div
+                              class="c53"
+                            >
+                              <div
+                                class="c54 c55"
+                              >
+                                <div
+                                  class="c56 c57"
+                                  style="text-overflow: ellipsis; white-space: nowrap;"
+                                >
+                                  category
+                                </div>
+                                <div
+                                  class="c22"
+                                >
+                                  <span
+                                    class="c58"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </a>
+                        </li>
+                      </ol>
+                    </div>
+                  </li>
+                  <li>
+                    <div
+                      class="c39"
+                    >
+                      <div
+                        class="c7"
+                      >
+                        <div
+                          class="c40 c31"
+                        >
+                          <div
+                            class="c3"
+                          >
+                            <div
+                              class="c41"
+                            >
+                              <span
+                                class="c42"
+                              >
+                                Single Types
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            class="c43"
+                          >
+                            <div
+                              class="c44 c45 c46"
+                            >
+                              <span
+                                class="c47"
+                              >
+                                1
+                              </span>
+                            </div>
+                            <button
+                              aria-disabled="false"
+                              class="c11 c12 c48"
+                              data-state="closed"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                fill="currentColor"
+                                focusable="false"
+                                height="16"
+                                viewBox="0 0 32 32"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                                />
+                              </svg>
+                              <span
+                                class="c15"
+                              >
+                                Create new single type
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <ol
+                        class="c49 c50"
+                        id=":r6:"
+                      >
+                        <li>
+                          <a
+                            class="c51 c52"
+                            href="/plugins/content-type-builder/content-types/application::homepage.homepage"
+                          >
+                            <div
+                              class="c53"
+                            >
+                              <div
+                                class="c54 c55"
+                              >
+                                <div
+                                  class="c56 c57"
+                                  style="text-overflow: ellipsis; white-space: nowrap;"
+                                >
+                                  Homepage
+                                </div>
+                                <div
+                                  class="c22"
+                                >
+                                  <span
+                                    class="c58"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </a>
+                        </li>
+                      </ol>
+                    </div>
+                  </li>
+                  <li>
+                    <div
+                      class="c39"
+                    >
+                      <div
+                        class="c7"
+                      >
+                        <div
+                          class="c40 c31"
+                        >
+                          <div
+                            class="c3"
+                          >
+                            <div
+                              class="c41"
+                            >
+                              <span
+                                class="c42"
+                              >
+                                Components
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            class="c43"
+                          >
+                            <div
+                              class="c44 c45 c46"
+                            >
+                              <span
+                                class="c47"
+                              >
+                                3
+                              </span>
+                            </div>
+                            <button
+                              aria-disabled="false"
+                              class="c11 c12 c48"
+                              data-state="closed"
+                            >
+                              <svg
+                                aria-hidden="true"
+                                fill="currentColor"
+                                focusable="false"
+                                height="16"
+                                viewBox="0 0 32 32"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                                />
+                              </svg>
+                              <span
+                                class="c15"
+                              >
+                                Create a new component
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <ol
+                        class="c49 c50"
+                        id=":r8:"
+                      >
+                        <li>
+                          <div
+                            class=""
+                          >
+                            <div
+                              class="c8"
+                            >
+                              <button
+                                aria-controls=":ra:"
+                                aria-expanded="true"
+                                class="c59"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  fill="#8e8ea9"
+                                  height="16"
+                                  style="transform: rotate(0deg); transition: transform 0.5s;"
+                                  viewBox="0 0 32 32"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="m27.061 13.061-10 10a1.503 1.503 0 0 1-2.125 0l-10-10a1.503 1.503 0 1 1 2.125-2.125L16 19.875l8.939-8.94a1.502 1.502 0 1 1 2.125 2.125z"
+                                  />
+                                </svg>
+                                <div
+                                  class="c60"
+                                >
+                                  <span
+                                    class="c61"
+                                  >
+                                    basic
+                                  </span>
+                                </div>
+                              </button>
+                            </div>
+                            <ul
+                              class="c50"
+                              id=":ra:"
+                              style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
+                            >
+                              <li
+                                class="c62"
+                              >
+                                <a
+                                  class="c51 c52"
+                                  href="/plugins/content-type-builder/component-categories/basic/basic.simple"
+                                >
+                                  <div
+                                    class="c53"
+                                  >
+                                    <div
+                                      class="c54 c55"
+                                    >
+                                      <div
+                                        class="c56 c57"
+                                        style="text-overflow: ellipsis; white-space: nowrap;"
+                                      >
+                                        simple
+                                      </div>
+                                      <div
+                                        class="c22"
+                                      >
+                                        <span
+                                          class="c58"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
+                        </li>
+                        <li>
+                          <div
+                            class=""
+                          >
+                            <div
+                              class="c8"
+                            >
+                              <button
+                                aria-controls=":rb:"
+                                aria-expanded="true"
+                                class="c59"
+                              >
+                                <svg
+                                  aria-hidden="true"
+                                  fill="#8e8ea9"
+                                  height="16"
+                                  style="transform: rotate(0deg); transition: transform 0.5s;"
+                                  viewBox="0 0 32 32"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="m27.061 13.061-10 10a1.503 1.503 0 0 1-2.125 0l-10-10a1.503 1.503 0 1 1 2.125-2.125L16 19.875l8.939-8.94a1.502 1.502 0 1 1 2.125 2.125z"
+                                  />
+                                </svg>
+                                <div
+                                  class="c60"
+                                >
+                                  <span
+                                    class="c61"
+                                  >
+                                    default
+                                  </span>
+                                </div>
+                              </button>
+                            </div>
+                            <ul
+                              class="c50"
+                              id=":rb:"
+                              style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
+                            >
+                              <li
+                                class="c62"
+                              >
+                                <a
+                                  class="c51 c52"
+                                  href="/plugins/content-type-builder/component-categories/default/default.closingperiod"
+                                >
+                                  <div
+                                    class="c53"
+                                  >
+                                    <div
+                                      class="c54 c55"
+                                    >
+                                      <div
+                                        class="c56 c57"
+                                        style="text-overflow: ellipsis; white-space: nowrap;"
+                                      >
+                                        closingperiod
+                                      </div>
+                                      <div
+                                        class="c22"
+                                      >
+                                        <span
+                                          class="c58"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </a>
+                              </li>
+                              <li
+                                class="c62"
+                              >
+                                <a
+                                  class="c51 c52"
+                                  href="/plugins/content-type-builder/component-categories/default/default.dish"
+                                >
+                                  <div
+                                    class="c53"
+                                  >
+                                    <div
+                                      class="c54 c55"
+                                    >
+                                      <div
+                                        class="c56 c57"
+                                        style="text-overflow: ellipsis; white-space: nowrap;"
+                                      >
+                                        dish
+                                      </div>
+                                      <div
+                                        class="c22"
+                                      >
+                                        <span
+                                          class="c58"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
+                        </li>
+                      </ol>
+                    </div>
+                  </li>
+                </ol>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div
-        class="c27"
-      >
-        <ol
-          class="c28"
-        >
-          <li>
-            <div
-              class="c1"
-            >
-              <div
-                class="c29"
-              >
-                <div
-                  class="c30 c31"
-                >
-                  <div
-                    class="c32"
-                  >
-                    <div
-                      class=""
-                    >
-                      <span
-                        class="c33"
-                      >
-                        Collection Types
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    aria-disabled="false"
-                    class="c34 c35 c36"
-                    data-state="closed"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      fill="currentColor"
-                      focusable="false"
-                      height="16"
-                      viewBox="0 0 32 32"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                      />
-                    </svg>
-                    <span
-                      class="c18"
-                    >
-                      Create new collection type
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <ol
-                class="c37 c38"
-                id=":r3:"
-              >
-                <li>
-                  <a
-                    class="c39 c40"
-                    href="/plugins/content-type-builder/content-types/application::address.address"
-                  >
-                    <div
-                      class="c41"
-                    >
-                      <div
-                        class="c42 c43"
-                      >
-                        <div
-                          class="c44 c45"
-                          style="text-overflow: ellipsis; white-space: nowrap;"
-                        >
-                          address
-                        </div>
-                        <div
-                          class="c11"
-                        >
-                          <span
-                            class="c46"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="c39 c40"
-                    href="/plugins/content-type-builder/content-types/application::category.category"
-                  >
-                    <div
-                      class="c41"
-                    >
-                      <div
-                        class="c42 c43"
-                      >
-                        <div
-                          class="c44 c45"
-                          style="text-overflow: ellipsis; white-space: nowrap;"
-                        >
-                          category
-                        </div>
-                        <div
-                          class="c11"
-                        >
-                          <span
-                            class="c46"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              </ol>
-            </div>
-          </li>
-          <li>
-            <div
-              class="c1"
-            >
-              <div
-                class="c29"
-              >
-                <div
-                  class="c30 c31"
-                >
-                  <div
-                    class="c32"
-                  >
-                    <div
-                      class=""
-                    >
-                      <span
-                        class="c33"
-                      >
-                        Single Types
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    aria-disabled="false"
-                    class="c34 c35 c36"
-                    data-state="closed"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      fill="currentColor"
-                      focusable="false"
-                      height="16"
-                      viewBox="0 0 32 32"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                      />
-                    </svg>
-                    <span
-                      class="c18"
-                    >
-                      Create new single type
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <ol
-                class="c37 c38"
-                id=":r5:"
-              >
-                <li>
-                  <a
-                    class="c39 c40"
-                    href="/plugins/content-type-builder/content-types/application::homepage.homepage"
-                  >
-                    <div
-                      class="c41"
-                    >
-                      <div
-                        class="c42 c43"
-                      >
-                        <div
-                          class="c44 c45"
-                          style="text-overflow: ellipsis; white-space: nowrap;"
-                        >
-                          Homepage
-                        </div>
-                        <div
-                          class="c11"
-                        >
-                          <span
-                            class="c46"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                </li>
-              </ol>
-            </div>
-          </li>
-          <li>
-            <div
-              class="c1"
-            >
-              <div
-                class="c29"
-              >
-                <div
-                  class="c30 c31"
-                >
-                  <div
-                    class="c32"
-                  >
-                    <div
-                      class=""
-                    >
-                      <span
-                        class="c33"
-                      >
-                        Components
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    aria-disabled="false"
-                    class="c34 c35 c36"
-                    data-state="closed"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      fill="currentColor"
-                      focusable="false"
-                      height="16"
-                      viewBox="0 0 32 32"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                      />
-                    </svg>
-                    <span
-                      class="c18"
-                    >
-                      Create a new component
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <ol
-                class="c37 c38"
-                id=":r7:"
-              >
-                <li>
-                  <div
-                    class=""
-                  >
-                    <div
-                      class="c31"
-                    >
-                      <button
-                        aria-controls=":r9:"
-                        aria-expanded="true"
-                        class="c47"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          fill="#8e8ea9"
-                          height="16"
-                          style="transform: rotate(0deg); transition: transform 0.5s;"
-                          viewBox="0 0 32 32"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="m27.061 13.061-10 10a1.503 1.503 0 0 1-2.125 0l-10-10a1.503 1.503 0 1 1 2.125-2.125L16 19.875l8.939-8.94a1.502 1.502 0 1 1 2.125 2.125z"
-                          />
-                        </svg>
-                        <div
-                          class="c48"
-                        >
-                          <span
-                            class="c49"
-                          >
-                            basic
-                          </span>
-                        </div>
-                      </button>
-                    </div>
-                    <ul
-                      class="c38"
-                      id=":r9:"
-                      style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
-                    >
-                      <li
-                        class="c50"
-                      >
-                        <a
-                          class="c39 c40"
-                          href="/plugins/content-type-builder/component-categories/basic/basic.simple"
-                        >
-                          <div
-                            class="c41"
-                          >
-                            <div
-                              class="c42 c43"
-                            >
-                              <div
-                                class="c44 c45"
-                                style="text-overflow: ellipsis; white-space: nowrap;"
-                              >
-                                simple
-                              </div>
-                              <div
-                                class="c11"
-                              >
-                                <span
-                                  class="c46"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </li>
-                <li>
-                  <div
-                    class=""
-                  >
-                    <div
-                      class="c31"
-                    >
-                      <button
-                        aria-controls=":ra:"
-                        aria-expanded="true"
-                        class="c47"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          fill="#8e8ea9"
-                          height="16"
-                          style="transform: rotate(0deg); transition: transform 0.5s;"
-                          viewBox="0 0 32 32"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="m27.061 13.061-10 10a1.503 1.503 0 0 1-2.125 0l-10-10a1.503 1.503 0 1 1 2.125-2.125L16 19.875l8.939-8.94a1.502 1.502 0 1 1 2.125 2.125z"
-                          />
-                        </svg>
-                        <div
-                          class="c48"
-                        >
-                          <span
-                            class="c49"
-                          >
-                            default
-                          </span>
-                        </div>
-                      </button>
-                    </div>
-                    <ul
-                      class="c38"
-                      id=":ra:"
-                      style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
-                    >
-                      <li
-                        class="c50"
-                      >
-                        <a
-                          class="c39 c40"
-                          href="/plugins/content-type-builder/component-categories/default/default.closingperiod"
-                        >
-                          <div
-                            class="c41"
-                          >
-                            <div
-                              class="c42 c43"
-                            >
-                              <div
-                                class="c44 c45"
-                                style="text-overflow: ellipsis; white-space: nowrap;"
-                              >
-                                closingperiod
-                              </div>
-                              <div
-                                class="c11"
-                              >
-                                <span
-                                  class="c46"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </a>
-                      </li>
-                      <li
-                        class="c50"
-                      >
-                        <a
-                          class="c39 c40"
-                          href="/plugins/content-type-builder/component-categories/default/default.dish"
-                        >
-                          <div
-                            class="c41"
-                          >
-                            <div
-                              class="c42 c43"
-                            >
-                              <div
-                                class="c44 c45"
-                                style="text-overflow: ellipsis; white-space: nowrap;"
-                              >
-                                dish
-                              </div>
-                              <div
-                                class="c11"
-                              >
-                                <span
-                                  class="c46"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </li>
-              </ol>
-            </div>
-          </li>
-        </ol>
-      </div>
-    </nav>
+      </nav>
+    </div>
     <div
-      class="c51 c52"
+      class="c63 c64"
     >
       <div />
     </div>
   </div>
   <span
-    class="c18"
+    class="c15"
   >
     <p
       aria-live="polite"

@@ -6,7 +6,6 @@ import { styled } from 'styled-components';
 
 import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { SubNav } from '../../../components/SubNav';
-import { useHistory } from '../../../features/BackButton';
 import { useTracking } from '../../../features/Tracking';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 
@@ -31,8 +30,6 @@ const SettingsNav = () => {
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
   const { license } = useLicenseLimits();
-
-  const goBack = useHistory('CloseNavButton', (state) => state.goBack);
 
   const availableFeatureNames = license?.features.map((feature) => feature.name);
 
