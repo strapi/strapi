@@ -178,7 +178,7 @@ test.describe('Home as super admin', () => {
         .getByRole('button', { name: 'Upload 1 asset to the library' })
         .waitFor({ state: 'visible', timeout: 5000 });
       await page.getByRole('button', { name: 'Upload 1 asset to the library' }).click();
-      await page.getByLabel('Home').click();
+      clickAndWait(page, page.getByRole('link', { name: 'Home' }));
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');

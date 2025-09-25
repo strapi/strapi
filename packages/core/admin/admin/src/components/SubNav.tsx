@@ -18,7 +18,7 @@ import { tours } from './GuidedTour/Tours';
 
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 5.7rem);
   overflow: hidden;
   background-color: ${({ theme }) => theme.colors.neutral0};
   display: flex;
@@ -26,13 +26,17 @@ const MainSubNav = styled(DSSubNav)`
   border-right: 0;
   box-shadow: none;
   position: fixed;
-  top: 0;
+  top: 5.7rem;
   left: 0;
-  z-index: 4;
+  z-index: 2;
 
   ${({ theme }) => theme.breakpoints.medium} {
     position: sticky;
+    top: 0;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+  }
+  ${({ theme }) => theme.breakpoints.large} {
+    height: 100vh;
   }
 `;
 
@@ -325,12 +329,7 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
 };
 
 const PageWrapper = styled(Box)`
-  ${MainSubNav} {
-    height: 100vh;
-  }
   ${({ theme }) => theme.breakpoints.medium} {
-    margin-top: -5.7rem;
-
     ${MainSubNav} {
       border-right: none;
     }
@@ -338,8 +337,10 @@ const PageWrapper = styled(Box)`
       display: block;
     }
   }
-  ${({ theme }) => theme.breakpoints.large} {
-    margin-top: 0;
+  ${({ theme }) => theme.breakpoints.medium} {
+    ${MainSubNav} {
+      top: 0;
+    }
   }
 `;
 

@@ -21,7 +21,7 @@ const NavBurgerMenuWrapper = styled(Box)<{ $isShown: boolean }>`
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 2;
+  z-index: 3;
   background-color: ${({ theme }) => theme.colors.neutral0};
   transform: ${({ $isShown }) => ($isShown ? 'translateY(0)' : 'translateY(-100%)')};
   transition: transform 0.2s ease-in-out;
