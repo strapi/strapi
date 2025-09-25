@@ -12,6 +12,14 @@ interface AdminAuthConfig {
 
 export default defineProvider({
   init(strapi) {
+    strapi.add('sessionManager', () =>
+      createSessionManager({
+        db: strapi.db,
+      })
+    );
+  },
+
+  async register(strapi) {
     // Get JWT secret from admin auth settings (same as admin token service)
     const adminAuth = strapi.config.get<AdminAuthConfig>('admin.auth', {});
     const jwtSecret = adminAuth.secret;
@@ -21,11 +29,5 @@ export default defineProvider({
         'Missing admin.auth.secret configuration. The SessionManager requires a JWT secret'
       );
     }
-
-    strapi.add('sessionManager', () =>
-      createSessionManager({
-        db: strapi.db,
-      })
-    );
   },
 });
