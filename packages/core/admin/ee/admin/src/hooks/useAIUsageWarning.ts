@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 
+import { useLocation } from 'react-router-dom';
+
 import { useNotification } from '../../../../admin/src/features/Notifications';
 import { useGetAIUsageQuery } from '../services/ai';
 
@@ -7,20 +9,22 @@ import { useAIAvailability } from './useAIAvailability';
 
 /**
  * Triggers a warning notification if AI usage is above a threshold (default 80%).
- * Place this hook in a top-level component (e.g., App.tsx) to show global notifications.
  * @param threshold - Usage percentage (0-1) at which to warn. Default: 0.8 (80%)
  */
 export function useAIUsageWarning(threshold: number = 0.8) {
+  const location = useLocation();
+  const isAuthPage = location.pathname.startsWith('/auth');
   const { toggleNotification } = useNotification();
   const isAIEnabled = useAIAvailability();
   const { data, isLoading, error } = useGetAIUsageQuery(
     {},
-    { refetchOnMountOrArgChange: true, skip: !isAIEnabled }
+    { refetchOnMountOrArgChange: true, skip: !isAIEnabled || isAuthPage }
   );
   const hasWarnedRef = useRef(false);
 
   useEffect(() => {
-    if (isLoading || error || !data?.subscription?.cmsAiEnabled || !isAIEnabled) return;
+    if (isAuthPage || isLoading || error || !data?.subscription?.cmsAiEnabled || !isAIEnabled)
+      return;
 
     const totalCredits = data.subscription.cmsAiCreditsBase;
     const usedCredits = data.cmsAiCreditsUsed;
@@ -49,5 +53,5 @@ export function useAIUsageWarning(threshold: number = 0.8) {
     } else if (percentUsed < threshold) {
       hasWarnedRef.current = false;
     }
-  }, [data, isLoading, error, threshold, toggleNotification, isAIEnabled]);
+  }, [data, isLoading, error, threshold, toggleNotification, isAIEnabled, isAuthPage]);
 }
