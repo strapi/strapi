@@ -37,6 +37,8 @@ import { createContentSourceMapsService } from './services/content-source-maps';
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
+import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+
 class Strapi extends Container implements Core.Strapi {
   app: any;
 
@@ -137,6 +139,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get telemetry(): Modules.Metrics.TelemetryService {
     return this.get('telemetry');
+  }
+
+  get sessionManager(): Modules.SessionManager.SessionManagerService {
+    return this.get('sessionManager');
   }
 
   get store(): Modules.CoreStore.CoreStore {
@@ -448,6 +454,20 @@ class Strapi extends Container implements Core.Strapi {
     // if schemas have changed, run repairs
     if (status === 'CHANGED') {
       await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+    }
+
+    const alreadyRanComponentRepair = await this.store.get({
+      type: 'strapi',
+      key: 'unidirectional-join-table-repair-ran',
+    });
+
+    if (!alreadyRanComponentRepair) {
+      await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
+      await this.store.set({
+        type: 'strapi',
+        key: 'unidirectional-join-table-repair-ran',
+        value: true,
+      });
     }
 
     if (this.EE) {
