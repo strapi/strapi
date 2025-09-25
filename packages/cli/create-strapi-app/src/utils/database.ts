@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import type { Question } from 'inquirer';
+import type { DistinctQuestion } from 'inquirer';
 
 import type { Scope, Options, DBClient, DBConfig } from '../types';
 import { logger } from './logger';
@@ -118,7 +118,7 @@ export function addDatabaseDependencies(scope: Scope) {
 }
 
 interface QuestionFactory {
-  (options: { client: DBClient }): Question;
+  (options: { client: DBClient }): DistinctQuestion;
 }
 
 const DEFAULT_PORTS = {
@@ -152,7 +152,7 @@ const port: QuestionFactory = ({ client }) => ({
   type: 'input',
   name: 'port',
   message: 'Port:',
-  default: DEFAULT_PORTS[client],
+  default: `${DEFAULT_PORTS[client]}`,
 });
 
 const username: QuestionFactory = () => ({
