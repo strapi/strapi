@@ -7,6 +7,7 @@ const WidgetEntrySchema = z
   .object({
     uid: z.string().nonempty(),
     width: WidthSchema,
+    row: z.number().int().min(0).default(0),
   })
   .strict();
 
