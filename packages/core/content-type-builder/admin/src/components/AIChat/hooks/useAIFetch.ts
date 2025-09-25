@@ -8,6 +8,7 @@ import { useState } from 'react';
 
 import { UIMessage, useChat } from '@ai-sdk/react';
 import { useAppInfo } from '@strapi/admin/strapi-admin';
+import { useGetAIUsageQuery } from '@strapi/admin/strapi-admin/ee';
 import { DefaultChatTransport } from 'ai';
 
 import { fetchAI, makeChatFetch, safeParseJson } from '../lib/aiClient';
@@ -147,6 +148,7 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
     const strapiVersion = useAppInfo('useAIFetch', (state) => state.strapiVersion);
     const projectId = useAppInfo('useAIFetch', (state) => state.projectId);
     const userId = useAppInfo('useAIFetch-user', (state) => state.userId);
+    const aiUsage = useGetAIUsageQuery({}, { refetchOnMountOrArgChange: true });
 
     const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -182,7 +184,8 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
         }
-
+        // refetch ai usage data on every successful request
+        aiUsage.refetch();
         return body as ResponseType<T>;
       } catch (err) {
         setError(err instanceof Error ? err.message : `Failed to fetch data from ${endpoint}`);

@@ -16,6 +16,7 @@ export const AIUsage = () => {
   if (error || !data) {
     return null;
   }
+
   if (!data.subscription?.cmsAiEnabled) {
     return null;
   }
@@ -24,13 +25,14 @@ export const AIUsage = () => {
   const totalCredits = data.subscription.cmsAiCreditsBase;
   const usedCredits = data.cmsAiCreditsUsed;
   const maxCredits = data.subscription.cmsAiCreditsMaxUsage;
-  const remainingCredits = Math.max(totalCredits - usedCredits, 0);
-  const overage = Math.max(usedCredits - totalCredits, 0);
-  const percentRemaining = (remainingCredits / totalCredits) * 100;
-  const percentOverage = (overage / totalCredits) * 100;
+  const overage = usedCredits - totalCredits;
+  const percentRemaining = (usedCredits / totalCredits) * 100;
+  const percentOverage = (usedCredits / maxCredits) * 100;
+
+  const isInOverages = overage > 0 && maxCredits !== totalCredits;
 
   return (
-    <Grid.Item col={6} s={12} direction="column" alignItems="flex-start" gap={2}>
+    <Grid.Item col={6} s={12} direction="column" alignItems="start" gap={2}>
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: 'Settings.application.ai-usage',
@@ -38,17 +40,17 @@ export const AIUsage = () => {
         })}
       </Typography>
       <Flex gap={2} direction="column" alignItems="flex-start">
-        {remainingCredits > 0 && (
+        {!isInOverages && (
           <>
             <Flex>
               <ProgressBar value={percentRemaining} size="M" />
             </Flex>
             <Typography variant="omega">
-              {`${remainingCredits} credits remaining on ${totalCredits}`}
+              {`${usedCredits} credits used from ${totalCredits} credits available in your plan`}
             </Typography>
           </>
         )}
-        {overage > 0 && (
+        {isInOverages && (
           <>
             <Flex>
               <ProgressBar value={percentOverage} size="M" color="danger" />
