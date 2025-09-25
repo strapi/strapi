@@ -71,6 +71,7 @@ export const homepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       return {
         uid: w.uid,
         width: w.width ?? prev?.width ?? DEFAULT_WIDTH,
+        row: w.row ?? prev?.row ?? 0,
       };
     });
 
