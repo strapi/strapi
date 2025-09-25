@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { findAndClose } from '../../../utils/shared';
+import { clickAndWait, findAndClose } from '../../../utils/shared';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
 
 test.describe('Edit View', () => {
@@ -20,7 +20,7 @@ test.describe('Edit View', () => {
     test.fixme(
       'as a user I want to be warned if I try to publish content that has draft relations',
       async ({ page }) => {
-        await page.getByLabel('Content Manager').click();
+        clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
         await page.getByRole('link', { name: 'Create new entry' }).click();
 
         // Wait for the URL to match the CREATE_URL pattern
@@ -66,7 +66,7 @@ test.describe('Edit View', () => {
       page,
     }) => {
       // As super admin create a new draft product entry
-      await page.getByLabel('Content Manager').click();
+      clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
       await page.getByRole('link', { name: 'Products' }).click();
       await page.getByRole('link', { name: 'Create new entry' }).click();
 
@@ -77,7 +77,7 @@ test.describe('Edit View', () => {
       await findAndClose(page, 'Saved Document');
 
       // As super admin remove read permission for the name field for the Editor role
-      await page.getByLabel('Settings').click();
+      clickAndWait(page, page.getByRole('link', { name: 'Settings' }));
       await page.getByRole('link', { name: 'Roles' }).first().click();
       await page.getByText('Editor', { exact: true }).click();
 
@@ -94,7 +94,7 @@ test.describe('Edit View', () => {
       // As editor login and try to publish the entry
       await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
 
-      await page.getByLabel('Content Manager').click();
+      clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
       await page.getByRole('link', { name: 'Products' }).click();
       await page.getByText(slug).click();
       await page.getByRole('button', { name: 'Publish' }).click();

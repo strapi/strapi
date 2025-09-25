@@ -34,15 +34,8 @@ const SideNavContainer = styled(Flex)`
 
   ${({ theme }) => theme.breakpoints.medium} {
     display: block;
-    width: 23.2rem;
-    height: calc(100vh - 5.6rem);
-    position: sticky;
     box-shadow: none;
     transform: none;
-  }
-  ${({ theme }) => theme.breakpoints.large} {
-    height: 100vh;
-    top: 0;
   }
 `;
 

@@ -176,7 +176,7 @@ const LeftMenu = ({
               large: '1px 0 0 0',
             }}
             borderColor="neutral150"
-            padding={2}
+            padding={3}
           >
             <NavUser />
           </Box>

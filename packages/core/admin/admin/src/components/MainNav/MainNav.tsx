@@ -6,6 +6,7 @@ const MainNavWrapper = styled(Flex)`
   position: fixed;
   max-height: 100%;
   height: auto;
+  z-index: 4;
 
   ${({ theme }) => theme.breakpoints.large} {
     border-bottom: none;
