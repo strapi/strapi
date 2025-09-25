@@ -16,10 +16,10 @@ export function useAIUsageWarning(threshold: number = 0.8) {
   const isAuthPage = location.pathname.startsWith('/auth');
   const { toggleNotification } = useNotification();
   const isAIEnabled = useAIAvailability();
-  const { data, isLoading, error } = useGetAIUsageQuery(
-    {},
-    { refetchOnMountOrArgChange: true, skip: !isAIEnabled || isAuthPage }
-  );
+  const { data, isLoading, error } = useGetAIUsageQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+    skip: !isAIEnabled || isAuthPage,
+  });
   const hasWarnedRef = useRef(false);
 
   useEffect(() => {

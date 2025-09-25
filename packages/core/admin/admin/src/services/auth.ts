@@ -10,12 +10,7 @@ import {
 } from '../../../shared/contracts/authentication';
 import { Check } from '../../../shared/contracts/permissions';
 import { GetProviders, IsSSOLocked } from '../../../shared/contracts/providers';
-import {
-  type GetOwnPermissions,
-  type GetMe,
-  type UpdateMe,
-  type GetAiToken,
-} from '../../../shared/contracts/users';
+import { type GetOwnPermissions, type GetMe, type UpdateMe } from '../../../shared/contracts/users';
 
 import { adminApi } from './api';
 
@@ -57,15 +52,6 @@ const authService = adminApi
           return res.data;
         },
         invalidatesTags: ['Me'],
-      }),
-      getAiToken: builder.query<GetAiToken.Response['data'], void>({
-        query: () => ({
-          method: 'GET',
-          url: '/admin/users/me/ai-token',
-        }),
-        transformResponse(res: GetAiToken.Response) {
-          return res.data;
-        },
       }),
       /**
        * Permissions
@@ -224,8 +210,6 @@ const {
   useGetRegistrationInfoQuery,
   useForgotPasswordMutation,
   useGetMyPermissionsQuery,
-  useGetAiTokenQuery,
-  useLazyGetAiTokenQuery,
   useIsSSOLockedQuery,
   useGetProvidersQuery,
   useGetProviderOptionsQuery,
@@ -246,8 +230,6 @@ export {
   useGetRegistrationInfoQuery,
   useForgotPasswordMutation,
   useGetMyPermissionsQuery,
-  useGetAiTokenQuery,
-  useLazyGetAiTokenQuery,
   useIsSSOLockedQuery,
   useGetProvidersQuery,
   useGetProviderOptionsQuery,

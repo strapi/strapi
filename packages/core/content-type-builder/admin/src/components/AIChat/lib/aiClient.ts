@@ -86,7 +86,7 @@ export const getAIJwt = async (): Promise<AITokenData | null> => {
   // Fetch from admin endpoint
   try {
     const { get } = getFetchClient();
-    const { data } = await get('/admin/users/me/ai-token');
+    const { data } = await get('/admin/ai-token');
 
     const token = data?.token || data?.data?.token;
     const expiresAt = data?.expiresAt || data?.data?.expiresAt;
