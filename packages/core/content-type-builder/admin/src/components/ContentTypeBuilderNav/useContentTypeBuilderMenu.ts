@@ -50,7 +50,7 @@ export const useContentTypeBuilderMenu = () => {
   const { onOpenModalCreateSchema } = useFormModalNavigation();
   const { locale } = useIntl();
 
-  const { startsWith } = useFilter(locale, {
+  const { contains } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -178,7 +178,7 @@ export const useContentTypeBuilderMenu = () => {
         ...section,
         links: section.links.reduce((acc, link) => {
           const filteredLinks =
-            'links' in link ? link.links.filter((link) => startsWith(link.title, searchValue)) : [];
+            'links' in link ? link.links.filter((link) => contains(link.title, searchValue)) : [];
 
           if (filteredLinks.length === 0) {
             return acc;
@@ -198,7 +198,7 @@ export const useContentTypeBuilderMenu = () => {
     }
 
     const filteredLinks = section.links
-      .filter((link) => startsWith(link.title, searchValue))
+      .filter((link) => contains(link.title, searchValue))
       .sort((a, b) => formatter.compare(a.title, b.title));
 
     return {
