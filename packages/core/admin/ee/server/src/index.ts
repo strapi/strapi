@@ -29,8 +29,8 @@ const getAdminEE = () => {
     routes,
   };
 
-  // TODO: Check if ai feature is enabled in EE license when it's available
-  const isAIEnabled = strapi.config.get('admin.ai.enabled', true);
+  const isAIEnabled =
+    strapi.config.get('admin.ai.enabled', true) && strapi.ee.features.isEnabled('cms-ai');
   const isAuditLogsEnabled =
     strapi.config.get('admin.auditLogs.enabled', true) &&
     strapi.ee.features.isEnabled('audit-logs');
