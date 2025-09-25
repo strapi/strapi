@@ -111,7 +111,7 @@ const AdminLayout = () => {
             <Flex
               alignItems="flex-start"
               paddingTop={{
-                initial: '5.6rem',
+                initial: '5.7rem',
                 large: 0,
               }}
             >

@@ -64,10 +64,10 @@ const getInitialRoutes = (): RouteObject[] => [
   {
     path: 'settings/navigation',
     lazy: async () => {
-      const { SettingsNav } = await import('./pages/Settings/components/SettingsNav');
+      const { Navigation } = await import('./pages/Settings/pages/Navigation');
 
       return {
-        Component: SettingsNav,
+        Component: Navigation,
       };
     },
   },

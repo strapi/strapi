@@ -42,7 +42,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           shadow="tableShadow"
           width={`${width}px`}
           zIndex={2}
-          minHeight="5.7rem"
+          minHeight="5.6rem"
           data-strapi-header-sticky
         >
           <Flex justifyContent="space-between" wrap="wrap">

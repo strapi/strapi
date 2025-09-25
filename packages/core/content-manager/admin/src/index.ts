@@ -36,10 +36,10 @@ export default {
     app.router.addRoute({
       path: 'content-manager/navigation',
       lazy: async () => {
-        const { LeftMenu } = await import('./components/LeftMenu');
+        const { Navigation } = await import('./pages/Navigation');
 
         return {
-          Component: LeftMenu,
+          Component: Navigation,
         };
       },
     });

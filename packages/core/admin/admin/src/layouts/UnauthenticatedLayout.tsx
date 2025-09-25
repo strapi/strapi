@@ -57,10 +57,26 @@ export const LayoutContent = ({ children }: LayoutContentProps) => (
   <Wrapper
     shadow="tableShadow"
     hasRadius
-    paddingTop={9}
-    paddingBottom={9}
-    paddingLeft={10}
-    paddingRight={10}
+    paddingTop={{
+      initial: 4,
+      medium: 6,
+      large: 10,
+    }}
+    paddingBottom={{
+      initial: 4,
+      medium: 6,
+      large: 10,
+    }}
+    paddingLeft={{
+      initial: 4,
+      medium: 6,
+      large: 10,
+    }}
+    paddingRight={{
+      initial: 4,
+      medium: 6,
+      large: 10,
+    }}
     background="neutral0"
   >
     {children}
@@ -75,11 +91,35 @@ export const UnauthenticatedLayout = ({ children }: UnauthenticatedLayoutProps) 
   return (
     <div>
       <Flex tag="header" justifyContent="flex-end">
-        <Box paddingTop={6} paddingRight={8}>
+        <Box
+          paddingTop={6}
+          paddingRight={{
+            initial: 6,
+            medium: 8,
+            large: 10,
+          }}
+        >
           <LocaleToggle />
         </Box>
       </Flex>
-      <Box paddingTop={2} paddingBottom={11}>
+      <Box
+        paddingTop={2}
+        paddingBottom={{
+          initial: 6,
+          medium: 8,
+          large: 10,
+        }}
+        marginLeft={{
+          initial: 6,
+          medium: 8,
+          large: 10,
+        }}
+        marginRight={{
+          initial: 6,
+          medium: 8,
+          large: 10,
+        }}
+      >
         {children}
       </Box>
     </div>

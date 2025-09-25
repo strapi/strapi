@@ -39,12 +39,10 @@ const SideNavContainer = styled(Flex)`
     position: sticky;
     box-shadow: none;
     transform: none;
-    border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
   }
   ${({ theme }) => theme.breakpoints.large} {
     height: 100vh;
     top: 0;
-    border-top: none;
   }
 `;
 

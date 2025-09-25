@@ -29,8 +29,6 @@ const MainSubNav = styled(DSSubNav)`
   top: 0;
   left: 0;
   z-index: 4;
-  width: 100%;
-  height: 100%;
 
   ${({ theme }) => theme.breakpoints.medium} {
     position: sticky;
@@ -119,6 +117,7 @@ const StyledHeader = styled(Flex)`
 
 const CloseButton = styled(IconButton)`
   display: block;
+
   ${({ theme }) => theme.breakpoints.medium} {
     display: none;
   }
@@ -325,6 +324,25 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
   );
 };
 
+const PageWrapper = styled(Box)`
+  ${MainSubNav} {
+    height: 100vh;
+  }
+  ${({ theme }) => theme.breakpoints.medium} {
+    margin-top: -5.7rem;
+
+    ${MainSubNav} {
+      border-right: none;
+    }
+    ${CloseButton} {
+      display: block;
+    }
+  }
+  ${({ theme }) => theme.breakpoints.large} {
+    margin-top: 0;
+  }
+`;
+
 export const SubNav = {
   Main,
   Header,
@@ -332,4 +350,5 @@ export const SubNav = {
   Sections,
   Section,
   SubSection,
+  PageWrapper,
 };

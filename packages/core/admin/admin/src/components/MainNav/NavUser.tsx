@@ -6,6 +6,16 @@ import { styled } from 'styled-components';
 import { useAuth } from '../../features/Auth';
 import { getInitials, getDisplayName } from '../../utils/users';
 
+const MenuTrigger = styled(Menu.Trigger)`
+  padding: 0;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    width: 4rem;
+    height: 4rem;
+    justify-content: center;
+  }
+`;
+
 const MenuIcon = styled(Flex)`
   height: ${({ theme }) => theme.spaces[7]};
   width: ${({ theme }) => theme.spaces[7]};
@@ -72,8 +82,8 @@ export const NavUser = ({
   return (
     <Flex {...props}>
       <Menu.Root>
-        <Menu.Trigger endIcon={null} fullWidth justifyContent="flex-start" paddingLeft={0}>
-          <Flex alignItems="center" justifyContent="center" gap={3}>
+        <MenuTrigger endIcon={null} fullWidth justifyContent="flex-start">
+          <Flex alignItems="center" gap={3}>
             <MenuIcon justifyContent="center">
               <Avatar.Item delayMs={0} fallback={initials} />
             </MenuIcon>
@@ -83,7 +93,7 @@ export const NavUser = ({
               <VisuallyHidden tag="span">{userDisplayName}</VisuallyHidden>
             )}
           </Flex>
-        </Menu.Trigger>
+        </MenuTrigger>
 
         <MenuContent popoverPlacement="top-start" zIndex={3}>
           <UserInfo direction="column" gap={0} alignItems="flex-start">

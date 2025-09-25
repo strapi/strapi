@@ -27,7 +27,7 @@ const MainNav = (props: FlexProps<'nav'>) => (
     top={0}
     zIndex={3}
     width={{
-      initial: '100%',
+      initial: '100vw',
       large: 10,
     }}
     {...props}
