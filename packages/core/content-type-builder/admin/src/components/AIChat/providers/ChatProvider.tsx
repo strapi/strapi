@@ -11,10 +11,10 @@ import {
 
 import { UIMessage, useChat } from '@ai-sdk/react';
 import { useTracking } from '@strapi/admin/strapi-admin';
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 
 import { useDataManager } from '../../DataManager/useDataManager';
 import { FeedbackProvider } from '../FeedbackModal';
-import { useAIAvailability } from '../hooks/useAIAvailability';
 import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
 import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
