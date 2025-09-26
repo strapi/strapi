@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { createContext } from '@strapi/admin/strapi-admin';
-import { Button, Flex, Modal } from '@strapi/design-system';
+import { Alert, Button, Flex, Modal } from '@strapi/design-system';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -34,11 +34,17 @@ const StyledModalBody = styled(Modal.Body)`
   }
 `;
 
+const StyledAlert = styled(Alert)`
+  & > button {
+    display: none;
+  }
+`;
+
 const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const { formatMessage } = useIntl();
   const state = useAIUploadModalContext('ModalContent', (s) => s.state);
   const dispatch = useAIUploadModalContext('ModalContent', (s) => s.dispatch);
-  const { upload, isLoading } = useUpload();
+  const { upload, isLoading, error } = useUpload();
 
   const handleCaptionChange = (assetId: number, caption: string) => {
     dispatch({
@@ -120,19 +126,45 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
     );
   }
 
+  const title = formatMessage(
+    {
+      id: getTrad('ai.modal.title'),
+      defaultMessage:
+        '{count, plural, one {# Asset uploaded} other {# Assets uploaded}} time to review AI generated content',
+    },
+    { count: state.uploadedAssets.length }
+  );
+
+  if (error) {
+    return (
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <StyledAlert closeLabel="" variant="danger">
+            {formatMessage({
+              id: getTrad('ai.modal.error'),
+              defaultMessage: 'Could not generate AI metadata for the uploaded files.',
+            })}
+          </StyledAlert>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={handleCancel} variant="tertiary">
+            {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+          </Button>
+          <Button onClick={handleDone}>
+            {formatMessage({ id: 'global.done', defaultMessage: 'Done' })}
+          </Button>
+        </Modal.Footer>
+      </Modal.Content>
+    );
+  }
+
   return (
     <Modal.Content>
       <Modal.Header>
-        <Modal.Title>
-          {formatMessage(
-            {
-              id: getTrad('ai.modal.title'),
-              defaultMessage:
-                '{count, plural, one {# Asset uploaded} other {# Assets uploaded}} time to review AI generated content',
-            },
-            { count: state.uploadedAssets.length }
-          )}
-        </Modal.Title>
+        <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
 
       <StyledModalBody>
