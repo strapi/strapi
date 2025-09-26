@@ -10,6 +10,7 @@
  */
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
+import type { Homepage } from '../../../shared/contracts/homepage';
 
 // ============================================================================
 // CONSTANTS
@@ -357,4 +358,104 @@ export const canResizeBetweenWidgets = (
 
   // Resizing is possible if either widget can shrink AND the other can grow
   return (canLeftShrink && canRightGrow) || (canRightShrink && canLeftGrow);
+};
+
+// ============================================================================
+// HOMEPAGE LAYOUT UTILITIES
+// ============================================================================
+
+/**
+ * Creates a Set of widget UIDs from homepage layout for efficient lookup
+ */
+export const createHomepageWidgetUidsSet = (homepageLayout: Homepage.Layout): Set<string> => {
+  return new Set(homepageLayout.widgets.map((w) => w.uid));
+};
+
+/**
+ * Filters widgets to only include those present in the homepage layout
+ */
+export const filterWidgetsByHomepageLayout = (
+  widgets: WidgetWithUID[],
+  homepageLayout: Homepage.Layout
+): WidgetWithUID[] => {
+  const homepageWidgetUids = createHomepageWidgetUidsSet(homepageLayout);
+  return widgets.filter((widget) => homepageWidgetUids.has(widget.uid));
+};
+
+/**
+ * Creates a map of widget UIDs to their positions in the homepage layout
+ */
+export const createWidgetOrderMap = (homepageLayout: Homepage.Layout): Map<string, number> => {
+  return new Map(homepageLayout.widgets.map((widget, index) => [widget.uid, index]));
+};
+
+/**
+ * Sorts widgets according to the homepage layout order
+ */
+export const sortWidgetsByHomepageLayout = (
+  widgets: WidgetWithUID[],
+  homepageLayout: Homepage.Layout
+): WidgetWithUID[] => {
+  const widgetOrderMap = createWidgetOrderMap(homepageLayout);
+
+  return [...widgets].sort((a, b) => {
+    const aIndex = widgetOrderMap.get(a.uid) ?? Number.MAX_SAFE_INTEGER;
+    const bIndex = widgetOrderMap.get(b.uid) ?? Number.MAX_SAFE_INTEGER;
+    return aIndex - bIndex;
+  });
+};
+
+/**
+ * Extracts widths from homepage layout into a Record
+ */
+export const extractHomepageWidths = (homepageLayout: Homepage.Layout): Record<string, number> => {
+  const widths: Record<string, number> = {};
+  homepageLayout.widgets.forEach(({ uid, width }) => {
+    widths[uid] = width;
+  });
+  return widths;
+};
+
+/**
+ * Applies homepage layout to widgets (filters, sorts, and extracts widths)
+ */
+export const applyHomepageLayout = (
+  authorizedWidgets: WidgetWithUID[],
+  homepageLayout: Homepage.Layout
+): {
+  filteredWidgets: WidgetWithUID[];
+  widths: Record<string, number>;
+} => {
+  const layoutWidgets = filterWidgetsByHomepageLayout(authorizedWidgets, homepageLayout);
+  const sortedWidgets = sortWidgetsByHomepageLayout(layoutWidgets, homepageLayout);
+  const widths = extractHomepageWidths(homepageLayout);
+
+  return {
+    filteredWidgets: sortedWidgets,
+    widths,
+  };
+};
+
+/**
+ * Creates default widget widths based on widget count
+ * Even count: all widgets get width 6
+ * Odd count: all widgets get width 6 except the last one which gets width 12
+ */
+export const createDefaultWidgetWidths = (widgets: WidgetWithUID[]): Record<string, number> => {
+  const defaultWidths: Record<string, number> = {};
+  const widgetCount = widgets.length;
+
+  if (widgetCount > 0) {
+    if (widgetCount % 2 === 0) {
+      widgets.forEach((widget) => {
+        defaultWidths[widget.uid] = 6;
+      });
+    } else {
+      widgets.forEach((widget, index) => {
+        defaultWidths[widget.uid] = index === widgetCount - 1 ? 12 : 6;
+      });
+    }
+  }
+
+  return defaultWidths;
 };

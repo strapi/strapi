@@ -16,6 +16,8 @@ import { useStrapiApp } from '../../features/StrapiApp';
 import { useTracking } from '../../features/Tracking';
 import { useWidgets } from '../../features/Widgets';
 import { useWidgetLayout } from '../../hooks/useWidgetLayout';
+import { useGetHomepageLayoutQuery } from '../../services/homepage';
+import { applyHomepageLayout, createDefaultWidgetWidths } from '../../utils/widgetUtils';
 import { InterWidgetResizeHandle } from '../../components/ResizeIndicator';
 import { GapDropZone } from '../../components/GapDropZone';
 
@@ -234,29 +236,11 @@ const HomePageCE = () => {
   const displayName = user?.firstname ?? user?.username ?? user?.email;
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
   const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
+  const { data: homepageLayout, isLoading: isLoadingLayout } = useGetHomepageLayoutQuery();
   const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
   const [allAvailableWidgets, setAllAvailableWidgets] = React.useState<WidgetWithUID[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [isAddWidgetModalOpen, setIsAddWidgetModalOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkWidgetsPermissions = async () => {
-      const allWidgets = getAllWidgets();
-      const authorizedWidgets = await Promise.all(
-        allWidgets.map(async (widget) => {
-          if (!widget.permissions || widget.permissions.length === 0) return true;
-          const matchingPermissions = await checkUserHasPermissions(widget.permissions);
-          return matchingPermissions.length >= widget.permissions.length;
-        })
-      );
-      const authorizedWidgetsList = allWidgets.filter((_, i) => authorizedWidgets[i]);
-      setFilteredWidgets(authorizedWidgetsList);
-      setAllAvailableWidgets(authorizedWidgetsList);
-      setLoading(false);
-    };
-
-    checkWidgetsPermissions();
-  }, [checkUserHasPermissions, getAllWidgets]);
 
   // Use custom hook for widget management
   const {
@@ -275,6 +259,44 @@ const HomePageCE = () => {
     filteredWidgets,
     setFilteredWidgets,
   });
+
+  React.useEffect(() => {
+    const checkWidgetsPermissions = async () => {
+      const allWidgets = getAllWidgets();
+      const authorizedWidgets = await Promise.all(
+        allWidgets.map(async (widget) => {
+          if (!widget.permissions || widget.permissions.length === 0) return true;
+          const matchingPermissions = await checkUserHasPermissions(widget.permissions);
+          return matchingPermissions.length >= widget.permissions.length;
+        })
+      );
+      const authorizedWidgetsList = allWidgets.filter((_, i) => authorizedWidgets[i]);
+
+      setAllAvailableWidgets(authorizedWidgetsList);
+      setLoading(false);
+    };
+
+    checkWidgetsPermissions();
+  }, [checkUserHasPermissions, getAllWidgets]);
+
+  React.useEffect(() => {
+    if (allAvailableWidgets.length === 0) return;
+
+    // If user has customized the homepage layout, apply it
+    if (homepageLayout && homepageLayout.widgets) {
+      const { filteredWidgets, widths: homepageWidths } = applyHomepageLayout(
+        allAvailableWidgets,
+        homepageLayout
+      );
+
+      setFilteredWidgets(filteredWidgets);
+      setColumnWidths(homepageWidths);
+    } else {
+      // Set default layout when no custom layout exists
+      setFilteredWidgets(allAvailableWidgets);
+      setColumnWidths(createDefaultWidgetWidths(allAvailableWidgets));
+    }
+  }, [homepageLayout, allAvailableWidgets, setColumnWidths]);
 
   const handleAddWidget = (widget: WidgetWithUID) => {
     addWidget(widget);

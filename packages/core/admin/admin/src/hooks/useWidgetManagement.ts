@@ -18,8 +18,12 @@ import {
   isValidResizeOperation,
   canResizeBetweenWidgets,
 } from '../utils/widgetUtils';
+import { useUpdateHomepageLayoutMutation } from '../services/homepage';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
+import { useNotification } from '../features/Notifications';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
+import { useIntl } from 'react-intl';
 
 interface UseWidgetManagementOptions {
   filteredWidgets: WidgetWithUID[];
@@ -46,6 +50,39 @@ export const useWidgetManagement = ({
   setColumnWidths,
   columnWidths,
 }: UseWidgetManagementOptions) => {
+  const [updateHomepageLayout] = useUpdateHomepageLayoutMutation();
+  const { toggleNotification } = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const { formatMessage } = useIntl();
+
+  const saveLayout = React.useCallback(
+    async (widgets: WidgetWithUID[], widths: Record<string, number>) => {
+      try {
+        const layoutData = {
+          widgets: widgets.map((widget) => ({
+            uid: widget.uid,
+            width: (widths[widget.uid] || 12) as 4 | 6 | 8 | 12,
+          })),
+        };
+
+        const res = await updateHomepageLayout(layoutData);
+
+        if ('error' in res) {
+          toggleNotification({
+            type: 'danger',
+            message: formatAPIError(res.error),
+          });
+        }
+      } catch {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+        });
+      }
+    },
+    [updateHomepageLayout]
+  );
+
   const findWidget = React.useCallback(
     (widgetId: string): WidgetInfo => {
       const widget = filteredWidgets.find((c) => `${c.uid}` === widgetId);
@@ -80,7 +117,13 @@ export const useWidgetManagement = ({
       if (!widget) return;
 
       // Move widget in the array
-      setFilteredWidgets((prevWidgets) => moveWidgetInArray(prevWidgets, widgetId, insertIndex));
+      setFilteredWidgets((prevWidgets) => {
+        const newWidgets = moveWidgetInArray(prevWidgets, widgetId, insertIndex);
+
+        saveLayout(newWidgets, columnWidths);
+
+        return newWidgets;
+      });
 
       // Calculate optimal widths for both source and target rows
       setColumnWidths((prevWidths) => {
@@ -109,10 +152,13 @@ export const useWidgetManagement = ({
           Object.assign(newWidths, targetRowResize);
         }
 
+        const updatedWidgets = moveWidgetInArray(filteredWidgets, widgetId, insertIndex);
+        saveLayout(updatedWidgets, newWidths);
+
         return newWidths;
       });
     },
-    [filteredWidgets, setFilteredWidgets, setColumnWidths, widgetRows]
+    [filteredWidgets, setFilteredWidgets, setColumnWidths, widgetRows, saveLayout]
   );
 
   const deleteWidget = React.useCallback(
@@ -139,10 +185,15 @@ export const useWidgetManagement = ({
         );
 
         // Use resizeRowAfterRemoval to resize the affected row
-        return resizeRowAfterRemoval(affectedRow, widgetId, newWidths);
+        const finalWidths = resizeRowAfterRemoval(affectedRow, widgetId, newWidths);
+
+        const updatedWidgets = filteredWidgets.filter((w) => w.uid !== widgetId);
+        saveLayout(updatedWidgets, finalWidths);
+
+        return finalWidths;
       });
     },
-    [filteredWidgets, setFilteredWidgets, setColumnWidths, widgetRows]
+    [filteredWidgets, setFilteredWidgets, setColumnWidths, widgetRows, saveLayout]
   );
 
   const addWidget = React.useCallback(
@@ -162,13 +213,16 @@ export const useWidgetManagement = ({
         const newWidths = { ...prev };
         // New widget always takes full width (3/3 = 12 columns) in its own row
         newWidths[widget.uid] = 12;
+
+        const updatedWidgets = [...filteredWidgets, widget];
+        saveLayout(updatedWidgets, newWidths);
+
         return newWidths;
       });
     },
-    [filteredWidgets, setFilteredWidgets, setColumnWidths]
+    [filteredWidgets, setFilteredWidgets, setColumnWidths, saveLayout]
   );
 
-  // Handle inter-widget resize
   const handleInterWidgetResize = React.useCallback(
     (leftWidgetId: string, rightWidgetId: string, newLeftWidth: number, newRightWidth: number) => {
       setColumnWidths((prev) => {
@@ -188,10 +242,12 @@ export const useWidgetManagement = ({
           [rightWidgetId]: newRightWidth,
         };
 
+        saveLayout(filteredWidgets, updatedWidths);
+
         return updatedWidths;
       });
     },
-    [filteredWidgets, setColumnWidths]
+    [filteredWidgets, setColumnWidths, saveLayout]
   );
 
   return {
