@@ -1,8 +1,8 @@
 'use strict';
 
 module.exports = {
-  fs: require('./fs'),
-  seed: require('../scripts/dts-import'),
+  fs: require('../../helpers/fs'),
+  seed: require('../../helpers/dts-import'),
   instances: require('./test-app'),
   helpers: require('./helpers'),
 };

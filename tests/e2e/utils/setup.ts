@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 
 import { login as loginFunc } from './login';
 import { resetFiles as resetFilesFunc } from './file-reset';
-import { resetDatabaseAndImportDataFromPath } from './dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../helpers/dts-import';
 import { navToHeader } from './shared';
 
 export type SharedSetupOptions = {

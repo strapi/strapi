@@ -1,5 +1,5 @@
 import { resolve, join } from 'path';
-import { ALLOWED_CONTENT_TYPES, CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from '../constants';
+import { ALLOWED_CONTENT_TYPES, CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from './constants';
 
 const {
   file: {

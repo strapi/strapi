@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from.*helpers/dts-import';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Edit View', () => {

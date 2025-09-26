@@ -3,7 +3,7 @@ import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { expect, type Page } from '@playwright/test';
 import { clickAndWait, ensureCheckbox, findByRowColumn, navToHeader } from './shared';
-import { rowHeight } from '@strapi/admin/admin/src/pages/Settings/pages/Roles/utils/constants';
+import { rowHeight } from '../../helpers/constants';
 
 export interface AddAttribute {
   type: string;
