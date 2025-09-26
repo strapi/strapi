@@ -8,6 +8,8 @@ const defaultJwtOptions = { expiresIn: '30d' };
 export type TokenOptions = {
   expiresIn?: string;
   algorithm?: Algorithm;
+  privateKey?: string;
+  publicKey?: string;
   [key: string]: unknown;
 };
 
@@ -26,9 +28,22 @@ const getTokenOptions = () => {
     {} as AdminAuthConfig
   );
 
+  // Check for new sessions.options configuration
+  const sessionsOptions = strapi.config.get('admin.auth.sessions.options', {});
+
+  // Merge with legacy options for backward compatibility
+  const mergedOptions = _.merge({}, defaultJwtOptions, options, sessionsOptions);
+
+  // Warn if using deprecated admin.auth.options
+  if (options && Object.keys(options).length > 0) {
+    strapi.log.warn(
+      'admin.auth.options is deprecated and will be removed in Strapi 6. Please move JWT options to admin.auth.sessions.options instead.'
+    );
+  }
+
   return {
     secret,
-    options: _.merge(defaultJwtOptions, options),
+    options: mergedOptions,
   };
 };
 
