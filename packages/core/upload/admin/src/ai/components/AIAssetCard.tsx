@@ -279,12 +279,16 @@ const getAssetBadgeLabel = (assetType: AssetType) => {
 
 export const AIAssetCard = ({ asset, onCaptionChange, onAltTextChange }: AssetCardProps) => {
   const { formatMessage } = useIntl();
+  const [wasCaptionChanged, setWasCaptionChanged] = React.useState(false);
+  const [wasAltTextChanged, setWasAltTextChanged] = React.useState(false);
 
   const handleCaptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setWasCaptionChanged(true);
     onCaptionChange(event.target.value);
   };
 
   const handleAltTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setWasAltTextChanged(true);
     onAltTextChange(event.target.value);
   };
 
@@ -347,7 +351,9 @@ export const AIAssetCard = ({ asset, onCaptionChange, onAltTextChange }: AssetCa
                   id: getTrad('form.input.placeholder.file-caption'),
                   defaultMessage: 'Enter caption',
                 })}
-                endAction={<Sparkle width="16px" height="16px" fill="#AC73E6" />}
+                endAction={
+                  !wasCaptionChanged && <Sparkle width="16px" height="16px" fill="#AC73E6" />
+                }
               />
             </Field.Root>
 
@@ -374,7 +380,9 @@ export const AIAssetCard = ({ asset, onCaptionChange, onAltTextChange }: AssetCa
                   id: getTrad('form.input.placeholder.file-alt'),
                   defaultMessage: 'Enter alternative text',
                 })}
-                endAction={<Sparkle width="16px" height="16px" fill="#AC73E6" />}
+                endAction={
+                  !wasAltTextChanged && <Sparkle width="16px" height="16px" fill="#AC73E6" />
+                }
               />
               <Field.Hint />
             </Field.Root>
