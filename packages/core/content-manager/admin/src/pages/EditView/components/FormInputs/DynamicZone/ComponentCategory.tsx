@@ -5,7 +5,6 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
-import { RESPONSIVE_CONTAINER_BREAKPOINTS } from '../../FormLayout';
 
 interface ComponentCategoryProps {
   category: string;
@@ -82,7 +81,7 @@ const Grid =
         grid-template-columns: repeat(auto-fill, 100%);
         grid-gap: 4px;
 
-        @container (min-width: ${() => RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+        ${({ theme }) => theme.breakpoints.medium} {
           grid-template-columns: repeat(auto-fill, 14rem);
         }
       `

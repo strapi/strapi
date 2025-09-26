@@ -17,8 +17,16 @@ const ActionLayout = ({ startActions, endActions }: ActionLayoutProps) => {
       justifyContent="space-between"
       alignItems="flex-start"
       paddingBottom={4}
-      paddingLeft={10}
-      paddingRight={10}
+      paddingLeft={{
+        initial: 4,
+        medium: 6,
+        large: 10,
+      }}
+      paddingRight={{
+        initial: 4,
+        medium: 6,
+        large: 10,
+      }}
     >
       <Flex gap={2} wrap="wrap">
         {startActions}

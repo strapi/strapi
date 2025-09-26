@@ -13,7 +13,7 @@ const PurchaseContentHistory = () => {
 
   const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Layouts.Header
           title={formatMessage({
@@ -22,8 +22,16 @@ const PurchaseContentHistory = () => {
           })}
         />
         <Box
-          marginLeft={10}
-          marginRight={10}
+          marginLeft={{
+            initial: 4,
+            medium: 6,
+            large: 10,
+          }}
+          marginRight={{
+            initial: 4,
+            medium: 6,
+            large: 10,
+          }}
           shadow="filterShadow"
           hasRadius
           background="neutral0"
@@ -136,7 +144,7 @@ const PurchaseContentHistory = () => {
           </Grid.Root>
         </Box>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

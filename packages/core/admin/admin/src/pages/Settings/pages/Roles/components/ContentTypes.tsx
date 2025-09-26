@@ -1,4 +1,4 @@
-import { Box } from '@strapi/design-system';
+import { Box, ScrollArea } from '@strapi/design-system';
 
 import { ContentPermission } from '../../../../../../../shared/contracts/permissions';
 
@@ -19,13 +19,15 @@ const ContentTypes = ({
 
   return (
     <Box background="neutral0">
-      <GlobalActions actions={actions} kind={kind} isFormDisabled={isFormDisabled} />
-      <ContentTypeCollapses
-        actions={actions}
-        isFormDisabled={isFormDisabled}
-        pathToData={kind}
-        subjects={sortedSubjects}
-      />
+      <ScrollArea>
+        <GlobalActions actions={actions} kind={kind} isFormDisabled={isFormDisabled} />
+        <ContentTypeCollapses
+          actions={actions}
+          isFormDisabled={isFormDisabled}
+          pathToData={kind}
+          subjects={sortedSubjects}
+        />
+      </ScrollArea>
     </Box>
   );
 };

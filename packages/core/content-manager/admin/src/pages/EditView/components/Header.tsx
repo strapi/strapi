@@ -65,7 +65,19 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
     : documentTitle;
 
   return (
-    <Flex direction="column" alignItems="flex-start" paddingTop={6} paddingBottom={4} gap={2}>
+    <Flex
+      direction="column"
+      alignItems="flex-start"
+      paddingTop={{
+        initial: 4,
+        large: 6,
+      }}
+      paddingBottom={{
+        initial: 0,
+        large: 4,
+      }}
+      gap={2}
+    >
       <BackButton
         fallback={
           params.collectionType === SINGLE_TYPES

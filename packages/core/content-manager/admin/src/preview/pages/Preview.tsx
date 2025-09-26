@@ -439,7 +439,7 @@ const ProtectedPreviewPageImpl = () => {
         position="fixed"
         top={0}
         left={0}
-        zIndex={2}
+        zIndex={5}
         background="neutral0"
       >
         <Page.Error />
@@ -454,7 +454,7 @@ const ProtectedPreviewPageImpl = () => {
       position="fixed"
       top={0}
       left={0}
-      zIndex={2}
+      zIndex={5}
       background="neutral0"
     >
       <Page.Protect

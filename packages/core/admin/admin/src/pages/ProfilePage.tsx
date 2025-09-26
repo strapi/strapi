@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Button, Flex, useNotifyAT, Grid, Typography, FlexProps } from '@strapi/design-system';
-import { Check } from '@strapi/icons';
+import { Check, Layout } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -187,52 +187,54 @@ const ProfilePage = () => {
   };
 
   return (
-    <Page.Main aria-busy={isSubmittingForm}>
-      <Page.Title>
-        {formatMessage({
-          id: 'Settings.profile.form.section.head.title',
-          defaultMessage: 'User profile',
-        })}
-      </Page.Title>
-      <Form
-        method="PUT"
-        onSubmit={handleSubmit}
-        initialValues={initialData}
-        validationSchema={PROFILE_VALIDTION_SCHEMA}
-      >
-        {({ isSubmitting, modified }) => (
-          <>
-            <Layouts.Header
-              title={getDisplayName(user)}
-              primaryAction={
-                <Button
-                  startIcon={<Check />}
-                  loading={isSubmitting}
-                  type="submit"
-                  disabled={!modified}
-                >
-                  {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-                </Button>
-              }
-            />
-            <Box paddingBottom={6}>
-              <Layouts.Content>
-                <Flex direction="column" alignItems="stretch" gap={6}>
-                  <UserInfoSection />
-                  {!hasLockedRole && <PasswordSection />}
-                  <PreferencesSection localeNames={localeNames} />
-                </Flex>
-              </Layouts.Content>
-            </Box>
-          </>
-        )}
-      </Form>
-      <Box paddingBottom={10}>
-        <Layouts.Content>
-          <GuidedTourSection />
-        </Layouts.Content>
-      </Box>
-    </Page.Main>
+    <Layouts.Root>
+      <Page.Main aria-busy={isSubmittingForm}>
+        <Page.Title>
+          {formatMessage({
+            id: 'Settings.profile.form.section.head.title',
+            defaultMessage: 'User profile',
+          })}
+        </Page.Title>
+        <Form
+          method="PUT"
+          onSubmit={handleSubmit}
+          initialValues={initialData}
+          validationSchema={PROFILE_VALIDTION_SCHEMA}
+        >
+          {({ isSubmitting, modified }) => (
+            <>
+              <Layouts.Header
+                title={getDisplayName(user)}
+                primaryAction={
+                  <Button
+                    startIcon={<Check />}
+                    loading={isSubmitting}
+                    type="submit"
+                    disabled={!modified}
+                  >
+                    {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
+                  </Button>
+                }
+              />
+              <Box paddingBottom={6}>
+                <Layouts.Content>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
+                    <UserInfoSection />
+                    {!hasLockedRole && <PasswordSection />}
+                    <PreferencesSection localeNames={localeNames} />
+                  </Flex>
+                </Layouts.Content>
+              </Box>
+            </>
+          )}
+        </Form>
+        <Box>
+          <Layouts.Content>
+            <GuidedTourSection />
+          </Layouts.Content>
+        </Box>
+      </Page.Main>
+    </Layouts.Root>
   );
 };
 

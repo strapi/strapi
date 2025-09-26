@@ -144,7 +144,7 @@ export const ProvidersPage = () => {
   }
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -249,7 +249,7 @@ export const ProvidersPage = () => {
         onSubmit={handleSubmit}
         providerToEditName={providerToEditName}
       />
-    </Layouts.Root>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect } from 'react';
 
-import { ConfirmDialog, SubNav, tours, useGuidedTour } from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, SubNav, tours } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Searchbar,
@@ -209,7 +209,7 @@ export const ContentTypeBuilderNav = () => {
                     id: section.customLink?.id,
                     defaultMessage: section.customLink?.defaultMessage,
                   }),
-                  onClik: section.customLink?.onClick,
+                  onClick: section.customLink?.onClick,
                 }
               }
               sectionId={section.name}

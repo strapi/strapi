@@ -1,23 +1,46 @@
 import { useId, useState } from 'react';
 
-import { Box, SubNav as DSSubNav, Flex, Typography, IconButton } from '@strapi/design-system';
+import {
+  Box,
+  SubNav as DSSubNav,
+  Flex,
+  Typography,
+  IconButton,
+  Badge,
+} from '@strapi/design-system';
 import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { tours } from './GuidedTour/Tours';
 
-const Main = styled(DSSubNav)`
+const MainSubNav = styled(DSSubNav)`
+  width: 100%;
+  height: calc(100vh - 5.7rem);
+  overflow: hidden;
   background-color: ${({ theme }) => theme.colors.neutral0};
-  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+  display: flex;
+  flex-direction: column;
+  border-right: 0;
+  box-shadow: none;
+  position: fixed;
+  top: 5.7rem;
+  left: 0;
+  z-index: 2;
 
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
+  ${({ theme }) => theme.breakpoints.medium} {
+    position: sticky;
+    top: 0;
+    border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+  }
+  ${({ theme }) => theme.breakpoints.large} {
+    height: 100vh;
   }
 `;
+
+const Main = ({ children, ...props }: { children: React.ReactNode }) => (
+  <MainSubNav {...props}>{children}</MainSubNav>
+);
 
 const StyledLink = styled(NavLink)`
   display: flex;
@@ -63,11 +86,13 @@ const Link = (
   props: Omit<React.ComponentProps<typeof StyledLink>, 'label'> & {
     label: React.ReactNode;
     endAction?: React.ReactNode;
+    handleClick?: () => void;
   }
 ) => {
-  const { label, endAction, ...rest } = props;
+  const { label, endAction, handleClick, ...rest } = props;
+
   return (
-    <StyledLink {...rest}>
+    <StyledLink {...rest} onClick={handleClick}>
       <Box width={'100%'} paddingLeft={3} paddingRight={3} borderRadius={1}>
         <Flex justifyContent="space-between" width="100%" gap={1}>
           <Typography
@@ -86,16 +111,13 @@ const Link = (
   );
 };
 
-const StyledHeader = styled(Box)`
-  height: 56px;
-  display: flex;
-  align-items: center;
-  padding-left: ${({ theme }) => theme.spaces[5]};
+const StyledHeader = styled(Flex)`
+  flex: 0 0 5.6rem;
 `;
 
 const Header = ({ label }: { label: string }) => {
   return (
-    <StyledHeader>
+    <StyledHeader justifyContent="space-between" paddingLeft={5} paddingRight={5}>
       <Typography variant="beta" tag="h2">
         {label}
       </Typography>
@@ -105,7 +127,7 @@ const Header = ({ label }: { label: string }) => {
 
 const Sections = ({ children, ...props }: { children: React.ReactNode[]; [key: string]: any }) => {
   return (
-    <Box paddingBottom={4}>
+    <Box paddingTop={4} paddingBottom={4}>
       <Flex tag="ol" gap="5" direction="column" alignItems="stretch" {...props}>
         {children.map((child, index) => {
           return <li key={index}>{child}</li>;
@@ -150,38 +172,47 @@ const Section = ({
   children,
   link,
   sectionId,
+  badgeLabel,
 }: {
   label: string;
   children: React.ReactNode[];
-  link?: { label: string; onClik: () => void };
+  link?: { label: string; onClick: () => void };
   sectionId?: string;
+  badgeLabel?: string;
 }) => {
   const listId = useId();
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
       <Box paddingLeft={5} paddingRight={5}>
-        <Flex position="relative" justifyContent="space-between">
+        <Flex position="relative" justifyContent="space-between" gap={2}>
           <Flex>
-            <Box>
+            <Box paddingRight={1}>
               <Typography variant="sigma" textColor="neutral600">
                 {label}
               </Typography>
             </Box>
           </Flex>
-          {link && (
-            <GuidedTourTooltip sectionId={sectionId}>
-              <IconButton
-                label={link.label}
-                variant="ghost"
-                withTooltip
-                onClick={link.onClik}
-                size="XS"
-              >
-                <Plus />
-              </IconButton>
-            </GuidedTourTooltip>
-          )}
+          <Flex gap={1}>
+            {badgeLabel && (
+              <Badge backgroundColor="neutral150" textColor="neutral600">
+                {badgeLabel}
+              </Badge>
+            )}
+            {link && (
+              <GuidedTourTooltip sectionId={sectionId}>
+                <IconButton
+                  label={link.label}
+                  variant="ghost"
+                  withTooltip
+                  onClick={link.onClick}
+                  size="XS"
+                >
+                  <Plus />
+                </IconButton>
+              </GuidedTourTooltip>
+            )}
+          </Flex>
         </Flex>
       </Box>
       <Flex
@@ -209,11 +240,7 @@ const SubSectionHeader = styled.button`
   background: transparent;
   display: flex;
   align-items: center;
-
-  height: 32px;
-
   border-radius: ${({ theme }) => theme.borderRadius};
-
   padding-left: ${({ theme }) => theme.spaces[3]};
   padding-right: ${({ theme }) => theme.spaces[3]};
   padding-top: ${({ theme }) => theme.spaces[2]};
@@ -281,6 +308,19 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
   );
 };
 
+const PageWrapper = styled(Box)`
+  ${({ theme }) => theme.breakpoints.medium} {
+    ${MainSubNav} {
+      border-right: none;
+    }
+  }
+  ${({ theme }) => theme.breakpoints.medium} {
+    ${MainSubNav} {
+      top: 0;
+    }
+  }
+`;
+
 export const SubNav = {
   Main,
   Header,
@@ -288,4 +328,5 @@ export const SubNav = {
   Sections,
   Section,
   SubSection,
+  PageWrapper,
 };

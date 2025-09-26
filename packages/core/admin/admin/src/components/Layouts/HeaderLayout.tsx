@@ -27,20 +27,25 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     if (sticky) {
       return (
         <Box
+          display={{
+            initial: 'none',
+            large: 'block',
+          }}
           paddingLeft={6}
           paddingRight={6}
-          paddingTop={3}
-          paddingBottom={3}
+          paddingTop={2}
+          paddingBottom={2}
           position="fixed"
           top={0}
           right={0}
           background="neutral0"
           shadow="tableShadow"
           width={`${width}px`}
-          zIndex={3}
+          zIndex={2}
+          minHeight="5.6rem"
           data-strapi-header-sticky
         >
-          <Flex justifyContent="space-between">
+          <Flex justifyContent="space-between" wrap="wrap">
             <Flex>
               {navigationAction && <Box paddingRight={3}>{navigationAction}</Box>}
               <Box>
@@ -66,25 +71,46 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     return (
       <Box
         ref={ref}
-        paddingLeft={10}
-        paddingRight={10}
-        paddingBottom={8}
-        paddingTop={navigationAction ? 6 : 8}
+        paddingLeft={{
+          initial: 4,
+          medium: 6,
+          large: 10,
+        }}
+        paddingRight={{
+          initial: 4,
+          medium: 6,
+          large: 10,
+        }}
+        paddingBottom={{
+          initial: 4,
+          large: 8,
+        }}
+        paddingTop={{
+          initial: 4,
+          large: navigationAction ? 6 : 8,
+        }}
         background="neutral100"
         data-strapi-header
       >
-        {navigationAction ? <Box paddingBottom={2}>{navigationAction}</Box> : null}
-        <Flex justifyContent="space-between">
-          <Flex minWidth={0}>
-            <Typography tag="h1" variant="alpha" {...props}>
-              {title}
-            </Typography>
-            {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
+        <Flex direction="column" alignItems="initial" gap={2}>
+          {navigationAction}
+          <Flex justifyContent="space-between" wrap="wrap" gap={4}>
+            <Flex minWidth={0}>
+              <Typography tag="h1" variant="alpha" {...props}>
+                {title}
+              </Typography>
+              {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
+            </Flex>
+            {primaryAction}
           </Flex>
-          {primaryAction}
         </Flex>
         {isSubtitleString ? (
-          <Typography variant="epsilon" textColor="neutral600" tag="p">
+          <Typography
+            variant="epsilon"
+            textColor="neutral600"
+            tag="p"
+            paddingTop={{ initial: 4, large: 0 }}
+          >
             {subtitle}
           </Typography>
         ) : (
@@ -112,9 +138,9 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
     threshold: 0,
   });
 
-  useResizeObserver(containerRef, () => {
-    if (containerRef.current) {
-      setHeaderSize(containerRef.current.getBoundingClientRect());
+  useResizeObserver([containerRef, baseHeaderLayoutRef], () => {
+    if (baseHeaderLayoutRef.current) {
+      setHeaderSize(baseHeaderLayoutRef.current.getBoundingClientRect());
     }
   });
 

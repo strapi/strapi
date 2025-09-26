@@ -11,11 +11,19 @@ import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
  * useMenu
  * -----------------------------------------------------------------------------------------------*/
 
-export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'>;
+export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'> & {
+  navigationLink?: string;
+};
+export type MobileMenuItem = {
+  to: string;
+  link?: string;
+};
 
 export interface Menu {
   generalSectionLinks: MenuItem[];
   pluginsSectionLinks: MenuItem[];
+  topMobileNavigation: MobileMenuItem[];
+  burgerMobileNavigation: MobileMenuItem[];
   isLoading: boolean;
 }
 
@@ -60,6 +68,27 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
       },
     ],
     pluginsSectionLinks: [],
+    topMobileNavigation: [
+      {
+        to: '/',
+      },
+      {
+        to: 'content-manager',
+        link: '/content-manager/navigation',
+      },
+      {
+        to: 'plugins/content-releases',
+      },
+      {
+        to: 'plugins/upload',
+      },
+    ],
+    burgerMobileNavigation: [
+      {
+        to: '/settings',
+        link: '/settings/navigation',
+      },
+    ],
     isLoading: true,
   });
   const generalSectionLinksRef = React.useRef(menuWithUserPermissions.generalSectionLinks);

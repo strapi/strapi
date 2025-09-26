@@ -73,6 +73,8 @@ const AdminLayout = () => {
     isLoading: isLoadingMenu,
     generalSectionLinks,
     pluginsSectionLinks,
+    topMobileNavigation,
+    burgerMobileNavigation,
   } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName));
 
   const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
@@ -106,10 +108,18 @@ const AdminLayout = () => {
             <SkipToContent>
               {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
             </SkipToContent>
-            <Flex alignItems="flex-start">
+            <Flex
+              alignItems="flex-start"
+              paddingTop={{
+                initial: '5.7rem',
+                large: 0,
+              }}
+            >
               <LeftMenu
                 generalSectionLinks={generalSectionLinks}
                 pluginsSectionLinks={pluginsSectionLinks}
+                topMobileNavigation={topMobileNavigation}
+                burgerMobileNavigation={burgerMobileNavigation}
               />
               <Box flex={1}>
                 <UpsellBanner />

@@ -128,7 +128,18 @@ const EditViewPage = () => {
   };
 
   return (
-    <Main paddingLeft={10} paddingRight={10}>
+    <Main
+      paddingLeft={{
+        initial: 4,
+        medium: 6,
+        large: 10,
+      }}
+      paddingRight={{
+        initial: 4,
+        medium: 6,
+        large: 10,
+      }}
+    >
       <Page.Title>{pageTitle}</Page.Title>
       {isSingleType && (
         <tours.contentManager.Introduction>
@@ -193,7 +204,14 @@ const EditViewPage = () => {
                 </>
               ) : null}
             </Tabs.List>
-            <Grid.Root paddingTop={8} gap={4}>
+            <Grid.Root
+              paddingTop={{
+                initial: 2,
+                medium: 4,
+                large: 8,
+              }}
+              gap={4}
+            >
               <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
                 <Tabs.Content value="draft">
                   <tours.contentManager.Fields>
