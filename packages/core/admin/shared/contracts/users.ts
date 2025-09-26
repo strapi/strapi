@@ -45,24 +45,6 @@ export declare namespace UpdateMe {
 }
 
 /**
- * GET /users/me/getAiToken - Get an AI token for the current admin user
- */
-export declare namespace GetAiToken {
-  export interface Request {
-    query: {};
-    body: {};
-  }
-
-  export interface Response {
-    data: {
-      token: string;
-      expiresAt?: string;
-    };
-    error?: errors.ApplicationError;
-  }
-}
-
-/**
  * GET /users/me/permissions - Get the permissions of the current admin user
  */
 export declare namespace GetOwnPermissions {
