@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_default_vishals",
+  "info": {
+    "displayName": "Vishal",
+    "icon": "moon"
+  },
+  "options": {},
+  "attributes": {
+    "Vishal1": {
+      "type": "string"
+    },
+    "Vishal2": {
+      "type": "string"
+    },
+    "Vishal3": {
+      "type": "string"
+    },
+    "Vishal4": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}
