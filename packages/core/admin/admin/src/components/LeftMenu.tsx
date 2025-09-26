@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Divider, Flex, FlexComponent, ScrollArea, useCollator } from '@strapi/design-system';
+import { Box, Divider, Flex, FlexComponent, useCollator } from '@strapi/design-system';
 import { Cross, List } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -30,8 +30,23 @@ const sortLinks = (links: MenuItem[]) => {
   });
 };
 
-const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
+const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)<{ $device: string }>`
+  width: 100%;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  display: ${({ $device }) => ($device === 'desktop' ? 'none' : 'flex')};
+
+  ${({ $device, theme }) => $device === 'mobile' && theme.breakpoints.large} {
+    display: none;
+  }
+  ${({ $device, theme }) => $device === 'desktop' && theme.breakpoints.large} {
+    display: flex;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 interface LeftMenuProps
@@ -122,48 +137,35 @@ const LeftMenu = ({
         <Divider />
 
         <MenuDetails>
-          <ScrollArea>
-            <Box
-              display={{
-                initial: 'flex',
-                large: 'none',
-              }}
-            >
-              <NavListWrapper
-                tag="ul"
-                gap={3}
-                justifyContent="center"
-                flex={1}
-                paddingLeft={3}
-                paddingRight={3}
-                paddingTop={3}
-                paddingBottom={3}
-              >
-                <MainNavIcons
-                  listLinks={topMobileNavigationLinks}
-                  handleClickOnLink={handleClickOnLink}
-                />
-              </NavListWrapper>
-            </Box>
-            <Box
-              display={{
-                initial: 'none',
-                large: 'flex',
-              }}
-            >
-              <NavListWrapper
-                tag="ul"
-                gap={3}
-                direction="column"
-                justifyContent="center"
-                flex={1}
-                paddingTop={3}
-                paddingBottom={3}
-              >
-                <MainNavIcons listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
-              </NavListWrapper>
-            </Box>
-          </ScrollArea>
+          <NavListWrapper
+            $device="mobile"
+            tag="ul"
+            gap={3}
+            justifyContent="center"
+            flex={1}
+            paddingLeft={3}
+            paddingRight={3}
+            paddingTop={3}
+            paddingBottom={3}
+          >
+            <MainNavIcons
+              listLinks={topMobileNavigationLinks}
+              handleClickOnLink={handleClickOnLink}
+            />
+          </NavListWrapper>
+          <NavListWrapper
+            $device="desktop"
+            tag="ul"
+            gap={3}
+            direction="column"
+            alignItems="center"
+            justifyContent="flex-start"
+            flex={1}
+            paddingTop={3}
+            paddingBottom={3}
+          >
+            <MainNavIcons listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
+          </NavListWrapper>
           <TrialCountdown />
           <Box
             display={{

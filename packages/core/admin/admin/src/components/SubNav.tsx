@@ -8,11 +8,9 @@ import {
   IconButton,
   Badge,
 } from '@strapi/design-system';
-import { ChevronDown, Cross, Plus } from '@strapi/icons';
+import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
-
-import { useHistory } from '../features/BackButton';
 
 import { tours } from './GuidedTour/Tours';
 
@@ -119,28 +117,12 @@ const StyledHeader = styled(Flex)`
   flex: 0 0 5.6rem;
 `;
 
-const CloseButton = styled(IconButton)`
-  display: block;
-
-  ${({ theme }) => theme.breakpoints.medium} {
-    display: none;
-  }
-`;
-
 const Header = ({ label }: { label: string }) => {
-  const goBack = useHistory('CloseNavButton', (state) => state.goBack);
   return (
     <StyledHeader justifyContent="space-between" paddingLeft={5} paddingRight={5}>
       <Typography variant="beta" tag="h2">
         {label}
       </Typography>
-      <CloseButton
-        onClick={goBack}
-        label="Close side navigation" // TODO: translate
-        type="button"
-      >
-        <Cross display="block" />
-      </CloseButton>
     </StyledHeader>
   );
 };
@@ -332,9 +314,6 @@ const PageWrapper = styled(Box)`
   ${({ theme }) => theme.breakpoints.medium} {
     ${MainSubNav} {
       border-right: none;
-    }
-    ${CloseButton} {
-      display: block;
     }
   }
   ${({ theme }) => theme.breakpoints.medium} {
