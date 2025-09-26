@@ -18,6 +18,7 @@ const migrateTours = (storedTourState: State) => {
         draft.tours[tourName] = {
           currentStep: 0,
           isCompleted: false,
+          tourType: undefined,
         };
       }
     });
