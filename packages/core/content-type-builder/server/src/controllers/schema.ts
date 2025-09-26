@@ -32,15 +32,31 @@ export default () => {
         internals.isUpdating = true;
         strapi.reload.isWatching = false;
 
+        strapi.log.info('CTB: updateSchema received, writing files');
         await getService('schema').updateSchema(data);
 
-        // NOTE: we do not set isUpdating to false here.
-        // We want to wait for the server to restart to get the isUpdate = false only
+        // Prefer soft reset when available to avoid full process restart
+        try {
+          if (typeof (strapi as any).softReset === 'function') {
+            strapi.log.info('CTB: invoking softReset');
+            await (strapi as any).softReset();
+            strapi.log.info('CTB: softReset finished');
+            internals.isUpdating = false;
+            ctx.body = { data: { softReset: true } };
+            return;
+          }
+        } catch (e) {
+          strapi.log.error('CTB: Soft reset failed, falling back to reload');
+          strapi.log.error(e);
+        }
+
+        // Fallback to reload (existing behavior)
         setImmediate(() => {
+          strapi.log.info('CTB: calling strapi.reload() (fallback)');
           strapi.reload();
         });
 
-        ctx.body = {};
+        ctx.body = { data: { softReset: false } };
       } catch (error) {
         internals.isUpdating = false;
         const errorMessage = error instanceof Error ? error.message : String(error);

@@ -14,8 +14,8 @@ const modulesRegistry = (strapi: Core.Strapi) => {
     getAll(prefix = '') {
       return pickBy<ModuleMap>((mod, namespace) => namespace.startsWith(prefix))(modules);
     },
-    add(namespace: string, rawModule: RawModule) {
-      if (has(namespace, modules)) {
+    add(namespace: string, rawModule: RawModule, options?: { force?: boolean }) {
+      if (has(namespace, modules) && !options?.force) {
         throw new Error(`Module ${namespace} has already been registered.`);
       }
 
@@ -38,6 +38,35 @@ const modulesRegistry = (strapi: Core.Strapi) => {
       for (const mod of Object.values(modules)) {
         await mod.destroy();
       }
+    },
+    async softReset() {
+      for (const mod of Object.values(modules)) {
+        await mod.softReset?.();
+      }
+    },
+
+    /**
+     * Removes modules whose namespace starts with the given prefix (e.g. 'plugin::', 'api::')
+     */
+    removePrefix(prefix: string) {
+      for (const namespace of Object.keys(modules)) {
+        if (namespace.startsWith(prefix)) {
+          delete modules[namespace];
+        }
+      }
+
+      return this;
+    },
+
+    /**
+     * Clears all modules
+     */
+    clear() {
+      for (const namespace of Object.keys(modules)) {
+        delete modules[namespace];
+      }
+
+      return this;
     },
   };
 };
