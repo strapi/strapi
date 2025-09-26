@@ -92,7 +92,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
         background="neutral100"
         data-strapi-header
       >
-        <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Flex direction="column" alignItems="initial" gap={2}>
           {navigationAction}
           <Flex justifyContent="space-between" wrap="wrap" gap={4}>
             <Flex minWidth={0}>

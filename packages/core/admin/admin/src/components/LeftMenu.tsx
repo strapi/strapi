@@ -30,19 +30,11 @@ const sortLinks = (links: MenuItem[]) => {
   });
 };
 
-const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)<{ $device: string }>`
+const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
   width: 100%;
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  display: ${({ $device }) => ($device === 'desktop' ? 'none' : 'flex')};
-
-  ${({ $device, theme }) => $device === 'mobile' && theme.breakpoints.large} {
-    display: none;
-  }
-  ${({ $device, theme }) => $device === 'desktop' && theme.breakpoints.large} {
-    display: flex;
-  }
 
   &::-webkit-scrollbar {
     display: none;
@@ -138,33 +130,34 @@ const LeftMenu = ({
 
         <MenuDetails>
           <NavListWrapper
-            $device="mobile"
             tag="ul"
             gap={3}
-            justifyContent="center"
+            direction={{
+              initial: 'row',
+              large: 'column',
+            }}
+            alignItems="center"
+            justifyContent={{
+              initial: 'center',
+              large: 'flex-start',
+            }}
             flex={1}
-            paddingLeft={3}
-            paddingRight={3}
+            paddingLeft={{
+              initial: 3,
+              large: 0,
+            }}
+            paddingRight={{
+              initial: 3,
+              large: 0,
+            }}
             paddingTop={3}
             paddingBottom={3}
           >
             <MainNavIcons
-              listLinks={topMobileNavigationLinks}
+              listLinks={listLinks}
+              mobileLinks={topMobileNavigationLinks}
               handleClickOnLink={handleClickOnLink}
             />
-          </NavListWrapper>
-          <NavListWrapper
-            $device="desktop"
-            tag="ul"
-            gap={3}
-            direction="column"
-            alignItems="center"
-            justifyContent="flex-start"
-            flex={1}
-            paddingTop={3}
-            paddingBottom={3}
-          >
-            <MainNavIcons listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
           </NavListWrapper>
           <TrialCountdown />
           <Box
