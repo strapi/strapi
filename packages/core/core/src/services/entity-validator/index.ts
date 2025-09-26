@@ -247,14 +247,17 @@ const createRelationValidator = ({
 };
 
 const createScalarAttributeValidator =
-  (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMeta, options: ValidatorContext) => {
+  (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMetas, options: ValidatorContext) => {
     let validator;
 
     if (has(metas.attr.type, Validators)) {
       validator = (Validators as any)[metas.attr.type](metas, options);
     } else {
-      // No validators specified - fall back to mixed
       validator = yup.mixed();
+    }
+
+    if (metas.attr.type === 'enumeration' && metas.attr.required !== true) {
+      return validator;
     }
 
     validator = addRequiredValidation(createOrUpdate)(validator, {
