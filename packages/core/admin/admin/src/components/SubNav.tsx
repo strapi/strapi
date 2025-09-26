@@ -39,9 +39,7 @@ const MainSubNav = styled(DSSubNav)`
 `;
 
 const Main = ({ children, ...props }: { children: React.ReactNode }) => (
-  <MainSubNav data-strapi-sidenav {...props}>
-    {children}
-  </MainSubNav>
+  <MainSubNav {...props}>{children}</MainSubNav>
 );
 
 const StyledLink = styled(NavLink)`

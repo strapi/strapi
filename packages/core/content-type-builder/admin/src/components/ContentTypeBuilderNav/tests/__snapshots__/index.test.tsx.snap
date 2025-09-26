@@ -523,7 +523,6 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
   <nav
     aria-label="Content-Type Builder"
     class="c2 c3"
-    data-strapi-sidenav="true"
   >
     <div
       class="c4 c5 c6"

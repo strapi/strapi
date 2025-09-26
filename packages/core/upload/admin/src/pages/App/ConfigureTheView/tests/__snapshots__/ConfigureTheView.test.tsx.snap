@@ -61,7 +61,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c5 {
   gap: 8px;
-  align-items: flex-start;
+  align-items: initial;
   flex-direction: column;
   display: flex;
 }
