@@ -160,7 +160,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 .c4 {
   max-width: 42rem;
   height: min-content;
-  width: 100%;
+  width: calc(100% - 40px);
   overflow: hidden;
   margin: 0 auto;
   display: flex;

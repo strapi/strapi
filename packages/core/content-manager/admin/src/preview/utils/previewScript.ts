@@ -4,6 +4,7 @@ declare global {
     __strapi_previewCleanup?: () => void;
     STRAPI_HIGHLIGHT_HOVER_COLOR?: string;
     STRAPI_HIGHLIGHT_ACTIVE_COLOR?: string;
+    STRAPI_DISABLE_STEGA_DECODING?: boolean;
   }
 }
 
@@ -20,7 +21,10 @@ const previewScript = (shouldRun = true) => {
   const HIGHLIGHT_PADDING = 2; // in pixels
   const HIGHLIGHT_HOVER_COLOR = window.STRAPI_HIGHLIGHT_HOVER_COLOR ?? '#4945ff'; // dark primary500
   const HIGHLIGHT_ACTIVE_COLOR = window.STRAPI_HIGHLIGHT_ACTIVE_COLOR ?? '#7b79ff'; // dark primary600
+  const HIGHLIGHT_STYLES_ID = 'strapi-preview-highlight-styles';
+  const DOUBLE_CLICK_TIMEOUT = 300; // milliseconds to wait for potential double-click
 
+  const DISABLE_STEGA_DECODING = window.STRAPI_DISABLE_STEGA_DECODING ?? false;
   const SOURCE_ATTRIBUTE = 'data-strapi-source';
   const OVERLAY_ID = 'strapi-preview-overlay';
   const INTERNAL_EVENTS = {
@@ -28,6 +32,7 @@ const previewScript = (shouldRun = true) => {
     STRAPI_FIELD_BLUR: 'strapiFieldBlur',
     STRAPI_FIELD_CHANGE: 'strapiFieldChange',
     STRAPI_FIELD_FOCUS_INTENT: 'strapiFieldFocusIntent',
+    STRAPI_FIELD_SINGLE_CLICK_HINT: 'strapiFieldSingleClickHint',
   } as const;
 
   /**
@@ -50,9 +55,123 @@ const previewScript = (shouldRun = true) => {
     window.parent.postMessage({ type, payload }, '*');
   };
 
+  const getElementsByPath = (path: string) => {
+    return document.querySelectorAll(`[${SOURCE_ATTRIBUTE}*="path=${path}"]`);
+  };
+
   /* -----------------------------------------------------------------------------------------------
    * Functionality pieces
    * ---------------------------------------------------------------------------------------------*/
+
+  const setupStegaDOMObserver = async () => {
+    if (DISABLE_STEGA_DECODING) {
+      return;
+    }
+
+    const { vercelStegaDecode: stegaDecode, vercelStegaClean: stegaClean } = await import(
+      // @ts-expect-error it's not a local dependency
+      // eslint-disable-next-line import/no-unresolved
+      'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
+    );
+
+    const applyStegaToElement = (element: Element) => {
+      const directTextNodes = Array.from(element.childNodes).filter(
+        (node) => node.nodeType === Node.TEXT_NODE
+      );
+
+      const directTextContent = directTextNodes.map((node) => node.textContent || '').join('');
+
+      if (directTextContent) {
+        try {
+          // TODO: check if we can call split instead of decode+clean
+          const result = stegaDecode(directTextContent);
+          if (result && 'strapiSource' in result) {
+            element.setAttribute(SOURCE_ATTRIBUTE, result.strapiSource);
+
+            // Remove encoded part from DOM text content (to avoid breaking links for example)
+            directTextNodes.forEach((node) => {
+              if (node.textContent) {
+                const cleanedText = stegaClean(node.textContent);
+                if (cleanedText !== node.textContent) {
+                  node.textContent = cleanedText;
+                }
+              }
+            });
+          }
+        } catch (error) {}
+      }
+    };
+
+    // Process all existing elements
+    const allElements = document.querySelectorAll('*');
+    Array.from(allElements).forEach(applyStegaToElement);
+
+    // Create observer for new elements and text changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        // Handle added nodes
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const element = node as Element;
+              // Process the added element
+              applyStegaToElement(element);
+              // Process all child elements
+              const childElements = element.querySelectorAll('*');
+              Array.from(childElements).forEach(applyStegaToElement);
+            }
+          });
+        }
+
+        // Handle text content changes
+        if (mutation.type === 'characterData' && mutation.target.parentElement) {
+          applyStegaToElement(mutation.target.parentElement);
+        }
+      });
+    });
+
+    observer.observe(document, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    return observer;
+  };
+
+  const createHighlightStyles = () => {
+    const existingStyles = document.getElementById(HIGHLIGHT_STYLES_ID);
+    // Remove existing styles to avoid duplicates
+    if (existingStyles) {
+      existingStyles.remove();
+    }
+
+    const styleElement = document.createElement('style');
+    styleElement.id = HIGHLIGHT_STYLES_ID;
+    styleElement.textContent = `
+      .strapi-highlight {
+        position: absolute;
+        outline: 2px solid transparent;
+        pointer-events: auto;
+        border-radius: 2px;
+        background-color: transparent;
+        will-change: transform;
+        transition: outline-color 0.1s ease-in-out;
+      }
+
+      .strapi-highlight:hover {
+        outline-color: ${HIGHLIGHT_HOVER_COLOR} !important;
+      }
+
+      .strapi-highlight.strapi-highlight-focused {
+        outline-color: ${HIGHLIGHT_ACTIVE_COLOR} !important;
+        outline-width: 3px !important;
+      }
+    `;
+
+    document.head.appendChild(styleElement);
+    return styleElement;
+  };
 
   const createOverlaySystem = () => {
     // Clean up before creating a new overlay so we can safely call previewScript multiple times
@@ -82,10 +201,10 @@ const previewScript = (shouldRun = true) => {
   }>;
 
   const createHighlightManager = (overlay: HTMLElement) => {
-    const elements = window.document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
+    const elementsToHighlight = new Map<Element, HTMLElement>();
     const eventListeners: EventListenersList = [];
-    const highlights: HTMLElement[] = [];
     const focusedHighlights: HTMLElement[] = [];
+    const pendingClicks = new Map<Element, number>(); // number is timeout id
     let focusedField: string | null = null;
 
     const drawHighlight = (target: Element, highlight: HTMLElement) => {
@@ -98,108 +217,186 @@ const previewScript = (shouldRun = true) => {
     };
 
     const updateAllHighlights = () => {
-      highlights.forEach((highlight, index) => {
-        const element = elements[index];
-        if (element && highlight) {
-          drawHighlight(element, highlight);
-        }
+      elementsToHighlight.forEach((highlight, element) => {
+        drawHighlight(element, highlight);
       });
     };
 
-    elements.forEach((element) => {
+    const createHighlightForElement = (element: HTMLElement) => {
+      if (elementsToHighlight.has(element)) {
+        // Already has a highlight
+        return;
+      }
+
+      const highlight = document.createElement('div');
+      highlight.className = 'strapi-highlight';
+      const clickHandler = (event: MouseEvent) => {
+        // Skip if this is a re-dispatched event from our delayed handler to avoid infinite loops
+        if ((event as any).__strapi_redispatched) {
+          return;
+        }
+
+        // Prevent the immediate action for interactive elements
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Clear any existing timeout for this element
+        const existingTimeout = pendingClicks.get(element);
+        if (existingTimeout) {
+          window.clearTimeout(existingTimeout);
+          pendingClicks.delete(element);
+        }
+
+        // Set up a delayed single-click handler
+        const timeout = window.setTimeout(() => {
+          pendingClicks.delete(element);
+
+          // Send single-click hint notification
+          sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_SINGLE_CLICK_HINT, null);
+
+          // Re-trigger the click on the underlying element after the double-click timeout
+          // Create a new event to dispatch with a marker to prevent re-handling
+          const newEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            detail: 1,
+            button: event.button,
+            buttons: event.buttons,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            ctrlKey: event.ctrlKey,
+            altKey: event.altKey,
+            shiftKey: event.shiftKey,
+            metaKey: event.metaKey,
+          });
+          (newEvent as any).__strapi_redispatched = true;
+          element.dispatchEvent(newEvent);
+        }, DOUBLE_CLICK_TIMEOUT);
+
+        pendingClicks.set(element, timeout);
+      };
+
+      const doubleClickHandler = (event: MouseEvent) => {
+        // Prevent the default behavior on double-click
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Clear any pending single-click action
+        const existingTimeout = pendingClicks.get(element);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
+          pendingClicks.delete(element);
+        }
+
+        const sourceAttribute = element.getAttribute(SOURCE_ATTRIBUTE);
+        if (sourceAttribute) {
+          const rect = element.getBoundingClientRect();
+          sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
+            path: sourceAttribute,
+            position: {
+              top: rect.top,
+              left: rect.left,
+              right: rect.right,
+              bottom: rect.bottom,
+              width: rect.width,
+              height: rect.height,
+            },
+          });
+        }
+      };
+
+      const mouseDownHandler = (event: MouseEvent) => {
+        // Prevent default multi click to select behavior
+        if (event.detail >= 2) {
+          event.preventDefault();
+        }
+      };
+
+      highlight.addEventListener('click', clickHandler);
+      highlight.addEventListener('dblclick', doubleClickHandler);
+      highlight.addEventListener('mousedown', mouseDownHandler);
+
+      // Store event listeners for cleanup
+      eventListeners.push(
+        { element: highlight, type: 'click', handler: clickHandler as EventListener },
+        { element: highlight, type: 'dblclick', handler: doubleClickHandler as EventListener },
+        { element: highlight, type: 'mousedown', handler: mouseDownHandler as EventListener }
+      );
+
+      elementsToHighlight.set(element, highlight);
+      overlay.appendChild(highlight);
+      drawHighlight(element, highlight);
+    };
+
+    const removeHighlightForElement = (element: Element) => {
+      const highlight = elementsToHighlight.get(element);
+
+      if (!highlight) return;
+
+      // Clear any pending click timeout for this element
+      const pendingTimeout = pendingClicks.get(element);
+      if (pendingTimeout) {
+        window.clearTimeout(pendingTimeout);
+        pendingClicks.delete(element);
+      }
+
+      highlight.remove();
+      elementsToHighlight.delete(element);
+
+      // Remove event listeners for this highlight
+      const listenersToRemove = eventListeners.filter((listener) => listener.element === highlight);
+      listenersToRemove.forEach(({ element, type, handler }) => {
+        element.removeEventListener(type, handler);
+      });
+
+      // Mutate eventListeners to remove listeners for this highlight
+      eventListeners.splice(
+        0,
+        eventListeners.length,
+        ...eventListeners.filter((listener) => listener.element !== highlight)
+      );
+    };
+
+    // Process all existing elements with source attributes
+    const initialElements = window.document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
+    Array.from(initialElements).forEach((element) => {
       if (element instanceof HTMLElement) {
-        const highlight = document.createElement('div');
-        highlight.style.cssText = `
-          position: absolute;
-          outline: 2px solid transparent;
-          pointer-events: none;
-          border-radius: 2px;
-          background-color: transparent;
-          will-change: transform;
-          transition: outline-color 0.1s ease-in-out;
-        `;
-
-        // Move hover detection to the underlying element
-        const mouseEnterHandler = () => {
-          if (!highlightManager.focusedHighlights.includes(highlight)) {
-            highlight.style.outlineColor = HIGHLIGHT_HOVER_COLOR;
-          }
-        };
-        const mouseLeaveHandler = () => {
-          if (!highlightManager.focusedHighlights.includes(highlight)) {
-            highlight.style.outlineColor = 'transparent';
-          }
-        };
-        const doubleClickHandler = () => {
-          const sourceAttribute = element.getAttribute(SOURCE_ATTRIBUTE);
-          if (sourceAttribute) {
-            const rect = element.getBoundingClientRect();
-            sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
-              path: sourceAttribute,
-              position: {
-                top: rect.top,
-                left: rect.left,
-                right: rect.right,
-                bottom: rect.bottom,
-                width: rect.width,
-                height: rect.height,
-              },
-            });
-          }
-        };
-        const mouseDownHandler = (event: MouseEvent) => {
-          // Prevent default multi click to select behavior
-          if (event.detail >= 2) {
-            event.preventDefault();
-          }
-        };
-
-        element.addEventListener('mouseenter', mouseEnterHandler);
-        element.addEventListener('mouseleave', mouseLeaveHandler);
-        element.addEventListener('dblclick', doubleClickHandler);
-        element.addEventListener('mousedown', mouseDownHandler);
-
-        // Store event listeners for cleanup
-        eventListeners.push(
-          { element, type: 'mouseenter', handler: mouseEnterHandler },
-          { element, type: 'mouseleave', handler: mouseLeaveHandler },
-          { element, type: 'dblclick', handler: doubleClickHandler },
-          { element, type: 'mousedown', handler: mouseDownHandler as EventListener }
-        );
-
-        highlights.push(highlight);
-        overlay.appendChild(highlight);
-
-        drawHighlight(element, highlight);
+        createHighlightForElement(element);
       }
     });
 
     return {
-      elements,
+      get elements() {
+        return Array.from(elementsToHighlight.keys());
+      },
+      get highlights() {
+        return Array.from(elementsToHighlight.values());
+      },
       updateAllHighlights,
       eventListeners,
-      highlights,
       focusedHighlights,
+      createHighlightForElement,
+      removeHighlightForElement,
       setFocusedField: (field: string | null) => {
         focusedField = field;
       },
       getFocusedField: () => focusedField,
+      clearAllPendingClicks: () => {
+        pendingClicks.forEach((timeout) => clearTimeout(timeout));
+        pendingClicks.clear();
+      },
     };
   };
 
   type HighlightManager = ReturnType<typeof createHighlightManager>;
 
-  const setupObservers = (highlightManager: HighlightManager) => {
-    const resizeObserver = new ResizeObserver(() => {
-      highlightManager.updateAllHighlights();
-    });
-
-    highlightManager.elements.forEach((element: Element) => {
-      resizeObserver.observe(element);
-    });
-
-    resizeObserver.observe(document.documentElement);
-
+  /**
+   * We need to track scroll in all the element parents in order to keep the highlight position
+   * in sync with the element position. Listening to window scroll is not enough because the
+   * element can be inside one or more scrollable containers.
+   */
+  const setupScrollManagement = (highlightManager: HighlightManager) => {
     const updateOnScroll = () => {
       highlightManager.updateAllHighlights();
     };
@@ -207,7 +404,7 @@ const previewScript = (shouldRun = true) => {
     const scrollableElements = new Set<Element | Window>();
     scrollableElements.add(window);
 
-    // Find all scrollable ancestors for all tracked elements
+    // Find all scrollable ancestors for all tracked elements and set up scroll listeners
     highlightManager.elements.forEach((element) => {
       let parent = element.parentElement;
       while (parent) {
@@ -232,10 +429,90 @@ const previewScript = (shouldRun = true) => {
       }
     });
 
+    const cleanup = () => {
+      scrollableElements.forEach((element) => {
+        if (element === window) {
+          window.removeEventListener('scroll', updateOnScroll);
+          window.removeEventListener('resize', updateOnScroll);
+        } else {
+          (element as Element).removeEventListener('scroll', updateOnScroll);
+        }
+      });
+    };
+
+    return { cleanup };
+  };
+
+  const setupObservers = (
+    highlightManager: HighlightManager,
+    stegaObserver: MutationObserver | undefined
+  ) => {
+    const resizeObserver = new ResizeObserver(() => {
+      highlightManager.updateAllHighlights();
+    });
+
+    const observeElementForResize = (element: Element) => {
+      resizeObserver.observe(element);
+    };
+
+    // Observe existing elements
+    highlightManager.elements.forEach(observeElementForResize);
+    resizeObserver.observe(document.documentElement);
+
+    // Create highlight observer to watch for new elements with source attributes
+    const highlightObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === SOURCE_ATTRIBUTE) {
+          const target = mutation.target as HTMLElement;
+          if (target.hasAttribute(SOURCE_ATTRIBUTE)) {
+            highlightManager.createHighlightForElement(target);
+            observeElementForResize(target);
+          } else {
+            highlightManager.removeHighlightForElement(target);
+          }
+        }
+
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const element = node as Element;
+              // Check if the added element has source attribute
+              if (element.hasAttribute(SOURCE_ATTRIBUTE) && element instanceof HTMLElement) {
+                highlightManager.createHighlightForElement(element);
+                observeElementForResize(element);
+              }
+              // Check all child elements for source attributes
+              const elementsWithSource = element.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
+              Array.from(elementsWithSource).forEach((childElement) => {
+                if (childElement instanceof HTMLElement) {
+                  highlightManager.createHighlightForElement(childElement);
+                  observeElementForResize(childElement);
+                }
+              });
+            }
+          });
+
+          mutation.removedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const element = node as Element;
+              highlightManager.removeHighlightForElement(element);
+            }
+          });
+        }
+      });
+    });
+
+    highlightObserver.observe(document, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: [SOURCE_ATTRIBUTE],
+    });
+
     return {
       resizeObserver,
-      updateOnScroll,
-      scrollableElements,
+      highlightObserver,
+      stegaObserver,
     };
   };
 
@@ -248,12 +525,14 @@ const previewScript = (shouldRun = true) => {
         const { field, value } = event.data.payload;
         if (!field) return;
 
-        const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
-        matchingElements.forEach((element) => {
+        getElementsByPath(field).forEach((element) => {
           if (element instanceof HTMLElement) {
             element.textContent = value || '';
           }
         });
+
+        // Update highlight dimensions since the new text content may affect them
+        highlightManager.updateAllHighlights();
         return;
       }
 
@@ -264,19 +543,20 @@ const previewScript = (shouldRun = true) => {
 
         // Clear existing focused highlights
         highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
-          highlight.style.outlineColor = 'transparent';
+          highlight.classList.remove('strapi-highlight-focused');
         });
         highlightManager.focusedHighlights.length = 0;
 
         // Set new focused field and highlight matching elements
         highlightManager.setFocusedField(field);
-        const matchingElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}="${field}"]`);
-        matchingElements.forEach((element) => {
+        getElementsByPath(field).forEach((element, index) => {
+          if (index === 0) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
           const highlight =
             highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];
           if (highlight) {
-            highlight.style.outlineColor = HIGHLIGHT_ACTIVE_COLOR;
-            highlight.style.outlineWidth = '3px';
+            highlight.classList.add('strapi-highlight-focused');
             highlightManager.focusedHighlights.push(highlight);
           }
         });
@@ -289,8 +569,7 @@ const previewScript = (shouldRun = true) => {
         if (field !== highlightManager.getFocusedField()) return;
 
         highlightManager.focusedHighlights.forEach((highlight: HTMLElement) => {
-          highlight.style.outlineColor = 'transparent';
-          highlight.style.outlineWidth = '2px';
+          highlight.classList.remove('strapi-highlight-focused');
         });
         highlightManager.focusedHighlights.length = 0;
         highlightManager.setFocusedField(null);
@@ -312,25 +591,31 @@ const previewScript = (shouldRun = true) => {
   const createCleanupSystem = (
     overlay: HTMLElement,
     observers: ReturnType<typeof setupObservers>,
-    eventHandlers: EventListenersList
+    scrollManager: ReturnType<typeof setupScrollManagement>,
+    eventHandlers: EventListenersList,
+    highlightManager: HighlightManager
   ) => {
     window.__strapi_previewCleanup = () => {
       observers.resizeObserver.disconnect();
+      observers.highlightObserver.disconnect();
+      observers.stegaObserver?.disconnect();
 
-      // Remove all scroll listeners
-      observers.scrollableElements.forEach((element) => {
-        if (element === window) {
-          window.removeEventListener('scroll', observers.updateOnScroll);
-          window.removeEventListener('resize', observers.updateOnScroll);
-        } else {
-          (element as Element).removeEventListener('scroll', observers.updateOnScroll);
-        }
-      });
+      // Clean up scroll listeners
+      scrollManager.cleanup();
+
+      // Clear all pending click timeouts
+      highlightManager.clearAllPendingClicks();
 
       // Remove highlight event listeners
       eventHandlers.forEach(({ element, type, handler }) => {
         element.removeEventListener(type, handler);
       });
+
+      // Clean up CSS styles
+      const existingStyles = document.getElementById(HIGHLIGHT_STYLES_ID);
+      if (existingStyles) {
+        existingStyles.remove();
+      }
 
       overlay.remove();
     };
@@ -340,11 +625,15 @@ const previewScript = (shouldRun = true) => {
    * Orchestration
    * ---------------------------------------------------------------------------------------------*/
 
-  const overlay = createOverlaySystem();
-  const highlightManager = createHighlightManager(overlay);
-  const observers = setupObservers(highlightManager);
-  const eventHandlers = setupEventHandlers(highlightManager);
-  createCleanupSystem(overlay, observers, eventHandlers);
+  setupStegaDOMObserver().then((stegaObserver) => {
+    createHighlightStyles();
+    const overlay = createOverlaySystem();
+    const highlightManager = createHighlightManager(overlay);
+    const observers = setupObservers(highlightManager, stegaObserver);
+    const scrollManager = setupScrollManagement(highlightManager);
+    const eventHandlers = setupEventHandlers(highlightManager);
+    createCleanupSystem(overlay, observers, scrollManager, eventHandlers, highlightManager);
+  });
 };
 
 export { previewScript };
