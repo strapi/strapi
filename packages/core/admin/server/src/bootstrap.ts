@@ -103,8 +103,7 @@ const createDefaultAPITokensIfNeeded = async () => {
 };
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  // Fallback for backward compatibility: if the new maxRefreshTokenLifespan is not set,
-  // reuse the legacy admin.auth.options.expiresIn value (previously the sole JWT lifespan)
+  // Get the merged token options (includes defaults merged with user config)
   const { options } = getTokenOptions();
   const legacyMaxRefreshFallback =
     expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN;
@@ -141,6 +140,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
       'admin.auth.sessions.idleSessionLifespan',
       DEFAULT_IDLE_SESSION_LIFESPAN
     ),
+    algorithm: options?.algorithm,
+    // Pass through all JWT options (includes privateKey, publicKey, and any other options)
+    jwtOptions: options,
   });
 
   await registerAdminConditions();

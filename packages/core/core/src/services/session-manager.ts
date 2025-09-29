@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import type { VerifyOptions } from 'jsonwebtoken';
+import type { VerifyOptions, Algorithm } from 'jsonwebtoken';
 import type { Database } from '@strapi/database';
 import { DEFAULT_ALGORITHM } from '../constants';
 
@@ -111,12 +111,14 @@ class DatabaseSessionProvider implements SessionProvider {
 }
 
 export interface SessionManagerConfig {
-  jwtSecret: string;
+  jwtSecret?: string;
   accessTokenLifespan: number;
   maxRefreshTokenLifespan: number;
   idleRefreshTokenLifespan: number;
   maxSessionLifespan: number;
   idleSessionLifespan: number;
+  algorithm?: Algorithm;
+  jwtOptions?: Record<string, unknown>;
 }
 
 class OriginSessionManager {
@@ -214,6 +216,46 @@ class SessionManager {
     );
   }
 
+  /**
+   * Get the appropriate JWT key based on the algorithm
+   */
+  private getJwtKey(
+    config: SessionManagerConfig,
+    algorithm: Algorithm,
+    operation: 'sign' | 'verify'
+  ): string {
+    const isAsymmetric =
+      algorithm.startsWith('RS') || algorithm.startsWith('ES') || algorithm.startsWith('PS');
+
+    if (isAsymmetric) {
+      // For asymmetric algorithms, check if user has provided proper key configuration
+      if (operation === 'sign') {
+        const privateKey = config.jwtOptions?.privateKey as string;
+        if (privateKey) {
+          return privateKey;
+        }
+        throw new Error(
+          `SessionManager: Private key is required for asymmetric algorithm ${algorithm}. Please configure admin.auth.options.privateKey.`
+        );
+      } else {
+        const publicKey = config.jwtOptions?.publicKey as string;
+        if (publicKey) {
+          return publicKey;
+        }
+        throw new Error(
+          `SessionManager: Public key is required for asymmetric algorithm ${algorithm}. Please configure admin.auth.options.publicKey.`
+        );
+      }
+    } else {
+      if (!config.jwtSecret) {
+        throw new Error(
+          `SessionManager: Secret key is required for symmetric algorithm ${algorithm}`
+        );
+      }
+      return config.jwtSecret;
+    }
+  }
+
   generateSessionId(): string {
     return crypto.randomBytes(16).toString('hex');
   }
@@ -249,6 +291,8 @@ class SessionManager {
     await this.maybeCleanupExpired();
 
     const config = this.getConfigForOrigin(origin);
+    const algorithm = config.algorithm || DEFAULT_ALGORITHM;
+    const jwtKey = this.getJwtKey(config, algorithm, 'sign');
     const sessionId = this.generateSessionId();
     const tokenType = options?.type ?? 'refresh';
     const isRefresh = tokenType === 'refresh';
@@ -285,9 +329,14 @@ class SessionManager {
       exp: expiresAtSeconds,
     };
 
-    const token = jwt.sign(payload, config.jwtSecret, {
-      algorithm: DEFAULT_ALGORITHM,
+    // Filter out conflicting options that are already handled by the payload or used for key selection
+    const jwtOptions = config.jwtOptions || {};
+    const { expiresIn, privateKey, publicKey, ...jwtSignOptions } = jwtOptions;
+
+    const token = jwt.sign(payload, jwtKey, {
+      algorithm,
       noTimestamp: true,
+      ...jwtSignOptions,
     });
 
     return {
@@ -309,8 +358,11 @@ class SessionManager {
 
     try {
       const config = this.getConfigForOrigin(origin);
-      const payload = jwt.verify(token, config.jwtSecret, {
-        algorithms: [DEFAULT_ALGORITHM],
+      const algorithm = config.algorithm || DEFAULT_ALGORITHM;
+      const jwtKey = this.getJwtKey(config, algorithm, 'verify');
+      const payload = jwt.verify(token, jwtKey, {
+        algorithms: [algorithm],
+        ...config.jwtOptions,
       }) as TokenPayload;
 
       // Ensure this is an access token
@@ -333,11 +385,14 @@ class SessionManager {
 
     try {
       const config = this.getConfigForOrigin(origin);
+      const algorithm = config.algorithm || DEFAULT_ALGORITHM;
+      const jwtKey = this.getJwtKey(config, algorithm, 'verify');
       const verifyOptions: VerifyOptions = {
-        algorithms: [DEFAULT_ALGORITHM],
+        algorithms: [algorithm],
+        ...config.jwtOptions,
       };
 
-      const payload = jwt.verify(token, config.jwtSecret, verifyOptions) as RefreshTokenPayload;
+      const payload = jwt.verify(token, jwtKey, verifyOptions) as RefreshTokenPayload;
 
       if (payload.type !== 'refresh') {
         return { isValid: false };
@@ -408,9 +463,16 @@ class SessionManager {
     };
 
     const config = this.getConfigForOrigin(origin);
-    const token = jwt.sign(payload, config.jwtSecret, {
-      algorithm: DEFAULT_ALGORITHM,
+    const algorithm = config.algorithm || DEFAULT_ALGORITHM;
+    const jwtKey = this.getJwtKey(config, algorithm, 'sign');
+    // Filter out conflicting options that are already handled by the payload or used for key selection
+    const jwtOptions = config.jwtOptions || {};
+    const { expiresIn, privateKey, publicKey, ...jwtSignOptions } = jwtOptions;
+
+    const token = jwt.sign(payload, jwtKey, {
+      algorithm,
       expiresIn: config.accessTokenLifespan,
+      ...jwtSignOptions,
     });
 
     return { token };
@@ -436,8 +498,11 @@ class SessionManager {
 
     try {
       const config = this.getConfigForOrigin(origin);
-      const payload = jwt.verify(refreshToken, config.jwtSecret, {
-        algorithms: [DEFAULT_ALGORITHM],
+      const algorithm = config.algorithm || DEFAULT_ALGORITHM;
+      const jwtKey = this.getJwtKey(config, algorithm, 'verify');
+      const payload = jwt.verify(refreshToken, jwtKey, {
+        algorithms: [algorithm],
+        ...config.jwtOptions,
       }) as RefreshTokenPayload;
 
       if (!payload || payload.type !== 'refresh') {
@@ -465,9 +530,13 @@ class SessionManager {
             exp: childExp,
           };
 
-          const childToken = jwt.sign(childPayload, config.jwtSecret, {
-            algorithm: DEFAULT_ALGORITHM,
+          // Filter out conflicting options that are already handled by the payload
+          const { expiresIn, ...jwtSignOptions } = config.jwtOptions || {};
+
+          const childToken = jwt.sign(childPayload, jwtKey, {
+            algorithm,
             noTimestamp: true,
+            ...jwtSignOptions,
           });
 
           let absoluteExpiresAt;
@@ -532,9 +601,13 @@ class SessionManager {
         iat: childIat,
         exp: childExp,
       };
-      const childToken = jwt.sign(payloadOut, config.jwtSecret, {
-        algorithm: DEFAULT_ALGORITHM,
+      // Filter out conflicting options that are already handled by the payload
+      const { expiresIn, ...jwtSignOptions } = config.jwtOptions || {};
+
+      const childToken = jwt.sign(payloadOut, jwtKey, {
+        algorithm,
         noTimestamp: true,
+        ...jwtSignOptions,
       });
 
       await this.provider.updateBySessionId(current.sessionId, {

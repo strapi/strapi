@@ -63,12 +63,20 @@ Optional request fields on login/register:
 
 Configuration:
 
-- `admin.auth.secret` — required JWT secret used by admin origin
+- `admin.auth.secret` — JWT secret for symmetric algorithms (HS256, HS384, HS512)
+- `admin.auth.sessions.options.algorithm` — JWT algorithm (default: 'HS256')
+- `admin.auth.sessions.options.privateKey` — Private key for asymmetric algorithms (RS256, RS512, ES256, etc.)
+- `admin.auth.sessions.options.publicKey` — Public key for asymmetric algorithms (RS256, RS512, ES256, etc.)
+- `admin.auth.sessions.options.*` — Any other JWT options (issuer, audience, subject, etc.)
 - `admin.auth.sessions.accessTokenLifespan` (default 1800)
 - `admin.auth.sessions.maxRefreshTokenLifespan` (default 30 days)
-- `admin.auth.sessions.idleRefreshTokenLifespan` (default 7 days)
-- `admin.auth.sessions.maxSessionLifespan` (default 7 days)
-- `admin.auth.sessions.idleSessionLifespan` (default 1 hour)
+- `admin.auth.sessions.idleRefreshTokenLifespan` (default 14 days)
+- `admin.auth.sessions.maxSessionLifespan` (default 1 day)
+- `admin.auth.sessions.idleSessionLifespan` (default 2 hours)
+
+**Deprecated:**
+
+- `admin.auth.options.*` — Use `admin.auth.sessions.options.*` instead
 - Cookie options (applied to `strapi_admin_refresh`):
   - `admin.auth.cookie.domain` (or `admin.auth.domain`)
   - `admin.auth.cookie.path` (default `/admin`)
