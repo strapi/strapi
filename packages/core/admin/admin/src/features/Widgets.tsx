@@ -14,6 +14,7 @@ import { useTracking } from './Tracking';
 import type { WidgetWithUID } from '../core/apis/Widgets';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 import { useDrag } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 
 /* -------------------------------------------------------------------------------------------------
  * WidgetRoot Component
@@ -36,6 +37,7 @@ interface WidgetRootProps
   deleteWidget: (id: string) => void;
   onDragStart?: (widgetId: string) => void;
   onDragEnd?: () => void;
+  component?: () => Promise<React.ComponentType>;
 }
 
 export const WidgetRoot = ({
@@ -48,6 +50,7 @@ export const WidgetRoot = ({
   deleteWidget,
   onDragStart,
   onDragEnd,
+  component,
 }: WidgetRootProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
@@ -66,12 +69,19 @@ export const WidgetRoot = ({
     onDragStart?.(uid);
   };
 
-  const [, drag] = useDrag(
+  const [, drag, preview] = useDrag(
     () => ({
       type: 'widget',
       item: () => {
         onDragStart?.(uid);
-        return { id: uid, originalIndex: findWidget(uid).index };
+        return {
+          id: uid,
+          originalIndex: findWidget(uid).index,
+          title,
+          icon,
+          link,
+          component,
+        };
       },
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
@@ -80,8 +90,13 @@ export const WidgetRoot = ({
         onDragEnd?.();
       },
     }),
-    [uid, findWidget, onDragStart, onDragEnd]
+    [uid, findWidget, onDragStart, onDragEnd, title, icon, link, component]
   );
+
+  // Suppress default drag preview
+  React.useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, [preview]);
 
   return (
     <Flex
