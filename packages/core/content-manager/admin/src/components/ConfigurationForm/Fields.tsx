@@ -113,6 +113,110 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
   const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
 
+  const attributesRef = React.useRef(attributes);
+  const fieldSizesRef = React.useRef(fieldSizes);
+  const metadatasRef = React.useRef(metadatas);
+
+  React.useEffect(() => {
+    attributesRef.current = attributes;
+  }, [attributes]);
+
+  React.useEffect(() => {
+    fieldSizesRef.current = fieldSizes;
+  }, [fieldSizes]);
+
+  React.useEffect(() => {
+    metadatasRef.current = metadatas;
+  }, [metadatas]);
+
+  const makeKey = React.useCallback(
+    () => `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`,
+    []
+  );
+
+  const buildRowForAttribute = React.useCallback(
+    (name: string) => {
+      const attrs = attributesRef.current ?? {};
+      const sizes = fieldSizesRef.current ?? {};
+      const metas = metadatasRef.current ?? {};
+
+      const type = attrs[name]?.type;
+      const size = type ? (sizes[type] ?? GRID_COLUMNS) : GRID_COLUMNS;
+
+      const meta = metas[name] as
+        | Partial<{
+            label?: string;
+            placeholder?: string;
+            mainField?: any;
+            hint?: string;
+            disabled?: boolean;
+          }>
+        | undefined;
+
+      return {
+        name,
+        size: Math.min(size, 6), // Limit size to 6 to allow pairing
+        label: meta?.label ?? name,
+        placeholder: meta?.placeholder ?? '',
+        mainField: meta?.mainField ?? undefined,
+        description: meta?.hint ?? '',
+        editable: meta?.disabled === undefined ? true : !meta.disabled,
+        __temp_key__: makeKey(),
+      };
+    },
+    [makeKey]
+  );
+
+  React.useEffect(() => {
+    const handler = () => {
+      try {
+        const attrs = attributesRef.current ?? {};
+
+        const rows = Object.keys(attrs)
+          .filter((name) => name !== 'id' && !name.startsWith('_'))
+          .map((name) => buildRowForAttribute(name));
+
+        if (rows.length > 0) {
+          onChange('layout', rows);
+        }
+      } catch (err) {
+        console.warn('ctb:attributesReordered handler failed', err);
+      }
+    };
+
+    window.addEventListener('ctb:attributesReordered', handler);
+    return () => window.removeEventListener('ctb:attributesReordered', handler);
+  }, [onChange, buildRowForAttribute]);
+
+  React.useEffect(() => {
+    try {
+      const attrs = attributes ?? {};
+      const rows: ConfigurationFormData['layout'] = [];
+      const fieldNames = Object.keys(attrs)
+
+        .filter((name) => name !== 'id' && !name.startsWith('_'));
+
+      for (let i = 0; i < fieldNames.length; i += 2) {
+        const name1 = fieldNames[i];
+        const name2 = fieldNames[i + 1];
+        const row: ConfigurationFormData['layout'][number] = {
+          __temp_key__: makeKey(),
+          children: [],
+        };
+
+        row.children.push(buildRowForAttribute(name1));
+        if (name2) row.children.push(buildRowForAttribute(name2)); // Add second field if it exists
+
+        rows.push(row);
+      }
+
+      if (rows.length > 0) {
+        onChange('layout', rows as ConfigurationFormData['layout']);
+      }
+    } catch (err) {
+      console.warn('initial layout sync failed', err);
+    }
+  }, [attributes, fieldSizes, metadatas, onChange, makeKey]);
   const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
 
   /**
