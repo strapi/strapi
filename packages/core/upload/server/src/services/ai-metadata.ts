@@ -2,7 +2,7 @@ import type { Core } from '@strapi/types';
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 import { InputFile } from '../types';
-import { Settings } from '../../src/controllers/validation/admin/settings';
+import { Settings } from '../controllers/validation/admin/settings';
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_ADMIN_AI_URL || process.env.STRAPI_AI_URL;
