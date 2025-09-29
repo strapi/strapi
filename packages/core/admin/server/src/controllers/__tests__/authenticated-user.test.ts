@@ -77,7 +77,7 @@ describe('Authenticated User Controller', () => {
         'AI token request failed. Check server logs for details.'
       );
 
-      expect(mockUserService.getAiToken).toHaveBeenCalledWith(mockUser);
+      expect(mockUserService.getAiToken).toHaveBeenCalledWith();
     });
 
     test('Should successfully return AI token when service succeeds', async () => {
@@ -92,7 +92,7 @@ describe('Authenticated User Controller', () => {
 
       await authenticatedUserController.getAiToken(ctx as any);
 
-      expect(mockUserService.getAiToken).toHaveBeenCalledWith(mockUser);
+      expect(mockUserService.getAiToken).toHaveBeenCalledWith();
       expect(ctx.body).toEqual({
         data: tokenData,
       });

@@ -60,10 +60,7 @@ export default {
         return ctx.unauthorized('Authentication required');
       }
 
-      const userService = getService('user');
-      const user = ctx.state.user as AdminUser;
-
-      const tokenData = await userService.getAiToken(user);
+      const tokenData = await getService('user').getAiToken();
 
       ctx.body = {
         data: tokenData,

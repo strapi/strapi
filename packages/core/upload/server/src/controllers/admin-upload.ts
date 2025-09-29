@@ -5,11 +5,38 @@ import type { Context } from 'koa';
 
 import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
-import { validateUploadBody } from './validation/admin/upload';
+import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
 import { FileInfo } from '../types';
 
 export default {
+  async bulkUpdateFileInfo(ctx: Context) {
+    const {
+      state: { userAbility, user },
+      request: { body },
+    } = ctx;
+
+    const { updates } = await validateBulkUpdateBody(body);
+    const uploadService = getService('upload');
+
+    const results = await async.map(
+      updates,
+      async ({ id, fileInfo }: { id: number; fileInfo: FileInfo }) => {
+        const { pm } = await findEntityAndCheckPermissions(
+          userAbility,
+          ACTIONS.update,
+          FILE_MODEL_UID,
+          id
+        );
+
+        const updated = await uploadService.updateFileInfo(id, fileInfo as any, { user });
+        return pm.sanitizeOutput(updated, { action: ACTIONS.read });
+      }
+    );
+
+    ctx.body = results;
+  },
+
   async updateFileInfo(ctx: Context) {
     const {
       state: { userAbility, user },
@@ -86,26 +113,30 @@ export default {
     }
 
     const data = await validateUploadBody(body);
-    const fileInfosArray = Array.isArray(data.fileInfo) ? data.fileInfo : [data.fileInfo];
-
     const filesArray = Array.isArray(files) ? files : [files];
-    const metadataResults = await getService('aiMetadata').processFiles(filesArray);
 
-    const mergedData = {
-      ...data,
-      fileInfo: filesArray.map((_, index) => {
-        return {
-          ...fileInfosArray[index],
-          alternativeText: metadataResults[index].altText,
-          caption: metadataResults[index].caption,
-        };
-      }),
-    };
+    const aiMetadataService = getService('aiMetadata');
 
-    const uploadedFiles = await uploadService.upload(
-      { data: mergedData, files: filesArray },
-      { user }
-    );
+    if (aiMetadataService.isEnabled()) {
+      try {
+        const metadataResults = await aiMetadataService.processFiles(filesArray);
+
+        // Enhance fileInfo with AI metadata if available
+        const fileInfos = Array.isArray(data.fileInfo) ? data.fileInfo : [data.fileInfo];
+        fileInfos.forEach((fileInfo, index) => {
+          const aiMetadata = metadataResults[index];
+          if (!aiMetadata || !fileInfo) return;
+          fileInfo.alternativeText = aiMetadata.altText;
+          fileInfo.caption = aiMetadata.caption;
+        });
+      } catch (error) {
+        strapi.log.warn('AI metadata generation failed, proceeding without AI enhancements', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
 
     // Sign file urls for private providers
     const signedFiles = await async.map(uploadedFiles, getService('file').signFileUrls);
