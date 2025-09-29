@@ -132,7 +132,7 @@ export const SettingsPage = () => {
         />
         <Layouts.Content>
           <Layouts.Root>
-            <Flex direction="column" alignItems="stretch" gap={12}>
+            <Flex direction="column" alignItems="stretch" gap={4}>
               <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                 <Flex direction="column" alignItems="stretch" gap={1}>
                   <Grid.Root gap={6}>
@@ -143,7 +143,7 @@ export const SettingsPage = () => {
                           {formatMessage({
                             id: getTrad('settings.form.aiMetadata.label'),
                             defaultMessage:
-                              'Generate AI captions and alt texts automatically on upload !',
+                              'Generate AI captions and alt texts automatically on upload!',
                           })}
                         </Typography>
                       </Flex>
@@ -152,7 +152,7 @@ export const SettingsPage = () => {
                           {formatMessage({
                             id: getTrad('settings.form.aiMetadata.description'),
                             defaultMessage:
-                              'Enable this feature to save time, optimize your SEO and increase accessibility by letting our AI generate captions and alternative texts for your.',
+                              'Enable this feature to save time, optimize your SEO and increase accessibility by letting our AI generate captions and alternative texts for you.',
                           })}
                         </Typography>
                       </Flex>
@@ -169,11 +169,11 @@ export const SettingsPage = () => {
                           checked={modifiedData?.aiMetadata}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
-                            defaultMessage: 'Off',
+                            defaultMessage: 'Disabled',
                           })}
                           onLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.on-label',
-                            defaultMessage: 'On',
+                            defaultMessage: 'Enabled',
                           })}
                           onChange={(e) => {
                             handleChange({
@@ -186,7 +186,6 @@ export const SettingsPage = () => {
                   </Grid.Root>
                 </Flex>
               </Box>
-              <Box height="16px" background="transparent" aria-hidden="true" />
               <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                 <Flex direction="column" alignItems="stretch" gap={4}>
                   <Flex>

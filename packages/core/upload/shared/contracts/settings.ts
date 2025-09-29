@@ -16,6 +16,8 @@ export interface Settings {
   };
 }
 
+export type SettingsData = Settings['data'];
+
 /**
  * GET /upload/settings
  *

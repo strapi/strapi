@@ -1,21 +1,18 @@
 import { produce } from 'immer';
 import set from 'lodash/set';
+import { SettingsData } from '../../../../shared/contracts/settings';
+
+const initialData: SettingsData = {
+  responsiveDimensions: true,
+  sizeOptimization: true,
+  autoOrientation: false,
+  videoPreview: false,
+  aiMetadata: true,
+};
 
 export type InitialState = {
-  initialData: {
-    responsiveDimensions?: boolean;
-    sizeOptimization?: boolean;
-    autoOrientation?: boolean;
-    videoPreview?: boolean;
-    aiMetadata?: boolean;
-  } | null;
-  modifiedData: {
-    responsiveDimensions?: boolean;
-    sizeOptimization?: boolean;
-    autoOrientation?: boolean;
-    videoPreview?: boolean;
-    aiMetadata?: boolean;
-  } | null;
+  initialData: SettingsData | null;
+  modifiedData: SettingsData | null;
 };
 
 interface ActionGetDataSucceeded {
@@ -32,20 +29,8 @@ interface ActionOnChange {
 export type Action = ActionGetDataSucceeded | ActionOnChange;
 
 const initialState: InitialState = {
-  initialData: {
-    responsiveDimensions: true,
-    sizeOptimization: true,
-    autoOrientation: false,
-    videoPreview: false,
-    aiMetadata: true,
-  },
-  modifiedData: {
-    responsiveDimensions: true,
-    sizeOptimization: true,
-    autoOrientation: false,
-    videoPreview: false,
-    aiMetadata: true,
-  },
+  initialData,
+  modifiedData: { ...initialData },
 };
 
 const reducer = (state: InitialState, action: Action) =>
