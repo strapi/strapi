@@ -73,19 +73,18 @@ const CardContainer = styled(Box)`
 const AssetCardActions = ({ asset }: { asset: File }) => {
   const { formatMessage } = useIntl();
   const dispatch = useAIUploadModalContext('AssetCardActions', (s) => s.dispatch);
-  const state = useAIUploadModalContext('AssetCardActions', (s) => s.state);
   const { canUpdate, canCopyLink, canDownload } = useMediaLibraryPermissions();
 
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
 
   const { removeAsset } = useRemoveAsset(() => {});
 
-  const handleConfirm = async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleConfirmRemove = async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event?.preventDefault();
     await removeAsset(asset.id);
     dispatch({
-      type: 'set_uploaded_assets',
-      payload: state.uploadedAssets.filter((a) => a.id !== asset.id),
+      type: 'remove_uploaded_asset',
+      payload: { id: asset.id },
     });
   };
 
@@ -95,18 +94,9 @@ const AssetCardActions = ({ asset }: { asset: File }) => {
 
   const handleEditAsset = (editedAsset?: File | null) => {
     if (editedAsset) {
-      const assetToReplace = state.uploadedAssets.find((a) => a.id === editedAsset.id);
-      const updatedAssets = assetToReplace
-        ? state.uploadedAssets.toSpliced(
-            state.uploadedAssets.indexOf(assetToReplace),
-            1,
-            editedAsset
-          )
-        : state.uploadedAssets;
-
       dispatch({
-        type: 'set_uploaded_assets',
-        payload: updatedAssets,
+        type: 'edit_uploaded_asset',
+        payload: { editedAsset },
       });
 
       setIsEditModalOpen(false);
@@ -126,7 +116,7 @@ const AssetCardActions = ({ asset }: { asset: File }) => {
             <Trash />
           </IconButton>
         </Dialog.Trigger>
-        <ConfirmDialog onConfirm={handleConfirm} />
+        <ConfirmDialog onConfirm={handleConfirmRemove} />
       </Dialog.Root>
 
       <Modal.Root open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
@@ -169,6 +159,8 @@ interface AssetCardProps {
   asset: File;
   onCaptionChange: (caption: string) => void;
   onAltTextChange: (altText: string) => void;
+  wasCaptionChanged: boolean;
+  wasAltTextChanged: boolean;
 }
 
 const Extension = styled.span`
@@ -277,18 +269,20 @@ const getAssetBadgeLabel = (assetType: AssetType) => {
   }
 };
 
-export const AIAssetCard = ({ asset, onCaptionChange, onAltTextChange }: AssetCardProps) => {
+export const AIAssetCard = ({
+  asset,
+  onCaptionChange,
+  onAltTextChange,
+  wasAltTextChanged,
+  wasCaptionChanged,
+}: AssetCardProps) => {
   const { formatMessage } = useIntl();
-  const [wasCaptionChanged, setWasCaptionChanged] = React.useState(false);
-  const [wasAltTextChanged, setWasAltTextChanged] = React.useState(false);
 
   const handleCaptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setWasCaptionChanged(true);
     onCaptionChange(event.target.value);
   };
 
   const handleAltTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setWasAltTextChanged(true);
     onAltTextChange(event.target.value);
   };
 
