@@ -45,7 +45,15 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         formData.append('files', blob);
       }
 
-      const { token } = await strapi.service('admin::user').getAiToken();
+      let token: string;
+      try {
+        const tokenData = await strapi.service('admin::user').getAiToken();
+        token = tokenData.token;
+      } catch (error) {
+        throw new Error('Failed to retrieve AI token', {
+          cause: error instanceof Error ? error : undefined,
+        });
+      }
 
       strapi.log.http('Contacting AI Server for media metadata generation');
       const res = await fetch(`${aiServerUrl}/media-library/generate-metadata`, {
