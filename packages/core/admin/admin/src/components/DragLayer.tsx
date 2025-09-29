@@ -6,7 +6,8 @@ import { DragLayerMonitor, XYCoord, useDragLayer } from 'react-dnd';
 function getStyle(
   initialOffset: XYCoord | null,
   currentOffset: XYCoord | null,
-  mouseOffset: XYCoord | null
+  mouseOffset: XYCoord | null,
+  item?: any
 ) {
   if (!initialOffset || !currentOffset || !mouseOffset) {
     return { display: 'none' };
@@ -14,6 +15,20 @@ function getStyle(
 
   const { x, y } = mouseOffset;
 
+  // Only apply custom offset for widget drags
+  if (item?.type === 'widget') {
+    // Calculate dynamic offset based on widget position and width
+    const widgetElement = document.querySelector(`[data-widget-id="${item.id}"]`);
+    const previewWidth = widgetElement?.clientWidth;
+    const offsetX = previewWidth ? -previewWidth + 20 : 0;
+    const offsetY = 20;
+
+    return {
+      transform: `translate(${x + offsetX}px, ${y + offsetY}px)`,
+    };
+  }
+
+  // Default positioning for non-widget drags
   return {
     transform: `translate(${x}px, ${y}px)`,
   };
@@ -45,6 +60,10 @@ const DragLayer = ({ renderItem }: DragLayerProps) => {
     return null;
   }
 
+  const renderPreview = () => {
+    return renderItem({ type: itemType, item });
+  };
+
   return (
     <Box
       height="100%"
@@ -55,8 +74,8 @@ const DragLayer = ({ renderItem }: DragLayerProps) => {
       zIndex={100}
       width="100%"
     >
-      <Box style={getStyle(initialOffset, currentOffset, mouseOffset)}>
-        {renderItem({ type: itemType, item })}
+      <Box style={getStyle(initialOffset, currentOffset, mouseOffset, { type: itemType, ...item })}>
+        {renderPreview()}
       </Box>
     </Box>
   );
