@@ -17,12 +17,24 @@ import { useGetHomepageLayoutQuery } from '../../services/homepage';
 import { applyHomepageLayout, createDefaultWidgetWidths } from '../../utils/widgetUtils';
 import { InterWidgetResizeHandle } from '../../components/ResizeIndicator';
 import { GapDropZone } from '../../components/GapDropZone';
+import { DragLayer } from '../../components/DragLayer';
+import { styled } from 'styled-components';
 
 import { AddWidgetModal } from './components/AddWidgetModal';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
 import { FreeTrialWelcomeModal } from './components/FreeTrialWelcomeModal';
 
 import type { WidgetWithUID } from '../../core/apis/Widgets';
+
+// Styled wrapper for the drag preview
+const DragPreviewWrapper = styled.div<{ $maxWidth: string }>`
+  max-width: ${(props) => props.$maxWidth};
+  overflow: hidden;
+  opacity: 0.9;
+  border: 2px solid ${({ theme }) => theme.colors.primary500};
+  border-radius: 4px;
+  pointer-events: none;
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * UnstableHomePageCe
@@ -204,6 +216,7 @@ const HomePageCE = () => {
                           deleteWidget={deleteWidget}
                           onDragStart={handleDragStart}
                           onDragEnd={handleDragEnd}
+                          component={widget.component}
                         >
                           <WidgetComponent component={widget.component} columnWidth={widgetWidth} />
                         </WidgetRoot>
@@ -243,6 +256,37 @@ const HomePageCE = () => {
           )}
         </Flex>
       </Layouts.Content>
+
+      {/* Add the DragLayer to handle custom drag previews */}
+      <DragLayer
+        renderItem={({ type, item }) => {
+          if (type === 'widget') {
+            const widgetElement = document.querySelector(`[data-widget-id="${item.id}"]`);
+            const maxWidth = `${widgetElement?.clientWidth}px`;
+
+            return (
+              <DragPreviewWrapper $maxWidth={maxWidth}>
+                <WidgetRoot
+                  uid={item.id}
+                  title={item.title || { id: `${item.id}`, defaultMessage: item.id }}
+                  icon={item.icon}
+                  link={item.link}
+                  findWidget={() => ({ index: 0 })}
+                  moveWidget={() => {}}
+                  deleteWidget={() => {}}
+                  columnWidths={{}}
+                  setColumnWidths={() => {}}
+                  onDragStart={() => {}}
+                  onDragEnd={() => {}}
+                >
+                  <WidgetComponent component={item.component} columnWidth={item.columnWidth} />
+                </WidgetRoot>
+              </DragPreviewWrapper>
+            );
+          }
+          return null;
+        }}
+      />
     </Main>
   );
 };
