@@ -37,7 +37,7 @@ import { createContentSourceMapsService } from './services/content-source-maps';
 import { coreStoreModel } from './services/core-store';
 import { createConfigProvider } from './services/config';
 
-import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
+// import { cleanComponentJoinTable } from './services/document-service/utils/clean-component-join-table';
 
 class Strapi extends Container implements Core.Strapi {
   app: any;
@@ -449,26 +449,29 @@ class Strapi extends Container implements Core.Strapi {
       contentTypes: this.contentTypes,
     });
 
+    // NOTE: commenting out repair logic for now as it is causing relationship loss in some cases
+    // will revisit soon in the future PR
+
     const status = await this.db.schema.sync();
 
-    // if schemas have changed, run repairs
+    // // if schemas have changed, run repairs
     if (status === 'CHANGED') {
       await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
     }
 
-    const alreadyRanComponentRepair = await this.store.get({
-      type: 'strapi',
-      key: 'unidirectional-join-table-repair-ran',
-    });
+    // const alreadyRanComponentRepair = await this.store.get({
+    //   type: 'strapi',
+    //   key: 'unidirectional-join-table-repair-ran',
+    // });
 
-    if (!alreadyRanComponentRepair) {
-      await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
-      await this.store.set({
-        type: 'strapi',
-        key: 'unidirectional-join-table-repair-ran',
-        value: true,
-      });
-    }
+    // if (!alreadyRanComponentRepair) {
+    //   await this.db.repair.processUnidirectionalJoinTables(cleanComponentJoinTable);
+    //   await this.store.set({
+    //     type: 'strapi',
+    //     key: 'unidirectional-join-table-repair-ran',
+    //     value: true,
+    //   });
+    // }
 
     if (this.EE) {
       await utils.ee.checkLicense({ strapi: this });
