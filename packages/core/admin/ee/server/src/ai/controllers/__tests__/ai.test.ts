@@ -116,7 +116,6 @@ describe('AI Controller', () => {
 
       process.env.STRAPI_LICENSE = 'test-license';
       delete process.env.STRAPI_AI_URL;
-      delete process.env.STRAPI_ADMIN_AI_URL;
 
       await aiController.getAiToken(ctx as any);
 
@@ -126,7 +125,7 @@ describe('AI Controller', () => {
 
       // Check that the specific error was logged
       expect(mockStrapi.log.error).toHaveBeenCalledWith(
-        'AI token request failed: AI server URL not configured. Please set STRAPI_ADMIN_AI_URL or STRAPI_AI_URL environment variable.'
+        'AI token request failed: AI server URL not configured. Please set STRAPI_AI_URL environment variable.'
       );
     });
 

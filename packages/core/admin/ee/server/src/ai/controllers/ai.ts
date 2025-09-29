@@ -42,11 +42,11 @@ export default {
         return ctx.internalServerError(USER_ERROR_MESSAGE);
       }
 
-      const aiServerUrl = process.env.STRAPI_ADMIN_AI_URL || process.env.STRAPI_AI_URL;
+      const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
       if (!aiServerUrl) {
         strapi.log.error(
-          `${ERROR_PREFIX} AI server URL not configured. Please set STRAPI_ADMIN_AI_URL or STRAPI_AI_URL environment variable.`
+          `${ERROR_PREFIX} AI server URL not configured. Please set STRAPI_AI_URL environment variable.`
         );
         return ctx.internalServerError(USER_ERROR_MESSAGE);
       }
@@ -183,11 +183,11 @@ export default {
       return ctx.internalServerError(USER_ERROR_MESSAGE);
     }
 
-    const aiServerUrl = process.env.STRAPI_ADMIN_AI_URL || process.env.STRAPI_AI_URL;
+    const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
     if (!aiServerUrl) {
       strapi.log.error(
-        `${ERROR_PREFIX} AI server URL not configured. Please set STRAPI_ADMIN_AI_URL or STRAPI_AI_URL environment variable.`
+        `${ERROR_PREFIX} AI server URL not configured. Please set STRAPI_AI_URL or STRAPI_AI_URL environment variable.`
       );
       return ctx.internalServerError(USER_ERROR_MESSAGE);
     }
