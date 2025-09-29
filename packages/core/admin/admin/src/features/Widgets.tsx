@@ -1,190 +1,184 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography, ScrollArea, IconButton } from '@strapi/design-system';
-import { PuzzlePiece, Trash, Drag } from '@strapi/icons';
+import {
+  calculateWidgetRows,
+  moveWidgetInArray,
+  findRowContainingWidget,
+  resizeRowAfterRemoval,
+  resizeRowAfterAddition,
+  isValidResizeOperation,
+  canResizeBetweenWidgets,
+} from '../utils/widgetUtils';
+import { useUpdateHomepageLayoutMutation } from '../services/homepage';
+import { useNotification } from './Notifications';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
+import { WidgetRoot } from '../components/WidgetRoot';
 import { useIntl } from 'react-intl';
-import { Link as ReactRouterLink } from 'react-router-dom';
-
-import { useWidgetManagement } from '../hooks/useWidgetManagement';
-import { useGapDropZonePosition } from '../hooks/useGapDropZonePosition';
-import { InterWidgetResizeHandle } from '../components/ResizeIndicator';
-
-import { useTracking } from './Tracking';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
-import type { WidgetType } from '@strapi/admin/strapi-admin';
-import { useDrag } from 'react-dnd';
-import { getEmptyImage } from 'react-dnd-html5-backend';
 
-/* -------------------------------------------------------------------------------------------------
- * WidgetRoot Component
- * -----------------------------------------------------------------------------------------------*/
-
-interface WidgetRootProps
-  extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
-  children: React.ReactNode;
-  columnWidths: Record<string, number>;
-  setColumnWidths: (
-    widths: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)
-  ) => void;
-  findWidget: (id: string) => { index: number };
-  moveWidget: (
-    id: string,
-    atIndex: number,
-    targetRowIndex?: number,
-    isHorizontalDrop?: boolean
-  ) => void;
-  deleteWidget: (id: string) => void;
-  onDragStart?: (widgetId: string) => void;
-  onDragEnd?: () => void;
-  component?: () => Promise<React.ComponentType>;
+interface WidgetInfo {
+  widget: WidgetWithUID | undefined;
+  index: number;
 }
 
-export const WidgetRoot = ({
-  title,
-  icon = PuzzlePiece,
-  children,
-  link,
-  uid,
-  findWidget,
-  deleteWidget,
-  onDragStart,
-  onDragEnd,
-  component,
-}: WidgetRootProps) => {
-  const { trackUsage } = useTracking();
-  const { formatMessage } = useIntl();
-  const Icon = icon;
-  const [isHovered, setIsHovered] = React.useState(false);
+/* -------------------------------------------------------------------------------------------------
+ * Widget Management
+ * -----------------------------------------------------------------------------------------------*/
 
-  const handleClickOnLink = () => {
-    trackUsage('didOpenHomeWidgetLink', { widgetUID: uid });
+const findWidget = (filteredWidgets: WidgetWithUID[], widgetId: string): WidgetInfo => {
+  const widget = filteredWidgets.find((c) => `${c.uid}` === widgetId);
+  if (!widget) {
+    return {
+      widget: undefined,
+      index: -1,
+    };
+  }
+  return {
+    widget,
+    index: filteredWidgets.indexOf(widget),
   };
-
-  const handleDeleteWidget = () => {
-    deleteWidget(uid);
-  };
-
-  const handleDragStart = () => {
-    onDragStart?.(uid);
-  };
-
-  const [, drag, preview] = useDrag(
-    () => ({
-      type: 'widget',
-      item: () => {
-        onDragStart?.(uid);
-        return {
-          id: uid,
-          originalIndex: findWidget(uid).index,
-          title,
-          icon,
-          link,
-          component,
-        };
-      },
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging(),
-      }),
-      end: () => {
-        onDragEnd?.();
-      },
-    }),
-    [uid, findWidget, onDragStart, onDragEnd, title, icon, link, component]
-  );
-
-  // Suppress default drag preview
-  React.useEffect(() => {
-    preview(getEmptyImage(), { captureDraggingState: true });
-  }, [preview]);
-
-  return (
-    <Flex
-      width="100%"
-      hasRadius
-      direction="column"
-      alignItems="flex-start"
-      background={'neutral0'}
-      borderColor={'neutral150'}
-      shadow="tableShadow"
-      tag="section"
-      gap={4}
-      padding={6}
-      position="relative"
-      aria-labelledby={uid}
-      ref={(node: HTMLElement | null) => {
-        if (node) {
-          node.setAttribute('data-widget-id', uid);
-        }
-        drag(node);
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      }}
-    >
-      <Flex direction="row" gap={2} width="100%" tag="header" alignItems="center" minHeight="22px">
-        <Flex gap={2} marginRight="auto">
-          <Icon fill="neutral500" aria-hidden />
-          <Typography textColor="neutral500" variant="sigma" tag="h2" id={uid}>
-            {formatMessage(title)}
-          </Typography>
-        </Flex>
-        {link && (
-          <Typography
-            tag={ReactRouterLink}
-            variant="omega"
-            textColor="primary600"
-            style={{ textDecoration: 'none' }}
-            textAlign="right"
-            to={link.href}
-            onClick={handleClickOnLink}
-          >
-            {formatMessage(link.label)}
-          </Typography>
-        )}
-        {isHovered && (
-          <Flex gap={2}>
-            <IconButton
-              variant="danger-light"
-              size="XS"
-              onClick={handleDeleteWidget}
-              label={formatMessage({
-                id: 'HomePage.widget.delete',
-                defaultMessage: 'Delete',
-              })}
-              cursor="pointer"
-            >
-              <Trash />
-            </IconButton>
-            <IconButton
-              variant="tertiary"
-              size="XS"
-              onMouseDown={handleDragStart}
-              label={formatMessage({
-                id: 'HomePage.widget.drag',
-                defaultMessage: 'Drag to move',
-              })}
-              cursor="grab"
-            >
-              <Drag />
-            </IconButton>
-          </Flex>
-        )}
-      </Flex>
-      <ScrollArea>
-        <Box width="100%" height="261px" overflow="auto" tag="main">
-          {children}
-        </Box>
-      </ScrollArea>
-    </Flex>
-  );
 };
 
-/* -------------------------------------------------------------------------------------------------
- * Widget Management Hook
- * -----------------------------------------------------------------------------------------------*/
+const saveLayout = async (
+  widgets: WidgetWithUID[],
+  widths: Record<string, number>,
+  updateHomepageLayout: any,
+  toggleNotification: any,
+  formatAPIError: any,
+  formatMessage: any
+) => {
+  try {
+    const layoutData = {
+      widgets: widgets.map((widget) => ({
+        uid: widget.uid,
+        width: (widths[widget.uid] || 12) as 4 | 6 | 8 | 12,
+      })),
+    };
+
+    const res = await updateHomepageLayout(layoutData);
+
+    if ('error' in res) {
+      toggleNotification({
+        type: 'danger',
+        message: formatAPIError(res.error),
+      });
+    }
+  } catch {
+    toggleNotification({
+      type: 'danger',
+      message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+    });
+  }
+};
+
+const moveWidget = (
+  filteredWidgets: WidgetWithUID[],
+  columnWidths: Record<string, number>,
+  widgetId: string,
+  insertIndex: number,
+  targetRowIndex?: number,
+  isHorizontalDrop?: boolean
+) => {
+  const widget = filteredWidgets.find((w) => w.uid === widgetId);
+  if (!widget) return { newWidgets: filteredWidgets, newWidths: columnWidths };
+
+  const widgetRows = calculateWidgetRows(filteredWidgets, columnWidths);
+
+  // Move widget in the array
+  const newWidgets = moveWidgetInArray(filteredWidgets, widgetId, insertIndex);
+
+  // Calculate optimal widths for both source and target rows
+  const newWidths = { ...columnWidths };
+
+  // Find the source row (where the widget was removed from)
+  const sourceRow = findRowContainingWidget(widgetRows, widgetId, filteredWidgets);
+
+  if (isHorizontalDrop) {
+    // This is a horizontal drop zone - widget gets full width in its own row
+    newWidths[widgetId] = 12;
+
+    // Resize source row (after widget removal)
+    const sourceRowResize = resizeRowAfterRemoval(sourceRow, widgetId, newWidths);
+    Object.assign(newWidths, sourceRowResize);
+  } else {
+    // This is a vertical drop zone within a row
+    const targetRow = widgetRows[targetRowIndex!];
+
+    // Resize source row (after widget removal)
+    const sourceRowResize = resizeRowAfterRemoval(sourceRow, widgetId, newWidths);
+    Object.assign(newWidths, sourceRowResize);
+
+    // Resize target row (after widget addition)
+    const targetRowResize = resizeRowAfterAddition(targetRow, widget, insertIndex, newWidths);
+    Object.assign(newWidths, targetRowResize);
+  }
+
+  return { newWidgets, newWidths };
+};
+
+const deleteWidget = (filteredWidgets: WidgetWithUID[], columnWidths: Record<string, number>) => {
+  const widgetRows = calculateWidgetRows(filteredWidgets, columnWidths);
+
+  return (widgetId: string) => {
+    const { [widgetId]: removed, ...newWidths } = columnWidths;
+
+    // Find the row containing the deleted widget
+    const deletedWidgetIndex = filteredWidgets.findIndex((w) => w.uid === widgetId);
+    if (deletedWidgetIndex === -1) return { newWidgets: filteredWidgets, newWidths };
+
+    const affectedRow = widgetRows.find(
+      (row) => deletedWidgetIndex >= row.startIndex && deletedWidgetIndex <= row.endIndex
+    );
+
+    // Use resizeRowAfterRemoval to resize the affected row
+    const finalWidths = resizeRowAfterRemoval(affectedRow, widgetId, newWidths);
+
+    const newWidgets = filteredWidgets.filter((w) => w.uid !== widgetId);
+
+    return { newWidgets, newWidths: finalWidths };
+  };
+};
+
+const addWidget = (filteredWidgets: WidgetWithUID[], columnWidths: Record<string, number>) => {
+  return (widget: WidgetWithUID) => {
+    // Check if widget is already added
+    const index = filteredWidgets.findIndex((w) => w.uid === widget.uid);
+    if (index !== -1) return { newWidgets: filteredWidgets, newWidths: columnWidths };
+
+    const newWidgets = [...filteredWidgets, widget];
+    const newWidths = { ...columnWidths };
+    // New widget always takes full width (3/3 = 12 columns) in its own row
+    newWidths[widget.uid] = 12;
+
+    return { newWidgets, newWidths };
+  };
+};
+
+const handleInterWidgetResize = (
+  filteredWidgets: WidgetWithUID[],
+  columnWidths: Record<string, number>,
+  leftWidgetId: string,
+  rightWidgetId: string,
+  newLeftWidth: number,
+  newRightWidth: number
+) => {
+  // Check if widgets can be resized (adjacent, same row, valid sizes)
+  if (!canResizeBetweenWidgets(leftWidgetId, rightWidgetId, columnWidths, filteredWidgets)) {
+    return columnWidths;
+  }
+
+  if (!isValidResizeOperation(newLeftWidth, newRightWidth)) {
+    // Resize would violate constraints, don't allow it
+    return columnWidths;
+  }
+
+  return {
+    ...columnWidths,
+    [leftWidgetId]: newLeftWidth,
+    [rightWidgetId]: newRightWidth,
+  };
+};
 
 interface UseWidgetsOptions {
   filteredWidgets: WidgetWithUID[];
@@ -193,23 +187,157 @@ interface UseWidgetsOptions {
   ) => void;
 }
 
-/**
- * Main hook for widget management functionality
- * Consolidates widget layout and management logic
- */
 export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOptions) => {
   const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
   const [isDraggingWidget, setIsDraggingWidget] = React.useState(false);
   const [draggedWidgetId, setDraggedWidgetId] = React.useState<string | undefined>();
 
-  // Use custom hook for widget management
-  const { findWidget, deleteWidget, addWidget, moveWidget, handleInterWidgetResize } =
-    useWidgetManagement({
+  // Get services for saveLayout function
+  const [updateHomepageLayout] = useUpdateHomepageLayoutMutation();
+  const { toggleNotification } = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const { formatMessage } = useIntl();
+
+  // Create memoized functions
+  const findWidgetFn = React.useCallback(
+    (widgetId: string) => findWidget(filteredWidgets, widgetId),
+    [filteredWidgets]
+  );
+
+  const moveWidgetFn = React.useCallback(
+    (
+      widgetId: string,
+      insertIndex: number,
+      targetRowIndex?: number,
+      isHorizontalDrop?: boolean
+    ) => {
+      const result = moveWidget(
+        filteredWidgets,
+        columnWidths,
+        widgetId,
+        insertIndex,
+        targetRowIndex,
+        isHorizontalDrop
+      );
+
+      setFilteredWidgets(result.newWidgets);
+      setColumnWidths(result.newWidths);
+
+      // Save layout after state updates
+      saveLayout(
+        result.newWidgets,
+        result.newWidths,
+        updateHomepageLayout,
+        toggleNotification,
+        formatAPIError,
+        formatMessage
+      );
+    },
+    [
       filteredWidgets,
+      columnWidths,
       setFilteredWidgets,
+      setColumnWidths,
+      updateHomepageLayout,
+      toggleNotification,
+      formatAPIError,
+      formatMessage,
+    ]
+  );
+
+  const deleteWidgetFn = React.useCallback(
+    (widgetId: string) => {
+      const deleteWidgetOperation = deleteWidget(filteredWidgets, columnWidths);
+      const result = deleteWidgetOperation(widgetId);
+
+      setFilteredWidgets(result.newWidgets);
+      setColumnWidths(result.newWidths);
+
+      // Save layout after state updates
+      saveLayout(
+        result.newWidgets,
+        result.newWidths,
+        updateHomepageLayout,
+        toggleNotification,
+        formatAPIError,
+        formatMessage
+      );
+    },
+    [
+      filteredWidgets,
+      columnWidths,
+      setFilteredWidgets,
+      setColumnWidths,
+      updateHomepageLayout,
+      toggleNotification,
+      formatAPIError,
+      formatMessage,
+    ]
+  );
+
+  const addWidgetFn = React.useCallback(
+    (widget: WidgetWithUID) => {
+      const addWidgetOperation = addWidget(filteredWidgets, columnWidths);
+      const result = addWidgetOperation(widget);
+
+      setFilteredWidgets(result.newWidgets);
+      setColumnWidths(result.newWidths);
+
+      // Save layout after state updates
+      saveLayout(
+        result.newWidgets,
+        result.newWidths,
+        updateHomepageLayout,
+        toggleNotification,
+        formatAPIError,
+        formatMessage
+      );
+    },
+    [
+      filteredWidgets,
+      columnWidths,
+      setFilteredWidgets,
+      setColumnWidths,
+      updateHomepageLayout,
+      toggleNotification,
+      formatAPIError,
+      formatMessage,
+    ]
+  );
+
+  const handleInterWidgetResizeFn = React.useCallback(
+    (leftWidgetId: string, rightWidgetId: string, newLeftWidth: number, newRightWidth: number) => {
+      const newWidths = handleInterWidgetResize(
+        filteredWidgets,
+        columnWidths,
+        leftWidgetId,
+        rightWidgetId,
+        newLeftWidth,
+        newRightWidth
+      );
+
+      setColumnWidths(newWidths);
+
+      // Save layout after state updates
+      saveLayout(
+        filteredWidgets,
+        newWidths,
+        updateHomepageLayout,
+        toggleNotification,
+        formatAPIError,
+        formatMessage
+      );
+    },
+    [
+      filteredWidgets,
       columnWidths,
       setColumnWidths,
-    });
+      updateHomepageLayout,
+      toggleNotification,
+      formatAPIError,
+      formatMessage,
+    ]
+  );
 
   // Drag state callbacks
   const handleDragStart = React.useCallback((widgetId: string) => {
@@ -222,25 +350,17 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     setDraggedWidgetId(undefined);
   }, []);
 
-  // Use GapDropZone positioning hook
-  const { gapDropZonePositions } = useGapDropZonePosition({
-    filteredWidgets,
-    columnWidths,
-    isDraggingWidget,
-    draggedWidgetId,
-  });
-
   return {
-    findWidget,
-    deleteWidget,
-    addWidget,
-    moveWidget,
+    findWidget: findWidgetFn,
+    deleteWidget: deleteWidgetFn,
+    addWidget: addWidgetFn,
+    moveWidget: moveWidgetFn,
     columnWidths,
     setColumnWidths,
     WidgetRoot,
-    handleInterWidgetResize,
-    gapDropZonePositions,
+    handleInterWidgetResize: handleInterWidgetResizeFn,
     isDraggingWidget,
+    draggedWidgetId,
     handleDragStart,
     handleDragEnd,
   };

@@ -12,11 +12,16 @@ import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useWidgets } from '../../features/Widgets';
-import { useWidgetLayout } from '../../hooks/useWidgetLayout';
 import { useGetHomepageLayoutQuery } from '../../services/homepage';
-import { applyHomepageLayout, createDefaultWidgetWidths } from '../../utils/widgetUtils';
+import {
+  applyHomepageLayout,
+  createDefaultWidgetWidths,
+  isLastWidgetInRow,
+  canResizeBetweenWidgets,
+  getWidgetWidth,
+} from '../../utils/widgetUtils';
 import { InterWidgetResizeHandle } from '../../components/ResizeIndicator';
-import { GapDropZone } from '../../components/GapDropZone';
+import { GapDropZoneManager } from '../../components/GapDropZone';
 import { DragLayer } from '../../components/DragLayer';
 import { styled } from 'styled-components';
 
@@ -94,7 +99,8 @@ const HomePageCE = () => {
     setColumnWidths,
     WidgetRoot,
     handleInterWidgetResize,
-    gapDropZonePositions,
+    isDraggingWidget,
+    draggedWidgetId,
     handleDragStart,
     handleDragEnd,
   } = useWidgets({
@@ -144,7 +150,25 @@ const HomePageCE = () => {
     addWidget(widget);
   };
 
-  const widgetLayout = useWidgetLayout(filteredWidgets, columnWidths);
+  const widgetLayout = React.useMemo(() => {
+    return filteredWidgets.map((widget, index) => {
+      const rightWidgetId = filteredWidgets[index + 1]?.uid;
+      const widgetWidth = getWidgetWidth(columnWidths, widget.uid);
+      const rightWidgetWidth = getWidgetWidth(columnWidths, rightWidgetId);
+
+      return {
+        widget,
+        index,
+        isLastInRow: isLastWidgetInRow(index, filteredWidgets, columnWidths),
+        rightWidgetId,
+        widgetWidth,
+        rightWidgetWidth,
+        canResize:
+          rightWidgetId &&
+          canResizeBetweenWidgets(widget.uid, rightWidgetId, columnWidths, filteredWidgets),
+      };
+    });
+  }, [filteredWidgets, columnWidths]);
 
   return (
     <Layouts.Root>
@@ -242,24 +266,17 @@ const HomePageCE = () => {
                   )}
                 </Grid.Root>
 
-                {/* Render GapDropZones with calculated positions */}
-                {gapDropZonePositions.map((gapDropZone, index) => {
-                  return (
-                    <GapDropZone
-                      key={`gap-drop-zone-${index}`}
-                      insertIndex={gapDropZone.insertIndex}
-                      position={gapDropZone.position}
-                      isVisible={gapDropZone.isVisible}
-                      type={gapDropZone.type}
-                      moveWidget={moveWidget}
-                      targetRowIndex={gapDropZone.targetRowIndex}
-                    />
-                  );
-                })}
-              </Box>
-            )}
-          </Flex>
-        </Layouts.Content>
+              <GapDropZoneManager
+                filteredWidgets={filteredWidgets}
+                columnWidths={columnWidths}
+                isDraggingWidget={isDraggingWidget}
+                draggedWidgetId={draggedWidgetId}
+                moveWidget={moveWidget}
+              />
+            </Box>
+          )}
+        </Flex>
+      </Layouts.Content>
 
         {/* Add the DragLayer to handle custom drag previews */}
         <DragLayer
