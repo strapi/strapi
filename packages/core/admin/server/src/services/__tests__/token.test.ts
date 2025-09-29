@@ -116,9 +116,6 @@ describe('Token', () => {
           expiresIn: '1d',
         },
       });
-      expect(global.strapi.log.warn).toHaveBeenCalledWith(
-        'admin.auth.options is deprecated and will be removed in Strapi 6. Please move JWT options to admin.auth.sessions.options instead.'
-      );
     });
 
     test('Uses new admin.auth.sessions.options configuration', () => {
@@ -190,9 +187,6 @@ describe('Token', () => {
         },
         secret: config.secret,
       });
-      expect(global.strapi.log.warn).toHaveBeenCalledWith(
-        'admin.auth.options is deprecated and will be removed in Strapi 6. Please move JWT options to admin.auth.sessions.options instead.'
-      );
     });
 
     test('Supports asymmetric algorithm configuration', () => {

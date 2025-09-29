@@ -110,25 +110,6 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const legacyMaxSessionFallback =
     expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_SESSION_LIFESPAN;
 
-  // Warn if using deprecated legacy expiresIn for new session settings
-  const hasLegacyExpires = options?.expiresIn != null;
-  const hasNewMaxRefresh = strapi.config.get('admin.auth.sessions.maxRefreshTokenLifespan') != null;
-  const hasNewMaxSession = strapi.config.get('admin.auth.sessions.maxSessionLifespan') != null;
-
-  if (hasLegacyExpires && (!hasNewMaxRefresh || !hasNewMaxSession)) {
-    strapi.log.warn(
-      'admin.auth.options.expiresIn is deprecated and will be removed in Strapi 6. Please configure admin.auth.sessions.maxRefreshTokenLifespan and admin.auth.sessions.maxSessionLifespan.'
-    );
-  }
-
-  // Warn if using deprecated admin.auth.options for JWT configuration
-  const legacyOptions = strapi.config.get('admin.auth.options', {});
-  if (legacyOptions && Object.keys(legacyOptions).length > 0) {
-    strapi.log.warn(
-      'admin.auth.options is deprecated and will be removed in Strapi 6. Please move JWT options to admin.auth.sessions.options instead.'
-    );
-  }
-
   strapi.sessionManager.defineOrigin('admin', {
     jwtSecret: strapi.config.get('admin.auth.secret'),
     accessTokenLifespan: strapi.config.get('admin.auth.sessions.accessTokenLifespan', 30 * 60),
