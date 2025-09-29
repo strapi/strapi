@@ -18,7 +18,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
     async processFiles(
       files: InputFile[]
     ): Promise<Array<{ altText: string; caption: string } | null>> {
-      if ((await !this.isEnabled()) || !aiServerUrl) {
+      if (!(await this.isEnabled()) || !aiServerUrl) {
         throw new Error('AI Metadata service is not enabled');
       }
 
