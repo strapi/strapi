@@ -7,12 +7,14 @@ export type InitialState = {
     sizeOptimization?: boolean;
     autoOrientation?: boolean;
     videoPreview?: boolean;
+    aiMetadata?: boolean;
   } | null;
   modifiedData: {
     responsiveDimensions?: boolean;
     sizeOptimization?: boolean;
     autoOrientation?: boolean;
     videoPreview?: boolean;
+    aiMetadata?: boolean;
   } | null;
 };
 
@@ -35,12 +37,14 @@ const initialState: InitialState = {
     sizeOptimization: true,
     autoOrientation: false,
     videoPreview: false,
+    aiMetadata: true,
   },
   modifiedData: {
     responsiveDimensions: true,
     sizeOptimization: true,
     autoOrientation: false,
     videoPreview: false,
+    aiMetadata: true,
   },
 };
 

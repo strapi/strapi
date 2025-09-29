@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/design-system';
-import { Check } from '@strapi/icons';
+import { Check, Sparkle } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
@@ -102,7 +102,7 @@ export const SettingsPage = () => {
       <Page.Title>
         {formatMessage({
           id: getTrad('page.title'),
-          defaultMessage: 'Settings - Media Libray',
+          defaultMessage: 'Settings - Media Library',
         })}
       </Page.Title>
       <form onSubmit={handleSubmit}>
@@ -133,6 +133,60 @@ export const SettingsPage = () => {
         <Layouts.Content>
           <Layouts.Root>
             <Flex direction="column" alignItems="stretch" gap={12}>
+              <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                <Flex direction="column" alignItems="stretch" gap={1}>
+                  <Grid.Root gap={6}>
+                    <Grid.Item col={8} s={12} direction="column" alignItems="stretch">
+                      <Flex gap={2}>
+                        <Sparkle color="#8312D1" />
+                        <Typography variant="delta" tag="h2">
+                          {formatMessage({
+                            id: getTrad('settings.form.aiMetadata.label'),
+                            defaultMessage:
+                              'Generate AI captions and alt texts automatically on upload !',
+                          })}
+                        </Typography>
+                      </Flex>
+                      <Flex paddingTop={1}>
+                        <Typography variant="pi" textColor="neutral600">
+                          {formatMessage({
+                            id: getTrad('settings.form.aiMetadata.description'),
+                            defaultMessage:
+                              'Enable this feature to save time, optimize your SEO and increase accessibility by letting our AI generate captions and alternative texts for your.',
+                          })}
+                        </Typography>
+                      </Flex>
+                    </Grid.Item>
+                    <Grid.Item
+                      col={4}
+                      s={12}
+                      direction="column"
+                      alignItems="end"
+                      justifyContent={'center'}
+                    >
+                      <Field.Root name="aiMetadata" width={'158px'}>
+                        <Toggle
+                          checked={modifiedData?.aiMetadata}
+                          offLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.off-label',
+                            defaultMessage: 'Off',
+                          })}
+                          onLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.on-label',
+                            defaultMessage: 'On',
+                          })}
+                          onChange={(e) => {
+                            handleChange({
+                              target: { name: 'aiMetadata', value: e.target.checked },
+                            });
+                          }}
+                        />
+                      </Field.Root>
+                    </Grid.Item>
+                  </Grid.Root>
+                </Flex>
+              </Box>
+              <Box height="16px" background="transparent" aria-hidden="true" />
               <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                 <Flex direction="column" alignItems="stretch" gap={4}>
                   <Flex>

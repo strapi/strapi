@@ -56,33 +56,33 @@ describe('AI Metadata Service', () => {
   });
 
   describe('isEnabled', () => {
-    it('should return true when AI is enabled and EE is available', () => {
+    it('should return true when AI is enabled and EE is available', async () => {
       mockStrapi.config.get.mockReturnValue(true);
       mockStrapi.ee.isEE = true;
 
-      expect(aiMetadataService.isEnabled()).toBe(true);
+      expect(await aiMetadataService.isEnabled()).toBe(true);
       expect(mockStrapi.config.get).toHaveBeenCalledWith('admin.ai.enabled', false);
     });
 
-    it('should return false when AI is disabled but EE is available', () => {
+    it('should return false when AI is disabled but EE is available', async () => {
       mockStrapi.config.get.mockReturnValue(false);
       mockStrapi.ee.isEE = true;
 
-      expect(aiMetadataService.isEnabled()).toBe(false);
+      expect(await aiMetadataService.isEnabled()).toBe(false);
     });
 
-    it('should return false when AI is enabled but EE is not available', () => {
+    it('should return false when AI is enabled but EE is not available', async () => {
       mockStrapi.config.get.mockReturnValue(true);
       mockStrapi.ee.isEE = false;
 
-      expect(aiMetadataService.isEnabled()).toBe(false);
+      expect(await aiMetadataService.isEnabled()).toBe(false);
     });
 
-    it('should return false when both AI and EE are disabled', () => {
+    it('should return false when both AI and EE are disabled', async () => {
       mockStrapi.config.get.mockReturnValue(false);
       mockStrapi.ee.isEE = false;
 
-      expect(aiMetadataService.isEnabled()).toBe(false);
+      expect(await aiMetadataService.isEnabled()).toBe(false);
     });
   });
 

@@ -117,7 +117,7 @@ export default {
 
     const aiMetadataService = getService('aiMetadata');
 
-    if (aiMetadataService.isEnabled()) {
+    if (await aiMetadataService.isEnabled()) {
       try {
         const metadataResults = await aiMetadataService.processFiles(filesArray);
 

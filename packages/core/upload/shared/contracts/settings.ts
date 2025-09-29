@@ -12,6 +12,7 @@ export interface Settings {
     responsiveDimensions?: boolean;
     autoOrientation?: boolean;
     videoPreview?: boolean;
+    aiMetadata?: boolean;
   };
 }
 
