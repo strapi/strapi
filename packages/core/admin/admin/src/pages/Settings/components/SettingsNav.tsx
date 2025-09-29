@@ -24,7 +24,7 @@ const StyledBadge = styled(Badge)`
   height: 2rem;
 `;
 
-const SettingsNav = () => {
+const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const { menu } = useSettingsMenu();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -72,9 +72,14 @@ const SettingsNav = () => {
 
   return (
     <SubNav.Main aria-label={label}>
-      <SubNav.Header label={label} />
-      <Divider />
+      {!isFullPage && (
+        <>
+          <SubNav.Header label={label} />
+          <Divider />
+        </>
+      )}
       <ScrollArea>
+        {isFullPage && <SubNav.Header label={label} />}
         <SubNav.Sections>
           {sections.map((section) => (
             <SubNav.Section key={section.id} label={formatMessage(section.intlLabel)}>

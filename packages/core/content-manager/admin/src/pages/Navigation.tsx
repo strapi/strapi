@@ -5,7 +5,7 @@ import { LeftMenu } from '../components/LeftMenu';
 const Navigation = () => {
   return (
     <SubNav.PageWrapper>
-      <LeftMenu />
+      <LeftMenu isFullPage />
     </SubNav.PageWrapper>
   );
 };

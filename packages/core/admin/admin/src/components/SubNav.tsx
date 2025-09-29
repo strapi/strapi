@@ -38,7 +38,7 @@ const MainSubNav = styled(DSSubNav)`
   }
 `;
 
-const Main = ({ children, ...props }: { children: React.ReactNode }) => (
+const Main = ({ children, ...props }: { children: React.ReactNode; isFullPage?: boolean }) => (
   <MainSubNav {...props}>{children}</MainSubNav>
 );
 
@@ -113,6 +113,7 @@ const Link = (
 
 const StyledHeader = styled(Flex)`
   flex: 0 0 5.6rem;
+  height: 5.6rem;
 `;
 
 const Header = ({ label }: { label: string }) => {
@@ -309,11 +310,11 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
 };
 
 const PageWrapper = styled(Box)`
-  ${({ theme }) => theme.breakpoints.medium} {
-    ${MainSubNav} {
-      border-right: none;
-    }
+  ${MainSubNav} {
+    background-color: transparent;
+    border-right: none;
   }
+
   ${({ theme }) => theme.breakpoints.medium} {
     ${MainSubNav} {
       top: 0;

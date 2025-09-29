@@ -459,6 +459,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
 
 .c6 {
   flex: 0 0 5.6rem;
+  height: 5.6rem;
 }
 
 .c49 {

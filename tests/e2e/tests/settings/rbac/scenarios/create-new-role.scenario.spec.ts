@@ -85,7 +85,7 @@ const addPublisherRole = async (page: Page) => {
 
   // Assign the "publish" permission for articles initially
   await page.getByRole('tab', { name: 'Collection Types' }).click();
-  await page.getByRole('checkbox', { name: 'Select Publish article permission' }).check();
+  await page.getByLabel('Select Publish article permission').click();
 
   // Save the newly created role
   await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
@@ -100,12 +100,12 @@ const editPublisherRole = async (page: Page) => {
   // Modify permissions
   await page.getByRole('tab', { name: 'Collection Types' }).click(); // Open permissions tab
 
-  await page.getByRole('checkbox', { name: `Select Read article permission` }).check();
-  await page.getByRole('checkbox', { name: `Select Update article permission` }).check();
-  await page.getByRole('checkbox', { name: 'Select Create article permission' }).check();
-  await page.getByRole('checkbox', { name: 'Select Delete article permission' }).check();
+  await page.getByLabel('Select Read article permission').click();
+  await page.getByLabel('Select Update article permission').click();
+  await page.getByLabel('Select Create article permission').click();
+  await page.getByLabel('Select Delete article permission').click();
 
-  await page.getByRole('checkbox', { name: 'Select Publish article permission' }).uncheck();
+  await page.getByLabel('Select Publish article permission').click();
 
   // Save the updated role
   await clickAndWait(page, page.getByRole('button', { name: 'Save' }));

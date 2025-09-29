@@ -20,7 +20,7 @@ import { getTranslation } from '../utils/translations';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 
-const LeftMenu = () => {
+const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const [search, setSearch] = React.useState('');
   const [{ query }] = useQueryParams<{ plugins?: object }>();
   const { formatMessage, locale } = useIntl();
@@ -137,10 +137,23 @@ const LeftMenu = () => {
 
   return (
     <SubNav.Main aria-label={label}>
-      <SubNav.Header label={label} />
-      <Divider />
+      {!isFullPage && (
+        <>
+          <SubNav.Header label={label} />
+          <Divider />
+        </>
+      )}
       <ScrollArea>
-        <Flex padding={5} paddingBottom={0} gap={3} direction="column" alignItems="stretch">
+        {isFullPage && <SubNav.Header label={label} />}
+        <Flex
+          paddingLeft={5}
+          paddingRight={5}
+          paddingTop={isFullPage ? 0 : 5}
+          paddingBottom={0}
+          gap={3}
+          direction="column"
+          alignItems="stretch"
+        >
           <Searchbar
             value={search}
             onChange={handleChangeSearch}

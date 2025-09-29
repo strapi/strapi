@@ -4,7 +4,7 @@ import { SettingsNav } from '../components/SettingsNav';
 const Navigation = () => {
   return (
     <SubNav.PageWrapper>
-      <SettingsNav />
+      <SettingsNav isFullPage />
     </SubNav.PageWrapper>
   );
 };

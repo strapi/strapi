@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { type To } from 'react-router-dom';
+import { useNavigate, type To } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
 
 import { MenuItem } from '../../hooks/useMenu';
@@ -46,6 +46,7 @@ const MainNavIcons = ({
   handleClickOnLink: (value: string) => void;
 }) => {
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
   const theme = useTheme();
 
   const minWidthTablet = theme.breakpoints.medium.replace('@media', '');
@@ -86,8 +87,14 @@ const MainNavIcons = ({
           <Flex tag="li" key={link.to}>
             <GuidedTourTooltip to={linkTarget}>
               <NavLink.Link
-                to={linkTarget}
-                onClick={() => handleClickOnLink(linkTarget)}
+                to={link.to}
+                onClick={(e) => {
+                  handleClickOnLink(linkTarget);
+                  if (!isDesktop && link.to !== linkTarget) {
+                    e.preventDefault();
+                    navigate(linkTarget);
+                  }
+                }}
                 aria-label={labelValue}
               >
                 <NavLink.Icon label={labelValue}>
@@ -134,6 +141,7 @@ const MainNavBurgerMenuLinks = ({
   handleClickOnLink: (value: string) => void;
 }) => {
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
 
   return listLinks.length > 0
     ? listLinks.map((link) => {
@@ -152,8 +160,14 @@ const MainNavBurgerMenuLinks = ({
         return (
           <Flex paddingTop={3} alignItems="center" tag="li" key={navigationTarget}>
             <NavLink.Link
-              to={navigationTarget}
-              onClick={() => handleClickOnLink(navigationTarget)}
+              to={link.to}
+              onClick={(e) => {
+                handleClickOnLink(navigationTarget);
+                if (link.to !== navigationTarget) {
+                  e.preventDefault();
+                  navigate(navigationTarget);
+                }
+              }}
               aria-label={labelValue}
             >
               <IconContainer marginRight="0.6rem">

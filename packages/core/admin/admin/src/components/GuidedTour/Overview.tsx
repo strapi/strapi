@@ -31,6 +31,11 @@ const Container = styled(Flex)`
   background-color: ${({ theme }) => theme.colors.neutral0};
   box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   align-items: stretch;
+  display: none;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    display: flex;
+  }
 `;
 
 const ContentSection = styled(Flex)`
