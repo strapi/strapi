@@ -105,13 +105,23 @@ const moveWidget = (
     // This is a vertical drop zone within a row
     const targetRow = widgetRows[targetRowIndex!];
 
-    // Resize source row (after widget removal)
-    const sourceRowResize = resizeRowAfterRemoval(sourceRow, widgetId, newWidths);
-    Object.assign(newWidths, sourceRowResize);
+    // Check if we're reordering within the same row
+    const isSameRowReorder =
+      sourceRow && targetRow && sourceRow.startIndex === targetRow.startIndex;
 
-    // Resize target row (after widget addition)
-    const targetRowResize = resizeRowAfterAddition(targetRow, widget, insertIndex, newWidths);
-    Object.assign(newWidths, targetRowResize);
+    if (isSameRowReorder) {
+      // For same-row reordering, just preserve the existing widths
+      return { newWidgets, newWidths };
+    } else {
+      // Different rows - resize both source and target rows
+      // Resize source row (after widget removal)
+      const sourceRowResize = resizeRowAfterRemoval(sourceRow, widgetId, newWidths);
+      Object.assign(newWidths, sourceRowResize);
+
+      // Resize target row (after widget addition)
+      const targetRowResize = resizeRowAfterAddition(targetRow, widget, insertIndex, newWidths);
+      Object.assign(newWidths, targetRowResize);
+    }
   }
 
   return { newWidgets, newWidths };

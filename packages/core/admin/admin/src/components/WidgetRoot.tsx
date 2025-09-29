@@ -56,10 +56,6 @@ export const WidgetRoot = ({
     deleteWidget(uid);
   };
 
-  const handleDragStart = () => {
-    onDragStart?.(uid);
-  };
-
   const [, drag, preview] = useDrag(
     () => ({
       type: 'widget',
@@ -107,7 +103,6 @@ export const WidgetRoot = ({
         if (node) {
           node.setAttribute('data-widget-id', uid);
         }
-        drag(node);
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -152,7 +147,7 @@ export const WidgetRoot = ({
             <IconButton
               variant="tertiary"
               size="XS"
-              onMouseDown={handleDragStart}
+              ref={drag}
               label={formatMessage({
                 id: 'HomePage.widget.drag',
                 defaultMessage: 'Drag to move',
