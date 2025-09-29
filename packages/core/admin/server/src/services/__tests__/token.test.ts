@@ -103,6 +103,8 @@ describe('Token', () => {
         if (key === 'admin.auth.sessions.options') return {};
         return {};
       });
+
+      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
@@ -135,6 +137,8 @@ describe('Token', () => {
         if (key === 'admin.auth.sessions.options') return sessionsOptions;
         return {};
       });
+
+      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
@@ -174,6 +178,8 @@ describe('Token', () => {
         if (key === 'admin.auth.sessions.options') return sessionsOptions;
         return {};
       });
+
+      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
@@ -208,6 +214,8 @@ describe('Token', () => {
         if (key === 'admin.auth.sessions.options') return sessionsOptions;
         return {};
       });
+
+      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
@@ -244,6 +252,8 @@ describe('Token', () => {
         if (key === 'admin.auth.sessions.options') return sessionsOptions;
         return {};
       });
+
+      // @ts-expect-error mock
       global.strapi.config.get = getFn;
 
       const res = getTokenOptions();
