@@ -12,8 +12,11 @@ export interface Settings {
     responsiveDimensions?: boolean;
     autoOrientation?: boolean;
     videoPreview?: boolean;
+    aiMetadata?: boolean;
   };
 }
+
+export type SettingsData = Settings['data'];
 
 /**
  * GET /upload/settings

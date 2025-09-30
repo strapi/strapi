@@ -2,24 +2,24 @@ import type { Core } from '@strapi/types';
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 import { InputFile } from '../types';
+import { Settings } from '../controllers/validation/admin/settings';
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_ADMIN_AI_URL || process.env.STRAPI_AI_URL;
 
   return {
-    isEnabled() {
-      const isAIEnabled = strapi.config.get('admin.ai.enabled', false);
+    async isEnabled() {
+      const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
+      const aiMetadata: boolean = settings.aiMetadata ?? false;
 
-      // TODO replace by a specific feature check once it's set up in the license registry
       const { isEE } = strapi.ee;
-
-      return isAIEnabled && isEE;
+      return aiMetadata && isEE;
     },
 
     async processFiles(
       files: InputFile[]
     ): Promise<Array<{ altText: string; caption: string } | null>> {
-      if (!this.isEnabled() || !aiServerUrl) {
+      if (!(await this.isEnabled()) || !aiServerUrl) {
         throw new Error('AI Metadata service is not enabled');
       }
 
