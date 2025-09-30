@@ -10,6 +10,7 @@ import {
   AddAssetStep,
   FileWithRawFile,
 } from '../../components/UploadAssetDialog/AddAssetStep/AddAssetStep';
+import { useBulkEdit } from '../../hooks/useBulkEdit';
 import { useUpload } from '../../hooks/useUpload';
 import { getTrad } from '../../utils';
 
@@ -45,6 +46,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const state = useAIUploadModalContext('ModalContent', (s) => s.state);
   const dispatch = useAIUploadModalContext('ModalContent', (s) => s.dispatch);
   const { upload, isLoading, error } = useUpload();
+  const { edit, isLoading: isSaving } = useBulkEdit();
 
   const handleCaptionChange = (assetId: number, caption: string) => {
     dispatch({
@@ -64,9 +66,34 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
     dispatch({ type: 'set_uploaded_assets', payload: [] });
   };
 
-  const handleDone = () => {
+  const handleFinish = async () => {
+    if (state.hasUnsavedChanges) {
+      const assetsToUpdate = state.uploadedAssets.filter(
+        (asset) => (asset.wasCaptionChanged || asset.wasAltTextChanged) && asset.file.id
+      );
+
+      if (assetsToUpdate.length > 0) {
+        const updates = assetsToUpdate.map((asset) => ({
+          id: asset.file.id!,
+          fileInfo: {
+            name: asset.file.name,
+            alternativeText: asset.file.alternativeText ?? null,
+            caption: asset.file.caption ?? null,
+            folder: typeof asset.file.folder === 'number' ? asset.file.folder : null,
+          },
+        }));
+
+        try {
+          await edit(updates);
+          dispatch({ type: 'clear_unsaved_changes' });
+        } catch (err) {
+          console.error('Failed to save asset changes:', err);
+          return; // Don't close modal on error
+        }
+      }
+    }
+
     resetState();
-    // TODO: Bulk update assets after upload if the user manually updates the caption or alt text
     onClose();
   };
 
@@ -149,8 +176,8 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
           <Button onClick={handleCancel} variant="tertiary">
             {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
           </Button>
-          <Button onClick={handleDone}>
-            {formatMessage({ id: 'global.done', defaultMessage: 'Done' })}
+          <Button onClick={handleFinish} disabled={!state.hasUnsavedChanges} loading={isSaving}>
+            {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
           </Button>
         </Modal.Footer>
       </Modal.Content>
@@ -186,8 +213,8 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
         <Button onClick={handleCancel} variant="tertiary">
           {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
         </Button>
-        <Button onClick={handleDone}>
-          {formatMessage({ id: 'global.done', defaultMessage: 'Done' })}
+        <Button onClick={handleFinish} disabled={!state.hasUnsavedChanges} loading={isSaving}>
+          {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
         </Button>
       </Modal.Footer>
     </Modal.Content>
@@ -206,6 +233,7 @@ interface AIUploadModalProps {
 type State = {
   uploadedAssets: Array<{ file: File; wasCaptionChanged: boolean; wasAltTextChanged: boolean }>;
   assetsToUploadLength: number;
+  hasUnsavedChanges: boolean;
 };
 
 type Action =
@@ -232,6 +260,9 @@ type Action =
   | {
       type: 'edit_uploaded_asset';
       payload: { editedAsset: File };
+    }
+  | {
+      type: 'clear_unsaved_changes';
     };
 
 const [AIUploadModalContext, useAIUploadModalContext] = createContext<{
@@ -247,6 +278,7 @@ const reducer = (state: State, action: Action): State => {
         wasCaptionChanged: false,
         wasAltTextChanged: false,
       }));
+      draft.hasUnsavedChanges = false;
     }
 
     if (action.type === 'set_assets_to_upload_length') {
@@ -258,6 +290,7 @@ const reducer = (state: State, action: Action): State => {
       if (asset) {
         asset.file.caption = action.payload.caption;
         asset.wasCaptionChanged = true;
+        draft.hasUnsavedChanges = true;
       }
     }
 
@@ -266,6 +299,7 @@ const reducer = (state: State, action: Action): State => {
       if (asset) {
         asset.file.alternativeText = action.payload.altText;
         asset.wasAltTextChanged = true;
+        draft.hasUnsavedChanges = true;
       }
     }
 
@@ -285,6 +319,14 @@ const reducer = (state: State, action: Action): State => {
         };
       }
     }
+
+    if (action.type === 'clear_unsaved_changes') {
+      draft.hasUnsavedChanges = false;
+      draft.uploadedAssets.forEach((asset) => {
+        asset.wasCaptionChanged = false;
+        asset.wasAltTextChanged = false;
+      });
+    }
   });
 };
 
@@ -292,6 +334,7 @@ export const AIUploadModal = ({ open, onClose }: AIUploadModalProps) => {
   const [state, dispatch] = React.useReducer(reducer, {
     uploadedAssets: [],
     assetsToUploadLength: 0,
+    hasUnsavedChanges: false,
   });
 
   return (

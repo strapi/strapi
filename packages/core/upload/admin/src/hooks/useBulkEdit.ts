@@ -7,10 +7,10 @@ import { pluginId } from '../pluginId';
 import { getTrad } from '../utils';
 
 interface FileInfoUpdate {
-  name?: string;
-  alternativeText?: string | null;
-  caption?: string | null;
-  folder?: number | null;
+  name: string;
+  alternativeText: string | null;
+  caption: string | null;
+  folder: number | null;
 }
 
 interface BulkEditParams {
