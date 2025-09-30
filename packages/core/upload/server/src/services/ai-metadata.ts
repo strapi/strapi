@@ -9,10 +9,11 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async isEnabled() {
-      const settings: Settings = await strapi.plugin('upload').service('settings').get();
-      // If you still want to check for EE, keep that line
+      const settingsService = await strapi.plugin('upload').service('upload').getSettings();
+      let aiMetadata: Settings['aiMetadata'] = settingsService.aiMetadata ?? false;
+      
       const { isEE } = strapi.ee;
-      return settings.aiMetadata && isEE;
+      return aiMetadata && isEE;
     },
 
     async processFiles(

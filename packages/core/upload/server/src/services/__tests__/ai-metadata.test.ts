@@ -6,7 +6,7 @@ import type { InputFile } from '../../types';
 jest.mock('node:fs/promises');
 const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
 
-const mockGet = jest.fn();
+const mockGetSettings = jest.fn();
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -42,17 +42,18 @@ describe('AI Metadata Service', () => {
         warn: jest.fn(),
       },
       plugin: jest.fn().mockImplementation((pluginName) => {
-        if (pluginName === 'upload') {
-          return {
-            service: jest.fn().mockImplementation((serviceName) => {
-              if (serviceName === 'settings') {
-                return { get: mockGet };
-              }
-              return {};
-            }),
-          };
-        }
-        return {};
+         if (pluginName === 'upload') {
+      return {
+        service: jest.fn().mockImplementation((serviceName) => {
+          if (serviceName === 'upload') {
+            return { getSettings: mockGetSettings };
+          }
+          // ...other services if needed
+          return {};
+        }),
+      };
+    }
+    return {};
       }),
     };
 
@@ -68,29 +69,29 @@ describe('AI Metadata Service', () => {
 
   describe('isEnabled', () => {
     it('should return true when AI is enabled and EE is available', async () => {
-      mockGet.mockResolvedValue({ aiMetadata: true });
+      mockGetSettings.mockResolvedValue({ aiMetadata: true });
       mockStrapi.ee.isEE = true;
 
       expect(await aiMetadataService.isEnabled()).toBe(true);
-      expect(mockGet).toHaveBeenCalled();
+      expect(mockGetSettings).toHaveBeenCalled();
     });
 
     it('should return false when AI is disabled but EE is available', async () => {
-      mockGet.mockResolvedValue({ aiMetadata: false });
+      mockGetSettings.mockResolvedValue({ aiMetadata: false });
       mockStrapi.ee.isEE = true;
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
     });
 
     it('should return false when AI is enabled but EE is not available', async () => {
-      mockGet.mockResolvedValue({ aiMetadata: true });
+      mockGetSettings.mockResolvedValue({ aiMMetadata: true });
       mockStrapi.ee.isEE = false;
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
     });
 
     it('should return false when both AI and EE are disabled', async () => {
-      mockGet.mockResolvedValue({ aiMetadata: false });
+      mockGetSettings.mockResolvedValue({ aiMetadata: false });
       mockStrapi.ee.isEE = false;
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
@@ -114,7 +115,7 @@ describe('AI Metadata Service', () => {
 
     beforeEach(() => {
       // Mock service as enabled by default
-      mockGet.mockResolvedValue({ aiMetadata: true });
+      mockGetSettings.mockResolvedValue({ aiMetadata: true });
       mockStrapi.ee.isEE = true;
 
       // Mock readFile to return proper Buffer with .buffer property
@@ -124,7 +125,7 @@ describe('AI Metadata Service', () => {
 
     describe('error cases', () => {
       it('should throw error when service is disabled', async () => {
-        mockGet.mockResolvedValue({ aiMetadata: false });
+        mockGetSettings.mockResolvedValue({ aiMetadata: false });
 
         await expect(aiMetadataService.processFiles([mockImageFile])).rejects.toThrow(
           'AI Metadata service is not enabled'
