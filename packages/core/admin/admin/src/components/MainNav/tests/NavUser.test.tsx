@@ -14,6 +14,13 @@ describe('NavUser', () => {
     await screen.findByText('JD');
   });
 
+  it('passing initials and children overrides the inside logic', async () => {
+    render(<NavUser initials="MS">Michael Scott</NavUser>);
+    await screen.findByText('MS');
+    const userName = screen.getByText('Michael Scott');
+    expect(userName).toBeInTheDocument();
+  });
+
   it('contains the user name', async () => {
     render(<NavUser />);
     await screen.findByText('JD');

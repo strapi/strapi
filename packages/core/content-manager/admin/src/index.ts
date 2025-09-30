@@ -34,17 +34,6 @@ export default {
     });
 
     app.router.addRoute({
-      path: 'content-manager/navigation',
-      lazy: async () => {
-        const { Navigation } = await import('./pages/Navigation');
-
-        return {
-          Component: Navigation,
-        };
-      },
-    });
-
-    app.router.addRoute({
       path: 'content-manager/*',
       lazy: async () => {
         const { Layout } = await import('./layout');

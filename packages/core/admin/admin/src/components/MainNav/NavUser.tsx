@@ -50,33 +50,32 @@ const StyledTypography = styled(Typography)`
 `;
 
 export interface NavUserProps {
+  initials?: string;
+  children?: React.ReactNode;
   showDisplayName?: boolean;
-  closeBurgerMenu?: (destination: string) => void;
 }
 
 export const NavUser = ({
+  initials,
   showDisplayName = false,
-  closeBurgerMenu = () => {},
+  children,
   ...props
 }: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const user = useAuth('User', (state) => state.user);
   const logout = useAuth('Logout', (state) => state.logout);
-  const initials = getInitials(user);
   const userDisplayName = getDisplayName(user);
 
   const handleProfile = () => {
     const redirection = '/me';
     navigate(redirection);
-    closeBurgerMenu(redirection);
   };
 
   const handleLogout = () => {
     const redirection = '/auth/login';
     logout();
     navigate(redirection);
-    closeBurgerMenu(redirection);
   };
 
   return (
@@ -85,12 +84,12 @@ export const NavUser = ({
         <MenuTrigger endIcon={null} fullWidth justifyContent="flex-start">
           <Flex alignItems="center" gap={3}>
             <MenuIcon justifyContent="center">
-              <Avatar.Item delayMs={0} fallback={initials} />
+              <Avatar.Item delayMs={0} fallback={initials || getInitials(user)} />
             </MenuIcon>
             {showDisplayName ? (
-              <Typography variant="omega">{userDisplayName}</Typography>
+              <Typography variant="omega">{children || userDisplayName}</Typography>
             ) : (
-              <VisuallyHidden tag="span">{userDisplayName}</VisuallyHidden>
+              <VisuallyHidden tag="span">{children || userDisplayName}</VisuallyHidden>
             )}
           </Flex>
         </MenuTrigger>
@@ -98,7 +97,7 @@ export const NavUser = ({
         <MenuContent popoverPlacement="top-start" zIndex={3}>
           <UserInfo direction="column" gap={0} alignItems="flex-start">
             <Typography variant="omega" fontWeight="bold" textTransform="none">
-              {userDisplayName}
+              {children || userDisplayName}
             </Typography>
             <StyledTypography variant="pi" textColor="neutral600">
               {user?.email}

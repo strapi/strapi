@@ -228,7 +228,7 @@ const ProfilePage = () => {
             </>
           )}
         </Form>
-        <Box display={{ initial: 'none', medium: 'block' }}>
+        <Box>
           <Layouts.Content>
             <GuidedTourSection />
           </Layouts.Content>

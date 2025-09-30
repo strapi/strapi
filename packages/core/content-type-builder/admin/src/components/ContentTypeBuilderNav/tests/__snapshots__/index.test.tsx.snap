@@ -417,7 +417,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
 
 .c3 {
   width: 100%;
-  height: calc(100vh - 5.7rem);
+  height: calc(100vh - 5.6rem - 1px);
   overflow: hidden;
   background-color: #ffffff;
   display: flex;
@@ -425,7 +425,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
   border-right: 0;
   box-shadow: none;
   position: fixed;
-  top: 5.7rem;
+  top: calc(5.6rem + 1px);
   left: 0;
   z-index: 2;
 }

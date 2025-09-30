@@ -12,11 +12,13 @@ import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
+
 import { tours } from './GuidedTour/Tours';
 
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
-  height: calc(100vh - 5.7rem);
+  height: calc(100vh - ${HEIGHT_TOP_NAVIGATION} - 1px);
   overflow: hidden;
   background-color: ${({ theme }) => theme.colors.neutral0};
   display: flex;
@@ -24,7 +26,7 @@ const MainSubNav = styled(DSSubNav)`
   border-right: 0;
   box-shadow: none;
   position: fixed;
-  top: 5.7rem;
+  top: calc(${HEIGHT_TOP_NAVIGATION} + 1px);
   left: 0;
   z-index: 2;
 
@@ -112,8 +114,8 @@ const Link = (
 };
 
 const StyledHeader = styled(Flex)`
-  flex: 0 0 5.6rem;
-  height: 5.6rem;
+  flex: 0 0 ${HEIGHT_TOP_NAVIGATION};
+  height: ${HEIGHT_TOP_NAVIGATION};
 `;
 
 const Header = ({ label }: { label: string }) => {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Popover, Portal } from '@strapi/design-system';
-import { styled, useTheme } from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
@@ -71,13 +71,9 @@ const GuidedTourTooltipImpl = ({
   step,
   when,
 }: GuidedTourTooltipProps) => {
-  const theme = useTheme();
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
-
   const state = useGuidedTour('GuidedTourTooltip', (s) => s.state);
   const dispatch = useGuidedTour('GuidedTourTooltip', (s) => s.dispatch);
-  const minWidthTablet = theme.breakpoints.medium.replace('@media', '');
-  const [isMobile, setIsMobile] = React.useState(!window.matchMedia(minWidthTablet).matches);
 
   const isCurrentStep = state.tours[tourName].currentStep === step;
   const isStepConditionMet = when ? when(state.completedActions) : true;
@@ -98,13 +94,6 @@ const GuidedTourTooltipImpl = ({
       document.body.style.overflow = originalStyle;
     };
   }, [isPopoverOpen]);
-
-  React.useEffect(() => {
-    const mediaQuery = window.matchMedia(minWidthTablet);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(!e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, [minWidthTablet]);
 
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
@@ -131,12 +120,12 @@ const GuidedTourTooltipImpl = ({
 
   return (
     <>
-      {!isMobile && isPopoverOpen && (
+      {isPopoverOpen && (
         <Portal>
           <GuidedTourOverlay />
         </Portal>
       )}
-      <Popover.Root open={isPopoverOpen && !isMobile}>
+      <Popover.Root open={isPopoverOpen}>
         <Popover.Anchor>{children}</Popover.Anchor>
         {content({ Step, state, dispatch })}
       </Popover.Root>

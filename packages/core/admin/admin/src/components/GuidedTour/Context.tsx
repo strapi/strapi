@@ -64,6 +64,10 @@ type Action =
         tourName: ValidTourName;
         tourType: 'ContentTypeBuilderAI' | 'ContentTypeBuilderNoAI';
       };
+    }
+  | {
+      type: 'set_enabled';
+      payload: boolean;
     };
 
 type TourState = Record<
@@ -139,6 +143,10 @@ function reducer(state: State, action: Action): State {
       draft.enabled = false;
     }
 
+    if (action.type === 'set_enabled') {
+      draft.enabled = action.payload;
+    }
+
     if (action.type === 'reset_all_tours') {
       draft.enabled = true;
       draft.tours = getInitialTourState(guidedTours);
@@ -178,7 +186,17 @@ const GuidedTourContext = ({
     completedActions: [],
   });
   const migratedTourState = migrateTours(storedTours);
-  const [state, dispatch] = React.useReducer(reducer, migratedTourState);
+  // Override enabled state if prop is false (e.g., on mobile)
+  const initialState =
+    enabled === false ? { ...migratedTourState, enabled: false } : migratedTourState;
+  const [state, dispatch] = React.useReducer(reducer, initialState);
+
+  // Watch for changes to enabled prop to update state
+  React.useEffect(() => {
+    if (enabled !== state.enabled) {
+      dispatch({ type: 'set_enabled', payload: enabled });
+    }
+  }, [enabled, state.enabled]);
 
   // Sync local storage
   React.useEffect(() => {

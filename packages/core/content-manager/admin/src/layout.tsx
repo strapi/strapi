@@ -1,7 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
-import * as React from 'react';
-
-import { Page, Layouts } from '@strapi/admin/strapi-admin';
+import { Page, Layouts, SubNav, useIsDesktop } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
@@ -20,6 +18,7 @@ import { getTranslation } from './utils/translations';
 
 const Layout = () => {
   const contentTypeMatch = useMatch('/content-manager/:kind/:uid/*');
+  const isDesktop = useIsDesktop();
 
   const { isLoading, collectionTypeLinks, models, singleTypeLinks } = useContentManagerInitData();
   const authorisedModels = [...collectionTypeLinks, ...singleTypeLinks].sort((a, b) =>
@@ -60,15 +59,34 @@ const Layout = () => {
     return <Navigate to="/no-content-types" />;
   }
 
+  // On /content-manager base route
   if (!contentTypeMatch && authorisedModels.length > 0) {
+    // On desktop: redirect to first collection type
+    if (isDesktop) {
+      return (
+        <Navigate
+          to={{
+            pathname: authorisedModels[0].to,
+            search: authorisedModels[0].search ?? '',
+          }}
+          replace
+        />
+      );
+    }
+
+    // On mobile: show navigation page
     return (
-      <Navigate
-        to={{
-          pathname: authorisedModels[0].to,
-          search: authorisedModels[0].search ?? '',
-        }}
-        replace
-      />
+      <>
+        <Page.Title>
+          {formatMessage({
+            id: getTranslation('plugin.name'),
+            defaultMessage: 'Content Manager',
+          })}
+        </Page.Title>
+        <SubNav.PageWrapper>
+          <LeftMenu isFullPage />
+        </SubNav.PageWrapper>
+      </>
     );
   }
 

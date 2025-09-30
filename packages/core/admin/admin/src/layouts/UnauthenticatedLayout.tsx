@@ -18,7 +18,7 @@ import { setLocale } from '../reducer';
 const Wrapper = styled<BoxComponent>(Box)`
   margin: 0 auto;
   width: 100%;
-  max-width: 552px;
+  max-width: 55.2rem;
 `;
 
 export const Column = styled<FlexComponent>(Flex)`

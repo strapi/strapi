@@ -3,6 +3,8 @@ import * as React from 'react';
 import { Alert, AlertVariant, Flex, useCallbackRef, Link, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
+
 interface NotificationLink {
   label: string;
   target?: string;
@@ -89,7 +91,7 @@ const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
         alignItems="stretch"
         gap={4}
         marginTop={4}
-        top={`5.6rem`}
+        top={HEIGHT_TOP_NAVIGATION}
         width="100%"
         maxWidth={`50rem`}
         zIndex="notification"

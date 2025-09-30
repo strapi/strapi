@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Box, ScrollArea } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
+import { HEIGHT_TOP_NAVIGATION } from '../../constants/theme';
 import { MenuItem } from '../../core/apis/router';
 
 import { MainNavBurgerMenuLinks } from './MainNavLinks';
@@ -17,7 +18,7 @@ interface NavBurgerMenuProps {
 
 const NavBurgerMenuWrapper = styled(Box)<{ $isShown: boolean }>`
   position: fixed;
-  top: 5.7rem;
+  top: calc(${HEIGHT_TOP_NAVIGATION} + 1px);
   left: 0;
   right: 0;
   bottom: 0;
@@ -37,7 +38,7 @@ const NavBurgerMenu = ({ isShown, handleClickOnLink, listLinks }: NavBurgerMenuP
       <Box tag="ul" paddingLeft={6} paddingRight={6} paddingTop={3} paddingBottom={6}>
         <MainNavBurgerMenuLinks listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
         <Box paddingTop={4} tag="li">
-          <NavUser closeBurgerMenu={handleClickOnLink} showDisplayName />
+          <NavUser showDisplayName />
         </Box>
       </Box>
     </ScrollArea>

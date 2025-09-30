@@ -75,9 +75,13 @@ const LeftMenu = ({
   });
 
   const handleClickOnLink = (destination: string) => {
-    setIsBurgerMenuShown(false);
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
+
+  // Close burger menu when route changes
+  React.useEffect(() => {
+    setIsBurgerMenuShown(false);
+  }, [pathname]);
 
   const listLinksAlphabeticallySorted = [...pluginsSectionLinks, ...generalSectionLinks].sort(
     (a, b) => formatter.compare(formatMessage(a.intlLabel), formatMessage(b.intlLabel))
@@ -87,17 +91,14 @@ const LeftMenu = ({
   /**
    * Return filtered mobile navigation links (used for both top and burger menu)
    */
-  const mapMobileNavigationLinks = React.useCallback(
-    (mobileNavLinks: MobileMenuItem[]): MenuItem[] =>
-      mobileNavLinks
-        .map((mobileLink) => {
-          const linkFound = listLinks.find((link) => link.to === mobileLink.to);
-          if (!linkFound) return null;
-          return mobileLink.link ? { ...linkFound, navigationLink: mobileLink.link } : linkFound;
-        })
-        .filter((link) => link !== null) as MenuItem[],
-    [listLinks]
-  );
+  const mapMobileNavigationLinks = (mobileNavLinks: MobileMenuItem[]): MenuItem[] =>
+    mobileNavLinks.reduce<MenuItem[]>((acc, mobileLink) => {
+      const linkFound = listLinks.find((link) => link.to === mobileLink.to);
+      if (linkFound) {
+        acc.push(mobileLink.link ? { ...linkFound, navigationLink: mobileLink.link } : linkFound);
+      }
+      return acc;
+    }, []);
 
   /**
    * Mobile top navigation

@@ -74,7 +74,6 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
       },
       {
         to: 'content-manager',
-        link: '/content-manager/navigation',
       },
       {
         to: 'plugins/content-releases',
@@ -86,7 +85,6 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
     burgerMobileNavigation: [
       {
         to: '/settings',
-        link: '/settings/navigation',
       },
     ],
     isLoading: true,

@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import * as React from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate, type To } from 'react-router-dom';
-import { styled, useTheme } from 'styled-components';
+import { type To } from 'react-router-dom';
+import { styled } from 'styled-components';
 
+import { useIsDesktop } from '../../hooks/useMediaQuery';
 import { MenuItem } from '../../hooks/useMenu';
 import { tours } from '../GuidedTour/Tours';
 
@@ -21,16 +22,26 @@ const NavLinkBadgeCounter = styled(NavLink.Badge)`
   }
 `;
 
+/**
+ * Will attach a guided tour tooltip to the right links. (mostly used for the finish step to indicate the next tour)
+ * @param to: The target link
+ * @param children: The original link to be wrapped in a guided tour tooltip
+ * @returns The link wrapped in a guided tour tooltip or the original link if no guided tour needs to be attached
+ */
 const GuidedTourTooltip = ({ to, children }: { to: To; children: React.ReactNode }) => {
   const normalizedTo = to.toString().replace(/\//g, '');
 
   switch (normalizedTo) {
+    // We attach the final step of the content type builder tour on content manager link because it's the next tour (Content Type Builder -> Content Manager).
     case 'content-manager':
       return <tours.contentTypeBuilder.Finish>{children}</tours.contentTypeBuilder.Finish>;
+    // We attach the final step of the api tokens tour on the home link because it was the last tour (API Tokens -> Go back to homepage).
     case '':
       return <tours.apiTokens.Finish>{children}</tours.apiTokens.Finish>;
+    // We attach the final step of the content manager tour on the settings link because it's the next tour (Content Manager -> API tokens).
     case 'settings':
       return <tours.contentManager.Finish>{children}</tours.contentManager.Finish>;
+    // If the link doesn't match any of the above, we return the original link.
     default:
       return children;
   }
@@ -46,27 +57,7 @@ const MainNavIcons = ({
   handleClickOnLink: (value: string) => void;
 }) => {
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
-  const theme = useTheme();
-
-  const minWidthTablet = theme.breakpoints.medium.replace('@media', '');
-  const minWidthDesktop = theme.breakpoints.large.replace('@media', '');
-  const [isAboveTablet, setIsAboveTablet] = useState(window.matchMedia(minWidthTablet).matches);
-  const [isDesktop, setIsDesktop] = useState(window.matchMedia(minWidthDesktop).matches);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia(minWidthTablet);
-    const handler = (e: MediaQueryListEvent) => setIsAboveTablet(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, [minWidthTablet]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia(minWidthDesktop);
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, [minWidthDesktop]);
+  const isDesktop = useIsDesktop();
 
   return listLinks.length > 0
     ? listLinks.map((link) => {
@@ -80,21 +71,13 @@ const MainNavIcons = ({
 
         const labelValue = formatMessage(link.intlLabel);
         const linkMobile = mobileLinks.find((mobileLink) => mobileLink.to === link.to);
-        const mobileLinkCustomLink = linkMobile?.navigationLink;
-        const linkTarget = !isAboveTablet && mobileLinkCustomLink ? mobileLinkCustomLink : link.to;
 
         return isDesktop || (!isDesktop && linkMobile) ? (
           <Flex tag="li" key={link.to}>
-            <GuidedTourTooltip to={linkTarget}>
+            <GuidedTourTooltip to={link.to}>
               <NavLink.Link
                 to={link.to}
-                onClick={(e) => {
-                  handleClickOnLink(linkTarget);
-                  if (!isDesktop && link.to !== linkTarget) {
-                    e.preventDefault();
-                    navigate(linkTarget);
-                  }
-                }}
+                onClick={() => handleClickOnLink(link.to)}
                 aria-label={labelValue}
               >
                 <NavLink.Icon label={labelValue}>
@@ -141,7 +124,6 @@ const MainNavBurgerMenuLinks = ({
   handleClickOnLink: (value: string) => void;
 }) => {
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
 
   return listLinks.length > 0
     ? listLinks.map((link) => {
@@ -154,20 +136,13 @@ const MainNavBurgerMenuLinks = ({
             : undefined;
 
         const labelValue = formatMessage(link.intlLabel);
-
         const navigationTarget = link.navigationLink || link.to;
 
         return (
           <Flex paddingTop={3} alignItems="center" tag="li" key={navigationTarget}>
             <NavLink.Link
-              to={link.to}
-              onClick={(e) => {
-                handleClickOnLink(navigationTarget);
-                if (link.to !== navigationTarget) {
-                  e.preventDefault();
-                  navigate(navigationTarget);
-                }
-              }}
+              to={navigationTarget}
+              onClick={() => handleClickOnLink(navigationTarget)}
               aria-label={labelValue}
             >
               <IconContainer marginRight="0.6rem">

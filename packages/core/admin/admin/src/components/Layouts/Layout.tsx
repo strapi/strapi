@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Flex } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
+import { HEIGHT_TOP_NAVIGATION, RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
 
 import { ActionLayout } from './ActionLayout';
 import { ContentLayout } from './ContentLayout';
@@ -20,7 +20,7 @@ const GridContainer = styled(Box)<{ $hasSideNav: boolean }>`
   display: grid;
   grid-template-columns: 1fr;
   overflow: hidden;
-  height: calc(100vh - 5.6rem);
+  height: calc(100vh - ${HEIGHT_TOP_NAVIGATION});
 
   ${({ theme }) => theme.breakpoints.medium} {
     grid-template-columns: ${({ $hasSideNav }) => ($hasSideNav ? `auto 1fr` : '1fr')};
