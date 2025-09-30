@@ -42,18 +42,18 @@ describe('AI Metadata Service', () => {
         warn: jest.fn(),
       },
       plugin: jest.fn().mockImplementation((pluginName) => {
-         if (pluginName === 'upload') {
-      return {
-        service: jest.fn().mockImplementation((serviceName) => {
-          if (serviceName === 'upload') {
-            return { getSettings: mockGetSettings };
-          }
-          // ...other services if needed
-          return {};
-        }),
-      };
-    }
-    return {};
+        if (pluginName === 'upload') {
+          return {
+            service: jest.fn().mockImplementation((serviceName) => {
+              if (serviceName === 'upload') {
+                return { getSettings: mockGetSettings };
+              }
+              // ...other services if needed
+              return {};
+            }),
+          };
+        }
+        return {};
       }),
     };
 
