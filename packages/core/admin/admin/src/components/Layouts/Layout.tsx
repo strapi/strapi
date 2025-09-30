@@ -3,6 +3,8 @@ import * as React from 'react';
 import { Box, Flex } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
+import { RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
+
 import { ActionLayout } from './ActionLayout';
 import { ContentLayout } from './ContentLayout';
 import { GridLayout, GridLayoutProps } from './GridLayout';
@@ -55,15 +57,7 @@ const RootLayout = ({ sideNav, children }: LayoutProps) => (
         <SideNavContainer>{sideNav}</SideNavContainer>
       </>
     )}
-    <OverflowingItem
-      paddingBottom={{
-        initial: 4,
-        medium: 6,
-        large: 10,
-      }}
-    >
-      {children}
-    </OverflowingItem>
+    <OverflowingItem paddingBottom={RESPONSIVE_DEFAULT_SPACING}>{children}</OverflowingItem>
   </GridContainer>
 );
 

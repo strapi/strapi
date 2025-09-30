@@ -1,4 +1,4 @@
-import { Layouts } from '@strapi/admin/strapi-admin';
+import { Layouts, RESPONSIVE_DEFAULT_SPACING } from '@strapi/admin/strapi-admin';
 import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-system';
 import { ExternalLink, Check, PaperPlane } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -22,16 +22,8 @@ const PurchaseContentReleases = () => {
           })}
         />
         <Box
-          marginLeft={{
-            initial: 4,
-            medium: 6,
-            large: 10,
-          }}
-          marginRight={{
-            initial: 4,
-            medium: 6,
-            large: 10,
-          }}
+          marginLeft={RESPONSIVE_DEFAULT_SPACING}
+          marginRight={RESPONSIVE_DEFAULT_SPACING}
           shadow="filterShadow"
           hasRadius
           background="neutral0"

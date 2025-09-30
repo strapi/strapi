@@ -117,8 +117,8 @@ const LeftMenu = ({
     (plugin) => !excludedPluginsFromBurgerMenu.some((link) => plugin.to.includes(link))
   );
   const burgerMobileNavigationLinks = [
-    ...mapMobileNavigationLinks(burgerMobileNavigation),
     ...burgerMenuPluginsLinks,
+    ...mapMobileNavigationLinks(burgerMobileNavigation),
   ];
 
   return (

@@ -7,6 +7,7 @@ import {
   useNotification,
   useQueryParams,
   tours,
+  RESPONSIVE_DEFAULT_SPACING,
 } from '@strapi/admin/strapi-admin';
 import { Grid, Main, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -128,18 +129,7 @@ const EditViewPage = () => {
   };
 
   return (
-    <Main
-      paddingLeft={{
-        initial: 4,
-        medium: 6,
-        large: 10,
-      }}
-      paddingRight={{
-        initial: 4,
-        medium: 6,
-        large: 10,
-      }}
-    >
+    <Main paddingLeft={RESPONSIVE_DEFAULT_SPACING} paddingRight={RESPONSIVE_DEFAULT_SPACING}>
       <Page.Title>{pageTitle}</Page.Title>
       {isSingleType && (
         <tours.contentManager.Introduction>

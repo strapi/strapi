@@ -32,6 +32,8 @@ export { useGuidedTour } from './components/GuidedTour/Context';
 /** @internal */
 export { GUIDED_TOUR_REQUIRED_ACTIONS } from './components/GuidedTour/utils/constants';
 
+export { RESPONSIVE_DEFAULT_SPACING } from './constants/theme';
+
 /**
  * Features
  */

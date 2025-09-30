@@ -11,6 +11,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { RESPONSIVE_DEFAULT_SPACING } from '../constants/theme';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { setLocale } from '../reducer';
 
@@ -57,26 +58,10 @@ export const LayoutContent = ({ children }: LayoutContentProps) => (
   <Wrapper
     shadow="tableShadow"
     hasRadius
-    paddingTop={{
-      initial: 4,
-      medium: 6,
-      large: 10,
-    }}
-    paddingBottom={{
-      initial: 4,
-      medium: 6,
-      large: 10,
-    }}
-    paddingLeft={{
-      initial: 4,
-      medium: 6,
-      large: 10,
-    }}
-    paddingRight={{
-      initial: 4,
-      medium: 6,
-      large: 10,
-    }}
+    paddingTop={RESPONSIVE_DEFAULT_SPACING}
+    paddingBottom={RESPONSIVE_DEFAULT_SPACING}
+    paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+    paddingRight={RESPONSIVE_DEFAULT_SPACING}
     background="neutral0"
   >
     {children}

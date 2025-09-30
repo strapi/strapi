@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
 
+import { RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
 
 /* -------------------------------------------------------------------------------------------------
@@ -71,16 +72,8 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     return (
       <Box
         ref={ref}
-        paddingLeft={{
-          initial: 4,
-          medium: 6,
-          large: 10,
-        }}
-        paddingRight={{
-          initial: 4,
-          medium: 6,
-          large: 10,
-        }}
+        paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+        paddingRight={RESPONSIVE_DEFAULT_SPACING}
         paddingBottom={{
           initial: 4,
           large: 8,

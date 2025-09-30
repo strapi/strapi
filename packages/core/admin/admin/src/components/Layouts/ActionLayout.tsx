@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import { Flex } from '@strapi/design-system';
 
+import { RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
+
 interface ActionLayoutProps {
   endActions?: React.ReactNode;
   startActions?: React.ReactNode;
@@ -17,16 +19,8 @@ const ActionLayout = ({ startActions, endActions }: ActionLayoutProps) => {
       justifyContent="space-between"
       alignItems="flex-start"
       paddingBottom={4}
-      paddingLeft={{
-        initial: 4,
-        medium: 6,
-        large: 10,
-      }}
-      paddingRight={{
-        initial: 4,
-        medium: 6,
-        large: 10,
-      }}
+      paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+      paddingRight={RESPONSIVE_DEFAULT_SPACING}
     >
       <Flex gap={2} wrap="wrap">
         {startActions}

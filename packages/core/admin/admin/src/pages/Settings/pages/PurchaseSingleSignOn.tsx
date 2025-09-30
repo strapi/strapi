@@ -3,6 +3,7 @@ import { ExternalLink, Check, Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
+import { RESPONSIVE_DEFAULT_SPACING } from '../../../constants/theme';
 import { useTypedSelector } from '../../../core/store/hooks';
 import darkIllustration from '../assets/purchase-page-sso-illustration-dark.svg';
 import lightIllustration from '../assets/purchase-page-sso-illustration-light.svg';
@@ -22,16 +23,8 @@ const PurchaseSingleSignOn = () => {
           })}
         />
         <Box
-          marginLeft={{
-            initial: 4,
-            medium: 6,
-            large: 10,
-          }}
-          marginRight={{
-            initial: 4,
-            medium: 6,
-            large: 10,
-          }}
+          marginLeft={RESPONSIVE_DEFAULT_SPACING}
+          marginRight={RESPONSIVE_DEFAULT_SPACING}
           shadow="filterShadow"
           hasRadius
           background="neutral0"
