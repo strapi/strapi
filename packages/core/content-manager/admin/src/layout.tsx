@@ -1,5 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { Page, Layouts, SubNav, useIsDesktop } from '@strapi/admin/strapi-admin';
+import * as React from 'react';
+
+import { Page, Layouts, SubNav, useIsMobile } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
@@ -18,7 +20,7 @@ import { getTranslation } from './utils/translations';
 
 const Layout = () => {
   const contentTypeMatch = useMatch('/content-manager/:kind/:uid/*');
-  const isDesktop = useIsDesktop();
+  const isMobile = useIsMobile();
 
   const { isLoading, collectionTypeLinks, models, singleTypeLinks } = useContentManagerInitData();
   const authorisedModels = [...collectionTypeLinks, ...singleTypeLinks].sort((a, b) =>
@@ -62,7 +64,7 @@ const Layout = () => {
   // On /content-manager base route
   if (!contentTypeMatch && authorisedModels.length > 0) {
     // On desktop: redirect to first collection type
-    if (isDesktop) {
+    if (!isMobile) {
       return (
         <Navigate
           to={{

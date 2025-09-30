@@ -3,7 +3,7 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { useTracking } from '../../features/Tracking';
-import { useIsMobile } from '../../hooks/useMediaQuery';
+import { useIsDesktop } from '../../hooks/useMediaQuery';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
@@ -78,7 +78,7 @@ type TourState = Record<
 type State = {
   tours: TourState;
   enabled: boolean;
-  hidden: boolean;
+  hidden?: boolean;
   completedActions: CompletedActions;
 };
 
@@ -181,12 +181,12 @@ const GuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   const { trackUsage } = useTracking();
   const [storedTours, setStoredTours] = usePersistentState<State>(STORAGE_KEY, {
     tours: getInitialTourState(guidedTours),
     enabled,
-    hidden: isMobile ? true : false,
+    hidden: !isDesktop,
     completedActions: [],
   });
   const migratedTourState = migrateTours(storedTours);
@@ -194,8 +194,8 @@ const GuidedTourContext = ({
 
   // Watch for changes to enabled prop to update state
   React.useEffect(() => {
-    dispatch({ type: 'set_hidden', payload: isMobile });
-  }, [isMobile]);
+    dispatch({ type: 'set_hidden', payload: !isDesktop });
+  }, [isDesktop]);
 
   // Sync local storage
   React.useEffect(() => {

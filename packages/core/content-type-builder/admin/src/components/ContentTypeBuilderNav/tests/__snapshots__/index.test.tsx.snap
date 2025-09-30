@@ -13,8 +13,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c4 {
-  padding-inline-start: 20px;
-  padding-inline-end: 20px;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
 }
 
 .c8 {
@@ -65,8 +65,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c39 {
-  margin-inline-start: 8px;
-  margin-inline-end: 8px;
+  margin-inline-start: 4px;
+  margin-inline-end: 4px;
 }
 
 .c43 {
@@ -483,6 +483,20 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
 
 .c52 .c41>div {
   padding-left: 36px;
+}
+
+@media (min-width: 1080px) {
+  .c4 {
+    padding-inline-start: 20px;
+    padding-inline-end: 20px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c39 {
+    margin-inline-start: 8px;
+    margin-inline-end: 8px;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

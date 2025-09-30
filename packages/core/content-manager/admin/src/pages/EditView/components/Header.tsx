@@ -7,6 +7,7 @@ import {
   useNotification,
   useStrapiApp,
   useQueryParams,
+  useIsDesktop,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -467,18 +468,21 @@ const HeaderActionDialog = ({
 const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
-  return {
-    label: formatMessage({
-      id: 'app.links.configure-view',
-      defaultMessage: 'Configure the view',
-    }),
-    icon: <ListPlus />,
-    onClick: () => {
-      navigate(`../${collectionType}/${model}/configurations/edit`);
-    },
-    position: 'header',
-  };
+  return isDesktop
+    ? {
+        label: formatMessage({
+          id: 'app.links.configure-view',
+          defaultMessage: 'Configure the view',
+        }),
+        icon: <ListPlus />,
+        onClick: () => {
+          navigate(`../${collectionType}/${model}/configurations/edit`);
+        },
+        position: 'header',
+      }
+    : null;
 };
 
 ConfigureTheViewAction.type = 'configure-the-view';
@@ -487,18 +491,21 @@ ConfigureTheViewAction.position = 'header';
 const EditTheModelAction: DocumentActionComponent = ({ model }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
-  return {
-    label: formatMessage({
-      id: 'content-manager.link-to-ctb',
-      defaultMessage: 'Edit the model',
-    }),
-    icon: <Pencil />,
-    onClick: () => {
-      navigate(`/plugins/content-type-builder/content-types/${model}`);
-    },
-    position: 'header',
-  };
+  return isDesktop
+    ? {
+        label: formatMessage({
+          id: 'content-manager.link-to-ctb',
+          defaultMessage: 'Edit the model',
+        }),
+        icon: <Pencil />,
+        onClick: () => {
+          navigate(`/plugins/content-type-builder/content-types/${model}`);
+        },
+        position: 'header',
+      }
+    : null;
 };
 
 EditTheModelAction.type = 'edit-the-model';

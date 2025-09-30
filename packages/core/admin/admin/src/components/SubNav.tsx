@@ -120,7 +120,17 @@ const StyledHeader = styled(Flex)`
 
 const Header = ({ label }: { label: string }) => {
   return (
-    <StyledHeader justifyContent="space-between" paddingLeft={5} paddingRight={5}>
+    <StyledHeader
+      justifyContent="space-between"
+      paddingLeft={{
+        initial: 4,
+        large: 5,
+      }}
+      paddingRight={{
+        initial: 4,
+        large: 5,
+      }}
+    >
       <Typography variant="beta" tag="h2">
         {label}
       </Typography>
@@ -187,7 +197,16 @@ const Section = ({
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
-      <Box paddingLeft={5} paddingRight={5}>
+      <Box
+        paddingLeft={{
+          initial: 4,
+          large: 5,
+        }}
+        paddingRight={{
+          initial: 4,
+          large: 5,
+        }}
+      >
         <Flex position="relative" justifyContent="space-between" gap={2}>
           <Flex>
             <Box paddingRight={1}>
@@ -224,8 +243,14 @@ const Section = ({
         direction="column"
         gap="2px"
         alignItems={'stretch'}
-        marginLeft={2}
-        marginRight={2}
+        marginLeft={{
+          initial: 1,
+          large: 2,
+        }}
+        marginRight={{
+          initial: 1,
+          large: 2,
+        }}
       >
         {children.map((child, index) => {
           return <li key={index}>{child}</li>;

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Button, Flex, useNotifyAT, Grid, Typography, FlexProps } from '@strapi/design-system';
-import { Check, Layout } from '@strapi/icons';
+import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -16,6 +16,7 @@ import { useAuth } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
 import { useTracking } from '../features/Tracking';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
+import { useIsDesktop } from '../hooks/useMediaQuery';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';
@@ -67,6 +68,7 @@ const Panel = ({ children, ...flexProps }: FlexProps) => {
 };
 
 const ProfilePage = () => {
+  const isDesktop = useIsDesktop();
   const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -187,7 +189,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Main aria-busy={isSubmittingForm}>
         <Page.Title>
           {formatMessage({
@@ -228,13 +230,15 @@ const ProfilePage = () => {
             </>
           )}
         </Form>
-        <Box>
-          <Layouts.Content>
-            <GuidedTourSection />
-          </Layouts.Content>
-        </Box>
+        {isDesktop && (
+          <Box>
+            <Layouts.Content>
+              <GuidedTourSection />
+            </Layouts.Content>
+          </Box>
+        )}
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 

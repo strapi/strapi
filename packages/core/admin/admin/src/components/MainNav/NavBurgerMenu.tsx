@@ -35,7 +35,25 @@ const NavBurgerMenuWrapper = styled(Box)<{ $isShown: boolean }>`
 const NavBurgerMenu = ({ isShown, handleClickOnLink, listLinks }: NavBurgerMenuProps) => (
   <NavBurgerMenuWrapper $isShown={isShown}>
     <ScrollArea>
-      <Box tag="ul" paddingLeft={6} paddingRight={6} paddingTop={3} paddingBottom={6}>
+      <Box
+        tag="ul"
+        paddingLeft={{
+          initial: 4,
+          medium: 6,
+        }}
+        paddingRight={{
+          initial: 4,
+          medium: 6,
+        }}
+        paddingTop={{
+          initial: 1,
+          medium: 3,
+        }}
+        paddingBottom={{
+          initial: 4,
+          medium: 6,
+        }}
+      >
         <MainNavBurgerMenuLinks listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
         <Box paddingTop={4} tag="li">
           <NavUser showDisplayName />

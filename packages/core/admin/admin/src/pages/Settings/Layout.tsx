@@ -4,7 +4,7 @@ import { Navigate, Outlet, useMatch } from 'react-router-dom';
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { SubNav } from '../../components/SubNav';
-import { useIsDesktop } from '../../hooks/useMediaQuery';
+import { useIsMobile } from '../../hooks/useMediaQuery';
 import { useSettingsMenu } from '../../hooks/useSettingsMenu';
 
 import { SettingsNav } from './components/SettingsNav';
@@ -17,7 +17,7 @@ const Layout = () => {
   const match = useMatch('/settings/:settingId/*');
   const { formatMessage } = useIntl();
   const { isLoading } = useSettingsMenu();
-  const isDesktop = useIsDesktop();
+  const isMobile = useIsMobile();
 
   // Since the useSettingsMenu hook can make API calls in order to check the links permissions
   // We need to add a loading state to prevent redirecting the user while permissions are being checked
@@ -28,7 +28,7 @@ const Layout = () => {
   // On /settings base route
   if (!match?.params.settingId) {
     // On desktop: redirect to first settings page
-    if (isDesktop) {
+    if (!isMobile) {
       return <Navigate to="application-infos" />;
     }
 

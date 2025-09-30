@@ -146,9 +146,22 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
       <ScrollArea>
         {isFullPage && <SubNav.Header label={label} />}
         <Flex
-          paddingLeft={5}
-          paddingRight={5}
-          paddingTop={isFullPage ? 0 : 5}
+          paddingLeft={{
+            initial: 4,
+            large: 5,
+          }}
+          paddingRight={{
+            initial: 4,
+            large: 5,
+          }}
+          paddingTop={
+            isFullPage
+              ? 0
+              : {
+                  initial: 4,
+                  large: 5,
+                }
+          }
           paddingBottom={0}
           gap={3}
           direction="column"

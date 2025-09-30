@@ -341,7 +341,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   display: grid;
   grid-template-columns: 1fr;
   overflow: hidden;
-  height: calc(100dvh - 5.6rem);
+  height: calc(100dvh - 5.6rem - 1px);
 }
 
 .c2 {

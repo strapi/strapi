@@ -34,18 +34,21 @@ export const useIsDesktop = (): boolean => {
 };
 
 /**
- * Hook to detect if the current viewport is desktop size
- * Uses the theme's large breakpoint
+ * Hook to detect if the current viewport is tablet size
+ * Uses the theme's medium breakpoint
  */
 export const useIsTablet = (): boolean => {
   const theme = useTheme();
-  return useMediaQuery(theme.breakpoints.medium);
+  const isTabletOrAbove = useMediaQuery(theme.breakpoints.medium);
+  const isDesktop = useMediaQuery(theme.breakpoints.large);
+  return isTabletOrAbove && !isDesktop;
 };
 
 /**
  * Hook to detect if the current viewport is mobile size
- * Uses the theme's large breakpoint (inverted)
+ * Uses the theme's medium breakpoint (inverted)
  */
 export const useIsMobile = (): boolean => {
-  return !useIsTablet();
+  const theme = useTheme();
+  return !useMediaQuery(theme.breakpoints.medium);
 };
