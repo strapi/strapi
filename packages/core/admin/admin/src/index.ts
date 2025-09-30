@@ -61,6 +61,8 @@ export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useDebounce } from './hooks/useDebounce';
 export { useAdminUsers } from './services/users';
 export { useGetCountDocumentsQuery } from './services/homepage';
+/** @internal */
+export { useAIAvailability } from './hooks/useAIAvailability';
 
 /**
  * Types

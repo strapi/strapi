@@ -805,6 +805,8 @@
   "submit": "Submit",
   "tours.contentTypeBuilder.Introduction.title": "Welcome to the Content-Type Builder!",
   "tours.contentTypeBuilder.Introduction.content": "Here you create and manage the structure of your app with collection types, single types, and reusable components. Let's dive in!",
+  "tours.contentTypeBuilder.AIChat.title": "Time to get started!",
+  "tours.contentTypeBuilder.AIChat.content": "<p>If you have any questions about the Content-Type Builder or Strapi ask them here.</p><p>Strapi AI can generate schemas tailored to your needs. Ask for exactly what you want, for example:<ul><li>Date picker</li><li>Email and password fields</li><li>Media of any type</li><li>UIDs</li></ul></p><p>Don’t be shy, try it out !</p>",
   "tours.contentTypeBuilder.CollectionTypes.title": "Collection Types",
   "tours.contentTypeBuilder.CollectionTypes.content": "These are your go-to for managing multiple entries — think blog posts or products.",
   "tours.contentTypeBuilder.SingleTypes.title": "Single Types",

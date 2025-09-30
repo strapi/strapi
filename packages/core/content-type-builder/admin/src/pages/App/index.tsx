@@ -3,7 +3,13 @@
 /* eslint-disable check-file/no-index */
 import { lazy, Suspense, useEffect } from 'react';
 
-import { Page, Layouts, useAppInfo } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  Layouts,
+  useAppInfo,
+  useGuidedTour,
+  useAIAvailability,
+} from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
@@ -30,11 +36,27 @@ const App = () => {
   });
 
   const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
+  const isAIEnabled = useAIAvailability();
+  const state = useGuidedTour('ContentTypeBuilderApp', (s) => s.state);
+  const dispatch = useGuidedTour('ContentTypeBuilderApp', (s) => s.dispatch);
 
   // Prefetch AI token on initial load
   useEffect(() => {
     prefetchAIToken();
   }, []);
+
+  // Set tour type based on AI availability when the app loads
+  useEffect(() => {
+    const tourType = isAIEnabled ? 'ContentTypeBuilderAI' : 'ContentTypeBuilderNoAI';
+    const currentTourType = state.tours.contentTypeBuilder.tourType;
+
+    if (currentTourType !== tourType) {
+      dispatch({
+        type: 'set_tour_type',
+        payload: { tourName: 'contentTypeBuilder', tourType },
+      });
+    }
+  }, [isAIEnabled, state.tours.contentTypeBuilder.tourType, dispatch]);
 
   return (
     <Page.Protect permissions={PERMISSIONS.main}>

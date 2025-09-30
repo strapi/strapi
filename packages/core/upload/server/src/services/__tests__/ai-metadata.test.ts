@@ -6,6 +6,8 @@ import type { InputFile } from '../../types';
 jest.mock('node:fs/promises');
 const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
 
+const mockGetSettings = jest.fn();
+
 // Mock fetch globally
 global.fetch = jest.fn();
 const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
@@ -29,9 +31,6 @@ describe('AI Metadata Service', () => {
     jest.clearAllMocks();
 
     mockStrapi = {
-      config: {
-        get: jest.fn(),
-      },
       ee: {
         isEE: true,
       },
@@ -42,9 +41,22 @@ describe('AI Metadata Service', () => {
         http: jest.fn(),
         warn: jest.fn(),
       },
+      plugin: jest.fn().mockImplementation((pluginName) => {
+        if (pluginName === 'upload') {
+          return {
+            service: jest.fn().mockImplementation((serviceName) => {
+              if (serviceName === 'upload') {
+                return { getSettings: mockGetSettings };
+              }
+              // ...other services if needed
+              return {};
+            }),
+          };
+        }
+        return {};
+      }),
     };
 
-    // Set default environment
     process.env.STRAPI_AI_URL = 'https://ai.strapi.com';
 
     aiMetadataService = createAIMetadataService({ strapi: mockStrapi });
@@ -56,33 +68,33 @@ describe('AI Metadata Service', () => {
   });
 
   describe('isEnabled', () => {
-    it('should return true when AI is enabled and EE is available', () => {
-      mockStrapi.config.get.mockReturnValue(true);
+    it('should return true when AI is enabled and EE is available', async () => {
+      mockGetSettings.mockResolvedValue({ aiMetadata: true });
       mockStrapi.ee.isEE = true;
 
-      expect(aiMetadataService.isEnabled()).toBe(true);
-      expect(mockStrapi.config.get).toHaveBeenCalledWith('admin.ai.enabled', false);
+      expect(await aiMetadataService.isEnabled()).toBe(true);
+      expect(mockGetSettings).toHaveBeenCalled();
     });
 
-    it('should return false when AI is disabled but EE is available', () => {
-      mockStrapi.config.get.mockReturnValue(false);
+    it('should return false when AI is disabled but EE is available', async () => {
+      mockGetSettings.mockResolvedValue({ aiMetadata: false });
       mockStrapi.ee.isEE = true;
 
-      expect(aiMetadataService.isEnabled()).toBe(false);
+      expect(await aiMetadataService.isEnabled()).toBe(false);
     });
 
-    it('should return false when AI is enabled but EE is not available', () => {
-      mockStrapi.config.get.mockReturnValue(true);
+    it('should return false when AI is enabled but EE is not available', async () => {
+      mockGetSettings.mockResolvedValue({ aiMMetadata: true });
       mockStrapi.ee.isEE = false;
 
-      expect(aiMetadataService.isEnabled()).toBe(false);
+      expect(await aiMetadataService.isEnabled()).toBe(false);
     });
 
-    it('should return false when both AI and EE are disabled', () => {
-      mockStrapi.config.get.mockReturnValue(false);
+    it('should return false when both AI and EE are disabled', async () => {
+      mockGetSettings.mockResolvedValue({ aiMetadata: false });
       mockStrapi.ee.isEE = false;
 
-      expect(aiMetadataService.isEnabled()).toBe(false);
+      expect(await aiMetadataService.isEnabled()).toBe(false);
     });
   });
 
@@ -103,7 +115,7 @@ describe('AI Metadata Service', () => {
 
     beforeEach(() => {
       // Mock service as enabled by default
-      mockStrapi.config.get.mockReturnValue(true);
+      mockGetSettings.mockResolvedValue({ aiMetadata: true });
       mockStrapi.ee.isEE = true;
 
       // Mock readFile to return proper Buffer with .buffer property
@@ -113,7 +125,7 @@ describe('AI Metadata Service', () => {
 
     describe('error cases', () => {
       it('should throw error when service is disabled', async () => {
-        mockStrapi.config.get.mockReturnValue(false);
+        mockGetSettings.mockResolvedValue({ aiMetadata: false });
 
         await expect(aiMetadataService.processFiles([mockImageFile])).rejects.toThrow(
           'AI Metadata service is not enabled'
