@@ -23,7 +23,7 @@ export default [
     handler: 'authentication.registerAdmin',
     config: {
       auth: false,
-      middlewares: ['admin::rateLimit']
+      middlewares: ['admin::rateLimit'],
     },
   },
   {
