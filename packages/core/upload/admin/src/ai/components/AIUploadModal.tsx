@@ -176,7 +176,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
           <Button onClick={handleCancel} variant="tertiary">
             {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
           </Button>
-          <Button onClick={handleFinish} disabled={!state.hasUnsavedChanges} loading={isSaving}>
+          <Button onClick={handleFinish} loading={isSaving}>
             {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
           </Button>
         </Modal.Footer>
@@ -213,7 +213,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
         <Button onClick={handleCancel} variant="tertiary">
           {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
         </Button>
-        <Button onClick={handleFinish} disabled={!state.hasUnsavedChanges} loading={isSaving}>
+        <Button onClick={handleFinish} loading={isSaving}>
           {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
         </Button>
       </Modal.Footer>

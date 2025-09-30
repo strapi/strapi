@@ -174,10 +174,7 @@ test.describe('Home as super admin', () => {
       await page
         .getByLabel('Drag & Drop here or')
         .setInputFiles('public/assets/administration_panel.png');
-      await page
-        .getByRole('button', { name: 'Upload 1 asset to the library' })
-        .waitFor({ state: 'visible', timeout: 5000 });
-      await page.getByRole('button', { name: 'Upload 1 asset to the library' }).click();
+      await page.getByRole('button', { name: /^finish$/i }).click();
       await page.getByLabel('Home').click();
 
       // Create a content type and a component
