@@ -9,8 +9,8 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async isEnabled() {
-      const settingsService = await strapi.plugin('upload').service('upload').getSettings();
-      let aiMetadata: Settings['aiMetadata'] = settingsService.aiMetadata ?? false;
+      const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
+      const aiMetadata: boolean = settings.aiMetadata ?? false;
 
       const { isEE } = strapi.ee;
       return aiMetadata && isEE;
