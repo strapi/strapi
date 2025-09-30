@@ -76,34 +76,15 @@ export const UnauthenticatedLayout = ({ children }: UnauthenticatedLayoutProps) 
   return (
     <div>
       <Flex tag="header" justifyContent="flex-end">
-        <Box
-          paddingTop={6}
-          paddingRight={{
-            initial: 6,
-            medium: 8,
-            large: 10,
-          }}
-        >
+        <Box paddingTop={6} paddingRight={RESPONSIVE_DEFAULT_SPACING}>
           <LocaleToggle />
         </Box>
       </Flex>
       <Box
         paddingTop={2}
-        paddingBottom={{
-          initial: 6,
-          medium: 8,
-          large: 10,
-        }}
-        marginLeft={{
-          initial: 6,
-          medium: 8,
-          large: 10,
-        }}
-        marginRight={{
-          initial: 6,
-          medium: 8,
-          large: 10,
-        }}
+        paddingBottom={RESPONSIVE_DEFAULT_SPACING}
+        marginLeft={RESPONSIVE_DEFAULT_SPACING}
+        marginRight={RESPONSIVE_DEFAULT_SPACING}
       >
         {children}
       </Box>

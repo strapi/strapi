@@ -12,6 +12,7 @@ import { useIntl } from 'react-intl';
 import { useRouteError } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { RESPONSIVE_DEFAULT_SPACING } from '../constants/theme';
 import { useClipboard } from '../hooks/useClipboard';
 
 /**
@@ -40,16 +41,8 @@ ${error.stack}
           alignItems="center"
           height="100%"
           justifyContent="center"
-          paddingLeft={{
-            initial: 6,
-            small: 8,
-            medium: 10,
-          }}
-          paddingRight={{
-            initial: 6,
-            small: 8,
-            medium: 10,
-          }}
+          paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+          paddingRight={RESPONSIVE_DEFAULT_SPACING}
         >
           <Flex
             gap={7}
