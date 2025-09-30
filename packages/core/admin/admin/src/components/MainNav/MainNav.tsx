@@ -12,7 +12,7 @@ const MainNavWrapper = styled(Flex)`
     border-bottom: none;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
     position: sticky;
-    height: 100vh;
+    height: 100dvh;
   }
 `;
 
@@ -28,7 +28,7 @@ const MainNav = (props: FlexProps<'nav'>) => (
     top={0}
     zIndex={3}
     width={{
-      initial: '100vw',
+      initial: '100dvw',
       large: 10,
     }}
     {...props}

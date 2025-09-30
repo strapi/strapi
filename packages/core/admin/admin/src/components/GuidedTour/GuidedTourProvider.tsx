@@ -1,5 +1,3 @@
-import { useIsMobile } from '../../hooks/useMediaQuery';
-
 import { GuidedTourContext } from './Context';
 
 interface GuidedTourProviderProps {
@@ -7,8 +5,7 @@ interface GuidedTourProviderProps {
 }
 
 export const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
-  const isMobile = useIsMobile();
-  const isGuidedTourEnabled = process.env.NODE_ENV !== 'test' && !isMobile;
+  const isGuidedTourEnabled = process.env.NODE_ENV !== 'test';
 
   return <GuidedTourContext enabled={isGuidedTourEnabled}>{children}</GuidedTourContext>;
 };

@@ -3,6 +3,7 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { useTracking } from '../../features/Tracking';
+import { useIsMobile } from '../../hooks/useMediaQuery';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
@@ -66,7 +67,7 @@ type Action =
       };
     }
   | {
-      type: 'set_enabled';
+      type: 'set_hidden';
       payload: boolean;
     };
 
@@ -77,6 +78,7 @@ type TourState = Record<
 type State = {
   tours: TourState;
   enabled: boolean;
+  hidden: boolean;
   completedActions: CompletedActions;
 };
 
@@ -143,8 +145,8 @@ function reducer(state: State, action: Action): State {
       draft.enabled = false;
     }
 
-    if (action.type === 'set_enabled') {
-      draft.enabled = action.payload;
+    if (action.type === 'set_hidden') {
+      draft.hidden = action.payload;
     }
 
     if (action.type === 'reset_all_tours') {
@@ -179,24 +181,21 @@ const GuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
+  const isMobile = useIsMobile();
   const { trackUsage } = useTracking();
   const [storedTours, setStoredTours] = usePersistentState<State>(STORAGE_KEY, {
     tours: getInitialTourState(guidedTours),
     enabled,
+    hidden: isMobile ? true : false,
     completedActions: [],
   });
   const migratedTourState = migrateTours(storedTours);
-  // Override enabled state if prop is false (e.g., on mobile)
-  const initialState =
-    enabled === false ? { ...migratedTourState, enabled: false } : migratedTourState;
-  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const [state, dispatch] = React.useReducer(reducer, migratedTourState);
 
   // Watch for changes to enabled prop to update state
   React.useEffect(() => {
-    if (enabled !== state.enabled) {
-      dispatch({ type: 'set_enabled', payload: enabled });
-    }
-  }, [enabled, state.enabled]);
+    dispatch({ type: 'set_hidden', payload: isMobile });
+  }, [isMobile]);
 
   // Sync local storage
   React.useEffect(() => {

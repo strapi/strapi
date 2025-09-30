@@ -20,13 +20,13 @@ const GridContainer = styled(Box)<{ $hasSideNav: boolean }>`
   display: grid;
   grid-template-columns: 1fr;
   overflow: hidden;
-  height: calc(100vh - ${HEIGHT_TOP_NAVIGATION});
+  height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION});
 
   ${({ theme }) => theme.breakpoints.medium} {
     grid-template-columns: ${({ $hasSideNav }) => ($hasSideNav ? `auto 1fr` : '1fr')};
   }
   ${({ theme }) => theme.breakpoints.large} {
-    height: 100vh;
+    height: 100dvh;
   }
 `;
 

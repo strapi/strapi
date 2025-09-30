@@ -341,7 +341,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   display: grid;
   grid-template-columns: 1fr;
   overflow: hidden;
-  height: calc(100vh - 5.6rem);
+  height: calc(100dvh - 5.6rem);
 }
 
 .c2 {
@@ -432,7 +432,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 @media (min-width: 1080px) {
   .c0 {
-    height: 100vh;
+    height: 100dvh;
   }
 }
 

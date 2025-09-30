@@ -47,7 +47,7 @@ type GuidedTourTooltipProps = {
 const GuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
   const state = useGuidedTour('TooltipWrapper', (s) => s.state);
 
-  if (!state.enabled) {
+  if (!state.enabled || state.hidden) {
     return children;
   }
 

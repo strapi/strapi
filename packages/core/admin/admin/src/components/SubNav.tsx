@@ -18,7 +18,7 @@ import { tours } from './GuidedTour/Tours';
 
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
-  height: calc(100vh - ${HEIGHT_TOP_NAVIGATION} - 1px);
+  height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px);
   overflow: hidden;
   background-color: ${({ theme }) => theme.colors.neutral0};
   display: flex;
@@ -36,7 +36,7 @@ const MainSubNav = styled(DSSubNav)`
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
   }
   ${({ theme }) => theme.breakpoints.large} {
-    height: 100vh;
+    height: 100dvh;
   }
 `;
 

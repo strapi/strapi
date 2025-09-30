@@ -417,7 +417,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
 
 .c3 {
   width: 100%;
-  height: calc(100vh - 5.6rem - 1px);
+  height: calc(100dvh - 5.6rem - 1px);
   overflow: hidden;
   background-color: #ffffff;
   display: flex;
@@ -513,7 +513,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
 
 @media (min-width: 1080px) {
   .c3 {
-    height: 100vh;
+    height: 100dvh;
   }
 }
 
