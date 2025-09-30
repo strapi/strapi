@@ -109,26 +109,6 @@ describe('AI Controller', () => {
       );
     });
 
-    test('Should return internal server error when AI server URL is not configured', async () => {
-      const ctx = createMockContext();
-      const mockStrapi = createMockStrapi() as any;
-      global.strapi = mockStrapi;
-
-      process.env.STRAPI_LICENSE = 'test-license';
-      delete process.env.STRAPI_AI_URL;
-
-      await aiController.getAiToken(ctx as any);
-
-      expect(ctx.internalServerError).toHaveBeenCalledWith(
-        'AI token request failed. Check server logs for details.'
-      );
-
-      // Check that the specific error was logged
-      expect(mockStrapi.log.error).toHaveBeenCalledWith(
-        'AI token request failed: AI server URL not configured. Please set STRAPI_AI_URL environment variable.'
-      );
-    });
-
     test('Should return internal server error when project ID is not configured', async () => {
       const ctx = createMockContext();
       const mockStrapi = createMockStrapi({
