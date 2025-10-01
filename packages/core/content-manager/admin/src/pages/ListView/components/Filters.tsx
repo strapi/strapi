@@ -108,6 +108,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
     return (
       [
         'id',
+        'documentId',
         ...allowedFields,
         ...DEFAULT_ALLOWED_FILTERS,
         ...(canReadAdminUsers ? CREATOR_FIELDS : []),
@@ -214,7 +215,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
       onChange={handleFilterChange}
     >
       <Filters.Trigger />
-      <Filters.Popover />
+      <Filters.Popover zIndex={499} />
       <Filters.List />
     </Filters.Root>
   );

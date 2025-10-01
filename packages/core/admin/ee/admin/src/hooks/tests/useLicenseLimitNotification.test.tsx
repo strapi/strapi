@@ -13,7 +13,7 @@ const baseLicenseInfo = {
   shouldStopCreate: true,
   licenseLimitStatus: 'AT_LIMIT',
   isHostedOnStrapiCloud: false,
-  licenseType: 'gold',
+  type: 'growth',
 };
 
 // TODO: refactor
@@ -109,21 +109,21 @@ describe('useLicenseLimitNotification', () => {
         "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
       title: 'Over seat limit (6/5)',
       link: {
-        url: 'https://strapi.io/billing/request-seats',
-        label: 'CONTACT SALES',
+        url: 'https://strapi.io/billing/manage-seats',
+        label: 'Manage seats',
       },
       blockTransition: true,
       onClose: expect.any(Function),
     });
   });
 
-  it('should have cloud billing url if is hosted on strapi cloud', () => {
+  it('should have Contact sales url if is Gold license', () => {
     // @ts-expect-error – mock
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
         ...baseLicenseInfo,
         licenseLimitStatus: 'OVER_LIMIT',
-        isHostedOnStrapiCloud: true,
+        type: 'gold',
       },
     }));
 
@@ -135,8 +135,8 @@ describe('useLicenseLimitNotification', () => {
         "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
       title: 'Over seat limit (5/5)',
       link: {
-        url: 'https://cloud.strapi.io/profile/billing',
-        label: 'ADD SEATS',
+        url: 'https://strapi.io/billing/request-seats',
+        label: 'Contact sales',
       },
       blockTransition: true,
       onClose: expect.any(Function),

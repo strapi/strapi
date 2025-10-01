@@ -1,3 +1,7 @@
+import jsonLogic from 'json-logic-js';
+
+type JsonLogicCondition = jsonLogic.RulesLogic<jsonLogic.AdditionalOperation>;
+
 /**
  * Enumerates all possible attribute types in Strapi.
  *
@@ -64,6 +68,13 @@ export interface Attribute<TKind extends Kind = Kind> {
    * Meaning that, if it's set to 'true', the attribute would be considered while performing a search operation.
    */
   searchable?: boolean;
+
+  /**
+   * Specifies conditional logic on an attribute's visibility.
+   */
+  conditions?: {
+    visible: JsonLogicCondition;
+  };
 
   /**
    * Database validations and settings

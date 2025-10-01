@@ -2,13 +2,13 @@ import * as React from 'react';
 
 import {
   Page,
-  Blocker,
   Form,
   useRBAC,
   useNotification,
   useQueryParams,
+  tours,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Main, Tabs } from '@strapi/design-system';
+import { Grid, Main, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -16,16 +16,18 @@ import { styled } from 'styled-components';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { type UseDocument, useDoc } from '../../hooks/useDocument';
+import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
+import { Blocker } from './components/Blocker';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels } from './components/Panels';
+import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
@@ -44,6 +46,7 @@ const EditViewPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
 
+  const doc = useDoc();
   const {
     document,
     meta,
@@ -56,7 +59,7 @@ const EditViewPage = () => {
     hasError,
     getTitle,
     getInitialFormValues,
-  } = useDoc();
+  } = doc;
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
 
@@ -93,6 +96,7 @@ const EditViewPage = () => {
       settings: { mainField },
     },
   } = useDocumentLayout(model);
+  const pageTitle = getTitle(mainField);
 
   const { isLazyLoading } = useLazyComponents([]);
 
@@ -125,75 +129,89 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Page.Title>{getTitle(mainField)}</Page.Title>
+      <Page.Title>{pageTitle}</Page.Title>
+      {isSingleType && (
+        <tours.contentManager.Introduction>
+          {/* Invisible Anchor */}
+          <Box />
+        </tours.contentManager.Introduction>
+      )}
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
         validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+          // removes hidden fields from the validation
+          // this is necessary because the yup schema doesn't know about the visibility conditions
+          // and we don't want to validate fields that are not visible
+          const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
+            schema,
+            initialValues,
+            components,
+          });
+
           const yupSchema = createYupSchema(schema?.attributes, components, {
             status,
+            removedAttributes,
             ...options,
           });
 
-          return yupSchema.validate(values, { abortEarly: false });
+          return yupSchema.validate(cleanedValues, { abortEarly: false });
         }}
         initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >
-        {({ resetForm }) => (
-          <>
-            <Header
-              isCreating={isCreatingDocument}
-              status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
-              title={getTitle(mainField)}
-            />
-            <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
-              <Tabs.List
-                aria-label={formatMessage({
-                  id: getTranslation('containers.edit.tabs.label'),
-                  defaultMessage: 'Document status',
-                })}
-              >
-                {hasDraftAndPublished ? (
-                  <>
-                    <StatusTab value="draft">
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.draft'),
-                        defaultMessage: 'draft',
-                      })}
-                    </StatusTab>
-                    <StatusTab
-                      disabled={!meta || meta.availableStatus.length === 0}
-                      value="published"
-                    >
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.published'),
-                        defaultMessage: 'published',
-                      })}
-                    </StatusTab>
-                  </>
-                ) : null}
-              </Tabs.List>
-              <Grid.Root paddingTop={8} gap={4}>
-                <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
-                  <Tabs.Content value="draft">
-                    <FormLayout layout={layout} />
-                  </Tabs.Content>
-                  <Tabs.Content value="published">
-                    <FormLayout layout={layout} />
-                  </Tabs.Content>
-                </Grid.Item>
-                <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
-                  <Panels />
-                </Grid.Item>
-              </Grid.Root>
-            </Tabs.Root>
-            <Blocker
-              // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-              onProceed={resetForm}
-            />
-          </>
-        )}
+        <>
+          <Header
+            isCreating={isCreatingDocument}
+            status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
+            title={pageTitle}
+          />
+          <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
+            <Tabs.List
+              aria-label={formatMessage({
+                id: getTranslation('containers.edit.tabs.label'),
+                defaultMessage: 'Document status',
+              })}
+            >
+              {hasDraftAndPublished ? (
+                <>
+                  <StatusTab value="draft">
+                    {formatMessage({
+                      id: getTranslation('containers.edit.tabs.draft'),
+                      defaultMessage: 'draft',
+                    })}
+                  </StatusTab>
+                  <StatusTab
+                    disabled={!meta || meta.availableStatus.length === 0}
+                    value="published"
+                  >
+                    {formatMessage({
+                      id: getTranslation('containers.edit.tabs.published'),
+                      defaultMessage: 'published',
+                    })}
+                  </StatusTab>
+                </>
+              ) : null}
+            </Tabs.List>
+            <Grid.Root paddingTop={8} gap={4}>
+              <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
+                <Tabs.Content value="draft">
+                  <tours.contentManager.Fields>
+                    <Box />
+                  </tours.contentManager.Fields>
+                  <FormLayout layout={layout} document={doc} />
+                </Tabs.Content>
+                <Tabs.Content value="published">
+                  <FormLayout layout={layout} document={doc} />
+                </Tabs.Content>
+              </Grid.Item>
+              <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
+                <Panels />
+              </Grid.Item>
+            </Grid.Root>
+          </Tabs.Root>
+          <Blocker />
+        </>
       </Form>
     </Main>
   );

@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { Button, Dialog, Flex } from '@strapi/design-system';
-import { Check, ArrowClockwise } from '@strapi/icons';
+import { Button, Dialog, Flex, Tooltip } from '@strapi/design-system';
+import { Check, ArrowClockwise, Eye, EyeStriked } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
@@ -117,7 +118,10 @@ interface FormHeadProps<TToken extends Token | null> {
   token: TToken;
   canEditInputs: boolean;
   canRegenerate: boolean;
+  canShowToken?: boolean;
   setToken: (token: TToken) => void;
+  toggleToken?: () => void;
+  showToken?: boolean;
   isSubmitting: boolean;
   regenerateUrl: string;
 }
@@ -126,6 +130,9 @@ export const FormHead = <TToken extends Token | null>({
   title,
   token,
   setToken,
+  toggleToken,
+  showToken,
+  canShowToken,
   canEditInputs,
   canRegenerate,
   isSubmitting,
@@ -137,6 +144,7 @@ export const FormHead = <TToken extends Token | null>({
       ...token,
       accessKey: newKey,
     });
+    toggleToken?.();
   };
 
   return (
@@ -150,6 +158,33 @@ export const FormHead = <TToken extends Token | null>({
                 onRegenerate={handleRegenerate}
                 url={`${regenerateUrl}${token?.id ?? ''}`}
               />
+            )}
+            {token?.id && toggleToken && (
+              <tours.apiTokens.ViewAPIToken>
+                <Tooltip
+                  label={
+                    !canShowToken &&
+                    formatMessage({
+                      id: 'Settings.tokens.encryptionKeyMissing',
+                      defaultMessage:
+                        'In order to view the token, you need a valid encryption key in the admin configuration',
+                    })
+                  }
+                >
+                  <Button
+                    type="button"
+                    startIcon={showToken ? <EyeStriked /> : <Eye />}
+                    variant="secondary"
+                    onClick={() => toggleToken?.()}
+                    disabled={!canShowToken}
+                  >
+                    {formatMessage({
+                      id: 'Settings.tokens.viewToken',
+                      defaultMessage: 'View token',
+                    })}
+                  </Button>
+                </Tooltip>
+              </tours.apiTokens.ViewAPIToken>
             )}
             <Button
               disabled={isSubmitting}

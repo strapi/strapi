@@ -27,12 +27,17 @@ import type {
 const documentApi = contentManagerApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    autoCloneDocument: builder.mutation<Clone.Response, Clone.Params & { query?: string }>({
-      query: ({ model, sourceId, query }) => ({
+    autoCloneDocument: builder.mutation<
+      Clone.Response,
+      Clone.Params & {
+        params?: Find.Request['query'] & Clone.Request['query'];
+      }
+    >({
+      query: ({ model, sourceId, params }) => ({
         url: `/content-manager/collection-types/${model}/auto-clone/${sourceId}`,
         method: 'POST',
         config: {
-          params: query,
+          params,
         },
       }),
       invalidatesTags: (_result, error, { model }) => {
@@ -40,7 +45,12 @@ const documentApi = contentManagerApi.injectEndpoints({
           return [];
         }
 
-        return [{ type: 'Document', id: `${model}_LIST` }, 'RecentDocumentList'];
+        return [
+          { type: 'Document', id: `${model}_LIST` },
+          'RecentDocumentList',
+          'CountDocuments',
+          'UpcomingReleasesList',
+        ];
       },
     }),
     cloneDocument: builder.mutation<
@@ -62,6 +72,8 @@ const documentApi = contentManagerApi.injectEndpoints({
         { type: 'Document', id: `${model}_LIST` },
         { type: 'UidAvailability', id: model },
         'RecentDocumentList',
+        'CountDocuments',
+        'UpcomingReleasesList',
       ],
     }),
     /**
@@ -88,6 +100,8 @@ const documentApi = contentManagerApi.injectEndpoints({
         'Relations',
         { type: 'UidAvailability', id: model },
         'RecentDocumentList',
+        'CountDocuments',
+        'UpcomingReleasesList',
       ],
       transformResponse: (response: Create.Response, meta, arg): Create.Response => {
         /**
@@ -128,6 +142,8 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_result, _error, { collectionType, model }) => [
         { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_LIST` : model },
         'RecentDocumentList',
+        'CountDocuments',
+        'UpcomingReleasesList',
       ],
     }),
     deleteManyDocuments: builder.mutation<
@@ -145,6 +161,8 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_res, _error, { model }) => [
         { type: 'Document', id: `${model}_LIST` },
         'RecentDocumentList',
+        'CountDocuments',
+        'UpcomingReleasesList',
       ],
     }),
     discardDocument: builder.mutation<
@@ -176,6 +194,8 @@ const documentApi = contentManagerApi.injectEndpoints({
           'Relations',
           { type: 'UidAvailability', id: model },
           'RecentDocumentList',
+          'CountDocuments',
+          'UpcomingReleasesList',
         ];
       },
     }),
@@ -329,6 +349,8 @@ const documentApi = contentManagerApi.injectEndpoints({
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
           'RecentDocumentList',
+          'CountDocuments',
+          'UpcomingReleasesList',
         ];
       },
     }),
@@ -344,8 +366,14 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_res, _error, { model, documentIds }) =>
-        documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
+      invalidatesTags: (_res, _error, { model, documentIds }) => {
+        return [
+          ...documentIds.map((id) => ({ type: 'Document' as const, id: `${model}_${id}` })),
+          'RecentDocumentList',
+          'CountDocuments',
+          'UpcomingReleasesList',
+        ];
+      },
     }),
     updateDocument: builder.mutation<
       Update.Response,
@@ -373,7 +401,8 @@ const documentApi = contentManagerApi.injectEndpoints({
           'Relations',
           { type: 'UidAvailability', id: model },
           'RecentDocumentList',
-          'RecentDocumentList',
+          'CountDocuments',
+          'UpcomingReleasesList',
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
@@ -389,6 +418,24 @@ const documentApi = contentManagerApi.injectEndpoints({
           // Rollback the optimistic update if there's an error
           patchResult.undo();
         }
+      },
+      transformResponse: (response: Update.Response, meta, arg): Update.Response => {
+        /**
+         * TODO v6
+         * Adapt plugin:users-permissions.user to return the same response
+         * shape as all other requests. The error is returned as expected.
+         */
+        if (!('data' in response) && arg.model === 'plugin::users-permissions.user') {
+          return {
+            data: response,
+            meta: {
+              availableStatus: [],
+              availableLocales: [],
+            },
+          };
+        }
+
+        return response;
       },
     }),
     unpublishDocument: builder.mutation<
@@ -417,6 +464,8 @@ const documentApi = contentManagerApi.injectEndpoints({
             id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
           'RecentDocumentList',
+          'CountDocuments',
+          'UpcomingReleasesList',
         ];
       },
     }),
@@ -438,6 +487,8 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_res, _error, { model, documentIds }) => [
         ...documentIds.map((id) => ({ type: 'Document' as const, id: `${model}_${id}` })),
         'RecentDocumentList',
+        'CountDocuments',
+        'UpcomingReleasesList',
       ],
     }),
   }),

@@ -27,6 +27,7 @@ import { command as generateCommand } from './generate';
 import { command as reportCommand } from './report';
 import { command as startCommand } from './start';
 import { command as versionCommand } from './version';
+import { command as openAPICommand } from './openapi';
 import exportCommand from './export/command';
 import importCommand from './import/command';
 import transferCommand from './transfer/command';
@@ -64,6 +65,7 @@ export const commands: StrapiCommand[] = [
   exportCommand,
   importCommand,
   transferCommand,
+  openAPICommand,
   /**
    * Cloud
    */

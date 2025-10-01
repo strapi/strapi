@@ -23,6 +23,11 @@ const { ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
   _.pick(role, ['id', 'name', 'description', 'code']);
 
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
+};
+
 /**
  * Remove private user fields
  * @param  user - user to sanitize
@@ -162,6 +167,31 @@ const isLastSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
 };
 
 /**
+ * Check if a user is the first super admin
+ * @param userId user's id to look for
+ */
+const isFirstSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
+  const currentUser = (await findOne(userId)) as AdminUser | null;
+
+  if (!currentUser || !hasSuperAdminRole(currentUser)) return false;
+
+  const [oldestUser] = await strapi.db.query('admin::user').findMany({
+    populate: {
+      roles: {
+        where: {
+          code: { $eq: SUPER_ADMIN_CODE },
+        },
+      },
+    },
+    orderBy: { createdAt: 'asc' },
+    limit: 1,
+    select: ['id'],
+  });
+
+  return oldestUser.id === currentUser.id;
+};
+
+/**
  * Check if a user with specific attributes exists in the database
  * @param attributes A partial user object
  */
@@ -274,6 +304,12 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
 
+  // Invalidate all sessions for the deleted user
+  const sessionManager = getSessionManager();
+  if (sessionManager && sessionManager.hasOrigin('admin')) {
+    await sessionManager('admin').invalidateRefreshToken(String(id));
+  }
+
   strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
 
   return deletedUser;
@@ -302,6 +338,12 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
       where: { id },
       populate: ['roles'],
     });
+
+    // Invalidate all sessions for the deleted user
+    const sessionManager = getSessionManager();
+    if (sessionManager && sessionManager.hasOrigin('admin')) {
+      await sessionManager('admin').invalidateRefreshToken(String(id));
+    }
 
     deletedUsers.push(deletedUser);
   }
@@ -390,4 +432,5 @@ export default {
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
   getLanguagesInUse,
+  isFirstSuperAdminUser,
 };

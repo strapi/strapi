@@ -286,7 +286,7 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
     const speed =
       elapsedTime > 0 ? `(${readableBytes(((stageData?.bytes ?? 0) * 1000) / elapsedTime)}/s)` : '';
 
-    loaders[stage].text = `${stage}: ${stageData?.count ?? 0} transfered (${size}) (${elapsed}) ${
+    loaders[stage].text = `${stage}: ${stageData?.count ?? 0} transferred (${size}) (${elapsed}) ${
       !stageData?.endTime ? speed : ''
     }`;
 

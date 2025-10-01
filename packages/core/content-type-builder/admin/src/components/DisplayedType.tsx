@@ -1,4 +1,3 @@
-import { Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils/getTrad';
@@ -7,12 +6,14 @@ type DisplayedTypeProps = {
   type: string;
   customField?: string | null;
   repeatable?: boolean;
+  multiple?: boolean;
 };
 
 export const DisplayedType = ({
   type,
   customField = null,
   repeatable = false,
+  multiple = false,
 }: DisplayedTypeProps) => {
   const { formatMessage } = useIntl();
 
@@ -25,28 +26,29 @@ export const DisplayedType = ({
   }
 
   if (customField) {
-    return (
-      <Typography>
-        {formatMessage({
-          id: getTrad('attribute.customField'),
-          defaultMessage: 'Custom field',
-        })}
-      </Typography>
-    );
+    return formatMessage({
+      id: getTrad('attribute.customField'),
+      defaultMessage: 'Custom field',
+    });
   }
 
   return (
-    <Typography textColor="neutral800">
+    <>
+      {repeatable &&
+        formatMessage({
+          id: getTrad('component.repeatable'),
+          defaultMessage: 'Repeatable',
+        })}
+      {multiple &&
+        formatMessage({
+          id: getTrad('media.multiple'),
+          defaultMessage: 'Multiple',
+        })}
+      &nbsp;
       {formatMessage({
         id: getTrad(`attribute.${readableType}`),
         defaultMessage: type,
       })}
-      &nbsp;
-      {repeatable &&
-        formatMessage({
-          id: getTrad('component.repeatable'),
-          defaultMessage: '(repeatable)',
-        })}
-    </Typography>
+    </>
   );
 };

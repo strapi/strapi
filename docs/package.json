@@ -25,11 +25,16 @@
       "last 1 safari version"
     ]
   },
+  "resolutions": {
+    "@babel/helpers": "7.27.0",
+    "@babel/runtime": "7.26.10",
+    "@babel/runtime-corejs3": "7.26.10"
+  },
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "1.1.0",
-    "@docusaurus/core": "3.7.0",
-    "@docusaurus/preset-classic": "3.7.0",
-    "@docusaurus/theme-mermaid": "3.7.0",
+    "@docusaurus/core": "3.8.1",
+    "@docusaurus/preset-classic": "3.8.1",
+    "@docusaurus/theme-mermaid": "3.8.1",
     "@mdx-js/react": "^3.0.0",
     "clsx": "^1.1.1",
     "prism-react-renderer": "^2.4.1",
@@ -37,7 +42,7 @@
     "react-dom": "18.3.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.7.0",
+    "@docusaurus/module-type-aliases": "3.8.1",
     "docusaurus-plugin-typedoc": "0.22.0",
     "typedoc": "0.25.9",
     "typedoc-plugin-markdown": "3.17.1",
