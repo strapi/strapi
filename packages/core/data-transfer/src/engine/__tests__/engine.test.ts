@@ -14,11 +14,7 @@ import type {
   ITransferEngineOptions,
   TransferFilterPreset,
 } from '../../../types';
-import {
-  extendExpectForDataTransferTests,
-  providerStages,
-  sourceStages,
-} from '../../__tests__/test-utils';
+import { extendExpectForDataTransferTests } from '../../__tests__/test-utils';
 import { TransferEngineValidationError } from '../errors';
 
 const getMockSourceStream = (data: Iterable<unknown>) => Readable.from(data);
@@ -690,20 +686,23 @@ describe('Transfer engine', () => {
       const source = createSource();
       const engine = createTransferEngine(source, completeDestination, defaultOptions);
 
-      let calls = 0;
+      const progressEvents: Record<string, number> = {};
       engine.progress.stream.on('stage::progress', ({ stage, data }) => {
         expect(TRANSFER_STAGES.includes(stage)).toBe(true);
         expect(data).toMatchObject(engine.progress.data);
-        calls += 1;
+        progressEvents[stage] = (progressEvents[stage] || 0) + 1;
       });
 
       await engine.transfer();
 
-      // Two values are emitted by default for each stage
-      // TODO: this is no longer true, we should be checking the sum of the various mocked streams
-      const itemPerStage = 3;
+      // Each stage should emit at least one progress event
+      TRANSFER_STAGES.forEach((stage) => {
+        expect(progressEvents[stage]).toBeGreaterThanOrEqual(1);
+      });
 
-      expect(calls).toEqual((sourceStages.length - providerStages.length) * itemPerStage);
+      // For assets, the number of progress events should match the number of chunks plus one for each asset's 'end' event
+      // (from getAssetsMockSourceStream default: [ [1,2,3], [4,5,6,7,8,9] ] => 3 + 6 = 9, plus 2 'end' events = 11)
+      expect(progressEvents.assets).toBe(11);
     });
 
     test("emits 'stage::start' events", async () => {
