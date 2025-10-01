@@ -147,7 +147,12 @@ export const MediaLibrary = () => {
   const assetCount = assets?.length ?? 0;
   const totalAssetCount = assetsData?.pagination?.total;
 
-  const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading || aiAvailabilityStatus === 'loading';
+  const isLoading =
+    isCurrentFolderLoading ||
+    foldersLoading ||
+    permissionsLoading ||
+    assetsLoading ||
+    aiAvailabilityStatus === 'loading';
   const [showUploadAssetDialog, setShowUploadAssetDialog] = React.useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = React.useState(false);
   const [assetToEdit, setAssetToEdit] = React.useState<Asset | undefined>(undefined);

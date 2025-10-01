@@ -1,4 +1,4 @@
-import { useSettings } from "./useSettings";
+import { useSettings } from './useSettings';
 
 export const useAIAvailability = () => {
   const isAiEnabled = window.strapi.ai?.enabled !== false;
@@ -6,10 +6,10 @@ export const useAIAvailability = () => {
   const isEE = window.strapi?.isEE;
   const shouldMakeRequest = isAiEnabled && isEE;
 
-  const {status, data} = useSettings(shouldMakeRequest);
+  const { status, data } = useSettings(shouldMakeRequest);
 
   if (!shouldMakeRequest) {
-    return {status: 'success' as const, isEnabled: false};
+    return { status: 'success' as const, isEnabled: false };
   }
 
   return { status, isEnabled: data?.aiMetadata };

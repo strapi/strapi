@@ -31,6 +31,9 @@ describe('AI Metadata Service', () => {
     jest.clearAllMocks();
 
     mockStrapi = {
+      config: {
+        get: jest.fn(),
+      },
       ee: {
         isEE: true,
       },
@@ -68,7 +71,8 @@ describe('AI Metadata Service', () => {
   });
 
   describe('isEnabled', () => {
-    it('should return true when AI is enabled and EE is available', async () => {
+    it('should return true when AI is enabled, EE is available and aiMetadata is set to true', async () => {
+      mockStrapi.config.get.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
       mockStrapi.ee.isEE = true;
 
@@ -77,6 +81,7 @@ describe('AI Metadata Service', () => {
     });
 
     it('should return false when AI is disabled but EE is available', async () => {
+      mockStrapi.config.get.mockReturnValue(false);
       mockGetSettings.mockResolvedValue({ aiMetadata: false });
       mockStrapi.ee.isEE = true;
 
@@ -84,6 +89,7 @@ describe('AI Metadata Service', () => {
     });
 
     it('should return false when AI is enabled but EE is not available', async () => {
+      mockStrapi.config.get.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMMetadata: true });
       mockStrapi.ee.isEE = false;
 
@@ -91,8 +97,17 @@ describe('AI Metadata Service', () => {
     });
 
     it('should return false when both AI and EE are disabled', async () => {
+      mockStrapi.config.get.mockReturnValue(false);
       mockGetSettings.mockResolvedValue({ aiMetadata: false });
       mockStrapi.ee.isEE = false;
+
+      expect(await aiMetadataService.isEnabled()).toBe(false);
+    });
+
+    it('should return false when both AI and EE are enabled but aiMetadata is disabled', async () => {
+      mockStrapi.config.get.mockReturnValue(true);
+      mockGetSettings.mockResolvedValue({ aiMetadata: false });
+      mockStrapi.ee.isEE = true;
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
     });
@@ -115,6 +130,7 @@ describe('AI Metadata Service', () => {
 
     beforeEach(() => {
       // Mock service as enabled by default
+      mockStrapi.config.get.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
       mockStrapi.ee.isEE = true;
 
@@ -125,11 +141,29 @@ describe('AI Metadata Service', () => {
 
     describe('error cases', () => {
       it('should throw error when service is disabled', async () => {
+        mockStrapi.config.get.mockReturnValue(false);
         mockGetSettings.mockResolvedValue({ aiMetadata: false });
 
         await expect(aiMetadataService.processFiles([mockImageFile])).rejects.toThrow(
           'AI Metadata service is not enabled'
         );
+      });
+
+      it('should throw if getSettings throws an error', async () => {
+        mockStrapi.config.get.mockReturnValue(true);
+        mockGetSettings.mockRejectedValue(new Error('Settings error'));
+        mockStrapi.ee.isEE = true;
+
+        const mockImageFile2: InputFile = {
+          filepath: '/tmp/image2.png',
+          mimetype: 'image/png',
+          originalFilename: 'image2.png',
+          size: 2048,
+        } as InputFile;
+
+        const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
+
+        await expect(aiMetadataService.processFiles(files)).rejects.toThrow('Settings error');
       });
     });
 
@@ -157,6 +191,12 @@ describe('AI Metadata Service', () => {
     });
 
     describe('image file processing', () => {
+      const mockImageFile2: InputFile = {
+        filepath: '/tmp/image2.png',
+        mimetype: 'image/png',
+        originalFilename: 'image2.png',
+        size: 2048,
+      } as InputFile;
       it('should process single image file correctly', async () => {
         const expectedMetadata = { altText: 'A beautiful image', caption: 'Image caption' };
 
@@ -210,13 +250,6 @@ describe('AI Metadata Service', () => {
       });
 
       it('should handle mixed file types with correct sparse array mapping', async () => {
-        const mockImageFile2: InputFile = {
-          filepath: '/tmp/image2.png',
-          mimetype: 'image/png',
-          originalFilename: 'image2.png',
-          size: 2048,
-        } as InputFile;
-
         const expectedMetadata = [
           { altText: 'First image', caption: 'First caption' },
           { altText: 'Second image', caption: 'Second caption' },
@@ -239,6 +272,45 @@ describe('AI Metadata Service', () => {
           expectedMetadata[1], // second image
           null, // pdf
         ]);
+      });
+
+      it('should not call fetch and throw if aiMetadata is false, even if AI and EE are enabled', async () => {
+        mockStrapi.config.get.mockReturnValue(true);
+        mockGetSettings.mockResolvedValue({ aiMetadata: false });
+        mockStrapi.ee.isEE = true;
+
+        const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
+
+        await expect(aiMetadataService.processFiles(files)).rejects.toThrow(
+          'AI Metadata service is not enabled'
+        );
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should throw if aiMetadata is missing from settings', async () => {
+        mockStrapi.config.get.mockReturnValue(true);
+        mockGetSettings.mockResolvedValue({});
+        mockStrapi.ee.isEE = true;
+
+        const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
+
+        await expect(aiMetadataService.processFiles(files)).rejects.toThrow(
+          'AI Metadata service is not enabled'
+        );
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should throw if AI is enabled, EE is disabled, aiMetadata is enabled', async () => {
+        mockStrapi.config.get.mockReturnValue(true);
+        mockGetSettings.mockResolvedValue({ aiMetadata: true });
+        mockStrapi.ee.isEE = false;
+
+        const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
+
+        await expect(aiMetadataService.processFiles(files)).rejects.toThrow(
+          'AI Metadata service is not enabled'
+        );
+        expect(mockFetch).not.toHaveBeenCalled();
       });
     });
   });
