@@ -6,10 +6,11 @@ import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/desi
 import { Check, Sparkle } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation } from 'react-query';
 
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
+import { useSettings } from '../../hooks/useSettings';
 import { getTrad } from '../../utils';
 
 import { init } from './init';
@@ -20,20 +21,11 @@ import type { InitialState } from './reducer';
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const { get, put } = useFetchClient();
+  const { put } = useFetchClient();
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['upload', 'settings'],
-    async queryFn() {
-      const {
-        data: { data },
-      } = await get('/upload/settings');
-
-      return data;
-    },
-  });
+  const { data, isLoading, refetch } = useSettings();
 
   React.useEffect(() => {
     if (data) {

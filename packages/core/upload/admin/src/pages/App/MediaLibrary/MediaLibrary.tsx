@@ -89,7 +89,7 @@ export const MediaLibrary = () => {
     canConfigureView,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
-  const isAiAvailable = useAIAvailability();
+  const { isEnabled: isAiEnabled, status: aiAvailabilityStatus } = useAIAvailability();
   const currentFolderToEditRef = React.useRef<HTMLDivElement>();
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
@@ -147,7 +147,12 @@ export const MediaLibrary = () => {
   const assetCount = assets?.length ?? 0;
   const totalAssetCount = assetsData?.pagination?.total;
 
-  const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
+  const isLoading =
+    isCurrentFolderLoading ||
+    foldersLoading ||
+    permissionsLoading ||
+    assetsLoading ||
+    aiAvailabilityStatus === 'loading';
   const [showUploadAssetDialog, setShowUploadAssetDialog] = React.useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = React.useState(false);
   const [assetToEdit, setAssetToEdit] = React.useState<Asset | undefined>(undefined);
@@ -230,7 +235,7 @@ export const MediaLibrary = () => {
     return <Page.Loading />;
   }
 
-  if (assetsError || foldersError) {
+  if (assetsError || foldersError || aiAvailabilityStatus === 'error') {
     return <Page.Error />;
   }
 
@@ -523,7 +528,7 @@ export const MediaLibrary = () => {
         </Layouts.Content>
       </Page.Main>
       {showUploadAssetDialog &&
-        (isAiAvailable ? (
+        (isAiEnabled ? (
           <AIUploadModal open={showUploadAssetDialog} onClose={toggleUploadAssetDialog} />
         ) : (
           <UploadAssetDialog
