@@ -66,7 +66,8 @@ const createYupSchema = (
         Object.entries(attributes).reduce<ObjectShape>((acc, [name, attribute]) => {
           const getNestedPathsForAttribute = (removed: string[], attrName: string): string[] => {
             const prefix = `${attrName}.`;
-            const bracketRegex = new RegExp(`^${escapeRegex(attrName)}\\[\\d+\\]\\.`);
+            // Match both numeric indices [0] and __temp_key__ values [some_key]
+            const bracketRegex = new RegExp(`^${escapeRegex(attrName)}\\[[^\\]]+\\]\\.`);
 
             return removed
               .filter((p) => p.startsWith(prefix) || bracketRegex.test(p))
