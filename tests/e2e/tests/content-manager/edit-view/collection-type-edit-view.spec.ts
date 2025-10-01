@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, findAndClose } from '../../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
 
 test.describe('Edit View', () => {
@@ -77,8 +77,7 @@ test.describe('Edit View', () => {
       await findAndClose(page, 'Saved Document');
 
       // As super admin remove read permission for the name field for the Editor role
-      clickAndWait(page, page.getByRole('link', { name: 'Settings' }));
-      await page.getByRole('link', { name: 'Roles' }).first().click();
+      await navToHeader(page, ['Settings', ['Administration Panel', 'Roles']], 'Roles');
       await page.getByText('Editor', { exact: true }).click();
 
       await page.getByLabel('Select all Product permissions').click();

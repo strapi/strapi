@@ -12,6 +12,7 @@ const theme = {
 };
 
 const wrapper = ({ children }: { children: React.ReactNode }) => {
+  // @ts-expect-error - partial theme for testing
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 };
 
