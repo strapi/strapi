@@ -121,6 +121,13 @@ describe('AI Metadata Service', () => {
       size: 1024,
     } as InputFile;
 
+    const mockImageFile2: InputFile = {
+      filepath: '/tmp/image2.png',
+      mimetype: 'image/png',
+      originalFilename: 'image2.png',
+      size: 2048,
+    } as InputFile;
+
     const mockPdfFile: InputFile = {
       filepath: '/tmp/document.pdf',
       mimetype: 'application/pdf',
@@ -154,13 +161,6 @@ describe('AI Metadata Service', () => {
         mockGetSettings.mockRejectedValue(new Error('Settings error'));
         mockStrapi.ee.isEE = true;
 
-        const mockImageFile2: InputFile = {
-          filepath: '/tmp/image2.png',
-          mimetype: 'image/png',
-          originalFilename: 'image2.png',
-          size: 2048,
-        } as InputFile;
-
         const files = [mockImageFile, mockPdfFile, mockImageFile2, mockPdfFile];
 
         await expect(aiMetadataService.processFiles(files)).rejects.toThrow('Settings error');
@@ -191,12 +191,6 @@ describe('AI Metadata Service', () => {
     });
 
     describe('image file processing', () => {
-      const mockImageFile2: InputFile = {
-        filepath: '/tmp/image2.png',
-        mimetype: 'image/png',
-        originalFilename: 'image2.png',
-        size: 2048,
-      } as InputFile;
       it('should process single image file correctly', async () => {
         const expectedMetadata = { altText: 'A beautiful image', caption: 'Image caption' };
 
@@ -224,13 +218,6 @@ describe('AI Metadata Service', () => {
       });
 
       it('should process multiple image files correctly', async () => {
-        const mockImageFile2: InputFile = {
-          filepath: '/tmp/image2.png',
-          mimetype: 'image/png',
-          originalFilename: 'image2.png',
-          size: 2048,
-        } as InputFile;
-
         const expectedMetadata = [
           { altText: 'First image', caption: 'First caption' },
           { altText: 'Second image', caption: 'Second caption' },
