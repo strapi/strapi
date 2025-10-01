@@ -1,5 +1,6 @@
-import { useQuery } from 'react-query';
 import { useFetchClient } from '@strapi/admin/strapi-admin';
+import { useQuery } from 'react-query';
+
 import type { GetSettings } from '../../../shared/contracts/settings';
 
 export function useSettings(isEnabled: boolean = true) {

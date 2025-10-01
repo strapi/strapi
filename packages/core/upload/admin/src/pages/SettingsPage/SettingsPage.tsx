@@ -6,12 +6,12 @@ import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/desi
 import { Check, Sparkle } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation } from 'react-query';
 
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
-import { getTrad } from '../../utils';
 import { useSettings } from '../../hooks/useSettings';
+import { getTrad } from '../../utils';
 
 import { init } from './init';
 import { initialState, reducer } from './reducer';
