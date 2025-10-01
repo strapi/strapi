@@ -1,7 +1,7 @@
 import { createCommand } from 'commander';
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
-import inquirer from 'inquirer';
+import inquirer, { type DistinctQuestion } from 'inquirer';
 import { createStrapi, compileStrapi } from '@strapi/core';
 
 import { runAction } from '../../utils/helpers';
@@ -40,18 +40,18 @@ interface Answers {
 
 /**
  * It's not an observable, in reality this is
- * `ReadOnlyArray<inquirer.DistinctQuestion<Answers>>`
+ * `Array<DistinctQuestion<Answers>>`
  * but then the logic of the validate function needs to change.
  */
 // eslint-disable-next-line rxjs/finnish
-const promptQuestions: inquirer.QuestionCollection<Answers> = [
+const promptQuestions: Array<DistinctQuestion<Answers>> = [
   {
     type: 'input',
     name: 'email',
     message: 'Admin email?',
     async validate(value: string) {
       const validEmail = await emailValidator.validate(value);
-      return validEmail === value || validEmail;
+      return validEmail === value || validEmail || false;
     },
   },
   {
@@ -60,7 +60,7 @@ const promptQuestions: inquirer.QuestionCollection<Answers> = [
     message: 'Admin password?',
     async validate(value: string) {
       const validPassword = await passwordValidator.validate(value);
-      return validPassword === value || validPassword;
+      return validPassword === value || validPassword || false;
     },
   },
   { type: 'input', name: 'firstname', message: 'First name?' },
