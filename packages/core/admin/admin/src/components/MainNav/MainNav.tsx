@@ -3,7 +3,7 @@ import { styled } from 'styled-components';
 
 const MainNavWrapper = styled(Flex)`
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
-  position: fixed;
+  position: sticky;
   max-height: 100%;
   height: auto;
   z-index: 4;
@@ -11,7 +11,6 @@ const MainNavWrapper = styled(Flex)`
   ${({ theme }) => theme.breakpoints.large} {
     border-bottom: none;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
-    position: sticky;
     height: 100dvh;
   }
 `;

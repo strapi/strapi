@@ -551,7 +551,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   return (
     <Layouts.Content>
-      <Flex gap={8} direction="column" alignItems="stretch">
+      <Flex gap={4} direction="column" alignItems="stretch">
         <Flex>
           <SingleSelect
             placeholder={groupByLabel}
@@ -676,13 +676,15 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             </Table.Root>
           </Flex>
         ))}
-        <Pagination.Root
-          {...releaseMeta?.pagination}
-          defaultPageSize={releaseMeta?.pagination?.pageSize}
-        >
-          <Pagination.PageSize />
-          <Pagination.Links />
-        </Pagination.Root>
+        {releaseMeta?.pagination?.pageCount && releaseMeta.pagination.pageCount > 1 && (
+          <Pagination.Root
+            {...releaseMeta?.pagination}
+            defaultPageSize={releaseMeta?.pagination?.pageSize}
+          >
+            <Pagination.PageSize />
+            <Pagination.Links />
+          </Pagination.Root>
+        )}
       </Flex>
     </Layouts.Content>
   );

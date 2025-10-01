@@ -340,8 +340,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   max-width: 100%;
   display: grid;
   grid-template-columns: 1fr;
-  overflow: hidden;
-  height: calc(100dvh - 5.6rem - 1px);
+  padding: 0;
 }
 
 .c2 {
@@ -430,12 +429,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   }
 }
 
-@media (min-width: 1080px) {
-  .c0 {
-    height: 100dvh;
-  }
-}
-
 @media (min-width: 768px) {
   .c2 {
     transform: none;
@@ -449,6 +442,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   >
     <div
       class="c1 c2"
+      data-strapi-main-content="true"
     >
       <main
         aria-labelledby="main-content-title"
@@ -457,86 +451,88 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
         tabindex="-1"
       >
         <form>
-          <div
-            style="height: 0px;"
-          >
+          <div>
             <div
-              class="c4"
-              data-strapi-header="true"
+              style="height: 0px;"
             >
               <div
-                class="c5"
+                class="c4"
+                data-strapi-header="true"
               >
-                <a
-                  aria-disabled="false"
-                  class="c6 c7 c8"
-                  href="/plugins/upload"
-                  id="go-back"
-                >
-                  <svg
-                    fill="currentColor"
-                    height="16"
-                    viewBox="0 0 32 32"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H8.625l6.44 6.439a1.502 1.502 0 1 1-2.125 2.125l-9-9a1.5 1.5 0 0 1 0-2.125l9-9a1.503 1.503 0 0 1 2.125 2.125L8.625 14.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                    />
-                  </svg>
-                  <span
-                    class="c9"
-                  >
-                    Back
-                  </span>
-                </a>
                 <div
-                  class="c10"
+                  class="c5"
                 >
+                  <a
+                    aria-disabled="false"
+                    class="c6 c7 c8"
+                    href="/plugins/upload"
+                    id="go-back"
+                  >
+                    <svg
+                      fill="currentColor"
+                      height="16"
+                      viewBox="0 0 32 32"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H8.625l6.44 6.439a1.502 1.502 0 1 1-2.125 2.125l-9-9a1.5 1.5 0 0 1 0-2.125l9-9a1.503 1.503 0 0 1 2.125 2.125L8.625 14.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                      />
+                    </svg>
+                    <span
+                      class="c9"
+                    >
+                      Back
+                    </span>
+                  </a>
                   <div
-                    class="c11 c12"
+                    class="c10"
                   >
-                    <h1
-                      class="c13"
+                    <div
+                      class="c11 c12"
                     >
-                      Configure the view - Media Library
-                    </h1>
-                  </div>
-                  <button
-                    aria-disabled="true"
-                    class="c14 c15 c16"
-                    disabled=""
-                    type="submit"
-                  >
-                    <span
-                      aria-hidden="true"
-                      class="c12"
-                    >
-                      <svg
-                        fill="currentColor"
-                        height="16"
-                        viewBox="0 0 32 32"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <h1
+                        class="c13"
                       >
-                        <path
-                          d="m29.061 10.061-16 16a1.5 1.5 0 0 1-2.125 0l-7-7a1.504 1.504 0 0 1 2.125-2.125L12 22.875 26.939 7.939a1.502 1.502 0 1 1 2.125 2.125z"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      class="c17"
+                        Configure the view - Media Library
+                      </h1>
+                    </div>
+                    <button
+                      aria-disabled="true"
+                      class="c14 c15 c16"
+                      disabled=""
+                      type="submit"
                     >
-                      Save
-                    </span>
-                  </button>
+                      <span
+                        aria-hidden="true"
+                        class="c12"
+                      >
+                        <svg
+                          fill="currentColor"
+                          height="16"
+                          viewBox="0 0 32 32"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="m29.061 10.061-16 16a1.5 1.5 0 0 1-2.125 0l-7-7a1.504 1.504 0 0 1 2.125-2.125L12 22.875 26.939 7.939a1.502 1.502 0 1 1 2.125 2.125z"
+                          />
+                        </svg>
+                      </span>
+                      <span
+                        class="c17"
+                      >
+                        Save
+                      </span>
+                    </button>
+                  </div>
                 </div>
+                <p
+                  class="c18 c19"
+                >
+                  Define the view settings of the media library.
+                </p>
               </div>
-              <p
-                class="c18 c19"
-              >
-                Define the view settings of the media library.
-              </p>
             </div>
           </div>
           <div

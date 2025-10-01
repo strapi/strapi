@@ -528,6 +528,7 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
         onClick={() => {
           setIsModalOpen(true);
         }}
+        position="relative"
       >
         {isDesktop && (
           <DragButton
@@ -551,7 +552,7 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
             <Typography ellipsis fontWeight="bold">
               {value.label}
             </Typography>
-            <Flex>
+            <Flex position="relative">
               <IconButton
                 type="button"
                 variant="ghost"

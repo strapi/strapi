@@ -110,11 +110,12 @@ const AdminLayout = () => {
               {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
             </SkipToContent>
             <Flex
-              alignItems="flex-start"
-              paddingTop={{
-                initial: `calc(${HEIGHT_TOP_NAVIGATION} + 1px)`,
-                large: 0,
+              height="100dvh"
+              direction={{
+                initial: 'column',
+                large: 'row',
               }}
+              alignItems="flex-start"
             >
               <LeftMenu
                 generalSectionLinks={generalSectionLinks}
@@ -122,7 +123,15 @@ const AdminLayout = () => {
                 topMobileNavigation={topMobileNavigation}
                 burgerMobileNavigation={burgerMobileNavigation}
               />
-              <Box flex={1}>
+              <Box
+                flex={1}
+                overflow="auto"
+                width="100%"
+                height={{
+                  initial: 'auto',
+                  large: '100%',
+                }}
+              >
                 <UpsellBanner />
                 <Outlet />
               </Box>

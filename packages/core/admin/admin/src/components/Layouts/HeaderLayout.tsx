@@ -30,7 +30,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
         <Box
           display={{
             initial: 'none',
-            large: 'block',
+            large: 'flex',
           }}
           paddingLeft={6}
           paddingRight={6}
@@ -38,7 +38,6 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           paddingBottom={2}
           position="fixed"
           top={0}
-          right={0}
           background="neutral0"
           shadow="tableShadow"
           width={`${width}px`}
@@ -46,7 +45,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           minHeight={HEIGHT_TOP_NAVIGATION}
           data-strapi-header-sticky
         >
-          <Flex justifyContent="space-between" wrap="wrap">
+          <Flex alignItems="center" justifyContent="space-between" wrap="wrap" width="100%">
             <Flex>
               {navigationAction && <Box paddingRight={3}>{navigationAction}</Box>}
               <Box>
@@ -131,26 +130,33 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
     threshold: 0,
   });
 
-  useResizeObserver([containerRef, baseHeaderLayoutRef], () => {
-    if (baseHeaderLayoutRef.current) {
-      setHeaderSize(baseHeaderLayoutRef.current.getBoundingClientRect());
+  useResizeObserver([containerRef], () => {
+    if (containerRef.current) {
+      const newSize = containerRef.current.getBoundingClientRect();
+      setHeaderSize((prevSize) => {
+        // Only update if size actually changed
+        if (!prevSize || prevSize.height !== newSize.height || prevSize.width !== newSize.width) {
+          return newSize;
+        }
+        return prevSize;
+      });
     }
   });
 
   React.useEffect(() => {
-    if (baseHeaderLayoutRef.current) {
-      setHeaderSize(baseHeaderLayoutRef.current.getBoundingClientRect());
+    if (containerRef.current) {
+      setHeaderSize(containerRef.current.getBoundingClientRect());
     }
-  }, [baseHeaderLayoutRef]);
+  }, [containerRef]);
 
   return (
-    <>
-      <div style={{ height: headerSize?.height }} ref={containerRef}>
+    <div ref={containerRef}>
+      <div style={{ height: headerSize?.height }}>
         {isVisible && <BaseHeaderLayout ref={baseHeaderLayoutRef} {...props} />}
       </div>
 
       {!isVisible && <BaseHeaderLayout {...props} sticky width={headerSize?.width} />}
-    </>
+    </div>
   );
 };
 

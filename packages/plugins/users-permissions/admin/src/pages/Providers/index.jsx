@@ -144,7 +144,7 @@ export const ProvidersPage = () => {
   }
 
   return (
-    <>
+    <Page.Main>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -156,83 +156,81 @@ export const ProvidersPage = () => {
           }
         )}
       </Page.Title>
-      <Page.Main>
-        <Layouts.Header
-          title={formatMessage({
-            id: getTrad('HeaderNav.link.providers'),
-            defaultMessage: 'Providers',
-          })}
-        />
-        <Layouts.Content>
-          <Table colCount={3} rowCount={providers.length + 1}>
-            <Thead>
-              <Tr>
-                <Th>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
+      <Layouts.Header
+        title={formatMessage({
+          id: getTrad('HeaderNav.link.providers'),
+          defaultMessage: 'Providers',
+        })}
+      />
+      <Layouts.Content>
+        <Table colCount={3} rowCount={providers.length + 1}>
+          <Thead>
+            <Tr>
+              <Th>
+                <Typography variant="sigma" textColor="neutral600">
+                  {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
+                </Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma" textColor="neutral600">
+                  {formatMessage({ id: getTrad('Providers.status'), defaultMessage: 'Status' })}
+                </Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">
+                  <VisuallyHidden>
+                    {formatMessage({
+                      id: 'global.settings',
+                      defaultMessage: 'Settings',
+                    })}
+                  </VisuallyHidden>
+                </Typography>
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {providers.map((provider) => (
+              <Tr
+                key={provider.name}
+                onClick={() => (canUpdate ? handleClickEdit(provider) : undefined)}
+              >
+                <Td width="45%">
+                  <Typography fontWeight="semiBold" textColor="neutral800">
+                    {provider.name}
                   </Typography>
-                </Th>
-                <Th>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {formatMessage({ id: getTrad('Providers.status'), defaultMessage: 'Status' })}
+                </Td>
+                <Td width="65%">
+                  <Typography
+                    textColor={provider.enabled ? 'success600' : 'danger600'}
+                    data-testid={`enable-${provider.name}`}
+                  >
+                    {provider.enabled
+                      ? formatMessage({
+                          id: 'global.enabled',
+                          defaultMessage: 'Enabled',
+                        })
+                      : formatMessage({
+                          id: 'global.disabled',
+                          defaultMessage: 'Disabled',
+                        })}
                   </Typography>
-                </Th>
-                <Th>
-                  <Typography variant="sigma">
-                    <VisuallyHidden>
-                      {formatMessage({
-                        id: 'global.settings',
-                        defaultMessage: 'Settings',
-                      })}
-                    </VisuallyHidden>
-                  </Typography>
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {providers.map((provider) => (
-                <Tr
-                  key={provider.name}
-                  onClick={() => (canUpdate ? handleClickEdit(provider) : undefined)}
-                >
-                  <Td width="45%">
-                    <Typography fontWeight="semiBold" textColor="neutral800">
-                      {provider.name}
-                    </Typography>
-                  </Td>
-                  <Td width="65%">
-                    <Typography
-                      textColor={provider.enabled ? 'success600' : 'danger600'}
-                      data-testid={`enable-${provider.name}`}
+                </Td>
+                <Td onClick={(e) => e.stopPropagation()}>
+                  {canUpdate && (
+                    <IconButton
+                      onClick={() => handleClickEdit(provider)}
+                      variant="ghost"
+                      label="Edit"
                     >
-                      {provider.enabled
-                        ? formatMessage({
-                            id: 'global.enabled',
-                            defaultMessage: 'Enabled',
-                          })
-                        : formatMessage({
-                            id: 'global.disabled',
-                            defaultMessage: 'Disabled',
-                          })}
-                    </Typography>
-                  </Td>
-                  <Td onClick={(e) => e.stopPropagation()}>
-                    {canUpdate && (
-                      <IconButton
-                        onClick={() => handleClickEdit(provider)}
-                        variant="ghost"
-                        label="Edit"
-                      >
-                        <Pencil />
-                      </IconButton>
-                    )}
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </Layouts.Content>
-      </Page.Main>
+                      <Pencil />
+                    </IconButton>
+                  )}
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Layouts.Content>
       <FormModal
         initialData={data[providerToEditName]}
         isOpen={isOpen}
@@ -249,7 +247,7 @@ export const ProvidersPage = () => {
         onSubmit={handleSubmit}
         providerToEditName={providerToEditName}
       />
-    </>
+    </Page.Main>
   );
 };
 

@@ -19,14 +19,17 @@ const GridContainer = styled(Box)<{ $hasSideNav: boolean }>`
   max-width: 100%;
   display: grid;
   grid-template-columns: 1fr;
-  overflow: hidden;
-  height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px);
+  /* overflow: hidden;
+  height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px); */
+  padding: 0;
 
   ${({ theme }) => theme.breakpoints.medium} {
     grid-template-columns: ${({ $hasSideNav }) => ($hasSideNav ? `auto 1fr` : '1fr')};
   }
   ${({ theme }) => theme.breakpoints.large} {
-    height: 100dvh;
+    /* overflow: inherit;
+    height: auto; */
+    /* height: 100dvh; */
   }
 `;
 
@@ -52,12 +55,10 @@ const OverflowingItem = styled(Box)`
 
 const RootLayout = ({ sideNav, children }: LayoutProps) => (
   <GridContainer $hasSideNav={Boolean(sideNav)}>
-    {sideNav && (
-      <>
-        <SideNavContainer>{sideNav}</SideNavContainer>
-      </>
-    )}
-    <OverflowingItem paddingBottom={RESPONSIVE_DEFAULT_SPACING}>{children}</OverflowingItem>
+    {sideNav && <SideNavContainer>{sideNav}</SideNavContainer>}
+    <OverflowingItem paddingBottom={RESPONSIVE_DEFAULT_SPACING} data-strapi-main-content>
+      {children}
+    </OverflowingItem>
   </GridContainer>
 );
 
