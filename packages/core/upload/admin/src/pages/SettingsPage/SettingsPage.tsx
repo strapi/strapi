@@ -130,7 +130,9 @@ export const SettingsPage = () => {
                   <Grid.Root gap={6}>
                     <Grid.Item col={8} s={12} direction="column" alignItems="stretch">
                       <Flex gap={2}>
-                        <Sparkle color="#8312D1" />
+                        <Box color="alternative700">
+                          <Sparkle />
+                        </Box>
                         <Typography variant="delta" tag="h2">
                           {formatMessage({
                             id: getTrad('settings.form.aiMetadata.label'),

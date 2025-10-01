@@ -346,7 +346,8 @@ export const AIAssetCard = ({
                   defaultMessage: 'Enter caption',
                 })}
                 endAction={
-                  !wasCaptionChanged && <Sparkle width="16px" height="16px" fill="#AC73E6" />
+                  !wasCaptionChanged &&
+                  asset.caption && <Sparkle width="16px" height="16px" fill="#AC73E6" />
                 }
               />
             </Field.Root>
@@ -375,7 +376,8 @@ export const AIAssetCard = ({
                   defaultMessage: 'Enter alternative text',
                 })}
                 endAction={
-                  !wasAltTextChanged && <Sparkle width="16px" height="16px" fill="#AC73E6" />
+                  !wasAltTextChanged &&
+                  asset.alternativeText && <Sparkle width="16px" height="16px" fill="#AC73E6" />
                 }
               />
               <Field.Hint />
