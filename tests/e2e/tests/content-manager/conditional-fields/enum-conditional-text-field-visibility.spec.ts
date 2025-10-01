@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../../helpers/dts-import';
 import { login } from '../../../utils/login';
 import { createContent, fillField } from '../../../utils/content-creation';
 import { findAndClose, navToHeader } from '../../../utils/shared';
