@@ -323,6 +323,72 @@ const handleTabOnList = (editor: Editor) => {
   }
 };
 
+/**
+ * Common handler for the shift+tab key on ordered and unordered lists (un-indentation)
+ */
+
+const hasChildren = (node: any): node is { children: unknown[] } => {
+  return typeof node === 'object' && node !== null && 'children' in node;
+};
+
+const handleShiftTabOnList = (editor: Editor) => {
+  const currentListItemEntry = Editor.above(editor, {
+    match: (node) => !Editor.isEditor(node) && 'type' in node && node.type === 'list-item',
+  });
+
+  if (!currentListItemEntry || !editor.selection) {
+    return;
+  }
+
+  const [, currentListItemPath] = currentListItemEntry;
+
+  const [currentList] = Editor.parent(editor, currentListItemPath);
+
+  if (
+    !Editor.isEditor(currentList) &&
+    hasChildren(currentList) &&
+    (currentList as any).type === 'list'
+  ) {
+    const parentListPath = Path.parent(currentListItemPath);
+
+    const [parentList] = Editor.parent(editor, parentListPath);
+
+    // Case 1: The parent of the current list is the editor itself.
+    if (Editor.isEditor(parentList)) {
+      // Lift the list item to the top level of the editor's children.
+      Transforms.liftNodes(editor, {
+        at: currentListItemPath,
+        match: (node) => !Editor.isEditor(node) && 'type' in node && node.type === 'list-item',
+      });
+      // Change the type of the newly lifted node from 'list-item' to 'paragraph'.
+      Transforms.setNodes(editor, { type: 'paragraph' });
+      return;
+    }
+
+    // Case 2: The parent of the current list is another list.
+    if (hasChildren(parentList) && (parentList as any).type === 'list') {
+      Transforms.liftNodes(editor, {
+        at: currentListItemPath,
+        match: (node) => !Editor.isEditor(node) && 'type' in node && node.type === 'list-item',
+      });
+
+      try {
+        const [remainingList, remainingListPath] = Editor.node(editor, parentListPath);
+
+        if (
+          hasChildren(remainingList) &&
+          (remainingList as any).type === 'list' &&
+          remainingList.children.length === 0
+        ) {
+          Transforms.removeNodes(editor, { at: remainingListPath });
+        }
+      } catch (error) {
+        // The path might no longer exist if the structure changed, which is fine
+      }
+    }
+  }
+};
+
 const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-item'> = {
   'list-ordered': {
     renderElement: (props) => <List {...props} />,
@@ -337,6 +403,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     handleEnterKey: handleEnterKeyOnList,
     handleBackspaceKey: handleBackspaceKeyOnList,
     handleTab: handleTabOnList,
+    handleShiftTab: handleShiftTabOnList,
     snippets: ['1.'],
   },
   'list-unordered': {
@@ -352,6 +419,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     handleEnterKey: handleEnterKeyOnList,
     handleBackspaceKey: handleBackspaceKeyOnList,
     handleTab: handleTabOnList,
+    handleShiftTab: handleShiftTabOnList,
     snippets: ['-', '*', '+'],
   },
   'list-item': {
