@@ -7,6 +7,8 @@ import { ActionLayout } from './ActionLayout';
 import { ContentLayout } from './ContentLayout';
 import { GridLayout, GridLayoutProps } from './GridLayout';
 import { HeaderLayout, BaseHeaderLayout } from './HeaderLayout';
+import BackToTop from '../BackToTop';
+
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -26,7 +28,10 @@ const RootLayout = ({ sideNav, children }: LayoutProps) => {
   return (
     <GridContainer $hasSideNav={Boolean(sideNav)}>
       {sideNav}
-      <OverflowingItem paddingBottom={10}>{children}</OverflowingItem>
+      <OverflowingItem paddingBottom={10}>
+        {children}
+        <BackToTop />
+      </OverflowingItem>
     </GridContainer>
   );
 };
