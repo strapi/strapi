@@ -154,6 +154,11 @@ tests/e2e/.env
 tests/cli/.env
 
 ############################
+# AI tools
+############################
+CLAUDE.local.md
+
+############################
 # Strapi
 ############################
 examples/**/types/generated

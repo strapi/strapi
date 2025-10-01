@@ -84,6 +84,7 @@ export interface Strapi extends Container {
   contentAPI: Modules.ContentAPI.ContentApi;
   sanitizers: Modules.Sanitizers.SanitizersRegistry;
   validators: Modules.Validators.ValidatorsRegistry;
+  sessionManager: Modules.SessionManager.SessionManagerService;
   load(): Promise<Strapi>;
   start(): Promise<Strapi>;
   destroy(): Promise<void>;
