@@ -14,7 +14,6 @@ export default [
     handler: 'authentication.accessToken',
     config: {
       auth: false,
-      middlewares: ['admin::rateLimit'],
     },
   },
   {
