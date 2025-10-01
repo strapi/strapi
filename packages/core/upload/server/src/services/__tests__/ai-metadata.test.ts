@@ -122,7 +122,7 @@ describe('AI Metadata Service', () => {
     } as InputFile;
 
     const mockImageFile2: InputFile = {
-      filepath: '/tmp/image2.png',
+      filepath: 'image2.png',
       mimetype: 'image/png',
       originalFilename: 'image2.png',
       size: 2048,
