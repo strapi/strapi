@@ -72,37 +72,47 @@ const MainNavIcons = ({
         const labelValue = formatMessage(link.intlLabel);
         const linkMobile = mobileLinks.find((mobileLink) => mobileLink.to === link.to);
 
+        const LinkElement = () => (
+          <NavLink.Link
+            to={link.to}
+            onClick={() => handleClickOnLink(link.to)}
+            aria-label={labelValue}
+          >
+            <NavLink.Icon label={labelValue}>
+              <LinkIcon width="20" height="20" fill="neutral500" />
+            </NavLink.Icon>
+            {badgeContentLock ? (
+              <NavLinkBadgeLock
+                label="locked"
+                textColor="neutral500"
+                paddingLeft={0}
+                paddingRight={0}
+              >
+                {badgeContentLock}
+              </NavLinkBadgeLock>
+            ) : badgeContentNumeric ? (
+              <NavLinkBadgeCounter
+                label={badgeContentNumeric}
+                backgroundColor="primary600"
+                width="2.3rem"
+                color="neutral0"
+              >
+                {badgeContentNumeric}
+              </NavLinkBadgeCounter>
+            ) : null}
+          </NavLink.Link>
+        );
+
         return isDesktop || (!isDesktop && linkMobile) ? (
           <Flex tag="li" key={link.to}>
             <GuidedTourTooltip to={link.to}>
-              <NavLink.Link
-                to={link.to}
-                onClick={() => handleClickOnLink(link.to)}
-                aria-label={labelValue}
-              >
-                <NavLink.Icon label={labelValue}>
-                  <LinkIcon width="20" height="20" fill="neutral500" />
-                </NavLink.Icon>
-                {badgeContentLock ? (
-                  <NavLinkBadgeLock
-                    label="locked"
-                    textColor="neutral500"
-                    paddingLeft={0}
-                    paddingRight={0}
-                  >
-                    {badgeContentLock}
-                  </NavLinkBadgeLock>
-                ) : badgeContentNumeric ? (
-                  <NavLinkBadgeCounter
-                    label={badgeContentNumeric}
-                    backgroundColor="primary600"
-                    width="2.3rem"
-                    color="neutral0"
-                  >
-                    {badgeContentNumeric}
-                  </NavLinkBadgeCounter>
-                ) : null}
-              </NavLink.Link>
+              {isDesktop ? (
+                <NavLink.Tooltip label={labelValue}>
+                  <LinkElement />
+                </NavLink.Tooltip>
+              ) : (
+                <LinkElement />
+              )}
             </GuidedTourTooltip>
           </Flex>
         ) : null;
