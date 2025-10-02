@@ -1,5 +1,10 @@
 import * as React from 'react';
 
+import { useIntl } from 'react-intl';
+
+import { WidgetRoot } from '../components/WidgetRoot';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
+import { useUpdateHomepageLayoutMutation } from '../services/homepage';
 import {
   calculateWidgetRows,
   moveWidgetInArray,
@@ -9,11 +14,8 @@ import {
   isValidResizeOperation,
   canResizeBetweenWidgets,
 } from '../utils/widgetUtils';
-import { useUpdateHomepageLayoutMutation } from '../services/homepage';
+
 import { useNotification } from './Notifications';
-import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
-import { WidgetRoot } from '../components/WidgetRoot';
-import { useIntl } from 'react-intl';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
 
@@ -43,10 +45,12 @@ const findWidget = (filteredWidgets: WidgetWithUID[], widgetId: string): WidgetI
 const saveLayout = async (
   widgets: WidgetWithUID[],
   widths: Record<string, number>,
-  updateHomepageLayout: any,
-  toggleNotification: any,
-  formatAPIError: any,
-  formatMessage: any
+  updateHomepageLayout: (data: {
+    widgets: Array<{ uid: string; width: 4 | 6 | 8 | 12 }>;
+  }) => Promise<any>,
+  toggleNotification: (config: { type: 'danger'; message: string }) => void,
+  formatAPIError: (error: any) => string,
+  formatMessage: (descriptor: { id: string; defaultMessage: string }) => string
 ) => {
   try {
     const layoutData = {
@@ -131,7 +135,7 @@ const deleteWidget = (filteredWidgets: WidgetWithUID[], columnWidths: Record<str
   const widgetRows = calculateWidgetRows(filteredWidgets, columnWidths);
 
   return (widgetId: string) => {
-    const { [widgetId]: removed, ...newWidths } = columnWidths;
+    const { [widgetId]: _removed, ...newWidths } = columnWidths;
 
     // Find the row containing the deleted widget
     const deletedWidgetIndex = filteredWidgets.findIndex((w) => w.uid === widgetId);

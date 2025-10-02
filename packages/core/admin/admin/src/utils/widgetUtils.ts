@@ -9,8 +9,8 @@
  * - Widget widths are snapped to discrete values: 4 (1/3), 6 (1/2), 8 (2/3), 12 (3/3)
  */
 
-import type { WidgetWithUID } from '../core/apis/Widgets';
 import type { Homepage } from '../../../shared/contracts/homepage';
+import type { WidgetWithUID } from '../core/apis/Widgets';
 
 // ============================================================================
 // CONSTANTS

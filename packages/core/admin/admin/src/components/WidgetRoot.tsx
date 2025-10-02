@@ -2,10 +2,10 @@ import * as React from 'react';
 
 import { Box, Flex, Typography, ScrollArea, IconButton } from '@strapi/design-system';
 import { PuzzlePiece, Trash, Drag } from '@strapi/icons';
-import { useIntl } from 'react-intl';
-import { Link as ReactRouterLink } from 'react-router-dom';
 import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useIntl } from 'react-intl';
+import { Link as ReactRouterLink } from 'react-router-dom';
 
 import { useTracking } from '../features/Tracking';
 

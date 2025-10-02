@@ -1,8 +1,19 @@
+import { server } from '@tests/server';
 import { act, renderHook, waitFor } from '@tests/utils';
 import { rest } from 'msw';
-import { server } from '@tests/server';
+
+import {
+  calculateWidgetRows,
+  moveWidgetInArray,
+  findRowContainingWidget,
+  resizeRowAfterRemoval,
+  resizeRowAfterAddition,
+  isValidResizeOperation,
+  canResizeBetweenWidgets,
+} from '../../utils/widgetUtils';
 
 import { useWidgets } from '../Widgets';
+
 import type { WidgetWithUID } from '../../core/apis/Widgets';
 
 // Mock the widget utilities
@@ -22,17 +33,6 @@ jest.mock('../../components/WidgetRoot', () => ({
     <div data-testid="widget-root">{children}</div>
   ),
 }));
-
-// Import mocked functions
-import {
-  calculateWidgetRows,
-  moveWidgetInArray,
-  findRowContainingWidget,
-  resizeRowAfterRemoval,
-  resizeRowAfterAddition,
-  isValidResizeOperation,
-  canResizeBetweenWidgets,
-} from '../../utils/widgetUtils';
 
 const mockCalculateWidgetRows = calculateWidgetRows as jest.MockedFunction<
   typeof calculateWidgetRows
@@ -58,7 +58,7 @@ const mockCanResizeBetweenWidgets = canResizeBetweenWidgets as jest.MockedFuncti
 const createMockWidget = (uid: string, title: string): WidgetWithUID => ({
   uid: uid as `plugin::${string}.${string}` | `global::${string}`,
   title: { id: `widget.${uid}`, defaultMessage: title },
-  icon: jest.fn() as any,
+  icon: undefined,
   component: jest.fn(),
 });
 
@@ -164,6 +164,8 @@ describe('useWidgets', () => {
 
       await waitFor(() => {
         expect(mockMoveWidgetInArray).toHaveBeenCalledWith(mockWidgets, 'widget-1', 2);
+      });
+      await waitFor(() => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
     });
@@ -177,6 +179,8 @@ describe('useWidgets', () => {
 
       await waitFor(() => {
         expect(mockMoveWidgetInArray).toHaveBeenCalledWith(mockWidgets, 'widget-1', 2);
+      });
+      await waitFor(() => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
     });
@@ -190,6 +194,8 @@ describe('useWidgets', () => {
 
       await waitFor(() => {
         expect(mockMoveWidgetInArray).toHaveBeenCalledWith(mockWidgets, 'widget-1', 1);
+      });
+      await waitFor(() => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
     });
@@ -205,6 +211,8 @@ describe('useWidgets', () => {
 
       await waitFor(() => {
         expect(mockCalculateWidgetRows).toHaveBeenCalledWith(mockWidgets, {});
+      });
+      await waitFor(() => {
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
     });
@@ -253,6 +261,8 @@ describe('useWidgets', () => {
           {},
           mockWidgets
         );
+      });
+      await waitFor(() => {
         expect(mockIsValidResizeOperation).toHaveBeenCalledWith(8, 4);
       });
     });
@@ -353,7 +363,7 @@ describe('useWidgets', () => {
     it('should handle network errors gracefully', async () => {
       // Mock network error
       server.use(
-        rest.put('/admin/homepage/layout', (req, res, ctx) => {
+        rest.put('/admin/homepage/layout', (req, res, _ctx) => {
           return res.networkError('Network error');
         })
       );

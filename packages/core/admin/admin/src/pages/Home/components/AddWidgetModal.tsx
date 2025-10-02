@@ -1,11 +1,12 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, Modal, Typography, ScrollArea } from '@strapi/design-system';
+import { Box, Button, Flex, Modal, Typography, ScrollArea } from '@strapi/design-system';
 import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import type { WidgetWithUID } from '../../../core/apis/Widgets';
 import { WidgetComponent } from '../HomePage';
+
+import type { WidgetWithUID } from '../../../core/apis/Widgets';
 
 /* -------------------------------------------------------------------------------------------------
  * AddWidgetModal
