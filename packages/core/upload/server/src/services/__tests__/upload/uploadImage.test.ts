@@ -12,7 +12,7 @@ const defaultConfig = {
       large_webp: { breakpoint: 1000, format: 'webp' },
       medium: 750,
       medium_webp: { breakpoint: 750, format: 'webp' },
-      medium_faulty: { breakpoint: 750, format: 'notwebp' },
+      medium_invalid_format: { breakpoint: 750, format: 'notwebp' },
     },
   },
 };
@@ -104,7 +104,7 @@ describe('Upload image', () => {
       responsiveDimensions: true,
     });
     await uploadService._uploadImage(fileData);
-    // 1 for the original image, 1 for thumbnail, 2 for the responsive formats,no webp format as original is webp, faulty format is ignored
+    // 1 for the original image, 1 for thumbnail, 2 for the responsive formats, no webp format as original is webp, faulty format is ignored
     expect(upload).toHaveBeenCalledTimes(4);
   });
 });

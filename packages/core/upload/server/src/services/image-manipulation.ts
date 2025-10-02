@@ -210,9 +210,9 @@ const validatedBreakpoints = (breakpoints: Breakpoints, originalFormat?: keyof s
       acc[key] = value;
       return acc;
     }
-    const breakpointFormat = 'format' in value ? value.format : null;
+    const breakpointFormat = typeof value === 'object' && value !== null && 'format' in value ? value.format : null;
     if (!breakpointFormat) return acc;
-    if (!sharp.format[breakpointFormat]) return acc;
+    if (breakpointFormat === null || !sharp.format[breakpointFormat]) return acc;
     if (breakpointFormat !== originalFormat) {
       acc[key] = value;
     }
