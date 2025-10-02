@@ -432,7 +432,10 @@ const getAiToken = async (): Promise<{ token: string; expiresAt?: string }> => {
     throw new Error('AI token request failed. Check server logs for details.');
   }
 
-  const aiServerUrl = process.env.STRAPI_ADMIN_AI_URL || process.env.STRAPI_AI_URL;
+  const aiServerUrl =
+    process.env.STRAPI_ADMIN_AI_URL ||
+    process.env.STRAPI_AI_URL ||
+    'https://strapi-ai.apps.strapi.io';
 
   if (!aiServerUrl) {
     strapi.log.error(
