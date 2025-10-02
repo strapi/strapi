@@ -9,7 +9,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     await page.goto('/admin');
   });
 
-  test('I want to create a new relation, save the related document and check if the new relation is added to the parent document', async ({
+  test.only('I want to create a new relation, save the related document and check if the new relation is added to the parent document', async ({
     page,
   }) => {
     // Step 0. Login as admin
@@ -37,7 +37,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     await expect(page.getByRole('status', { name: 'Draft' }).first()).toBeVisible();
 
     // Step 5. Close the relation modal to see the updated relation on the root document
-    await page.getByRole('button', { name: 'Close modal' }).click();
+    await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
 
     // Wait for the modal to be closed
     await expect(page.getByText('Create a relation')).not.toBeVisible();

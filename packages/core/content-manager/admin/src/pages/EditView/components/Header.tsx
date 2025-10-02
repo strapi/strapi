@@ -86,7 +86,19 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
             : `../${COLLECTION_TYPES}/${params.slug}`
         }
       />
-      <Flex width="100%" justifyContent="space-between" gap="80px" alignItems="flex-start">
+      <Flex
+        width="100%"
+        justifyContent="space-between"
+        gap={{
+          initial: 2,
+          medium: '8rem',
+        }}
+        alignItems="flex-start"
+        direction={{
+          initial: 'column',
+          medium: 'row',
+        }}
+      >
         <Typography variant="alpha" tag="h1">
           {title}
         </Typography>

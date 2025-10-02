@@ -122,32 +122,34 @@ const ListConfiguration = () => {
   return (
     <Layouts.Root>
       <Page.Title>{`Configure ${list.settings.displayName} List View`}</Page.Title>
-      <Form initialValues={initialValues} onSubmit={handleSubmit} method="PUT">
-        <Header
-          collectionType={collectionType}
-          model={model}
-          name={list.settings.displayName ?? ''}
-        />
-        <Layouts.Content>
-          <Flex
-            alignItems="stretch"
-            background="neutral0"
-            direction="column"
-            gap={6}
-            hasRadius
-            shadow="tableShadow"
-            paddingTop={6}
-            paddingBottom={6}
-            paddingLeft={7}
-            paddingRight={7}
-            position="relative"
-          >
-            <Settings />
-            <Divider />
-            <SortDisplayedFields />
-          </Flex>
-        </Layouts.Content>
-      </Form>
+      <Main>
+        <Form initialValues={initialValues} onSubmit={handleSubmit} method="PUT">
+          <Header
+            collectionType={collectionType}
+            model={model}
+            name={list.settings.displayName ?? ''}
+          />
+          <Layouts.Content>
+            <Flex
+              alignItems="stretch"
+              background="neutral0"
+              direction="column"
+              gap={6}
+              hasRadius
+              shadow="tableShadow"
+              paddingTop={6}
+              paddingBottom={6}
+              paddingLeft={7}
+              paddingRight={7}
+              position="relative"
+            >
+              <Settings />
+              <Divider />
+              <SortDisplayedFields />
+            </Flex>
+          </Layouts.Content>
+        </Form>
+      </Main>
     </Layouts.Root>
   );
 };
