@@ -179,13 +179,14 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
           ctx: { strapiVersion, projectId, userId },
         });
 
+        // refetch ai usage data on every successful request
+        aiUsage.refetch();
+
         const body = await safeParseJson(response);
 
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
         }
-        // refetch ai usage data on every successful request
-        aiUsage.refetch();
         return body as ResponseType<T>;
       } catch (err) {
         setError(err instanceof Error ? err.message : `Failed to fetch data from ${endpoint}`);
