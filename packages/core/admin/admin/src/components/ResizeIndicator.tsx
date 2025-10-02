@@ -154,7 +154,7 @@ const ResizeHandleBar = styled(Box)<{ $isDragging?: boolean }>`
   ${({ $isDragging }) => $isDragging && `opacity: 0.8;`}
 `;
 
-export interface InterWidgetResizeHandleProps {
+interface InterWidgetResizeHandleProps {
   leftWidgetId: string;
   rightWidgetId: string;
   leftWidgetWidth: number;
@@ -254,7 +254,6 @@ export const InterWidgetResizeHandle = ({
 
   const throttleRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  // Handle resize logic
   const handleResize = React.useCallback(
     (deltaColumns: number) => {
       // Only resize if there's significant movement (dead zone)
