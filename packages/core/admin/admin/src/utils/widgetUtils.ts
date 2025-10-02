@@ -2,7 +2,6 @@
  * Widget Utilities
  *
  * Comprehensive utilities for widget operations including sizing, positioning, resizing, and layout calculations.
- * This file consolidates all widget-related utility functions for better maintainability and reusability.
  *
  * Constraints:
  * - Maximum 3 widgets per row (since minimum widget width is 4 columns)
@@ -12,19 +11,11 @@
 import type { Homepage } from '../../../shared/contracts/homepage';
 import type { WidgetWithUID } from '../core/apis/Widgets';
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
-
 export const WIDGET_SIZING = {
   TOTAL_COLUMNS: 12,
   MIN_WIDGET_WIDTH: 4,
   DISCRETE_SIZES: [4, 6, 8, 12] as const,
 } as const;
-
-// ============================================================================
-// TYPES
-// ============================================================================
 
 export interface WidgetRow {
   widgets: WidgetWithUID[];
@@ -32,10 +23,6 @@ export interface WidgetRow {
   startIndex: number;
   endIndex: number;
 }
-
-// ============================================================================
-// WIDGET SIZING UTILITIES
-// ============================================================================
 
 /**
  * Snaps a width value to the nearest discrete size
@@ -96,10 +83,6 @@ export const isValidResizeOperation = (leftWidth: number, rightWidth: number): b
   return true;
 };
 
-// ============================================================================
-// WIDGET WIDTH UTILITIES
-// ============================================================================
-
 /**
  * Gets widget width with fallback to default value
  */
@@ -110,10 +93,6 @@ export const getWidgetWidth = (
 ): number => {
   return widgetId ? columnWidths[widgetId] || defaultWidth : defaultWidth;
 };
-
-// ============================================================================
-// WIDGET ROW CALCULATIONS
-// ============================================================================
 
 /**
  * Calculates the current row structure from widgets and their widths
@@ -207,13 +186,6 @@ export const calculateOptimalLayoutForRow = (
   return newWidths;
 };
 
-// ============================================================================
-// WIDGET POSITIONING UTILITIES
-// ============================================================================
-
-/**
- * Helper function to move a widget in the array
- */
 export const moveWidgetInArray = (
   widgets: WidgetWithUID[],
   widgetId: string,
@@ -233,9 +205,6 @@ export const moveWidgetInArray = (
   return newWidgets;
 };
 
-/**
- * Helper function to find the row containing a widget
- */
 export const findRowContainingWidget = (
   widgetRows: WidgetRow[],
   widgetId: string,
@@ -247,9 +216,6 @@ export const findRowContainingWidget = (
   return widgetRows.find((row) => widgetIndex >= row.startIndex && widgetIndex <= row.endIndex);
 };
 
-/**
- * Helper function to resize a row after widget removal
- */
 export const resizeRowAfterRemoval = (
   row: WidgetRow | undefined,
   removedWidgetId: string,
@@ -261,9 +227,6 @@ export const resizeRowAfterRemoval = (
   return calculateOptimalLayoutForRow(remainingWidgets, currentWidths);
 };
 
-/**
- * Helper function to resize a row after widget addition
- */
 export const resizeRowAfterAddition = (
   row: WidgetRow | undefined,
   addedWidget: WidgetWithUID,
@@ -294,10 +257,6 @@ export const resizeRowAfterAddition = (
 
   return calculateOptimalLayoutForRow(targetRowWidgets, currentWidths);
 };
-
-// ============================================================================
-// WIDGET RESIZE UTILITIES
-// ============================================================================
 
 export const isLastWidgetInRow = (
   widgetIndex: number,
@@ -360,17 +319,6 @@ export const canResizeBetweenWidgets = (
   return (canLeftShrink && canRightGrow) || (canRightShrink && canLeftGrow);
 };
 
-// ============================================================================
-// HOMEPAGE LAYOUT UTILITIES
-// ============================================================================
-
-/**
- * Creates a Set of widget UIDs from homepage layout for efficient lookup
- */
-export const createHomepageWidgetUidsSet = (homepageLayout: Homepage.Layout): Set<string> => {
-  return new Set(homepageLayout.widgets.map((w) => w.uid));
-};
-
 /**
  * Filters widgets to only include those present in the homepage layout
  */
@@ -378,15 +326,10 @@ export const filterWidgetsByHomepageLayout = (
   widgets: WidgetWithUID[],
   homepageLayout: Homepage.Layout
 ): WidgetWithUID[] => {
+  const createHomepageWidgetUidsSet = (homepageLayout: Homepage.Layout): Set<string> =>
+    new Set(homepageLayout.widgets.map((w) => w.uid));
   const homepageWidgetUids = createHomepageWidgetUidsSet(homepageLayout);
   return widgets.filter((widget) => homepageWidgetUids.has(widget.uid));
-};
-
-/**
- * Creates a map of widget UIDs to their positions in the homepage layout
- */
-export const createWidgetOrderMap = (homepageLayout: Homepage.Layout): Map<string, number> => {
-  return new Map(homepageLayout.widgets.map((widget, index) => [widget.uid, index]));
 };
 
 /**
@@ -396,24 +339,15 @@ export const sortWidgetsByHomepageLayout = (
   widgets: WidgetWithUID[],
   homepageLayout: Homepage.Layout
 ): WidgetWithUID[] => {
-  const widgetOrderMap = createWidgetOrderMap(homepageLayout);
+  const widgetOrderMap = new Map(
+    homepageLayout.widgets.map((widget, index) => [widget.uid, index])
+  );
 
   return [...widgets].sort((a, b) => {
     const aIndex = widgetOrderMap.get(a.uid) ?? Number.MAX_SAFE_INTEGER;
     const bIndex = widgetOrderMap.get(b.uid) ?? Number.MAX_SAFE_INTEGER;
     return aIndex - bIndex;
   });
-};
-
-/**
- * Extracts widths from homepage layout into a Record
- */
-export const extractHomepageWidths = (homepageLayout: Homepage.Layout): Record<string, number> => {
-  const widths: Record<string, number> = {};
-  homepageLayout.widgets.forEach(({ uid, width }) => {
-    widths[uid] = width;
-  });
-  return widths;
 };
 
 /**
@@ -428,7 +362,12 @@ export const applyHomepageLayout = (
 } => {
   const layoutWidgets = filterWidgetsByHomepageLayout(authorizedWidgets, homepageLayout);
   const sortedWidgets = sortWidgetsByHomepageLayout(layoutWidgets, homepageLayout);
-  const widths = extractHomepageWidths(homepageLayout);
+
+  // Extract widths from homepage layout
+  const widths: Record<string, number> = {};
+  homepageLayout.widgets.forEach(({ uid, width }) => {
+    widths[uid] = width;
+  });
 
   return {
     filteredWidgets: sortedWidgets,

@@ -11,7 +11,6 @@ import {
   isValidResizeOperation,
   canResizeBetweenWidgets,
 } from '../../utils/widgetUtils';
-
 import { useWidgets } from '../Widgets';
 
 import type { WidgetWithUID } from '../../core/apis/Widgets';

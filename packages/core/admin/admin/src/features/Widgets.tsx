@@ -140,14 +140,12 @@ const deleteWidget = (filteredWidgets: WidgetWithUID[], columnWidths: Record<str
     // Find the row containing the deleted widget
     const deletedWidgetIndex = filteredWidgets.findIndex((w) => w.uid === widgetId);
     if (deletedWidgetIndex === -1) return { newWidgets: filteredWidgets, newWidths };
-
     const affectedRow = widgetRows.find(
       (row) => deletedWidgetIndex >= row.startIndex && deletedWidgetIndex <= row.endIndex
     );
 
     // Use resizeRowAfterRemoval to resize the affected row
     const finalWidths = resizeRowAfterRemoval(affectedRow, widgetId, newWidths);
-
     const newWidgets = filteredWidgets.filter((w) => w.uid !== widgetId);
 
     return { newWidgets, newWidths: finalWidths };
@@ -206,13 +204,11 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
   const [isDraggingWidget, setIsDraggingWidget] = React.useState(false);
   const [draggedWidgetId, setDraggedWidgetId] = React.useState<string | undefined>();
 
-  // Get services for saveLayout function
   const [updateHomepageLayout] = useUpdateHomepageLayoutMutation();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { formatMessage } = useIntl();
 
-  // Create memoized functions
   const findWidgetFn = React.useCallback(
     (widgetId: string) => findWidget(filteredWidgets, widgetId),
     [filteredWidgets]
@@ -237,7 +233,6 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
       setFilteredWidgets(result.newWidgets);
       setColumnWidths(result.newWidths);
 
-      // Save layout after state updates
       saveLayout(
         result.newWidgets,
         result.newWidths,
@@ -267,7 +262,6 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
       setFilteredWidgets(result.newWidgets);
       setColumnWidths(result.newWidths);
 
-      // Save layout after state updates
       saveLayout(
         result.newWidgets,
         result.newWidths,
@@ -297,7 +291,6 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
       setFilteredWidgets(result.newWidgets);
       setColumnWidths(result.newWidths);
 
-      // Save layout after state updates
       saveLayout(
         result.newWidgets,
         result.newWidths,
@@ -332,7 +325,6 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
 
       setColumnWidths(newWidths);
 
-      // Save layout after state updates
       saveLayout(
         filteredWidgets,
         newWidths,
@@ -353,7 +345,6 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     ]
   );
 
-  // Drag state callbacks
   const handleDragStart = React.useCallback((widgetId: string) => {
     setIsDraggingWidget(true);
     setDraggedWidgetId(widgetId);
