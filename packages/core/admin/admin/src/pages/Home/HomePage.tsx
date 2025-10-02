@@ -3,10 +3,14 @@ import * as React from 'react';
 import { Box, Button, Flex, Grid, Main } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
+import { DragLayer } from '../../components/DragLayer';
+import { GapDropZoneManager } from '../../components/GapDropZone';
 import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
+import { InterWidgetResizeHandle } from '../../components/ResizeIndicator';
 import { Widget } from '../../components/WidgetHelpers';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
@@ -20,10 +24,6 @@ import {
   canResizeBetweenWidgets,
   getWidgetWidth,
 } from '../../utils/widgetUtils';
-import { InterWidgetResizeHandle } from '../../components/ResizeIndicator';
-import { GapDropZoneManager } from '../../components/GapDropZone';
-import { DragLayer } from '../../components/DragLayer';
-import { styled } from 'styled-components';
 
 import { AddWidgetModal } from './components/AddWidgetModal';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';
@@ -70,7 +70,7 @@ export const WidgetComponent = ({
     return <Widget.Loading />;
   }
 
-  return <Component {...({ columnWidth } as any)} />;
+  return <Component {...({ columnWidth } as Record<string, unknown>)} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ const HomePageCE = () => {
   const displayName = user?.firstname ?? user?.username ?? user?.email;
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
   const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
-  const { data: homepageLayout, isLoading: isLoadingLayout } = useGetHomepageLayoutQuery();
+  const { data: homepageLayout, isLoading: _isLoadingLayout } = useGetHomepageLayoutQuery();
   const [filteredWidgets, setFilteredWidgets] = React.useState<WidgetWithUID[]>([]);
   const [allAvailableWidgets, setAllAvailableWidgets] = React.useState<WidgetWithUID[]>([]);
   const [loading, setLoading] = React.useState(true);
