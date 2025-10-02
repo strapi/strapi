@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { styled } from 'styled-components';
-import { useDrop } from 'react-dnd';
 
 import { Box } from '@strapi/design-system';
+import { useDrop } from 'react-dnd';
+import { styled } from 'styled-components';
 
 import { calculateWidgetRows, type WidgetRow } from '../utils/widgetUtils';
 
@@ -332,7 +332,7 @@ export const GapDropZoneManager = ({
     });
 
     return gapDropZones;
-  }, [widgetRows, columnWidths, isDraggingWidget, draggedWidgetId, filteredWidgets]);
+  }, [widgetRows, isDraggingWidget, draggedWidgetId, filteredWidgets]);
 
   React.useEffect(() => {
     const updatePositions = () => {

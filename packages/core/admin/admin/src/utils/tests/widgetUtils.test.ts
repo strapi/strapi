@@ -14,14 +14,15 @@ import {
   canResizeBetweenWidgets,
   createDefaultWidgetWidths,
 } from '../widgetUtils';
+
 import type { WidgetWithUID } from '../../core/apis/Widgets';
 
 // Mock widget data
 const createMockWidget = (uid: string, title: string): WidgetWithUID => ({
   uid: uid as `plugin::${string}.${string}` | `global::${string}`,
   title: { id: `widget.${uid}`, defaultMessage: title },
-  icon: {} as any,
-  component: {} as any,
+  icon: undefined,
+  component: jest.fn(),
 });
 
 const mockWidgets: WidgetWithUID[] = [
