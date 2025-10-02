@@ -17,7 +17,7 @@ class ApplicationError<
   message: TMessage;
 
   constructor(
-    message = 'An application error occured' as TMessage,
+    message = 'An application error occurred' as TMessage,
     details: TDetails = {} as TDetails
   ) {
     super();
