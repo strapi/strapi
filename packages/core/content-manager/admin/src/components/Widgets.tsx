@@ -34,7 +34,7 @@ const calculateDynamicMaxWidth = (columnWidth: number = 4): string => {
   return `${(baseMaxWidth * columnWidth) / baseColumnWidth}rem`;
 };
 
-const CellTypography = styled(Typography) <{ $maxWidth?: string }>`
+const CellTypography = styled(Typography)<{ $maxWidth?: string }>`
   display: block;
   max-width: ${({ $maxWidth }) => $maxWidth || '14.4rem'};
   overflow: hidden;
@@ -77,7 +77,12 @@ const RecentDocumentsTable = ({
         {documents?.map((document) => (
           <Tr onClick={handleRowClick(document)} cursor="pointer" key={document.documentId}>
             <Td>
-              <CellTypography title={document.title} variant="omega" textColor="neutral800" $maxWidth={dynamicMaxWidth}>
+              <CellTypography
+                title={document.title}
+                variant="omega"
+                textColor="neutral800"
+                $maxWidth={dynamicMaxWidth}
+              >
                 {document.title}
               </CellTypography>
             </Td>
@@ -85,13 +90,13 @@ const RecentDocumentsTable = ({
               <CellTypography variant="omega" textColor="neutral600" $maxWidth={dynamicMaxWidth}>
                 {document.kind === 'singleType'
                   ? formatMessage({
-                    id: 'content-manager.widget.last-edited.single-type',
-                    defaultMessage: 'Single-Type',
-                  })
+                      id: 'content-manager.widget.last-edited.single-type',
+                      defaultMessage: 'Single-Type',
+                    })
                   : formatMessage({
-                    id: document.contentTypeDisplayName,
-                    defaultMessage: document.contentTypeDisplayName,
-                  })}
+                      id: document.contentTypeDisplayName,
+                      defaultMessage: document.contentTypeDisplayName,
+                    })}
               </CellTypography>
             </Td>
             <Td>
@@ -194,7 +199,9 @@ const LastPublishedWidget = ({ columnWidth = 6 }: { columnWidth?: number }) => {
     );
   }
 
-  return <RecentDocumentsTable documents={data} type="published" dynamicMaxWidth={dynamicMaxWidth} />;
+  return (
+    <RecentDocumentsTable documents={data} type="published" dynamicMaxWidth={dynamicMaxWidth} />
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------

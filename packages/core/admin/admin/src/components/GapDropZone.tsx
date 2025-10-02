@@ -25,7 +25,6 @@ interface GapDropZoneManagerProps {
   moveWidget: (id: string, to: number, targetRowIndex?: number, isHorizontalDrop?: boolean) => void;
 }
 
-// Get DOM elements and calculate basic row info
 const getRowInfo = (row: WidgetRow) => {
   const firstWidgetElement = document.querySelector(`[data-widget-id="${row.widgets[0].uid}"]`);
   const lastWidgetElement = document.querySelector(

@@ -1,7 +1,6 @@
 import { useAuth, useTracking } from '@strapi/admin/strapi-admin';
 import { Avatar, Badge, Box, Flex, Typography } from '@strapi/design-system';
 import { Earth, Images, User, Key, Files, Layout, Graph, Webhooks } from '@strapi/icons';
-import { useDrop } from 'react-dnd';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
