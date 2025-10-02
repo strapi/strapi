@@ -8,6 +8,13 @@ import { Layout } from '../Layout';
 
 jest.mock('../../../hooks/useSettingsMenu');
 
+jest.mock('../../../hooks/useMediaQuery', () => ({
+  useIsDesktop: jest.fn(() => true),
+  useIsMobile: jest.fn(() => false),
+  useIsTablet: jest.fn(() => false),
+  useMediaQuery: jest.fn(() => true),
+}));
+
 jest.mock('../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
   useLicenseLimits: jest.fn(() => ({
     license: {

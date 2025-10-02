@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-import { Box } from '@strapi/design-system';
+import { Box, Flex } from '@strapi/design-system';
 import { styled } from 'styled-components';
+
+import { HEIGHT_TOP_NAVIGATION, RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
 
 import { ActionLayout } from './ActionLayout';
 import { ContentLayout } from './ContentLayout';
@@ -14,22 +16,51 @@ interface LayoutProps {
 }
 
 const GridContainer = styled(Box)<{ $hasSideNav: boolean }>`
+  max-width: 100%;
   display: grid;
-  grid-template-columns: ${({ $hasSideNav }) => ($hasSideNav ? `auto 1fr` : '1fr')};
+  grid-template-columns: 1fr;
+  /* overflow: hidden;
+  height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px); */
+  padding: 0;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    grid-template-columns: ${({ $hasSideNav }) => ($hasSideNav ? `auto 1fr` : '1fr')};
+  }
+  ${({ theme }) => theme.breakpoints.large} {
+    /* overflow: inherit;
+    height: auto; */
+    /* height: 100dvh; */
+  }
+`;
+
+const SideNavContainer = styled(Flex)`
+  display: none;
+  background: ${({ theme }) => theme.colors.neutral0};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    display: block;
+    box-shadow: none;
+    transform: none;
+  }
 `;
 
 const OverflowingItem = styled(Box)`
   overflow-x: hidden;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    transform: none;
+    width: auto;
+  }
 `;
 
-const RootLayout = ({ sideNav, children }: LayoutProps) => {
-  return (
-    <GridContainer $hasSideNav={Boolean(sideNav)}>
-      {sideNav}
-      <OverflowingItem paddingBottom={10}>{children}</OverflowingItem>
-    </GridContainer>
-  );
-};
+const RootLayout = ({ sideNav, children }: LayoutProps) => (
+  <GridContainer $hasSideNav={Boolean(sideNav)}>
+    {sideNav && <SideNavContainer>{sideNav}</SideNavContainer>}
+    <OverflowingItem paddingBottom={RESPONSIVE_DEFAULT_SPACING} data-strapi-main-content>
+      {children}
+    </OverflowingItem>
+  </GridContainer>
+);
 
 const Layouts = {
   Root: RootLayout,

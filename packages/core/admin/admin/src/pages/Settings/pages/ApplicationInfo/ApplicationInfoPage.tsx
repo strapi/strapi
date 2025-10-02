@@ -119,7 +119,7 @@ const ApplicationInfoPage = () => {
     logos.auth.custom === serverLogos.auth.custom && logos.menu.custom === serverLogos.menu.custom;
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -300,7 +300,7 @@ const ApplicationInfoPage = () => {
           </Layouts.Content>
         </form>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 

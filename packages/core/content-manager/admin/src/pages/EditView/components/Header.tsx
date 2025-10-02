@@ -7,6 +7,7 @@ import {
   useNotification,
   useStrapiApp,
   useQueryParams,
+  useIsDesktop,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -65,7 +66,19 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
     : documentTitle;
 
   return (
-    <Flex direction="column" alignItems="flex-start" paddingTop={6} paddingBottom={4} gap={2}>
+    <Flex
+      direction="column"
+      alignItems="flex-start"
+      paddingTop={{
+        initial: 4,
+        large: 6,
+      }}
+      paddingBottom={{
+        initial: 0,
+        large: 4,
+      }}
+      gap={2}
+    >
       <BackButton
         fallback={
           params.collectionType === SINGLE_TYPES
@@ -73,7 +86,19 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
             : `../${COLLECTION_TYPES}/${params.slug}`
         }
       />
-      <Flex width="100%" justifyContent="space-between" gap="80px" alignItems="flex-start">
+      <Flex
+        width="100%"
+        justifyContent="space-between"
+        gap={{
+          initial: 2,
+          medium: '8rem',
+        }}
+        alignItems="flex-start"
+        direction={{
+          initial: 'column',
+          medium: 'row',
+        }}
+      >
         <Typography variant="alpha" tag="h1">
           {title}
         </Typography>
@@ -455,18 +480,21 @@ const HeaderActionDialog = ({
 const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
-  return {
-    label: formatMessage({
-      id: 'app.links.configure-view',
-      defaultMessage: 'Configure the view',
-    }),
-    icon: <ListPlus />,
-    onClick: () => {
-      navigate(`../${collectionType}/${model}/configurations/edit`);
-    },
-    position: 'header',
-  };
+  return isDesktop
+    ? {
+        label: formatMessage({
+          id: 'app.links.configure-view',
+          defaultMessage: 'Configure the view',
+        }),
+        icon: <ListPlus />,
+        onClick: () => {
+          navigate(`../${collectionType}/${model}/configurations/edit`);
+        },
+        position: 'header',
+      }
+    : null;
 };
 
 ConfigureTheViewAction.type = 'configure-the-view';
@@ -475,18 +503,21 @@ ConfigureTheViewAction.position = 'header';
 const EditTheModelAction: DocumentActionComponent = ({ model }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
-  return {
-    label: formatMessage({
-      id: 'content-manager.link-to-ctb',
-      defaultMessage: 'Edit the model',
-    }),
-    icon: <Pencil />,
-    onClick: () => {
-      navigate(`/plugins/content-type-builder/content-types/${model}`);
-    },
-    position: 'header',
-  };
+  return isDesktop
+    ? {
+        label: formatMessage({
+          id: 'content-manager.link-to-ctb',
+          defaultMessage: 'Edit the model',
+        }),
+        icon: <Pencil />,
+        onClick: () => {
+          navigate(`/plugins/content-type-builder/content-types/${model}`);
+        },
+        position: 'header',
+      }
+    : null;
 };
 
 EditTheModelAction.type = 'edit-the-model';
