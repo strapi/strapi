@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Box } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
+import { BackToTop } from '../BackToTop';
 import { ActionLayout } from './ActionLayout';
 import { ContentLayout } from './ContentLayout';
 import { GridLayout, GridLayoutProps } from './GridLayout';
@@ -26,7 +27,10 @@ const RootLayout = ({ sideNav, children }: LayoutProps) => {
   return (
     <GridContainer $hasSideNav={Boolean(sideNav)}>
       {sideNav}
-      <OverflowingItem paddingBottom={10}>{children}</OverflowingItem>
+      <OverflowingItem paddingBottom={10}>
+        {children}
+        <BackToTop />
+      </OverflowingItem>
     </GridContainer>
   );
 };
