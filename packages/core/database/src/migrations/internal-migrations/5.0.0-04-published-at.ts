@@ -1,6 +1,9 @@
 import type { Knex } from 'knex';
 
 import type { Migration } from '../common';
+import { transformLogMessage } from '../logger';
+
+const migrationScriptId = '5.0.0-04-created-published-at';
 
 /**
  * In v4, content types with disabled D&P did not have any `published_at` column.
@@ -19,8 +22,9 @@ const createPublishedAtColumn = async (db: Knex, tableName: string) => {
 };
 
 export const createdPublishedAt: Migration = {
-  name: '5.0.0-04-created-published-at',
+  name: migrationScriptId,
   async up(knex, db) {
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} running`));
     for (const meta of db.metadata.values()) {
       const hasTable = await knex.schema.hasTable(meta.tableName);
 
@@ -42,6 +46,7 @@ export const createdPublishedAt: Migration = {
         await createPublishedAtColumn(knex, meta.tableName);
       }
     }
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} completed`));
   },
   async down() {
     throw new Error('not implemented');
