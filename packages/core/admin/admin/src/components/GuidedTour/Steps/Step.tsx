@@ -9,7 +9,7 @@ import {
   LinkButton,
   FlexProps,
 } from '@strapi/design-system';
-import { FormattedMessage, type MessageDescriptor } from 'react-intl';
+import { FormattedMessage, useIntl, type MessageDescriptor } from 'react-intl';
 import { To, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
@@ -176,6 +176,16 @@ const ActionsContainer = styled(Flex)`
   border-top: ${({ theme }) => `1px solid ${theme.colors.neutral150}`};
 `;
 
+const ContentContainer = styled(Box)`
+  p {
+    margin-top: ${({ theme }) => theme.spaces[5]};
+  }
+  ul {
+    list-style-type: disc;
+    padding-left: ${({ theme }) => theme.spaces[4]};
+  }
+`;
+
 /**
  * TODO:
  * We should probably move all arrow styles + svg to the DS
@@ -231,21 +241,27 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     );
   },
 
-  Content: (props) => (
-    <Box paddingBottom={5} paddingLeft={5} paddingRight={5} width="100%">
-      {'children' in props ? (
-        props.children
-      ) : (
-        <Typography tag="div" variant="omega">
-          <FormattedMessage
-            id={props.id}
-            defaultMessage={props.defaultMessage}
-            values={props.values}
-          />
-        </Typography>
-      )}
-    </Box>
-  ),
+  Content: (props) => {
+    const { formatMessage } = useIntl();
+    let content = '';
+    if (!('children' in props)) {
+      content = formatMessage({
+        id: props.id,
+        defaultMessage: props.defaultMessage,
+      });
+    }
+    return (
+      <Box paddingBottom={5} paddingLeft={5} paddingRight={5} width="100%">
+        {'children' in props ? (
+          props.children
+        ) : (
+          <ContentContainer>
+            <Typography tag="div" variant="omega" dangerouslySetInnerHTML={{ __html: content }} />
+          </ContentContainer>
+        )}
+      </Box>
+    );
+  },
 
   Actions: ({
     showStepCount = true,
