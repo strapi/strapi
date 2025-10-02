@@ -18,6 +18,22 @@ export default async () => {
   )[];
 
   const configuredMiddlewares = middlewares.map((m) => {
+    // Handle case where middleware is a string 'strapi::security'
+    if (typeof m === 'string' && m === 'strapi::security') {
+      return {
+        name: 'strapi::security',
+        config: {
+          contentSecurityPolicy: {
+            useDefaults: true,
+            directives: {
+              'img-src': Array.from(new Set([...defaults, ...s3Domains])),
+              'media-src': Array.from(new Set([...defaults, ...s3Domains])),
+            },
+          },
+        },
+      };
+    }
+    // Handle case where middleware is an object with name 'strapi::security'
     if (typeof m === 'object' && m.name === 'strapi::security') {
       const config = m.config || {};
       const csp = config.contentSecurityPolicy || {};

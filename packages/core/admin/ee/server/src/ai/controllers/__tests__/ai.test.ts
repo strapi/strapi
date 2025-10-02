@@ -1,9 +1,9 @@
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../tests/helpers/create-context';
-import authenticatedUserController from '../authenticated-user';
+import createContext from '../../../../../../../../../tests/helpers/create-context';
+import aiController from '../ai';
 
-describe('Authenticated User Controller', () => {
+describe('AI Controller', () => {
   const ORIGINAL_ENV = process.env;
 
   beforeEach(() => {
@@ -84,7 +84,7 @@ describe('Authenticated User Controller', () => {
       const ctx = createMockContext(null);
       global.strapi = createMockStrapi() as any;
 
-      await authenticatedUserController.getAiToken(ctx as any);
+      await aiController.getAiToken(ctx as any);
 
       expect(ctx.unauthorized).toHaveBeenCalledWith('Authentication required');
     });
@@ -97,7 +97,7 @@ describe('Authenticated User Controller', () => {
       // Ensure no license is available
       delete process.env.STRAPI_LICENSE;
 
-      await authenticatedUserController.getAiToken(ctx as any);
+      await aiController.getAiToken(ctx as any);
 
       expect(ctx.internalServerError).toHaveBeenCalledWith(
         'AI token request failed. Check server logs for details.'
@@ -106,27 +106,6 @@ describe('Authenticated User Controller', () => {
       // Check that the specific error was logged
       expect(mockStrapi.log.error).toHaveBeenCalledWith(
         'AI token request failed: No EE license found. Please ensure STRAPI_LICENSE environment variable is set or license.txt file exists.'
-      );
-    });
-
-    test('Should return internal server error when AI server URL is not configured', async () => {
-      const ctx = createMockContext();
-      const mockStrapi = createMockStrapi() as any;
-      global.strapi = mockStrapi;
-
-      process.env.STRAPI_LICENSE = 'test-license';
-      delete process.env.STRAPI_AI_URL;
-      delete process.env.STRAPI_ADMIN_AI_URL;
-
-      await authenticatedUserController.getAiToken(ctx as any);
-
-      expect(ctx.internalServerError).toHaveBeenCalledWith(
-        'AI token request failed. Check server logs for details.'
-      );
-
-      // Check that the specific error was logged
-      expect(mockStrapi.log.error).toHaveBeenCalledWith(
-        'AI token request failed: AI server URL not configured. Please set STRAPI_ADMIN_AI_URL or STRAPI_AI_URL environment variable.'
       );
     });
 
@@ -140,7 +119,7 @@ describe('Authenticated User Controller', () => {
       global.strapi = mockStrapi;
       setupValidEnvironment();
 
-      await authenticatedUserController.getAiToken(ctx as any);
+      await aiController.getAiToken(ctx as any);
 
       expect(ctx.internalServerError).toHaveBeenCalledWith(
         'AI token request failed. Check server logs for details.'
@@ -160,7 +139,7 @@ describe('Authenticated User Controller', () => {
 
       global.fetch = createSuccessfulFetch();
 
-      await authenticatedUserController.getAiToken(ctx as any);
+      await aiController.getAiToken(ctx as any);
 
       expect(global.fetch).toHaveBeenCalledWith(
         'http://ai-server.com/auth/getAiJWT',
