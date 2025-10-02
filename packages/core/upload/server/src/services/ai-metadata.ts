@@ -12,7 +12,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async isEnabled() {
-      const isAIEnabled = strapi.config.get('admin.ai.enabled', false);
+      const isAIEnabled = strapi.config.get('admin.ai.enabled', true);
       if (!isAIEnabled) {
         return false;
       }
