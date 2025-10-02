@@ -14,7 +14,11 @@ describe('Admin Auth End to End', () => {
   let strapi;
   let utils;
   beforeAll(async () => {
-    strapi = await createStrapiInstance();
+    strapi = await createStrapiInstance({
+      async bootstrap({ strapi: s }) {
+        s.config.set('admin.rateLimit.enabled', false);
+      },
+    });
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);
 
@@ -144,80 +148,6 @@ describe('Admin Auth End to End', () => {
           name: 'ApplicationError',
           message: 'Missing credentials',
           details: {},
-        },
-      });
-    });
-  });
-
-  describe('Renew token', () => {
-    test('Renew token', async () => {
-      const authRes = await rq({
-        url: '/admin/login',
-        method: 'POST',
-        body: superAdmin.loginInfo,
-      });
-
-      expect(authRes.statusCode).toBe(200);
-      const { token } = authRes.body.data;
-
-      const res = await rq({
-        url: '/admin/renew-token',
-        method: 'POST',
-        body: {
-          token,
-        },
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toEqual({
-        token: expect.any(String),
-      });
-    });
-
-    test('Fails on invalid token', async () => {
-      const res = await rq({
-        url: '/admin/renew-token',
-        method: 'POST',
-        body: {
-          token: 'invalid-token',
-        },
-      });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
-        data: null,
-        error: {
-          status: 400,
-          name: 'ValidationError',
-          message: 'Invalid token',
-          details: {},
-        },
-      });
-    });
-
-    test('Fails on missing token', async () => {
-      const res = await rq({
-        url: '/admin/renew-token',
-        method: 'POST',
-        body: {},
-      });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
-        data: null,
-        error: {
-          status: 400,
-          message: 'token is a required field',
-          name: 'ValidationError',
-          details: {
-            errors: [
-              {
-                message: 'token is a required field',
-                name: 'ValidationError',
-                path: ['token'],
-              },
-            ],
-          },
         },
       });
     });

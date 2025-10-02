@@ -455,7 +455,7 @@ const assignComponentData = curry(
 const findComponentParent = async (
   componentSchema: Schema.Component,
   componentId: number | string,
-  parentSchemasForComponent: Schema.ContentType[],
+  parentSchemasForComponent: (Schema.ContentType | Schema.Component)[],
   opts?: { trx?: any }
 ): Promise<{ uid: string; table: string; parentId: number | string } | null> => {
   if (!componentSchema?.uid) return null;
@@ -504,17 +504,21 @@ const findComponentParent = async (
 /**
  * Finds content types that contain the given component and have draft & publish enabled.
  */
-const getParentSchemasForComponent = (componentSchema: Schema.Component): Schema.ContentType[] => {
-  return Object.values(strapi.contentTypes).filter((contentType: any) => {
-    if (!contentType.options?.draftAndPublish) return false;
-
-    return Object.values(contentType.attributes).some((attr: any) => {
-      return (
-        (attr.type === 'component' && attr.component === componentSchema.uid) ||
-        (attr.type === 'dynamiczone' && attr.components?.includes(componentSchema.uid))
-      );
-    });
-  });
+const getParentSchemasForComponent = (
+  componentSchema: Schema.Component
+): Array<Schema.ContentType | Schema.Component> => {
+  // Find direct parents in contentTypes and components
+  return [...Object.values(strapi.contentTypes), ...Object.values(strapi.components)].filter(
+    (schema: any) => {
+      if (!schema?.attributes) return false;
+      return Object.values(schema.attributes).some((attr: any) => {
+        return (
+          (attr.type === 'component' && attr.component === componentSchema.uid) ||
+          (attr.type === 'dynamiczone' && attr.components?.includes(componentSchema.uid))
+        );
+      });
+    }
+  );
 };
 
 /**
@@ -524,7 +528,7 @@ const getParentSchemasForComponent = (componentSchema: Schema.Component): Schema
 const shouldPropagateComponentRelationToNewVersion = async (
   componentRelation: Record<string, any>,
   componentSchema: Schema.Component,
-  parentSchemasForComponent: Schema.ContentType[],
+  parentSchemasForComponent: (Schema.ContentType | Schema.Component)[],
   trx: any
 ): Promise<boolean> => {
   // Get the component ID column name using the actual component model name
@@ -532,7 +536,7 @@ const shouldPropagateComponentRelationToNewVersion = async (
     _.snakeCase(componentSchema.modelName)
   );
 
-  const componentId = componentRelation[componentIdColumn];
+  const componentId = componentRelation[componentIdColumn] ?? componentRelation.parentId;
 
   const parent = await findComponentParent(
     componentSchema,
@@ -544,6 +548,18 @@ const shouldPropagateComponentRelationToNewVersion = async (
   // Keep relation if component has no parent entry
   if (!parent?.uid) {
     return true;
+  }
+
+  if (strapi.components[parent.uid as UID.Component]) {
+    // If the parent is a component, we need to check its parents recursively
+    const parentComponentSchema = strapi.components[parent.uid as UID.Component];
+    const grandParentSchemas = getParentSchemasForComponent(parentComponentSchema);
+    return shouldPropagateComponentRelationToNewVersion(
+      parent,
+      parentComponentSchema,
+      grandParentSchemas,
+      trx
+    );
   }
 
   const parentContentType = strapi.contentTypes[parent.uid as UID.ContentType];
@@ -598,4 +614,6 @@ export {
   deleteComponents,
   deleteComponent,
   createComponentRelationFilter,
+  findComponentParent,
+  getParentSchemasForComponent,
 };

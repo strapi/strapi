@@ -23,6 +23,11 @@ const { ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
   _.pick(role, ['id', 'name', 'description', 'code']);
 
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
+};
+
 /**
  * Remove private user fields
  * @param  user - user to sanitize
@@ -299,6 +304,12 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
 
+  // Invalidate all sessions for the deleted user
+  const sessionManager = getSessionManager();
+  if (sessionManager && sessionManager.hasOrigin('admin')) {
+    await sessionManager('admin').invalidateRefreshToken(String(id));
+  }
+
   strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
 
   return deletedUser;
@@ -327,6 +338,12 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
       where: { id },
       populate: ['roles'],
     });
+
+    // Invalidate all sessions for the deleted user
+    const sessionManager = getSessionManager();
+    if (sessionManager && sessionManager.hasOrigin('admin')) {
+      await sessionManager('admin').invalidateRefreshToken(String(id));
+    }
 
     deletedUsers.push(deletedUser);
   }

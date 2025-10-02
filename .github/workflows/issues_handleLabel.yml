@@ -202,12 +202,12 @@ jobs:
         with:
           project-url: https://github.com/orgs/strapi/projects/13
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: cli, source: core:content-type-builder, source: core:core, source: core:data-transfer, source: core:database, source: core:strapi, source: core:utils, source: dependencies, source: docs, source: external, source: generators:app, source: generators, source: marketplace, source: plugin:graphql, source: plugin:users-permissions, source: tooling, source: typescript, source: utils:upgrade'
+          labeled: 'source: cli, source: core:content-type-builder, source: core:core, source: core:data-transfer, source: core:database, source: core:strapi, source: core:utils, source: dependencies, source: marketplace, source: plugin:graphql, source: plugin:users-permissions, source: tooling, source: typescript, source: utils:upgrade, source: core:permissions, source: rbac, source: providers, source: core:openapi, source: strapi-ai'
           label-operator: OR
       - name: assign issues to Content squad project
         uses: actions/add-to-project@v0.4.1
         with:
           project-url: https://github.com/orgs/strapi/projects/23
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:email, source: core:permissions, source: core:review-workflows, source: core:upload, source: plugin:cloud, source: plugin:color-picker, source:  plugin:documentation, source: , plugin:i18n, source: plugin:sentry, source: providers'
+          labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:review-workflows, source: core:upload, source: plugin:color-picker, source: plugin:documentation, source: plugin:i18n, source: core:preview'
           label-operator: OR
