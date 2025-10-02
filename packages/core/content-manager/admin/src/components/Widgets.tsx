@@ -24,9 +24,19 @@ import { RelativeTime } from './RelativeTime';
 
 import type { RecentDocument } from '../../../shared/contracts/homepage';
 
-const CellTypography = styled(Typography)`
+/**
+ * Calculate dynamic max-width based on column span
+ * Base width is 14.4rem for 6 columns, scale proportionally
+ */
+const calculateDynamicMaxWidth = (columnWidth: number = 4): string => {
+  const baseColumnWidth = 4;
+  const baseMaxWidth = 14.4; // rem
+  return `${(baseMaxWidth * columnWidth) / baseColumnWidth}rem`;
+};
+
+const CellTypography = styled(Typography)<{ $maxWidth?: string }>`
   display: block;
-  max-width: 14.4rem;
+  max-width: ${({ $maxWidth }) => $maxWidth || '14.4rem'};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -35,9 +45,11 @@ const CellTypography = styled(Typography)`
 const RecentDocumentsTable = ({
   documents,
   type,
+  dynamicMaxWidth = '14.4rem',
 }: {
   documents: RecentDocument[];
   type: 'edited' | 'published';
+  dynamicMaxWidth?: string;
 }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -65,12 +77,17 @@ const RecentDocumentsTable = ({
         {documents?.map((document) => (
           <Tr onClick={handleRowClick(document)} cursor="pointer" key={document.documentId}>
             <Td>
-              <CellTypography title={document.title} variant="omega" textColor="neutral800">
+              <CellTypography
+                title={document.title}
+                variant="omega"
+                textColor="neutral800"
+                $maxWidth={dynamicMaxWidth}
+              >
                 {document.title}
               </CellTypography>
             </Td>
             <Td>
-              <CellTypography variant="omega" textColor="neutral600">
+              <CellTypography variant="omega" textColor="neutral600" $maxWidth={dynamicMaxWidth}>
                 {document.kind === 'singleType'
                   ? formatMessage({
                       id: 'content-manager.widget.last-edited.single-type',
@@ -125,9 +142,11 @@ const RecentDocumentsTable = ({
  * LastEditedWidget
  * -----------------------------------------------------------------------------------------------*/
 
-const LastEditedWidget = () => {
+const LastEditedWidget = ({ columnWidth = 6 }: { columnWidth?: number }) => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'update' });
+
+  const dynamicMaxWidth = calculateDynamicMaxWidth(columnWidth);
 
   if (isLoading) {
     return <Widget.Loading />;
@@ -148,16 +167,18 @@ const LastEditedWidget = () => {
     );
   }
 
-  return <RecentDocumentsTable documents={data} type="edited" />;
+  return <RecentDocumentsTable documents={data} type="edited" dynamicMaxWidth={dynamicMaxWidth} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
  * LastPublishedWidget
  * -----------------------------------------------------------------------------------------------*/
 
-const LastPublishedWidget = () => {
+const LastPublishedWidget = ({ columnWidth = 6 }: { columnWidth?: number }) => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'publish' });
+
+  const dynamicMaxWidth = calculateDynamicMaxWidth(columnWidth);
 
   if (isLoading) {
     return <Widget.Loading />;
@@ -178,7 +199,9 @@ const LastPublishedWidget = () => {
     );
   }
 
-  return <RecentDocumentsTable documents={data} type="published" />;
+  return (
+    <RecentDocumentsTable documents={data} type="published" dynamicMaxWidth={dynamicMaxWidth} />
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
