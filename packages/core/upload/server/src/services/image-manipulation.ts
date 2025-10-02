@@ -194,11 +194,8 @@ const optimize = async (file: UploadableFile) => {
 
 const DEFAULT_BREAKPOINTS = {
   large: 1000,
-  large_webp: { breakpoint: 1000, format: 'webp' },
-  medium: { breakpoint: 750, format: 'jpeg' },
-  medium_webp: { breakpoint: 750, format: 'webp' },
-  small: { breakpoint: 500, format: 'jpeg' },
-  small_webp: { breakpoint: 500, format: 'webp' },
+  medium: 750,
+  small: 500
 } satisfies Breakpoints;
 
 const getBreakpoints = () =>
