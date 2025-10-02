@@ -9,7 +9,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     await page.goto('/admin');
   });
 
-  test.only('I want to create a new relation, save the related document and check if the new relation is added to the parent document', async ({
+  test('I want to create a new relation, save the related document and check if the new relation is added to the parent document', async ({
     page,
   }) => {
     // Step 0. Login as admin
