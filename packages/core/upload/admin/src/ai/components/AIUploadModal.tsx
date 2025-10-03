@@ -282,6 +282,7 @@ const [AIUploadModalContext, useAIUploadModalContext] = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
   folderId: number | null;
+  onClose: () => void;
 }>('AIUploadModalContext');
 
 const reducer = (state: State, action: Action): State => {
@@ -351,10 +352,21 @@ export const AIUploadModal = ({ open, onClose, folderId = null }: AIUploadModalP
     hasUnsavedChanges: false,
   });
 
+  const handleClose = React.useCallback(() => {
+    // Reset state when modal closes
+    dispatch({ type: 'set_uploaded_assets', payload: [] });
+    onClose();
+  }, [onClose]);
+
   return (
-    <AIUploadModalContext state={state} dispatch={dispatch} folderId={folderId}>
-      <Modal.Root open={open} onOpenChange={onClose}>
-        <ModalContent onClose={onClose} />
+    <AIUploadModalContext
+      state={state}
+      dispatch={dispatch}
+      folderId={folderId}
+      onClose={handleClose}
+    >
+      <Modal.Root open={open} onOpenChange={handleClose}>
+        <ModalContent onClose={handleClose} />
       </Modal.Root>
     </AIUploadModalContext>
   );

@@ -73,6 +73,8 @@ const CardContainer = styled(Box)`
 const AssetCardActions = ({ asset }: { asset: File }) => {
   const { formatMessage } = useIntl();
   const dispatch = useAIUploadModalContext('AssetCardActions', (s) => s.dispatch);
+  const state = useAIUploadModalContext('AssetCardActions', (s) => s.state);
+  const onClose = useAIUploadModalContext('AssetCardActions', (s) => s.onClose);
   const { canUpdate, canCopyLink, canDownload } = useMediaLibraryPermissions();
 
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
@@ -86,6 +88,11 @@ const AssetCardActions = ({ asset }: { asset: File }) => {
       type: 'remove_uploaded_asset',
       payload: { id: asset.id },
     });
+
+    // Close modal if this was the last asset
+    if (state.uploadedAssets.length === 1) {
+      onClose();
+    }
   };
 
   const handlePropagationClick = (event: React.MouseEvent) => {
