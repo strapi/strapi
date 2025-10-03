@@ -45,6 +45,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const { formatMessage } = useIntl();
   const state = useAIUploadModalContext('ModalContent', (s) => s.state);
   const dispatch = useAIUploadModalContext('ModalContent', (s) => s.dispatch);
+  const folderId = useAIUploadModalContext('ModalContent', (s) => s.folderId);
   const { upload, isLoading, error } = useUpload();
   const { edit, isLoading: isSaving } = useBulkEdit();
 
@@ -79,7 +80,11 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
             name: asset.file.name,
             alternativeText: asset.file.alternativeText ?? null,
             caption: asset.file.caption ?? null,
-            folder: typeof asset.file.folder === 'number' ? asset.file.folder : null,
+            folder:
+              typeof asset.file.folder === 'object' && asset.file.folder !== null
+                ? // @ts-expect-error types are wrong
+                  asset.file.folder.id
+                : asset.file.folder,
           },
         }));
 
@@ -111,11 +116,18 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
           ...asset,
           id: asset.id ? Number(asset.id) : undefined,
         };
-        return upload(assetForUpload, null);
+        return upload(assetForUpload, folderId);
       });
 
       const results = await Promise.all(uploadPromises);
-      const uploadedFiles = results.flat().filter(Boolean);
+      const uploadedFiles = results
+        .flat()
+        .filter(Boolean)
+        .map((file) => ({
+          ...file,
+          // The upload API doesn't populate the folder relation, so we add it manually
+          folder: folderId || file.folder,
+        }));
       dispatch({ type: 'set_uploaded_assets', payload: uploadedFiles });
     } catch (error) {
       // TODO: toast error
@@ -228,6 +240,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
 interface AIUploadModalProps {
   open: boolean;
   onClose: () => void;
+  folderId?: number | null;
 }
 
 type State = {
@@ -268,6 +281,7 @@ type Action =
 const [AIUploadModalContext, useAIUploadModalContext] = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
+  folderId: number | null;
 }>('AIUploadModalContext');
 
 const reducer = (state: State, action: Action): State => {
@@ -330,7 +344,7 @@ const reducer = (state: State, action: Action): State => {
   });
 };
 
-export const AIUploadModal = ({ open, onClose }: AIUploadModalProps) => {
+export const AIUploadModal = ({ open, onClose, folderId = null }: AIUploadModalProps) => {
   const [state, dispatch] = React.useReducer(reducer, {
     uploadedAssets: [],
     assetsToUploadLength: 0,
@@ -338,7 +352,7 @@ export const AIUploadModal = ({ open, onClose }: AIUploadModalProps) => {
   });
 
   return (
-    <AIUploadModalContext state={state} dispatch={dispatch}>
+    <AIUploadModalContext state={state} dispatch={dispatch} folderId={folderId}>
       <Modal.Root open={open} onOpenChange={onClose}>
         <ModalContent onClose={onClose} />
       </Modal.Root>

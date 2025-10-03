@@ -529,7 +529,11 @@ export const MediaLibrary = () => {
       </Page.Main>
       {showUploadAssetDialog &&
         (isAiEnabled ? (
-          <AIUploadModal open={showUploadAssetDialog} onClose={toggleUploadAssetDialog} />
+          <AIUploadModal
+            open={showUploadAssetDialog}
+            onClose={toggleUploadAssetDialog}
+            folderId={query?.folder ? Number(query.folder) : null}
+          />
         ) : (
           <UploadAssetDialog
             open={showUploadAssetDialog}

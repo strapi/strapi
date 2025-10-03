@@ -130,7 +130,13 @@ const AssetCardActions = ({ asset }: { asset: File }) => {
         <Modal.Content>
           <EditAssetContent
             // Is Local must be set to false to trigger the correct branch of logic in the EditAssetContent on submit
-            asset={{ ...asset, isLocal: false } as Asset}
+            asset={
+              {
+                ...asset,
+                isLocal: false,
+                folder: typeof asset.folder === 'number' ? { id: asset.folder } : asset.folder,
+              } as Asset
+            }
             onClose={(arg) => handleEditAsset(arg as File)}
             canUpdate={canUpdate}
             canCopyLink={canCopyLink}
