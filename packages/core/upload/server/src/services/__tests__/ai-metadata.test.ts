@@ -67,7 +67,6 @@ describe('AI Metadata Service', () => {
 
   afterEach(() => {
     delete process.env.STRAPI_AI_URL;
-    delete process.env.STRAPI_ADMIN_AI_URL;
   });
 
   describe('isEnabled', () => {

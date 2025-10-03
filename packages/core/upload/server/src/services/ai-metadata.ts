@@ -5,10 +5,7 @@ import { InputFile } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
-  const aiServerUrl =
-    process.env.STRAPI_ADMIN_AI_URL ||
-    process.env.STRAPI_AI_URL ||
-    'https://strapi-ai.apps.strapi.io';
+  const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
   return {
     async isEnabled() {
