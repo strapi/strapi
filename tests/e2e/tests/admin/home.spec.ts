@@ -5,6 +5,8 @@ import { clickAndWait, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
 test.describe('Home as super admin', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
@@ -174,10 +176,13 @@ test.describe('Home as super admin', () => {
       await page
         .getByLabel('Drag & Drop here or')
         .setInputFiles('public/assets/administration_panel.png');
-      await page
-        .getByRole('button', { name: 'Upload 1 asset to the library' })
-        .waitFor({ state: 'visible', timeout: 5000 });
-      await page.getByRole('button', { name: 'Upload 1 asset to the library' }).click();
+      const uploadButton = page.getByRole('button', { name: 'Upload 1 asset to the library' });
+      try {
+        await uploadButton.waitFor({ state: 'visible', timeout: 5000 });
+        await uploadButton.click();
+      } catch {
+        await page.getByRole('button', { name: /^finish$/i }).click();
+      }
       await page.getByLabel('Home').click();
 
       // Create a content type and a component

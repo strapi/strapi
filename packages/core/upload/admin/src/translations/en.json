@@ -12,6 +12,7 @@
   "control-card.crop": "Crop",
   "control-card.download": "Download",
   "control-card.edit": "Edit",
+  "control-card.remove-selection": "Remove from selection",
   "control-card.replace-media": "Replace Media",
   "control-card.save": "Save",
   "control-card.stop-crop": "Stop cropping",
@@ -20,6 +21,7 @@
   "form.input.description.file-alt": "This text will be displayed if the asset can’t be shown.",
   "form.input.label.file-alt": "Alternative text",
   "form.input.label.file-caption": "Caption",
+  "form.input.placeholder.file-caption": "Enter caption",
   "form.input.label.file-name": "File name",
   "form.upload-url.error.url.invalid": "One URL is invalid",
   "form.upload-url.error.url.invalids": "{number} URLs are invalids",
@@ -105,6 +107,7 @@
   "settings.form.videoPreview.description": "It will generate a six-second preview of the video (GIF)",
   "settings.form.videoPreview.label": "Preview",
   "settings.header.label": "Media Library",
+  "settings.section.audio.label": "Audio",
   "settings.section.doc.label": "Doc",
   "settings.section.image.label": "Image",
   "settings.section.video.label": "Video",
@@ -136,5 +139,8 @@
   "config.note": "Note: You can override this value in the media library.",
   "config.popUpWarning.warning.updateAllSettings": "This will modify all your settings",
   "view-switch.list": "List View",
-  "view-switch.grid": "Grid View"
+  "view-switch.grid": "Grid View",
+  "ai.modal.uploading.title": "Uploading and processing with AI...",
+  "ai.modal.title": "{count, plural, one {# Asset uploaded} other {# Assets uploaded}} time to review AI generated content",
+  "ai.modal.error": "Could not generate AI metadata for the uploaded files."
 }

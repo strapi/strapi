@@ -9,6 +9,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
       sizeOptimization: true,
       responsiveDimensions: true,
       autoOrientation: false,
+      aiMetadata: true,
     },
     view_configuration: {
       pageSize: 10,
