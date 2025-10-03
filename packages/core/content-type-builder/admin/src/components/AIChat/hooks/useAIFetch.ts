@@ -178,7 +178,6 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
               : undefined,
           ctx: { strapiVersion, projectId, userId },
         });
-
         // refetch ai usage data on every successful request
         aiUsage.refetch();
 
