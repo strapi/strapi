@@ -6,10 +6,39 @@ import { useDrag } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { useTracking } from '../features/Tracking';
 
 import type { WidgetType } from '@strapi/admin/strapi-admin';
+
+const WidgetActions = styled(Flex)`
+  ${({ theme }) => theme.breakpoints.initial} {
+    display: flex;
+  }
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    display: none;
+  }
+`;
+
+const DragIconButton = styled(IconButton)`
+  ${({ theme }) => theme.breakpoints.initial} {
+    display: none;
+  }
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    display: flex;
+  }
+`;
+
+const WidgetContainer = styled(Flex)`
+  ${({ theme }) => theme.breakpoints.medium} {
+    &:hover ${WidgetActions} {
+      display: flex;
+    }
+  }
+`;
 
 export interface WidgetRootProps
   extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
@@ -46,7 +75,6 @@ export const WidgetRoot = ({
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const Icon = icon;
-  const [isHovered, setIsHovered] = React.useState(false);
 
   const handleClickOnLink = () => {
     trackUsage('didOpenHomeWidgetLink', { widgetUID: uid });
@@ -86,7 +114,7 @@ export const WidgetRoot = ({
   }, [preview]);
 
   return (
-    <Flex
+    <WidgetContainer
       width="100%"
       hasRadius
       direction="column"
@@ -104,8 +132,6 @@ export const WidgetRoot = ({
           node.setAttribute('data-widget-id', uid);
         }
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       style={{
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
@@ -130,40 +156,38 @@ export const WidgetRoot = ({
             {formatMessage(link.label)}
           </Typography>
         )}
-        {isHovered && (
-          <Flex gap={2}>
-            <IconButton
-              variant="danger-light"
-              size="XS"
-              onClick={handleDeleteWidget}
-              label={formatMessage({
-                id: 'HomePage.widget.delete',
-                defaultMessage: 'Delete',
-              })}
-              cursor="pointer"
-            >
-              <Trash />
-            </IconButton>
-            <IconButton
-              variant="tertiary"
-              size="XS"
-              ref={drag}
-              label={formatMessage({
-                id: 'HomePage.widget.drag',
-                defaultMessage: 'Drag to move',
-              })}
-              cursor="grab"
-            >
-              <Drag />
-            </IconButton>
-          </Flex>
-        )}
+        <WidgetActions gap={2}>
+          <IconButton
+            variant="danger-light"
+            size="XS"
+            onClick={handleDeleteWidget}
+            label={formatMessage({
+              id: 'HomePage.widget.delete',
+              defaultMessage: 'Delete',
+            })}
+            cursor="pointer"
+          >
+            <Trash />
+          </IconButton>
+          <DragIconButton
+            variant="tertiary"
+            size="XS"
+            ref={drag}
+            label={formatMessage({
+              id: 'HomePage.widget.drag',
+              defaultMessage: 'Drag to move',
+            })}
+            cursor="grab"
+          >
+            <Drag />
+          </DragIconButton>
+        </WidgetActions>
       </Flex>
       <ScrollArea>
         <Box width="100%" height="261px" overflow="auto" tag="main">
           {children}
         </Box>
       </ScrollArea>
-    </Flex>
+    </WidgetContainer>
   );
 };
