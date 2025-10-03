@@ -112,7 +112,9 @@ export default {
       return ctx.forbidden();
     }
 
-    const data = await validateUploadBody(body);
+    console.log('body', body);
+    const data = await validateUploadBody(body, Array.isArray(files));
+    console.log('data', data);
     const filesArray = Array.isArray(files) ? files : [files];
 
     const aiMetadataService = getService('aiMetadata');

@@ -46,8 +46,10 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const state = useAIUploadModalContext('ModalContent', (s) => s.state);
   const dispatch = useAIUploadModalContext('ModalContent', (s) => s.dispatch);
   const folderId = useAIUploadModalContext('ModalContent', (s) => s.folderId);
-  const { upload, isLoading, error } = useUpload();
+  const { upload } = useUpload();
   const { edit, isLoading: isSaving } = useBulkEdit();
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState<Error | null>(null);
 
   const handleCaptionChange = (assetId: number, caption: string) => {
     dispatch({
@@ -109,29 +111,27 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
 
   const handleUpload = async (assets: FileWithRawFile[]) => {
     dispatch({ type: 'set_assets_to_upload_length', payload: assets.length });
+    setUploadError(null);
+    setIsUploading(true);
 
     try {
-      const uploadPromises = assets.map(async (asset) => {
-        const assetForUpload = {
-          ...asset,
-          id: asset.id ? Number(asset.id) : undefined,
-        };
-        return upload(assetForUpload, folderId);
-      });
+      const assetsForUpload = assets.map((asset) => ({
+        ...asset,
+        id: asset.id ? Number(asset.id) : undefined,
+      }));
 
-      const results = await Promise.all(uploadPromises);
-      const uploadedFiles = results
-        .flat()
-        .filter(Boolean)
-        .map((file) => ({
-          ...file,
-          // The upload API doesn't populate the folder relation, so we add it manually
-          folder: folderId || file.folder,
-        }));
-      dispatch({ type: 'set_uploaded_assets', payload: uploadedFiles });
+      const uploadedFiles = await upload(assetsForUpload, folderId);
+      const filesWithFolder = uploadedFiles.map((file: File) => ({
+        ...file,
+        // The upload API doesn't populate the folder relation, so we add it manually
+        folder: folderId || file.folder,
+      }));
+      dispatch({ type: 'set_uploaded_assets', payload: filesWithFolder });
     } catch (error) {
-      // TODO: toast error
       console.error('Upload failed:', error);
+      setUploadError(error instanceof Error ? error : new Error('Upload failed'));
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -143,7 +143,10 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
     );
   }
 
-  if (isLoading || (state.assetsToUploadLength > 0 && state.uploadedAssets.length === 0)) {
+  if (
+    isUploading ||
+    (state.assetsToUploadLength > 0 && state.uploadedAssets.length === 0 && !uploadError)
+  ) {
     return (
       <Modal.Content>
         <Modal.Header>
@@ -170,7 +173,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
     { count: state.uploadedAssets.length }
   );
 
-  if (error) {
+  if (uploadError) {
     return (
       <Modal.Content>
         <Modal.Header>
