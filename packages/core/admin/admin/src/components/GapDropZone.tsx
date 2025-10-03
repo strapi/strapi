@@ -81,7 +81,7 @@ const createHorizontalDropZone = (
   isHorizontalDrop: true,
 });
 
-const addVerticalDropZonesForSingleWidget = (
+const addVerticalDropZones = (
   gapDropZones: GapDropZonePosition[],
   row: WidgetRow,
   rowInfo: ReturnType<typeof getRowInfo>,
@@ -89,114 +89,59 @@ const addVerticalDropZonesForSingleWidget = (
 ) => {
   if (!rowInfo) return;
 
-  const { firstRect, containerRect, rowTop, rowHeight } = rowInfo;
-  const widgetLeft = firstRect.left - containerRect.left;
+  const { containerRect, rowTop, rowHeight } = rowInfo;
+  const widgetCount = row.widgets.length;
 
-  // Before the first widget
+  // Get widget positions relative to container
+  const widgetPositions = row.widgets
+    .map((widget) => {
+      const element = document.querySelector(`[data-widget-id="${widget.uid}"]`);
+      if (!element) return null;
+
+      const rect = element.getBoundingClientRect();
+      return {
+        left: rect.left - containerRect.left,
+        width: rect.width,
+      };
+    })
+    .filter((pos): pos is NonNullable<typeof pos> => pos !== null);
+
+  if (widgetPositions.length !== widgetCount) return;
+
+  // Always add drop zone before the first widget
   gapDropZones.push(
-    createVerticalDropZone(row.startIndex, widgetLeft - 20, rowTop, rowHeight, 20, rowIndex)
+    createVerticalDropZone(
+      row.startIndex,
+      widgetPositions[0].left - 20,
+      rowTop,
+      rowHeight,
+      20,
+      rowIndex
+    )
   );
 
-  // At the end of the row
+  // Add drop zones between widgets
+  for (let i = 0; i < widgetCount - 1; i++) {
+    const currentWidget = widgetPositions[i];
+
+    gapDropZones.push(
+      createVerticalDropZone(
+        row.startIndex + i + 1,
+        currentWidget.left + currentWidget.width,
+        rowTop,
+        rowHeight,
+        20,
+        rowIndex
+      )
+    );
+  }
+
+  // Always add drop zone after the last widget
+  const lastWidget = widgetPositions[widgetCount - 1];
   gapDropZones.push(
     createVerticalDropZone(
       row.endIndex + 1,
-      widgetLeft + firstRect.width,
-      rowTop,
-      rowHeight,
-      20,
-      rowIndex
-    )
-  );
-};
-
-const addVerticalDropZonesForTwoWidgets = (
-  gapDropZones: GapDropZonePosition[],
-  row: WidgetRow,
-  rowInfo: ReturnType<typeof getRowInfo>,
-  rowIndex: number
-) => {
-  if (!rowInfo) return;
-
-  const { firstRect, lastRect, containerRect, rowTop, rowHeight } = rowInfo;
-  const firstWidgetLeft = firstRect.left - containerRect.left;
-  const secondWidgetLeft = lastRect.left - containerRect.left;
-
-  // Before the first widget
-  gapDropZones.push(
-    createVerticalDropZone(row.startIndex, firstWidgetLeft - 20, rowTop, rowHeight, 20, rowIndex)
-  );
-
-  // Between the two widgets
-  gapDropZones.push(
-    createVerticalDropZone(row.startIndex + 1, firstRect.width, rowTop, rowHeight, 20, rowIndex)
-  );
-
-  // At the end of the row
-  gapDropZones.push(
-    createVerticalDropZone(
-      row.endIndex + 1,
-      secondWidgetLeft + lastRect.width,
-      rowTop,
-      rowHeight,
-      20,
-      rowIndex
-    )
-  );
-};
-
-const addVerticalDropZonesForThreeWidgets = (
-  gapDropZones: GapDropZonePosition[],
-  row: WidgetRow,
-  rowInfo: ReturnType<typeof getRowInfo>,
-  rowIndex: number
-) => {
-  if (!rowInfo) return;
-
-  const { firstRect, lastRect, containerRect, rowTop, rowHeight } = rowInfo;
-  const secondWidgetElement = document.querySelector(`[data-widget-id="${row.widgets[1].uid}"]`);
-
-  if (!secondWidgetElement) return;
-
-  const secondWidgetRect = secondWidgetElement.getBoundingClientRect();
-  const firstWidgetLeft = firstRect.left - containerRect.left;
-  const secondWidgetLeft = secondWidgetRect.left - containerRect.left;
-  const thirdWidgetLeft = lastRect.left - containerRect.left;
-
-  // Before the first widget
-  gapDropZones.push(
-    createVerticalDropZone(row.startIndex, firstWidgetLeft - 20, rowTop, rowHeight, 20, rowIndex)
-  );
-
-  // Between the first and second widgets
-  gapDropZones.push(
-    createVerticalDropZone(
-      row.startIndex + 1,
-      firstWidgetLeft + firstRect.width,
-      rowTop,
-      rowHeight,
-      20,
-      rowIndex
-    )
-  );
-
-  // Between the second and third widgets
-  gapDropZones.push(
-    createVerticalDropZone(
-      row.startIndex + 2,
-      secondWidgetLeft + secondWidgetRect.width,
-      rowTop,
-      rowHeight,
-      20,
-      rowIndex
-    )
-  );
-
-  // At the end of the row
-  gapDropZones.push(
-    createVerticalDropZone(
-      row.endIndex + 1,
-      thirdWidgetLeft + lastRect.width,
+      lastWidget.left + lastWidget.width,
       rowTop,
       rowHeight,
       20,
@@ -317,13 +262,7 @@ export const GapDropZoneManager = ({
 
       // Add vertical drop zones based on widget count
       if (shouldShowVerticalDropZones) {
-        if (widgetCount === 1) {
-          addVerticalDropZonesForSingleWidget(gapDropZones, row, rowInfo, rowIndex);
-        } else if (widgetCount === 2) {
-          addVerticalDropZonesForTwoWidgets(gapDropZones, row, rowInfo, rowIndex);
-        } else if (widgetCount === 3) {
-          addVerticalDropZonesForThreeWidgets(gapDropZones, row, rowInfo, rowIndex);
-        }
+        addVerticalDropZones(gapDropZones, row, rowInfo, rowIndex);
       }
 
       // Add horizontal drop zones
@@ -354,46 +293,17 @@ export const GapDropZoneManager = ({
     };
   }, [calculateGapDropZonePositions]);
 
-  // Set up resize observer for position updates
-  React.useEffect(() => {
-    const updatePositions = () => {
-      const newPositions = calculateGapDropZonePositions();
-      setPositions(newPositions);
-    };
-
-    // Update positions when widgets change size
-    const resizeObserver = new ResizeObserver(() => {
-      setTimeout(updatePositions, 50); // Small delay to ensure DOM is updated
-    });
-
-    // Observe all widget elements
-    filteredWidgets.forEach((widget) => {
-      const element = document.querySelector(`[data-widget-id="${widget.uid}"]`);
-      if (element) {
-        resizeObserver.observe(element);
-      }
-    });
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [filteredWidgets, calculateGapDropZonePositions]);
-
-  return (
-    <>
-      {positions.map((gapDropZone, index) => (
-        <GapDropZone
-          key={`gap-drop-zone-${index}`}
-          insertIndex={gapDropZone.insertIndex}
-          position={gapDropZone.position}
-          isVisible={gapDropZone.isVisible && isDraggingWidget}
-          type={gapDropZone.type}
-          moveWidget={moveWidget}
-          targetRowIndex={gapDropZone.targetRowIndex}
-        />
-      ))}
-    </>
-  );
+  return positions.map((gapDropZone, index) => (
+    <GapDropZone
+      key={`gap-drop-zone-${index}`}
+      insertIndex={gapDropZone.insertIndex}
+      position={gapDropZone.position}
+      isVisible={gapDropZone.isVisible && isDraggingWidget}
+      type={gapDropZone.type}
+      moveWidget={moveWidget}
+      targetRowIndex={gapDropZone.targetRowIndex}
+    />
+  ));
 };
 
 interface GapDropZoneProps {
