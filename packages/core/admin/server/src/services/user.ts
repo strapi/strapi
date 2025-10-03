@@ -26,6 +26,11 @@ const { ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
   _.pick(role, ['id', 'name', 'description', 'code']);
 
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
+};
+
 /**
  * Remove private user fields
  * @param  user - user to sanitize
@@ -302,6 +307,12 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
 
+  // Invalidate all sessions for the deleted user
+  const sessionManager = getSessionManager();
+  if (sessionManager && sessionManager.hasOrigin('admin')) {
+    await sessionManager('admin').invalidateRefreshToken(String(id));
+  }
+
   strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
 
   return deletedUser;
@@ -330,6 +341,12 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
       where: { id },
       populate: ['roles'],
     });
+
+    // Invalidate all sessions for the deleted user
+    const sessionManager = getSessionManager();
+    if (sessionManager && sessionManager.hasOrigin('admin')) {
+      await sessionManager('admin').invalidateRefreshToken(String(id));
+    }
 
     deletedUsers.push(deletedUser);
   }
@@ -432,14 +449,11 @@ const getAiToken = async (): Promise<{ token: string; expiresAt?: string }> => {
     throw new Error('AI token request failed. Check server logs for details.');
   }
 
-  const aiServerUrl =
-    process.env.STRAPI_ADMIN_AI_URL ||
-    process.env.STRAPI_AI_URL ||
-    'https://strapi-ai.apps.strapi.io';
+  const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
   if (!aiServerUrl) {
     strapi.log.error(
-      `${ERROR_PREFIX} AI server URL not configured. Please set STRAPI_ADMIN_AI_URL or STRAPI_AI_URL environment variable.`
+      `${ERROR_PREFIX} AI server URL not configured. Please set STRAPI_AI_URL environment variable.`
     );
     throw new Error('AI token request failed. Check server logs for details.');
   }

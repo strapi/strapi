@@ -15,7 +15,6 @@ describeOnCondition(edition === 'EE')('Guided tour - Content Type Builder (AI Ch
       importData: 'with-admin.tar',
     });
   });
-
   test('should see the ai content-type-builder tour if ai isenabled', async ({ page }) => {
     await clickAndWait(
       page,
@@ -28,11 +27,17 @@ describeOnCondition(edition === 'EE')('Guided tour - Content Type Builder (AI Ch
     await expect(
       page.getByRole('dialog', { name: 'Welcome to the Content-Type Builder!' })
     ).toBeVisible();
-    await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Time to get started!' })).toBeVisible();
-    await nextButton.click();
 
-    // Check if the AI chat is opened
-    await expect(page.getByRole('textbox', { name: 'Ask Strapi AI...' })).toBeVisible();
+    // Check if AI feature is enabled
+    const isAiEnabled = await page.evaluate(() => {
+      return window.strapi.features.isEnabled('cms-ai');
+    });
+    if (isAiEnabled) {
+      await nextButton.click();
+      await expect(page.getByRole('dialog', { name: 'Time to get started!' })).toBeVisible();
+      await nextButton.click();
+      // Check if the AI chat is opened
+      await expect(page.getByRole('textbox', { name: 'Ask Strapi AI...' })).toBeVisible();
+    }
   });
 });

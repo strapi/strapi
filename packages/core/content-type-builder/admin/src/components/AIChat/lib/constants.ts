@@ -9,7 +9,7 @@ export const STRAPI_MAX_ATTACHMENT_SIZE = 15 * 1024 * 1024; // 15MB
  * APIs
  * -----------------------------------------------------------------------------------------------*/
 export const STRAPI_AI_URL =
-  process.env.STRAPI_ADMIN_AI_URL?.replace(/\/+$/, '') ?? 'https://strapi-ai.apps.strapi.io';
+  process.env.STRAPI_AI_URL?.replace(/\/+$/, '') ?? 'https://strapi-ai.apps.strapi.io';
 export const STRAPI_AI_CHAT_URL = `${STRAPI_AI_URL}/schemas/chat`;
 export const STRAPI_AI_TITLE_URL = `/schemas/chat/generate-title` as const;
 export const STRAPI_AI_FEEDBACK_URL = `/schemas/chat/feedback` as const;

@@ -11,6 +11,7 @@ import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 
@@ -18,6 +19,7 @@ import { LogoInput, LogoInputProps } from './components/LogoInput';
 import { DIMENSION, SIZE } from './utils/constants';
 
 const AdminSeatInfoCE = () => null;
+const AIUageDataCE = () => null;
 
 /* -------------------------------------------------------------------------------------------------
  * ApplicationInfoPage
@@ -26,6 +28,7 @@ const AdminSeatInfoCE = () => null;
 const ApplicationInfoPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
+  const { get } = useFetchClient();
   const { logos: serverLogos, updateProjectSettings } = useConfiguration('ApplicationInfoPage');
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
@@ -47,6 +50,19 @@ const ApplicationInfoPage = () => {
           '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE
+  );
+  const isAiEnabled = window.strapi.ai?.enabled !== false;
+  const AIUsageData = useEnterprise(
+    AIUageDataCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AIUsage'
+        )
+      ).AIUsage,
+    {
+      enabled: isAiEnabled,
+    }
   );
 
   const {
@@ -92,6 +108,10 @@ const ApplicationInfoPage = () => {
 
   // block rendering until the EE component is fully loaded
   if (!AdminSeatInfo) {
+    return null;
+  }
+
+  if (!AIUsageData) {
     return null;
   }
 
@@ -211,6 +231,7 @@ const ApplicationInfoPage = () => {
                     <Typography tag="dd">{nodeVersion}</Typography>
                   </Grid.Item>
                   <AdminSeatInfo />
+                  <AIUsageData />
                 </Grid.Root>
               </Flex>
               {canRead && (

@@ -368,7 +368,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   max-width: 83rem;
   max-height: 90vh;
   height: auto;
-  width: 60%;
+  width: calc(100% - 40px);
   overflow: hidden;
   margin: 0 auto;
   display: flex;
@@ -516,6 +516,12 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 @media (prefers-reduced-motion: no-preference) {
   .c3 {
     animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+@media (min-width: 768px) {
+  .c4 {
+    width: calc(100% - 48px);
   }
 }
 

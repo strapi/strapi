@@ -87,6 +87,7 @@ class UsersPermissionsRouteValidator extends AbstractRouteValidator {
   get authResponseSchema() {
     return z.object({
       jwt: z.string(),
+      refreshToken: z.string().optional(),
       user: this.userSchema,
     });
   }
