@@ -315,8 +315,12 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
           // Check the sizes of the children, if there is no room, exit
           if (spaceTaken + draggedItem.size > GRID_COLUMNS) {
-            // Leave the item where it started
-            draft[activeContainerIndex].children = containers[activeContainerIndex].children;
+            // Insert new row if there is no room in the current container
+            draft.splice(overContainerIndex + 1, 0, {
+              dndId: `container-${Date.now()}`,
+              children: [draggedItem],
+              __temp_key__: `container-${Date.now()}`,
+            });
             return;
           }
 
@@ -517,32 +521,32 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
   }
 
   return (
-    <Modal.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <Flex
-        borderColor="neutral150"
-        background="neutral100"
-        hasRadius
-        gap={3}
-        cursor="pointer"
-        onClick={() => {
-          setIsModalOpen(true);
-        }}
+    <Flex
+      borderColor="neutral150"
+      background="neutral100"
+      hasRadius
+      gap={3}
+      cursor="pointer"
+      onClick={() => {
+        setIsModalOpen(true);
+      }}
+    >
+      <DragButton
+        ref={setActivatorNodeRef}
+        tag="span"
+        withTooltip={false}
+        label={formatMessage(
+          {
+            id: getTranslation('components.DraggableCard.move.field'),
+            defaultMessage: 'Move {item}',
+          },
+          { item: value.label }
+        )}
+        {...listeners}
       >
-        <DragButton
-          ref={setActivatorNodeRef}
-          tag="span"
-          withTooltip={false}
-          label={formatMessage(
-            {
-              id: getTranslation('components.DraggableCard.move.field'),
-              defaultMessage: 'Move {item}',
-            },
-            { item: value.label }
-          )}
-          {...listeners}
-        >
-          <Drag />
-        </DragButton>
+        <Drag />
+      </DragButton>
+      <Modal.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
         <Flex direction="column" alignItems="flex-start" grow={1} overflow="hidden">
           <Flex gap={3} justifyContent="space-between" width="100%">
             <Typography ellipsis fontWeight="bold">
@@ -655,11 +659,11 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
             </Flex>
           ) : null}
         </Flex>
-      </Flex>
-      {value.name !== TEMP_FIELD_NAME && (
-        <EditFieldForm attribute={attribute} name={name} onClose={() => setIsModalOpen(false)} />
-      )}
-    </Modal.Root>
+        {value.name !== TEMP_FIELD_NAME && (
+          <EditFieldForm attribute={attribute} name={name} onClose={() => setIsModalOpen(false)} />
+        )}
+      </Modal.Root>
+    </Flex>
   );
 };
 
