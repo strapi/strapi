@@ -278,14 +278,6 @@ export const AIAssetCard = ({
 }: AssetCardProps) => {
   const { formatMessage } = useIntl();
 
-  const handleCaptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onCaptionChange(event.target.value);
-  };
-
-  const handleAltTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onAltTextChange(event.target.value);
-  };
-
   const assetType = typeFromMime(asset.mime || '');
   const thumbnailUrl =
     prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url) || '';
@@ -293,6 +285,16 @@ export const AIAssetCard = ({
   const subtitle = asset.height && asset.width ? ` - ${asset.width}x${asset.height}` : '';
   const formattedSize = asset.size ? formatBytes(asset.size) : '';
   const fullSubtitle = `${subtitle}${subtitle && formattedSize ? ' - ' : ''}${formattedSize}`;
+
+  const [caption, setCaption] = React.useState(asset.caption || '');
+  React.useEffect(() => {
+    onCaptionChange(caption);
+  }, [caption, onCaptionChange]);
+
+  const [altText, setAltText] = React.useState(asset.alternativeText || '');
+  React.useEffect(() => {
+    onAltTextChange(altText);
+  }, [altText, onAltTextChange]);
 
   return (
     <CardContainer>
@@ -339,8 +341,8 @@ export const AIAssetCard = ({
                 </Field.Label>
               </Flex>
               <TextInput
-                value={asset.caption || ''}
-                onChange={handleCaptionChange}
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
                 placeholder={formatMessage({
                   id: getTrad('form.input.placeholder.file-caption'),
                   defaultMessage: 'Enter caption',
@@ -369,8 +371,8 @@ export const AIAssetCard = ({
               </Flex>
 
               <TextInput
-                value={asset.alternativeText || ''}
-                onChange={handleAltTextChange}
+                value={altText}
+                onChange={(e) => setAltText(e.target.value)}
                 placeholder={formatMessage({
                   id: getTrad('form.input.placeholder.file-alt'),
                   defaultMessage: 'Enter alternative text',
