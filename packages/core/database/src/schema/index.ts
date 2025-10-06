@@ -6,7 +6,7 @@ import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 
 import type { Database } from '..';
-import { SchemaDiff } from './types';
+import { SchemaDiff, Schema } from './types';
 
 export type * from './types';
 
@@ -17,7 +17,7 @@ export interface SchemaProvider {
   schemaDiff: ReturnType<typeof createSchemaDiff>;
   schemaStorage: ReturnType<typeof createSchemaStorage>;
   sync(): Promise<SchemaDiff['status']>;
-  syncSchema(): Promise<SchemaDiff['status']>;
+  syncSchema(schema?: Schema): Promise<SchemaDiff['status']>;
   reset(): Promise<void>;
   create(): Promise<void>;
   drop(): Promise<void>;
@@ -61,12 +61,12 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       await this.create();
     },
 
-    async syncSchema(): Promise<SchemaDiff['status']> {
+    async syncSchema(oldSchema?: Schema): Promise<SchemaDiff['status']> {
       debug('Synchronizing database schema');
 
-      const DBSchema = await db.dialect.schemaInspector.getSchema();
+      const currentSchema = oldSchema ?? (await db.dialect.schemaInspector.getSchema());
 
-      const { status, diff } = await this.schemaDiff.diff(DBSchema, schema);
+      const { status, diff } = await this.schemaDiff.diff(currentSchema, schema);
 
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);
@@ -100,6 +100,11 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
 
       if (oldHash !== hash) {
         debug('Schema changed');
+
+        if (!db.config.settings.strictSyncSchema) {
+          debug('Syncing schema keeping not Strapi managed elements');
+          return this.syncSchema(oldSchema.schema);
+        }
 
         return this.syncSchema();
       }
