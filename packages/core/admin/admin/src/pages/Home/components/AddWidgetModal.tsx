@@ -1,12 +1,25 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Modal, Typography, ScrollArea } from '@strapi/design-system';
+import { Box, Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import { WidgetComponent } from '../HomePage';
 
 import type { WidgetWithUID } from '../../../core/apis/Widgets';
+
+// Hide scrollbars in widget previews
+const StyledBox = styled(Box)`
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * AddWidgetModal
@@ -50,14 +63,14 @@ const WidgetPreview = ({ widget, onSelect }: WidgetPreviewProps) => {
             {formatMessage(widget.title)}
           </Typography>
         </Flex>
-        <Box
+        <StyledBox
           width={'100%'}
           style={{
             pointerEvents: 'none',
           }}
         >
           <WidgetComponent component={widget.component} columnWidth={4} />
-        </Box>
+        </StyledBox>
       </Flex>
     </Box>
   );
@@ -98,31 +111,29 @@ export const AddWidgetModal = ({
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <ScrollArea>
-            <Box padding={6}>
-              {addableWidgets.length === 0 ? (
-                <Flex direction="column" alignItems="center" gap={4}>
-                  <PuzzlePiece width="4rem" height="4rem" fill="neutral300" />
-                  <Typography textColor="neutral500" textAlign="center">
-                    {formatMessage({
-                      id: 'HomePage.addWidget.noWidgetsAvailable',
-                      defaultMessage: 'No widgets available to add',
-                    })}
-                  </Typography>
-                </Flex>
-              ) : (
-                <Flex direction="column" gap={3} justifyContent="center">
-                  {addableWidgets.map((widget) => (
-                    <WidgetPreview
-                      key={widget.uid}
-                      widget={widget}
-                      onSelect={() => handleWidgetSelect(widget)}
-                    />
-                  ))}
-                </Flex>
-              )}
-            </Box>
-          </ScrollArea>
+          <Box>
+            {addableWidgets.length === 0 ? (
+              <Flex direction="column" alignItems="center" gap={4}>
+                <PuzzlePiece width="4rem" height="4rem" fill="neutral300" />
+                <Typography textColor="neutral500" textAlign="center">
+                  {formatMessage({
+                    id: 'HomePage.addWidget.noWidgetsAvailable',
+                    defaultMessage: 'No widgets available to add',
+                  })}
+                </Typography>
+              </Flex>
+            ) : (
+              <Flex direction="column" gap={3} justifyContent="center">
+                {addableWidgets.map((widget) => (
+                  <WidgetPreview
+                    key={widget.uid}
+                    widget={widget}
+                    onSelect={() => handleWidgetSelect(widget)}
+                  />
+                ))}
+              </Flex>
+            )}
+          </Box>
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={onClose} variant="tertiary">
