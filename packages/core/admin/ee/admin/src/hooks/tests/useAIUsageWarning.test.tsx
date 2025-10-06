@@ -142,6 +142,7 @@ describe('useAIUsageWarning', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'warning',
       message: "You've used 80% of your AI credits. 200 remain.",
+      timeout: 5000,
     });
   });
 
@@ -161,6 +162,7 @@ describe('useAIUsageWarning', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'warning',
       message: "You've used 70% of your AI credits. 300 remain.",
+      timeout: 5000,
     });
   });
 
@@ -180,6 +182,7 @@ describe('useAIUsageWarning', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'warning',
       message: "You've used 90% of your AI credits. 100 remain.",
+      timeout: 5000,
     });
   });
 
@@ -203,6 +206,7 @@ describe('useAIUsageWarning', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'danger',
       message: "You've used 100% of your AI credits. Overages are being applied.",
+      timeout: 5000,
     });
   });
 
@@ -222,6 +226,7 @@ describe('useAIUsageWarning', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'danger',
       message: "You've exhausted your AI credits. No additional credits available.",
+      timeout: 5000,
     });
   });
 
@@ -245,6 +250,7 @@ describe('useAIUsageWarning', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'danger',
       message: "You've used 100% of your AI credits. Overages are being applied.",
+      timeout: 5000,
     });
   });
 
@@ -281,6 +287,7 @@ describe('useAIUsageWarning', () => {
     expect(toggleNotification).toHaveBeenCalledWith({
       type: 'danger',
       message: "You've exhausted your AI credits. No additional credits available.",
+      timeout: 5000,
     });
   });
 });
