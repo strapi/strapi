@@ -45,12 +45,14 @@ export function useAIUsageWarning(threshold: number = 0.8) {
         toggleNotification({
           type: 'danger',
           message: `You've used 100% of your AI credits. Overages are being applied.`,
+          timeout: 5000,
         });
       } else {
         // No overages allowed - credits exhausted
         toggleNotification({
           type: 'danger',
           message: `You've exhausted your AI credits. No additional credits available.`,
+          timeout: 5000,
         });
       }
       warningLevelsRef.current.add(100);
@@ -59,6 +61,7 @@ export function useAIUsageWarning(threshold: number = 0.8) {
       toggleNotification({
         type: 'warning',
         message: `You've used ${percentDisplay}% of your AI credits. ${remaining} remain.`,
+        timeout: 5000,
       });
       warningLevelsRef.current.add(90);
     } else if (
@@ -70,6 +73,7 @@ export function useAIUsageWarning(threshold: number = 0.8) {
       toggleNotification({
         type: 'warning',
         message: `You've used ${percentDisplay}% of your AI credits. ${remaining} remain.`,
+        timeout: 5000,
       });
       warningLevelsRef.current.add(Math.round(threshold * 100));
     }
