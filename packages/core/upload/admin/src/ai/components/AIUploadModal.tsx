@@ -305,7 +305,7 @@ const reducer = (state: State, action: Action): State => {
 
     if (action.type === 'set_uploaded_asset_caption') {
       const asset = draft.uploadedAssets.find((a) => a.file.id === action.payload.id);
-      if (asset) {
+      if (asset && asset.file.caption !== action.payload.caption) {
         asset.file.caption = action.payload.caption;
         asset.wasCaptionChanged = true;
         draft.hasUnsavedChanges = true;
@@ -314,7 +314,7 @@ const reducer = (state: State, action: Action): State => {
 
     if (action.type === 'set_uploaded_asset_alt_text') {
       const asset = draft.uploadedAssets.find((a) => a.file.id === action.payload.id);
-      if (asset) {
+      if (asset && asset.file.alternativeText !== action.payload.altText) {
         asset.file.alternativeText = action.payload.altText;
         asset.wasAltTextChanged = true;
         draft.hasUnsavedChanges = true;
