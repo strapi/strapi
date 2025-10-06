@@ -11,6 +11,7 @@ const Main = styled(DSSubNav)`
   background-color: ${({ theme }) => theme.colors.neutral0};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
 
+  overscroll-behavior: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
 

@@ -42,8 +42,9 @@ const NavLinkBadgeLock = styled(NavLink.Badge)`
   background-color: transparent;
 `;
 
-const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
+const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`    
   overflow-y: auto;
+  overscroll-behavior: contain
 `;
 
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
@@ -69,6 +70,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const { pathname } = useLocation();
   const userDisplayName = getDisplayName(user);
   const { formatMessage, locale } = useIntl();
+  const navRef = React.useRef<HTMLUListElement>(null);
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
@@ -84,13 +86,32 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   );
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
+React.useEffect(() => {
+  const nav = navRef.current;
+  if (!nav) return;
+
+  const handleWheel = (e: WheelEvent) => {
+    const isAtTop = nav.scrollTop === 0 && e.deltaY < 0;
+    const isAtBottom = nav.scrollTop + nav.clientHeight === nav.scrollHeight && e.deltaY > 0;
+
+    if (isAtTop || isAtBottom) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  nav.addEventListener('wheel', handleWheel, { passive: false });
+  return () => nav.removeEventListener('wheel', handleWheel);
+}, []);
+
+
   return (
     <MainNav>
       <NavBrand />
 
       <Divider />
 
-      <NavListWrapper tag="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3}>
+      <NavListWrapper  ref={navRef}  tag="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3} >
         {listLinks.length > 0
           ? listLinks.map((link) => {
               const LinkIcon = link.icon;
