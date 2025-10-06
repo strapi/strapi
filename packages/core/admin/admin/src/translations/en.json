@@ -875,5 +875,10 @@
   "widget.last-activity.link": "Open Audit Logs",
   "widget.last-activity.no-activity": "No activity",
   "widget.last-activity.title": "Last activity",
-  "widget.profile.title": "Profile"
+  "widget.profile.title": "Profile",
+  "HomePage.addWidget.title": "Add Widget",
+  "HomePage.addWidget.noWidgetsAvailable": "No widgets available to add",
+  "HomePage.addWidget.button": "Add Widget",
+  "HomePage.widget.delete": "Delete",
+  "HomePage.widget.drag": "Drag to move"
 }
