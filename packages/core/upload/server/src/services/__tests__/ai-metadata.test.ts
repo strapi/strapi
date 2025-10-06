@@ -20,8 +20,8 @@ const mockFetch = jest.fn().mockResolvedValue({
   }),
   text: jest.fn().mockResolvedValue(''),
   headers: {
-    get: jest.fn().mockReturnValue('image/jpeg')
-  }
+    get: jest.fn().mockReturnValue('image/jpeg'),
+  },
 } as any);
 
 global.fetch = mockFetch;
