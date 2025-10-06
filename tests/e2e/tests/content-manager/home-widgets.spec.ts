@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../helpers/dts-import';
 import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
 
 test.describe('Homepage - Content Manager Widgets', () => {

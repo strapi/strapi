@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../../helpers/dts-import';
 import { clickAndWait } from '../../../utils/shared';
-import { AUTHOR_EMAIL_ADDRESS, AUTHOR_PASSWORD } from '../../../constants';
+import { AUTHOR_EMAIL_ADDRESS, AUTHOR_PASSWORD } from '../../../helpers/constants';
 
 test.describe('Relations on the fly - Create a Relation', () => {
   test.beforeEach(async ({ page }) => {

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME } from '../constants';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME } from '../../helpers/constants';
 
 /**
  * Fill in the sign-up form with valid values

@@ -2,7 +2,7 @@ import type { Core } from '@strapi/strapi';
 
 import dts from '@strapi/data-transfer';
 import { createStrapi } from '@strapi/strapi';
-import { ALLOWED_CONTENT_TYPES } from '../constants';
+import { ALLOWED_CONTENT_TYPES } from './constants';
 
 const {
   file: {
