@@ -43,18 +43,8 @@ const WidgetContainer = styled(Flex)`
 export interface WidgetRootProps
   extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
   children: React.ReactNode;
-  columnWidths: Record<string, number>;
-  setColumnWidths: (
-    widths: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)
-  ) => void;
-  findWidget: (id: string) => { index: number };
-  moveWidget: (
-    id: string,
-    atIndex: number,
-    targetRowIndex?: number,
-    isHorizontalDrop?: boolean
-  ) => void;
-  deleteWidget: (id: string) => void;
+  findWidget?: (id: string) => { index: number };
+  deleteWidget?: (id: string) => void;
   onDragStart?: (widgetId: string) => void;
   onDragEnd?: () => void;
   component?: () => Promise<React.ComponentType>;
@@ -81,7 +71,7 @@ export const WidgetRoot = ({
   };
 
   const handleDeleteWidget = () => {
-    deleteWidget(uid);
+    deleteWidget?.(uid);
   };
 
   const [, drag, preview] = useDrag(
@@ -91,7 +81,7 @@ export const WidgetRoot = ({
         onDragStart?.(uid);
         return {
           id: uid,
-          originalIndex: findWidget(uid).index,
+          originalIndex: findWidget?.(uid)?.index ?? 0,
           title,
           icon,
           link,
@@ -136,7 +126,14 @@ export const WidgetRoot = ({
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
-      <Flex direction="row" gap={2} width="100%" tag="header" alignItems="center" minHeight="22px">
+      <Flex
+        direction="row"
+        gap={2}
+        width="100%"
+        tag="header"
+        alignItems="center"
+        minHeight="2.25rem"
+      >
         <Flex gap={2} marginRight="auto">
           <Icon fill="neutral500" aria-hidden />
           <Typography textColor="neutral500" variant="sigma" tag="h2" id={uid}>

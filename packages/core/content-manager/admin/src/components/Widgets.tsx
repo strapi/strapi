@@ -24,6 +24,8 @@ import { RelativeTime } from './RelativeTime';
 
 import type { RecentDocument } from '../../../shared/contracts/homepage';
 
+const BASE_MAX_WIDTH = '14.4rem';
+
 /**
  * Calculate dynamic max-width based on column span
  * Base width is 14.4rem for 6 columns, scale proportionally
@@ -31,12 +33,13 @@ import type { RecentDocument } from '../../../shared/contracts/homepage';
 const calculateDynamicMaxWidth = (columnWidth: number = 4): string => {
   const baseColumnWidth = 4;
   const baseMaxWidth = 14.4; // rem
-  return `${(baseMaxWidth * columnWidth) / baseColumnWidth}rem`;
+  const calculatedWidth = (baseMaxWidth * columnWidth) / baseColumnWidth;
+  return `${Math.round(calculatedWidth * 10) / 10}rem`;
 };
 
 const CellTypography = styled(Typography)<{ $maxWidth?: string }>`
   display: block;
-  max-width: ${({ $maxWidth }) => $maxWidth || '14.4rem'};
+  max-width: ${({ $maxWidth }) => $maxWidth || BASE_MAX_WIDTH};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -45,7 +48,7 @@ const CellTypography = styled(Typography)<{ $maxWidth?: string }>`
 const RecentDocumentsTable = ({
   documents,
   type,
-  dynamicMaxWidth = '14.4rem',
+  dynamicMaxWidth = BASE_MAX_WIDTH,
 }: {
   documents: RecentDocument[];
   type: 'edited' | 'published';

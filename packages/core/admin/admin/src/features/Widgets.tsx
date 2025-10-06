@@ -13,6 +13,7 @@ import {
   resizeRowAfterAddition,
   isValidResizeOperation,
   canResizeBetweenWidgets,
+  WIDGET_SIZING,
 } from '../utils/widgetUtils';
 
 import { useNotification } from './Notifications';
@@ -46,7 +47,7 @@ const saveLayout = async (
   widgets: WidgetWithUID[],
   widths: Record<string, number>,
   updateHomepageLayout: (data: {
-    widgets: Array<{ uid: string; width: 4 | 6 | 8 | 12 }>;
+    widgets: Array<{ uid: string; width: (typeof WIDGET_SIZING.DISCRETE_SIZES)[number] }>;
   }) => Promise<any>,
   toggleNotification: (config: { type: 'danger'; message: string }) => void,
   formatAPIError: (error: any) => string,
@@ -56,7 +57,8 @@ const saveLayout = async (
     const layoutData = {
       widgets: widgets.map((widget) => ({
         uid: widget.uid,
-        width: (widths[widget.uid] || 12) as 4 | 6 | 8 | 12,
+        width: (widths[widget.uid] ||
+          WIDGET_SIZING.TOTAL_COLUMNS) as (typeof WIDGET_SIZING.DISCRETE_SIZES)[number],
       })),
     };
 
@@ -100,7 +102,7 @@ const moveWidget = (
 
   if (isHorizontalDrop) {
     // This is a horizontal drop zone - widget gets full width in its own row
-    newWidths[widgetId] = 12;
+    newWidths[widgetId] = WIDGET_SIZING.TOTAL_COLUMNS;
 
     // Resize source row (after widget removal)
     const sourceRowResize = resizeRowAfterRemoval(sourceRow, widgetId, newWidths);
@@ -160,8 +162,8 @@ const addWidget = (filteredWidgets: WidgetWithUID[], columnWidths: Record<string
 
     const newWidgets = [...filteredWidgets, widget];
     const newWidths = { ...columnWidths };
-    // New widget always takes full width (3/3 = 12 columns) in its own row
-    newWidths[widget.uid] = 12;
+    // New widget always takes full width in its own row
+    newWidths[widget.uid] = WIDGET_SIZING.TOTAL_COLUMNS;
 
     return { newWidgets, newWidths };
   };
@@ -209,141 +211,87 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { formatMessage } = useIntl();
 
-  const findWidgetFn = React.useCallback(
-    (widgetId: string) => findWidget(filteredWidgets, widgetId),
-    [filteredWidgets]
-  );
+  const findWidgetFn = (widgetId: string) => findWidget(filteredWidgets, widgetId);
 
-  const moveWidgetFn = React.useCallback(
-    (
-      widgetId: string,
-      insertIndex: number,
-      targetRowIndex?: number,
-      isHorizontalDrop?: boolean
-    ) => {
-      const result = moveWidget(
-        filteredWidgets,
-        columnWidths,
-        widgetId,
-        insertIndex,
-        targetRowIndex,
-        isHorizontalDrop
-      );
-
-      setFilteredWidgets(result.newWidgets);
-      setColumnWidths(result.newWidths);
-
-      saveLayout(
-        result.newWidgets,
-        result.newWidths,
-        updateHomepageLayout,
-        toggleNotification,
-        formatAPIError,
-        formatMessage
-      );
-    },
-    [
+  const moveWidgetFn = (
+    widgetId: string,
+    insertIndex: number,
+    targetRowIndex?: number,
+    isHorizontalDrop?: boolean
+  ) => {
+    const result = moveWidget(
       filteredWidgets,
       columnWidths,
-      setFilteredWidgets,
-      setColumnWidths,
+      widgetId,
+      insertIndex,
+      targetRowIndex,
+      isHorizontalDrop
+    );
+
+    setFilteredWidgets(result.newWidgets);
+    setColumnWidths(result.newWidths);
+
+    saveLayout(
+      result.newWidgets,
+      result.newWidths,
       updateHomepageLayout,
       toggleNotification,
       formatAPIError,
-      formatMessage,
-    ]
-  );
+      formatMessage
+    );
+  };
 
-  const deleteWidgetFn = React.useCallback(
-    (widgetId: string) => {
-      const deleteWidgetOperation = deleteWidget(filteredWidgets, columnWidths);
-      const result = deleteWidgetOperation(widgetId);
+  const deleteWidgetFn = (widgetId: string) => {
+    const deleteWidgetOperation = deleteWidget(filteredWidgets, columnWidths);
+    const result = deleteWidgetOperation(widgetId);
 
-      setFilteredWidgets(result.newWidgets);
-      setColumnWidths(result.newWidths);
+    setFilteredWidgets(result.newWidgets);
+    setColumnWidths(result.newWidths);
 
-      saveLayout(
-        result.newWidgets,
-        result.newWidths,
-        updateHomepageLayout,
-        toggleNotification,
-        formatAPIError,
-        formatMessage
-      );
-    },
-    [
-      filteredWidgets,
-      columnWidths,
-      setFilteredWidgets,
-      setColumnWidths,
+    saveLayout(
+      result.newWidgets,
+      result.newWidths,
       updateHomepageLayout,
       toggleNotification,
       formatAPIError,
-      formatMessage,
-    ]
-  );
+      formatMessage
+    );
+  };
 
-  const addWidgetFn = React.useCallback(
-    (widget: WidgetWithUID) => {
-      const addWidgetOperation = addWidget(filteredWidgets, columnWidths);
-      const result = addWidgetOperation(widget);
+  const addWidgetFn = (widget: WidgetWithUID) => {
+    const addWidgetOperation = addWidget(filteredWidgets, columnWidths);
+    const result = addWidgetOperation(widget);
 
-      setFilteredWidgets(result.newWidgets);
-      setColumnWidths(result.newWidths);
+    setFilteredWidgets(result.newWidgets);
+    setColumnWidths(result.newWidths);
 
-      saveLayout(
-        result.newWidgets,
-        result.newWidths,
-        updateHomepageLayout,
-        toggleNotification,
-        formatAPIError,
-        formatMessage
-      );
-    },
-    [
-      filteredWidgets,
-      columnWidths,
-      setFilteredWidgets,
-      setColumnWidths,
+    saveLayout(
+      result.newWidgets,
+      result.newWidths,
       updateHomepageLayout,
       toggleNotification,
       formatAPIError,
-      formatMessage,
-    ]
-  );
+      formatMessage
+    );
+  };
 
-  const handleInterWidgetResizeFn = React.useCallback(
-    (leftWidgetId: string, rightWidgetId: string, newLeftWidth: number, newRightWidth: number) => {
-      const newWidths = handleInterWidgetResize(
-        filteredWidgets,
-        columnWidths,
-        leftWidgetId,
-        rightWidgetId,
-        newLeftWidth,
-        newRightWidth
-      );
-
-      setColumnWidths(newWidths);
-
-      saveLayout(
-        filteredWidgets,
-        newWidths,
-        updateHomepageLayout,
-        toggleNotification,
-        formatAPIError,
-        formatMessage
-      );
-    },
-    [
+  const handleInterWidgetResizeFn = (
+    leftWidgetId: string,
+    rightWidgetId: string,
+    newLeftWidth: number,
+    newRightWidth: number
+  ) => {
+    const newWidths = handleInterWidgetResize(
       filteredWidgets,
       columnWidths,
-      setColumnWidths,
-      updateHomepageLayout,
-      toggleNotification,
-      formatAPIError,
-      formatMessage,
-    ]
-  );
+      leftWidgetId,
+      rightWidgetId,
+      newLeftWidth,
+      newRightWidth
+    );
+
+    setColumnWidths(newWidths);
+  };
 
   const handleDragStart = React.useCallback((widgetId: string) => {
     setIsDraggingWidget(true);
@@ -355,6 +303,17 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     setDraggedWidgetId(undefined);
   }, []);
 
+  const saveLayoutFn = () => {
+    saveLayout(
+      filteredWidgets,
+      columnWidths,
+      updateHomepageLayout,
+      toggleNotification,
+      formatAPIError,
+      formatMessage
+    );
+  };
+
   return {
     findWidget: findWidgetFn,
     deleteWidget: deleteWidgetFn,
@@ -364,6 +323,7 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     setColumnWidths,
     WidgetRoot,
     handleInterWidgetResize: handleInterWidgetResizeFn,
+    saveLayout: saveLayoutFn,
     isDraggingWidget,
     draggedWidgetId,
     handleDragStart,

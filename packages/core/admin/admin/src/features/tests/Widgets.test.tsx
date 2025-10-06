@@ -17,6 +17,7 @@ import type { WidgetWithUID } from '../../core/apis/Widgets';
 
 // Mock the widget utilities
 jest.mock('../../utils/widgetUtils', () => ({
+  ...jest.requireActual('../../utils/widgetUtils'),
   calculateWidgetRows: jest.fn(),
   moveWidgetInArray: jest.fn(),
   findRowContainingWidget: jest.fn(),

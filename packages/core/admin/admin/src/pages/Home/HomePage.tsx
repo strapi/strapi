@@ -99,6 +99,7 @@ const HomePageCE = () => {
     setColumnWidths,
     WidgetRoot,
     handleInterWidgetResize,
+    saveLayout,
     isDraggingWidget,
     draggedWidgetId,
     handleDragStart,
@@ -235,9 +236,6 @@ const HomePageCE = () => {
                             icon={widget.icon}
                             link={widget.link}
                             findWidget={findWidget}
-                            moveWidget={moveWidget}
-                            columnWidths={columnWidths}
-                            setColumnWidths={setColumnWidths}
                             deleteWidget={deleteWidget}
                             onDragStart={handleDragStart}
                             onDragEnd={handleDragEnd}
@@ -258,6 +256,7 @@ const HomePageCE = () => {
                             leftWidgetWidth={widgetWidth}
                             rightWidgetWidth={rightWidgetWidth}
                             onResize={handleInterWidgetResize}
+                            saveLayout={saveLayout}
                             filteredWidgets={filteredWidgets}
                           />
                         )}
@@ -266,17 +265,17 @@ const HomePageCE = () => {
                   )}
                 </Grid.Root>
 
-              <GapDropZoneManager
-                filteredWidgets={filteredWidgets}
-                columnWidths={columnWidths}
-                isDraggingWidget={isDraggingWidget}
-                draggedWidgetId={draggedWidgetId}
-                moveWidget={moveWidget}
-              />
-            </Box>
-          )}
-        </Flex>
-      </Layouts.Content>
+                <GapDropZoneManager
+                  filteredWidgets={filteredWidgets}
+                  columnWidths={columnWidths}
+                  isDraggingWidget={isDraggingWidget}
+                  draggedWidgetId={draggedWidgetId}
+                  moveWidget={moveWidget}
+                />
+              </Box>
+            )}
+          </Flex>
+        </Layouts.Content>
 
         {/* Add the DragLayer to handle custom drag previews */}
         <DragLayer
@@ -292,13 +291,6 @@ const HomePageCE = () => {
                     title={item.title || { id: `${item.id}`, defaultMessage: item.id }}
                     icon={item.icon}
                     link={item.link}
-                    findWidget={() => ({ index: 0 })}
-                    moveWidget={() => {}}
-                    deleteWidget={() => {}}
-                    columnWidths={{}}
-                    setColumnWidths={() => {}}
-                    onDragStart={() => {}}
-                    onDragEnd={() => {}}
                   >
                     <WidgetComponent component={item.component} columnWidth={item.columnWidth} />
                   </WidgetRoot>
