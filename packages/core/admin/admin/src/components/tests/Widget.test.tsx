@@ -11,11 +11,6 @@ describe('Homepage Widget component', () => {
         title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
         icon={Cog}
         uid="plugin::test.test-widget"
-        columnWidths={{}}
-        setColumnWidths={() => {}}
-        findWidget={() => ({ index: 0 })}
-        moveWidget={() => {}}
-        deleteWidget={() => {}}
       >
         actual widget content
       </WidgetRoot>
@@ -30,11 +25,6 @@ describe('Homepage Widget component', () => {
     render(
       <WidgetRoot
         title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
-        columnWidths={{}}
-        setColumnWidths={() => {}}
-        findWidget={() => ({ index: 0 })}
-        moveWidget={() => {}}
-        deleteWidget={() => {}}
         uid="plugin::test.test-widget"
       >
         <Widget.Loading />
@@ -50,11 +40,6 @@ describe('Homepage Widget component', () => {
       <WidgetRoot
         title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
         uid="plugin::test.test-widget"
-        columnWidths={{}}
-        setColumnWidths={() => {}}
-        findWidget={() => ({ index: 0 })}
-        moveWidget={() => {}}
-        deleteWidget={() => {}}
       >
         <Widget.Error />
       </WidgetRoot>
@@ -69,11 +54,6 @@ describe('Homepage Widget component', () => {
       <WidgetRoot
         title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
         uid="plugin::test.test-widget"
-        columnWidths={{}}
-        setColumnWidths={() => {}}
-        findWidget={() => ({ index: 0 })}
-        moveWidget={() => {}}
-        deleteWidget={() => {}}
       >
         <Widget.Error>Custom error message</Widget.Error>
       </WidgetRoot>
@@ -88,11 +68,6 @@ describe('Homepage Widget component', () => {
       <WidgetRoot
         title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
         uid="plugin::test.test-widget"
-        columnWidths={{}}
-        setColumnWidths={() => {}}
-        findWidget={() => ({ index: 0 })}
-        moveWidget={() => {}}
-        deleteWidget={() => {}}
       >
         <Widget.NoData />
       </WidgetRoot>
@@ -106,11 +81,6 @@ describe('Homepage Widget component', () => {
       <WidgetRoot
         title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}
         uid="plugin::test.test-widget"
-        columnWidths={{}}
-        setColumnWidths={() => {}}
-        findWidget={() => ({ index: 0 })}
-        moveWidget={() => {}}
-        deleteWidget={() => {}}
       >
         <Widget.NoData>Custom no data message</Widget.NoData>
       </WidgetRoot>

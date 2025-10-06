@@ -7,6 +7,8 @@ import { snapToDiscreteSize, isValidResize, adjustToTotalColumns } from '../util
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
 
+const INDICATOR_SIZE = 20;
+
 interface ResizeIndicatorProps {
   isVisible: boolean;
   position: { left: number; top: number; height: number };
@@ -18,12 +20,12 @@ interface ResizeIndicatorProps {
 
 const IndicatorContainer = styled(Box)<{ $isVisible: boolean }>`
   position: absolute;
-  z-index: 20;
+  z-index: 1;
   pointer-events: none;
   opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
   transition: opacity 0.2s ease-in-out;
   background: transparent;
-  height: 20px;
+  height: ${INDICATOR_SIZE}px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,11 +59,14 @@ const calculateGapAdjustment = (rowWidth: number, leftColumns: number): number =
   const gapAdjustmentPercent = (gapAdjustmentPixels / rowWidth) * 100;
 
   // Different adjustments for different positions
-  if (leftColumns === 4) return -gapAdjustmentPercent; // Left dot
-  if (leftColumns === 6) return 0; // Center dot
-  if (leftColumns === 8) return gapAdjustmentPercent; // Right dot
-
-  return 0;
+  switch (leftColumns) {
+    case 4:
+      return -gapAdjustmentPercent; // Left dot
+    case 8:
+      return gapAdjustmentPercent; // Right dot
+    default: // Center dot
+      return 0;
+  }
 };
 
 const ResizeIndicator = ({
@@ -99,7 +104,7 @@ const ResizeIndicator = ({
 
   // Calculate positioning - indicator always spans the full row width
   const indicatorTop = rowPosition
-    ? rowPosition.top - 20
+    ? rowPosition.top - INDICATOR_SIZE
     : Math.max(10, position.top + position.height / 2 - 40);
   const isCurrent = (index: number) => index === currentPositionIndex;
   const isActive = (index: number) => Math.abs(index - currentPositionIndex) <= 1;
@@ -128,8 +133,8 @@ const ResizeHandleContainer = styled(Box)<{ $isDragging?: boolean }>`
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 20px;
-  z-index: 10;
+  width: ${INDICATOR_SIZE}px;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,6 +170,7 @@ interface InterWidgetResizeHandleProps {
     newLeftWidth: number,
     newRightWidth: number
   ) => void;
+  saveLayout: () => void;
   filteredWidgets?: WidgetWithUID[];
 }
 
@@ -239,6 +245,7 @@ export const InterWidgetResizeHandle = ({
   leftWidgetWidth,
   rightWidgetWidth,
   onResize,
+  saveLayout,
   filteredWidgets,
 }: InterWidgetResizeHandleProps) => {
   const [state, setState] = React.useState({
@@ -314,7 +321,7 @@ export const InterWidgetResizeHandle = ({
         const deltaColumns = Math.round(deltaX / threshold);
 
         handleResize(deltaColumns);
-      }, 2);
+      }, 0);
     },
     [state.isDragging, state.startX, handleResize]
   );
@@ -327,6 +334,9 @@ export const InterWidgetResizeHandle = ({
       throttleRef.current = null;
     }
 
+    // Save the layout
+    saveLayout();
+
     // Reset last resize values and stop dragging
     setState((prev) => ({
       ...prev,
@@ -334,7 +344,7 @@ export const InterWidgetResizeHandle = ({
       currentResizeValues: { leftWidth: leftWidgetWidth, rightWidth: rightWidgetWidth },
       isDragging: false,
     }));
-  }, [leftWidgetWidth, rightWidgetWidth]);
+  }, [leftWidgetWidth, rightWidgetWidth, saveLayout]);
 
   // Handle mouse down to start drag
   const handleMouseDown = React.useCallback(
@@ -427,8 +437,7 @@ export const InterWidgetResizeHandle = ({
       <ResizeHandleContainer
         onMouseDown={handleMouseDown}
         style={{
-          left: `${state.position.left}px`,
-          top: `${state.position.top}px`,
+          transform: `translate(${state.position.left}px, ${state.position.top}px)`,
           height: `${state.position.height}px`,
         }}
       >

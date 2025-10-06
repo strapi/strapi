@@ -8,6 +8,8 @@ import { calculateWidgetRows, type WidgetRow } from '../utils/widgetUtils';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
 
+const DROP_ZONE_SIZE = 20;
+
 interface GapDropZonePosition {
   insertIndex: number;
   position: { left: number; top: number; height: number; width: number };
@@ -57,7 +59,7 @@ const createVerticalDropZone = (
   left: number,
   top: number,
   height: number,
-  width: number = 20,
+  width: number = DROP_ZONE_SIZE,
   targetRowIndex?: number
 ): GapDropZonePosition => ({
   insertIndex,
@@ -72,7 +74,7 @@ const createHorizontalDropZone = (
   left: number,
   top: number,
   height: number,
-  width: number
+  width: number = DROP_ZONE_SIZE
 ): GapDropZonePosition => ({
   insertIndex,
   position: { left, top, height, width },
@@ -112,10 +114,10 @@ const addVerticalDropZones = (
   gapDropZones.push(
     createVerticalDropZone(
       row.startIndex,
-      widgetPositions[0].left - 20,
+      widgetPositions[0].left - DROP_ZONE_SIZE,
       rowTop,
       rowHeight,
-      20,
+      DROP_ZONE_SIZE,
       rowIndex
     )
   );
@@ -130,7 +132,7 @@ const addVerticalDropZones = (
         currentWidget.left + currentWidget.width,
         rowTop,
         rowHeight,
-        20,
+        DROP_ZONE_SIZE,
         rowIndex
       )
     );
@@ -144,7 +146,7 @@ const addVerticalDropZones = (
       lastWidget.left + lastWidget.width,
       rowTop,
       rowHeight,
-      20,
+      DROP_ZONE_SIZE,
       rowIndex
     )
   );
@@ -165,7 +167,7 @@ const addHorizontalDropZones = (
 
   const { containerRect } = rowInfo;
   const containerWidth = containerRect.width;
-  const horizontalDropZoneHeight = 20;
+  const horizontalDropZoneHeight = DROP_ZONE_SIZE;
 
   // Add horizontal drop zone above the first row
   if (rowIndex === 0) {
@@ -295,7 +297,7 @@ export const GapDropZoneManager = ({
 
   return positions.map((gapDropZone, index) => (
     <GapDropZone
-      key={`gap-drop-zone-${index}`}
+      key={`gap-drop-zone-${gapDropZone.type}-${gapDropZone.insertIndex}-${gapDropZone.targetRowIndex ?? 'no-row'}`}
       insertIndex={gapDropZone.insertIndex}
       position={gapDropZone.position}
       isVisible={gapDropZone.isVisible && isDraggingWidget}
@@ -318,7 +320,8 @@ interface GapDropZoneProps {
 const GapDropZoneContainer = styled(Box)<{
   $isOver: boolean;
 }>`
-  background-color: ${({ $isOver }) => ($isOver ? 'rgba(0, 123, 255, 0.2)' : 'transparent')};
+  background-color: ${({ $isOver, theme }) =>
+    $isOver ? `${theme.colors.primary100}` : 'transparent'};
   border: ${({ $isOver, theme }) =>
     $isOver ? `2px solid ${theme.colors.primary500}` : '2px solid transparent'};
   opacity: ${({ $isOver }) => ($isOver ? 1 : 0.6)};
@@ -331,8 +334,8 @@ const GapDropZoneContainer = styled(Box)<{
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 20px;
-  z-index: 10;
+  width: ${DROP_ZONE_SIZE}rem;
+  z-index: 1;
 `;
 
 const GapDropZone = ({
@@ -367,8 +370,7 @@ const GapDropZone = ({
       ref={drop}
       $isOver={isOver}
       style={{
-        left: `${position.left}px`,
-        top: `${position.top}px`,
+        transform: `translate(${position.left}px, ${position.top}px)`,
         height: `${position.height}px`,
         width: `${position.width}px`,
       }}
