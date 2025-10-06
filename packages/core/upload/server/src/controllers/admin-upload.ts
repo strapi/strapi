@@ -112,9 +112,7 @@ export default {
       return ctx.forbidden();
     }
 
-    console.log('body', body);
     const data = await validateUploadBody(body, Array.isArray(files));
-    console.log('data', data);
     const filesArray = Array.isArray(files) ? files : [files];
     // Upload files first to get thumbnails
     const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
@@ -139,22 +137,24 @@ export default {
         const metadataResults = await aiMetadataService.processFiles(thumbnailFiles);
 
         // Update the uploaded files with AI metadata
-        for (const uploadedFile of uploadedFiles) {
-          const aiMetadata = metadataResults[uploadedFile];
-          if (aiMetadata) {
-            await uploadService.updateFileInfo(
-              uploadedFiles[uploadedFile].id,
-              {
-                alternativeText: aiMetadata.altText,
-                caption: aiMetadata.caption,
-              },
-              { user }
-            );
+        await Promise.all(
+          uploadedFiles.map(async (uploadedFile, index) => {
+            const aiMetadata = metadataResults[index];
+            if (aiMetadata) {
+              await uploadService.updateFileInfo(
+                uploadedFile.id,
+                {
+                  alternativeText: aiMetadata.altText,
+                  caption: aiMetadata.caption,
+                },
+                { user }
+              );
 
-            uploadedFiles[uploadedFile].alternativeText = aiMetadata.altText;
-            uploadedFiles[uploadedFile].caption = aiMetadata.caption;
-          }
-        }
+              uploadedFiles[index].alternativeText = aiMetadata.altText;
+              uploadedFiles[index].caption = aiMetadata.caption;
+            }
+          })
+        );
       } catch (error) {
         strapi.log.warn('AI metadata generation failed, proceeding without AI enhancements', {
           error: error instanceof Error ? error.message : String(error),
