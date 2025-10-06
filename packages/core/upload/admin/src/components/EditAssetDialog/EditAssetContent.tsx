@@ -36,7 +36,7 @@ import type { File as FileDefinition, RawFile } from '../../../../shared/contrac
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + 8rem)`};
+  min-height: ${() => `calc(60dvh + 8rem)`};
 `;
 
 const fileInfoSchema = yup.object({

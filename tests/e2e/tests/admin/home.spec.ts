@@ -183,7 +183,7 @@ test.describe('Home as super admin', () => {
       } catch {
         await page.getByRole('button', { name: /^finish$/i }).click();
       }
-      await page.getByLabel('Home').click();
+      await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');

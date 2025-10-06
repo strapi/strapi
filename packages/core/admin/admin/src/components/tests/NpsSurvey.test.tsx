@@ -4,6 +4,11 @@ import { rest } from 'msw';
 
 import { NpsSurvey } from '../NpsSurvey';
 
+jest.mock('../../hooks/useMediaQuery', () => ({
+  useIsMobile: jest.fn().mockReturnValue(false),
+  useIsDesktop: jest.fn().mockReturnValue(true),
+}));
+
 const localStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),
