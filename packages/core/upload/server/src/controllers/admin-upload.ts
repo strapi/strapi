@@ -116,29 +116,52 @@ export default {
     const data = await validateUploadBody(body, Array.isArray(files));
     console.log('data', data);
     const filesArray = Array.isArray(files) ? files : [files];
+    // Upload files first to get thumbnails
+    const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
 
     const aiMetadataService = getService('aiMetadata');
 
+    // AFTER upload - use thumbnail versions for AI processing
     if (await aiMetadataService.isEnabled()) {
       try {
-        const metadataResults = await aiMetadataService.processFiles(filesArray);
+        // Use thumbnail URLs instead of original files
+        const thumbnailFiles = uploadedFiles.map(
+          (file) =>
+            ({
+              filepath: file.formats?.thumbnail?.url || file.url, // Use thumbnail if available
+              mimetype: file.mime,
+              originalFilename: file.name,
+              size: file.formats?.thumbnail?.size || file.size,
+              provider: file.provider,
+            }) as unknown as any
+        );
 
-        // Enhance fileInfo with AI metadata if available
-        const fileInfos = Array.isArray(data.fileInfo) ? data.fileInfo : [data.fileInfo];
-        fileInfos.forEach((fileInfo, index) => {
-          const aiMetadata = metadataResults[index];
-          if (!aiMetadata || !fileInfo) return;
-          fileInfo.alternativeText = aiMetadata.altText;
-          fileInfo.caption = aiMetadata.caption;
-        });
+        const metadataResults = await aiMetadataService.processFiles(thumbnailFiles);
+
+        // Update the uploaded files with AI metadata
+        for (let i = 0; i < uploadedFiles.length; i++) {
+          const aiMetadata = metadataResults[i];
+          if (aiMetadata) {
+            await uploadService.updateFileInfo(
+              uploadedFiles[i].id,
+              {
+                alternativeText: aiMetadata.altText,
+                caption: aiMetadata.caption,
+              },
+              { user }
+            );
+
+            // Update the response object
+            uploadedFiles[i].alternativeText = aiMetadata.altText;
+            uploadedFiles[i].caption = aiMetadata.caption;
+          }
+        }
       } catch (error) {
         strapi.log.warn('AI metadata generation failed, proceeding without AI enhancements', {
           error: error instanceof Error ? error.message : String(error),
         });
       }
     }
-
-    const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
 
     // Sign file urls for private providers
     const signedFiles = await async.map(uploadedFiles, getService('file').signFileUrls);
