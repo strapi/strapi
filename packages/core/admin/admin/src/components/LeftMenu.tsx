@@ -70,6 +70,7 @@ const LeftMenu = ({
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
   const { formatMessage, locale } = useIntl();
+  const navRef = React.useRef<HTMLUListElement>(null);
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
