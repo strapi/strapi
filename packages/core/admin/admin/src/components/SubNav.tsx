@@ -19,7 +19,10 @@ import { tours } from './GuidedTour/Tours';
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
   height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px);
-  overflow: hidden;
+  overflow-y: auto
+  overscroll-behavior: contain;
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
   background-color: ${({ theme }) => theme.colors.neutral0};
   display: flex;
   flex-direction: column;
