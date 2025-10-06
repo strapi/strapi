@@ -139,11 +139,11 @@ export default {
         const metadataResults = await aiMetadataService.processFiles(thumbnailFiles);
 
         // Update the uploaded files with AI metadata
-        for (let i = 0; i < uploadedFiles.length; i++) {
-          const aiMetadata = metadataResults[i];
+        for (const uploadedFile of uploadedFiles) {
+          const aiMetadata = metadataResults[uploadedFile];
           if (aiMetadata) {
             await uploadService.updateFileInfo(
-              uploadedFiles[i].id,
+              uploadedFiles[uploadedFile].id,
               {
                 alternativeText: aiMetadata.altText,
                 caption: aiMetadata.caption,
@@ -151,9 +151,8 @@ export default {
               { user }
             );
 
-            // Update the response object
-            uploadedFiles[i].alternativeText = aiMetadata.altText;
-            uploadedFiles[i].caption = aiMetadata.caption;
+            uploadedFiles[uploadedFile].alternativeText = aiMetadata.altText;
+            uploadedFiles[uploadedFile].caption = aiMetadata.caption;
           }
         }
       } catch (error) {
