@@ -10,6 +10,8 @@ import {
   Portal,
   Field,
   VisuallyHidden,
+  SingleSelect,
+  SingleSelectOption,
 } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
@@ -20,6 +22,7 @@ import * as yup from 'yup';
 import { useAppInfo } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { usePersistentState } from '../hooks/usePersistentState';
 
 const FieldWrapper = styled(Field.Root)`
@@ -130,6 +133,7 @@ const checkIfShouldShowSurvey = (settings: NpsSurveySettings) => {
 };
 
 const NpsSurvey = () => {
+  const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
   const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
@@ -259,13 +263,8 @@ const NpsSurvey = () => {
       >
         {({ values, handleChange, setFieldValue, isSubmitting }) => (
           <Form name="npsSurveyForm">
-            <Flex
-              hasRadius
-              direction="column"
+            <Box
               padding={4}
-              borderColor="primary200"
-              background="neutral0"
-              shadow="popupShadow"
               position="fixed"
               bottom={0}
               left="50%"
@@ -273,108 +272,158 @@ const NpsSurvey = () => {
               zIndex="200"
               width="50%"
             >
-              {isFeedbackResponse ? (
-                <Typography fontWeight="semiBold">
-                  {formatMessage({
-                    id: 'app.components.NpsSurvey.feedback-response',
-                    defaultMessage: 'Thank you very much for your feedback!',
-                  })}
-                </Typography>
-              ) : (
-                <Box tag="fieldset" width="100%" borderWidth={0}>
-                  <Flex justifyContent="space-between" width="100%">
-                    <Box marginLeft="auto" marginRight="auto">
-                      <Typography fontWeight="semiBold" tag="legend">
-                        {formatMessage({
-                          id: 'app.components.NpsSurvey.banner-title',
-                          defaultMessage:
-                            'How likely are you to recommend Strapi to a friend or colleague?',
-                        })}
-                      </Typography>
-                    </Box>
-                    <IconButton
-                      onClick={handleDismiss}
-                      withTooltip={false}
-                      label={formatMessage({
-                        id: 'app.components.NpsSurvey.dismiss-survey-label',
-                        defaultMessage: 'Dismiss survey',
-                      })}
-                    >
-                      <Cross />
-                    </IconButton>
-                  </Flex>
-                  <Flex gap={2} marginTop={2} marginBottom={2} justifyContent="center">
-                    <Typography variant="pi" textColor="neutral600">
-                      {formatMessage({
-                        id: 'app.components.NpsSurvey.no-recommendation',
-                        defaultMessage: 'Not at all likely',
-                      })}
-                    </Typography>
-                    {ratingArray.map((number) => {
-                      return (
-                        <FieldWrapper
-                          key={number}
-                          name="npsSurveyRating"
-                          className={values.npsSurveyRating === number ? 'selected' : undefined} // "selected" class added when child radio button is checked
-                          hasRadius
-                          background="primary100"
-                          borderColor="primary200"
-                          color="primary600"
-                          position="relative"
-                          cursor="pointer"
-                        >
-                          <Field.Label>
-                            <VisuallyHidden>
-                              <Field.Input
-                                type="radio"
-                                checked={values.npsSurveyRating === number}
-                                onChange={(e) =>
-                                  setFieldValue('npsSurveyRating', parseInt(e.target.value, 10))
-                                }
-                                value={number}
-                              />
-                            </VisuallyHidden>
-                            {number}
-                          </Field.Label>
-                        </FieldWrapper>
-                      );
+              <Flex
+                hasRadius
+                direction="column"
+                padding={4}
+                borderColor="primary200"
+                background="neutral0"
+                shadow="popupShadow"
+                wrap="wrap"
+              >
+                {isFeedbackResponse ? (
+                  <Typography fontWeight="semiBold">
+                    {formatMessage({
+                      id: 'app.components.NpsSurvey.feedback-response',
+                      defaultMessage: 'Thank you very much for your feedback!',
                     })}
-                    <Typography variant="pi" textColor="neutral600">
-                      {formatMessage({
-                        id: 'app.components.NpsSurvey.happy-to-recommend',
-                        defaultMessage: 'Extremely likely',
-                      })}
-                    </Typography>
-                  </Flex>
-                  {values.npsSurveyRating !== null && (
-                    <Flex direction="column">
-                      <Box marginTop={2}>
-                        <Field.Label fontWeight="semiBold" fontSize={2}>
+                  </Typography>
+                ) : (
+                  <Box tag="fieldset" width="100%" borderWidth={0}>
+                    <Flex justifyContent="space-between" width="100%" gap={2}>
+                      <Box marginLeft="auto" marginRight="auto">
+                        <Typography fontWeight="semiBold" tag="legend">
                           {formatMessage({
-                            id: 'app.components.NpsSurvey.feedback-question',
-                            defaultMessage: 'Do you have any suggestion for improvements?',
+                            id: 'app.components.NpsSurvey.banner-title',
+                            defaultMessage:
+                              'How likely are you to recommend Strapi to a friend or colleague?',
                           })}
-                        </Field.Label>
+                        </Typography>
                       </Box>
-                      <Box width="62%" marginTop={3} marginBottom={4}>
-                        <Textarea
-                          id="npsSurveyFeedback" // formik element attribute "id" should be same as the values key to work
-                          width="100%"
-                          onChange={handleChange}
-                          value={values.npsSurveyFeedback}
-                        />
-                      </Box>
-                      <Button marginBottom={2} type="submit" loading={isSubmitting}>
-                        {formatMessage({
-                          id: 'app.components.NpsSurvey.submit-feedback',
-                          defaultMessage: 'Submit Feedback',
+                      <IconButton
+                        onClick={handleDismiss}
+                        withTooltip={false}
+                        label={formatMessage({
+                          id: 'app.components.NpsSurvey.dismiss-survey-label',
+                          defaultMessage: 'Dismiss survey',
                         })}
-                      </Button>
+                        type="button"
+                      >
+                        <Cross />
+                      </IconButton>
                     </Flex>
-                  )}
-                </Box>
-              )}
-            </Flex>
+                    {isMobile ? (
+                      <Box marginTop={2}>
+                        <SingleSelect
+                          placeholder={formatMessage({
+                            id: 'app.components.NpsSurvey.select-rating',
+                            defaultMessage: 'Select rating',
+                          })}
+                          onChange={(value) => {
+                            setFieldValue('npsSurveyRating', parseInt(value.toString(), 10));
+                          }}
+                          value={values.npsSurveyRating}
+                        >
+                          {ratingArray
+                            .sort((a, b) => b - a)
+                            .map((number) => {
+                              const suffixMessage =
+                                number === 0
+                                  ? formatMessage({
+                                      id: 'app.components.NpsSurvey.no-recommendation',
+                                      defaultMessage: 'Not at all likely',
+                                    })
+                                  : number === 10
+                                    ? formatMessage({
+                                        id: 'app.components.NpsSurvey.happy-to-recommend',
+                                        defaultMessage: 'Extremely likely',
+                                      })
+                                    : '';
+                              return (
+                                <SingleSelectOption key={number} value={number}>
+                                  {number} {suffixMessage && `(${suffixMessage})`}
+                                </SingleSelectOption>
+                              );
+                            })}
+                        </SingleSelect>
+                      </Box>
+                    ) : (
+                      <Flex gap={2} marginTop={2} marginBottom={2} justifyContent="center">
+                        <Typography variant="pi" textColor="neutral600">
+                          {formatMessage({
+                            id: 'app.components.NpsSurvey.no-recommendation',
+                            defaultMessage: 'Not at all likely',
+                          })}
+                        </Typography>
+                        {ratingArray.map((number) => {
+                          return (
+                            <FieldWrapper
+                              key={number}
+                              name="npsSurveyRating"
+                              className={values.npsSurveyRating === number ? 'selected' : undefined} // "selected" class added when child radio button is checked
+                              hasRadius
+                              background="primary100"
+                              borderColor="primary200"
+                              color="primary600"
+                              position="relative"
+                              cursor="pointer"
+                            >
+                              <Field.Label>
+                                <VisuallyHidden>
+                                  <Field.Input
+                                    type="radio"
+                                    checked={values.npsSurveyRating === number}
+                                    onChange={(e) =>
+                                      setFieldValue('npsSurveyRating', parseInt(e.target.value, 10))
+                                    }
+                                    value={number}
+                                  />
+                                </VisuallyHidden>
+                                {number}
+                              </Field.Label>
+                            </FieldWrapper>
+                          );
+                        })}
+                        <Typography variant="pi" textColor="neutral600">
+                          {formatMessage({
+                            id: 'app.components.NpsSurvey.happy-to-recommend',
+                            defaultMessage: 'Extremely likely',
+                          })}
+                        </Typography>
+                      </Flex>
+                    )}
+                    {values.npsSurveyRating !== null && (
+                      <Flex direction="column" alignItems="stretch">
+                        <Box marginTop={2}>
+                          <Field.Label fontWeight="semiBold" fontSize={2}>
+                            {formatMessage({
+                              id: 'app.components.NpsSurvey.feedback-question',
+                              defaultMessage: 'Do you have any suggestion for improvements?',
+                            })}
+                          </Field.Label>
+                        </Box>
+                        <Box marginTop={3} marginBottom={4} width="100%">
+                          <Textarea
+                            id="npsSurveyFeedback" // formik element attribute "id" should be same as the values key to work
+                            width="100%"
+                            onChange={handleChange}
+                            value={values.npsSurveyFeedback}
+                          />
+                        </Box>
+                        <Box>
+                          <Button marginBottom={2} type="submit" loading={isSubmitting}>
+                            {formatMessage({
+                              id: 'app.components.NpsSurvey.submit-feedback',
+                              defaultMessage: 'Submit Feedback',
+                            })}
+                          </Button>
+                        </Box>
+                      </Flex>
+                    )}
+                  </Box>
+                )}
+              </Flex>
+            </Box>
           </Form>
         )}
       </Formik>
