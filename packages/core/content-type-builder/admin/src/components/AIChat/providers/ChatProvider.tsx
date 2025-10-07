@@ -131,8 +131,7 @@ export const BaseChatProvider = ({
     }
 
     const readyAttachments = attachments.filter((a) => a.status !== 'loading');
-
-    if (!input.trim() || readyAttachments.length !== 0) {
+    if (input.trim().length === 0 && attachments.length === 0) {
       return;
     }
 

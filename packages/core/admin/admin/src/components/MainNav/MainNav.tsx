@@ -1,8 +1,18 @@
-import { Flex, FlexComponent, FlexProps } from '@strapi/design-system';
+import { Flex, FlexProps } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-const MainNavWrapper = styled<FlexComponent<'nav'>>(Flex)`
-  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+const MainNavWrapper = styled(Flex)`
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+  position: sticky;
+  max-height: 100%;
+  height: auto;
+  z-index: 4;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    border-bottom: none;
+    border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+    height: 100dvh;
+  }
 `;
 
 const MainNav = (props: FlexProps<'nav'>) => (
@@ -10,12 +20,16 @@ const MainNav = (props: FlexProps<'nav'>) => (
     alignItems="normal"
     tag="nav"
     background="neutral0"
-    direction="column"
-    height="100vh"
-    position="sticky"
+    direction={{
+      initial: 'row',
+      large: 'column',
+    }}
     top={0}
-    zIndex={2}
-    width={10}
+    zIndex={3}
+    width={{
+      initial: '100dvw',
+      large: 10,
+    }}
     {...props}
   />
 );

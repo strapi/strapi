@@ -40,8 +40,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to our products list-view
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Products' }).click();
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await page.waitForURL(LIST_URL);
     await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 
@@ -145,8 +144,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to our products list-view where there will be one document already made in the `en` locale
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Products' }).click();
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await page.waitForURL(LIST_URL);
     await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 
@@ -263,8 +261,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to settings and roles & modify editor permissions
      */
-    await page.getByRole('link', { name: 'Settings', exact: true }).click();
-    await page.getByRole('link', { name: 'Roles' }).first().click();
+    await navToHeader(page, ['Settings', ['Administration Panel', 'Roles']], 'Roles');
     await page.getByRole('gridcell', { name: 'Editor', exact: true }).click();
 
     /**
@@ -328,7 +325,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to our articles list-view and create a new entry
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await page.waitForURL(LIST_URL);
     await page.getByRole('link', { name: 'Create new entry' }).click();
     await page.getByLabel('title').fill('trent crimm');

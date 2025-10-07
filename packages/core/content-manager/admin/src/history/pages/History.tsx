@@ -204,7 +204,7 @@ const HistoryPage = () => {
         <Flex direction="row" alignItems="flex-start">
           <Main
             grow={1}
-            height="100vh"
+            height="100dvh"
             background="neutral100"
             paddingBottom={6}
             overflow="auto"
@@ -242,12 +242,12 @@ const ProtectedHistoryPageImpl = () => {
   if (error || !slug) {
     return (
       <Box
-        height="100vh"
-        width="100vw"
+        height="100dvh"
+        width="100dvw"
         position="fixed"
         top={0}
         left={0}
-        zIndex={2}
+        zIndex={4}
         background="neutral0"
       >
         <Page.Error />
@@ -257,12 +257,12 @@ const ProtectedHistoryPageImpl = () => {
 
   return (
     <Box
-      height="100vh"
-      width="100vw"
+      height="100dvh"
+      width="100dvw"
       position="fixed"
       top={0}
       left={0}
-      zIndex={2}
+      zIndex={4}
       background="neutral0"
     >
       <Page.Protect permissions={permissions}>
