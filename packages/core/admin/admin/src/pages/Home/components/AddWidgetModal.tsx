@@ -10,7 +10,7 @@ import { WidgetComponent } from '../HomePage';
 import type { WidgetWithUID } from '../../../core/apis/Widgets';
 
 // Hide scrollbars in widget previews
-const StyledBox = styled(Box)`
+const WidgetWrapper = styled(Box)`
   * {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -63,14 +63,14 @@ const WidgetPreview = ({ widget, onSelect }: WidgetPreviewProps) => {
             {formatMessage(widget.title)}
           </Typography>
         </Flex>
-        <StyledBox
+        <WidgetWrapper
           width={'100%'}
           style={{
             pointerEvents: 'none',
           }}
         >
           <WidgetComponent component={widget.component} columnWidth={4} />
-        </StyledBox>
+        </WidgetWrapper>
       </Flex>
     </Box>
   );

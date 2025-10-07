@@ -13,27 +13,23 @@ import { useTracking } from '../features/Tracking';
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 
 const WidgetActions = styled(Flex)`
-  ${({ theme }) => theme.breakpoints.initial} {
-    display: flex;
-  }
+  display: flex;
 
-  ${({ theme }) => theme.breakpoints.medium} {
+  @media (hover: hover) and (pointer: fine) {
     display: none;
   }
 `;
 
 const DragIconButton = styled(IconButton)`
-  ${({ theme }) => theme.breakpoints.initial} {
-    display: none;
-  }
+  display: none;
 
-  ${({ theme }) => theme.breakpoints.medium} {
+  @media (hover: hover) and (pointer: fine) {
     display: flex;
   }
 `;
 
 const WidgetContainer = styled(Flex)`
-  ${({ theme }) => theme.breakpoints.medium} {
+  @media (hover: hover) and (pointer: fine) {
     &:hover ${WidgetActions} {
       display: flex;
     }
