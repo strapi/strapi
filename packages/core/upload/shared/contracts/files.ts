@@ -234,3 +234,27 @@ export declare namespace UpdateFile {
     error?: errors.ApplicationError | errors.ValidationError;
   }
 }
+
+/**
+ * POST /upload/actions/bulk-update - Bulk update files
+ */
+export declare namespace BulkUpdateFiles {
+  export interface Request {
+    body: {
+      updates: Array<{
+        id: number;
+        fileInfo: {
+          name?: string;
+          alternativeText?: string | null;
+          caption?: string | null;
+          folder?: number | null;
+        };
+      }>;
+    };
+  }
+
+  export interface Response {
+    data: File[];
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
