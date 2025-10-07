@@ -113,7 +113,7 @@ module.exports = ({ strapi }) => ({
           const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
           const cookieOptions = {
             httpOnly: true,
-            secure: Boolean(upSessions.cookie?.secure),
+            secure: process.env.NODE_ENV === 'production' || Boolean(upSessions.cookie?.secure),
             sameSite: upSessions.cookie?.sameSite ?? 'lax',
             path: upSessions.cookie?.path ?? '/',
             domain: upSessions.cookie?.domain,
@@ -166,7 +166,7 @@ module.exports = ({ strapi }) => ({
           const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
           const cookieOptions = {
             httpOnly: true,
-            secure: Boolean(upSessions.cookie?.secure),
+            secure: process.env.NODE_ENV === 'production' || Boolean(upSessions.cookie?.secure),
             sameSite: upSessions.cookie?.sameSite ?? 'lax',
             path: upSessions.cookie?.path ?? '/',
             domain: upSessions.cookie?.domain,
@@ -346,7 +346,7 @@ module.exports = ({ strapi }) => ({
       const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
       const cookieOptions = {
         httpOnly: true,
-        secure: Boolean(upSessions.cookie?.secure),
+        secure: process.env.NODE_ENV === 'production' || Boolean(upSessions.cookie?.secure),
         sameSite: upSessions.cookie?.sameSite ?? 'lax',
         path: upSessions.cookie?.path ?? '/',
         domain: upSessions.cookie?.domain,

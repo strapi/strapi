@@ -145,6 +145,13 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     jwtOptions: options,
   });
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  const adminCookieSecure = strapi.config.get('admin.auth.cookie.secure');
+  if (isProduction && adminCookieSecure === false) {
+    // TODO
+    strapi.log.warn('PLACEHOLDER WARNING: Session cookie secure');
+  }
+
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();

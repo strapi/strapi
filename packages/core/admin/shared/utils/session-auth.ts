@@ -9,7 +9,9 @@ export const DEFAULT_MAX_SESSION_LIFESPAN = 1 * 24 * 60 * 60;
 export const DEFAULT_IDLE_SESSION_LIFESPAN = 2 * 60 * 60;
 
 export const getRefreshCookieOptions = () => {
-  const isProduction = strapi.config.get('environment') === 'production';
+  const configuredSecure = strapi.config.get('admin.auth.cookie.secure');
+  const isProduction = process.env.NODE_ENV === 'production';
+
   const domain: string | undefined =
     strapi.config.get('admin.auth.cookie.domain') || strapi.config.get('admin.auth.domain');
   const path: string = strapi.config.get('admin.auth.cookie.path', '/admin');
@@ -19,7 +21,7 @@ export const getRefreshCookieOptions = () => {
 
   return {
     httpOnly: true,
-    secure: isProduction,
+    secure: typeof configuredSecure === 'boolean' ? configuredSecure : isProduction,
     overwrite: true,
     domain,
     path,
