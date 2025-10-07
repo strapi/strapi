@@ -75,7 +75,7 @@ export const useUpload = () => {
       onSuccess() {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
         queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
-        dispatch(adminApi.util.invalidateTags(['HomepageKeyStatistics']));
+        dispatch(adminApi.util.invalidateTags(['HomepageKeyStatistics', 'AIUsage']));
       },
     }
   );

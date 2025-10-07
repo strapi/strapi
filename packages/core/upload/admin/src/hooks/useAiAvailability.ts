@@ -1,14 +1,12 @@
+import { useAIAvailability as useGlobalAIAvailability } from '@strapi/admin/strapi-admin/ee';
+
 import { useSettings } from './useSettings';
 
 export const useAIAvailability = () => {
-  const isAiEnabled = window.strapi.ai?.enabled !== false;
-  // @ts-expect-error - incorrect window types
-  const isEE = window.strapi?.isEE;
-  const shouldMakeRequest = isAiEnabled && isEE;
+  const isAiAvailable = useGlobalAIAvailability();
+  const { status, data } = useSettings(isAiAvailable);
 
-  const { status, data } = useSettings(shouldMakeRequest);
-
-  if (!shouldMakeRequest) {
+  if (!isAiAvailable) {
     return { status: 'success' as const, isEnabled: false };
   }
 

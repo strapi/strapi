@@ -8,16 +8,23 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async isEnabled() {
+      // Check if user disabled AI features globally
       const isAIEnabled = strapi.config.get('admin.ai.enabled', true);
       if (!isAIEnabled) {
         return false;
       }
 
-      const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
-      const aiMetadata: boolean = settings.aiMetadata ?? false;
+      // Check if the user's license grants access to AI features
+      const hasAccess = strapi.ee.features.isEnabled('cms-ai');
+      if (!hasAccess) {
+        return false;
+      }
 
-      const { isEE } = strapi.ee;
-      return aiMetadata && isEE;
+      // Check if feature is specifically enabled, defaulting to true
+      const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
+      const aiMetadata: boolean = settings.aiMetadata ?? true;
+
+      return aiMetadata;
     },
 
     async processFiles(

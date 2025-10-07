@@ -8,6 +8,7 @@ const aiService = adminApi.injectEndpoints({
         method: 'GET',
         url: `/admin/ai-usage`,
       }),
+      providesTags: ['AIUsage'],
     }),
     getAiToken: builder.query<GetAiToken.Response['data'], void>({
       query: () => ({
