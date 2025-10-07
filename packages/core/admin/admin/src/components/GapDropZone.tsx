@@ -295,7 +295,7 @@ export const GapDropZoneManager = ({
     };
   }, [calculateGapDropZonePositions]);
 
-  return positions.map((gapDropZone, index) => (
+  return positions.map((gapDropZone) => (
     <GapDropZone
       key={`gap-drop-zone-${gapDropZone.type}-${gapDropZone.insertIndex}-${gapDropZone.targetRowIndex ?? 'no-row'}`}
       insertIndex={gapDropZone.insertIndex}
