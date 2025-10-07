@@ -1,15 +1,7 @@
 import * as React from 'react';
 
 import { useQueryParams, SubNav } from '@strapi/admin/strapi-admin';
-import {
-  Flex,
-  Searchbar,
-  useCollator,
-  useFilter,
-  Divider,
-  ScrollArea,
-  Loader,
-} from '@strapi/design-system';
+import { Flex, Searchbar, useCollator, useFilter, Divider, Loader } from '@strapi/design-system';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 
@@ -143,7 +135,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
           <Divider />
         </>
       )}
-      <ScrollArea>
+      <SubNav.Content>
         {isFullPage && <SubNav.Header label={label} />}
         <Flex
           paddingLeft={{
@@ -209,7 +201,7 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
             );
           })}
         </SubNav.Sections>
-      </ScrollArea>
+      </SubNav.Content>
     </SubNav.Main>
   );
 };

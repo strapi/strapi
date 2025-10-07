@@ -1,4 +1,4 @@
-import { Badge, Divider, ScrollArea } from '@strapi/design-system';
+import { Badge, Divider } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -78,7 +78,7 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
           <Divider />
         </>
       )}
-      <ScrollArea>
+      <SubNav.Content>
         {isFullPage && <SubNav.Header label={label} />}
         <SubNav.Sections>
           {sections.map((section) => (
@@ -124,7 +124,7 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
             </SubNav.Section>
           ))}
         </SubNav.Sections>
-      </ScrollArea>
+      </SubNav.Content>
     </SubNav.Main>
   );
 };

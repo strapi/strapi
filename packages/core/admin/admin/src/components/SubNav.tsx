@@ -7,6 +7,7 @@ import {
   Typography,
   IconButton,
   Badge,
+  ScrollArea,
 } from '@strapi/design-system';
 import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
@@ -349,8 +350,13 @@ const PageWrapper = styled(Box)`
   }
 `;
 
+const Content = ({ children }: { children: React.ReactNode }) => {
+  return <ScrollArea>{children}</ScrollArea>;
+};
+
 export const SubNav = {
   Main,
+  Content,
   Header,
   Link,
   Sections,
