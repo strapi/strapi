@@ -9,8 +9,22 @@ const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
 const mockGetSettings = jest.fn();
 
 // Mock fetch globally
-global.fetch = jest.fn();
-const mockFetch = fetch as jest.MockedFunction<typeof fetch>;
+const mockArrayBuffer = jest.fn().mockResolvedValue(new ArrayBuffer(8));
+
+const mockFetch = jest.fn().mockResolvedValue({
+  ok: true,
+  status: 200,
+  arrayBuffer: mockArrayBuffer, // Add this
+  json: jest.fn().mockResolvedValue({
+    results: [{ altText: 'image alt', caption: 'image caption' }],
+  }),
+  text: jest.fn().mockResolvedValue(''),
+  headers: {
+    get: jest.fn().mockReturnValue('image/jpeg'),
+  },
+} as any);
+
+global.fetch = mockFetch;
 
 // Mock FormData
 global.FormData = jest.fn().mockImplementation(() => ({
@@ -118,6 +132,7 @@ describe('AI Metadata Service', () => {
       mimetype: 'image/jpeg',
       originalFilename: 'image.jpg',
       size: 1024,
+      provider: 'local',
     } as InputFile;
 
     const mockImageFile2: InputFile = {
@@ -135,8 +150,15 @@ describe('AI Metadata Service', () => {
     } as InputFile;
 
     beforeEach(() => {
+      // Mock strapi config
+      mockStrapi.config.get.mockImplementation((key: string) => {
+        if (key === 'server.url') return 'test-url';
+        if (key === 'admin.ai.enabled') return true;
+        if (key === 'server.port') return 1337;
+        return undefined;
+      });
+
       // Mock service as enabled by default
-      mockStrapi.config.get.mockReturnValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
       mockStrapi.ee.isEE = true;
 
@@ -177,6 +199,7 @@ describe('AI Metadata Service', () => {
       it('should return proper sparse array for mixed file types', async () => {
         mockFetch.mockResolvedValue({
           ok: true,
+          arrayBuffer: mockArrayBuffer,
           json: jest.fn().mockResolvedValue({
             results: [{ altText: 'image alt', caption: 'image caption' }],
           }),
@@ -195,6 +218,7 @@ describe('AI Metadata Service', () => {
 
         mockFetch.mockResolvedValue({
           ok: true,
+          arrayBuffer: mockArrayBuffer,
           json: jest.fn().mockResolvedValue({
             results: [expectedMetadata],
           }),
@@ -203,7 +227,7 @@ describe('AI Metadata Service', () => {
         const result = await aiMetadataService.processFiles([mockImageFile]);
 
         expect(result).toEqual([expectedMetadata]);
-        expect(mockReadFile).toHaveBeenCalledWith('/tmp/image.jpg');
+        expect(mockFetch).toHaveBeenCalledWith('test-url/tmp/image.jpg');
         expect(mockFetch).toHaveBeenCalledWith(
           'https://ai.strapi.com/media-library/generate-metadata',
           {
@@ -224,6 +248,7 @@ describe('AI Metadata Service', () => {
 
         mockFetch.mockResolvedValue({
           ok: true,
+          arrayBuffer: mockArrayBuffer,
           json: jest.fn().mockResolvedValue({
             results: expectedMetadata,
           }),
@@ -232,7 +257,9 @@ describe('AI Metadata Service', () => {
         const result = await aiMetadataService.processFiles([mockImageFile, mockImageFile2]);
 
         expect(result).toEqual(expectedMetadata);
-        expect(mockReadFile).toHaveBeenCalledTimes(2);
+        expect(mockFetch).toHaveBeenCalledTimes(3); // 2 files + 1 AI service call
+        expect(mockFetch).toHaveBeenCalledWith('test-url/tmp/image.jpg');
+        expect(mockFetch).toHaveBeenCalledWith('image2.png');
       });
 
       it('should handle mixed file types with correct sparse array mapping', async () => {
@@ -243,6 +270,7 @@ describe('AI Metadata Service', () => {
 
         mockFetch.mockResolvedValue({
           ok: true,
+          arrayBuffer: mockArrayBuffer,
           json: jest.fn().mockResolvedValue({
             results: expectedMetadata,
           }),

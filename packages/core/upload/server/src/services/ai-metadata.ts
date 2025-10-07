@@ -1,5 +1,4 @@
 import type { Core } from '@strapi/types';
-import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
 import { InputFile } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
@@ -43,10 +42,17 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       const formData = new FormData();
 
       for (const { file } of imageFiles) {
-        const fileBuffer = await readFile(file.filepath);
-        const blob = new Blob([fileBuffer.buffer as ArrayBuffer], {
-          type: file.mimetype || undefined,
-        });
+        const fullUrl =
+          file.provider === 'local'
+            ? strapi.config.get('server.url') + file.filepath
+            : file.filepath;
+
+        const resp = await fetch(fullUrl);
+        if (!resp.ok) {
+          throw new Error(`Failed to fetch image from URL: ${fullUrl} (${resp.status})`);
+        }
+        const ab = await resp.arrayBuffer();
+        const blob: Blob = new Blob([ab], { type: file.mimetype || undefined });
         formData.append('files', blob);
       }
 

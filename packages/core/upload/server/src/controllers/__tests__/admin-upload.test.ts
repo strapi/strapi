@@ -111,11 +111,22 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       mockAiMetadataService.isEnabled.mockReturnValue(true);
       mockAiMetadataService.processFiles.mockResolvedValue([{}]);
 
+      // Mock upload service to return files with proper structure
+      uploadService.upload.mockResolvedValue([
+        {
+          id: 1,
+          name: 'test.jpg',
+          mime: 'image/jpeg',
+          url: '/uploads/test.jpg',
+          provider: 'local',
+        },
+      ]);
+
       await adminUploadController.uploadFiles(mockContext as Context);
 
       expect(mockAiMetadataService.processFiles).toHaveBeenCalledWith([
         expect.objectContaining({
-          filepath: '/tmp/test.jpg',
+          filepath: '/uploads/test.jpg',
           mimetype: 'image/jpeg',
         }),
       ]);
