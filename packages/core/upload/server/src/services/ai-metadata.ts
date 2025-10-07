@@ -51,7 +51,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       for (const { file } of imageFiles) {
         const fullUrl =
           file.provider === 'local'
-            ? strapi.config.get('server.url') + file.filepath
+            ? strapi.config.get('server.absoluteUrl') + file.filepath
             : file.filepath;
 
         const resp = await fetch(fullUrl);
