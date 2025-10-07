@@ -211,7 +211,7 @@ const authService = adminApi
         invalidatesTags: ['ProvidersOptions'],
       }),
     }),
-    overrideExisting: true,
+    overrideExisting: false,
   });
 
 const {

@@ -20,7 +20,7 @@ const aiService = adminApi.injectEndpoints({
       },
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 const { useGetAIUsageQuery, useGetAiTokenQuery, useLazyGetAiTokenQuery } = aiService;
