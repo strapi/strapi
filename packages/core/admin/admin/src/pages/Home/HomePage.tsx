@@ -11,7 +11,7 @@ import { GapDropZoneManager } from '../../components/GapDropZone';
 import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
-import { InterWidgetResizeHandle } from '../../components/ResizeIndicator';
+import { WidgetResizeHandle } from '../../components/ResizeIndicator';
 import { Widget } from '../../components/WidgetHelpers';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
@@ -100,7 +100,7 @@ const HomePageCE = () => {
     moveWidget,
     columnWidths,
     setColumnWidths,
-    handleInterWidgetResize,
+    handleWidgetResize,
     saveLayout,
     isDraggingWidget,
     draggedWidgetId,
@@ -251,13 +251,13 @@ const HomePageCE = () => {
                         </Grid.Item>
 
                         {!isLastInRow && canResize && rightWidgetId && (
-                          <InterWidgetResizeHandle
+                          <WidgetResizeHandle
                             key={`resize-${widget.uid}`}
                             leftWidgetId={widget.uid}
                             rightWidgetId={rightWidgetId}
                             leftWidgetWidth={widgetWidth}
                             rightWidgetWidth={rightWidgetWidth}
-                            onResize={handleInterWidgetResize}
+                            onResize={handleWidgetResize}
                             saveLayout={saveLayout}
                             filteredWidgets={filteredWidgets}
                           />

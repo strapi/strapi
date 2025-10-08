@@ -168,7 +168,7 @@ const addWidget = (filteredWidgets: WidgetWithUID[], columnWidths: Record<string
   };
 };
 
-const handleInterWidgetResize = (
+const handleWidgetResize = (
   filteredWidgets: WidgetWithUID[],
   columnWidths: Record<string, number>,
   leftWidgetId: string,
@@ -274,13 +274,13 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     );
   };
 
-  const handleInterWidgetResizeFn = (
+  const handleWidgetResizeFn = (
     leftWidgetId: string,
     rightWidgetId: string,
     newLeftWidth: number,
     newRightWidth: number
   ) => {
-    const newWidths = handleInterWidgetResize(
+    const newWidths = handleWidgetResize(
       filteredWidgets,
       columnWidths,
       leftWidgetId,
@@ -320,7 +320,7 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     moveWidget: moveWidgetFn,
     columnWidths,
     setColumnWidths,
-    handleInterWidgetResize: handleInterWidgetResizeFn,
+    handleWidgetResize: handleWidgetResizeFn,
     saveLayout: saveLayoutFn,
     isDraggingWidget,
     draggedWidgetId,
