@@ -159,7 +159,7 @@ const ResizeHandleBar = styled(Box)<{ $isDragging?: boolean }>`
   ${({ $isDragging }) => $isDragging && `opacity: 0.8;`}
 `;
 
-interface InterWidgetResizeHandleProps {
+interface WidgetResizeHandleProps {
   leftWidgetId: string;
   rightWidgetId: string;
   leftWidgetWidth: number;
@@ -243,7 +243,7 @@ const shouldTriggerResize = (
   return leftWidth !== lastResizeValues.leftWidth || rightWidth !== lastResizeValues.rightWidth;
 };
 
-export const InterWidgetResizeHandle = ({
+export const WidgetResizeHandle = ({
   leftWidgetId,
   rightWidgetId,
   leftWidgetWidth,
@@ -251,7 +251,7 @@ export const InterWidgetResizeHandle = ({
   onResize,
   saveLayout,
   filteredWidgets,
-}: InterWidgetResizeHandleProps) => {
+}: WidgetResizeHandleProps) => {
   const [state, setState] = React.useState({
     isDragging: false,
     startX: 0,

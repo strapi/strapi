@@ -246,12 +246,12 @@ describe('useWidgets', () => {
     });
   });
 
-  describe('handleInterWidgetResize', () => {
+  describe('handleWidgetResize', () => {
     it('should resize widgets and update columnWidths', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
       await act(async () => {
-        result.current.handleInterWidgetResize('widget-1', 'widget-2', 8, 4);
+        result.current.handleWidgetResize('widget-1', 'widget-2', 8, 4);
       });
 
       await waitFor(() => {
@@ -272,7 +272,7 @@ describe('useWidgets', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
       await act(async () => {
-        result.current.handleInterWidgetResize('widget-1', 'widget-2', 8, 4);
+        result.current.handleWidgetResize('widget-1', 'widget-2', 8, 4);
       });
 
       await waitFor(() => {
@@ -285,7 +285,7 @@ describe('useWidgets', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
       await act(async () => {
-        result.current.handleInterWidgetResize('widget-1', 'widget-2', 8, 4);
+        result.current.handleWidgetResize('widget-1', 'widget-2', 8, 4);
       });
 
       await waitFor(() => {
@@ -425,7 +425,7 @@ describe('useWidgets', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
       await act(async () => {
-        result.current.handleInterWidgetResize('invalid-1', 'invalid-2', 8, 4);
+        result.current.handleWidgetResize('invalid-1', 'invalid-2', 8, 4);
       });
 
       await waitFor(() => {
