@@ -59,6 +59,8 @@ interface EditAssetContentProps {
   canDownload?: boolean;
   trackedLocation?: string;
   onClose: (arg?: Asset | null | boolean) => void;
+  omitFields?: ('caption' | 'alternativeText')[];
+  omitActions?: 'replace'[];
 }
 
 interface FormInitialData {
@@ -78,6 +80,8 @@ export const EditAssetContent = ({
   canCopyLink = false,
   canDownload = false,
   trackedLocation,
+  omitFields = [],
+  omitActions = [],
 }: EditAssetContentProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { trackUsage } = useTracking();
@@ -274,42 +278,47 @@ export const EditAssetContent = ({
                       <Field.Error />
                     </Field.Root>
 
-                    <Field.Root
-                      name="alternativeText"
-                      hint={formatMessage({
-                        id: getTrad('form.input.description.file-alt'),
-                        defaultMessage: 'This text will be displayed if the asset can’t be shown.',
-                      })}
-                      error={errors.alternativeText}
-                    >
-                      <Field.Label>
-                        {formatMessage({
-                          id: getTrad('form.input.label.file-alt'),
-                          defaultMessage: 'Alternative text',
+                    {!omitFields?.includes('alternativeText') && (
+                      <Field.Root
+                        name="alternativeText"
+                        hint={formatMessage({
+                          id: getTrad('form.input.description.file-alt'),
+                          defaultMessage:
+                            'This text will be displayed if the asset can’t be shown.',
                         })}
-                      </Field.Label>
-                      <TextInput
-                        value={values.alternativeText}
-                        onChange={handleChange}
-                        disabled={formDisabled}
-                      />
-                      <Field.Hint />
-                      <Field.Error />
-                    </Field.Root>
+                        error={errors.alternativeText}
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: getTrad('form.input.label.file-alt'),
+                            defaultMessage: 'Alternative text',
+                          })}
+                        </Field.Label>
+                        <TextInput
+                          value={values.alternativeText}
+                          onChange={handleChange}
+                          disabled={formDisabled}
+                        />
+                        <Field.Hint />
+                        <Field.Error />
+                      </Field.Root>
+                    )}
 
-                    <Field.Root name="caption" error={errors.caption}>
-                      <Field.Label>
-                        {formatMessage({
-                          id: getTrad('form.input.label.file-caption'),
-                          defaultMessage: 'Caption',
-                        })}
-                      </Field.Label>
-                      <TextInput
-                        value={values.caption}
-                        onChange={handleChange}
-                        disabled={formDisabled}
-                      />
-                    </Field.Root>
+                    {!omitFields?.includes('caption') && (
+                      <Field.Root name="caption" error={errors.caption}>
+                        <Field.Label>
+                          {formatMessage({
+                            id: getTrad('form.input.label.file-caption'),
+                            defaultMessage: 'Caption',
+                          })}
+                        </Field.Label>
+                        <TextInput
+                          value={values.caption}
+                          onChange={handleChange}
+                          disabled={formDisabled}
+                        />
+                      </Field.Root>
+                    )}
 
                     <Flex direction="column" alignItems="stretch" gap={1}>
                       <Field.Root name="parent" id="asset-folder">
@@ -356,12 +365,14 @@ export const EditAssetContent = ({
               {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
             </Button>
             <Flex gap={2}>
-              <ReplaceMediaButton
-                onSelectMedia={setReplacementFile}
-                acceptedMime={asset?.mime ?? ''}
-                disabled={formDisabled}
-                trackedLocation={trackedLocation}
-              />
+              {!omitActions?.includes('replace') && (
+                <ReplaceMediaButton
+                  onSelectMedia={setReplacementFile}
+                  acceptedMime={asset?.mime ?? ''}
+                  disabled={formDisabled}
+                  trackedLocation={trackedLocation}
+                />
+              )}
 
               <Button
                 onClick={() => submitButtonRef.current?.click()}

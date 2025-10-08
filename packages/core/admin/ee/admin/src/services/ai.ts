@@ -8,6 +8,7 @@ const aiService = adminApi.injectEndpoints({
         method: 'GET',
         url: `/admin/ai-usage`,
       }),
+      providesTags: ['AIUsage'],
     }),
     getAiToken: builder.query<GetAiToken.Response['data'], void>({
       query: () => ({
@@ -19,7 +20,7 @@ const aiService = adminApi.injectEndpoints({
       },
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 const { useGetAIUsageQuery, useGetAiTokenQuery, useLazyGetAiTokenQuery } = aiService;
