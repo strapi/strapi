@@ -141,6 +141,6 @@
   "view-switch.list": "List View",
   "view-switch.grid": "Grid View",
   "ai.modal.uploading.title": "Uploading and processing with AI...",
-  "ai.modal.title": "{count, plural, one {# Asset uploaded} other {# Assets uploaded}} time to review AI generated content",
+  "ai.modal.title": "{count, plural, one {# asset uploaded} other {# assets uploaded}}, review AI generated metadata",
   "ai.modal.error": "Could not generate AI metadata for the uploaded files."
 }
