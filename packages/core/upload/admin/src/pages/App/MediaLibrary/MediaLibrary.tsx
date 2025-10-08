@@ -157,10 +157,14 @@ export const MediaLibrary = () => {
   const [showEditFolderDialog, setShowEditFolderDialog] = React.useState(false);
   const [assetToEdit, setAssetToEdit] = React.useState<Asset | undefined>(undefined);
   const [folderToEdit, setFolderToEdit] = React.useState<FolderRow | undefined | null>(undefined);
-  const [selected, { selectOne, selectAll }] = useSelectionState<FolderRow | FileRow>(
-    ['type', 'id'],
-    []
-  );
+  const [selected, { selectOne, selectAll, setSelections }] = useSelectionState<
+    FolderRow | FileRow
+  >(['type', 'id'], []);
+  // reset selection when folder changes to hide bulk actions
+  React.useEffect(() => {
+    setSelections([]);
+  }, [query.folder, setSelections]);
+
   const indeterminateBulkSelect =
     selected?.length > 0 && selected?.length !== assetCount + folderCount;
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog((prev) => !prev);
