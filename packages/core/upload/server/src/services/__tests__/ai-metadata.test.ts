@@ -155,7 +155,7 @@ describe('AI Metadata Service', () => {
     beforeEach(() => {
       // Mock strapi config
       mockStrapi.config.get.mockImplementation((key: string) => {
-        if (key === 'server.url') return 'test-url';
+        if (key === 'server.absoluteUrl') return 'test-url';
         if (key === 'admin.ai.enabled') return true;
         if (key === 'server.port') return 1337;
         return undefined;
