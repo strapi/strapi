@@ -22,15 +22,27 @@ export const username = yup.string().min(1);
 
 export const password = yup
   .string()
-  .min(8)
-  .test('required-byte-size', '${path} must be less than 73 bytes', function (value) {
+  .test('min-length', 'Password must be at least 8 characters long', (value) => {
+    if (!value) return true;
+    return value.length >= 8;
+  })
+  .test('required-byte-size', 'Password must be less than 73 bytes', function (value) {
     if (!value) return true;
     const byteSize = new TextEncoder().encode(value).length;
     return byteSize <= 72;
   })
-  .matches(/[a-z]/, '${path} must contain at least one lowercase character')
-  .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
-  .matches(/\d/, '${path} must contain at least one number');
+  .test('lowercase', 'Password must contain at least one lowercase character', (value) => {
+    if (!value) return true;
+    return /[a-z]/.test(value);
+  })
+  .test('uppercase', 'Password must contain at least one uppercase character', (value) => {
+    if (!value) return true;
+    return /[A-Z]/.test(value);
+  })
+  .test('number', 'Password must contain at least one number', (value) => {
+    if (!value) return true;
+    return /\d/.test(value);
+  });
 
 export const roles = yup.array(yup.strapiID()).min(1);
 
