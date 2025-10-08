@@ -60,10 +60,6 @@ const DragLayer = ({ renderItem }: DragLayerProps) => {
     return null;
   }
 
-  const renderPreview = () => {
-    return renderItem({ type: itemType, item });
-  };
-
   return (
     <Box
       height="100%"
@@ -75,7 +71,7 @@ const DragLayer = ({ renderItem }: DragLayerProps) => {
       width="100%"
     >
       <Box style={getStyle(initialOffset, currentOffset, mouseOffset, { type: itemType, ...item })}>
-        {renderPreview()}
+        {renderItem({ type: itemType, item })}
       </Box>
     </Box>
   );
