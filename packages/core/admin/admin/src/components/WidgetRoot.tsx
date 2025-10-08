@@ -115,7 +115,7 @@ export const WidgetRoot = ({
       aria-labelledby={uid}
       ref={(node: HTMLElement | null) => {
         if (node) {
-          node.setAttribute('data-widget-id', uid);
+          node.setAttribute('data-strapi-widget-id', uid);
         }
       }}
       style={{

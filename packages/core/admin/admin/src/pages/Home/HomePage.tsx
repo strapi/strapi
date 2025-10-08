@@ -217,7 +217,7 @@ const HomePageCE = () => {
                 <Page.Loading />
               </Box>
             ) : (
-              <Box position="relative" data-grid-container>
+              <Box position="relative" data-strapi-grid-container>
                 <Grid.Root gap={5}>
                   {widgetLayout.map(
                     ({
@@ -281,7 +281,7 @@ const HomePageCE = () => {
         <DragLayer
           renderItem={({ type, item }) => {
             if (type === 'widget') {
-              const widgetElement = document.querySelector(`[data-widget-id="${item.id}"]`);
+              const widgetElement = document.querySelector(`[data-strapi-widget-id="${item.id}"]`);
               const maxWidth = `${widgetElement?.clientWidth}px`;
 
               return (

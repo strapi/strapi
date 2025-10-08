@@ -18,7 +18,7 @@ function getStyle(
   // Only apply custom offset for widget drags
   if (item?.type === 'widget') {
     // Calculate dynamic offset based on widget position and width
-    const widgetElement = document.querySelector(`[data-widget-id="${item.id}"]`);
+    const widgetElement = document.querySelector(`[data-strapi-widget-id="${item.id}"]`);
     const previewWidth = widgetElement?.clientWidth;
     const offsetX = previewWidth ? -previewWidth + 20 : 0;
     const offsetY = 20;

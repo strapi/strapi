@@ -28,11 +28,11 @@ interface GapDropZoneManagerProps {
 }
 
 const getRowInfo = (row: WidgetRow) => {
-  const firstWidgetElement = document.querySelector(`[data-widget-id="${row.widgets[0].uid}"]`);
+  const firstWidgetElement = document.querySelector(`[data-strapi-widget-id="${row.widgets[0].uid}"]`);
   const lastWidgetElement = document.querySelector(
-    `[data-widget-id="${row.widgets[row.widgets.length - 1].uid}"]`
+    `[data-strapi-widget-id="${row.widgets[row.widgets.length - 1].uid}"]`
   );
-  const containerElement = document.querySelector('[data-grid-container]');
+  const containerElement = document.querySelector('[data-strapi-grid-container]');
 
   if (!firstWidgetElement || !lastWidgetElement || !containerElement) {
     return null;
@@ -97,7 +97,7 @@ const addVerticalDropZones = (
   // Get widget positions relative to container
   const widgetPositions = row.widgets
     .map((widget) => {
-      const element = document.querySelector(`[data-widget-id="${widget.uid}"]`);
+      const element = document.querySelector(`[data-strapi-widget-id="${widget.uid}"]`);
       if (!element) return null;
 
       const rect = element.getBoundingClientRect();
@@ -190,7 +190,7 @@ const addHorizontalDropZones = (
     // Between rows: position above the next row
     const nextRow = widgetRows[rowIndex + 1];
     const nextRowFirstWidgetElement = document.querySelector(
-      `[data-widget-id="${nextRow.widgets[0].uid}"]`
+      `[data-strapi-widget-id="${nextRow.widgets[0].uid}"]`
     );
 
     if (nextRowFirstWidgetElement) {
