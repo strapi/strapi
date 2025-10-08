@@ -25,6 +25,7 @@ import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { AIUploadModal } from '../../../ai/components/AIUploadModal';
 import { AssetGridList } from '../../../components/AssetGridList/AssetGridList';
 import { EditAssetDialog } from '../../../components/EditAssetDialog/EditAssetContent';
 import { EditFolderDialog } from '../../../components/EditFolderDialog/EditFolderDialog';
@@ -37,6 +38,7 @@ import { SortPicker } from '../../../components/SortPicker/SortPicker';
 import { TableList } from '../../../components/TableList/TableList';
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
 import { localStorageKeys, viewOptions } from '../../../constants';
+import { useAIAvailability } from '../../../hooks/useAiAvailability';
 import { useAssets } from '../../../hooks/useAssets';
 import { useFolder } from '../../../hooks/useFolder';
 import { useFolders } from '../../../hooks/useFolders';
@@ -87,6 +89,7 @@ export const MediaLibrary = () => {
     canConfigureView,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
+  const { isEnabled: isAiEnabled, status: aiAvailabilityStatus } = useAIAvailability();
   const currentFolderToEditRef = React.useRef<HTMLDivElement>();
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
@@ -144,7 +147,12 @@ export const MediaLibrary = () => {
   const assetCount = assets?.length ?? 0;
   const totalAssetCount = assetsData?.pagination?.total;
 
-  const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
+  const isLoading =
+    isCurrentFolderLoading ||
+    foldersLoading ||
+    permissionsLoading ||
+    assetsLoading ||
+    aiAvailabilityStatus === 'loading';
   const [showUploadAssetDialog, setShowUploadAssetDialog] = React.useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = React.useState(false);
   const [assetToEdit, setAssetToEdit] = React.useState<Asset | undefined>(undefined);
@@ -227,7 +235,7 @@ export const MediaLibrary = () => {
     return <Page.Loading />;
   }
 
-  if (assetsError || foldersError) {
+  if (assetsError || foldersError || aiAvailabilityStatus === 'error') {
     return <Page.Error />;
   }
 
@@ -519,14 +527,21 @@ export const MediaLibrary = () => {
           </Pagination.Root>
         </Layouts.Content>
       </Page.Main>
-      {showUploadAssetDialog && (
-        <UploadAssetDialog
-          open={showUploadAssetDialog}
-          onClose={toggleUploadAssetDialog}
-          trackedLocation="upload"
-          folderId={query?.folder as string | number | null | undefined}
-        />
-      )}
+      {showUploadAssetDialog &&
+        (isAiEnabled ? (
+          <AIUploadModal
+            open={showUploadAssetDialog}
+            onClose={toggleUploadAssetDialog}
+            folderId={query?.folder ? Number(query.folder) : null}
+          />
+        ) : (
+          <UploadAssetDialog
+            open={showUploadAssetDialog}
+            onClose={toggleUploadAssetDialog}
+            trackedLocation="upload"
+            folderId={query?.folder as string | number | null | undefined}
+          />
+        ))}
       {showEditFolderDialog && (
         <EditFolderDialog
           open={showEditFolderDialog}

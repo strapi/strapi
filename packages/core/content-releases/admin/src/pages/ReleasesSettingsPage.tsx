@@ -125,7 +125,7 @@ const ReleasesSettingsPage = () => {
   });
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -204,7 +204,7 @@ const ReleasesSettingsPage = () => {
           }}
         </Form>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { tours, useTracking, useGuidedTour } from '@strapi/admin/strapi-admin';
+import { tours, useTracking, useGuidedTour, useAppInfo } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system';
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
 import { styled } from 'styled-components';
@@ -364,6 +364,10 @@ const Chat = () => {
   const { attachFiles } = useAttachments();
   const { t } = useTranslations();
   const state = useGuidedTour('Chat', (s) => s.state);
+  const currentEnvironment = useAppInfo('Chat', (state) => state.currentEnvironment);
+
+  // Disable AI Chat in production mode
+  const isProduction = currentEnvironment === 'production';
 
   // Auto-open chat when AIChat guided tour step is active
   useEffect(() => {
@@ -393,7 +397,8 @@ const Chat = () => {
     'Strapi AI can make mistakes.'
   );
 
-  if (!isChatEnabled) {
+  // Don't render the chat at all in production mode or if chat is not enabled
+  if (!isChatEnabled || isProduction) {
     return null;
   }
 
