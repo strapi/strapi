@@ -327,7 +327,7 @@ const GapDropZoneContainer = styled(Box)<{
   opacity: ${({ $isOver }) => ($isOver ? 1 : 0.6)};
   transition: all 0.2s ease-in-out;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.borderRadius};
   display: flex;
   align-items: center;
   justify-content: center;
