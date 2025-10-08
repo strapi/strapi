@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { useIntl } from 'react-intl';
 
-import { WidgetRoot } from '../components/WidgetRoot';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useUpdateHomepageLayoutMutation } from '../services/homepage';
 import {
@@ -321,7 +320,6 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     moveWidget: moveWidgetFn,
     columnWidths,
     setColumnWidths,
-    WidgetRoot,
     handleInterWidgetResize: handleInterWidgetResizeFn,
     saveLayout: saveLayoutFn,
     isDraggingWidget,
