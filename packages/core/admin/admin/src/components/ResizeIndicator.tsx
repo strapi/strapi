@@ -175,13 +175,15 @@ interface InterWidgetResizeHandleProps {
 }
 
 const calculatePosition = (leftWidgetId: string, rightWidgetId: string) => {
-  const leftElement = document.querySelector(`[data-widget-id="${leftWidgetId}"]`);
-  const rightElement = document.querySelector(`[data-widget-id="${rightWidgetId}"]`);
+  const leftElement = document.querySelector(`[data-strapi-widget-id="${leftWidgetId}"]`);
+  const rightElement = document.querySelector(`[data-strapi-widget-id="${rightWidgetId}"]`);
 
   if (leftElement && rightElement) {
     const leftRect = leftElement.getBoundingClientRect();
     const rightRect = rightElement.getBoundingClientRect();
-    const containerRect = leftElement.closest('[data-grid-container]')?.getBoundingClientRect();
+    const containerRect = leftElement
+      .closest('[data-strapi-grid-container]')
+      ?.getBoundingClientRect();
 
     if (containerRect) {
       const left = leftRect.right - containerRect.left;
@@ -195,9 +197,11 @@ const calculatePosition = (leftWidgetId: string, rightWidgetId: string) => {
 };
 
 const calculateRowPosition = (leftWidgetId: string, rightWidgetId: string) => {
-  const leftElement = document.querySelector(`[data-widget-id="${leftWidgetId}"]`);
-  const rightElement = document.querySelector(`[data-widget-id="${rightWidgetId}"]`);
-  const containerRect = leftElement?.closest('[data-grid-container]')?.getBoundingClientRect();
+  const leftElement = document.querySelector(`[data-strapi-widget-id="${leftWidgetId}"]`);
+  const rightElement = document.querySelector(`[data-strapi-widget-id="${rightWidgetId}"]`);
+  const containerRect = leftElement
+    ?.closest('[data-strapi-grid-container]')
+    ?.getBoundingClientRect();
 
   if (leftElement && rightElement && containerRect) {
     const leftRect = leftElement.getBoundingClientRect();
@@ -411,8 +415,8 @@ export const InterWidgetResizeHandle = ({
 
     // Update position when widgets change size
     const resizeObserver = new ResizeObserver(updatePosition);
-    const leftElement = document.querySelector(`[data-widget-id="${leftWidgetId}"]`);
-    const rightElement = document.querySelector(`[data-widget-id="${rightWidgetId}"]`);
+    const leftElement = document.querySelector(`[data-strapi-widget-id="${leftWidgetId}"]`);
+    const rightElement = document.querySelector(`[data-strapi-widget-id="${rightWidgetId}"]`);
 
     if (leftElement) resizeObserver.observe(leftElement);
     if (rightElement) resizeObserver.observe(rightElement);
