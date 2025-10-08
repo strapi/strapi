@@ -148,8 +148,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const isProduction = process.env.NODE_ENV === 'production';
   const adminCookieSecure = strapi.config.get('admin.auth.cookie.secure');
   if (isProduction && adminCookieSecure === false) {
-    // TODO
-    strapi.log.warn('PLACEHOLDER WARNING: Session cookie secure');
+    strapi.log.warn(
+      'Server is in production mode, but admin.auth.cookie.secure has been set to false. This is not recommended and will allow cookies to be sent over insecure connections.'
+    );
   }
 
   await registerAdminConditions();

@@ -19,9 +19,11 @@ export const getRefreshCookieOptions = () => {
   const sameSite: boolean | 'lax' | 'strict' | 'none' =
     strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
 
+  const isSecure = typeof configuredSecure === 'boolean' ? configuredSecure : isProduction;
+
   return {
     httpOnly: true,
-    secure: typeof configuredSecure === 'boolean' ? configuredSecure : isProduction,
+    secure: isSecure,
     overwrite: true,
     domain,
     path,
