@@ -53,7 +53,9 @@ export const WidgetComponent = ({
   component: () => Promise<React.ComponentType>;
   columnWidth: number;
 }) => {
-  const [loadedComponent, setLoadedComponent] = React.useState<React.ComponentType | null>(null);
+  const [loadedComponent, setLoadedComponent] = React.useState<React.ComponentType<{
+    columnWidth?: number;
+  }> | null>(null);
 
   React.useEffect(() => {
     const loadComponent = async () => {
