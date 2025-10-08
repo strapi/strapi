@@ -529,16 +529,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   );
 };
 
-interface RegisterFormValues {
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  registrationToken: string | undefined;
-  news: boolean;
-}
-
 type StringKeys<T> = {
   [K in keyof T]: T[K] extends string | undefined ? K : never;
 }[keyof T];
