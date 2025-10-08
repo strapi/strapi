@@ -5,6 +5,7 @@ import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { WidgetRoot } from '../../components/WidgetRoot';
 import { DragLayer } from '../../components/DragLayer';
 import { GapDropZoneManager } from '../../components/GapDropZone';
 import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
@@ -97,7 +98,6 @@ const HomePageCE = () => {
     moveWidget,
     columnWidths,
     setColumnWidths,
-    WidgetRoot,
     handleInterWidgetResize,
     saveLayout,
     isDraggingWidget,
