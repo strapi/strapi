@@ -3,6 +3,7 @@ import type { File as FormidableFile } from 'formidable';
 export type InputFile = FormidableFile & {
   path?: string;
   tmpWorkingDirectory?: string;
+  provider?: string;
 };
 
 export interface File {

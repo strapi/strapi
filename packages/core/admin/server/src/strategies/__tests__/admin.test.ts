@@ -1,27 +1,37 @@
+/* eslint-env jest */
 /* eslint-disable import/no-relative-packages */
 // @ts-expect-error - test purposes
 import createContext from '../../../../../../../tests/helpers/create-context';
+// @ts-expect-error - test purposes
+import { createMockSessionManager } from '../../../../../../../tests/helpers/create-session-manager-mock';
 import adminAuthStrategy from '../admin';
 
 describe('Admin Auth Strategy', () => {
-  describe('Authenticate a user', () => {
+  describe('Authenticate a user (sessions-based access token)', () => {
     const request = {
       header: {
-        authorization: 'Bearer admin_tests-jwt-token',
+        authorization: 'Bearer admin_tests-access-token',
       },
     };
 
-    test('Authenticates a valid JWT token', async () => {
-      const decodeJwtToken = jest.fn(() => ({ isValid: true, payload: { id: 1 } }));
+    test('Authenticates a valid access token and active session', async () => {
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest.fn(async () => true);
       const ctx = createContext({}, { request, state: {} });
-      const user = { id: 1, isActive: true };
+      const user = { id: 1, isActive: true } as any;
       const findOne = jest.fn(() => user);
       const generateUserAbility = jest.fn(() => 'ability');
 
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
       global.strapi = {
+        sessionManager: sessionManager as any,
         admin: {
           services: {
-            token: { decodeJwtToken },
             permission: { engine: { generateUserAbility } },
           },
         },
@@ -30,7 +40,8 @@ describe('Admin Auth Strategy', () => {
 
       const response = await adminAuthStrategy.authenticate(ctx);
 
-      expect(decodeJwtToken).toHaveBeenCalledWith('admin_tests-jwt-token');
+      expect(validateAccessToken).toHaveBeenCalledWith('admin_tests-access-token');
+      expect(isSessionActive).toHaveBeenCalledWith('session-123');
       expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'] });
       expect(response).toStrictEqual({
         authenticated: true,
@@ -56,61 +67,88 @@ describe('Admin Auth Strategy', () => {
     });
 
     test('Fails to authenticate an invalid bearer token', async () => {
-      const decodeJwtToken = jest.fn(() => ({ isValid: false }));
+      const validateAccessToken = jest.fn(() => ({ isValid: false, payload: null }));
       const ctx = createContext({}, { request });
 
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken });
+
       global.strapi = {
-        admin: {
-          services: {
-            token: { decodeJwtToken },
-          },
-        },
+        sessionManager: sessionManager as any,
       } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
 
-      expect(decodeJwtToken).toHaveBeenCalledWith('admin_tests-jwt-token');
+      expect(validateAccessToken).toHaveBeenCalledWith('admin_tests-access-token');
+      expect(response).toStrictEqual({ authenticated: false });
+    });
+
+    test('Fails to authenticate when session is not active', async () => {
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest.fn(async () => false);
+      const ctx = createContext({}, { request });
+
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
+      global.strapi = {
+        sessionManager: sessionManager as any,
+      } as any;
+
+      const response = await adminAuthStrategy.authenticate(ctx);
+
+      expect(validateAccessToken).toHaveBeenCalledWith('admin_tests-access-token');
+      expect(isSessionActive).toHaveBeenCalledWith('session-123');
       expect(response).toStrictEqual({ authenticated: false });
     });
 
     test('Fails to authenticate an invalid user', async () => {
-      const decodeJwtToken = jest.fn(() => ({ isValid: true, payload: { id: 1 } }));
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest.fn(async () => true);
       const ctx = createContext({}, { request });
       const findOne = jest.fn(() => ({ isActive: false }));
 
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
       global.strapi = {
-        admin: {
-          services: {
-            token: { decodeJwtToken },
-          },
-        },
+        sessionManager: sessionManager as any,
         db: { query: jest.fn(() => ({ findOne })) },
       } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
 
-      expect(decodeJwtToken).toHaveBeenCalledWith('admin_tests-jwt-token');
+      expect(validateAccessToken).toHaveBeenCalledWith('admin_tests-access-token');
       expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'] });
       expect(response).toStrictEqual({ authenticated: false });
     });
 
-    test('Fails to authenticate an non-existing user', async () => {
-      const decodeJwtToken = jest.fn(() => ({ isValid: true, payload: { id: 1 } }));
+    test('Fails to authenticate a non-existing user', async () => {
+      const validateAccessToken = jest.fn(() => ({
+        isValid: true,
+        payload: { userId: '1', sessionId: 'session-123', type: 'access', exp: 0, iat: 0 },
+      }));
+      const isSessionActive = jest.fn(async () => true);
       const ctx = createContext({}, { request });
       const findOne = jest.fn(() => null);
 
+      // Mock the new callable SessionManager API
+      const { sessionManager } = createMockSessionManager({ validateAccessToken, isSessionActive });
+
       global.strapi = {
-        admin: {
-          services: {
-            token: { decodeJwtToken },
-          },
-        },
+        sessionManager: sessionManager as any,
         db: { query: jest.fn(() => ({ findOne })) },
       } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
 
-      expect(decodeJwtToken).toHaveBeenCalledWith('admin_tests-jwt-token');
+      expect(validateAccessToken).toHaveBeenCalledWith('admin_tests-access-token');
       expect(findOne).toHaveBeenCalledWith({ where: { id: 1 }, populate: ['roles'] });
       expect(response).toStrictEqual({ authenticated: false });
     });

@@ -47,8 +47,9 @@ const createStrapiInstance = async ({
     const originalBootstrap = modules.bootstrap;
     // decorate modules bootstrap
     modules.bootstrap = async () => {
-      await originalBootstrap();
       await bootstrap({ strapi: instance });
+
+      await originalBootstrap();
     };
   }
 
