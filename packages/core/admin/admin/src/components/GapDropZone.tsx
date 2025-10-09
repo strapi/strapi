@@ -349,7 +349,7 @@ const GapDropZoneContainer = styled(Box)<{
   position: absolute;
   top: 0;
   bottom: 0;
-  width: ${DROP_ZONE_SIZE}rem;
+  width: ${DROP_ZONE_SIZE}px;
   z-index: 1;
 `;
 
