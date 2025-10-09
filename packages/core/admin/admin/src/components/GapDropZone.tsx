@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
+// TODO: use @dnd-kit/core instead
 import { useDrop } from 'react-dnd';
 import { styled } from 'styled-components';
 
