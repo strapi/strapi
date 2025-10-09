@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@tests/utils';
+import { useNavigate } from 'react-router-dom';
 
 import { useFolderStructure } from '../../../hooks/useFolderStructure';
 import { CrumbSimpleMenuAsync } from '../CrumbSimpleMenuAsync';
@@ -6,12 +7,14 @@ import { CrumbSimpleMenuAsync } from '../CrumbSimpleMenuAsync';
 // Mock dependencies
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
   useLocation: jest.fn(() => ({ pathname: '/plugins/upload' })),
 }));
 
 jest.mock('../../../hooks/useFolderStructure');
 
 const mockUseFolderStructure = useFolderStructure as jest.MockedFunction<typeof useFolderStructure>;
+const mockNavigate = jest.fn();
 
 const mockFolderData = [
   {
@@ -39,6 +42,7 @@ const mockFolderData = [
 describe('CrumbSimpleMenuAsync', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
   });
 
   it('should render the menu trigger', () => {
@@ -119,11 +123,11 @@ describe('CrumbSimpleMenuAsync', () => {
     await user.click(screen.getByRole('button', { name: /get more ascendants folders/i }));
 
     // Check the link URL
-    const folderLink = screen.getByRole('menuitem', { name: 'Folder 1' });
-    expect(folderLink).toHaveAttribute(
-      'href',
-      expect.stringContaining('/admin/plugins/upload?folder=1&folderPath=/1')
-    );
+    await user.click(screen.getByRole('menuitem', { name: 'Folder 1' }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(expect.stringContaining('folder=1&folderPath=/1'));
+    });
   });
 
   it('should call onChangeFolder callback when provided', async () => {
