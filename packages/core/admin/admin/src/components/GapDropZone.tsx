@@ -22,7 +22,6 @@ export interface GapDropZonePosition {
 interface GapDropZoneManagerProps {
   filteredWidgets: WidgetWithUID[];
   columnWidths: Record<string, number>;
-  isDraggingWidget: boolean;
   draggedWidgetId?: string;
   moveWidget: (id: string, to: number, targetRowIndex?: number, isHorizontalDrop?: boolean) => void;
 }
@@ -235,7 +234,6 @@ export const addHorizontalDropZones = (
 export const GapDropZoneManager = ({
   filteredWidgets,
   columnWidths,
-  isDraggingWidget,
   draggedWidgetId,
   moveWidget,
 }: GapDropZoneManagerProps) => {
@@ -267,8 +265,7 @@ export const GapDropZoneManager = ({
       const canAcceptMoreWidgets = widgetCount < 3;
 
       const shouldShowVerticalDropZones =
-        (isDraggingFromThisRow || (isDraggingFromAnotherRow && canAcceptMoreWidgets)) &&
-        isDraggingWidget;
+        isDraggingFromThisRow || (isDraggingFromAnotherRow && canAcceptMoreWidgets);
 
       // Add vertical drop zones based on widget count
       if (shouldShowVerticalDropZones) {
@@ -288,9 +285,9 @@ export const GapDropZoneManager = ({
     });
 
     return gapDropZones;
-  }, [widgetRows, isDraggingWidget, draggedWidgetId, filteredWidgets]);
+  }, [widgetRows, draggedWidgetId, filteredWidgets]);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const updatePositions = () => {
       const newPositions = calculateGapDropZonePositions();
       setPositions(newPositions);
@@ -298,16 +295,18 @@ export const GapDropZoneManager = ({
 
     updatePositions();
 
-    // Update positions on window resize
-    const handleResize = () => {
-      // Debounce the resize handler
-      setTimeout(updatePositions, 100);
-    };
+    // Update positions on container resize using ResizeObserver
+    const containerElement = document.querySelector('[data-strapi-grid-container]');
+    if (!containerElement) return;
 
-    window.addEventListener('resize', handleResize);
+    const resizeObserver = new ResizeObserver(() => {
+      updatePositions();
+    });
+
+    resizeObserver.observe(containerElement);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
     };
   }, [calculateGapDropZonePositions]);
 
@@ -316,7 +315,7 @@ export const GapDropZoneManager = ({
       key={`gap-drop-zone-${gapDropZone.type}-${gapDropZone.insertIndex}-${gapDropZone.targetRowIndex ?? 'no-row'}`}
       insertIndex={gapDropZone.insertIndex}
       position={gapDropZone.position}
-      isVisible={gapDropZone.isVisible && isDraggingWidget}
+      isVisible={gapDropZone.isVisible}
       type={gapDropZone.type}
       moveWidget={moveWidget}
       targetRowIndex={gapDropZone.targetRowIndex}
