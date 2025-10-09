@@ -254,6 +254,8 @@
   "chat.messages.error": "Something went wrong.",
   "chat.messages.too-many-requests": "Too many requests, please try again later.",
   "chat.messages.license-limit-reached": "License limit reached, please try again tomorrow.",
+  "chat.messages.license-limit-exceeded": "AI credit limit exceeded.",
+  "chat.messages.too-long-error": "This conversation reached its maximum length. Start a new conversation",
   "chat.code-upload.header": "Import code",
   "chat.code-upload.title": "Import code",
   "chat.code-upload.description": "Your app will be analyzed by AI. Make sure to remove all sensitive data before importation.",

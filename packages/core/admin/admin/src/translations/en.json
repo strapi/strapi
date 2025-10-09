@@ -511,6 +511,7 @@
   "app.components.NpsSurvey.dismiss-survey-label": "Dismiss survey",
   "app.components.NpsSurvey.no-recommendation": "Not at all likely",
   "app.components.NpsSurvey.happy-to-recommend": "Extremely likely",
+  "app.components.NpsSurvey.select-rating": "Select rating",
   "app.components.Official": "Official",
   "app.components.Onboarding.help.button": "Help button",
   "app.components.Onboarding.label.completed": "% completed",

@@ -17,7 +17,7 @@ import {
 import { formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { Formik, Form, useFormikContext } from 'formik';
-import { MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
 import { pluginId } from '../pluginId';
@@ -163,8 +163,13 @@ export const ReleaseModal = ({
                     </Box>
                     {values.isScheduled && (
                       <>
-                        <Flex gap={4} alignItems="start">
-                          <Box width="100%">
+                        <Flex
+                          gap={4}
+                          alignItems="start"
+                          direction={{ initial: 'column', medium: 'row' }}
+                          wrap="wrap"
+                        >
+                          <Box width="100%" flex={1}>
                             <Field.Root
                               name="date"
                               error={
@@ -199,7 +204,7 @@ export const ReleaseModal = ({
                               <Field.Error />
                             </Field.Root>
                           </Box>
-                          <Box width="100%">
+                          <Box width="100%" flex={1}>
                             <Field.Root
                               name="time"
                               error={

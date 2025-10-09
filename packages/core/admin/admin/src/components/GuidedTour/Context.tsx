@@ -3,6 +3,7 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { useTracking } from '../../features/Tracking';
+import { useIsDesktop } from '../../hooks/useMediaQuery';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
@@ -64,6 +65,10 @@ type Action =
         tourName: ValidTourName;
         tourType: 'ContentTypeBuilderAI' | 'ContentTypeBuilderNoAI';
       };
+    }
+  | {
+      type: 'set_hidden';
+      payload: boolean;
     };
 
 type TourState = Record<
@@ -73,6 +78,7 @@ type TourState = Record<
 type State = {
   tours: TourState;
   enabled: boolean;
+  hidden?: boolean;
   completedActions: CompletedActions;
 };
 
@@ -139,6 +145,10 @@ function reducer(state: State, action: Action): State {
       draft.enabled = false;
     }
 
+    if (action.type === 'set_hidden') {
+      draft.hidden = action.payload;
+    }
+
     if (action.type === 'reset_all_tours') {
       draft.enabled = true;
       draft.tours = getInitialTourState(guidedTours);
@@ -171,14 +181,21 @@ const GuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
+  const isDesktop = useIsDesktop();
   const { trackUsage } = useTracking();
   const [storedTours, setStoredTours] = usePersistentState<State>(STORAGE_KEY, {
     tours: getInitialTourState(guidedTours),
     enabled,
+    hidden: !isDesktop,
     completedActions: [],
   });
   const migratedTourState = migrateTours(storedTours);
   const [state, dispatch] = React.useReducer(reducer, migratedTourState);
+
+  // Watch for changes to enabled prop to update state
+  React.useEffect(() => {
+    dispatch({ type: 'set_hidden', payload: !isDesktop });
+  }, [isDesktop]);
 
   // Sync local storage
   React.useEffect(() => {

@@ -261,11 +261,11 @@ const Finish = ({ Step }: StepContentProps) => {
     <Step.Root side="right">
       <Step.Title
         id="tours.contentTypeBuilder.Finish.title"
-        defaultMessage="It's time to create content!"
+        defaultMessage="First Step: Done! 🎉"
       />
       <Step.Content
         id="tours.contentTypeBuilder.Finish.content"
-        defaultMessage="Now that you created content types, you'll be able to create content in the content manager."
+        defaultMessage="You've built your first content type! Now head over to the Content Manager to start adding entries!"
       />
       <Step.Actions showStepCount={false} showPrevious={false} to={to} />
     </Step.Root>

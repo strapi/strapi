@@ -153,107 +153,105 @@ export const RolesListPage = () => {
   }
 
   return (
-    <Layouts.Root>
+    <Page.Main>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           { name: pageTitle }
         )}
       </Page.Title>
-      <Page.Main>
-        <Layouts.Header
-          title={formatMessage({
-            id: 'global.roles',
-            defaultMessage: 'Roles',
-          })}
-          subtitle={formatMessage({
-            id: 'Settings.roles.list.description',
-            defaultMessage: 'List of roles',
-          })}
-          primaryAction={
-            canCreate ? (
-              <LinkButton
-                to="new"
-                tag={NavLink}
-                onClick={() => trackUsage('willCreateRole')}
-                startIcon={<Plus />}
-                size="S"
-              >
-                {formatMessage({
-                  id: getTrad('List.button.roles'),
-                  defaultMessage: 'Add new role',
-                })}
-              </LinkButton>
-            ) : null
-          }
-        />
-
-        <Layouts.Action
-          startActions={
-            <SearchInput
-              label={formatMessage({
-                id: 'app.component.search.label',
-                defaultMessage: 'Search',
+      <Layouts.Header
+        title={formatMessage({
+          id: 'global.roles',
+          defaultMessage: 'Roles',
+        })}
+        subtitle={formatMessage({
+          id: 'Settings.roles.list.description',
+          defaultMessage: 'List of roles',
+        })}
+        primaryAction={
+          canCreate ? (
+            <LinkButton
+              to="new"
+              tag={NavLink}
+              onClick={() => trackUsage('willCreateRole')}
+              startIcon={<Plus />}
+              size="S"
+            >
+              {formatMessage({
+                id: getTrad('List.button.roles'),
+                defaultMessage: 'Add new role',
               })}
-            />
-          }
-        />
+            </LinkButton>
+          ) : null
+        }
+      />
 
-        <Layouts.Content>
-          {!canRead && <Page.NoPermissions />}
-          {canRead && sortedRoles && sortedRoles?.length ? (
-            <Table colCount={colCount} rowCount={rowCount}>
-              <Thead>
-                <Tr>
-                  <Th>
-                    <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
-                    </Typography>
-                  </Th>
-                  <Th>
-                    <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({
-                        id: 'global.description',
-                        defaultMessage: 'Description',
-                      })}
-                    </Typography>
-                  </Th>
-                  <Th>
-                    <Typography variant="sigma" textColor="neutral600">
-                      {formatMessage({
-                        id: 'global.users',
-                        defaultMessage: 'Users',
-                      })}
-                    </Typography>
-                  </Th>
-                  <Th>
-                    <VisuallyHidden>
-                      {formatMessage({
-                        id: 'global.actions',
-                        defaultMessage: 'Actions',
-                      })}
-                    </VisuallyHidden>
-                  </Th>
-                </Tr>
-              </Thead>
-              <TableBody
-                sortedRoles={sortedRoles}
-                canDelete={canDelete}
-                canUpdate={canUpdate}
-                permissions={PERMISSIONS}
-                setRoleToDelete={setRoleToDelete}
-                onDelete={[showConfirmDelete, setShowConfirmDelete]}
-              />
-            </Table>
-          ) : (
-            <EmptyStateLayout content={formatMessage(emptyLayout[emptyContent])} />
-          )}
-        </Layouts.Content>
-        <Dialog.Root open={showConfirmDelete} onOpenChange={handleShowConfirmDelete}>
-          <ConfirmDialog onConfirm={handleConfirmDelete} />
-        </Dialog.Root>
-      </Page.Main>
-    </Layouts.Root>
+      <Layouts.Action
+        startActions={
+          <SearchInput
+            label={formatMessage({
+              id: 'app.component.search.label',
+              defaultMessage: 'Search',
+            })}
+          />
+        }
+      />
+
+      <Layouts.Content>
+        {!canRead && <Page.NoPermissions />}
+        {canRead && sortedRoles && sortedRoles?.length ? (
+          <Table colCount={colCount} rowCount={rowCount}>
+            <Thead>
+              <Tr>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({
+                      id: 'global.description',
+                      defaultMessage: 'Description',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma" textColor="neutral600">
+                    {formatMessage({
+                      id: 'global.users',
+                      defaultMessage: 'Users',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <VisuallyHidden>
+                    {formatMessage({
+                      id: 'global.actions',
+                      defaultMessage: 'Actions',
+                    })}
+                  </VisuallyHidden>
+                </Th>
+              </Tr>
+            </Thead>
+            <TableBody
+              sortedRoles={sortedRoles}
+              canDelete={canDelete}
+              canUpdate={canUpdate}
+              permissions={PERMISSIONS}
+              setRoleToDelete={setRoleToDelete}
+              onDelete={[showConfirmDelete, setShowConfirmDelete]}
+            />
+          </Table>
+        ) : (
+          <EmptyStateLayout content={formatMessage(emptyLayout[emptyContent])} />
+        )}
+      </Layouts.Content>
+      <Dialog.Root open={showConfirmDelete} onOpenChange={handleShowConfirmDelete}>
+        <ConfirmDialog onConfirm={handleConfirmDelete} />
+      </Dialog.Root>
+    </Page.Main>
   );
 };
 

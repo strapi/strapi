@@ -3,6 +3,7 @@ import { ExternalLink, Check, ListSearch } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
+import { RESPONSIVE_DEFAULT_SPACING } from '../../../constants/theme';
 import { useTypedSelector } from '../../../core/store/hooks';
 import darkIllustration from '../assets/purchase-page-audit-logs-illustration-dark.svg';
 import lightIllustration from '../assets/purchase-page-audit-logs-illustration-light.svg';
@@ -13,14 +14,14 @@ const PurchaseAuditLogs = () => {
 
   const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Layouts.Header
           title={formatMessage({ id: 'global.auditLogs', defaultMessage: 'Audit Logs' })}
         />
         <Box
-          marginLeft={10}
-          marginRight={10}
+          marginLeft={RESPONSIVE_DEFAULT_SPACING}
+          marginRight={RESPONSIVE_DEFAULT_SPACING}
           shadow="filterShadow"
           hasRadius
           background="neutral0"
@@ -132,7 +133,7 @@ const PurchaseAuditLogs = () => {
           </Grid.Root>
         </Box>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

@@ -24,6 +24,14 @@ export default [
     },
   },
   {
+    method: 'GET',
+    path: '/users/me/ai-token',
+    handler: 'authenticated-user.getAiToken',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
     method: 'POST',
     path: '/users',
     handler: 'user.create',

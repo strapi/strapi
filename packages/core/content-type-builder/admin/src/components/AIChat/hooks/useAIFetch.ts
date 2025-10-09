@@ -134,6 +134,7 @@ type ResponseType<T extends keyof AIEndpoints> = AIEndpoints[T]['response'];
 
 export const TOO_MANY_REQUESTS_ERROR = 'Too many requests';
 export const LICENSE_LIMIT_REACHED_ERROR = 'License limit';
+export const LICENSE_LIMIT_EXCEEDED_ERROR = 'AI credit limit exceeded';
 export const CHAT_TOO_LONG_ERROR = 'Chat too long';
 export const ATTACHMENT_TOO_BIG_ERROR = 'Attachment too big';
 export const ATTACHMENT_NOT_FOUND_ERROR = 'Attachment not found';
@@ -178,7 +179,6 @@ export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
               : undefined,
           ctx: { strapiVersion, projectId, userId },
         });
-
         // refetch ai usage data on every successful request
         aiUsage.refetch();
 

@@ -104,4 +104,10 @@ describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
 
     expect(getByText('localized')).toBeInTheDocument();
   });
+
+  it.only('should not render the edit button if disabled', () => {
+    const { queryByRole } = setup({ disabled: true });
+
+    expect(queryByRole('button', { name: 'edit' })).not.toBeInTheDocument();
+  });
 });
