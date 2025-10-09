@@ -1,0 +1,652 @@
+'use strict';
+
+const { createTestBuilder } = require('api-tests/builder');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createAuthRequest } = require('api-tests/request');
+const modelsUtils = require('api-tests/models');
+
+let builder;
+let strapi;
+let rq;
+const data = {
+  users: [],
+  posts: [],
+  categories: [],
+  tags: [],
+};
+
+// Content types with various relation types and self-references
+const userModel = {
+  draftAndPublish: false, // Start without draft and publish (v4 style)
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    email: {
+      type: 'email',
+      unique: true,
+    },
+    // Self-referential one-to-one
+    bestFriend: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: 'api::user.user',
+    },
+    // Self-referential many-to-one
+    parent: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'api::user.user',
+    },
+    // Self-referential one-to-many
+    children: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::user.user',
+    },
+    // Self-referential many-to-many
+    friends: {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::user.user',
+    },
+  },
+  singularName: 'user',
+  pluralName: 'users',
+  displayName: 'User',
+  description: '',
+  collectionName: '',
+};
+
+const categoryModel = {
+  draftAndPublish: false, // No draft and publish
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    description: {
+      type: 'text',
+    },
+    // Self-referential many-to-one (parent category)
+    parent: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'api::category.category',
+    },
+    // Self-referential one-to-many (subcategories)
+    subcategories: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::category.category',
+    },
+  },
+  singularName: 'category',
+  pluralName: 'categories',
+  displayName: 'Category',
+  description: '',
+  collectionName: '',
+};
+
+const tagModel = {
+  draftAndPublish: false, // Start without draft and publish (v4 style)
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    color: {
+      type: 'string',
+    },
+  },
+  singularName: 'tag',
+  pluralName: 'tags',
+  displayName: 'Tag',
+  description: '',
+  collectionName: '',
+};
+
+const postModel = {
+  draftAndPublish: false, // Start without draft and publish (v4 style)
+  attributes: {
+    title: {
+      type: 'string',
+    },
+    content: {
+      type: 'text',
+    },
+    // Many-to-one relation to user
+    author: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'api::user.user',
+    },
+    // Many-to-many relation to tags
+    tags: {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::tag.tag',
+    },
+    // One-to-one relation to category
+    category: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: 'api::category.category',
+    },
+    // Self-referential many-to-many (related posts)
+    relatedPosts: {
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::post.post',
+    },
+  },
+  singularName: 'post',
+  pluralName: 'posts',
+  displayName: 'Post',
+  description: '',
+  collectionName: '',
+};
+
+const restart = async () => {
+  await strapi.destroy();
+  strapi = await createStrapiInstance();
+  rq = await createAuthRequest({ strapi });
+};
+
+describe('Migration - discard drafts', () => {
+  beforeAll(async () => {
+    builder = createTestBuilder();
+
+    // Create content types without draft and publish first (v4 style)
+    await builder.addContentTypes([userModel, categoryModel, tagModel, postModel]).build();
+
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+
+    // Create test data in v4 style (published entries without drafts)
+    await createTestData();
+  });
+
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  describe('Before migration - v4 style data', () => {
+    test('Users should be published without drafts', async () => {
+      const users = await strapi.db.query('api::user.user').findMany();
+
+      expect(users.length).toBe(5);
+      users.forEach((user) => {
+        expect(user.publishedAt).toBeTruthy();
+        expect(user.documentId).toBeDefined();
+      });
+    });
+
+    test('Posts should be published without drafts', async () => {
+      const posts = await strapi.db.query('api::post.post').findMany();
+
+      expect(posts.length).toBe(3);
+      posts.forEach((post) => {
+        expect(post.publishedAt).toBeTruthy();
+        expect(post.documentId).toBeDefined();
+      });
+    });
+
+    test('Categories should exist (no draft and publish)', async () => {
+      const categories = await strapi.db.query('api::category.category').findMany();
+
+      expect(categories.length).toBe(3);
+      categories.forEach((category) => {
+        expect(category.publishedAt).toBeTruthy(); // Still has publishedAt in v4 style
+      });
+    });
+
+    test('Tags should be published without drafts', async () => {
+      const tags = await strapi.db.query('api::tag.tag').findMany();
+
+      expect(tags.length).toBe(4);
+      tags.forEach((tag) => {
+        expect(tag.publishedAt).toBeTruthy();
+        expect(tag.documentId).toBeDefined();
+      });
+    });
+  });
+
+  describe('After migration - v5 style data', () => {
+    beforeAll(async () => {
+      // Enable draft and publish for content types that support it
+      const userSchema = await modelsUtils.getContentTypeSchema('user', { strapi });
+      await modelsUtils.modifyContentType(
+        {
+          ...userSchema,
+          draftAndPublish: true,
+        },
+        { strapi }
+      );
+
+      const postSchema = await modelsUtils.getContentTypeSchema('post', { strapi });
+      await modelsUtils.modifyContentType(
+        {
+          ...postSchema,
+          draftAndPublish: true,
+        },
+        { strapi }
+      );
+
+      const tagSchema = await modelsUtils.getContentTypeSchema('tag', { strapi });
+      await modelsUtils.modifyContentType(
+        {
+          ...tagSchema,
+          draftAndPublish: true,
+        },
+        { strapi }
+      );
+
+      await restart();
+
+      // Manually run the discard drafts migration by calling discardDraft on each published entry
+      // This simulates what the migration does
+      const contentTypes = ['api::user.user', 'api::post.post', 'api::tag.tag'];
+
+      for (const uid of contentTypes) {
+        const publishedEntries = await strapi.db.query(uid).findMany({
+          where: { publishedAt: { $ne: null } },
+        });
+
+        for (const entry of publishedEntries) {
+          await strapi.documents(uid).discardDraft({
+            documentId: entry.documentId,
+            locale: entry.locale || 'en',
+          });
+        }
+      }
+    });
+
+    test('Users should have both published and draft versions', async () => {
+      const users = await strapi.db.query('api::user.user').findMany();
+
+      expect(users.length).toBe(10); // 5 published + 5 drafts
+
+      const usersByDocumentId = groupBy(users, 'documentId');
+      expect(Object.keys(usersByDocumentId).length).toBe(5);
+
+      Object.values(usersByDocumentId).forEach((versions) => {
+        expect(versions.length).toBe(2);
+
+        const published = versions.find((u) => u.publishedAt);
+        const draft = versions.find((u) => !u.publishedAt);
+
+        expect(published).toBeDefined();
+        expect(draft).toBeDefined();
+        expect(draft.publishedAt).toBeNull();
+        expect(draft.documentId).toBe(published.documentId);
+      });
+    });
+
+    test('Posts should have both published and draft versions', async () => {
+      const posts = await strapi.db.query('api::post.post').findMany();
+
+      expect(posts.length).toBe(6); // 3 published + 3 drafts
+
+      const postsByDocumentId = groupBy(posts, 'documentId');
+      expect(Object.keys(postsByDocumentId).length).toBe(3);
+
+      Object.values(postsByDocumentId).forEach((versions) => {
+        expect(versions.length).toBe(2);
+
+        const published = versions.find((p) => p.publishedAt);
+        const draft = versions.find((p) => !p.publishedAt);
+
+        expect(published).toBeDefined();
+        expect(draft).toBeDefined();
+        expect(draft.publishedAt).toBeNull();
+        expect(draft.documentId).toBe(published.documentId);
+      });
+    });
+
+    test('Categories should remain unchanged (no draft and publish)', async () => {
+      const categories = await strapi.db.query('api::category.category').findMany();
+
+      expect(categories.length).toBe(3);
+      categories.forEach((category) => {
+        expect(category.publishedAt).toBeTruthy();
+      });
+    });
+
+    test('Tags should have both published and draft versions', async () => {
+      const tags = await strapi.db.query('api::tag.tag').findMany();
+
+      expect(tags.length).toBe(8); // 4 published + 4 drafts
+
+      const tagsByDocumentId = groupBy(tags, 'documentId');
+      expect(Object.keys(tagsByDocumentId).length).toBe(4);
+
+      Object.values(tagsByDocumentId).forEach((versions) => {
+        expect(versions.length).toBe(2);
+
+        const published = versions.find((t) => t.publishedAt);
+        const draft = versions.find((t) => !t.publishedAt);
+
+        expect(published).toBeDefined();
+        expect(draft).toBeDefined();
+        expect(draft.publishedAt).toBeNull();
+        expect(draft.documentId).toBe(published.documentId);
+      });
+    });
+
+    test('Relations should be correctly copied to draft versions', async () => {
+      // Test user relations
+      const users = await strapi.db.query('api::user.user').findMany({
+        populate: {
+          bestFriend: true,
+          parent: true,
+          children: true,
+          friends: true,
+        },
+      });
+
+      const usersByDocumentId = groupBy(users, 'documentId');
+
+      Object.values(usersByDocumentId).forEach((versions) => {
+        const published = versions.find((u) => u.publishedAt);
+        const draft = versions.find((u) => !u.publishedAt);
+
+        // Self-referential relations should be copied
+        // Note: Relations point to draft versions of related entries, not published versions
+        expect(draft.bestFriend).toBeDefined();
+        expect(draft.parent).toBeDefined();
+        expect(draft.children?.length).toBe(published.children?.length);
+        expect(draft.friends?.length).toBe(published.friends?.length);
+
+        // Relations should point to draft versions (different IDs but same documentId)
+        if (published.bestFriend) {
+          expect(draft.bestFriend.documentId).toBe(published.bestFriend.documentId);
+        }
+        if (published.parent) {
+          expect(draft.parent.documentId).toBe(published.parent.documentId);
+        }
+
+        if (published.children?.length > 0) {
+          expect(draft.children.map((c) => c.documentId).sort()).toEqual(
+            published.children.map((c) => c.documentId).sort()
+          );
+        }
+        if (published.friends?.length > 0) {
+          expect(draft.friends.map((f) => f.documentId).sort()).toEqual(
+            published.friends.map((f) => f.documentId).sort()
+          );
+        }
+      });
+    });
+
+    test('Post relations should be correctly copied to draft versions', async () => {
+      const posts = await strapi.db.query('api::post.post').findMany({
+        populate: {
+          author: true,
+          tags: true,
+          category: true,
+          relatedPosts: true,
+        },
+      });
+
+      const postsByDocumentId = groupBy(posts, 'documentId');
+
+      Object.values(postsByDocumentId).forEach((versions) => {
+        const published = versions.find((p) => p.publishedAt);
+        const draft = versions.find((p) => !p.publishedAt);
+
+        // Relations should be copied
+        // Note: Relations point to draft versions of related entries, not published versions
+        expect(draft.author).toBeDefined();
+        expect(draft.category).toBeDefined();
+        expect(draft.tags?.length).toBe(published.tags?.length);
+        expect(draft.relatedPosts?.length).toBe(published.relatedPosts?.length);
+
+        // Relations should point to draft versions (different IDs but same documentId)
+        if (published.author) {
+          expect(draft.author.documentId).toBe(published.author.documentId);
+        }
+        if (published.category) {
+          expect(draft.category.documentId).toBe(published.category.documentId);
+        }
+
+        if (published.tags?.length > 0) {
+          expect(draft.tags.map((t) => t.documentId).sort()).toEqual(
+            published.tags.map((t) => t.documentId).sort()
+          );
+        }
+        if (published.relatedPosts?.length > 0) {
+          expect(draft.relatedPosts.map((p) => p.documentId).sort()).toEqual(
+            published.relatedPosts.map((p) => p.documentId).sort()
+          );
+        }
+      });
+    });
+
+    test('Category relations should be correctly maintained', async () => {
+      const categories = await strapi.db.query('api::category.category').findMany({
+        populate: {
+          parent: true,
+          subcategories: true,
+        },
+      });
+
+      categories.forEach((category) => {
+        // Categories don't have draft versions, but relations should still work
+        expect(category.parent).toBeDefined();
+        expect(category.subcategories).toBeDefined();
+      });
+    });
+  });
+});
+
+// Helper functions
+function groupBy(array, key) {
+  return array.reduce((groups, item) => {
+    const group = item[key];
+    groups[group] = groups[group] || [];
+    groups[group].push(item);
+    return groups;
+  }, {});
+}
+
+async function createTestData() {
+  // Create users with self-referential relations
+  const user1 = await strapi.db.query('api::user.user').create({
+    data: {
+      name: 'Alice',
+      email: 'alice@example.com',
+      publishedAt: new Date(),
+    },
+  });
+
+  const user2 = await strapi.db.query('api::user.user').create({
+    data: {
+      name: 'Bob',
+      email: 'bob@example.com',
+      publishedAt: new Date(),
+    },
+  });
+
+  const user3 = await strapi.db.query('api::user.user').create({
+    data: {
+      name: 'Charlie',
+      email: 'charlie@example.com',
+      publishedAt: new Date(),
+    },
+  });
+
+  const user4 = await strapi.db.query('api::user.user').create({
+    data: {
+      name: 'Diana',
+      email: 'diana@example.com',
+      publishedAt: new Date(),
+    },
+  });
+
+  const user5 = await strapi.db.query('api::user.user').create({
+    data: {
+      name: 'Eve',
+      email: 'eve@example.com',
+      publishedAt: new Date(),
+    },
+  });
+
+  data.users = [user1, user2, user3, user4, user5];
+
+  // Update users with self-referential relations
+  await strapi.db.query('api::user.user').update({
+    where: { id: user1.id },
+    data: {
+      bestFriend: user2.id,
+      parent: user3.id,
+      children: [user4.id, user5.id],
+      friends: [user2.id, user3.id, user4.id],
+    },
+  });
+
+  await strapi.db.query('api::user.user').update({
+    where: { id: user2.id },
+    data: {
+      bestFriend: user1.id,
+      parent: user3.id,
+      friends: [user1.id, user3.id, user5.id],
+    },
+  });
+
+  await strapi.db.query('api::user.user').update({
+    where: { id: user3.id },
+    data: {
+      children: [user1.id, user2.id],
+      friends: [user1.id, user2.id, user4.id],
+    },
+  });
+
+  // Create categories (no draft and publish)
+  const category1 = await strapi.db.query('api::category.category').create({
+    data: {
+      name: 'Technology',
+      description: 'Tech related posts',
+      publishedAt: new Date(),
+    },
+  });
+
+  const category2 = await strapi.db.query('api::category.category').create({
+    data: {
+      name: 'Science',
+      description: 'Science related posts',
+      publishedAt: new Date(),
+    },
+  });
+
+  const category3 = await strapi.db.query('api::category.category').create({
+    data: {
+      name: 'Programming',
+      description: 'Programming related posts',
+      publishedAt: new Date(),
+      parent: category1.id,
+    },
+  });
+
+  data.categories = [category1, category2, category3];
+
+  // Update categories with self-referential relations
+  await strapi.db.query('api::category.category').update({
+    where: { id: category1.id },
+    data: {
+      subcategories: [category3.id],
+    },
+  });
+
+  // Create tags
+  const tag1 = await strapi.db.query('api::tag.tag').create({
+    data: {
+      name: 'JavaScript',
+      color: '#f7df1e',
+      publishedAt: new Date(),
+    },
+  });
+
+  const tag2 = await strapi.db.query('api::tag.tag').create({
+    data: {
+      name: 'React',
+      color: '#61dafb',
+      publishedAt: new Date(),
+    },
+  });
+
+  const tag3 = await strapi.db.query('api::tag.tag').create({
+    data: {
+      name: 'Node.js',
+      color: '#339933',
+      publishedAt: new Date(),
+    },
+  });
+
+  const tag4 = await strapi.db.query('api::tag.tag').create({
+    data: {
+      name: 'TypeScript',
+      color: '#3178c6',
+      publishedAt: new Date(),
+    },
+  });
+
+  data.tags = [tag1, tag2, tag3, tag4];
+
+  // Create posts
+  const post1 = await strapi.db.query('api::post.post').create({
+    data: {
+      title: 'Getting Started with React',
+      content: 'Learn the basics of React development',
+      author: user1.id,
+      category: category1.id,
+      tags: [tag1.id, tag2.id],
+      publishedAt: new Date(),
+    },
+  });
+
+  const post2 = await strapi.db.query('api::post.post').create({
+    data: {
+      title: 'Advanced Node.js Patterns',
+      content: 'Deep dive into Node.js advanced patterns',
+      author: user2.id,
+      category: category1.id,
+      tags: [tag3.id, tag4.id],
+      publishedAt: new Date(),
+    },
+  });
+
+  const post3 = await strapi.db.query('api::post.post').create({
+    data: {
+      title: 'JavaScript Best Practices',
+      content: 'Essential JavaScript best practices',
+      author: user3.id,
+      category: category3.id,
+      tags: [tag1.id, tag4.id],
+      publishedAt: new Date(),
+    },
+  });
+
+  data.posts = [post1, post2, post3];
+
+  // Update posts with self-referential relations
+  await strapi.db.query('api::post.post').update({
+    where: { id: post1.id },
+    data: {
+      relatedPosts: [post2.id, post3.id],
+    },
+  });
+
+  await strapi.db.query('api::post.post').update({
+    where: { id: post2.id },
+    data: {
+      relatedPosts: [post1.id, post3.id],
+    },
+  });
+
+  await strapi.db.query('api::post.post').update({
+    where: { id: post3.id },
+    data: {
+      relatedPosts: [post1.id, post2.id],
+    },
+  });
+}

@@ -14,8 +14,7 @@
 /* eslint-disable no-continue */
 import type { UID } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
-import { async, contentTypes } from '@strapi/utils';
-import { createDocumentService } from '../../services/document-service';
+import { contentTypes } from '@strapi/utils';
 
 type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
@@ -104,6 +103,221 @@ async function copyPublishedEntriesToDraft({
 }
 
 /**
+ * Copy relations from published entries to draft entries using direct database queries.
+ * This replaces the need to call discardDraft for each entry.
+ */
+async function copyRelationsToDrafts({ db, trx, uid }: { db: Database; trx: Knex; uid: string }) {
+  const meta = db.metadata.get(uid);
+  if (!meta) return;
+
+  // Get all published and draft entries for this content type
+  const publishedEntries = await trx(meta.tableName)
+    .select(['id', 'documentId', 'locale'])
+    .whereNotNull('published_at');
+
+  const draftEntries = await trx(meta.tableName)
+    .select(['id', 'documentId', 'locale'])
+    .whereNull('published_at');
+
+  if (publishedEntries.length === 0 || draftEntries.length === 0) {
+    return;
+  }
+
+  // Create mapping from documentId to draft entry ID
+  const draftByDocumentId = new Map();
+  for (const draft of draftEntries) {
+    draftByDocumentId.set(draft.documentId, draft);
+  }
+
+  // Create mapping from published entry ID to draft entry ID
+  const publishedToDraftMap = new Map();
+  for (const published of publishedEntries) {
+    const draft = draftByDocumentId.get(published.documentId);
+    if (draft) {
+      publishedToDraftMap.set(published.id, draft.id);
+    }
+  }
+
+  if (publishedToDraftMap.size === 0) {
+    return;
+  }
+
+  // Copy relations for this content type
+  await copyRelationsForContentType({
+    trx,
+    uid,
+    publishedToDraftMap,
+    publishedEntries,
+  });
+
+  // Copy relations from other content types that target this content type
+  await copyRelationsFromOtherContentTypes({
+    trx,
+    uid,
+    publishedToDraftMap,
+    publishedEntries,
+  });
+}
+
+/**
+ * Copy relations within the same content type (self-referential relations)
+ */
+async function copyRelationsForContentType({
+  trx,
+  uid,
+  publishedToDraftMap,
+  publishedEntries,
+}: {
+  trx: Knex;
+  uid: string;
+  publishedToDraftMap: Map<number, number>;
+  publishedEntries: Array<{ id: number; documentId: string; locale: string }>;
+}) {
+  const meta = strapi.db.metadata.get(uid);
+  if (!meta) return;
+
+  const publishedIds = Array.from(publishedToDraftMap.keys());
+
+  for (const attribute of Object.values(meta.attributes) as any) {
+    if (attribute.type !== 'relation' || attribute.target !== uid) {
+      continue;
+    }
+
+    const joinTable = attribute.joinTable;
+    if (!joinTable) {
+      continue;
+    }
+
+    const { name: sourceColumnName } = joinTable.joinColumn;
+    const { name: targetColumnName } = joinTable.inverseJoinColumn;
+    const orderColumnName = joinTable.orderColumnName;
+
+    // Get all relations where the source is a published entry
+    const relations = await trx(joinTable.name).select('*').whereIn(sourceColumnName, publishedIds);
+
+    if (relations.length === 0) {
+      continue;
+    }
+
+    // Create new relations pointing to draft entries
+    const newRelations = relations
+      .map((relation) => {
+        const newSourceId = publishedToDraftMap.get(relation[sourceColumnName]);
+        const newTargetId = publishedToDraftMap.get(relation[targetColumnName]);
+
+        if (!newSourceId || !newTargetId) {
+          return null;
+        }
+
+        return {
+          ...relation,
+          [sourceColumnName]: newSourceId,
+          [targetColumnName]: newTargetId,
+        };
+      })
+      .filter(Boolean);
+
+    if (newRelations.length > 0) {
+      await trx.batchInsert(joinTable.name, newRelations, 1000);
+    }
+  }
+}
+
+/**
+ * Copy relations from other content types that target this content type
+ */
+async function copyRelationsFromOtherContentTypes({
+  trx,
+  uid,
+  publishedToDraftMap,
+  publishedEntries,
+}: {
+  trx: Knex;
+  uid: string;
+  publishedToDraftMap: Map<number, number>;
+  publishedEntries: Array<{ id: number; documentId: string; locale: string }>;
+}) {
+  const targetIds = Array.from(publishedToDraftMap.keys());
+
+  // Iterate through all content types to find relations targeting our content type
+  for (const model of Object.values(strapi.contentTypes) as any) {
+    const dbModel = strapi.db.metadata.get(model.uid);
+    if (!dbModel) continue;
+
+    for (const attribute of Object.values(dbModel.attributes) as any) {
+      if (attribute.type !== 'relation' || attribute.target !== uid) {
+        continue;
+      }
+
+      const joinTable = attribute.joinTable;
+      if (!joinTable) {
+        continue;
+      }
+
+      const { name: sourceColumnName } = joinTable.joinColumn;
+      const { name: targetColumnName } = joinTable.inverseJoinColumn;
+      const orderColumnName = joinTable.orderColumnName;
+
+      // Get all relations where the target is a published entry of our content type
+      const relations = await trx(joinTable.name).select('*').whereIn(targetColumnName, targetIds);
+
+      if (relations.length === 0) {
+        continue;
+      }
+
+      // Create new relations pointing to draft entries
+      const newRelations = relations
+        .map((relation) => {
+          const newTargetId = publishedToDraftMap.get(relation[targetColumnName]);
+
+          if (!newTargetId) {
+            return null;
+          }
+
+          return {
+            ...relation,
+            [targetColumnName]: newTargetId,
+          };
+        })
+        .filter(Boolean);
+
+      if (newRelations.length > 0) {
+        await trx.batchInsert(joinTable.name, newRelations, 1000);
+      }
+    }
+  }
+}
+
+/**
+ * 2 pass migration to create the draft entries for all the published entries.
+ * And then copy relations directly using database queries.
+ */
+const migrateUp = async (trx: Knex, db: Database) => {
+  const dpModels = [];
+  for (const meta of db.metadata.values()) {
+    const hasDP = await hasDraftAndPublish(trx, meta);
+    if (hasDP) {
+      dpModels.push(meta);
+    }
+  }
+
+  /**
+   * Create plain draft entries for all the entries that were published.
+   */
+  for (const model of dpModels) {
+    await copyPublishedEntriesToDraft({ db, trx, uid: model.uid });
+  }
+
+  /**
+   * Copy relations from published entries to draft entries using direct database queries.
+   * This is much more efficient than calling discardDraft for each entry.
+   */
+  for (const model of dpModels) {
+    await copyRelationsToDrafts({ db, trx, uid: model.uid });
+  }
+};
+
+/**
  * Load a batch of versions to discard.
  *
  * Versions with only a draft version will be ignored.
@@ -152,63 +366,6 @@ export async function* getBatchToDiscard({
     yield batch;
   }
 }
-
-/**
- * 2 pass migration to create the draft entries for all the published entries.
- * And then discard the drafts to copy the relations.
- */
-const migrateUp = async (trx: Knex, db: Database) => {
-  const dpModels = [];
-  for (const meta of db.metadata.values()) {
-    const hasDP = await hasDraftAndPublish(trx, meta);
-    if (hasDP) {
-      dpModels.push(meta);
-    }
-  }
-
-  /**
-   * Create plain draft entries for all the entries that were published.
-   */
-  for (const model of dpModels) {
-    await copyPublishedEntriesToDraft({ db, trx, uid: model.uid });
-  }
-
-  /**
-   * Discard the drafts will copy the relations from the published entries to the newly created drafts.
-   *
-   * Load a batch of entries (batched to prevent loading millions of rows at once ),
-   * and discard them using the document service.
-   *
-   * NOTE: This is using a custom document service without any validations,
-   *       to prevent the migration from failing if users already had invalid data in V4.
-   *       E.g. @see https://github.com/strapi/strapi/issues/21583
-   */
-  const documentService = createDocumentService(strapi, {
-    async validateEntityCreation(_, data) {
-      return data;
-    },
-    async validateEntityUpdate(_, data) {
-      // Data can be partially empty on partial updates
-      // This migration doesn't trigger any update (or partial update),
-      // so it's safe to return the data as is.
-      return data as any;
-    },
-  });
-
-  for (const model of dpModels) {
-    const discardDraft = async (entry: DocumentVersion) =>
-      documentService(model.uid as UID.ContentType).discardDraft({
-        documentId: entry.documentId,
-        locale: entry.locale,
-      });
-
-    for await (const batch of getBatchToDiscard({ db, trx, uid: model.uid })) {
-      // NOTE: concurrency had to be disabled to prevent a race condition with self-references
-      // TODO: improve performance in a safe way
-      await async.map(batch, discardDraft, { concurrency: 1 });
-    }
-  }
-};
 
 export const discardDocumentDrafts: Migration = {
   name: 'core::5.0.0-discard-drafts',
