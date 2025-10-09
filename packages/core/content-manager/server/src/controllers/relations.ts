@@ -127,7 +127,7 @@ const validateStatus = (
   const sourceModel = strapi.getModel(sourceUid);
 
   const isDP = contentTypes.hasDraftAndPublish;
-  const isSourceDP = isDP(sourceModel)
+  const isSourceDP = isDP(sourceModel);
 
   // Default to draft if not set
   if (!isSourceDP && sourceModel.modelType === 'contentType') {
