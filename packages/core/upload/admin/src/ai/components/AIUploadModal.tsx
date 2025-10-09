@@ -168,7 +168,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
     {
       id: getTrad('ai.modal.title'),
       defaultMessage:
-        '{count, plural, one {# Asset uploaded} other {# Assets uploaded}} time to review AI generated content',
+        '{count, plural, one {# asset uploaded} other {# assets uploaded}}, review AI generated metadata',
     },
     { count: state.uploadedAssets.length }
   );
