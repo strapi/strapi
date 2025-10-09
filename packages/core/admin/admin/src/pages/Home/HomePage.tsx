@@ -5,7 +5,6 @@ import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { WidgetRoot } from '../../components/WidgetRoot';
 import { DragLayer } from '../../components/DragLayer';
 import { GapDropZoneManager } from '../../components/GapDropZone';
 import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
@@ -13,6 +12,7 @@ import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { WidgetResizeHandle } from '../../components/ResizeIndicator';
 import { Widget } from '../../components/WidgetHelpers';
+import { WidgetRoot } from '../../components/WidgetRoot';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
@@ -267,13 +267,14 @@ const HomePageCE = () => {
                   )}
                 </Grid.Root>
 
-                <GapDropZoneManager
-                  filteredWidgets={filteredWidgets}
-                  columnWidths={columnWidths}
-                  isDraggingWidget={isDraggingWidget}
-                  draggedWidgetId={draggedWidgetId}
-                  moveWidget={moveWidget}
-                />
+                {isDraggingWidget && (
+                  <GapDropZoneManager
+                    filteredWidgets={filteredWidgets}
+                    columnWidths={columnWidths}
+                    draggedWidgetId={draggedWidgetId}
+                    moveWidget={moveWidget}
+                  />
+                )}
               </Box>
             )}
           </Flex>
