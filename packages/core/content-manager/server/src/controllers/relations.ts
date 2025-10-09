@@ -127,10 +127,12 @@ const validateStatus = (
   const sourceModel = strapi.getModel(sourceUid);
 
   const isDP = contentTypes.hasDraftAndPublish;
-  const isSourceDP = isDP(sourceModel);
+  const isSourceDP = isDP(sourceModel)
 
   // Default to draft if not set
-  if (!isSourceDP) return { status: undefined };
+  if (!isSourceDP && sourceModel.modelType === 'contentType') {
+    return { status: undefined };
+  }
 
   switch (status) {
     case 'published':
@@ -450,7 +452,7 @@ export default {
       publishedAt?: Record<string, any>;
     } = {};
 
-    if (sourceSchema?.options?.draftAndPublish) {
+    if (sourceSchema?.options?.draftAndPublish || sourceSchema?.modelType === 'component') {
       if (targetSchema?.options?.draftAndPublish) {
         if (status === 'published') {
           filters.publishedAt = { $notNull: true };
