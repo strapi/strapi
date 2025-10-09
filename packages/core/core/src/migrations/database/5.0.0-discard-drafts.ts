@@ -239,8 +239,11 @@ async function copyRelationsFromOtherContentTypes({
 }) {
   const targetIds = Array.from(publishedToDraftMap.keys());
 
-  // Iterate through all content types to find relations targeting our content type
-  for (const model of Object.values(strapi.contentTypes) as any) {
+  // Iterate through all content types and components to find relations targeting our content type
+  const contentTypes = Object.values(strapi.contentTypes) as any[];
+  const components = Object.values(strapi.components) as any[];
+
+  for (const model of [...contentTypes, ...components]) {
     const dbModel = strapi.db.metadata.get(model.uid);
     if (!dbModel) continue;
 
