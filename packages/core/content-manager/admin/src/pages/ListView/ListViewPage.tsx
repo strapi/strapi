@@ -104,8 +104,9 @@ const ListViewPage = () => {
     if (displayedHeaders.length === 0) return;
     if (schema.uid !== model) return;
 
-    const allowedDisplayHeaders = displayedHeaders
-      .filter((header) => Object.keys(schema?.attributes).includes(header.name));
+    const allowedDisplayHeaders = displayedHeaders.filter((header) =>
+      Object.keys(schema?.attributes).includes(header.name)
+    );
 
     if (allowedDisplayHeaders.length !== displayedHeaders.length) {
       setDisplayedHeaders(allowedDisplayHeaders);
