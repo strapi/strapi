@@ -10,14 +10,14 @@ import {
   resizeRowAfterAddition,
   isValidResizeOperation,
   canResizeBetweenWidgets,
-} from '../../utils/widgetUtils';
+} from '../../utils/widgetLayout';
 import { useWidgets } from '../Widgets';
 
 import type { WidgetWithUID } from '../../core/apis/Widgets';
 
 // Mock the widget utilities
-jest.mock('../../utils/widgetUtils', () => ({
-  ...jest.requireActual('../../utils/widgetUtils'),
+jest.mock('../../utils/widgetLayout', () => ({
+  ...jest.requireActual('../../utils/widgetLayout'),
   calculateWidgetRows: jest.fn(),
   moveWidgetInArray: jest.fn(),
   findRowContainingWidget: jest.fn(),

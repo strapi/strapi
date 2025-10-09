@@ -1,7 +1,6 @@
 /**
- * Widget Utilities
  *
- * Comprehensive utilities for widget operations including sizing, positioning, resizing, and layout calculations.
+ * Comprehensive utilities for widget layout operations including sizing, positioning, and layout calculations.
  *
  * Constraints:
  * - Maximum 3 widgets per row (since minimum widget width is 4 columns)
@@ -25,45 +24,10 @@ export interface WidgetRow {
 }
 
 /**
- * Snaps a width value to the nearest discrete size
- */
-export const snapToDiscreteSize = (width: number): number => {
-  return WIDGET_SIZING.DISCRETE_SIZES.reduce((prev, curr) =>
-    Math.abs(curr - width) < Math.abs(prev - width) ? curr : prev
-  );
-};
-
-/**
  * Validates if a widget width is valid (within constraints)
  */
 export const isValidWidgetWidth = (width: number): boolean => {
   return width >= WIDGET_SIZING.MIN_WIDGET_WIDTH && width <= WIDGET_SIZING.TOTAL_COLUMNS;
-};
-
-/**
- * Validates if two widget widths together are valid (sum to 12 columns)
- */
-export const isValidResize = (leftWidth: number, rightWidth: number): boolean => {
-  return (
-    leftWidth >= WIDGET_SIZING.MIN_WIDGET_WIDTH &&
-    rightWidth >= WIDGET_SIZING.MIN_WIDGET_WIDTH &&
-    leftWidth + rightWidth === WIDGET_SIZING.TOTAL_COLUMNS
-  );
-};
-
-/**
- * Ensures two widths sum to exactly 12 columns by adjusting the right width
- */
-export const adjustToTotalColumns = (
-  leftWidth: number,
-  rightWidth: number
-): { leftWidth: number; rightWidth: number } => {
-  const totalWidth = leftWidth + rightWidth;
-  if (totalWidth !== WIDGET_SIZING.TOTAL_COLUMNS) {
-    const difference = WIDGET_SIZING.TOTAL_COLUMNS - totalWidth;
-    rightWidth += difference;
-  }
-  return { leftWidth, rightWidth };
 };
 
 /**

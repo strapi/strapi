@@ -24,7 +24,7 @@ import {
   isLastWidgetInRow,
   canResizeBetweenWidgets,
   getWidgetWidth,
-} from '../../utils/widgetUtils';
+} from '../../utils/widgetLayout';
 
 import { AddWidgetModal } from './components/AddWidgetModal';
 import { FreeTrialEndedModal } from './components/FreeTrialEndedModal';

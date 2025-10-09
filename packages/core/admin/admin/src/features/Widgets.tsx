@@ -13,7 +13,7 @@ import {
   isValidResizeOperation,
   canResizeBetweenWidgets,
   WIDGET_SIZING,
-} from '../utils/widgetUtils';
+} from '../utils/widgetLayout';
 
 import { useNotification } from './Notifications';
 

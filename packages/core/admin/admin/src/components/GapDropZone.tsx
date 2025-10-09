@@ -4,7 +4,7 @@ import { Box } from '@strapi/design-system';
 import { useDrop } from 'react-dnd';
 import { styled } from 'styled-components';
 
-import { calculateWidgetRows, type WidgetRow } from '../utils/widgetUtils';
+import { calculateWidgetRows, type WidgetRow } from '../utils/widgetLayout';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
 
