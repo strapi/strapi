@@ -3,7 +3,13 @@ import * as React from 'react';
 import { Box } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { snapToDiscreteSize, isValidResize, adjustToTotalColumns } from '../utils/widgetUtils';
+import {
+  isValidResize,
+  calculateTargetWidths,
+  shouldTriggerResize,
+  calculateResizeHandlePosition,
+  calculateRowBounds,
+} from '../utils/resizeHandlers';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
 
@@ -128,7 +134,6 @@ const ResizeIndicator = ({
     </IndicatorContainer>
   );
 };
-
 const ResizeHandleContainer = styled(Box)<{ $isDragging?: boolean }>`
   position: absolute;
   top: 0;
@@ -174,75 +179,6 @@ interface WidgetResizeHandleProps {
   filteredWidgets?: WidgetWithUID[];
 }
 
-const calculatePosition = (leftWidgetId: string, rightWidgetId: string) => {
-  const leftElement = document.querySelector(`[data-strapi-widget-id="${leftWidgetId}"]`);
-  const rightElement = document.querySelector(`[data-strapi-widget-id="${rightWidgetId}"]`);
-
-  if (leftElement && rightElement) {
-    const leftRect = leftElement.getBoundingClientRect();
-    const rightRect = rightElement.getBoundingClientRect();
-    const containerRect = leftElement
-      .closest('[data-strapi-grid-container]')
-      ?.getBoundingClientRect();
-
-    if (containerRect) {
-      const left = leftRect.right - containerRect.left;
-      const top = leftRect.top - containerRect.top;
-      const height = Math.max(leftRect.height, rightRect.height);
-
-      return { left, top, height };
-    }
-  }
-  return { left: 0, top: 0, height: 0 };
-};
-
-const calculateRowPosition = (leftWidgetId: string, rightWidgetId: string) => {
-  const leftElement = document.querySelector(`[data-strapi-widget-id="${leftWidgetId}"]`);
-  const rightElement = document.querySelector(`[data-strapi-widget-id="${rightWidgetId}"]`);
-  const containerRect = leftElement
-    ?.closest('[data-strapi-grid-container]')
-    ?.getBoundingClientRect();
-
-  if (leftElement && rightElement && containerRect) {
-    const leftRect = leftElement.getBoundingClientRect();
-    const rightRect = rightElement.getBoundingClientRect();
-
-    // Calculate the row bounds
-    const rowLeft = Math.min(leftRect.left, rightRect.left) - containerRect.left;
-    const rowTop = leftRect.top - containerRect.top;
-    const rowWidth =
-      Math.max(leftRect.right, rightRect.right) - Math.min(leftRect.left, rightRect.left);
-    const rowHeight = Math.max(leftRect.height, rightRect.height);
-
-    return { left: rowLeft, top: rowTop, width: rowWidth, height: rowHeight };
-  }
-  return null;
-};
-
-const calculateTargetWidths = (
-  deltaColumns: number,
-  startLeftWidth: number,
-  startRightWidth: number
-) => {
-  let targetLeftWidth = startLeftWidth + deltaColumns;
-  let targetRightWidth = startRightWidth - deltaColumns;
-
-  targetLeftWidth = snapToDiscreteSize(targetLeftWidth);
-  targetRightWidth = snapToDiscreteSize(targetRightWidth);
-
-  // Adjust to maintain 12 columns total
-  const adjusted = adjustToTotalColumns(targetLeftWidth, targetRightWidth);
-  return { targetLeftWidth: adjusted.leftWidth, targetRightWidth: adjusted.rightWidth };
-};
-
-const shouldTriggerResize = (
-  leftWidth: number,
-  rightWidth: number,
-  lastResizeValues: { leftWidth: number; rightWidth: number }
-): boolean => {
-  return leftWidth !== lastResizeValues.leftWidth || rightWidth !== lastResizeValues.rightWidth;
-};
-
 export const WidgetResizeHandle = ({
   leftWidgetId,
   rightWidgetId,
@@ -250,7 +186,6 @@ export const WidgetResizeHandle = ({
   rightWidgetWidth,
   onResize,
   saveLayout,
-  filteredWidgets,
 }: WidgetResizeHandleProps) => {
   const [state, setState] = React.useState({
     isDragging: false,
@@ -309,8 +244,8 @@ export const WidgetResizeHandle = ({
     ]
   );
 
-  const handleMouseMove = React.useCallback(
-    (e: MouseEvent) => {
+  const handlePointerMove = React.useCallback(
+    (e: PointerEvent) => {
       if (!state.isDragging) return;
 
       // Clear any existing throttle timeout
@@ -330,8 +265,8 @@ export const WidgetResizeHandle = ({
     [state.isDragging, state.startX, handleResize]
   );
 
-  // Handle mouse up to end drag
-  const handleMouseUp = React.useCallback(() => {
+  // Handle pointer up to end drag
+  const handlePointerUp = React.useCallback(() => {
     // Clear any pending throttle timeout
     if (throttleRef.current) {
       clearTimeout(throttleRef.current);
@@ -350,9 +285,9 @@ export const WidgetResizeHandle = ({
     }));
   }, [leftWidgetWidth, rightWidgetWidth, saveLayout]);
 
-  // Handle mouse down to start drag
-  const handleMouseDown = React.useCallback(
-    (e: React.MouseEvent) => {
+  // Handle pointer down to start drag
+  const handlePointerDown = React.useCallback(
+    (e: React.PointerEvent) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -367,62 +302,45 @@ export const WidgetResizeHandle = ({
     [leftWidgetWidth, rightWidgetWidth]
   );
 
-  // Update position when widgets resize
-  React.useEffect(() => {
-    setState((prev) => ({
-      ...prev,
-      position: calculatePosition(leftWidgetId, rightWidgetId),
-      rowPosition: calculateRowPosition(leftWidgetId, rightWidgetId),
-    }));
-
-    // Recalculate on window resize
-    const handleResize = () =>
-      setState((prev) => ({
-        ...prev,
-        position: calculatePosition(leftWidgetId, rightWidgetId),
-        rowPosition: calculateRowPosition(leftWidgetId, rightWidgetId),
-      }));
-    window.addEventListener('resize', handleResize);
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, [leftWidgetId, rightWidgetId, leftWidgetWidth, rightWidgetWidth, filteredWidgets]);
-
   // Set up drag event listeners
   React.useEffect(() => {
     if (state.isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('pointermove', handlePointerMove);
+      document.addEventListener('pointerup', handlePointerUp);
 
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('pointermove', handlePointerMove);
+        document.removeEventListener('pointerup', handlePointerUp);
       };
     }
-  }, [state.isDragging, handleMouseMove, handleMouseUp]);
+  }, [state.isDragging, handlePointerMove, handlePointerUp]);
 
-  // Set up resize observer for position updates
-  React.useEffect(() => {
+  // Set up resize observer for position updates - watching widgets and grid container
+  React.useLayoutEffect(() => {
+    const leftElement = document.querySelector(`[data-strapi-widget-id="${leftWidgetId}"]`);
+    const rightElement = document.querySelector(`[data-strapi-widget-id="${rightWidgetId}"]`);
+    const containerElement = leftElement?.closest('[data-strapi-grid-container]') || null;
+
     const updatePosition = () => {
+      const position = calculateResizeHandlePosition(leftElement, rightElement, containerElement);
+      const rowPosition = calculateRowBounds(leftElement, rightElement, containerElement);
+
       setState((prev) => ({
         ...prev,
-        position: calculatePosition(leftWidgetId, rightWidgetId),
-        rowPosition: calculateRowPosition(leftWidgetId, rightWidgetId),
+        position,
+        rowPosition,
       }));
     };
 
-    // Update position on window resize
-    window.addEventListener('resize', updatePosition);
-
-    // Update position when widgets change size
+    // Create ResizeObserver to watch widgets and grid container
     const resizeObserver = new ResizeObserver(updatePosition);
-    const leftElement = document.querySelector(`[data-strapi-widget-id="${leftWidgetId}"]`);
-    const rightElement = document.querySelector(`[data-strapi-widget-id="${rightWidgetId}"]`);
 
+    // Observe all relevant elements
     if (leftElement) resizeObserver.observe(leftElement);
     if (rightElement) resizeObserver.observe(rightElement);
+    if (containerElement) resizeObserver.observe(containerElement);
 
     return () => {
-      window.removeEventListener('resize', updatePosition);
       resizeObserver.disconnect();
     };
   }, [leftWidgetId, rightWidgetId]);
@@ -439,7 +357,7 @@ export const WidgetResizeHandle = ({
   return (
     <>
       <ResizeHandleContainer
-        onMouseDown={handleMouseDown}
+        onPointerDown={handlePointerDown}
         style={{
           transform: `translate(${state.position.left}px, ${state.position.top}px)`,
           height: `${state.position.height}px`,

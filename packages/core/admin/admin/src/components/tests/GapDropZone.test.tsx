@@ -7,7 +7,7 @@ import {
 } from '../GapDropZone';
 
 import type { WidgetWithUID } from '../../core/apis/Widgets';
-import type { WidgetRow } from '../../utils/widgetUtils';
+import type { WidgetRow } from '../../utils/widgetLayout';
 
 // Mock data
 const createMockWidget = (uid: string, title: string): WidgetWithUID => ({
