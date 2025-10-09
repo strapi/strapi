@@ -34,6 +34,18 @@ const WidgetContainer = styled(Flex)`
       display: flex;
     }
   }
+
+  &:focus-within ${WidgetActions} {
+    display: flex;
+  }
+
+  &:focus-within ${DragIconButton} {
+    pointer-events: none;
+
+    ${({ theme }) => theme.breakpoints.medium} {
+      pointer-events: auto;
+    }
+  }
 `;
 
 export interface WidgetRootProps
@@ -113,6 +125,7 @@ export const WidgetRoot = ({
       padding={6}
       position="relative"
       aria-labelledby={uid}
+      tabIndex={0}
       ref={(node: HTMLElement | null) => {
         if (node) {
           node.setAttribute('data-strapi-widget-id', uid);
@@ -166,6 +179,7 @@ export const WidgetRoot = ({
             variant="tertiary"
             size="XS"
             ref={drag}
+            tabIndex={-1}
             label={formatMessage({
               id: 'HomePage.widget.drag',
               defaultMessage: 'Drag to move',

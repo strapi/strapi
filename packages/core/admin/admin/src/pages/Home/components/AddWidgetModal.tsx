@@ -21,6 +21,20 @@ const WidgetWrapper = styled(Box)`
   }
 `;
 
+// Interactive widget preview container
+const WidgetPreviewContainer = styled(Box)`
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary100};
+    border-color: ${({ theme }) => theme.colors.primary200};
+  }
+
+  &:focus-visible {
+    background-color: ${({ theme }) => theme.colors.primary100};
+    border-color: ${({ theme }) => theme.colors.primary200};
+    outline-offset: 0;
+  }
+`;
+
 /* -------------------------------------------------------------------------------------------------
  * AddWidgetModal
  * -----------------------------------------------------------------------------------------------*/
@@ -41,20 +55,34 @@ interface WidgetPreviewProps {
 const WidgetPreview = ({ widget, onSelect }: WidgetPreviewProps) => {
   const { formatMessage } = useIntl();
   const Icon = widget.icon || PuzzlePiece;
-  const [isHovered, setIsHovered] = React.useState(false);
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect();
+    }
+  };
 
   return (
-    <Box
+    <WidgetPreviewContainer
       padding={4}
-      background={isHovered ? 'primary100' : 'neutral0'}
-      borderColor={isHovered ? 'primary200' : 'neutral200'}
+      background="neutral0"
+      borderColor="neutral200"
       hasRadius
       shadow="tableShadow"
       onClick={onSelect}
+      onKeyDown={handleKeyDown}
       width={'100%'}
       cursor="pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      tabIndex={0}
+      role="button"
+      aria-label={formatMessage(
+        {
+          id: 'HomePage.addWidget.selectWidget',
+          defaultMessage: 'Select {widgetName} widget',
+        },
+        { widgetName: formatMessage(widget.title) }
+      )}
     >
       <Flex direction="column" alignItems="center" gap={3}>
         <Flex gap={2} marginRight="auto">
@@ -72,7 +100,7 @@ const WidgetPreview = ({ widget, onSelect }: WidgetPreviewProps) => {
           <WidgetComponent component={widget.component} columnWidth={4} />
         </WidgetWrapper>
       </Flex>
-    </Box>
+    </WidgetPreviewContainer>
   );
 };
 
