@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Grid, Main, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, Typography, Main } from '@strapi/design-system';
 import { PuzzlePiece } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
@@ -138,48 +138,50 @@ const HomePageCE = () => {
   }, [checkUserHasPermissions, getAllWidgets]);
 
   return (
-    <Main>
-      <Page.Title>
-        {formatMessage({ id: 'HomePage.head.title', defaultMessage: 'Homepage' })}
-      </Page.Title>
-      <Layouts.Header
-        title={formatMessage(
-          { id: 'HomePage.header.title', defaultMessage: 'Hello {name}' },
-          { name: displayName }
-        )}
-        subtitle={formatMessage({
-          id: 'HomePage.header.subtitle',
-          defaultMessage: 'Welcome to your administration panel',
-        })}
-      />
-      <FreeTrialWelcomeModal />
-      <FreeTrialEndedModal />
-      <Layouts.Content>
-        <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
-          <GuidedTourHomepageOverview />
-          {loading ? (
-            <Box position="absolute" top={0} left={0} right={0} bottom={0}>
-              <Page.Loading />
-            </Box>
-          ) : (
-            <Grid.Root gap={5}>
-              {filteredWidgets.map((widget) => (
-                <Grid.Item col={6} s={12} key={widget.uid}>
-                  <WidgetRoot
-                    title={widget.title}
-                    icon={widget.icon}
-                    link={widget.link}
-                    uid={widget.uid}
-                  >
-                    <WidgetComponent component={widget.component} />
-                  </WidgetRoot>
-                </Grid.Item>
-              ))}
-            </Grid.Root>
+    <Layouts.Root>
+      <Main>
+        <Page.Title>
+          {formatMessage({ id: 'HomePage.head.title', defaultMessage: 'Homepage' })}
+        </Page.Title>
+        <Layouts.Header
+          title={formatMessage(
+            { id: 'HomePage.header.title', defaultMessage: 'Hello {name}' },
+            { name: displayName }
           )}
-        </Flex>
-      </Layouts.Content>
-    </Main>
+          subtitle={formatMessage({
+            id: 'HomePage.header.subtitle',
+            defaultMessage: 'Welcome to your administration panel',
+          })}
+        />
+        <FreeTrialWelcomeModal />
+        <FreeTrialEndedModal />
+        <Layouts.Content>
+          <Flex direction="column" alignItems="stretch" gap={8}>
+            <GuidedTourHomepageOverview />
+            {loading ? (
+              <Box position="absolute" top={0} left={0} right={0} bottom={0}>
+                <Page.Loading />
+              </Box>
+            ) : (
+              <Grid.Root gap={5}>
+                {filteredWidgets.map((widget) => (
+                  <Grid.Item col={6} s={12} key={widget.uid}>
+                    <WidgetRoot
+                      title={widget.title}
+                      icon={widget.icon}
+                      link={widget.link}
+                      uid={widget.uid}
+                    >
+                      <WidgetComponent component={widget.component} />
+                    </WidgetRoot>
+                  </Grid.Item>
+                ))}
+              </Grid.Root>
+            )}
+          </Flex>
+        </Layouts.Content>
+      </Main>
+    </Layouts.Root>
   );
 };
 
