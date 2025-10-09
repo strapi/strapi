@@ -111,13 +111,13 @@ async function copyRelationsToDrafts({ db, trx, uid }: { db: Database; trx: Knex
   if (!meta) return;
 
   // Get all published and draft entries for this content type
-  const publishedEntries = await trx(meta.tableName)
+  const publishedEntries = (await trx(meta.tableName)
     .select(['id', 'documentId', 'locale'])
-    .whereNotNull('published_at');
+    .whereNotNull('published_at')) as Array<{ id: number; documentId: string; locale: string }>;
 
-  const draftEntries = await trx(meta.tableName)
+  const draftEntries = (await trx(meta.tableName)
     .select(['id', 'documentId', 'locale'])
-    .whereNull('published_at');
+    .whereNull('published_at')) as Array<{ id: number; documentId: string; locale: string }>;
 
   if (publishedEntries.length === 0 || draftEntries.length === 0) {
     return;
