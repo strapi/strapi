@@ -3,6 +3,7 @@ import * as React from 'react';
 import axios, { AxiosResponse } from 'axios';
 
 import { Tours } from '../components/GuidedTour/Tours';
+import { useDeviceType } from '../hooks/useDeviceType';
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
@@ -13,6 +14,7 @@ export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
   useTypescriptOnAdmin?: boolean;
   isHostedOnStrapiCloud?: boolean;
+  aiLicenseKey?: string;
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
@@ -193,6 +195,7 @@ export interface EventWithoutProperties {
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
     | 'didCreateRelease'
+    | 'didStartNewChat'
     | 'didLaunchGuidedtour';
   properties?: never;
 }
@@ -373,6 +376,30 @@ interface DidPublishRelease {
   };
 }
 
+interface DidUsePresetPromptEvent {
+  name: 'didUsePresetPrompt';
+  properties: {
+    promptType:
+      | 'generate-product-schema'
+      | 'tell-me-about-the-content-type-builder'
+      | 'tell-me-about-strapi';
+  };
+}
+
+interface DidAnswerMessageEvent {
+  name: 'didAnswerMessage';
+  properties: {
+    successful: boolean;
+  };
+}
+
+interface DidVoteAnswerEvent {
+  name: 'didVoteAnswer';
+  properties: {
+    value: 'positive' | 'negative';
+  };
+}
+
 interface DidUpdateCTBSchema {
   name: 'didUpdateCTBSchema';
   properties: {
@@ -447,6 +474,9 @@ type EventsWithProperties =
   | DidSelectFile
   | DidSortMediaLibraryElementsEvent
   | DidSubmitWithErrorsFirstAdminEvent
+  | DidUsePresetPromptEvent
+  | DidAnswerMessageEvent
+  | DidVoteAnswerEvent
   | LogoEvent
   | TokenEvents
   | UpdateEntryEvents
@@ -502,6 +532,7 @@ export interface UseTrackingReturn {
  * ```
  */
 const useTracking = (): UseTrackingReturn => {
+  const deviceType = useDeviceType();
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
@@ -517,11 +548,14 @@ const useTracking = (): UseTrackingReturn => {
               event,
               userId,
               eventProperties: { ...properties },
-              userProperties: {},
+              userProperties: {
+                deviceType,
+              },
               groupProperties: {
                 ...telemetryProperties,
                 projectId: uuid,
                 projectType: window.strapi.projectType,
+                aiLicenseKey: window.strapi.aiLicenseKey,
               },
             },
             {

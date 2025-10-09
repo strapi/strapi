@@ -2,14 +2,16 @@
 import * as React from 'react';
 
 import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/design-system';
-import { Check } from '@strapi/icons';
+import { Check, Sparkle } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation } from 'react-query';
 
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
+import { useSettings } from '../../hooks/useSettings';
 import { getTrad } from '../../utils';
 
 import { init } from './init';
@@ -20,20 +22,12 @@ import type { InitialState } from './reducer';
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const { get, put } = useFetchClient();
+  const { put } = useFetchClient();
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['upload', 'settings'],
-    async queryFn() {
-      const {
-        data: { data },
-      } = await get('/upload/settings');
-
-      return data;
-    },
-  });
+  const { data, isLoading, refetch } = useSettings();
+  const isAIAvailable = useAIAvailability();
 
   React.useEffect(() => {
     if (data) {
@@ -102,7 +96,7 @@ export const SettingsPage = () => {
       <Page.Title>
         {formatMessage({
           id: getTrad('page.title'),
-          defaultMessage: 'Settings - Media Libray',
+          defaultMessage: 'Settings - Media Library',
         })}
       </Page.Title>
       <form onSubmit={handleSubmit}>
@@ -132,7 +126,65 @@ export const SettingsPage = () => {
         />
         <Layouts.Content>
           <Layouts.Root>
-            <Flex direction="column" alignItems="stretch" gap={12}>
+            <Flex direction="column" alignItems="stretch" gap={4}>
+              {isAIAvailable && (
+                <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                  <Flex direction="column" alignItems="stretch" gap={1}>
+                    <Grid.Root gap={6}>
+                      <Grid.Item col={8} s={12} direction="column" alignItems="stretch">
+                        <Flex gap={2}>
+                          <Box color="alternative700">
+                            <Sparkle />
+                          </Box>
+                          <Typography variant="delta" tag="h2">
+                            {formatMessage({
+                              id: getTrad('settings.form.aiMetadata.label'),
+                              defaultMessage:
+                                'Generate AI captions and alt texts automatically on upload!',
+                            })}
+                          </Typography>
+                        </Flex>
+                        <Flex paddingTop={1}>
+                          <Typography variant="pi" textColor="neutral600">
+                            {formatMessage({
+                              id: getTrad('settings.form.aiMetadata.description'),
+                              defaultMessage:
+                                'Enable this feature to save time, optimize your SEO and increase accessibility by letting our AI generate captions and alternative texts for you.',
+                            })}
+                          </Typography>
+                        </Flex>
+                      </Grid.Item>
+                      <Grid.Item
+                        col={4}
+                        s={12}
+                        direction="column"
+                        alignItems="end"
+                        justifyContent={'center'}
+                      >
+                        <Field.Root name="aiMetadata" width={'158px'}>
+                          <Toggle
+                            checked={modifiedData?.aiMetadata}
+                            offLabel={formatMessage({
+                              id: 'app.components.ToggleCheckbox.off-label',
+                              defaultMessage: 'Disabled',
+                            })}
+                            onLabel={formatMessage({
+                              id: 'app.components.ToggleCheckbox.on-label',
+                              defaultMessage: 'Enabled',
+                            })}
+                            onChange={(e) => {
+                              handleChange({
+                                target: { name: 'aiMetadata', value: e.target.checked },
+                              });
+                            }}
+                          />
+                        </Field.Root>
+                      </Grid.Item>
+                    </Grid.Root>
+                  </Flex>
+                </Box>
+              )}
+
               <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                 <Flex direction="column" alignItems="stretch" gap={4}>
                   <Flex>
