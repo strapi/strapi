@@ -110,11 +110,12 @@ async function copyRelationsToDrafts({ db, trx, uid }: { db: Database; trx: Knex
   const meta = db.metadata.get(uid);
   if (!meta) return;
 
-  // Get all published and draft entries for this content type
+  // Get all published entries for this content type
   const publishedEntries = (await trx(meta.tableName)
     .select(['id', 'documentId', 'locale'])
     .whereNotNull('published_at')) as Array<{ id: number; documentId: string; locale: string }>;
 
+  // Get all draft entries for this content type
   const draftEntries = (await trx(meta.tableName)
     .select(['id', 'documentId', 'locale'])
     .whereNull('published_at')) as Array<{ id: number; documentId: string; locale: string }>;
@@ -123,10 +124,12 @@ async function copyRelationsToDrafts({ db, trx, uid }: { db: Database; trx: Knex
     return;
   }
 
-  // Create mapping from documentId to draft entry ID
+  // Create mapping from documentId to draft entry ID (only for drafts created by migration)
   const draftByDocumentId = new Map();
   for (const draft of draftEntries) {
-    draftByDocumentId.set(draft.documentId, draft);
+    if (draft.documentId) {
+      draftByDocumentId.set(draft.documentId, draft);
+    }
   }
 
   // Create mapping from published entry ID to draft entry ID
