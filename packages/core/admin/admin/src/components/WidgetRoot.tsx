@@ -11,6 +11,20 @@ import styled from 'styled-components';
 import { useTracking } from '../features/Tracking';
 
 import type { WidgetType } from '@strapi/admin/strapi-admin';
+import type { FindWidgetFunction, WidgetIdFunction, DragEndFunction } from '../features/Widgets';
+
+export interface BaseWidgetProps
+  extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
+  findWidget?: FindWidgetFunction;
+  deleteWidget?: WidgetIdFunction;
+  onDragStart?: WidgetIdFunction;
+  onDragEnd?: DragEndFunction;
+}
+
+export interface WidgetRootProps extends BaseWidgetProps {
+  children: React.ReactNode;
+  component?: () => Promise<React.ComponentType>;
+}
 
 const WidgetActions = styled(Flex)`
   display: flex;
@@ -47,16 +61,6 @@ const WidgetContainer = styled(Flex)`
     }
   }
 `;
-
-export interface WidgetRootProps
-  extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
-  children: React.ReactNode;
-  findWidget?: (id: string) => { index: number };
-  deleteWidget?: (id: string) => void;
-  onDragStart?: (widgetId: string) => void;
-  onDragEnd?: () => void;
-  component?: () => Promise<React.ComponentType>;
-}
 
 export const WidgetRoot = ({
   title,
