@@ -10,6 +10,7 @@ import {
   calculateResizeHandlePosition,
   calculateRowBounds,
 } from '../utils/resizeHandlers';
+import { getWidgetElement, getWidgetGridContainer } from '../utils/widgetLayout';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
 
@@ -317,9 +318,9 @@ export const WidgetResizeHandle = ({
 
   // Set up resize observer for position updates - watching widgets and grid container
   React.useLayoutEffect(() => {
-    const leftElement = document.querySelector(`[data-strapi-widget-id="${leftWidgetId}"]`);
-    const rightElement = document.querySelector(`[data-strapi-widget-id="${rightWidgetId}"]`);
-    const containerElement = leftElement?.closest('[data-strapi-grid-container]') || null;
+    const leftElement = getWidgetElement(leftWidgetId);
+    const rightElement = getWidgetElement(rightWidgetId);
+    const containerElement = getWidgetGridContainer();
 
     const updatePosition = () => {
       const position = calculateResizeHandlePosition(leftElement, rightElement, containerElement);
