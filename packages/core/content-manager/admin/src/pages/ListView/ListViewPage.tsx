@@ -11,6 +11,7 @@ import {
   useTracking,
   useAPIErrorHandler,
   useQueryParams,
+  useScopedPersistentState,
   useRBAC,
   Layouts,
   useTable,
@@ -42,6 +43,7 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
+import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
@@ -73,21 +75,43 @@ const ListViewPage = () => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
+  usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
+
   const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);
 
-  const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
+  const [displayedHeaders, setDisplayedHeaders] = useScopedPersistentState<ListFieldLayout[]>(
+    `STRAPI_LIST_VIEW_DISPLAY_HEADERS:${model}`,
+    []
+  );
 
-  const listLayout = usePrev(list.layout);
+  /**
+   * If the persistent displayedHeaders are not yet initialized, set them to list.layout
+   */
   React.useEffect(() => {
-    /**
-     * ONLY update the displayedHeaders if the document
-     * layout has actually changed in value.
-     */
-    if (!isEqual(listLayout, list.layout)) {
+    // wait for list.layout to be loaded
+    if (list.layout.length === 0) {
+      return;
+    }
+
+    if (displayedHeaders.length === 0) {
       setDisplayedHeaders(list.layout);
     }
-  }, [list.layout, listLayout]);
+  }, [list.layout]);
+
+  React.useEffect(() => {
+    if (!schema?.attributes) return;
+    if (displayedHeaders.length === 0) return;
+    if (schema.uid !== model) return;
+
+    const allowedDisplayHeaders = displayedHeaders.filter((header) =>
+      Object.keys(schema?.attributes).includes(header.name)
+    );
+
+    if (allowedDisplayHeaders.length !== displayedHeaders.length) {
+      setDisplayedHeaders(allowedDisplayHeaders);
+    }
+  }, [displayedHeaders]);
 
   const handleSetHeaders = (headers: string[]) => {
     setDisplayedHeaders(
