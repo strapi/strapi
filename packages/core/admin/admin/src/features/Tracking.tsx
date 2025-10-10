@@ -459,6 +459,20 @@ interface DidOpenKeyStatisticsWidgetLink {
   };
 }
 
+interface DidEditAICaption {
+  name: 'didEditAICaption';
+  properties: {
+    percentageOfCaptionsChanged: number;
+  };
+}
+
+interface DidEditAIAlternativeText {
+  name: 'didEditAIAlternativeText';
+  properties: {
+    percentageOfAlternativeTextChanged: number;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
@@ -490,7 +504,9 @@ type EventsWithProperties =
   | DidStartGuidedTour
   | DidOpenHomeWidgetLink
   | DidOpenKeyStatisticsWidgetLink
-  | WillEditEntryFromHome;
+  | WillEditEntryFromHome
+  | DidEditAICaption
+  | DidEditAIAlternativeText;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

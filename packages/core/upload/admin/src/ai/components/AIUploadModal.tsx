@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { createContext } from '@strapi/admin/strapi-admin';
+import { createContext, useTracking } from '@strapi/admin/strapi-admin';
 import { Alert, Button, Flex, Modal } from '@strapi/design-system';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
@@ -10,9 +10,10 @@ import {
   AddAssetStep,
   FileWithRawFile,
 } from '../../components/UploadAssetDialog/AddAssetStep/AddAssetStep';
+import { AssetType } from '../../constants';
 import { useBulkEdit } from '../../hooks/useBulkEdit';
 import { useUpload } from '../../hooks/useUpload';
-import { getTrad } from '../../utils';
+import { getTrad, typeFromMime } from '../../utils';
 
 import { AIAssetCard, AIAssetCardSkeletons } from './AIAssetCard';
 
@@ -50,6 +51,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const { edit, isLoading: isSaving } = useBulkEdit();
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadError, setUploadError] = React.useState<Error | null>(null);
+  const { trackUsage } = useTracking();
 
   const handleCaptionChange = (assetId: number, caption: string) => {
     dispatch({
@@ -76,6 +78,29 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
       );
 
       if (assetsToUpdate.length > 0) {
+        // Track updates
+        const totalImageAssets = state.uploadedAssets.filter((asset) => {
+          const type = typeFromMime(asset.file.mime || '');
+          return type === AssetType.Image;
+        }).length;
+
+        const percentageOfCaptionsChanged = Math.round(
+          (assetsToUpdate.filter((asset) => asset.wasCaptionChanged).length / totalImageAssets) *
+            100
+        );
+        if (percentageOfCaptionsChanged > 0) {
+          trackUsage('didEditAICaption', { percentageOfCaptionsChanged });
+        }
+
+        const percentageOfAlternativeTextChanged = Math.round(
+          (assetsToUpdate.filter((asset) => asset.wasAltTextChanged).length / totalImageAssets) *
+            100
+        );
+        if (assetsToUpdate.some((asset) => asset.wasAltTextChanged)) {
+          trackUsage('didEditAIAlternativeText', { percentageOfAlternativeTextChanged });
+        }
+
+        // Update assets
         const updates = assetsToUpdate.map((asset) => ({
           id: asset.file.id!,
           fileInfo: {
