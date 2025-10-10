@@ -53,7 +53,13 @@ export default (plop: NodePlopAPI) => {
 
       const filePath = getFilePath(answers.destination || (answers.isPluginApi && answers.plugin ? 'plugin' : 'api'));
       const currentDir = process.cwd();
-      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
+      let language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
+
+      if (answers.plugin) {
+        // The tsconfig in plugins is located just outside the server src, not in the root of the plugin.
+        const pluginServerDir = join(currentDir, 'src', filePath.replace('{{ plugin }}', answers.plugin), '../');
+        language = tsUtils.isUsingTypeScriptSync(pluginServerDir) ? 'ts' : 'js';
+      }
 
       const baseActions: Array<ActionType> = [
         {
@@ -85,6 +91,7 @@ export default (plop: NodePlopAPI) => {
               type: 'add',
               path: `${filePath}/${type}/index.${language}`,
               templateFile: `templates/${language}/plugin/plugin.index.${language}.hbs`,
+              skipIfExists: true,
             });
           }
 
@@ -97,6 +104,7 @@ export default (plop: NodePlopAPI) => {
                 type: 'add',
                 path: `${filePath}/${type}/index.${language}`,
                 templateFile: `templates/${language}/plugin/plugin.routes.index.${language}.hbs`,
+                skipIfExists: true,
               });
             }
 
@@ -112,6 +120,7 @@ export default (plop: NodePlopAPI) => {
                   path: `${filePath}/${type}/${routeType}/index.${language}`,
                   templateFile: `templates/${language}/plugin/plugin.routes.type.index.${language}.hbs`,
                   data: { type: routeType },
+                  skipIfExists: true,
                 });
               }
             });
