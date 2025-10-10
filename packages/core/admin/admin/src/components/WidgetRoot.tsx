@@ -130,11 +130,7 @@ export const WidgetRoot = ({
       position="relative"
       aria-labelledby={uid}
       tabIndex={0}
-      ref={(node: HTMLElement | null) => {
-        if (node) {
-          node.setAttribute('data-strapi-widget-id', uid);
-        }
-      }}
+      data-strapi-widget-id={uid}
       style={{
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
