@@ -1,5 +1,6 @@
 import { Flex, Typography } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
+import { File, FileCsv, FilePdf, FileXls, FileZip } from '@strapi/icons';
+
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -27,6 +28,16 @@ export const DocAssetCard = ({
   ...restProps
 }: DocAssetCardProps) => {
   const { formatMessage } = useIntl();
+
+  const DOC_ICON_MAP: Record<string, typeof File> = {
+    pdf: FilePdf,
+    csv: FileCsv,
+    xls: FileXls,
+    zip: FileZip,
+  };
+
+  const DocIcon = DOC_ICON_MAP[extension] || File;
+
   return (
     <AssetCardBase
       name={name}
@@ -37,11 +48,7 @@ export const DocAssetCard = ({
     >
       <CardAsset width="100%" height={size === 'S' ? `8.8rem` : `16.4rem`} justifyContent="center">
         <Flex gap={2} direction="column" alignItems="center">
-          {extension === 'pdf' ? (
-            <FilePdf aria-label={name} fill="neutral500" width={24} height={24} />
-          ) : (
-            <File aria-label={name} fill="neutral500" width={24} height={24} />
-          )}
+          <DocIcon aria-label={name} fill="neutral500" width={24} height={24} />
 
           <Typography textColor="neutral500" variant="pi">
             {formatMessage({

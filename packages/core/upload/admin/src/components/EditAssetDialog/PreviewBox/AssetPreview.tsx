@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import MuxPlayer from '@mux/mux-player-react';
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
+import { File, FileCsv, FilePdf, FileXls, FileZip } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
@@ -54,27 +54,22 @@ export const AssetPreview = React.forwardRef<
     );
   }
 
-  if (mime.includes('pdf')) {
-    return (
-      <CardAsset width="100%" justifyContent="center" {...props}>
-        <Flex gap={2} direction="column" alignItems="center">
-          <FilePdf aria-label={name} fill="neutral500" width={24} height={24} />
-          <Typography textColor="neutral500" variant="pi">
-            {formatMessage({
-              id: 'noPreview',
-              defaultMessage: 'No preview available',
-            })}
-          </Typography>
-        </Flex>
-      </CardAsset>
-    );
-  }
+  const DOC_ICON_MAP: Record<string, typeof File> = {
+    pdf: FilePdf,
+    csv: FileCsv,
+    xls: FileXls,
+    'vnd.ms-excel': FileXls,
+    'vnd.openxmlformats-officedocument.spreadsheetml.sheet': FileXls,
+    zip: FileZip,
+  };
+
+  const fileExt = mime.split('/').pop()?.toLowerCase();
+  const DocIcon = fileExt ? DOC_ICON_MAP[fileExt] || File : File;
 
   return (
     <CardAsset width="100%" justifyContent="center" {...props}>
       <Flex gap={2} direction="column" alignItems="center">
-        <File aria-label={name} fill="neutral500" width={24} height={24} />
-
+        <DocIcon aria-label={name} fill="neutral500" width={24} height={24} />
         <Typography textColor="neutral500" variant="pi">
           {formatMessage({
             id: 'noPreview',

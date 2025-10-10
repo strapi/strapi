@@ -1,9 +1,9 @@
 import { Box, Flex } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
+import { File, FileCsv, FilePdf, FileXls, FileZip } from '@strapi/icons';
 import { styled } from 'styled-components';
 
 import { AssetType } from '../../../constants';
-import { createAssetUrl } from '../../../utils';
+import { createAssetUrl, getFileExtension } from '../../../utils';
 import { AudioPreview } from '../../AssetCard/AudioPreview';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
 
@@ -73,13 +73,19 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
     );
   }
 
+  const DOC_ICON_MAP: Record<string, typeof File> = {
+    pdf: FilePdf,
+    csv: FileCsv,
+    xls: FileXls,
+    zip: FileZip,
+  };
+
+  const fileExtension = getFileExtension(asset.ext);
+  const DocIcon = fileExtension ? DOC_ICON_MAP[fileExtension] || File : File;
+
   return (
     <DocAsset width="100%" height="100%" justifyContent="center" hasRadius>
-      {asset.ext?.includes('pdf') ? (
-        <FilePdf aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
-      ) : (
-        <File aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
-      )}
+      <DocIcon aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
     </DocAsset>
   );
 };
