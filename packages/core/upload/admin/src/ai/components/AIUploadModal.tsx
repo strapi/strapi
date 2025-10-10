@@ -96,7 +96,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
           (assetsToUpdate.filter((asset) => asset.wasAltTextChanged).length / totalImageAssets) *
             100
         );
-        if (assetsToUpdate.some((asset) => asset.wasAltTextChanged)) {
+        if (percentageOfAlternativeTextChanged > 0) {
           trackUsage('didEditAIAlternativeText', { percentageOfAlternativeTextChanged });
         }
 
