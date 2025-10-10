@@ -42,16 +42,23 @@ const findWidget = (filteredWidgets: WidgetWithUID[], widgetId: string): WidgetI
   };
 };
 
-const saveLayout = async (
-  widgets: WidgetWithUID[],
-  widths: Record<string, number>,
+const saveLayout = async ({
+  widgets,
+  widths,
+  updateHomepageLayout,
+  toggleNotification,
+  formatAPIError,
+  formatMessage,
+}: {
+  widgets: WidgetWithUID[];
+  widths: Record<string, number>;
   updateHomepageLayout: (data: {
     widgets: Array<{ uid: string; width: (typeof WIDGET_SIZING.DISCRETE_SIZES)[number] }>;
-  }) => Promise<any>,
-  toggleNotification: (config: { type: 'danger'; message: string }) => void,
-  formatAPIError: (error: any) => string,
-  formatMessage: (descriptor: { id: string; defaultMessage: string }) => string
-) => {
+  }) => Promise<any>;
+  toggleNotification: (config: { type: 'danger'; message: string }) => void;
+  formatAPIError: (error: any) => string;
+  formatMessage: (descriptor: { id: string; defaultMessage: string }) => string;
+}) => {
   try {
     const layoutData = {
       widgets: widgets.map((widget) => ({
@@ -77,14 +84,21 @@ const saveLayout = async (
   }
 };
 
-const moveWidget = (
-  filteredWidgets: WidgetWithUID[],
-  columnWidths: Record<string, number>,
-  widgetId: string,
-  insertIndex: number,
-  targetRowIndex?: number,
-  isHorizontalDrop?: boolean
-) => {
+const moveWidget = ({
+  filteredWidgets,
+  columnWidths,
+  widgetId,
+  insertIndex,
+  targetRowIndex,
+  isHorizontalDrop,
+}: {
+  filteredWidgets: WidgetWithUID[];
+  columnWidths: Record<string, number>;
+  widgetId: string;
+  insertIndex: number;
+  targetRowIndex?: number;
+  isHorizontalDrop?: boolean;
+}) => {
   const widget = filteredWidgets.find((w) => w.uid === widgetId);
   if (!widget) return { newWidgets: filteredWidgets, newWidths: columnWidths };
 
@@ -168,14 +182,21 @@ const addWidget = (filteredWidgets: WidgetWithUID[], columnWidths: Record<string
   };
 };
 
-const handleWidgetResize = (
-  filteredWidgets: WidgetWithUID[],
-  columnWidths: Record<string, number>,
-  leftWidgetId: string,
-  rightWidgetId: string,
-  newLeftWidth: number,
-  newRightWidth: number
-) => {
+const handleWidgetResize = ({
+  filteredWidgets,
+  columnWidths,
+  leftWidgetId,
+  rightWidgetId,
+  newLeftWidth,
+  newRightWidth,
+}: {
+  filteredWidgets: WidgetWithUID[];
+  columnWidths: Record<string, number>;
+  leftWidgetId: string;
+  rightWidgetId: string;
+  newLeftWidth: number;
+  newRightWidth: number;
+}) => {
   // Check if widgets can be resized (adjacent, same row, valid sizes)
   if (!canResizeBetweenWidgets(leftWidgetId, rightWidgetId, columnWidths, filteredWidgets)) {
     return columnWidths;
@@ -218,26 +239,26 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     targetRowIndex?: number,
     isHorizontalDrop?: boolean
   ) => {
-    const result = moveWidget(
+    const result = moveWidget({
       filteredWidgets,
       columnWidths,
       widgetId,
       insertIndex,
       targetRowIndex,
-      isHorizontalDrop
-    );
+      isHorizontalDrop,
+    });
 
     setFilteredWidgets(result.newWidgets);
     setColumnWidths(result.newWidths);
 
-    saveLayout(
-      result.newWidgets,
-      result.newWidths,
+    saveLayout({
+      widgets: result.newWidgets,
+      widths: result.newWidths,
       updateHomepageLayout,
       toggleNotification,
       formatAPIError,
-      formatMessage
-    );
+      formatMessage,
+    });
   };
 
   const deleteWidgetFn = (widgetId: string) => {
@@ -247,14 +268,14 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     setFilteredWidgets(result.newWidgets);
     setColumnWidths(result.newWidths);
 
-    saveLayout(
-      result.newWidgets,
-      result.newWidths,
+    saveLayout({
+      widgets: result.newWidgets,
+      widths: result.newWidths,
       updateHomepageLayout,
       toggleNotification,
       formatAPIError,
-      formatMessage
-    );
+      formatMessage,
+    });
   };
 
   const addWidgetFn = (widget: WidgetWithUID) => {
@@ -264,14 +285,14 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     setFilteredWidgets(result.newWidgets);
     setColumnWidths(result.newWidths);
 
-    saveLayout(
-      result.newWidgets,
-      result.newWidths,
+    saveLayout({
+      widgets: result.newWidgets,
+      widths: result.newWidths,
       updateHomepageLayout,
       toggleNotification,
       formatAPIError,
-      formatMessage
-    );
+      formatMessage,
+    });
   };
 
   const handleWidgetResizeFn = (
@@ -280,14 +301,14 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     newLeftWidth: number,
     newRightWidth: number
   ) => {
-    const newWidths = handleWidgetResize(
+    const newWidths = handleWidgetResize({
       filteredWidgets,
       columnWidths,
       leftWidgetId,
       rightWidgetId,
       newLeftWidth,
-      newRightWidth
-    );
+      newRightWidth,
+    });
 
     setColumnWidths(newWidths);
   };
@@ -303,14 +324,14 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
   }, []);
 
   const saveLayoutFn = () => {
-    saveLayout(
-      filteredWidgets,
-      columnWidths,
+    saveLayout({
+      widgets: filteredWidgets,
+      widths: columnWidths,
       updateHomepageLayout,
       toggleNotification,
       formatAPIError,
-      formatMessage
-    );
+      formatMessage,
+    });
   };
 
   return {
