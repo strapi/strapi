@@ -150,10 +150,6 @@ const HomePageCE = () => {
     }
   }, [homepageLayout, allAvailableWidgets, setColumnWidths]);
 
-  const handleAddWidget = (widget: WidgetWithUID) => {
-    addWidget(widget);
-  };
-
   const widgetLayout = React.useMemo(() => {
     return filteredWidgets.map((widget, index) => {
       const rightWidgetId = filteredWidgets[index + 1]?.uid;
@@ -208,7 +204,7 @@ const HomePageCE = () => {
         <AddWidgetModal
           isOpen={isAddWidgetModalOpen}
           onClose={() => setIsAddWidgetModalOpen(false)}
-          onAddWidget={handleAddWidget}
+          onAddWidget={addWidget}
           currentWidgets={filteredWidgets}
           availableWidgets={allAvailableWidgets}
         />
@@ -284,24 +280,25 @@ const HomePageCE = () => {
         {/* Add the DragLayer to handle custom drag previews */}
         <DragLayer
           renderItem={({ type, item }) => {
-            if (type === 'widget') {
-              const widgetElement = getWidgetElement(item.id);
-              const maxWidth = `${widgetElement?.clientWidth}px`;
-
-              return (
-                <DragPreviewWrapper $maxWidth={maxWidth}>
-                  <WidgetRoot
-                    uid={item.id}
-                    title={item.title || { id: `${item.id}`, defaultMessage: item.id }}
-                    icon={item.icon}
-                    link={item.link}
-                  >
-                    <WidgetComponent component={item.component} columnWidth={item.columnWidth} />
-                  </WidgetRoot>
-                </DragPreviewWrapper>
-              );
+            if (type !== 'widget') {
+              return null;
             }
-            return null;
+
+            const widgetElement = getWidgetElement(item.id);
+            const maxWidth = `${widgetElement?.clientWidth}px`;
+
+            return (
+              <DragPreviewWrapper $maxWidth={maxWidth}>
+                <WidgetRoot
+                  uid={item.id}
+                  title={item.title || { id: `${item.id}`, defaultMessage: item.id }}
+                  icon={item.icon}
+                  link={item.link}
+                >
+                  <WidgetComponent component={item.component} columnWidth={item.columnWidth} />
+                </WidgetRoot>
+              </DragPreviewWrapper>
+            );
           }}
         />
       </Main>
