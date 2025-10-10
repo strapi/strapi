@@ -24,6 +24,36 @@ interface WidgetInfo {
   index: number;
 }
 
+interface BaseWidgetContext {
+  filteredWidgets: WidgetWithUID[];
+  columnWidths: Record<string, number>;
+}
+
+interface MoveWidgetOptions extends BaseWidgetContext {
+  widgetId: string;
+  insertIndex: number;
+  targetRowIndex?: number;
+  isHorizontalDrop?: boolean;
+}
+
+interface SaveLayoutOptions {
+  widgets: WidgetWithUID[];
+  widths: Record<string, number>;
+  updateHomepageLayout: (data: {
+    widgets: Array<{ uid: string; width: (typeof WIDGET_SIZING.DISCRETE_SIZES)[number] }>;
+  }) => Promise<any>;
+  toggleNotification: (config: { type: 'danger'; message: string }) => void;
+  formatAPIError: (error: any) => string;
+  formatMessage: (descriptor: { id: string; defaultMessage: string }) => string;
+}
+
+interface HandleWidgetResizeOptions extends BaseWidgetContext {
+  leftWidgetId: string;
+  rightWidgetId: string;
+  newLeftWidth: number;
+  newRightWidth: number;
+}
+
 /* -------------------------------------------------------------------------------------------------
  * Widget Management
  * -----------------------------------------------------------------------------------------------*/
@@ -49,16 +79,7 @@ const saveLayout = async ({
   toggleNotification,
   formatAPIError,
   formatMessage,
-}: {
-  widgets: WidgetWithUID[];
-  widths: Record<string, number>;
-  updateHomepageLayout: (data: {
-    widgets: Array<{ uid: string; width: (typeof WIDGET_SIZING.DISCRETE_SIZES)[number] }>;
-  }) => Promise<any>;
-  toggleNotification: (config: { type: 'danger'; message: string }) => void;
-  formatAPIError: (error: any) => string;
-  formatMessage: (descriptor: { id: string; defaultMessage: string }) => string;
-}) => {
+}: SaveLayoutOptions) => {
   try {
     const layoutData = {
       widgets: widgets.map((widget) => ({
@@ -91,14 +112,7 @@ const moveWidget = ({
   insertIndex,
   targetRowIndex,
   isHorizontalDrop,
-}: {
-  filteredWidgets: WidgetWithUID[];
-  columnWidths: Record<string, number>;
-  widgetId: string;
-  insertIndex: number;
-  targetRowIndex?: number;
-  isHorizontalDrop?: boolean;
-}) => {
+}: MoveWidgetOptions) => {
   const widget = filteredWidgets.find((w) => w.uid === widgetId);
   if (!widget) return { newWidgets: filteredWidgets, newWidths: columnWidths };
 
@@ -189,14 +203,7 @@ const handleWidgetResize = ({
   rightWidgetId,
   newLeftWidth,
   newRightWidth,
-}: {
-  filteredWidgets: WidgetWithUID[];
-  columnWidths: Record<string, number>;
-  leftWidgetId: string;
-  rightWidgetId: string;
-  newLeftWidth: number;
-  newRightWidth: number;
-}) => {
+}: HandleWidgetResizeOptions) => {
   // Check if widgets can be resized (adjacent, same row, valid sizes)
   if (!canResizeBetweenWidgets(leftWidgetId, rightWidgetId, columnWidths, filteredWidgets)) {
     return columnWidths;
