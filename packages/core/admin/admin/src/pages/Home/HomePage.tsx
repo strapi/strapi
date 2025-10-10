@@ -5,7 +5,7 @@ import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { DragLayer } from '../../components/DragLayer';
+import { DragLayer, isWidgetDragItem } from '../../components/DragLayer';
 import { GapDropZoneManager } from '../../components/GapDropZone';
 import { GuidedTourHomepageOverview } from '../../components/GuidedTour/Overview';
 import { Layouts } from '../../components/Layouts/Layout';
@@ -280,7 +280,7 @@ const HomePageCE = () => {
         {/* Add the DragLayer to handle custom drag previews */}
         <DragLayer
           renderItem={({ type, item }) => {
-            if (type !== 'widget') {
+            if (!isWidgetDragItem(item)) {
               return null;
             }
 
@@ -290,12 +290,12 @@ const HomePageCE = () => {
             return (
               <DragPreviewWrapper $maxWidth={maxWidth}>
                 <WidgetRoot
-                  uid={item.id}
+                  uid={item.id as WidgetWithUID['uid']}
                   title={item.title || { id: `${item.id}`, defaultMessage: item.id }}
                   icon={item.icon}
                   link={item.link}
                 >
-                  <WidgetComponent component={item.component} columnWidth={item.columnWidth} />
+                  <WidgetComponent component={item.component} columnWidth={4} />
                 </WidgetRoot>
               </DragPreviewWrapper>
             );
