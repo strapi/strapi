@@ -127,9 +127,7 @@ export const addVerticalDropZones = (
   );
 
   // Add drop zones between widgets
-  for (let i = 0; i < widgetCount - 1; i++) {
-    const currentWidget = widgetPositions[i];
-
+  widgetPositions.slice(0, -1).forEach((currentWidget, i) => {
     gapDropZones.push(
       createVerticalDropZone(
         row.startIndex + i + 1,
@@ -140,7 +138,7 @@ export const addVerticalDropZones = (
         rowIndex
       )
     );
-  }
+  });
 
   // Always add drop zone after the last widget
   const lastWidget = widgetPositions[widgetCount - 1];
