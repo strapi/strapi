@@ -31,6 +31,7 @@ export interface Strapi extends Container {
   telemetry: Modules.Metrics.TelemetryService;
   requestContext: Modules.RequestContext.RequestContext;
   customFields: Modules.CustomFields.CustomFields;
+  customBlocks: Modules.CustomBlocks.CustomBlocks;
   fetch: Modules.Fetch.Fetch;
   dirs: StrapiDirectories;
   admin: Core.Module;
