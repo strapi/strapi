@@ -10,13 +10,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.get('auth').register('admin', adminAuthStrategy);
   strapi.get('auth').register('content-api', apiTokenAuthStrategy);
 
-  // Prevent serving static admin panel in development mode when autoReload is enabled
-  // This fixes race conditions during server restarts that can cause MIME type conflicts
   const shouldServeAdminPanel = strapi.config.get('admin.serveAdminPanel');
-  const isAutoReloadEnabled = strapi.config.get('autoReload');
-  const isDevelopment = strapi.config.get('environment') === 'development';
 
-  if (shouldServeAdminPanel && !(isDevelopment && isAutoReloadEnabled)) {
+  if (shouldServeAdminPanel) {
     registerAdminPanelRoute({ strapi });
   }
 };

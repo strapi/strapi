@@ -24,12 +24,6 @@ export const useServerRestartWatcher = () => {
           }, 200);
         });
       }
-
-      // Add a small delay after restart completion to ensure middleware stabilization
-      // This prevents MIME type conflicts from race conditions during route registration
-      return new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
     } catch (err) {
       return new Promise((resolve) => {
         setTimeout(() => {
