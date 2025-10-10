@@ -18,11 +18,16 @@ import {
 import { useNotification } from './Notifications';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
+import type { WidgetType } from '@strapi/admin/strapi-admin';
 
-interface WidgetInfo {
-  widget: WidgetWithUID | undefined;
+export interface WidgetInfo {
+  widget: WidgetType | undefined;
   index: number;
 }
+
+export type FindWidgetFunction = (id: string) => WidgetInfo;
+export type WidgetIdFunction = (id: string) => void;
+export type DragEndFunction = () => void;
 
 interface BaseWidgetContext {
   filteredWidgets: WidgetWithUID[];
@@ -238,7 +243,8 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { formatMessage } = useIntl();
 
-  const findWidgetFn = (widgetId: string) => findWidget(filteredWidgets, widgetId);
+  const findWidgetFn: FindWidgetFunction = (widgetId: string) =>
+    findWidget(filteredWidgets, widgetId);
 
   const moveWidgetFn = (
     widgetId: string,
@@ -268,7 +274,7 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     });
   };
 
-  const deleteWidgetFn = (widgetId: string) => {
+  const deleteWidgetFn: WidgetIdFunction = (widgetId: string) => {
     const deleteWidgetOperation = deleteWidget(filteredWidgets, columnWidths);
     const result = deleteWidgetOperation(widgetId);
 
@@ -320,12 +326,12 @@ export const useWidgets = ({ filteredWidgets, setFilteredWidgets }: UseWidgetsOp
     setColumnWidths(newWidths);
   };
 
-  const handleDragStart = React.useCallback((widgetId: string) => {
+  const handleDragStart: WidgetIdFunction = React.useCallback((widgetId: string) => {
     setIsDraggingWidget(true);
     setDraggedWidgetId(widgetId);
   }, []);
 
-  const handleDragEnd = React.useCallback(() => {
+  const handleDragEnd: DragEndFunction = React.useCallback(() => {
     setIsDraggingWidget(false);
     setDraggedWidgetId(undefined);
   }, []);
