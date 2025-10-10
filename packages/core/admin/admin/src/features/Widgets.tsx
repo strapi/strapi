@@ -145,16 +145,16 @@ const moveWidget = ({
     if (isSameRowReorder) {
       // For same-row reordering, just preserve the existing widths
       return { newWidgets, newWidths };
-    } else {
-      // Different rows - resize both source and target rows
-      // Resize source row (after widget removal)
-      const sourceRowResize = resizeRowAfterRemoval(sourceRow, widgetId, newWidths);
-      Object.assign(newWidths, sourceRowResize);
-
-      // Resize target row (after widget addition)
-      const targetRowResize = resizeRowAfterAddition(targetRow, widget, insertIndex, newWidths);
-      Object.assign(newWidths, targetRowResize);
     }
+
+    // Different rows - resize both source and target rows
+    // Resize source row (after widget removal)
+    const sourceRowResize = resizeRowAfterRemoval(sourceRow, widgetId, newWidths);
+    Object.assign(newWidths, sourceRowResize);
+
+    // Resize target row (after widget addition)
+    const targetRowResize = resizeRowAfterAddition(targetRow, widget, insertIndex, newWidths);
+    Object.assign(newWidths, targetRowResize);
   }
 
   return { newWidgets, newWidths };
