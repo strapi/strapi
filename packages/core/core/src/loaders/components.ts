@@ -61,5 +61,5 @@ export default async function loadComponents(strapi: Core.Strapi) {
     return acc;
   }, {} as ComponentMap);
 
-  strapi.get('components').add(components);
+  strapi.get('components').add(components, { force: true });
 }

@@ -25,5 +25,6 @@ export default async function loadPolicies(strapi: Core.Strapi) {
     }
   }
 
-  strapi.get('policies').add(`global::`, policies);
+  strapi.log.debug(`loadPolicies: adding global policies: ${Object.keys(policies).join(', ')}`);
+  strapi.get('policies').add(`global::`, policies, { force: true });
 }
