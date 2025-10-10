@@ -57,35 +57,6 @@ const getRowInfo = (row: WidgetRow) => {
   };
 };
 
-export const createVerticalDropZone = (
-  insertIndex: number,
-  left: number,
-  top: number,
-  height: number,
-  width: number = DROP_ZONE_SIZE,
-  targetRowIndex?: number
-): GapDropZonePosition => ({
-  insertIndex,
-  position: { left, top, height, width },
-  isVisible: true, // Will be controlled by parent
-  type: 'vertical',
-  targetRowIndex,
-});
-
-export const createHorizontalDropZone = (
-  insertIndex: number,
-  left: number,
-  top: number,
-  height: number,
-  width: number = DROP_ZONE_SIZE
-): GapDropZonePosition => ({
-  insertIndex,
-  position: { left, top, height, width },
-  isVisible: true, // Will be controlled by parent
-  type: 'horizontal',
-  isHorizontalDrop: true,
-});
-
 export const addVerticalDropZones = (
   row: WidgetRow,
   rowInfo: ReturnType<typeof getRowInfo>,
@@ -115,43 +86,49 @@ export const addVerticalDropZones = (
   const gapDropZones: GapDropZonePosition[] = [];
 
   // Always add drop zone before the first widget
-  gapDropZones.push(
-    createVerticalDropZone(
-      row.startIndex,
-      widgetPositions[0].left - DROP_ZONE_SIZE,
-      rowTop,
-      rowHeight,
-      DROP_ZONE_SIZE,
-      rowIndex
-    )
-  );
+  gapDropZones.push({
+    insertIndex: row.startIndex,
+    position: {
+      left: widgetPositions[0].left - DROP_ZONE_SIZE,
+      top: rowTop,
+      height: rowHeight,
+      width: DROP_ZONE_SIZE,
+    },
+    isVisible: true,
+    type: 'vertical',
+    targetRowIndex: rowIndex,
+  });
 
   // Add drop zones between widgets
   widgetPositions.slice(0, -1).forEach((currentWidget, i) => {
-    gapDropZones.push(
-      createVerticalDropZone(
-        row.startIndex + i + 1,
-        currentWidget.left + currentWidget.width,
-        rowTop,
-        rowHeight,
-        DROP_ZONE_SIZE,
-        rowIndex
-      )
-    );
+    gapDropZones.push({
+      insertIndex: row.startIndex + i + 1,
+      position: {
+        left: currentWidget.left + currentWidget.width,
+        top: rowTop,
+        height: rowHeight,
+        width: DROP_ZONE_SIZE,
+      },
+      isVisible: true,
+      type: 'vertical',
+      targetRowIndex: rowIndex,
+    });
   });
 
   // Always add drop zone after the last widget
   const lastWidget = widgetPositions[widgetCount - 1];
-  gapDropZones.push(
-    createVerticalDropZone(
-      row.endIndex + 1,
-      lastWidget.left + lastWidget.width,
-      rowTop,
-      rowHeight,
-      DROP_ZONE_SIZE,
-      rowIndex
-    )
-  );
+  gapDropZones.push({
+    insertIndex: row.endIndex + 1,
+    position: {
+      left: lastWidget.left + lastWidget.width,
+      top: rowTop,
+      height: rowHeight,
+      width: DROP_ZONE_SIZE,
+    },
+    isVisible: true,
+    type: 'vertical',
+    targetRowIndex: rowIndex,
+  });
 
   return gapDropZones;
 };
@@ -179,15 +156,18 @@ export const addHorizontalDropZones = (
     const firstRowRect = rowInfo.firstRect;
     const firstRowTop = firstRowRect.top - containerRect.top;
 
-    gapDropZones.push(
-      createHorizontalDropZone(
-        0,
-        0,
-        firstRowTop - horizontalDropZoneHeight,
-        horizontalDropZoneHeight,
-        containerWidth
-      )
-    );
+    gapDropZones.push({
+      insertIndex: 0,
+      position: {
+        left: 0,
+        top: firstRowTop - horizontalDropZoneHeight,
+        height: horizontalDropZoneHeight,
+        width: containerWidth,
+      },
+      isVisible: true,
+      type: 'horizontal',
+      isHorizontalDrop: true,
+    });
   }
 
   // Add horizontal drop zone below the current row (between rows or after last row)
@@ -200,30 +180,36 @@ export const addHorizontalDropZones = (
       const nextRowRect = nextRowFirstWidgetElement.getBoundingClientRect();
       const nextRowTop = nextRowRect.top - containerRect.top;
 
-      gapDropZones.push(
-        createHorizontalDropZone(
-          row.endIndex + 1,
-          0,
-          nextRowTop - horizontalDropZoneHeight,
-          horizontalDropZoneHeight,
-          containerWidth
-        )
-      );
+      gapDropZones.push({
+        insertIndex: row.endIndex + 1,
+        position: {
+          left: 0,
+          top: nextRowTop - horizontalDropZoneHeight,
+          height: horizontalDropZoneHeight,
+          width: containerWidth,
+        },
+        isVisible: true,
+        type: 'horizontal',
+        isHorizontalDrop: true,
+      });
     }
   } else {
     // After the last row: position below the current row
     const lastRowRect = rowInfo.lastRect;
     const lastRowBottom = lastRowRect.bottom - containerRect.top;
 
-    gapDropZones.push(
-      createHorizontalDropZone(
-        filteredWidgets.length,
-        0,
-        lastRowBottom,
-        horizontalDropZoneHeight,
-        containerWidth
-      )
-    );
+    gapDropZones.push({
+      insertIndex: filteredWidgets.length,
+      position: {
+        left: 0,
+        top: lastRowBottom,
+        height: horizontalDropZoneHeight,
+        width: containerWidth,
+      },
+      isVisible: true,
+      type: 'horizontal',
+      isHorizontalDrop: true,
+    });
   }
 
   return gapDropZones;
