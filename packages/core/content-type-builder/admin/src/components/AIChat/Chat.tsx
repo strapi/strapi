@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { tours, useTracking, useGuidedTour } from '@strapi/admin/strapi-admin';
+import { tours, useTracking, useGuidedTour, useAppInfo } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system';
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
 import { styled } from 'styled-components';
@@ -20,6 +20,7 @@ import {
   CHAT_TOO_LONG_ERROR,
   LICENSE_LIMIT_REACHED_ERROR,
   TOO_MANY_REQUESTS_ERROR,
+  LICENSE_LIMIT_EXCEEDED_ERROR,
 } from './hooks/useAIFetch';
 import { useAttachments } from './hooks/useAttachments';
 import { useTranslations } from './hooks/useTranslations';
@@ -112,6 +113,10 @@ const ChatError = () => {
     'chat.messages.license-limit-reached',
     'License limit reached, please try again tomorrow.'
   );
+  const licenseLimitExceededMessage = t(
+    'chat.messages.license-limit-exceeded',
+    'AI credit limit exceeded.'
+  );
   const chatTooLongError = t(
     'chat.messages.too-long-error',
     'This conversation reached its maximum length. Start a new conversation'
@@ -120,12 +125,20 @@ const ChatError = () => {
   if (!error) return null;
 
   const errorMessage = getErrorMessage(error);
+  if (!errorMessage || typeof errorMessage !== 'string') {
+    return null;
+  }
+
   if (errorMessage === TOO_MANY_REQUESTS_ERROR) {
     return <Alert title={tooManyRequestsMessage} variant="warning" />;
   }
 
   if (errorMessage === LICENSE_LIMIT_REACHED_ERROR) {
     return <Alert title={licenseLimitReachedMessage} variant="warning" />;
+  }
+
+  if (errorMessage.split('.')[0] === LICENSE_LIMIT_EXCEEDED_ERROR) {
+    return <Alert title={licenseLimitExceededMessage} variant="danger" />;
   }
 
   if (errorMessage === CHAT_TOO_LONG_ERROR) {
@@ -351,6 +364,10 @@ const Chat = () => {
   const { attachFiles } = useAttachments();
   const { t } = useTranslations();
   const state = useGuidedTour('Chat', (s) => s.state);
+  const currentEnvironment = useAppInfo('Chat', (state) => state.currentEnvironment);
+
+  // Disable AI Chat in production mode
+  const isProduction = currentEnvironment === 'production';
 
   // Auto-open chat when AIChat guided tour step is active
   useEffect(() => {
@@ -380,7 +397,8 @@ const Chat = () => {
     'Strapi AI can make mistakes.'
   );
 
-  if (!isChatEnabled) {
+  // Don't render the chat at all in production mode or if chat is not enabled
+  if (!isChatEnabled || isProduction) {
     return null;
   }
 

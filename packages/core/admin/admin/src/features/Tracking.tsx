@@ -3,6 +3,7 @@ import * as React from 'react';
 import axios, { AxiosResponse } from 'axios';
 
 import { Tours } from '../components/GuidedTour/Tours';
+import { useDeviceType } from '../hooks/useDeviceType';
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
@@ -531,6 +532,7 @@ export interface UseTrackingReturn {
  * ```
  */
 const useTracking = (): UseTrackingReturn => {
+  const deviceType = useDeviceType();
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
@@ -546,7 +548,9 @@ const useTracking = (): UseTrackingReturn => {
               event,
               userId,
               eventProperties: { ...properties },
-              userProperties: {},
+              userProperties: {
+                deviceType,
+              },
               groupProperties: {
                 ...telemetryProperties,
                 projectId: uuid,
