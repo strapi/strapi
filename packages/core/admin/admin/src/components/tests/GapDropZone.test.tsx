@@ -1,10 +1,4 @@
-import {
-  addVerticalDropZones,
-  addHorizontalDropZones,
-  createVerticalDropZone,
-  createHorizontalDropZone,
-  DROP_ZONE_SIZE,
-} from '../GapDropZone';
+import { addVerticalDropZones, addHorizontalDropZones, DROP_ZONE_SIZE } from '../GapDropZone';
 
 import type { WidgetWithUID } from '../../core/apis/Widgets';
 import type { WidgetRow } from '../../utils/widgetLayout';
@@ -40,7 +34,7 @@ const mockElement = {
     bottom: 300,
     right: 150,
   }),
-} as unknown as Element;
+} as unknown as HTMLElement;
 
 const mockRowInfo = {
   firstWidgetElement: mockElement,
@@ -82,46 +76,6 @@ const mockRowInfo = {
   rowHeight: 200,
   rowTop: 100,
 };
-
-describe('createVerticalDropZone', () => {
-  it('should create a vertical drop zone with correct properties', () => {
-    const dropZone = createVerticalDropZone(0, 10, 20, 30, 40, 1);
-
-    expect(dropZone).toEqual({
-      insertIndex: 0,
-      position: { left: 10, top: 20, height: 30, width: 40 },
-      isVisible: true,
-      type: 'vertical',
-      targetRowIndex: 1,
-    });
-  });
-
-  it('should use default width when not provided', () => {
-    const dropZone = createVerticalDropZone(0, 10, 20, 30);
-
-    expect(dropZone.position.width).toBe(DROP_ZONE_SIZE);
-  });
-});
-
-describe('createHorizontalDropZone', () => {
-  it('should create a horizontal drop zone with correct properties', () => {
-    const dropZone = createHorizontalDropZone(0, 10, 20, 30, 40);
-
-    expect(dropZone).toEqual({
-      insertIndex: 0,
-      position: { left: 10, top: 20, height: 30, width: 40 },
-      isVisible: true,
-      type: 'horizontal',
-      isHorizontalDrop: true,
-    });
-  });
-
-  it('should use default width when not provided', () => {
-    const dropZone = createHorizontalDropZone(0, 10, 20, 30);
-
-    expect(dropZone.position.width).toBe(DROP_ZONE_SIZE);
-  });
-});
 
 describe('addVerticalDropZones', () => {
   it('should return empty array when rowInfo is null', () => {
