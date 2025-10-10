@@ -1,10 +1,7 @@
 # strapi-utils
 
-[![npm version](https://img.shields.io/npm/v/strapi-utils.svg)](https://www.npmjs.org/package/strapi-utils)
-[![npm downloads](https://img.shields.io/npm/dm/strapi-utils.svg)](https://www.npmjs.org/package/strapi-utils)
-[![npm dependencies](https://david-dm.org/strapi/strapi-utils.svg)](https://david-dm.org/strapi/strapi-utils)
-[![Build status](https://travis-ci.org/strapi/strapi-utils.svg?branch=master)](https://travis-ci.org/strapi/strapi-utils)
-[![Slack status](https://slack.strapi.io/badge.svg)](https://slack.strapi.io)
+[![npm version](https://img.shields.io/npm/v/@strapi/utils.svg)](https://www.npmjs.org/package/@strapi/utils)
+[![npm downloads](https://img.shields.io/npm/dm/@strapi/utils.svg)](https://www.npmjs.org/package/@strapi/utils)
 
 Shared utilities between Strapi packages.
 

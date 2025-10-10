@@ -26,12 +26,14 @@ npm install @strapi/provider-email-mailgun --save
 | Variable                | Type                    | Description                                                                                                                        | Required | Default   |
 | ----------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
 | provider                | string                  | The name of the provider you use                                                                                                   | yes      |           |
-| providerOptions         | object                  | Will be directly given to the `require('mailgun-js')`. Please refer to [mailgun-js](https://www.npmjs.com/package/mailgun-js) doc. | yes      |           |
+| providerOptions         | object                  | Will be directly given to the `require('mailgun.js')`. Please refer to [mailgun.js](https://www.npmjs.com/package/mailgun.js) doc. | yes      |           |
 | settings                | object                  | Settings                                                                                                                           | no       | {}        |
 | settings.defaultFrom    | string                  | Default sender mail address                                                                                                        | no       | undefined |
 | settings.defaultReplyTo | string \| array<string> | Default address or addresses the receiver is asked to reply to                                                                     | no       | undefined |
 
 > :warning: The Shipper Email (or defaultfrom) may also need to be changed in the `Email Templates` tab on the admin panel for emails to send properly
+
+Since [mailgun-js](https://www.npmjs.com/package/mailgun-js) has been deprecated, this package now uses `mailgun.js` instead. In an effort to avoid breaking changes methods were added to convert existing configuration objects to work with the new package.
 
 ### Example
 
@@ -44,9 +46,9 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'mailgun',
       providerOptions: {
-        apiKey: env('MAILGUN_API_KEY'),
-        domain: env('MAILGUN_DOMAIN'), //Required if you have an account with multiple domains
-        host: env('MAILGUN_HOST', 'api.mailgun.net'), //Optional. If domain region is Europe use 'api.eu.mailgun.net'
+        key: env('MAILGUN_API_KEY'), // Required
+        domain: env('MAILGUN_DOMAIN'), // Required
+        url: env('MAILGUN_URL', 'https://api.mailgun.net'), //Optional. If domain region is Europe use 'https://api.eu.mailgun.net'
       },
       settings: {
         defaultFrom: 'myemail@protonmail.com',

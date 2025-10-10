@@ -1,4 +1,5 @@
 {
+  "kind": "collectionType",
   "collectionName": "reviews",
   "info": {
     "displayName": "Review",
@@ -7,8 +8,8 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": false,
-    "comment": ""
+    "comment": "",
+    "draftAndPublish": false
   },
   "attributes": {
     "comment": {

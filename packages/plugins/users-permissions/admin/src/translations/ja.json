@@ -13,7 +13,6 @@
   "HeaderNav.link.advancedSettings": "高度な設定",
   "HeaderNav.link.emailTemplates": "メールテンプレート",
   "HeaderNav.link.providers": "プロバイダー",
-  "HeaderNav.link.roles": "ロールと権限",
   "Plugin.permissions.plugins.description": "{name} 個のプラグインに対して許可されたすべてのアクションを定義する",
   "Plugins.header.description": "ルートにバインドされたアクションのみが以下にリストされています",
   "Plugins.header.title": "権限",

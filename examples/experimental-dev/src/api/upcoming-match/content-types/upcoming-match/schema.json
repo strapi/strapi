@@ -1,0 +1,24 @@
+{
+  "kind": "singleType",
+  "collectionName": "upcoming_matches",
+  "info": {
+    "singularName": "upcoming-match",
+    "pluralName": "upcoming-matches",
+    "displayName": "Upcoming Matches"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "number_of_upcoming_matches": {
+      "type": "integer"
+    },
+    "next_match": {
+      "type": "date"
+    }
+  }
+}

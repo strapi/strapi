@@ -10,6 +10,7 @@ const typesFactories = [
   require('./create-role-payload'),
   require('./update-role-payload'),
   require('./delete-role-payload'),
+  require('./user-input'),
 ];
 
 /**
@@ -18,4 +19,4 @@ const typesFactories = [
  * @param {object} context.strapi
  * @return {any[]}
  */
-module.exports = context => typesFactories.map(factory => factory(context));
+module.exports = (context) => typesFactories.map((factory) => factory(context));

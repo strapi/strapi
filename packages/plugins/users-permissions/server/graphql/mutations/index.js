@@ -3,7 +3,7 @@
 const userUID = 'plugin::users-permissions.user';
 const roleUID = 'plugin::users-permissions.role';
 
-module.exports = context => {
+module.exports = (context) => {
   const { nexus, strapi } = context;
 
   const { naming } = strapi.plugin('graphql').service('utils');
@@ -25,6 +25,7 @@ module.exports = context => {
     register: require('./auth/register'),
     forgotPassword: require('./auth/forgot-password'),
     resetPassword: require('./auth/reset-password'),
+    changePassword: require('./auth/change-password'),
     emailConfirmation: require('./auth/email-confirmation'),
   };
 

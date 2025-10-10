@@ -26,10 +26,7 @@ module.exports = ({ nexus, strapi }) => {
 
       koaContext.request.body = toPlainObject(args.data);
 
-      await strapi
-        .plugin('users-permissions')
-        .controller('role')
-        .createRole(koaContext);
+      await strapi.plugin('users-permissions').controller('role').createRole(koaContext);
 
       return { ok: true };
     },

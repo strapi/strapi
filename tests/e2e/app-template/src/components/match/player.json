@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_match_player",
+  "info": {
+    "displayName": "Player",
+    "icon": "moon"
+  },
+  "options": {},
+  "attributes": {
+    "full_name": {
+      "type": "string",
+      "required": true,
+      "regex": "^(?!.*nate).*"
+    },
+    "position": {
+      "type": "string",
+      "required": false
+    }
+  }
+}

@@ -17,7 +17,7 @@ module.exports = {
 
     const emailTemplates = ctx.request.body['email-templates'];
 
-    for (let key in emailTemplates) {
+    for (const key of Object.keys(emailTemplates)) {
       const template = emailTemplates[key].options.message;
 
       if (!isValidEmailTemplate(template)) {
@@ -37,7 +37,7 @@ module.exports = {
       .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
-    const roles = await getService('role').getRoles();
+    const roles = await getService('role').find();
 
     ctx.send({ settings, roles });
   },

@@ -1,0 +1,255 @@
+---
+title: CheatSheet
+tags:
+  - typescript
+  - type system
+  - type
+  - cheatsheet
+toc_max_heading_level: 3
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import Admonition from '@theme/Admonition';
+
+### Common Use Cases
+
+---
+
+#### Function that Returns Any Entity
+
+```typescript
+import type { Data } from '@strapi/types';
+
+function find(): Data.Entity {}
+```
+
+---
+
+#### Using UIDs as Resource Selectors in Function Params
+
+<Tabs>
+
+<TabItem value='dynamic' label='Dynamic'>
+
+:::info
+Infer the UID type based on usage and allow passing it to other generic types.
+:::
+
+```typescript
+import type { Schema, UID } from '@strapi/types';
+
+function getSchema<TSchemaUID extends UID.Schema>(uid: TSchemaUID): Schema.Schema<TSchemaUID> {}
+```
+
+</TabItem>
+
+<TabItem value='static' label='Static'>
+
+:::info
+Simpler definition than the dynamic one.
+Useful when the uid type doesn't need to be re-used by other type.
+:::
+
+```typescript
+import type { Schema, UID } from '@strapi/types';
+
+function getSchema(uid: UID.Schema): Schema.Schema {}
+```
+
+</TabItem>
+
+</Tabs>
+
+---
+
+#### Loop Over Schema Attributes
+
+Given a schema such as:
+
+```typescript
+import type { Schema } from '@strapi/types';
+
+declare const schema: Schema.Schema;
+```
+
+Extract its attributes
+
+```typescript
+const { attributes } = schema;
+```
+
+Then loop over them, using `attribute.type` as a discriminator to infer the correct type for each attribute type.
+
+```typescript
+for (const attributeName in attributes) {
+  // attribute is Schema.Attribute.AnyAttribute
+  const attribute = attributes[attributeName];
+
+  switch (attribute.type) {
+    case 'string':
+      // attribute is Schema.Attribute.String
+      console.log(attribute.minLength, attribute.maxLength);
+      break;
+    case 'relation':
+      // attribute is Schema.Attribute.Relation
+      console.log(attribute.relation);
+      break;
+  }
+}
+```
+
+---
+
+#### Type Guard
+
+```typescript
+import type { Schema } from '@strapi/types';
+
+function isContentTypeSchema(schema: Schema.Schema): schema is Schema.ContentType {
+  return schema.modelType === 'contentType';
+}
+```
+
+---
+
+#### Assertion Function
+
+```typescript
+import type { Schema } from '@strapi/types';
+
+function assertIsContentTypeSchema(schema: Schema.Schema): asserts schema is Schema.ContentType {
+  if (schema.modelType !== 'contentType') {
+    throw new Error('schema is not a content-type');
+  }
+}
+```
+
+---
+
+### Data
+
+```typescript
+import type { Data } from '@strapi/types';
+```
+
+<Tabs>
+  <TabItem value="entity" label="Data.Entity">
+    #### Represent any entity
+
+    ```typescript
+    type Entity = Data.Entity;
+    ```
+
+    #### Represent a specific content-type entity
+
+    ```typescript
+    type Article = Data.Entity<'api::article.article'>;
+    ```
+
+    #### Represent a specific component entity
+
+    ```typescript
+    type Metadata = Data.Entity<'seo.metadata'>;
+    ```
+
+    #### Represent any content-type
+
+    ```typescript
+    type Entity = Data.Entity<UID.ContentType>;
+    ```
+
+    #### Only select a subset of an entity
+
+    ```typescript
+    type PartialArticle = Data.Entity<'api::article.article', 'title' | 'description' | 'author'>;
+    ```
+
+  </TabItem>
+  <TabItem value="contenttype" label="Data.ContentType">
+    #### Represent any content-type entity
+
+    ```typescript
+    type ContentTypeEntity = Data.ContentType;
+    ```
+
+    #### Represent a specific content-type entity
+
+    ```typescript
+    type Article = Data.ContentType<'api::article.article'>;
+    ```
+
+    #### Only select a subset of a content-type entity
+
+    ```typescript
+    type PartialArticle = Data.ContentType<'api::article.article', 'title' | 'description' | 'author'>;
+    ```
+
+  </TabItem>
+  <TabItem value="component" label="Data.Component">
+    #### Represent any component entity
+
+    ```typescript
+    type ComponentEntity = Data.Component;
+    ```
+
+    #### Represent a specific component entity
+
+    ```typescript
+    type Metadata = Data.Component<'seo.metadata'>;
+    ```
+
+    #### Only select a subset of a component entity
+
+    ```typescript
+    type PartialMetadata = Data.Component<'seo.metadata', 'description' | 'tags'>;
+    ```
+
+  </TabItem>
+</Tabs>
+
+---
+
+### UID
+
+```typescript
+import type { UID } from '@strapi/types';
+```
+
+#### Represent any schema UID
+
+```typescript
+type SchemaUID = UID.Schema;
+```
+
+#### Represent a specific content-type UID
+
+```typescript
+const articleUID = 'api::article.article' satisfies UID.ContentType;
+```
+
+#### Represent a specific component entity
+
+```typescript
+const metadataUID = 'seo.metadata' satisfies UID.Component;
+```
+
+#### Represent any content-type
+
+```typescript
+type ContentTypeUID = UID.ContentType;
+```
+
+```typescript
+declare const contentTypeUID: UID.ContentType;
+```
+
+#### Check if a given UID is a ContentType UID
+
+```typescript
+type IsContentType = UID.IsContentType<'api::article.article'>;
+```
+
+:::note
+`IsContentType` will either be `true` or `false`.
+:::

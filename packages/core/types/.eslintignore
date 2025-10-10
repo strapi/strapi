@@ -1,0 +1,6 @@
+node_modules/
+.eslintrc.js
+dist/
+jest.config.js
+index.js
+rollup.config.mjs

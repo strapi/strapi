@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Content types service format ContentType Returns consistent schemas 1`] = `
+{
+  "apiID": "my-name",
+  "plugin": "some-plugin",
+  "schema": {
+    "attributes": {
+      "title": {
+        "type": "string",
+      },
+    },
+    "collectionName": "tests",
+    "description": "My description",
+    "displayName": "My name",
+    "draftAndPublish": false,
+    "kind": "singleType",
+    "pluginOptions": {
+      "content-manager": {
+        "visible": true,
+      },
+    },
+    "pluralName": "my-names",
+    "restrictRelationsTo": null,
+    "singularName": "my-name",
+    "visible": true,
+  },
+  "uid": "test-uid",
+}
+`;

@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Content Type Builder - Content types Single Types Get single type returns full schema and information 1`] = `
+{
+  "data": {
+    "apiID": "test-single-type",
+    "schema": {
+      "attributes": {
+        "title": {
+          "pluginOptions": {
+            "i18n": {
+              "localized": true,
+            },
+          },
+          "type": "string",
+        },
+      },
+      "collectionName": "test_single_types",
+      "description": "",
+      "displayName": "Test Single Type",
+      "draftAndPublish": false,
+      "kind": "singleType",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true,
+        },
+      },
+      "pluralName": "test-single-types",
+      "restrictRelationsTo": null,
+      "singularName": "test-single-type",
+      "visible": true,
+    },
+    "uid": "api::test-single-type.test-single-type",
+  },
+}
+`;

@@ -1,4 +1,4 @@
-import produce from 'immer';
+import { produce } from 'immer';
 
 const initialState = {
   collapses: [],
@@ -6,7 +6,7 @@ const initialState = {
 
 const reducer = (state, action) =>
   // eslint-disable-next-line consistent-return
-  produce(state, draftState => {
+  produce(state, (draftState) => {
     switch (action.type) {
       case 'TOGGLE_COLLAPSE': {
         draftState.collapses = state.collapses.map((collapse, index) => {

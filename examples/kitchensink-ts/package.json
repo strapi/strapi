@@ -1,0 +1,32 @@
+{
+  "name": "kitchensink-ts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A Strapi application",
+  "license": "MIT",
+  "author": {
+    "name": "A Strapi developer"
+  },
+  "scripts": {
+    "build": "strapi build",
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "strapi": "strapi"
+  },
+  "dependencies": {
+    "@strapi/plugin-users-permissions": "workspace:*",
+    "@strapi/strapi": "workspace:*",
+    "better-sqlite3": "11.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "getstarted"
+  }
+}

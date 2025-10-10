@@ -2,12 +2,7 @@
 
 const _ = require('lodash');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const {
-  ApplicationError,
-  ValidationError,
-  NotFoundError,
-  ForbiddenError,
-} = require('@strapi/utils').errors;
+const { ApplicationError, NotFoundError, ForbiddenError } = require('@strapi/utils').errors;
 const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
@@ -21,24 +16,25 @@ const ACTIONS = {
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
-  const entity = await strapi.query(userModel).findOne({
-    where: { id },
+  const doc = await strapi.service('plugin::content-manager.document-manager').findOne(id, model, {
     populate: [`${CREATED_BY_ATTRIBUTE}.roles`],
   });
 
-  if (_.isNil(entity)) {
+  if (_.isNil(doc)) {
     throw new NotFoundError();
   }
 
-  const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
+  const pm = strapi
+    .service('admin::permission')
+    .createPermissionsManager({ ability, action, model });
 
-  if (pm.ability.cannot(pm.action, pm.toSubject(entity))) {
+  if (pm.ability.cannot(pm.action, pm.toSubject(doc))) {
     throw new ForbiddenError();
   }
 
-  const entityWithoutCreatorRoles = _.omit(entity, `${CREATED_BY_ATTRIBUTE}.roles`);
+  const docWithoutCreatorRoles = _.omit(doc, `${CREATED_BY_ATTRIBUTE}.roles`);
 
-  return { pm, entity: entityWithoutCreatorRoles };
+  return { pm, doc: docWithoutCreatorRoles };
 };
 
 module.exports = {
@@ -52,7 +48,7 @@ module.exports = {
 
     const { email, username } = body;
 
-    const pm = strapi.admin.services.permission.createPermissionsManager({
+    const pm = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
       action: ACTIONS.create,
       model: userModel,
@@ -70,7 +66,7 @@ module.exports = {
 
     await validateCreateUserBody(ctx.request.body);
 
-    const userWithSameUsername = await strapi
+    const userWithSameUsername = await strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { username } });
 
@@ -79,7 +75,7 @@ module.exports = {
     }
 
     if (advanced.unique_email) {
-      const userWithSameEmail = await strapi
+      const userWithSameEmail = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: email.toLowerCase() } });
 
@@ -97,18 +93,11 @@ module.exports = {
 
     user.email = _.toLower(user.email);
 
-    if (!user.role) {
-      const defaultRole = await strapi
-        .query('plugin::users-permissions.role')
-        .findOne({ where: { type: advanced.default_role } });
-
-      user.role = defaultRole.id;
-    }
-
     try {
       const data = await strapi
-        .service('plugin::content-manager.entity-manager')
-        .create(user, userModel);
+        .service('plugin::content-manager.document-manager')
+        .create(userModel, { data: user });
+
       const sanitizedData = await pm.sanitizeOutput(data, { action: ACTIONS.read });
 
       ctx.created(sanitizedData);
@@ -122,7 +111,7 @@ module.exports = {
    */
 
   async update(ctx) {
-    const { id } = ctx.params;
+    const { id: documentId } = ctx.params;
     const { body } = ctx.request;
     const { user: admin, userAbility } = ctx.state;
 
@@ -132,42 +121,40 @@ module.exports = {
 
     const { email, username, password } = body;
 
-    let pm;
-    let user;
-
-    const { pm: permissionManager, entity } = await findEntityAndCheckPermissions(
+    const { pm, doc } = await findEntityAndCheckPermissions(
       userAbility,
       ACTIONS.edit,
       userModel,
-      id
+      documentId
     );
-    pm = permissionManager;
-    user = entity;
+
+    const user = doc;
 
     await validateUpdateUserBody(ctx.request.body);
 
-    if (_.has(body, 'password') && !password && user.provider === 'local') {
-      throw new ValidationError('password.notNull');
+    if (_.has(body, 'password') && (password == null || password === '')) {
+      delete body.password;
     }
 
     if (_.has(body, 'username')) {
-      const userWithSameUsername = await strapi
+      const userWithSameUsername = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { username } });
 
-      if (userWithSameUsername && userWithSameUsername.id != id) {
+      if (userWithSameUsername && _.toString(userWithSameUsername.id) !== _.toString(user.id)) {
         throw new ApplicationError('Username already taken');
       }
     }
 
     if (_.has(body, 'email') && advancedConfigs.unique_email) {
-      const userWithSameEmail = await strapi
+      const userWithSameEmail = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: _.toLower(email) } });
 
-      if (userWithSameEmail && userWithSameEmail.id != id) {
+      if (userWithSameEmail && _.toString(userWithSameEmail.id) !== _.toString(user.id)) {
         throw new ApplicationError('Email already taken');
       }
+
       body.email = _.toLower(body.email);
     }
 
@@ -175,8 +162,10 @@ module.exports = {
     const updateData = _.omit({ ...sanitizedData, updatedBy: admin.id }, 'createdBy');
 
     const data = await strapi
-      .service('plugin::content-manager.entity-manager')
-      .update({ id }, updateData, userModel);
+      .service('plugin::content-manager.document-manager')
+      .update(documentId, userModel, {
+        data: updateData,
+      });
 
     ctx.body = await pm.sanitizeOutput(data, { action: ACTIONS.read });
   },

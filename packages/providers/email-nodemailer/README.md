@@ -60,11 +60,13 @@ You can override the default configurations for specific environments. E.g. for
 ```js
 module.exports = ({ env }) => ({
   email: {
-    provider: 'nodemailer',
-    providerOptions: {
-      host: 'localhost',
-      port: 1025,
-      ignoreTLS: true,
+    config: {
+      provider: 'nodemailer',
+      providerOptions: {
+        host: 'localhost',
+        port: 1025,
+        ignoreTLS: true,
+      },
     },
   },
 });
@@ -83,23 +85,25 @@ const nodemailerNTLMAuth = require('nodemailer-ntlm-auth');
 
 module.exports = ({ env }) => ({
   email: {
-    provider: 'nodemailer',
-    providerOptions: {
-      host: env('SMTP_HOST', 'smtp.example.com'),
-      port: env('SMTP_PORT', 587),
-      auth: {
-        type: 'custom',
-        method: 'NTLM',
-        user: env('SMTP_USERNAME'),
-        pass: env('SMTP_PASSWORD'),
+    config: {
+      provider: 'nodemailer',
+      providerOptions: {
+        host: env('SMTP_HOST', 'smtp.example.com'),
+        port: env('SMTP_PORT', 587),
+        auth: {
+          type: 'custom',
+          method: 'NTLM',
+          user: env('SMTP_USERNAME'),
+          pass: env('SMTP_PASSWORD'),
+        },
+        customAuth: {
+          NTLM: nodemailerNTLMAuth,
+        },
       },
-      customAuth: {
-        NTLM: nodemailerNTLMAuth,
+      settings: {
+        defaultFrom: 'hello@example.com',
+        defaultReplyTo: 'hello@example.com',
       },
-    },
-    settings: {
-      defaultFrom: 'hello@example.com',
-      defaultReplyTo: 'hello@example.com',
     },
   },
 });
@@ -112,16 +116,13 @@ module.exports = ({ env }) => ({
 To send an email from anywhere inside Strapi:
 
 ```js
-await strapi
-  .plugin('email')
-  .service('email')
-  .send({
-    to: 'someone@example.com',
-    from: 'someone2@example.com',
-    subject: 'Hello world',
-    text: 'Hello world',
-    html: `<h4>Hello world</h4>`,
-  });
+await strapi.plugin('email').service('email').send({
+  to: 'someone@example.com',
+  from: 'someone2@example.com',
+  subject: 'Hello world',
+  text: 'Hello world',
+  html: `<h4>Hello world</h4>`,
+});
 ```
 
 The following fields are supported:

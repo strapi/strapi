@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BulkDeleteButton renders 1`] = `
+.c0 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c1 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c3 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c4 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c5 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c2 {
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #f5c0b8;
+  background: #fcecea;
+  color: #b72b1a;
+}
+
+.c2:hover {
+  background-color: #ffffff;
+}
+
+.c2:active {
+  background-color: #ffffff;
+  border: 1px solid #d02b20;
+  color: #d02b20;
+}
+
+.c2[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c2 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+<div>
+  <button
+    aria-controls="radix-:r0:"
+    aria-disabled="false"
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    class="c0 c1 c2"
+    data-state="closed"
+    type="button"
+  >
+    <span
+      aria-hidden="true"
+      class="c3"
+    >
+      <svg
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
+        />
+      </svg>
+    </span>
+    <span
+      class="c4"
+    >
+      Delete
+    </span>
+  </button>
+  <span
+    class="c5"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

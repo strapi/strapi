@@ -15,7 +15,6 @@
   "HeaderNav.link.advancedSettings": "Pokročilé nastavenia",
   "HeaderNav.link.emailTemplates": "Šablóny emailov",
   "HeaderNav.link.providers": "Poskytovatelia",
-  "HeaderNav.link.roles": "Roly a oprávnenia",
   "Plugin.permissions.plugins.description": "Zvoľte akcie, ktoré majú byť povolené pre plugin {name}.",
   "Plugins.header.description": "Zobrazujú sa iba akcie naviazané na URL endpoint.",
   "Plugins.header.title": "Oprávnenia",

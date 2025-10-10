@@ -1,1 +1,22 @@
-{}
+{
+  "Settings.email.plugin.button.test-email": "Wyślij testowy email",
+  "Settings.email.plugin.label.defaultFrom": "Domyślny nadawca",
+  "Settings.email.plugin.label.defaultReplyTo": "Domyślny obiorca",
+  "Settings.email.plugin.label.provider": "Dostawca",
+  "Settings.email.plugin.label.testAddress": "Odbiorca",
+  "Settings.email.plugin.notification.config.error": "Nie udało się uzyskać konfiguracji email",
+  "Settings.email.plugin.notification.data.loaded": "Dane dotyczące ustawień email zostały załadowane",
+  "Settings.email.plugin.notification.test.error": "Nie udało się wysłać testowego maila do {to}",
+  "Settings.email.plugin.notification.test.success": "Testowy email wysłany, sprawdź skrzynkę: {to}",
+  "Settings.email.plugin.placeholder.defaultFrom": "np: Strapi No-Reply <no-reply@strapi.io>",
+  "Settings.email.plugin.placeholder.defaultReplyTo": "np: Strapi <example@strapi.io>",
+  "Settings.email.plugin.placeholder.testAddress": "np: developer@example.com",
+  "Settings.email.plugin.subTitle": "Sprawdź ustawienia dla testowego maila",
+  "Settings.email.plugin.text.configuration": "Ten plugin jest skonfigurowany w pliku {file}, sprawdź {link} do dokumentacji.",
+  "Settings.email.plugin.title": "Ustawienia",
+  "Settings.email.plugin.title.config": "Ustawienia",
+  "Settings.email.plugin.title.test": "Przetestuj dostarczanie maila",
+  "SettingsNav.link.settings": "Ustawienia",
+  "SettingsNav.section-label": "Plugin e-mail",
+  "components.Input.error.validation.email": "Ten email jest niepoprawny."
+}

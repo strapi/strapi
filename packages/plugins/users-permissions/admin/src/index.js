@@ -1,23 +1,17 @@
-// NOTE TO PLUGINS DEVELOPERS:
-// If you modify this file by adding new options to the plugin entry point
-// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-field-api.md
-// Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
-// Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
-// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
-import pluginPkg from '../../package.json';
-import pluginPermissions from './permissions';
-import pluginId from './pluginId';
-import getTrad from './utils/getTrad';
+import { strapi as pkgStrapi } from '../../package.json';
 
-const name = pluginPkg.strapi.name;
+import { PERMISSIONS } from './constants';
+import getTrad from './utils/getTrad';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
+
+const name = pkgStrapi.name;
 
 export default {
   register(app) {
     // Create the plugin's settings section
     app.createSettingSection(
       {
-        id: pluginId,
+        id: 'users-permissions',
         intlLabel: {
           id: getTrad('Settings.section-label'),
           defaultMessage: 'Users & Permissions plugin',
@@ -26,19 +20,13 @@ export default {
       [
         {
           intlLabel: {
-            id: getTrad('HeaderNav.link.roles'),
+            id: 'global.roles',
             defaultMessage: 'Roles',
           },
           id: 'roles',
-          to: `/settings/${pluginId}/roles`,
-          Component: async () => {
-            const component = await import(
-              /* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'
-            );
-
-            return component;
-          },
-          permissions: pluginPermissions.accessRoles,
+          to: `users-permissions/roles`,
+          Component: () => import('./pages/Roles'),
+          permissions: PERMISSIONS.accessRoles,
         },
         {
           intlLabel: {
@@ -46,15 +34,9 @@ export default {
             defaultMessage: 'Providers',
           },
           id: 'providers',
-          to: `/settings/${pluginId}/providers`,
-          Component: async () => {
-            const component = await import(
-              /* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'
-            );
-
-            return component;
-          },
-          permissions: pluginPermissions.readProviders,
+          to: `users-permissions/providers`,
+          Component: () => import('./pages/Providers'),
+          permissions: PERMISSIONS.readProviders,
         },
         {
           intlLabel: {
@@ -62,15 +44,12 @@ export default {
             defaultMessage: 'Email templates',
           },
           id: 'email-templates',
-          to: `/settings/${pluginId}/email-templates`,
-          Component: async () => {
-            const component = await import(
-              /* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'
-            );
-
-            return component;
-          },
-          permissions: pluginPermissions.readEmailTemplates,
+          to: `users-permissions/email-templates`,
+          Component: () =>
+            import('./pages/EmailTemplates').then((mod) => ({
+              default: mod.ProtectedEmailTemplatesPage,
+            })),
+          permissions: PERMISSIONS.readEmailTemplates,
         },
         {
           intlLabel: {
@@ -78,34 +57,29 @@ export default {
             defaultMessage: 'Advanced Settings',
           },
           id: 'advanced-settings',
-          to: `/settings/${pluginId}/advanced-settings`,
-          Component: async () => {
-            const component = await import(
-              /* webpackChunkName: "users-advanced-settings-page" */ './pages/AdvancedSettings'
-            );
-
-            return component;
-          },
-          permissions: pluginPermissions.readAdvancedSettings,
+          to: `users-permissions/advanced-settings`,
+          Component: () =>
+            import('./pages/AdvancedSettings').then((mod) => ({
+              default: mod.ProtectedAdvancedSettingsPage,
+            })),
+          permissions: PERMISSIONS.readAdvancedSettings,
         },
       ]
     );
 
     app.registerPlugin({
-      id: pluginId,
+      id: 'users-permissions',
       name,
     });
   },
   bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
-      locales.map(locale => {
-        return import(
-          /* webpackChunkName: "users-permissions-translation-[request]" */ `./translations/${locale}.json`
-        )
+      locales.map((locale) => {
+        return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
-              data: prefixPluginTranslations(data, pluginId),
+              data: prefixPluginTranslations(data, 'users-permissions'),
               locale,
             };
           })

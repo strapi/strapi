@@ -1,0 +1,109 @@
+---
+title: useDocumentActions
+description: API reference for the useDocumentActions hook from Strapi's Content Manager
+tags:
+  - content-manager
+  - hooks
+  - public API
+---
+
+:::warning
+This hook is considered unstable and may change in a future release.
+:::
+
+Contains all the operations that can be performed on a single document. Designed to be able to be
+used anywhere within a Strapi app. The hooks will handle notifications should the operation fail,
+however the response is always returned incase the user needs to handle side-effects.
+
+## Usage
+
+```tsx
+import { Form } from '@strapi/admin/admin';
+
+const { id, model, collectionType } = useParams<{
+  id: string;
+  model: string;
+  collectionType: string;
+}>();
+const { update } = useDocumentActions();
+
+const handleSubmit = async (data) => {
+  await update({ collectionType, model, documentId: id }, data);
+};
+
+return <Form method="PUT" onSubmit={handleSubmit} />;
+```
+
+## Typescript
+
+```ts
+type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> =
+  | Pick<TResponse, 'data' | 'meta'>
+  | { error: BaseQueryError | SerializedError };
+
+type UseDocumentActions = () => {
+  clone: (
+    args: {
+      model: string;
+      documentId: string;
+      params: object;
+    },
+    document: Omit<Document, 'documentId'>,
+    trackerProperty?: Extract<
+      TrackingEvent,
+      { name: 'willCreateEntry' | 'didCreateEntry' | 'didNotCreateEntry' }
+    >['properties']
+  ) => Promise<OperationResponse<Contracts.CollectionTypes.Clone.Response>>;
+  create: (
+    args: {
+      model: string;
+      params?: object;
+    },
+    document: Omit<Document, 'documentId'>,
+    trackerProperty?: Extract<
+      TrackingEvent,
+      { name: 'willCreateEntry' | 'didCreateEntry' | 'didNotCreateEntry' }
+    >['properties']
+  ) => Promise<OperationResponse<Contracts.CollectionTypes.Create.Response>>;
+  delete: (
+    args: {
+      collectionType: string;
+      model: string;
+      documentId: string;
+    },
+    trackerProperty?: Extract<
+      TrackingEvent,
+      { name: 'willDeleteEntry' | 'didDeleteEntry' | 'didNotDeleteEntry' }
+    >['properties']
+  ) => Promise<OperationResponse<Contracts.CollectionTypes.Delete.Response>>;
+  getDocument: (args: {
+    collectionType: string;
+    model: string;
+    documentId?: string;
+    params?: object;
+  }) => Promise<Contracts.CollectionTypes.FindOne.Response | undefined>;
+  publish: (args: {
+    collectionType: string;
+    model: string;
+    documentId: string;
+  }) => Promise<OperationResponse<Contracts.CollectionTypes.Publish.Response>>;
+  update: (
+    args: {
+      collectionType: string;
+      model: string;
+      documentId: string;
+      params: object;
+    },
+    document: Document,
+    trackerProperty?: Extract<
+      TrackingEvent,
+      { name: 'willEditEntry' | 'didEditEntry' | 'didNotEditEntry' }
+    >['properties']
+  ) => Promise<OperationResponse<Contracts.CollectionTypes.Update.Response>>;
+  unpublish: (args: {
+    collectionType: string;
+    model: string;
+    documentId: string;
+  }) => Promise<OperationResponse<Contracts.CollectionTypes.Unpublish.Response>>;
+};
+```

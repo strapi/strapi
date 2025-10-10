@@ -19,17 +19,14 @@ module.exports = ({ nexus, strapi }) => {
       id: nonNull('ID'),
     },
 
-    description: 'Update an existing user',
+    description: 'Delete an existing user',
 
     async resolve(parent, args, context) {
       const { koaContext } = context;
 
       koaContext.params = { id: args.id };
 
-      await strapi
-        .plugin('users-permissions')
-        .controller('user')
-        .destroy(koaContext);
+      await strapi.plugin('users-permissions').controller('user').destroy(koaContext);
 
       checkBadRequest(koaContext.body);
 

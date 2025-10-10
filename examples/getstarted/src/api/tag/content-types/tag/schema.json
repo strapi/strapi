@@ -38,6 +38,19 @@
       "relation": "oneToOne",
       "target": "api::kitchensink.kitchensink",
       "mappedBy": "one_to_one_tag"
+    },
+    "taggable": {
+      "type": "relation",
+      "relation": "morphToOne",
+      "morphColumn": {
+        "typeColumn": {
+          "name": "taggable_type"
+        },
+        "idColumn": {
+          "name": "taggable_id",
+          "referencedColumn": "id"
+        }
+      }
     }
   }
 }

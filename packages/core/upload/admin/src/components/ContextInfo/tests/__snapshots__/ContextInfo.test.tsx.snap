@@ -1,0 +1,166 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ContextInfo renders 1`] = `
+.c0 {
+  padding-block-start: 16px;
+  padding-block-end: 16px;
+  padding-inline-start: 24px;
+  padding-inline-end: 24px;
+  background: #f6f6f9;
+  border-radius: 4px;
+}
+
+.c2 {
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c4 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c5 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c6 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #4a4a6a;
+}
+
+.c7 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c1 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c3 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
+@media (min-width: 520px) {
+  .c3 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 768px) {
+  .c3 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c3 {
+    grid-column: span 6;
+  }
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    <div
+      class="c1"
+    >
+      <div
+        class="c2 c3"
+      >
+        <div
+          class="c4"
+        >
+          <span
+            class="c5"
+          >
+            Label 1
+          </span>
+          <span
+            class="c6"
+          >
+            value1
+          </span>
+        </div>
+      </div>
+      <div
+        class="c2 c3"
+      >
+        <div
+          class="c4"
+        >
+          <span
+            class="c5"
+          >
+            Label 2
+          </span>
+          <span
+            class="c6"
+          >
+            value2
+          </span>
+        </div>
+      </div>
+      <div
+        class="c2 c3"
+      >
+        <div
+          class="c4"
+        >
+          <span
+            class="c5"
+          >
+            Label 3
+          </span>
+          <span
+            class="c6"
+          >
+            value3
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    class="c7"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

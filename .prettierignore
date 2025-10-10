@@ -1,5 +1,7 @@
 coverage
-testApp
+test-apps
 dist
 build
-.cache
+.strapi
+/.nx/cache
+/.nx/workspace-data

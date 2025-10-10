@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_page_blocks_product_carousels",
+  "info": {
+    "displayName": "Product carousel"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 20
+    },
+    "products": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product.product"
+    }
+  }
+}

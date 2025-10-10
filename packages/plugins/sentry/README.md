@@ -15,10 +15,10 @@ To install this plugin, you need to add an NPM dependency to your Strapi applica
 
 ```sh
 # Using Yarn
-yarn add strapi-plugin-sentry
+yarn add @strapi/plugin-sentry
 
 # Or using NPM
-npm install strapi-plugin-sentry
+npm install @strapi/plugin-sentry
 ```
 
 ## Configuration
@@ -37,8 +37,11 @@ npm install strapi-plugin-sentry
 module.exports = ({ env }) => ({
   // ...
   sentry: {
-    dsn: env('SENTRY_DSN'),
-    sendMetadata: true,
+    enabled: true,
+    config: {
+      dsn: env('SENTRY_DSN'),
+      sendMetadata: true,
+    },
   },
   // ...
 });
@@ -65,10 +68,7 @@ try {
   // Your code here
 } catch (error) {
   // Either send a simple error
-  strapi
-    .plugin('sentry')
-    .service('sentry')
-    .sendError(error);
+  strapi.plugin('sentry').service('sentry').sendError(error);
 
   // Or send an error with a customized Sentry scope
   strapi
@@ -89,38 +89,17 @@ Use it if you need direct access to the Sentry instance, which should already al
 **Example**
 
 ```js
-const sentryInstance = strapi
-  .plugin('sentry')
-  .service('sentry')
-  .getInstance();
+const sentryInstance = strapi.plugin('sentry').service('sentry').getInstance();
 ```
 
-## Disabling
+## Disabling for non-production environments
 
-### Disabling only the middleware
+If the `dsn` property is set to a nil value (`null` or `undefined`) while `enabled` is true, the Sentry plugin will be available to use in the running Strapi instance, but the service will not actually send errors to Sentry. That allows you to write code that runs on every environment without additional checks, but only send errors to Sentry in production.
 
-By default, this plugin uses a middleware that logs all your unhandled API errors to Sentry. You can disable this feature by turning off the `sentry` middleware in your app's config.
+When you start Strapi with a nil `dsn` config property, the plugin will print a warning:  
+`info: @strapi/plugin-sentry is disabled because no Sentry DSN was provided`
 
-**Example**
-
-`./config/middleware.js`
-
-```js
-module.exports = {
-  //...
-  settings: {
-    sentry: {
-      enabled: false,
-    },
-  },
-};
-```
-
-Only the middleware will be disabled. You will still have access to the Sentry service.
-
-### Disabling the plugin entirely
-
-You can also completely disable this plugin (both the middleware and the service). If you omit the `dsn` property of your plugin's settings, or if you give it a null value, the Sentry plugin will be ignored. You can use the `env` utility to disable it depending on the environment.
+You can make use of that by using the `env` utility to set the `dsn` config property depending on the environment.
 
 **Example**
 
@@ -130,7 +109,29 @@ You can also completely disable this plugin (both the middleware and the service
 module.exports = ({ env }) => ({
   // ...
   sentry: {
-    dsn: env('NODE_ENV') === 'development' ? null : env('SENTRY_DSN'),
+    enabled: true,
+    config: {
+      // Only set `dsn` property in production
+      dsn: env('NODE_ENV') === 'production' ? env('SENTRY_DSN') : null,
+    },
+  },
+  // ...
+});
+```
+
+## Disabling altogether
+
+Like every other plugin, you can also disable this plugin in the plugins configuration file. This will cause `strapi.plugins('sentry')` to return undefined.
+
+**Example**
+
+`./config/plugins.js`
+
+```js
+module.exports = ({ env }) => ({
+  // ...
+  sentry: {
+    enabled: false,
   },
   // ...
 });

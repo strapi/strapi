@@ -14,9 +14,8 @@ services:
       - '5432:5432'
 
   mysql:
-    image: mysql:5
+    image: mysql:8
     restart: always
-    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_DATABASE: strapi
       MYSQL_USER: strapi

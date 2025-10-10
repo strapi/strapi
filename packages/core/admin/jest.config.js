@@ -1,5 +1,6 @@
 'use strict';
 
 module.exports = {
-  testPathIgnorePatterns: ['<rootDir>/'],
+  preset: '../../../jest-preset.unit.js',
+  displayName: 'Core admin',
 };

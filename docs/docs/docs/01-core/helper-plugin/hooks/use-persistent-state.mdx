@@ -1,0 +1,27 @@
+---
+title: usePersistentState
+description: API reference for the usePersistentState hook in Strapi
+tags:
+  - hooks
+  - helper-plugin
+---
+
+Provides a easily usable hook to store data on the local storage.
+
+## Usage
+
+```js
+import { usePersistentState } from '@strapi/helper-plugin';
+
+const MyComponent = () => {
+  const [navbarOpened, setNavbarOpened] = usePersistentState('navbar-open', true);
+
+  return <nav>{navbarOpened ? <div>My menu!</div> : null}</nav>;
+};
+```
+
+## Typescript
+
+```ts
+function usePersistentState<T>(key: string, defaultValue: T): [T, Dispatch<SetStateAction<T>>];
+```

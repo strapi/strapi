@@ -7,168 +7,42 @@
  * This gives you an opportunity to set up your data model,
  * run jobs, or perform some special logic.
  */
+const crypto = require('crypto');
 const _ = require('lodash');
-const uuid = require('uuid/v4');
 const { getService } = require('../utils');
-
 const usersPermissionsActions = require('./users-permissions-actions');
+const {
+  DEFAULT_ACCESS_TOKEN_LIFESPAN,
+  DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN,
+  DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
+  DEFAULT_MAX_SESSION_LIFESPAN,
+  DEFAULT_IDLE_SESSION_LIFESPAN,
+} = require('../services/constants');
 
-module.exports = async ({ strapi }) => {
-  const pluginStore = strapi.store({ type: 'plugin', name: 'users-permissions' });
-
-  await initGrant(pluginStore);
-  await initEmails(pluginStore);
-  await initAdvancedOptions(pluginStore);
-
-  await strapi.admin.services.permission.actionProvider.registerMany(
-    usersPermissionsActions.actions
-  );
-
-  await getService('users-permissions').initialize();
-
-  if (!strapi.config.get('plugin.users-permissions.jwtSecret')) {
-    const jwtSecret = uuid();
-    strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret);
-
-    if (!process.env.JWT_SECRET) {
-      strapi.fs.appendFile('.env', `JWT_SECRET=${jwtSecret}\n`);
-    }
-  }
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
 };
 
-const initGrant = async pluginStore => {
-  const apiPrefix = strapi.config.get('api.rest.prefix');
-  const baseURL = `${strapi.config.server.url}/${apiPrefix}/auth`;
+const initGrant = async (pluginStore) => {
+  const allProviders = getService('providers-registry').getAll();
 
-  const grantConfig = {
-    email: {
-      enabled: true,
-      icon: 'envelope',
-    },
-    discord: {
-      enabled: false,
-      icon: 'discord',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/discord/callback`,
-      scope: ['identify', 'email'],
-    },
-    facebook: {
-      enabled: false,
-      icon: 'facebook-square',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/facebook/callback`,
-      scope: ['email'],
-    },
-    google: {
-      enabled: false,
-      icon: 'google',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/google/callback`,
-      scope: ['email'],
-    },
-    github: {
-      enabled: false,
-      icon: 'github',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/github/callback`,
-      scope: ['user', 'user:email'],
-    },
-    microsoft: {
-      enabled: false,
-      icon: 'windows',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/microsoft/callback`,
-      scope: ['user.read'],
-    },
-    twitter: {
-      enabled: false,
-      icon: 'twitter',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/twitter/callback`,
-    },
-    instagram: {
-      enabled: false,
-      icon: 'instagram',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/instagram/callback`,
-      scope: ['user_profile'],
-    },
-    vk: {
-      enabled: false,
-      icon: 'vk',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/vk/callback`,
-      scope: ['email'],
-    },
-    twitch: {
-      enabled: false,
-      icon: 'twitch',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/twitch/callback`,
-      scope: ['user:read:email'],
-    },
-    linkedin: {
-      enabled: false,
-      icon: 'linkedin',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/linkedin/callback`,
-      scope: ['r_liteprofile', 'r_emailaddress'],
-    },
-    cognito: {
-      enabled: false,
-      icon: 'aws',
-      key: '',
-      secret: '',
-      subdomain: 'my.subdomain.com',
-      callback: `${baseURL}/cognito/callback`,
-      scope: ['email', 'openid', 'profile'],
-    },
-    reddit: {
-      enabled: false,
-      icon: 'reddit',
-      key: '',
-      secret: '',
-      state: true,
-      callback: `${baseURL}/reddit/callback`,
-      scope: ['identity'],
-    },
-    auth0: {
-      enabled: false,
-      icon: '',
-      key: '',
-      secret: '',
-      subdomain: 'my-tenant.eu',
-      callback: `${baseURL}/auth0/callback`,
-      scope: ['openid', 'email', 'profile'],
-    },
-    cas: {
-      enabled: false,
-      icon: 'book',
-      key: '',
-      secret: '',
-      callback: `${baseURL}/cas/callback`,
-      scope: ['openid email'], // scopes should be space delimited
-      subdomain: 'my.subdomain.com/cas',
-    },
-  };
+  const grantConfig = Object.entries(allProviders).reduce((acc, [name, provider]) => {
+    const { icon, enabled, grantConfig } = provider;
+
+    acc[name] = {
+      icon,
+      enabled,
+      ...grantConfig,
+    };
+    return acc;
+  }, {});
 
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
-  // store grant auth config to db
-  // when plugin_users-permissions_grant is not existed in db
-  // or we have added/deleted provider here.
-  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
+
+  if (!prevGrantConfig || !_.isEqual(prevGrantConfig, grantConfig)) {
     // merge with the previous provider config.
-    _.keys(grantConfig).forEach(key => {
+    _.keys(grantConfig).forEach((key) => {
       if (key in prevGrantConfig) {
         grantConfig[key] = _.merge(grantConfig[key], prevGrantConfig[key]);
       }
@@ -177,7 +51,7 @@ const initGrant = async pluginStore => {
   }
 };
 
-const initEmails = async pluginStore => {
+const initEmails = async (pluginStore) => {
   if (!(await pluginStore.get({ key: 'email' }))) {
     const value = {
       reset_password: {
@@ -223,7 +97,7 @@ const initEmails = async pluginStore => {
   }
 };
 
-const initAdvancedOptions = async pluginStore => {
+const initAdvancedOptions = async (pluginStore) => {
   if (!(await pluginStore.get({ key: 'advanced' }))) {
     const value = {
       unique_email: true,
@@ -235,5 +109,59 @@ const initAdvancedOptions = async pluginStore => {
     };
 
     await pluginStore.set({ key: 'advanced', value });
+  }
+};
+
+module.exports = async ({ strapi }) => {
+  const pluginStore = strapi.store({ type: 'plugin', name: 'users-permissions' });
+
+  await initGrant(pluginStore);
+  await initEmails(pluginStore);
+  await initAdvancedOptions(pluginStore);
+
+  await strapi
+    .service('admin::permission')
+    .actionProvider.registerMany(usersPermissionsActions.actions);
+
+  await getService('users-permissions').initialize();
+
+  // Define users-permissions origin configuration for sessionManager
+  const upConfig = strapi.config.get('plugin::users-permissions');
+  const sessionManager = getSessionManager();
+
+  if (sessionManager) {
+    sessionManager.defineOrigin('users-permissions', {
+      jwtSecret: upConfig.jwtSecret || strapi.config.get('admin.auth.secret'),
+      accessTokenLifespan: upConfig.sessions?.accessTokenLifespan || DEFAULT_ACCESS_TOKEN_LIFESPAN,
+      maxRefreshTokenLifespan:
+        upConfig.sessions?.maxRefreshTokenLifespan || DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN,
+      idleRefreshTokenLifespan:
+        upConfig.sessions?.idleRefreshTokenLifespan || DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
+      maxSessionLifespan: upConfig.sessions?.maxSessionLifespan || DEFAULT_MAX_SESSION_LIFESPAN,
+      idleSessionLifespan: upConfig.sessions?.idleSessionLifespan || DEFAULT_IDLE_SESSION_LIFESPAN,
+      algorithm: upConfig.jwt?.algorithm,
+      jwtOptions: upConfig.jwt || {},
+    });
+  }
+
+  if (!strapi.config.get('plugin::users-permissions.jwtSecret')) {
+    if (process.env.NODE_ENV !== 'development') {
+      throw new Error(
+        `Missing jwtSecret. Please, set configuration variable "jwtSecret" for the users-permissions plugin in config/plugins.js (ex: you can generate one using Node with \`crypto.randomBytes(16).toString('base64')\`).
+For security reasons, prefer storing the secret in an environment variable and read it in config/plugins.js. See https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#configuration-using-environment-variables.`
+      );
+    }
+
+    const jwtSecret = crypto.randomBytes(16).toString('base64');
+
+    strapi.config.set('plugin::users-permissions.jwtSecret', jwtSecret);
+
+    if (!process.env.JWT_SECRET) {
+      const envPath = process.env.ENV_PATH || '.env';
+      strapi.fs.appendFile(envPath, `JWT_SECRET=${jwtSecret}\n`);
+      strapi.log.info(
+        `The Users & Permissions plugin automatically generated a jwt secret and stored it in ${envPath} under the name JWT_SECRET.`
+      );
+    }
   }
 };

@@ -1,0 +1,39 @@
+name: 'Fetch Merged Pull Requests Between Branches'
+description: 'Fetch merged pull requests between two branches using the GitHub API.'
+
+inputs:
+  base_branch:
+    description: 'Base branch to compare from.'
+    required: false
+    default: 'develop'
+  target_branch:
+    description: 'Target branch to compare to.'
+    required: true
+  owner:
+    description: 'Repository owner (default: current repository owner).'
+    default: '${{ github.repository_owner }}'
+    required: false
+  repo:
+    description: 'Repository name (default: current repository).'
+    default: '${{ github.repository }}'
+    required: false
+outputs:
+  prs:
+    description: 'List of merged pull requests between the base and target branches.'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Run Fetch Merged PRs Script'
+      shell: bash
+      run: |
+        chmod +x ${{ github.action_path }}/script.sh
+        ${{ github.action_path }}/script.sh
+      env:
+        OWNER: ${{ inputs.owner }}
+        REPO: ${{ inputs.repo }}
+        BASE_BRANCH: ${{ inputs.base_branch }}
+        TARGET_BRANCH: ${{ inputs.target_branch }}
+        GITHUB_TOKEN: ${{ github.token }}
+branding:
+  icon: 'git-pull-request'
+  color: 'blue'

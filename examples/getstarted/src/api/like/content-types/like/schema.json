@@ -8,8 +8,8 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": false,
-    "comment": ""
+    "comment": "",
+    "draftAndPublish": false
   },
   "attributes": {
     "author": {

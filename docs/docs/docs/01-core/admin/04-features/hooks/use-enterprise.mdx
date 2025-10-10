@@ -1,0 +1,61 @@
+---
+title: useEnterprise
+description: API reference for the useEnterprise hook
+tags:
+  - admin
+  - hooks
+  - users
+---
+
+A hook that returns either community or enterprise-edition data-structures based on the global `window.strapi.isEE` flag.
+
+## Usage
+
+```
+import { CE_DATA } from './data';
+
+function Component() {
+    const data = useEnterprise(CE_DATA, async () => (await import('./ee/data')).default);
+}
+```
+
+It accepts an optional third argument to pass in options customizing the hook behavior:
+
+### `combine()`
+
+THe `combine` callback can be used as a custom "merge" function for the ce and ee arguments:
+
+```
+const data = useEnterprise({ a: 1 }, () => { b: 1 }, { combine(ce, ee) { return { ...ce, ...ee } } });
+
+console.log(data); // { a: 1, b: 1 }
+```
+
+### `defaultValue`
+
+By default the hook returns `null` if `window.strapi.isEE` is true and the enterprise data structure is not yet loaded. Customizing
+this value can help implementing various loading scenarios:
+
+```
+// display a loading state while an EE component is loading
+const Component = useEnterprise(() => <p>CE</p>, () => <p>EE</p>, {
+    defaultValue: () => <div>loading ...</div>
+})
+
+// display nothing while an EE component is loading, but don't block the overall rendering
+const Component = useEnterprise(() => <p>CE</p>, () => <p>EE</p>, {
+    defaultValue: () => null
+})
+
+// display nothing while an EE component is loading
+const Component = useEnterprise(() => <p>CE</p>, () => <p>EE</p>)
+
+if (!Component) {
+    return;
+}
+```
+
+### `enabled`
+
+Similar to react-query this boolean flag allows disabling the EE import, e.g. when more than one condition needs to be applied. If `enabled`
+is set to false, the first argument (CE_DATA) will be returned.

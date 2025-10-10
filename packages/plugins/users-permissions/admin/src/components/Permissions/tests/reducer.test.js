@@ -1,4 +1,5 @@
-import produce from 'immer';
+import { produce } from 'immer';
+
 import { reducer } from '../reducer';
 
 describe('USERS PERMISSIONS | COMPONENTS | Permissions | reducer', () => {
@@ -33,7 +34,7 @@ describe('USERS PERMISSIONS | COMPONENTS | Permissions | reducer', () => {
         index: 1,
       };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.collapses = [
           { name: 'test1', isOpen: false },
           { name: 'test2', isOpen: false },
@@ -58,7 +59,7 @@ describe('USERS PERMISSIONS | COMPONENTS | Permissions | reducer', () => {
         index: 2,
       };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.collapses = [
           { name: 'test1', isOpen: false },
           { name: 'test2', isOpen: false },

@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "rootDir": "../",
+    "baseUrl": ".",
+    "outDir": "../dist",
+    "noEmit": false
+  },
+  "include": ["./src", "../shared"],
+  "exclude": ["node_modules", "**/*.test.*"]
+}

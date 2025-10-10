@@ -1,4 +1,5 @@
-import produce from 'immer';
+import { produce } from 'immer';
+
 import reducer from '../reducer';
 
 describe('USERS PERMISSIONS | COMPONENTS | UsersPermissions | reducer', () => {
@@ -35,7 +36,7 @@ describe('USERS PERMISSIONS | COMPONENTS | UsersPermissions | reducer', () => {
         value: 'custom',
       };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.modifiedData.find.policy = 'custom';
       });
 
@@ -54,7 +55,7 @@ describe('USERS PERMISSIONS | COMPONENTS | UsersPermissions | reducer', () => {
         value: true,
       };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.modifiedData.findOne.enabled = true;
         draft.selectedAction = 'findOne';
       });
@@ -83,7 +84,7 @@ describe('USERS PERMISSIONS | COMPONENTS | UsersPermissions | reducer', () => {
         value: true,
       };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.modifiedData.app = {
           find: { enabled: true, policy: '' },
           findOne: { enabled: true, policy: '' },
@@ -102,7 +103,7 @@ describe('USERS PERMISSIONS | COMPONENTS | UsersPermissions | reducer', () => {
 
       const action = { type: 'ON_RESET' };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.modifiedData = { ok: true };
       });
 
@@ -117,7 +118,7 @@ describe('USERS PERMISSIONS | COMPONENTS | UsersPermissions | reducer', () => {
 
       const action = { type: 'ON_SUBMIT_SUCCEEDED' };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.initialData = { ok: false };
       });
 
@@ -131,7 +132,7 @@ describe('USERS PERMISSIONS | COMPONENTS | UsersPermissions | reducer', () => {
 
       const action = { type: 'SELECT_ACTION', actionToSelect: 'findOne' };
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.selectedAction = 'findOne';
       });
 

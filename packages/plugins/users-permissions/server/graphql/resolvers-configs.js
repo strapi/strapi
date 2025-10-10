@@ -23,15 +23,20 @@ module.exports = ({ strapi }) => {
     'Mutation.forgotPassword': { auth: false },
     'Mutation.resetPassword': { auth: false },
     'Mutation.emailConfirmation': { auth: false },
+    'Mutation.changePassword': {
+      auth: {
+        scope: 'plugin::users-permissions.auth.changePassword',
+      },
+    },
 
     // Scoped auth for replaced CRUD operations
     // Role
-    [`Mutation.${createRole}`]: { auth: { scope: [`${roleUID}.create`] } },
-    [`Mutation.${updateRole}`]: { auth: { scope: [`${roleUID}.update`] } },
-    [`Mutation.${deleteRole}`]: { auth: { scope: [`${roleUID}.delete`] } },
+    [`Mutation.${createRole}`]: { auth: { scope: [`${roleUID}.createRole`] } },
+    [`Mutation.${updateRole}`]: { auth: { scope: [`${roleUID}.updateRole`] } },
+    [`Mutation.${deleteRole}`]: { auth: { scope: [`${roleUID}.deleteRole`] } },
     // User
     [`Mutation.${createUser}`]: { auth: { scope: [`${userUID}.create`] } },
     [`Mutation.${updateUser}`]: { auth: { scope: [`${userUID}.update`] } },
-    [`Mutation.${deleteUser}`]: { auth: { scope: [`${userUID}.delete`] } },
+    [`Mutation.${deleteUser}`]: { auth: { scope: [`${userUID}.destroy`] } },
   };
 };
