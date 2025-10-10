@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import tsUtils from '@strapi/typescript-utils';
 
 import validateInput from './utils/validate-input';
+import getFilePath from './utils/get-file-path';
 
 export default (plop: NodePlopAPI) => {
   // API generator
@@ -49,8 +50,7 @@ export default (plop: NodePlopAPI) => {
         return [];
       }
 
-      const filePath =
-        answers.isPluginApi && answers.plugin ? 'plugins/{{ plugin }}/server' : 'api/{{ id }}';
+      const filePath = getFilePath(answers.destination || (answers.isPluginApi && answers.plugin ? 'plugin' : 'api'));
       const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
