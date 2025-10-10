@@ -11,6 +11,7 @@ import ctNamesPrompts from './prompts/ct-names-prompts';
 import kindPrompts from './prompts/kind-prompts';
 import getAttributesPrompts from './prompts/get-attributes-prompts';
 import bootstrapApiPrompts from './prompts/bootstrap-api-prompts';
+import { appendToFile } from './utils/extend-plugin-index-files';
 
 export default (plop: NodePlopAPI) => {
   // Model generator
@@ -106,6 +107,29 @@ export default (plop: NodePlopAPI) => {
         });
       }
 
+      if (answers.plugin) {
+        const indexPath = join(plop.getDestBasePath(), `${filePath}/content-types/index.${language}`);
+        const exists = fs.existsSync(indexPath);
+
+        if (!exists) {
+          // Create index file if it doesn't exist
+          baseActions.push({
+            type: 'add',
+            path: `${filePath}/content-types/index.${language}`,
+            templateFile: `templates/${language}/plugin/plugin.index.${language}.hbs`,
+          });
+        }
+
+        // Append the new content type to the index.ts file
+        baseActions.push({
+          type: 'modify',
+          path: `${filePath}/content-types/index.${language}`,
+          transform(template: string) {
+            return appendToFile(template, { type: 'content-type', singularName: answers.singularName });
+          },
+        });
+      }
+
       if (answers.bootstrapApi) {
         const { singularName } = answers;
 
@@ -133,11 +157,69 @@ export default (plop: NodePlopAPI) => {
           },
           {
             type: 'add',
-            path: `${filePath}/routes/{{ singularName }}.${language}`,
+            path: `${filePath}/routes/${answers.plugin ? 'content-api/' : ''}{{ singularName }}.${language}`,
             templateFile: `templates/${language}/core-router.${language}.hbs`,
             data: { uid },
           }
         );
+
+        if (answers.plugin) {
+          const indexFiles = ['controllers', 'services', 'routes'];
+
+          indexFiles.forEach((type) => {
+            const indexPath = join(plop.getDestBasePath(), `${filePath}/${type}/index.${language}`);
+            const exists = fs.existsSync(indexPath);
+
+            if (!exists && type !== 'routes') {
+              baseActions.push({
+                type: 'add',
+                path: `${filePath}/${type}/index.${language}`,
+                templateFile: `templates/${language}/plugin/plugin.index.${language}.hbs`,
+              });
+            }
+
+            if (type === 'routes') {
+              const indexPath = join(plop.getDestBasePath(), `${filePath}/${type}/index.${language}`);
+              const exists = fs.existsSync(indexPath);
+
+              if (!exists) {
+                baseActions.push({
+                  type: 'add',
+                  path: `${filePath}/${type}/index.${language}`,
+                  templateFile: `templates/${language}/plugin/plugin.routes.index.${language}.hbs`,
+                });
+              }
+
+              const routeIndexFiles = ['content-api', 'admin'];
+
+              routeIndexFiles.forEach((routeType) => {
+                const routeTypeIndexPath = join(plop.getDestBasePath(), `${filePath}/${type}/${routeType}/index.${language}`);
+                const routeTypeExists = fs.existsSync(routeTypeIndexPath);
+
+                if (!routeTypeExists) {
+                  baseActions.push({
+                    type: 'add',
+                    path: `${filePath}/${type}/${routeType}/index.${language}`,
+                    templateFile: `templates/${language}/plugin/plugin.routes.type.index.${language}.hbs`,
+                    data: { type: routeType },
+                  });
+                }
+              });
+            }
+
+            baseActions.push({
+              type: 'modify',
+              path: `${filePath}/${type}/${type === 'routes' ? 'content-api/' : ''}index.${language}`,
+              transform(template: string) {
+                if (type === 'routes') {
+                  return appendToFile(template, { type: 'routes', singularName: answers.singularName });
+                }
+
+                return appendToFile(template, { type: 'index', singularName: answers.singularName });
+              },
+            });
+          });
+        }
       }
 
       return baseActions;
