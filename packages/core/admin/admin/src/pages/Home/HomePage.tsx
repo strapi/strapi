@@ -18,6 +18,7 @@ import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useWidgets } from '../../features/Widgets';
 import { useGetHomepageLayoutQuery } from '../../services/homepage';
+import { getWidgetElement, WIDGET_DATA_ATTRIBUTES } from '../../utils/widgetLayout';
 import {
   applyHomepageLayout,
   createDefaultWidgetWidths,
@@ -219,7 +220,7 @@ const HomePageCE = () => {
                 <Page.Loading />
               </Box>
             ) : (
-              <Box position="relative" data-strapi-grid-container>
+              <Box position="relative" {...{ [WIDGET_DATA_ATTRIBUTES.GRID_CONTAINER]: true }}>
                 <Grid.Root gap={5}>
                   {widgetLayout.map(
                     ({
@@ -284,7 +285,7 @@ const HomePageCE = () => {
         <DragLayer
           renderItem={({ type, item }) => {
             if (type === 'widget') {
-              const widgetElement = document.querySelector(`[data-strapi-widget-id="${item.id}"]`);
+              const widgetElement = getWidgetElement(item.id);
               const maxWidth = `${widgetElement?.clientWidth}px`;
 
               return (

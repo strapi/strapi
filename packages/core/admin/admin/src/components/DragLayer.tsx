@@ -3,6 +3,8 @@ import * as React from 'react';
 import { Box } from '@strapi/design-system';
 import { DragLayerMonitor, XYCoord, useDragLayer } from 'react-dnd';
 
+import { getWidgetElement } from '../utils/widgetLayout';
+
 function getStyle(
   initialOffset: XYCoord | null,
   currentOffset: XYCoord | null,
@@ -18,7 +20,7 @@ function getStyle(
   // Only apply custom offset for widget drags
   if (item?.type === 'widget') {
     // Calculate dynamic offset based on widget position and width
-    const widgetElement = document.querySelector(`[data-strapi-widget-id="${item.id}"]`);
+    const widgetElement = getWidgetElement(item.id);
     const previewWidth = widgetElement?.clientWidth;
     const offsetX = previewWidth ? -previewWidth + 20 : 0;
     const offsetY = 20;

@@ -9,6 +9,7 @@ import { Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useTracking } from '../features/Tracking';
+import { WIDGET_DATA_ATTRIBUTES } from '../utils/widgetLayout';
 
 import type { WidgetType } from '@strapi/admin/strapi-admin';
 import type { FindWidgetFunction, WidgetIdFunction, DragEndFunction } from '../features/Widgets';
@@ -130,7 +131,7 @@ export const WidgetRoot = ({
       position="relative"
       aria-labelledby={uid}
       tabIndex={0}
-      data-strapi-widget-id={uid}
+      {...{ [WIDGET_DATA_ATTRIBUTES.WIDGET_ID]: uid }}
       style={{
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}

@@ -16,6 +16,19 @@ export const WIDGET_SIZING = {
   DISCRETE_SIZES: [4, 6, 8, 12] as const,
 } as const;
 
+export const WIDGET_DATA_ATTRIBUTES = {
+  WIDGET_ID: 'data-strapi-widget-id',
+  GRID_CONTAINER: 'data-strapi-grid-container',
+} as const;
+
+export const getWidgetElement = (uid: string): HTMLElement | null => {
+  return document.querySelector(`[${WIDGET_DATA_ATTRIBUTES.WIDGET_ID}="${uid}"]`);
+};
+
+export const getWidgetGridContainer = (): HTMLElement | null => {
+  return document.querySelector(`[${WIDGET_DATA_ATTRIBUTES.GRID_CONTAINER}]`);
+};
+
 export interface WidgetRow {
   widgets: WidgetWithUID[];
   totalWidth: number;

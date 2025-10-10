@@ -5,7 +5,12 @@ import { Box } from '@strapi/design-system';
 import { useDrop } from 'react-dnd';
 import { styled } from 'styled-components';
 
-import { calculateWidgetRows, type WidgetRow } from '../utils/widgetLayout';
+import {
+  calculateWidgetRows,
+  type WidgetRow,
+  getWidgetElement,
+  getWidgetGridContainer,
+} from '../utils/widgetLayout';
 
 import type { WidgetWithUID } from '../core/apis/Widgets';
 
@@ -28,13 +33,9 @@ interface GapDropZoneManagerProps {
 }
 
 const getRowInfo = (row: WidgetRow) => {
-  const firstWidgetElement = document.querySelector(
-    `[data-strapi-widget-id="${row.widgets[0].uid}"]`
-  );
-  const lastWidgetElement = document.querySelector(
-    `[data-strapi-widget-id="${row.widgets[row.widgets.length - 1].uid}"]`
-  );
-  const containerElement = document.querySelector('[data-strapi-grid-container]');
+  const firstWidgetElement = getWidgetElement(row.widgets[0].uid);
+  const lastWidgetElement = getWidgetElement(row.widgets[row.widgets.length - 1].uid);
+  const containerElement = getWidgetGridContainer();
 
   if (!firstWidgetElement || !lastWidgetElement || !containerElement) {
     return null;
@@ -98,7 +99,7 @@ export const addVerticalDropZones = (
   // Get widget positions relative to container
   const widgetPositions = row.widgets
     .map((widget) => {
-      const element = document.querySelector(`[data-strapi-widget-id="${widget.uid}"]`);
+      const element = getWidgetElement(widget.uid);
       if (!element) return null;
 
       const rect = element.getBoundingClientRect();
@@ -195,9 +196,7 @@ export const addHorizontalDropZones = (
   if (rowIndex < widgetRows.length - 1) {
     // Between rows: position above the next row
     const nextRow = widgetRows[rowIndex + 1];
-    const nextRowFirstWidgetElement = document.querySelector(
-      `[data-strapi-widget-id="${nextRow.widgets[0].uid}"]`
-    );
+    const nextRowFirstWidgetElement = getWidgetElement(nextRow.widgets[0].uid);
 
     if (nextRowFirstWidgetElement) {
       const nextRowRect = nextRowFirstWidgetElement.getBoundingClientRect();
@@ -297,7 +296,7 @@ export const GapDropZoneManager = ({
     updatePositions();
 
     // Update positions on container resize using ResizeObserver
-    const containerElement = document.querySelector('[data-strapi-grid-container]');
+    const containerElement = getWidgetGridContainer();
     if (!containerElement) return;
 
     const resizeObserver = new ResizeObserver(() => {
