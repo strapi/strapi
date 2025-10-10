@@ -26,6 +26,7 @@ const MenuIcon = styled(Flex)`
 `;
 
 const MenuContent = styled(Menu.Content)`
+  left: ${({ theme }) => theme.spaces[0]};
   max-height: fit-content;
   width: 200px;
 `;
