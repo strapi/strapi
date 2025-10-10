@@ -125,7 +125,7 @@ export default {
         .map((info) => {
           return filesArray.find((file) => file.originalFilename === info.name);
         })
-        .filter(Boolean) as import('formidable').File[];
+        .filter(Boolean) as any[];
 
       filesArray = alignedFilesArray;
     }
