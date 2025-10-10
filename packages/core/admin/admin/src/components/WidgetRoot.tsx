@@ -11,8 +11,8 @@ import styled from 'styled-components';
 import { useTracking } from '../features/Tracking';
 import { WIDGET_DATA_ATTRIBUTES } from '../utils/widgetLayout';
 
-import type { WidgetType } from '@strapi/admin/strapi-admin';
 import type { FindWidgetFunction, WidgetIdFunction, DragEndFunction } from '../features/Widgets';
+import type { WidgetType } from '@strapi/admin/strapi-admin';
 
 export interface BaseWidgetProps
   extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link' | 'uid'> {
