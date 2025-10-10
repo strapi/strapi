@@ -92,7 +92,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const assetNumber = await strapi.db.query(FILE_MODEL_UID).count();
 
     // AI metadata generation metrics
-    const settings: Settings = strapi.plugin('upload').service('upload').getSettings();
+    const settings: Settings = await strapi.plugin('upload').service('upload').getSettings();
     const isAIMediaLibraryConfigured = settings?.aiMetadata;
 
     return {
