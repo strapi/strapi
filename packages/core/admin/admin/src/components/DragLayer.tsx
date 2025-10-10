@@ -4,6 +4,7 @@ import { Box } from '@strapi/design-system';
 import { DragLayerMonitor, XYCoord, useDragLayer } from 'react-dnd';
 
 import { getWidgetElement } from '../utils/widgetLayout';
+
 import type { WidgetArgs } from '../core/apis/Widgets';
 
 export interface WidgetDragItem extends Pick<WidgetArgs, 'title' | 'icon' | 'link' | 'component'> {
