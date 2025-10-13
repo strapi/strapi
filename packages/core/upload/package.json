@@ -69,6 +69,7 @@
     "byte-size": "8.1.1",
     "cropperjs": "1.6.1",
     "date-fns": "2.30.0",
+    "file-type": "^19.0.0",
     "formik": "2.4.5",
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
