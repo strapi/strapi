@@ -169,7 +169,6 @@ async function copyRelationsForContentType({
   trx,
   uid,
   publishedToDraftMap,
-  publishedEntries,
 }: {
   trx: Knex;
   uid: string;
@@ -193,7 +192,6 @@ async function copyRelationsForContentType({
 
     const { name: sourceColumnName } = joinTable.joinColumn;
     const { name: targetColumnName } = joinTable.inverseJoinColumn;
-    const orderColumnName = joinTable.orderColumnName;
 
     // Get all relations where the source is a published entry
     const relations = await trx(joinTable.name).select('*').whereIn(sourceColumnName, publishedIds);
@@ -233,7 +231,6 @@ async function copyRelationsFromOtherContentTypes({
   trx,
   uid,
   publishedToDraftMap,
-  publishedEntries,
 }: {
   trx: Knex;
   uid: string;
@@ -260,9 +257,7 @@ async function copyRelationsFromOtherContentTypes({
         continue;
       }
 
-      const { name: sourceColumnName } = joinTable.joinColumn;
       const { name: targetColumnName } = joinTable.inverseJoinColumn;
-      const orderColumnName = joinTable.orderColumnName;
 
       // Get all relations where the target is a published entry of our content type
       const relations = await trx(joinTable.name).select('*').whereIn(targetColumnName, targetIds);
