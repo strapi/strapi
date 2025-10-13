@@ -26,14 +26,11 @@ export async function detectMimeType(file: any): Promise<string | undefined> {
   try {
     let buffer: Buffer;
 
-    // Check for different path properties
     const filePath = file.path || file.filepath || file.tempFilePath;
 
     if (filePath) {
-      // Read from file path
       buffer = await readFileChunk(filePath, 4100);
     } else if (file.buffer) {
-      // Use buffer directly if available
       buffer = file.buffer.length > 4100 ? file.buffer.subarray(0, 4100) : file.buffer;
     } else {
       return undefined;
@@ -55,7 +52,6 @@ function matchesMimePattern(mimeType: string, patterns: string[]): boolean {
     const normalizedMimeType = mimeType.toLowerCase();
 
     if (normalizedPattern.includes('*')) {
-      // Simple approach: just replace * with .* for regex
       const regexPattern = normalizedPattern.replace(/\*/g, '.*');
 
       const regex = new RegExp(`^${regexPattern}$`);
@@ -63,7 +59,6 @@ function matchesMimePattern(mimeType: string, patterns: string[]): boolean {
       return matches;
     }
 
-    // Exact match (case insensitive)
     const exactMatch = normalizedPattern === normalizedMimeType;
     return exactMatch;
   });
@@ -74,17 +69,14 @@ export function isMimeTypeAllowed(mimeType: string, config: SecurityConfig): boo
 
   if (!mimeType) return false;
 
-  // Check deny list first (takes precedence)
   if (deniedTypes?.length && matchesMimePattern(mimeType, deniedTypes)) {
     return false;
   }
 
-  // If allow list exists, check if mime type matches any pattern
   if (allowedTypes?.length) {
     return matchesMimePattern(mimeType, allowedTypes);
   }
 
-  // If no allow list, allow by default (unless denied above)
   return true;
 }
 
@@ -130,7 +122,6 @@ export async function validateFile(
   let detectedMime: string | undefined;
   let mimeDetectionFailed = false;
 
-  // Try to detect MIME type from file content
   try {
     detectedMime = await detectMimeType(file);
   } catch (error) {
@@ -141,10 +132,8 @@ export async function validateFile(
     });
   }
 
-  // Determine final MIME type to validate
   const mimeToValidate = detectedMime || declaredMimeType;
 
-  // Security policy: If we can't detect MIME type AND declared type is generic, be strict
   if (
     !detectedMime &&
     (declaredMimeType === 'application/octet-stream' || !declaredMimeType || mimeDetectionFailed)
@@ -166,7 +155,6 @@ export async function validateFile(
     }
   }
 
-  // Check file size first
   if (maxFileSize && fileSize && !isFileSizeAllowed(fileSize, maxFileSize)) {
     return {
       isValid: false,
@@ -184,7 +172,6 @@ export async function validateFile(
     };
   }
 
-  // Check MIME type restrictions (only if we have a MIME type to validate)
   if (
     mimeToValidate &&
     (allowedTypes || deniedTypes) &&
@@ -259,7 +246,7 @@ export async function enforceUploadSecurity(
   strapi: Core.Strapi
 ): Promise<{
   validFiles: any[];
-  validFileNames: string[]; // Return names for filtering
+  validFileNames: string[];
   errors: Array<{
     file: any;
     originalIndex: number;

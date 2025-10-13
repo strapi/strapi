@@ -89,7 +89,6 @@ export default {
 
     const securityResults = await enforceUploadSecurity(files, strapi);
 
-    // If validation failed, throw appropriate error
     if (securityResults.errors.length > 0) {
       const { error } = securityResults.errors[0];
       switch (error.code) {
