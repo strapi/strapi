@@ -84,8 +84,13 @@ const DynamicComponent = ({
       (component) => component.uid === componentUid
     ) ?? { icon: null, displayName: null };
 
-    return { icon, displayName };
-  }, [componentUid, dynamicComponentsByCategory]);
+    return {
+      icon,
+      displayName: displayName
+        ? formatMessage({ id: componentUid, defaultMessage: displayName })
+        : null,
+    };
+  }, [componentUid, dynamicComponentsByCategory, formatMessage]);
 
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(!disabled, {
@@ -178,10 +183,12 @@ const DynamicComponent = ({
             <Menu.SubContent>
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
-                  <Menu.Label>{category}</Menu.Label>
+                  <Menu.Label>
+                    {formatMessage({ id: category, defaultMessage: category })}
+                  </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index)}>
-                      {displayName}
+                      {formatMessage({ id: uid, defaultMessage: displayName })}
                     </Menu.Item>
                   ))}
                 </React.Fragment>
@@ -198,10 +205,12 @@ const DynamicComponent = ({
             <Menu.SubContent>
               {Object.entries(dynamicComponentsByCategory).map(([category, components]) => (
                 <React.Fragment key={category}>
-                  <Menu.Label>{category}</Menu.Label>
+                  <Menu.Label>
+                    {formatMessage({ id: category, defaultMessage: category })}
+                  </Menu.Label>
                   {components.map(({ displayName, uid }) => (
                     <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
-                      {displayName}
+                      {formatMessage({ id: uid, defaultMessage: displayName })}
                     </Menu.Item>
                   ))}
                 </React.Fragment>
