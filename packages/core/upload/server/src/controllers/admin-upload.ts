@@ -8,6 +8,7 @@ import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
 import { FileInfo } from '../types';
+import { enforceUploadSecurity } from '../utils/mime-validation';
 
 export default {
   async bulkUpdateFileInfo(ctx: Context) {
@@ -86,8 +87,27 @@ export default {
       throw new errors.ApplicationError('Cannot replace a file with multiple ones');
     }
 
+    const securityResults = await enforceUploadSecurity(files, strapi);
+
+    // If validation failed, throw appropriate error
+    if (securityResults.errors.length > 0) {
+      const { error } = securityResults.errors[0];
+      switch (error.code) {
+        case 'MIME_TYPE_NOT_ALLOWED':
+          throw new errors.ValidationError(error.message, { details: error.details });
+        case 'FILE_SIZE_EXCEEDED':
+          throw new errors.PayloadTooLargeError(error.message, { details: error.details });
+        default:
+          throw new errors.ApplicationError(error.message, { details: error.details });
+      }
+    }
+
     const data = (await validateUploadBody(body)) as { fileInfo: FileInfo };
-    const replacedFile = await uploadService.replace(id, { data, file: files }, { user });
+    const replacedFile = await uploadService.replace(
+      id,
+      { data, file: securityResults.validFiles[0] },
+      { user }
+    );
 
     // Sign file urls for private providers
     const signedFile = await getService('file').signFileUrls(replacedFile);
