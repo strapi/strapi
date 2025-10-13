@@ -75,6 +75,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         },
       },
       log: { warn: jest.fn() },
+      telemetry: { send: jest.fn() },
     } as any;
 
     mockValidateUploadBody.mockResolvedValue({
