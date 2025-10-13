@@ -8,15 +8,7 @@ import {
   Layouts,
 } from '@strapi/admin/strapi-admin';
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
-import {
-  Box,
-  EmptyStateLayout,
-  Field,
-  Flex,
-  Grid,
-  Toggle,
-  Typography,
-} from '@strapi/design-system';
+import { Box, EmptyStateLayout, Field, Flex, Toggle, Typography } from '@strapi/design-system';
 import { Sparkle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
@@ -119,7 +111,7 @@ const SettingsPage = () => {
                 <Typography variant="delta" tag="h2">
                   {formatMessage({
                     id: getTranslation('Settings.aiLocalizations.label'),
-                    defaultMessage: 'Generate AI translations everytime you save a content change!',
+                    defaultMessage: 'AI Translations',
                   })}
                 </Typography>
               </Flex>
@@ -127,7 +119,7 @@ const SettingsPage = () => {
                 {formatMessage({
                   id: getTranslation('Settings.aiLocalizations.description'),
                   defaultMessage:
-                    'Enable this feature to let our AI use your default locale to translate all other locales automatically, everytime you save.',
+                    'Everytime you save in the Content Manager, our AI will use your default locale to translate all other locales automatically.',
                 })}
               </Typography>
             </Flex>
