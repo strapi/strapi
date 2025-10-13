@@ -196,7 +196,9 @@ export interface EventWithoutProperties {
     | 'didEditFieldNameOnContentType'
     | 'didCreateRelease'
     | 'didStartNewChat'
-    | 'didLaunchGuidedtour';
+    | 'didLaunchGuidedtour'
+    | 'didEditAICaption'
+    | 'didEditAIAlternativeText';
   properties?: never;
 }
 
@@ -459,20 +461,6 @@ interface DidOpenKeyStatisticsWidgetLink {
   };
 }
 
-interface DidEditAICaption {
-  name: 'didEditAICaption';
-  properties: {
-    percentageOfCaptionsChanged: number;
-  };
-}
-
-interface DidEditAIAlternativeText {
-  name: 'didEditAIAlternativeText';
-  properties: {
-    percentageOfAlternativeTextChanged: number;
-  };
-}
-
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
@@ -504,9 +492,7 @@ type EventsWithProperties =
   | DidStartGuidedTour
   | DidOpenHomeWidgetLink
   | DidOpenKeyStatisticsWidgetLink
-  | WillEditEntryFromHome
-  | DidEditAICaption
-  | DidEditAIAlternativeText;
+  | WillEditEntryFromHome;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

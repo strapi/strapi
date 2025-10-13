@@ -78,26 +78,12 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
       );
 
       if (assetsToUpdate.length > 0) {
-        // Track updates
-        const totalImageAssets = state.uploadedAssets.filter((asset) => {
-          const type = typeFromMime(asset.file.mime || '');
-          return type === AssetType.Image;
-        }).length;
-
-        const percentageOfCaptionsChanged = Math.round(
-          (assetsToUpdate.filter((asset) => asset.wasCaptionChanged).length / totalImageAssets) *
-            100
-        );
-        if (percentageOfCaptionsChanged > 0) {
-          trackUsage('didEditAICaption', { percentageOfCaptionsChanged });
+        if (assetsToUpdate.some((asset) => asset.wasCaptionChanged)) {
+          trackUsage('didEditAICaption');
         }
 
-        const percentageOfAlternativeTextChanged = Math.round(
-          (assetsToUpdate.filter((asset) => asset.wasAltTextChanged).length / totalImageAssets) *
-            100
-        );
-        if (percentageOfAlternativeTextChanged > 0) {
-          trackUsage('didEditAIAlternativeText', { percentageOfAlternativeTextChanged });
+        if (assetsToUpdate.some((asset) => asset.wasAltTextChanged)) {
+          trackUsage('didEditAIAlternativeText');
         }
 
         // Update assets
