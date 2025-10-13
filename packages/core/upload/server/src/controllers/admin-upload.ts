@@ -131,16 +131,46 @@ export default {
       return ctx.forbidden();
     }
 
-    const data = await validateUploadBody(body, Array.isArray(files));
+    const securityResults = await enforceUploadSecurity(files, strapi);
 
-    let filesArray = Array.isArray(files) ? files : [files];
+    if (securityResults.validFiles.length === 0) {
+      throw new errors.ValidationError(securityResults.errors[0].error.message, {
+        details: securityResults.errors[0].error.details,
+      });
+    }
+
+    let filteredBody = body;
+    if (body?.fileInfo && Array.isArray(body.fileInfo)) {
+      const filteredFileInfo = body.fileInfo.filter((fi: string) => {
+        const info = typeof fi === 'string' ? JSON.parse(fi) : fi;
+        return securityResults.validFileNames.includes(info.name);
+      });
+
+      if (filteredFileInfo.length === 1) {
+        filteredBody = {
+          ...body,
+          fileInfo: filteredFileInfo[0],
+        };
+      } else {
+        filteredBody = {
+          ...body,
+          fileInfo: filteredFileInfo,
+        };
+      }
+    }
+
+    const isMultipleFiles =
+      Array.isArray(filteredBody.fileInfo) && filteredBody.fileInfo.length > 1;
+
+    const data = await validateUploadBody(filteredBody, isMultipleFiles);
+
+    let filesArray = securityResults.validFiles;
 
     if (
       data.fileInfo &&
       Array.isArray(data.fileInfo) &&
       filesArray.length === data.fileInfo.length
     ) {
-      // Reorder filesArray to match data.fileInfo order
       const alignedFilesArray = data.fileInfo
         .map((info) => {
           return filesArray.find((file) => file.originalFilename === info.name);
