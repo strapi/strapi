@@ -1,11 +1,12 @@
 import type { Context } from 'koa';
 
+import { errors } from '@strapi/utils';
 import adminUploadController from '../admin-upload';
 import { getService } from '../../utils';
 import { validateBulkUpdateBody, validateUploadBody } from '../validation/admin/upload';
 import * as findEntityAndCheckPermissionsModule from '../utils/find-entity-and-check-permissions';
 import { ACTIONS } from '../../constants';
-import { errors } from '@strapi/utils';
+import { enforceUploadSecurity } from '../../utils/mime-validation';
 
 jest.mock('../../utils/mime-validation', () => ({
   enforceUploadSecurity: jest.fn(() => ({
@@ -18,7 +19,6 @@ jest.mock('../../utils/mime-validation', () => ({
 jest.mock('../../utils');
 jest.mock('../validation/admin/upload');
 jest.mock('../utils/find-entity-and-check-permissions');
-import { enforceUploadSecurity } from '../../utils/mime-validation';
 const mockEnforceUploadSecurity = jest.mocked(enforceUploadSecurity);
 
 const mockGetService = getService as jest.MockedFunction<typeof getService>;
@@ -141,7 +141,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
           hashAlgorithm: "sha256" as const,
           length: 12345,
           mtime: new Date(),
-          toJSON: function () {
+          toJSON() {
             return {
               originalFilename: this.originalFilename,
               mimetype: this.mimetype,
@@ -163,7 +163,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
           hashAlgorithm: "sha256" as const,
           length: 23456,
           mtime: new Date(),
-          toJSON: function () {
+          toJSON() {
             return {
               originalFilename: this.originalFilename,
               mimetype: this.mimetype,
@@ -298,8 +298,8 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       expect(mockValidateUploadBody).toHaveBeenCalledWith(
         {
           fileInfo: [
-            {"name":"file1.jpg","folder":null, caption: "", alternativeText: ""},
-            {"name":"file2.png","folder":null, caption: "", alternativeText: ""}
+            { "name":"file1.jpg", "folder":null, caption: "", alternativeText: "" },
+            { "name":"file2.png", "folder":null, caption: "", alternativeText: "" }
           ]
         },
         true
