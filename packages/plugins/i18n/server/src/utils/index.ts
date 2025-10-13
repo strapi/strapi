@@ -5,12 +5,14 @@ import type { MetricsService } from '../services/metrics';
 import type { ISOLocalesService } from '../services/iso-locales';
 import type { LocalizationsService } from '../services/localizations';
 import type { SanitizeService } from '../services/sanitize';
+import type { SettingsService } from '../services/settings';
 
 type S = {
   permissions: PermissionsService;
   metrics: MetricsService;
   locales: LocaleService;
   localizations: LocalizationsService;
+  settings: SettingsService;
   ['iso-locales']: ISOLocalesService;
   ['content-types']: ContentTypesService;
   sanitize: SanitizeService;

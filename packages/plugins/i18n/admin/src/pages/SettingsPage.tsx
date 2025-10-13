@@ -7,7 +7,17 @@ import {
   useRBAC,
   Layouts,
 } from '@strapi/admin/strapi-admin';
-import { EmptyStateLayout } from '@strapi/design-system';
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
+import {
+  Box,
+  EmptyStateLayout,
+  Field,
+  Flex,
+  Grid,
+  Toggle,
+  Typography,
+} from '@strapi/design-system';
+import { Sparkle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
@@ -15,6 +25,7 @@ import { CreateLocale } from '../components/CreateLocale';
 import { LocaleTable } from '../components/LocaleTable';
 import { PERMISSIONS } from '../constants';
 import { useGetLocalesQuery } from '../services/locales';
+import { useGetSettingsQuery, useUpdateSettingsMutation } from '../services/settings';
 import { getTranslation } from '../utils/getTranslation';
 
 const SettingsPage = () => {
@@ -26,6 +37,15 @@ const SettingsPage = () => {
     isLoading: isLoadingRBAC,
     allowedActions: { canUpdate, canCreate, canDelete },
   } = useRBAC(PERMISSIONS);
+  const isAIAvailable = useAIAvailability();
+
+  // Settings state management
+  const {
+    data: settings,
+    isLoading: isLoadingSettings,
+    error: settingsError,
+  } = useGetSettingsQuery();
+  const [updateSettings] = useUpdateSettingsMutation();
 
   React.useEffect(() => {
     if (error) {
@@ -36,7 +56,36 @@ const SettingsPage = () => {
     }
   }, [error, formatAPIError, toggleNotification]);
 
-  const isLoading = isLoadingLocales || isLoadingRBAC;
+  React.useEffect(() => {
+    if (settingsError) {
+      toggleNotification({
+        type: 'danger',
+        message: formatAPIError(settingsError),
+      });
+    }
+  }, [settingsError, formatAPIError, toggleNotification]);
+
+  const handleToggleChange = async (checked: boolean) => {
+    try {
+      await updateSettings({ aiLocalizations: checked }).unwrap();
+
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({ id: 'notification.form.success.fields' }),
+      });
+    } catch (err) {
+      console.error(err);
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        }),
+      });
+    }
+  };
+
+  const isLoading = isLoadingLocales || isLoadingRBAC || isLoadingSettings;
 
   if (isLoading) {
     return <Page.Loading />;
@@ -60,6 +109,44 @@ const SettingsPage = () => {
         })}
       />
       <Layouts.Content>
+        {isAIAvailable && window.strapi.future.isEnabled('unstableAILocalizations') && (
+          <Flex background="neutral0" padding={6} marginBottom={6} shadow="filterShadow" hasRadius>
+            <Flex direction="column" alignItems="stretch" gap={1} flex={1}>
+              <Flex gap={1}>
+                <Box color="alternative700">
+                  <Sparkle />
+                </Box>
+                <Typography variant="delta" tag="h2">
+                  {formatMessage({
+                    id: getTranslation('Settings.aiLocalizations.label'),
+                    defaultMessage: 'Generate AI translations everytime you save a content change!',
+                  })}
+                </Typography>
+              </Flex>
+              <Typography variant="pi" textColor="neutral600" fontSize="14px">
+                {formatMessage({
+                  id: getTranslation('Settings.aiLocalizations.description'),
+                  defaultMessage:
+                    'Enable this feature to let our AI use your default locale to translate all other locales automatically, everytime you save.',
+                })}
+              </Typography>
+            </Flex>
+            <Field.Root name="aiLocalizations" minWidth="200px">
+              <Toggle
+                checked={settings?.data?.aiLocalizations ?? false}
+                offLabel={formatMessage({
+                  id: 'app.components.ToggleCheckbox.disabled-label',
+                  defaultMessage: 'Disabled',
+                })}
+                onLabel={formatMessage({
+                  id: 'app.components.ToggleCheckbox.enabled-label',
+                  defaultMessage: 'Enabled',
+                })}
+                onChange={(e) => handleToggleChange(e.target.checked)}
+              />
+            </Field.Root>
+          </Flex>
+        )}
         {locales.length > 0 ? (
           <LocaleTable locales={locales} canDelete={canDelete} canUpdate={canUpdate} />
         ) : (
