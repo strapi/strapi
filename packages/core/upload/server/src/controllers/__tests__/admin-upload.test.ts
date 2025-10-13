@@ -46,7 +46,6 @@ describe('Admin Upload Controller - AI Service Connection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Setup enforceUploadSecurity mock in beforeEach
     mockEnforceUploadSecurity.mockResolvedValue({
       validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
       validFileNames: ['test.jpg'],
@@ -207,7 +206,6 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     });
 
     it('should filter fileInfo array when some files are rejected by security', async () => {
-      // Simulate 2 files uploaded: PDF (rejected) + JPG (accepted)
       mockEnforceUploadSecurity.mockResolvedValue({
         validFiles: [{ originalFilename: 'allowed.jpg', mimetype: 'image/jpeg' }],
         validFileNames: ['allowed.jpg'],
@@ -236,12 +234,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       await adminUploadController.uploadFiles(mockContext as Context);
 
-      // Should validate with single object (not array) since only 1 file remains
       expect(mockValidateUploadBody).toHaveBeenCalledWith(
         {
           fileInfo: '{"name":"allowed.jpg","folder":null}'
         },
-        false // isMultipleFiles should be false
+        false
       );
     });
 
@@ -305,7 +302,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
             {"name":"file2.png","folder":null, caption: "", alternativeText: ""}
           ]
         },
-        true // isMultipleFiles should be true
+        true
       );
     });
 
@@ -323,7 +320,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       mockValidateUploadBody.mockResolvedValue({
         fileInfo: [
-          { name: 'file2.png', alternativeText: '', caption: '', folder: null }, // Note: different order
+          { name: 'file2.png', alternativeText: '', caption: '', folder: null },
           { name: 'file1.jpg', alternativeText: '', caption: '', folder: null }
         ]
       });
@@ -343,13 +340,13 @@ describe('Admin Upload Controller - AI Service Connection', () => {
             ])
           })
         }),
-        expect.any(Object) // user context
+        expect.any(Object)
       );
     });
 
     it('should handle non-array fileInfo body correctly', async () => {
       mockContext.request!.body = {
-        fileInfo: '{"name":"single.jpg","folder":null}' // Single string, not array
+        fileInfo: '{"name":"single.jpg","folder":null}'
       };
 
       mockValidateUploadBody.mockResolvedValue({
@@ -358,7 +355,6 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       await adminUploadController.uploadFiles(mockContext as Context);
 
-      // Should not attempt to filter since it's not an array
       expect(mockValidateUploadBody).toHaveBeenCalledWith(
         {
           fileInfo: '{"name":"single.jpg","folder":null}'
@@ -394,7 +390,6 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       mockAiMetadataService.isEnabled.mockReturnValue(true);
       mockAiMetadataService.processFiles.mockResolvedValue([{}]);
 
-      // Mock upload service to return files with proper structure
       uploadService.upload.mockResolvedValue([
         {
           id: 1,

@@ -10,10 +10,8 @@ import {
   type SecurityConfig,
 } from '../mime-validation';
 
-// Mock dependencies
 jest.mock('node:fs/promises');
 
-// Mock file-type as a CommonJS module
 jest.mock('file-type', () => ({
   fileTypeFromBuffer: jest.fn(),
 }));
@@ -21,7 +19,6 @@ jest.mock('file-type', () => ({
 const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
 const mockFileTypeFromBuffer = jest.mocked(fileTypeFromBuffer);
 
-// Mock strapi instance
 const mockStrapi = {
   log: {
     warn: jest.fn(),
@@ -305,7 +302,7 @@ describe('mime-validation', () => {
     it('should handle validation errors gracefully', async () => {
       mockReadFile.mockRejectedValue(new Error('Unexpected error'));
       mockStrapi.config.get.mockReturnValue({
-        allowedTypes: ['application/pdf'], // This will cause MIME_TYPE_NOT_ALLOWED for JPEG file
+        allowedTypes: ['application/pdf'],
       });
 
       const brokenFile = { ...mockFile1, path: '/invalid/path' };
