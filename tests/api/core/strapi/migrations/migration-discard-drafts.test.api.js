@@ -7,7 +7,6 @@ const modelsUtils = require('api-tests/models');
 
 let builder;
 let strapi;
-let rq;
 const data = {
   users: [],
   posts: [],
@@ -169,7 +168,6 @@ const metadataComponentModel = {
 const restart = async () => {
   await strapi.destroy();
   strapi = await createStrapiInstance();
-  rq = await createAuthRequest({ strapi });
 };
 
 describe('Migration - discard drafts', () => {
@@ -183,7 +181,6 @@ describe('Migration - discard drafts', () => {
       .build();
 
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
 
     // Create test data in v4 style (published entries without drafts)
     await createTestData();
@@ -198,11 +195,11 @@ describe('Migration - discard drafts', () => {
     test('Users should be published without drafts', async () => {
       const users = await strapi.db.query('api::user.user').findMany();
 
-      expect(users.length).toBe(6); // 5 published + 1 existing draft
+      expect(users.length).toBe(101); // 100 published + 1 existing draft
       const publishedUsers = users.filter((u) => u.publishedAt);
       const draftUsers = users.filter((u) => !u.publishedAt);
 
-      expect(publishedUsers.length).toBe(5);
+      expect(publishedUsers.length).toBe(100);
       expect(draftUsers.length).toBe(1);
 
       publishedUsers.forEach((user) => {
@@ -214,11 +211,11 @@ describe('Migration - discard drafts', () => {
     test('Posts should be published without drafts', async () => {
       const posts = await strapi.db.query('api::post.post').findMany();
 
-      expect(posts.length).toBe(4); // 3 published + 1 existing draft
+      expect(posts.length).toBe(76); // 75 published + 1 existing draft
       const publishedPosts = posts.filter((p) => p.publishedAt);
       const draftPosts = posts.filter((p) => !p.publishedAt);
 
-      expect(publishedPosts.length).toBe(3);
+      expect(publishedPosts.length).toBe(75);
       expect(draftPosts.length).toBe(1);
 
       publishedPosts.forEach((post) => {
@@ -230,7 +227,7 @@ describe('Migration - discard drafts', () => {
     test('Categories should exist (no draft and publish)', async () => {
       const categories = await strapi.db.query('api::category.category').findMany();
 
-      expect(categories.length).toBe(3);
+      expect(categories.length).toBe(10);
       categories.forEach((category) => {
         expect(category.publishedAt).toBeTruthy(); // Still has publishedAt in v4 style
       });
@@ -239,11 +236,11 @@ describe('Migration - discard drafts', () => {
     test('Tags should be published without drafts', async () => {
       const tags = await strapi.db.query('api::tag.tag').findMany();
 
-      expect(tags.length).toBe(5); // 4 published + 1 existing draft
+      expect(tags.length).toBe(26); // 25 published + 1 existing draft
       const publishedTags = tags.filter((t) => t.publishedAt);
       const draftTags = tags.filter((t) => !t.publishedAt);
 
-      expect(publishedTags.length).toBe(4);
+      expect(publishedTags.length).toBe(25);
       expect(draftTags.length).toBe(1);
 
       publishedTags.forEach((tag) => {
@@ -257,25 +254,25 @@ describe('Migration - discard drafts', () => {
       const posts = await strapi.db.query('api::post.post').findMany();
       const tags = await strapi.db.query('api::tag.tag').findMany();
 
-      // Should have 6 users total (5 published + 1 draft)
-      expect(users.length).toBe(6);
+      // Should have 101 users total (100 published + 1 draft)
+      expect(users.length).toBe(101);
       const publishedUsers = users.filter((u) => u.publishedAt);
       const draftUsers = users.filter((u) => !u.publishedAt);
-      expect(publishedUsers.length).toBe(5);
+      expect(publishedUsers.length).toBe(100);
       expect(draftUsers.length).toBe(1);
 
-      // Should have 4 posts total (3 published + 1 draft)
-      expect(posts.length).toBe(4);
+      // Should have 76 posts total (75 published + 1 draft)
+      expect(posts.length).toBe(76);
       const publishedPosts = posts.filter((p) => p.publishedAt);
       const draftPosts = posts.filter((p) => !p.publishedAt);
-      expect(publishedPosts.length).toBe(3);
+      expect(publishedPosts.length).toBe(75);
       expect(draftPosts.length).toBe(1);
 
-      // Should have 5 tags total (4 published + 1 draft)
-      expect(tags.length).toBe(5);
+      // Should have 26 tags total (25 published + 1 draft)
+      expect(tags.length).toBe(26);
       const publishedTags = tags.filter((t) => t.publishedAt);
       const draftTags = tags.filter((t) => !t.publishedAt);
-      expect(publishedTags.length).toBe(4);
+      expect(publishedTags.length).toBe(25);
       expect(draftTags.length).toBe(1);
 
       // Verify the draft entries have the expected data
@@ -332,14 +329,14 @@ describe('Migration - discard drafts', () => {
     test('Users should have both published and draft versions', async () => {
       const users = await strapi.db.query('api::user.user').findMany();
 
-      // Should have 11 users total: 5 published + 5 new drafts + 1 existing draft (unchanged)
-      expect(users.length).toBe(11);
+      // Should have 201 users total: 100 published + 100 new drafts + 1 existing draft (unchanged)
+      expect(users.length).toBe(201);
 
       const publishedUsers = users.filter((u) => u.publishedAt);
       const draftUsers = users.filter((u) => !u.publishedAt);
 
-      expect(publishedUsers.length).toBe(5);
-      expect(draftUsers.length).toBe(6); // 5 new drafts + 1 existing draft
+      expect(publishedUsers.length).toBe(100);
+      expect(draftUsers.length).toBe(101); // 100 new drafts + 1 existing draft
 
       // The migration should create drafts for published entries
       // Each published entry should have a corresponding draft entry
@@ -376,14 +373,14 @@ describe('Migration - discard drafts', () => {
     test('Posts should have both published and draft versions', async () => {
       const posts = await strapi.db.query('api::post.post').findMany();
 
-      // Should have 7 posts total: 3 published + 3 new drafts + 1 existing draft (unchanged)
-      expect(posts.length).toBe(7);
+      // Should have 151 posts total: 75 published + 75 new drafts + 1 existing draft (unchanged)
+      expect(posts.length).toBe(151);
 
       const publishedPosts = posts.filter((p) => p.publishedAt);
       const draftPosts = posts.filter((p) => !p.publishedAt);
 
-      expect(publishedPosts.length).toBe(3);
-      expect(draftPosts.length).toBe(4); // 3 new drafts + 1 existing draft
+      expect(publishedPosts.length).toBe(75);
+      expect(draftPosts.length).toBe(76); // 75 new drafts + 1 existing draft
 
       // Group by documentId to verify new drafts were created (only for published entries)
       const publishedPostsWithDocumentId = posts.filter((p) => p.documentId && p.publishedAt);
@@ -414,7 +411,7 @@ describe('Migration - discard drafts', () => {
     test('Categories should remain unchanged (no draft and publish)', async () => {
       const categories = await strapi.db.query('api::category.category').findMany();
 
-      expect(categories.length).toBe(3);
+      expect(categories.length).toBe(10);
       categories.forEach((category) => {
         expect(category.publishedAt).toBeTruthy();
       });
@@ -423,14 +420,14 @@ describe('Migration - discard drafts', () => {
     test('Tags should have both published and draft versions', async () => {
       const tags = await strapi.db.query('api::tag.tag').findMany();
 
-      // Should have 9 tags total: 4 published + 4 new drafts + 1 existing draft
-      expect(tags.length).toBe(9);
+      // Should have 51 tags total: 25 published + 25 new drafts + 1 existing draft
+      expect(tags.length).toBe(51);
 
       const publishedTags = tags.filter((t) => t.publishedAt);
       const draftTags = tags.filter((t) => !t.publishedAt);
 
-      expect(publishedTags.length).toBe(4);
-      expect(draftTags.length).toBe(5); // 4 new drafts + 1 existing draft
+      expect(publishedTags.length).toBe(25);
+      expect(draftTags.length).toBe(26); // 25 new drafts + 1 existing draft
 
       // Group by documentId to verify new drafts were created (only for published entries)
       const publishedTagsWithDocumentId = tags.filter((t) => t.documentId && t.publishedAt);
@@ -573,8 +570,8 @@ describe('Migration - discard drafts', () => {
         },
       });
 
-      expect(publishedPosts.length).toBe(3);
-      expect(draftPosts.length).toBe(4); // 3 new drafts + 1 existing draft
+      expect(publishedPosts.length).toBe(75);
+      expect(draftPosts.length).toBe(76); // 75 new drafts + 1 existing draft
 
       // Check that posts with components have their metadata properly copied
       const postWithMetadata = publishedPosts.find((p) => p.metadata?.length > 0);
@@ -618,7 +615,7 @@ describe('Migration - discard drafts', () => {
 
       // Verify the existing draft user's relations are preserved
       expect(existingDraftUser.bestFriend).toBeDefined();
-      expect(existingDraftUser.bestFriend.name).toBe('Alice');
+      expect(existingDraftUser.bestFriend.name).toBe('User 1');
 
       // Find the existing draft post (now has documentId due to content type migration)
       const existingDraftPosts = posts.filter((p) => !p.publishedAt && p.title === 'Draft Post');
@@ -631,21 +628,21 @@ describe('Migration - discard drafts', () => {
 
       // Verify the existing draft post's relations are preserved
       expect(existingDraftPost.author).toBeDefined();
-      expect(existingDraftPost.author.name).toBe('Alice');
+      expect(existingDraftPost.author.name).toBe('User 1');
       expect(existingDraftPost.category).toBeDefined();
       expect(existingDraftPost.tags).toBeDefined();
       expect(existingDraftPost.tags.length).toBe(1);
       expect(existingDraftPost.relatedPosts).toBeDefined();
       expect(existingDraftPost.relatedPosts.length).toBe(1);
-      expect(existingDraftPost.relatedPosts[0].title).toBe('Getting Started with React');
+      expect(existingDraftPost.relatedPosts[0].title).toBe('Post 1');
 
       // Verify no duplicate entries were created for existing drafts
       const allDraftUsers = users.filter((u) => !u.publishedAt);
       const allDraftPosts = posts.filter((p) => !p.publishedAt);
 
-      // Should have exactly 6 draft users (5 new + 1 existing) and 4 draft posts (3 new + 1 existing)
-      expect(allDraftUsers.length).toBe(6);
-      expect(allDraftPosts.length).toBe(4);
+      // Should have exactly 101 draft users (100 new + 1 existing) and 76 draft posts (75 new + 1 existing)
+      expect(allDraftUsers.length).toBe(101);
+      expect(allDraftPosts.length).toBe(76);
     });
   });
 });
@@ -661,198 +658,228 @@ function groupBy(array, key) {
 }
 
 async function createTestData() {
-  // Create users with self-referential relations
-  const user1 = await strapi.db.query('api::user.user').create({
-    data: {
-      name: 'Alice',
-      email: 'alice@example.com',
-      publishedAt: new Date(),
-    },
-  });
+  const BATCH_SIZE = 50;
+  const TOTAL_USERS = 100;
+  const TOTAL_POSTS = 75;
+  const TOTAL_TAGS = 25;
+  const TOTAL_CATEGORIES = 10;
+  const TOTAL_COMPONENTS = 20;
 
-  const user2 = await strapi.db.query('api::user.user').create({
-    data: {
-      name: 'Bob',
-      email: 'bob@example.com',
-      publishedAt: new Date(),
-    },
-  });
+  // Create categories first (no draft and publish)
+  const categories = [];
+  for (let i = 0; i < TOTAL_CATEGORIES; i += 1) {
+    const category = await strapi.db.query('api::category.category').create({
+      data: {
+        name: `Category ${i + 1}`,
+        description: `Description for category ${i + 1}`,
+        publishedAt: new Date(),
+      },
+    });
+    categories.push(category);
+  }
+  data.categories = categories;
 
-  const user3 = await strapi.db.query('api::user.user').create({
-    data: {
-      name: 'Charlie',
-      email: 'charlie@example.com',
-      publishedAt: new Date(),
-    },
-  });
+  // Create hierarchical category relationships
+  for (let i = 1; i < categories.length; i += 1) {
+    const parentIndex = Math.floor((i - 1) / 3); // Each parent has up to 3 children
+    if (parentIndex < i) {
+      await strapi.db.query('api::category.category').update({
+        where: { id: categories[i].id },
+        data: {
+          parent: categories[parentIndex].id,
+        },
+      });
+    }
+  }
 
-  const user4 = await strapi.db.query('api::user.user').create({
-    data: {
-      name: 'Diana',
-      email: 'diana@example.com',
-      publishedAt: new Date(),
-    },
-  });
+  // Update parent categories with subcategories
+  for (let i = 0; i < Math.floor(categories.length / 3); i += 1) {
+    const startChild = i * 3 + 1;
+    const endChild = Math.min(startChild + 3, categories.length);
+    const children = categories.slice(startChild, endChild).map((c) => c.id);
 
-  const user5 = await strapi.db.query('api::user.user').create({
-    data: {
-      name: 'Eve',
-      email: 'eve@example.com',
-      publishedAt: new Date(),
-    },
-  });
-
-  data.users = [user1, user2, user3, user4, user5];
-
-  // Update users with self-referential relations
-  await strapi.db.query('api::user.user').update({
-    where: { id: user1.id },
-    data: {
-      bestFriend: user2.id,
-      parent: user3.id,
-      children: [user4.id, user5.id],
-      friends: [user2.id, user3.id, user4.id],
-    },
-  });
-
-  await strapi.db.query('api::user.user').update({
-    where: { id: user2.id },
-    data: {
-      bestFriend: user1.id,
-      parent: user3.id,
-      friends: [user1.id, user3.id, user5.id],
-    },
-  });
-
-  await strapi.db.query('api::user.user').update({
-    where: { id: user3.id },
-    data: {
-      children: [user1.id, user2.id],
-      friends: [user1.id, user2.id, user4.id],
-    },
-  });
-
-  // Create categories (no draft and publish)
-  const category1 = await strapi.db.query('api::category.category').create({
-    data: {
-      name: 'Technology',
-      description: 'Tech related posts',
-      publishedAt: new Date(),
-    },
-  });
-
-  const category2 = await strapi.db.query('api::category.category').create({
-    data: {
-      name: 'Science',
-      description: 'Science related posts',
-      publishedAt: new Date(),
-    },
-  });
-
-  const category3 = await strapi.db.query('api::category.category').create({
-    data: {
-      name: 'Programming',
-      description: 'Programming related posts',
-      publishedAt: new Date(),
-      parent: category1.id,
-    },
-  });
-
-  data.categories = [category1, category2, category3];
-
-  // Update categories with self-referential relations
-  await strapi.db.query('api::category.category').update({
-    where: { id: category1.id },
-    data: {
-      subcategories: [category3.id],
-    },
-  });
+    if (children.length > 0) {
+      await strapi.db.query('api::category.category').update({
+        where: { id: categories[i].id },
+        data: {
+          subcategories: children,
+        },
+      });
+    }
+  }
 
   // Create tags
-  const tag1 = await strapi.db.query('api::tag.tag').create({
-    data: {
-      name: 'JavaScript',
-      color: '#f7df1e',
-      publishedAt: new Date(),
-    },
-  });
+  const tags = [];
+  const colors = [
+    '#f7df1e',
+    '#61dafb',
+    '#339933',
+    '#3178c6',
+    '#ff6b6b',
+    '#4ecdc4',
+    '#45b7d1',
+    '#96ceb4',
+  ];
 
-  const tag2 = await strapi.db.query('api::tag.tag').create({
-    data: {
-      name: 'React',
-      color: '#61dafb',
-      publishedAt: new Date(),
-    },
-  });
+  for (let i = 0; i < TOTAL_TAGS; i += 1) {
+    const tag = await strapi.db.query('api::tag.tag').create({
+      data: {
+        name: `Tag ${i + 1}`,
+        color: colors[i % colors.length],
+        publishedAt: new Date(),
+      },
+    });
+    tags.push(tag);
+  }
+  data.tags = tags;
 
-  const tag3 = await strapi.db.query('api::tag.tag').create({
-    data: {
-      name: 'Node.js',
-      color: '#339933',
-      publishedAt: new Date(),
-    },
-  });
+  // Create users in batches
+  const users = [];
+  for (let batch = 0; batch < Math.ceil(TOTAL_USERS / BATCH_SIZE); batch += 1) {
+    const batchUsers = [];
+    const startIndex = batch * BATCH_SIZE;
+    const endIndex = Math.min(startIndex + BATCH_SIZE, TOTAL_USERS);
 
-  const tag4 = await strapi.db.query('api::tag.tag').create({
-    data: {
-      name: 'TypeScript',
-      color: '#3178c6',
-      publishedAt: new Date(),
-    },
-  });
+    for (let i = startIndex; i < endIndex; i += 1) {
+      const user = await strapi.db.query('api::user.user').create({
+        data: {
+          name: `User ${i + 1}`,
+          email: `user${i + 1}@example.com`,
+          publishedAt: new Date(),
+        },
+      });
+      batchUsers.push(user);
+    }
+    users.push(...batchUsers);
+  }
+  data.users = users;
 
-  data.tags = [tag1, tag2, tag3, tag4];
+  // Create self-referential user relationships
+  for (let i = 0; i < users.length; i += 1) {
+    const user = users[i];
+    const relationships = {
+      bestFriend: null,
+      parent: null,
+      children: [],
+      friends: [],
+    };
 
-  // Create posts
-  const post1 = await strapi.db.query('api::post.post').create({
-    data: {
-      title: 'Getting Started with React',
-      content: 'Learn the basics of React development',
-      author: user1.id,
-      category: category1.id,
-      tags: [tag1.id, tag2.id],
-      publishedAt: new Date(),
-    },
-  });
+    // Best friend (one-to-one): pair users
+    if (i % 2 === 0 && i + 1 < users.length) {
+      relationships.bestFriend = users[i + 1].id;
+    } else if (i % 2 === 1 && i - 1 >= 0) {
+      relationships.bestFriend = users[i - 1].id;
+    }
 
-  const post2 = await strapi.db.query('api::post.post').create({
-    data: {
-      title: 'Advanced Node.js Patterns',
-      content: 'Deep dive into Node.js advanced patterns',
-      author: user2.id,
-      category: category1.id,
-      tags: [tag3.id, tag4.id],
-      publishedAt: new Date(),
-    },
-  });
+    // Parent (many-to-one): every 5th user has a parent
+    if (i >= 5 && i % 5 === 0) {
+      relationships.parent = users[i - 5].id;
+    }
 
-  const post3 = await strapi.db.query('api::post.post').create({
-    data: {
-      title: 'JavaScript Best Practices',
-      content: 'Essential JavaScript best practices',
-      author: user3.id,
-      category: category3.id,
-      tags: [tag1.id, tag4.id],
-      publishedAt: new Date(),
-    },
-  });
+    // Children (one-to-many): users with indices 0, 5, 10, 15... have children
+    if (i % 5 === 0) {
+      const childStart = i + 1;
+      const childEnd = Math.min(i + 5, users.length);
+      relationships.children = users.slice(childStart, childEnd).map((u) => u.id);
+    }
 
-  data.posts = [post1, post2, post3];
+    // Friends (many-to-many): each user has 3-7 friends
+    const friendCount = 3 + (i % 5);
+    const friendIndices = new Set();
+    while (friendIndices.size < friendCount) {
+      const friendIndex = Math.floor(Math.random() * users.length);
+      if (friendIndex !== i) {
+        friendIndices.add(friendIndex);
+      }
+    }
+    relationships.friends = Array.from(friendIndices).map((idx) => users[idx].id);
 
-  // Update posts with self-referential relations
-  await strapi.db.query('api::post.post').update({
-    where: { id: post1.id },
-    data: {
-      relatedPosts: [post2.id, post3.id],
-    },
-  });
+    // Update user with relationships
+    await strapi.db.query('api::user.user').update({
+      where: { id: user.id },
+      data: relationships,
+    });
+  }
 
-  await strapi.db.query('api::post.post').update({
-    where: { id: post2.id },
-    data: {
-      relatedPosts: [post1.id, post3.id],
-    },
-  });
+  // Create component instances
+  const components = [];
+  for (let i = 0; i < TOTAL_COMPONENTS; i += 1) {
+    const component = await strapi.db.query('default.metadata').create({
+      data: {
+        title: `Metadata ${i + 1}`,
+        description: `Description for metadata component ${i + 1}`,
+      },
+    });
+    components.push(component);
+  }
+  data.components = components;
+
+  // Create posts in batches
+  const posts = [];
+  for (let batch = 0; batch < Math.ceil(TOTAL_POSTS / BATCH_SIZE); batch += 1) {
+    const batchPosts = [];
+    const startIndex = batch * BATCH_SIZE;
+    const endIndex = Math.min(startIndex + BATCH_SIZE, TOTAL_POSTS);
+
+    for (let i = startIndex; i < endIndex; i += 1) {
+      const post = await strapi.db.query('api::post.post').create({
+        data: {
+          title: `Post ${i + 1}`,
+          content: `Content for post ${i + 1}`,
+          author: users[i % users.length].id,
+          category: categories[i % categories.length].id,
+          tags: tags.slice(i % 10, (i % 10) + 3), // 3 tags per post
+          publishedAt: new Date(),
+        },
+      });
+      batchPosts.push(post);
+    }
+    posts.push(...batchPosts);
+  }
+  data.posts = posts;
+
+  // Create self-referential post relationships
+  for (let i = 0; i < posts.length; i += 1) {
+    const post = posts[i];
+    const relatedCount = 2 + (i % 4); // 2-5 related posts
+    const relatedIndices = new Set();
+
+    while (relatedIndices.size < relatedCount) {
+      const relatedIndex = Math.floor(Math.random() * posts.length);
+      if (relatedIndex !== i) {
+        relatedIndices.add(relatedIndex);
+      }
+    }
+
+    const relatedPosts = Array.from(relatedIndices).map((idx) => posts[idx].id);
+
+    await strapi.db.query('api::post.post').update({
+      where: { id: post.id },
+      data: {
+        relatedPosts,
+      },
+    });
+  }
+
+  // Add components to posts
+  for (let i = 0; i < posts.length; i += 1) {
+    const post = posts[i];
+    const componentCount = 1 + (i % 3); // 1-3 components per post
+    const componentIndices = [];
+
+    for (let j = 0; j < componentCount; j += 1) {
+      componentIndices.push((i + j) % components.length);
+    }
+
+    const postComponents = componentIndices.map((idx) => components[idx].id);
+
+    await strapi.db.query('api::post.post').update({
+      where: { id: post.id },
+      data: {
+        metadata: postComponents,
+      },
+    });
+  }
 
   // Create some entries that were already drafts in v4 (these should NOT be duplicated)
   const draftUser = await strapi.db.query('api::user.user').create({
@@ -860,7 +887,7 @@ async function createTestData() {
       name: 'Draft User',
       email: 'draft@example.com',
       publishedAt: null, // This is a draft in v4
-      bestFriend: user1.id, // Has relations
+      bestFriend: users[0].id, // Has relations
     },
   });
 
@@ -868,11 +895,11 @@ async function createTestData() {
     data: {
       title: 'Draft Post',
       content: 'This is a draft post from v4',
-      author: user1.id,
-      category: category1.id,
-      tags: [tag1.id],
+      author: users[0].id,
+      category: categories[0].id,
+      tags: [tags[0].id],
       publishedAt: null, // This is a draft in v4
-      relatedPosts: [post1.id], // Has relations
+      relatedPosts: [posts[0].id], // Has relations
     },
   });
 
@@ -885,43 +912,4 @@ async function createTestData() {
   });
 
   data.draftEntries = [draftUser, draftPost, draftTag];
-
-  await strapi.db.query('api::post.post').update({
-    where: { id: post3.id },
-    data: {
-      relatedPosts: [post1.id, post2.id],
-    },
-  });
-
-  // Create component instances
-  const metadata1 = await strapi.db.query('default.metadata').create({
-    data: {
-      title: 'Metadata 1',
-      description: 'First metadata component',
-    },
-  });
-
-  const metadata2 = await strapi.db.query('default.metadata').create({
-    data: {
-      title: 'Metadata 2',
-      description: 'Second metadata component',
-    },
-  });
-
-  data.components = [metadata1, metadata2];
-
-  // Add components to posts
-  await strapi.db.query('api::post.post').update({
-    where: { id: post1.id },
-    data: {
-      metadata: [metadata1.id, metadata2.id],
-    },
-  });
-
-  await strapi.db.query('api::post.post').update({
-    where: { id: post2.id },
-    data: {
-      metadata: [metadata2.id],
-    },
-  });
 }
