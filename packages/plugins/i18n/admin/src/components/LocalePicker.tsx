@@ -53,18 +53,30 @@ const LocalePicker = () => {
     }
   }, [hasI18n, handleChange, locales, query.plugins?.i18n?.locale]);
 
+  const sortedLocaleOptions = React.useMemo(() => {
+    const displayedLocales = Array.isArray(locales)
+      ? locales.filter((locale) => {
+          /**
+           * If you can create or read we allow you to see the locale exists
+           * this is because in the ListView, you may be able to create a new entry
+           * in a locale you can't read.
+           */
+          return canCreate.includes(locale.code) || canRead.includes(locale.code);
+        })
+      : [];
+
+    return displayedLocales
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((locale) => (
+        <SingleSelectOption key={locale.id} value={locale.code}>
+          {locale.name}
+        </SingleSelectOption>
+      ));
+  }, [locales, canCreate, canRead]);
+
   if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
     return null;
   }
-
-  const displayedLocales = locales.filter((locale) => {
-    /**
-     * If you can create or read we allow you to see the locale exists
-     * this is because in the ListView, you may be able to create a new entry
-     * in a locale you can't read.
-     */
-    return canCreate.includes(locale.code) || canRead.includes(locale.code);
-  });
 
   return (
     <SingleSelect
@@ -77,13 +89,7 @@ const LocalePicker = () => {
       // @ts-expect-error – This can be removed in V2 of the DS.
       onChange={handleChange}
     >
-      {displayedLocales
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((locale) => (
-          <SingleSelectOption key={locale.id} value={locale.code}>
-            {locale.name}
-          </SingleSelectOption>
-        ))}
+      {sortedLocaleOptions}
     </SingleSelect>
   );
 };
