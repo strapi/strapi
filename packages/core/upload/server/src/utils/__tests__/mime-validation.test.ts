@@ -16,7 +16,7 @@ jest.mock('file-type', () => ({
   fileTypeFromBuffer: jest.fn(),
 }));
 
-const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
+const mockReadFile = jest.mocked(readFile);
 const mockFileTypeFromBuffer = jest.mocked(fileTypeFromBuffer);
 
 const mockStrapi = {
