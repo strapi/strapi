@@ -12,8 +12,8 @@ jest.mock('../../utils/mime-validation', () => ({
   enforceUploadSecurity: jest.fn(() => ({
     validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
     validFileNames: ['test.jpg'],
-    errors: []
-  }))
+    errors: [],
+  })),
 }));
 
 jest.mock('../../utils');
@@ -49,7 +49,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     mockEnforceUploadSecurity.mockResolvedValue({
       validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
       validFileNames: ['test.jpg'],
-      errors: []
+      errors: [],
     });
 
     mockAiMetadataService = {
@@ -133,7 +133,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
           size: 12345,
           filepath: '/tmp/test1.jpg',
           newFilename: 'test1.jpg',
-          hashAlgorithm: "sha256" as const,
+          hashAlgorithm: 'sha256' as const,
           length: 12345,
           mtime: new Date(),
           toJSON() {
@@ -147,7 +147,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
               length: this.length,
               mtime: this.mtime,
             };
-          }
+          },
         },
         {
           originalFilename: 'test2.pdf',
@@ -155,7 +155,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
           size: 23456,
           filepath: '/tmp/test2.pdf',
           newFilename: 'test2.pdf',
-          hashAlgorithm: "sha256" as const,
+          hashAlgorithm: 'sha256' as const,
           length: 23456,
           mtime: new Date(),
           toJSON() {
@@ -169,8 +169,8 @@ describe('Admin Upload Controller - AI Service Connection', () => {
               length: this.length,
               mtime: this.mtime,
             };
-          }
-        }
+          },
+        },
       ];
 
       mockContext.request!.files = { files };
@@ -187,17 +187,19 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         errors: [
           {
             error: {
-              message: 'MIME type not allowed', details: {},
-              code: 'MIME_TYPE_NOT_ALLOWED'
+              message: 'MIME type not allowed',
+              details: {},
+              code: 'MIME_TYPE_NOT_ALLOWED',
             },
             file: { originalFilename: 'test.exe' },
-            originalIndex: 0
-          }
-        ]
+            originalIndex: 0,
+          },
+        ],
       });
 
-      await expect(adminUploadController.uploadFiles(mockContext as Context))
-        .rejects.toThrow(errors.ValidationError);
+      await expect(adminUploadController.uploadFiles(mockContext as Context)).rejects.toThrow(
+        errors.ValidationError
+      );
     });
 
     it('should filter fileInfo array when some files are rejected by security', async () => {
@@ -207,31 +209,29 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         errors: [
           {
             error: {
-              message: 'MIME type not allowed', details: {},
-              code: 'MIME_TYPE_NOT_ALLOWED'
+              message: 'MIME type not allowed',
+              details: {},
+              code: 'MIME_TYPE_NOT_ALLOWED',
             },
             file: { originalFilename: 'blocked.pdf' },
-            originalIndex: 0
-          }
-        ]
+            originalIndex: 0,
+          },
+        ],
       });
 
       mockContext.request!.body = {
-        fileInfo: [
-          '{"name":"blocked.pdf","folder":null}',
-          '{"name":"allowed.jpg","folder":null}'
-        ]
+        fileInfo: ['{"name":"blocked.pdf","folder":null}', '{"name":"allowed.jpg","folder":null}'],
       };
 
       mockValidateUploadBody.mockResolvedValue({
-        fileInfo: { name: 'allowed.jpg', folder: null, alternativeText: '', caption: '' }
+        fileInfo: { name: 'allowed.jpg', folder: null, alternativeText: '', caption: '' },
       });
 
       await adminUploadController.uploadFiles(mockContext as Context);
 
       expect(mockValidateUploadBody).toHaveBeenCalledWith(
         {
-          fileInfo: '{"name":"allowed.jpg","folder":null}'
+          fileInfo: '{"name":"allowed.jpg","folder":null}',
         },
         false
       );
@@ -241,24 +241,22 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       mockEnforceUploadSecurity.mockResolvedValue({
         validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
         validFileNames: ['test.jpg'],
-        errors: []
+        errors: [],
       });
 
       mockContext.request!.body = {
-        fileInfo: [
-          '{"name":"test.jpg","folder":null}'
-        ]
+        fileInfo: ['{"name":"test.jpg","folder":null}'],
       };
 
       mockValidateUploadBody.mockResolvedValue({
-        fileInfo: { name: 'test.jpg', folder: null, alternativeText: '', caption: '' }
+        fileInfo: { name: 'test.jpg', folder: null, alternativeText: '', caption: '' },
       });
 
       await adminUploadController.uploadFiles(mockContext as Context);
 
       expect(mockValidateUploadBody).toHaveBeenCalledWith(
         {
-          fileInfo: '{"name":"test.jpg","folder":null}'
+          fileInfo: '{"name":"test.jpg","folder":null}',
         },
         false
       );
@@ -268,24 +266,24 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       mockEnforceUploadSecurity.mockResolvedValue({
         validFiles: [
           { originalFilename: 'file1.jpg', mimetype: 'image/jpeg' },
-          { originalFilename: 'file2.png', mimetype: 'image/png' }
+          { originalFilename: 'file2.png', mimetype: 'image/png' },
         ],
         validFileNames: ['file1.jpg', 'file2.png'],
-        errors: []
+        errors: [],
       });
 
       mockContext.request!.body = {
         fileInfo: [
           { name: 'file1.jpg', alternativeText: '', caption: '', folder: null },
-          { name: 'file2.png', alternativeText: '', caption: '', folder: null }
-        ]
+          { name: 'file2.png', alternativeText: '', caption: '', folder: null },
+        ],
       };
 
       mockValidateUploadBody.mockResolvedValue({
         fileInfo: [
           { name: 'file1.jpg', alternativeText: '', caption: '', folder: null },
-          { name: 'file2.png', alternativeText: '', caption: '', folder: null }
-        ]
+          { name: 'file2.png', alternativeText: '', caption: '', folder: null },
+        ],
       });
 
       await adminUploadController.uploadFiles(mockContext as Context);
@@ -293,9 +291,9 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       expect(mockValidateUploadBody).toHaveBeenCalledWith(
         {
           fileInfo: [
-            { "name":"file1.jpg", "folder":null, caption: "", alternativeText: "" },
-            { "name":"file2.png", "folder":null, caption: "", alternativeText: "" }
-          ]
+            { name: 'file1.jpg', folder: null, caption: '', alternativeText: '' },
+            { name: 'file2.png', folder: null, caption: '', alternativeText: '' },
+          ],
         },
         true
       );
@@ -304,20 +302,20 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     it('should align filesArray with filtered fileInfo data', async () => {
       const validFiles = [
         { originalFilename: 'file1.jpg', mimetype: 'image/jpeg' },
-        { originalFilename: 'file2.png', mimetype: 'image/png' }
+        { originalFilename: 'file2.png', mimetype: 'image/png' },
       ];
 
       mockEnforceUploadSecurity.mockResolvedValue({
         validFiles,
         validFileNames: ['file1.jpg', 'file2.png'],
-        errors: []
+        errors: [],
       });
 
       mockValidateUploadBody.mockResolvedValue({
         fileInfo: [
           { name: 'file2.png', alternativeText: '', caption: '', folder: null },
-          { name: 'file1.jpg', alternativeText: '', caption: '', folder: null }
-        ]
+          { name: 'file1.jpg', alternativeText: '', caption: '', folder: null },
+        ],
       });
 
       await adminUploadController.uploadFiles(mockContext as Context);
@@ -326,14 +324,14 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         expect.objectContaining({
           files: expect.arrayContaining([
             expect.objectContaining({ originalFilename: 'file2.png' }),
-            expect.objectContaining({ originalFilename: 'file1.jpg' })
+            expect.objectContaining({ originalFilename: 'file1.jpg' }),
           ]),
           data: expect.objectContaining({
             fileInfo: expect.arrayContaining([
               expect.objectContaining({ name: 'file2.png' }),
-              expect.objectContaining({ name: 'file1.jpg' })
-            ])
-          })
+              expect.objectContaining({ name: 'file1.jpg' }),
+            ]),
+          }),
         }),
         expect.any(Object)
       );
@@ -341,18 +339,18 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
     it('should handle non-array fileInfo body correctly', async () => {
       mockContext.request!.body = {
-        fileInfo: '{"name":"single.jpg","folder":null}'
+        fileInfo: '{"name":"single.jpg","folder":null}',
       };
 
       mockValidateUploadBody.mockResolvedValue({
-        fileInfo: { name: 'single.jpg', folder: null, alternativeText: '', caption: '' }
+        fileInfo: { name: 'single.jpg', folder: null, alternativeText: '', caption: '' },
       });
 
       await adminUploadController.uploadFiles(mockContext as Context);
 
       expect(mockValidateUploadBody).toHaveBeenCalledWith(
         {
-          fileInfo: '{"name":"single.jpg","folder":null}'
+          fileInfo: '{"name":"single.jpg","folder":null}',
         },
         false
       );
@@ -367,16 +365,17 @@ describe('Admin Upload Controller - AI Service Connection', () => {
             error: {
               message: 'File size exceeds limit',
               details: { fileSize: 10000000, maxFileSize: 1000000 },
-              code: 'MIME_TYPE_NOT_ALLOWED'
+              code: 'MIME_TYPE_NOT_ALLOWED',
             },
             file: { originalFilename: 'large-file.jpg' },
-            originalIndex: 0
-          }
-        ]
+            originalIndex: 0,
+          },
+        ],
       });
 
-      await expect(adminUploadController.uploadFiles(mockContext as Context))
-        .rejects.toThrow('File size exceeds limit');
+      await expect(adminUploadController.uploadFiles(mockContext as Context)).rejects.toThrow(
+        'File size exceeds limit'
+      );
     });
   });
 
@@ -428,7 +427,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     it('should update files with AI metadata when available', async () => {
       mockAiMetadataService.isEnabled.mockReturnValue(true);
       mockAiMetadataService.processFiles.mockResolvedValue([
-        { altText: 'AI generated alt text', caption: 'AI generated caption' }
+        { altText: 'AI generated alt text', caption: 'AI generated caption' },
       ]);
 
       uploadService.upload.mockResolvedValue([
