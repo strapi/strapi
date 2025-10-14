@@ -171,6 +171,7 @@ export default {
       Array.isArray(data.fileInfo) &&
       filesArray.length === data.fileInfo.length
     ) {
+      // Reorder filesArray to match data.fileInfo order
       const alignedFilesArray = data.fileInfo
         .map((info) => {
           return filesArray.find((file) => file.originalFilename === info.name);
