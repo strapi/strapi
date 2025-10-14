@@ -65,13 +65,13 @@ describe('Settings Page', () => {
 
     render(<SettingsPage />);
 
-    // Wait for the page to load
+    // Wait for the page to load completely
     await screen.findByRole('heading', { name: 'Internationalization' });
 
     // Check that AI Translations section is visible
-    expect(screen.getByRole('heading', { name: 'AI Translations' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'AI Translations' })).toBeInTheDocument();
     expect(
-      screen.getByText(
+      await screen.findByText(
         /Everytime you save in the Content Manager, our AI will use your default locale to translate all other locales automatically/i
       )
     ).toBeInTheDocument();
