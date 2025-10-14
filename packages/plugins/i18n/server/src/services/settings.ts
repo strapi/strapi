@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from '@strapi/types';
 import type { Settings } from '../validation/settings';
 import validateSettings from '../validation/settings';
 
