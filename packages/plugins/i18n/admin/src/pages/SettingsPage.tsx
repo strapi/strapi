@@ -1,14 +1,24 @@
 import * as React from 'react';
 
+import { SerializedError } from '@reduxjs/toolkit';
 import {
   Page,
   useAPIErrorHandler,
   useNotification,
   useRBAC,
   Layouts,
+  BaseQueryError,
 } from '@strapi/admin/strapi-admin';
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
-import { Box, EmptyStateLayout, Field, Flex, Toggle, Typography } from '@strapi/design-system';
+import {
+  Box,
+  EmptyStateLayout,
+  Field,
+  Flex,
+  Tooltip,
+  Toggle,
+  Typography,
+} from '@strapi/design-system';
 import { Sparkle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
@@ -20,10 +30,23 @@ import { useGetLocalesQuery } from '../services/locales';
 import { useGetSettingsQuery, useUpdateSettingsMutation } from '../services/settings';
 import { getTranslation } from '../utils/getTranslation';
 
+const SettingsErrrorTooltip = ({
+  children,
+  error,
+}: {
+  children: React.ReactNode;
+  error: BaseQueryError | SerializedError | undefined;
+}) => {
+  if (error) {
+    return <Tooltip label="An error occurred">{children}</Tooltip>;
+  }
+
+  return children;
+};
+
 const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { data: locales, isLoading: isLoadingLocales, error } = useGetLocalesQuery();
   const {
     isLoading: isLoadingRBAC,
@@ -38,24 +61,6 @@ const SettingsPage = () => {
     error: settingsError,
   } = useGetSettingsQuery();
   const [updateSettings] = useUpdateSettingsMutation();
-
-  React.useEffect(() => {
-    if (error) {
-      toggleNotification({
-        type: 'danger',
-        message: formatAPIError(error),
-      });
-    }
-  }, [error, formatAPIError, toggleNotification]);
-
-  React.useEffect(() => {
-    if (settingsError) {
-      toggleNotification({
-        type: 'danger',
-        message: formatAPIError(settingsError),
-      });
-    }
-  }, [settingsError, formatAPIError, toggleNotification]);
 
   const handleToggleChange = async (checked: boolean) => {
     try {
@@ -124,18 +129,21 @@ const SettingsPage = () => {
               </Typography>
             </Flex>
             <Field.Root name="aiLocalizations" minWidth="200px">
-              <Toggle
-                checked={settings?.data?.aiLocalizations ?? false}
-                offLabel={formatMessage({
-                  id: 'app.components.ToggleCheckbox.disabled-label',
-                  defaultMessage: 'Disabled',
-                })}
-                onLabel={formatMessage({
-                  id: 'app.components.ToggleCheckbox.enabled-label',
-                  defaultMessage: 'Enabled',
-                })}
-                onChange={(e) => handleToggleChange(e.target.checked)}
-              />
+              <SettingsErrrorTooltip error={settingsError}>
+                <Toggle
+                  disabled={true}
+                  checked={settings?.data?.aiLocalizations ?? false}
+                  offLabel={formatMessage({
+                    id: 'app.components.ToggleCheckbox.disabled-label',
+                    defaultMessage: 'Disabled',
+                  })}
+                  onLabel={formatMessage({
+                    id: 'app.components.ToggleCheckbox.enabled-label',
+                    defaultMessage: 'Enabled',
+                  })}
+                  onChange={(e) => handleToggleChange(e.target.checked)}
+                />
+              </SettingsErrrorTooltip>
             </Field.Root>
           </Flex>
         )}
