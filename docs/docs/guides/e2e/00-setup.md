@@ -65,7 +65,7 @@ yarn test:e2e --domains admin -- --debug
 yarn test:e2e --domains admin -- login.spec.ts --debug
 ```
 
-### Concurrency / parallellization
+### Concurrency / parallelization
 
 By default, every domain is run with its own test app in parallel with the other domains. The tests within a domain are run in series, one at a time.
 

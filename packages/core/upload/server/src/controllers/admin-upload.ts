@@ -114,8 +114,12 @@ export default {
 
     const data = await validateUploadBody(body, Array.isArray(files));
     const filesArray = Array.isArray(files) ? files : [files];
+
     // Upload files first to get thumbnails
     const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
+    if (uploadedFiles.some((file) => file.mime?.startsWith('image/'))) {
+      strapi.telemetry.send('didUploadImage');
+    }
 
     const aiMetadataService = getService('aiMetadata');
 

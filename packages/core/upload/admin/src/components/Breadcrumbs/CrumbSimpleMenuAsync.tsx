@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { CrumbSimpleMenu, Loader, MenuItem } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getFolderParents, getFolderURL, getTrad } from '../../utils';
@@ -22,6 +22,7 @@ export const CrumbSimpleMenuAsync = ({
   const [shouldFetch, setShouldFetch] = React.useState(false);
   const { data, isLoading } = useFolderStructure({ enabled: shouldFetch });
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
 
@@ -71,12 +72,12 @@ export const CrumbSimpleMenuAsync = ({
           }
 
           const url = getFolderURL(pathname, query, {
-            folder: typeof ascendant?.id === 'string' ? ascendant.id : undefined,
+            folder: String(ascendant.id),
             folderPath: ascendant?.path,
           });
 
           return (
-            <MenuItem isLink href={url} key={ascendant.id}>
+            <MenuItem key={ascendant.id} onClick={() => navigate(url)}>
               {ascendant.label}
             </MenuItem>
           );

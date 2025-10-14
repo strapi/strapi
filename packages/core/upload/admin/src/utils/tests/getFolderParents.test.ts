@@ -41,9 +41,9 @@ describe('getFolderParents', () => {
   test('should return ascendants', () => {
     const result = getFolderParents(FIXTURE_FOLDER_STRUCTURE, 3);
     const expected = [
-      { id: null, label: 'Media Library' },
-      { id: 1, label: 'First folder' },
-      { id: 2, label: 'Second folder' },
+      { id: null, label: 'Media Library', path: '' },
+      { id: 1, label: 'First folder', path: '/1' },
+      { id: 2, label: 'Second folder', path: '/1/2' },
     ];
 
     expect(result).toEqual(expected);
@@ -52,10 +52,10 @@ describe('getFolderParents', () => {
   test('should not return parent siblings', () => {
     const result = getFolderParents(FIXTURE_FOLDER_STRUCTURE, 5);
     const expected = [
-      { id: null, label: 'Media Library' },
-      { id: 1, label: 'First folder' },
-      { id: 2, label: 'Second folder' },
-      { id: 3, label: 'Third folder' },
+      { id: null, label: 'Media Library', path: '' },
+      { id: 1, label: 'First folder', path: '/1' },
+      { id: 2, label: 'Second folder', path: '/1/2' },
+      { id: 3, label: 'Third folder', path: '/1/2/3' },
     ];
 
     expect(result).toEqual(expected);
