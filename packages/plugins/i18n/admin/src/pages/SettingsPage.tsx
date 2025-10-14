@@ -36,7 +36,7 @@ const SettingsPage = () => {
     data: settings,
     isLoading: isLoadingSettings,
     error: settingsError,
-  } = useGetSettingsQuery();
+  } = useGetSettingsQuery(undefined, { skip: !isAIAvailable });
   const [updateSettings] = useUpdateSettingsMutation();
 
   React.useEffect(() => {
