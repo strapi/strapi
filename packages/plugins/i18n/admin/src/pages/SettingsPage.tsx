@@ -131,7 +131,7 @@ const SettingsPage = () => {
             <Field.Root name="aiLocalizations" minWidth="200px">
               <SettingsErrrorTooltip error={settingsError}>
                 <Toggle
-                  disabled={true}
+                  disabled={Boolean(settingsError)}
                   checked={settings?.data?.aiLocalizations ?? false}
                   offLabel={formatMessage({
                     id: 'app.components.ToggleCheckbox.disabled-label',
