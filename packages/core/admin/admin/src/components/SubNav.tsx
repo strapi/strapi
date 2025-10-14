@@ -354,7 +354,7 @@ const PageWrapper = styled(Box)`
 `;
 
 const Content = ({ children }: { children: React.ReactNode }) => {
-  return <ScrollArea>{children}</ScrollArea>;
+  return <>{children}</>;
 };
 
 export const SubNav = {
