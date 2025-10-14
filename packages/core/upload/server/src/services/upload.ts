@@ -223,7 +223,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       files,
     }: {
       data: Record<string, unknown>;
-      files: InputFile | InputFile[];
+      files: InputFile[];
     },
     opts?: CommonOptions
   ) {

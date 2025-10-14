@@ -61,7 +61,7 @@ export const FromComputerForm = ({
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    inputRef.current?.click();
+    // inputRef.current?.click();
   };
 
   const handleChange = () => {
@@ -159,14 +159,14 @@ export const FromComputerForm = ({
                   onChange={handleChange}
                 />
 
-                <Box position="relative">
+                {/* <Box position="relative">
                   <Button type="button" onClick={handleClick}>
                     {formatMessage({
                       id: getTrad('input.button.label'),
                       defaultMessage: 'Browse files',
                     })}
                   </Button>
-                </Box>
+                </Box> */}
               </Wrapper>
             </Flex>
           </MediaBox>

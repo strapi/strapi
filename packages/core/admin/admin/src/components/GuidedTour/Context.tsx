@@ -3,6 +3,7 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { useTracking } from '../../features/Tracking';
+import { useIsDesktop } from '../../hooks/useMediaQuery';
 import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
@@ -57,12 +58,27 @@ type Action =
   | {
       type: 'remove_completed_action';
       payload: ValueOf<CompletedActions>;
+    }
+  | {
+      type: 'set_tour_type';
+      payload: {
+        tourName: ValidTourName;
+        tourType: 'ContentTypeBuilderAI' | 'ContentTypeBuilderNoAI';
+      };
+    }
+  | {
+      type: 'set_hidden';
+      payload: boolean;
     };
 
-type TourState = Record<ValidTourName, { currentStep: number; isCompleted: boolean }>;
+type TourState = Record<
+  ValidTourName,
+  { currentStep: number; isCompleted: boolean; tourType?: string }
+>;
 type State = {
   tours: TourState;
   enabled: boolean;
+  hidden?: boolean;
   completedActions: CompletedActions;
 };
 
@@ -76,6 +92,7 @@ const getInitialTourState = (tours: Tours) => {
     acc[tourName as ValidTourName] = {
       currentStep: 0,
       isCompleted: false,
+      tourType: undefined,
     };
 
     return acc;
@@ -128,6 +145,10 @@ function reducer(state: State, action: Action): State {
       draft.enabled = false;
     }
 
+    if (action.type === 'set_hidden') {
+      draft.hidden = action.payload;
+    }
+
     if (action.type === 'reset_all_tours') {
       draft.enabled = true;
       draft.tours = getInitialTourState(guidedTours);
@@ -136,6 +157,18 @@ function reducer(state: State, action: Action): State {
 
     if (action.type === 'go_to_step') {
       draft.tours[action.payload.tourName].currentStep = action.payload.step;
+    }
+
+    if (action.type === 'set_tour_type') {
+      const { tourName, tourType } = action.payload;
+      const currentTour = draft.tours[tourName];
+
+      // If tour type changes and tour is not completed, reset to step 0
+      if (currentTour.tourType && currentTour.tourType !== tourType && !currentTour.isCompleted) {
+        currentTour.currentStep = 0;
+      }
+
+      currentTour.tourType = tourType;
     }
   });
 }
@@ -148,14 +181,21 @@ const GuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
+  const isDesktop = useIsDesktop();
   const { trackUsage } = useTracking();
   const [storedTours, setStoredTours] = usePersistentState<State>(STORAGE_KEY, {
     tours: getInitialTourState(guidedTours),
     enabled,
+    hidden: !isDesktop,
     completedActions: [],
   });
   const migratedTourState = migrateTours(storedTours);
   const [state, dispatch] = React.useReducer(reducer, migratedTourState);
+
+  // Watch for changes to enabled prop to update state
+  React.useEffect(() => {
+    dispatch({ type: 'set_hidden', payload: !isDesktop });
+  }, [isDesktop]);
 
   // Sync local storage
   React.useEffect(() => {
