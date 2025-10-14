@@ -98,6 +98,12 @@ const createAgent = (strapi, initialState = {}) => {
       return this.assignState({ headers });
     },
 
+    asHTTPS() {
+      const httpsHeaders = { 'x-forwarded-proto': 'https', 'x-forwarded-port': '443' };
+      const merged = Object.assign({}, state.headers || {}, httpsHeaders);
+      return this.setHeaders(merged);
+    },
+
     getLoggedUser() {
       return state.loggedUser;
     },
