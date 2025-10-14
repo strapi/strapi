@@ -117,7 +117,7 @@ const Span = styled(Flex)`
     height: 12px;
 
     fill: ${({ theme }) => theme.colors.neutral500};
-    cursor: pointer;
+
     path {
       fill: ${({ theme }) => theme.colors.neutral500};
     }
