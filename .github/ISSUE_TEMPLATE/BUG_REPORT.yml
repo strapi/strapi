@@ -1,11 +1,11 @@
 name: 🐛 Bug Report
-description: Help us improve this repository by filing a detailed bug report.
+description: Report a bug to help us improve this repository.
 body:
   - type: input
     id: nodeVersion
     attributes:
-      label: Node Version
-      description: The version of Node.js you are using (only LTS versions are supported).
+      label: Node.js Version
+      description: Version of Node.js (only LTS versions are supported).
       placeholder: 20.0.0
     validations:
       required: true
@@ -13,9 +13,9 @@ body:
   - type: input
     id: pmVersion
     attributes:
-      label: NPM/Yarn/PNPM Version
-      description: The package manager and version you are using.
-      placeholder: NPM 10.0.0
+      label: Package Manager Version
+      description: Specify your package manager and version (npm, yarn, pnpm, etc.).
+      placeholder: npm 10.0.0
     validations:
       required: true
 
@@ -23,7 +23,7 @@ body:
     id: strapiVersion
     attributes:
       label: Strapi Version
-      description: The version of Strapi you are using ("Latest" is not a valid response).
+      description: Exact Strapi version in use (not “latest”).
       placeholder: 5.7.0
     validations:
       required: true
@@ -32,11 +32,10 @@ body:
     id: os
     attributes:
       label: Operating System
-      description: Select the operating system where you are experiencing the issue.
-      multiple: false
+      description: Select the OS where the issue occurs.
       options:
         - Strapi Cloud
-        - MacOS
+        - macOS
         - Linux (Debian/Ubuntu)
         - Linux (RedHat/CentOS)
         - Linux (Other)
@@ -51,8 +50,7 @@ body:
     id: database
     attributes:
       label: Database
-      description: Select the database type you are using.
-      multiple: false
+      description: Select the database you’re using.
       options:
         - Strapi Cloud
         - SQLite
@@ -66,12 +64,11 @@ body:
   - type: dropdown
     id: codeType
     attributes:
-      label: Javascript or Typescript
-      description: Select the code language your project is using.
-      multiple: false
+      label: Language
+      description: Select the language your project uses.
       options:
-        - Javascript
-        - Typescript
+        - JavaScript
+        - TypeScript
         - Other
     validations:
       required: true
@@ -80,36 +77,36 @@ body:
     id: url
     attributes:
       label: Reproduction URL
-      description: If you would like to provide a link to a repository that reproduces the issue, please provide it here.
+      description: (Optional) Link to a repository reproducing the issue.
       placeholder: https://github.com/strapi/LaunchPad
-    validations:
-      required: false
 
   - type: textarea
+    id: bugDescription
     attributes:
       label: Bug Description
-      description: Provide a clear and concise description of the issue or unexpected behavior.
-      placeholder: When fetching data from the REST API, I see a HTTP 500 error response.
+      description: Describe the issue clearly and concisely.
+      placeholder: Example: When fetching data from the REST API, I get a 500 error.
     validations:
       required: true
 
   - type: textarea
+    id: steps
     attributes:
       label: Steps to Reproduce
-      description: Provide a detailed, step-by-step guide on how to reproduce the issue. Include code snippets or links to repositories if applicable.
+      description: Step-by-step guide to reproduce the issue.
       placeholder: |
-        Example:
-          1. Create a content type in Strapi with fields: title, content.
-          2. Add test data to the new content type
-          3. Perform a REST API call to fetch the data
-          4. Observe the unexpected behavior or error in the response/output.
+        1. Create a content type with fields: title, content
+        2. Add sample data
+        3. Fetch data via REST API
+        4. Observe the unexpected behavior
     validations:
       required: true
 
   - type: textarea
+    id: expected
     attributes:
       label: Expected Behavior
-      description: Provide a detailed explanation of what you expected to happen instead of the observed issue. Be as specific as possible.
+      description: Explain what you expected to happen.
     validations:
       required: true
 
@@ -117,34 +114,33 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: If available, please provide the logs generated either in the Browser or Server Side console.
+      description: Include relevant logs (server or browser console).
       render: shell
 
   - type: textarea
     id: codeSnippets
     attributes:
       label: Code Snippets
-      description: If available, please add any code snippets (content-type schemas, custom code, ect) to illustrate the issue.
+      description: Include related code snippets if applicable.
 
   - type: textarea
-    id: screenshots
+    id: media
     attributes:
-      label: Media
-      description: If available, please upload screenshots or videos to illustrate the issue.
+      label: Screenshots or Videos
+      description: Add screenshots or videos illustrating the issue.
 
   - type: textarea
-    id: informationContext
+    id: additionalInfo
     attributes:
-      label: Additional information
-      description: If available, please add any additional information you may find useful to help us understand the issue.
+      label: Additional Information
+      description: Any other details that might help debug the issue.
 
   - type: checkboxes
     id: checklist
     attributes:
       label: Confirmation Checklist
       options:
-        - label: I have checked the existing [issues](https://github.com/strapi/strapi/issues) for duplicates.
+        - label: I have checked for duplicate [issues](https://github.com/strapi/strapi/issues).
           required: true
-
-        - label: I agree to follow this project's [Code of Conduct](https://github.com/strapi/strapi/blob/develop/CODE_OF_CONDUCT.md).
+        - label: I agree to follow this project’s [Code of Conduct](https://github.com/strapi/strapi/blob/develop/CODE_OF_CONDUCT.md).
           required: true
