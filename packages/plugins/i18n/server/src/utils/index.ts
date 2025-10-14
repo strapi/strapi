@@ -23,7 +23,9 @@ const getCoreStore = () => {
 };
 
 // retrieve a local service
-const getService = <T extends keyof S>(name: T): ReturnType<S[T]> => {
+const getService = <T extends keyof S>(
+  name: T
+): S[T] extends (...args: any) => any ? ReturnType<S[T]> : S[T] => {
   return strapi.plugin('i18n').service(name);
 };
 

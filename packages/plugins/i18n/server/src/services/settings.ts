@@ -1,14 +1,18 @@
-import type { Settings } from '../controllers/validation/settings';
+import type { Core } from '@strapi/strapi';
+import type { Settings } from '../validation/settings';
+import validateSettings from '../validation/settings';
 
-const settingsService = () => {
+const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const settings = strapi.store!({ type: 'plugin', name: 'i18n', key: 'settings' });
+
   async function getSettings() {
-    const res = await strapi.store!({ type: 'plugin', name: 'i18n', key: 'settings' }).get({});
+    const res = await settings.get({});
 
-    return res as Settings | null;
+    return validateSettings(res);
   }
 
   function setSettings(value: Settings) {
-    return strapi.store!({ type: 'plugin', name: 'i18n', key: 'settings' }).set({ value });
+    return settings.set({ value });
   }
 
   return {
@@ -17,6 +21,5 @@ const settingsService = () => {
   };
 };
 
-export default settingsService;
-
-export type SettingsService = typeof settingsService;
+export { createSettingsService };
+export type SettingsService = ReturnType<typeof createSettingsService>;

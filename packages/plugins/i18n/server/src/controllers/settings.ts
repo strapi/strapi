@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
 
 import { getService } from '../utils';
-import validateSettings from './validation/settings';
+import validateSettings from '../validation/settings';
 
 export default {
   async updateSettings(ctx: Context) {
