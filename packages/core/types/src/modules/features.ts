@@ -1,5 +1,7 @@
 export interface FeaturesConfig {
-  future?: Record<string, unknown>;
+  future?: {
+    unstableAILocalizations?: boolean;
+  };
 }
 
 export interface FeaturesService {
