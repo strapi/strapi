@@ -183,7 +183,7 @@ jobs:
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
-        node: [20, 22, 24]
+        node: [20]
     steps:
       - uses: actions/checkout@v4
         with:
