@@ -83,24 +83,51 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       };
     },
 
-    async create(uid: UID.CollectionType, opts: DocServiceParams<'create'> = {} as any) {
-      const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, status: 'draft' as const, populate };
+        const sanitizeComponentIds = (data: any) => {
+  const dynamicZoneField = 'blocks';
 
-      return strapi.documents(uid).create(params);
-    },
+  if (data?.[dynamicZoneField] && Array.isArray(data[dynamicZoneField])) {
+    // Create a new data object to avoid mutating the original
+    const newData = { ...data };
+    const componentsToClean = cloneDeep(newData[dynamicZoneField]);
+    
+    // Create a new array of components, explicitly omitting the 'id' from each.
+    // This is a safer pattern than using `delete` and resolves security hotspot warnings.
+    const sanitizedComponents = componentsToClean.map((component: any) => {
+      const { id, ...rest } = component;
+      return rest;
+    });
 
-    async update(
-      id: Modules.Documents.ID,
-      uid: UID.CollectionType,
-      opts: Omit<DocServiceParams<'update'>, 'documentId'> = {} as any
-    ) {
-      const publishData = pipe(omitPublishedAtField, omitIdField)(opts.data || {});
-      const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, data: publishData, populate, status: 'draft' };
+    newData[dynamicZoneField] = sanitizedComponents;
+    return newData;
+  }
+  
+  // Return the original data if no changes are needed
+  return data;
+};
 
-      return strapi.documents(uid).update({ ...params, documentId: id });
-    },
+   async create(uid: UID.CollectionType, opts: DocServiceParams<'create'> = {} as any) {
+  const data = sanitizeComponentIds(opts.data); // Use the helper function
+
+  const populate = opts.populate ?? (await buildDeepPopulate(uid));
+  const params = { ...opts, data, status: 'draft' as const, populate };
+
+  return strapi.documents(uid).create(params);
+},
+
+async update(
+  id: Modules.Documents.ID,
+  uid: UID.CollectionType,
+  opts: Omit<DocServiceParams<'update'>, 'documentId'> = {} as any
+) {
+  const data = sanitizeComponentIds(opts.data); // Use the same helper function
+
+  const publishData = pipe(omitPublishedAtField, omitIdField)(data || {});
+  const populate = opts.populate ?? (await buildDeepPopulate(uid));
+  const params = { ...opts, data: publishData, populate, status: 'draft' };
+
+  return strapi.documents(uid).update({ ...params, documentId: id });
+},
 
     async clone(
       id: Modules.Documents.ID,
