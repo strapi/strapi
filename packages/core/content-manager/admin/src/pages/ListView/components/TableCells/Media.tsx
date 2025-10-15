@@ -10,15 +10,15 @@ import type { Data } from '@strapi/types';
 interface MediaFile {
   id?: Data.ID;
   alternativeText?: string;
-  ext: string;
-  formats: {
+  ext?: string;
+  formats?: {
     thumbnail?: {
       url?: string;
     };
   };
-  mime: string;
-  name: string;
-  url: string;
+  mime?: string;
+  name?: string;
+  url?: string;
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -30,6 +30,11 @@ interface MediaSingleProps extends MediaFile {}
 const getFileExtension = (ext: string) => (ext && ext[0] === '.' ? ext.substring(1) : ext);
 
 const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSingleProps) => {
+  // Return null if required props are missing
+  if (!url || !mime || !name || !ext) {
+    return null;
+  }
+
   const fileURL = prefixFileUrlWithBackendUrl(url)!;
 
   if (mime.includes('image')) {
