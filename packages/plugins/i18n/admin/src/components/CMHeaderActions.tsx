@@ -163,9 +163,17 @@ const LocalePickerAction = ({
     ? locales.find((locale) => locale.code === currentDesiredLocale)
     : undefined;
 
+  // Use meta.availableLocales instead of document.localizations
+  // meta.availableLocales contains all locales for the document, even when creating new locales
+  const availableLocales = meta?.availableLocales ?? [];
+  const documentLocalizations = document?.localizations ?? [];
+
+  // Prefer meta.availableLocales as it's more reliable, fallback to document.localizations
+  const allLocalizations = availableLocales.length > 0 ? availableLocales : documentLocalizations;
+
   const allCurrentLocales = [
     { status: getDocumentStatus(document, meta), locale: currentLocale?.code },
-    ...(document?.localizations ?? []),
+    ...allLocalizations,
   ];
 
   if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {

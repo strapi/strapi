@@ -37,7 +37,11 @@ const createProvider = (emailConfig: EmailConfig) => {
   try {
     provider = require(modulePath);
   } catch (err) {
-    throw new Error(`Could not load email provider "${providerName}".`);
+    const newError = new Error(`Could not load email provider "${providerName}".`);
+    if (err instanceof Error) {
+      newError.stack = err.stack;
+    }
+    throw newError;
   }
 
   return provider.init(emailConfig.providerOptions, emailConfig.settings);
