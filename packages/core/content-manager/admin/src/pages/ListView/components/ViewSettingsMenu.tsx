@@ -123,12 +123,13 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
       tag="fieldset"
       direction="column"
       alignItems="stretch"
-      gap={3}
+      gap={1}
       borderWidth={0}
       maxHeight={'240px'}
-      overflow={'scroll'}
+      padding={1}
+      overflow={'auto'}
     >
-      <Flex justifyContent="space-between">
+      <Flex justifyContent="space-between" gap={2}>
         <Typography tag="legend" variant="pi" fontWeight="bold">
           {formatMessage({
             id: 'containers.list.displayedFields',
@@ -155,6 +156,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
               background={isActive ? 'primary100' : 'transparent'}
               hasRadius
               padding={2}
+              marginBottom={1}
               key={header.name}
             >
               <Checkbox
