@@ -68,14 +68,18 @@ export declare namespace Homepage {
 
   export interface Layout {
     version: number;
-    order: WidgetUID[];
-    widths: Record<WidgetUID, Width>;
+    widgets: Array<{
+      uid: WidgetUID;
+      width: Width;
+    }>;
     updatedAt: string;
   }
 
   export interface LayoutWrite {
-    order: WidgetUID[];
-    widths: Record<WidgetUID, Width>;
+    widgets: Array<{
+      uid: WidgetUID;
+      width: Width;
+    }>;
   }
 }
 
