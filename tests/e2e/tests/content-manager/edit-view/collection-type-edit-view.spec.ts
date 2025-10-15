@@ -20,7 +20,7 @@ test.describe('Edit View', () => {
     test.fixme(
       'as a user I want to be warned if I try to publish content that has draft relations',
       async ({ page }) => {
-        clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+        await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
         await page.getByRole('link', { name: 'Create new entry' }).click();
 
         // Wait for the URL to match the CREATE_URL pattern
@@ -66,7 +66,7 @@ test.describe('Edit View', () => {
       page,
     }) => {
       // As super admin create a new draft product entry
-      clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
       await page.getByRole('link', { name: 'Products' }).click();
       await page.getByRole('link', { name: 'Create new entry' }).click();
 
@@ -93,7 +93,7 @@ test.describe('Edit View', () => {
       // As editor login and try to publish the entry
       await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
 
-      clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
       await page.getByRole('link', { name: 'Products' }).click();
       await page.getByText(slug).click();
       await page.getByRole('button', { name: 'Publish' }).click();
