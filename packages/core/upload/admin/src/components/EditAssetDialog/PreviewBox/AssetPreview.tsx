@@ -33,21 +33,21 @@ export const AssetPreview = React.forwardRef<
 >(({ mime, url, name, ...props }, ref) => {
   const theme = useTheme();
 
-  const documentType = typeFromMime(mime);
+  const assetType = typeFromMime(mime);
 
   const { formatMessage } = useIntl();
 
-  if (documentType === AssetType.Image) {
+  if (assetType === AssetType.Image) {
     return (
       <img ref={ref as React.ForwardedRef<HTMLImageElement>} src={url} alt={name} {...props} />
     );
   }
 
-  if (documentType === AssetType.Video) {
+  if (assetType === AssetType.Video) {
     return <MuxPlayer src={url} accentColor={theme.colors.primary500} />;
   }
 
-  if (documentType === AssetType.Audio) {
+  if (assetType === AssetType.Audio) {
     return (
       <Box margin="5">
         <audio controls src={url} ref={ref as React.ForwardedRef<HTMLAudioElement>} {...props}>
@@ -59,7 +59,7 @@ export const AssetPreview = React.forwardRef<
 
   // getFileIconComponent will handle all other file types, eg. PDF, CSV, XLS, ZIP
   // If the file type is not recognized, the default icon will be used
-  const IconComponent = getFileIconComponent(documentType);
+  const IconComponent = getFileIconComponent(assetType);
   return (
     <CardAsset width="100%" justifyContent="center" {...props}>
       <Flex gap={2} direction="column" alignItems="center">
