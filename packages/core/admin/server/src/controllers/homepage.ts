@@ -1,39 +1,27 @@
-import type { Core } from '@strapi/types';
-import * as yup from 'yup';
-import { errors } from '@strapi/utils';
+import type { Context } from 'koa';
 import { getService } from '../utils';
-import type { GetRecentDocuments } from '../../../shared/contracts/homepage';
+import { HomepageLayout, HomepageLayoutWrite } from './validation/schema';
 
-const createHomepageController = () => {
-  const homepageService = getService('homepage');
+export default {
+  async getKeyStatistics(): Promise<{
+    data: Awaited<ReturnType<typeof homepageService.getKeyStatistics>>;
+  }> {
+    const homepageService = getService('homepage');
+    return { data: await homepageService.getKeyStatistics() };
+  },
+  async getHomepageLayout(ctx: Context): Promise<{ data: HomepageLayout | null }> {
+    const homepageService = getService('homepage');
+    const userId = ctx.state.user?.id;
 
-  const recentDocumentParamsSchema = yup.object().shape({
-    action: yup
-      .mixed<GetRecentDocuments.Request['query']['action']>()
-      .oneOf(['update', 'publish'])
-      .required(),
-  });
+    const data = await homepageService.getHomepageLayout(userId);
+    return { data };
+  },
+  async updateHomepageLayout(ctx: Context): Promise<{ data: HomepageLayout }> {
+    const homepageService = getService('homepage');
+    const userId = ctx.state.user?.id;
 
-  return {
-    async getRecentDocuments(ctx): Promise<GetRecentDocuments.Response> {
-      let action;
-
-      try {
-        action = (await recentDocumentParamsSchema.validate(ctx.query)).action;
-      } catch (error) {
-        if (error instanceof yup.ValidationError) {
-          throw new errors.ValidationError(error.message);
-        }
-        throw error;
-      }
-
-      if (action === 'publish') {
-        return { data: await homepageService.getRecentlyPublishedDocuments() };
-      }
-
-      return { data: await homepageService.getRecentlyUpdatedDocuments() };
-    },
-  } satisfies Core.Controller;
+    const body = ctx.request.body as HomepageLayoutWrite;
+    const data = await homepageService.updateHomepageLayout(userId, body);
+    return { data };
+  },
 };
-
-export { createHomepageController };

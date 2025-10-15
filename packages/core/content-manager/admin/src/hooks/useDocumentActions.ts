@@ -6,7 +6,6 @@ import {
   useTracking,
   type TrackingEvent,
   useAPIErrorHandler,
-  useGuidedTour,
 } from '@strapi/admin/strapi-admin';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -73,6 +72,7 @@ type UseDocumentActions = (
   autoClone: (args: {
     model: string;
     sourceId: string;
+    locale?: string;
   }) => Promise<OperationResponse<AutoClone.Response>>;
   clone: (
     args: {
@@ -200,7 +200,6 @@ const useDocumentActions: UseDocumentActions = () => {
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
-  const setCurrentStep = useGuidedTour('useDocumentActions', (state) => state.setCurrentStep);
 
   // Get metadata from context providers for tracking purposes
   const previewContext = usePreviewContext('useDocumentActions', () => true, false);
@@ -602,8 +601,12 @@ const useDocumentActions: UseDocumentActions = () => {
 
           return { error: res.error };
         }
-
-        trackUsage('didCreateEntry', { ...trackerProperty, documentId: res.data.data.documentId });
+        trackUsage('didCreateEntry', {
+          ...trackerProperty,
+          documentId: res.data.data.documentId,
+          fromPreview,
+          fromRelationModal,
+        });
 
         toggleNotification({
           type: 'success',
@@ -612,8 +615,6 @@ const useDocumentActions: UseDocumentActions = () => {
             defaultMessage: 'Saved document',
           }),
         });
-
-        setCurrentStep('contentManager.success');
 
         return res.data;
       } catch (err) {
@@ -627,16 +628,25 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [createDocument, formatAPIError, formatMessage, setCurrentStep, toggleNotification, trackUsage]
+    [
+      createDocument,
+      formatAPIError,
+      formatMessage,
+      fromPreview,
+      fromRelationModal,
+      toggleNotification,
+      trackUsage,
+    ]
   );
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();
   const autoClone: IUseDocumentActs['autoClone'] = React.useCallback(
-    async ({ model, sourceId }) => {
+    async ({ model, sourceId, locale }) => {
       try {
         const res = await autoCloneDocument({
           model,
           sourceId,
+          params: locale ? { locale } : undefined,
         });
 
         if ('error' in res) {
@@ -668,7 +678,8 @@ const useDocumentActions: UseDocumentActions = () => {
   const clone: IUseDocumentActs['clone'] = React.useCallback(
     async ({ model, documentId, params }, body, trackerProperty) => {
       try {
-        const { id: _id, ...restBody } = body;
+        // Omit id and documentId so they are not copied to the clone
+        const { id: _id, documentId: _documentId, ...restBody } = body;
 
         /**
          * If we're cloning we want to post directly to this endpoint

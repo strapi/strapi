@@ -7,6 +7,7 @@ const {
   template: { createStrictInterpolationRegExp },
   errors,
   objects,
+  sanitizeRoutesMapForSerialization,
 } = require('@strapi/utils');
 
 const { getService } = require('../utils');
@@ -99,7 +100,8 @@ module.exports = ({ strapi }) => ({
       }
     });
 
-    return actionMap;
+    // Return a deeply cloned version to avoid circular references
+    return _.cloneDeep(actionMap);
   },
 
   async getRoutes() {
@@ -147,7 +149,7 @@ module.exports = ({ strapi }) => ({
       }));
     });
 
-    return routesMap;
+    return sanitizeRoutesMapForSerialization(routesMap);
   },
 
   async syncPermissions() {

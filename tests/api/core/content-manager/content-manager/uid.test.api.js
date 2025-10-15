@@ -321,11 +321,12 @@ describe('Content Manager single types', () => {
         error: {
           status: 400,
           name: 'ValidationError',
-          message: 'value must match the following: "/^[A-Za-z0-9-_.~]*$/"',
+          message: 'value must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"',
           details: {
             errors: [
               {
-                message: 'value must match the following: "/^[A-Za-z0-9-_.~]*$/"',
+                message:
+                  'value must match the custom regex or the default one "/^[A-Za-z0-9-_.~]*$/"',
                 name: 'ValidationError',
                 path: ['value'],
               },

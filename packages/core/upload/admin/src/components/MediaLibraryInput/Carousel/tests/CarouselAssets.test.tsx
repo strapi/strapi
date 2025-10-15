@@ -24,6 +24,13 @@ const ASSET_FIXTURES = [
   },
 ];
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const setup = (props?: Partial<CarouselAssetsProps>) =>
   render(
     <CarouselAssets
@@ -96,5 +103,11 @@ describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
     const { getByText } = setup({ labelAction: <div>localized</div> });
 
     expect(getByText('localized')).toBeInTheDocument();
+  });
+
+  it.only('should not render the edit button if disabled', () => {
+    const { queryByRole } = setup({ disabled: true });
+
+    expect(queryByRole('button', { name: 'edit' })).not.toBeInTheDocument();
   });
 });

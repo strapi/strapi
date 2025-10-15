@@ -1,7 +1,8 @@
 import fs from 'fs';
 import { join } from 'path';
 import sharp from 'sharp';
-import { file as fileUtils } from '@strapi/utils';
+import crypto from 'crypto';
+import { strings, file as fileUtils } from '@strapi/utils';
 
 import { getService } from '../utils';
 
@@ -294,6 +295,13 @@ const isImage = async (file: UploadableFile) => {
   return format && FORMATS_TO_PROCESS.includes(format);
 };
 
+const generateFileName = (name: string) => {
+  const randomSuffix = () => crypto.randomBytes(5).toString('hex');
+  const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
+
+  return `${baseName}_${randomSuffix()}`;
+};
+
 export default {
   isFaultyImage,
   isOptimizableImage,
@@ -303,4 +311,5 @@ export default {
   generateResponsiveFormats,
   generateThumbnail,
   optimize,
+  generateFileName,
 };

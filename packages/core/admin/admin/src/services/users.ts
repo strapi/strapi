@@ -22,7 +22,7 @@ const usersService = adminApi
           data: body,
         }),
         transformResponse: (response: Users.Create.Response) => response.data,
-        invalidatesTags: ['LicenseLimits', { type: 'User', id: 'LIST' }],
+        invalidatesTags: ['LicenseLimits', { type: 'User', id: 'LIST' }, 'HomepageKeyStatistics'],
       }),
       updateUser: builder.mutation<
         Users.Update.Response['data'],
@@ -91,7 +91,7 @@ const usersService = adminApi
           data: body,
         }),
         transformResponse: (res: Users.DeleteMany.Response) => res.data,
-        invalidatesTags: ['LicenseLimits', { type: 'User', id: 'LIST' }],
+        invalidatesTags: ['LicenseLimits', { type: 'User', id: 'LIST' }, 'HomepageKeyStatistics'],
       }),
       /**
        * roles

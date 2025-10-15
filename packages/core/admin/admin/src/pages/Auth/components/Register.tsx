@@ -14,7 +14,6 @@ import {
 } from '../../../../../shared/contracts/authentication';
 import { Form, FormHelpers } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
-import { useGuidedTour } from '../../../components/GuidedTour/Provider';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useTypedDispatch } from '../../../core/store/hooks';
@@ -29,6 +28,7 @@ import {
   useRegisterUserMutation,
 } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { getOrCreateDeviceId } from '../../../utils/deviceId';
 import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
@@ -149,7 +149,7 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
   confirmPassword: yup
     .string()
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Confirm password is required',
     })
     .nullable()
@@ -196,7 +196,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const setSkipped = useGuidedTour('Register', (state) => state.setSkipped);
   const { search: searchString } = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const match = useMatch('/auth/:authType');
@@ -235,22 +234,10 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },
     setFormErrors: FormHelpers<RegisterFormValues>['setErrors']
   ) => {
-    const res = await registerAdmin(body);
+    const res = await registerAdmin({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
       dispatch(login({ token: res.data.token }));
-
-      const { roles } = res.data.user;
-
-      if (roles) {
-        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
-
-        if (isUserSuperAdmin) {
-          localStorage.setItem('GUIDED_TOUR_SKIPPED', JSON.stringify(false));
-          setSkipped(false);
-          trackUsage('didLaunchGuidedtour');
-        }
-      }
 
       if (news) {
         // Only enable EE survey if user accepted the newsletter
@@ -281,7 +268,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     { news, ...body }: RegisterUser.Request['body'] & { news: boolean },
     setFormErrors: FormHelpers<RegisterFormValues>['setErrors']
   ) => {
-    const res = await registerUser(body);
+    const res = await registerUser({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
       dispatch(login({ token: res.data.token }));

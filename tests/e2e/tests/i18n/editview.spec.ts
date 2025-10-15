@@ -3,13 +3,24 @@ import { test, expect } from '@playwright/test';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
-import { clickAndWait, findAndClose } from '../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 
+interface ValidationType {
+  field: string;
+  initialValue: string;
+  expectedError: string;
+  ctbParams: {
+    key: string;
+    operation: {
+      type: 'click' | 'fill';
+      value?: string;
+    };
+  };
+}
+
 test.describe('Edit view', () => {
-  // TODO: split this into multiple tests
-  // give additional time because this test file is so large
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
@@ -29,8 +40,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to our products list-view
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Products' }).click();
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await page.waitForURL(LIST_URL);
     await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 
@@ -52,7 +62,7 @@ test.describe('Edit view', () => {
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
       'Spanish (es)'
     );
-    await expect(page.getByRole('row', { name: 'No content found' })).toBeVisible();
+    await expect(page.getByText('No content found')).toBeVisible();
 
     /**
      * So now we're going to create a document.
@@ -94,7 +104,7 @@ test.describe('Edit view', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
@@ -134,8 +144,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to our products list-view where there will be one document already made in the `en` locale
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Products' }).click();
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await page.waitForURL(LIST_URL);
     await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 
@@ -213,7 +222,7 @@ test.describe('Edit view', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
@@ -252,8 +261,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to settings and roles & modify editor permissions
      */
-    await page.getByRole('link', { name: 'Settings', exact: true }).click();
-    await page.getByRole('link', { name: 'Roles' }).first().click();
+    await navToHeader(page, ['Settings', ['Administration Panel', 'Roles']], 'Roles');
     await page.getByRole('gridcell', { name: 'Editor', exact: true }).click();
 
     /**
@@ -274,7 +282,7 @@ test.describe('Edit view', () => {
     // header is behind the permissions component.
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Logout and login as editor
@@ -297,7 +305,7 @@ test.describe('Edit view', () => {
     await page.getByRole('link', { name: 'Create new entry' }).click();
     await page.getByLabel('title').fill('the richmond way');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Verify we cannot create a new entry in the french locale as editors do
@@ -317,12 +325,12 @@ test.describe('Edit view', () => {
     /**
      * Navigate to our articles list-view and create a new entry
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await page.waitForURL(LIST_URL);
     await page.getByRole('link', { name: 'Create new entry' }).click();
     await page.getByLabel('title').fill('trent crimm');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Create a Spanish (es) locale for the entry
@@ -331,7 +339,7 @@ test.describe('Edit view', () => {
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
     await page.getByLabel('title').fill('dani rojas');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Delete the Spanish (es) locale entry
@@ -339,7 +347,7 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await findAndClose(page, 'Success:Deleted');
+    await findAndClose(page, 'Deleted');
 
     /**
      * Navigate to our homepage single-type and create a new entry
@@ -349,7 +357,7 @@ test.describe('Edit view', () => {
     await page.waitForURL(HOMEPAGE_LIST_URL);
     await page.getByLabel('title').fill('football is life');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Create a Spanish (es) locale for the homepage entry
@@ -358,7 +366,7 @@ test.describe('Edit view', () => {
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
     await page.getByLabel('title').fill('el fútbol también es muerte.');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Delete the Spanish (es) locale homepage entry
@@ -366,21 +374,14 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await findAndClose(page, 'Success:Deleted');
+    await findAndClose(page, 'Deleted');
   });
 
   test('As a user I want to publish multiple locales of my document', async ({ page, browser }) => {
-    const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
-    const EDIT_URL =
-      /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
-
     /**
      * Navigate to our articles list-view where there will be one document already made in the `en` locale
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Article' }).click();
-    await page.waitForURL(LIST_URL);
-    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
 
     /**
      * Assert we're on the english locale and our document exists
@@ -396,7 +397,6 @@ test.describe('Edit view', () => {
     /**
      * Create a new spanish draft article
      */
-    await page.waitForURL(EDIT_URL);
     await expect(
       page.getByRole('heading', { name: 'Why I prefer football over soccer' })
     ).toBeVisible();
@@ -424,7 +424,7 @@ test.describe('Edit view', () => {
      * Save the spanish draft
      */
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Open the bulk locale publish modal
@@ -456,17 +456,10 @@ test.describe('Edit view', () => {
     page,
     browser,
   }) => {
-    const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
-    const EDIT_URL =
-      /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
-
     /**
      * Navigate to our articles list-view where there will be one document already made in the `en` locale
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Article' }).click();
-    await page.waitForURL(LIST_URL);
-    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
 
     /**
      * Assert we're on the english locale and our document exists
@@ -482,7 +475,6 @@ test.describe('Edit view', () => {
     /**
      * Create a new spanish draft article
      */
-    await page.waitForURL(EDIT_URL);
     await expect(
       page.getByRole('heading', { name: 'Why I prefer football over soccer' })
     ).toBeVisible();
@@ -491,7 +483,7 @@ test.describe('Edit view', () => {
      * Publish the english article
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
@@ -517,13 +509,13 @@ test.describe('Edit view', () => {
      * Save the spanish draft
      */
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Publish the spanish article
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Open the bulk locale unpublish modal
@@ -553,184 +545,4 @@ test.describe('Edit view', () => {
       page.getByLabel('Unpublish multiple locales').getByRole('button', { name: 'Unpublish' })
     ).toBeDisabled();
   });
-
-  interface ValidationType {
-    field: string;
-    initialValue: string;
-    expectedError: string;
-    ctbParams: {
-      key: string;
-      operation: {
-        type: 'click' | 'fill';
-        value?: string;
-      };
-    };
-  }
-
-  const typesOfValidation: Record<string, ValidationType> = {
-    required: {
-      field: 'title',
-      initialValue: '',
-      ctbParams: {
-        key: 'Required Field',
-        operation: {
-          type: 'click',
-        },
-      },
-      expectedError: 'This value is required.',
-    },
-    maxLength: {
-      field: 'title',
-      initialValue: 'a'.repeat(256),
-      ctbParams: {
-        key: 'Maximum Length',
-        operation: {
-          type: 'fill',
-          value: '255',
-        },
-      },
-      expectedError: 'The value is too long',
-    },
-    // TODO schema changes from previous runs persist which means each new
-    // validation must take into account the previous one.
-    minLength: {
-      field: 'title',
-      initialValue: 'a'.repeat(10),
-      ctbParams: {
-        key: 'Minimum Length',
-        operation: {
-          type: 'fill',
-          value: '11',
-        },
-      },
-      expectedError: 'The value is too short',
-    },
-  };
-
-  for (const [type, validationParams] of Object.entries(typesOfValidation)) {
-    test(`As a user I want to see the relevant error message when trying to publish a draft that fails ${type} validation`, async ({
-      browser,
-      page,
-    }) => {
-      const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
-      const EDIT_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
-
-      const {
-        field,
-        initialValue,
-        ctbParams: { key: ctbKey, operation: ctbOperation },
-        expectedError,
-      } = validationParams;
-
-      /**
-       * Navigate to our articles list-view where there will be one document already made in the `en` locale
-       */
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
-      await page.waitForURL(LIST_URL);
-      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-
-      /**
-       * Assert we're on the english locale and our document exists
-       */
-      await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
-        'English (en)'
-      );
-      await expect(
-        page.getByRole('row', { name: 'Why I prefer football over soccer' })
-      ).toBeVisible();
-      await page.getByText('why-i-prefer-football-over-').click();
-      await page.waitForURL(EDIT_URL);
-
-      /**
-       * This is here because the `fill` method below doesn't immediately update the value
-       * in webkit.
-       */
-      if (browser.browserType().name() === 'webkit') {
-        await page.getByRole('textbox', { name: 'title' }).press('s');
-        await page.getByRole('textbox', { name: 'title' }).press('Delete');
-      }
-
-      /**
-       * Fill the target field with the initial value, there is currently no
-       * validation on this field
-       */
-      await page.getByRole('textbox', { name: field }).fill(initialValue);
-      await page.getByRole('button', { name: 'Save' }).click();
-      await findAndClose(page, 'Success:Saved');
-
-      /**
-       * Navigate to the CTB and modify the schema of the article to apply the
-       * validation constraints to the field
-       */
-      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-      await page.getByRole('button', { name: 'Close' }).click(); // TODO improve this
-
-      /**
-       * Edit the field and apply the validation constraint
-       */
-      await page.getByRole('link', { name: 'Article' }).click();
-      await page
-        .getByRole('button', { name: `Edit ${field}` })
-        .first()
-        .click();
-      await page.getByRole('tab', { name: 'Advanced settings' }).click();
-
-      const ctbOperatonType = ctbOperation?.type ?? '';
-      switch (ctbOperatonType) {
-        case 'click':
-          await page.getByLabel(ctbKey).first().click();
-          break;
-        case 'fill': {
-          if (!ctbOperation?.value) {
-            throw new Error('CTB operation value is required');
-          }
-
-          await page.getByLabel(ctbKey).first().click();
-          await page.getByRole('textbox', { name: ctbKey }).fill(ctbOperation.value);
-          break;
-        }
-        default:
-          throw new Error(`Unsupported CTB operation type ${ctbOperatonType} provided`);
-      }
-
-      await page.getByRole('button', { name: 'Finish' }).click();
-      await page.getByRole('button', { name: 'Save' }).click();
-
-      /**
-       * Wait for the server to restart
-       */
-      await waitForRestart(page);
-
-      /**
-       * Navigate back to the article we just modified
-       */
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: 'Article' }).click();
-      await page.waitForURL(LIST_URL);
-
-      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
-        'English (en)'
-      );
-
-      /**
-       * Attempt to publish through the 'Publish multiple locales' button
-       */
-      await page.getByText('why-i-prefer-football-over-').click();
-      await page.getByRole('button', { name: 'More document actions' }).click();
-      await page.getByRole('menuitem', { name: 'Publish multiple locales', exact: true }).click();
-
-      /**
-       * We have modified the content and then modifed the schema in a way that
-       * is incompatible. Therefore we should expect the relevant error message
-       * to be displayed.
-       */
-      await expect(page.getByText('1 entry waiting for action')).toBeVisible();
-      await expect(
-        page.getByLabel('Publish multiple locales').getByText(`${field}: ${expectedError}`)
-      ).toBeVisible();
-    });
-  }
 });

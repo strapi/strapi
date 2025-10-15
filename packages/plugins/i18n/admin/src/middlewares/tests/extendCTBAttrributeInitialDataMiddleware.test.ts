@@ -31,8 +31,10 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
     it('should forward if the forTarget is not contentType', () => {
       const middleware = extendCTBAttributeInitialDataMiddleware();
       const action = {
-        forTarget: 'contentType',
-        type: 'ContentTypeBuilder/FormModal/SET_ATTRIBUTE_DATA_SCHEMA',
+        type: 'formModal/setAttributeDataSchema',
+        payload: {
+          uid: 'api::test.test',
+        },
       };
       const getState = jest.fn();
 
@@ -47,14 +49,16 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
     it('should forward if the i18n is not activated is not contentType', () => {
       const middleware = extendCTBAttributeInitialDataMiddleware();
       const action = {
-        forTarget: 'contentType',
-        attributeType: 'text',
-        type: 'ContentTypeBuilder/FormModal/SET_ATTRIBUTE_DATA_SCHEMA',
+        type: 'formModal/setAttributeDataSchema',
+        payload: { attributeType: 'text', uid: 'api::test.test' },
       };
+
       const getState = jest.fn(() => ({
         'content-type-builder_dataManagerProvider': {
-          modifiedData: {
-            contentType: { schema: { pluginOptions: { i18n: { localized: false } } } },
+          current: {
+            contentTypes: {
+              'api::test.test': { pluginOptions: { i18n: { localized: false } } },
+            },
           },
         },
       }));
@@ -70,10 +74,10 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
     it('should forward if the ctb is not mounted', () => {
       const middleware = extendCTBAttributeInitialDataMiddleware();
       const action = {
-        forTarget: 'contentType',
-        attributeType: 'text',
-        type: 'ContentTypeBuilder/FormModal/SET_ATTRIBUTE_DATA_SCHEMA',
+        type: 'formModal/setAttributeDataSchema',
+        payload: { attributeType: 'text', uid: 'api::test.test' },
       };
+
       const getState = jest.fn(() => ({
         'content-type-builder_dataManagerProvider': undefined,
       }));
@@ -90,15 +94,23 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
   it('should add the action.pluginOptions if the type is correct and i18n is activated', () => {
     const middleware = extendCTBAttributeInitialDataMiddleware();
     const action = {
-      forTarget: 'contentType',
-      attributeType: 'text',
-      type: 'ContentTypeBuilder/FormModal/SET_ATTRIBUTE_DATA_SCHEMA',
+      type: 'formModal/setAttributeDataSchema',
+      payload: {
+        attributeType: 'text',
+        uid: 'api::test.test',
+      },
     };
+
     const getState = jest.fn(() => ({
       'content-type-builder_dataManagerProvider': {
         // i18n is activated
-        modifiedData: {
-          contentType: { schema: { pluginOptions: { i18n: { localized: true } } } },
+        current: {
+          contentTypes: {
+            'api::test.test': {
+              modelType: 'contentType',
+              pluginOptions: { i18n: { localized: true } },
+            },
+          },
         },
       },
     }));
@@ -110,22 +122,33 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
     expect(next).toBeCalledWith({
       ...action,
-      options: { pluginOptions: { i18n: { localized: true } } },
+      payload: {
+        ...action.payload,
+        options: { pluginOptions: { i18n: { localized: true } } },
+      },
     });
   });
 
   it('should modify the options.pluginOptions when it exists', () => {
     const middleware = extendCTBAttributeInitialDataMiddleware();
     const action = {
-      forTarget: 'contentType',
-      type: 'ContentTypeBuilder/FormModal/RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
-      options: { pluginOptions: { pluginTest: { ok: true } } },
+      type: 'formModal/resetPropsAndSetFormForAddingAnExistingCompo',
+      payload: {
+        options: { pluginOptions: { pluginTest: { ok: true } } },
+        uid: 'api::test.test',
+      },
     };
+
     const getState = jest.fn(() => ({
       'content-type-builder_dataManagerProvider': {
         // i18n is activated
-        modifiedData: {
-          contentType: { schema: { pluginOptions: { i18n: { localized: true } } } },
+        current: {
+          contentTypes: {
+            'api::test.test': {
+              modelType: 'contentType',
+              pluginOptions: { i18n: { localized: true } },
+            },
+          },
         },
       },
     }));
@@ -137,7 +160,10 @@ describe('i18n | middlewares | extendCTBAttributeInitialDataMiddleware', () => {
 
     expect(next).toBeCalledWith({
       ...action,
-      options: { pluginOptions: { pluginTest: { ok: true }, i18n: { localized: true } } },
+      payload: {
+        ...action.payload,
+        options: { pluginOptions: { pluginTest: { ok: true }, i18n: { localized: true } } },
+      },
     });
   });
 });

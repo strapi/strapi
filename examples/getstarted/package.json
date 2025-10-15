@@ -13,7 +13,8 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/icons": "2.0.0-rc.21",
+    "@strapi/blocks-react-renderer": "1.0.2",
+    "@strapi/icons": "2.0.0-rc.30",
     "@strapi/plugin-color-picker": "workspace:*",
     "@strapi/plugin-documentation": "workspace:*",
     "@strapi/plugin-graphql": "workspace:*",

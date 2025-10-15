@@ -155,7 +155,6 @@ const PreviewHeader = () => {
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
-  const onPreview = usePreviewContext('PreviewHeader', (state) => state.onPreview);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
 
   const [{ query }] = useQueryParams<{
@@ -181,7 +180,7 @@ const PreviewHeader = () => {
     activeTab: query.status ?? null,
     collectionType: schema.kind === 'collectionType' ? 'collection-types' : 'single-types',
     model: schema.uid,
-    documentId: document.documentId,
+    documentId: schema.kind === 'collectionType' ? document.documentId : undefined,
     document,
     meta,
   } satisfies DocumentActionProps;

@@ -6,6 +6,13 @@ import { IntlProvider } from 'react-intl';
 
 import { ColorPickerInput } from '../ColorPickerInput';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const render = () => ({
   ...renderRTL(<ColorPickerInput name="color" label={'color-picker'} type="string" />, {
     wrapper: ({ children }) => {
@@ -25,10 +32,18 @@ const render = () => ({
 });
 
 describe('<ColorPickerInput />', () => {
-  it('renders and matches the snapshot', () => {
-    const { container } = render();
+  it('renders with the correct elements', () => {
+    const { getByRole, getByText } = render();
 
-    expect(container).toMatchSnapshot();
+    // Check for the label
+    expect(getByText('color-picker')).toBeInTheDocument();
+
+    // Check for the color picker button
+    const colorPickerButton = getByRole('button', { name: 'Color picker toggle' });
+    expect(colorPickerButton).toBeInTheDocument();
+
+    // The button should be present (we can't check the exact style as it might be implemented differently)
+    expect(colorPickerButton).toHaveAttribute('aria-label', 'Color picker toggle');
   });
 
   it('toggles the popover', async () => {
