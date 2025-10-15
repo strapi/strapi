@@ -154,9 +154,18 @@ export default {
 
     const setStatus = (document: any) => {
       // Available status of document
-      const availableStatuses = documentsAvailableStatus.filter(
-        (d: any) => d.documentId === document.documentId
-      );
+      // Scope by documentId and, when present, by the same locale to avoid cross-locale state
+      const availableStatuses = documentsAvailableStatus.filter((d: any) => {
+        if (d.documentId !== document.documentId) {
+          return false;
+        }
+        // If the document has a locale, only consider statuses from the same locale
+        if (document.locale) {
+          return d.locale === document.locale;
+        }
+        // If no locale on the document, keep all
+        return true;
+      });
       // Compute document version status
       document.status = documentMetadata.getStatus(document, availableStatuses);
       return document;
