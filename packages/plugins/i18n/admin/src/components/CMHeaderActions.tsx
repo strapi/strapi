@@ -370,7 +370,7 @@ const FillFromAnotherLocaleAction = ({
   }
 
   const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (hasAIFutureFlag || isAIAvailable) {
+  if (hasAIFutureFlag && isAIAvailable) {
     return {
       type: 'icon',
       icon: (
