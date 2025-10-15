@@ -531,6 +531,8 @@
   "app.components.PluginCard.more-details": "More details",
   "app.components.ToggleCheckbox.off-label": "False",
   "app.components.ToggleCheckbox.on-label": "True",
+  "app.components.ToggleCheckbox.enabled-label": "Enabled",
+  "app.components.ToggleCheckbox.disabled-label": "Disabled",
   "app.components.UpsellBanner.button": "Upgrade now",
   "app.components.UpsellBanner.intro": "Access to Growth plan features: ",
   "app.components.UpsellBanner.text": "As part of your trial, you can explore premium tools such as Content History, Releases, and Single Sign-On (SSO).",
@@ -875,5 +877,10 @@
   "widget.last-activity.link": "Open Audit Logs",
   "widget.last-activity.no-activity": "No activity",
   "widget.last-activity.title": "Last activity",
-  "widget.profile.title": "Profile"
+  "widget.profile.title": "Profile",
+  "HomePage.addWidget.title": "Add Widget",
+  "HomePage.addWidget.noWidgetsAvailable": "No widgets available to add",
+  "HomePage.addWidget.button": "Add Widget",
+  "HomePage.widget.delete": "Delete",
+  "HomePage.widget.drag": "Drag to move"
 }

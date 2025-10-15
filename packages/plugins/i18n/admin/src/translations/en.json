@@ -34,6 +34,8 @@
   "Settings.list.description": "Configure the settings for the Internationalization plugin",
   "Settings.list.empty.description": "This is not a usual behavior, meaning that you have eventually modified the database manually. Make sure to have at least one locale saved in your database in order to be able to use Strapi correctly.",
   "Settings.list.empty.title": "There are no locales.",
+  "Settings.aiLocalizations.label": "AI Translations",
+  "Settings.aiLocalizations.description": "Everytime you save in the Content Manager, our AI will use your default locale to translate all other locales automatically.",
   "Settings.locales.default": "Default",
   "Settings.locales.list.sort.default": "Sort by the default locale",
   "Settings.locales.list.sort.displayName": "Sort by display name",
