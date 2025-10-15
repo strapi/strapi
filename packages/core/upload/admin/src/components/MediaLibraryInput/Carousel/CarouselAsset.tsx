@@ -73,19 +73,11 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
     );
   }
 
+  const IconComponent = getFileIconComponent(asset.ext);
+
   return (
     <DocAsset width="100%" height="100%" justifyContent="center" hasRadius>
-      {(() => {
-        const IconComponent = getFileIconComponent(asset.ext);
-
-        return (
-          <IconComponent
-            aria-label={asset.alternativeText || asset.name}
-            width="24px"
-            height="32px"
-          />
-        );
-      })()}
+      <IconComponent aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
     </DocAsset>
   );
 };
