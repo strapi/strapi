@@ -11,14 +11,12 @@ const MIME_TYPE_MAP: Record<string, string> = {
   zip: DocType.Zip,
 };
 
+const MIME_TYPE_KEYS = Object.keys(MIME_TYPE_MAP) as Array<keyof typeof MIME_TYPE_MAP>;
+
 export const typeFromMime = (mime: string) => {
-  const lowerCasedMime = mime.toLowerCase();
+  const mimeTypeKey = MIME_TYPE_KEYS.find((m) => mime.toLowerCase().includes(m));
 
-  for (const [key, value] of Object.entries(MIME_TYPE_MAP)) {
-    if (lowerCasedMime.includes(key)) {
-      return value;
-    }
-  }
+  if (mimeTypeKey === undefined) return AssetType.Document;
 
-  return AssetType.Document;
+  return MIME_TYPE_MAP[mimeTypeKey] ?? AssetType.Document;
 };
