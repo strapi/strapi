@@ -8,7 +8,9 @@ import {
   useAPIErrorHandler,
   FormErrors,
   useForm,
+  useDebounce,
 } from '@strapi/admin/strapi-admin';
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import {
   type DocumentActionComponent,
   type DocumentActionProps,
@@ -28,15 +30,29 @@ import {
   SingleSelectOption,
   Dialog,
   type StatusVariant,
+  Tooltip,
+  Box,
+  Link,
+  Popover,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus } from '@strapi/icons';
+import {
+  WarningCircle,
+  ListPlus,
+  Trash,
+  Earth,
+  Cross,
+  Plus,
+  Sparkle,
+  ArrowRight,
+} from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useI18n } from '../hooks/useI18n';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
+import { useGetSettingsQuery } from '../services/settings';
 import { cleanData } from '../utils/clean';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
@@ -240,6 +256,100 @@ const getDocumentStatus = (
  * FillFromAnotherLocaleAction
  * -----------------------------------------------------------------------------------------------*/
 
+const StatusIcon = styled(Status)<{ isAISettingEnabled: boolean }>`
+  display: flex;
+  gap: ${({ theme }) => theme.spaces[1]};
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  // Disabled state
+  background-color: ${({ isAISettingEnabled, theme }) =>
+    !isAISettingEnabled && theme.colors.neutral150};
+
+  svg {
+    fill: ${({ isAISettingEnabled, theme }) => !isAISettingEnabled && theme.colors.neutral300};
+  }
+`;
+
+const AITranslationStatus = () => {
+  const { formatMessage } = useIntl();
+  const { data, isLoading } = useGetSettingsQuery();
+  const [open, setOpen] = React.useState(false);
+  const debouncedOpen = useDebounce(open, 100);
+  const isAISettingEnabled = data?.data.aiLocalizations;
+
+  const handleMouseEnter = () => setOpen(true);
+  const handleMouseLeave = () => setOpen(false);
+
+  if (isLoading) return null;
+
+  return (
+    <Popover.Root open={debouncedOpen} onOpenChange={setOpen}>
+      <Popover.Anchor
+        style={{ alignSelf: 'stretch' }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <Box height="100%">
+          <StatusIcon
+            isAISettingEnabled={Boolean(isAISettingEnabled)}
+            variant={isAISettingEnabled ? 'alternative' : 'neutral'}
+            size="S"
+          >
+            <Earth />
+            <Sparkle />
+          </StatusIcon>
+        </Box>
+      </Popover.Anchor>
+      <Popover.Content
+        side="bottom"
+        align="center"
+        style={{ width: '250px' }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <Flex direction="column" padding={4} alignItems="flex-start">
+          <Typography variant="pi" fontWeight="600">
+            {formatMessage(
+              {
+                id: getTranslation('CMEditViewAITranslation.status-title'),
+                defaultMessage:
+                  '{enabled, select, true {AI translation enabled} false {AI translation disabled} other {AI translation disabled}}',
+              },
+              { enabled: isAISettingEnabled }
+            )}
+          </Typography>
+          <Typography variant="pi" paddingTop={1} paddingBottom={3}>
+            {formatMessage({
+              id: getTranslation('CMEditViewAITranslation.status-description'),
+              defaultMessage:
+                'Our AI translates content in all locales each time you save a modification.',
+            })}
+          </Typography>
+          <Link
+            fontSize="inherit"
+            tag={NavLink}
+            to="/settings/internationalization"
+            style={{ alignSelf: 'flex-end' }}
+          >
+            <Typography variant="pi" textAlign="right">
+              {formatMessage(
+                {
+                  id: getTranslation('CMEditViewAITranslation.settings-link'),
+                  defaultMessage:
+                    '{enabled, select, true {Disable it in settings} false {Enable it in settings} other {Enable it in settings}}',
+                },
+                { enabled: isAISettingEnabled }
+              )}
+            </Typography>
+          </Link>
+        </Flex>
+      </Popover.Content>
+    </Popover.Root>
+  );
+};
+
 const FillFromAnotherLocaleAction = ({
   documentId,
   meta,
@@ -261,6 +371,7 @@ const FillFromAnotherLocaleAction = ({
     params: { locale: currentDesiredLocale },
   });
   const { data: locales = [] } = useGetLocalesQuery();
+  const isAIAvailable = useAIAvailability();
 
   const availableLocales = Array.isArray(locales)
     ? locales.filter((locale) => meta?.availableLocales.some((l) => l.locale === locale.code))
@@ -288,6 +399,14 @@ const FillFromAnotherLocaleAction = ({
 
   if (!hasI18n) {
     return null;
+  }
+
+  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
+  if (hasAIFutureFlag || isAIAvailable) {
+    return {
+      type: 'icon',
+      customizeContent: () => <AITranslationStatus />,
+    };
   }
 
   return {

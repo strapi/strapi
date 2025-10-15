@@ -411,6 +411,14 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
           );
         } else {
           if (action.type === 'icon') {
+            if (action.customizeContent) {
+              return (
+                <React.Fragment key={action.id}>
+                  {action.customizeContent(action.label)}
+                </React.Fragment>
+              );
+            }
+
             return (
               <React.Fragment key={action.id}>
                 <IconButton
