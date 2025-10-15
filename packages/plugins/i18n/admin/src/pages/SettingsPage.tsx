@@ -37,8 +37,14 @@ const SettingsErrrorTooltip = ({
   children: React.ReactNode;
   error: BaseQueryError | SerializedError | undefined;
 }) => {
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+
   if (error) {
-    return <Tooltip label="An error occurred">{children}</Tooltip>;
+    return (
+      <Tooltip label={formatAPIError(error)} style={{ maxWidth: '200px' }}>
+        {children}
+      </Tooltip>
+    );
   }
 
   return children;
