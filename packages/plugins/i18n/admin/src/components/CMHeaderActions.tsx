@@ -8,7 +8,6 @@ import {
   useAPIErrorHandler,
   FormErrors,
   useForm,
-  useDebounce,
 } from '@strapi/admin/strapi-admin';
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import {
@@ -30,21 +29,10 @@ import {
   SingleSelectOption,
   Dialog,
   type StatusVariant,
-  Tooltip,
   Box,
   Link,
-  Popover,
 } from '@strapi/design-system';
-import {
-  WarningCircle,
-  ListPlus,
-  Trash,
-  Earth,
-  Cross,
-  Plus,
-  Sparkle,
-  ArrowRight,
-} from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus, Sparkle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -253,10 +241,10 @@ const getDocumentStatus = (
 };
 
 /* -------------------------------------------------------------------------------------------------
- * FillFromAnotherLocaleAction
+ * AISettingsStatusAction
  * -----------------------------------------------------------------------------------------------*/
 
-const AITranslationStatusIcon = styled(Status)<{ isAISettingEnabled: boolean }>`
+const AITanslationStatusIcon = styled(Status)<{ isAISettingEnabled: boolean }>`
   display: flex;
   gap: ${({ theme }) => theme.spaces[1]};
   justify-content: center;
@@ -272,48 +260,75 @@ const AITranslationStatusIcon = styled(Status)<{ isAISettingEnabled: boolean }>`
   }
 `;
 
-const AITranslationStatus = ({ isAISettingEnabled }: { isAISettingEnabled: boolean }) => {
+const AITranslationStatusAction = () => {
   const { formatMessage } = useIntl();
+  const isAIAvailable = useAIAvailability();
+  const { data: settings } = useGetSettingsQuery();
+  const isAISettingEnabled = settings?.data.aiLocalizations;
 
-  return (
-    <Flex direction="column" padding={4} alignItems="flex-start">
-      <Typography variant="pi" fontWeight="600">
-        {formatMessage(
-          {
-            id: getTranslation('CMEditViewAITranslation.status-title'),
-            defaultMessage:
-              '{enabled, select, true {AI translation enabled} false {AI translation disabled} other {AI translation disabled}}',
-          },
-          { enabled: isAISettingEnabled }
-        )}
-      </Typography>
-      <Typography variant="pi" paddingTop={1} paddingBottom={3}>
-        {formatMessage({
-          id: getTranslation('CMEditViewAITranslation.status-description'),
-          defaultMessage:
-            'Our AI translates content in all locales each time you save a modification.',
-        })}
-      </Typography>
-      <Link
-        fontSize="inherit"
-        tag={NavLink}
-        to="/settings/internationalization"
-        style={{ alignSelf: 'flex-end' }}
-      >
-        <Typography variant="pi" textAlign="right">
-          {formatMessage(
-            {
-              id: getTranslation('CMEditViewAITranslation.settings-link'),
+  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
+  if (hasAIFutureFlag && isAIAvailable) {
+    return {
+      type: 'icon',
+      icon: (
+        <Box height="100%">
+          <AITanslationStatusIcon
+            isAISettingEnabled={Boolean(isAISettingEnabled)}
+            variant={isAISettingEnabled ? 'alternative' : 'neutral'}
+            size="S"
+          >
+            <Sparkle />
+          </AITanslationStatusIcon>
+        </Box>
+      ),
+      customizeContent: () => (
+        <Flex direction="column" padding={4} alignItems="flex-start">
+          <Typography variant="pi" fontWeight="600">
+            {formatMessage(
+              {
+                id: getTranslation('CMEditViewAITranslation.status-title'),
+                defaultMessage:
+                  '{enabled, select, true {AI translation enabled} false {AI translation disabled} other {AI translation disabled}}',
+              },
+              { enabled: isAISettingEnabled }
+            )}
+          </Typography>
+          <Typography variant="pi" paddingTop={1} paddingBottom={3}>
+            {formatMessage({
+              id: getTranslation('CMEditViewAITranslation.status-description'),
               defaultMessage:
-                '{enabled, select, true {Disable it in settings} false {Enable it in settings} other {Enable it in settings}}',
-            },
-            { enabled: isAISettingEnabled }
-          )}
-        </Typography>
-      </Link>
-    </Flex>
-  );
+                'Our AI translates content in all locales each time you save a modification.',
+            })}
+          </Typography>
+          <Link
+            fontSize="inherit"
+            tag={NavLink}
+            to="/settings/internationalization"
+            style={{ alignSelf: 'flex-end' }}
+          >
+            <Typography variant="pi" textAlign="right">
+              {formatMessage(
+                {
+                  id: getTranslation('CMEditViewAITranslation.settings-link'),
+                  defaultMessage:
+                    '{enabled, select, true {Disable it in settings} false {Enable it in settings} other {Enable it in settings}}',
+                },
+                { enabled: isAISettingEnabled }
+              )}
+            </Typography>
+          </Link>
+        </Flex>
+      ),
+    };
+  }
+
+  // Do not display the action if AI is not available
+  return null;
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * FillFromAnotherLocaleAction
+ * -----------------------------------------------------------------------------------------------*/
 
 const FillFromAnotherLocaleAction = ({
   documentId,
@@ -369,26 +384,10 @@ const FillFromAnotherLocaleAction = ({
     return null;
   }
 
+  // Do not display this action when AI is available and AI translations are enabled
   const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (hasAIFutureFlag && isAIAvailable) {
-    return {
-      type: 'icon',
-      icon: (
-        <Box height="100%">
-          <AITranslationStatusIcon
-            isAISettingEnabled={Boolean(isAISettingEnabled)}
-            variant={isAISettingEnabled ? 'alternative' : 'neutral'}
-            size="S"
-          >
-            <Earth />
-            <Sparkle />
-          </AITranslationStatusIcon>
-        </Box>
-      ),
-      customizeContent: () => (
-        <AITranslationStatus isAISettingEnabled={Boolean(isAISettingEnabled)} />
-      ),
-    };
+  if (hasAIFutureFlag && isAIAvailable && isAISettingEnabled) {
+    return null;
   }
 
   return {
@@ -906,4 +905,5 @@ export {
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
+  AITranslationStatusAction,
 };

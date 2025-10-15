@@ -458,6 +458,7 @@ interface HeaderActionStatusProps {
 
 const HeaderActionStatus = ({ trigger, children }: HeaderActionStatusProps) => {
   const [open, setOpen] = React.useState(false);
+  // Debounce the open/close so the user can hover over the popover content before it closes
   const debouncedOpen = useDebounce(open, 100);
 
   const handleMouseEnter = () => setOpen(true);
