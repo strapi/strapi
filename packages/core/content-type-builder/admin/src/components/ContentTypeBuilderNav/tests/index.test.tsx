@@ -55,11 +55,7 @@ jest.mock('../../DataManager/useDataManager.ts', () => {
 
 const mockedUseDataManager = jest.mocked(useDataManager);
 
-const App = (
-  <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
-    <div />
-  </Layouts.Root>
-);
+const App = <ContentTypeBuilderNav />;
 
 describe('<ContentTypeBuilderNav />', () => {
   beforeEach(() => {

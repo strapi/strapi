@@ -1,20 +1,24 @@
 import * as React from 'react';
 
 import { useQueryParams, SubNav } from '@strapi/admin/strapi-admin';
-import { Divider, Flex, Searchbar, useCollator, useFilter } from '@strapi/design-system';
+import { Flex, Searchbar, useCollator, useFilter, Divider, Loader } from '@strapi/design-system';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 
+import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
 import { useContentTypeSchema } from '../hooks/useContentTypeSchema';
 import { useTypedSelector } from '../modules/hooks';
 import { getTranslation } from '../utils/translations';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 
-const LeftMenu = () => {
+const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const [search, setSearch] = React.useState('');
   const [{ query }] = useQueryParams<{ plugins?: object }>();
   const { formatMessage, locale } = useIntl();
+
+  // Initialize Content Manager data to ensure links are available
+  const { isLoading } = useContentManagerInitData();
 
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager'].app.collectionTypeLinks
@@ -110,49 +114,94 @@ const LeftMenu = () => {
     return query.plugins;
   };
 
+  // Show loading state while data is being fetched
+  if (isLoading) {
+    return (
+      <SubNav.Main aria-label={label}>
+        <SubNav.Header label={label} />
+        <Divider />
+        <Flex padding={4} justifyContent="center">
+          <Loader />
+        </Flex>
+      </SubNav.Main>
+    );
+  }
+
   return (
     <SubNav.Main aria-label={label}>
-      <SubNav.Header label={label} />
-      <Divider background="neutral150" />
-      <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
-        <Searchbar
-          value={search}
-          onChange={handleChangeSearch}
-          onClear={handleClear}
-          placeholder={formatMessage({
-            id: 'content-manager.components.LeftMenu.Search.label',
-            defaultMessage: 'Search for a content type',
+      {!isFullPage && (
+        <>
+          <SubNav.Header label={label} />
+          <Divider />
+        </>
+      )}
+      <SubNav.Content>
+        {isFullPage && <SubNav.Header label={label} />}
+        <Flex
+          paddingLeft={{
+            initial: 4,
+            large: 5,
+          }}
+          paddingRight={{
+            initial: 4,
+            large: 5,
+          }}
+          paddingTop={
+            isFullPage
+              ? 0
+              : {
+                  initial: 4,
+                  large: 5,
+                }
+          }
+          paddingBottom={0}
+          gap={3}
+          direction="column"
+          alignItems="stretch"
+        >
+          <Searchbar
+            value={search}
+            onChange={handleChangeSearch}
+            onClear={handleClear}
+            placeholder={formatMessage({
+              id: 'search.placeholder',
+              defaultMessage: 'Search',
+            })}
+            size="S"
+            // eslint-disable-next-line react/no-children-prop
+            children={undefined}
+            name={'search_contentType'}
+            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+          />
+        </Flex>
+        <SubNav.Sections>
+          {menu.map((section) => {
+            return (
+              <SubNav.Section
+                key={section.id}
+                label={section.title}
+                badgeLabel={section.links.length.toString()}
+              >
+                {section.links.map((link) => {
+                  return (
+                    <SubNav.Link
+                      key={link.uid}
+                      to={{
+                        pathname: link.to,
+                        search: stringify({
+                          ...parse(link.search ?? ''),
+                          plugins: getPluginsParamsForLink(link),
+                        }),
+                      }}
+                      label={link.title}
+                    />
+                  );
+                })}
+              </SubNav.Section>
+            );
           })}
-          size="S"
-          // eslint-disable-next-line react/no-children-prop
-          children={undefined}
-          name={'search_contentType'}
-          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-        />
-      </Flex>
-      <SubNav.Sections>
-        {menu.map((section) => {
-          return (
-            <SubNav.Section key={section.id} label={section.title}>
-              {section.links.map((link) => {
-                return (
-                  <SubNav.Link
-                    key={link.uid}
-                    to={{
-                      pathname: link.to,
-                      search: stringify({
-                        ...parse(link.search ?? ''),
-                        plugins: getPluginsParamsForLink(link),
-                      }),
-                    }}
-                    label={link.title}
-                  />
-                );
-              })}
-            </SubNav.Section>
-          );
-        })}
-      </SubNav.Sections>
+        </SubNav.Sections>
+      </SubNav.Content>
     </SubNav.Main>
   );
 };
