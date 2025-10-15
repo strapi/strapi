@@ -8,6 +8,7 @@ import {
   useStrapiApp,
   useQueryParams,
   useIsDesktop,
+  useDebounce,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -17,6 +18,7 @@ import {
   Typography,
   IconButton,
   Dialog,
+  Popover,
 } from '@strapi/design-system';
 import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -413,9 +415,9 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
           if (action.type === 'icon') {
             if (action.customizeContent) {
               return (
-                <React.Fragment key={action.id}>
-                  {action.customizeContent(action.label)}
-                </React.Fragment>
+                <HeaderActionStatus trigger={action.icon} key={action.id}>
+                  {action.customizeContent('')}
+                </HeaderActionStatus>
               );
             }
 
@@ -442,6 +444,44 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
         }
       })}
     </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * HeaderActionStatus
+ * -----------------------------------------------------------------------------------------------*/
+
+interface HeaderActionStatusProps {
+  trigger: HeaderActionDescription['icon'];
+  children: React.ReactNode;
+}
+
+const HeaderActionStatus = ({ trigger, children }: HeaderActionStatusProps) => {
+  const [open, setOpen] = React.useState(false);
+  const debouncedOpen = useDebounce(open, 100);
+
+  const handleMouseEnter = () => setOpen(true);
+  const handleMouseLeave = () => setOpen(false);
+
+  return (
+    <Popover.Root open={debouncedOpen} onOpenChange={setOpen}>
+      <Popover.Anchor
+        style={{ alignSelf: 'stretch' }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <Box height="100%">{trigger}</Box>
+      </Popover.Anchor>
+      <Popover.Content
+        side="bottom"
+        align="center"
+        style={{ width: '250px' }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {children}
+      </Popover.Content>
+    </Popover.Root>
   );
 };
 
