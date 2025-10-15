@@ -39,6 +39,7 @@ interface BaseBlock {
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
   handleTab?: (editor: Editor) => void;
+  handleShiftTab?: (editor: Editor) => void;
   snippets?: string[];
   dragHandleTopMargin?: CSSProperties['marginTop'];
 }
