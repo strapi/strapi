@@ -161,15 +161,15 @@ export const SettingsPage = () => {
                         alignItems="end"
                         justifyContent={'center'}
                       >
-                        <Field.Root name="aiMetadata" width={'158px'}>
+                        <Field.Root name="aiMetadata" minWidth="200px">
                           <Toggle
                             checked={modifiedData?.aiMetadata}
                             offLabel={formatMessage({
-                              id: 'app.components.ToggleCheckbox.off-label',
+                              id: 'app.components.ToggleCheckbox.disabled-label',
                               defaultMessage: 'Disabled',
                             })}
                             onLabel={formatMessage({
-                              id: 'app.components.ToggleCheckbox.on-label',
+                              id: 'app.components.ToggleCheckbox.enabled-label',
                               defaultMessage: 'Enabled',
                             })}
                             onChange={(e) => {
