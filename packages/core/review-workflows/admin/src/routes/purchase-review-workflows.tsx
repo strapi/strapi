@@ -1,4 +1,4 @@
-import { Layouts } from '@strapi/admin/strapi-admin';
+import { Layouts, RESPONSIVE_DEFAULT_SPACING } from '@strapi/admin/strapi-admin';
 import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-system';
 import { ExternalLink, Check, SealCheck } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -13,7 +13,7 @@ const PurchaseReviewWorkflows = () => {
 
   const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Layouts.Header
           title={formatMessage({
@@ -22,8 +22,8 @@ const PurchaseReviewWorkflows = () => {
           })}
         />
         <Box
-          marginLeft={10}
-          marginRight={10}
+          marginLeft={RESPONSIVE_DEFAULT_SPACING}
+          marginRight={RESPONSIVE_DEFAULT_SPACING}
           shadow="filterShadow"
           hasRadius
           background="neutral0"
@@ -137,7 +137,7 @@ const PurchaseReviewWorkflows = () => {
           </Grid.Root>
         </Box>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

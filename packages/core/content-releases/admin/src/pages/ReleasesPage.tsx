@@ -278,134 +278,136 @@ const ReleasesPage = () => {
   };
 
   return (
-    <Main aria-busy={isLoadingReleases || isLoadingSettings}>
-      <Layouts.Header
-        title={formatMessage({
-          id: 'content-releases.pages.Releases.title',
-          defaultMessage: 'Releases',
-        })}
-        secondaryAction={
-          <GradientBadge
-            label={formatMessage({
-              id: 'components.premiumFeature.title',
-              defaultMessage: 'Premium feature',
-            })}
-          />
-        }
-        subtitle={formatMessage({
-          id: 'content-releases.pages.Releases.header-subtitle',
-          defaultMessage: 'Create and manage content updates',
-        })}
-        primaryAction={
-          canCreate ? (
-            <Button
-              startIcon={<Plus />}
-              onClick={toggleAddReleaseModal}
-              disabled={hasReachedMaximumPendingReleases}
-            >
-              {formatMessage({
-                id: 'content-releases.header.actions.add-release',
-                defaultMessage: 'New release',
+    <Layouts.Root>
+      <Main aria-busy={isLoadingReleases || isLoadingSettings}>
+        <Layouts.Header
+          title={formatMessage({
+            id: 'content-releases.pages.Releases.title',
+            defaultMessage: 'Releases',
+          })}
+          secondaryAction={
+            <GradientBadge
+              label={formatMessage({
+                id: 'components.premiumFeature.title',
+                defaultMessage: 'Premium feature',
               })}
-            </Button>
-          ) : null
-        }
-      />
-      <Layouts.Content>
-        <>
-          {hasReachedMaximumPendingReleases && (
-            <StyledAlert
-              marginBottom={6}
-              action={
-                <Link href="https://strapi.io/pricing-cloud" isExternal>
-                  {formatMessage({
-                    id: 'content-releases.pages.Releases.max-limit-reached.action',
-                    defaultMessage: 'Explore plans',
-                  })}
-                </Link>
-              }
-              title={formatMessage(
-                {
-                  id: 'content-releases.pages.Releases.max-limit-reached.title',
-                  defaultMessage:
-                    'You have reached the {number} pending {number, plural, one {release} other {releases}} limit.',
-                },
-                { number: maximumReleases }
-              )}
-              onClose={() => {}}
-              closeLabel=""
-            >
-              {formatMessage({
-                id: 'content-releases.pages.Releases.max-limit-reached.message',
-                defaultMessage: 'Upgrade to manage an unlimited number of releases.',
-              })}
-            </StyledAlert>
-          )}
-          <Tabs.Root variant="simple" onValueChange={handleTabChange} value={activeTab}>
-            <Box paddingBottom={8}>
-              <Tabs.List
-                aria-label={formatMessage({
-                  id: 'content-releases.pages.Releases.tab-group.label',
-                  defaultMessage: 'Releases list',
-                })}
+            />
+          }
+          subtitle={formatMessage({
+            id: 'content-releases.pages.Releases.header-subtitle',
+            defaultMessage: 'Create and manage content updates',
+          })}
+          primaryAction={
+            canCreate ? (
+              <Button
+                startIcon={<Plus />}
+                onClick={toggleAddReleaseModal}
+                disabled={hasReachedMaximumPendingReleases}
               >
-                <Tabs.Trigger value="pending">
-                  {formatMessage(
-                    {
-                      id: 'content-releases.pages.Releases.tab.pending',
-                      defaultMessage: 'Pending ({count})',
-                    },
-                    {
-                      count: totalPendingReleases,
-                    }
-                  )}
-                </Tabs.Trigger>
-                <Tabs.Trigger value="done">
-                  {formatMessage({
-                    id: 'content-releases.pages.Releases.tab.done',
-                    defaultMessage: 'Done',
+                {formatMessage({
+                  id: 'content-releases.header.actions.add-release',
+                  defaultMessage: 'New release',
+                })}
+              </Button>
+            ) : null
+          }
+        />
+        <Layouts.Content>
+          <>
+            {hasReachedMaximumPendingReleases && (
+              <StyledAlert
+                marginBottom={6}
+                action={
+                  <Link href="https://strapi.io/pricing-cloud" isExternal>
+                    {formatMessage({
+                      id: 'content-releases.pages.Releases.max-limit-reached.action',
+                      defaultMessage: 'Explore plans',
+                    })}
+                  </Link>
+                }
+                title={formatMessage(
+                  {
+                    id: 'content-releases.pages.Releases.max-limit-reached.title',
+                    defaultMessage:
+                      'You have reached the {number} pending {number, plural, one {release} other {releases}} limit.',
+                  },
+                  { number: maximumReleases }
+                )}
+                onClose={() => {}}
+                closeLabel=""
+              >
+                {formatMessage({
+                  id: 'content-releases.pages.Releases.max-limit-reached.message',
+                  defaultMessage: 'Upgrade to manage an unlimited number of releases.',
+                })}
+              </StyledAlert>
+            )}
+            <Tabs.Root variant="simple" onValueChange={handleTabChange} value={activeTab}>
+              <Box paddingBottom={8}>
+                <Tabs.List
+                  aria-label={formatMessage({
+                    id: 'content-releases.pages.Releases.tab-group.label',
+                    defaultMessage: 'Releases list',
                   })}
-                </Tabs.Trigger>
-              </Tabs.List>
-              <Divider />
-            </Box>
-            {/* Pending releases */}
-            <Tabs.Content value="pending">
-              <ReleasesGrid
-                sectionTitle="pending"
-                releases={response?.currentData?.data}
-                isError={isError}
-              />
-            </Tabs.Content>
-            {/* Done releases */}
-            <Tabs.Content value="done">
-              <ReleasesGrid
-                sectionTitle="done"
-                releases={response?.currentData?.data}
-                isError={isError}
-              />
-            </Tabs.Content>
-          </Tabs.Root>
-          <Pagination.Root
-            {...response?.currentData?.meta?.pagination}
-            defaultPageSize={response?.currentData?.meta?.pagination?.pageSize}
-          >
-            <Pagination.PageSize options={['8', '16', '32', '64']} />
-            <Pagination.Links />
-          </Pagination.Root>
-        </>
-      </Layouts.Content>
-      <ReleaseModal
-        open={releaseModalShown}
-        handleClose={toggleAddReleaseModal}
-        handleSubmit={handleAddRelease}
-        isLoading={isSubmittingForm}
-        initialValues={{
-          ...INITIAL_FORM_VALUES,
-          timezone: data?.data.defaultTimezone ? data.data.defaultTimezone.split('&')[1] : null,
-        }}
-      />
-    </Main>
+                >
+                  <Tabs.Trigger value="pending">
+                    {formatMessage(
+                      {
+                        id: 'content-releases.pages.Releases.tab.pending',
+                        defaultMessage: 'Pending ({count})',
+                      },
+                      {
+                        count: totalPendingReleases,
+                      }
+                    )}
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="done">
+                    {formatMessage({
+                      id: 'content-releases.pages.Releases.tab.done',
+                      defaultMessage: 'Done',
+                    })}
+                  </Tabs.Trigger>
+                </Tabs.List>
+                <Divider />
+              </Box>
+              {/* Pending releases */}
+              <Tabs.Content value="pending">
+                <ReleasesGrid
+                  sectionTitle="pending"
+                  releases={response?.currentData?.data}
+                  isError={isError}
+                />
+              </Tabs.Content>
+              {/* Done releases */}
+              <Tabs.Content value="done">
+                <ReleasesGrid
+                  sectionTitle="done"
+                  releases={response?.currentData?.data}
+                  isError={isError}
+                />
+              </Tabs.Content>
+            </Tabs.Root>
+            <Pagination.Root
+              {...response?.currentData?.meta?.pagination}
+              defaultPageSize={response?.currentData?.meta?.pagination?.pageSize}
+            >
+              <Pagination.PageSize options={['8', '16', '32', '64']} />
+              <Pagination.Links />
+            </Pagination.Root>
+          </>
+        </Layouts.Content>
+        <ReleaseModal
+          open={releaseModalShown}
+          handleClose={toggleAddReleaseModal}
+          handleSubmit={handleAddRelease}
+          isLoading={isSubmittingForm}
+          initialValues={{
+            ...INITIAL_FORM_VALUES,
+            timezone: data?.data.defaultTimezone ? data.data.defaultTimezone.split('&')[1] : null,
+          }}
+        />
+      </Main>
+    </Layouts.Root>
   );
 };
 
