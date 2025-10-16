@@ -141,8 +141,8 @@ interface HeaderActionDescription {
     value: string;
   }>;
   status?: {
-    anchor: React.ReactNode;
-    content: React.ReactNode;
+    message: React.ReactNode;
+    tooltip?: React.ReactNode;
   };
   onSelect?: (value: string) => void;
   value?: string;
@@ -417,8 +417,8 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
           );
         } else if (action.status) {
           return (
-            <HeaderActionStatus anchor={action.status.anchor} key={action.id}>
-              {action.status.content}
+            <HeaderActionStatus tooltip={action.status?.tooltip} key={action.id}>
+              {action.status.message}
             </HeaderActionStatus>
           );
         } else {
@@ -452,11 +452,11 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface HeaderActionStatusProps {
-  anchor: React.ReactNode;
+  tooltip: React.ReactNode;
   children: React.ReactNode;
 }
 
-const HeaderActionStatus = ({ anchor, children }: HeaderActionStatusProps) => {
+const HeaderActionStatus = ({ tooltip, children }: HeaderActionStatusProps) => {
   const [open, setOpen] = React.useState(false);
   // Debounce the open/close so the user can hover over the popover content before it closes
   const debouncedOpen = useDebounce(open, 100);
@@ -470,17 +470,20 @@ const HeaderActionStatus = ({ anchor, children }: HeaderActionStatusProps) => {
         style={{ alignSelf: 'stretch' }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        aria-describedby="document-header-action-status"
       >
-        <Box height="100%">{anchor}</Box>
+        <Box height="100%">{children}</Box>
       </Popover.Anchor>
       <Popover.Content
+        role="tooltip"
+        id="document-header-action-status"
         side="bottom"
         align="center"
         style={{ width: '250px' }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {children}
+        {tooltip}
       </Popover.Content>
     </Popover.Root>
   );

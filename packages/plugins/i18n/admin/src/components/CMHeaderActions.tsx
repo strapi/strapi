@@ -288,14 +288,13 @@ const AITranslationStatusAction = () => {
 
   return {
     status: {
-      anchor: (
+      message: (
         <Box
           height="100%"
           aria-label={formatMessage({
             id: getTranslation('CMEditViewAITranslation.status-aria-label'),
             defaultMessage: 'AI Translation Status',
           })}
-          aria-describedby="ai-translation-status"
         >
           <AITanslationStatusIcon
             isAISettingEnabled={Boolean(isAISettingEnabled)}
@@ -306,14 +305,8 @@ const AITranslationStatusAction = () => {
           </AITanslationStatusIcon>
         </Box>
       ),
-      content: (
-        <Flex
-          role="tooltip"
-          id="ai-translation-status"
-          direction="column"
-          padding={4}
-          alignItems="flex-start"
-        >
+      tooltip: (
+        <Flex direction="column" padding={4} alignItems="flex-start">
           <Typography variant="pi" fontWeight="600">
             {formatMessage(
               {
