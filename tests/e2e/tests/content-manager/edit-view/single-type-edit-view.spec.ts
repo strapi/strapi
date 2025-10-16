@@ -18,7 +18,7 @@ test.describe('Edit View', () => {
     test.fixme(
       'as a user I want to be warned if I try to publish content that has draft relations on components within a dynamic zone',
       async ({ page }) => {
-        clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+        await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
         await page.getByRole('link', { name: 'Shop' }).click();
 
         await page.waitForURL(SHOP_URL);
@@ -314,7 +314,6 @@ test.describe('Edit View', () => {
     test('as a user I want to add a component to a dynamic zone at a specific position', async ({
       page,
     }) => {
-      clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
       await navToHeader(page, ['Content Manager', 'Shop'], 'UK Shop');
 
       // There should be a dynamic zone with two components
