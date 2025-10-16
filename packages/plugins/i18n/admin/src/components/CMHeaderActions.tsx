@@ -272,7 +272,7 @@ const AITranslationStatusAction = () => {
   const { formatMessage } = useIntl();
   const isAIAvailable = useAIAvailability();
   const { data: settings } = useGetSettingsQuery();
-  const isAISettingEnabled = settings?.data.aiLocalizations;
+  const isAISettingEnabled = settings?.data?.aiLocalizations;
 
   const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
   if (hasAIFutureFlag && isAIAvailable) {
@@ -362,7 +362,7 @@ const FillFromAnotherLocaleAction = ({
 
   const isAIAvailable = useAIAvailability();
   const { data: settings } = useGetSettingsQuery();
-  const isAISettingEnabled = settings?.data.aiLocalizations;
+  const isAISettingEnabled = settings?.data?.aiLocalizations;
 
   const availableLocales = Array.isArray(locales)
     ? locales.filter((locale) => meta?.availableLocales.some((l) => l.locale === locale.code))
