@@ -461,8 +461,16 @@ const HeaderActionStatus = ({ tooltip, children }: HeaderActionStatusProps) => {
   // Debounce the open/close so the user can hover over the popover content before it closes
   const debouncedOpen = useDebounce(open, 100);
 
-  const handleMouseEnter = () => setOpen(true);
-  const handleMouseLeave = () => setOpen(false);
+  const handleMouseEnter = () => {
+    if (tooltip) {
+      setOpen(true);
+    }
+  };
+  const handleMouseLeave = () => {
+    if (tooltip) {
+      setOpen(false);
+    }
+  };
 
   return (
     <Popover.Root open={debouncedOpen} onOpenChange={setOpen}>
