@@ -16,6 +16,6 @@ export default {
   sanitize,
   'iso-locales': isoLocales,
   'content-types': contentTypes,
-  aiLocalizations: createAILocalizationsService,
+  'ai-localizations': createAILocalizationsService,
   settings: createSettingsService,
 };

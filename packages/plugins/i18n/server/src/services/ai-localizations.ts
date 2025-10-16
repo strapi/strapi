@@ -1,6 +1,10 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
+import { traverseEntity } from '@strapi/utils';
+import { getService } from '../utils';
 
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
+  const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
+
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
     async isEnabled() {
@@ -23,6 +27,108 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       return true;
+    },
+
+    /**
+     * Checks if there are localizations that need to be generated for the given document,
+     * and if so, calls the AI service and saves the results to the database.
+     */
+    async generateDocumentLocalizations({
+      model,
+      document,
+    }: {
+      model: UID.ContentType;
+      document: Modules.Documents.AnyDocument;
+    }) {
+      const schema = strapi.getModel(model);
+      const localeService = getService('locales');
+
+      // No localizations needed for content types with i18n disabled
+      const isLocalizedContentType = getService('content-types').isLocalizedContentType(schema);
+      if (!isLocalizedContentType) {
+        return;
+      }
+
+      // Don't trigger localizations if the update is on a derived locale, only do it on the default
+      const defaultLocale = await localeService.getDefaultLocale();
+      if (document.locale !== defaultLocale) {
+        return;
+      }
+
+      const isFeatureEnabled = await this.isEnabled();
+      if (!isFeatureEnabled) {
+        return;
+      }
+
+      // Extract only the localized content from the document
+      const translateableContent = await traverseEntity(
+        ({ key, attribute }, { remove }) => {
+          const hasLocalizedOption = attribute?.pluginOptions?.i18n?.localized === true;
+          // Only keep fields that actually need to be localized
+          // TODO: remove blocks from this list once the AI server can handle it reliably
+          if (!hasLocalizedOption || ['media', 'blocks'].includes(attribute.type)) {
+            remove(key);
+          }
+        },
+        { schema, getModel: strapi.getModel.bind(strapi) },
+        document
+      );
+
+      // 3. Call the AI server to get the localized content
+      const localesList = await localeService.find();
+      const targetLocales = localesList
+        .filter((l) => l.code !== document.locale)
+        .map((l) => l.code);
+
+      let token: string;
+      try {
+        const tokenData = await strapi.service('admin::user').getAiToken();
+        token = tokenData.token;
+      } catch (error) {
+        throw new Error('Failed to retrieve AI token', {
+          cause: error instanceof Error ? error : undefined,
+        });
+      }
+
+      strapi.log.http('Contacting AI Server for localizations generation');
+      const response = await fetch(`${aiServerUrl}/i18n/generate-localizations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          content: translateableContent,
+          sourceLocale: document.locale,
+          targetLocales,
+        }),
+      });
+
+      if (!response.ok) {
+        strapi.log.error(
+          `AI Localizations request failed: ${response.status} ${response.statusText}`
+        );
+        throw new Error(`AI Localizations request failed: ${response.statusText}`);
+      }
+
+      const aiResult = await response.json();
+      console.log('********* AI RESULT', JSON.stringify(aiResult, null, 2));
+
+      try {
+        await Promise.allSettled(
+          aiResult.localizations.map((localization: any) => {
+            const { content, locale } = localization;
+            return strapi.documents(model).update({
+              documentId: document.documentId,
+              locale,
+              fields: [],
+              data: content,
+            });
+          })
+        );
+      } catch (error) {
+        strapi.log.error('AI Localizations generation failed', error);
+      }
     },
   };
 };
