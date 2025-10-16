@@ -279,7 +279,14 @@ const AITranslationStatusAction = () => {
     return {
       type: 'icon',
       icon: (
-        <Box height="100%">
+        <Box
+          height="100%"
+          aria-label={formatMessage({
+            id: getTranslation('CMEditViewAITranslation.status-aria-label'),
+            defaultMessage: 'AI Translation Status',
+          })}
+          aria-describedby="ai-translation-status"
+        >
           <AITanslationStatusIcon
             isAISettingEnabled={Boolean(isAISettingEnabled)}
             variant={isAISettingEnabled ? 'alternative' : 'neutral'}
@@ -290,7 +297,13 @@ const AITranslationStatusAction = () => {
         </Box>
       ),
       customizeContent: () => (
-        <Flex direction="column" padding={4} alignItems="flex-start">
+        <Flex
+          role="tooltip"
+          id="ai-translation-status"
+          direction="column"
+          padding={4}
+          alignItems="flex-start"
+        >
           <Typography variant="pi" fontWeight="600">
             {formatMessage(
               {
