@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { DatePicker, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -13,10 +14,14 @@ const DateInput = React.forwardRef<HTMLInputElement, InputProps>(
     const { formatMessage } = useIntl();
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
+    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
     const composedRefs = useComposedRefs(ref, fieldRef);
     const [lastValidDate, setLastValidDate] = React.useState<Date | null>(null);
 
     const value = typeof field.value === 'string' ? new Date(field.value) : field.value;
+
+    // Create a key that changes when locale changes to force re-render
+    const localeKey = query?.plugins?.i18n?.locale || 'default';
 
     const handleDateChange = (date: Date | undefined) => {
       if (!date) {
@@ -37,6 +42,7 @@ const DateInput = React.forwardRef<HTMLInputElement, InputProps>(
       <Field.Root error={field.error} name={name} hint={hint} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
         <DatePicker
+          key={`inputDate-${name}-${localeKey}`}
           ref={composedRefs}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onChange={handleDateChange}

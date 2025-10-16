@@ -1,5 +1,6 @@
-import { forwardRef, memo } from 'react';
+import * as React from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { SingleSelect, SingleSelectOption, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -8,18 +9,23 @@ import { useField } from '../Form';
 
 import { EnumerationProps } from './types';
 
-const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
+const EnumerationInput = React.forwardRef<HTMLDivElement, EnumerationProps>(
   ({ name, required, label, hint, labelAction, options = [], ...props }, ref) => {
     const { formatMessage } = useIntl();
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLDivElement>(name);
+    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
+
+    // Create a key that changes when locale changes to force re-render
+    const localeKey = query?.plugins?.i18n?.locale || 'default';
 
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
         <SingleSelect
+          key={`inputEnumeration-${name}-${localeKey}`}
           ref={composedRefs}
           onChange={(value) => {
             field.onChange(name, value);
@@ -48,6 +54,6 @@ const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
   }
 );
 
-const MemoizedEnumerationInput = memo(EnumerationInput);
+const MemoizedEnumerationInput = React.memo(EnumerationInput);
 
 export { MemoizedEnumerationInput as EnumerationInput };
