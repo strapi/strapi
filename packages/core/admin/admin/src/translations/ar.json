@@ -442,7 +442,7 @@
   "content-manager.emptyAttributes.description": "أضف حقلك الأول إلى نوع المجموعة الخاصة بك",
   "content-manager.form.Input.hint.character.unit": "{maxValue, plural, one { character} other { characters}}",
   "content-manager.form.Input.hint.minMaxDivider": " / ",
-  "content-manager.form.Input.hint.text": "{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}",
+  "content-manager.form.Input.hint.text": "{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}",
   "content-manager.form.Input.pageEntries.inputDescription": "ملاحظة: يمكنك تجاوز هذه القيمة في صفحة إعدادات نوع المجموعة.",
   "content-manager.form.Input.sort.order": "ترتيب الافتراضي",
   "content-manager.form.Input.wysiwyg": "WYSIWYG عرض كـ",
