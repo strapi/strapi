@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import type { Modules } from '@strapi/types';
+import type { Context } from 'koa';
 
 export const REFRESH_COOKIE_NAME = 'strapi_admin_refresh';
 
@@ -8,7 +9,7 @@ export const DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN = 14 * 24 * 60 * 60;
 export const DEFAULT_MAX_SESSION_LIFESPAN = 1 * 24 * 60 * 60;
 export const DEFAULT_IDLE_SESSION_LIFESPAN = 2 * 60 * 60;
 
-export const getRefreshCookieOptions = () => {
+export const getRefreshCookieOptions = (ctx?: Context) => {
   const configuredSecure = strapi.config.get('admin.auth.cookie.secure');
   const isProduction = process.env.NODE_ENV === 'production';
 
@@ -19,7 +20,12 @@ export const getRefreshCookieOptions = () => {
   const sameSite: boolean | 'lax' | 'strict' | 'none' =
     strapi.config.get('admin.auth.cookie.sameSite') ?? 'lax';
 
-  const isSecure = typeof configuredSecure === 'boolean' ? configuredSecure : isProduction;
+  let isSecure: boolean;
+  if (typeof configuredSecure === 'boolean') {
+    isSecure = configuredSecure;
+  } else {
+    isSecure = isProduction && ctx.request.secure;
+  }
 
   return {
     httpOnly: true,
@@ -64,9 +70,10 @@ const getLifespansForType = (
 
 export const buildCookieOptionsWithExpiry = (
   type: 'refresh' | 'session',
-  absoluteExpiresAtISO?: string
+  absoluteExpiresAtISO?: string,
+  ctx?: Context
 ) => {
-  const base = getRefreshCookieOptions();
+  const base = getRefreshCookieOptions(ctx);
   if (type === 'session') {
     return base;
   }
