@@ -273,12 +273,22 @@ const AITranslationStatusAction = () => {
   const isAIAvailable = useAIAvailability();
   const { data: settings } = useGetSettingsQuery();
   const isAISettingEnabled = settings?.data?.aiLocalizations;
+  const { hasI18n } = useI18n();
 
+  // Do not display this action when i18n is not available
+  if (!hasI18n) {
+    return null;
+  }
+
+  // Do not display this action when AI is not available
   const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (hasAIFutureFlag && isAIAvailable) {
-    return {
-      type: 'icon',
-      icon: (
+  if (!isAIAvailable && !hasAIFutureFlag) {
+    return null;
+  }
+
+  return {
+    status: {
+      anchor: (
         <Box
           height="100%"
           aria-label={formatMessage({
@@ -296,7 +306,7 @@ const AITranslationStatusAction = () => {
           </AITanslationStatusIcon>
         </Box>
       ),
-      customizeContent: () => (
+      content: (
         <Flex
           role="tooltip"
           id="ai-translation-status"
@@ -340,11 +350,8 @@ const AITranslationStatusAction = () => {
           </Link>
         </Flex>
       ),
-    };
-  }
-
-  // Do not display the action if AI is not available
-  return null;
+    },
+  };
 };
 
 /* -------------------------------------------------------------------------------------------------

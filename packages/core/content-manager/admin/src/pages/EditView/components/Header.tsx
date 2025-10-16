@@ -140,6 +140,10 @@ interface HeaderActionDescription {
     textValue?: string;
     value: string;
   }>;
+  status?: {
+    anchor: React.ReactNode;
+    content: React.ReactNode;
+  };
   onSelect?: (value: string) => void;
   value?: string;
   customizeContent?: (value: string) => React.ReactNode;
@@ -411,36 +415,32 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               ))}
             </SingleSelect>
           );
+        } else if (action.status) {
+          return (
+            <HeaderActionStatus anchor={action.status.anchor} key={action.id}>
+              {action.status.content}
+            </HeaderActionStatus>
+          );
         } else {
-          if (action.type === 'icon') {
-            if (action.customizeContent) {
-              return (
-                <HeaderActionStatus trigger={action.icon} key={action.id}>
-                  {action.customizeContent('')}
-                </HeaderActionStatus>
-              );
-            }
-
-            return (
-              <React.Fragment key={action.id}>
-                <IconButton
-                  disabled={action.disabled}
-                  label={action.label}
-                  size="S"
-                  onClick={handleClick(action)}
-                >
-                  {action.icon}
-                </IconButton>
-                {action.dialog ? (
-                  <HeaderActionDialog
-                    {...action.dialog}
-                    isOpen={dialogId === action.id}
-                    onClose={handleClose}
-                  />
-                ) : null}
-              </React.Fragment>
-            );
-          }
+          return (
+            <React.Fragment key={action.id}>
+              <IconButton
+                disabled={action.disabled}
+                label={action.label}
+                size="S"
+                onClick={handleClick(action)}
+              >
+                {action.icon}
+              </IconButton>
+              {action.dialog ? (
+                <HeaderActionDialog
+                  {...action.dialog}
+                  isOpen={dialogId === action.id}
+                  onClose={handleClose}
+                />
+              ) : null}
+            </React.Fragment>
+          );
         }
       })}
     </Flex>
@@ -452,11 +452,11 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface HeaderActionStatusProps {
-  trigger: HeaderActionDescription['icon'];
+  anchor: React.ReactNode;
   children: React.ReactNode;
 }
 
-const HeaderActionStatus = ({ trigger, children }: HeaderActionStatusProps) => {
+const HeaderActionStatus = ({ anchor, children }: HeaderActionStatusProps) => {
   const [open, setOpen] = React.useState(false);
   // Debounce the open/close so the user can hover over the popover content before it closes
   const debouncedOpen = useDebounce(open, 100);
@@ -471,7 +471,7 @@ const HeaderActionStatus = ({ trigger, children }: HeaderActionStatusProps) => {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <Box height="100%">{trigger}</Box>
+        <Box height="100%">{anchor}</Box>
       </Popover.Anchor>
       <Popover.Content
         side="bottom"
