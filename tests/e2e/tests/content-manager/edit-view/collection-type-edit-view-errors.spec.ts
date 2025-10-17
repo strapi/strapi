@@ -12,7 +12,7 @@ test.describe('Edit View', () => {
   });
 
   test.describe('Collection Type - Errors', () => {
-    test.only('as a user I should see an error when trying to publish a document with a required component that is not filled in', async ({
+    test('as a user I should see an error when trying to publish a document with a required component that is not filled in', async ({
       page,
     }) => {
       await navToHeader(page, ['Content Manager', 'Match'], 'Match');
