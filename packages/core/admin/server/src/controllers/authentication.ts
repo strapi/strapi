@@ -88,7 +88,8 @@ export default {
 
         const cookieOptions = buildCookieOptionsWithExpiry(
           rememberMe ? 'refresh' : 'session',
-          absoluteExpiresAt
+          absoluteExpiresAt,
+          ctx.request.secure
         );
         ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
 
@@ -148,7 +149,8 @@ export default {
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
-        absoluteExpiresAt
+        absoluteExpiresAt,
+        ctx.request.secure
       );
       ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
 
@@ -214,7 +216,8 @@ export default {
 
       const cookieOptions = buildCookieOptionsWithExpiry(
         rememberMe ? 'refresh' : 'session',
-        absoluteExpiresAt
+        absoluteExpiresAt,
+        ctx.request.secure
       );
       ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
 
@@ -273,7 +276,11 @@ export default {
       ).generateRefreshToken(userId, deviceId, { type: 'session' });
 
       // No rememberMe flow here; expire with session by default (session cookie)
-      const cookieOptions = buildCookieOptionsWithExpiry('session', absoluteExpiresAt);
+      const cookieOptions = buildCookieOptionsWithExpiry(
+        'session',
+        absoluteExpiresAt,
+        ctx.request.secure
+      );
       ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
 
       const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
@@ -322,7 +329,11 @@ export default {
 
       const { token } = result;
       // Preserve session-vs-remember mode using rotation.type and rotation.absoluteExpiresAt
-      const opts = buildCookieOptionsWithExpiry(rotation.type, rotation.absoluteExpiresAt);
+      const opts = buildCookieOptionsWithExpiry(
+        rotation.type,
+        rotation.absoluteExpiresAt,
+        ctx.request.secure
+      );
 
       ctx.cookies.set(REFRESH_COOKIE_NAME, rotation.token, opts);
       ctx.body = { data: { token } };
@@ -341,7 +352,7 @@ export default {
 
     // Clear cookie regardless of token validity
     ctx.cookies.set(REFRESH_COOKIE_NAME, '', {
-      ...getRefreshCookieOptions(),
+      ...getRefreshCookieOptions(ctx.request.secure),
       expires: new Date(0),
     });
 
