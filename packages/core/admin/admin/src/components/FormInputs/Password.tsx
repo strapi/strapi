@@ -1,5 +1,6 @@
-import { forwardRef, memo, useState } from 'react';
+import * as React from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { TextInput, useComposedRefs, Field } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -9,19 +10,24 @@ import { useField } from '../Form';
 
 import type { StringProps } from './types';
 
-const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
+const PasswordInput = React.forwardRef<HTMLInputElement, StringProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = React.useState(false);
     const { formatMessage } = useIntl();
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
+    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
+
+    // Create a key that changes when locale changes to force re-render
+    const localeKey = query?.plugins?.i18n?.locale || 'default';
 
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
         <TextInput
+          key={`inputPassword-${name}-${localeKey}`}
           ref={composedRefs}
           autoComplete="password"
           endAction={
@@ -49,6 +55,6 @@ const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
   }
 );
 
-const MemoizedPasswordInput = memo(PasswordInput);
+const MemoizedPasswordInput = React.memo(PasswordInput);
 
 export { MemoizedPasswordInput as PasswordInput };
