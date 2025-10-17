@@ -545,6 +545,14 @@ test.describe('Edit view', () => {
       page.getByLabel('Unpublish multiple locales').getByRole('button', { name: 'Unpublish' })
     ).toBeDisabled();
   });
+});
+
+describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')('Unstable edit view',() => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await page.goto('/admin');
+    await login({ page });
+  });
 
   test('As a user I want to enable AI translation', async ({ page }) => {
     // Navigate to an Article

@@ -1,5 +1,5 @@
 module.exports = ({ env }) => ({
   future: {
-    unstableAILocalizations: true,
+    unstableAILocalizations: env.bool('STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS', false),
   },
 });
