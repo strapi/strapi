@@ -28,7 +28,7 @@ export const extendMiddlewareConfiguration = (
       return mergeWith(
         (objValue, srcValue) => {
           if (Array.isArray(objValue)) {
-            return objValue.concat(srcValue);
+            return Array.from(new Set(objValue.concat(srcValue)));
           }
           return undefined;
         },

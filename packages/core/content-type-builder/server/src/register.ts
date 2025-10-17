@@ -2,8 +2,8 @@ import type { Core } from '@strapi/types';
 import { CSP_DEFAULTS, extendMiddlewareConfiguration } from '@strapi/utils';
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  const isAIEnabled =
-    strapi.config.get('admin.ai.enabled') && strapi.ee.features.isEnabled('cms-ai');
+  const aiEnabledConfig = strapi.config.get('admin.ai.enabled') !== false;
+  const isAIEnabled = aiEnabledConfig && strapi.ee.features.isEnabled('cms-ai');
 
   if (isAIEnabled) {
     const s3Domains = [
