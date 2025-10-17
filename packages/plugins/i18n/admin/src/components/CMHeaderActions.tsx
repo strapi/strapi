@@ -252,7 +252,7 @@ const getDocumentStatus = (
  * AISettingsStatusAction
  * -----------------------------------------------------------------------------------------------*/
 
-const AITanslationStatusIcon = styled(Status)<{ isAISettingEnabled: boolean }>`
+const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>`
   display: flex;
   gap: ${({ theme }) => theme.spaces[1]};
   justify-content: center;
@@ -260,11 +260,18 @@ const AITanslationStatusIcon = styled(Status)<{ isAISettingEnabled: boolean }>`
   height: 100%;
 
   // Disabled state
-  background-color: ${({ isAISettingEnabled, theme }) =>
-    !isAISettingEnabled && theme.colors.neutral150};
+  ${({ $isAISettingEnabled, theme }) =>
+    !$isAISettingEnabled &&
+    `
+    background-color: ${theme.colors.neutral150};
+  `}
 
   svg {
-    fill: ${({ isAISettingEnabled, theme }) => !isAISettingEnabled && theme.colors.neutral300};
+    ${({ $isAISettingEnabled, theme }) =>
+      !$isAISettingEnabled &&
+      `
+        fill: ${theme.colors.neutral300};
+      `}
   }
 `;
 
@@ -282,7 +289,7 @@ const AITranslationStatusAction = () => {
 
   // Do not display this action when AI is not available
   const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (!isAIAvailable && !hasAIFutureFlag) {
+  if (!isAIAvailable || !hasAIFutureFlag) {
     return null;
   }
 
@@ -296,17 +303,17 @@ const AITranslationStatusAction = () => {
             defaultMessage: 'AI Translation Status',
           })}
         >
-          <AITanslationStatusIcon
-            isAISettingEnabled={Boolean(isAISettingEnabled)}
+          <AITranslationStatusIcon
+            $isAISettingEnabled={Boolean(isAISettingEnabled)}
             variant={isAISettingEnabled ? 'alternative' : 'neutral'}
             size="S"
           >
             <Sparkle />
-          </AITanslationStatusIcon>
+          </AITranslationStatusIcon>
         </Box>
       ),
       tooltip: (
-        <Flex direction="column" padding={4} alignItems="flex-start">
+        <Flex direction="column" padding={4} alignItems="flex-start" width="25rem">
           <Typography variant="pi" fontWeight="600">
             {formatMessage(
               {

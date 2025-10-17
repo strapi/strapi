@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 
 interface ValidationType {
@@ -544,6 +544,14 @@ test.describe('Edit view', () => {
     await expect(
       page.getByLabel('Unpublish multiple locales').getByRole('button', { name: 'Unpublish' })
     ).toBeDisabled();
+  });
+});
+
+describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')('Unstable edit view',() => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await page.goto('/admin');
+    await login({ page });
   });
 
   test('As a user I want to enable AI translation', async ({ page }) => {

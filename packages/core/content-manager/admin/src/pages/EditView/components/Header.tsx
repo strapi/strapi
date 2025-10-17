@@ -487,7 +487,6 @@ const HeaderActionStatus = ({ tooltip, children }: HeaderActionStatusProps) => {
         id="document-header-action-status"
         side="bottom"
         align="center"
-        style={{ width: '250px' }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
