@@ -33,6 +33,7 @@ import { SelectedStep } from './SelectedStep/SelectedStep';
 import type { File as Asset, FilterCondition, Query } from '../../../../shared/contracts/files';
 import type { Folder, FolderDefinition } from '../../../../shared/contracts/folders';
 import type { AllowedTypes } from '../AssetCard/AssetCard';
+import { useFolder } from '../../hooks/useFolder';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
@@ -107,6 +108,17 @@ export const AssetContent = ({
   } = useAssets({ skipWhen: !canRead, query: queryObject });
 
   const {
+    data: currentFolder,
+    isLoading: isCurrentFolderLoading,
+    error: currentFolderError,
+  } = useFolder(folderId as number | null | undefined, {
+    enabled: canRead && !!folderId,
+  });
+  if (currentFolder) {
+    queryObject!.folderPath = currentFolder.path;
+  }
+
+  const {
     data: folders,
     isLoading: isLoadingFolders,
     error: errorFolders,
@@ -143,8 +155,8 @@ export const AssetContent = ({
     return multiple ? selectOne(asset as Asset) : selectOnly(asset as Asset);
   };
 
-  const isLoading = isLoadingPermissions || isLoadingAssets || isLoadingFolders;
-  const hasError = errorAssets || errorFolders;
+  const isLoading = isLoadingPermissions || isLoadingAssets || isLoadingFolders || isCurrentFolderLoading;
+  const hasError = errorAssets || errorFolders || currentFolderError;
 
   const [activeTab, setActiveTab] = React.useState(
     selectedAssets.length > 0 ? 'selected' : 'browse'
