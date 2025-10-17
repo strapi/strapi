@@ -366,8 +366,8 @@ const releaseApi = adminApi
               method: 'POST',
             };
           },
-          invalidatesTags: () => [
-            { type: 'Release', id: 'LIST' },
+          invalidatesTags: (result, error, arg) => [
+            { type: 'Release', id: arg.id },
             { type: 'Document' },
             'UpcomingReleasesList',
           ],
