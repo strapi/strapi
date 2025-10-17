@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * test-locale service
+ * config service
  */
 
 const { createCoreService } = require('@strapi/strapi').factories;
 
-module.exports = createCoreService('api::test-locale.test-locale');
+module.exports = createCoreService('api::config.config');
