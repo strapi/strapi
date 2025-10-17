@@ -8,7 +8,7 @@ const settingsApi = i18nApi.injectEndpoints({
       query: () => '/i18n/settings',
       providesTags: ['Settings'],
     }),
-    updateSettings: builder.mutation<UpdateSettings.Response, UpdateSettings.Request['body']>({
+    updatei18nSettings: builder.mutation<UpdateSettings.Response, UpdateSettings.Request['body']>({
       query: (data) => ({
         url: '/i18n/settings',
         method: 'PUT',
@@ -19,6 +19,6 @@ const settingsApi = i18nApi.injectEndpoints({
   }),
 });
 
-const { useGetSettingsQuery, useUpdateSettingsMutation } = settingsApi;
+const { useGetSettingsQuery, useUpdatei18nSettingsMutation } = settingsApi;
 
-export { useGetSettingsQuery, useUpdateSettingsMutation };
+export { useGetSettingsQuery, useUpdatei18nSettingsMutation };
