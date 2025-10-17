@@ -127,17 +127,40 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const aiResult = await response.json();
-      console.log('********* AI RESULT', JSON.stringify(aiResult, null, 2));
+
+      // 1. Get all media field names dynamically from the schema
+      const mediaFields = Object.entries(schema.attributes)
+        .filter(([_, attr]) => attr.type === 'media')
+        .map(([key]) => key);
 
       try {
         await Promise.allSettled(
-          aiResult.localizations.map((localization: any) => {
+          aiResult.localizations.map(async (localization: any) => {
             const { content, locale } = localization;
+
+            // Fetch the derived locale document
+            const derivedDoc = await strapi.documents(model).findOne({
+              documentId,
+              locale,
+              populate: mediaFields
+            });
+
+            // Merge AI content and media fields
+            const mergedData = { ...content };
+            for (const field of mediaFields) {
+              // Only copy media if not already set in derived locale
+              if (!derivedDoc || !derivedDoc[field]) {
+                mergedData[field] = document[field];
+              } else {
+                mergedData[field] = derivedDoc[field];
+              }
+            }
+
             return strapi.documents(model).update({
               documentId,
               locale,
               fields: [],
-              data: content,
+              data: mergedData,
             });
           })
         );

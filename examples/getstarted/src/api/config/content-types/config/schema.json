@@ -16,7 +16,7 @@
   },
   "attributes": {
     "siteName": {
-      "type": "text",
+      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": true
