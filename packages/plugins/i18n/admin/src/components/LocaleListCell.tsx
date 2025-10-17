@@ -59,15 +59,13 @@ const LocaleListCell = ({
       return baseText;
     }
 
-    const moreText = formatMessage(
+    return formatMessage(
       {
         id: getTranslation('CMListView.popover.display-locales.more'),
-        defaultMessage: '+ {count} more',
+        defaultMessage: '{locales} + {count} more',
       },
-      { count: remainingCount }
+      { locales: baseText, count: remainingCount }
     );
-
-    return `${baseText} ${moreText}`;
   };
 
   const handleLocaleClick = (localeCode: string) => {
