@@ -4,8 +4,12 @@ import type { Core } from '@strapi/types';
 import validateLocaleCreation from './controllers/validate-locale-creation';
 import graphqlProvider from './graphql';
 import { getService } from './utils';
+import { aiLocalizationJobs } from './models/ai-localization-jobs';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
+  // Register the AI localizations job model
+  strapi.get('models').add(aiLocalizationJobs);
+
   extendContentTypes(strapi);
   addContentManagerLocaleMiddleware(strapi);
 };

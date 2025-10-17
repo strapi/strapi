@@ -408,6 +408,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           'RecentDocumentList',
           'CountDocuments',
           'UpcomingReleasesList',
+          {
+            type: 'AILocalizationJobs',
+            id: `document-${documentId}`,
+          },
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {

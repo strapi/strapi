@@ -80,5 +80,9 @@ export default async () => {
   // Hooks & Models
   registerModelsHooks();
 
+  // AI Localizations
+  const aiLocalizationsService = getService('ai-localizations');
+  aiLocalizationsService.setupMiddleware();
+
   sendDidInitializeEvent();
 };

@@ -89,5 +89,13 @@ export default {
         policies: ['admin::isAuthenticatedAdmin'],
       },
     },
+    {
+      method: 'GET',
+      path: '/ai-localization-jobs/document/:documentId',
+      handler: 'ai-localization-jobs.getJobByDocument',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
   ],
 };
