@@ -32,6 +32,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Checks if there are localizations that need to be generated for the given document,
      * and if so, calls the AI service and saves the results to the database.
+     * Works for both single and collection types, on create and update.
      */
     async generateDocumentLocalizations({
       model,
@@ -60,6 +61,13 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         return;
       }
 
+      const documentId = document.documentId;
+
+      if (!documentId) {
+        strapi.log.warn(`AI Localizations: missing documentId for ${schema.uid}`);
+        return;
+      }
+
       // Extract only the localized content from the document
       const translateableContent = await traverseEntity(
         ({ key, attribute }, { remove }) => {
@@ -79,6 +87,13 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       const targetLocales = localesList
         .filter((l) => l.code !== document.locale)
         .map((l) => l.code);
+
+      if (targetLocales.length === 0) {
+        strapi.log.info(
+          `AI Localizations: no target locales for ${schema.uid} document ${documentId}`
+        );
+        return;
+      }
 
       let token: string;
       try {
@@ -119,7 +134,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           aiResult.localizations.map((localization: any) => {
             const { content, locale } = localization;
             return strapi.documents(model).update({
-              documentId: document.documentId,
+              documentId,
               locale,
               fields: [],
               data: content,
