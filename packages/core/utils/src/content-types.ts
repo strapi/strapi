@@ -48,10 +48,6 @@ const getTimestamps = (model: Model) => {
     attributes.push(UPDATED_AT_ATTRIBUTE);
   }
 
-  if (has(PUBLISHED_AT_ATTRIBUTE, model.attributes)) {
-    attributes.push(PUBLISHED_AT_ATTRIBUTE);
-  }
-
   return attributes;
 };
 
@@ -103,7 +99,7 @@ const getNonVisibleAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
+  return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, PUBLISHED_AT_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
 };
 
 const getVisibleAttributes = (model: Model) => {
