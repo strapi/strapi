@@ -23,6 +23,8 @@ describe('Link', () => {
           type: 'link',
           url: 'https://example.com',
           children: [{ type: 'text', text: 'Some link' }],
+          rel: 'noopener noreferrer',
+          target: '_blank',
         },
         attributes: {
           'data-slate-node': 'element',
@@ -39,6 +41,38 @@ describe('Link', () => {
     const link = screen.getByRole('link', { name: 'Some link' });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', 'https://example.com');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders a link block without rel and target attributes', () => {
+    render(
+      linkBlocks.link.renderElement({
+        children: 'Some link',
+        element: {
+          type: 'link',
+          url: 'https://example.com',
+          children: [{ type: 'text', text: 'Some link' }],
+          rel: '',
+          target: '',
+        },
+        attributes: {
+          'data-slate-node': 'element',
+          ref: null,
+        },
+      }),
+      {
+        renderOptions: {
+          wrapper: Wrapper,
+        },
+      }
+    );
+
+    const link = screen.getByRole('link', { name: 'Some link' });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://example.com');
+    expect(link).toHaveAttribute('rel', '');
+    expect(link).toHaveAttribute('target', '');
   });
 
   it('toggles the popover when clicking on a link', async () => {
@@ -48,6 +82,8 @@ describe('Link', () => {
         element: {
           type: 'link',
           url: 'https://example.com',
+          rel: 'noopener noreferrer',
+          target: '_blank',
           children: [
             { type: 'text', text: 'Some' },
             { type: 'text', text: ' link' },
@@ -83,6 +119,8 @@ describe('Link', () => {
         element: {
           type: 'link',
           url: 'https://example.com',
+          rel: 'noopener noreferrer',
+          target: '_blank',
           children: [
             { type: 'text', text: 'Some' },
             { type: 'text', text: ' link' },
