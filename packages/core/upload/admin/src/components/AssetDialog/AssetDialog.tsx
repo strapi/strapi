@@ -114,9 +114,8 @@ export const AssetContent = ({
   } = useFolder(folderId as number | null | undefined, {
     enabled: canRead && !!folderId,
   });
-  if (currentFolder) {
-    queryObject!.folderPath = currentFolder.path;
-  }
+
+  queryObject!.folderPath = currentFolder?.path ?? "/"
 
   const {
     data: folders,
