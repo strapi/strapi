@@ -44,7 +44,7 @@ import {
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
-import { AnyData, handleInvisibleAttributes } from '../utils/data';
+import { AnyData } from '../utils/data';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
@@ -746,10 +746,6 @@ const PublishAction: DocumentActionComponent = ({
         }
         return;
       }
-      const { data } = handleInvisibleAttributes(transformData(formValues), {
-        schema,
-        components,
-      });
       const res = await publish(
         {
           collectionType,
@@ -757,7 +753,7 @@ const PublishAction: DocumentActionComponent = ({
           documentId,
           params: currentDocumentMeta.params,
         },
-        data
+        transformData(formValues)
       );
 
       // Reset form if successful
@@ -1050,11 +1046,6 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
-        const { data } = handleInvisibleAttributes(transformData(document), {
-          schema: fromRelationModal ? relationalModalSchema : schema,
-          initialValues,
-          components,
-        });
         const res = await update(
           {
             collectionType,
@@ -1062,7 +1053,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId,
             params: currentDocumentMeta.params,
           },
-          data
+          transformData(document)
         );
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
@@ -1071,17 +1062,12 @@ const UpdateAction: DocumentActionComponent = ({
           resetForm();
         }
       } else {
-        const { data } = handleInvisibleAttributes(transformData(document), {
-          schema: fromRelationModal ? relationalModalSchema : schema,
-          initialValues,
-          components,
-        });
         const res = await create(
           {
             model,
             params: currentDocumentMeta.params,
           },
-          data
+          transformData(document)
         );
 
         if ('data' in res && collectionType !== SINGLE_TYPES) {
