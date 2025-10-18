@@ -20,8 +20,8 @@ import { tours } from './GuidedTour/Tours';
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
   height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px);
-  overflow: hidden;
   background-color: ${({ theme }) => theme.colors.neutral0};
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   border-right: 0;
@@ -354,8 +354,14 @@ const PageWrapper = styled(Box)`
   }
 `;
 
+const StyledScrollArea = styled(ScrollArea)`
+   [data-radix-scroll-area-viewport] {
+    overscroll-behavior: contain ; 
+  }
+`;
+
 const Content = ({ children }: { children: React.ReactNode }) => {
-  return <ScrollArea>{children}</ScrollArea>;
+  return <StyledScrollArea>{children}</StyledScrollArea>;
 };
 
 export const SubNav = {
