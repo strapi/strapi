@@ -16,6 +16,8 @@ type UseI18n = () => {
   canPublish: string[];
 };
 
+type Action = 'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canPublish';
+
 /**
  * @alpha
  * @description This hook is used to get the i18n status of a content type.
@@ -33,10 +35,14 @@ const useI18n: UseI18n = () => {
     return permissions.reduce<Omit<ReturnType<UseI18n>, 'hasI18n'>>(
       (acc, permission) => {
         const [actionShorthand] = permission.action.split('.').slice(-1);
+        const key = `can${capitalize(actionShorthand)}` as Action;
+
+        const existingLocales = acc[key] ?? [];
+        const newLocales = permission.properties?.locales ?? [];
 
         return {
           ...acc,
-          [`can${capitalize(actionShorthand)}`]: permission.properties?.locales ?? [],
+          [key]: [...existingLocales, ...newLocales],
         };
       },
       { canCreate: [], canRead: [], canUpdate: [], canDelete: [], canPublish: [] }
