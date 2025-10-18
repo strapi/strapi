@@ -8,6 +8,7 @@ import {
   useStrapiApp,
   useQueryParams,
   useIsDesktop,
+  useDebounce,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -17,6 +18,7 @@ import {
   Typography,
   IconButton,
   Dialog,
+  Popover,
 } from '@strapi/design-system';
 import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -138,6 +140,10 @@ interface HeaderActionDescription {
     textValue?: string;
     value: string;
   }>;
+  status?: {
+    message: React.ReactNode;
+    tooltip?: React.ReactNode;
+  };
   onSelect?: (value: string) => void;
   value?: string;
   customizeContent?: (value: string) => React.ReactNode;
@@ -409,31 +415,84 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               ))}
             </SingleSelect>
           );
+        } else if (action.status) {
+          return (
+            <HeaderActionStatus tooltip={action.status?.tooltip} key={action.id}>
+              {action.status.message}
+            </HeaderActionStatus>
+          );
         } else {
-          if (action.type === 'icon') {
-            return (
-              <React.Fragment key={action.id}>
-                <IconButton
-                  disabled={action.disabled}
-                  label={action.label}
-                  size="S"
-                  onClick={handleClick(action)}
-                >
-                  {action.icon}
-                </IconButton>
-                {action.dialog ? (
-                  <HeaderActionDialog
-                    {...action.dialog}
-                    isOpen={dialogId === action.id}
-                    onClose={handleClose}
-                  />
-                ) : null}
-              </React.Fragment>
-            );
-          }
+          return (
+            <React.Fragment key={action.id}>
+              <IconButton
+                disabled={action.disabled}
+                label={action.label}
+                size="S"
+                onClick={handleClick(action)}
+              >
+                {action.icon}
+              </IconButton>
+              {action.dialog ? (
+                <HeaderActionDialog
+                  {...action.dialog}
+                  isOpen={dialogId === action.id}
+                  onClose={handleClose}
+                />
+              ) : null}
+            </React.Fragment>
+          );
         }
       })}
     </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * HeaderActionStatus
+ * -----------------------------------------------------------------------------------------------*/
+
+interface HeaderActionStatusProps {
+  tooltip: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const HeaderActionStatus = ({ tooltip, children }: HeaderActionStatusProps) => {
+  const [open, setOpen] = React.useState(false);
+  // Debounce the open/close so the user can hover over the popover content before it closes
+  const debouncedOpen = useDebounce(open, 100);
+
+  const handleMouseEnter = () => {
+    if (tooltip) {
+      setOpen(true);
+    }
+  };
+  const handleMouseLeave = () => {
+    if (tooltip) {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <Popover.Root open={debouncedOpen} onOpenChange={setOpen}>
+      <Popover.Anchor
+        style={{ alignSelf: 'stretch' }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        aria-describedby="document-header-action-status"
+      >
+        <Box height="100%">{children}</Box>
+      </Popover.Anchor>
+      <Popover.Content
+        role="tooltip"
+        id="document-header-action-status"
+        side="bottom"
+        align="center"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {tooltip}
+      </Popover.Content>
+    </Popover.Root>
   );
 };
 
