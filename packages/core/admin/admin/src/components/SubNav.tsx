@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useId, useState ,useEffect, useRef} from 'react';
 
 import {
   Box,
@@ -120,8 +120,23 @@ const StyledHeader = styled(Flex)`
 `;
 
 const Header = ({ label }: { label: string }) => {
+  const headerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault(); 
+    };
+    
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+    
+  }, []);
+
   return (
     <StyledHeader
+    ref={headerRef}
       justifyContent="space-between"
       paddingLeft={{
         initial: 4,
@@ -351,8 +366,8 @@ const PageWrapper = styled(Box)`
 `;
 
 const StyledScrollArea = styled(ScrollArea)`
-   [data-radix-scroll-area-viewport] {
-    overscroll-behavior: contain ; 
+    [data-radix-scroll-area-viewport] {
+      overscroll-behavior: contain ; 
   }
 `;
 
