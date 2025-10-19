@@ -722,6 +722,15 @@ const PublishAction: DocumentActionComponent = ({
         const hasUnreadableRequiredField = Object.keys(schema.attributes).some((fieldName) => {
           const attribute = schema.attributes[fieldName];
 
+          // For components, check if any of the component fields are readable
+          if (attribute.type === 'component') {
+            const componentFields = (canReadFields ?? []).filter((field) =>
+              field.startsWith(`${fieldName}.`)
+            );
+            return componentFields.length === 0;
+          }
+
+          // For regular fields, check if the field itself is readable
           return attribute?.required && !(canReadFields ?? []).includes(fieldName);
         });
 

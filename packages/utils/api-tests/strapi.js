@@ -32,6 +32,9 @@ const createStrapiInstance = async ({
   };
   const instance = createStrapi(options);
 
+  // Ensure Koa trusts X-Forwarded-* headers in tests so asHTTPS() can simulate HTTPS
+  instance.config.set('server.proxy.koa', true);
+
   if (bypassAuth) {
     instance.get('auth').register('content-api', {
       name: 'test-auth',
