@@ -18,7 +18,7 @@ test.describe('Edit View', () => {
     test.fixme(
       'as a user I want to be warned if I try to publish content that has draft relations on components within a dynamic zone',
       async ({ page }) => {
-        clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+        await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
         await page.getByRole('link', { name: 'Shop' }).click();
 
         await page.waitForURL(SHOP_URL);
@@ -314,30 +314,42 @@ test.describe('Edit View', () => {
     test('as a user I want to add a component to a dynamic zone at a specific position', async ({
       page,
     }) => {
-      clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
       await navToHeader(page, ['Content Manager', 'Shop'], 'UK Shop');
 
       // There should be a dynamic zone with two components
-      const components = await page
+      const componentsLocator = page
         .getByRole('listitem')
-        .filter({ has: page.getByRole('heading') })
-        .all();
-      expect(components).toHaveLength(3);
-      expect(components[0]).toHaveText(/product carousel/i);
-      expect(components[1]).toHaveText(/content and image/i);
-      expect(components[2]).toHaveText(/product carousel/i);
+        .filter({ has: page.getByRole('heading') });
+      await expect(componentsLocator).toHaveCount(3);
+      await expect(componentsLocator.nth(0)).toHaveText(/product carousel/i);
+      await expect(componentsLocator.nth(1)).toHaveText(/content and image/i);
+      await expect(componentsLocator.nth(2)).toHaveText(/product carousel/i);
 
       // Add components at specific locations:
       // - very last position
-      await components[1].getByRole('button', { name: /more actions/i }).click();
+      const moreActionsBtn1 = componentsLocator
+        .nth(1)
+        .getByRole('button', { name: /more actions/i });
+      await moreActionsBtn1.waitFor({ state: 'visible' });
+      await moreActionsBtn1.click({ force: true });
       await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
       await page.getByRole('menuitem', { name: /product carousel/i }).dispatchEvent('click');
+
       // - very first position
-      await components[0].getByRole('button', { name: /more actions/i }).click();
+      const moreActionsBtn2 = componentsLocator
+        .nth(0)
+        .getByRole('button', { name: /more actions/i });
+      await moreActionsBtn2.waitFor({ state: 'visible' });
+      await moreActionsBtn2.click({ force: true });
       await page.getByRole('menuitem', { name: /add component above/i }).dispatchEvent('click');
       await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
+
       // - middle position
-      await components[1].getByRole('button', { name: /more actions/i }).click();
+      const moreActionsBtn3 = componentsLocator
+        .nth(1)
+        .getByRole('button', { name: /more actions/i });
+      await moreActionsBtn3.waitFor({ state: 'visible' });
+      await moreActionsBtn3.click({ force: true });
       await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
       await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
 
