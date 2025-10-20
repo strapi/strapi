@@ -143,7 +143,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
             const derivedDoc = await strapi.documents(model).findOne({
               documentId,
               locale,
-              populate: mediaFields
+              populate: mediaFields,
             });
 
             // Merge AI content and media fields

@@ -31,12 +31,7 @@
         }
       },
       "multiple": true,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ]
+      "allowedTypes": ["images", "files", "videos", "audios"]
     },
     "contactEmail": {
       "type": "email",
@@ -79,11 +74,7 @@
           "localized": true
         }
       },
-      "enum": [
-        "en",
-        "fr",
-        "de"
-      ]
+      "enum": ["en", "fr", "de"]
     }
   }
 }
