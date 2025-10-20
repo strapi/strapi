@@ -72,7 +72,7 @@ export const PluralName = ({
   return (
     <Field.Root error={errorMessage} hint={hint} name={name}>
       <Field.Label>{label}</Field.Label>
-      <TextInput onChange={onChange} value={value || ''} />
+      <TextInput onChange={onChange} value={value || ''} type="text" />
       <Field.Error />
     </Field.Root>
   );
