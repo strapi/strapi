@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { Box, EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
+import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -68,12 +68,8 @@ export const ListView = () => {
   } = useRBAC(permissions);
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
-  const startSection = useGuidedTour('ListView', (state) => state.startSection);
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  React.useEffect(() => {
-    startSection('apiTokens');
-  }, [startSection]);
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
     navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
@@ -134,6 +130,12 @@ export const ListView = () => {
 
   return (
     <>
+      {apiTokens.length > 0 && (
+        <tours.apiTokens.Introduction>
+          {/* Invisible Anchor */}
+          <Box />
+        </tours.apiTokens.Introduction>
+      )}
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },

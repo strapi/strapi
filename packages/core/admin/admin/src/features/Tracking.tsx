@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import axios, { AxiosResponse } from 'axios';
 
+import { Tours } from '../components/GuidedTour/Tours';
+import { useDeviceType } from '../hooks/useDeviceType';
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
@@ -12,6 +14,7 @@ export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
   useTypescriptOnAdmin?: boolean;
   isHostedOnStrapiCloud?: boolean;
+  aiLicenseKey?: string;
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
@@ -40,19 +43,18 @@ export interface TrackingProviderProps {
 
 const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const token = useAuth('App', (state) => state.token);
-  const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
   const { data: initData } = useInitQuery();
   const { uuid } = initData ?? {};
+  const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
 
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
-
   React.useEffect(() => {
     if (uuid && data) {
       const event = 'didInitializeAdministration';
       try {
-        fetch('https://analytics.strapi.io/api/v2/track', {
+        fetch(`${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`, {
           method: 'POST',
           body: JSON.stringify({
             // This event is anonymous
@@ -75,7 +77,6 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
       }
     }
   }, [data, uuid, getAllWidgets]);
-
   const value = React.useMemo(
     () => ({
       uuid,
@@ -98,10 +99,9 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
  * Meanwhile those with properties have different property shapes corresponding to the specific
  * event so understanding which properties go with which event is very helpful.
  */
-interface EventWithoutProperties {
+export interface EventWithoutProperties {
   name:
     | 'changeComponentsOrder'
-    | 'didAccessAuthenticatedAdministration'
     | 'didAddComponentToDynamicZone'
     | 'didBulkDeleteEntries'
     | 'didNotBulkDeleteEntries'
@@ -177,8 +177,8 @@ interface EventWithoutProperties {
     | 'willEditEditLayout'
     | 'willEditEmailTemplates'
     | 'willEditEntryFromButton'
-    | 'willEditEntryFromHome'
     | 'willEditEntryFromList'
+    | 'willEditReleaseFromHome'
     | 'willEditFieldOfContentType'
     | 'willEditMediaLibraryConfig'
     | 'willEditNameOfContentType'
@@ -188,13 +188,26 @@ interface EventWithoutProperties {
     | 'willEditStage'
     | 'willFilterEntries'
     | 'willInstallPlugin'
+    | 'willOpenAuditLogDetailsFromHome'
     | 'willUnpublishEntry'
     | 'willSaveComponent'
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease';
+    | 'didCreateRelease'
+    | 'didStartNewChat'
+    | 'didLaunchGuidedtour'
+    | 'didEditAICaption'
+    | 'didEditAIAlternativeText';
   properties?: never;
+}
+
+interface DidAccessAuthenticatedAdministrationEvent {
+  name: 'didAccessAuthenticatedAdministration';
+  properties: {
+    registeredWidgets: string[];
+    projectId: string;
+  };
 }
 
 interface DidFilterMediaLibraryElementsEvent {
@@ -365,9 +378,93 @@ interface DidPublishRelease {
   };
 }
 
+interface DidUsePresetPromptEvent {
+  name: 'didUsePresetPrompt';
+  properties: {
+    promptType:
+      | 'generate-product-schema'
+      | 'tell-me-about-the-content-type-builder'
+      | 'tell-me-about-strapi';
+  };
+}
+
+interface DidAnswerMessageEvent {
+  name: 'didAnswerMessage';
+  properties: {
+    successful: boolean;
+  };
+}
+
+interface DidVoteAnswerEvent {
+  name: 'didVoteAnswer';
+  properties: {
+    value: 'positive' | 'negative';
+  };
+}
+
+interface DidUpdateCTBSchema {
+  name: 'didUpdateCTBSchema';
+  properties: {
+    success: boolean;
+    newContentTypes: number;
+    editedContentTypes: number;
+    deletedContentTypes: number;
+    newComponents: number;
+    editedComponents: number;
+    deletedComponents: number;
+    newFields: number;
+    editedFields: number;
+    deletedFields: number;
+  };
+}
+
+interface DidSkipGuidedTour {
+  name: 'didSkipGuidedTour';
+  properties: {
+    name: keyof Tours | 'all';
+  };
+}
+
+interface DidCompleteGuidedTour {
+  name: 'didCompleteGuidedTour';
+  properties: {
+    name: keyof Tours | 'all';
+  };
+}
+
+interface DidStartGuidedTour {
+  name: 'didStartGuidedTour';
+  properties: {
+    name: keyof Tours;
+    fromHomepage?: boolean;
+  };
+}
+
+interface WillEditEntryFromHome {
+  name: 'willEditEntryFromHome';
+  properties: {
+    entryType: 'edited' | 'published' | 'assigned';
+  };
+}
+
+interface DidOpenHomeWidgetLink {
+  name: 'didOpenHomeWidgetLink';
+  properties: {
+    widgetUID: string;
+  };
+}
+
+interface DidOpenKeyStatisticsWidgetLink {
+  name: 'didOpenKeyStatisticsWidgetLink';
+  properties: {
+    itemKey: string;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
+  | DidAccessAuthenticatedAdministrationEvent
   | DidAccessTokenListEvent
   | DidChangeModeEvent
   | DidCropFileEvent
@@ -379,13 +476,23 @@ type EventsWithProperties =
   | DidSelectFile
   | DidSortMediaLibraryElementsEvent
   | DidSubmitWithErrorsFirstAdminEvent
+  | DidUsePresetPromptEvent
+  | DidAnswerMessageEvent
+  | DidVoteAnswerEvent
   | LogoEvent
   | TokenEvents
   | UpdateEntryEvents
   | WillModifyTokenEvent
   | WillNavigateEvent
   | DidPublishRelease
-  | MediaEvents;
+  | MediaEvents
+  | DidUpdateCTBSchema
+  | DidSkipGuidedTour
+  | DidCompleteGuidedTour
+  | DidStartGuidedTour
+  | DidOpenHomeWidgetLink
+  | DidOpenKeyStatisticsWidgetLink
+  | WillEditEntryFromHome;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {
@@ -427,6 +534,7 @@ export interface UseTrackingReturn {
  * ```
  */
 const useTracking = (): UseTrackingReturn => {
+  const deviceType = useDeviceType();
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
@@ -437,16 +545,19 @@ const useTracking = (): UseTrackingReturn => {
       try {
         if (uuid && !window.strapi.telemetryDisabled) {
           const res = await axios.post<string>(
-            'https://analytics.strapi.io/api/v2/track',
+            `${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/api/v2/track`,
             {
               event,
               userId,
               eventProperties: { ...properties },
-              userProperties: {},
+              userProperties: {
+                deviceType,
+              },
               groupProperties: {
                 ...telemetryProperties,
                 projectId: uuid,
                 projectType: window.strapi.projectType,
+                aiLicenseKey: window.strapi.aiLicenseKey,
               },
             },
             {

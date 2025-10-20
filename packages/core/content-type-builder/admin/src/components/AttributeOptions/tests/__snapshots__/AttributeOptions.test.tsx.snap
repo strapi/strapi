@@ -16,6 +16,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 
 .c20 {
   width: 3.2rem;
+  height: 3.2rem;
   flex-shrink: 0;
 }
 
@@ -108,7 +109,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 }
 
 .c1 {
-  padding-inline: 40px;
+  padding-inline: 32px;
 }
 
 .c1>div {

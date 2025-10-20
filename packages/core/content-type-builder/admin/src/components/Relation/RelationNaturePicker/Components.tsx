@@ -33,6 +33,13 @@ const IconWrapper = styled<BoxComponent<'button'>>(Box)<{ $isSelected: boolean }
   cursor: pointer;
   &:disabled {
     cursor: not-allowed;
+    background: ${({ theme }) => theme.colors.neutral150};
+
+    svg {
+      path {
+        fill: ${({ theme }) => theme.colors.neutral300};
+      }
+    }
   }
   display: flex;
   justify-content: center;

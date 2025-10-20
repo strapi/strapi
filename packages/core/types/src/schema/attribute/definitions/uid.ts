@@ -15,6 +15,7 @@ export interface UIDProperties<
 > {
   targetField?: TTargetAttribute;
   options?: UIDOptions & TOptions;
+  regex?: RegExp['source'];
 }
 
 /**

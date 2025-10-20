@@ -5,6 +5,7 @@ module.exports = {
     'api::category.category': require('./category'),
     'api::article.article': require('./article'),
     'api::author.author': require('./author'),
+    'api::mixed-content.mixed-content': require('./mixed-content'),
   },
   components: {
     'article.comp': require('./comp'),

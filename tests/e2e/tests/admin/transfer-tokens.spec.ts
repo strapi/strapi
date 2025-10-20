@@ -54,9 +54,11 @@ test.describe('Transfer Tokens', () => {
 
     await navToHeader(page, ['Settings', 'Transfer Tokens'], 'Transfer Tokens');
 
-    const row = page.getByRole('gridcell', { name: 'my test token', exact: true });
+    const row = page.getByRole('row').filter({ hasText: 'my test token' });
     await expect(row).toBeVisible();
-    await expect(page.getByText(/\d+ (second|minute)s? ago/)).toBeVisible();
+
+    // Check the time element within the specific row
+    await expect(row.getByText(/\d+ (second|minute)s? ago/)).toBeVisible();
     // TODO: expand on this test, it could check edit and delete icons
   });
 });

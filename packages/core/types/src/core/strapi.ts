@@ -38,10 +38,20 @@ export interface Strapi extends Container {
   db: Database;
   app: any;
   EE?: boolean;
+  aiLicenseKey?: string;
+  ai?: {
+    enabled: boolean;
+  };
   ee: {
     seats: number | null | undefined;
     type: string | null | undefined;
     isEE: boolean;
+    isTrial: boolean;
+    getTrialEndDate: ({
+      strapi,
+    }: {
+      strapi: Core.Strapi;
+    }) => Promise<{ trialEndsAt: string } | null>;
     features: {
       isEnabled: (feature: string) => boolean;
       list: () => { name: string; [key: string]: any }[];
@@ -74,6 +84,7 @@ export interface Strapi extends Container {
   contentAPI: Modules.ContentAPI.ContentApi;
   sanitizers: Modules.Sanitizers.SanitizersRegistry;
   validators: Modules.Validators.ValidatorsRegistry;
+  sessionManager: Modules.SessionManager.SessionManagerService;
   load(): Promise<Strapi>;
   start(): Promise<Strapi>;
   destroy(): Promise<void>;

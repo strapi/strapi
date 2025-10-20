@@ -38,6 +38,7 @@ const getProperties = (scope: Scope, error?: TrackError) => {
     useTypescriptOnAdmin: boolToString(scope.useTypescript),
     useTypescript: boolToString(scope.useTypescript),
     isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
+    aiLicenseKey: process.env.STRAPI_ADMIN_AI_LICENSE,
     noRun: boolToString(scope.runApp),
     projectId: scope.uuid,
     useExample: boolToString(scope.useExample),
@@ -57,8 +58,10 @@ function trackEvent(event: string, payload: Record<string, unknown>) {
     return;
   }
 
+  const analyticsUrl = process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io';
+
   try {
-    return fetch('https://analytics.strapi.io/api/v2/track', {
+    return fetch(`${analyticsUrl}/api/v2/track`, {
       method: 'POST',
       body: JSON.stringify({
         event,

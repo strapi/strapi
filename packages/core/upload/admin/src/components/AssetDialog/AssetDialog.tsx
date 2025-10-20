@@ -36,7 +36,7 @@ import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + 8rem)`};
+  min-height: ${() => `calc(60dvh + 8rem)`};
 `;
 
 export interface FileRow extends Asset {
@@ -146,6 +146,10 @@ export const AssetContent = ({
   const isLoading = isLoadingPermissions || isLoadingAssets || isLoadingFolders;
   const hasError = errorAssets || errorFolders;
 
+  const [activeTab, setActiveTab] = React.useState(
+    selectedAssets.length > 0 ? 'selected' : 'browse'
+  );
+
   if (isLoading) {
     return (
       <>
@@ -253,7 +257,7 @@ export const AssetContent = ({
         </Modal.Title>
       </Modal.Header>
 
-      <TabsRoot variant="simple" defaultValue={selectedAssets.length > 0 ? 'selected' : 'browse'}>
+      <TabsRoot variant="simple" value={activeTab} onValueChange={setActiveTab}>
         <Flex paddingLeft={8} paddingRight={8} paddingTop={6} justifyContent="space-between">
           <Tabs.List>
             <Tabs.Trigger value="browse">

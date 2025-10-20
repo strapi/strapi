@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { describeOnCondition, findAndClose } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -18,8 +18,7 @@ describeOnCondition(edition === 'EE')('settings', () => {
     /**
      * Get to the settings page
      */
-    await page.getByRole('link', { name: 'Settings' }).click();
-    await page.getByRole('link', { name: 'Review Workflows' }).click();
+    await navToHeader(page, ['Settings', 'Review Workflows'], 'Review Workflows');
 
     await page.getByRole('link', { name: 'Create new workflow' }).click();
 
@@ -70,8 +69,7 @@ describeOnCondition(edition === 'EE')('settings', () => {
   });
 
   test('as a user I want to be able to edit an existing workflow', async ({ page }) => {
-    await page.getByRole('link', { name: 'Settings' }).click();
-    await page.getByRole('link', { name: 'Review Workflows' }).click();
+    await navToHeader(page, ['Settings', 'Review Workflows'], 'Review Workflows');
 
     // Click on the existing workflow
     await page.getByRole('link', { name: 'Default' }).click();
@@ -98,8 +96,7 @@ describeOnCondition(edition === 'EE')('settings', () => {
   });
 
   test('as a user I want to be able to set a required stage for publishing', async ({ page }) => {
-    await page.getByRole('link', { name: 'Settings' }).click();
-    await page.getByRole('link', { name: 'Review Workflows' }).click();
+    await navToHeader(page, ['Settings', 'Review Workflows'], 'Review Workflows');
     await page.getByRole('link', { name: 'Create new workflow' }).click();
 
     /**
@@ -139,12 +136,10 @@ describeOnCondition(edition === 'EE')('settings', () => {
     await expect(requiredStageCombobox).toBeVisible();
     await expect(requiredStageCombobox.locator('span').first()).toHaveText('Done');
 
-    // Navigate to Content Manager to check validation is working
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-
     // Go to the entry
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Author' }).click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
+
     await page.getByRole('gridcell', { name: 'Ted Lasso' }).click();
     await page.getByRole('textbox', { name: 'Name' }).fill('Ted Laso');
 

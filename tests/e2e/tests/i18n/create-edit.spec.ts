@@ -52,7 +52,7 @@ test.describe('Create and Edit Operations', () => {
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
       'Spanish (es)'
     );
-    await expect(page.getByRole('row', { name: 'No content found' })).toBeVisible();
+    await expect(page.getByText('No content found')).toBeVisible();
 
     /**
      * So now we're going to create a document.
@@ -94,7 +94,7 @@ test.describe('Create and Edit Operations', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
@@ -211,7 +211,7 @@ test.describe('Create and Edit Operations', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
