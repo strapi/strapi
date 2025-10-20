@@ -3,6 +3,7 @@ import { traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
 
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
+  // TODO: add a helper function to get the AI server URL
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
   return {
@@ -82,7 +83,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         document
       );
 
-      // 3. Call the AI server to get the localized content
+      // Call the AI server to get the localized content
       const localesList = await localeService.find();
       const targetLocales = localesList
         .filter((l) => l.code !== document.locale)
@@ -128,7 +129,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const aiResult = await response.json();
 
-      // 1. Get all media field names dynamically from the schema
+      // Get all media field names dynamically from the schema
       const mediaFields = Object.entries(schema.attributes)
         .filter(([_, attr]) => attr.type === 'media')
         .map(([key]) => key);
