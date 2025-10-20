@@ -5,6 +5,8 @@ import locales from './locales';
 import isoLocales from './iso-locales';
 import contentTypes from './content-types';
 import sanitize from './sanitize';
+import { createSettingsService } from './settings';
+import { createAILocalizationsService } from './ai-localizations';
 
 export default {
   permissions,
@@ -14,4 +16,6 @@ export default {
   sanitize,
   'iso-locales': isoLocales,
   'content-types': contentTypes,
+  'ai-localizations': createAILocalizationsService,
+  settings: createSettingsService,
 };

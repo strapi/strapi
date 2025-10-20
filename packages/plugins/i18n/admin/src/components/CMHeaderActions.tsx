@@ -9,6 +9,7 @@ import {
   FormErrors,
   useForm,
 } from '@strapi/admin/strapi-admin';
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import {
   type DocumentActionComponent,
   type DocumentActionProps,
@@ -28,15 +29,18 @@ import {
   SingleSelectOption,
   Dialog,
   type StatusVariant,
+  Box,
+  Link,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus } from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus, Sparkle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useI18n } from '../hooks/useI18n';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
+import { useGetSettingsQuery } from '../services/settings';
 import { cleanData } from '../utils/clean';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
@@ -159,9 +163,17 @@ const LocalePickerAction = ({
     ? locales.find((locale) => locale.code === currentDesiredLocale)
     : undefined;
 
+  // Use meta.availableLocales instead of document.localizations
+  // meta.availableLocales contains all locales for the document, even when creating new locales
+  const availableLocales = meta?.availableLocales ?? [];
+  const documentLocalizations = document?.localizations ?? [];
+
+  // Prefer meta.availableLocales as it's more reliable, fallback to document.localizations
+  const allLocalizations = availableLocales.length > 0 ? availableLocales : documentLocalizations;
+
   const allCurrentLocales = [
     { status: getDocumentStatus(document, meta), locale: currentLocale?.code },
-    ...(document?.localizations ?? []),
+    ...allLocalizations,
   ];
 
   if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
@@ -237,6 +249,112 @@ const getDocumentStatus = (
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * AISettingsStatusAction
+ * -----------------------------------------------------------------------------------------------*/
+
+const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>`
+  display: flex;
+  gap: ${({ theme }) => theme.spaces[1]};
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  // Disabled state
+  ${({ $isAISettingEnabled, theme }) =>
+    !$isAISettingEnabled &&
+    `
+    background-color: ${theme.colors.neutral150};
+  `}
+
+  svg {
+    ${({ $isAISettingEnabled, theme }) =>
+      !$isAISettingEnabled &&
+      `
+        fill: ${theme.colors.neutral300};
+      `}
+  }
+`;
+
+const AITranslationStatusAction = () => {
+  const { formatMessage } = useIntl();
+  const isAIAvailable = useAIAvailability();
+  const { data: settings } = useGetSettingsQuery();
+  const isAISettingEnabled = settings?.data?.aiLocalizations;
+  const { hasI18n } = useI18n();
+
+  // Do not display this action when i18n is not available
+  if (!hasI18n) {
+    return null;
+  }
+
+  // Do not display this action when AI is not available
+  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
+  if (!isAIAvailable || !hasAIFutureFlag) {
+    return null;
+  }
+
+  return {
+    status: {
+      message: (
+        <Box
+          height="100%"
+          aria-label={formatMessage({
+            id: getTranslation('CMEditViewAITranslation.status-aria-label'),
+            defaultMessage: 'AI Translation Status',
+          })}
+        >
+          <AITranslationStatusIcon
+            $isAISettingEnabled={Boolean(isAISettingEnabled)}
+            variant={isAISettingEnabled ? 'alternative' : 'neutral'}
+            size="S"
+          >
+            <Sparkle />
+          </AITranslationStatusIcon>
+        </Box>
+      ),
+      tooltip: (
+        <Flex direction="column" padding={4} alignItems="flex-start" width="25rem">
+          <Typography variant="pi" fontWeight="600">
+            {formatMessage(
+              {
+                id: getTranslation('CMEditViewAITranslation.status-title'),
+                defaultMessage:
+                  '{enabled, select, true {AI translation enabled} false {AI translation disabled} other {AI translation disabled}}',
+              },
+              { enabled: isAISettingEnabled }
+            )}
+          </Typography>
+          <Typography variant="pi" paddingTop={1} paddingBottom={3}>
+            {formatMessage({
+              id: getTranslation('CMEditViewAITranslation.status-description'),
+              defaultMessage:
+                'Our AI translates content in all locales each time you save a modification.',
+            })}
+          </Typography>
+          <Link
+            fontSize="inherit"
+            tag={NavLink}
+            to="/settings/internationalization"
+            style={{ alignSelf: 'flex-end' }}
+          >
+            <Typography variant="pi" textAlign="right">
+              {formatMessage(
+                {
+                  id: getTranslation('CMEditViewAITranslation.settings-link'),
+                  defaultMessage:
+                    '{enabled, select, true {Disable it in settings} false {Enable it in settings} other {Enable it in settings}}',
+                },
+                { enabled: isAISettingEnabled }
+              )}
+            </Typography>
+          </Link>
+        </Flex>
+      ),
+    },
+  };
+};
+
+/* -------------------------------------------------------------------------------------------------
  * FillFromAnotherLocaleAction
  * -----------------------------------------------------------------------------------------------*/
 
@@ -261,6 +379,10 @@ const FillFromAnotherLocaleAction = ({
     params: { locale: currentDesiredLocale },
   });
   const { data: locales = [] } = useGetLocalesQuery();
+
+  const isAIAvailable = useAIAvailability();
+  const { data: settings } = useGetSettingsQuery();
+  const isAISettingEnabled = settings?.data?.aiLocalizations;
 
   const availableLocales = Array.isArray(locales)
     ? locales.filter((locale) => meta?.availableLocales.some((l) => l.locale === locale.code))
@@ -287,6 +409,12 @@ const FillFromAnotherLocaleAction = ({
   };
 
   if (!hasI18n) {
+    return null;
+  }
+
+  // Do not display this action when AI is available and AI translations are enabled
+  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
+  if (hasAIFutureFlag && isAIAvailable && isAISettingEnabled) {
     return null;
   }
 
@@ -805,4 +933,5 @@ export {
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
+  AITranslationStatusAction,
 };
