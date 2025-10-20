@@ -131,6 +131,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Get all media field names dynamically from the schema
       const mediaFields = Object.entries(schema.attributes)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .filter(([_, attr]) => attr.type === 'media')
         .map(([key]) => key);
 
