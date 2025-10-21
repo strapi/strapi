@@ -2,6 +2,8 @@ import _ from 'lodash';
 
 export type Env = typeof envFn & typeof utils;
 
+function envFn<T>(key: string): string | T | undefined;
+function envFn<T>(key: string, defaultValue: T): string | T;
 function envFn<T>(key: string, defaultValue?: T): string | T | undefined {
   return _.has(process.env, key) ? process.env[key] : defaultValue;
 }
