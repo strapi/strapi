@@ -54,7 +54,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Don't trigger localizations if the update is on a derived locale, only do it on the default
       const defaultLocale = await localeService.getDefaultLocale();
-      if (document.locale !== defaultLocale) {
+      if (document?.locale !== defaultLocale) {
         return;
       }
 
