@@ -120,7 +120,9 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
         required: validators.required,
         unique: validators.unique,
         minLength: validators.minLength,
-        maxLength: validators.maxLength,
+        maxLength: validators.maxLength
+          .max(255, 'maxLength cannot exceed 255 characters for short text fields')
+          .test(maxLengthIsGreaterThanOrEqualToMinLength),
         regex: yup.string().test(isValidRegExpPattern),
       };
     }
