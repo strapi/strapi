@@ -97,6 +97,14 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         return;
       }
 
+      await aiLocalizationJobsService.upsertJobForDocument({
+        contentType: model,
+        documentId,
+        sourceLocale: document.locale,
+        targetLocales,
+        status: 'processing',
+      });
+
       let token: string;
       try {
         const tokenData = await strapi.service('admin::user').getAiToken();
@@ -114,14 +122,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           cause: error instanceof Error ? error : undefined,
         });
       }
-
-      await aiLocalizationJobsService.upsertJobForDocument({
-        contentType: model,
-        documentId,
-        sourceLocale: document.locale,
-        targetLocales,
-        status: 'processing',
-      });
 
       strapi.log.http('Contacting AI Server for localizations generation');
       const response = await fetch(`${aiServerUrl}/i18n/generate-localizations`, {

@@ -64,10 +64,21 @@ export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strap
   /**
    * Get job by document ID
    */
-  async getJobByDocument(documentId: string) {
+  async getJobByDocumentId(documentId: string) {
     return strapi.db.query(AI_LOCALIZATION_JOB_UID).findOne({
       where: {
         relatedDocumentId: documentId,
+      },
+    });
+  },
+
+  /**
+   * Get job by content type
+   */
+  async getJobByContentType(contentType: string) {
+    return strapi.db.query(AI_LOCALIZATION_JOB_UID).findOne({
+      where: {
+        contentType,
       },
     });
   },

@@ -2,18 +2,31 @@ import { i18nApi } from './api';
 
 import type { GetAILocalizationJobsByDocument } from '../../../shared/contracts/ai-localization-jobs';
 
+// Import the same constant used by the documents service for consistency
+const SINGLE_TYPES = 'single-types';
+
 const aiLocalizationJobsApi = i18nApi.injectEndpoints({
   endpoints: (builder) => ({
     getAILocalizationJobsByDocument: builder.query<
       GetAILocalizationJobsByDocument.Response,
-      string
+      {
+        documentId: string;
+        model: string;
+        collectionType: string;
+      }
     >({
-      query: (documentId) => ({
-        url: `/i18n/ai-localization-jobs/document/${documentId}`,
+      query: ({ documentId, collectionType, model }) => ({
+        url:
+          collectionType === SINGLE_TYPES
+            ? `/i18n/ai-localization-jobs/single-types/${model}`
+            : `/i18n/ai-localization-jobs/collection-types/${documentId}`,
         method: 'GET',
       }),
-      providesTags: (result, error, documentId) => [
-        { type: 'AILocalizationJobs', id: `document-${documentId}` },
+      providesTags: (result, error, { documentId, model, collectionType }) => [
+        {
+          type: 'AILocalizationJobs',
+          id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+        },
       ],
     }),
   }),

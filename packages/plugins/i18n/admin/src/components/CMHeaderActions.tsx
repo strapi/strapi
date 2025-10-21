@@ -276,7 +276,7 @@ const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>
   }
 `;
 
-const AITranslationStatusAction = ({ documentId }: HeaderActionProps) => {
+const AITranslationStatusAction = ({ documentId, model, collectionType }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const isAIAvailable = useAIAvailability();
   const { data: settings } = useGetSettingsQuery();
@@ -286,6 +286,8 @@ const AITranslationStatusAction = ({ documentId }: HeaderActionProps) => {
   // Poll for AI localizations jobs when AI is enabled and we have a documentId
   const { status } = useAILocalizationJobsPolling({
     documentId,
+    model,
+    collectionType,
   });
   const statusVariant = (() => {
     if (status === 'failed') {

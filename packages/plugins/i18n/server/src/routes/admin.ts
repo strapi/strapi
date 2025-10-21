@@ -91,8 +91,16 @@ export default {
     },
     {
       method: 'GET',
-      path: '/ai-localization-jobs/document/:documentId',
-      handler: 'ai-localization-jobs.getJobByDocument',
+      path: '/ai-localization-jobs/collection-types/:documentId',
+      handler: 'ai-localization-jobs.getJobForCollectionType',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/ai-localization-jobs/single-types/:contentType',
+      handler: 'ai-localization-jobs.getJobForSingleType',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },
