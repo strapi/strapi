@@ -1,4 +1,6 @@
-const adminConfig = ({ env }) => ({
+import { type Env } from '@strapi/utils';
+
+const adminConfig = ({ env }: { env: Env }) => ({
   auth: {
     secret: env('ADMIN_JWT_SECRET', 'example-token'),
   },
