@@ -24,11 +24,11 @@ export const cleanComponentJoinTable = async (
     const sourceContentType = strapi.contentTypes[sourceModel.uid];
     // It could be a model, which does not have the draftAndPublish option
     const sourceSupportsDraftPublish = sourceContentType?.options?.draftAndPublish;
-    
+
     if (sourceContentType && !sourceSupportsDraftPublish) {
       return 0;
     }
-    
+
     // Check if target supports draft/publish using schema-based approach (like prevention fix)
     const targetContentType =
       strapi.contentTypes[relation.target as keyof typeof strapi.contentTypes];
