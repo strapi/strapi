@@ -63,6 +63,24 @@ function json(key: string, defaultValue?: JSON) {
   }
 }
 
+function array(key: string): string[] | undefined;
+function array(key: string, defaultValue: string[]): string[];
+function array(key: string, defaultValue?: string[]): string[] | undefined {
+  if (!_.has(process.env, key)) {
+    return defaultValue;
+  }
+
+  let value = getKey(key);
+
+  if (value.startsWith('[') && value.endsWith(']')) {
+    value = value.substring(1, value.length - 1);
+  }
+
+  return value.split(',').map((v) => {
+    return _.trim(_.trim(v, ' '), '"');
+  });
+}
+
 const utils = {
   int,
 
@@ -72,21 +90,7 @@ const utils = {
 
   json,
 
-  array(key: string, defaultValue?: string[]): string[] | undefined {
-    if (!_.has(process.env, key)) {
-      return defaultValue;
-    }
-
-    let value = getKey(key);
-
-    if (value.startsWith('[') && value.endsWith(']')) {
-      value = value.substring(1, value.length - 1);
-    }
-
-    return value.split(',').map((v) => {
-      return _.trim(_.trim(v, ' '), '"');
-    });
-  },
+  array,
 
   date(key: string, defaultValue?: Date): Date | undefined {
     if (!_.has(process.env, key)) {
