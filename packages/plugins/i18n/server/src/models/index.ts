@@ -1,5 +1,5 @@
-import { aiLocalizationJobs } from './ai-localization-jobs';
+import { aiLocalizationJob } from './ai-localization-job';
 
 export default {
-  aiLocalizationJobs,
+  aiLocalizationJob,
 };

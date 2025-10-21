@@ -102,6 +102,14 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         const tokenData = await strapi.service('admin::user').getAiToken();
         token = tokenData.token;
       } catch (error) {
+        await aiLocalizationJobsService.upsertJobForDocument({
+          documentId,
+          contentType: model,
+          sourceLocale: document.locale,
+          targetLocales,
+          status: 'failed',
+        });
+
         throw new Error('Failed to retrieve AI token', {
           cause: error instanceof Error ? error : undefined,
         });
@@ -193,6 +201,13 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           })
         );
       } catch (error) {
+        await aiLocalizationJobsService.upsertJobForDocument({
+          documentId,
+          contentType: model,
+          sourceLocale: document.locale,
+          targetLocales,
+          status: 'failed',
+        });
         strapi.log.error('AI Localizations generation failed', error);
       }
     },
@@ -200,20 +215,22 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.documents.use(async (context, next) => {
         const result = await next();
 
-        // Only trigger on create/update actions
+        // Only trigger on create/update/publish actions
         if (!['create', 'update'].includes(context.action)) {
           return result;
         }
 
-        try {
-          // Don't await since localizations should be done in the background without blocking the request
-          strapi.plugin('i18n').service('ai-localizations').generateDocumentLocalizations({
+        // Don't await since localizations should be done in the background without blocking the request
+        strapi
+          .plugin('i18n')
+          .service('ai-localizations')
+          .generateDocumentLocalizations({
             model: context.contentType.uid,
             document: result,
+          })
+          .catch((error: any) => {
+            strapi.log.error('AI Localizations generation failed', error);
           });
-        } catch (error) {
-          strapi.log.error('AI Localizations generation failed', error);
-        }
 
         return result;
       });

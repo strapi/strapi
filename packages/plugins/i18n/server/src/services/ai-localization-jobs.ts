@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { AI_LOCALIZATION_JOBS_UID } from '../models/ai-localization-jobs';
+import { AI_LOCALIZATION_JOB_UID } from '../models/ai-localization-job';
 import type { AILocalizationJobs } from '../../../shared/contracts/ai-localization-jobs';
 
 export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -21,7 +21,7 @@ export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strap
     status?: AILocalizationJobs['status'];
   }) {
     // Check if job already exists for this document
-    const existingJob = await strapi.db.query(AI_LOCALIZATION_JOBS_UID).findOne({
+    const existingJob = await strapi.db.query(AI_LOCALIZATION_JOB_UID).findOne({
       where: {
         relatedDocumentId: documentId,
       },
@@ -32,7 +32,7 @@ export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strap
         `[AI Localizations Job] Updated existing job for document ${documentId} with status: ${status}`
       );
       // Update existing job with new data and status
-      return strapi.db.query(AI_LOCALIZATION_JOBS_UID).update({
+      return strapi.db.query(AI_LOCALIZATION_JOB_UID).update({
         where: { id: existingJob.id },
         data: {
           contentType,
@@ -48,7 +48,7 @@ export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strap
       `[AI Localizations Job] Created new job for document ${documentId} with status: ${status}`
     );
     // Create new AI localizations job
-    return strapi.db.query(AI_LOCALIZATION_JOBS_UID).create({
+    return strapi.db.query(AI_LOCALIZATION_JOB_UID).create({
       data: {
         contentType,
         relatedDocumentId: documentId,
@@ -65,7 +65,7 @@ export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strap
    * Get job by document ID
    */
   async getJobByDocument(documentId: string) {
-    return strapi.db.query(AI_LOCALIZATION_JOBS_UID).findOne({
+    return strapi.db.query(AI_LOCALIZATION_JOB_UID).findOne({
       where: {
         relatedDocumentId: documentId,
       },
