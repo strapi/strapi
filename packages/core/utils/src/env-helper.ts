@@ -81,6 +81,23 @@ function array(key: string, defaultValue?: string[]): string[] | undefined {
   });
 }
 
+function oneOf(key: string, expectedValues: unknown[]): unknown | undefined;
+function oneOf(key: string, expectedValues: number[], defaultValue: number): number;
+function oneOf(key: string, expectedValues: string[], defaultValue: string): string;
+function oneOf(key: string, expectedValues: unknown[], defaultValue: unknown): unknown;
+function oneOf(key: string, expectedValues: unknown[], defaultValue?: unknown): unknown | undefined {
+  if (!expectedValues) {
+    throw new Error(`env.oneOf requires expectedValues`);
+  }
+
+  if (defaultValue && !expectedValues.includes(defaultValue)) {
+    throw new Error(`env.oneOf requires defaultValue to be included in expectedValues`);
+  }
+
+  const rawValue = env(key, defaultValue);
+  return expectedValues.includes(rawValue) ? rawValue : defaultValue;
+}
+
 function date(key: string): Date | undefined;
 function date(key: string, defaultValue: Date): Date;
 function date(key: string, defaultValue?: Date): Date | undefined {
@@ -104,25 +121,7 @@ const utils = {
 
   date,
 
-  /**
-   * Gets a value from env that matches oneOf provided values
-   * @param {string} key
-   * @param {string[]} expectedValues
-   * @param {string|undefined} defaultValue
-   * @returns {string|undefined}
-   */
-  oneOf(key: string, expectedValues?: unknown[], defaultValue?: unknown) {
-    if (!expectedValues) {
-      throw new Error(`env.oneOf requires expectedValues`);
-    }
-
-    if (defaultValue && !expectedValues.includes(defaultValue)) {
-      throw new Error(`env.oneOf requires defaultValue to be included in expectedValues`);
-    }
-
-    const rawValue = env(key, defaultValue);
-    return expectedValues.includes(rawValue) ? rawValue : defaultValue;
-  },
+  oneOf,
 };
 
 const env: Env = Object.assign(envFn, utils);
