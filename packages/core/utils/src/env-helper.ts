@@ -21,17 +21,21 @@ function int(key: string, defaultValue?: number): number | undefined {
   return parseInt(getKey(key), 10);
 }
 
+function float(key: string): number | undefined;
+function float(key: string, defaultValue: number): number;
+function float(key: string, defaultValue?: number): number | undefined {
+  if (!_.has(process.env, key)) {
+    return defaultValue;
+  }
+
+  return parseFloat(getKey(key));
+}
+
 
 const utils = {
   int,
 
-  float(key: string, defaultValue?: number): number | undefined {
-    if (!_.has(process.env, key)) {
-      return defaultValue;
-    }
-
-    return parseFloat(getKey(key));
-  },
+  float,
 
   bool(key: string, defaultValue?: boolean): boolean | undefined {
     if (!_.has(process.env, key)) {
