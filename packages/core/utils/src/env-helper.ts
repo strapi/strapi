@@ -31,19 +31,22 @@ function float(key: string, defaultValue?: number): number | undefined {
   return parseFloat(getKey(key));
 }
 
+function bool(key: string): boolean | undefined;
+function bool(key: string, defaultValue: boolean): boolean;
+function bool(key: string, defaultValue?: boolean): boolean | undefined {
+  if (!_.has(process.env, key)) {
+    return defaultValue;
+  }
+
+  return getKey(key) === 'true';
+}
 
 const utils = {
   int,
 
   float,
 
-  bool(key: string, defaultValue?: boolean): boolean | undefined {
-    if (!_.has(process.env, key)) {
-      return defaultValue;
-    }
-
-    return getKey(key) === 'true';
-  },
+  bool,
 
   json(key: string, defaultValue?: object) {
     if (!_.has(process.env, key)) {
