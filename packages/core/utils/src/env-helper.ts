@@ -13,9 +13,9 @@ function getKey(key: string) {
 }
 
 
-function int(key: string): number | undefined;
-function int(key: string, defaultValue: number): number;
-function int(key: string, defaultValue?: number): number | undefined {
+function intFromEnv(key: string): number | undefined;
+function intFromEnv(key: string, defaultValue: number): number;
+function intFromEnv(key: string, defaultValue?: number): number | undefined {
   if (!_.has(process.env, key)) {
     return defaultValue;
   }
@@ -23,9 +23,9 @@ function int(key: string, defaultValue?: number): number | undefined {
   return parseInt(getKey(key), 10);
 }
 
-function float(key: string): number | undefined;
-function float(key: string, defaultValue: number): number;
-function float(key: string, defaultValue?: number): number | undefined {
+function floatFromEnv(key: string): number | undefined;
+function floatFromEnv(key: string, defaultValue: number): number;
+function floatFromEnv(key: string, defaultValue?: number): number | undefined {
   if (!_.has(process.env, key)) {
     return defaultValue;
   }
@@ -33,9 +33,9 @@ function float(key: string, defaultValue?: number): number | undefined {
   return parseFloat(getKey(key));
 }
 
-function bool(key: string): boolean | undefined;
-function bool(key: string, defaultValue: boolean): boolean;
-function bool(key: string, defaultValue?: boolean): boolean | undefined {
+function boolFromEnv(key: string): boolean | undefined;
+function boolFromEnv(key: string, defaultValue: boolean): boolean;
+function boolFromEnv(key: string, defaultValue?: boolean): boolean | undefined {
   if (!_.has(process.env, key)) {
     return defaultValue;
   }
@@ -45,9 +45,9 @@ function bool(key: string, defaultValue?: boolean): boolean | undefined {
 
 type JSON = string | number | boolean | null | object | any[];
 
-function json(key: string): JSON | undefined;
-function json(key: string, defaultValue: JSON): JSON;
-function json(key: string, defaultValue?: JSON) {
+function jsonFromEnv(key: string): JSON | undefined;
+function jsonFromEnv(key: string, defaultValue: JSON): JSON;
+function jsonFromEnv(key: string, defaultValue?: JSON) {
   if (!_.has(process.env, key)) {
     return defaultValue;
   }
@@ -63,9 +63,9 @@ function json(key: string, defaultValue?: JSON) {
   }
 }
 
-function array(key: string): string[] | undefined;
-function array(key: string, defaultValue: string[]): string[];
-function array(key: string, defaultValue?: string[]): string[] | undefined {
+function arrayFromEnv(key: string): string[] | undefined;
+function arrayFromEnv(key: string, defaultValue: string[]): string[];
+function arrayFromEnv(key: string, defaultValue?: string[]): string[] | undefined {
   if (!_.has(process.env, key)) {
     return defaultValue;
   }
@@ -81,11 +81,11 @@ function array(key: string, defaultValue?: string[]): string[] | undefined {
   });
 }
 
-function oneOf(key: string, expectedValues: unknown[]): unknown | undefined;
-function oneOf(key: string, expectedValues: number[], defaultValue: number): number;
-function oneOf(key: string, expectedValues: string[], defaultValue: string): string;
-function oneOf(key: string, expectedValues: unknown[], defaultValue: unknown): unknown;
-function oneOf(key: string, expectedValues: unknown[], defaultValue?: unknown): unknown | undefined {
+function oneOfFromEnv(key: string, expectedValues: unknown[]): unknown | undefined;
+function oneOfFromEnv(key: string, expectedValues: number[], defaultValue: number): number;
+function oneOfFromEnv(key: string, expectedValues: string[], defaultValue: string): string;
+function oneOfFromEnv(key: string, expectedValues: unknown[], defaultValue: unknown): unknown;
+function oneOfFromEnv(key: string, expectedValues: unknown[], defaultValue?: unknown): unknown | undefined {
   if (!expectedValues) {
     throw new Error(`env.oneOf requires expectedValues`);
   }
@@ -98,9 +98,9 @@ function oneOf(key: string, expectedValues: unknown[], defaultValue?: unknown): 
   return expectedValues.includes(rawValue) ? rawValue : defaultValue;
 }
 
-function date(key: string): Date | undefined;
-function date(key: string, defaultValue: Date): Date;
-function date(key: string, defaultValue?: Date): Date | undefined {
+function dateFromEnv(key: string): Date | undefined;
+function dateFromEnv(key: string, defaultValue: Date): Date;
+function dateFromEnv(key: string, defaultValue?: Date): Date | undefined {
   if (!_.has(process.env, key)) {
     return defaultValue;
   }
@@ -109,19 +109,19 @@ function date(key: string, defaultValue?: Date): Date | undefined {
 }
 
 const utils = {
-  int,
+  int: intFromEnv,
 
-  float,
+  float: floatFromEnv,
 
-  bool,
+  bool: boolFromEnv,
 
-  json,
+  json: jsonFromEnv,
 
-  array,
+  array: arrayFromEnv,
 
-  date,
+  date: dateFromEnv,
 
-  oneOf,
+  oneOf: oneOfFromEnv,
 };
 
 const env: Env = Object.assign(envFn, utils);
