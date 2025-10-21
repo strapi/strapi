@@ -81,6 +81,16 @@ function array(key: string, defaultValue?: string[]): string[] | undefined {
   });
 }
 
+function date(key: string): Date | undefined;
+function date(key: string, defaultValue: Date): Date;
+function date(key: string, defaultValue?: Date): Date | undefined {
+  if (!_.has(process.env, key)) {
+    return defaultValue;
+  }
+
+  return new Date(getKey(key));
+}
+
 const utils = {
   int,
 
@@ -92,13 +102,7 @@ const utils = {
 
   array,
 
-  date(key: string, defaultValue?: Date): Date | undefined {
-    if (!_.has(process.env, key)) {
-      return defaultValue;
-    }
-
-    return new Date(getKey(key));
-  },
+  date,
 
   /**
    * Gets a value from env that matches oneOf provided values
