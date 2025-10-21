@@ -6,7 +6,6 @@ import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
 import { createUndoRedoSlice } from './undoRedo';
-import { formatSchema } from './utils/formatSchemas';
 
 import type {
   Components,
@@ -735,26 +734,75 @@ const slice = createUndoRedoSlice(
         const { action, schema } = reducerAction.payload;
 
         switch (action) {
-          case 'add': {
-            // generate a uid ?
-            const uid = schema.uid;
+          case 'add':
+            {
+              const uid = schema.uid;
 
-            if (schema.modelType === 'component') {
-              state.components[uid] = {
-                ...formatSchema(schema),
-                status: 'NEW',
-              };
-            } else {
-              state.contentTypes[uid] = {
-                ...formatSchema(schema),
-                status: 'NEW',
-              };
+              if (schema.modelType === 'component') {
+                state.components[uid] = schema;
+              } else {
+                state.contentTypes[uid] = schema;
+              }
             }
+            break;
+          case 'update':
+            {
+              const uid = schema.uid;
+
+              // Find the schema, if the state was "create", we should keep it as it was before
+
+              if (schema.modelType === 'component') {
+                const component = state.components[uid];
+                state.components[uid] = {
+                  ...schema,
+                  status: component?.status === 'NEW' ? 'NEW' : schema.status,
+                };
+              } else {
+                const contentType = state.contentTypes[uid];
+                state.contentTypes[uid] = {
+                  ...schema,
+                  status: contentType?.status === 'NEW' ? 'NEW' : schema.status,
+                };
+              }
+            }
+            break;
+          case 'delete': {
+            const uid = schema.uid;
+            const isComponent = schema.modelType === 'component';
+            // It's a component that has yet not been added
+            if (isComponent) {
+              const exists = state.components[uid];
+              if (!exists) {
+                return;
+              }
+
+              const isUnsaved = state.components[uid]?.status === 'NEW';
+              if (isUnsaved) {
+                delete state.components[uid];
+              } else {
+                state.components[uid].status = 'REMOVED';
+              }
+            } else {
+              const exists = state.contentTypes[uid];
+              if (!exists) {
+                return;
+              }
+
+              const isUnsaved = state.contentTypes[uid]?.status === 'NEW';
+              if (isUnsaved) {
+                delete state.contentTypes[uid];
+              } else {
+                state.contentTypes[uid].status = 'REMOVED';
+              }
+            }
+
+            break;
           }
         }
       },
     },
   },
+
   {
     limit: 50,
     excludeActionsFromHistory: ['reloadPlugin', 'init'],
