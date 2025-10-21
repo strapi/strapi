@@ -8,6 +8,8 @@ const defaultJwtOptions = { expiresIn: '30d' };
 export type TokenOptions = {
   expiresIn?: string;
   algorithm?: Algorithm;
+  privateKey?: string;
+  publicKey?: string;
   [key: string]: unknown;
 };
 
@@ -26,9 +28,15 @@ const getTokenOptions = () => {
     {} as AdminAuthConfig
   );
 
+  // Check for new sessions.options configuration
+  const sessionsOptions = strapi.config.get('admin.auth.sessions.options', {});
+
+  // Merge with legacy options for backward compatibility
+  const mergedOptions = _.merge({}, defaultJwtOptions, options, sessionsOptions);
+
   return {
     secret,
-    options: _.merge(defaultJwtOptions, options),
+    options: mergedOptions,
   };
 };
 
