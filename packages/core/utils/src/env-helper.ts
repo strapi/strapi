@@ -43,6 +43,26 @@ function bool(key: string, defaultValue?: boolean): boolean | undefined {
   return getKey(key) === 'true';
 }
 
+type JSON = string | number | boolean | null | object | any[];
+
+function json(key: string): JSON | undefined;
+function json(key: string, defaultValue: JSON): JSON;
+function json(key: string, defaultValue?: JSON) {
+  if (!_.has(process.env, key)) {
+    return defaultValue;
+  }
+
+  try {
+    return JSON.parse(getKey(key));
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Invalid json environment variable ${key}: ${error.message}`);
+    }
+
+    throw error;
+  }
+}
+
 const utils = {
   int,
 
@@ -50,21 +70,7 @@ const utils = {
 
   bool,
 
-  json(key: string, defaultValue?: object) {
-    if (!_.has(process.env, key)) {
-      return defaultValue;
-    }
-
-    try {
-      return JSON.parse(getKey(key));
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Invalid json environment variable ${key}: ${error.message}`);
-      }
-
-      throw error;
-    }
-  },
+  json,
 
   array(key: string, defaultValue?: string[]): string[] | undefined {
     if (!_.has(process.env, key)) {
