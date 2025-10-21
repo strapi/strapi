@@ -10,14 +10,20 @@ function getKey(key: string) {
   return process.env[key] ?? '';
 }
 
-const utils = {
-  int(key: string, defaultValue?: number): number | undefined {
-    if (!_.has(process.env, key)) {
-      return defaultValue;
-    }
 
-    return parseInt(getKey(key), 10);
-  },
+function int(key: string): number | undefined;
+function int(key: string, defaultValue: number): number;
+function int(key: string, defaultValue?: number): number | undefined {
+  if (!_.has(process.env, key)) {
+    return defaultValue;
+  }
+
+  return parseInt(getKey(key), 10);
+}
+
+
+const utils = {
+  int,
 
   float(key: string, defaultValue?: number): number | undefined {
     if (!_.has(process.env, key)) {
