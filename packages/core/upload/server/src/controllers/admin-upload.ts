@@ -113,7 +113,23 @@ export default {
     }
 
     const data = await validateUploadBody(body, Array.isArray(files));
-    const filesArray = Array.isArray(files) ? files : [files];
+
+    let filesArray = Array.isArray(files) ? files : [files];
+
+    if (
+      data.fileInfo &&
+      Array.isArray(data.fileInfo) &&
+      filesArray.length === data.fileInfo.length
+    ) {
+      // Reorder filesArray to match data.fileInfo order
+      const alignedFilesArray = data.fileInfo
+        .map((info) => {
+          return filesArray.find((file) => file.originalFilename === info.name);
+        })
+        .filter(Boolean) as any[];
+
+      filesArray = alignedFilesArray;
+    }
 
     // Upload files first to get thumbnails
     const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
