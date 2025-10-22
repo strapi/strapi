@@ -198,11 +198,13 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
               }
             }
 
-            return strapi.documents(model).update({
-              documentId,
-              locale,
-              fields: [],
-              data: mergedData,
+            return strapi.db.transaction(async () => {
+              return strapi.documents(model).update({
+                documentId,
+                locale,
+                fields: [],
+                data: mergedData,
+              });
             });
           })
         );
