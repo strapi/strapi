@@ -198,13 +198,11 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
               }
             }
 
-            return strapi.db.transaction(async () => {
-              return strapi.documents(model).update({
-                documentId,
-                locale,
-                fields: [],
-                data: mergedData,
-              });
+            return strapi.documents(model).update({
+              documentId,
+              locale,
+              fields: [],
+              data: mergedData,
             });
           })
         );
@@ -229,16 +227,19 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         }
 
         // Don't await since localizations should be done in the background without blocking the request
-        strapi
-          .plugin('i18n')
-          .service('ai-localizations')
-          .generateDocumentLocalizations({
-            model: context.contentType.uid,
-            document: result,
-          })
-          .catch((error: any) => {
-            strapi.log.error('AI Localizations generation failed', error);
-          });
+        // Use setImmediate to ensure this runs outside the current transaction context
+        setImmediate(() => {
+          strapi
+            .plugin('i18n')
+            .service('ai-localizations')
+            .generateDocumentLocalizations({
+              model: context.contentType.uid,
+              document: result,
+            })
+            .catch((error: any) => {
+              strapi.log.error('AI Localizations generation failed', error);
+            });
+        });
 
         return result;
       });
