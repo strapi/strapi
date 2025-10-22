@@ -82,7 +82,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           const hasLocalizedOption = attribute?.pluginOptions?.i18n?.localized === true;
           // Only keep fields that actually need to be localized
           // TODO: remove blocks from this list once the AI server can handle it reliably
-          if (!hasLocalizedOption || ['media', 'blocks'].includes(attribute.type)) {
+          if (!hasLocalizedOption || ['media'].includes(attribute.type)) {
             remove(key);
           }
         },
@@ -140,6 +140,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           content: translateableContent,
           sourceLocale: document.locale,
           targetLocales,
+          schema: Object.fromEntries(
+            Object.entries(schema.attributes)
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              .filter(([_, attr]) => (attr?.pluginOptions as any)?.i18n?.localized === true)
+              .map(([key, attr]) => [key, { type: attr.type }])
+          ),
         }),
       });
 
