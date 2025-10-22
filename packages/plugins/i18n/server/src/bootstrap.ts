@@ -81,10 +81,7 @@ export default async () => {
   registerModelsHooks();
 
   // AI Localizations
-  const aiLocalizationsService = getService('ai-localizations');
-  if (aiLocalizationsService) {
-    aiLocalizationsService.setupMiddleware();
-  }
+  getService('ai-localizations').setupMiddleware();
 
   sendDidInitializeEvent();
 };

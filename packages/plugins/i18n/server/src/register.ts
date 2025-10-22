@@ -7,10 +7,7 @@ import { getService } from './utils';
 import { aiLocalizationJob } from './models/ai-localization-job';
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  // Always register the model if the app at least has AI available
-  if (strapi.ee.features.isEnabled('cms-ai') && strapi.config.get('admin.ai.enabled')) {
-    strapi.get('models').add(aiLocalizationJob);
-  }
+  strapi.get('models').add(aiLocalizationJob);
 
   extendContentTypes(strapi);
   addContentManagerLocaleMiddleware(strapi);
