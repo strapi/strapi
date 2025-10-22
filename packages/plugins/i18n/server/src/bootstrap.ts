@@ -82,7 +82,9 @@ export default async () => {
 
   // AI Localizations
   const aiLocalizationsService = getService('ai-localizations');
-  aiLocalizationsService.setupMiddleware();
+  if (aiLocalizationsService) {
+    aiLocalizationsService.setupMiddleware();
+  }
 
   sendDidInitializeEvent();
 };

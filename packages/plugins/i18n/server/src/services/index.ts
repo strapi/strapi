@@ -18,6 +18,6 @@ export default {
   'iso-locales': isoLocales,
   'content-types': contentTypes,
   'ai-localizations': createAILocalizationsService,
-  settings: createSettingsService,
   'ai-localization-jobs': createAILocalizationJobsService,
+  settings: createSettingsService,
 };

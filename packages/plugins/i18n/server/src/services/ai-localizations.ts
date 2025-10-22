@@ -28,6 +28,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         return false;
       }
 
+      const settings = getService('settings');
+      const aiSettings = await settings.getSettings();
+      if (!aiSettings?.aiLocalizations) {
+        return false;
+      }
+
       return true;
     },
 
@@ -43,6 +49,11 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       model: UID.ContentType;
       document: Modules.Documents.AnyDocument;
     }) {
+      const isFeatureEnabled = await this.isEnabled();
+      if (!isFeatureEnabled) {
+        return;
+      }
+
       const schema = strapi.getModel(model);
       const localeService = getService('locales');
 
@@ -55,11 +66,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Don't trigger localizations if the update is on a derived locale, only do it on the default
       const defaultLocale = await localeService.getDefaultLocale();
       if (document?.locale !== defaultLocale) {
-        return;
-      }
-
-      const isFeatureEnabled = await this.isEnabled();
-      if (!isFeatureEnabled) {
         return;
       }
 
