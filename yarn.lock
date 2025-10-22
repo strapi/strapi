@@ -9281,6 +9281,7 @@ __metadata:
     "@strapi/admin": "npm:5.28.0"
     "@strapi/admin-test-utils": "npm:5.28.0"
     "@strapi/content-manager": "npm:5.28.0"
+    "@strapi/database": "npm:5.28.0"
     "@strapi/design-system": "npm:2.0.0-rc.30"
     "@strapi/icons": "npm:2.0.0-rc.30"
     "@strapi/types": "npm:5.28.0"
