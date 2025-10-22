@@ -274,6 +274,7 @@ export const EditAssetContent = ({
                         value={values.name}
                         onChange={handleChange}
                         disabled={formDisabled}
+                        type="text"
                       />
                       <Field.Error />
                     </Field.Root>
@@ -298,6 +299,7 @@ export const EditAssetContent = ({
                           value={values.alternativeText}
                           onChange={handleChange}
                           disabled={formDisabled}
+                          type="text"
                         />
                         <Field.Hint />
                         <Field.Error />
@@ -316,6 +318,7 @@ export const EditAssetContent = ({
                           value={values.caption}
                           onChange={handleChange}
                           disabled={formDisabled}
+                          type="text"
                         />
                       </Field.Root>
                     )}

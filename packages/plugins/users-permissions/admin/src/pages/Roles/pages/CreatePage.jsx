@@ -132,7 +132,7 @@ export const CreatePage = () => {
                             defaultMessage: 'Name',
                           })}
                         </Field.Label>
-                        <TextInput value={values.name || ''} onChange={handleChange} />
+                        <TextInput type="text" value={values.name || ''} onChange={handleChange} />
                         <Field.Error />
                       </Field.Root>
                     </Grid.Item>
