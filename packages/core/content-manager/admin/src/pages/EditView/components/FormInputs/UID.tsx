@@ -59,7 +59,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const { toggleNotification } = useNotification();
     const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
     const { formatMessage } = useIntl();
-    const [{ query }] = useQueryParams();
+    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
     const params = React.useMemo(() => buildValidParams(query), [query]);
 
     const { regex } = attribute;
@@ -197,6 +197,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
       <Field.Root hint={hint} name={name} error={field.error} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
         <TextInput
+          key={`uidInput-${name}-${query?.plugins?.i18n?.locale || 'default'}`}
           ref={composedRefs}
           disabled={props.disabled}
           endAction={

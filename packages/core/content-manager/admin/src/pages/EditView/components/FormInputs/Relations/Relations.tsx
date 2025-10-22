@@ -8,6 +8,7 @@ import {
   useFocusInputField,
   useRBAC,
   useIsDesktop,
+  useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -497,8 +498,12 @@ const RelationsInput = ({
   const { toggleNotification } = useNotification();
   const { currentDocumentMeta } = useDocumentContext('RelationsInput');
   const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
   const field = useField<RelationsFormValue>(name);
+
+  // Create a key that changes when locale changes to force re-render
+  const localeKey = query?.plugins?.i18n?.locale || 'default';
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
   const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
@@ -621,6 +626,7 @@ const RelationsInput = ({
       <Field.Label action={labelAction}>{label}</Field.Label>
       <DocumentRBAC permissions={permissions} model={relation.model}>
         <RelationModalWithContext
+          key={`relationModal-${name}-${localeKey}`}
           relation={relation}
           name={name}
           placeholder={placeholder}

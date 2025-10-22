@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { InputProps, useField } from '@strapi/admin/strapi-admin';
+import { InputProps, useField, useQueryParams } from '@strapi/admin/strapi-admin';
 import { Field, Flex, IconButton } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -39,12 +39,16 @@ const ComponentInput = ({
 }: ComponentInputProps) => {
   const { formatMessage } = useIntl();
   const field = useField(name);
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
   const showResetComponent = !attribute.repeatable && field.value && !disabled;
 
   const {
     currentDocument: { components },
   } = useDocumentContext('ComponentInput');
+
+  // Create a key that changes when locale changes to force re-render
+  const localeKey = query?.plugins?.i18n?.locale || 'default';
 
   const handleInitialisationClick = () => {
     const schema = components[attribute.component];
@@ -87,12 +91,24 @@ const ComponentInput = ({
         <Initializer disabled={disabled} name={name} onClick={handleInitialisationClick} />
       )}
       {!attribute.repeatable && field.value ? (
-        <NonRepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>
+        <NonRepeatableComponent
+          key={`nonRepeatable-${name}-${localeKey}`}
+          attribute={attribute}
+          name={name}
+          disabled={disabled}
+          {...props}
+        >
           {props.children}
         </NonRepeatableComponent>
       ) : null}
       {attribute.repeatable && (
-        <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>
+        <RepeatableComponent
+          key={`repeatable-${name}-${localeKey}`}
+          attribute={attribute}
+          name={name}
+          disabled={disabled}
+          {...props}
+        >
           {props.children}
         </RepeatableComponent>
       )}

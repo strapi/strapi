@@ -6,6 +6,7 @@ import {
   useField,
   useForm,
   useNotification,
+  useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
 import pipe from 'lodash/fp/pipe';
@@ -59,10 +60,14 @@ const DynamicZone = ({
 
   const [addComponentIsOpen, setAddComponentIsOpen] = React.useState(false);
   const [liveText, setLiveText] = React.useState('');
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
   const {
     currentDocument: { components, isLoading },
   } = useDocumentContext('DynamicZone');
+
+  // Create a key that changes when locale changes to force re-render
+  const localeKey = query?.plugins?.i18n?.locale || 'default';
 
   const disabled = disabledProp || isLoading;
   const { addFieldRow, removeFieldRow, moveFieldRow } = useForm(
@@ -275,6 +280,7 @@ const DynamicZone = ({
                   type="dynamiczone"
                 >
                   <DynamicComponent
+                    key={`dynamicComponent-${field.__temp_key__}-${localeKey}`}
                     disabled={disabled}
                     name={name}
                     index={index}
