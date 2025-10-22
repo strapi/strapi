@@ -19,7 +19,7 @@ const aiLocalizationJobsApi = i18nApi.injectEndpoints({
         url:
           collectionType === SINGLE_TYPES
             ? `/i18n/ai-localization-jobs/single-types/${model}`
-            : `/i18n/ai-localization-jobs/collection-types/${documentId}`,
+            : `/i18n/ai-localization-jobs/collection-types/${model}/${documentId}`,
         method: 'GET',
       }),
       providesTags: (result, error, { documentId, model, collectionType }) => [

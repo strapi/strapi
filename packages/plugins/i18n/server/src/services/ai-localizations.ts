@@ -215,7 +215,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.documents.use(async (context, next) => {
         const result = await next();
 
-        // Only trigger on create/update/publish actions
+        // Only trigger on create/update actions
         if (!['create', 'update'].includes(context.action)) {
           return result;
         }

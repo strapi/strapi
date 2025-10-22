@@ -91,7 +91,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/ai-localization-jobs/collection-types/:documentId',
+      path: '/ai-localization-jobs/collection-types/:contentType/:documentId',
       handler: 'ai-localization-jobs.getJobForCollectionType',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],

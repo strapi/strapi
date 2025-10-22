@@ -32,14 +32,14 @@ const createAILocalizationJobsController = ({ strapi }: { strapi: Core.Strapi })
      * There is only 1 job per documentId
      */
     async getJobForCollectionType(ctx: any) {
-      const { documentId } = ctx.params;
+      const { documentId, contentType } = ctx.params;
 
-      if (!documentId) {
-        return ctx.badRequest('Document ID is required');
+      if (!documentId || !contentType) {
+        return ctx.badRequest('Document ID and contentType are required');
       }
 
       try {
-        const job = await aiLocalizationJobsService.getJobByDocumentId(documentId);
+        const job = await aiLocalizationJobsService.getJobByDocument(contentType, documentId);
 
         ctx.body = {
           data: job,

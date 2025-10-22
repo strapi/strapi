@@ -21,11 +21,7 @@ export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strap
     status?: AILocalizationJobs['status'];
   }) {
     // Check if job already exists for this document
-    const existingJob = await strapi.db.query(AI_LOCALIZATION_JOB_UID).findOne({
-      where: {
-        relatedDocumentId: documentId,
-      },
-    });
+    const existingJob = await this.getJobByDocument(contentType, documentId);
 
     if (existingJob) {
       strapi.log.info(
@@ -64,10 +60,11 @@ export const createAILocalizationJobsService = ({ strapi }: { strapi: Core.Strap
   /**
    * Get job by document ID
    */
-  async getJobByDocumentId(documentId: string) {
+  async getJobByDocument(contentType: string, documentId: string) {
     return strapi.db.query(AI_LOCALIZATION_JOB_UID).findOne({
       where: {
         relatedDocumentId: documentId,
+        contentType,
       },
     });
   },
