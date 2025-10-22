@@ -226,20 +226,23 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           return result;
         }
 
+        // Check if AI localizations are enabled before triggering
+        const isEnabled = await this.isEnabled();
+        if (!isEnabled) {
+          return result;
+        }
+
         // Don't await since localizations should be done in the background without blocking the request
-        // Use setImmediate to ensure this runs outside the current transaction context
-        setImmediate(() => {
-          strapi
-            .plugin('i18n')
-            .service('ai-localizations')
-            .generateDocumentLocalizations({
-              model: context.contentType.uid,
-              document: result,
-            })
-            .catch((error: any) => {
-              strapi.log.error('AI Localizations generation failed', error);
-            });
-        });
+        strapi
+          .plugin('i18n')
+          .service('ai-localizations')
+          .generateDocumentLocalizations({
+            model: context.contentType.uid,
+            document: result,
+          })
+          .catch((error: any) => {
+            strapi.log.error('AI Localizations generation failed', error);
+          });
 
         return result;
       });
