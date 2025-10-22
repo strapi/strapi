@@ -37,6 +37,7 @@ import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useAILocalizationJobsPolling } from '../hooks/useAILocalizationJobsPolling';
 import { useI18n } from '../hooks/useI18n';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
@@ -275,12 +276,30 @@ const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>
   }
 `;
 
-const AITranslationStatusAction = () => {
+const AITranslationStatusAction = ({ documentId, model, collectionType }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const isAIAvailable = useAIAvailability();
   const { data: settings } = useGetSettingsQuery();
   const isAISettingEnabled = settings?.data?.aiLocalizations;
   const { hasI18n } = useI18n();
+
+  // Poll for AI localizations jobs when AI is enabled and we have a documentId
+  const { status } = useAILocalizationJobsPolling({
+    documentId,
+    model,
+    collectionType,
+  });
+  const statusVariant = (() => {
+    if (status === 'failed') {
+      return 'warning';
+    }
+
+    if (isAISettingEnabled) {
+      return 'alternative';
+    }
+
+    return 'neutral';
+  })();
 
   // Do not display this action when i18n is not available
   if (!hasI18n) {
@@ -305,7 +324,7 @@ const AITranslationStatusAction = () => {
         >
           <AITranslationStatusIcon
             $isAISettingEnabled={Boolean(isAISettingEnabled)}
-            variant={isAISettingEnabled ? 'alternative' : 'neutral'}
+            variant={statusVariant}
             size="S"
           >
             <Sparkle />
