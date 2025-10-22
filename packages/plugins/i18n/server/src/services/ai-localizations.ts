@@ -1,6 +1,8 @@
 import type { Core, Modules, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
+import _ from 'lodash';
+import { c } from 'tar';
 
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   // TODO: add a helper function to get the AI server URL
@@ -76,18 +78,47 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         return;
       }
 
-      // Extract only the localized content from the document
+      const localizedRoots = new Set();
+
       const translateableContent = await traverseEntity(
-        ({ key, attribute }, { remove }) => {
-          const hasLocalizedOption = attribute?.pluginOptions?.i18n?.localized === true;
-          // Only keep fields that actually need to be localized
-          // TODO: remove blocks from this list once the AI server can handle it reliably
-          if (!hasLocalizedOption || ['media', 'blocks'].includes(attribute.type)) {
+        ({ key, attribute, parent, value, path }, { remove }) => {
+          // Always remove media and blocks fields
+          if (attribute && ['media', 'blocks'].includes(attribute.type)) {
             remove(key);
+            return;
           }
+
+          // If this field is localized, keep it (and mark as localized root if component/dz)
+          const isLocalized = attribute?.pluginOptions?.i18n?.localized === true;
+          if (isLocalized) {
+            // If it's a component/dynamiczone, add to the set
+            if (['component', 'dynamiczone'].includes(attribute.type)) {
+              localizedRoots.add(path.raw);
+            }
+            return; // keep
+          }
+
+          // If parent exists in the localized roots set, keep it
+          if (parent && localizedRoots.has(parent.path.raw)) {
+            // If this is also a component/dz, propagate the localized root flag
+            if (['component', 'dynamiczone'].includes(attribute?.type ?? '')) {
+              localizedRoots.add(path.raw);
+            }
+            return; // keep
+          }
+
+          // Otherwise, remove the field
+          remove(key);
         },
         { schema, getModel: strapi.getModel.bind(strapi) },
         document
+      );
+
+      console.log('AI Localizations: localized roots:', localizedRoots);
+
+      console.log(
+        'AI Localizations: translateable content:',
+        JSON.stringify(translateableContent, null, 2)
       );
 
       // Call the AI server to get the localized content
@@ -167,13 +198,65 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
       }
 
-      const aiResult = await response.json();
+      const aiResult = {
+        localizations: [
+          {
+            locale: 'fr',
+            content: {
+              title: 'Bonjour',
+              teamMembers: {
+                id: 19,
+                name: 'Jane Smith',
+                role: 'Developpeuse',
+                organization: [
+                  {
+                    id: 1,
+                    name: 'TestO',
+                    address: 'Test address',
+                    testComponent: [
+                      {
+                        id: 1,
+                        testName: 'Test Name',
+                        testAnotherText: 'Test Another Text',
+                      },
+                    ],
+                  },
+                ],
+              },
+              createdBy: null,
+            },
+          },
+          {
+            locale: 'de',
+            content: {
+              title: 'Hallo',
+              teamMembers: {
+                id: 19,
+                name: 'Jane Smith',
+                role: 'Entwicklerin',
+                organization: [
+                  {
+                    id: 1,
+                    name: 'TestO',
+                    address: 'Test address',
+                    testComponent: [
+                      {
+                        id: 1,
+                        testName: 'Test Name',
+                        testAnotherText: 'Test Another Text',
+                      },
+                    ],
+                  },
+                ],
+              },
+              createdBy: null,
+            },
+          },
+        ],
+      };
 
-      // Get all media field names dynamically from the schema
-      const mediaFields = Object.entries(schema.attributes)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .filter(([_, attr]) => attr.type === 'media')
-        .map(([key]) => key);
+      //const aiResult = await response.json();
+      console.log('DOCUMENT:', JSON.stringify(document, null, 2));
 
       try {
         await Promise.allSettled(
@@ -184,25 +267,36 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
             const derivedDoc = await strapi.documents(model).findOne({
               documentId,
               locale,
-              populate: mediaFields,
+              populate: '*',
             });
 
-            // Merge AI content and media fields
-            const mergedData = { ...content };
-            for (const field of mediaFields) {
-              // Only copy media if not already set in derived locale
-              if (!derivedDoc || !derivedDoc[field]) {
-                mergedData[field] = document[field];
-              } else {
-                mergedData[field] = derivedDoc[field];
-              }
-            }
+            // Use traverseEntity to collect all media field paths from the schema
+            /*const mediaContent = await traverseEntity(
+              ({ key, attribute }, { remove }) => {
+                if (!attribute) return;
+                if (attribute.type === 'media') {
+                  if (!derivedDoc || !derivedDoc[key]) return;
+                }
+                if (['component', 'dynamiczone'].includes(attribute.type)) return;
+                remove(key);
+              },
+              { schema, getModel: strapi.getModel.bind(strapi) },
+              document
+            );
+
+            const mergedData = _.merge({}, content, mediaContent);
+
+            console.log(
+              'Merging media fields for locale',
+              JSON.stringify(mergedData, null, 2),
+              locale
+            );*/
 
             return strapi.documents(model).update({
               documentId,
               locale,
               fields: [],
-              data: mergedData,
+              data: content//mergedData,
             });
           })
         );
