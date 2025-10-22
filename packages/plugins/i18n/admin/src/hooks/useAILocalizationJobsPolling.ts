@@ -35,15 +35,9 @@ export const useAILocalizationJobsPolling = ({
     model: model!,
     collectionType: collectionType!,
   });
-  /**
-   * Poll when:
-   * - We haven't seen a terminal state yet (previousJobStatus is null or 'processing')
-   * - The initial job data shows 'processing'
-   */
+
   const shouldPoll =
-    previousJobStatus === null ||
-    previousJobStatus === 'processing' ||
-    initialJobData?.data?.status === 'processing';
+    initialJobData?.data?.status === 'processing' || previousJobStatus === 'processing';
   const { data: jobData } = useGetAILocalizationJobsByDocumentQuery(
     { documentId: documentId!, model: model!, collectionType: collectionType! },
     {
