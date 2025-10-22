@@ -68,5 +68,5 @@ export type Route = {
 export type Router = {
   type: RouterType;
   prefix?: string;
-  routes: Route[] | (() => Route[]);
+  routes: Route[];
 };
