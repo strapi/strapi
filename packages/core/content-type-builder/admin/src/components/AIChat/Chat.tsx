@@ -369,23 +369,23 @@ const Chat = () => {
   // Disable AI Chat in production mode
   const isProduction = currentEnvironment === 'production';
 
-  // Auto-open chat when AIChat guided tour step is active
-  useEffect(() => {
-    const isAIChatStepActive =
-      state.enabled &&
-      state.tours.contentTypeBuilder?.currentStep === 1 && // AIChat is step 1 in contentTypeBuilderStepsAI
-      !state.tours.contentTypeBuilder?.isCompleted;
+  // // Auto-open chat when AIChat guided tour step is active
+  // useEffect(() => {
+  //   const isAIChatStepActive =
+  //     state.enabled &&
+  //     state.tours.contentTypeBuilder?.currentStep === 1 && // AIChat is step 1 in contentTypeBuilderStepsAI
+  //     !state.tours.contentTypeBuilder?.isCompleted;
 
-    if (isAIChatStepActive && !isChatOpen && openChat) {
-      openChat();
-    }
-  }, [
-    state.tours.contentTypeBuilder?.currentStep,
-    state.tours.contentTypeBuilder?.isCompleted,
-    state.enabled,
-    isChatOpen,
-    openChat,
-  ]);
+  //   if (isAIChatStepActive && !isChatOpen && openChat) {
+  //     openChat();
+  //   }
+  // }, [
+  //   state.tours.contentTypeBuilder?.currentStep,
+  //   state.tours.contentTypeBuilder?.isCompleted,
+  //   state.enabled,
+  //   isChatOpen,
+  //   openChat,
+  // ]);
 
   // Labels
   const openChatLabel = t('chat.tooltips.open-chat', 'Open chat');
@@ -418,6 +418,7 @@ const Chat = () => {
             onClick={isChatOpen ? closeChat : openChat}
             label={isChatOpen ? closeChatLabel : openChatLabel}
             variant="default"
+            size="L"
           >
             <Sparkle />
           </IconButton>
