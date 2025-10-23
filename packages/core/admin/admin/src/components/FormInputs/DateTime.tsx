@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { DateTimePicker, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
+import { useLocaleKey } from '../../hooks/useLocaleKey';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
@@ -14,13 +14,11 @@ const DateTimeInput = React.forwardRef<HTMLInputElement, InputProps>(
     const { formatMessage } = useIntl();
     const field = useField<string | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
-    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
     const value = typeof field.value === 'string' ? new Date(field.value) : field.value;
 
-    // Create a key that changes when locale changes to force re-render
-    const localeKey = query?.plugins?.i18n?.locale || 'default';
+    const localeKey = useLocaleKey();
 
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>

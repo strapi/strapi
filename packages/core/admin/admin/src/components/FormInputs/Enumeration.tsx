@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { SingleSelect, SingleSelectOption, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
+import { useLocaleKey } from '../../hooks/useLocaleKey';
 import { useField } from '../Form';
 
 import { EnumerationProps } from './types';
@@ -14,12 +14,10 @@ const EnumerationInput = React.forwardRef<HTMLDivElement, EnumerationProps>(
     const { formatMessage } = useIntl();
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLDivElement>(name);
-    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
-    // Create a key that changes when locale changes to force re-render
-    const localeKey = query?.plugins?.i18n?.locale || 'default';
+    const localeKey = useLocaleKey();
 
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>

@@ -8,7 +8,6 @@ import {
   useFocusInputField,
   useRBAC,
   useIsDesktop,
-  useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -48,6 +47,7 @@ import {
   UseDragAndDropOptions,
   useDragAndDrop,
 } from '../../../../../hooks/useDragAndDrop';
+import { useLocaleKey } from '../../../../../hooks/useLocaleKey';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
@@ -498,12 +498,10 @@ const RelationsInput = ({
   const { toggleNotification } = useNotification();
   const { currentDocumentMeta } = useDocumentContext('RelationsInput');
   const { formatMessage } = useIntl();
-  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
   const field = useField<RelationsFormValue>(name);
 
-  // Create a key that changes when locale changes to force re-render
-  const localeKey = query?.plugins?.i18n?.locale || 'default';
+  const localeKey = useLocaleKey();
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
   const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();

@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { NumberInput, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
+import { useLocaleKey } from '../../hooks/useLocaleKey';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
@@ -12,12 +12,9 @@ const NumberInputImpl = React.forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, type, ...props }, ref) => {
     const field = useField<number | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
-    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
+    const localeKey = useLocaleKey();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
-
-    // Create a stable key that only changes when locale changes to force re-render
-    const localeKey = query?.plugins?.i18n?.locale || 'default';
 
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>

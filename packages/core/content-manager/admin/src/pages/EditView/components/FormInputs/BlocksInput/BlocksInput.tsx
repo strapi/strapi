@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-import { useField, useQueryParams, type InputProps } from '@strapi/admin/strapi-admin';
+import { useField, type InputProps } from '@strapi/admin/strapi-admin';
 import { Field, Flex } from '@strapi/design-system';
+
+import { useLocaleKey } from '../../../../../hooks/useLocaleKey';
 
 import { BlocksEditor } from './BlocksEditor';
 
@@ -16,10 +18,8 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
   ({ label, name, required = false, hint, labelAction, ...editorProps }, forwardedRef) => {
     const id = React.useId();
     const field = useField(name);
-    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
-    // Create a key that changes when locale changes to force re-render
-    const localeKey = query?.plugins?.i18n?.locale || 'default';
+    const localeKey = useLocaleKey();
 
     return (
       <Field.Root id={id} name={name} hint={hint} error={field.error} required={required}>

@@ -120,6 +120,13 @@ export const HOOKS = {
   MUTATE_EDIT_VIEW_LAYOUT: 'Admin/CM/pages/EditView/mutate-edit-view-layout',
 
   /**
+   * Hook that allows to get the locale key for the CM's edit view
+   * @constant
+   * @type {string}
+   */
+  GET_LOCALE_KEY: 'Admin/CM/pages/EditView/locale-key',
+
+  /**
    * Hook that allows to mutate the CM's single types links pre-set filters
    * @constant
    * @type {string}

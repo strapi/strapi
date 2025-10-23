@@ -1,14 +1,10 @@
 import * as React from 'react';
 
-import {
-  useField,
-  useStrapiApp,
-  useQueryParams,
-  type InputProps,
-} from '@strapi/admin/strapi-admin';
+import { useField, useStrapiApp, type InputProps } from '@strapi/admin/strapi-admin';
 import { Field, Flex } from '@strapi/design-system';
 import { EditorFromTextArea } from 'codemirror5';
 
+import { useLocaleKey } from '../../../../../hooks/useLocaleKey';
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 
 import { Editor, EditorApi } from './Editor';
@@ -35,11 +31,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     const [mediaLibVisible, setMediaLibVisible] = React.useState(false);
     const [isExpandMode, setIsExpandMode] = React.useState(false);
     const components = useStrapiApp('ImageDialog', (state) => state.components);
-    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
-
-    // Create a key that changes when locale changes to force re-render
-    const localeKey = query?.plugins?.i18n?.locale || 'default';
-
+    const localeKey = useLocaleKey();
     const MediaLibraryDialog = components['media-library'];
 
     const handleToggleMediaLib = () => setMediaLibVisible((prev) => !prev);

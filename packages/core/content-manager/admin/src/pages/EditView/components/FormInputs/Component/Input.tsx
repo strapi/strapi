@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { InputProps, useField, useQueryParams } from '@strapi/admin/strapi-admin';
+import { InputProps, useField } from '@strapi/admin/strapi-admin';
 import { Field, Flex, IconButton } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
+import { useLocaleKey } from '../../../../../hooks/useLocaleKey';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
@@ -39,7 +40,6 @@ const ComponentInput = ({
 }: ComponentInputProps) => {
   const { formatMessage } = useIntl();
   const field = useField(name);
-  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
   const showResetComponent = !attribute.repeatable && field.value && !disabled;
 
@@ -47,8 +47,7 @@ const ComponentInput = ({
     currentDocument: { components },
   } = useDocumentContext('ComponentInput');
 
-  // Create a key that changes when locale changes to force re-render
-  const localeKey = query?.plugins?.i18n?.locale || 'default';
+  const localeKey = useLocaleKey();
 
   const handleInitialisationClick = () => {
     const schema = components[attribute.component];

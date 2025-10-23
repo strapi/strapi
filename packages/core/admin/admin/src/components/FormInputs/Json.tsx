@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
 import {
   JSONInput as JSONInputImpl,
   useComposedRefs,
@@ -9,6 +8,7 @@ import {
 } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
+import { useLocaleKey } from '../../hooks/useLocaleKey';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
@@ -17,12 +17,10 @@ const JsonInput = React.forwardRef<JSONInputRef, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField(name);
-    const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
-    // Create a key that changes when locale changes to force re-render
-    const localeKey = query?.plugins?.i18n?.locale || 'default';
+    const localeKey = useLocaleKey();
 
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>
