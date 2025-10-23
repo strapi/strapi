@@ -1,8 +1,7 @@
 import type { Core, Modules, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
-import _ from 'lodash';
-import { c } from 'tar';
+import { get, set } from 'lodash/fp';
 
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   // TODO: add a helper function to get the AI server URL
@@ -79,10 +78,23 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const localizedRoots = new Set();
+      // TODO: Uncomment if we want to keep media fields for nested components
+      // let mediaFields: string[] = [];
 
       const translateableContent = await traverseEntity(
         ({ key, attribute, parent, value, path }, { remove }) => {
+          /*if (key === 'id') {
+            remove(key);
+            return;
+          }*/
+
           // Always remove media and blocks fields
+          // TODO: Uncomment if we want to keep media fields for nested components
+          /*if (attribute && attribute.type === 'media') {
+            if (path.raw !== null) {
+              mediaFields.push(path.raw);
+            }
+          }*/
           if (attribute && ['media', 'blocks'].includes(attribute.type)) {
             remove(key);
             return;
@@ -98,8 +110,8 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
             return; // keep
           }
 
-          // If parent exists in the localized roots set, keep it
           if (parent && localizedRoots.has(parent.path.raw)) {
+            // If parent exists in the localized roots set, keep it
             // If this is also a component/dz, propagate the localized root flag
             if (['component', 'dynamiczone'].includes(attribute?.type ?? '')) {
               localizedRoots.add(path.raw);
@@ -114,12 +126,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         document
       );
 
-      console.log('AI Localizations: localized roots:', localizedRoots);
+      /*console.log('AI Localizations: localized roots:', localizedRoots);
 
       console.log(
         'AI Localizations: translateable content:',
         JSON.stringify(translateableContent, null, 2)
-      );
+      );*/
 
       // Call the AI server to get the localized content
       const localesList = await localeService.find();
@@ -198,14 +210,14 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
       }
 
-      const aiResult = {
+      // TODO: Remove this mocked result when the AI server is ready
+      /*const aiResult = {
         localizations: [
           {
             locale: 'fr',
             content: {
               title: 'Bonjour',
               teamMembers: {
-                id: 19,
                 name: 'Jane Smith',
                 role: 'Developpeuse',
                 organization: [
@@ -223,7 +235,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
                   },
                 ],
               },
-              createdBy: null,
             },
           },
           {
@@ -253,10 +264,15 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
             },
           },
         ],
-      };
+      };*/
 
-      //const aiResult = await response.json();
-      console.log('DOCUMENT:', JSON.stringify(document, null, 2));
+      const aiResult = await response.json();
+
+      // Get all media field names dynamically from the schema
+      const mediaFields = Object.entries(schema.attributes)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, attr]) => attr.type === 'media')
+        .map(([key]) => key);
 
       try {
         await Promise.allSettled(
@@ -270,33 +286,33 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
               populate: '*',
             });
 
-            // Use traverseEntity to collect all media field paths from the schema
-            /*const mediaContent = await traverseEntity(
-              ({ key, attribute }, { remove }) => {
-                if (!attribute) return;
-                if (attribute.type === 'media') {
-                  if (!derivedDoc || !derivedDoc[key]) return;
-                }
-                if (['component', 'dynamiczone'].includes(attribute.type)) return;
-                remove(key);
-              },
-              { schema, getModel: strapi.getModel.bind(strapi) },
-              document
-            );
+            // Merge AI content and media fields, works for nested media fields as well
+            // TODO: We need to decide if we want this behavior. I keep it here for that reason.
+            /*let mergedData = content;
+            mediaFields.forEach((key) => {
+              const value = get(key, document);
+              const derivedValue = get(key, derivedDoc);
+              if (value && !derivedValue) {
+                mergedData = set(key, value, mergedData);
+              }
+            });*/
 
-            const mergedData = _.merge({}, content, mediaContent);
-
-            console.log(
-              'Merging media fields for locale',
-              JSON.stringify(mergedData, null, 2),
-              locale
-            );*/
+            // Merge AI content and media fields, works only on first level media fields (root level)
+            const mergedData = { ...content };
+            for (const field of mediaFields) {
+              // Only copy media if not already set in derived locale
+              if (!derivedDoc || !derivedDoc[field]) {
+                mergedData[field] = document[field];
+              } else {
+                mergedData[field] = derivedDoc[field];
+              }
+            }
 
             return strapi.documents(model).update({
               documentId,
               locale,
               fields: [],
-              data: content//mergedData,
+              data: mergedData
             });
           })
         );
