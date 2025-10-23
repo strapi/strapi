@@ -5,6 +5,7 @@ import { getService } from '../utils';
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   // TODO: add a helper function to get the AI server URL
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
+  const aiLocalizationJobsService = getService('ai-localization-jobs');
 
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
@@ -27,6 +28,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         return false;
       }
 
+      const settings = getService('settings');
+      const aiSettings = await settings.getSettings();
+      if (!aiSettings?.aiLocalizations) {
+        return false;
+      }
+
       return true;
     },
 
@@ -42,6 +49,11 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       model: UID.ContentType;
       document: Modules.Documents.AnyDocument;
     }) {
+      const isFeatureEnabled = await this.isEnabled();
+      if (!isFeatureEnabled) {
+        return;
+      }
+
       const schema = strapi.getModel(model);
       const localeService = getService('locales');
 
@@ -53,12 +65,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       // Don't trigger localizations if the update is on a derived locale, only do it on the default
       const defaultLocale = await localeService.getDefaultLocale();
-      if (document.locale !== defaultLocale) {
-        return;
-      }
-
-      const isFeatureEnabled = await this.isEnabled();
-      if (!isFeatureEnabled) {
+      if (document?.locale !== defaultLocale) {
         return;
       }
 
@@ -96,11 +103,27 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         return;
       }
 
+      await aiLocalizationJobsService.upsertJobForDocument({
+        contentType: model,
+        documentId,
+        sourceLocale: document.locale,
+        targetLocales,
+        status: 'processing',
+      });
+
       let token: string;
       try {
         const tokenData = await strapi.service('admin::user').getAiToken();
         token = tokenData.token;
       } catch (error) {
+        await aiLocalizationJobsService.upsertJobForDocument({
+          documentId,
+          contentType: model,
+          sourceLocale: document.locale,
+          targetLocales,
+          status: 'failed',
+        });
+
         throw new Error('Failed to retrieve AI token', {
           cause: error instanceof Error ? error : undefined,
         });
@@ -124,7 +147,24 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         strapi.log.error(
           `AI Localizations request failed: ${response.status} ${response.statusText}`
         );
+
+        await aiLocalizationJobsService.upsertJobForDocument({
+          documentId,
+          contentType: model,
+          sourceLocale: document.locale,
+          targetLocales,
+          status: 'failed',
+        });
+
         throw new Error(`AI Localizations request failed: ${response.statusText}`);
+      } else {
+        await aiLocalizationJobsService.upsertJobForDocument({
+          documentId,
+          contentType: model,
+          sourceLocale: document.locale,
+          targetLocales,
+          status: 'completed',
+        });
       }
 
       const aiResult = await response.json();
@@ -167,8 +207,45 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           })
         );
       } catch (error) {
+        await aiLocalizationJobsService.upsertJobForDocument({
+          documentId,
+          contentType: model,
+          sourceLocale: document.locale,
+          targetLocales,
+          status: 'failed',
+        });
         strapi.log.error('AI Localizations generation failed', error);
       }
+    },
+    setupMiddleware() {
+      strapi.documents.use(async (context, next) => {
+        const result = await next();
+
+        // Only trigger on create/update actions
+        if (!['create', 'update'].includes(context.action)) {
+          return result;
+        }
+
+        // Check if AI localizations are enabled before triggering
+        const isEnabled = await this.isEnabled();
+        if (!isEnabled) {
+          return result;
+        }
+
+        // Don't await since localizations should be done in the background without blocking the request
+        strapi
+          .plugin('i18n')
+          .service('ai-localizations')
+          .generateDocumentLocalizations({
+            model: context.contentType.uid,
+            document: result,
+          })
+          .catch((error: any) => {
+            strapi.log.error('AI Localizations generation failed', error);
+          });
+
+        return result;
+      });
     },
   };
 };
