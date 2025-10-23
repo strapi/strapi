@@ -93,7 +93,7 @@ const LocaleOption = ({
   }
 
   return (
-    <Flex gap={1} justifyContent="space-between">
+    <Flex width="100%" gap={1} justifyContent="space-between">
       <Typography>{locale.name}</Typography>
       {isDraftAndPublishEnabled ? (
         <Status
