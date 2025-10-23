@@ -139,6 +139,7 @@ interface HeaderActionDescription {
     startIcon?: React.ReactNode;
     textValue?: string;
     value: string;
+    render?: React.ReactNode;
   }>;
   status?: {
     message: React.ReactNode;
@@ -408,11 +409,17 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               aria-label={action.label}
               {...action}
             >
-              {action.options.map(({ label, ...option }) => (
-                <SingleSelectOption key={option.value} {...option}>
-                  {label}
-                </SingleSelectOption>
-              ))}
+              {action.options.map(({ label, ...option }) => {
+                if (option.render) {
+                  return option.render;
+                }
+
+                return (
+                  <SingleSelectOption key={option.value} {...option}>
+                    {label}
+                  </SingleSelectOption>
+                );
+              })}
             </SingleSelect>
           );
         } else if (action.status) {

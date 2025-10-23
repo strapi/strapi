@@ -39,6 +39,7 @@ import { styled } from 'styled-components';
 
 import { useAILocalizationJobsPolling } from '../hooks/useAILocalizationJobsPolling';
 import { useI18n } from '../hooks/useI18n';
+import { useGetAILocalizationJobsByDocumentQuery } from '../services/aiLocalizationJobs';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
 import { useGetSettingsQuery } from '../services/settings';
@@ -61,6 +62,7 @@ interface LocaleOptionProps {
   locale: Locale;
   status: 'draft' | 'published' | 'modified';
   entryExists: boolean;
+  translationStatus?: 'processing' | 'failed' | 'completed' | undefined;
 }
 
 const statusVariants: Record<LocaleOptionProps['status'], StatusVariant> = {
@@ -91,7 +93,7 @@ const LocaleOption = ({
   }
 
   return (
-    <Flex width="100%" gap={1} justifyContent="space-between">
+    <Flex gap={1} justifyContent="space-between">
       <Typography>{locale.name}</Typography>
       {isDraftAndPublishEnabled ? (
         <Status
@@ -112,6 +114,28 @@ const LocaleOption = ({
   );
 };
 
+const LocaleOptionStartIcon = ({
+  entryWithLocaleExists,
+  translationStatus,
+  index,
+}: {
+  entryWithLocaleExists: boolean;
+  translationStatus?: 'processing' | 'failed' | 'completed' | undefined;
+  index?: number;
+}) => {
+  const isAiAvailable = useAIAvailability();
+
+  if (!entryWithLocaleExists) {
+    return <Plus />;
+  }
+
+  if (isAiAvailable && index !== 0 && translationStatus === 'failed') {
+    return <WarningCircle fill="warning600" />;
+  }
+
+  return null;
+};
+
 const LocalePickerAction = ({
   document,
   meta,
@@ -130,6 +154,12 @@ const LocalePickerAction = ({
     documentId,
     params: { locale: currentDesiredLocale },
   });
+  const { data: jobData } = useGetAILocalizationJobsByDocumentQuery({
+    documentId: documentId!,
+    model: model!,
+    collectionType: collectionType!,
+  });
+  const isAiAvailable = useAIAvailability();
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -194,7 +224,7 @@ const LocalePickerAction = ({
       id: getTranslation('Settings.locales.modal.locales.label'),
       defaultMessage: 'Locales',
     }),
-    options: displayedLocales.map((locale) => {
+    options: displayedLocales.map((locale, index) => {
       const entryWithLocaleExists = allCurrentLocales.some((doc) => doc.locale === locale.code);
 
       const currentLocaleDoc = allCurrentLocales.find((doc) =>
@@ -202,6 +232,44 @@ const LocalePickerAction = ({
       );
 
       const permissionsToCheck = currentLocaleDoc ? canRead : canCreate;
+
+      if (isAiAvailable) {
+        return {
+          render: (
+            <React.Fragment key={index}>
+              <SingleSelectOption
+                disabled={!permissionsToCheck.includes(locale.code)}
+                key={locale.code}
+                startIcon={
+                  <LocaleOptionStartIcon
+                    entryWithLocaleExists={entryWithLocaleExists}
+                    translationStatus={jobData?.data?.status}
+                    index={index}
+                  />
+                }
+                value={locale.code}
+              >
+                <LocaleOption
+                  isDraftAndPublishEnabled={!!schema?.options?.draftAndPublish}
+                  locale={locale}
+                  status={currentLocaleDoc?.status}
+                  entryExists={entryWithLocaleExists}
+                />
+              </SingleSelectOption>
+              {index === 0 && (
+                <Box paddingRight={4} paddingLeft={4} paddingTop={2} paddingBottom={2}>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTranslation('CMEditViewLocalePicker.locale.ai-translations'),
+                      defaultMessage: 'AI Translations',
+                    })}
+                  </Typography>
+                </Box>
+              )}
+            </React.Fragment>
+          ),
+        };
+      }
 
       return {
         disabled: !permissionsToCheck.includes(locale.code),
@@ -212,9 +280,10 @@ const LocalePickerAction = ({
             locale={locale}
             status={currentLocaleDoc?.status}
             entryExists={entryWithLocaleExists}
+            translationStatus={jobData?.data?.status}
           />
         ),
-        startIcon: !entryWithLocaleExists ? <Plus /> : null,
+        startIcon: <LocaleOptionStartIcon entryWithLocaleExists={entryWithLocaleExists} />,
       };
     }),
     customizeContent: () => currentLocale?.name,
