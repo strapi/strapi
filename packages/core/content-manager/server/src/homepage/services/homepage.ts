@@ -189,6 +189,13 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
             ...additionalQueryParams,
           });
 
+          // minimal fix: ensure fields is an array of non-empty strings
+          if (permissionQuery && Array.isArray((permissionQuery as any).fields)) {
+            (permissionQuery as any).fields = (permissionQuery as any).fields.filter(
+              (f: unknown): f is string => typeof f === 'string' && f.length > 0
+            );
+          }
+
           const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
           const populate = additionalQueryParams?.populate as string[];
 
