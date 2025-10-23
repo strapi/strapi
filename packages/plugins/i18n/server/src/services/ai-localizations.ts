@@ -78,23 +78,9 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const localizedRoots = new Set();
-      // TODO: Uncomment if we want to keep media fields for nested components
-      // let mediaFields: string[] = [];
 
       const translateableContent = await traverseEntity(
         ({ key, attribute, parent, value, path }, { remove }) => {
-          /*if (key === 'id') {
-            remove(key);
-            return;
-          }*/
-
-          // Always remove media and blocks fields
-          // TODO: Uncomment if we want to keep media fields for nested components
-          /*if (attribute && attribute.type === 'media') {
-            if (path.raw !== null) {
-              mediaFields.push(path.raw);
-            }
-          }*/
           if (attribute && ['media', 'blocks'].includes(attribute.type)) {
             remove(key);
             return;
@@ -125,13 +111,11 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         { schema, getModel: strapi.getModel.bind(strapi) },
         document
       );
-
-      /*console.log('AI Localizations: localized roots:', localizedRoots);
-
+      console.log('DOCUMENT = ', JSON.stringify(document, null, 2));
       console.log(
-        'AI Localizations: translateable content:',
+        'Translateable content generated: translateableContent =',
         JSON.stringify(translateableContent, null, 2)
-      );*/
+      );
 
       // Call the AI server to get the localized content
       const localesList = await localeService.find();
@@ -210,62 +194,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
       }
 
-      // TODO: Remove this mocked result when the AI server is ready
-      /*const aiResult = {
-        localizations: [
-          {
-            locale: 'fr',
-            content: {
-              title: 'Bonjour',
-              teamMembers: {
-                name: 'Jane Smith',
-                role: 'Developpeuse',
-                organization: [
-                  {
-                    id: 1,
-                    name: 'TestO',
-                    address: 'Test address',
-                    testComponent: [
-                      {
-                        id: 1,
-                        testName: 'Test Name',
-                        testAnotherText: 'Test Another Text',
-                      },
-                    ],
-                  },
-                ],
-              },
-            },
-          },
-          {
-            locale: 'de',
-            content: {
-              title: 'Hallo',
-              teamMembers: {
-                id: 19,
-                name: 'Jane Smith',
-                role: 'Entwicklerin',
-                organization: [
-                  {
-                    id: 1,
-                    name: 'TestO',
-                    address: 'Test address',
-                    testComponent: [
-                      {
-                        id: 1,
-                        testName: 'Test Name',
-                        testAnotherText: 'Test Another Text',
-                      },
-                    ],
-                  },
-                ],
-              },
-              createdBy: null,
-            },
-          },
-        ],
-      };*/
-
       const aiResult = await response.json();
 
       // Get all media field names dynamically from the schema
@@ -286,17 +214,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
               populate: '*',
             });
 
-            // Merge AI content and media fields, works for nested media fields as well
-            // TODO: We need to decide if we want this behavior. I keep it here for that reason.
-            /*let mergedData = content;
-            mediaFields.forEach((key) => {
-              const value = get(key, document);
-              const derivedValue = get(key, derivedDoc);
-              if (value && !derivedValue) {
-                mergedData = set(key, value, mergedData);
-              }
-            });*/
-
             // Merge AI content and media fields, works only on first level media fields (root level)
             const mergedData = { ...content };
             for (const field of mediaFields) {
@@ -312,7 +229,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
               documentId,
               locale,
               fields: [],
-              data: mergedData
+              data: mergedData,
             });
           })
         );
