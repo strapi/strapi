@@ -12,6 +12,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
   const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation'];
+  const IGNORED_FIELDS = ['id', 'documentId', 'createdAt', 'updatedAt', 'updatedBy', 'localizations'];
 
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
@@ -86,15 +87,18 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const translateableContent = await traverseEntity(
         ({ key, attribute, parent, value, path }, { remove }) => {
+          if (IGNORED_FIELDS.includes(key)) {
+            remove(key);
+            return;
+          }
           const hasLocalizedOption = attribute && isLocalizedAttribute(attribute);
-          if (!hasLocalizedOption || UNSUPPORTED_ATTRIBUTE_TYPES.includes(attribute.type)) {
+          if (attribute && UNSUPPORTED_ATTRIBUTE_TYPES.includes(attribute.type)) {
             remove(key);
             return;
           }
 
           // If this field is localized, keep it (and mark as localized root if component/dz)
-          const isLocalized = attribute?.pluginOptions?.i18n?.localized === true;
-          if (isLocalized) {
+          if (hasLocalizedOption) {
             // If it's a component/dynamiczone, add to the set
             if (['component', 'dynamiczone'].includes(attribute.type)) {
               localizedRoots.add(path.raw);
@@ -116,11 +120,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         },
         { schema, getModel: strapi.getModel.bind(strapi) },
         document
-      );
-      console.log('DOCUMENT = ', JSON.stringify(document, null, 2));
-      console.log(
-        'Translateable content generated: translateableContent =',
-        JSON.stringify(translateableContent, null, 2)
       );
 
       // Call the AI server to get the localized content
