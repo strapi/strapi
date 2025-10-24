@@ -36,6 +36,7 @@ const LIFECYCLES = [
  * into the GraphQL plugin.
  */
 const GRAPHQL_ENUM_REGEX = /^[_A-Za-z][_0-9A-Za-z]*$/;
+const GRAPHQL_RESERVED_KEYWORDS = ['true', 'false', 'null', 'undefined'];
 
 const lifecyclesShape = _.mapValues(_.keyBy(LIFECYCLES), () => yup.mixed().nullable().isFunction());
 
@@ -69,6 +70,16 @@ const contentTypeSchemaValidator = yup.object().shape({
             if (regressedValues.some((value: string) => value === '')) {
               return this.createError({
                 message: `At least one value of the enumeration '${attrName}' appears to be empty. Only alphanumerical characters are taken into account.`,
+              });
+            }
+
+            // should not contain reserved keywords
+            const reservedValues = regressedValues.filter((value: string) => 
+              GRAPHQL_RESERVED_KEYWORDS.includes(value.toLowerCase())
+            );
+            if (reservedValues.length > 0) {
+              return this.createError({
+                message: `The enumeration '${attrName}' contains reserved GraphQL keywords (${reservedValues.join(', ')}). These values are not allowed.`,
               });
             }
 
