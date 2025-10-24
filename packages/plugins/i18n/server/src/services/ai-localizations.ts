@@ -86,7 +86,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       const localizedRoots = new Set();
 
       const translateableContent = await traverseEntity(
-        ({ key, attribute, parent, value, path }, { remove }) => {
+        ({ key, attribute, parent, path }, { remove }) => {
           if (IGNORED_FIELDS.includes(key)) {
             remove(key);
             return;
