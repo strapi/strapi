@@ -356,7 +356,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(cookies.toLowerCase()).toMatch(/httponly/);
     });
 
-    test('Even with cookie set, missing body yields 400', async () => {
+    test('Cookie-based refresh works when httpOnly is configured', async () => {
       const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
 
       const loginRes = await rqAuth({
@@ -377,8 +377,13 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
         },
         body: {},
       });
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toBe('Missing refresh token');
+      expect(res.statusCode).toBe(200);
+      expect(res.body.jwt).toEqual(expect.any(String));
+      expect(res.body.refreshToken).toBeUndefined();
+      const newSetCookie = res.headers['set-cookie'];
+      const newCookies = Array.isArray(newSetCookie) ? newSetCookie.join('\n') : String(newSetCookie || '');
+      expect(newCookies).toMatch(/strapi_up_refresh=/);
+      expect(newCookies.toLowerCase()).toMatch(/httponly/);
     });
   });
 
