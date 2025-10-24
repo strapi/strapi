@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { useNotification, adminApi } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
 
 import { AILocalizationJobs } from '../../../shared/contracts/ai-localization-jobs';
 import { useGetAILocalizationJobsByDocumentQuery } from '../services/aiLocalizationJobs';
@@ -20,6 +21,7 @@ export const useAILocalizationJobsPolling = ({
 }: UseAILocalizationJobsPollingOptions) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
+  const dispatch = useDispatch();
 
   const [previousJobStatus, setPreviousJobStatus] = React.useState<
     AILocalizationJobs['status'] | null
@@ -49,6 +51,18 @@ export const useAILocalizationJobsPolling = ({
   const job = jobData?.data || initialJobData?.data;
   const currentJobStatus = job?.status;
 
+  const invalidateDocument = React.useCallback(() => {
+    dispatch(
+      adminApi.util.invalidateTags([
+        {
+          // @ts-expect-error tag isn't available
+          type: 'Document',
+          id: collectionType !== 'single-types' ? `${model}_${documentId}` : model,
+        },
+      ])
+    );
+  }, [dispatch, collectionType, model, documentId]);
+
   // Check for job status changes and trigger callbacks
   React.useEffect(() => {
     if (!currentJobStatus) return;
@@ -62,6 +76,7 @@ export const useAILocalizationJobsPolling = ({
           defaultMessage: 'AI translation completed successfully!',
         }),
       });
+      invalidateDocument();
     }
 
     if (previousJobStatus === 'processing' && currentJobStatus === 'failed') {
@@ -72,6 +87,7 @@ export const useAILocalizationJobsPolling = ({
           defaultMessage: 'AI translation failed. Please try again.',
         }),
       });
+      invalidateDocument();
     }
 
     // Update the previous status if it changed
@@ -84,6 +100,7 @@ export const useAILocalizationJobsPolling = ({
     setPreviousJobStatus,
     toggleNotification,
     formatMessage,
+    invalidateDocument,
   ]);
 
   return {
