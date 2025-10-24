@@ -1,0 +1,8 @@
+{
+  "name": "strapi-plugin-audit-logs",
+  "version": "0.1.0",
+  "description": "Audit logs plugin for Strapi v4 - logs create/update/delete operations via Content API",
+  "main": "server/index.js",
+  "author": "Your Name",
+  "license": "MIT"
+}
