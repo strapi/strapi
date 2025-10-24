@@ -139,7 +139,7 @@ interface HeaderActionDescription {
     startIcon?: React.ReactNode;
     textValue?: string;
     value: string;
-    render?: React.ReactNode;
+    render?: () => React.ReactNode;
   }>;
   status?: {
     message: React.ReactNode;
@@ -411,7 +411,7 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
             >
               {action.options.map(({ label, ...option }) => {
                 if (option.render) {
-                  return option.render;
+                  return option.render();
                 }
 
                 return (

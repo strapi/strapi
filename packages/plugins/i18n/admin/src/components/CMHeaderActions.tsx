@@ -159,6 +159,7 @@ const LocalePickerAction = ({
     model: model!,
     collectionType: collectionType!,
   });
+  const { data: settings } = useGetSettingsQuery();
   const isAiAvailable = useAIAvailability();
 
   const handleSelect = React.useCallback(
@@ -233,9 +234,13 @@ const LocalePickerAction = ({
 
       const permissionsToCheck = currentLocaleDoc ? canRead : canCreate;
 
-      if (isAiAvailable) {
+      if (
+        window.strapi.future.isEnabled('unstableAILocalizations') &&
+        isAiAvailable &&
+        settings?.data?.aiLocalizations
+      ) {
         return {
-          render: (
+          render: () => (
             <React.Fragment key={index}>
               <SingleSelectOption
                 disabled={!permissionsToCheck.includes(locale.code)}
