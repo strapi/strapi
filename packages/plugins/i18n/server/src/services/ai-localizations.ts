@@ -1,12 +1,17 @@
-import type { Core, Modules, UID } from '@strapi/types';
+import type { Core, Modules, Schema, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
-import { get, set } from 'lodash/fp';
+
+const isLocalizedAttribute = (attribute: Schema.Attribute.Attribute | undefined): boolean => {
+  return (attribute?.pluginOptions as any)?.i18n?.localized === true;
+};
 
 const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   // TODO: add a helper function to get the AI server URL
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
   const aiLocalizationJobsService = getService('ai-localization-jobs');
+
+  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation'];
 
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
@@ -81,7 +86,8 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const translateableContent = await traverseEntity(
         ({ key, attribute, parent, value, path }, { remove }) => {
-          if (attribute && ['media', 'blocks'].includes(attribute.type)) {
+          const hasLocalizedOption = attribute && isLocalizedAttribute(attribute);
+          if (!hasLocalizedOption || UNSUPPORTED_ATTRIBUTE_TYPES.includes(attribute.type)) {
             remove(key);
             return;
           }
@@ -156,6 +162,31 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
       }
 
+      /**
+       * Provide a schema to the LLM so that we can give it instructions about how to handle each
+       * type of attribute. Only keep essential schema data to avoid cluttering the context.
+       * Ignore fields that don't need to be localized.
+       * TODO: also provide a schema of all the referenced components
+       */
+      const minimalContentTypeSchema = Object.fromEntries(
+        Object.entries(schema.attributes)
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .filter(([_, attr]) => {
+            const isLocalized = isLocalizedAttribute(attr);
+            const isSupportedType = !UNSUPPORTED_ATTRIBUTE_TYPES.includes(attr.type);
+            return isLocalized && isSupportedType;
+          })
+          .map(([key, attr]) => {
+            const minimalAttribute = { type: attr.type };
+            if (attr.type === 'component') {
+              (
+                minimalAttribute as Schema.Attribute.Component<`${string}.${string}`, boolean>
+              ).repeatable = attr.repeatable ?? false;
+            }
+            return [key, minimalAttribute];
+          })
+      );
+
       strapi.log.http('Contacting AI Server for localizations generation');
       const response = await fetch(`${aiServerUrl}/i18n/generate-localizations`, {
         method: 'POST',
@@ -167,6 +198,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
           content: translateableContent,
           sourceLocale: document.locale,
           targetLocales,
+          contentTypeSchema: minimalContentTypeSchema,
         }),
       });
 
