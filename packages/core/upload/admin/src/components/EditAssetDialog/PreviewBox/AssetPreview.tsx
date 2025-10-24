@@ -3,11 +3,12 @@ import * as React from 'react';
 
 import MuxPlayer from '@mux/mux-player-react';
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
-import { AssetType } from '../../../constants';
+import { AssetType } from '../../../enums';
+import { typeFromMime } from '../../../utils';
+import { getFileIconComponent } from '../../../utils/icons';
 
 const CardAsset = styled(Flex)`
   min-height: 26.4rem;
@@ -32,19 +33,21 @@ export const AssetPreview = React.forwardRef<
 >(({ mime, url, name, ...props }, ref) => {
   const theme = useTheme();
 
+  const assetType = typeFromMime(mime);
+
   const { formatMessage } = useIntl();
 
-  if (mime.includes(AssetType.Image)) {
+  if (assetType === AssetType.Image) {
     return (
       <img ref={ref as React.ForwardedRef<HTMLImageElement>} src={url} alt={name} {...props} />
     );
   }
 
-  if (mime.includes(AssetType.Video)) {
+  if (assetType === AssetType.Video) {
     return <MuxPlayer src={url} accentColor={theme.colors.primary500} />;
   }
 
-  if (mime.includes(AssetType.Audio)) {
+  if (assetType === AssetType.Audio) {
     return (
       <Box margin="5">
         <audio controls src={url} ref={ref as React.ForwardedRef<HTMLAudioElement>} {...props}>
@@ -54,27 +57,13 @@ export const AssetPreview = React.forwardRef<
     );
   }
 
-  if (mime.includes('pdf')) {
-    return (
-      <CardAsset width="100%" justifyContent="center" {...props}>
-        <Flex gap={2} direction="column" alignItems="center">
-          <FilePdf aria-label={name} fill="neutral500" width={24} height={24} />
-          <Typography textColor="neutral500" variant="pi">
-            {formatMessage({
-              id: 'noPreview',
-              defaultMessage: 'No preview available',
-            })}
-          </Typography>
-        </Flex>
-      </CardAsset>
-    );
-  }
-
+  // getFileIconComponent will handle all other file types, eg. PDF, CSV, XLS, ZIP
+  // If the file type is not recognized, the default icon will be used
+  const IconComponent = getFileIconComponent(assetType);
   return (
     <CardAsset width="100%" justifyContent="center" {...props}>
       <Flex gap={2} direction="column" alignItems="center">
-        <File aria-label={name} fill="neutral500" width={24} height={24} />
-
+        <IconComponent aria-label={name} fill="neutral500" width={24} height={24} />
         <Typography textColor="neutral500" variant="pi">
           {formatMessage({
             id: 'noPreview',
