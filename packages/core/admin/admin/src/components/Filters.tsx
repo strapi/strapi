@@ -37,11 +37,15 @@ interface FitlersContextValue {
   onChange: (data: FilterFormData) => void;
   options: Filters.Filter[];
   setOpen: (open: boolean) => void;
+  editingFilter: FilterFormData | null;
+  setEditingFilter: (filter: FilterFormData | null) => void;
 }
 
 const [FiltersProvider, useFilters] = createContext<FitlersContextValue>('Filters');
 
-interface RootProps extends Partial<FitlersContextValue>, Popover.Props {
+interface RootProps
+  extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options'>>,
+    Popover.Props {
   children: React.ReactNode;
 }
 
@@ -55,16 +59,25 @@ const Root = ({
   defaultOpen,
   ...restProps
 }: RootProps) => {
+  const [editingFilter, setEditingFilter] = React.useState<FilterFormData | null>(null);
+
   const handleChange = (data: FilterFormData) => {
     if (onChange) {
       onChange(data);
     }
   };
+
   const [open = false, setOpen] = useControllableState({
     prop: openProp,
     defaultProp: defaultOpen,
     onChange: onOpenChange,
   });
+
+  React.useEffect(() => {
+    if (!open) {
+      setEditingFilter(null);
+    }
+  }, [open]);
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen} {...restProps}>
@@ -73,6 +86,8 @@ const Root = ({
         disabled={disabled}
         onChange={handleChange}
         options={options}
+        editingFilter={editingFilter}
+        setEditingFilter={setEditingFilter}
       >
         {children}
       </FiltersProvider>
@@ -121,6 +136,21 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   const options = useFilters('Popover', ({ options }) => options);
   const onChange = useFilters('Popover', ({ onChange }) => onChange);
   const setOpen = useFilters('Popover', ({ setOpen }) => setOpen);
+  const editingFilter = useFilters('Popover', ({ editingFilter }) => editingFilter);
+  const setEditingFilter = useFilters('Popover', ({ setEditingFilter }) => setEditingFilter);
+
+  const initialValues = React.useMemo(() => {
+    return editingFilter
+      ? {
+          name: editingFilter.name,
+          filter: editingFilter.filter,
+          value: editingFilter.value,
+        }
+      : {
+          name: options[0]?.name,
+          filter: BASE_FILTERS[0].value,
+        };
+  }, [editingFilter, options]);
 
   if (options.length === 0) {
     return null;
@@ -158,23 +188,81 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
       [data.filter]: value,
     };
 
-    const newFilterQuery = {
-      ...query.filters,
-      $and: [
-        ...(query.filters?.$and ?? []),
-        {
-          [data.name]:
-            fieldOptions.type === 'relation'
-              ? {
-                  [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
-                }
-              : operatorValuePairing,
-        },
-      ],
-    };
+    let newFilterQuery;
+
+    if (editingFilter) {
+      const nextFilters = (query.filters?.$and ?? []).map((filter) => {
+        const [attributeName] = Object.keys(filter);
+        if (attributeName !== editingFilter.name) {
+          return filter;
+        }
+
+        const { type, mainField } = options.find(({ name }) => name === attributeName)!;
+
+        if (type === 'relation') {
+          const filterObj = filter[attributeName][mainField?.name ?? 'id'];
+
+          if (typeof filterObj === 'object') {
+            const [operator] = Object.keys(filterObj);
+            const filterValue = filterObj[operator];
+
+            if (operator === editingFilter.filter && filterValue === editingFilter.value) {
+              return {
+                [data.name]:
+                  fieldOptions.type === 'relation'
+                    ? {
+                        [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
+                      }
+                    : operatorValuePairing,
+              };
+            }
+          }
+
+          return filter;
+        } else {
+          const filterObj = filter[attributeName];
+          const [operator] = Object.keys(filterObj);
+          const filterValue = filterObj[operator];
+
+          if (operator === editingFilter.filter && filterValue === editingFilter.value) {
+            return {
+              [data.name]:
+                fieldOptions.type === 'relation'
+                  ? {
+                      [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
+                    }
+                  : operatorValuePairing,
+            };
+          }
+
+          return filter;
+        }
+      });
+
+      newFilterQuery = {
+        ...query.filters,
+        $and: nextFilters,
+      };
+    } else {
+      newFilterQuery = {
+        ...query.filters,
+        $and: [
+          ...(query.filters?.$and ?? []),
+          {
+            [data.name]:
+              fieldOptions.type === 'relation'
+                ? {
+                    [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
+                  }
+                : operatorValuePairing,
+          },
+        ],
+      };
+    }
 
     setQuery({ filters: newFilterQuery, page: 1 });
     setOpen(false);
+    setEditingFilter(null);
   };
 
   return (
@@ -182,13 +270,13 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
       <Box padding={3}>
         <Form
           method="POST"
-          initialValues={
-            {
-              name: options[0]?.name,
-              filter: BASE_FILTERS[0].value,
-            } satisfies FilterFormData
-          }
+          initialValues={initialValues}
           onSubmit={handleSubmit}
+          key={
+            editingFilter
+              ? `edit-${editingFilter.name}-${editingFilter.filter}-${editingFilter.value}`
+              : 'create'
+          }
         >
           {({ values: formValues, modified, isSubmitting }) => {
             const filter = options.find((filter) => filter.name === formValues.name);
@@ -254,7 +342,12 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
                   type="submit"
                   fullWidth
                 >
-                  {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
+                  {editingFilter
+                    ? formatMessage({
+                        id: 'app.utils.update-filter',
+                        defaultMessage: 'Update filter',
+                      })
+                    : formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
                 </Button>
               </Flex>
             );
@@ -434,9 +527,26 @@ const AttributeTag = ({
   ...filter
 }: AttributeTagProps) => {
   const { formatMessage, formatDate, formatTime, formatNumber } = useIntl();
+  const setOpen = useFilters('AttributeTag', ({ setOpen }) => setOpen);
+  const setEditingFilter = useFilters('AttributeTag', ({ setEditingFilter }) => setEditingFilter);
 
-  const handleClick = () => {
+  const handleRemoveClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onClick({ name, value, filter: operator });
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const decodedValue = FILTERS_WITH_NO_VALUE.includes(operator)
+      ? undefined
+      : decodeURIComponent(value);
+
+    setEditingFilter({
+      name,
+      filter: operator,
+      value: decodedValue,
+    });
+    setOpen(true);
   };
 
   const type = mainField?.type ? mainField.type : filter.type;
@@ -489,9 +599,15 @@ const AttributeTag = ({
   })} ${operator !== '$null' && operator !== '$notNull' ? formattedValue : ''}`;
 
   return (
-    <Tag padding={1} onClick={handleClick} icon={<Cross />}>
-      {content}
-    </Tag>
+    <Box style={{ display: 'inline-block' }}>
+      <Tag padding={1} onClick={handleRemoveClick} style={{ cursor: 'pointer' }} icon={<Cross />}>
+        <Flex alignItems="center" gap={1}>
+          <Box onClick={handleEditClick} style={{ flex: 1 }}>
+            {content}
+          </Box>
+        </Flex>
+      </Tag>
+    </Box>
   );
 };
 
