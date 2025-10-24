@@ -12,7 +12,14 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
   const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation'];
-  const IGNORED_FIELDS = ['id', 'documentId', 'createdAt', 'updatedAt', 'updatedBy', 'localizations'];
+  const IGNORED_FIELDS = [
+    'id',
+    'documentId',
+    'createdAt',
+    'updatedAt',
+    'updatedBy',
+    'localizations',
+  ];
 
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)

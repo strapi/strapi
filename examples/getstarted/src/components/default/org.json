@@ -15,12 +15,7 @@
     "coverOrgImage": {
       "type": "media",
       "multiple": true,
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos",
-        "audios"
-      ]
+      "allowedTypes": ["images", "files", "videos", "audios"]
     },
     "testComponent": {
       "type": "component",
