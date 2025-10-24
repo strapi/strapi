@@ -240,7 +240,7 @@ const LocalePickerAction = ({
         settings?.data?.aiLocalizations
       ) {
         return {
-          render: () => (
+          _render: () => (
             <React.Fragment key={index}>
               <SingleSelectOption
                 disabled={!permissionsToCheck.includes(locale.code)}
@@ -387,7 +387,7 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
   }
 
   return {
-    status: {
+    _status: {
       message: (
         <Box
           height="100%"
