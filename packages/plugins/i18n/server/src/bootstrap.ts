@@ -17,7 +17,7 @@ const registerModelsHooks = () => {
   strapi.documents.use(async (context, next) => {
     const schema: Schema.ContentType = context.contentType;
 
-    if (!['create', 'update', 'discardDraft', 'publish'].includes(context.action)) {
+    if (!['create', 'update', 'discardDraft'].includes(context.action)) {
       return next();
     }
 
@@ -26,9 +26,18 @@ const registerModelsHooks = () => {
     }
 
     // Build a populate array for all non localized fields within the schema
-    const { getNestedPopulateOfNonLocalizedAttributes } = getService('content-types');
-
+    const { getNestedPopulateOfNonLocalizedAttributes, copyNonLocalizedAttributes } =
+      getService('content-types');
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
+
+    // Get original data before the update to compare what actually changed
+    const originalData =
+      context.action === 'update' && context.params.documentId
+        ? await strapi.db.query(schema.uid).findOne({
+            where: { documentId: context.params.documentId },
+            populate: attributesToPopulate,
+          })
+        : null;
 
     // Get the result of the document service action
     const result = (await next()) as any;
@@ -51,7 +60,19 @@ const registerModelsHooks = () => {
         .query(schema.uid)
         .findOne({ where: { id: resultID }, populate: attributesToPopulate });
 
-      await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+      const currentFields = copyNonLocalizedAttributes(schema, populatedResult);
+      const originalFields = copyNonLocalizedAttributes(schema, originalData);
+
+      // Only sync if there are actual changes to non-localized fields
+      const shouldSync =
+        !originalData ||
+        Object.keys(currentFields).some(
+          (key) => JSON.stringify(currentFields[key]) !== JSON.stringify(originalFields[key])
+        );
+
+      if (shouldSync) {
+        await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+      }
     }
 
     return result;
