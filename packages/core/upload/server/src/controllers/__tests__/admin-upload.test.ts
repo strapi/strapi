@@ -55,6 +55,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
           signFileUrls: jest.fn((file) => Promise.resolve(file)),
         };
       }
+      if (serviceName === 'metrics') {
+        return {
+          trackUsage: jest.fn().mockResolvedValue(undefined),
+        };
+      }
       return {};
     });
 
