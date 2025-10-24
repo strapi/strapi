@@ -319,6 +319,61 @@ describe('Type validators', () => {
     });
   });
 
+  describe('string/text type', () => {
+    test('maxLength cannot exceed 255 for short text fields', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          maxLength: 256,
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        attributes,
+      });
+
+      expect(() => validator.validateSync(attributes.title)).toThrow(
+        'maxLength cannot exceed 255 characters for short text fields'
+      );
+    });
+
+    test('maxLength can be equal to 255', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          maxLength: 255,
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.title)).toBe(true);
+    });
+
+    test('maxLength cannot be smaller than minLength', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          minLength: 120,
+          maxLength: 119,
+        },
+      } satisfies Struct.SchemaAttributes;
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        attributes,
+      });
+
+      expect(() => validator.validateSync(attributes.title)).toThrow(
+        'maxLength must be greater or equal to minLength'
+      );
+    });
+  });
+
   describe('media type', () => {
     test('Validates allowedTypes', () => {
       // @ts-expect-error - Silence the cast as Struct.SchemaAttributes since allowedTypes expects one of 'audios',
