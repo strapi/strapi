@@ -1,18 +1,20 @@
-import { forwardRef, memo } from 'react';
+import * as React from 'react';
 
 import { Toggle, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
+import { useLocaleKey } from '../../hooks/useLocaleKey';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
+const BooleanInput = React.forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const { formatMessage } = useIntl();
     const field = useField<boolean | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
+    const localeKey = useLocaleKey();
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
@@ -20,6 +22,7 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
       <Field.Root error={field.error} name={name} hint={hint} required={required} maxWidth="320px">
         <Field.Label action={labelAction}>{label}</Field.Label>
         <Toggle
+          key={`inputBoolean-${name}-${localeKey}`}
           ref={composedRefs}
           checked={field.value === null ? null : field.value || false}
           offLabel={formatMessage({
@@ -40,6 +43,6 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-const MemoizedBooleanInput = memo(BooleanInput);
+const MemoizedBooleanInput = React.memo(BooleanInput);
 
 export { MemoizedBooleanInput as BooleanInput };
