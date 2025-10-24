@@ -51,15 +51,6 @@
       },
       "multiple": false,
       "allowedTypes": ["images", "files", "videos", "audios"]
-    },
-    "dynamiczone": {
-      "type": "dynamiczone",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      },
-      "components": ["basic.simple", "blog.test-como", "default.closingperiod"]
     }
   }
 }
