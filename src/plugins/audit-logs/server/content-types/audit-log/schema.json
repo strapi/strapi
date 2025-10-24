@@ -1,1 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log",
+    "description": "Logs all create, update, and delete actions across APIs"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "contentType": {
+      "type": "string",
+      "required": true
+    },
+    "recordId": {
+      "type": "string"
+    },
+    "action": {
+      "type": "enumeration",
+      "enum": ["create", "update", "delete"],
+      "required": true
+    },
+    "user": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "json"
+    },
+    "createdAt": {
+      "type": "datetime"
+    }
+  }
+}
 
