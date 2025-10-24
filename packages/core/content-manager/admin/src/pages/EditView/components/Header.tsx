@@ -139,8 +139,19 @@ interface HeaderActionDescription {
     startIcon?: React.ReactNode;
     textValue?: string;
     value: string;
+    /**
+     * @internal
+     * @description
+     * Internal SelectOption renderer used to display the status of AI translation background jobs
+     */
+    _render?: () => React.ReactNode;
   }>;
-  status?: {
+  /**
+   * @internal
+   * @description
+   * Internal document header action to display the status of AI translation background jobs
+   */
+  _status?: {
     message: React.ReactNode;
     tooltip?: React.ReactNode;
   };
@@ -408,17 +419,23 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               aria-label={action.label}
               {...action}
             >
-              {action.options.map(({ label, ...option }) => (
-                <SingleSelectOption key={option.value} {...option}>
-                  {label}
-                </SingleSelectOption>
-              ))}
+              {action.options.map(({ label, ...option }) => {
+                if (option._render) {
+                  return option._render();
+                }
+
+                return (
+                  <SingleSelectOption key={option.value} {...option}>
+                    {label}
+                  </SingleSelectOption>
+                );
+              })}
             </SingleSelect>
           );
-        } else if (action.status) {
+        } else if (action._status) {
           return (
-            <HeaderActionStatus tooltip={action.status?.tooltip} key={action.id}>
-              {action.status.message}
+            <HeaderActionStatus tooltip={action._status?.tooltip} key={action.id}>
+              {action._status.message}
             </HeaderActionStatus>
           );
         } else {
