@@ -1,8 +1,24 @@
 {
   "name": "strapi-plugin-audit-logs",
   "version": "0.1.0",
-  "description": "Audit logs plugin for Strapi v4 - logs create/update/delete operations via Content API",
+  "description": "Audit logs plugin for Strapi v4 - automatically logs create, update, and delete operations via the Content API",
+  "strapi": {
+    "name": "audit-logs",
+    "type": "plugin"
+  },
   "main": "server/index.js",
-  "author": "Your Name",
-  "license": "MIT"
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "strapi",
+    "plugin",
+    "audit",
+    "logs",
+    "content-api"
+  ],
+  "author": "Naman Kaushik",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
 }
