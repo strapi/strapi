@@ -24,7 +24,7 @@ npm install @strapi/provider-upload-aws-s3 --save
 ## Configuration
 
 - `provider` defines the name of the provider
-- `providerOptions` is passed down during the construction of the provider. (ex: `new AWS.S3(config)`). [Complete list of options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property)
+- `providerOptions` is passed down during the construction of the provider. (ex: `new AWS.S3(config)`). [Complete list of options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property) (note that this library uses v3 of the library, so some options have been renamed and are not yet available in the documentation, see [the migration guide](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/migrating/notable-changes/) for changes)
 - `providerOptions.params` is passed directly to the parameters to each method respectively.
   - `ACL` is the access control list for the object. Defaults to `public-read`.
   - `signedUrlExpires` is the number of seconds before a signed URL expires. (See [how signed URLs work](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-signed-urls.html)). Defaults to 15 minutes and URLs are only signed when ACL is set to `private`.
@@ -138,6 +138,8 @@ module.exports = ({ env }) => ({
   // ...
 });
 ```
+
+For providers that place buckets in the path rather than as a subdomain, use the `forcePathStyle` parameter ([without the s3 prefix](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/migrating/notable-changes/)).
 
 ### Security Middleware Configuration
 
