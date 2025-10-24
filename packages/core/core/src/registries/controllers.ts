@@ -59,7 +59,10 @@ const controllersRegistry = (strapi: Core.Strapi) => {
     /**
      * Registers a controller
      */
-    set(uid: UID.Controller, value: ControllerFactory) {
+    set(uid: UID.Controller, value: ControllerFactory, options?: { force?: boolean }) {
+      if (has(uid, controllers) && !options?.force) {
+        throw new Error(`Controller ${uid} has already been registered.`);
+      }
       controllers[uid] = value;
       delete instances[uid];
       return this;
@@ -68,12 +71,12 @@ const controllersRegistry = (strapi: Core.Strapi) => {
     /**
      * Registers a map of controllers for a specific namespace
      */
-    add(namespace: string, newControllers: ControllerFactoryMap) {
+    add(namespace: string, newControllers: ControllerFactoryMap, options?: { force?: boolean }) {
       for (const controllerName of Object.keys(newControllers) as UID.Controller[]) {
         const controller = newControllers[controllerName];
         const uid = addNamespace(controllerName, namespace) as UID.Controller;
 
-        if (has(uid, controllers)) {
+        if (has(uid, controllers) && !options?.force) {
           throw new Error(`Controller ${uid} has already been registered.`);
         }
 
@@ -95,6 +98,20 @@ const controllersRegistry = (strapi: Core.Strapi) => {
 
       const newController = extendFn(currentController);
       instances[controllerUID] = newController;
+
+      return this;
+    },
+
+    /**
+     * Removes all controllers for a specific namespace (e.g. api::blog)
+     */
+    removeNamespace(namespace: string) {
+      for (const uid of Object.keys(controllers) as UID.Controller[]) {
+        if (hasNamespace(uid, namespace)) {
+          delete controllers[uid];
+          delete instances[uid];
+        }
+      }
 
       return this;
     },
