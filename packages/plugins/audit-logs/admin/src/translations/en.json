@@ -1,0 +1,5 @@
+{
+  "plugin.name": "Audit Logs",
+  "plugin.description": "Automated audit logging for all content changes"
+}
+
