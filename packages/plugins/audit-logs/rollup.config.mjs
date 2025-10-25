@@ -1,4 +1,4 @@
-import baseConfig from '../../../rollup.utils.mjs';
+import { basePluginConfig } from '../../../rollup.utils.mjs';
 
-export default baseConfig;
+export default basePluginConfig();
 

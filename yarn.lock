@@ -9390,6 +9390,28 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/plugin-audit-logs@workspace:*, @strapi/plugin-audit-logs@workspace:packages/plugins/audit-logs":
+  version: 0.0.0-use.local
+  resolution: "@strapi/plugin-audit-logs@workspace:packages/plugins/audit-logs"
+  dependencies:
+    "@strapi/design-system": "npm:2.0.0-rc.30"
+    "@strapi/icons": "npm:2.0.0-rc.30"
+    "@strapi/strapi": "npm:5.29.0"
+    "@types/lodash": "npm:4.14.202"
+    lodash: "npm:4.17.21"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.1"
+    react-router-dom: "npm:6.22.3"
+    styled-components: "npm:6.1.8"
+  peerDependencies:
+    "@strapi/strapi": ^5.0.0
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^6.0.0
+    styled-components: ^6.0.0
+  languageName: unknown
+  linkType: soft
+
 "@strapi/plugin-cloud@workspace:packages/plugins/cloud":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
@@ -11263,6 +11285,13 @@ __metadata:
   version: 3.0.5
   resolution: "@types/linkify-it@npm:3.0.5"
   checksum: 10c0/696e09975991c649ba37c5585714929fdebf5c64a8bfb99910613ef838337dbbba6c608fccdfa03d6347432586ef12e139bc0e947ae6fec569096fef5cc1c550
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:4.14.202":
+  version: 4.14.202
+  resolution: "@types/lodash@npm:4.14.202"
+  checksum: 10c0/6064d43c8f454170841bd67c8266cc9069d9e570a72ca63f06bceb484cb4a3ee60c9c1f305c1b9e3a87826049fd41124b8ef265c4dd08b00f6766609c7fe9973
   languageName: node
   linkType: hard
 
@@ -16622,6 +16651,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "empty@workspace:examples/empty"
   dependencies:
+    "@strapi/plugin-audit-logs": "workspace:*"
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
     "@types/node": "npm:^20"

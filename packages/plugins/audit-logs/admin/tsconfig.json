@@ -1,10 +1,9 @@
 {
-  "extends": "@strapi/typescript-utils/tsconfigs/admin",
+  "extends": "tsconfig/client.json",
+  "include": ["src"],
   "compilerOptions": {
-    "outDir": "../dist",
-    "rootDir": "."
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules/", "dist/"]
+    "rootDir": "../",
+    "baseUrl": "."
+  }
 }
 

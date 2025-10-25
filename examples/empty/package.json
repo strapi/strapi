@@ -15,6 +15,7 @@
     "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
+    "@strapi/plugin-audit-logs": "workspace:*",
     "@strapi/plugin-users-permissions": "workspace:*",
     "@strapi/strapi": "workspace:*",
     "better-sqlite3": "11.3.0",
