@@ -1,0 +1,21 @@
+{
+  "name": "@strapi/plugin-audit-log",
+  "version": "0.0.1",
+  "description": "This is the audit-log plugin for Strapi",
+  "strapi": {
+    "name": "audit-log",
+    "description": "",
+    "kind": "plugin"
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "@strapi/strapi": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=20.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}
