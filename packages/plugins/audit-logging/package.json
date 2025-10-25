@@ -1,0 +1,69 @@
+{
+  "name": "@strapi/audit-logging",
+  "version": "5.29.0",
+  "description": "Automated audit logging for all content changes performed through Strapi's Content API",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/plugins/audit-logging"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/",
+    "strapi-server.js"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "@strapi/utils": "5.29.0",
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "@strapi/database": "5.29.0",
+    "@strapi/types": "5.29.0",
+    "koa": "2.16.1"
+  },
+  "peerDependencies": {},
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "displayName": "Audit Logging",
+    "name": "audit-logging",
+    "description": "Automated audit logging for all content changes performed through Strapi's Content API with comprehensive metadata capture and secure REST API access.",
+    "required": false,
+    "kind": "plugin"
+  }
+}
