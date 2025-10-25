@@ -19,7 +19,7 @@ The audit logging system integrates with Strapi's core in the following manner:
     *   **Lifecycle Hooks (`register.ts`):** The plugin subscribes to `afterCreate`, `afterUpdate`, and `afterDelete` lifecycle events for all content types. These hooks are responsible for:
         *   Detecting content modifications.
         *   Constructing the audit log entry based on the action type (full payload for create/delete, before/after state for update).
-        *   Sending the audit log entry as a message to a Kafka topic via the `kafka.ts` service.
+        *   **Sending the audit log entry as a message to a Kafka topic via the `kafka.ts` service.**
     *   **Kafka Integration:**
         *   **Kafka Producer (`kafka.ts` service):** Handles connecting to Kafka brokers and sending audit log messages to a configured topic.
         *   **Kafka Consumer (`kafka-consumer.ts` service):** Runs as a background process, consumes messages from the Kafka topic, and then persists these audit log entries to the `audit_logs` collection via `strapi.entityService.create()`. This decouples the logging process from the main request flow, preventing backpressure and ensuring event durability.
