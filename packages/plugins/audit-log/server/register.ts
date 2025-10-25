@@ -48,14 +48,13 @@ export default ({ strapi }: { strapi: Strapi }) => {
         userId = ctx.state.user.id;
       }
 
-      await strapi.entityService.create('plugin::audit-log.audit-log', {
-        data: {
-          action: action.replace('after', '').toLowerCase(),
-          contentType: singularName,
-          recordId,
-          userId, // Added userId
-          payload,
-        },
+      // Instead of directly persisting, send the audit log to Kafka
+      await strapi.plugin('audit-log').service('kafka').sendMessage({
+        action: action.replace('after', '').toLowerCase(),
+        contentType: singularName,
+        recordId,
+        userId,
+        payload,
       });
     });
   }
