@@ -8,130 +8,100 @@ describe('NumberField', () => {
   });
 
   describe('toDB', () => {
+    // Test data to reduce duplication
+    const validInputs = [
+      { input: 123, expected: 123, description: 'integer number' },
+      { input: 123.45, expected: 123.45, description: 'float number' },
+      { input: -123, expected: -123, description: 'negative number' },
+      { input: 0, expected: 0, description: 'zero' },
+      { input: '123', expected: 123, description: 'numeric string' },
+      { input: '123.45', expected: 123.45, description: 'decimal string' },
+      { input: '-123', expected: -123, description: 'negative string' },
+      { input: '  123  ', expected: 123, description: 'string with whitespace' },
+      { input: '0', expected: 0, description: 'zero string' },
+      { input: '1e3', expected: 1000, description: 'scientific notation' },
+      { input: Infinity, expected: Infinity, description: 'Infinity' },
+      { input: -Infinity, expected: -Infinity, description: '-Infinity' },
+      { input: 'Infinity', expected: Infinity, description: 'Infinity string' },
+      { input: true, expected: 1, description: 'boolean true' },
+      { input: false, expected: 0, description: 'boolean false' },
+    ];
+
+    const invalidInputs = [
+      { input: '900260056-1', description: 'bug #24678 - string with trailing dash' },
+      { input: '123abc', description: 'alphanumeric with trailing letters' },
+      { input: '123-456', description: 'string with dash in middle' },
+      { input: 'abc123', description: 'string with leading letters' },
+      { input: '$123', description: 'currency format' },
+      { input: '12a34', description: 'letters in middle' },
+      { input: 'abc', description: 'pure alphabetic string' },
+      { input: 'hello', description: 'text string' },
+      { input: '', description: 'empty string' },
+      { input: '   ', description: 'whitespace-only string' },
+      { input: '#', description: 'special character #' },
+      { input: '@', description: 'special character @' },
+      { input: {}, description: 'empty object' },
+      { input: { value: 123 }, description: 'object with properties' },
+      { input: [], description: 'empty array' },
+      { input: [123], description: 'array with value' },
+    ];
+
+    const nullishValues = [
+      { input: null, expected: null, description: 'null' },
+      { input: undefined, expected: undefined, description: 'undefined' },
+    ];
+
     describe('valid inputs', () => {
-      it('should convert valid numeric string to number', () => {
-        expect(field.toDB('123')).toBe(123);
-        expect(field.toDB('123.45')).toBe(123.45);
-        expect(field.toDB('-123')).toBe(-123);
-        expect(field.toDB('-123.45')).toBe(-123.45);
+      validInputs.forEach(({ input, expected, description }) => {
+        it(`should handle ${description}`, () => {
+          expect(field.toDB(input)).toBe(expected);
+        });
       });
 
-      it('should handle numeric strings with whitespace', () => {
-        expect(field.toDB('  123  ')).toBe(123);
-        expect(field.toDB('  123.45  ')).toBe(123.45);
-      });
-
-      it('should convert scientific notation strings', () => {
-        expect(field.toDB('1e3')).toBe(1000);
-        expect(field.toDB('1.23e2')).toBe(123);
-      });
-
-      it('should handle number values', () => {
-        expect(field.toDB(123)).toBe(123);
-        expect(field.toDB(123.45)).toBe(123.45);
-        expect(field.toDB(-123)).toBe(-123);
-        expect(field.toDB(0)).toBe(0);
-      });
-
-      it('should handle zero string values', () => {
-        expect(field.toDB('0')).toBe(0);
-        expect(field.toDB('0.0')).toBe(0);
-      });
-
-      it('should return null for null input', () => {
-        expect(field.toDB(null)).toBeNull();
-      });
-
-      it('should return undefined for undefined input', () => {
-        expect(field.toDB(undefined)).toBeUndefined();
-      });
-
-      it('should handle Infinity', () => {
-        expect(field.toDB(Infinity)).toBe(Infinity);
-        expect(field.toDB(-Infinity)).toBe(-Infinity);
-        expect(field.toDB('Infinity')).toBe(Infinity);
-        expect(field.toDB('-Infinity')).toBe(-Infinity);
+      nullishValues.forEach(({ input, expected, description }) => {
+        it(`should return ${description} as-is`, () => {
+          expect(field.toDB(input)).toBe(expected);
+        });
       });
     });
 
     describe('invalid inputs - should throw errors', () => {
-      it('should reject string with trailing non-numeric characters', () => {
-        expect(() => field.toDB('900260056-1')).toThrow('Expected a valid Number, got 900260056-1');
-        expect(() => field.toDB('123abc')).toThrow('Expected a valid Number, got 123abc');
-        expect(() => field.toDB('123-456')).toThrow('Expected a valid Number, got 123-456');
-      });
-
-      it('should reject string with leading non-numeric characters', () => {
-        expect(() => field.toDB('abc123')).toThrow('Expected a valid Number, got abc123');
-        expect(() => field.toDB('$123')).toThrow('Expected a valid Number, got $123');
-      });
-
-      it('should reject string with non-numeric characters in the middle', () => {
-        expect(() => field.toDB('12a34')).toThrow('Expected a valid Number, got 12a34');
-      });
-
-      it('should reject purely alphabetic strings', () => {
-        expect(() => field.toDB('abc')).toThrow('Expected a valid Number, got abc');
-        expect(() => field.toDB('hello')).toThrow('Expected a valid Number, got hello');
-      });
-
-      it('should reject empty string', () => {
-        expect(() => field.toDB('')).toThrow('Expected a valid Number, got ');
-      });
-
-      it('should reject whitespace-only string', () => {
-        expect(() => field.toDB('   ')).toThrow('Expected a valid Number, got    ');
-      });
-
-      it('should reject special characters', () => {
-        expect(() => field.toDB('#')).toThrow('Expected a valid Number, got #');
-        expect(() => field.toDB('@')).toThrow('Expected a valid Number, got @');
-      });
-
-      it('should reject objects', () => {
-        expect(() => field.toDB({})).toThrow('Expected a valid Number');
-        expect(() => field.toDB({ value: 123 })).toThrow('Expected a valid Number');
-      });
-
-      it('should reject arrays', () => {
-        expect(() => field.toDB([])).toThrow('Expected a valid Number');
-        expect(() => field.toDB([123])).toThrow('Expected a valid Number');
-      });
-
-      it('should reject boolean values that result in NaN', () => {
-        // Note: booleans actually convert to 0 and 1, so they might be valid
-        // This depends on the expected behavior
-        expect(field.toDB(true)).toBe(1);
-        expect(field.toDB(false)).toBe(0);
+      invalidInputs.forEach(({ input, description }) => {
+        it(`should reject ${description}`, () => {
+          expect(() => field.toDB(input)).toThrow(/Expected a valid Number/);
+        });
       });
     });
 
     describe('edge cases', () => {
-      it('should handle very large numbers', () => {
-        expect(field.toDB('999999999999999')).toBe(999999999999999);
-        expect(field.toDB(999999999999999)).toBe(999999999999999);
-      });
+      const edgeCases = [
+        { input: '999999999999999', expected: 999999999999999, description: 'very large string' },
+        { input: 999999999999999, expected: 999999999999999, description: 'very large number' },
+        { input: '0.00000001', expected: 0.00000001, description: 'very small string' },
+        { input: 0.00000001, expected: 0.00000001, description: 'very small number' },
+        { input: '-0', expected: 0, description: 'negative zero string' },
+      ];
 
-      it('should handle very small numbers', () => {
-        expect(field.toDB('0.00000001')).toBe(0.00000001);
-        expect(field.toDB(0.00000001)).toBe(0.00000001);
-      });
-
-      it('should handle negative zero', () => {
-        expect(field.toDB('-0')).toBe(0);
+      edgeCases.forEach(({ input, expected, description }) => {
+        it(`should handle ${description}`, () => {
+          expect(field.toDB(input)).toBe(expected);
+        });
       });
     });
   });
 
   describe('fromDB', () => {
-    it('should convert values from database', () => {
-      expect(field.fromDB(123)).toBe(123);
-      expect(field.fromDB('123')).toBe(123);
-      expect(field.fromDB(123.45)).toBe(123.45);
-    });
+    const fromDBCases = [
+      { input: 123, expected: 123 },
+      { input: '123', expected: 123 },
+      { input: 123.45, expected: 123.45 },
+      { input: null, expected: 0 }, // toNumber converts null to 0
+    ];
 
-    it('should handle null', () => {
-      expect(field.fromDB(null)).toBe(0); // toNumber converts null to 0
+    fromDBCases.forEach(({ input, expected }) => {
+      it(`should convert ${JSON.stringify(input)} from database`, () => {
+        expect(field.fromDB(input)).toBe(expected);
+      });
     });
   });
 });
