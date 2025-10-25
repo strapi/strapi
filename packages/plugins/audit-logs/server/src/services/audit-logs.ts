@@ -94,14 +94,14 @@ const auditLogsService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     try {
       const results = await strapi.documents('plugin::audit-logs.audit-log').findMany({
-        filters: where,
-        sort: { [field]: order },
+        filters: where as any,
+        sort: { [field]: order } as any,
         start: (page - 1) * pageSize,
         limit: pageSize,
       });
 
       const total = await strapi.db.query('plugin::audit-logs.audit-log').count({
-        where,
+        where: where as any,
       });
 
       return {

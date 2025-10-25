@@ -19,16 +19,21 @@ const controller: Core.Controller = {
         sort,
       } = ctx.query;
 
+      // Ensure query params are strings
+      const getString = (val: any): string | undefined => {
+        return Array.isArray(val) ? val[0] : val;
+      };
+
       const auditLogsService = getService('audit-logs');
       const result = await auditLogsService.find({
-        contentType,
-        userId: userId ? parseInt(userId, 10) : undefined,
-        action,
-        startDate,
-        endDate,
-        page: page ? parseInt(page, 10) : undefined,
-        pageSize: pageSize ? parseInt(pageSize, 10) : undefined,
-        sort,
+        contentType: getString(contentType),
+        userId: userId ? parseInt(getString(userId) || '0', 10) : undefined,
+        action: getString(action),
+        startDate: getString(startDate),
+        endDate: getString(endDate),
+        page: page ? parseInt(getString(page) || '1', 10) : undefined,
+        pageSize: pageSize ? parseInt(getString(pageSize) || '25', 10) : undefined,
+        sort: getString(sort),
       });
 
       ctx.body = {
@@ -38,7 +43,8 @@ const controller: Core.Controller = {
         },
       };
     } catch (error) {
-      ctx.throw(500, `Failed to fetch audit logs: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      ctx.throw(500, `Failed to fetch audit logs: ${message}`);
     }
   },
 
@@ -60,7 +66,8 @@ const controller: Core.Controller = {
         data: auditLog,
       };
     } catch (error) {
-      ctx.throw(500, `Failed to fetch audit log: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      ctx.throw(500, `Failed to fetch audit log: ${message}`);
     }
   },
 
@@ -72,14 +79,22 @@ const controller: Core.Controller = {
     try {
       const { startDate, endDate } = ctx.query;
 
+      // Ensure query params are strings
+      const getString = (val: any): string | undefined => {
+        return Array.isArray(val) ? val[0] : val;
+      };
+
+      const startDateStr = getString(startDate);
+      const endDateStr = getString(endDate);
+
       const where: any = {};
-      if (startDate || endDate) {
+      if (startDateStr || endDateStr) {
         where.timestamp = {};
-        if (startDate) {
-          where.timestamp.$gte = new Date(startDate);
+        if (startDateStr) {
+          where.timestamp.$gte = new Date(startDateStr);
         }
-        if (endDate) {
-          where.timestamp.$lte = new Date(endDate);
+        if (endDateStr) {
+          where.timestamp.$lte = new Date(endDateStr);
         }
       }
 
@@ -136,7 +151,8 @@ const controller: Core.Controller = {
         },
       };
     } catch (error) {
-      ctx.throw(500, `Failed to fetch audit log statistics: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      ctx.throw(500, `Failed to fetch audit log statistics: ${message}`);
     }
   },
 };

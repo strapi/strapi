@@ -1,6 +1,6 @@
 {
-  "extends": "tsconfig/server.json",
-  "include": ["src"],
+  "extends": "tsconfig/base.json",
+  "include": ["./src"],
   "compilerOptions": {
     "rootDir": "../",
     "baseUrl": "."

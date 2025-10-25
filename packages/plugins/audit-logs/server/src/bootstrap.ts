@@ -133,10 +133,10 @@ const registerDocumentServiceMiddleware = () => {
 
     // Store previous data for updates
     let previousData = null;
-    if (action === 'update' && context.documentId) {
+    if (action === 'update' && (context as any).documentId) {
       try {
         previousData = await strapi.documents(contentType).findOne({
-          documentId: context.documentId,
+          documentId: (context as any).documentId,
         });
       } catch (e) {
         // Could not fetch previous data
@@ -148,12 +148,23 @@ const registerDocumentServiceMiddleware = () => {
 
     // Log the action
     try {
+      // Extract ID from result safely
+      const getRecordId = (data: any): string | null => {
+        if (!data) return null;
+        if (typeof data === 'object') {
+          return data.documentId || data.id || null;
+        }
+        return null;
+      };
+
+      const recordId = getRecordId(result);
+
       switch (action) {
         case 'create':
-          if (result) {
+          if (result && recordId) {
             await auditLogsService.logCreate(
               contentType,
-              result.documentId || result.id,
+              recordId,
               result,
               userInfo
             );
@@ -161,10 +172,10 @@ const registerDocumentServiceMiddleware = () => {
           break;
 
         case 'update':
-          if (result && previousData) {
+          if (result && previousData && recordId) {
             await auditLogsService.logUpdate(
               contentType,
-              result.documentId || result.id,
+              recordId,
               previousData,
               result,
               userInfo
@@ -173,10 +184,11 @@ const registerDocumentServiceMiddleware = () => {
           break;
 
         case 'delete':
-          if (context.documentId) {
+          const deleteId = (context as any).documentId || recordId;
+          if (deleteId) {
             await auditLogsService.logDelete(
               contentType,
-              context.documentId,
+              deleteId,
               previousData || {},
               userInfo
             );
@@ -184,10 +196,10 @@ const registerDocumentServiceMiddleware = () => {
           break;
 
         case 'publish':
-          if (result) {
+          if (result && recordId) {
             await auditLogsService.logPublish(
               contentType,
-              result.documentId || result.id,
+              recordId,
               result,
               userInfo
             );
@@ -195,10 +207,10 @@ const registerDocumentServiceMiddleware = () => {
           break;
 
         case 'unpublish':
-          if (result) {
+          if (result && recordId) {
             await auditLogsService.logUnpublish(
               contentType,
-              result.documentId || result.id,
+              recordId,
               result,
               userInfo
             );

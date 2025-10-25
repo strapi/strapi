@@ -4,8 +4,15 @@ export const getService = (name: string) => {
   return strapi.plugin(pluginId).service(name);
 };
 
-export const getConfig = () => {
-  return strapi.config.get(`plugin::${pluginId}`) || {};
+interface AuditLogsConfig {
+  enabled?: boolean;
+  excludeContentTypes?: string[];
+  capturePayload?: boolean;
+  retentionDays?: number | null;
+}
+
+export const getConfig = (): AuditLogsConfig => {
+  return (strapi.config.get(`plugin::${pluginId}`) as AuditLogsConfig) || {};
 };
 
 export const isAuditingEnabled = (): boolean => {
