@@ -1,0 +1,58 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "comment": ""
+  },
+  "attributes": {
+    "action": {
+      "type": "enumeration",
+      "enum": ["create", "update", "delete"],
+      "required": true
+    },
+    "contentType": {
+      "type": "string",
+      "required": true
+    },
+    "recordId": {
+      "type": "string",
+      "required": true
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user",
+      "private": true
+    },
+    "userId": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "json"
+    }
+  },
+  "indexes": [
+    {
+      "name": "audit_logs_action_index",
+      "columns": ["action"]
+    },
+    {
+      "name": "audit_logs_content_type_index",
+      "columns": ["contentType"]
+    },
+    {
+      "name": "audit_logs_record_id_index",
+      "columns": ["recordId"]
+    },
+    {
+      "name": "audit_logs_user_id_index",
+      "columns": ["userId"]
+    }
+  ]
+}
