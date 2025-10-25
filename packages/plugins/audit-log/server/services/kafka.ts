@@ -1,12 +1,14 @@
 import { Strapi } from '@strapi/strapi';
 import { Kafka, Producer } from 'kafkajs';
+import { AuditLogPluginConfig } from '@strapi/plugin-audit-log/types'; // Use new alias
 
 let producer: Producer | null = null;
 let kafka: Kafka | null = null;
 
 export default ({ strapi }: { strapi: Strapi }) => ({
   async connect() {
-    const { brokers, topic } = strapi.config.get('plugin.audit-log.kafka');
+    const config = strapi.config.get('plugin.audit-log') as AuditLogPluginConfig; // Cast config
+    const { brokers, topic } = config.kafka; // Access kafka property
 
     if (!brokers || brokers.length === 0) {
       strapi.log.error('Kafka brokers not configured for audit-log plugin.');
@@ -44,7 +46,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return;
     }
 
-    const { topic } = strapi.config.get('plugin.audit-log.kafka');
+    const config = strapi.config.get('plugin.audit-log') as AuditLogPluginConfig; // Cast config
+    const { topic } = config.kafka; // Access kafka property
 
     try {
       await producer.send({

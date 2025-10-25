@@ -1,0 +1,43 @@
+{
+  "name": "plugin-audit-log",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/plugins/audit-log/server",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/plugins/audit-log",
+        "main": "packages/plugins/audit-log/server/index.ts",
+        "tsConfig": "packages/plugins/audit-log/tsconfig.build.json",
+        "assets": [
+          "packages/plugins/audit-log/*.md",
+          {
+            "input": "packages/plugins/audit-log/server",
+            "glob": "**/*.js",
+            "output": "./server"
+          },
+          {
+            "input": "packages/plugins/audit-log/server",
+            "glob": "**/*.json",
+            "output": "./server"
+          },
+          {
+            "input": "packages/plugins/audit-log/server",
+            "glob": "**/*.d.ts",
+            "output": "./server"
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/plugins/audit-log/**/*.ts"]
+      }
+    }
+  },
+  "tags": []
+}

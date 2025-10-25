@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node"],
+    "target": "es2021",
+    "module": "commonjs",
+    "lib": ["es2021"],
+    "baseUrl": ".",
+    "paths": {
+      "@strapi/strapi": ["../../../packages/core/strapi/dist"],
+      "@strapi/plugin-audit-log/types": ["./server/types"]
+    },
+    "esModuleInterop": true, // Explicitly set this to true
+    "skipLibCheck": true, // Add this line
+    "rootDir": "./server"
+  },
+  "include": ["server/**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}
