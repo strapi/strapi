@@ -36,6 +36,7 @@ const controller: Core.Controller = {
         sort: getString(sort),
       });
 
+      ctx.type = 'application/json';
       ctx.body = {
         data: result.results,
         meta: {
@@ -44,6 +45,7 @@ const controller: Core.Controller = {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
+      ctx.type = 'application/json';
       ctx.throw(500, `Failed to fetch audit logs: ${message}`);
     }
   },
@@ -59,14 +61,17 @@ const controller: Core.Controller = {
       const auditLog = await auditLogsService.findOne(id);
 
       if (!auditLog) {
+        ctx.type = 'application/json';
         return ctx.notFound('Audit log not found');
       }
 
+      ctx.type = 'application/json';
       ctx.body = {
         data: auditLog,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
+      ctx.type = 'application/json';
       ctx.throw(500, `Failed to fetch audit log: ${message}`);
     }
   },
@@ -137,6 +142,7 @@ const controller: Core.Controller = {
         .orderBy('count', 'desc')
         .limit(10);
 
+      ctx.type = 'application/json';
       ctx.body = {
         data: {
           total: totalCount,
@@ -152,6 +158,7 @@ const controller: Core.Controller = {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
+      ctx.type = 'application/json';
       ctx.throw(500, `Failed to fetch audit log statistics: ${message}`);
     }
   },
