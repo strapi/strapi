@@ -1,0 +1,56 @@
+{
+  "name": "@strapi/audit-log",
+  "version": "4.0.0",
+  "description": "Audit log core package for Strapi Content API operations",
+  "main": "./lib/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "lib",
+    "dist",
+    "admin",
+    "server"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf lib dist",
+    "prebuild": "npm run clean"
+  },
+  "dependencies": {
+    "@strapi/utils": "4.0.0"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "4.0.0"
+  },
+  "strapi": {
+    "displayName": "Audit Log",
+    "name": "audit-log",
+    "description": "Track Content API operations with comprehensive audit logging",
+    "kind": "core"
+  },
+  "author": {
+    "name": "Strapi team",
+    "email": "hello@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hello@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "homepage": "https://github.com/strapi/strapi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/core/audit-log"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=20.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}
