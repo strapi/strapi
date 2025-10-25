@@ -1,0 +1,58 @@
+{
+  "name": "@strapi/audit-log",
+  "version": "1.0.0",
+  "description": "Strapi plugin for audit logging create/update/delete operations",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ashish1341/strapi.git",
+    "directory": "packages/plugins/audit-log"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Ashish Pandey",
+    "email": "ashish.1341@gmail.com"
+  },
+  "exports": {
+    "./strapi-server": {
+      "source": "./server/index.js",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean build:code",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "axios": "^1.12.2",
+    "dayjs": "^1.11.7"
+  },
+  "devDependencies": {
+    "@strapi/types": "5.29.0",
+    "typescript": "^5"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "audit-log",
+    "displayName": "Audit Log",
+    "description": "Records create/update/delete operations automatically",
+    "required": false,
+    "kind": "plugin"
+  }
+}

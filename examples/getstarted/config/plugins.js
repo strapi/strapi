@@ -35,4 +35,11 @@ module.exports = () => ({
     enabled: false,
     resolve: `../plugins/todo-example`, // From the /examples/plugins folder
   },
+  'audit-log': {
+    enabled: true,
+    config: {
+      enabled: true,
+      excludeContentTypes: ['api::token.token'],
+    },
+  },
 });

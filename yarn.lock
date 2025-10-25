@@ -8796,6 +8796,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/audit-log@workspace:packages/plugins/audit-log":
+  version: 0.0.0-use.local
+  resolution: "@strapi/audit-log@workspace:packages/plugins/audit-log"
+  dependencies:
+    "@strapi/types": "npm:5.29.0"
+    axios: "npm:^1.12.2"
+    dayjs: "npm:^1.11.7"
+    typescript: "npm:^5"
+  peerDependencies:
+    "@strapi/strapi": ^5.0.0
+  languageName: unknown
+  linkType: soft
+
 "@strapi/blocks-react-renderer@npm:1.0.2":
   version: 1.0.2
   resolution: "@strapi/blocks-react-renderer@npm:1.0.2"
@@ -13446,7 +13459,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.12.2, axios@npm:^1.6.0, axios@npm:^1.6.8, axios@npm:^1.7.4":
+"axios@npm:1.12.2, axios@npm:^1.12.2, axios@npm:^1.6.0, axios@npm:^1.6.8, axios@npm:^1.7.4":
   version: 1.12.2
   resolution: "axios@npm:1.12.2"
   dependencies:
@@ -15834,6 +15847,13 @@ __metadata:
   version: 3.0.3
   resolution: "dateformat@npm:3.0.3"
   checksum: 10c0/2effb8bef52ff912f87a05e4adbeacff46353e91313ad1ea9ed31412db26849f5a0fcc7e3ce36dbfb84fc6c881a986d5694f84838ad0da7000d5150693e78678
+  languageName: node
+  linkType: hard
+
+"dayjs@npm:^1.11.7":
+  version: 1.11.18
+  resolution: "dayjs@npm:1.11.18"
+  checksum: 10c0/83b67f5d977e2634edf4f5abdd91d9041a696943143638063016915d2cd8c7e57e0751e40379a07ebca8be7a48dd380bef8752d22a63670f2d15970e34f96d7a
   languageName: node
   linkType: hard
 
