@@ -76,23 +76,23 @@ Copy the `token` from the response.
 export TOKEN="YOUR_TOKEN_HERE"
 
 # Get all audit logs
-curl http://localhost:1337/api/audit-logs/audit-logs \
+curl http://localhost:1337/admin/audit-logs/audit-logs \
   -H "Authorization: Bearer $TOKEN"
 
 # Get audit logs for articles
-curl "http://localhost:1337/api/audit-logs/audit-logs?contentType=api::article.article" \
+curl "http://localhost:1337/admin/audit-logs/audit-logs?contentType=api::article.article" \
   -H "Authorization: Bearer $TOKEN"
 
 # Get only create actions
-curl "http://localhost:1337/api/audit-logs/audit-logs?action=create" \
+curl "http://localhost:1337/admin/audit-logs/audit-logs?action=create" \
   -H "Authorization: Bearer $TOKEN"
 
 # Get statistics
-curl http://localhost:1337/api/audit-logs/audit-logs/stats \
+curl http://localhost:1337/admin/audit-logs/audit-logs/stats \
   -H "Authorization: Bearer $TOKEN"
 
 # Get with pagination
-curl "http://localhost:1337/api/audit-logs/audit-logs?page=1&pageSize=10" \
+curl "http://localhost:1337/admin/audit-logs/audit-logs?page=1&pageSize=10" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -167,7 +167,7 @@ curl -X POST http://localhost:1337/api/articles \
   }'
 
 # Check audit log - should show "create" action
-curl "http://localhost:1337/api/audit-logs/audit-logs?action=create" \
+curl "http://localhost:1337/admin/audit-logs/audit-logs?action=create" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -184,7 +184,7 @@ curl -X PUT http://localhost:1337/api/articles/1 \
   }'
 
 # Check audit log - should show "update" action with changedFields: ["title"]
-curl "http://localhost:1337/api/audit-logs/audit-logs?action=update" \
+curl "http://localhost:1337/admin/audit-logs/audit-logs?action=update" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -195,20 +195,20 @@ curl -X DELETE http://localhost:1337/api/articles/1 \
   -H "Authorization: Bearer $TOKEN"
 
 # Check audit log - should show "delete" action
-curl "http://localhost:1337/api/audit-logs/audit-logs?action=delete" \
+curl "http://localhost:1337/admin/audit-logs/audit-logs?action=delete" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Test 4: Filter by Date Range
 ```bash
 # Get logs from today
-curl "http://localhost:1337/api/audit-logs/audit-logs?startDate=2024-10-25T00:00:00.000Z" \
+curl "http://localhost:1337/admin/audit-logs/audit-logs?startDate=2024-10-25T00:00:00.000Z" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Test 5: Get Statistics
 ```bash
-curl http://localhost:1337/api/audit-logs/audit-logs/stats \
+curl http://localhost:1337/admin/audit-logs/audit-logs/stats \
   -H "Authorization: Bearer $TOKEN"
 ```
 

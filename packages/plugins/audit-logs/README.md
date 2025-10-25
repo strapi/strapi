@@ -95,7 +95,7 @@ GET /api/audit-logs/audit-logs
 
 ```bash
 curl -X GET \
-  'http://localhost:1337/api/audit-logs/audit-logs?contentType=api::article.article&action=update&page=1&pageSize=10' \
+  'http://localhost:1337/admin/audit-logs/audit-logs?contentType=api::article.article&action=update&page=1&pageSize=10' \
   -H 'Authorization: Bearer YOUR_TOKEN'
 ```
 
@@ -148,7 +148,7 @@ GET /api/audit-logs/audit-logs/:id
 
 ```bash
 curl -X GET \
-  'http://localhost:1337/api/audit-logs/audit-logs/abc123' \
+  'http://localhost:1337/admin/audit-logs/audit-logs/abc123' \
   -H 'Authorization: Bearer YOUR_TOKEN'
 ```
 
@@ -169,7 +169,7 @@ GET /api/audit-logs/audit-logs/stats
 
 ```bash
 curl -X GET \
-  'http://localhost:1337/api/audit-logs/audit-logs/stats?startDate=2024-10-01T00:00:00.000Z' \
+  'http://localhost:1337/admin/audit-logs/audit-logs/stats?startDate=2024-10-01T00:00:00.000Z' \
   -H 'Authorization: Bearer YOUR_TOKEN'
 ```
 

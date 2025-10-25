@@ -62,15 +62,15 @@ Copy the `token` from response, then:
 export TOKEN="paste_your_token_here"
 
 # Get all audit logs
-curl http://localhost:1337/api/audit-logs/audit-logs \
+curl http://localhost:1337/admin/audit-logs/audit-logs \
   -H "Authorization: Bearer $TOKEN" | jq
 
 # Filter by action
-curl "http://localhost:1337/api/audit-logs/audit-logs?action=create" \
+curl "http://localhost:1337/admin/audit-logs/audit-logs?action=create" \
   -H "Authorization: Bearer $TOKEN" | jq
 
 # Get statistics
-curl http://localhost:1337/api/audit-logs/audit-logs/stats \
+curl http://localhost:1337/admin/audit-logs/audit-logs/stats \
   -H "Authorization: Bearer $TOKEN" | jq
 ```
 

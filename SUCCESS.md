@@ -98,11 +98,11 @@ curl -X POST http://localhost:1337/admin/login \
 # Copy the JWT token from response
 
 # Get all audit logs
-curl http://localhost:1337/api/audit-logs/audit-logs \
+curl http://localhost:1337/admin/audit-logs/audit-logs \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" | jq
 
 # Get statistics
-curl http://localhost:1337/api/audit-logs/audit-logs/stats \
+curl http://localhost:1337/admin/audit-logs/audit-logs/stats \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" | jq
 ```
 
