@@ -1,0 +1,66 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log",
+    "description": "System audit log for tracking content changes via Content API"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "comment": "Audit logs for tracking Content API operations"
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "contentType": {
+      "type": "string",
+      "required": true,
+      "index": true
+    },
+    "recordId": {
+      "type": "string",
+      "required": true,
+      "index": true
+    },
+    "action": {
+      "type": "enumeration",
+      "enum": ["create", "update", "delete"],
+      "required": true,
+      "index": true
+    },
+    "timestamp": {
+      "type": "datetime",
+      "required": true,
+      "index": true
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "index": true
+    },
+    "changedFields": {
+      "type": "json"
+    },
+    "fullPayload": {
+      "type": "json"
+    },
+    "previousData": {
+      "type": "json"
+    },
+    "ipAddress": {
+      "type": "string"
+    },
+    "userAgent": {
+      "type": "string"
+    },
+    "requestId": {
+      "type": "string",
+      "index": true
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+}
