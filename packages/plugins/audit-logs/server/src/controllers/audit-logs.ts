@@ -7,6 +7,10 @@ const controller: Core.Controller = {
    * GET /audit-logs/audit-logs
    */
   async find(ctx) {
+    console.log('🔍 [Audit Logs] find() controller called');
+    console.log('🔍 [Audit Logs] ctx.query:', ctx.query);
+    console.log('🔍 [Audit Logs] ctx.state.user:', ctx.state.user);
+    
     try {
       const {
         contentType,
