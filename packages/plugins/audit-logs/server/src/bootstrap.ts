@@ -255,44 +255,6 @@ export default async () => {
 
   // Setup cleanup cron job
   setupCleanupCron();
-  
-  // CRITICAL FIX: Add middleware to intercept audit-logs requests BEFORE admin catch-all
-  strapi.server.use(async (ctx, next) => {
-    const path = ctx.path;
-    
-    // Check if this is an audit-logs request
-    if (path.startsWith('/admin/audit-logs')) {
-      console.log('🔍 [INTERCEPTOR] Caught request:', path, ctx.method);
-      
-      // Extract the route part after /admin/audit-logs
-      const subPath = path.replace('/admin/audit-logs', '') || '/';
-      
-      // Get the controller
-      const controller = strapi.plugin('audit-logs').controller('audit-logs');
-      
-      try {
-        // Route to the appropriate handler
-        if (subPath === '/' && ctx.method === 'GET') {
-          console.log('🔍 [INTERCEPTOR] Routing to find()');
-          return await controller.find(ctx, () => Promise.resolve());
-        } else if (subPath === '/stats' && ctx.method === 'GET') {
-          console.log('🔍 [INTERCEPTOR] Routing to stats()');
-          return await controller.stats(ctx, () => Promise.resolve());
-        } else if (subPath.match(/^\/[^\/]+$/) && ctx.method === 'GET') {
-          console.log('🔍 [INTERCEPTOR] Routing to findOne()');
-          return await controller.findOne(ctx, () => Promise.resolve());
-        }
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        console.error('🔍 [INTERCEPTOR] Error:', message);
-        ctx.status = 500;
-        ctx.body = { error: message };
-        return;
-      }
-    }
-    
-    await next();
-  });
 
   strapi.log.info('Audit Logs plugin initialized');
 };
