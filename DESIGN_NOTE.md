@@ -8,6 +8,12 @@ The automated audit logging feature is implemented as a custom Strapi plugin nam
 
 The audit logging system integrates with Strapi's core in the following manner:
 
+### Read Path Flow
+![Read Path Flow](./readpath.png)
+
+### Write Path Flow
+![Write Path Flow](./writepath.png)
+
 *   **`audit-log` Plugin:**
     *   **Content Type (`audit_log`):** A new collection type `audit_log` is defined within the plugin. This content type stores all audit log entries, including `action` (create, update, delete), `contentType`, `recordId`, `userId`, and a `payload` containing the change details.
     *   **Lifecycle Hooks (`register.ts`):** The plugin subscribes to `afterCreate`, `afterUpdate`, and `afterDelete` lifecycle events for all content types. These hooks are responsible for:
