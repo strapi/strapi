@@ -3,15 +3,31 @@ export default {
   routes: [
     {
       method: 'GET',
-      path: '/logs',
+      path: '/test',
       handler: 'audit-logs.find',
       config: {
-        policies: ['admin::isAuthenticatedAdmin'],
+        policies: [],
       },
     },
     {
       method: 'GET',
-      path: '/logs/stats',
+      path: '/',
+      handler: 'audit-logs.find',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::audit-logs.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
+      method: 'GET',
+      path: '/stats',
       handler: 'audit-logs.stats',
       config: {
         policies: [
@@ -27,7 +43,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/logs/:id',
+      path: '/:id',
       handler: 'audit-logs.findOne',
       config: {
         policies: [
