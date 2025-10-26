@@ -1,0 +1,18 @@
+{
+  "name": "audit-logs-tests",
+  "version": "1.0.0",
+  "description": "Test suite for audit logs functionality",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest --testPathPattern=controller|middleware",
+    "test:integration": "jest --testPathPattern=integration"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.0.0",
+    "jest": "^29.0.0",
+    "supertest": "^6.0.0",
+    "@strapi/strapi": "^5.0.0"
+  }
+}

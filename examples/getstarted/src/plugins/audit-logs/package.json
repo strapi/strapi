@@ -1,0 +1,31 @@
+{
+  "name": "@strapi/plugin-audit-logs",
+  "version": "5.29.0",
+  "description": "Automated audit logging for Strapi Content API operations",
+  "main": "./server/index.js",
+  "keywords": [
+    "strapi",
+    "plugin",
+    "audit",
+    "logging",
+    "content-api"
+  ],
+  "strapi": {
+    "displayName": "Audit Logs",
+    "name": "audit-logs",
+    "description": "Automated audit logging for all content changes",
+    "kind": "plugin"
+  },
+  "dependencies": {
+    "@strapi/utils": "5.29.0",
+    "@strapi/types": "5.29.0"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "SEE LICENSE IN LICENSE"
+}

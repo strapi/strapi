@@ -1,0 +1,71 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log",
+    "description": "Automated audit logs for content changes"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "comment": ""
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "contentType": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "contentId": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "action": {
+      "type": "enumeration",
+      "enum": ["create", "update", "delete"],
+      "required": true
+    },
+    "userId": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "userEmail": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "userRole": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "ipAddress": {
+      "type": "string",
+      "maxLength": 45
+    },
+    "userAgent": {
+      "type": "text"
+    },
+    "requestId": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "changes": {
+      "type": "json"
+    },
+    "previousValues": {
+      "type": "json"
+    },
+    "newValues": {
+      "type": "json"
+    },
+    "metadata": {
+      "type": "json"
+    },
+    "timestamp": {
+      "type": "datetime",
+      "required": true
+    }
+  }
+}
