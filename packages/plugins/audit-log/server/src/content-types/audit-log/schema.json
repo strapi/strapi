@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": { "visible": true },
+    "content-type-builder": { "visible": false }
+  },
+  "attributes": {
+    "contentType": { "type": "string", "required": true },
+    "recordId": { "type": "string", "required": true },
+    "action": { "type": "enumeration", "enum": ["create", "update", "delete"], "required": true },
+    "userId": { "type": "integer" },
+    "timestamp": { "type": "datetime", "required": true },
+    "correlationId": { "type": "string" },
+    "payload": { "type": "json" },
+    "metadata": { "type": "json" }
+  }
+}
