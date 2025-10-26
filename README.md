@@ -163,6 +163,34 @@ See our dedicated [repository](https://github.com/strapi/documentation) for the 
 
 See for yourself what's under the hood by getting access to a [hosted Strapi project](https://strapi.io/demo) with sample data.
 
+## Access Control
+This plugin adds a new "Read" permission for Audit Logs to the Admin Panel. To grant access to the API:
+
+ - Go to Settings > Administration Panel > Roles.
+
+ - Select the Role you wish to grant access to (e.g., "Editor").
+
+ - Scroll to the Plugins section and find Audit Log.
+
+ - Check the box for Read.
+
+ - Click Save.
+
+Users with this role will now be able to make requests to the /audit-log/audit-logs endpoint.
+
+## API Usage
+The endpoint supports Strapi's full range of query parameters for filtering, sorting, and pagination.
+
+Endpoint: GET /audit-log/audit-logs
+
+ - Example-1: Get all "create" actions, sorted by newest first GET /audit-log/audit-logs?filters[action][$eq]=create&sort=createdAt:desc
+
+ - Example-2: Get logs for a specific content type and user GET /audit-log/audit-logs?filters[contentType][$eq]=api::article.article&filters[actorId][$eq]=1
+
+ - Example-3: Get logs for a specific date range (requires createdAt timestamp) GET /audit-log/audit-logs?filters[createdAt][$gte]=2025-10-20&filters[createdAt][$lte]=2025-10-21
+
+ - Example-4: Paginate results GET /audit-log/audit-logs?pagination[page]=1&pagination[pageSize]=25
+
 ## License
 
 See the [LICENSE](./LICENSE) file for licensing information.
