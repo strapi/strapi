@@ -1,0 +1,63 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "timestamps": true,
+    "private": true
+  },
+  "attributes": {
+    "action": {
+      "type": "string",
+      "required": true,
+      "enum": ["create", "update", "delete"]
+    },
+    "contentType": {
+      "type": "string",
+      "required": true,
+      "configurable": false,
+      "pluginOptions": {
+        "i18n": { "localized": false }
+      }
+    },
+    "recordId": {
+      "type": "string",
+      "required": true,
+      "configurable": false,
+      "pluginOptions": {
+        "i18n": { "localized": false }
+      }
+    },
+    "actorId": {
+      "type": "string",
+      "configurable": false,
+      "pluginOptions": {
+        "i18n": { "localized": false }
+      }
+    },
+    "actorType": {
+      "type": "string",
+      "configurable": false,
+      "pluginOptions": {
+        "i18n": { "localized": false }
+      }
+    },
+    "payload": {
+      "type": "json",
+      "configurable": false,
+      "pluginOptions": {
+        "i18n": { "localized": false }
+      }
+    }
+  },
+  "indexes": [
+    { "name": "idx_audit_logs_content_type", "columns": ["contentType"] },
+    { "name": "idx_audit_logs_actor_id", "columns": ["actorId"] },
+    { "name": "idx_audit_logs_action", "columns": ["action"] }
+  ]
+}
