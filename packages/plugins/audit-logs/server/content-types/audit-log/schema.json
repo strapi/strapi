@@ -1,0 +1,70 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log",
+    "description": "Stores audit logs for content changes"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "timestamps": true,
+    "indexes": [
+      {
+        "name": "audit_content_type_idx",
+        "columns": ["content_type"]
+      },
+      {
+        "name": "audit_user_id_idx",
+        "columns": ["user_id"]
+      },
+      {
+        "name": "audit_action_idx",
+        "columns": ["action"]
+      },
+      {
+        "name": "audit_created_at_idx",
+        "columns": ["created_at"]
+      }
+    ]
+  },
+  "attributes": {
+    "content_type": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "record_id": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "action": {
+      "type": "enumeration",
+      "enum": ["create", "update", "delete"],
+      "required": true,
+      "configurable": false
+    },
+    "user_id": {
+      "type": "integer",
+      "configurable": false
+    },
+    "user_email": {
+      "type": "string",
+      "configurable": false
+    },
+    "changes": {
+      "type": "json",
+      "configurable": false
+    },
+    "payload": {
+      "type": "json",
+      "configurable": false
+    },
+    "metadata": {
+      "type": "json",
+      "configurable": false
+    }
+  }
+}

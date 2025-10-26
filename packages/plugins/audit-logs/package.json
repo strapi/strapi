@@ -1,0 +1,16 @@
+{
+  "name": "@strapi/plugin-audit-logs",
+  "version": "1.0.0",
+  "description": "Audit logging plugin for Strapi",
+  "strapi": {
+    "name": "audit-logs",
+    "description": "Capture and monitor content changes",
+    "kind": "plugin"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^4.0.0"
+  }
+}
