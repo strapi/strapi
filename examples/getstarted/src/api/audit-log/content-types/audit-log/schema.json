@@ -1,0 +1,21 @@
+{
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log",
+    "description": "Stores content API audit logs"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "contentType": { "type": "string", "required": true, "index": true },
+    "recordId": { "type": "string", "required": true, "index": true },
+    "action": { "type": "string", "required": true, "index": true },
+    "timestamp": { "type": "datetime", "required": true, "default": "now", "index": true },
+    "user": { "type": "json" },
+    "diff": { "type": "json" },
+    "payload": { "type": "json" }
+  }
+}
