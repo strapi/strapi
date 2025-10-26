@@ -6,33 +6,51 @@ The automated audit logging feature is implemented as a custom Strapi plugin nam
 
 ## 2. Architecture
 
-The audit logging system integrates with Strapi's core in the following manner:
+### Read Path Flow
+![Read Path Flow](./readpath.png)
+
+### Write Path Flow
+![Write Path Flow](./WritePath.png)
+
+The audit logging system is architected around a decoupled, event-driven flow using Kafka, which integrates with Strapi's core in the following manner:
 
 *   **`audit-log` Plugin:**
     *   **Content Type (`audit_log`):** A new collection type `audit_log` is defined within the plugin. This content type stores all audit log entries, including `action` (create, update, delete), `contentType`, `recordId`, `userId`, and a `payload` containing the change details.
     *   **Lifecycle Hooks (`register.ts`):** The plugin subscribes to `afterCreate`, `afterUpdate`, and `afterDelete` lifecycle events for all content types. These hooks are responsible for:
         *   Detecting content modifications.
-        *   Constructing the audit log entry based on the action type (full payload for create/delete, before/after state for update).
-        *   Persisting the audit log entry to the `audit_logs` collection via `strapi.entityService.create()`.
-    *   **REST API (`/audit-logs`):** The plugin exposes a custom REST API endpoint `/audit-logs` to retrieve, filter, and paginate audit log entries.
+        *   Constructing the audit log entry.
+        *   **Sending the audit log entry as a message to a Kafka topic via the `kafka.ts` service.**
+    *   **Kafka Integration:**
+        *   **Kafka Producer (`kafka.ts` service):** Handles connecting to Kafka brokers and sending audit log messages to a configured topic. It is initialized during the Strapi `bootstrap` phase and disconnected during the `destroy` phase.
+        *   **Kafka Consumer (`kafka-consumer.ts` service):** Runs as a background process, consuming messages from the Kafka topic. Upon receiving a message, it parses the content and persists the audit log entry to the `audit_logs` collection via `strapi.entityService.create()`. This decouples the logging process from the main request flow.
+    *   **REST API (`/audit-logs`):** The plugin exposes a custom REST API endpoint `/audit-logs` to retrieve, filter, and paginate audit log entries from the database.
         *   **Route (`routes/index.ts`):** Defines the `GET /audit-logs` endpoint.
         *   **Controller (`controllers/audit-log.ts`):** Handles incoming requests to `/audit-logs`, extracts query parameters, and delegates to the service layer.
-        *   **Service (`services/audit-log.ts`):** Contains the business logic for querying the `audit_logs` collection, applying filters (content type, user ID, action type, date range), pagination, and sorting using `strapi.entityService.findPage()`.
-    *   **Access Control:** A custom permission `plugin::audit-log.read` is registered, allowing administrators to control access to the `/audit-logs` endpoint via Strapi's role-based access control system.
-    *   **Configuration:** The plugin provides configuration options (`auditLog.enabled`, `auditLog.excludeContentTypes`) to globally enable/disable logging and specify content types to exclude.
+        *   **Service (`services/audit-log.ts`):** Contains the business logic for querying the `audit_logs` collection.
+    *   **Access Control:** A custom permission `plugin::audit-log.read` is registered to control access to the `/audit-logs` endpoint.
+    *   **Configuration:** The plugin is configured via `./config/plugins.js`, including Kafka `brokers` and `topic`.
 
 *   **Strapi Core:**
-    *   **Database Layer:** The `audit_logs` content type is automatically mapped to a database table. `strapi.entityService` provides a database-agnostic interface for interacting with this table.
-    *   **Lifecycle Event System:** Strapi's built-in lifecycle event system is leveraged to trigger the audit logging logic.
-    *   **Authentication/Authorization:** Strapi's authentication system is used to identify the user performing the action (though injecting the user into the lifecycle hook requires careful consideration, potentially via middleware).
+    *   **Database Layer:** The `audit_logs` content type is automatically mapped to a database table. `strapi.entityService` is used by the Kafka consumer to write the final log entry.
+    *   **Lifecycle Event System:** Strapi's built-in lifecycle event system is the trigger for the entire audit logging process.
 
 ## 3. Tradeoffs and Considerations
 
-*   **User Context in Lifecycle Hooks:** Obtaining the authenticated user within a lifecycle hook can be challenging as the `event` object doesn't directly expose the request context. A common solution involves using a global middleware to store the user information (e.g., `ctx.state.user`) in a request-scoped manner that the lifecycle hook can then access. This adds a dependency on a global state or a custom context propagation mechanism.
-*   **`afterUpdate` "Before" State:** To accurately capture the "before" state for `update` operations, the lifecycle hook needs to perform an additional database query *before* the update occurs (e.g., in a `beforeUpdate` hook, store the current state, then use it in `afterUpdate`). This introduces an extra database read for every update operation, which is a performance consideration for high-volume applications. For simplicity in the initial implementation, the `afterUpdate` payload might only contain the `after` state, with a note on how to enhance it.
-*   **Performance Impact:** Logging every `create`, `update`, and `delete` operation can generate a significant volume of data, especially for active content types. Proper database indexing (as included in the `audit_log` schema) is crucial for maintaining query performance. The `excludeContentTypes` configuration option helps mitigate this by allowing developers to opt out of logging for less critical content types.
-*   **Payload Size:** Storing the full `payload` (especially for rich text or large objects) can lead to large audit log entries. While `JSON` type is flexible, it's important to consider the storage implications.
-*   **Scalability of Audit Log Storage:** For very high-traffic applications, the `audit_logs` table could grow very large. Strategies like archiving old logs, using a dedicated logging service, or implementing time-based partitioning might be necessary in a production environment.
+*   **Kafka Integration - Benefits:**
+    *   **Decoupling & Backpressure:** The primary benefit is decoupling the audit logging from the main API request-response cycle. If the database is slow, the application doesn't slow down; messages simply queue in Kafka. This prevents backpressure on the API.
+    *   **Durability & Reliability:** Kafka acts as a durable buffer, reducing the risk of losing audit logs if the database is temporarily unavailable.
+    *   **Scalability:** The event-driven architecture allows both the number of producers (Strapi instances) and consumers to be scaled independently. This makes the system highly scalable for high-traffic applications.
+
+*   **Kafka Integration - Complexities:**
+    *   **Infrastructure Overhead:** This design introduces an external dependency on a Kafka cluster, which requires separate setup, maintenance, and monitoring.
+    *   **Eventual Consistency:** Audit logs are no longer immediately available in the database after an API call. They are persisted asynchronously by the consumer, leading to a state of eventual consistency.
+    *   **Consumer Reliability:** The Kafka consumer (`kafka-consumer.ts`) must be robust. It needs comprehensive error handling, retry logic, and potentially a dead-letter queue (DLQ) strategy to handle malformed messages or persistent database errors.
+    *   **Message Ordering:** While Kafka guarantees message order within a single partition, achieving strict global order across the entire system can be complex if multiple consumers or partitions are involved.
+
+*   **General Considerations:**
+    *   **User Context in Lifecycle Hooks:** Obtaining the authenticated user within a lifecycle hook remains a challenge. The current implementation uses `strapi.requestContext` which works for standard API requests but might not capture context from other event sources.
+    *   **`afterUpdate` "Before" State:** The implementation correctly captures the "before" state by using the `beforeUpdate` hook to temporarily store the record. This adds one extra database read for every update operation, which is a performance tradeoff for accurate logging.
+    *   **Payload Size:** Storing the full `payload` in Kafka messages and the database can have significant storage implications.
 
 ## 4. Future Enhancements
 

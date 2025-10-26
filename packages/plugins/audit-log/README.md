@@ -58,24 +58,176 @@ You can access the audit logs via the `/audit-logs` endpoint.
 
 **GET /api/audit-logs**
 
-Retrieve a list of audit logs.
+Retrieve a list of audit log entries with support for filtering, sorting, and pagination.
 
 #### Query Parameters
 
-*   `filters[contentType][$eq]`: Filter by content type name (e.g., `product`).
-*   `filters[userId][$eq]`: Filter by user ID.
-*   `filters[action][$eq]`: Filter by action type (`create`, `update`, `delete`).
-*   `filters[createdAt][$gte]`: Filter by start date (e.g., `2023-01-01T00:00:00Z`).
-*   `filters[createdAt][$lte]`: Filter by end date (e.g., `2023-12-31T23:59:59Z`).
-*   `pagination[page]`: Page number (default: 1).
-*   `pagination[pageSize]`: Number of entries per page (default: 10).
-*   `sort`: Sorting criteria (e.g., `createdAt:desc`).
+| Parameter | Type | Description | Example |
+| :--- | :--- | :--- | :--- |
+| `sort` | `string` | Sort the results. Use format `field:asc` or `field:desc`. | `createdAt:desc` |
+| `pagination[page]` | `integer` | The page number to retrieve. | `1` |
+| `pagination[pageSize]` | `integer` | The number of items to return per page. | `25` |
+| `filters[action][$eq]` | `string` | Filter by action type. Must be `create`, `update`, or `delete`. | `update` |
+| `filters[contentType][$eq]`| `string` | Filter by the singular name of the content type. | `product` |
+| `filters[recordId][$eq]` | `string` \| `integer` | Filter by the ID of the content entry that was changed. | `42` |
+| `filters[userId][$eq]` | `string` \| `integer` | Filter by the ID of the admin user who performed the action. | `1` |
+| `filters[createdAt][$gte]` | `string` | Filter for entries created on or after a specific ISO 8601 date. | `2024-01-01T00:00:00Z` |
+| `filters[createdAt][$lte]` | `string` | Filter for entries created on or before a specific ISO 8601 date. | `2024-01-31T23:59:59Z` |
 
 #### Example Request
 
 ```bash
-curl -X GET "http://localhost:1337/api/audit-logs?filters[contentType][$eq]=product&sort=createdAt:desc&pagination[page]=1&pagination[pageSize]=5" \
+curl -X GET "http://localhost:1337/api/audit-logs?filters[contentType][$eq]=article&sort=createdAt:desc&pagination[page]=1&pagination[pageSize]=10" \
   -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"
+```
+
+#### Success Response (200 OK)
+
+The response body is a JSON object containing `data` and `meta` properties. The following examples show responses for different action types.
+
+##### Action: 'update'
+
+**Example Request**
+
+```bash
+curl -X GET "http://localhost:1337/api/audit-logs?filters[action][$eq]=update" \
+  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"
+```
+
+**Example Response Body**
+
+```json
+{
+  "data": [
+    {
+      "id": 101,
+      "action": "update",
+      "contentType": "article",
+      "recordId": "23",
+      "userId": "1",
+      "payload": {
+        "before": { "title": "Old Title" },
+        "after": { "title": "New Title" }
+      },
+      "createdAt": "2024-02-15T10:30:00.123Z",
+      "updatedAt": "2024-02-15T10:30:00.123Z"
+    }
+  ],
+  "meta": { "pagination": { "page": 1, "pageSize": 25, "pageCount": 1, "total": 1 } }
+}
+```
+
+##### Action: 'create'
+
+**Example Request**
+
+```bash
+curl -X GET "http://localhost:1337/api/audit-logs?filters[action][$eq]=create" \
+  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"
+```
+
+**Example Response Body**
+
+```json
+{
+  "data": [
+    {
+      "id": 102,
+      "action": "create",
+      "contentType": "article",
+      "recordId": "24",
+      "userId": "1",
+      "payload": {
+        "after": { "title": "A Brand New Article" }
+      },
+      "createdAt": "2024-02-15T11:00:00.456Z",
+      "updatedAt": "2024-02-15T11:00:00.456Z"
+    }
+  ],
+  "meta": { "pagination": { "page": 1, "pageSize": 25, "pageCount": 1, "total": 1 } }
+}
+```
+
+##### Action: 'delete'
+
+**Example Request**
+
+```bash
+curl -X GET "http://localhost:1337/api/audit-logs?filters[action][$eq]=delete" \
+  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"
+```
+
+**Example Response Body**
+
+```json
+{
+  "data": [
+    {
+      "id": 103,
+      "action": "delete",
+      "contentType": "article",
+      "recordId": "22",
+      "userId": "2",
+      "payload": {},
+      "createdAt": "2024-02-15T11:30:00.789Z",
+      "updatedAt": "2024-02-15T11:30:00.789Z"
+    }
+  ],
+  "meta": { "pagination": { "page": 1, "pageSize": 25, "pageCount": 1, "total": 1 } }
+}
+```
+
+##### Filtering by User and Date Range
+
+You can combine filters to create more specific queries.
+
+**Example Request**
+
+```bash
+curl -X GET "http://localhost:1337/api/audit-logs?filters[userId][$eq]=1&filters[createdAt][$gte]=2024-02-15T10:00:00.000Z&filters[createdAt][$lte]=2024-02-15T12:00:00.000Z&sort=createdAt:asc" \
+  -H "Authorization: Bearer YOUR_ADMIN_JWT_TOKEN"
+```
+
+**Example Response Body**
+
+```json
+{
+  "data": [
+    {
+      "id": 101,
+      "action": "update",
+      "contentType": "article",
+      "recordId": "23",
+      "userId": "1",
+      "payload": {
+        "before": { "title": "Old Title" },
+        "after": { "title": "New Title" }
+      },
+      "createdAt": "2024-02-15T10:30:00.123Z",
+      "updatedAt": "2024-02-15T10:30:00.123Z"
+    },
+    {
+      "id": 102,
+      "action": "create",
+      "contentType": "article",
+      "recordId": "24",
+      "userId": "1",
+      "payload": {
+        "after": { "title": "A Brand New Article" }
+      },
+      "createdAt": "2024-02-15T11:00:00.456Z",
+      "updatedAt": "2024-02-15T11:00:00.456Z"
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "page": 1,
+      "pageSize": 25,
+      "pageCount": 1,
+      "total": 2
+    }
+  }
+}
 ```
 
 ### Access Control

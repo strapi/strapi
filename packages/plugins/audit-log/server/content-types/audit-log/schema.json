@@ -39,20 +39,38 @@
   },
   "indexes": [
     {
-      "name": "audit_logs_action_index",
-      "columns": ["action"]
+      "name": "audit_logs_action_createdAt_index",
+      "columns": [
+        "action",
+        "createdAt"
+      ]
     },
     {
-      "name": "audit_logs_content_type_index",
-      "columns": ["contentType"]
+      "name": "audit_logs_createdAt_index",
+      "columns": [
+        "createdAt"
+      ]
     },
     {
-      "name": "audit_logs_record_id_index",
-      "columns": ["recordId"]
+      "name": "audit_logs_contentType_createdAt_index",
+      "columns": [
+        "contentType",
+        "createdAt"
+      ]
     },
     {
-      "name": "audit_logs_user_id_index",
-      "columns": ["userId"]
+      "name": "audit_logs_recordId_createdAt_index",
+      "columns": [
+        "recordId",
+        "createdAt"
+      ]
+    },
+    {
+      "name": "audit_logs_userId_createdAt_index",
+      "columns": [
+        "userId",
+        "createdAt"
+      ]
     }
   ]
 }
