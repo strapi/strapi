@@ -9390,6 +9390,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/plugin-audit-log@workspace:packages/plugins/audit-log":
+  version: 0.0.0-use.local
+  resolution: "@strapi/plugin-audit-log@workspace:packages/plugins/audit-log"
+  dependencies:
+    "@paralleldrive/cuid2": "npm:2.2.2"
+    "@strapi/types": "npm:5.29.0"
+    "@strapi/utils": "npm:5.29.0"
+    tsconfig: "npm:5.29.0"
+  languageName: unknown
+  linkType: soft
+
 "@strapi/plugin-cloud@workspace:packages/plugins/cloud":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
