@@ -78,10 +78,20 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
   const processEvent = (name: string, ...args: any) => {
     const requestState = strapi.requestContext.get()?.state;
 
-    // Ignore events with auth strategies different from admin
-    const isUsingAdminAuth = requestState?.route.info.type === 'admin';
+    // Only process events coming from the Admin or the Content API
+    // - For admin routes we require an authenticated user
+    // - For content-api routes we allow unauthenticated requests (user may be null)
+    const routeType = requestState?.route?.info?.type;
+    const isUsingAdminAuth = routeType === 'admin';
+    const isUsingContentApi = routeType === 'content-api';
     const user = requestState?.user;
-    if (!isUsingAdminAuth || !user) {
+
+    if (!isUsingAdminAuth && !isUsingContentApi) {
+      return null;
+    }
+
+    // Admin operations must be performed by an authenticated admin user
+    if (isUsingAdminAuth && !user) {
       return null;
     }
 
@@ -103,7 +113,8 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       action: name,
       date: new Date().toISOString(),
       payload: getPayload(...args) || {},
-      userId: user.id,
+      // For content-api requests the user might be undefined (public access)
+      userId: user?.id ?? null,
     };
   };
 
