@@ -9390,6 +9390,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/plugin-audit-logs@workspace:packages/plugins/audit-logs":
+  version: 0.0.0-use.local
+  resolution: "@strapi/plugin-audit-logs@workspace:packages/plugins/audit-logs"
+  dependencies:
+    lodash: "npm:^4.17.21"
+  peerDependencies:
+    "@strapi/strapi": ^4.0.0
+  languageName: unknown
+  linkType: soft
+
 "@strapi/plugin-cloud@workspace:packages/plugins/cloud":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
@@ -31657,11 +31667,11 @@ __metadata:
 
 "typescript@patch:typescript@npm%3A^5#optional!builtin<compat/typescript>":
   version: 5.8.3
-  resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=8c6c40"
+  resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/92ea03509e06598948559ddcdd8a4ae5a7ab475766d5589f1b796f5731b3d631a4c7ddfb86a3bd44d58d10102b132cd4b4994dda9b63e6273c66d77d6a271dbd
+  checksum: 10c0/39117e346ff8ebd87ae1510b3a77d5d92dae5a89bde588c747d25da5c146603a99c8ee588c7ef80faaf123d89ed46f6dbd918d534d641083177d5fac38b8a1cb
   languageName: node
   linkType: hard
 
