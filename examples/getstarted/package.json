@@ -10,7 +10,10 @@
     "develop": "strapi develop",
     "develop:ce": "STRAPI_DISABLE_EE=true strapi develop",
     "start": "strapi start",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "test:audit": "node scripts/integration-test-audit.js",
+    "test:integration": "node scripts/run-integration-tests.js",
+    "test:integration:jest": "npx jest --runInBand --runTestsByPath /Users/shubham/projects/strapi/examples/getstarted/tests/integration/audit.test.js --config ../../jest.config.js"
   },
   "dependencies": {
     "@strapi/blocks-react-renderer": "1.0.2",
