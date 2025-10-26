@@ -21,6 +21,16 @@ const path = require('node:path');
 const bcrypt = require('bcryptjs');
 const util = require('util');
 
+// Audit log configuration
+const auditLogConfig = {
+  enabled: true, // Global flag to enable/disable audit logging
+  excludeContentTypes: [], // Array of content type UIDs to exclude from logging
+  permissions: {
+    read: 'read_audit_logs', // Permission required to read audit logs
+    write: 'write_audit_logs', // Permission required to create audit logs
+  }
+};
+
 async function main() {
   const cwd = process.cwd();
   if (!cwd.endsWith('examples/getstarted')) {
@@ -141,6 +151,17 @@ async function main() {
     // the problematic fields based on the validation details and retry a few times.
     // Register audit log entry function
     const createAuditEntry = async (action, contentType, recordId, payload = {}) => {
+      // Check if audit logging is enabled and content type is not excluded
+      if (!auditLogConfig.enabled) {
+        console.log('Audit logging is disabled globally');
+        return null;
+      }
+
+      if (auditLogConfig.excludeContentTypes.includes(contentType)) {
+        console.log(`Audit logging is disabled for content type: ${contentType}`);
+        return null;
+      }
+
       // Wait a bit to ensure any transactions complete
       await new Promise(resolve => setTimeout(resolve, 100));
       
@@ -164,6 +185,39 @@ async function main() {
         return null;
       }
     };
+
+    // Test audit log configurations
+    console.log('\nTesting audit log configurations:');
+    
+    // Test 1: Disable audit logging globally
+    auditLogConfig.enabled = false;
+    let testLog = await createAuditEntry('test', publicCollectionType, 0, {});
+    console.log('Test 1 - Disabled logging:', testLog === null ? 'PASS' : 'FAIL');
+    
+    // Test 2: Enable but exclude content type
+    auditLogConfig.enabled = true;
+    auditLogConfig.excludeContentTypes = [publicCollectionType];
+    testLog = await createAuditEntry('test', publicCollectionType, 0, {});
+    console.log('Test 2 - Excluded content type:', testLog === null ? 'PASS' : 'FAIL');
+    
+    // Reset config for actual test
+    auditLogConfig.enabled = true;
+    auditLogConfig.excludeContentTypes = [];
+    
+    // Test 3: Permission check
+    try {
+      const testPermissions = await strapi.db.query('admin::permission').findMany({
+        where: {
+          action: auditLogConfig.permissions.read,
+          role: role?.id,
+        },
+      });
+      console.log('Test 3 - Permission check:', testPermissions?.length > 0 ? 'Has Permission' : 'No Permission');
+    } catch (err) {
+      console.log('Test 3 - Permission check: Error -', err.message);
+    }
+    
+    console.log('Configuration tests completed.\n');
 
     const maxAttempts = 3;
     let attempt = 0;
@@ -290,6 +344,31 @@ async function main() {
     }
 
     console.log(`Audit-log model detected: ${auditUid}. Searching for entries referencing the created record...`);
+    
+    // Check if the admin user has required permissions
+    let hasPermission = false;
+    try {
+      // For admin users, check role permissions
+      const adminPermissions = await strapi.db.query('admin::permission').findMany({
+        where: {
+          action: auditLogConfig.permissions.read,
+          role: role?.id,
+        },
+      });
+      hasPermission = adminPermissions?.length > 0;
+
+      console.log(`Permission check for ${auditLogConfig.permissions.read}:`, hasPermission ? 'GRANTED' : 'DENIED');
+    } catch (err) {
+      console.warn('Permission check failed:', err.message);
+      hasPermission = false;
+    }
+
+    if (!hasPermission) {
+      console.warn('User does not have the required permission:', auditLogConfig.permissions.read);
+      await strapi.destroy();
+      process.exit(2);
+    }
+
     // Print current total count (best-effort) to help debug whether entries were created
     try {
       const util = require('util');
