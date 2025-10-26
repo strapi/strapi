@@ -13,6 +13,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
+    "@strapi/audit-logs": "workspace:*",
     "@strapi/blocks-react-renderer": "1.0.2",
     "@strapi/icons": "2.0.0-rc.30",
     "@strapi/plugin-color-picker": "workspace:*",

@@ -1,0 +1,61 @@
+{
+  "name": "@strapi/audit-logs",
+  "version": "5.29.0",
+  "description": "Automatically creates audit log entries for all content operations (create, update, delete) via the Content API",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/plugins/audit-logs"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    "./strapi-server": {
+      "source": "./server/src/index.js",
+      "require": "./server/src/index.js",
+      "default": "./server/src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "server/",
+    "strapi-server.js",
+    "README.md"
+  ],
+  "scripts": {
+    "test:unit": "jest"
+  },
+  "dependencies": {
+    "@strapi/utils": "5.29.0"
+  },
+  "devDependencies": {
+    "@strapi/admin": "5.29.0",
+    "@strapi/database": "5.29.0",
+    "@strapi/types": "5.29.0"
+  },
+  "peerDependencies": {
+    "@strapi/admin": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "displayName": "Audit Logs",
+    "name": "audit-logs",
+    "description": "Automatically creates audit log entries for all content operations (create, update, delete) via the Content API.",
+    "required": false,
+    "kind": "plugin"
+  }
+}

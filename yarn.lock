@@ -8796,6 +8796,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/audit-logs@workspace:*, @strapi/audit-logs@workspace:packages/plugins/audit-logs":
+  version: 0.0.0-use.local
+  resolution: "@strapi/audit-logs@workspace:packages/plugins/audit-logs"
+  dependencies:
+    "@strapi/admin": "npm:5.29.0"
+    "@strapi/database": "npm:5.29.0"
+    "@strapi/types": "npm:5.29.0"
+    "@strapi/utils": "npm:5.29.0"
+  peerDependencies:
+    "@strapi/admin": ^5.0.0
+  languageName: unknown
+  linkType: soft
+
 "@strapi/blocks-react-renderer@npm:1.0.2":
   version: 1.0.2
   resolution: "@strapi/blocks-react-renderer@npm:1.0.2"
@@ -19304,6 +19317,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "getstarted@workspace:examples/getstarted"
   dependencies:
+    "@strapi/audit-logs": "workspace:*"
     "@strapi/blocks-react-renderer": "npm:1.0.2"
     "@strapi/icons": "npm:2.0.0-rc.30"
     "@strapi/plugin-color-picker": "workspace:*"
