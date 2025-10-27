@@ -1,0 +1,125 @@
+{
+  "info": {
+    "name": "Strapi Audit Logs API",
+    "description": "Collection for testing the Strapi Audit Logs plugin API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:1337",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "YOUR_JWT_TOKEN_HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Get Audit Logs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/audit-logs?page=1&pageSize=25",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "audit-logs"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "pageSize",
+              "value": "25"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Audit Logs - Filtered",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/audit-logs?contentType=api::article.article&action=update&userId=1&dateFrom=2023-10-01&dateTo=2023-10-31",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "audit-logs"],
+          "query": [
+            {
+              "key": "contentType",
+              "value": "api::article.article"
+            },
+            {
+              "key": "action",
+              "value": "update"
+            },
+            {
+              "key": "userId",
+              "value": "1"
+            },
+            {
+              "key": "dateFrom",
+              "value": "2023-10-01"
+            },
+            {
+              "key": "dateTo",
+              "value": "2023-10-31"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Single Audit Log",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/audit-logs/123",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "audit-logs", "123"]
+        }
+      }
+    },
+    {
+      "name": "Get Audit Log Statistics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/audit-logs/statistics",
+          "host": ["{{baseUrl}}"],
+          "path": ["admin", "audit-logs", "statistics"]
+        }
+      }
+    }
+  ]
+}

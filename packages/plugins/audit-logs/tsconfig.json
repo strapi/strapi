@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "lib": ["es2017", "es6", "dom"],
+    "allowJs": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": false,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["server/src/**/*", "admin/src/**/*"],
+  "exclude": ["node_modules", "dist", "build", "**/*.test.ts"]
+}
