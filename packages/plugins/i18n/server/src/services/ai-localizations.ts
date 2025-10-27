@@ -286,8 +286,8 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.documents.use(async (context, next) => {
         const result = await next();
 
-        // Only trigger on create/update actions
-        if (!['create', 'update'].includes(context.action)) {
+        // Only trigger for the allowed actions
+        if (!['create', 'update', 'publish'].includes(context.action)) {
           return result;
         }
 
@@ -295,6 +295,15 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         const isEnabled = await this.isEnabled();
         if (!isEnabled) {
           return result;
+        }
+
+        const metricsService = strapi.plugin('i18n').service('metrics');
+        if (context.action === 'update' || context.action === 'create') {
+          metricsService.sendWithAIEventProperty('didSaveEntry');
+        }
+
+        if (context.action === 'publish') {
+          metricsService.sendWithAIEventProperty('didPublishEntry');
         }
 
         // Don't await since localizations should be done in the background without blocking the request
