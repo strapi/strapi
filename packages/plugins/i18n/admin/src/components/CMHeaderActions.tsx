@@ -165,14 +165,18 @@ const LocalePickerAction = ({
 
   const handleSelect = React.useCallback(
     (value: string) => {
-      setQuery({
-        plugins: {
-          ...query.plugins,
-          i18n: {
-            locale: value,
+      setQuery(
+        {
+          plugins: {
+            ...query.plugins,
+            i18n: {
+              locale: value,
+            },
           },
         },
-      });
+        'push',
+        true
+      );
     },
     [query.plugins, setQuery]
   );

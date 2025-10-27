@@ -1,4 +1,4 @@
-import { Box, Typography } from '@strapi/design-system';
+import { Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useMatch } from 'react-router-dom';
 
@@ -21,7 +21,6 @@ const Layout = () => {
   const { formatMessage } = useIntl();
   const { isLoading } = useSettingsMenu();
   const isMobile = useIsMobile();
-  const hasSubPage = Boolean(match?.params['*']);
 
   // Since the useSettingsMenu hook can make API calls in order to check the links permissions
   // We need to add a loading state to prevent redirecting the user while permissions are being checked
@@ -60,16 +59,14 @@ const Layout = () => {
           defaultMessage: 'Settings',
         })}
       </Page.Title>
-      {!hasSubPage && (
-        <Box
-          display={{ initial: 'block', medium: 'none' }}
-          paddingLeft={RESPONSIVE_DEFAULT_SPACING}
-          paddingRight={RESPONSIVE_DEFAULT_SPACING}
-          paddingTop={RESPONSIVE_DEFAULT_SPACING}
-        >
-          <BackButton fallback="/settings" />
-        </Box>
-      )}
+      <Box
+        display={{ initial: 'block', medium: 'none' }}
+        paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+        paddingRight={RESPONSIVE_DEFAULT_SPACING}
+        paddingTop={RESPONSIVE_DEFAULT_SPACING}
+      >
+        <BackButton fallback="/settings" />
+      </Box>
       <Outlet />
     </Layouts.Root>
   );
