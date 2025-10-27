@@ -7,7 +7,7 @@ import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
 import { validateUploadBody } from './validation/content-api/upload';
-import { FileInfo } from '../types';
+import { FileInfo, Config } from '../types';
 
 const { ValidationError } = utils.errors;
 
@@ -38,7 +38,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await validateQuery(ctx.query, ctx);
       const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-      const files = await getService('upload').findMany(sanitizedQuery);
+      // Get plugin configuration to determine pagination behavior
+      const config = strapi.config.get<Config>('plugin::upload');
+      const usePagination = config?.paginatedResponses ?? false;
+
+      const files = usePagination 
+        ? await getService('upload').findPage(sanitizedQuery)
+        : await getService('upload').findMany(sanitizedQuery);
 
       ctx.body = await sanitizeOutput(files, ctx);
     },
