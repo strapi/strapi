@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "audit_logs",
+  "info": {
+    "singularName": "audit-log",
+    "pluralName": "audit-logs",
+    "displayName": "Audit Log",
+    "description": "Audit log entries for content API changes"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "contentType": {
+      "type": "string",
+      "required": true
+    },
+    "recordId": {
+      "type": "string",
+      "required": true
+    },
+    "action": {
+      "type": "enumeration",
+      "enum": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "required": true
+    },
+    "timestamp": {
+      "type": "datetime",
+      "required": true
+    },
+    "userId": {
+      "type": "string"
+    },
+    "user": {
+      "type": "json"
+    },
+    "diff": {
+      "type": "json"
+    },
+    "meta": {
+      "type": "json"
+    }
+  }
+}
