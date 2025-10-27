@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { useAuth } from '@strapi/admin/strapi-admin';
 import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
+import union from 'lodash/union';
 import { useParams } from 'react-router-dom';
 
 import { doesPluginOptionsHaveI18nLocalized } from '../utils/fields';
@@ -15,6 +16,8 @@ type UseI18n = () => {
   canDelete: string[];
   canPublish: string[];
 };
+
+type I18nPermissionKeys = keyof Omit<ReturnType<UseI18n>, 'hasI18n'>;
 
 /**
  * @alpha
@@ -30,14 +33,14 @@ const useI18n: UseI18n = () => {
   const actions = React.useMemo(() => {
     const permissions = userPermissions.filter((permission) => permission.subject === params.slug);
 
-    return permissions.reduce<Omit<ReturnType<UseI18n>, 'hasI18n'>>(
+    return permissions.reduce<Record<I18nPermissionKeys, string[]>>(
       (acc, permission) => {
         const [actionShorthand] = permission.action.split('.').slice(-1);
+        const permissionKey = `can${capitalize(actionShorthand)}` as I18nPermissionKeys;
 
-        return {
-          ...acc,
-          [`can${capitalize(actionShorthand)}`]: permission.properties?.locales ?? [],
-        };
+        acc[permissionKey] = union(acc[permissionKey] ?? [], permission.properties?.locales ?? []);
+
+        return acc;
       },
       { canCreate: [], canRead: [], canUpdate: [], canDelete: [], canPublish: [] }
     );
