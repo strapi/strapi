@@ -364,6 +364,7 @@ export const AIAssetCard = ({
                   !wasCaptionChanged &&
                   asset.caption && <Sparkle width="16px" height="16px" fill="#AC73E6" />
                 }
+                type="text"
               />
             </Field.Root>
 
@@ -394,6 +395,7 @@ export const AIAssetCard = ({
                   !wasAltTextChanged &&
                   asset.alternativeText && <Sparkle width="16px" height="16px" fill="#AC73E6" />
                 }
+                type="text"
               />
               <Field.Hint />
             </Field.Root>

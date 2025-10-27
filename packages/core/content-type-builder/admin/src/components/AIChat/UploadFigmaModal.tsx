@@ -165,6 +165,7 @@ const FigmaUrlInputStep = ({ figmaUrl, setFigmaUrl }: FigmaUrlInputStepProps) =>
           onChange={(e) => setFigmaUrl(e.target.value)}
           width="100%"
           disabled={isLoading}
+          type="url"
         />
       </Box>
 
