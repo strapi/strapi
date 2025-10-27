@@ -17,6 +17,6 @@
     "noImplicitAny": true,
     "declaration": true,
     "jsx": "react-jsx",
-    "types": ["@testing-library/jest-dom"]
+    "types": ["vitest/globals","@testing-library/jest-dom"]
   }
 }

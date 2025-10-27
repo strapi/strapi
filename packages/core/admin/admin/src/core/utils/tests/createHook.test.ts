@@ -8,7 +8,7 @@ describe('ADMIN | core | utils | createHook', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls all of the mocks sequentially', () => {
