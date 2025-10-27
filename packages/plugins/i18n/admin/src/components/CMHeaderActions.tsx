@@ -178,90 +178,73 @@ const LocalePickerAction = ({
     [query.plugins, setQuery]
   );
 
+  const nonTranslatedFields = React.useMemo(() => {
+    if (!schema?.attributes) return [];
+    return Object.keys(schema.attributes).filter((field) => {
+      const attribute = schema.attributes[field] as Record<string, unknown>;
+      return (attribute?.pluginOptions as any)?.i18n?.localized === false;
+    });
+  }, [schema?.attributes]);
+
+  const sourceLocale = React.useMemo(() => {
+    if (!Array.isArray(locales) || !meta?.availableLocales) return null;
+
+    const defaultLocale = locales.find((locale: Locale) => locale.isDefault);
+    const existingLocales = meta.availableLocales.map((loc) => loc.locale);
+
+    return defaultLocale &&
+      existingLocales.includes(defaultLocale.code) &&
+      defaultLocale.code !== currentDesiredLocale
+      ? defaultLocale.code
+      : existingLocales.find((locale) => locale !== currentDesiredLocale);
+  }, [locales, meta?.availableLocales, currentDesiredLocale]);
+
+  const fetchSourceLocaleData = React.useCallback(async () => {
+    if (!sourceLocale || !documentId) return;
+
+    try {
+      const response = await getDocument({
+        collectionType,
+        model,
+        documentId,
+        params: { locale: sourceLocale },
+      });
+
+      if (response?.data && nonTranslatedFields.length > 0) {
+        const dataToSet = nonTranslatedFields.reduce(
+          (acc: Record<string, unknown>, field: string) => {
+            acc[field] = response.data[field];
+            return acc;
+          },
+          {}
+        );
+
+        if (Object.keys(dataToSet).length > 0) {
+          setValues(dataToSet);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to fetch source locale data for non-translatable fields:', error);
+    }
+  }, [
+    sourceLocale,
+    documentId,
+    collectionType,
+    model,
+    getDocument,
+    nonTranslatedFields,
+    setValues,
+  ]);
+
   /**
    * Prefilling form with non-translatable fields from already existing locale
    */
   React.useEffect(() => {
-    // We need to get the default locale and set all non translatable fields to the default locale
-    if (!document || !schema || !currentDesiredLocale || !documentId) {
-      return;
+    // Only run when creating a new locale (no document ID yet) and when we have non-translatable fields
+    if (!document?.id && nonTranslatedFields.length > 0 && sourceLocale) {
+      fetchSourceLocaleData();
     }
-
-    // Check if we're creating a new locale of a document (document id doesn't exist yet)
-    if (!document.id) {
-      // Get all non-translatable fields from schema
-      const nonTranslatedFields = Object.keys(schema?.attributes ?? {}).filter((field) => {
-        const attribute = schema?.attributes[field] as Record<string, unknown>;
-        return (attribute?.pluginOptions as any)?.i18n?.localized === false;
-      });
-
-      // If we have non-translatable fields, find an existing locale to copy from
-      if (nonTranslatedFields.length > 0) {
-        // Find the best locale to copy from (default locale or any other available locale)
-        const defaultLocale = Array.isArray(locales)
-          ? locales.find((locale: Locale) => locale.isDefault)
-          : undefined;
-
-        const availableLocales = meta?.availableLocales ?? [];
-        const existingLocales = availableLocales.map((loc) => loc.locale);
-
-        // We pick the default locale or any other available locale
-        const sourceLocale =
-          defaultLocale &&
-          existingLocales.includes(defaultLocale.code) &&
-          defaultLocale.code !== currentDesiredLocale
-            ? defaultLocale.code
-            : existingLocales.find((locale) => locale !== currentDesiredLocale);
-
-        if (sourceLocale) {
-          const fetchSourceLocaleData = async () => {
-            try {
-              // We fetch the data from the selected document
-              const response = await getDocument({
-                collectionType,
-                model,
-                documentId,
-                params: { locale: sourceLocale },
-              });
-
-              if (response && response.data) {
-                // Extract only non-translatable fields from the source locale document
-                const dataToSet = nonTranslatedFields.reduce(
-                  (acc: Record<string, unknown>, field: string) => {
-                    acc[field] = response.data[field];
-                    return acc;
-                  },
-                  {}
-                );
-
-                if (Object.keys(dataToSet).length > 0) {
-                  setValues(dataToSet);
-                }
-              }
-            } catch (error) {
-              console.warn(
-                'Failed to fetch source locale data for non-translatable fields:',
-                error
-              );
-            }
-          };
-
-          fetchSourceLocaleData();
-        }
-      }
-    }
-  }, [
-    document,
-    schema,
-    setValues,
-    currentDesiredLocale,
-    locales,
-    documentId,
-    getDocument,
-    collectionType,
-    model,
-    meta,
-  ]);
+  }, [document?.id, nonTranslatedFields.length, sourceLocale, fetchSourceLocaleData]);
 
   React.useEffect(() => {
     if (!Array.isArray(locales) || !hasI18n) {
