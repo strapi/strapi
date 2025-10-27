@@ -234,11 +234,7 @@ const LocalePickerAction = ({
 
       const permissionsToCheck = currentLocaleDoc ? canRead : canCreate;
 
-      if (
-        window.strapi.future.isEnabled('unstableAILocalizations') &&
-        isAiAvailable &&
-        settings?.data?.aiLocalizations
-      ) {
+      if (isAiAvailable && settings?.data?.aiLocalizations) {
         return {
           _render: () => (
             <React.Fragment key={index}>
@@ -381,8 +377,7 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
   }
 
   // Do not display this action when AI is not available
-  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (!isAIAvailable || !hasAIFutureFlag) {
+  if (!isAIAvailable) {
     return null;
   }
 
@@ -506,8 +501,7 @@ const FillFromAnotherLocaleAction = ({
   }
 
   // Do not display this action when AI is available and AI translations are enabled
-  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (hasAIFutureFlag && isAIAvailable && isAISettingEnabled) {
+  if (isAIAvailable && isAISettingEnabled) {
     return null;
   }
 
