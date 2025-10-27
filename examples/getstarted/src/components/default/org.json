@@ -1,28 +1,25 @@
 {
-  "collectionName": "components_basic_team_members",
+  "collectionName": "components_default_orgs",
   "info": {
-    "displayName": "teamMembers",
-    "icon": "emotionHappy"
+    "displayName": "org",
+    "icon": "book"
   },
   "options": {},
   "attributes": {
     "name": {
       "type": "string"
     },
-    "role": {
+    "address": {
       "type": "string"
     },
-    "photo": {
+    "coverOrgImage": {
       "type": "media",
-      "multiple": false,
+      "multiple": true,
       "allowedTypes": ["images", "files", "videos", "audios"]
     },
-    "bio": {
-      "type": "blocks"
-    },
-    "organization": {
+    "testComponent": {
       "type": "component",
-      "component": "default.org",
+      "component": "default.test-component",
       "repeatable": true
     }
   },
