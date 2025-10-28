@@ -216,18 +216,9 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         throw new Error(`AI Localizations request failed: ${response.statusText}`);
-      } else {
-        await aiLocalizationJobsService.upsertJobForDocument({
-          documentId,
-          contentType: model,
-          sourceLocale: document.locale,
-          targetLocales,
-          status: 'completed',
-        });
       }
 
       const aiResult = await response.json();
-
       // Get all media field names dynamically from the schema
       const mediaFields = Object.entries(schema.attributes)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -235,7 +226,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         .map(([key]) => key);
 
       try {
-        await Promise.allSettled(
+        await Promise.all(
           aiResult.localizations.map(async (localization: any) => {
             const { content, locale } = localization;
 
@@ -247,7 +238,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
             });
 
             // Merge AI content and media fields, works only on first level media fields (root level)
-            const mergedData = { ...content };
+            const mergedData = structuredClone(content);
             for (const field of mediaFields) {
               // Only copy media if not already set in derived locale
               if (!derivedDoc || !derivedDoc[field]) {
@@ -257,11 +248,25 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
               }
             }
 
-            return strapi.documents(model).update({
-              documentId,
-              locale,
-              fields: [],
+            /**
+             * TODO:
+             * We should use the document service here, however currently,
+             * updating a localized entry marks the source document as modified.
+             * @see https://github.com/strapi/strapi/issues/22924
+             *
+             * Falling back to the query engine to preserve the correct status
+             */
+            await strapi.db.query(model).update({
+              where: { documentId, locale },
               data: mergedData,
+            });
+
+            await aiLocalizationJobsService.upsertJobForDocument({
+              documentId,
+              contentType: model,
+              sourceLocale: document.locale,
+              targetLocales,
+              status: 'completed',
             });
           })
         );
