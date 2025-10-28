@@ -280,7 +280,17 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.documents.use(async (context, next) => {
         const result = await next();
 
-        // Only trigger on create/update actions
+        const metricsService = strapi.plugin('i18n').service('metrics');
+        if (context.action === 'publish') {
+          metricsService.sendWithAIEventProperty('didPublishEntry');
+          return result;
+        }
+
+        if (context.action === 'update' || context.action === 'create') {
+          metricsService.sendWithAIEventProperty('didSaveEntry');
+        }
+
+        // Only trigger for the allowed actions
         if (!['create', 'update'].includes(context.action)) {
           return result;
         }
