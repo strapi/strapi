@@ -30,6 +30,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     const [mediaLibVisible, setMediaLibVisible] = React.useState(false);
     const [isExpandMode, setIsExpandMode] = React.useState(false);
     const components = useStrapiApp('ImageDialog', (state) => state.components);
+
     const MediaLibraryDialog = components['media-library'];
 
     const handleToggleMediaLib = () => setMediaLibVisible((prev) => !prev);

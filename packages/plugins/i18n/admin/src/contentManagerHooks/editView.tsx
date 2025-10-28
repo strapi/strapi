@@ -1,7 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { Flex, Tooltip, VisuallyHidden } from '@strapi/design-system';
 import { Earth } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -125,14 +124,4 @@ const Span = styled(Flex)`
   }
 `;
 
-const getLocaleKey = () => {
-  try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const locale = urlParams.get('plugins[i18n][locale]');
-    return locale || 'default';
-  } catch {
-    return 'default';
-  }
-};
-
-export { mutateEditViewHook, getLocaleKey };
+export { mutateEditViewHook };

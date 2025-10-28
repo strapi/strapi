@@ -14,7 +14,6 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
-import { useLocaleKey } from '../../../hooks/useLocaleKey';
 import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
 
@@ -48,7 +47,7 @@ const InputRenderer = ({
   document,
   ...inputProps
 }: InputRendererProps) => {
-  const localeKey = useLocaleKey();
+  const localeKey = document?.document?.locale || 'default';
   const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const {
     edit: { components },
