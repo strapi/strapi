@@ -7,7 +7,6 @@ import { useIntl } from 'react-intl';
 
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
-import { useLocaleKey } from '../../../../../hooks/useLocaleKey';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
@@ -46,8 +45,6 @@ const ComponentInput = ({
   const {
     currentDocument: { components },
   } = useDocumentContext('ComponentInput');
-
-  const localeKey = useLocaleKey();
 
   const handleInitialisationClick = () => {
     const schema = components[attribute.component];
@@ -90,24 +87,12 @@ const ComponentInput = ({
         <Initializer disabled={disabled} name={name} onClick={handleInitialisationClick} />
       )}
       {!attribute.repeatable && field.value ? (
-        <NonRepeatableComponent
-          key={`nonRepeatable-${name}-${localeKey}`}
-          attribute={attribute}
-          name={name}
-          disabled={disabled}
-          {...props}
-        >
+        <NonRepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>
           {props.children}
         </NonRepeatableComponent>
       ) : null}
       {attribute.repeatable && (
-        <RepeatableComponent
-          key={`repeatable-${name}-${localeKey}`}
-          attribute={attribute}
-          name={name}
-          disabled={disabled}
-          {...props}
-        >
+        <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>
           {props.children}
         </RepeatableComponent>
       )}

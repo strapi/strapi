@@ -3,8 +3,6 @@ import * as React from 'react';
 import { useField, type InputProps } from '@strapi/admin/strapi-admin';
 import { Field, Flex } from '@strapi/design-system';
 
-import { useLocaleKey } from '../../../../../hooks/useLocaleKey';
-
 import { BlocksEditor } from './BlocksEditor';
 
 import type { Schema } from '@strapi/types';
@@ -19,14 +17,11 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
     const id = React.useId();
     const field = useField(name);
 
-    const localeKey = useLocaleKey();
-
     return (
       <Field.Root id={id} name={name} hint={hint} error={field.error} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
           <Field.Label action={labelAction}>{label}</Field.Label>
           <BlocksEditor
-            key={`blocksEditor-${name}-${localeKey}`}
             name={name}
             error={field.error}
             ref={forwardedRef}

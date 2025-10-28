@@ -1,5 +1,6 @@
 import { CheckCircle, Feather, Pencil, PuzzlePiece } from '@strapi/icons';
 
+import { HOOKS } from './constants/hooks';
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
 import { historyAdmin } from './history';
@@ -46,6 +47,8 @@ export default {
     });
 
     app.registerPlugin(cm.config);
+
+    app.createHook?.(HOOKS.GET_LOCALE_KEY);
 
     app.widgets.register((widgets: WidgetArgs[]) => {
       const lastEditedWidget: WidgetArgs = {

@@ -36,7 +36,6 @@ const {
   INJECT_COLUMN_IN_TABLE,
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
-  GET_LOCALE_KEY,
   MUTATE_SINGLE_TYPES_LINKS,
 } = HOOKS;
 
@@ -135,7 +134,6 @@ class StrapiApp {
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     this.createHook(MUTATE_SINGLE_TYPES_LINKS);
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
-    this.createHook(GET_LOCALE_KEY);
 
     this.router = new Router(getInitialRoutes());
   }

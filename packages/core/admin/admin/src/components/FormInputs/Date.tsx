@@ -4,7 +4,6 @@ import { DatePicker, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
-import { useLocaleKey } from '../../hooks/useLocaleKey';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
@@ -18,8 +17,6 @@ const DateInput = React.forwardRef<HTMLInputElement, InputProps>(
     const [lastValidDate, setLastValidDate] = React.useState<Date | null>(null);
 
     const value = typeof field.value === 'string' ? new Date(field.value) : field.value;
-
-    const localeKey = useLocaleKey();
 
     const handleDateChange = (date: Date | undefined) => {
       if (!date) {
@@ -40,7 +37,6 @@ const DateInput = React.forwardRef<HTMLInputElement, InputProps>(
       <Field.Root error={field.error} name={name} hint={hint} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
         <DatePicker
-          key={`inputDate-${name}-${localeKey}`}
           ref={composedRefs}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onChange={handleDateChange}

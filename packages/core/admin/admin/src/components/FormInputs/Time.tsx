@@ -1,15 +1,14 @@
-import * as React from 'react';
+import { forwardRef, memo } from 'react';
 
 import { TimePicker, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
-import { useLocaleKey } from '../../hooks/useLocaleKey';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const TimeInput = React.forwardRef<HTMLInputElement, InputProps>(
+const TimeInput = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const { formatMessage } = useIntl();
     const field = useField<string>(name);
@@ -17,13 +16,10 @@ const TimeInput = React.forwardRef<HTMLInputElement, InputProps>(
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
-    const localeKey = useLocaleKey();
-
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
         <TimePicker
-          key={`inputTime-${name}-${localeKey}`}
           ref={composedRefs}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onChange={(time) => {
@@ -40,6 +36,6 @@ const TimeInput = React.forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-const MemoizedTimeInput = React.memo(TimeInput);
+const MemoizedTimeInput = memo(TimeInput);
 
 export { MemoizedTimeInput as TimeInput };

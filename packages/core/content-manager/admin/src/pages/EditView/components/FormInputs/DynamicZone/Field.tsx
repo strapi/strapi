@@ -13,7 +13,6 @@ import { useIntl } from 'react-intl';
 
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
-import { useLocaleKey } from '../../../../../hooks/useLocaleKey';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
@@ -64,8 +63,6 @@ const DynamicZone = ({
   const {
     currentDocument: { components, isLoading },
   } = useDocumentContext('DynamicZone');
-
-  const localeKey = useLocaleKey();
 
   const disabled = disabledProp || isLoading;
   const { addFieldRow, removeFieldRow, moveFieldRow } = useForm(
@@ -278,7 +275,6 @@ const DynamicZone = ({
                   type="dynamiczone"
                 >
                   <DynamicComponent
-                    key={`dynamicComponent-${field.__temp_key__}-${localeKey}`}
                     disabled={disabled}
                     name={name}
                     index={index}

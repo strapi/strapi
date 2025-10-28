@@ -47,7 +47,6 @@ import {
   UseDragAndDropOptions,
   useDragAndDrop,
 } from '../../../../../hooks/useDragAndDrop';
-import { useLocaleKey } from '../../../../../hooks/useLocaleKey';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
@@ -501,8 +500,6 @@ const RelationsInput = ({
 
   const field = useField<RelationsFormValue>(name);
 
-  const localeKey = useLocaleKey();
-
   const searchParamsDebounced = useDebounce(searchParams, 300);
   const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
 
@@ -624,7 +621,6 @@ const RelationsInput = ({
       <Field.Label action={labelAction}>{label}</Field.Label>
       <DocumentRBAC permissions={permissions} model={relation.model}>
         <RelationModalWithContext
-          key={`relationModal-${name}-${localeKey}`}
           relation={relation}
           name={name}
           placeholder={placeholder}

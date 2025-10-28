@@ -24,7 +24,6 @@ import { styled, keyframes } from 'styled-components';
 
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { useDocumentContext } from '../../../../hooks/useDocumentContext';
-import { useLocaleKey } from '../../../../hooks/useLocaleKey';
 import { CLONE_PATH } from '../../../../router';
 import {
   useGenerateUIDMutation,
@@ -62,7 +61,6 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();
     const params = React.useMemo(() => buildValidParams(query), [query]);
-    const localeKey = useLocaleKey();
 
     const { regex } = attribute;
     const validationRegExp = regex ? new RegExp(regex) : UID_REGEX;
@@ -199,7 +197,6 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
       <Field.Root hint={hint} name={name} error={field.error} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
         <TextInput
-          key={`uidInput-${name}-${localeKey}`}
           ref={composedRefs}
           disabled={props.disabled}
           endAction={

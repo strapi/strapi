@@ -4,7 +4,6 @@ import { useField, useStrapiApp, type InputProps } from '@strapi/admin/strapi-ad
 import { Field, Flex } from '@strapi/design-system';
 import { EditorFromTextArea } from 'codemirror5';
 
-import { useLocaleKey } from '../../../../../hooks/useLocaleKey';
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 
 import { Editor, EditorApi } from './Editor';
@@ -31,7 +30,6 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     const [mediaLibVisible, setMediaLibVisible] = React.useState(false);
     const [isExpandMode, setIsExpandMode] = React.useState(false);
     const components = useStrapiApp('ImageDialog', (state) => state.components);
-    const localeKey = useLocaleKey();
     const MediaLibraryDialog = components['media-library'];
 
     const handleToggleMediaLib = () => setMediaLibVisible((prev) => !prev);
@@ -72,7 +70,6 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
             />
 
             <Editor
-              key={`wysiwygEditor-${name}-${localeKey}`}
               disabled={disabled}
               isExpandMode={isExpandMode}
               editorRef={editorRef}

@@ -14,6 +14,7 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
+import { useLocaleKey } from '../../../hooks/useLocaleKey';
 import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
 
@@ -47,6 +48,7 @@ const InputRenderer = ({
   document,
   ...inputProps
 }: InputRendererProps) => {
+  const localeKey = useLocaleKey();
   const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const {
     edit: { components },
@@ -129,6 +131,7 @@ const InputRenderer = ({
 
     return (
       <FormInputRenderer
+        key={`input-${props.name}-${localeKey}`}
         {...props}
         {...previewProps}
         hint={hint}
@@ -147,6 +150,7 @@ const InputRenderer = ({
     const CustomInput = fields[props.type];
     return (
       <CustomInput
+        key={`input-${props.name}-${localeKey}`}
         {...props}
         // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
         hint={hint}
@@ -161,32 +165,77 @@ const InputRenderer = ({
    */
   switch (props.type) {
     case 'blocks':
-      return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      return (
+        <BlocksInput
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          type={props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'component':
       return (
         <ComponentInput
+          key={`input-${props.name}-${localeKey}`}
           {...props}
           hint={hint}
           layout={components[props.attribute.component].layout}
           disabled={fieldIsDisabled}
         >
-          {(componentInputProps) => <InputRenderer {...componentInputProps} />}
+          {(componentInputProps) => (
+            <InputRenderer
+              key={`input-${componentInputProps.name}-${localeKey}`}
+              {...componentInputProps}
+            />
+          )}
         </ComponentInput>
       );
     case 'dynamiczone':
-      return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <DynamicZone
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'relation':
-      return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <RelationsInput
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'richtext':
-      return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      return (
+        <Wysiwyg
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          type={props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'uid':
-      return <UIDInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      return (
+        <UIDInput
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          type={props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
     /**
      * Enumerations are a special case because they require options.
      */
     case 'enumeration':
       return (
         <FormInputRenderer
+          key={`input-${props.name}-${localeKey}`}
           {...props}
           {...previewProps}
           hint={hint}
@@ -201,6 +250,7 @@ const InputRenderer = ({
       const { unique: _unique, mainField: _mainField, ...restProps } = props;
       return (
         <FormInputRenderer
+          key={`input-${props.name}-${localeKey}`}
           {...restProps}
           {...previewProps}
           hint={hint}

@@ -1,15 +1,14 @@
-import * as React from 'react';
+import { forwardRef, memo } from 'react';
 
 import { DateTimePicker, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
-import { useLocaleKey } from '../../hooks/useLocaleKey';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const DateTimeInput = React.forwardRef<HTMLInputElement, InputProps>(
+const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const { formatMessage } = useIntl();
     const field = useField<string | null>(name);
@@ -18,13 +17,10 @@ const DateTimeInput = React.forwardRef<HTMLInputElement, InputProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
     const value = typeof field.value === 'string' ? new Date(field.value) : field.value;
 
-    const localeKey = useLocaleKey();
-
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
         <DateTimePicker
-          key={`inputDateTime-${name}-${localeKey}`}
           ref={composedRefs}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onChange={(date) => {
@@ -42,6 +38,6 @@ const DateTimeInput = React.forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-const MemoizedDateTimeInput = React.memo(DateTimeInput);
+const MemoizedDateTimeInput = memo(DateTimeInput);
 
 export { MemoizedDateTimeInput as DateTimeInput };

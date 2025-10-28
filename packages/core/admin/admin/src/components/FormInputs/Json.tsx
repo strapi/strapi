@@ -8,7 +8,6 @@ import {
 } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
-import { useLocaleKey } from '../../hooks/useLocaleKey';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
@@ -20,13 +19,10 @@ const JsonInput = React.forwardRef<JSONInputRef, InputProps>(
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
-    const localeKey = useLocaleKey();
-
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
         <JSONInputImpl
-          key={`inputJson-${name}-${localeKey}`}
           ref={composedRefs}
           value={
             typeof field.value === 'object' ||
