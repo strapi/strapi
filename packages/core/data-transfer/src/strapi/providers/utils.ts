@@ -1,5 +1,8 @@
 import { randomUUID } from 'crypto';
 import { RawData, WebSocket } from 'ws';
+import { URL } from 'url';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 import type { Client, Server } from '../../../types/remote/protocol';
 
@@ -189,9 +192,55 @@ export const connectToWebsocket = (
   diagnostics?: IDiagnosticReporter
 ): Promise<WebSocket> => {
   return new Promise((resolve, reject) => {
-    const server = new WebSocket(address, options);
+    // Check for proxy configuration from global agent settings set by Strapi
+    const globalProxyHttp = (global as any).GLOBAL_AGENT?.HTTP_PROXY;
+    const globalProxyHttps = (global as any).GLOBAL_AGENT?.HTTPS_PROXY;
+
+    // Prepare WebSocket options with proxy agent if needed
+    const wsOptions: Options = { ...options };
+
+    if (globalProxyHttp || globalProxyHttps) {
+      try {
+        // Parse the WebSocket URL to determine protocol
+        const wsUrl = new URL(address.toString());
+        const isSecure = wsUrl.protocol === 'wss:';
+
+        // Choose the appropriate proxy based on the WebSocket protocol
+        const proxyUrl = isSecure ? globalProxyHttps : globalProxyHttp;
+
+        if (proxyUrl) {
+          // Create the appropriate proxy agent
+          if (isSecure) {
+            wsOptions.agent = new HttpsProxyAgent(proxyUrl);
+          } else {
+            wsOptions.agent = new HttpProxyAgent(proxyUrl);
+          }
+
+          console.debug(
+            `[Data Transfer] Using ${isSecure ? 'HTTPS' : 'HTTP'} proxy agent for WebSocket: ${proxyUrl}`
+          );
+        }
+      } catch (error) {
+        console.warn(
+          `[Data Transfer] Failed to parse WebSocket URL or create proxy agent: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      }
+    }
+
+    const server = new WebSocket(address, wsOptions);
+
     server.once('open', () => {
       resolve(server);
+    });
+
+    server.once('error', (err) => {
+      reject(
+        new ProviderTransferError(err.message, {
+          details: {
+            error: err.message,
+          },
+        })
+      );
     });
 
     server.on('unexpected-response', (_req, res) => {
@@ -233,16 +282,6 @@ export const connectToWebsocket = (
           ...response.diagnostic,
         });
       }
-    });
-
-    server.once('error', (err) => {
-      reject(
-        new ProviderTransferError(err.message, {
-          details: {
-            error: err.message,
-          },
-        })
-      );
     });
   });
 };

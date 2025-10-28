@@ -49,6 +49,8 @@
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
     "fs-extra": "11.2.0",
+    "http-proxy-agent": "5.0.0",
+    "https-proxy-agent": "5.0.1",
     "inquirer": "8.2.5",
     "lodash": "4.17.21",
     "ora": "5.4.1",
