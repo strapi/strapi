@@ -19,7 +19,7 @@ try {
 
   // Install Husky
   console.log('Installing Husky...');
-  execSync('yarn husky install', { stdio: 'inherit' });
+  execSync('./node_modules/.bin/husky install', { stdio: 'inherit' });
 
   // Manually create symlinks if they don't exist
   const preCommitHook = path.join('.git', 'hooks', 'pre-commit');
