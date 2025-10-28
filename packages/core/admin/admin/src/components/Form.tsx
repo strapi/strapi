@@ -162,7 +162,6 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       isSubmitting: false,
       values: props.initialValues ?? {},
     });
-    const [initialValuesVersion, setInitialValuesVersion] = React.useState(0);
 
     React.useEffect(() => {
       /**
@@ -308,7 +307,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     const modified = React.useMemo(
       () => !isEqual(initialValues.current, state.values),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [state.values, initialValuesVersion]
+      [state.values, initialValues.current]
     );
 
     const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
@@ -419,7 +418,6 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     const resetForm: FormContextValue['resetForm'] = React.useCallback((newInitialValues) => {
       if (newInitialValues) {
         initialValues.current = newInitialValues;
-        setInitialValuesVersion((prev) => prev + 1);
       }
       dispatch({
         type: 'RESET_FORM',
