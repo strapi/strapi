@@ -11,7 +11,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
-  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation'];
+  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation', 'boolean'];
   const IGNORED_FIELDS = [
     'id',
     'documentId',
