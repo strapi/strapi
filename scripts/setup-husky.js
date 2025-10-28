@@ -7,6 +7,16 @@ const path = require('path');
 console.log('Setting up Husky Git hooks...');
 
 try {
+  // Skip in CI or when explicitly disabled
+  const isCI = process.env.CI;
+  const huskyDisabled = process.env.HUSKY === '0' || process.env.HUSKY_SKIP_INSTALL === '1';
+  const hasGitDir = fs.existsSync(path.join(process.cwd(), '.git'));
+
+  if (isCI || huskyDisabled || !hasGitDir) {
+    console.log('Skipping Husky setup.');
+    process.exit(0);
+  }
+
   // Install Husky
   console.log('Installing Husky...');
   execSync('yarn husky install', { stdio: 'inherit' });
