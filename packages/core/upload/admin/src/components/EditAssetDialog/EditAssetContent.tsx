@@ -5,7 +5,6 @@
  */
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Field,
@@ -24,6 +23,7 @@ import * as yup from 'yup';
 
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
+import { useTracking } from '../../hooks/useTracking';
 import { findRecursiveFolderByValue, getTrad, getFileExtension, formatBytes } from '../../utils';
 import { ContextInfo } from '../ContextInfo/ContextInfo';
 import { SelectTree } from '../SelectTree/SelectTree';
