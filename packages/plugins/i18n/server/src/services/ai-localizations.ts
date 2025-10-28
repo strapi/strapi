@@ -11,7 +11,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
-  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation'];
+  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation', 'boolean'];
   const IGNORED_FIELDS = [
     'id',
     'documentId',
@@ -123,7 +123,13 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         document
       );
 
-      // Call the AI server to get the localized content
+      if (Object.keys(translateableContent).length === 0) {
+        strapi.log.info(
+          `AI Localizations: no translatable content for ${schema.uid} document ${documentId}`
+        );
+        return;
+      }
+
       const localesList = await localeService.find();
       const targetLocales = localesList
         .filter((l) => l.code !== document.locale)
