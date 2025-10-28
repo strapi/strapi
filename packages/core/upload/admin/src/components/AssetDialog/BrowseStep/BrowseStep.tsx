@@ -459,7 +459,7 @@ export const BrowseStep = ({
           paddingTop={4}
           position="relative"
           zIndex={1}
-          style={{ overflow: 'hidden' }}
+          overflow="hidden"
         >
           <PageSize
             pageSize={queryObject.pageSize! as number}
