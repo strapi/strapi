@@ -6,6 +6,8 @@ import type { Core, UID, Modules } from '@strapi/types';
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 import { getPopulateForValidation } from './utils/populate';
 
+const { getScalarAttributes } = contentTypes;
+
 export interface DocumentVersion {
   id: string | number;
   documentId: Modules.Documents.ID;
@@ -216,16 +218,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // i18n is disabled
     const { populate = {}, fields = [] } = getPopulateForValidation(uid);
 
-    // Include non-translatable fields in availableLocales for i18n prefilling
+    // Include non-translatable scalar fields in availableLocales for i18n prefilling
     let nonLocalizedFields: string[] = [];
     try {
-      const i18nService = strapi.plugin('i18n')?.service('content-types');
-      if (i18nService?.getNonLocalizedAttributes) {
-        const model = strapi.getModel(uid);
-        nonLocalizedFields = i18nService.getNonLocalizedAttributes(model);
+      const i18nPlugin = strapi.plugin('i18n');
+      if (i18nPlugin) {
+        const i18nService = i18nPlugin.service('content-types');
+        if (i18nService?.getNonLocalizedAttributes) {
+          const model = strapi.getModel(uid);
+          if (model?.attributes) {
+            const allNonLocalized = i18nService.getNonLocalizedAttributes(model);
+            // Get only scalar attributes (components, relations, etc. can't be in fields array)
+            const scalarAttrs = getScalarAttributes(model);
+            // Only include scalar, non-localized fields that actually exist in the model
+            nonLocalizedFields = allNonLocalized.filter(
+              (field: string) => field in model.attributes && scalarAttrs.includes(field)
+            );
+          }
+        }
       }
-    } catch {
-      // i18n plugin might not be enabled, ignore
+    } catch (error) {
+      // i18n plugin might not be enabled or might error, ignore silently
     }
 
     const params = {
