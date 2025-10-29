@@ -16,10 +16,9 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
     await navToHeader(page, ['Content-Type Builder', 'Cat'], 'Cat');
 
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
-    await page.getByRole('button', { name: 'Enumeration List of values,' }).click();
+    await page.getByRole('button', { name: 'Enumeration' }).click();
     await page.getByLabel('Name', { exact: true }).fill('hair');
-    await page.getByPlaceholder('Ex:\nmorning\nnoon\nevening').click();
-    await page.getByPlaceholder('Ex:\nmorning\nnoon\nevening').fill('White\nBlack');
+    await page.getByLabel('Values (one line per value)').fill('White\nBlack');
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByLabel('Required field').click();
     await page.getByRole('button', { name: 'Finish' }).click();
