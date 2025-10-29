@@ -20,7 +20,7 @@
   "CMEditViewBulkLocale.continue-confirmation": "Are you sure you want to continue?",
   "CMEditViewAITranslation.status-aria-label": "AI Translation Status",
   "CMEditViewAITranslation.status-title": "{enabled, select, true {AI translation enabled} false {AI translation disabled} other {AI translation disabled}}",
-  "CMEditViewAITranslation.status-description": "Our AI translates content in all locales each time you save a modification.",
+  "CMEditViewAITranslation.status-description": "Our AI translates content in all locales each time you save a modification in the default locale.",
   "CMEditViewAITranslation.settings-link": "{enabled, select, true {Disable it in settings} false {Enable it in settings} other {Enable it in settings}}",
   "CMEditViewAITranslation.job-completed": "AI translation completed successfully!",
   "CMEditViewAITranslation.job-failed": "AI translation failed. Please try again.",
