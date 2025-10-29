@@ -987,7 +987,7 @@ border:1px solid #eaeaef .c22:focus-within .c27 {
                         <ul
                           class="c42"
                           id=":r9:"
-                          style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
+                          style="max-height: 9999px; overflow: hidden; transition: max-height 1s ease-in-out;"
                         >
                           <li
                             class="c54"
@@ -1061,7 +1061,7 @@ border:1px solid #eaeaef .c22:focus-within .c27 {
                         <ul
                           class="c42"
                           id=":ra:"
-                          style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
+                          style="max-height: 9999px; overflow: hidden; transition: max-height 1s ease-in-out;"
                         >
                           <li
                             class="c54"
