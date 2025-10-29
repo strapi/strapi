@@ -37,7 +37,9 @@ import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useAILocalizationJobsPolling } from '../hooks/useAILocalizationJobsPolling';
 import { useI18n } from '../hooks/useI18n';
+import { useGetAILocalizationJobsByDocumentQuery } from '../services/aiLocalizationJobs';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
 import { useGetSettingsQuery } from '../services/settings';
@@ -60,6 +62,7 @@ interface LocaleOptionProps {
   locale: Locale;
   status: 'draft' | 'published' | 'modified';
   entryExists: boolean;
+  translationStatus?: 'processing' | 'failed' | 'completed' | undefined;
 }
 
 const statusVariants: Record<LocaleOptionProps['status'], StatusVariant> = {
@@ -111,6 +114,28 @@ const LocaleOption = ({
   );
 };
 
+const LocaleOptionStartIcon = ({
+  entryWithLocaleExists,
+  translationStatus,
+  index,
+}: {
+  entryWithLocaleExists: boolean;
+  translationStatus?: 'processing' | 'failed' | 'completed' | undefined;
+  index?: number;
+}) => {
+  const isAiAvailable = useAIAvailability();
+
+  if (!entryWithLocaleExists) {
+    return <Plus />;
+  }
+
+  if (isAiAvailable && index !== 0 && translationStatus === 'failed') {
+    return <WarningCircle fill="warning600" />;
+  }
+
+  return null;
+};
+
 const LocalePickerAction = ({
   document,
   meta,
@@ -129,6 +154,14 @@ const LocalePickerAction = ({
     documentId,
     params: { locale: currentDesiredLocale },
   });
+  const { data: jobData } = useGetAILocalizationJobsByDocumentQuery({
+    documentId: documentId!,
+    model: model!,
+    collectionType: collectionType!,
+  });
+  const { data: settings } = useGetSettingsQuery();
+  const isAiAvailable = useAIAvailability();
+  const setValues = useForm('LocalePickerAction', (state) => state.setValues);
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -143,6 +176,57 @@ const LocalePickerAction = ({
     },
     [query.plugins, setQuery]
   );
+
+  const nonTranslatedFields = React.useMemo(() => {
+    if (!schema?.attributes) return [];
+    return Object.keys(schema.attributes).filter((field) => {
+      const attribute = schema.attributes[field] as Record<string, unknown>;
+      return (attribute?.pluginOptions as any)?.i18n?.localized === false;
+    });
+  }, [schema?.attributes]);
+
+  const sourceLocaleData = React.useMemo(() => {
+    if (!Array.isArray(locales) || !meta?.availableLocales) return null;
+
+    const defaultLocale = locales.find((locale: Locale) => locale.isDefault);
+    const existingLocales = meta.availableLocales.map((loc) => loc.locale);
+
+    const sourceLocaleCode =
+      defaultLocale &&
+      existingLocales.includes(defaultLocale.code) &&
+      defaultLocale.code !== currentDesiredLocale
+        ? defaultLocale.code
+        : existingLocales.find((locale) => locale !== currentDesiredLocale);
+
+    if (!sourceLocaleCode) return null;
+
+    // Find the document data from availableLocales (now includes non-translatable fields)
+    const sourceLocaleDoc = meta.availableLocales.find((loc) => loc.locale === sourceLocaleCode);
+
+    return sourceLocaleDoc
+      ? { locale: sourceLocaleCode, data: sourceLocaleDoc as Record<string, unknown> }
+      : null;
+  }, [locales, meta?.availableLocales, currentDesiredLocale]);
+
+  /**
+   * Prefilling form with non-translatable fields from already existing locale
+   */
+  React.useEffect(() => {
+    // Only run when creating a new locale (no document ID yet) and when we have non-translatable fields
+    if (!document?.id && nonTranslatedFields.length > 0 && sourceLocaleData?.data) {
+      const dataToSet = nonTranslatedFields.reduce(
+        (acc: Record<string, unknown>, field: string) => {
+          acc[field] = sourceLocaleData.data[field];
+          return acc;
+        },
+        {}
+      );
+
+      if (Object.keys(dataToSet).length > 0) {
+        setValues(dataToSet);
+      }
+    }
+  }, [document?.id, nonTranslatedFields, sourceLocaleData?.data, setValues]);
 
   React.useEffect(() => {
     if (!Array.isArray(locales) || !hasI18n) {
@@ -193,7 +277,7 @@ const LocalePickerAction = ({
       id: getTranslation('Settings.locales.modal.locales.label'),
       defaultMessage: 'Locales',
     }),
-    options: displayedLocales.map((locale) => {
+    options: displayedLocales.map((locale, index) => {
       const entryWithLocaleExists = allCurrentLocales.some((doc) => doc.locale === locale.code);
 
       const currentLocaleDoc = allCurrentLocales.find((doc) =>
@@ -201,6 +285,48 @@ const LocalePickerAction = ({
       );
 
       const permissionsToCheck = currentLocaleDoc ? canRead : canCreate;
+
+      if (
+        window.strapi.future.isEnabled('unstableAILocalizations') &&
+        isAiAvailable &&
+        settings?.data?.aiLocalizations
+      ) {
+        return {
+          _render: () => (
+            <React.Fragment key={index}>
+              <SingleSelectOption
+                disabled={!permissionsToCheck.includes(locale.code)}
+                key={locale.code}
+                startIcon={
+                  <LocaleOptionStartIcon
+                    entryWithLocaleExists={entryWithLocaleExists}
+                    translationStatus={jobData?.data?.status}
+                    index={index}
+                  />
+                }
+                value={locale.code}
+              >
+                <LocaleOption
+                  isDraftAndPublishEnabled={!!schema?.options?.draftAndPublish}
+                  locale={locale}
+                  status={currentLocaleDoc?.status}
+                  entryExists={entryWithLocaleExists}
+                />
+              </SingleSelectOption>
+              {index === 0 && (
+                <Box paddingRight={4} paddingLeft={4} paddingTop={2} paddingBottom={2}>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTranslation('CMEditViewLocalePicker.locale.ai-translations'),
+                      defaultMessage: 'AI Translations',
+                    })}
+                  </Typography>
+                </Box>
+              )}
+            </React.Fragment>
+          ),
+        };
+      }
 
       return {
         disabled: !permissionsToCheck.includes(locale.code),
@@ -211,9 +337,10 @@ const LocalePickerAction = ({
             locale={locale}
             status={currentLocaleDoc?.status}
             entryExists={entryWithLocaleExists}
+            translationStatus={jobData?.data?.status}
           />
         ),
-        startIcon: !entryWithLocaleExists ? <Plus /> : null,
+        startIcon: <LocaleOptionStartIcon entryWithLocaleExists={entryWithLocaleExists} />,
       };
     }),
     customizeContent: () => currentLocale?.name,
@@ -275,12 +402,30 @@ const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>
   }
 `;
 
-const AITranslationStatusAction = () => {
+const AITranslationStatusAction = ({ documentId, model, collectionType }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const isAIAvailable = useAIAvailability();
   const { data: settings } = useGetSettingsQuery();
   const isAISettingEnabled = settings?.data?.aiLocalizations;
   const { hasI18n } = useI18n();
+
+  // Poll for AI localizations jobs when AI is enabled and we have a documentId
+  const { status } = useAILocalizationJobsPolling({
+    documentId,
+    model,
+    collectionType,
+  });
+  const statusVariant = (() => {
+    if (status === 'failed') {
+      return 'warning';
+    }
+
+    if (isAISettingEnabled) {
+      return 'alternative';
+    }
+
+    return 'neutral';
+  })();
 
   // Do not display this action when i18n is not available
   if (!hasI18n) {
@@ -294,7 +439,7 @@ const AITranslationStatusAction = () => {
   }
 
   return {
-    status: {
+    _status: {
       message: (
         <Box
           height="100%"
@@ -305,7 +450,7 @@ const AITranslationStatusAction = () => {
         >
           <AITranslationStatusIcon
             $isAISettingEnabled={Boolean(isAISettingEnabled)}
-            variant={isAISettingEnabled ? 'alternative' : 'neutral'}
+            variant={statusVariant}
             size="S"
           >
             <Sparkle />
