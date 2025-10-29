@@ -56,22 +56,26 @@ const registerModelsHooks = () => {
     }
 
     if (attributesToPopulate.length > 0) {
-      const populatedResult = await strapi.db
-        .query(schema.uid)
-        .findOne({ where: { id: resultID }, populate: attributesToPopulate });
+      try {
+        const populatedResult = await strapi.db
+          .query(schema.uid)
+          .findOne({ where: { id: resultID }, populate: attributesToPopulate });
 
-      const currentFields = copyNonLocalizedAttributes(schema, populatedResult);
-      const originalFields = copyNonLocalizedAttributes(schema, originalData);
+        const currentFields = copyNonLocalizedAttributes(schema, populatedResult);
+        const originalFields = copyNonLocalizedAttributes(schema, originalData);
 
-      // Only sync if there are actual changes to non-localized fields
-      const shouldSync =
-        !originalData ||
-        Object.keys(currentFields).some(
-          (key) => JSON.stringify(currentFields[key]) !== JSON.stringify(originalFields[key])
-        );
+        // Only sync if there are actual changes to non-localized fields
+        const shouldSync =
+          !originalData ||
+          Object.keys(currentFields).some(
+            (key) => JSON.stringify(currentFields[key]) !== JSON.stringify(originalFields[key])
+          );
 
-      if (shouldSync) {
-        await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+        if (shouldSync) {
+          await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+        }
+      } catch (error) {
+        strapi.log.error('Failed to sync non-localized attributes:', error);
       }
     }
 
