@@ -254,16 +254,10 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
               }
             }
 
-            /**
-             * TODO:
-             * We should use the document service here, however currently,
-             * updating a localized entry marks the source document as modified.
-             * @see https://github.com/strapi/strapi/issues/22924
-             *
-             * Falling back to the query engine to preserve the correct status
-             */
-            await strapi.db.query(model).update({
-              where: { documentId, locale },
+            await strapi.documents(model).update({
+              documentId,
+              locale,
+              fields: [],
               data: mergedData,
             });
 
