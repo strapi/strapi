@@ -162,7 +162,6 @@ const LocalePickerAction = ({
   const { data: settings } = useGetSettingsQuery();
   const isAiAvailable = useAIAvailability();
   const setValues = useForm('LocalePickerAction', (state) => state.setValues);
-  const { getDocument } = useDocumentActions();
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -186,65 +185,48 @@ const LocalePickerAction = ({
     });
   }, [schema?.attributes]);
 
-  const sourceLocale = React.useMemo(() => {
+  const sourceLocaleData = React.useMemo(() => {
     if (!Array.isArray(locales) || !meta?.availableLocales) return null;
 
     const defaultLocale = locales.find((locale: Locale) => locale.isDefault);
     const existingLocales = meta.availableLocales.map((loc) => loc.locale);
 
-    return defaultLocale &&
+    const sourceLocaleCode =
+      defaultLocale &&
       existingLocales.includes(defaultLocale.code) &&
       defaultLocale.code !== currentDesiredLocale
-      ? defaultLocale.code
-      : existingLocales.find((locale) => locale !== currentDesiredLocale);
+        ? defaultLocale.code
+        : existingLocales.find((locale) => locale !== currentDesiredLocale);
+
+    if (!sourceLocaleCode) return null;
+
+    // Find the document data from availableLocales (now includes non-translatable fields)
+    const sourceLocaleDoc = meta.availableLocales.find((loc) => loc.locale === sourceLocaleCode);
+
+    return sourceLocaleDoc
+      ? { locale: sourceLocaleCode, data: sourceLocaleDoc as Record<string, unknown> }
+      : null;
   }, [locales, meta?.availableLocales, currentDesiredLocale]);
-
-  const fetchSourceLocaleData = React.useCallback(async () => {
-    if (!sourceLocale || !documentId) return;
-
-    try {
-      const response = await getDocument({
-        collectionType,
-        model,
-        documentId,
-        params: { locale: sourceLocale },
-      });
-
-      if (response?.data && nonTranslatedFields.length > 0) {
-        const dataToSet = nonTranslatedFields.reduce(
-          (acc: Record<string, unknown>, field: string) => {
-            acc[field] = response.data[field];
-            return acc;
-          },
-          {}
-        );
-
-        if (Object.keys(dataToSet).length > 0) {
-          setValues(dataToSet);
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to fetch source locale data for non-translatable fields:', error);
-    }
-  }, [
-    sourceLocale,
-    documentId,
-    collectionType,
-    model,
-    getDocument,
-    nonTranslatedFields,
-    setValues,
-  ]);
 
   /**
    * Prefilling form with non-translatable fields from already existing locale
    */
   React.useEffect(() => {
     // Only run when creating a new locale (no document ID yet) and when we have non-translatable fields
-    if (!document?.id && nonTranslatedFields.length > 0 && sourceLocale) {
-      fetchSourceLocaleData();
+    if (!document?.id && nonTranslatedFields.length > 0 && sourceLocaleData?.data) {
+      const dataToSet = nonTranslatedFields.reduce(
+        (acc: Record<string, unknown>, field: string) => {
+          acc[field] = sourceLocaleData.data[field];
+          return acc;
+        },
+        {}
+      );
+
+      if (Object.keys(dataToSet).length > 0) {
+        setValues(dataToSet);
+      }
     }
-  }, [document?.id, nonTranslatedFields.length, sourceLocale, fetchSourceLocaleData]);
+  }, [document?.id, nonTranslatedFields, sourceLocaleData?.data, setValues]);
 
   React.useEffect(() => {
     if (!Array.isArray(locales) || !hasI18n) {

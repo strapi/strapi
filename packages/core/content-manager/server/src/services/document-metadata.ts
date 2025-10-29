@@ -216,6 +216,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // i18n is disabled
     const { populate = {}, fields = [] } = getPopulateForValidation(uid);
 
+    // Include non-translatable fields in availableLocales for i18n prefilling
+    let nonLocalizedFields: string[] = [];
+    try {
+      const i18nService = strapi.plugin('i18n')?.service('content-types');
+      if (i18nService?.getNonLocalizedAttributes) {
+        const model = strapi.getModel(uid);
+        nonLocalizedFields = i18nService.getNonLocalizedAttributes(model);
+      }
+    } catch {
+      // i18n plugin might not be enabled, ignore
+    }
+
     const params = {
       populate: {
         ...populate,
@@ -227,7 +239,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           select: ['id', 'firstname', 'lastname', 'email'],
         },
       },
-      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...fields]),
+      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...fields, ...nonLocalizedFields]),
       filters: {
         documentId: version.documentId,
       },
