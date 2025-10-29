@@ -220,12 +220,16 @@ const LocalePickerAction = ({
     return canRead.includes(locale.code);
   });
 
+  const localesSortingDefaultFirst = displayedLocales.sort((a, b) =>
+    a.isDefault ? -1 : b.isDefault ? 1 : 0
+  );
+
   return {
     label: formatMessage({
       id: getTranslation('Settings.locales.modal.locales.label'),
       defaultMessage: 'Locales',
     }),
-    options: displayedLocales.map((locale, index) => {
+    options: localesSortingDefaultFirst.map((locale, index) => {
       const entryWithLocaleExists = allCurrentLocales.some((doc) => doc.locale === locale.code);
 
       const currentLocaleDoc = allCurrentLocales.find((doc) =>
