@@ -220,12 +220,16 @@ const LocalePickerAction = ({
     return canRead.includes(locale.code);
   });
 
+  const localesSortingDefaultFirst = displayedLocales.sort((a, b) =>
+    a.isDefault ? -1 : b.isDefault ? 1 : 0
+  );
+
   return {
     label: formatMessage({
       id: getTranslation('Settings.locales.modal.locales.label'),
       defaultMessage: 'Locales',
     }),
-    options: displayedLocales.map((locale, index) => {
+    options: localesSortingDefaultFirst.map((locale, index) => {
       const entryWithLocaleExists = allCurrentLocales.some((doc) => doc.locale === locale.code);
 
       const currentLocaleDoc = allCurrentLocales.find((doc) =>
@@ -257,7 +261,7 @@ const LocalePickerAction = ({
                   entryExists={entryWithLocaleExists}
                 />
               </SingleSelectOption>
-              {index === 0 && (
+              {localesSortingDefaultFirst.length > 1 && index === 0 && (
                 <Box paddingRight={4} paddingLeft={4} paddingTop={2} paddingBottom={2}>
                   <Typography variant="sigma">
                     {formatMessage({
