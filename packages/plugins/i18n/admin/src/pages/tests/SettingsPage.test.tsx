@@ -60,9 +60,6 @@ describe('Settings Page', () => {
   it('should display AI translations section when AI is available', async () => {
     (useAIAvailability as jest.Mock).mockReturnValue(true);
 
-    // TODO: remove mocked future flag after stable release
-    window.strapi.future.isEnabled = jest.fn((flag: string) => flag === 'unstableAILocalizations');
-
     render(<SettingsPage />);
 
     // Wait for the page to load completely
@@ -79,9 +76,6 @@ describe('Settings Page', () => {
 
   it('should not display AI translations section when AI is not available', async () => {
     (useAIAvailability as jest.Mock).mockReturnValue(false);
-
-    // TODO: remove mocked future flag after stable release
-    window.strapi.future.isEnabled = jest.fn((flag: string) => flag === 'unstableAILocalizations');
 
     render(<SettingsPage />);
 
