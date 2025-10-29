@@ -418,6 +418,19 @@ const getLanguagesInUse = async (): Promise<string[]> => {
 };
 
 /**
+ * In-memory cache for AI tokens
+ * Key format: `${projectId}:${userId}`
+ */
+const aiTokenCache = new Map<
+  string,
+  {
+    token: string;
+    expiresAt?: string;
+    expiresAtMs?: number;
+  }
+>();
+
+/**
  * Generate an AI token for the user performing the request
  */
 const getAiToken = async (): Promise<{ token: string; expiresAt?: string }> => {
@@ -472,6 +485,28 @@ const getAiToken = async (): Promise<{ token: string; expiresAt?: string }> => {
   if (!projectId) {
     strapi.log.error(`${ERROR_PREFIX} Project ID not configured`);
     throw new Error('AI token request failed. Check server logs for details.');
+  }
+
+  // Check cache for existing valid token
+  const cacheKey = `${projectId}:${userIdentifier}`;
+  const cachedToken = aiTokenCache.get(cacheKey);
+
+  if (cachedToken) {
+    const now = Date.now();
+    // Check if token is still valid (with buffer so it has time to  to be used)
+    const bufferMs = 2 * 60 * 1000; // 2 minutes
+
+    if (cachedToken.expiresAtMs && cachedToken.expiresAtMs - bufferMs > now) {
+      strapi.log.info('Using cached AI token');
+
+      return {
+        token: cachedToken.token,
+        expiresAt: cachedToken.expiresAt,
+      };
+    }
+
+    // Token expired or will expire soon, remove from cache
+    aiTokenCache.delete(cacheKey);
   }
 
   strapi.log.http('Contacting AI Server for token generation');
@@ -534,6 +569,16 @@ const getAiToken = async (): Promise<{ token: string; expiresAt?: string }> => {
       userId: user.id,
       expiresAt: data.expiresAt,
     });
+
+    // Cache the token if it has an expiration time
+    if (data.expiresAt) {
+      const expiresAtMs = new Date(data.expiresAt).getTime();
+      aiTokenCache.set(cacheKey, {
+        token: data.jwt,
+        expiresAt: data.expiresAt,
+        expiresAtMs,
+      });
+    }
 
     // Return the AI JWT with metadata
     // Note: Token expires in 1 hour, client should handle refresh
