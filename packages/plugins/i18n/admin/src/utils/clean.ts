@@ -85,9 +85,9 @@ const recursiveRemoveFieldTypes = (
             __temp_key__: index + 1,
           };
         });
-      } else {
+      } else if (data[current]) {
         const { id: _, ...rest } = recursiveRemoveFieldTypes(
-          data[current] ?? {},
+          data[current],
           components[component],
           components,
           fields
