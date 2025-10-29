@@ -3,12 +3,11 @@ import outdent from 'outdent';
 import { appendToFile } from '../extend-plugin-index-files';
 
 describe('Extend-Plugin-Index-Files util', () => {
-
   describe('Empty file handling', () => {
     it('should handle completely empty file with ESM content-type', () => {
       const result = appendToFile('', {
         singularName: 'user',
-        type: 'content-type'
+        type: 'content-type',
       });
 
       expect(result).toContain("import userSchema from './user/schema.json';");
@@ -20,7 +19,7 @@ describe('Extend-Plugin-Index-Files util', () => {
     it('should handle completely empty file with ESM index', () => {
       const result = appendToFile('', {
         singularName: 'product',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("import product from './product';");
@@ -31,12 +30,12 @@ describe('Extend-Plugin-Index-Files util', () => {
     it('should handle whitespace-only file', () => {
       const result = appendToFile('   \n\n  ', {
         singularName: 'category',
-        type: 'routes'
+        type: 'routes',
       });
 
       expect(result).toContain("import category from './category';");
       expect(result).toContain('export default () => ({');
-      expect(result).toContain('type: \'content-api\',');
+      expect(result).toContain("type: 'content-api',");
       expect(result).toContain('routes: [...category.routes]');
     });
   });
@@ -46,7 +45,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       const template = 'export default {};';
       const result = appendToFile(template, {
         singularName: 'article',
-        type: 'content-type'
+        type: 'content-type',
       });
 
       expect(result).toContain("import articleSchema from './article/schema.json';");
@@ -64,7 +63,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newItem',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("import newItem from './newItem';");
@@ -76,12 +75,12 @@ describe('Extend-Plugin-Index-Files util', () => {
       const template = 'export default {};';
       const result = appendToFile(template, {
         singularName: 'order',
-        type: 'routes'
+        type: 'routes',
       });
 
       expect(result).toContain("import order from './order';");
       expect(result).toContain('export default () => ({');
-      expect(result).toContain('type: \'content-api\'');
+      expect(result).toContain("type: 'content-api'");
       expect(result).toContain('...order.routes');
     });
 
@@ -98,7 +97,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newRoute',
-        type: 'routes'
+        type: 'routes',
       });
 
       expect(result).toContain("import newRoute from './newRoute';");
@@ -116,7 +115,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'user',
-        type: 'index'
+        type: 'index',
       });
 
       // Should not duplicate
@@ -133,7 +132,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       const template = 'module.exports = {};';
       const result = appendToFile(template, {
         singularName: 'post',
-        type: 'content-type'
+        type: 'content-type',
       });
 
       expect(result).toContain("const postSchema = require('./post/schema.json');");
@@ -151,7 +150,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'comment',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("const comment = require('./comment');");
@@ -163,12 +162,12 @@ describe('Extend-Plugin-Index-Files util', () => {
       const template = 'module.exports = {};';
       const result = appendToFile(template, {
         singularName: 'review',
-        type: 'routes'
+        type: 'routes',
       });
 
       expect(result).toContain("const review = require('./review');");
       expect(result).toContain('module.exports = () => ({');
-      expect(result).toContain('type: \'content-api\'');
+      expect(result).toContain("type: 'content-api'");
       expect(result).toContain('...review.routes');
     });
 
@@ -182,7 +181,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'tag',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("const tag = require('./tag');");
@@ -199,7 +198,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'product',
-        type: 'index'
+        type: 'index',
       });
 
       // Should not duplicate
@@ -225,7 +224,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newRoute',
-        type: 'routes'
+        type: 'routes',
       });
 
       expect(result).toContain('...existing.routes');
@@ -242,11 +241,11 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'route',
-        type: 'routes'
+        type: 'routes',
       });
 
       expect(result).toContain('export default () => ({');
-      expect(result).toContain('type: \'content-api\'');
+      expect(result).toContain("type: 'content-api'");
       expect(result).toContain('...route.routes');
     });
   });
@@ -264,12 +263,12 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'third',
-        type: 'index'
+        type: 'index',
       });
 
       const lines = result.split('\n');
-      const thirdImportLine = lines.findIndex(line => line.includes("import third from"));
-      const firstImportLine = lines.findIndex(line => line.includes("import first from"));
+      const thirdImportLine = lines.findIndex((line) => line.includes('import third from'));
+      const firstImportLine = lines.findIndex((line) => line.includes('import first from'));
 
       expect(thirdImportLine).toBeGreaterThan(firstImportLine);
       expect(result).toContain('third: third');
@@ -287,12 +286,12 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'third',
-        type: 'index'
+        type: 'index',
       });
 
       const lines = result.split('\n');
-      const thirdRequireLine = lines.findIndex(line => line.includes("const third = require"));
-      const firstRequireLine = lines.findIndex(line => line.includes("const first = require"));
+      const thirdRequireLine = lines.findIndex((line) => line.includes('const third = require'));
+      const firstRequireLine = lines.findIndex((line) => line.includes('const first = require'));
 
       expect(thirdRequireLine).toBeGreaterThan(firstRequireLine);
       expect(result).toContain('third: third');
@@ -304,7 +303,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       const template = 'export default {};';
       const result = appendToFile(template, {
         singularName: 'blogPost',
-        type: 'content-type'
+        type: 'content-type',
       });
 
       expect(result).toContain("import blogPostSchema from './blogPost/schema.json';");
@@ -316,7 +315,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       const template = 'export default {};';
       const result = appendToFile(template, {
         singularName: 'event',
-        type: 'content-type'
+        type: 'content-type',
       });
 
       expect(result).toContain('event: {');
@@ -333,11 +332,11 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newItem',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("import newItem from './newItem';");
-      expect(result).toContain('existing: \'value\'');
+      expect(result).toContain("existing: 'value'");
       expect(result).toContain('newItem: newItem');
     });
 
@@ -351,11 +350,11 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newItem',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("import newItem from './newItem';");
-      expect(result).toContain('existing: \'value\'');
+      expect(result).toContain("existing: 'value'");
       expect(result).toContain('newItem: newItem');
     });
 
@@ -369,11 +368,11 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newItem',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("const newItem = require('./newItem');");
-      expect(result).toContain('existing: \'value\'');
+      expect(result).toContain("existing: 'value'");
       expect(result).toContain('newItem: newItem');
     });
 
@@ -386,7 +385,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newRoute',
-        type: 'routes'
+        type: 'routes',
       });
 
       expect(result).toContain("import newRoute from './newRoute';");
@@ -405,11 +404,11 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newController',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("import newController from './newController';");
-      expect(result).toContain('test: \'value\'');
+      expect(result).toContain("test: 'value'");
       expect(result).toContain('newController: newController');
     });
 
@@ -423,11 +422,11 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newService',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("const newService = require('./newService');");
-      expect(result).toContain('existing: \'service\'');
+      expect(result).toContain("existing: 'service'");
       expect(result).toContain('newService: newService');
     });
 
@@ -441,11 +440,11 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'article',
-        type: 'content-type'
+        type: 'content-type',
       });
 
       expect(result).toContain("import articleSchema from './article/schema.json';");
-      expect(result).toContain('existing: { schema: \'existingSchema\' }');
+      expect(result).toContain("existing: { schema: 'existingSchema' }");
       expect(result).toContain('article: {');
       expect(result).toContain('schema: articleSchema');
     });
@@ -461,7 +460,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newRoute',
-        type: 'routes'
+        type: 'routes',
       });
 
       expect(result).toContain("import newRoute from './newRoute';");
@@ -478,11 +477,11 @@ describe('Extend-Plugin-Index-Files util', () => {
       `;
       const result = appendToFile(template, {
         singularName: 'newItem',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("import newItem from './newItem';");
-      expect(result).toContain('test: \'value\'');
+      expect(result).toContain("test: 'value'");
       expect(result).toContain('newItem: newItem');
     });
   });
@@ -491,7 +490,7 @@ describe('Extend-Plugin-Index-Files util', () => {
     it('should handle hyphenated singular names correctly', () => {
       const result = appendToFile('', {
         singularName: 'my-first-controller',
-        type: 'index'
+        type: 'index',
       });
 
       expect(result).toContain("import myFirstController from './my-first-controller';");
@@ -502,7 +501,7 @@ describe('Extend-Plugin-Index-Files util', () => {
     it('should handle hyphenated names with content-type', () => {
       const result = appendToFile('', {
         singularName: 'my-content-type',
-        type: 'content-type'
+        type: 'content-type',
       });
 
       expect(result).toContain("import myContentTypeSchema from './my-content-type/schema.json';");
@@ -513,7 +512,7 @@ describe('Extend-Plugin-Index-Files util', () => {
     it('should handle hyphenated names with routes', () => {
       const result = appendToFile('', {
         singularName: 'my-route-handler',
-        type: 'routes'
+        type: 'routes',
       });
 
       expect(result).toContain("import myRouteHandler from './my-route-handler';");
@@ -526,7 +525,7 @@ describe('Extend-Plugin-Index-Files util', () => {
       expect(() => {
         appendToFile('export default {};', {
           singularName: '',
-          type: 'index'
+          type: 'index',
         });
       }).toThrow('Invalid config: singularName and type are required');
     });
@@ -534,7 +533,7 @@ describe('Extend-Plugin-Index-Files util', () => {
     it('should throw error for missing type', () => {
       expect(() => {
         appendToFile('export default {};', {
-          singularName: 'test'
+          singularName: 'test',
         } as any);
       }).toThrow('Invalid config: singularName and type are required');
     });
@@ -543,10 +542,9 @@ describe('Extend-Plugin-Index-Files util', () => {
       expect(() => {
         appendToFile('export default {};', {
           singularName: 'test',
-          type: 'unknown-type' as any
+          type: 'unknown-type' as any,
         });
       }).toThrow('Unknown append type: unknown-type');
     });
   });
-
 });

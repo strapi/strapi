@@ -30,7 +30,12 @@ export default (plop: NodePlopAPI) => {
 
       if (answers.plugin) {
         // The tsconfig in plugins is located just outside the server src, not in the root of the plugin.
-        const pluginServerDir = join(currentDir, 'src', filePath.replace('{{ plugin }}', answers.plugin), '../');
+        const pluginServerDir = join(
+          currentDir,
+          'src',
+          filePath.replace('{{ plugin }}', answers.plugin),
+          '../'
+        );
         language = tsUtils.isUsingTypeScriptSync(pluginServerDir) ? 'ts' : 'js';
       }
 

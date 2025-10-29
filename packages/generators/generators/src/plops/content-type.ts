@@ -86,7 +86,12 @@ export default (plop: NodePlopAPI) => {
 
       if (answers.plugin) {
         // The tsconfig in plugins is located just outside the server src, not in the root of the plugin.
-        const pluginServerDir = join(currentDir, 'src', filePath.replace('{{ plugin }}', answers.plugin), '../');
+        const pluginServerDir = join(
+          currentDir,
+          'src',
+          filePath.replace('{{ plugin }}', answers.plugin),
+          '../'
+        );
         language = tsUtils.isUsingTypeScriptSync(pluginServerDir) ? 'ts' : 'js';
       }
 
@@ -114,7 +119,10 @@ export default (plop: NodePlopAPI) => {
       }
 
       if (answers.plugin) {
-        const indexPath = join(plop.getDestBasePath(), `${filePath}/content-types/index.${language}`);
+        const indexPath = join(
+          plop.getDestBasePath(),
+          `${filePath}/content-types/index.${language}`
+        );
         const exists = fs.existsSync(indexPath);
 
         if (!exists) {
@@ -132,7 +140,10 @@ export default (plop: NodePlopAPI) => {
           type: 'modify',
           path: `${filePath}/content-types/index.${language}`,
           transform(template: string) {
-            return appendToFile(template, { type: 'content-type', singularName: answers.singularName });
+            return appendToFile(template, {
+              type: 'content-type',
+              singularName: answers.singularName,
+            });
           },
         });
       }
@@ -187,7 +198,10 @@ export default (plop: NodePlopAPI) => {
             }
 
             if (type === 'routes') {
-              const indexPath = join(plop.getDestBasePath(), `${filePath}/${type}/index.${language}`);
+              const indexPath = join(
+                plop.getDestBasePath(),
+                `${filePath}/${type}/index.${language}`
+              );
               const exists = fs.existsSync(indexPath);
 
               if (!exists) {
@@ -202,7 +216,10 @@ export default (plop: NodePlopAPI) => {
               const routeIndexFiles = ['content-api', 'admin'];
 
               routeIndexFiles.forEach((routeType) => {
-                const routeTypeIndexPath = join(plop.getDestBasePath(), `${filePath}/${type}/${routeType}/index.${language}`);
+                const routeTypeIndexPath = join(
+                  plop.getDestBasePath(),
+                  `${filePath}/${type}/${routeType}/index.${language}`
+                );
                 const routeTypeExists = fs.existsSync(routeTypeIndexPath);
 
                 if (!routeTypeExists) {
@@ -222,10 +239,16 @@ export default (plop: NodePlopAPI) => {
               path: `${filePath}/${type}/${type === 'routes' ? 'content-api/' : ''}index.${language}`,
               transform(template: string) {
                 if (type === 'routes') {
-                  return appendToFile(template, { type: 'routes', singularName: answers.singularName });
+                  return appendToFile(template, {
+                    type: 'routes',
+                    singularName: answers.singularName,
+                  });
                 }
 
-                return appendToFile(template, { type: 'index', singularName: answers.singularName });
+                return appendToFile(template, {
+                  type: 'index',
+                  singularName: answers.singularName,
+                });
               },
             });
           });

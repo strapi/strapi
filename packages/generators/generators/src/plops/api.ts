@@ -51,13 +51,20 @@ export default (plop: NodePlopAPI) => {
         return [];
       }
 
-      const filePath = getFilePath(answers.destination || (answers.isPluginApi && answers.plugin ? 'plugin' : 'api'));
+      const filePath = getFilePath(
+        answers.destination || (answers.isPluginApi && answers.plugin ? 'plugin' : 'api')
+      );
       const currentDir = process.cwd();
       let language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       if (answers.plugin) {
         // The tsconfig in plugins is located just outside the server src, not in the root of the plugin.
-        const pluginServerDir = join(currentDir, 'src', filePath.replace('{{ plugin }}', answers.plugin), '../');
+        const pluginServerDir = join(
+          currentDir,
+          'src',
+          filePath.replace('{{ plugin }}', answers.plugin),
+          '../'
+        );
         language = tsUtils.isUsingTypeScriptSync(pluginServerDir) ? 'ts' : 'js';
       }
 
@@ -111,7 +118,10 @@ export default (plop: NodePlopAPI) => {
             const routeIndexFiles = ['content-api', 'admin'];
 
             routeIndexFiles.forEach((routeType) => {
-              const routeTypeIndexPath = join(plop.getDestBasePath(), `${filePath}/${type}/${routeType}/index.${language}`);
+              const routeTypeIndexPath = join(
+                plop.getDestBasePath(),
+                `${filePath}/${type}/${routeType}/index.${language}`
+              );
               const routeTypeExists = fs.existsSync(routeTypeIndexPath);
 
               if (!routeTypeExists) {

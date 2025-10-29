@@ -22,7 +22,9 @@ const createProperty = (config: AppendConfig) => {
   const varName = type === 'content-type' ? `${camelCaseName}Schema` : camelCaseName;
 
   // Use string literal for key only if singularName is not a valid identifier
-  const keyNode = isValidIdentifier(singularName) ? j.identifier(singularName) : j.literal(singularName);
+  const keyNode = isValidIdentifier(singularName)
+    ? j.identifier(singularName)
+    : j.literal(singularName);
 
   switch (type) {
     case 'content-type':
@@ -50,21 +52,23 @@ const hasExistingProperty = (obj: any, config: AppendConfig): boolean => {
   if (type === 'routes') {
     // Check for spread elements ...camelCaseName.routes
     const camelCaseName = camelCase(singularName);
-    return elements.some((element: any) =>
-      j.SpreadElement.check(element) &&
-      j.MemberExpression.check(element.argument) &&
-      j.Identifier.check(element.argument.object) &&
-      element.argument.object.name === camelCaseName &&
-      j.Identifier.check(element.argument.property) &&
-      element.argument.property.name === 'routes'
+    return elements.some(
+      (element: any) =>
+        j.SpreadElement.check(element) &&
+        j.MemberExpression.check(element.argument) &&
+        j.Identifier.check(element.argument.object) &&
+        element.argument.object.name === camelCaseName &&
+        j.Identifier.check(element.argument.property) &&
+        element.argument.property.name === 'routes'
     );
   }
 
   // For content-type and index, check for object property (both identifier and literal keys)
-  return elements.some((prop: any) =>
-    j.ObjectProperty.check(prop) &&
-    ((j.Identifier.check(prop.key) && prop.key.name === singularName) ||
-     (j.Literal.check(prop.key) && prop.key.value === singularName))
+  return elements.some(
+    (prop: any) =>
+      j.ObjectProperty.check(prop) &&
+      ((j.Identifier.check(prop.key) && prop.key.name === singularName) ||
+        (j.Literal.check(prop.key) && prop.key.value === singularName))
   );
 };
 
@@ -83,11 +87,12 @@ const addPropertyToObject = (obj: any, config: AppendConfig) => {
 const handleRoutesArray = (obj: any, config: AppendConfig) => {
   if (!obj?.properties) return false;
 
-  const routesProp = obj.properties.find((prop: any) =>
-    j.ObjectProperty.check(prop) &&
-    j.Identifier.check(prop.key) &&
-    prop.key.name === 'routes' &&
-    j.ArrayExpression.check(prop.value)
+  const routesProp = obj.properties.find(
+    (prop: any) =>
+      j.ObjectProperty.check(prop) &&
+      ((j.Identifier.check(prop.key) && prop.key.name === 'routes') ||
+        (j.Literal.check(prop.key) && prop.key.value === 'routes')) &&
+      j.ArrayExpression.check(prop.value)
   );
 
   if (routesProp?.value) {
@@ -111,10 +116,13 @@ const createRoutesElement = (config: AppendConfig) => {
 
 // Helper to create new export for routes
 const createRoutesExport = (config: AppendConfig) => {
-  return j.arrowFunctionExpression([], j.objectExpression([
-    j.objectProperty(j.identifier('type'), j.literal('content-api')),
-    j.objectProperty(j.identifier('routes'), j.arrayExpression([createRoutesElement(config)]))
-  ]));
+  return j.arrowFunctionExpression(
+    [],
+    j.objectExpression([
+      j.objectProperty(j.identifier('type'), j.literal('content-api')),
+      j.objectProperty(j.identifier('routes'), j.arrayExpression([createRoutesElement(config)])),
+    ])
+  );
 };
 
 // Unified append function for all types
@@ -156,7 +164,11 @@ const detectModuleFormat = (template: string): 'esm' | 'cjs' => {
 };
 
 // Helper to insert statement at appropriate location
-const insertStatement = (root: jscodeshift.Collection<any>, statement: any, preferredLocation?: jscodeshift.Collection<any>) => {
+const insertStatement = (
+  root: jscodeshift.Collection<any>,
+  statement: any,
+  preferredLocation?: jscodeshift.Collection<any>
+) => {
   if (preferredLocation && preferredLocation.length > 0) {
     preferredLocation.at(-1).insertAfter(statement);
   } else {
@@ -170,31 +182,50 @@ const insertStatement = (root: jscodeshift.Collection<any>, statement: any, pref
 };
 
 // Helper to add import/require if missing
-const addImportIfMissing = (root: jscodeshift.Collection<any>, varName: string, source: string, isEsm: boolean) => {
+const addImportIfMissing = (
+  root: jscodeshift.Collection<any>,
+  varName: string,
+  source: string,
+  isEsm: boolean
+) => {
   if (isEsm) {
     if (root.find(j.ImportDeclaration, { source: { value: source } }).length === 0) {
-      const importDecl = j.importDeclaration([j.importDefaultSpecifier(j.identifier(varName))], j.literal(source));
+      const importDecl = j.importDeclaration(
+        [j.importDefaultSpecifier(j.identifier(varName))],
+        j.literal(source)
+      );
       insertStatement(root, importDecl, root.find(j.ImportDeclaration));
     }
-  } else if (root.find(j.VariableDeclarator, {
-    id: { name: varName },
-    init: { type: 'CallExpression', callee: { name: 'require' }, arguments: [{ value: source }] }
-  }).length === 0) {
-      const requireStmt = j.variableDeclaration('const', [
-        j.variableDeclarator(j.identifier(varName), j.callExpression(j.identifier('require'), [j.literal(source)]))
-      ]);
+  } else if (
+    root.find(j.VariableDeclarator, {
+      id: { name: varName },
+      init: { type: 'CallExpression', callee: { name: 'require' }, arguments: [{ value: source }] },
+    }).length === 0
+  ) {
+    const requireStmt = j.variableDeclaration('const', [
+      j.variableDeclarator(
+        j.identifier(varName),
+        j.callExpression(j.identifier('require'), [j.literal(source)])
+      ),
+    ]);
 
-      const requires = root.find(j.VariableDeclaration).filter((path) =>
-        path.value.declarations.some((decl: any) =>
-          j.CallExpression.check(decl.init) && decl.init.callee?.name === 'require'
+    const requires = root
+      .find(j.VariableDeclaration)
+      .filter((path) =>
+        path.value.declarations.some(
+          (decl: any) => j.CallExpression.check(decl.init) && decl.init.callee?.name === 'require'
         )
       );
 
-      const useStrict = root.find(j.ExpressionStatement).filter((path: any) =>
-        j.Literal.check(path.value.expression) && /use strict/.test(String(path.value.expression.value))
+    const useStrict = root
+      .find(j.ExpressionStatement)
+      .filter(
+        (path: any) =>
+          j.Literal.check(path.value.expression) &&
+          /use strict/.test(String(path.value.expression.value))
       );
 
-      insertStatement(root, requireStmt, requires.length > 0 ? requires : useStrict);
+    insertStatement(root, requireStmt, requires.length > 0 ? requires : useStrict);
   }
 };
 
@@ -238,7 +269,9 @@ const handleEmptyFile = (root: jscodeshift.Collection<any>, firstStatement: any)
       root.replaceWith(newProgram);
     } catch (replaceError) {
       // Last resort - throw descriptive error
-      throw new Error(`Unable to add statement to empty file: ${error.message}. Root collection may be invalid.`);
+      throw new Error(
+        `Unable to add statement to empty file: ${error.message}. Root collection may be invalid.`
+      );
     }
   }
 };
@@ -251,7 +284,11 @@ const findExportedObject = (root: jscodeshift.Collection<any>, exportedValue: an
   }
 
   // Case 2: Function that returns an object
-  if (j.FunctionExpression.check(exportedValue) || j.ArrowFunctionExpression.check(exportedValue) || j.FunctionDeclaration.check(exportedValue)) {
+  if (
+    j.FunctionExpression.check(exportedValue) ||
+    j.ArrowFunctionExpression.check(exportedValue) ||
+    j.FunctionDeclaration.check(exportedValue)
+  ) {
     const body = exportedValue.body;
     // Arrow function with object expression body: () => ({...})
     if (j.ObjectExpression.check(body)) {
@@ -273,7 +310,7 @@ const findExportedObject = (root: jscodeshift.Collection<any>, exportedValue: an
 
     // Find the variable declaration
     const varDeclaration = root.find(j.VariableDeclarator, {
-      id: { name: varName }
+      id: { name: varName },
     });
 
     if (varDeclaration.length > 0) {
@@ -295,7 +332,12 @@ const findExportedObject = (root: jscodeshift.Collection<any>, exportedValue: an
 };
 
 // Helper to handle object export (common logic for ESM and CJS)
-const handleObjectExport = (obj: any, config: AppendConfig, type: AppendType, setExport: (newExport: any) => void) => {
+const handleObjectExport = (
+  obj: any,
+  config: AppendConfig,
+  type: AppendType,
+  setExport: (newExport: any) => void
+) => {
   if (type === 'routes') {
     if (!handleRoutesArray(obj, config)) {
       setExport(createRoutesExport(config));
@@ -306,11 +348,16 @@ const handleObjectExport = (obj: any, config: AppendConfig, type: AppendType, se
 };
 
 // Handle ESM export default
-const handleEsmExport = (root: jscodeshift.Collection<any>, config: AppendConfig, type: AppendType) => {
+const handleEsmExport = (
+  root: jscodeshift.Collection<any>,
+  config: AppendConfig,
+  type: AppendType
+) => {
   const exports = root.find(j.ExportDefaultDeclaration);
 
   if (exports.length === 0) {
-    const newExport = type === 'routes' ? createRoutesExport(config) : j.objectExpression([createProperty(config)]);
+    const newExport =
+      type === 'routes' ? createRoutesExport(config) : j.objectExpression([createProperty(config)]);
     insertStatement(root, j.exportDefaultDeclaration(newExport), root.find(j.Statement));
   } else {
     exports.forEach((path: any) => {
@@ -320,25 +367,39 @@ const handleEsmExport = (root: jscodeshift.Collection<any>, config: AppendConfig
       const exportedObject = findExportedObject(root, decl);
 
       if (exportedObject) {
-        handleObjectExport(exportedObject, config, type, (newExport) => { path.value.declaration = newExport; });
+        handleObjectExport(exportedObject, config, type, (newExport) => {
+          path.value.declaration = newExport;
+        });
       } else {
         // Fallback: replace the entire export
-        path.value.declaration = type === 'routes' ? createRoutesExport(config) : j.objectExpression([createProperty(config)]);
+        path.value.declaration =
+          type === 'routes'
+            ? createRoutesExport(config)
+            : j.objectExpression([createProperty(config)]);
       }
     });
   }
 };
 
 // Handle CJS module.exports
-const handleCjsExport = (root: jscodeshift.Collection<any>, config: AppendConfig, type: AppendType) => {
+const handleCjsExport = (
+  root: jscodeshift.Collection<any>,
+  config: AppendConfig,
+  type: AppendType
+) => {
   const exports = root.find(j.AssignmentExpression, {
-    left: { type: 'MemberExpression', object: { name: 'module' }, property: { name: 'exports' } }
+    left: { type: 'MemberExpression', object: { name: 'module' }, property: { name: 'exports' } },
   });
 
   if (exports.length === 0) {
-    const newExport = type === 'routes' ? createRoutesExport(config) : j.objectExpression([createProperty(config)]);
+    const newExport =
+      type === 'routes' ? createRoutesExport(config) : j.objectExpression([createProperty(config)]);
     const moduleExportStmt = j.expressionStatement(
-      j.assignmentExpression('=', j.memberExpression(j.identifier('module'), j.identifier('exports')), newExport)
+      j.assignmentExpression(
+        '=',
+        j.memberExpression(j.identifier('module'), j.identifier('exports')),
+        newExport
+      )
     );
     insertStatement(root, moduleExportStmt, root.find(j.Statement));
   } else {
@@ -349,10 +410,15 @@ const handleCjsExport = (root: jscodeshift.Collection<any>, config: AppendConfig
       const exportedObject = findExportedObject(root, right);
 
       if (exportedObject) {
-        handleObjectExport(exportedObject, config, type, (newExport) => { path.value.right = newExport; });
+        handleObjectExport(exportedObject, config, type, (newExport) => {
+          path.value.right = newExport;
+        });
       } else {
         // Fallback: replace the entire export
-        path.value.right = type === 'routes' ? createRoutesExport(config) : j.objectExpression([createProperty(config)]);
+        path.value.right =
+          type === 'routes'
+            ? createRoutesExport(config)
+            : j.objectExpression([createProperty(config)]);
       }
     });
   }
