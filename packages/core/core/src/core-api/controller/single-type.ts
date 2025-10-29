@@ -9,6 +9,16 @@ interface Options {
 /**
  * Returns a single type controller to handle default core-api actions
  */
+const getAuditLogService = () => strapi.get('content-audit-logs');
+
+const safeLog = async (handler: () => Promise<void>) => {
+  try {
+    await handler();
+  } catch (error) {
+    strapi.log.error('Failed to record content audit log entry', error as Error);
+  }
+};
+
 const createSingleTypeController = ({
   contentType,
 }: Options): Utils.PartialWithThis<Core.CoreAPI.Controller.SingleType> => {
@@ -45,12 +55,43 @@ const createSingleTypeController = ({
 
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
+      const existingEntity = await strapi.service(uid).find(query);
+      const sanitizedBefore = existingEntity
+        ? ((await this.sanitizeOutput(existingEntity, ctx)) as Record<string, unknown>)
+        : null;
+
       const entity = await strapi.service(uid).createOrUpdate({
         ...query,
         data: sanitizedInputData,
       });
 
-      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
+      const sanitizedEntity = (await this.sanitizeOutput(entity, ctx)) as Record<
+        string,
+        unknown
+      > & { id?: string | number };
+
+      const recordId = sanitizedEntity?.id ?? entity?.id ?? 'singleton';
+
+      if (sanitizedBefore) {
+        await safeLog(() =>
+          getAuditLogService().logUpdate({
+            uid,
+            recordId,
+            userId: ctx.state.user?.id,
+            before: sanitizedBefore,
+            after: sanitizedEntity,
+          })
+        );
+      } else {
+        await safeLog(() =>
+          getAuditLogService().logCreate({
+            uid,
+            recordId,
+            userId: ctx.state.user?.id,
+            entry: sanitizedEntity,
+          })
+        );
+      }
 
       return this.transformResponse(sanitizedEntity);
     },
@@ -58,7 +99,25 @@ const createSingleTypeController = ({
     async delete(ctx) {
       const { query } = ctx;
 
+      const existingEntity = await strapi.service(uid).find(query);
+      const sanitizedEntity = existingEntity
+        ? ((await this.sanitizeOutput(existingEntity, ctx)) as Record<string, unknown> & {
+            id?: string | number;
+          })
+        : null;
+
       await strapi.service(uid).delete(query);
+
+      if (sanitizedEntity) {
+        await safeLog(() =>
+          getAuditLogService().logDelete({
+            uid,
+            recordId: sanitizedEntity?.id ?? 'singleton',
+            userId: ctx.state.user?.id,
+            entry: sanitizedEntity,
+          })
+        );
+      }
 
       ctx.status = 204;
     },

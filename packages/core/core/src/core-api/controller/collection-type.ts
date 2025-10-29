@@ -11,6 +11,16 @@ interface Options {
  *
  * Returns a collection type controller to handle default core-api actions
  */
+const getAuditLogService = () => strapi.get('content-audit-logs');
+
+const safeLog = async (handler: () => Promise<void>) => {
+  try {
+    await handler();
+  } catch (error) {
+    strapi.log.error('Failed to record content audit log entry', error as Error);
+  }
+};
+
 const createCollectionTypeController = ({
   contentType,
 }: Options): Utils.PartialWithThis<Core.CoreAPI.Controller.CollectionType> => {
@@ -39,7 +49,10 @@ const createCollectionTypeController = ({
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
       const entity = await strapi.service(uid).findOne(id, sanitizedQuery);
-      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
+      const sanitizedEntity = (await this.sanitizeOutput(entity, ctx)) as Record<
+        string,
+        unknown
+      > & { id?: string | number };
 
       return this.transformResponse(sanitizedEntity);
     },
@@ -66,7 +79,24 @@ const createCollectionTypeController = ({
         data: sanitizedInputData,
       });
 
-      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
+      const sanitizedEntity = (await this.sanitizeOutput(entity, ctx)) as Record<
+        string,
+        unknown
+      > & { id?: string | number };
+
+      strapi.log.info('[audit-log] collection create captured', {
+        uid,
+        recordId: sanitizedEntity?.id ?? entity.id,
+      });
+
+      await safeLog(() =>
+        getAuditLogService().logCreate({
+          uid,
+          recordId: sanitizedEntity?.id ?? entity.id,
+          userId: ctx.state.user?.id,
+          entry: sanitizedEntity,
+        })
+      );
 
       ctx.status = 201;
       return this.transformResponse(sanitizedEntity);
@@ -90,12 +120,30 @@ const createCollectionTypeController = ({
 
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
+      const existingEntity = await strapi.service(uid).findOne(id, sanitizedQuery);
+      const sanitizedBefore = existingEntity
+        ? ((await this.sanitizeOutput(existingEntity, ctx)) as Record<string, unknown>)
+        : null;
+
       const entity = await strapi.service(uid).update(id, {
         ...sanitizedQuery,
         data: sanitizedInputData,
       });
 
-      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
+      const sanitizedEntity = (await this.sanitizeOutput(entity, ctx)) as Record<
+        string,
+        unknown
+      > & { id?: string | number };
+
+      await safeLog(() =>
+        getAuditLogService().logUpdate({
+          uid,
+          recordId: sanitizedEntity?.id ?? id,
+          userId: ctx.state.user?.id,
+          before: sanitizedBefore,
+          after: sanitizedEntity,
+        })
+      );
 
       return this.transformResponse(sanitizedEntity);
     },
@@ -108,7 +156,25 @@ const createCollectionTypeController = ({
       await this.validateQuery(ctx);
       const sanitizedQuery = await this.sanitizeQuery(ctx);
 
+      const existingEntity = await strapi.service(uid).findOne(id, sanitizedQuery);
+      const sanitizedEntity = existingEntity
+        ? ((await this.sanitizeOutput(existingEntity, ctx)) as Record<string, unknown> & {
+            id?: string | number;
+          })
+        : null;
+
       await strapi.service(uid).delete(id, sanitizedQuery);
+
+      if (sanitizedEntity) {
+        await safeLog(() =>
+          getAuditLogService().logDelete({
+            uid,
+            recordId: sanitizedEntity?.id ?? id,
+            userId: ctx.state.user?.id,
+            entry: sanitizedEntity,
+          })
+        );
+      }
 
       ctx.status = 204;
     },
