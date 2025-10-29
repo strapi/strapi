@@ -261,7 +261,7 @@ const LocalePickerAction = ({
                   entryExists={entryWithLocaleExists}
                 />
               </SingleSelectOption>
-              {index === 0 && (
+              {localesSortingDefaultFirst.length > 1 && index === 0 && (
                 <Box paddingRight={4} paddingLeft={4} paddingTop={2} paddingBottom={2}>
                   <Typography variant="sigma">
                     {formatMessage({
