@@ -11,8 +11,8 @@ export const runCLI = async () => {
       configPath: join(__dirname, 'plopfile.js'),
     },
     (env) => {
-      const argv = process.argv.slice(2); // Extract command-line arguments
-      Plop.execute(env, argv, (env, argv) => {
+      Plop.execute(env, [], (env, argv) => {
+        console.log(env, argv);
         const options = {
           ...env,
           dest: join(process.cwd(), 'src'), // this will make the destination path to be based on the cwd when calling the wrapper
