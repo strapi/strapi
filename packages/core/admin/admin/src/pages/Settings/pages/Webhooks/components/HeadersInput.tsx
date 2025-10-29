@@ -80,7 +80,7 @@ const HeadersInput = () => {
                         id: 'Settings.webhooks.value',
                         defaultMessage: 'Value',
                       })}
-                      type="string"
+                      type="text"
                     />
                   </Box>
                   <IconButton

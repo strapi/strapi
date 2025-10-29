@@ -18,8 +18,9 @@ import { useAuth } from '../../features/Auth';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useWidgets } from '../../features/Widgets';
 import { useGetHomepageLayoutQuery } from '../../services/homepage';
-import { getWidgetElement, WIDGET_DATA_ATTRIBUTES } from '../../utils/widgetLayout';
 import {
+  getWidgetElement,
+  WIDGET_DATA_ATTRIBUTES,
   applyHomepageLayout,
   createDefaultWidgetWidths,
   isLastWidgetInRow,

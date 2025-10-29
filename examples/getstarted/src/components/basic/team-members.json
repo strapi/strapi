@@ -19,6 +19,11 @@
     },
     "bio": {
       "type": "blocks"
+    },
+    "organization": {
+      "type": "component",
+      "component": "default.org",
+      "repeatable": true
     }
   },
   "config": {}

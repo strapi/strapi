@@ -38,24 +38,13 @@ const createDocument = async (ctx: any, opts?: Options) => {
 
   const { locale, status } = await getDocumentLocaleAndStatus(body, model);
 
-  const createdDocument = await documentManager.create(model, {
+  return documentManager.create(model, {
     data: sanitizedBody as any,
     locale,
     status,
     populate: opts?.populate,
   });
 
-  try {
-    // Don't await since localizations should be done in the background without blocking the request
-    strapi.plugin('i18n').service('ai-localizations').generateDocumentLocalizations({
-      model,
-      document: createdDocument,
-    });
-  } catch (error) {
-    strapi.log.error('AI Localizations generation failed', error);
-  }
-
-  return createdDocument;
   // TODO: Revert the creation if create permission conditions are not met
   // if (permissionChecker.cannot.create(document)) {
   //   throw new errors.ForbiddenError();
@@ -126,16 +115,6 @@ const updateDocument = async (ctx: any, opts?: Options) => {
     populate: opts?.populate,
     locale,
   });
-
-  try {
-    // Don't await since localizations should be done in the background without blocking the request
-    strapi.plugin('i18n').service('ai-localizations').generateDocumentLocalizations({
-      model,
-      document: updatedDocument,
-    });
-  } catch (error) {
-    strapi.log.error('AI Localizations generation failed', error);
-  }
 
   return updatedDocument;
 };
