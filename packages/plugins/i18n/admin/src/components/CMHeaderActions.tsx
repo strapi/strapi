@@ -421,7 +421,7 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
             {formatMessage({
               id: getTranslation('CMEditViewAITranslation.status-description'),
               defaultMessage:
-                'Our AI translates content in all locales each time you save a modification.',
+                'Our AI translates content in all locales each time you save a modification in the default locale.',
             })}
           </Typography>
           <Link
