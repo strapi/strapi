@@ -161,6 +161,7 @@ const LocalePickerAction = ({
   });
   const { data: settings } = useGetSettingsQuery();
   const isAiAvailable = useAIAvailability();
+  const setValues = useForm('LocalePickerAction', (state) => state.setValues);
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -175,6 +176,57 @@ const LocalePickerAction = ({
     },
     [query.plugins, setQuery]
   );
+
+  const nonTranslatedFields = React.useMemo(() => {
+    if (!schema?.attributes) return [];
+    return Object.keys(schema.attributes).filter((field) => {
+      const attribute = schema.attributes[field] as Record<string, unknown>;
+      return (attribute?.pluginOptions as any)?.i18n?.localized === false;
+    });
+  }, [schema?.attributes]);
+
+  const sourceLocaleData = React.useMemo(() => {
+    if (!Array.isArray(locales) || !meta?.availableLocales) return null;
+
+    const defaultLocale = locales.find((locale: Locale) => locale.isDefault);
+    const existingLocales = meta.availableLocales.map((loc) => loc.locale);
+
+    const sourceLocaleCode =
+      defaultLocale &&
+      existingLocales.includes(defaultLocale.code) &&
+      defaultLocale.code !== currentDesiredLocale
+        ? defaultLocale.code
+        : existingLocales.find((locale) => locale !== currentDesiredLocale);
+
+    if (!sourceLocaleCode) return null;
+
+    // Find the document data from availableLocales (now includes non-translatable fields)
+    const sourceLocaleDoc = meta.availableLocales.find((loc) => loc.locale === sourceLocaleCode);
+
+    return sourceLocaleDoc
+      ? { locale: sourceLocaleCode, data: sourceLocaleDoc as Record<string, unknown> }
+      : null;
+  }, [locales, meta?.availableLocales, currentDesiredLocale]);
+
+  /**
+   * Prefilling form with non-translatable fields from already existing locale
+   */
+  React.useEffect(() => {
+    // Only run when creating a new locale (no document ID yet) and when we have non-translatable fields
+    if (!document?.id && nonTranslatedFields.length > 0 && sourceLocaleData?.data) {
+      const dataToSet = nonTranslatedFields.reduce(
+        (acc: Record<string, unknown>, field: string) => {
+          acc[field] = sourceLocaleData.data[field];
+          return acc;
+        },
+        {}
+      );
+
+      if (Object.keys(dataToSet).length > 0) {
+        setValues(dataToSet);
+      }
+    }
+  }, [document?.id, nonTranslatedFields, sourceLocaleData?.data, setValues]);
 
   React.useEffect(() => {
     if (!Array.isArray(locales) || !hasI18n) {
