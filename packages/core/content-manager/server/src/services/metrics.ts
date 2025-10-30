@@ -29,7 +29,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     try {
-      await strapi.telemetry.send('didConfigureListView', data);
+      strapi.telemetry.send('didConfigureListView', data);
     } catch (e) {
       // silence
     }
