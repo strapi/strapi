@@ -183,9 +183,17 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
       <tours.contentManager.Publish>
         <Flex gap={2}>
           {primaryAction.label === 'Publish' ? (
-            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
+            <DocumentActionButton
+              {...primaryAction}
+              variant={primaryAction.variant || 'default'}
+              type="submit"
+            />
           ) : (
-            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
+            <DocumentActionButton
+              {...primaryAction}
+              variant={primaryAction.variant || 'default'}
+              type="submit"
+            />
           )}
 
           {restActions.length > 0 ? (
@@ -222,9 +230,11 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
  * DocumentActionButton
  * -----------------------------------------------------------------------------------------------*/
 
-interface DocumentActionButtonProps extends Action {}
+interface DocumentActionButtonProps extends Action {
+  type?: 'button' | 'submit' | 'reset';
+}
 
-const DocumentActionButton = (action: DocumentActionButtonProps) => {
+const DocumentActionButton = ({ type = 'button', ...action }: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { toggleNotification } = useNotification();
 
@@ -268,6 +278,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
         paddingTop="7px"
         paddingBottom="7px"
         loading={action.loading}
+        type={type}
       >
         {action.label}
       </Button>
