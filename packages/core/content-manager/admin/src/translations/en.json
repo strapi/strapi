@@ -317,5 +317,10 @@
   "widget.last-edited.single-type": "Single-Type",
   "widget.last-edited.no-data": "No edited entries",
   "widget.last-published.title": "Last published entries",
-  "widget.last-published.no-data": "No published entries"
+  "widget.last-published.no-data": "No published entries",
+  "components.Wysiwyg.uploading": "Uploading image...",
+  "components.Wysiwyg.uploading-multiple": "Uploading {count} images...",
+  "components.Wysiwyg.upload-success": "Image uploaded and inserted successfully",
+  "components.Wysiwyg.upload-success-multiple": "{count} images uploaded and inserted successfully",
+  "components.Wysiwyg.upload-error": "Error uploading image"
 }
