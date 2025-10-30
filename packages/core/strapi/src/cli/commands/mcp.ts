@@ -33,15 +33,33 @@ const makeRequest = (endpoint: string, body: string): Promise<string> => {
           data += chunk;
         });
         res.on('end', () => {
+          try {
+            fs.appendFileSync(
+              debugLogPath,
+              `[strapi-mcp-proxy] Debug: HTTP response for ${endpoint}: ${data}\n`
+            );
+          } catch {}
           resolve(data);
         });
       }
     );
 
     req.on('error', (err) => {
+      try {
+        fs.appendFileSync(
+          debugLogPath,
+          `[strapi-mcp-proxy] Debug: HTTP error for ${endpoint}: ${err?.message || err}\n`
+        );
+      } catch {}
       reject(err);
     });
 
+    try {
+      fs.appendFileSync(
+        debugLogPath,
+        `[strapi-mcp-proxy] Debug: HTTP request to ${endpoint}: ${body}\n`
+      );
+    } catch {}
     req.write(body);
     req.end();
   });
@@ -59,8 +77,23 @@ const action = async (opts: { endpoint?: string }) => {
     for (const line of lines) {
       if (line.trim()) {
         try {
+          try {
+            fs.appendFileSync(
+              debugLogPath,
+              `[strapi-mcp-proxy] Debug: STDIN -> HTTP: ${line.trim()}\n`
+            );
+          } catch {}
           const response = await makeRequest(endpoint, line.trim());
-          process.stdout.write(`${response}\n`);
+          try {
+            fs.appendFileSync(
+              debugLogPath,
+              `[strapi-mcp-proxy] Debug: HTTP -> STDOUT: ${response}\n`
+            );
+          } catch {}
+          // Only write if there is a non-empty JSON body (notifications yield 204/empty)
+          if (response && response.trim().length > 0) {
+            process.stdout.write(`${response}\n`);
+          }
         } catch (err: any) {
           process.stderr.write(`[strapi-mcp-proxy] Error: ${err?.message || err}\n`);
         }

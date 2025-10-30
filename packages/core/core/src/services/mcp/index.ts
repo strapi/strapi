@@ -11,6 +11,22 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
   const handleRequest = async (request: MCPRequest): Promise<MCPResponse | undefined> => {
     const { jsonrpc, id, method, params } = request;
 
+    // Trace raw inbound request
+    try {
+      strapi.log.debug('[MCP] Inbound JSON-RPC', {
+        raw: JSON.stringify(request),
+      });
+    } catch {}
+
+    // Do not respond to JSON-RPC notifications (no id)
+    if (id === undefined || id === null) {
+      strapi.log.debug('[MCP] Notification received; no response will be sent', {
+        method,
+        timestamp: new Date().toISOString(),
+      });
+      return undefined;
+    }
+
     // Log all MCP calls
     strapi.log.info('[MCP] Request received', {
       method,
@@ -78,7 +94,7 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
                 hasError: !!result?.error,
                 timestamp: new Date().toISOString(),
               });
-              return {
+              const response: MCPResponse = {
                 jsonrpc: '2.0',
                 id,
                 result: {
@@ -90,6 +106,15 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
                   ],
                 },
               };
+
+              // Trace raw outbound response
+              try {
+                strapi.log.debug('[MCP] Outbound JSON-RPC', {
+                  raw: JSON.stringify(response),
+                });
+              } catch {}
+
+              return response;
             } catch (error) {
               strapi.log.error('[MCP] Tool call failed', {
                 toolName: params.name,
@@ -152,12 +177,8 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
           };
 
         case 'notifications/initialized':
-          // This is a notification, not a request, so we return a success response
-          return {
-            jsonrpc: '2.0',
-            id,
-            result: { status: 'ok' },
-          };
+          // This is a JSON-RPC notification. Per spec, do NOT send a response.
+          return undefined;
 
         default:
           strapi.log.warn('[MCP] Unknown method requested', {
@@ -243,20 +264,10 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
                   const request = JSON.parse(body) as MCPRequest;
                   const response = await handleRequest(request);
 
-                  // Always send a response
+                  // For notifications (no response), return 204 No Content
                   if (!response) {
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(
-                      JSON.stringify({
-                        jsonrpc: '2.0',
-                        id: request.id,
-                        error: {
-                          code: -32603,
-                          message: 'Internal error',
-                          data: 'No response generated',
-                        },
-                      })
-                    );
+                    res.writeHead(204);
+                    res.end();
                     return;
                   }
 
