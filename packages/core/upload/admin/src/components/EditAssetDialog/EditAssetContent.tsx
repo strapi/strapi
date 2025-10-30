@@ -5,7 +5,6 @@
  */
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Field,
@@ -24,6 +23,7 @@ import * as yup from 'yup';
 
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
+import { useTracking } from '../../hooks/useTracking';
 import { findRecursiveFolderByValue, getTrad, getFileExtension, formatBytes } from '../../utils';
 import { ContextInfo } from '../ContextInfo/ContextInfo';
 import { SelectTree } from '../SelectTree/SelectTree';
@@ -274,6 +274,7 @@ export const EditAssetContent = ({
                         value={values.name}
                         onChange={handleChange}
                         disabled={formDisabled}
+                        type="text"
                       />
                       <Field.Error />
                     </Field.Root>
@@ -298,6 +299,7 @@ export const EditAssetContent = ({
                           value={values.alternativeText}
                           onChange={handleChange}
                           disabled={formDisabled}
+                          type="text"
                         />
                         <Field.Hint />
                         <Field.Error />
@@ -316,6 +318,7 @@ export const EditAssetContent = ({
                           value={values.caption}
                           onChange={handleChange}
                           disabled={formDisabled}
+                          type="text"
                         />
                       </Field.Root>
                     )}

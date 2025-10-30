@@ -356,6 +356,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           'RecentDocumentList',
           'CountDocuments',
           'UpcomingReleasesList',
+          {
+            type: 'AILocalizationJobs',
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+          },
         ];
       },
     }),
@@ -408,6 +412,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           'RecentDocumentList',
           'CountDocuments',
           'UpcomingReleasesList',
+          {
+            type: 'AILocalizationJobs',
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+          },
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {

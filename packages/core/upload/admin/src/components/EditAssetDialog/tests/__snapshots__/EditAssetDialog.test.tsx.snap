@@ -916,6 +916,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           class="c35"
                           id=":ra:"
                           name="name"
+                          type="text"
                           value="Screenshot 2.png"
                         />
                       </div>
@@ -939,6 +940,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           class="c35"
                           id=":rb:"
                           name="alternativeText"
+                          type="text"
                           value=""
                         />
                       </div>
@@ -967,6 +969,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           class="c35"
                           id=":rc:"
                           name="caption"
+                          type="text"
                         />
                       </div>
                     </div>
