@@ -143,8 +143,14 @@ export default {
 
     // OPTIMIZATION: For list view, avoid deep-populating localizations to prevent heavy payloads
     // Only expose minimal fields needed for locale badges/metadata
+    // @ts-expect-error ignored - There is an issue with the type because this does exist
+    const isLocalized = strapi.contentTypes[model]?.pluginOptions?.i18n?.localized;
     if (populate && typeof populate === 'object') {
-      (populate as any).localizations = { fields: ['id', 'locale', 'documentId'] };
+      if (isLocalized === true) {
+        populate.localizations = {
+          fields: ['id', 'locale', 'documentId'],
+        };
+      }
     }
 
     const { locale, status } = await getDocumentLocaleAndStatus(query, model);
