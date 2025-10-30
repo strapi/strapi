@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, TextInput } from '@strapi/design-system';
+import { Box, Button, Flex, Grid } from '@strapi/design-system';
 import { Check, Play as Publish } from '@strapi/icons';
 import { IntlShape, useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -125,7 +125,12 @@ const WebhookForm = ({
                   })
                 : data?.name
             }
-            navigationAction={<BackButton fallback="../webhooks" />}
+            navigationAction={
+              // The back link for mobile works differently; it is placed higher up in the DOM.
+              <Box display={{ initial: 'none', medium: 'block' }}>
+                <BackButton fallback="../webhooks" />
+              </Box>
+            }
           />
           <Layouts.Content>
             <Flex direction="column" alignItems="stretch" gap={4}>
