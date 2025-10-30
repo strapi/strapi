@@ -1,20 +1,27 @@
 import { fileTypeFromBuffer } from 'file-type';
 import { readFile } from 'node:fs/promises';
 import type { Core } from '@strapi/types';
+import { errors } from '@strapi/utils';
 
 export type SecurityConfig = {
   allowedTypes?: string[];
   deniedTypes?: string[];
-  maxFileSize?: number;
+};
+type UploadValidationError = {
+  code: 'MIME_TYPE_NOT_ALLOWED' | 'VALIDATION_ERROR';
+  message: string;
+  details: Record<string, any>;
 };
 
 type ValidationResult = {
   isValid: boolean;
-  error?: {
-    code: 'MIME_TYPE_NOT_ALLOWED' | 'FILE_SIZE_EXCEEDED' | 'VALIDATION_ERROR';
-    message: string;
-    details: Record<string, any>;
-  };
+  error?: UploadValidationError;
+};
+
+type ErrorDetail = {
+  file: any;
+  originalIndex: number;
+  error: UploadValidationError;
 };
 
 async function readFileChunk(filePath: string, chunkSize: number = 4100): Promise<Buffer> {
@@ -80,30 +87,12 @@ export function isMimeTypeAllowed(mimeType: string, config: SecurityConfig): boo
   return true;
 }
 
-export function isFileSizeAllowed(fileSize: number, maxFileSize?: number): boolean {
-  if (typeof maxFileSize !== 'number' || maxFileSize <= 0) {
-    return true;
-  }
-  return fileSize <= maxFileSize;
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
-
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
-}
-
 export function extractFileInfo(file: any) {
   const fileName =
     file.originalFilename || file.name || file.filename || file.newFilename || 'unknown';
-  const fileSize = file.size || file.length || 0;
   const declaredMimeType = file.mimetype || file.type || file.mimeType || file.mime || '';
 
-  return { fileName, fileSize, declaredMimeType };
+  return { fileName, declaredMimeType };
 }
 
 export async function validateFile(
@@ -111,13 +100,13 @@ export async function validateFile(
   config: SecurityConfig,
   strapi: Core.Strapi
 ): Promise<ValidationResult> {
-  const { allowedTypes, deniedTypes, maxFileSize } = config;
+  const { allowedTypes, deniedTypes } = config;
 
-  if (!allowedTypes && !deniedTypes && !maxFileSize) {
+  if (!allowedTypes && !deniedTypes) {
     return { isValid: true };
   }
 
-  const { fileName, fileSize, declaredMimeType } = extractFileInfo(file);
+  const { fileName, declaredMimeType } = extractFileInfo(file);
 
   let detectedMime: string | undefined;
   let mimeDetectionFailed = false;
@@ -155,23 +144,6 @@ export async function validateFile(
     }
   }
 
-  if (maxFileSize && fileSize && !isFileSizeAllowed(fileSize, maxFileSize)) {
-    return {
-      isValid: false,
-      error: {
-        code: 'FILE_SIZE_EXCEEDED',
-        message: `File '${fileName}' exceeds maximum allowed size`,
-        details: {
-          fileName,
-          fileSize,
-          maxFileSize,
-          fileSizeFormatted: formatBytes(fileSize),
-          maxFileSizeFormatted: formatBytes(maxFileSize),
-        },
-      },
-    };
-  }
-
   if (
     mimeToValidate &&
     (allowedTypes || deniedTypes) &&
@@ -205,8 +177,28 @@ export async function validateFiles(files: any, strapi: Core.Strapi): Promise<Va
   }
 
   const config: SecurityConfig = strapi.config.get('plugin::upload.security', {});
+  console.log('HERE: ', config);
+  if (
+    config.allowedTypes &&
+    (!Array.isArray(config.allowedTypes) ||
+      !config.allowedTypes.every((item) => typeof item === 'string'))
+  ) {
+    throw new errors.ApplicationError(
+      'Invalid configuration: allowedTypes must be an array of strings.'
+    );
+  }
 
-  if (!config.allowedTypes && !config.deniedTypes && !config.maxFileSize) {
+  if (
+    config.deniedTypes &&
+    (!Array.isArray(config.deniedTypes) ||
+      !config.deniedTypes.every((item) => typeof item === 'string'))
+  ) {
+    throw new errors.ApplicationError(
+      'Invalid configuration: deniedTypes must be an array of strings.'
+    );
+  }
+
+  if (!config.allowedTypes && !config.deniedTypes) {
     strapi.log.warn(
       'No upload security configuration found. Consider configuring plugin.upload.security for enhanced file validation.'
     );
@@ -247,30 +239,14 @@ export async function enforceUploadSecurity(
 ): Promise<{
   validFiles: any[];
   validFileNames: string[];
-  errors: Array<{
-    file: any;
-    originalIndex: number;
-    error: {
-      code: 'MIME_TYPE_NOT_ALLOWED' | 'FILE_SIZE_EXCEEDED' | 'VALIDATION_ERROR';
-      message: string;
-      details: Record<string, any>;
-    };
-  }>;
+  errors: Array<ErrorDetail>;
 }> {
   const validationResults = await validateFiles(files, strapi);
   const filesArray = Array.isArray(files) ? files : [files];
 
   const validFiles: any[] = [];
   const validFileNames: string[] = [];
-  const errors: Array<{
-    file: any;
-    originalIndex: number;
-    error: {
-      code: 'MIME_TYPE_NOT_ALLOWED' | 'FILE_SIZE_EXCEEDED' | 'VALIDATION_ERROR';
-      message: string;
-      details: Record<string, any>;
-    };
-  }> = [];
+  const errors: Array<ErrorDetail> = [];
 
   for (const [index, result] of validationResults.entries()) {
     if (result.isValid) {

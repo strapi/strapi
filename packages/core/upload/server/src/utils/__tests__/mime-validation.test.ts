@@ -3,7 +3,6 @@ import { fileTypeFromBuffer } from 'file-type';
 import {
   detectMimeType,
   isMimeTypeAllowed,
-  isFileSizeAllowed,
   validateFile,
   validateFiles,
   enforceUploadSecurity,
@@ -139,24 +138,6 @@ describe('mime-validation', () => {
     });
   });
 
-  describe('isFileSizeAllowed', () => {
-    it('should return true when no size limit is set', () => {
-      expect(isFileSizeAllowed(1000000)).toBe(true);
-      expect(isFileSizeAllowed(1000000, undefined)).toBe(true);
-      expect(isFileSizeAllowed(1000000, 0)).toBe(true);
-      expect(isFileSizeAllowed(1000000, -1)).toBe(true);
-    });
-
-    it('should return true when file size is within limit', () => {
-      expect(isFileSizeAllowed(500000, 1000000)).toBe(true);
-      expect(isFileSizeAllowed(1000000, 1000000)).toBe(true);
-    });
-
-    it('should return false when file size exceeds limit', () => {
-      expect(isFileSizeAllowed(1500000, 1000000)).toBe(false);
-    });
-  });
-
   describe('validateFile', () => {
     const mockFile = {
       name: 'test.jpg',
@@ -204,20 +185,6 @@ describe('mime-validation', () => {
       expect(result.isValid).toBe(false);
       expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
       expect(result.error?.message).toContain('image/jpeg');
-    });
-
-    it('should reject oversized files', async () => {
-      const largeFile = { ...mockFile, size: 2000000 };
-      const config: SecurityConfig = {
-        maxFileSize: 1000000,
-      };
-
-      const result = await validateFile(largeFile, config, mockStrapi);
-
-      expect(result.isValid).toBe(false);
-      expect(result.error?.code).toBe('FILE_SIZE_EXCEEDED');
-      expect(result.error?.details.fileSize).toBe(2000000);
-      expect(result.error?.details.maxFileSize).toBe(1000000);
     });
 
     it('should handle files without path', async () => {
@@ -362,19 +329,6 @@ describe('mime-validation', () => {
       expect(result.errors[0].error.code).toBe('MIME_TYPE_NOT_ALLOWED');
     });
 
-    it('should return errors for oversized files', async () => {
-      mockStrapi.config.get.mockReturnValue({
-        allowedTypes: ['image/jpeg'],
-        maxFileSize: 50000,
-      });
-
-      const result = await enforceUploadSecurity([mockFile], mockStrapi);
-
-      expect(result.validFiles).toHaveLength(0);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].error.code).toBe('FILE_SIZE_EXCEEDED');
-    });
-
     it('should handle single file input', async () => {
       const result = await enforceUploadSecurity(mockFile, mockStrapi);
 
@@ -403,6 +357,42 @@ describe('mime-validation', () => {
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].originalIndex).toBe(1);
       expect(result.errors[0].error.code).toBe('MIME_TYPE_NOT_ALLOWED');
+    });
+
+    it('throws error if allowedTypes is not an array', async () => {
+      mockStrapi.config.get.mockReturnValue({ allowedTypes: 'not-an-array' });
+      await expect(validateFiles([], mockStrapi as any)).rejects.toThrow(
+        'Invalid configuration: allowedTypes must be an array of strings.'
+      );
+    });
+
+    it('throws error if allowedTypes contains non-string items', async () => {
+      mockStrapi.config.get.mockReturnValue({ allowedTypes: ['image/png', 123] });
+      await expect(validateFiles([], mockStrapi as any)).rejects.toThrow(
+        'Invalid configuration: allowedTypes must be an array of strings.'
+      );
+    });
+
+    it('throws error if deniedTypes is not an array', async () => {
+      mockStrapi.config.get.mockReturnValue({ deniedTypes: 'not-an-array' });
+      await expect(validateFiles([], mockStrapi as any)).rejects.toThrow(
+        'Invalid configuration: deniedTypes must be an array of strings.'
+      );
+    });
+
+    it('throws error if deniedTypes contains non-string items', async () => {
+      mockStrapi.config.get.mockReturnValue({ deniedTypes: ['image/png', 123] });
+      await expect(validateFiles([], mockStrapi as any)).rejects.toThrow(
+        'Invalid configuration: deniedTypes must be an array of strings.'
+      );
+    });
+
+    it('does not throw if config is valid', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['image/png'],
+        deniedTypes: ['image/gif'],
+      });
+      await expect(validateFiles([], mockStrapi as any)).resolves.toBeInstanceOf(Array);
     });
   });
 });

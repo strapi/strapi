@@ -94,8 +94,6 @@ export default {
       switch (error.code) {
         case 'MIME_TYPE_NOT_ALLOWED':
           throw new errors.ValidationError(error.message, { details: error.details });
-        case 'FILE_SIZE_EXCEEDED':
-          throw new errors.PayloadTooLargeError(error.message, { details: error.details });
         default:
           throw new errors.ApplicationError(error.message, { details: error.details });
       }
