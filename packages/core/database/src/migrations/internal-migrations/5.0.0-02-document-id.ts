@@ -26,6 +26,8 @@ interface Params {
   joinTableName: string;
 }
 
+const BATCH_SIZE = 1000;
+
 const QUERIES = {
   async postgres(knex: Knex, params: Params) {
     const res = await knex.raw(
@@ -129,18 +131,19 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
 
 // Migrate document ids for tables that don't have localizations
 const migrationDocumentIds = async (db: Database, knex: Knex, meta: Meta) => {
-  let updatedRows: number;
-
-  do {
-    updatedRows = await knex(meta.tableName)
-      .update({ document_id: createId() })
-      .whereIn(
-        'id',
-        knex(meta.tableName)
-          .select('id')
-          .from(knex(meta.tableName).select('id').whereNull('document_id').limit(1).as('sub_query'))
-      );
-  } while (updatedRows > 0);
+  let recordsLeft = +(
+    await knex(meta.tableName).count('* as recordsLeft').whereNull('document_id')
+  )[0].recordsLeft;
+  while (recordsLeft > 0) {
+    const batchSize = recordsLeft < BATCH_SIZE ? recordsLeft : BATCH_SIZE;
+    const updateRecords = (
+      await knex(meta.tableName).select('id').whereNull('document_id').limit(batchSize)
+    ).map((item) => ({ id: item.id, document_id: createId() }));
+    await knex(meta.tableName).insert(updateRecords).onConflict('id').merge();
+    recordsLeft = +(
+      await knex(meta.tableName).count('* as recordsLeft').whereNull('document_id')
+    )[0].recordsLeft;
+  }
 };
 
 const createDocumentIdColumn = async (knex: Knex, tableName: string) => {
