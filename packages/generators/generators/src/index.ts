@@ -12,7 +12,6 @@ export const runCLI = async () => {
     },
     (env) => {
       Plop.execute(env, [], (env, argv) => {
-        console.log(env, argv);
         const options = {
           ...env,
           dest: join(process.cwd(), 'src'), // this will make the destination path to be based on the cwd when calling the wrapper
