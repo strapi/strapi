@@ -232,12 +232,18 @@ const ListViewPage = () => {
       <>
         <tours.contentManager.Introduction>
           {/* Invisible Anchor */}
-          <Box paddingTop={5} />
+          <Box />
         </tours.contentManager.Introduction>
         <Page.Main>
           <Page.Title>{`${contentTypeTitle}`}</Page.Title>
           <LayoutsHeaderCustom
-            primaryAction={canCreate ? <CreateButton /> : null}
+            primaryAction={
+              canCreate ? (
+                <tours.contentManager.CreateNewEntry>
+                  <CreateButton />
+                </tours.contentManager.CreateNewEntry>
+              ) : null
+            }
             subtitle={formatMessage(
               {
                 id: getTranslation('pages.ListView.header-subtitle'),
@@ -264,7 +270,6 @@ const ListViewPage = () => {
               <>
                 {list.settings.searchable && (
                   <SearchInput
-                    disabled={results.length === 0}
                     label={formatMessage(
                       { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                       { target: contentTypeTitle }
@@ -276,9 +281,7 @@ const ListViewPage = () => {
                     trackedEvent="didSearch"
                   />
                 )}
-                {list.settings.filterable && schema ? (
-                  <Filters disabled={results.length === 0} schema={schema} />
-                ) : null}
+                {list.settings.filterable && schema ? <Filters schema={schema} /> : null}
               </>
             }
           />
@@ -304,12 +307,18 @@ const ListViewPage = () => {
     <>
       <tours.contentManager.Introduction>
         {/* Invisible Anchor */}
-        <Box paddingTop={5} />
+        <Box />
       </tours.contentManager.Introduction>
       <Page.Main>
         <Page.Title>{`${contentTypeTitle}`}</Page.Title>
         <LayoutsHeaderCustom
-          primaryAction={canCreate ? <CreateButton /> : null}
+          primaryAction={
+            canCreate ? (
+              <tours.contentManager.CreateNewEntry>
+                <CreateButton />
+              </tours.contentManager.CreateNewEntry>
+            ) : null
+          }
           subtitle={formatMessage(
             {
               id: getTranslation('pages.ListView.header-subtitle'),

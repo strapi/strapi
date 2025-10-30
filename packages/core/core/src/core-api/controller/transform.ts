@@ -1,5 +1,6 @@
 import { isNil, isPlainObject } from 'lodash/fp';
 import type { UID, Struct, Data } from '@strapi/types';
+import { async } from '@strapi/utils';
 
 type TransformedEntry = {
   id: string;
@@ -32,13 +33,15 @@ interface TransformOptions {
    * @deprecated this option is deprecated and will be removed in the next major version
    */
   useJsonAPIFormat?: boolean;
+  encodeSourceMaps?: boolean;
 }
 
-const transformResponse = (
+const transformResponse = async (
   resource: any,
   meta: unknown = {},
   opts: TransformOptions = {
     useJsonAPIFormat: false,
+    encodeSourceMaps: false,
   }
 ) => {
   if (isNil(resource)) {
@@ -49,8 +52,20 @@ const transformResponse = (
     throw new Error('Entry must be an object or an array of objects');
   }
 
+  // Transform pipeline functions
+  const applyJsonApiFormat = async (data: any) =>
+    opts.useJsonAPIFormat ? transformEntry(data, opts?.contentType) : data;
+
+  const applySourceMapEncoding = async (data: any) =>
+    opts.encodeSourceMaps && opts.contentType
+      ? strapi.get('content-source-maps').encodeSourceMaps({ data, schema: opts.contentType })
+      : data;
+
+  // Process data through transformation pipeline
+  const data = await async.pipe(applyJsonApiFormat, applySourceMapEncoding)(resource);
+
   return {
-    data: opts.useJsonAPIFormat ? transformEntry(resource, opts?.contentType) : resource,
+    data,
     meta,
   };
 };

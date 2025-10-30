@@ -16,7 +16,9 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
       strapi.log.debug('[MCP] Inbound JSON-RPC', {
         raw: JSON.stringify(request),
       });
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     // Do not respond to JSON-RPC notifications (no id)
     if (id === undefined || id === null) {
@@ -112,7 +114,9 @@ export const createMCPService = (strapi: Core.Strapi): MCPService => {
                 strapi.log.debug('[MCP] Outbound JSON-RPC', {
                   raw: JSON.stringify(response),
                 });
-              } catch {}
+              } catch {
+                // ignore
+              }
 
               return response;
             } catch (error) {

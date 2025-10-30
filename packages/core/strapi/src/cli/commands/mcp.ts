@@ -38,7 +38,9 @@ const makeRequest = (endpoint: string, body: string): Promise<string> => {
               debugLogPath,
               `[strapi-mcp-proxy] Debug: HTTP response for ${endpoint}: ${data}\n`
             );
-          } catch {}
+          } catch {
+            // ignore
+          }
           resolve(data);
         });
       }
@@ -50,7 +52,9 @@ const makeRequest = (endpoint: string, body: string): Promise<string> => {
           debugLogPath,
           `[strapi-mcp-proxy] Debug: HTTP error for ${endpoint}: ${err?.message || err}\n`
         );
-      } catch {}
+      } catch {
+        // ignore
+      }
       reject(err);
     });
 
@@ -59,7 +63,9 @@ const makeRequest = (endpoint: string, body: string): Promise<string> => {
         debugLogPath,
         `[strapi-mcp-proxy] Debug: HTTP request to ${endpoint}: ${body}\n`
       );
-    } catch {}
+    } catch {
+      // ignore
+    }
     req.write(body);
     req.end();
   });
@@ -82,14 +88,18 @@ const action = async (opts: { endpoint?: string }) => {
               debugLogPath,
               `[strapi-mcp-proxy] Debug: STDIN -> HTTP: ${line.trim()}\n`
             );
-          } catch {}
+          } catch {
+            // ignore
+          }
           const response = await makeRequest(endpoint, line.trim());
           try {
             fs.appendFileSync(
               debugLogPath,
               `[strapi-mcp-proxy] Debug: HTTP -> STDOUT: ${response}\n`
             );
-          } catch {}
+          } catch {
+            // ignore
+          }
           // Only write if there is a non-empty JSON body (notifications yield 204/empty)
           if (response && response.trim().length > 0) {
             process.stdout.write(`${response}\n`);

@@ -79,6 +79,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
                 onChange={onChange}
                 onBlur={onBlur}
                 value={values.name || ''}
+                type="text"
               />
               <Field.Error />
             </Field.Root>

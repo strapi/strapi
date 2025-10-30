@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 
 interface ValidationType {
@@ -40,8 +40,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to our products list-view
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Products' }).click();
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await page.waitForURL(LIST_URL);
     await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 
@@ -105,7 +104,7 @@ test.describe('Edit view', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
@@ -145,8 +144,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to our products list-view where there will be one document already made in the `en` locale
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Products' }).click();
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await page.waitForURL(LIST_URL);
     await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 
@@ -224,7 +222,7 @@ test.describe('Edit view', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
@@ -263,8 +261,7 @@ test.describe('Edit view', () => {
     /**
      * Navigate to settings and roles & modify editor permissions
      */
-    await page.getByRole('link', { name: 'Settings', exact: true }).click();
-    await page.getByRole('link', { name: 'Roles' }).first().click();
+    await navToHeader(page, ['Settings', ['Administration Panel', 'Roles']], 'Roles');
     await page.getByRole('gridcell', { name: 'Editor', exact: true }).click();
 
     /**
@@ -285,7 +282,7 @@ test.describe('Edit view', () => {
     // header is behind the permissions component.
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Logout and login as editor
@@ -308,7 +305,7 @@ test.describe('Edit view', () => {
     await page.getByRole('link', { name: 'Create new entry' }).click();
     await page.getByLabel('title').fill('the richmond way');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Verify we cannot create a new entry in the french locale as editors do
@@ -328,12 +325,12 @@ test.describe('Edit view', () => {
     /**
      * Navigate to our articles list-view and create a new entry
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await page.waitForURL(LIST_URL);
     await page.getByRole('link', { name: 'Create new entry' }).click();
     await page.getByLabel('title').fill('trent crimm');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Create a Spanish (es) locale for the entry
@@ -342,7 +339,7 @@ test.describe('Edit view', () => {
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
     await page.getByLabel('title').fill('dani rojas');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Delete the Spanish (es) locale entry
@@ -350,7 +347,7 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await findAndClose(page, 'Success:Deleted');
+    await findAndClose(page, 'Deleted');
 
     /**
      * Navigate to our homepage single-type and create a new entry
@@ -360,7 +357,7 @@ test.describe('Edit view', () => {
     await page.waitForURL(HOMEPAGE_LIST_URL);
     await page.getByLabel('title').fill('football is life');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Create a Spanish (es) locale for the homepage entry
@@ -369,7 +366,7 @@ test.describe('Edit view', () => {
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
     await page.getByLabel('title').fill('el fútbol también es muerte.');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Delete the Spanish (es) locale homepage entry
@@ -377,7 +374,7 @@ test.describe('Edit view', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }).click();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await findAndClose(page, 'Success:Deleted');
+    await findAndClose(page, 'Deleted');
   });
 
   test('As a user I want to publish multiple locales of my document', async ({ page, browser }) => {
@@ -427,7 +424,7 @@ test.describe('Edit view', () => {
      * Save the spanish draft
      */
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Open the bulk locale publish modal
@@ -486,7 +483,7 @@ test.describe('Edit view', () => {
      * Publish the english article
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     await page.getByRole('combobox', { name: 'Locales' }).click();
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
@@ -512,13 +509,13 @@ test.describe('Edit view', () => {
      * Save the spanish draft
      */
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Publish the spanish article
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Open the bulk locale unpublish modal
@@ -548,4 +545,132 @@ test.describe('Edit view', () => {
       page.getByLabel('Unpublish multiple locales').getByRole('button', { name: 'Unpublish' })
     ).toBeDisabled();
   });
+
+  test('As a user I want to see non translatable fields pre-filled when creating a new locale of a document', async ({
+    page,
+  }) => {
+    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.getByRole('button', { name: /add another field to this collection type/i }).click();
+    await page
+      .getByRole('button', { name: 'Text Small or long text like title or description' })
+      .click();
+    await page.getByLabel('Name', { exact: true }).fill('nonTranslatableField');
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByLabel('Enable localization for this').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+
+    // Create a new entry in the english locale
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
+    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await page.getByLabel('name').fill('Translatable name (only for this locale)');
+    await page.getByLabel('nonTranslatableField').fill('Non translatable value (for all locales)');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved Document');
+
+    // Switch to french locale
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'French (fr)' }).click();
+
+    // The non translatable field should be pre-filled with the value from the english locale
+    await expect(page.getByLabel('nonTranslatableField')).toHaveValue(
+      'Non translatable value (for all locales)'
+    );
+    // The translatable field should be empty though
+    await expect(page.getByLabel('name')).toHaveValue('');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved Document');
+
+    // Remove the field from the content type
+    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.getByRole('button', { name: 'Delete nonTranslatableField' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+  });
 });
+
+describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')(() => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await page.goto('/admin');
+    await login({ page });
+  });
+
+  test('As a user I want to enable AI translation', async ({ page }) => {
+    // Navigate to an Article
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
+
+    // Assert the AI translation status is visible and disabled
+    const aiTranslationStatus = page.getByLabel('AI Translation Status');
+    await expect(aiTranslationStatus).toBeVisible();
+    aiTranslationStatus.hover();
+    await expect(page.getByRole('tooltip', { name: /AI translation disabled/ })).toBeVisible();
+
+    // Go to i18n settings
+    const enableLink = page.getByRole('link', { name: 'Enable it in settings' });
+    await clickAndWait(page, enableLink);
+    await page.waitForURL(/\/admin\/settings\/internationalization/);
+
+    // Enable the setting
+    const checkbox = await page.getByRole('checkbox');
+    await expect(checkbox).not.toBeChecked();
+    await checkbox.click();
+    await findAndClose(page, 'Changes saved');
+    await expect(checkbox).toBeChecked();
+
+    // Navigate back to the Article
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
+
+    // Assert the AI translation status is visible and enabled
+    await expect(aiTranslationStatus).toBeVisible();
+    aiTranslationStatus.hover();
+    await expect(page.getByRole('tooltip', { name: /AI translation enabled/ })).toBeVisible();
+  });
+});
+
+describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')(
+  'Unstable edit view',
+  () => {
+    test.beforeEach(async ({ page }) => {
+      await resetDatabaseAndImportDataFromPath('with-admin.tar');
+      await page.goto('/admin');
+      await login({ page });
+    });
+
+    test('As a user I want to enable AI translation', async ({ page }) => {
+      // Navigate to an Article
+      await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+      await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
+
+      // Assert the AI translation status is visible and disabled
+      const aiTranslationStatus = page.getByLabel('AI Translation Status');
+      await expect(aiTranslationStatus).toBeVisible();
+      aiTranslationStatus.hover();
+      await expect(page.getByRole('tooltip', { name: /AI translation disabled/ })).toBeVisible();
+
+      // Go to i18n settings
+      const enableLink = page.getByRole('link', { name: 'Enable it in settings' });
+      await clickAndWait(page, enableLink);
+      await page.waitForURL(/\/admin\/settings\/internationalization/);
+
+      // Enable the setting
+      const checkbox = await page.getByRole('checkbox');
+      await expect(checkbox).not.toBeChecked();
+      await checkbox.click();
+      await findAndClose(page, 'Changes saved');
+      await expect(checkbox).toBeChecked();
+
+      // Navigate back to the Article
+      await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+      await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
+
+      // Assert the AI translation status is visible and enabled
+      await expect(aiTranslationStatus).toBeVisible();
+      aiTranslationStatus.hover();
+      await expect(page.getByRole('tooltip', { name: /AI translation enabled/ })).toBeVisible();
+    });
+  }
+);

@@ -48,13 +48,13 @@ const { bytesToKbytes } = fileUtils;
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const fileService = getService('file');
 
-  const sendMediaMetrics = (data: Pick<File, 'caption' | 'alternativeText'>) => {
+  const sendMediaMetrics = async (data: Pick<File, 'caption' | 'alternativeText'>) => {
     if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
-      strapi.telemetry.send('didSaveMediaWithCaption');
+      await getService('metrics').trackUsage('didSaveMediaWithCaption');
     }
 
     if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
-      strapi.telemetry.send('didSaveMediaWithAlternativeText');
+      await getService('metrics').trackUsage('didSaveMediaWithAlternativeText');
     }
   };
 
@@ -223,7 +223,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       files,
     }: {
       data: Record<string, unknown>;
-      files: InputFile | InputFile[];
+      files: InputFile[];
     },
     opts?: CommonOptions
   ) {
@@ -436,7 +436,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     }
 
-    sendMediaMetrics(fileValues);
+    await sendMediaMetrics(fileValues);
 
     const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
@@ -456,7 +456,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     }
 
-    sendMediaMetrics(fileValues);
+    await sendMediaMetrics(fileValues);
 
     const res = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
 
@@ -539,11 +539,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res as Settings | null;
   }
 
-  function setSettings(value: Settings) {
+  async function setSettings(value: Settings) {
     if (value.responsiveDimensions === true) {
-      strapi.telemetry.send('didEnableResponsiveDimensions');
+      await getService('metrics').trackUsage('didEnableResponsiveDimensions');
     } else {
-      strapi.telemetry.send('didDisableResponsiveDimensions');
+      await getService('metrics').trackUsage('didDisableResponsiveDimensions');
     }
 
     return strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });

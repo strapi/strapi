@@ -9,6 +9,17 @@ import * as z from 'zod/v4';
 // eslint-disable-next-line import/no-cycle
 import * as attributes from './attributes';
 
+const isCustomFieldAttribute = (
+  attribute: unknown
+): attribute is { type: 'customField'; customField: string } => {
+  return (
+    !!attribute &&
+    typeof attribute === 'object' &&
+    (attribute as any).type === 'customField' &&
+    typeof (attribute as any).customField === 'string'
+  );
+};
+
 /**
  * Creates a Zod schema for a collection of Strapi attributes.
  *
@@ -131,6 +142,22 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
     case 'uid':
       return attributes.uidToSchema(attribute);
     default: {
+      if (isCustomFieldAttribute(attribute)) {
+        const attrCF = attribute as { type: 'customField'; customField: string };
+        const strapiInstance = global.strapi;
+        if (!strapiInstance) {
+          throw new Error('Strapi instance not available for custom field conversion');
+        }
+
+        const customField = strapiInstance.get('custom-fields').get(attrCF.customField);
+        if (!customField) {
+          throw new Error(`Custom field '${attrCF.customField}' not found`);
+        }
+
+        // Re-dispatch with the resolved underlying Strapi kind
+        return mapAttributeToSchema({ ...attrCF, type: customField.type });
+      }
+
       const { type } = attribute as Schema.Attribute.AnyAttribute;
 
       throw new Error(`Unsupported attribute type: ${type}`);
@@ -224,6 +251,22 @@ export const mapAttributeToInputSchema = (
     case 'uid':
       return attributes.uidToInputSchema(attribute);
     default: {
+      if (isCustomFieldAttribute(attribute)) {
+        const attrCF = attribute as { type: 'customField'; customField: string };
+        const strapiInstance = global.strapi;
+        if (!strapiInstance) {
+          throw new Error('Strapi instance not available for custom field conversion');
+        }
+
+        const customField = strapiInstance.get('custom-fields').get(attrCF.customField);
+        if (!customField) {
+          throw new Error(`Custom field '${attrCF.customField}' not found`);
+        }
+
+        // Re-dispatch with the resolved underlying Strapi kind
+        return mapAttributeToInputSchema({ ...attrCF, type: customField.type });
+      }
+
       const { type } = attribute as Schema.Attribute.AnyAttribute;
 
       throw new Error(`Unsupported attribute type: ${type}`);
