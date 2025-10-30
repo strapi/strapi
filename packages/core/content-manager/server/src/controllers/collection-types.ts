@@ -141,6 +141,12 @@ export default {
       .countRelations({ toOne: false, toMany: true })
       .build();
 
+    // OPTIMIZATION: For list view, avoid deep-populating localizations to prevent heavy payloads
+    // Only expose minimal fields needed for locale badges/metadata
+    if (populate && typeof populate === 'object') {
+      (populate as any).localizations = { fields: ['id', 'locale', 'documentId'] };
+    }
+
     const { locale, status } = await getDocumentLocaleAndStatus(query, model);
 
     const { results: documents, pagination } = await documentManager.findPage(
