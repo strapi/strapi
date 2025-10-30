@@ -65,7 +65,7 @@ const App = () => {
         <FormModalNavigationProvider>
           <DataManagerProvider>
             <ExitPrompt />
-            <ChatProvider defaultOpen={true}>
+            <ChatProvider>
               <>
                 {autoReload && <FormModal />}
                 <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
