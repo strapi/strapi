@@ -1,0 +1,30 @@
+{
+  "name": "@scal/audit-logs",
+  "version": "0.1.0",
+  "description": "Audit logs plugin for Strapi - logs content API changes and exposes a REST endpoint",
+  "main": "dist/server/index.js",
+  "types": "dist/server/index.d.ts",
+  "license": "MIT",
+  "author": "gopi10889@gmail.com",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@strapi/strapi": "workspace:*",
+    "@strapi/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "rimraf": "^5.0.5"
+  }
+}
+
+
