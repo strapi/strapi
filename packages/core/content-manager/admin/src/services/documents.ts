@@ -139,8 +139,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { collectionType, model }) => [
+      invalidatesTags: (_result, _error, { collectionType, model, documentId }) => [
         { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_LIST` : model },
+        {
+          type: 'Document',
+          id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+        },
+        { type: 'Document', id: `${model}_ALL_ITEMS` },
         'RecentDocumentList',
         'CountDocuments',
         'UpcomingReleasesList',
@@ -351,6 +356,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           'RecentDocumentList',
           'CountDocuments',
           'UpcomingReleasesList',
+          {
+            type: 'AILocalizationJobs',
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+          },
         ];
       },
     }),
@@ -403,6 +412,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           'RecentDocumentList',
           'CountDocuments',
           'UpcomingReleasesList',
+          {
+            type: 'AILocalizationJobs',
+            id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
+          },
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {

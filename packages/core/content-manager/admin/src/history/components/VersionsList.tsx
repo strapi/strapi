@@ -127,7 +127,7 @@ const VersionsList = () => {
       direction="column"
       alignItems="stretch"
       width="320px"
-      height="100vh"
+      height="100dvh"
       background="neutral0"
       borderColor="neutral200"
       borderWidth="0 0 0 1px"

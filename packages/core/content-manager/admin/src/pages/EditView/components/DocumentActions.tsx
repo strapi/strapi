@@ -573,6 +573,7 @@ const PublishAction: DocumentActionComponent = ({
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+  const initialValues = useForm('PublishAction', ({ initialValues }) => initialValues);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
   const {
     currentDocument: { components },
@@ -722,6 +723,15 @@ const PublishAction: DocumentActionComponent = ({
         const hasUnreadableRequiredField = Object.keys(schema.attributes).some((fieldName) => {
           const attribute = schema.attributes[fieldName];
 
+          // For components, check if any of the component fields are readable
+          if (attribute.type === 'component') {
+            const componentFields = (canReadFields ?? []).filter((field) =>
+              field.startsWith(`${fieldName}.`)
+            );
+            return componentFields.length === 0;
+          }
+
+          // For regular fields, check if the field itself is readable
           return attribute?.required && !(canReadFields ?? []).includes(fieldName);
         });
 
@@ -748,6 +758,7 @@ const PublishAction: DocumentActionComponent = ({
       }
       const { data } = handleInvisibleAttributes(transformData(formValues), {
         schema,
+        initialValues,
         components,
       });
       const res = await publish(
@@ -760,9 +771,9 @@ const PublishAction: DocumentActionComponent = ({
         data
       );
 
-      // Reset form if successful
+      // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
       if ('data' in res) {
-        resetForm();
+        resetForm(formValues);
         dispatchGuidedTour({
           type: 'set_completed_actions',
           payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
@@ -1068,7 +1079,7 @@ const UpdateAction: DocumentActionComponent = ({
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           setErrors(formatValidationErrors(res.error));
         } else {
-          resetForm();
+          resetForm(document);
         }
       } else {
         const { data } = handleInvisibleAttributes(transformData(document), {

@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-import { Alert, AlertVariant, Flex, useCallbackRef, Link } from '@strapi/design-system';
+import { Alert, AlertVariant, Flex, useCallbackRef, Link, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+
+import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
 
 interface NotificationLink {
   label: string;
@@ -83,22 +85,22 @@ const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
     <NotificationsContext.Provider value={value}>
       <Flex
         left="50%"
-        marginLeft="-250px"
+        transform="translateX(-50%)"
         position="fixed"
         direction="column"
         alignItems="stretch"
-        gap={2}
-        top={`4.6rem`}
-        width={`50rem`}
+        gap={4}
+        marginTop={4}
+        top={HEIGHT_TOP_NAVIGATION}
+        width="100%"
+        maxWidth={`50rem`}
         zIndex="notification"
       >
         {notifications.map((notification) => {
           return (
-            <Notification
-              key={notification.id}
-              {...notification}
-              clearNotification={clearNotification}
-            />
+            <Box key={notification.id} paddingLeft={4} paddingRight={4}>
+              <Notification {...notification} clearNotification={clearNotification} />
+            </Box>
           );
         })}
       </Flex>
@@ -148,38 +150,18 @@ const Notification = ({
     }
   }, [blockTransition, handleClose, timeout]);
 
-  let variant: AlertVariant;
-  let alertTitle: string;
-
-  if (type === 'info') {
-    variant = 'default';
-    alertTitle = formatMessage({
-      id: 'notification.default.title',
-      defaultMessage: 'Information:',
-    });
-  } else if (type === 'danger') {
-    variant = 'danger';
-    alertTitle = formatMessage({
-      id: 'notification.warning.title',
-      defaultMessage: 'Warning:',
-    });
-  } else if (type === 'warning') {
-    variant = 'warning';
-    alertTitle = formatMessage({
-      id: 'notification.warning.title',
-      defaultMessage: 'Warning:',
-    });
-  } else {
-    variant = 'success';
-    alertTitle = formatMessage({
-      id: 'notification.success.title',
-      defaultMessage: 'Success:',
-    });
-  }
-
-  if (title) {
-    alertTitle = title;
-  }
+  const getVariant = (): AlertVariant => {
+    switch (type) {
+      case 'info':
+        return 'default';
+      case 'danger':
+        return 'danger';
+      case 'warning':
+        return 'warning';
+      default:
+        return 'success';
+    }
+  };
 
   return (
     <Alert
@@ -195,8 +177,8 @@ const Notification = ({
         id: 'global.close',
         defaultMessage: 'Close',
       })}
-      title={alertTitle}
-      variant={variant}
+      title={title}
+      variant={getVariant()}
     >
       {message}
     </Alert>

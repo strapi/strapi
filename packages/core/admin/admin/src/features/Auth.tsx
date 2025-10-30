@@ -15,8 +15,8 @@ import {
   useLazyCheckPermissionsQuery,
   useLoginMutation,
   useLogoutMutation,
-  useRenewTokenMutation,
 } from '../services/auth';
+import { getOrCreateDeviceId } from '../utils/deviceId';
 
 import type {
   Permission as PermissionContract,
@@ -113,7 +113,6 @@ const AuthProvider = ({
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
-  const [renewTokenMutation] = useRenewTokenMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const clearStateAndLogout = React.useCallback(() => {
@@ -121,27 +120,6 @@ const AuthProvider = ({
     dispatch(logoutAction());
     navigate('/auth/login');
   }, [dispatch, navigate]);
-
-  /**
-   * Fetch data from storages on mount and store it in our state.
-   * It's not normally stored in session storage unless the user
-   * does click "remember me" when they login. We also need to renew the token.
-   */
-  React.useEffect(() => {
-    if (token && !_disableRenewToken) {
-      renewTokenMutation({ token }).then((res) => {
-        if ('data' in res) {
-          dispatch(
-            loginAction({
-              token: res.data.token,
-            })
-          );
-        } else {
-          clearStateAndLogout();
-        }
-      });
-    }
-  }, [token, dispatch, renewTokenMutation, clearStateAndLogout, _disableRenewToken]);
 
   React.useEffect(() => {
     if (user) {
@@ -170,7 +148,7 @@ const AuthProvider = ({
 
   const login = React.useCallback<AuthContextValue['login']>(
     async ({ rememberMe, ...body }) => {
-      const res = await loginMutation(body);
+      const res = await loginMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
 
       /**
        * There will always be a `data` key in the response
@@ -193,7 +171,7 @@ const AuthProvider = ({
   );
 
   const logout = React.useCallback(async () => {
-    await logoutMutation();
+    await logoutMutation({ deviceId: getOrCreateDeviceId() });
     clearStateAndLogout();
   }, [clearStateAndLogout, logoutMutation]);
 

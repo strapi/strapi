@@ -21,9 +21,22 @@ const sendDidUpdateI18nLocalesEvent = async () => {
   });
 };
 
+const sendWithAIEventProperty = async (event: string, payload: Record<string, any> = {}) => {
+  const settings = await getService('settings').getSettings();
+
+  strapi.telemetry.send(event, {
+    ...payload,
+    eventProperties: {
+      ...payload?.eventProperties,
+      isAIi18nConfigured: Boolean(settings?.aiLocalizations),
+    },
+  });
+};
+
 const metrics = () => ({
   sendDidInitializeEvent,
   sendDidUpdateI18nLocalesEvent,
+  sendWithAIEventProperty,
 });
 
 type MetricsService = typeof metrics;

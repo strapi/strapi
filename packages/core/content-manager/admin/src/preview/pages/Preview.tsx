@@ -434,12 +434,12 @@ const ProtectedPreviewPageImpl = () => {
   if (error || !model) {
     return (
       <Box
-        height="100vh"
-        width="100vw"
+        height="100dvh"
+        width="100dvw"
         position="fixed"
         top={0}
         left={0}
-        zIndex={2}
+        zIndex={5}
         background="neutral0"
       >
         <Page.Error />
@@ -449,12 +449,12 @@ const ProtectedPreviewPageImpl = () => {
 
   return (
     <Box
-      height="100vh"
-      width="100vw"
+      height="100dvh"
+      width="100dvw"
       position="fixed"
       top={0}
       left={0}
-      zIndex={2}
+      zIndex={5}
       background="neutral0"
     >
       <Page.Protect

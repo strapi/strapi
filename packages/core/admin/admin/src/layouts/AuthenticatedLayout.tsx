@@ -15,6 +15,7 @@ import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
 import { UpsellBanner } from '../components/UpsellBanner';
+import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
@@ -73,6 +74,8 @@ const AdminLayout = () => {
     isLoading: isLoadingMenu,
     generalSectionLinks,
     pluginsSectionLinks,
+    topMobileNavigation,
+    burgerMobileNavigation,
   } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName));
 
   const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
@@ -106,12 +109,29 @@ const AdminLayout = () => {
             <SkipToContent>
               {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
             </SkipToContent>
-            <Flex alignItems="flex-start">
+            <Flex
+              height="100dvh"
+              direction={{
+                initial: 'column',
+                large: 'row',
+              }}
+              alignItems="flex-start"
+            >
               <LeftMenu
                 generalSectionLinks={generalSectionLinks}
                 pluginsSectionLinks={pluginsSectionLinks}
+                topMobileNavigation={topMobileNavigation}
+                burgerMobileNavigation={burgerMobileNavigation}
               />
-              <Box flex={1}>
+              <Box
+                flex={1}
+                overflow="auto"
+                width="100%"
+                height={{
+                  initial: 'auto',
+                  large: '100%',
+                }}
+              >
                 <UpsellBanner />
                 <Outlet />
               </Box>
