@@ -37,7 +37,9 @@ import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useAILocalizationJobsPolling } from '../hooks/useAILocalizationJobsPolling';
 import { useI18n } from '../hooks/useI18n';
+import { useGetAILocalizationJobsByDocumentQuery } from '../services/aiLocalizationJobs';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
 import { useGetSettingsQuery } from '../services/settings';
@@ -60,6 +62,7 @@ interface LocaleOptionProps {
   locale: Locale;
   status: 'draft' | 'published' | 'modified';
   entryExists: boolean;
+  translationStatus?: 'processing' | 'failed' | 'completed' | undefined;
 }
 
 const statusVariants: Record<LocaleOptionProps['status'], StatusVariant> = {
@@ -111,6 +114,28 @@ const LocaleOption = ({
   );
 };
 
+const LocaleOptionStartIcon = ({
+  entryWithLocaleExists,
+  translationStatus,
+  index,
+}: {
+  entryWithLocaleExists: boolean;
+  translationStatus?: 'processing' | 'failed' | 'completed' | undefined;
+  index?: number;
+}) => {
+  const isAiAvailable = useAIAvailability();
+
+  if (!entryWithLocaleExists) {
+    return <Plus />;
+  }
+
+  if (isAiAvailable && index !== 0 && translationStatus === 'failed') {
+    return <WarningCircle fill="warning600" />;
+  }
+
+  return null;
+};
+
 const LocalePickerAction = ({
   document,
   meta,
@@ -129,6 +154,13 @@ const LocalePickerAction = ({
     documentId,
     params: { locale: currentDesiredLocale },
   });
+  const { data: jobData } = useGetAILocalizationJobsByDocumentQuery({
+    documentId: documentId!,
+    model: model!,
+    collectionType: collectionType!,
+  });
+  const { data: settings } = useGetSettingsQuery();
+  const isAiAvailable = useAIAvailability();
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -188,12 +220,16 @@ const LocalePickerAction = ({
     return canRead.includes(locale.code);
   });
 
+  const localesSortingDefaultFirst = displayedLocales.sort((a, b) =>
+    a.isDefault ? -1 : b.isDefault ? 1 : 0
+  );
+
   return {
     label: formatMessage({
       id: getTranslation('Settings.locales.modal.locales.label'),
       defaultMessage: 'Locales',
     }),
-    options: displayedLocales.map((locale) => {
+    options: localesSortingDefaultFirst.map((locale, index) => {
       const entryWithLocaleExists = allCurrentLocales.some((doc) => doc.locale === locale.code);
 
       const currentLocaleDoc = allCurrentLocales.find((doc) =>
@@ -201,6 +237,44 @@ const LocalePickerAction = ({
       );
 
       const permissionsToCheck = currentLocaleDoc ? canRead : canCreate;
+
+      if (isAiAvailable && settings?.data?.aiLocalizations) {
+        return {
+          _render: () => (
+            <React.Fragment key={index}>
+              <SingleSelectOption
+                disabled={!permissionsToCheck.includes(locale.code)}
+                key={locale.code}
+                startIcon={
+                  <LocaleOptionStartIcon
+                    entryWithLocaleExists={entryWithLocaleExists}
+                    translationStatus={jobData?.data?.status}
+                    index={index}
+                  />
+                }
+                value={locale.code}
+              >
+                <LocaleOption
+                  isDraftAndPublishEnabled={!!schema?.options?.draftAndPublish}
+                  locale={locale}
+                  status={currentLocaleDoc?.status}
+                  entryExists={entryWithLocaleExists}
+                />
+              </SingleSelectOption>
+              {localesSortingDefaultFirst.length > 1 && index === 0 && (
+                <Box paddingRight={4} paddingLeft={4} paddingTop={2} paddingBottom={2}>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTranslation('CMEditViewLocalePicker.locale.ai-translations'),
+                      defaultMessage: 'AI Translations',
+                    })}
+                  </Typography>
+                </Box>
+              )}
+            </React.Fragment>
+          ),
+        };
+      }
 
       return {
         disabled: !permissionsToCheck.includes(locale.code),
@@ -211,9 +285,10 @@ const LocalePickerAction = ({
             locale={locale}
             status={currentLocaleDoc?.status}
             entryExists={entryWithLocaleExists}
+            translationStatus={jobData?.data?.status}
           />
         ),
-        startIcon: !entryWithLocaleExists ? <Plus /> : null,
+        startIcon: <LocaleOptionStartIcon entryWithLocaleExists={entryWithLocaleExists} />,
       };
     }),
     customizeContent: () => currentLocale?.name,
@@ -275,12 +350,30 @@ const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>
   }
 `;
 
-const AITranslationStatusAction = () => {
+const AITranslationStatusAction = ({ documentId, model, collectionType }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const isAIAvailable = useAIAvailability();
   const { data: settings } = useGetSettingsQuery();
   const isAISettingEnabled = settings?.data?.aiLocalizations;
   const { hasI18n } = useI18n();
+
+  // Poll for AI localizations jobs when AI is enabled and we have a documentId
+  const { status } = useAILocalizationJobsPolling({
+    documentId,
+    model,
+    collectionType,
+  });
+  const statusVariant = (() => {
+    if (status === 'failed') {
+      return 'warning';
+    }
+
+    if (isAISettingEnabled) {
+      return 'alternative';
+    }
+
+    return 'neutral';
+  })();
 
   // Do not display this action when i18n is not available
   if (!hasI18n) {
@@ -288,13 +381,12 @@ const AITranslationStatusAction = () => {
   }
 
   // Do not display this action when AI is not available
-  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (!isAIAvailable || !hasAIFutureFlag) {
+  if (!isAIAvailable) {
     return null;
   }
 
   return {
-    status: {
+    _status: {
       message: (
         <Box
           height="100%"
@@ -305,7 +397,7 @@ const AITranslationStatusAction = () => {
         >
           <AITranslationStatusIcon
             $isAISettingEnabled={Boolean(isAISettingEnabled)}
-            variant={isAISettingEnabled ? 'alternative' : 'neutral'}
+            variant={statusVariant}
             size="S"
           >
             <Sparkle />
@@ -328,7 +420,7 @@ const AITranslationStatusAction = () => {
             {formatMessage({
               id: getTranslation('CMEditViewAITranslation.status-description'),
               defaultMessage:
-                'Our AI translates content in all locales each time you save a modification.',
+                'Our AI translates content in all locales each time you save a modification in the default locale.',
             })}
           </Typography>
           <Link
@@ -413,8 +505,7 @@ const FillFromAnotherLocaleAction = ({
   }
 
   // Do not display this action when AI is available and AI translations are enabled
-  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (hasAIFutureFlag && isAIAvailable && isAISettingEnabled) {
+  if (isAIAvailable && isAISettingEnabled) {
     return null;
   }
 

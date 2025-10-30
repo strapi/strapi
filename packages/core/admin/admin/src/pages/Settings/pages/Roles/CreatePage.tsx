@@ -269,7 +269,7 @@ const CreatePage = () => {
                                 defaultMessage: 'Name',
                               })}
                             </Field.Label>
-                            <TextInput onChange={handleChange} value={values.name} />
+                            <TextInput type="text" onChange={handleChange} value={values.name} />
                             <Field.Error />
                           </Field.Root>
                         </Grid.Item>
