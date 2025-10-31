@@ -42,3 +42,21 @@ export declare namespace GetAiUsage {
     };
   }
 }
+
+/**
+ * GET /ai-feature-config - Get AI feature config
+ */
+export declare namespace GetAIFeatureConfig {
+  export interface Request {
+    query: {};
+    body: {};
+  }
+
+  export interface Response {
+    data: {
+      isAIi18nConfigured: boolean;
+      isAIMediaLibraryConfigured: boolean;
+    };
+    error?: errors.ApplicationError;
+  }
+}

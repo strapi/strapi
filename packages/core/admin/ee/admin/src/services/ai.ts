@@ -1,5 +1,5 @@
 import { adminApi } from '../../../../admin/src/services/api';
-import { GetAiUsage, GetAiToken } from '../../../../shared/contracts/ai';
+import { GetAiUsage, GetAiToken, GetAIFeatureConfig } from '../../../../shared/contracts/ai';
 
 const aiService = adminApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -19,10 +19,29 @@ const aiService = adminApi.injectEndpoints({
         return res.data;
       },
     }),
+    getAIFeatureConfig: builder.query<GetAIFeatureConfig.Response['data'], void>({
+      query: () => ({
+        method: 'GET',
+        url: '/admin/ai-feature-config',
+      }),
+      transformResponse(res: GetAIFeatureConfig.Response) {
+        return res.data;
+      },
+    }),
   }),
   overrideExisting: true,
 });
 
-const { useGetAIUsageQuery, useGetAiTokenQuery, useLazyGetAiTokenQuery } = aiService;
+const {
+  useGetAIUsageQuery,
+  useGetAiTokenQuery,
+  useLazyGetAiTokenQuery,
+  useGetAIFeatureConfigQuery,
+} = aiService;
 
-export { useGetAIUsageQuery, useGetAiTokenQuery, useLazyGetAiTokenQuery };
+export {
+  useGetAIUsageQuery,
+  useGetAiTokenQuery,
+  useLazyGetAiTokenQuery,
+  useGetAIFeatureConfigQuery,
+};

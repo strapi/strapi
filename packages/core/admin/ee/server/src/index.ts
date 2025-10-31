@@ -31,6 +31,7 @@ const getAdminEE = () => {
 
   const isAIEnabled =
     strapi.config.get('admin.ai.enabled', true) && strapi.ee.features.isEnabled('cms-ai');
+
   const isAuditLogsEnabled =
     strapi.config.get('admin.auditLogs.enabled', true) &&
     strapi.ee.features.isEnabled('audit-logs');
