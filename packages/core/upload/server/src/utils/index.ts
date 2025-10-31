@@ -19,7 +19,7 @@ type Services = {
   metrics: ReturnType<typeof metrics>;
   'api-upload-folder': typeof apiUploadFolder;
   extensions: typeof extensions;
-  aiMetadata: ReturnType<typeof createAIMetadataService>;
+  'ai-metadata': ReturnType<typeof createAIMetadataService>;
 };
 
 export const getService = <TName extends keyof Services>(name: TName): Services[TName] => {

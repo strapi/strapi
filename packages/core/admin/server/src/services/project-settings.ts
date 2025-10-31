@@ -193,4 +193,20 @@ const updateProjectSettings = async (
   return getProjectSettings();
 };
 
-export { deleteOldFiles, parseFilesData, getProjectSettings, updateProjectSettings };
+const isAIAvailable = () => {
+  // Check if user disabled AI features globally
+  const isAIEnabled = strapi.config.get('admin.ai.enabled', true);
+  if (!isAIEnabled) {
+    return false;
+  }
+
+  // Check if the user's license grants access to AI features
+  const hasAccess = strapi.ee.features.isEnabled('cms-ai');
+  if (!hasAccess) {
+    return false;
+  }
+
+  return true;
+};
+
+export { deleteOldFiles, parseFilesData, getProjectSettings, updateProjectSettings, isAIAvailable };

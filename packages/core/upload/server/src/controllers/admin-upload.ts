@@ -137,7 +137,7 @@ export default {
       await getService('metrics').trackUsage('didUploadImage');
     }
 
-    const aiMetadataService = getService('aiMetadata');
+    const aiMetadataService = getService('ai-metadata');
 
     // AFTER upload - use thumbnail versions for AI processing
     if (await aiMetadataService.isEnabled()) {

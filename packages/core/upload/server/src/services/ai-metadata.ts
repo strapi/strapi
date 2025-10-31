@@ -8,15 +8,9 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async isEnabled() {
-      // Check if user disabled AI features globally
-      const isAIEnabled = strapi.config.get('admin.ai.enabled', true);
-      if (!isAIEnabled) {
-        return false;
-      }
+      const isAiAvailable = await strapi.service('admin::project-settings').isAIAvailable();
 
-      // Check if the user's license grants access to AI features
-      const hasAccess = strapi.ee.features.isEnabled('cms-ai');
-      if (!hasAccess) {
+      if (!isAiAvailable) {
         return false;
       }
 

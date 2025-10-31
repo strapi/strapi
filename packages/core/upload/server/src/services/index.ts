@@ -19,5 +19,5 @@ export const services = {
   'image-manipulation': imageManipulation,
   'api-upload-folder': apiUploadFolder,
   extensions,
-  aiMetadata: createAIMetadataService,
+  'ai-metadata': createAIMetadataService,
 };
