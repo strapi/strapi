@@ -29,7 +29,7 @@ import { styled } from 'styled-components';
 import { AudioPreview } from '../../components/AssetCard/AudioPreview';
 import { VideoPreview } from '../../components/AssetCard/VideoPreview';
 import { type Asset, EditAssetContent } from '../../components/EditAssetDialog/EditAssetContent';
-import { AssetType } from '../../constants';
+import { AssetType, DocType } from '../../enums';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useRemoveAsset } from '../../hooks/useRemoveAsset';
 import {
@@ -162,7 +162,7 @@ const AssetCardActions = ({ asset }: { asset: File }) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface AssetProps {
-  assetType: AssetType;
+  assetType: AssetType | DocType;
   thumbnailUrl: string;
   assetUrl: string;
   asset: File;
@@ -269,7 +269,7 @@ const StyledCard = styled(Card)`
   padding: 0;
 `;
 
-const getAssetBadgeLabel = (assetType: AssetType) => {
+const getAssetBadgeLabel = (assetType: AssetType | DocType) => {
   switch (assetType) {
     case AssetType.Image:
       return { id: getTrad('settings.section.image.label'), defaultMessage: 'IMAGE' };
@@ -277,6 +277,14 @@ const getAssetBadgeLabel = (assetType: AssetType) => {
       return { id: getTrad('settings.section.video.label'), defaultMessage: 'VIDEO' };
     case AssetType.Audio:
       return { id: getTrad('settings.section.audio.label'), defaultMessage: 'AUDIO' };
+    case DocType.Pdf:
+      return { id: getTrad('settings.section.pdf.label'), defaultMessage: 'PDF' };
+    case DocType.Csv:
+      return { id: getTrad('settings.section.csv.label'), defaultMessage: 'CSV' };
+    case DocType.Xls:
+      return { id: getTrad('settings.section.xls.label'), defaultMessage: 'XLS' };
+    case DocType.Zip:
+      return { id: getTrad('settings.section.zip.label'), defaultMessage: 'ZIP' };
     default:
       return { id: getTrad('settings.section.doc.label'), defaultMessage: 'DOC' };
   }
