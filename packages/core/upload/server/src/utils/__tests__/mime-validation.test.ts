@@ -291,6 +291,42 @@ describe('mime-validation', () => {
         expect.stringContaining('No upload security configuration found')
       );
     });
+
+    it('throws error if allowedTypes is not an array', async () => {
+      mockStrapi.config.get.mockReturnValue({ allowedTypes: 'not-an-array' });
+      await expect(validateFiles(mockFile1, mockStrapi as any)).rejects.toThrow(
+        'Invalid configuration: allowedTypes must be an array of strings.'
+      );
+    });
+
+    it('throws error if allowedTypes contains non-string items', async () => {
+      mockStrapi.config.get.mockReturnValue({ allowedTypes: ['image/png', 123] });
+      await expect(validateFiles(mockFile1, mockStrapi as any)).rejects.toThrow(
+        'Invalid configuration: allowedTypes must be an array of strings.'
+      );
+    });
+
+    it('throws error if deniedTypes is not an array', async () => {
+      mockStrapi.config.get.mockReturnValue({ deniedTypes: 'not-an-array' });
+      await expect(validateFiles(mockFile1, mockStrapi as any)).rejects.toThrow(
+        'Invalid configuration: deniedTypes must be an array of strings.'
+      );
+    });
+
+    it('throws error if deniedTypes contains non-string items', async () => {
+      mockStrapi.config.get.mockReturnValue({ deniedTypes: ['image/png', 123] });
+      await expect(validateFiles(mockFile1, mockStrapi as any)).rejects.toThrow(
+        'Invalid configuration: deniedTypes must be an array of strings.'
+      );
+    });
+
+    it('does not throw if config is valid', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['image/png'],
+        deniedTypes: ['image/gif'],
+      });
+      await expect(validateFiles([], mockStrapi as any)).resolves.toBeInstanceOf(Array);
+    });
   });
 
   describe('enforceUploadSecurity', () => {
@@ -357,42 +393,6 @@ describe('mime-validation', () => {
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].originalIndex).toBe(1);
       expect(result.errors[0].error.code).toBe('MIME_TYPE_NOT_ALLOWED');
-    });
-
-    it('throws error if allowedTypes is not an array', async () => {
-      mockStrapi.config.get.mockReturnValue({ allowedTypes: 'not-an-array' });
-      await expect(validateFiles([], mockStrapi as any)).rejects.toThrow(
-        'Invalid configuration: allowedTypes must be an array of strings.'
-      );
-    });
-
-    it('throws error if allowedTypes contains non-string items', async () => {
-      mockStrapi.config.get.mockReturnValue({ allowedTypes: ['image/png', 123] });
-      await expect(validateFiles([], mockStrapi as any)).rejects.toThrow(
-        'Invalid configuration: allowedTypes must be an array of strings.'
-      );
-    });
-
-    it('throws error if deniedTypes is not an array', async () => {
-      mockStrapi.config.get.mockReturnValue({ deniedTypes: 'not-an-array' });
-      await expect(validateFiles([], mockStrapi as any)).rejects.toThrow(
-        'Invalid configuration: deniedTypes must be an array of strings.'
-      );
-    });
-
-    it('throws error if deniedTypes contains non-string items', async () => {
-      mockStrapi.config.get.mockReturnValue({ deniedTypes: ['image/png', 123] });
-      await expect(validateFiles([], mockStrapi as any)).rejects.toThrow(
-        'Invalid configuration: deniedTypes must be an array of strings.'
-      );
-    });
-
-    it('does not throw if config is valid', async () => {
-      mockStrapi.config.get.mockReturnValue({
-        allowedTypes: ['image/png'],
-        deniedTypes: ['image/gif'],
-      });
-      await expect(validateFiles([], mockStrapi as any)).resolves.toBeInstanceOf(Array);
     });
   });
 });
