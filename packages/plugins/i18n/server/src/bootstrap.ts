@@ -1,4 +1,5 @@
 import type { Schema } from '@strapi/types';
+import { isEqual } from 'lodash';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
@@ -42,41 +43,20 @@ const registerModelsHooks = () => {
     // Get the result of the document service action
     const result = (await next()) as any;
 
-    // We may not have received a result with everything populated that we need
-    // Use the id and populate built from non localized fields to get the full
-    // result
-    let resultID;
-    // TODO: fix bug where an empty array can be returned
-    if (Array.isArray(result?.entries) && result.entries[0]?.id) {
-      resultID = result.entries[0].id;
-    } else if (result?.id) {
-      resultID = result.id;
-    } else {
-      return result;
-    }
+    // @ts-expect-error true
+    const paramData = context.params.data;
+    const currentFields = copyNonLocalizedAttributes(schema, paramData);
+    const originalFields = copyNonLocalizedAttributes(schema, originalData);
 
-    if (attributesToPopulate.length > 0) {
-      try {
-        const populatedResult = await strapi.db
-          .query(schema.uid)
-          .findOne({ where: { id: resultID }, populate: attributesToPopulate });
+    // Only sync if there are actual changes to non-localized fields
+    const shouldSync =
+      !originalData ||
+      Object.keys(currentFields).some((key) => {
+        return !isEqual(currentFields[key], originalFields[key]);
+      });
 
-        const currentFields = copyNonLocalizedAttributes(schema, populatedResult);
-        const originalFields = copyNonLocalizedAttributes(schema, originalData);
-
-        // Only sync if there are actual changes to non-localized fields
-        const shouldSync =
-          !originalData ||
-          Object.keys(currentFields).some(
-            (key) => JSON.stringify(currentFields[key]) !== JSON.stringify(originalFields[key])
-          );
-
-        if (shouldSync) {
-          await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
-        }
-      } catch (error) {
-        strapi.log.error('Failed to sync non-localized attributes:', error);
-      }
+    if (shouldSync) {
+      await getService('localizations').syncNonLocalizedAttributes(paramData, schema);
     }
 
     return result;
