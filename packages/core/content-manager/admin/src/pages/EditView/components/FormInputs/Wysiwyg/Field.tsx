@@ -88,19 +88,13 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
         });
 
         // Upload the files
-        const message =
-          files.length === 1
-            ? formatMessage({
-                id: 'content-manager.components.Wysiwyg.uploading',
-                defaultMessage: 'Uploading image...',
-              })
-            : formatMessage(
-                {
-                  id: 'content-manager.components.Wysiwyg.uploading-multiple',
-                  defaultMessage: 'Uploading {count} images...',
-                },
-                { count: files.length }
-              );
+        const message = formatMessage(
+          {
+            id: 'content-manager.components.Wysiwyg.uploading',
+            defaultMessage: 'Uploading {count, plural, one {# image} other {# images}}...',
+          },
+          { count: files.length }
+        );
 
         toggleNotification({
           type: 'info',
@@ -120,19 +114,14 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
           // Insert all images into the editor
           insertFile(editorRef, formattedFiles);
 
-          const successMessage =
-            files.length === 1
-              ? formatMessage({
-                  id: 'content-manager.components.Wysiwyg.upload-success',
-                  defaultMessage: 'Image uploaded and inserted successfully',
-                })
-              : formatMessage(
-                  {
-                    id: 'content-manager.components.Wysiwyg.upload-success-multiple',
-                    defaultMessage: '{count} images uploaded and inserted successfully',
-                  },
-                  { count: files.length }
-                );
+          const successMessage = formatMessage(
+            {
+              id: 'content-manager.components.Wysiwyg.upload-success',
+              defaultMessage:
+                '{count, plural, one {Image uploaded and inserted successfully} other {# images uploaded and inserted successfully}}',
+            },
+            { count: files.length }
+          );
 
           toggleNotification({
             type: 'success',
@@ -143,10 +132,13 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
         console.error('Error uploading pasted image:', error);
         toggleNotification({
           type: 'danger',
-          message: formatMessage({
-            id: 'content-manager.components.Wysiwyg.upload-error',
-            defaultMessage: 'Error uploading image',
-          }),
+          message: formatMessage(
+            {
+              id: 'content-manager.components.Wysiwyg.upload-error',
+              defaultMessage: 'Error uploading {count, plural, one {image} other {images}}',
+            },
+            { count: files.length }
+          ),
         });
       } finally {
         setIsUploading(false);
