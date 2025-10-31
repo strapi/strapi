@@ -56,6 +56,7 @@ describe('AI Metadata Service', () => {
       },
       service: jest.fn().mockReturnValue({
         getAiToken: jest.fn().mockResolvedValue({ token: 'mock-token' }),
+        isAIAvailable: jest.fn().mockResolvedValue(true),
       }),
       log: {
         http: jest.fn(),
@@ -87,43 +88,17 @@ describe('AI Metadata Service', () => {
   });
 
   describe('isEnabled', () => {
-    it('should return true when AI is enabled, EE is available and aiMetadata is set to true', async () => {
-      mockStrapi.config.get.mockReturnValue(true);
+    it('should return true when AI is available and aiMetadata is set to true', async () => {
+      mockStrapi.service().isAIAvailable.mockResolvedValue(true);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(true);
 
       expect(await aiMetadataService.isEnabled()).toBe(true);
       expect(mockGetSettings).toHaveBeenCalled();
     });
 
-    it('should return false when AI is disabled but EE is available', async () => {
-      mockStrapi.config.get.mockReturnValue(false);
-      mockGetSettings.mockResolvedValue({ aiMetadata: false });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(true);
-
-      expect(await aiMetadataService.isEnabled()).toBe(false);
-    });
-
-    it('should return false when AI is enabled but EE is not available', async () => {
-      mockStrapi.config.get.mockReturnValue(true);
+    it('should return false when AI is NOT available', async () => {
+      mockStrapi.service().isAIAvailable.mockResolvedValue(false);
       mockGetSettings.mockResolvedValue({ aiMetadata: true });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(false);
-
-      expect(await aiMetadataService.isEnabled()).toBe(false);
-    });
-
-    it('should return false when both AI and EE are disabled', async () => {
-      mockStrapi.config.get.mockReturnValue(false);
-      mockGetSettings.mockResolvedValue({ aiMetadata: false });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(false);
-
-      expect(await aiMetadataService.isEnabled()).toBe(false);
-    });
-
-    it('should return false when both AI and EE are enabled but aiMetadata is disabled', async () => {
-      mockStrapi.config.get.mockReturnValue(true);
-      mockGetSettings.mockResolvedValue({ aiMetadata: false });
-      mockStrapi.ee.features.isEnabled = jest.fn().mockReturnValue(true);
 
       expect(await aiMetadataService.isEnabled()).toBe(false);
     });
