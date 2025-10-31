@@ -41,7 +41,7 @@
   "button.single-types.create": "创建新单一类型",
   "media.multiple": "多个",
   "component.repeatable": "可重复",
-  "components.SelectComponents.displayed-value": "{number, plural, =0 {# 个组件} one {# 个组件} other {# 个组件}} 已选择",
+  "components.SelectComponents.displayed-value": "已选择 {number, plural, =0 {# components} 一个 {# component} 其他 {# components}}",
   "components.componentSelect.no-component-available": "您已经添加了所有组件",
   "components.componentSelect.no-component-available.with-search": "没有与搜索匹配的组件",
   "components.componentSelect.value-component": "{number} 个组件已选择（输入以搜索组件）",
