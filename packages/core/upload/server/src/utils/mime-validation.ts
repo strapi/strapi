@@ -177,7 +177,6 @@ export async function validateFiles(files: any, strapi: Core.Strapi): Promise<Va
   }
 
   const config: SecurityConfig = strapi.config.get('plugin::upload.security', {});
-  console.log('HERE: ', config);
   if (
     config.allowedTypes &&
     (!Array.isArray(config.allowedTypes) ||
