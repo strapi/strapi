@@ -7,6 +7,7 @@ import contentTypes from './content-types';
 import sanitize from './sanitize';
 import { createSettingsService } from './settings';
 import { createAILocalizationsService } from './ai-localizations';
+import { createAILocalizationJobsService } from './ai-localization-jobs';
 
 export default {
   permissions,
@@ -16,6 +17,7 @@ export default {
   sanitize,
   'iso-locales': isoLocales,
   'content-types': contentTypes,
-  aiLocalizations: createAILocalizationsService,
+  'ai-localizations': createAILocalizationsService,
+  'ai-localization-jobs': createAILocalizationJobsService,
   settings: createSettingsService,
 };

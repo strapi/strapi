@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
 
 import { HEIGHT_TOP_NAVIGATION, RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
+import { useDeviceType } from '../../hooks/useDeviceType';
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
 
 /* -------------------------------------------------------------------------------------------------
@@ -28,10 +29,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     if (sticky) {
       return (
         <Box
-          display={{
-            initial: 'none',
-            large: 'flex',
-          }}
+          display="flex"
           paddingLeft={6}
           paddingRight={6}
           paddingTop={2}
@@ -123,6 +121,7 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   const baseHeaderLayoutRef = React.useRef<HTMLDivElement>(null);
   const [headerSize, setHeaderSize] = React.useState<DOMRect | null>(null);
   const [isVisible, setIsVisible] = React.useState(true);
+  const deviceType = useDeviceType();
 
   const containerRef = useElementOnScreen<HTMLDivElement>(setIsVisible, {
     root: null,
@@ -148,6 +147,10 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
       setHeaderSize(containerRef.current.getBoundingClientRect());
     }
   }, [containerRef]);
+
+  if (deviceType === 'mobile') {
+    return <BaseHeaderLayout {...props} />;
+  }
 
   return (
     <div ref={containerRef}>

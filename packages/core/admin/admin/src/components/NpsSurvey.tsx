@@ -270,7 +270,7 @@ const NpsSurvey = () => {
               left="50%"
               transform="translateX(-50%)"
               zIndex="200"
-              width="50%"
+              minWidth={{ initial: '100%', medium: '50%' }}
             >
               <Flex
                 hasRadius

@@ -110,11 +110,13 @@ const updateDocument = async (ctx: any, opts?: Options) => {
   const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
-  return documentManager.update(documentVersion?.documentId || id, model, {
+  const updatedDocument = await documentManager.update(documentVersion?.documentId || id, model, {
     data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
   });
+
+  return updatedDocument;
 };
 
 export default {

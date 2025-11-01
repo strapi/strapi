@@ -418,6 +418,7 @@ const Chat = () => {
             onClick={isChatOpen ? closeChat : openChat}
             label={isChatOpen ? closeChatLabel : openChatLabel}
             variant="default"
+            size="L"
           >
             <Sparkle />
           </IconButton>

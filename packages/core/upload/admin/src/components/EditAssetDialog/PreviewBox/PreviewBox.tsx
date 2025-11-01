@@ -1,16 +1,16 @@
 // TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton } from '@strapi/design-system';
 import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
 import cropperjscss from 'cropperjs/dist/cropper.css?raw';
 import { useIntl } from 'react-intl';
 import { createGlobalStyle } from 'styled-components';
 
-import { AssetType } from '../../../constants';
+import { AssetType } from '../../../enums';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
+import { useTracking } from '../../../hooks/useTracking';
 import { useUpload } from '../../../hooks/useUpload';
 import { createAssetUrl, getTrad, downloadFile } from '../../../utils';
 import { CopyLinkButton } from '../../CopyLinkButton/CopyLinkButton';

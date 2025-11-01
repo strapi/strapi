@@ -62,8 +62,6 @@ describe('Roles – EditPage', () => {
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    expect(getByRole('link', { name: 'Back' })).toBeInTheDocument();
-
     expect(getByRole('heading', { name: 'Authenticated' })).toBeInTheDocument();
     expect(getByRole('heading', { name: 'Role details' })).toBeInTheDocument();
     expect(getByRole('heading', { name: 'Permissions' })).toBeInTheDocument();

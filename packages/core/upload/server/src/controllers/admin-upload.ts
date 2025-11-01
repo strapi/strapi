@@ -134,7 +134,7 @@ export default {
     // Upload files first to get thumbnails
     const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
     if (uploadedFiles.some((file) => file.mime?.startsWith('image/'))) {
-      strapi.telemetry.send('didUploadImage');
+      await getService('metrics').trackUsage('didUploadImage');
     }
 
     const aiMetadataService = getService('aiMetadata');

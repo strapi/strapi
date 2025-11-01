@@ -1,4 +1,4 @@
-import { Badge, Divider } from '@strapi/design-system';
+import { Badge, Divider, Typography } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';

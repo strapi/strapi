@@ -102,26 +102,34 @@ const MarketplacePage = () => {
     const hasTabQuery = tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length;
 
     if (hasTabQuery) {
-      setQuery({
-        // Keep filters and search
-        ...tabQuery[selectedTab],
-        search: query?.search || '',
-        // Set tab and reset page
-        npmPackageType: selectedTab,
-        page: 1,
-      });
+      setQuery(
+        {
+          // Keep filters and search
+          ...tabQuery[selectedTab],
+          search: query?.search || '',
+          // Set tab and reset page
+          npmPackageType: selectedTab,
+          page: 1,
+        },
+        'push',
+        true
+      );
     } else {
-      setQuery({
-        // Set tab
-        npmPackageType: selectedTab,
-        // Clear filters
-        collections: [],
-        categories: [],
-        sort: 'name:asc',
-        page: 1,
-        // Keep search
-        search: query?.search || '',
-      });
+      setQuery(
+        {
+          // Set tab
+          npmPackageType: selectedTab,
+          // Clear filters
+          collections: [],
+          categories: [],
+          sort: 'name:asc',
+          page: 1,
+          // Keep search
+          search: query?.search || '',
+        },
+        'push',
+        true
+      );
     }
   };
 
