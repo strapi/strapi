@@ -147,7 +147,8 @@ const Sections = ({
   [key: string]: unknown;
 }) => {
   return (
-    <Box paddingTop={4} paddingBottom={4} maxWidth={{ initial: '100%', medium: '23.2rem' }}>
+    // Ensure the sub-navigation spans the full available width across all breakpoints
+    <Box paddingTop={4} paddingBottom={4} maxWidth="100%">
       <Flex tag="ul" gap="5" direction="column" alignItems="stretch" {...props}>
         {children.map((child, index) => {
           return <li key={index}>{child}</li>;
