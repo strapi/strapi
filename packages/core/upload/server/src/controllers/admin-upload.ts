@@ -93,9 +93,9 @@ export default {
       const { error } = securityResults.errors[0];
       switch (error.code) {
         case 'MIME_TYPE_NOT_ALLOWED':
-          throw new errors.ValidationError(error.message, { details: error.details });
+          throw new errors.ValidationError(error.message, error.details);
         default:
-          throw new errors.ApplicationError(error.message, { details: error.details });
+          throw new errors.ApplicationError(error.message, error.details);
       }
     }
 
@@ -132,9 +132,10 @@ export default {
     const securityResults = await enforceUploadSecurity(files, strapi);
 
     if (securityResults.validFiles.length === 0) {
-      throw new errors.ValidationError(securityResults.errors[0].error.message, {
-        details: securityResults.errors[0].error.details,
-      });
+      throw new errors.ValidationError(
+        securityResults.errors[0].error.message,
+        securityResults.errors[0].error.details
+      );
     }
 
     let filteredBody = body;
