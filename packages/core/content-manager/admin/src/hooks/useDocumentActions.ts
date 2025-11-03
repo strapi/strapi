@@ -620,6 +620,9 @@ const useDocumentActions: UseDocumentActions = () => {
           documentId: res.data.data.documentId,
           fromPreview,
           fromRelationModal,
+          ...(isAiAvailable
+            ? { isAIi18nConfigured: Boolean(aiFeatureConfig?.isAIi18nConfigured) }
+            : {}),
         });
 
         toggleNotification({
@@ -650,6 +653,8 @@ const useDocumentActions: UseDocumentActions = () => {
       fromRelationModal,
       toggleNotification,
       trackUsage,
+      isAiAvailable,
+      aiFeatureConfig,
     ]
   );
 
@@ -715,7 +720,12 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didCreateEntry', trackerProperty);
+        trackUsage('didCreateEntry', {
+          ...trackerProperty,
+          ...(isAiAvailable
+            ? { isAIi18nConfigured: Boolean(aiFeatureConfig?.isAIi18nConfigured) }
+            : {}),
+        });
         toggleNotification({
           type: 'success',
           message: formatMessage({
