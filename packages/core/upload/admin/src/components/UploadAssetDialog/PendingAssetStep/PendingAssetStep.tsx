@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { AssetType } from '../../../constants';
+import { AssetType } from '../../../enums';
 import { useTracking } from '../../../hooks/useTracking';
 import { getTrad } from '../../../utils';
 import { AssetCard } from '../../AssetCard/AssetCard';

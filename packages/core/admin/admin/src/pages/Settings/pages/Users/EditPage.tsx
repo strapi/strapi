@@ -205,7 +205,12 @@ const EditPage = () => {
                     name: getDisplayName(initialData),
                   }
                 )}
-                navigationAction={<BackButton fallback="../users" />}
+                navigationAction={
+                  // The back link for mobile works differently; it is placed higher up in the DOM.
+                  <Box display={{ initial: 'none', medium: 'block' }}>
+                    <BackButton fallback="../users" />
+                  </Box>
+                }
               />
               <Layouts.Content>
                 {user?.registrationToken && (
