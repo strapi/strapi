@@ -14,7 +14,7 @@ const settingsApi = i18nApi.injectEndpoints({
         method: 'PUT',
         data,
       }),
-      invalidatesTags: ['Settings'],
+      invalidatesTags: ['Settings', 'AIFeatureConfig'],
     }),
   }),
 });

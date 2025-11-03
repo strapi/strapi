@@ -19,5 +19,14 @@ export default {
         policies: ['admin::isAuthenticatedAdmin'],
       },
     },
+    // get ai feature settings
+    {
+      method: 'GET',
+      path: '/ai-feature-config',
+      handler: 'ai.getAIFeatureConfig',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
   ],
 };
