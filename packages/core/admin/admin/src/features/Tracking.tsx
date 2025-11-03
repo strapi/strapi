@@ -50,7 +50,6 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
-
   React.useEffect(() => {
     if (uuid && data) {
       const event = 'didInitializeAdministration';
@@ -538,7 +537,6 @@ const useTracking = (): UseTrackingReturn => {
   const deviceType = useDeviceType();
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
-
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
       event: TEvent['name'],
@@ -551,9 +549,7 @@ const useTracking = (): UseTrackingReturn => {
             {
               event,
               userId,
-              eventProperties: {
-                ...properties,
-              },
+              eventProperties: { ...properties },
               userProperties: {
                 deviceType,
               },
@@ -580,7 +576,7 @@ const useTracking = (): UseTrackingReturn => {
 
       return null;
     },
-    [telemetryProperties, userId, uuid, deviceType]
+    [telemetryProperties, userId, uuid]
   );
 
   return { trackUsage };
