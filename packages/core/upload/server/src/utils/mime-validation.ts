@@ -30,24 +30,32 @@ async function readFileChunk(filePath: string, chunkSize: number = 4100): Promis
 }
 
 export async function detectMimeType(file: any): Promise<string | undefined> {
-  try {
-    let buffer: Buffer;
+  let buffer: Buffer;
 
-    const filePath = file.path || file.filepath || file.tempFilePath;
+  const filePath = file.path || file.filepath || file.tempFilePath;
 
-    if (filePath) {
+  if (filePath) {
+    try {
       buffer = await readFileChunk(filePath, 4100);
-    } else if (file.buffer) {
-      buffer = file.buffer.length > 4100 ? file.buffer.subarray(0, 4100) : file.buffer;
-    } else {
-      return undefined;
+    } catch (error) {
+      throw new Error(
+        `Failed to read file: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
+  } else if (file.buffer) {
+    buffer = file.buffer.length > 4100 ? file.buffer.subarray(0, 4100) : file.buffer;
+  } else {
+    // No file data available
+    return undefined;
+  }
 
+  try {
     const result = await fileTypeFromBuffer(new Uint8Array(buffer));
-
     return result?.mime;
   } catch (error) {
-    return undefined;
+    throw new Error(
+      `Failed to detect MIME type: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 

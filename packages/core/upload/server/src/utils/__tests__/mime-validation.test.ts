@@ -38,22 +38,32 @@ describe('mime-validation', () => {
   });
 
   describe('detectMimeType', () => {
-    it('should return undefined when file reading fails', async () => {
+    it('should throw error when file reading fails', async () => {
       mockReadFile.mockRejectedValue(new Error('File not found'));
 
-      const result = await detectMimeType('/nonexistent/file.jpg');
-
-      expect(result).toBeUndefined();
+      await expect(detectMimeType({ path: '/nonexistent/file.jpg' })).rejects.toThrow(
+        'Failed to read file: File not found'
+      );
     });
 
-    it('should return undefined when MIME type detection fails', async () => {
+    it('should return undefined when MIME type detection returns no result', async () => {
       const mockBuffer = Buffer.from('unknown data');
       mockReadFile.mockResolvedValue(mockBuffer);
       mockFileTypeFromBuffer.mockResolvedValue(undefined);
 
-      const result = await detectMimeType('/path/to/unknown.file');
+      const result = await detectMimeType({ path: '/path/to/unknown.file' });
 
       expect(result).toBeUndefined();
+    });
+
+    it('should throw error when MIME type detection fails', async () => {
+      const mockBuffer = Buffer.from('corrupted data');
+      mockReadFile.mockResolvedValue(mockBuffer);
+      mockFileTypeFromBuffer.mockRejectedValue(new Error('Invalid file format'));
+
+      await expect(detectMimeType({ path: '/path/to/corrupted.file' })).rejects.toThrow(
+        'Failed to detect MIME type: Invalid file format'
+      );
     });
   });
 
