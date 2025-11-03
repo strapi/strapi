@@ -5,7 +5,6 @@ import user from './user';
 import metrics from './metrics';
 import seatEnforcement from './seat-enforcement';
 import persistTables from './persist-tables';
-import { createAIService } from '../ai/services/ai';
 
 export default {
   auth,
