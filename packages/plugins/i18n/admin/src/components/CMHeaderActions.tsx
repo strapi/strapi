@@ -32,7 +32,7 @@ import {
   Box,
   Link,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus, Sparkle } from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus, Sparkle, Loader } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -406,6 +406,19 @@ const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>
   }
 `;
 
+const SpinningLoader = styled(Loader)`
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  animation: spin 2s linear infinite;
+`;
+
 const AITranslationStatusAction = ({ documentId, model, collectionType }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const isAIAvailable = useAIAvailability();
@@ -456,7 +469,7 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
             variant={statusVariant}
             size="S"
           >
-            <Sparkle />
+            {status === 'processing' ? <SpinningLoader /> : <Sparkle />}
           </AITranslationStatusIcon>
         </Box>
       ),
