@@ -274,7 +274,7 @@ export default {
     }
   },
   async getAIFeatureConfig(ctx: Context) {
-    const aiFeatureConfig = await strapi.service('admin::ai').getAIFeatureConfig();
+    const aiFeatureConfig = await strapi.get('ai').getAIFeatureConfig();
 
     ctx.body = {
       data: aiFeatureConfig,

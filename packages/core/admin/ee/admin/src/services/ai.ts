@@ -27,6 +27,7 @@ const aiService = adminApi.injectEndpoints({
       transformResponse(res: GetAIFeatureConfig.Response) {
         return res.data;
       },
+      providesTags: ['AIFeatureConfig'],
     }),
   }),
   overrideExisting: true,

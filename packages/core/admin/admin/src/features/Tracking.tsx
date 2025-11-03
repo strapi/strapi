@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { useGetAIFeatureConfigQuery, useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import axios, { AxiosResponse } from 'axios';
 
 import { Tours } from '../components/GuidedTour/Tours';
@@ -540,12 +539,6 @@ const useTracking = (): UseTrackingReturn => {
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
 
-  const token = useAuth('useTracking', (state) => state.token);
-  const isAiAvailable = useAIAvailability();
-  const { data: aiFeatureSettings } = useGetAIFeatureConfigQuery(undefined, {
-    skip: !isAiAvailable || !token,
-  });
-
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
       event: TEvent['name'],
@@ -560,7 +553,6 @@ const useTracking = (): UseTrackingReturn => {
               userId,
               eventProperties: {
                 ...properties,
-                ...(isAiAvailable ? { ...aiFeatureSettings } : {}),
               },
               userProperties: {
                 deviceType,
@@ -588,7 +580,7 @@ const useTracking = (): UseTrackingReturn => {
 
       return null;
     },
-    [telemetryProperties, userId, uuid, isAiAvailable, aiFeatureSettings, deviceType]
+    [telemetryProperties, userId, uuid, deviceType]
   );
 
   return { trackUsage };
