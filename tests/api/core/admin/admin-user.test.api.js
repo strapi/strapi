@@ -327,7 +327,7 @@ describe('Admin User CRUD (api)', () => {
       data: null,
       error: {
         details: {},
-        message: 'You cannot delete your own user.',
+        message: 'You cannot delete your own user',
         name: 'ApplicationError',
         status: 400,
       },
