@@ -23,6 +23,7 @@ import { Prompt, Redirect } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
 import { useTypedDispatch, useTypedSelector } from '../../../core/store/hooks';
+import { useWarnIfUnsavedChanges } from '../../../hooks/useWarnIfUnsavedChanges';
 import { usePrev } from '../../hooks/usePrev';
 import { clearSetModifiedDataOnly } from '../../sharedReducers/crud/actions';
 import { getTranslation } from '../../utils/translations';
@@ -113,6 +114,8 @@ const EditViewDataManagerProvider = ({
   const { lockApp, unlockApp } = useOverlayBlocker();
 
   const currentContentTypeLayout = allLayoutData.contentType;
+
+  useWarnIfUnsavedChanges(!isEqual(modifiedData, initialData) && !isSaving);
 
   const hasDraftAndPublish = React.useMemo(() => {
     return get(currentContentTypeLayout, ['options', 'draftAndPublish'], false);
