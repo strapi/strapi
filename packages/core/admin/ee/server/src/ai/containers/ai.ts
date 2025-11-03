@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-const createAIService = ({ strapi }: { strapi: Core.Strapi }) => {
+const createAIContainer = ({ strapi }: { strapi: Core.Strapi }) => {
   const getAIFeatureConfig = async () => {
     const i18nSettings = await strapi.plugin('i18n').service('settings').getSettings();
     const uploadSettings = await strapi.plugin('upload').service('upload').getSettings();
@@ -16,4 +16,4 @@ const createAIService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 };
 
-export { createAIService };
+export { createAIContainer };
