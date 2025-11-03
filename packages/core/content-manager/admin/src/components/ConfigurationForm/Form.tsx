@@ -84,7 +84,7 @@ const ConfigurationForm = ({
   }, [layout, settings]);
 
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Form initialValues={initialValues} onSubmit={onSubmit} method="PUT">
           <Header name={settings.displayName ?? ''} />
@@ -176,7 +176,7 @@ const ConfigurationForm = ({
           </Layouts.Content>
         </Form>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

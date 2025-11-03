@@ -1,4 +1,4 @@
-import { UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
 interface Options {

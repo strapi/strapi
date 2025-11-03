@@ -1,4 +1,5 @@
 import { PassThrough, Transform, Readable, Writable } from 'stream';
+import { pipeline } from 'stream/promises';
 import { extname } from 'path';
 import { EOL } from 'os';
 import type Chain from 'stream-chain';
@@ -119,6 +120,10 @@ class TransferEngine<
     errors: {},
   };
 
+  #currentStreamController?: AbortController;
+
+  #aborted: boolean = false;
+
   onSchemaDiff(handler: SchemaDiffHandler) {
     this.#handlers?.schemaDiff?.push(handler);
   }
@@ -142,9 +147,6 @@ class TransferEngine<
 
     return !!context.ignore;
   }
-
-  // Save the currently open stream so that we can access it at any time
-  #currentStream?: Writable;
 
   constructor(sourceProvider: S, destinationProvider: D, options: ITransferEngineOptions) {
     this.diagnostics = createDiagnosticReporter();
@@ -508,6 +510,10 @@ class TransferEngine<
     transform?: PassThrough | Chain;
     tracker?: PassThrough;
   }) {
+    if (this.#aborted) {
+      throw new TransferEngineError('fatal', 'Transfer aborted.');
+    }
+
     const { stage, source, destination, transform, tracker } = options;
 
     const updateEndTime = () => {
@@ -547,43 +553,52 @@ class TransferEngine<
 
     this.#emitStageUpdate('start', stage);
 
-    await new Promise<void>((resolve, reject) => {
-      let stream: Readable = source;
+    try {
+      const streams: (Readable | Writable)[] = [source];
 
       if (transform) {
-        stream = stream.pipe(transform);
+        streams.push(transform);
       }
-
       if (tracker) {
-        stream = stream.pipe(tracker);
+        streams.push(tracker);
       }
 
-      this.#currentStream = stream
-        .pipe(destination)
-        .on('error', (e) => {
-          updateEndTime();
-          this.#emitStageUpdate('error', stage);
-          this.reportError(e, 'error');
-          destination.destroy(e);
-          reject(e);
-        })
-        .on('close', () => {
-          this.#currentStream = undefined;
-          updateEndTime();
-          resolve();
-        });
-    });
+      streams.push(destination);
 
-    this.#emitStageUpdate('finish', stage);
+      // NOTE: to debug/confirm backpressure issues from misbehaving stream, uncomment the following lines
+      // source.on('pause', () => console.log(`[${stage}] Source paused due to backpressure`));
+      // source.on('resume', () => console.log(`[${stage}] Source resumed`));
+      // destination.on('drain', () =>
+      //   console.log(`[${stage}] Destination drained, resuming data flow`)
+      // );
+      // destination.on('error', (err) => console.error(`[${stage}] Destination error:`, err));
+
+      const controller = new AbortController();
+      const { signal } = controller;
+
+      // Store the controller so you can cancel later
+      this.#currentStreamController = controller;
+
+      await pipeline(streams, { signal });
+
+      this.#emitStageUpdate('finish', stage);
+    } catch (e) {
+      updateEndTime();
+      this.#emitStageUpdate('error', stage);
+      this.reportError(e as Error, 'error');
+      if (!destination.destroyed) {
+        destination.destroy(e as Error);
+      }
+    } finally {
+      updateEndTime();
+    }
   }
 
   // Cause an ongoing transfer to abort gracefully
   async abortTransfer(): Promise<void> {
-    const err = new TransferEngineError('fatal', 'Transfer aborted.');
-    if (!this.#currentStream) {
-      throw err;
-    }
-    this.#currentStream.destroy(err);
+    this.#aborted = true;
+    this.#currentStreamController?.abort();
+    throw new TransferEngineError('fatal', 'Transfer aborted.');
   }
 
   async init(): Promise<void> {

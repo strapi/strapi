@@ -1,6 +1,4 @@
-import type { PromptQuestion } from 'node-plop';
-
-const questions: Array<PromptQuestion> = [
+const questions = [
   {
     type: 'confirm',
     name: 'bootstrapApi',

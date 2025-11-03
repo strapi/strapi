@@ -201,5 +201,21 @@ export const routes = {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/actions/bulk-update',
+      handler: 'admin-upload.bulkUpdateFileInfo',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.assets.update'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { BaseLink, Button, Field, Flex, Popover, useComposedRefs } from '@strapi/design-system';
+import { Box, Button, Field, Flex, Popover, useComposedRefs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
@@ -10,7 +10,7 @@ import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
 import { isLinkNode, type Block } from '../utils/types';
 
-const StyledBaseLink = styled(BaseLink)`
+const StyledLink = styled(Box)`
   text-decoration: none;
 `;
 
@@ -33,6 +33,8 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const elementText = link.children.map((child) => child.text).join('');
     const [linkText, setLinkText] = React.useState(elementText);
     const [linkUrl, setLinkUrl] = React.useState(link.url);
+    const [linkRel, setLinRel] = React.useState(link.rel);
+    const [linkTarget, setLinkTarget] = React.useState(link.target);
     const linkInputRef = React.useRef<HTMLInputElement>(null);
     const isLastInsertedLink = editor.lastInsertedLinkPath
       ? !Path.equals(path, editor.lastInsertedLinkPath)
@@ -53,6 +55,16 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       }
     };
 
+    const onLinkRelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsSaveDisabled(false);
+      setLinRel(e.target.value);
+    };
+
+    const onLinkTargetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setIsSaveDisabled(false);
+      setLinkTarget(e.target.value);
+    };
+
     const handleSave: React.FormEventHandler = (e) => {
       e.stopPropagation();
 
@@ -62,7 +74,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
         Transforms.select(editor, parentPath);
       }
 
-      editLink(editor, { url: linkUrl, text: linkText });
+      editLink(editor, { url: linkUrl, text: linkText, rel: linkRel, target: linkTarget });
       setPopoverOpen(false);
       editor.lastInsertedLinkPath = null;
       ReactEditor.focus(editor);
@@ -85,20 +97,28 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const inputNotDirty =
       !linkText ||
       !linkUrl ||
-      (link.url && link.url === linkUrl && elementText && elementText === linkText);
+      (link.url &&
+        link.url === linkUrl &&
+        elementText &&
+        elementText === linkText &&
+        link.rel === linkRel &&
+        link.target === linkTarget);
 
     return (
       <Popover.Root open={popoverOpen}>
         <Popover.Trigger>
-          <StyledBaseLink
+          <StyledLink
             {...attributes}
             ref={forwardedRef}
+            tag="a"
             href={link.url}
+            rel={link.rel}
+            target={link.target}
             onClick={() => setPopoverOpen(true)}
             color="primary600"
           >
             {children}
-          </StyledBaseLink>
+          </StyledLink>
         </Popover.Trigger>
         <Popover.Content onPointerDownOutside={handleClose}>
           <Flex padding={4} direction="column" gap={4}>
@@ -140,6 +160,44 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                   })}
                   value={linkUrl}
                   onChange={onLinkChange}
+                />
+              </Flex>
+            </Field.Root>
+            <Field.Root width="368px">
+              <Flex direction="column" gap={1} alignItems="stretch">
+                <Field.Label>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.link.rel',
+                    defaultMessage: 'Rel (optional)',
+                  })}
+                </Field.Label>
+                <Field.Input
+                  name="rel"
+                  placeholder={formatMessage({
+                    id: 'components.Blocks.popover.link.rel.placeholder',
+                    defaultMessage: 'noopener, nofollow, noreferrer',
+                  })}
+                  value={linkRel}
+                  onChange={onLinkRelChange}
+                />
+              </Flex>
+            </Field.Root>
+            <Field.Root width="368px">
+              <Flex direction="column" gap={1} alignItems="stretch">
+                <Field.Label>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.link.target',
+                    defaultMessage: 'Target (optional)',
+                  })}
+                </Field.Label>
+                <Field.Input
+                  name="target"
+                  placeholder={formatMessage({
+                    id: 'components.Blocks.popover.link.target.placeholder',
+                    defaultMessage: '_blank, _self, _parent, _top',
+                  })}
+                  value={linkTarget}
+                  onChange={onLinkTargetChange}
                 />
               </Flex>
             </Field.Root>

@@ -1,6 +1,14 @@
 import { renderHook, act } from '@testing-library/react';
 
-import { usePersistentState } from '../usePersistentState';
+import { usePersistentState, useScopedPersistentState } from '../usePersistentState';
+
+jest.mock('../../services/admin', () => ({
+  useInitQuery: jest.fn(() => ({
+    data: {
+      uuid: 'test-uuid',
+    },
+  })),
+}));
 
 describe('usePersistentState', () => {
   it('should return the value passed to set in the local storage', async () => {
@@ -12,6 +20,21 @@ describe('usePersistentState', () => {
       setValue(1);
     });
     const [updatedValue] = result.current;
+    expect(updatedValue).toBe(1);
+  });
+});
+
+describe('useScopedPersistentState', () => {
+  it('should return the value passed to set in the local storage with a scoped key', async () => {
+    const { result } = renderHook(() => useScopedPersistentState('key', 0));
+    const [value, setValue] = result.current;
+    expect(value).toBe(0);
+
+    act(() => {
+      setValue(1);
+    });
+    const [updatedValue] = result.current;
+    expect(localStorage.getItem('key:test-uuid')).toBeDefined();
     expect(updatedValue).toBe(1);
   });
 });

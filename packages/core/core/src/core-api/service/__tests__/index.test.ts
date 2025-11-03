@@ -1,9 +1,9 @@
-import { Schema } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import { createService } from '../index';
 import { CollectionTypeService } from '../collection-type';
 import { SingleTypeService } from '../single-type';
 
-const singleType: Schema.SingleType = {
+const singleType: Struct.SingleTypeSchema = {
   kind: 'singleType',
   modelType: 'contentType',
   uid: 'api::testModel.testModel',
@@ -20,10 +20,12 @@ const singleType: Schema.SingleType = {
 describe('Default Service', () => {
   describe('Collection Type', () => {
     test('Creates default actions', () => {
-      const contentType: Schema.ContentType = {
+      const contentType: Struct.ContentTypeSchema = {
         kind: 'collectionType',
         modelType: 'contentType',
-        uid: 'testModel',
+        uid: 'api::testModel.testModel',
+        globalId: 'testModel',
+        modelName: 'testModel',
         attributes: {},
         info: {
           singularName: 'test-model',

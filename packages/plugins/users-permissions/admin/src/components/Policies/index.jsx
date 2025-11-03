@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Flex, Grid, Typography } from '@strapi/design-system';
 import get from 'lodash/get';

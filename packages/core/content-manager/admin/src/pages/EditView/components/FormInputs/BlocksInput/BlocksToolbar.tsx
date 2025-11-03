@@ -9,12 +9,15 @@ import {
   Box,
   FlexComponent,
   BoxComponent,
+  Menu,
 } from '@strapi/design-system';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
+
+import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
 
 import {
   type BlocksStore,
@@ -32,10 +35,12 @@ const ToolbarWrapper = styled<FlexComponent>(Flex)`
   }
 `;
 
-const Separator = styled(Toolbar.Separator)`
+const ToolbarSeparator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
   height: 2.4rem;
+  margin-left: 0.8rem;
+  margin-right: 0.8rem;
 `;
 
 const FlexButton = styled<FlexComponent<'button'>>(Flex)`
@@ -122,7 +127,7 @@ const ToolbarButton = ({
   const enabledColor = isActive ? 'primary600' : 'neutral600';
 
   return (
-    <Tooltip description={labelMessage}>
+    <Tooltip label={labelMessage}>
       <Toolbar.ToggleItem
         value={name}
         data-state={isActive ? 'on' : 'off'}
@@ -326,7 +331,7 @@ const BlockOption = ({ value, icon: Icon, label, blockSelected }: BlockOptionPro
 
   return (
     <SingleSelectOption
-      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral600'} />}
+      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral500'} />}
       value={value}
     >
       {formatMessage(label)}
@@ -341,9 +346,11 @@ const isListNode = (node: unknown): node is Block<'list'> => {
 interface ListButtonProps {
   block: BlocksStore['list-ordered'] | BlocksStore['list-unordered'];
   format: Block<'list'>['format'];
+  location?: 'toolbar' | 'menu';
 }
 
-const ListButton = ({ block, format }: ListButtonProps) => {
+const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) => {
+  const { formatMessage } = useIntl();
   const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
 
   const isListActive = () => {
@@ -360,6 +367,7 @@ const ListButton = ({ block, format }: ListButtonProps) => {
       if (!Editor.isEditor(currentList) && isListNode(currentList) && currentList.format === format)
         return true;
     }
+
     return false;
   };
 
@@ -431,6 +439,21 @@ const ListButton = ({ block, format }: ListButtonProps) => {
     }
   };
 
+  if (location === 'menu') {
+    const Icon = block.icon;
+
+    return (
+      <StyledMenuItem
+        startIcon={<Icon />}
+        onSelect={() => toggleList(format)}
+        isActive={isListActive()}
+        disabled={isListDisabled()}
+      >
+        {formatMessage(block.label)}
+      </StyledMenuItem>
+    );
+  }
+
   return (
     <ToolbarButton
       icon={block.icon}
@@ -443,8 +466,15 @@ const ListButton = ({ block, format }: ListButtonProps) => {
   );
 };
 
-const LinkButton = ({ disabled }: { disabled: boolean }) => {
+const LinkButton = ({
+  disabled,
+  location = 'toolbar',
+}: {
+  disabled: boolean;
+  location?: 'toolbar' | 'menu';
+}) => {
   const { editor } = useBlocksEditorContext('LinkButton');
+  const { formatMessage } = useIntl();
 
   const isLinkActive = () => {
     const { selection } = editor;
@@ -496,14 +526,29 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
     insertLink(editor, { url: '' });
   };
 
+  const label = {
+    id: 'components.Blocks.link',
+    defaultMessage: 'Link',
+  } as MessageDescriptor;
+
+  if (location === 'menu') {
+    return (
+      <StyledMenuItem
+        startIcon={<Link />}
+        onSelect={addLink}
+        isActive={isLinkActive()}
+        disabled={isLinkDisabled()}
+      >
+        {formatMessage(label)}
+      </StyledMenuItem>
+    );
+  }
+
   return (
     <ToolbarButton
       icon={Link}
       name="link"
-      label={{
-        id: 'components.Blocks.link',
-        defaultMessage: 'Link',
-      }}
+      label={label}
       isActive={isLinkActive()}
       handleClick={addLink}
       disabled={isLinkDisabled()}
@@ -511,8 +556,23 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
   );
 };
 
+const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
+  ${(props) =>
+    props.isActive &&
+    css`
+      color: ${({ theme }) => theme.colors.primary600};
+      font-weight: 600;
+    `}
+
+  svg {
+    fill: ${({ theme, isActive }) =>
+      isActive ? theme.colors.primary600 : theme.colors.neutral500};
+  }
+`;
+
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
+  const { formatMessage } = useIntl();
 
   /**
    * The modifier buttons are disabled when an image is selected.
@@ -528,6 +588,7 @@ const BlocksToolbar = () => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    if (!selectedNode) return true;
 
     if (['image', 'code'].includes(selectedNode.type)) {
       return true;
@@ -538,32 +599,76 @@ const BlocksToolbar = () => {
 
   const isButtonDisabled = checkButtonDisabled();
 
+  /**
+   * Observed components are ones that may or may not be visible in the toolbar, depending on the
+   * available space. They provide two render props:
+   * - renderInToolbar: for when we try to render the component in the toolbar (may be hidden)
+   * - renderInMenu: for when the component didn't fit in the toolbar and is relegated
+   *   to the "more" menu
+   */
+  const observedComponents: ObservedComponent[] = [
+    ...Object.entries(modifiers).map(([name, modifier]) => {
+      const Icon = modifier.icon;
+      const isActive = modifier.checkIsActive(editor);
+      const handleSelect = () => modifier.handleToggle(editor);
+
+      return {
+        toolbar: (
+          <ToolbarButton
+            key={name}
+            name={name}
+            icon={modifier.icon}
+            label={modifier.label}
+            isActive={modifier.checkIsActive(editor)}
+            handleClick={handleSelect}
+            disabled={isButtonDisabled}
+          />
+        ),
+        menu: (
+          <StyledMenuItem startIcon={<Icon />} onSelect={handleSelect} isActive={isActive}>
+            {formatMessage(modifier.label)}
+          </StyledMenuItem>
+        ),
+        key: `modifier.${name}`,
+      };
+    }),
+    {
+      toolbar: <LinkButton disabled={isButtonDisabled} location="toolbar" />,
+      menu: <LinkButton disabled={isButtonDisabled} location="menu" />,
+      key: 'block.link',
+    },
+    {
+      // List buttons can only be rendered together when in the toolbar
+      toolbar: (
+        <Flex direction="row">
+          <ToolbarSeparator style={{ marginLeft: '0.4rem' }} />
+          <Toolbar.ToggleGroup type="single" asChild>
+            <Flex gap={1}>
+              <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
+              <ListButton block={blocks['list-ordered']} format="ordered" location="toolbar" />
+            </Flex>
+          </Toolbar.ToggleGroup>
+        </Flex>
+      ),
+      menu: (
+        <>
+          <Menu.Separator />
+          <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
+          <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
+        </>
+      ),
+      key: 'block.list',
+    },
+  ];
+
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      <ToolbarWrapper gap={2} padding={2} width="100%">
+      <ToolbarWrapper padding={2} width="100%">
         <BlocksDropdown />
-        <Separator />
+        <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1}>
-            {Object.entries(modifiers).map(([name, modifier]) => (
-              <ToolbarButton
-                key={name}
-                name={name}
-                icon={modifier.icon}
-                label={modifier.label}
-                isActive={modifier.checkIsActive(editor)}
-                handleClick={() => modifier.handleToggle(editor)}
-                disabled={isButtonDisabled}
-              />
-            ))}
-            <LinkButton disabled={isButtonDisabled} />
-          </Flex>
-        </Toolbar.ToggleGroup>
-        <Separator />
-        <Toolbar.ToggleGroup type="single" asChild>
-          <Flex gap={1}>
-            <ListButton block={blocks['list-unordered']} format="unordered" />
-            <ListButton block={blocks['list-ordered']} format="ordered" />
+          <Flex direction="row" gap={1} grow={1} overflow="hidden">
+            <EditorToolbarObserver observedComponents={observedComponents} />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>

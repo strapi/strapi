@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { Button, Dialog, useCallbackRef, useComposedRefs } from '@strapi/design-system';
+import {
+  Box,
+  type BoxProps,
+  Button,
+  Dialog,
+  useCallbackRef,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
@@ -49,7 +56,7 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
    * pass the index.
    */
   removeFieldRow: (field: string, removeAtIndex?: number) => void;
-  resetForm: () => void;
+  resetForm: (newInitialValues?: TFormValues) => void;
   setErrors: (errors: FormErrors<TFormValues>) => void;
   setSubmitting: (isSubmitting: boolean) => void;
   setValues: (values: TFormValues) => void;
@@ -114,7 +121,8 @@ interface FormHelpers<TFormValues extends FormValues = FormValues>
   extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues' | 'resetForm'> {}
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>> {
+  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
+    Pick<BoxProps, 'width' | 'height'> {
   children:
     | React.ReactNode
     | ((
@@ -298,7 +306,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
 
     const modified = React.useMemo(
       () => !isEqual(initialValues.current, state.values),
-      [state.values]
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [state.values, initialValues.current]
     );
 
     const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
@@ -406,7 +415,10 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       []
     );
 
-    const resetForm: FormContextValue['resetForm'] = React.useCallback(() => {
+    const resetForm: FormContextValue['resetForm'] = React.useCallback((newInitialValues) => {
+      if (newInitialValues) {
+        initialValues.current = newInitialValues;
+      }
       dispatch({
         type: 'RESET_FORM',
         payload: {
@@ -424,7 +436,15 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     const composedRefs = useComposedRefs(formRef, ref);
 
     return (
-      <form ref={composedRefs} method={method} noValidate onSubmit={handleSubmit}>
+      <Box
+        tag="form"
+        ref={composedRefs}
+        method={method}
+        noValidate
+        onSubmit={handleSubmit}
+        width={props.width}
+        height={props.height}
+      >
         <FormProvider
           disabled={disabled}
           onChange={handleChange}
@@ -451,7 +471,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
               })
             : props.children}
         </FormProvider>
-      </form>
+      </Box>
     );
   }
 ) as <TFormValues extends FormValues>(
@@ -677,7 +697,7 @@ interface FieldValue<TValue = any> {
   rawError?: any;
 }
 
-const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> => {
+function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
   const { formatMessage } = useIntl();
 
   const initialValue = useForm(
@@ -726,7 +746,7 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
     onChange: handleChange,
     value: value,
   };
-};
+}
 
 const isErrorMessageDescriptor = (object?: object): object is TranslationMessage => {
   return (

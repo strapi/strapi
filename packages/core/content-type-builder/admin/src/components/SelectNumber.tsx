@@ -105,8 +105,3 @@ export const SelectNumber = ({
     </Field.Root>
   );
 };
-
-SelectNumber.defaultProps = {
-  error: undefined,
-  value: '',
-};

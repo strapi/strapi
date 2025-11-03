@@ -1,11 +1,30 @@
 /* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash/fp';
 
-import { UID, Schema } from '@strapi/types';
+import type { UID, Schema } from '@strapi/types';
+
+import type { JoinTable } from '@strapi/database';
 
 interface LoadContext {
   oldVersions: { id: string; locale: string }[];
   newVersions: { id: string; locale: string }[];
+}
+
+interface RelationUpdate {
+  joinTable: JoinTable;
+  relations: Record<string, any>[];
+}
+
+interface RelationFilterOptions {
+  /**
+   * Function to determine if a relation should be propagated to new document versions
+   * This replaces the hardcoded component-specific logic
+   */
+  shouldPropagateRelation?: (
+    relation: Record<string, any>,
+    model: Schema.Component | Schema.ContentType,
+    trx: any
+  ) => Promise<boolean>;
 }
 
 /**
@@ -13,8 +32,12 @@ interface LoadContext {
  * This is necessary because the relations are uni-directional and the target entry is not aware of the source entry.
  * This is not the case for bi-directional relations, where the target entry is also linked to the source entry.
  */
-const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadContext) => {
-  const updates = [] as any;
+const load = async (
+  uid: UID.ContentType,
+  { oldVersions, newVersions }: LoadContext,
+  options: RelationFilterOptions = {}
+): Promise<RelationUpdate[]> => {
+  const updates: RelationUpdate[] = [];
 
   // Iterate all components and content types to find relations that need to be updated
   await strapi.db.transaction(async ({ trx }) => {
@@ -74,10 +97,10 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
          *    if published version link exists & not draft version link
          *       create link to new draft version
          */
-
         if (!model.options?.draftAndPublish) {
           const ids = newVersions.map((entry) => entry.id);
 
+          // This is the step were we query the join table based on the id of the document
           const newVersionsRelations = await strapi.db
             .getConnection()
             .select('*')
@@ -85,19 +108,30 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
             .whereIn(targetColumnName, ids)
             .transacting(trx);
 
-          if (newVersionsRelations.length > 0) {
+          let versionRelations = newVersionsRelations;
+          if (options.shouldPropagateRelation) {
+            const relationsToPropagate = [];
+            for (const relation of newVersionsRelations) {
+              if (await options.shouldPropagateRelation(relation, model, trx)) {
+                relationsToPropagate.push(relation);
+              }
+            }
+            versionRelations = relationsToPropagate;
+          }
+
+          if (versionRelations.length > 0) {
             // when publishing a draft that doesn't have a published version yet,
             // copy the links to the draft over to the published version
             // when discarding a published version, if no drafts exists
-            const discardToAdd = newVersionsRelations
+            const discardToAdd = versionRelations
               .filter((relation) => {
-                const matchingOldVerion = oldVersionsRelations.find((oldRelation) => {
+                const matchingOldVersion = oldVersionsRelations.find((oldRelation) => {
                   return oldRelation[sourceColumnName] === relation[sourceColumnName];
                 });
 
-                return !matchingOldVerion;
+                return !matchingOldVersion;
               })
-              .map(omit('id'));
+              .map(omit(strapi.db.metadata.identifiers.ID_COLUMN));
 
             updates.push({ joinTable, relations: discardToAdd });
           }
@@ -111,6 +145,10 @@ const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadCont
 
 /**
  * Updates uni directional relations to target the right entries when overriding published or draft entries.
+ *
+ * This function:
+ * 1. Creates new relations pointing to the new entry versions
+ * 2. Precisely deletes only the old relations being replaced to prevent orphaned links
  *
  * @param oldEntries The old entries that are being overridden
  * @param newEntries The new entries that are overriding the old ones
@@ -155,3 +193,4 @@ const sync = async (
 };
 
 export { load, sync };
+export type { RelationFilterOptions };

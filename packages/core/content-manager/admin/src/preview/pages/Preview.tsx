@@ -1,25 +1,80 @@
 import * as React from 'react';
 
-import { Page, useQueryParams, useRBAC, createContext } from '@strapi/admin/strapi-admin';
-import { Box, Flex, FocusTrap, Portal } from '@strapi/design-system';
+import {
+  Page,
+  useQueryParams,
+  useRBAC,
+  createContext,
+  Form as FormContext,
+  type FieldContentSourceMap,
+  useNotification,
+} from '@strapi/admin/strapi-admin';
+import {
+  Box,
+  Flex,
+  FocusTrap,
+  IconButton,
+  Portal,
+  SingleSelect,
+  SingleSelectOption,
+} from '@strapi/design-system';
+import { ArrowLineLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
-import { useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { Blocker } from '../../pages/EditView/components/Blocker';
+import { FormLayout } from '../../pages/EditView/components/FormLayout';
+import { handleInvisibleAttributes } from '../../pages/EditView/utils/data';
 import { buildValidParams } from '../../utils/api';
-import { PreviewContent } from '../components/PreviewContent';
+import { createYupSchema } from '../../utils/validation';
+import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
+import { PUBLIC_EVENTS } from '../utils/constants';
+import { getSendMessage } from '../utils/getSendMessage';
+import { previewScript } from '../utils/previewScript';
 
-import type { UID } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
+
+/* -------------------------------------------------------------------------------------------------
+ * Constants
+ * -----------------------------------------------------------------------------------------------*/
+
+const DEVICES = [
+  {
+    name: 'desktop',
+    label: {
+      id: 'content-manager.preview.device.desktop',
+      defaultMessage: 'Desktop',
+    },
+    width: '100%',
+    height: '100%',
+  },
+  {
+    name: 'mobile',
+    label: {
+      id: 'content-manager.preview.device.mobile',
+      defaultMessage: 'Mobile',
+    },
+    width: '375px',
+    height: '667px',
+  },
+];
 
 /* -------------------------------------------------------------------------------------------------
  * PreviewProvider
  * -----------------------------------------------------------------------------------------------*/
+
+interface PopoverField extends FieldContentSourceMap {
+  position: DOMRect;
+  attribute: Schema.Attribute.AnyAttribute;
+}
 
 interface PreviewContextValue {
   url: string;
@@ -27,6 +82,12 @@ interface PreviewContextValue {
   document: NonNullable<ReturnType<UseDocument>['document']>;
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
+  components: NonNullable<ReturnType<UseDocument>['components']>;
+  layout: EditLayout;
+  onPreview: () => void;
+  iframeRef: React.RefObject<HTMLIFrameElement>;
+  popoverField: PopoverField | null;
+  setPopoverField: (value: PopoverField | null) => void;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -35,8 +96,20 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * PreviewPage
  * -----------------------------------------------------------------------------------------------*/
 
+const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
+  will-change: transform;
+  rotate: ${(props) => (props.$isSideEditorOpen ? '0deg' : '180deg')};
+  transition: rotate 0.2s ease-in-out;
+`;
+
 const PreviewPage = () => {
+  const location = useLocation();
   const { formatMessage } = useIntl();
+
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
+  const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
+  const { toggleNotification } = useNotification();
 
   // Read all the necessary data from the URL to find the right preview URL
   const {
@@ -50,9 +123,40 @@ const PreviewPage = () => {
   }>();
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
+    status?: string;
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+
+  const [deviceName, setDeviceName] = React.useState<(typeof DEVICES)[number]['name']>(
+    DEVICES[0].name
+  );
+  const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
+
+  // Listen for ready message from iframe before injecting script
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Only listen to events from the preview iframe
+      if (iframeRef.current) {
+        const previewOrigin = new URL(iframeRef.current?.src).origin;
+        if (event.origin !== previewOrigin) {
+          return;
+        }
+      }
+
+      if (event.data?.type === PUBLIC_EVENTS.PREVIEW_READY) {
+        const script = `(${previewScript.toString()})()`;
+        const sendMessage = getSendMessage(iframeRef);
+        sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [documentId, toggleNotification]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -77,30 +181,29 @@ const PreviewPage = () => {
       status: params.status as GetPreviewUrl.Request['query']['status'],
     },
   });
-
   const documentResponse = useDocument({
     model,
     collectionType,
     documentId,
     params,
   });
-
   const documentLayoutResponse = useDocumentLayout(model);
 
-  if (
-    documentResponse.isLoading ||
-    previewUrlResponse.isLoading ||
-    documentLayoutResponse.isLoading
-  ) {
+  const isLoading =
+    previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
+  if (isLoading && (!documentResponse.document?.documentId || previewUrlResponse.isLoading)) {
     return <Page.Loading />;
   }
+
+  const initialValues = documentResponse.getInitialFormValues();
 
   if (
     previewUrlResponse.error ||
     documentLayoutResponse.error ||
     !documentResponse.document ||
     !documentResponse.meta ||
-    !documentResponse.schema
+    !documentResponse.schema ||
+    !initialValues
   ) {
     return <Page.Error />;
   }
@@ -110,6 +213,38 @@ const PreviewPage = () => {
   }
 
   const documentTitle = documentResponse.getTitle(documentLayoutResponse.edit.settings.mainField);
+
+  const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
+    const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
+      schema: documentResponse.schema,
+      initialValues,
+      components: documentResponse.components,
+    });
+
+    const yupSchema = createYupSchema(
+      documentResponse.schema?.attributes,
+      documentResponse.components,
+      {
+        status: documentResponse.document?.status,
+        removedAttributes,
+        ...options,
+      }
+    );
+
+    return yupSchema.validateSync(cleanedValues, { abortEarly: false });
+  };
+
+  const previewUrl = previewUrlResponse.data.data.url;
+
+  const onPreview = () => {
+    iframeRef?.current?.contentWindow?.postMessage(
+      { type: 'strapiUpdate' },
+      // The iframe origin is safe to use since it must be provided through the allowedOrigins config
+      new URL(iframeRef.current.src).origin
+    );
+  };
+
+  const hasAdvancedPreview = window.strapi.features.isEnabled('cms-advanced-preview');
 
   return (
     <>
@@ -125,16 +260,150 @@ const PreviewPage = () => {
         )}
       </Page.Title>
       <PreviewProvider
-        url={previewUrlResponse.data.data.url}
+        url={previewUrl}
         document={documentResponse.document}
         title={documentTitle}
         meta={documentResponse.meta}
         schema={documentResponse.schema}
+        components={documentResponse.components}
+        layout={documentLayoutResponse.edit}
+        onPreview={onPreview}
+        iframeRef={iframeRef}
+        popoverField={popoverField}
+        setPopoverField={setPopoverField}
       >
-        <Flex direction="column" height="100%" alignItems="stretch">
-          <PreviewHeader />
-          <PreviewContent />
-        </Flex>
+        <FormContext
+          method="PUT"
+          disabled={
+            query.status === 'published' &&
+            documentResponse &&
+            documentResponse.document.status !== 'draft'
+          }
+          initialValues={documentResponse.getInitialFormValues()}
+          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
+          height="100%"
+          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+            const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
+              schema: documentResponse.schema,
+              initialValues,
+              components: documentResponse.components,
+            });
+
+            const yupSchema = createYupSchema(
+              documentResponse.schema?.attributes,
+              documentResponse.components,
+              {
+                status: documentResponse.document?.status,
+                removedAttributes,
+                ...options,
+              }
+            );
+
+            return yupSchema.validate(cleanedValues, { abortEarly: false });
+          }}
+        >
+          <Flex direction="column" height="100%" alignItems="stretch">
+            <Blocker />
+            <PreviewHeader />
+            <InputPopover documentResponse={documentResponse} />
+            <Flex flex={1} overflow="auto" alignItems="stretch">
+              {hasAdvancedPreview && (
+                <Box
+                  overflow="auto"
+                  width={isSideEditorOpen ? '50%' : 0}
+                  borderWidth="0 1px 0 0"
+                  borderColor="neutral150"
+                  paddingTop={6}
+                  paddingBottom={6}
+                  // Remove horizontal padding when the editor is closed or it won't fully disappear
+                  paddingLeft={isSideEditorOpen ? 6 : 0}
+                  paddingRight={isSideEditorOpen ? 6 : 0}
+                  transition="all 0.2s ease-in-out"
+                >
+                  <FormLayout
+                    layout={documentLayoutResponse.edit.layout}
+                    document={documentResponse}
+                    hasBackground={false}
+                  />
+                </Box>
+              )}
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                flex={1}
+                height="100%"
+                overflow="hidden"
+              >
+                <Flex
+                  direction="row"
+                  background="neutral0"
+                  padding={2}
+                  borderWidth="0 0 1px 0"
+                  borderColor="neutral150"
+                >
+                  {hasAdvancedPreview && (
+                    <IconButton
+                      variant="ghost"
+                      label={formatMessage(
+                        isSideEditorOpen
+                          ? {
+                              id: 'content-manager.preview.content.close-editor',
+                              defaultMessage: 'Close editor',
+                            }
+                          : {
+                              id: 'content-manager.preview.content.open-editor',
+                              defaultMessage: 'Open editor',
+                            }
+                      )}
+                      onClick={() => setIsSideEditorOpen((prev) => !prev)}
+                    >
+                      <AnimatedArrow $isSideEditorOpen={isSideEditorOpen} />
+                    </IconButton>
+                  )}
+                  <Flex justifyContent="center" flex={1}>
+                    <SingleSelect
+                      value={deviceName}
+                      onChange={(name) => setDeviceName(name.toString())}
+                      aria-label={formatMessage({
+                        id: 'content-manager.preview.device.select',
+                        defaultMessage: 'Select device type',
+                      })}
+                    >
+                      {DEVICES.map((deviceOption) => (
+                        <SingleSelectOption key={deviceOption.name} value={deviceOption.name}>
+                          {formatMessage(deviceOption.label)}
+                        </SingleSelectOption>
+                      ))}
+                    </SingleSelect>
+                  </Flex>
+                </Flex>
+                <Flex direction="column" justifyContent="center" background="neutral0" flex={1}>
+                  <Box
+                    data-testid="preview-iframe"
+                    ref={iframeRef}
+                    src={previewUrl}
+                    /**
+                     * For some reason, changing an iframe's src tag causes the browser to add a new item in the
+                     * history stack. This is an issue for us as it means clicking the back button will not let us
+                     * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
+                     * different iframe when the preview URL changes. So we set a key prop to force React
+                     * to mount a different node when the src changes.
+                     */
+                    key={previewUrl}
+                    title={formatMessage({
+                      id: 'content-manager.preview.panel.title',
+                      defaultMessage: 'Preview',
+                    })}
+                    width={device.width}
+                    height={device.height}
+                    borderWidth={0}
+                    tag="iframe"
+                  />
+                </Flex>
+              </Flex>
+            </Flex>
+          </Flex>
+        </FormContext>
       </PreviewProvider>
     </>
   );
@@ -152,7 +421,11 @@ const ProtectedPreviewPageImpl = () => {
     permissions = [],
     isLoading,
     error,
-  } = useRBAC([{ action: 'plugin::content-manager.explorer.read', subject: model }]);
+  } = useRBAC([
+    { action: 'plugin::content-manager.explorer.read', subject: model },
+    { action: 'plugin::content-manager.explorer.update', subject: model },
+    { action: 'plugin::content-manager.explorer.publish', subject: model },
+  ]);
 
   if (isLoading) {
     return <Page.Loading />;
@@ -161,12 +434,12 @@ const ProtectedPreviewPageImpl = () => {
   if (error || !model) {
     return (
       <Box
-        height="100vh"
-        width="100vw"
+        height="100dvh"
+        width="100dvw"
         position="fixed"
         top={0}
         left={0}
-        zIndex={2}
+        zIndex={5}
         background="neutral0"
       >
         <Page.Error />
@@ -176,20 +449,22 @@ const ProtectedPreviewPageImpl = () => {
 
   return (
     <Box
-      height="100vh"
-      width="100vw"
+      height="100dvh"
+      width="100dvw"
       position="fixed"
       top={0}
       left={0}
-      zIndex={2}
+      zIndex={5}
       background="neutral0"
     >
-      <Page.Protect permissions={permissions}>
-        {({ permissions }) => (
-          <DocumentRBAC permissions={permissions}>
-            <PreviewPage />
-          </DocumentRBAC>
+      <Page.Protect
+        permissions={permissions.filter((permission) =>
+          permission.action.includes('explorer.read')
         )}
+      >
+        <DocumentRBAC permissions={permissions}>
+          <PreviewPage />
+        </DocumentRBAC>
       </Page.Protect>
     </Box>
   );
@@ -206,3 +481,4 @@ const ProtectedPreviewPage = () => {
 };
 
 export { ProtectedPreviewPage, usePreviewContext };
+export type { PreviewContextValue };

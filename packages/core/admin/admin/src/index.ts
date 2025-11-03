@@ -17,12 +17,22 @@ export * from './components/Filters';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
+export * from './components/WidgetHelpers';
 export * from './components/Pagination';
 export * from './components/SearchInput';
 export * from './components/Table';
 export * from './components/ContentBox';
+export * from './components/SubNav';
+export * from './components/GradientBadge';
 
-export { useGuidedTour } from './components/GuidedTour/Provider';
+/** @internal */
+export { tours } from './components/GuidedTour/Tours';
+/** @internal */
+export { useGuidedTour } from './components/GuidedTour/Context';
+/** @internal */
+export { GUIDED_TOUR_REQUIRED_ACTIONS } from './components/GuidedTour/utils/constants';
+
+export { RESPONSIVE_DEFAULT_SPACING } from './constants/theme';
 
 /**
  * Features
@@ -43,13 +53,20 @@ export { useHistory } from './features/BackButton';
  * Hooks
  */
 export { useInjectReducer } from './hooks/useInjectReducer';
-export { useAPIErrorHandler, type ApiError } from './hooks/useAPIErrorHandler';
+export { useAPIErrorHandler } from './hooks/useAPIErrorHandler';
 export { useQueryParams } from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
 export { useFocusInputField } from './hooks/useFocusInputField';
-export { useRBAC } from './hooks/useRBAC';
+export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
+export { useElementOnScreen } from './hooks/useElementOnScreen';
+export { useDebounce } from './hooks/useDebounce';
+export { useMediaQuery, useIsDesktop, useIsTablet, useIsMobile } from './hooks/useMediaQuery';
+export { useDeviceType } from './hooks/useDeviceType';
 export { useAdminUsers } from './services/users';
+export { useGetCountDocumentsQuery } from './services/homepage';
+/** @internal */
+export { useAIAvailability } from './hooks/useAIAvailability';
 
 /**
  * Types
@@ -64,8 +81,10 @@ export type {
   SanitizedAdminRole,
   AdminRole,
   Entity,
+  FieldContentSourceMap,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
+export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';
 
 /**
  * Utils
@@ -73,6 +92,7 @@ export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';
+export * from './utils/rulesEngine';
 export * from './services/api';
 export type { CMAdminConfiguration } from './types/adminConfiguration';
 

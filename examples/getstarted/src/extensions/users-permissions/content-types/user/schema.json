@@ -29,6 +29,7 @@
     "password": {
       "type": "password",
       "minLength": 6,
+      "maxLength": 72,
       "configurable": false,
       "private": true,
       "searchable": false

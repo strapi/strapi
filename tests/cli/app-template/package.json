@@ -1,5 +1,5 @@
 {
-  "name": "@strapi/e2e-test-app",
+  "name": "@strapi/cli-test-app",
   "version": "0.1.0",
   "private": true,
   "description": "E2E template application",

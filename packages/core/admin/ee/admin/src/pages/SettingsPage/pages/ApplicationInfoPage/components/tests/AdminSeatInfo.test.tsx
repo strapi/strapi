@@ -66,31 +66,30 @@ describe('<AdminSeatInfo />', () => {
 
     const { getByText } = render(<AdminSeatInfoEE />);
 
-    expect(getByText('Contact sales')).toBeInTheDocument();
+    expect(getByText('Manage seats')).toBeInTheDocument();
     // eslint-disable-next-line testing-library/no-node-access
-    expect(getByText('Contact sales').closest('a')).toHaveAttribute(
+    expect(getByText('Manage seats').closest('a')).toHaveAttribute(
       'href',
-      'https://strapi.io/billing/request-seats'
+      'https://strapi.io/billing/manage-seats'
     );
   });
 
-  test('Render billing link (on strapi cloud)', async () => {
+  test('Render billing link (gold license)', () => {
     // @ts-expect-error – mocked
     useLicenseLimits.mockReturnValue({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
-        isHostedOnStrapiCloud: true,
+        type: 'gold',
       },
     });
 
-    const { findByText, getByText } = render(<AdminSeatInfoEE />);
+    const { getByText } = render(<AdminSeatInfoEE />);
 
-    await findByText('Add seats');
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(getByText('Add seats').closest('a')).toHaveAttribute(
-      'href',
-      'https://cloud.strapi.io/profile/billing'
-    );
+    expect(getByText('Contact sales')).toBeInTheDocument();
+    expect(
+      // eslint-disable-next-line testing-library/no-node-access
+      getByText('Contact sales').closest('a')
+    ).toHaveAttribute('href', 'https://strapi.io/billing/request-seats');
   });
 });

@@ -10,6 +10,7 @@
     "noImplicitThis": true,
     "noImplicitAny": true,
     "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "skipLibCheck": true
   }
 }

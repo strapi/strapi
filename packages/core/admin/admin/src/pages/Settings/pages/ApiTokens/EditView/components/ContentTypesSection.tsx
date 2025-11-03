@@ -10,7 +10,7 @@ interface ContentTypesSectionProps {
 
 export const ContentTypesSection = ({ section = null, ...props }: ContentTypesSectionProps) => {
   return (
-    <Box padding={4} background="neutral0">
+    <Box>
       <Accordion.Root size="M">
         {section &&
           section.map((api, index) => (

@@ -14,4 +14,4 @@ runs:
     - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
       name: 📥 Run build
       shell: bash
-      run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
+      run: yarn nx run-many --targets build --nx-ignore-cycles --skip-nx-cache

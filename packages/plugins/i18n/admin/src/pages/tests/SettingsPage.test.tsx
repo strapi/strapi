@@ -1,9 +1,19 @@
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { render, screen, server } from '@tests/utils';
 import { rest } from 'msw';
+
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
+  useAIAvailability: jest.fn(),
+}));
 
 import { SettingsPage } from '../SettingsPage';
 
 describe('Settings Page', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders correctly with default data', async () => {
     render(<SettingsPage />);
 
@@ -45,5 +55,39 @@ describe('Settings Page', () => {
 
     expect(screen.getByText('There are no locales')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Add new locale' })).toHaveLength(2);
+  });
+
+  it('should display AI translations section when AI is available', async () => {
+    (useAIAvailability as jest.Mock).mockReturnValue(true);
+
+    render(<SettingsPage />);
+
+    // Wait for the page to load completely
+    await screen.findByRole('heading', { name: 'Internationalization' });
+
+    // Check that AI Translations section is visible
+    expect(await screen.findByRole('heading', { name: 'AI Translations' })).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        /Everytime you save in the Content Manager, our AI will use your default locale to translate all other locales automatically/i
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should not display AI translations section when AI is not available', async () => {
+    (useAIAvailability as jest.Mock).mockReturnValue(false);
+
+    render(<SettingsPage />);
+
+    // Wait for the page to load
+    await screen.findByRole('heading', { name: 'Internationalization' });
+
+    // Check that AI Translations section is NOT visible
+    expect(screen.queryByRole('heading', { name: 'AI Translations' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        /Everytime you save in the Content Manager, our AI will use your default locale to translate all other locales automatically/i
+      )
+    ).not.toBeInTheDocument();
   });
 });

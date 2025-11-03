@@ -1,3 +1,4 @@
+import { createRulesEngine } from '@strapi/admin/strapi-admin';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 
@@ -210,11 +211,172 @@ const transformDocument =
     return transformations(document);
   };
 
+type HandleOptions = {
+  schema?: Schema.ContentType | Schema.Component;
+  initialValues?: AnyData;
+  components?: Record<string, Schema.Component>;
+};
+
+type RemovedFieldPath = string;
+
+/**
+ * @internal
+ * @description Finds the initial value for a component or dynamic zone item (based on its __temp_key__ and not its index).
+ * @param initialValue - The initial values object.
+ * @param item - The item to find the initial value for.
+ * @returns The initial value for the item.
+ */
+const getItemInitialValue = (initialValue: AnyData, item: AnyData) => {
+  if (initialValue && Array.isArray(initialValue)) {
+    const matchingInitialItem = initialValue.find(
+      (initialItem) => initialItem.__temp_key__ === item.__temp_key__
+    );
+    if (matchingInitialItem) {
+      return matchingInitialItem;
+    }
+  }
+  return {};
+};
+
+/**
+ * Removes values from the data object if their corresponding attribute has a
+ * visibility condition that evaluates to false.
+ *
+ * @param {object} schema - The content type schema (with attributes).
+ * @param {object} data - The data object to filter based on visibility.
+ * @returns {object} A new data object with only visible fields retained.
+ */
+const handleInvisibleAttributes = (
+  data: AnyData,
+  { schema, initialValues = {}, components = {} }: HandleOptions,
+  path: string[] = [],
+  removedAttributes: RemovedFieldPath[] = []
+): {
+  data: AnyData;
+  removedAttributes: RemovedFieldPath[];
+} => {
+  if (!schema?.attributes) return { data, removedAttributes };
+
+  const rulesEngine = createRulesEngine();
+  const result: AnyData = {};
+
+  for (const [attrName, attrDef] of Object.entries(schema.attributes)) {
+    const fullPath = [...path, attrName].join('.');
+    const condition = attrDef?.conditions?.visible;
+    const isVisible = condition ? rulesEngine.evaluate(condition, { ...data, ...result }) : true;
+
+    if (!isVisible) {
+      removedAttributes.push(fullPath);
+      continue;
+    }
+
+    const userProvided = Object.prototype.hasOwnProperty.call(data, attrName);
+    const currentValue = userProvided ? data[attrName] : undefined;
+    const initialValue = initialValues?.[attrName];
+
+    // 🔹 Handle components
+    if (attrDef.type === 'component') {
+      const compSchema = components[attrDef.component];
+      const value = currentValue === undefined ? initialValue : currentValue;
+
+      if (!value) {
+        result[attrName] = attrDef.repeatable ? [] : null;
+        continue;
+      }
+
+      if (attrDef.repeatable && Array.isArray(value)) {
+        result[attrName] = value.map((item) => {
+          const componentInitialValue = getItemInitialValue(initialValue, item);
+
+          return handleInvisibleAttributes(
+            item,
+            {
+              schema: compSchema,
+              initialValues: componentInitialValue,
+              components,
+            },
+            [...path, `${attrName}[${item.__temp_key__}]`],
+            removedAttributes
+          ).data;
+        });
+      } else {
+        result[attrName] = handleInvisibleAttributes(
+          value,
+          {
+            schema: compSchema,
+            initialValues: initialValue ?? {},
+            components,
+          },
+          [...path, attrName],
+          removedAttributes
+        ).data;
+      }
+
+      continue;
+    }
+
+    // 🔸 Handle dynamic zones
+    if (attrDef.type === 'dynamiczone') {
+      if (!Array.isArray(currentValue)) {
+        result[attrName] = [];
+        continue;
+      }
+
+      result[attrName] = currentValue.map((dzItem) => {
+        const compUID = dzItem?.__component;
+        const compSchema = components[compUID];
+
+        const componentInitialValue = getItemInitialValue(initialValue, dzItem);
+
+        const cleaned = handleInvisibleAttributes(
+          dzItem,
+          {
+            schema: compSchema,
+            initialValues: componentInitialValue,
+            components,
+          },
+          [...path, `${attrName}[${dzItem.__temp_key__}]`],
+          removedAttributes
+        ).data;
+
+        // For newly created components, we want to be sure that the id is undefined (in case of reordering items)
+        const processedItem =
+          dzItem.id === undefined || dzItem.id === null
+            ? { __component: compUID, ...cleaned, id: undefined }
+            : { __component: compUID, ...cleaned };
+
+        return processedItem;
+      });
+
+      continue;
+    }
+
+    // 🟡 Handle scalar/primitive
+    if (currentValue !== undefined) {
+      result[attrName] = currentValue;
+    } else if (initialValue !== undefined) {
+      result[attrName] = initialValue;
+    } else {
+      if (attrName === 'id' || attrName === 'documentId') {
+        // If the attribute is 'id', we don't want to set it to null, as it should not be removed.
+        continue;
+      }
+      result[attrName] = null;
+    }
+  }
+
+  return {
+    data: result,
+    removedAttributes,
+  };
+};
+
 export {
   removeProhibitedFields,
   prepareRelations,
   prepareTempKeys,
   removeFieldsThatDontExistOnSchema,
   transformDocument,
+  handleInvisibleAttributes,
 };
 export type { AnyData };
