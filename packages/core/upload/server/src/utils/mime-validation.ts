@@ -8,7 +8,7 @@ export type SecurityConfig = {
   deniedTypes?: string[];
 };
 type UploadValidationError = {
-  code: 'MIME_TYPE_NOT_ALLOWED' | 'VALIDATION_ERROR';
+  code: 'MIME_TYPE_NOT_ALLOWED' | 'VALIDATION_ERROR' | 'UNKNOWN_ERROR';
   message: string;
   details: Record<string, any>;
 };
@@ -257,6 +257,20 @@ export async function enforceUploadSecurity(
         file: filesArray[index],
         originalIndex: index,
         error: result.error,
+      });
+    } else {
+      // Handle case where validation failed but no error details are provided
+      errors.push({
+        file: filesArray[index],
+        originalIndex: index,
+        error: {
+          code: 'UNKNOWN_ERROR' as const,
+          message: 'File validation failed for unknown reason',
+          details: {
+            index,
+            fileName: filesArray[index]?.name || filesArray[index]?.originalname,
+          },
+        },
       });
     }
   }
