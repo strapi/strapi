@@ -146,6 +146,25 @@ describe('mime-validation', () => {
       expect(isMimeTypeAllowed('image/jpeg', config)).toBe(true);
       expect(isMimeTypeAllowed('APPLICATION/pdf', config)).toBe(true);
     });
+
+    it('should handle hybrid allowlist and denylist correctly', () => {
+      const config: SecurityConfig = {
+        allowedTypes: ['image/*', 'application/*'],
+        deniedTypes: ['application/x-executable'],
+      };
+
+      // PDF should be allowed (matches application/* but not in denied list)
+      expect(isMimeTypeAllowed('application/pdf', config)).toBe(true);
+
+      // Images should be allowed (matches image/*)
+      expect(isMimeTypeAllowed('image/jpeg', config)).toBe(true);
+
+      // Executables should be denied (in denied list, despite matching application/*)
+      expect(isMimeTypeAllowed('application/x-executable', config)).toBe(false);
+
+      // Text files should be denied (not in allowed list)
+      expect(isMimeTypeAllowed('text/plain', config)).toBe(false);
+    });
   });
 
   describe('validateFile', () => {
