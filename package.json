@@ -25,6 +25,7 @@
     "packages/*",
     "packages/*/*",
     "examples/*",
+    "!examples/complex-v4",
     "examples/plugins/*",
     "examples/*/src/plugins/*",
     ".github/actions/*",

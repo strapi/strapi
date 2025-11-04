@@ -1,0 +1,4 @@
+# Snapshots directory (database backups)
+snapshots/*
+!snapshots/.gitkeep
+

@@ -1,54 +1,247 @@
-# v4-schemas
+# Complex Example Project
 
-This is an example Strapi v5 application that includes schemas copied from the v4 project located at `../v4`.
+This project contains complex Strapi schemas for testing migrations between Strapi v4 and v5.
 
-## Schemas Included
+## Content Types
 
-This project includes the following content types from the v4 project:
+The project includes 6 content types with different combinations of features:
 
-- **basic-live** - A collection type with various field types (no draft/publish)
-- **basic-draft** - A collection type with various field types (with draft/publish)
-- **relations-live** - A collection type demonstrating various relations (no draft/publish)
-- **relations-draft** - A collection type demonstrating various relations (with draft/publish)
+- `basic` - Basic content type (no draft/publish, no i18n)
+- `basic-dp` - Basic content type with draft/publish
+- `basic-dp-i18n` - Basic content type with draft/publish and i18n
+- `relation` - Relation content type (no draft/publish, no i18n)
+- `relation-dp` - Relation content type with draft/publish
+- `relation-dp-i18n` - Relation content type with draft/publish and i18n
 
-And the following components:
+## Migration Testing Workflow
 
-- **shared.simple-info** - Simple info component
-- **shared.image-block** - Image block component
+This project includes tools for testing migrations between Strapi v4 and v5 by creating an isolated v4 project and managing database snapshots.
 
-## Requirements
+### Setup
 
-- Docker
-- Docker compose
-- Node
+1. **Create/Update the external v4 project:**
 
-## Installation
+   ```bash
+   yarn migration-test:setup-v4
+   ```
 
-By default once you have setup the monorepo you will be able to run this app with a sqlite DB directly.
+   This creates a Strapi v4 project at `../../complex-v4` (outside the monorepo) with all the same schemas.
 
-If you wish to run this app with another database you can use the `docker-compose.dev.yml` file at the root of the directory.
+2. **Navigate to the v4 project:**
 
-### start the databases
+   ```bash
+   cd ../../../complex-v4
+   ```
 
-Run the following command at the root of the monorepo
+3. **Configure the v4 project:**
 
+   ```bash
+   cp .env.example .env
+   # Edit .env to set your database configuration
+   ```
+
+4. **Start the v4 project:**
+   ```bash
+   npm run develop
+   ```
+
+### Database Management
+
+#### PostgreSQL
+
+**Start PostgreSQL container:**
+
+```bash
+yarn db:start:postgres
 ```
-docker-compose -f docker-compose.dev.yml up -d
+
+**Stop PostgreSQL container:**
+
+```bash
+yarn db:stop:postgres
 ```
 
-If you need to stop the running databases you can stop them with the following command:
+**Create a snapshot:**
 
-```
-docker-compose -f docker-compose.dev.yml stop
-```
-
-### run the app with a specific database
-
-```
-DB={dbName} yarn develop
+```bash
+yarn db:snapshot:postgres <name>
 ```
 
-**Warning**
+Example: `yarn db:snapshot:postgres mybackup`
 
-You might have some errors while connecting to the databases.
-They might be coming from a conflict between a locally running database instance and the docker instance. To avoid the errors either shutdown your local database instance or change the ports in the `./config/database.ts` and the `docker-compose.dev.yml` file.
+**Restore from snapshot:**
+
+```bash
+yarn db:restore:postgres <name>
+```
+
+Example: `yarn db:restore:postgres mybackup`
+
+**Wipe database (drop and recreate):**
+
+```bash
+yarn db:wipe:postgres
+```
+
+#### MariaDB
+
+**Start MariaDB container:**
+
+```bash
+yarn db:start:mariadb
+```
+
+**Stop MariaDB container:**
+
+```bash
+yarn db:stop:mariadb
+```
+
+**Create a snapshot:**
+
+```bash
+yarn db:snapshot:mariadb <name>
+```
+
+Example: `yarn db:snapshot:mariadb mybackup`
+
+**Restore from snapshot:**
+
+```bash
+yarn db:restore:mariadb <name>
+```
+
+Example: `yarn db:restore:mariadb mybackup`
+
+**Wipe database (drop and recreate):**
+
+```bash
+yarn db:wipe:mariadb
+```
+
+#### SQLite
+
+**Note:** SQLite is file-based, so there's no container to start/stop.
+
+**Create a snapshot:**
+
+```bash
+yarn db:snapshot:sqlite <name>
+```
+
+Example: `yarn db:snapshot:sqlite mybackup`
+
+**Restore from snapshot:**
+
+```bash
+yarn db:restore:sqlite <name>
+```
+
+Example: `yarn db:restore:sqlite mybackup`
+
+**Wipe database (delete file):**
+
+```bash
+yarn db:wipe:sqlite
+```
+
+### Typical Migration Testing Workflow
+
+1. **Setup v4 project** (if not already done):
+
+   ```bash
+   yarn migration-test:setup-v4
+   ```
+
+2. **Start v4 project** (in separate terminal):
+
+   ```bash
+   cd ../../../complex-v4
+   npm run develop
+   ```
+
+   (v4 will automatically start its database if needed)
+
+3. **Create test data** in the v4 admin panel (manual step)
+
+4. **Create snapshot:**
+
+   ```bash
+   cd examples/complex
+   yarn db:snapshot:postgres mybackup
+   ```
+
+5. **Stop v4 server** (Ctrl+C in v4 terminal)
+
+6. **Start v5 server** with the same database:
+
+   ```bash
+   yarn develop:postgres
+   ```
+
+   Migrations will run automatically on startup.
+
+7. **Test and fix bugs** as needed
+
+8. **Restore snapshot** to reset database:
+
+   ```bash
+   yarn db:restore:postgres mybackup
+   ```
+
+9. **Repeat from step 6** to test fixes
+
+**Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container.
+
+### Snapshots
+
+Database snapshots are stored in the `snapshots/` directory:
+
+- PostgreSQL: `snapshots/postgres-<name>.sql`
+- MariaDB: `snapshots/mariadb-<name>.sql`
+- SQLite: `snapshots/sqlite-<name>.db`
+
+Snapshots are gitignored and should not be committed to the repository.
+
+## Development Commands
+
+### Simplified Database Commands
+
+The easiest way to start Strapi with a specific database:
+
+**Start with PostgreSQL:**
+
+```bash
+yarn develop:postgres
+```
+
+**Start with MariaDB:**
+
+```bash
+yarn develop:mariadb
+```
+
+**Start with SQLite:**
+
+```bash
+yarn develop:sqlite
+```
+
+These commands will:
+
+- ✅ Automatically start the database container if it's not already running
+- ✅ Configure Strapi to use the specified database (no manual config needed)
+- ✅ Start the Strapi development server
+- ✅ Keep the database container running when you press Ctrl+C (only Strapi stops)
+
+**Note:** The database containers use non-standard ports to avoid conflicts:
+
+- PostgreSQL: port `15432` (instead of standard 5432)
+- MariaDB: port `13306` (instead of standard 3306)
+
+### Standard Strapi Commands
+
+- `yarn develop` - Start development server (defaults to SQLite)
+- `yarn build` - Build for production
+- `yarn start` - Start production server
+- `yarn strapi` - Run Strapi CLI commands
