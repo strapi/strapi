@@ -20,6 +20,7 @@ import {
   VisuallyHidden,
   Menu,
   ButtonProps,
+  Tooltip,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
@@ -178,19 +179,36 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
     return null;
   }
 
+  const addHintTooltip = (action: Action, children: React.ReactNode) => {
+    return !action.disabled ? (
+      <Tooltip label={`Ctrl / Cmd + Enter to ${action.label}`}>
+        <Flex width="100%">{children}</Flex>
+      </Tooltip>
+    ) : (
+      children
+    );
+  };
+
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
       <tours.contentManager.Publish>
         <Flex gap={2}>
-          {primaryAction.label === 'Publish' ? (
-            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-          ) : (
-            <DocumentActionButton
-              {...primaryAction}
-              variant={primaryAction.variant || 'default'}
-              buttonType="submit"
-            />
-          )}
+          {primaryAction.label === 'Publish'
+            ? addHintTooltip(
+                primaryAction,
+                <DocumentActionButton
+                  {...primaryAction}
+                  variant={primaryAction.variant || 'default'}
+                />
+              )
+            : addHintTooltip(
+                primaryAction,
+                <DocumentActionButton
+                  {...primaryAction}
+                  variant={primaryAction.variant || 'default'}
+                  buttonType="submit"
+                />
+              )}
 
           {restActions.length > 0 ? (
             <DocumentActionsMenu
@@ -214,8 +232,8 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
         ) : (
           <DocumentActionButton
             {...secondaryAction}
-            buttonType="submit"
             variant={secondaryAction.variant || 'secondary'}
+            buttonType="submit"
           />
         )
       ) : null}
