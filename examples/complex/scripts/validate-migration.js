@@ -374,6 +374,80 @@ async function validateCounts(strapi, expected) {
     passed: basicDpDrafts.length === expectedDrafts,
   });
 
+  // Count basic-dp-i18n: same logic as basic-dp
+  const basicDpI18nAll = await strapi.db.query('api::basic-dp-i18n.basic-dp-i18n').findMany({
+    publicationState: 'all',
+    locale: 'all',
+  });
+  const basicDpI18nPublished = basicDpI18nAll.filter((e) => e.publishedAt !== null);
+  const basicDpI18nDrafts = basicDpI18nAll.filter((e) => e.publishedAt === null);
+  const expectedDraftsI18n = expected.basicDpI18n.drafts + expected.basicDpI18n.published;
+  checks.push({
+    type: 'basic-dp-i18n (published)',
+    expected: expected.basicDpI18n.published,
+    actual: basicDpI18nPublished.length,
+    passed: basicDpI18nPublished.length === expected.basicDpI18n.published,
+  });
+  checks.push({
+    type: 'basic-dp-i18n (drafts)',
+    expected: expectedDraftsI18n,
+    actual: basicDpI18nDrafts.length,
+    passed: basicDpI18nDrafts.length === expectedDraftsI18n,
+  });
+
+  // Count relation (no draft/publish, so count should match)
+  const relationCount = await strapi.db.query('api::relation.relation').count();
+  checks.push({
+    type: 'relation',
+    expected: expected.relation,
+    actual: relationCount,
+    passed: relationCount === expected.relation,
+  });
+
+  // Count relation-dp: same logic as basic-dp
+  const relationDpAll = await strapi.db.query('api::relation-dp.relation-dp').findMany({
+    publicationState: 'all',
+  });
+  const relationDpPublished = relationDpAll.filter((e) => e.publishedAt !== null);
+  const relationDpDrafts = relationDpAll.filter((e) => e.publishedAt === null);
+  const expectedRelationDpDrafts = expected.relationDp.drafts + expected.relationDp.published;
+  checks.push({
+    type: 'relation-dp (published)',
+    expected: expected.relationDp.published,
+    actual: relationDpPublished.length,
+    passed: relationDpPublished.length === expected.relationDp.published,
+  });
+  checks.push({
+    type: 'relation-dp (drafts)',
+    expected: expectedRelationDpDrafts,
+    actual: relationDpDrafts.length,
+    passed: relationDpDrafts.length === expectedRelationDpDrafts,
+  });
+
+  // Count relation-dp-i18n: same logic as basic-dp
+  const relationDpI18nAll = await strapi.db
+    .query('api::relation-dp-i18n.relation-dp-i18n')
+    .findMany({
+      publicationState: 'all',
+      locale: 'all',
+    });
+  const relationDpI18nPublished = relationDpI18nAll.filter((e) => e.publishedAt !== null);
+  const relationDpI18nDrafts = relationDpI18nAll.filter((e) => e.publishedAt === null);
+  const expectedRelationDpI18nDrafts =
+    expected.relationDpI18n.drafts + expected.relationDpI18n.published;
+  checks.push({
+    type: 'relation-dp-i18n (published)',
+    expected: expected.relationDpI18n.published,
+    actual: relationDpI18nPublished.length,
+    passed: relationDpI18nPublished.length === expected.relationDpI18n.published,
+  });
+  checks.push({
+    type: 'relation-dp-i18n (drafts)',
+    expected: expectedRelationDpI18nDrafts,
+    actual: relationDpI18nDrafts.length,
+    passed: relationDpI18nDrafts.length === expectedRelationDpI18nDrafts,
+  });
+
   // Display results
   for (const check of checks) {
     const icon = check.passed ? '✅' : '❌';
@@ -442,6 +516,178 @@ async function validateComponents(strapi) {
 }
 
 /**
+ * Get pre-migration counts using raw database queries (before Strapi loads)
+ */
+async function getPreMigrationCounts() {
+  if (!knex) {
+    return null; // Can't check without knex
+  }
+
+  const client = process.env.DATABASE_CLIENT || 'sqlite';
+  let dbConfig = {};
+
+  // Build database config from environment variables (same as checkDatabaseFormat)
+  switch (client) {
+    case 'postgres':
+    case 'pg':
+      dbConfig = {
+        client: 'postgres',
+        connection: {
+          host: process.env.DATABASE_HOST || 'localhost',
+          port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+          database: process.env.DATABASE_NAME || 'strapi',
+          user: process.env.DATABASE_USERNAME || 'strapi',
+          password: process.env.DATABASE_PASSWORD || 'strapi',
+          ssl: process.env.DATABASE_SSL === 'true',
+        },
+      };
+      break;
+    case 'mysql':
+    case 'mysql2':
+      dbConfig = {
+        client: 'mysql',
+        connection: {
+          host: process.env.DATABASE_HOST || 'localhost',
+          port: parseInt(process.env.DATABASE_PORT || '3306', 10),
+          database: process.env.DATABASE_NAME || 'strapi',
+          user: process.env.DATABASE_USERNAME || 'strapi',
+          password: process.env.DATABASE_PASSWORD || 'strapi',
+          ssl: process.env.DATABASE_SSL === 'true',
+        },
+      };
+      break;
+    case 'sqlite':
+    case 'better-sqlite3':
+      dbConfig = {
+        client: 'better-sqlite3',
+        connection: {
+          filename: process.env.DATABASE_FILENAME || path.join(__dirname, '..', '.tmp', 'data.db'),
+        },
+        useNullAsDefault: true,
+      };
+      break;
+    default:
+      return null;
+  }
+
+  const db = knex(dbConfig);
+  const counts = {};
+
+  // Helper to parse count result (handles different database formats)
+  const parseCount = (result) => {
+    if (!result) return 0;
+    // PostgreSQL/MySQL returns { count: '5' } or { count: 5 }
+    if (result.count !== undefined) {
+      return parseInt(result.count, 10) || 0;
+    }
+    // Some databases might return different field names
+    const value = result['count(*)'] || result.count || Object.values(result)[0];
+    return parseInt(value, 10) || 0;
+  };
+
+  try {
+    // Count basic entries
+    try {
+      const basicCount = await db('basics').count('* as count').first();
+      counts.basic = parseCount(basicCount);
+    } catch (e) {
+      counts.basic = 0;
+    }
+
+    // Count basic-dp entries (separate published vs drafts)
+    try {
+      const basicDpPublished = await db('basic_dps')
+        .whereNotNull('published_at')
+        .count('* as count')
+        .first();
+      const basicDpDrafts = await db('basic_dps')
+        .whereNull('published_at')
+        .count('* as count')
+        .first();
+      counts.basicDp = {
+        published: parseCount(basicDpPublished),
+        drafts: parseCount(basicDpDrafts),
+      };
+    } catch (e) {
+      counts.basicDp = { published: 0, drafts: 0 };
+    }
+
+    // Count basic-dp-i18n entries
+    try {
+      const basicDpI18nPublished = await db('basic_dp_i18ns')
+        .whereNotNull('published_at')
+        .count('* as count')
+        .first();
+      const basicDpI18nDrafts = await db('basic_dp_i18ns')
+        .whereNull('published_at')
+        .count('* as count')
+        .first();
+      counts.basicDpI18n = {
+        published: parseCount(basicDpI18nPublished),
+        drafts: parseCount(basicDpI18nDrafts),
+      };
+    } catch (e) {
+      counts.basicDpI18n = { published: 0, drafts: 0 };
+    }
+
+    // Count relation entries
+    try {
+      const relationCount = await db('relations').count('* as count').first();
+      counts.relation = parseCount(relationCount);
+    } catch (e) {
+      counts.relation = 0;
+    }
+
+    // Count relation-dp entries
+    try {
+      const relationDpPublished = await db('relation_dps')
+        .whereNotNull('published_at')
+        .count('* as count')
+        .first();
+      const relationDpDrafts = await db('relation_dps')
+        .whereNull('published_at')
+        .count('* as count')
+        .first();
+      counts.relationDp = {
+        published: parseCount(relationDpPublished),
+        drafts: parseCount(relationDpDrafts),
+      };
+    } catch (e) {
+      counts.relationDp = { published: 0, drafts: 0 };
+    }
+
+    // Count relation-dp-i18n entries
+    try {
+      const relationDpI18nPublished = await db('relation_dp_i18ns')
+        .whereNotNull('published_at')
+        .count('* as count')
+        .first();
+      const relationDpI18nDrafts = await db('relation_dp_i18ns')
+        .whereNull('published_at')
+        .count('* as count')
+        .first();
+      counts.relationDpI18n = {
+        published: parseCount(relationDpI18nPublished),
+        drafts: parseCount(relationDpI18nDrafts),
+      };
+    } catch (e) {
+      counts.relationDpI18n = { published: 0, drafts: 0 };
+    }
+
+    await db.destroy();
+    return counts;
+  } catch (error) {
+    try {
+      await db.destroy();
+    } catch (e) {
+      // Ignore destroy errors
+    }
+    console.warn(`⚠️  Could not get pre-migration counts: ${error.message}`);
+    return null;
+  }
+}
+
+/**
  * Check if database is in v4 format before running migrations
  * v4 indicators:
  * - Tables don't have `document_id` column
@@ -505,94 +751,137 @@ async function checkDatabaseFormat() {
 
   const db = knex(dbConfig);
 
+  // Helper to parse count result (handles different database formats)
+  const parseCount = (result) => {
+    if (!result) return 0;
+    // PostgreSQL/MySQL returns { count: '5' } or { count: 5 }
+    if (result.count !== undefined) {
+      return parseInt(result.count, 10) || 0;
+    }
+    // Some databases might return different field names
+    const value = result['count(*)'] || result.count || Object.values(result)[0];
+    return parseInt(value, 10) || 0;
+  };
+
   try {
     // Check if strapi_database_schema table exists (v5 indicator)
     const hasSchemaTable = await db.schema.hasTable('strapi_database_schema');
     if (hasSchemaTable) {
-      await db.destroy();
-      return 'v5'; // Already migrated to v5
+      // Check if entries actually have document_id set (indicates migrated data)
+      // Just having the table doesn't mean data is migrated
+      const hasBasicDpTable = await db.schema.hasTable('basic_dps');
+      if (hasBasicDpTable) {
+        try {
+          // Check if any entries have non-null document_id (v5 migrated data)
+          // Try to query for document_id - if column doesn't exist, this will fail
+          const entriesWithDocumentId = await db('basic_dps')
+            .whereNotNull('document_id')
+            .limit(1)
+            .count('* as count')
+            .first();
+          const count = parseCount(entriesWithDocumentId);
+          if (count > 0) {
+            await db.destroy();
+            return 'v5'; // Has entries with document_id set, data is migrated
+          }
+        } catch (e) {
+          // Column might not exist or query failed, continue checking
+        }
+      }
     }
 
-    // Check if basic_dps table exists and has document_id column (v5 indicator)
+    // Check if basic_dps table exists and has document_id column with actual values
     const hasBasicDpTable = await db.schema.hasTable('basic_dps');
     if (hasBasicDpTable) {
       try {
-        const columns = await db('basic_dps').columnInfo();
-        // columnInfo() returns an object with column names as keys
-        if (columns && (columns.document_id || columns['document_id'])) {
-          await db.destroy();
-          return 'v5'; // Has document_id, already v5
-        }
-      } catch (error) {
-        // columnInfo() might not work for all databases, try alternative method
+        // Check if column exists
+        let hasDocumentIdColumn = false;
         try {
-          // For SQLite, query PRAGMA table_info
+          const columns = await db('basic_dps').columnInfo();
+          hasDocumentIdColumn = columns && (columns.document_id || columns['document_id']);
+        } catch (error) {
+          // Try alternative method for column checking
           if (client === 'sqlite' || client === 'better-sqlite3') {
             const pragmaResult = await db.raw('PRAGMA table_info(basic_dps)');
-            const hasDocumentId = pragmaResult.some(
+            hasDocumentIdColumn = pragmaResult.some(
               (col) => col.name === 'document_id' || col.name === 'documentId'
             );
-            if (hasDocumentId) {
-              await db.destroy();
-              return 'v5';
-            }
           } else {
-            // For PostgreSQL/MySQL, query information_schema
             const columnCheck = await db
               .select('column_name')
               .from('information_schema.columns')
               .where({ table_name: 'basic_dps', column_name: 'document_id' })
               .first();
-            if (columnCheck) {
-              await db.destroy();
-              return 'v5';
-            }
+            hasDocumentIdColumn = !!columnCheck;
           }
-        } catch (e) {
-          // Ignore errors and continue
         }
+
+        // If column exists, check if entries have document_id values set
+        if (hasDocumentIdColumn) {
+          const entriesWithDocumentId = await db('basic_dps')
+            .whereNotNull('document_id')
+            .limit(1)
+            .count('* as count')
+            .first();
+          const count = parseCount(entriesWithDocumentId);
+          if (count > 0) {
+            await db.destroy();
+            return 'v5'; // Has entries with document_id set, data is migrated
+          }
+          // Column exists but no entries have document_id set - likely v4 data in v5 schema
+          await db.destroy();
+          return 'v4';
+        }
+      } catch (error) {
+        // Ignore errors and continue
       }
     }
 
-    // Check if relation_dps table exists and has document_id column
+    // Check relation_dps table similarly
     const hasRelationDpTable = await db.schema.hasTable('relation_dps');
     if (hasRelationDpTable) {
       try {
-        const columns = await db('relation_dps').columnInfo();
-        if (columns && (columns.document_id || columns['document_id'])) {
-          await db.destroy();
-          return 'v5'; // Has document_id, already v5
-        }
-      } catch (error) {
-        // Try alternative method for column checking
+        let hasDocumentIdColumn = false;
         try {
+          const columns = await db('relation_dps').columnInfo();
+          hasDocumentIdColumn = columns && (columns.document_id || columns['document_id']);
+        } catch (error) {
           if (client === 'sqlite' || client === 'better-sqlite3') {
             const pragmaResult = await db.raw('PRAGMA table_info(relation_dps)');
-            const hasDocumentId = pragmaResult.some(
+            hasDocumentIdColumn = pragmaResult.some(
               (col) => col.name === 'document_id' || col.name === 'documentId'
             );
-            if (hasDocumentId) {
-              await db.destroy();
-              return 'v5';
-            }
           } else {
             const columnCheck = await db
               .select('column_name')
               .from('information_schema.columns')
               .where({ table_name: 'relation_dps', column_name: 'document_id' })
               .first();
-            if (columnCheck) {
-              await db.destroy();
-              return 'v5';
-            }
+            hasDocumentIdColumn = !!columnCheck;
           }
-        } catch (e) {
-          // Ignore errors and continue
         }
+
+        if (hasDocumentIdColumn) {
+          const entriesWithDocumentId = await db('relation_dps')
+            .whereNotNull('document_id')
+            .limit(1)
+            .count('* as count')
+            .first();
+          const count = parseCount(entriesWithDocumentId);
+          if (count > 0) {
+            await db.destroy();
+            return 'v5'; // Has entries with document_id set, data is migrated
+          }
+          // Column exists but no entries have document_id set - likely v4 data in v5 schema
+          await db.destroy();
+          return 'v4';
+        }
+      } catch (e) {
+        // Ignore errors and continue
       }
     }
 
-    // If we get here, it's likely v4 format
+    // If we get here, it's likely v4 format (no document_id column or no entries with document_id)
     await db.destroy();
     return 'v4';
   } catch (error) {
@@ -616,6 +905,29 @@ async function validate(multiplier = 1) {
   const expected = getExpectedCounts(multiplierNum);
 
   console.log(`🔍 Validating migrated data from v4 to v5 (multiplier: ${multiplierNum})...\n`);
+
+  // Pre-check: Get counts before migrations run
+  console.log('🔍 Getting pre-migration counts (before Strapi loads)...');
+  const preMigrationCounts = await getPreMigrationCounts();
+  if (preMigrationCounts) {
+    console.log('\n📊 Pre-migration counts (v4 format):');
+    console.log(`  basic: ${preMigrationCounts.basic}`);
+    console.log(
+      `  basic-dp: ${preMigrationCounts.basicDp.published} published, ${preMigrationCounts.basicDp.drafts} drafts`
+    );
+    console.log(
+      `  basic-dp-i18n: ${preMigrationCounts.basicDpI18n.published} published, ${preMigrationCounts.basicDpI18n.drafts} drafts`
+    );
+    console.log(`  relation: ${preMigrationCounts.relation}`);
+    console.log(
+      `  relation-dp: ${preMigrationCounts.relationDp.published} published, ${preMigrationCounts.relationDp.drafts} drafts`
+    );
+    console.log(
+      `  relation-dp-i18n: ${preMigrationCounts.relationDpI18n.published} published, ${preMigrationCounts.relationDpI18n.drafts} drafts\n`
+    );
+  } else {
+    console.log('⚠️  Could not get pre-migration counts\n');
+  }
 
   // Pre-check: Verify database is in v4 format before starting Strapi
   console.log('🔍 Checking database format...');
@@ -652,6 +964,70 @@ async function validate(multiplier = 1) {
     // Run all validations
     const countsResult = await validateCounts(app, expected);
     allErrors.push(...countsResult.errors);
+
+    // Show pre vs post migration comparison
+    if (preMigrationCounts) {
+      console.log('\n📊 Pre vs Post Migration Comparison:');
+      console.log('  basic:');
+      console.log(
+        `    Pre: ${preMigrationCounts.basic} → Post: ${countsResult.checks.find((c) => c.type === 'basic')?.actual || 'N/A'} (expected: ${expected.basic})`
+      );
+      console.log('  basic-dp:');
+      const basicDpPublishedCheck = countsResult.checks.find(
+        (c) => c.type === 'basic-dp (published)'
+      );
+      const basicDpDraftsCheck = countsResult.checks.find((c) => c.type === 'basic-dp (drafts)');
+      console.log(
+        `    Published - Pre: ${preMigrationCounts.basicDp.published} → Post: ${basicDpPublishedCheck?.actual || 'N/A'} (expected: ${expected.basicDp.published})`
+      );
+      console.log(
+        `    Drafts - Pre: ${preMigrationCounts.basicDp.drafts} → Post: ${basicDpDraftsCheck?.actual || 'N/A'} (expected: ${expected.basicDp.drafts + expected.basicDp.published})`
+      );
+      console.log('  basic-dp-i18n:');
+      const basicDpI18nPublishedCheck = countsResult.checks.find(
+        (c) => c.type === 'basic-dp-i18n (published)'
+      );
+      const basicDpI18nDraftsCheck = countsResult.checks.find(
+        (c) => c.type === 'basic-dp-i18n (drafts)'
+      );
+      console.log(
+        `    Published - Pre: ${preMigrationCounts.basicDpI18n.published} → Post: ${basicDpI18nPublishedCheck?.actual || 'N/A'} (expected: ${expected.basicDpI18n.published})`
+      );
+      console.log(
+        `    Drafts - Pre: ${preMigrationCounts.basicDpI18n.drafts} → Post: ${basicDpI18nDraftsCheck?.actual || 'N/A'} (expected: ${expected.basicDpI18n.drafts + expected.basicDpI18n.published})`
+      );
+      console.log('  relation:');
+      console.log(
+        `    Pre: ${preMigrationCounts.relation} → Post: ${countsResult.checks.find((c) => c.type === 'relation')?.actual || 'N/A'} (expected: ${expected.relation})`
+      );
+      console.log('  relation-dp:');
+      const relationDpPublishedCheck = countsResult.checks.find(
+        (c) => c.type === 'relation-dp (published)'
+      );
+      const relationDpDraftsCheck = countsResult.checks.find(
+        (c) => c.type === 'relation-dp (drafts)'
+      );
+      console.log(
+        `    Published - Pre: ${preMigrationCounts.relationDp.published} → Post: ${relationDpPublishedCheck?.actual || 'N/A'} (expected: ${expected.relationDp.published})`
+      );
+      console.log(
+        `    Drafts - Pre: ${preMigrationCounts.relationDp.drafts} → Post: ${relationDpDraftsCheck?.actual || 'N/A'} (expected: ${expected.relationDp.drafts + expected.relationDp.published})`
+      );
+      console.log('  relation-dp-i18n:');
+      const relationDpI18nPublishedCheck = countsResult.checks.find(
+        (c) => c.type === 'relation-dp-i18n (published)'
+      );
+      const relationDpI18nDraftsCheck = countsResult.checks.find(
+        (c) => c.type === 'relation-dp-i18n (drafts)'
+      );
+      console.log(
+        `    Published - Pre: ${preMigrationCounts.relationDpI18n.published} → Post: ${relationDpI18nPublishedCheck?.actual || 'N/A'} (expected: ${expected.relationDpI18n.published})`
+      );
+      console.log(
+        `    Drafts - Pre: ${preMigrationCounts.relationDpI18n.drafts} → Post: ${relationDpI18nDraftsCheck?.actual || 'N/A'} (expected: ${expected.relationDpI18n.drafts + expected.relationDpI18n.published})`
+      );
+      console.log('');
+    }
 
     const documentStructureErrors = await validateDocumentStructure(app, expected);
     allErrors.push(...documentStructureErrors);
