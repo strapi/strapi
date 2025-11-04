@@ -98,16 +98,18 @@ switch (command) {
     ensureSnapshotsDir();
     const snapshotPath = path.join(SNAPSHOTS_DIR, `postgres-${snapshotName}.sql`);
     console.log(`Creating snapshot: ${snapshotName}...`);
-    const containerName = getContainerName();
-    try {
-      execSync(
-        `docker exec ${containerName} pg_dump -U ${DB_USER} -d ${DB_NAME} > ${snapshotPath}`,
-        { stdio: 'inherit', cwd: MONOREPO_ROOT }
-      );
-      console.log(`✅ Snapshot created: ${snapshotPath}`);
-    } catch (error) {
-      console.error(`Error creating snapshot: ${error.message}`);
-      process.exit(1);
+    {
+      const containerName = getContainerName();
+      try {
+        execSync(
+          `docker exec ${containerName} pg_dump -U ${DB_USER} -d ${DB_NAME} > ${snapshotPath}`,
+          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+        );
+        console.log(`✅ Snapshot created: ${snapshotPath}`);
+      } catch (error) {
+        console.error(`Error creating snapshot: ${error.message}`);
+        process.exit(1);
+      }
     }
     break;
 
@@ -123,50 +125,101 @@ switch (command) {
       process.exit(1);
     }
     console.log(`Restoring snapshot: ${snapshotName}...`);
-    const containerName = getContainerName();
-    try {
-      // Drop and recreate database
-      execSync(
-        `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
-        { stdio: 'inherit', cwd: MONOREPO_ROOT }
-      );
-      execSync(
-        `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
-        { stdio: 'inherit', cwd: MONOREPO_ROOT }
-      );
-      // Restore from snapshot
-      execSync(
-        `docker exec -i ${containerName} psql -U ${DB_USER} -d ${DB_NAME} < ${restorePath}`,
-        { stdio: 'inherit', cwd: MONOREPO_ROOT }
-      );
-      console.log(`✅ Snapshot restored: ${snapshotName}`);
-    } catch (error) {
-      console.error(`Error restoring snapshot: ${error.message}`);
-      process.exit(1);
+    {
+      const containerName = getContainerName();
+      try {
+        // Drop and recreate database
+        execSync(
+          `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+        );
+        execSync(
+          `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+        );
+        // Restore from snapshot
+        execSync(
+          `docker exec -i ${containerName} psql -U ${DB_USER} -d ${DB_NAME} < ${restorePath}`,
+          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+        );
+        console.log(`✅ Snapshot restored: ${snapshotName}`);
+      } catch (error) {
+        console.error(`Error restoring snapshot: ${error.message}`);
+        process.exit(1);
+      }
     }
     break;
 
   case 'wipe':
     console.log('Wiping postgres database...');
-    const containerName = getContainerName();
-    try {
-      execSync(
-        `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
-        { stdio: 'inherit', cwd: MONOREPO_ROOT }
-      );
-      execSync(
-        `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
-        { stdio: 'inherit', cwd: MONOREPO_ROOT }
-      );
-      console.log('✅ Database wiped');
-    } catch (error) {
-      console.error(`Error wiping database: ${error.message}`);
-      process.exit(1);
+    {
+      const containerName = getContainerName();
+      try {
+        execSync(
+          `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+        );
+        execSync(
+          `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
+          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+        );
+        console.log('✅ Database wiped');
+      } catch (error) {
+        console.error(`Error wiping database: ${error.message}`);
+        process.exit(1);
+      }
+    }
+    break;
+
+  case 'check':
+    {
+      const containerName = getContainerName();
+      try {
+        // Use pg_stat_user_tables statistics for fast approximate counts
+        const query = `
+          SELECT 
+            schemaname||'.'||relname as table_name,
+            COALESCE(n_live_tup, 0)::text as row_count
+          FROM pg_stat_user_tables
+          ORDER BY schemaname, relname;
+        `;
+
+        const output = execSync(
+          `docker exec ${containerName} psql -U ${DB_USER} -d ${DB_NAME} -t -c "${query.trim()}"`,
+          { encoding: 'utf8', cwd: MONOREPO_ROOT }
+        );
+
+        const lines = output
+          .trim()
+          .split('\n')
+          .filter((l) => l.trim());
+
+        if (lines.length === 0) {
+          console.log('📊 No tables found (database is empty or wiped)');
+        } else {
+          console.log('📊 Database Tables (approximate row counts):\n');
+          console.log('Table Name                          | Row Count');
+          console.log('------------------------------------|----------');
+
+          for (const line of lines) {
+            const [table, count] = line
+              .trim()
+              .split('|')
+              .map((s) => s.trim());
+            const tableName = table.replace(/^public\./, ''); // Remove schema prefix
+            const paddedName = tableName.padEnd(35);
+            console.log(`${paddedName} | ${count}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error checking database: ${error.message}`);
+        process.exit(1);
+      }
     }
     break;
 
   default:
     console.error('Error: Unknown command');
-    console.error('Usage: node db-postgres.js <start|stop|snapshot|restore|wipe> [name]');
+    console.error('Usage: node db-postgres.js <start|stop|snapshot|restore|wipe|check> [name]');
     process.exit(1);
 }

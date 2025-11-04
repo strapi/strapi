@@ -100,8 +100,74 @@ switch (command) {
     }
     break;
 
+  case 'check':
+    try {
+      if (!fs.existsSync(DB_FILE)) {
+        console.log('📊 Database file does not exist (database is empty or wiped)');
+        break;
+      }
+
+      // Use sqlite3 command-line tool to query the database
+      const { execSync } = require('child_process');
+
+      // Build a single query that gets all counts at once using UNION ALL
+      // First get list of tables
+      const tablesOutput = execSync(
+        `sqlite3 ${DB_FILE} "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name;"`,
+        { encoding: 'utf8' }
+      );
+
+      const tables = tablesOutput
+        .trim()
+        .split('\n')
+        .filter((t) => t);
+
+      if (tables.length === 0) {
+        console.log('📊 No tables found (database is empty)');
+      } else {
+        // Build a single query with UNION ALL to get all counts at once
+        const unionQueries = tables
+          .map(
+            (table, index) =>
+              `SELECT '${table}' as table_name, (SELECT COUNT(*) FROM ${table}) as row_count`
+          )
+          .join(' UNION ALL ');
+
+        const query = `SELECT table_name || '|' || row_count FROM (${unionQueries}) ORDER BY table_name;`;
+
+        const output = execSync(`sqlite3 ${DB_FILE} "${query}"`, { encoding: 'utf8' });
+
+        const lines = output
+          .trim()
+          .split('\n')
+          .filter((l) => l.trim());
+
+        console.log('📊 Database Tables:\n');
+        console.log('Table Name                          | Row Count');
+        console.log('------------------------------------|----------');
+
+        for (const line of lines) {
+          const [table, count] = line.split('|');
+          const paddedName = (table || '').padEnd(35);
+          console.log(`${paddedName} | ${count || '0'}`);
+        }
+      }
+    } catch (error) {
+      if (error.message.includes('sqlite3: command not found')) {
+        console.error(
+          'Error: sqlite3 command-line tool not found. Please install it to use the check command.'
+        );
+        console.error('On macOS: brew install sqlite');
+        console.error('On Linux: sudo apt-get install sqlite3');
+      } else {
+        console.error(`Error checking database: ${error.message}`);
+      }
+      process.exit(1);
+    }
+    break;
+
   default:
     console.error('Error: Unknown command');
-    console.error('Usage: node db-sqlite.js <start|stop|snapshot|restore|wipe> [name]');
+    console.error('Usage: node db-sqlite.js <start|stop|snapshot|restore|wipe|check> [name]');
     process.exit(1);
 }

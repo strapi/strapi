@@ -29,7 +29,10 @@
     "db:restore:mariadb": "node scripts/db-mariadb.js restore",
     "db:wipe:sqlite": "node scripts/db-sqlite.js wipe",
     "db:wipe:postgres": "node scripts/db-postgres.js wipe",
-    "db:wipe:mariadb": "node scripts/db-mariadb.js wipe"
+    "db:wipe:mariadb": "node scripts/db-mariadb.js wipe",
+    "db:check:sqlite": "node scripts/db-sqlite.js check",
+    "db:check:postgres": "node scripts/db-postgres.js check",
+    "db:check:mariadb": "node scripts/db-mariadb.js check"
   },
   "dependencies": {
     "@strapi/plugin-users-permissions": "workspace:*",

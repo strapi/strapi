@@ -83,6 +83,14 @@ Example: `yarn db:restore:postgres mybackup`
 yarn db:wipe:postgres
 ```
 
+**Check database (show table row counts):**
+
+```bash
+yarn db:check:postgres
+```
+
+This displays a table showing how many records are in each table, useful for quickly seeing if the database is empty, has data, etc.
+
 #### MariaDB
 
 **Start MariaDB container:**
@@ -119,6 +127,14 @@ Example: `yarn db:restore:mariadb mybackup`
 yarn db:wipe:mariadb
 ```
 
+**Check database (show table row counts):**
+
+```bash
+yarn db:check:mariadb
+```
+
+This displays a table showing how many records are in each table, useful for quickly seeing if the database is empty, has data, etc.
+
 #### SQLite
 
 **Note:** SQLite is file-based, so there's no container to start/stop.
@@ -144,6 +160,19 @@ Example: `yarn db:restore:sqlite mybackup`
 ```bash
 yarn db:wipe:sqlite
 ```
+
+**Check database (show table row counts):**
+
+```bash
+yarn db:check:sqlite
+```
+
+This displays a table showing how many records are in each table, useful for quickly seeing if the database is empty, has data, etc.
+
+**Note:** SQLite check requires the `sqlite3` command-line tool. Install with:
+
+- macOS: `brew install sqlite`
+- Linux: `sudo apt-get install sqlite3`
 
 ### Typical Migration Testing Workflow
 
