@@ -32,7 +32,7 @@ import {
   Box,
   Link,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus, Sparkle } from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus, Sparkle, Loader } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -165,14 +165,18 @@ const LocalePickerAction = ({
 
   const handleSelect = React.useCallback(
     (value: string) => {
-      setQuery({
-        plugins: {
-          ...query.plugins,
-          i18n: {
-            locale: value,
+      setQuery(
+        {
+          plugins: {
+            ...query.plugins,
+            i18n: {
+              locale: value,
+            },
           },
         },
-      });
+        'push',
+        true
+      );
     },
     [query.plugins, setQuery]
   );
@@ -272,12 +276,16 @@ const LocalePickerAction = ({
     return canRead.includes(locale.code);
   });
 
+  const localesSortingDefaultFirst = displayedLocales.sort((a, b) =>
+    a.isDefault ? -1 : b.isDefault ? 1 : 0
+  );
+
   return {
     label: formatMessage({
       id: getTranslation('Settings.locales.modal.locales.label'),
       defaultMessage: 'Locales',
     }),
-    options: displayedLocales.map((locale, index) => {
+    options: localesSortingDefaultFirst.map((locale, index) => {
       const entryWithLocaleExists = allCurrentLocales.some((doc) => doc.locale === locale.code);
 
       const currentLocaleDoc = allCurrentLocales.find((doc) =>
@@ -286,11 +294,7 @@ const LocalePickerAction = ({
 
       const permissionsToCheck = currentLocaleDoc ? canRead : canCreate;
 
-      if (
-        window.strapi.future.isEnabled('unstableAILocalizations') &&
-        isAiAvailable &&
-        settings?.data?.aiLocalizations
-      ) {
+      if (isAiAvailable && settings?.data?.aiLocalizations) {
         return {
           _render: () => (
             <React.Fragment key={index}>
@@ -313,7 +317,7 @@ const LocalePickerAction = ({
                   entryExists={entryWithLocaleExists}
                 />
               </SingleSelectOption>
-              {index === 0 && (
+              {localesSortingDefaultFirst.length > 1 && index === 0 && (
                 <Box paddingRight={4} paddingLeft={4} paddingTop={2} paddingBottom={2}>
                   <Typography variant="sigma">
                     {formatMessage({
@@ -402,6 +406,19 @@ const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>
   }
 `;
 
+const SpinningLoader = styled(Loader)`
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  animation: spin 2s linear infinite;
+`;
+
 const AITranslationStatusAction = ({ documentId, model, collectionType }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const isAIAvailable = useAIAvailability();
@@ -433,8 +450,7 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
   }
 
   // Do not display this action when AI is not available
-  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (!isAIAvailable || !hasAIFutureFlag) {
+  if (!isAIAvailable) {
     return null;
   }
 
@@ -453,7 +469,7 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
             variant={statusVariant}
             size="S"
           >
-            <Sparkle />
+            {status === 'processing' ? <SpinningLoader /> : <Sparkle />}
           </AITranslationStatusIcon>
         </Box>
       ),
@@ -473,7 +489,7 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
             {formatMessage({
               id: getTranslation('CMEditViewAITranslation.status-description'),
               defaultMessage:
-                'Our AI translates content in all locales each time you save a modification.',
+                'Our AI translates content in all locales each time you save a modification in the default locale.',
             })}
           </Typography>
           <Link
@@ -558,8 +574,7 @@ const FillFromAnotherLocaleAction = ({
   }
 
   // Do not display this action when AI is available and AI translations are enabled
-  const hasAIFutureFlag = window.strapi.future.isEnabled('unstableAILocalizations');
-  if (hasAIFutureFlag && isAIAvailable && isAISettingEnabled) {
+  if (isAIAvailable && isAISettingEnabled) {
     return null;
   }
 

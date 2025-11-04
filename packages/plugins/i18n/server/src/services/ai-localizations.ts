@@ -11,7 +11,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
-  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation'];
+  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation', 'boolean'];
   const IGNORED_FIELDS = [
     'id',
     'documentId',
@@ -24,12 +24,6 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     // Async to avoid changing the signature later (there will be a db check in the future)
     async isEnabled() {
-      // Check if future flag is enabled
-      const isFutureFlagEnabled = strapi.features.future.isEnabled('unstableAILocalizations');
-      if (!isFutureFlagEnabled) {
-        return false;
-      }
-
       // Check if user disabled AI features globally
       const isAIEnabled = strapi.config.get('admin.ai.enabled', true);
       if (!isAIEnabled) {
@@ -129,7 +123,13 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         document
       );
 
-      // Call the AI server to get the localized content
+      if (Object.keys(translateableContent).length === 0) {
+        strapi.log.info(
+          `AI Localizations: no translatable content for ${schema.uid} document ${documentId}`
+        );
+        return;
+      }
+
       const localesList = await localeService.find();
       const targetLocales = localesList
         .filter((l) => l.code !== document.locale)
@@ -222,18 +222,9 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         throw new Error(`AI Localizations request failed: ${response.statusText}`);
-      } else {
-        await aiLocalizationJobsService.upsertJobForDocument({
-          documentId,
-          contentType: model,
-          sourceLocale: document.locale,
-          targetLocales,
-          status: 'completed',
-        });
       }
 
       const aiResult = await response.json();
-
       // Get all media field names dynamically from the schema
       const mediaFields = Object.entries(schema.attributes)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -241,7 +232,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
         .map(([key]) => key);
 
       try {
-        await Promise.allSettled(
+        await Promise.all(
           aiResult.localizations.map(async (localization: any) => {
             const { content, locale } = localization;
 
@@ -249,11 +240,11 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
             const derivedDoc = await strapi.documents(model).findOne({
               documentId,
               locale,
-              populate: '*',
+              populate: mediaFields,
             });
 
             // Merge AI content and media fields, works only on first level media fields (root level)
-            const mergedData = { ...content };
+            const mergedData = structuredClone(content);
             for (const field of mediaFields) {
               // Only copy media if not already set in derived locale
               if (!derivedDoc || !derivedDoc[field]) {
@@ -263,11 +254,19 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
               }
             }
 
-            return strapi.documents(model).update({
+            await strapi.documents(model).update({
               documentId,
               locale,
               fields: [],
               data: mergedData,
+            });
+
+            await aiLocalizationJobsService.upsertJobForDocument({
+              documentId,
+              contentType: model,
+              sourceLocale: document.locale,
+              targetLocales,
+              status: 'completed',
             });
           })
         );
@@ -286,7 +285,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.documents.use(async (context, next) => {
         const result = await next();
 
-        // Only trigger on create/update actions
+        // Only trigger for the allowed actions
         if (!['create', 'update'].includes(context.action)) {
           return result;
         }

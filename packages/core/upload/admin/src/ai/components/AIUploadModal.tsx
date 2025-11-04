@@ -10,11 +10,10 @@ import {
   AddAssetStep,
   FileWithRawFile,
 } from '../../components/UploadAssetDialog/AddAssetStep/AddAssetStep';
-import { AssetType } from '../../constants';
 import { useBulkEdit } from '../../hooks/useBulkEdit';
 import { useTracking } from '../../hooks/useTracking';
 import { useUpload } from '../../hooks/useUpload';
-import { getTrad, typeFromMime } from '../../utils';
+import { getTrad } from '../../utils';
 
 import { AIAssetCard, AIAssetCardSkeletons } from './AIAssetCard';
 
