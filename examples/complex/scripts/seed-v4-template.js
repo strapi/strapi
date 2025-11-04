@@ -251,12 +251,12 @@ async function seedRelation(strapi, basicEntries) {
     }
   }
 
-  // Add self-referential relations
-  if (entries.length > 1) {
-    await strapi.entityService.update('api::relation.relation', entries[0].id, {
+  // Add self-referential relations (each entry references itself)
+  for (const entry of entries) {
+    await strapi.entityService.update('api::relation.relation', entry.id, {
       data: {
-        selfOne: entries[1].id,
-        selfMany: entries.slice(1, 3).map((e) => e.id),
+        selfOne: entry.id, // Reference itself
+        selfMany: [entry.id], // Include itself in the array
       },
     });
   }
@@ -345,12 +345,12 @@ async function seedRelationDp(strapi, basicDpEntries) {
     }
   }
 
-  // Add self-referential relations
-  if (published.length > 1) {
-    await strapi.entityService.update('api::relation-dp.relation-dp', published[0].id, {
+  // Add self-referential relations (each entry references itself)
+  for (const entry of [...published, ...drafts]) {
+    await strapi.entityService.update('api::relation-dp.relation-dp', entry.id, {
       data: {
-        selfOne: published[1].id,
-        selfMany: published.slice(1, 3).map((e) => e.id),
+        selfOne: entry.id, // Reference itself
+        selfMany: [entry.id], // Include itself in the array
       },
     });
   }
@@ -450,19 +450,16 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
     }
   }
 
-  // Add self-referential relations
+  // Add self-referential relations (each entry references itself)
   const allEntries = [...entries.published, ...entries.drafts];
-  if (allEntries.length > 1) {
-    const enEntries = allEntries.filter((e) => e.locale === 'en');
-    if (enEntries.length > 1) {
-      await strapi.entityService.update('api::relation-dp-i18n.relation-dp-i18n', enEntries[0].id, {
-        data: {
-          selfOne: enEntries[1].id,
-          selfMany: enEntries.slice(1, 3).map((e) => e.id),
-        },
-        locale: 'en',
-      });
-    }
+  for (const entry of allEntries) {
+    await strapi.entityService.update('api::relation-dp-i18n.relation-dp-i18n', entry.id, {
+      data: {
+        selfOne: entry.id, // Reference itself
+        selfMany: [entry.id], // Include itself in the array
+      },
+      locale: entry.locale,
+    });
   }
 
   entries.all = allEntries;
