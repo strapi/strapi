@@ -1,0 +1,70 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relations",
+  "info": {
+    "singularName": "relation",
+    "pluralName": "relations",
+    "displayName": "Relation"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "selfOne": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation.relation"
+    },
+    "selfMany": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation.relation"
+    },
+    "oneToOneBasic": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::basic.basic"
+    },
+    "oneToManyBasics": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::basic.basic"
+    },
+    "manyToOneBasic": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::basic.basic"
+    },
+    "manyToManyBasics": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::basic.basic"
+    },
+    "morphToOne": {
+      "type": "relation",
+      "relation": "morphToOne"
+    },
+    "morphOne": {
+      "type": "relation",
+      "relation": "morphOne",
+      "target": "plugin::upload.file"
+    },
+    "morphMany": {
+      "type": "relation",
+      "relation": "morphMany",
+      "target": "plugin::upload.file"
+    },
+    "simpleInfo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.simple-info"
+    },
+    "content": {
+      "type": "dynamiczone",
+      "components": ["shared.simple-info", "shared.image-block"]
+    }
+  }
+}

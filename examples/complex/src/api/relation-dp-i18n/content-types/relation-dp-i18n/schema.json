@@ -1,0 +1,90 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relation_dp_i18ns",
+  "info": {
+    "singularName": "relation-dp-i18n",
+    "pluralName": "relation-dp-i18ns",
+    "displayName": "Relation DP i18n"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "selfOne": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-dp-i18n.relation-dp-i18n"
+    },
+    "selfMany": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation-dp-i18n.relation-dp-i18n"
+    },
+    "oneToOneBasic": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::basic-dp-i18n.basic-dp-i18n"
+    },
+    "oneToManyBasics": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::basic-dp-i18n.basic-dp-i18n"
+    },
+    "manyToOneBasic": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::basic-dp-i18n.basic-dp-i18n"
+    },
+    "manyToManyBasics": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::basic-dp-i18n.basic-dp-i18n"
+    },
+    "morphToOne": {
+      "type": "relation",
+      "relation": "morphToOne"
+    },
+    "morphOne": {
+      "type": "relation",
+      "relation": "morphOne",
+      "target": "plugin::upload.file"
+    },
+    "morphMany": {
+      "type": "relation",
+      "relation": "morphMany",
+      "target": "plugin::upload.file"
+    },
+    "simpleInfo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.simple-info",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "content": {
+      "type": "dynamiczone",
+      "components": ["shared.simple-info", "shared.image-block"],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}
