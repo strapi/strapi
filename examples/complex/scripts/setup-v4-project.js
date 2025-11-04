@@ -717,7 +717,12 @@ const PROJECT_DIR = path.resolve(__dirname, '..');
 const DOCKER_COMPOSE_FILE = '${dockerComposePath.replace(/\\/g, '\\\\')}';
 
 const dbType = process.argv[2];
-const multiplier = process.argv[3] || '1';
+// Skip '--' if present (yarn passes it as an argument separator)
+let multiplierArgIndex = 3;
+if (process.argv[multiplierArgIndex] === '--') {
+  multiplierArgIndex = 4;
+}
+const multiplier = process.argv[multiplierArgIndex] || '1';
 
 if (!dbType || !['postgres', 'mariadb', 'sqlite'].includes(dbType)) {
   console.error('Error: Database type is required');

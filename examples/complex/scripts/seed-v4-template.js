@@ -84,6 +84,48 @@ function createImageBlockComponentForDynamicZone() {
   };
 }
 
+// Inject invalid enum values via direct database query (bypasses validation)
+async function injectInvalidEnumValuesForTable(strapi, entries, tableName) {
+  if (!entries || entries.length === 0) return;
+
+  try {
+    const db = strapi.db.connection;
+    const client = db.client.config.client;
+
+    // Get a few entry IDs to corrupt (leave at least one valid)
+    const entriesToCorrupt = entries.slice(0, Math.min(2, entries.length - 1));
+    const ids = entriesToCorrupt.map((e) => e.id);
+
+    console.log(
+      `  🔧 Injecting invalid enum values into ${ids.length} entries (table: ${tableName})...`
+    );
+
+    // Invalid enum value that doesn't match ["one", "two", "three"]
+    const invalidValue = 'invalid_enum_value';
+
+    if (client === 'sqlite' || client === 'better-sqlite3') {
+      // SQLite
+      await db(tableName).whereIn('id', ids).update({ enumeration_field: invalidValue });
+    } else if (client === 'postgres' || client === 'pg') {
+      // PostgreSQL
+      await db(tableName).whereIn('id', ids).update({ enumeration_field: invalidValue });
+    } else if (client === 'mysql' || client === 'mysql2') {
+      // MySQL/MariaDB
+      await db(tableName).whereIn('id', ids).update({ enumeration_field: invalidValue });
+    } else {
+      console.log(`  ⚠️  Unknown database client: ${client}, skipping invalid enum injection`);
+      return;
+    }
+
+    console.log(
+      `  ✅ Injected invalid enum value "${invalidValue}" into entries: ${ids.join(', ')}`
+    );
+  } catch (error) {
+    console.error(`  ⚠️  Failed to inject invalid enum values: ${error.message}`);
+    // Don't throw - this is optional for testing
+  }
+}
+
 // Seed basic content types
 async function seedBasic(strapi) {
   console.log('Seeding basic...');
@@ -105,6 +147,10 @@ async function seedBasic(strapi) {
       throw error;
     }
   }
+
+  // Inject invalid enum values via direct DB query (bypasses validation)
+  await injectInvalidEnumValuesForTable(strapi, entries, 'basics');
+
   return entries;
 }
 
@@ -153,7 +199,12 @@ async function seedBasicDp(strapi) {
     }
   }
 
-  return { published, drafts, all: [...published, ...drafts] };
+  const allEntries = [...published, ...drafts];
+
+  // Inject invalid enum values via direct DB query (bypasses validation)
+  await injectInvalidEnumValuesForTable(strapi, allEntries, 'basic_dps');
+
+  return { published, drafts, all: allEntries };
 }
 
 async function seedBasicDpI18n(strapi) {
@@ -212,6 +263,10 @@ async function seedBasicDpI18n(strapi) {
   }
 
   entries.all = [...entries.published, ...entries.drafts];
+
+  // Inject invalid enum values via direct DB query (bypasses validation)
+  await injectInvalidEnumValuesForTable(strapi, entries.all, 'basic_dp_i18ns');
+
   return entries;
 }
 
@@ -493,7 +548,26 @@ async function seed(multiplier = 1) {
 
   console.log(`🌱 Starting seed (multiplier: ${multiplierNum})...\n`);
 
-  await strapi.load();
+  try {
+    await strapi.load();
+  } catch (error) {
+    // Migration errors can occur if the database already has migrations applied
+    // but Strapi is trying to recreate indexes/constraints
+    if (error.message && (error.message.includes('already exists') || error.code === '42P07')) {
+      console.error('\n❌ Migration error: Database already has migrations applied.');
+      console.error(
+        '   The seed script expects a clean database or one that has been properly migrated.'
+      );
+      console.error('\n   Try one of these solutions:');
+      console.error('   1. Wipe the database first (from v5 project): yarn db:wipe:postgres');
+      console.error('   2. Or ensure the database is in a clean state before seeding\n');
+      console.error(`   Error details: ${error.message}`);
+      process.exit(1);
+    } else {
+      // Re-throw if it's a different error
+      throw error;
+    }
+  }
 
   try {
     let totalStats = {

@@ -32,7 +32,10 @@
     "db:wipe:mariadb": "node scripts/db-mariadb.js wipe",
     "db:check:sqlite": "node scripts/db-sqlite.js check",
     "db:check:postgres": "node scripts/db-postgres.js check",
-    "db:check:mariadb": "node scripts/db-mariadb.js check"
+    "db:check:mariadb": "node scripts/db-mariadb.js check",
+    "validate:migration:sqlite": "node scripts/validate-migration-with-db.js sqlite",
+    "validate:migration:postgres": "node scripts/validate-migration-with-db.js postgres",
+    "validate:migration:mariadb": "node scripts/validate-migration-with-db.js mariadb"
   },
   "dependencies": {
     "@strapi/plugin-users-permissions": "workspace:*",
