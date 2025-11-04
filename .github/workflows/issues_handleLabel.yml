@@ -207,7 +207,7 @@ jobs:
       - name: assign issues to Content squad project
         uses: actions/add-to-project@v0.4.1
         with:
-          project-url: https://github.com/orgs/strapi/projects/23
+          project-url: https://github.com/orgs/strapi/projects/48
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
           labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:review-workflows, source: core:upload, source: plugin:color-picker, source: plugin:documentation, source: plugin:i18n, source: core:preview'
           label-operator: OR

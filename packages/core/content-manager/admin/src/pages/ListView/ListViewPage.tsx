@@ -270,7 +270,6 @@ const ListViewPage = () => {
               <>
                 {list.settings.searchable && (
                   <SearchInput
-                    disabled={results.length === 0}
                     label={formatMessage(
                       { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                       { target: contentTypeTitle }
@@ -282,9 +281,7 @@ const ListViewPage = () => {
                     trackedEvent="didSearch"
                   />
                 )}
-                {list.settings.filterable && schema ? (
-                  <Filters disabled={results.length === 0} schema={schema} />
-                ) : null}
+                {list.settings.filterable && schema ? <Filters schema={schema} /> : null}
               </>
             }
           />

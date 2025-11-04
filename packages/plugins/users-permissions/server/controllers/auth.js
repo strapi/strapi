@@ -111,9 +111,15 @@ module.exports = ({ strapi }) => ({
         const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
         if (upSessions?.httpOnly || requestHttpOnly) {
           const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
+          const isProduction = process.env.NODE_ENV === 'production';
+          const isSecure =
+            typeof upSessions.cookie?.secure === 'boolean'
+              ? upSessions.cookie?.secure
+              : isProduction;
+
           const cookieOptions = {
             httpOnly: true,
-            secure: Boolean(upSessions.cookie?.secure),
+            secure: isSecure,
             sameSite: upSessions.cookie?.sameSite ?? 'lax',
             path: upSessions.cookie?.path ?? '/',
             domain: upSessions.cookie?.domain,
@@ -164,9 +170,15 @@ module.exports = ({ strapi }) => ({
         const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
         if (upSessions?.httpOnly || requestHttpOnly) {
           const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
+          const isProduction = process.env.NODE_ENV === 'production';
+          const isSecure =
+            typeof upSessions.cookie?.secure === 'boolean'
+              ? upSessions.cookie?.secure
+              : isProduction;
+
           const cookieOptions = {
             httpOnly: true,
-            secure: Boolean(upSessions.cookie?.secure),
+            secure: isSecure,
             sameSite: upSessions.cookie?.sameSite ?? 'lax',
             path: upSessions.cookie?.path ?? '/',
             domain: upSessions.cookie?.domain,
@@ -344,9 +356,13 @@ module.exports = ({ strapi }) => ({
     const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
     if (upSessions?.httpOnly || requestHttpOnly) {
       const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
+      const isProduction = process.env.NODE_ENV === 'production';
+      const isSecure =
+        typeof upSessions.cookie?.secure === 'boolean' ? upSessions.cookie?.secure : isProduction;
+
       const cookieOptions = {
         httpOnly: true,
-        secure: Boolean(upSessions.cookie?.secure),
+        secure: isSecure,
         sameSite: upSessions.cookie?.sameSite ?? 'lax',
         path: upSessions.cookie?.path ?? '/',
         domain: upSessions.cookie?.domain,

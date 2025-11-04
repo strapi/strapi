@@ -145,6 +145,7 @@ export default {
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const document = await createOrUpdateDocument(ctx);
+
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },

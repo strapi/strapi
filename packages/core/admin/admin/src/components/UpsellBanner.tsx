@@ -7,6 +7,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useGetLicenseTrialTimeLeftQuery } from '../../src/services/admin';
+import { RESPONSIVE_DEFAULT_SPACING } from '../constants/theme';
 import { useScopedPersistentState } from '../hooks/usePersistentState';
 
 const BannerBackground = styled(Flex)`
@@ -28,8 +29,8 @@ const Banner = ({ isTrialEndedRecently }: { isTrialEndedRecently: boolean }) => 
         width="100%"
         paddingTop={2}
         paddingBottom={2}
-        paddingLeft={10}
-        paddingRight={10}
+        paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+        paddingRight={RESPONSIVE_DEFAULT_SPACING}
         gap={2}
       >
         <Box>

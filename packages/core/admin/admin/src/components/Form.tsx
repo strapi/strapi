@@ -56,7 +56,7 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
    * pass the index.
    */
   removeFieldRow: (field: string, removeAtIndex?: number) => void;
-  resetForm: () => void;
+  resetForm: (newInitialValues?: TFormValues) => void;
   setErrors: (errors: FormErrors<TFormValues>) => void;
   setSubmitting: (isSubmitting: boolean) => void;
   setValues: (values: TFormValues) => void;
@@ -306,7 +306,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
 
     const modified = React.useMemo(
       () => !isEqual(initialValues.current, state.values),
-      [state.values]
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [state.values, initialValues.current]
     );
 
     const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
@@ -414,7 +415,10 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       []
     );
 
-    const resetForm: FormContextValue['resetForm'] = React.useCallback(() => {
+    const resetForm: FormContextValue['resetForm'] = React.useCallback((newInitialValues) => {
+      if (newInitialValues) {
+        initialValues.current = newInitialValues;
+      }
       dispatch({
         type: 'RESET_FORM',
         payload: {

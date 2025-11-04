@@ -1,5 +1,5 @@
 export interface FeaturesConfig {
-  future?: Record<string, unknown>;
+  future?: object;
 }
 
 export interface FeaturesService {

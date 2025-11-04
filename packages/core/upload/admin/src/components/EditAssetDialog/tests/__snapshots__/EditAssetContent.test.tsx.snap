@@ -2,11 +2,13 @@
 
 exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c0 {
-  margin-inline-start: -250px;
-  top: 4.6rem;
+  margin-block-start: 16px;
+  top: 5.6rem;
   left: 50%;
-  width: 50rem;
+  width: 100%;
+  max-width: 50rem;
   z-index: 700;
+  transform: translateX(-50%);
   position: fixed;
 }
 
@@ -63,7 +65,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c1 {
-  gap: 8px;
+  gap: 16px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
@@ -914,6 +916,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           class="c35"
                           id=":ra:"
                           name="name"
+                          type="text"
                           value="Screenshot 2.png"
                         />
                       </div>
@@ -937,6 +940,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           class="c35"
                           id=":rb:"
                           name="alternativeText"
+                          type="text"
                         />
                       </div>
                       <p
@@ -964,6 +968,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           class="c35"
                           id=":rc:"
                           name="caption"
+                          type="text"
                         />
                       </div>
                     </div>

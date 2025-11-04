@@ -30,3 +30,4 @@ export * from './route-serialization';
 
 export * from './primitives';
 export * from './content-api-router';
+export * from './security';

@@ -39,7 +39,7 @@ const WorkflowAttributes = ({ canUpdate = true }: WorkflowAttributesProps) => {
           })}
           name="name"
           required
-          type="string"
+          type="text"
         />
       </Grid.Item>
       <Grid.Item col={6} direction="column" alignItems="stretch">

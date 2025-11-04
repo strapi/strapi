@@ -208,7 +208,9 @@ const SettingsPage = () => {
                             defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
                           })}
                           disabled
+                          readOnly
                           value={data.settings.defaultFrom}
+                          type="email"
                         />
                       </Field.Root>
                     </Grid.Item>
@@ -227,7 +229,9 @@ const SettingsPage = () => {
                             defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
                           })}
                           disabled
+                          readOnly
                           value={data.settings.defaultReplyTo}
+                          type="email"
                         />
                       </Field.Root>
                     </Grid.Item>
@@ -295,6 +299,7 @@ const SettingsPage = () => {
                           id: 'email.Settings.email.plugin.placeholder.testAddress',
                           defaultMessage: 'ex: developer@example.com',
                         })}
+                        type="email"
                       />
                     </Field.Root>
                   </Grid.Item>

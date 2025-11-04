@@ -127,10 +127,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    // The current attribute becomes the parent once visited
-    parent = { schema, key, attribute, path: newPath };
-
     if (isRelationalAttribute(attribute)) {
+      parent = { schema, key, attribute, path: newPath };
       const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
 
       const method = isMorphRelation
@@ -157,6 +155,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (isMediaAttribute(attribute)) {
+      parent = { schema, key, attribute, path: newPath };
+
       // need to update copy
       if (isArray(value)) {
         const res = new Array(value.length);
@@ -178,6 +178,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (attribute.type === 'component') {
+      parent = { schema, key, attribute, path: newPath };
       const targetSchema = getModel(attribute.component);
 
       if (isArray(value)) {
@@ -200,6 +201,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (attribute.type === 'dynamiczone' && isArray(value)) {
+      parent = { schema, key, attribute, path: newPath };
+
       const res = new Array(value.length);
       for (let i = 0; i < value.length; i += 1) {
         const arrayPath = {
