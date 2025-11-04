@@ -66,7 +66,7 @@
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
-    "@types/node": "18.19.24",
+    "@types/node": "24.10.0",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.3",

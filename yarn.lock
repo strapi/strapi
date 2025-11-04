@@ -9427,7 +9427,7 @@ __metadata:
     "@types/koa__router": "npm:12.0.0"
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
-    "@types/node": "npm:18.19.24"
+    "@types/node": "npm:24.10.0"
     "@types/node-schedule": "npm:2.1.7"
     "@types/statuses": "npm:2.0.1"
     "@vercel/stega": "npm:0.1.2"
@@ -9493,7 +9493,7 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"
     "@types/lodash": "npm:^4.14.191"
-    "@types/node": "npm:18.19.24"
+    "@types/node": "npm:24.10.0"
     "@types/semver": "npm:7.5.0"
     "@types/stream-chain": "npm:2.0.1"
     "@types/stream-json": "npm:1.7.3"
@@ -10177,7 +10177,7 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
-    "@types/node": "npm:18.19.24"
+    "@types/node": "npm:24.10.0"
     "@types/nodemon": "npm:1.19.6"
     "@types/webpack-bundle-analyzer": "npm:4.7.0"
     "@types/webpack-hot-middleware": "npm:2.25.9"
@@ -10421,7 +10421,7 @@ __metadata:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@types/http-errors": "npm:2.0.4"
     "@types/koa": "npm:2.13.4"
-    "@types/node": "npm:18.19.24"
+    "@types/node": "npm:24.10.0"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:5.30.0"
     execa: "npm:5.1.1"
@@ -10954,10 +10954,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node18@npm:18.2.2":
-  version: 18.2.2
-  resolution: "@tsconfig/node18@npm:18.2.2"
-  checksum: 10c0/71f2c65616125f3ec8c85704ea55100d2131e0c01cbf7a247e5f6f7d617dfaafd5ff4a09b4193bceface4b4f44e9aa909da8e9af3910c01a0661f202386e40af
+"@tsconfig/node20@npm:20.1.6":
+  version: 20.1.6
+  resolution: "@tsconfig/node20@npm:20.1.6"
+  checksum: 10c0/736bca8c405222e78f77da068bf705b398e3afb3f2ec3c1d2a8792505283863bef8cca5646358fcbabd3b07c6fbbf0b1acdf09aa182254fe60eb519827737f09
   languageName: node
   linkType: hard
 
@@ -11859,12 +11859,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:18.19.24":
+"@types/node@npm:*":
   version: 18.19.24
   resolution: "@types/node@npm:18.19.24"
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10c0/2c26e57002f4d77494fcc156ec188b345b8a8f987b9beffae7c17197690e7ec1cd5c67a5902514fe906b91514c0958dddb4bed54d888bd911d10be7c9ed8ed93
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:24.10.0":
+  version: 24.10.0
+  resolution: "@types/node@npm:24.10.0"
+  dependencies:
+    undici-types: "npm:~7.16.0"
+  checksum: 10c0/f82ed7194e16f5590ef7afdc20c6d09068c76d50278b485ede8f0c5749683536e3064ffa8def8db76915196afb3724b854aa5723c64d6571b890b14492943b46
   languageName: node
   linkType: hard
 
@@ -32025,7 +32034,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "tsconfig@workspace:packages/utils/tsconfig"
   dependencies:
-    "@tsconfig/node18": "npm:18.2.2"
+    "@tsconfig/node20": "npm:20.1.6"
   languageName: unknown
   linkType: soft
 
@@ -32553,6 +32562,13 @@ __metadata:
   version: 6.21.0
   resolution: "undici-types@npm:6.21.0"
   checksum: 10c0/c01ed51829b10aa72fc3ce64b747f8e74ae9b60eafa19a7b46ef624403508a54c526ffab06a14a26b3120d055e1104d7abe7c9017e83ced038ea5cf52f8d5e04
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~7.16.0":
+  version: 7.16.0
+  resolution: "undici-types@npm:7.16.0"
+  checksum: 10c0/3033e2f2b5c9f1504bdc5934646cb54e37ecaca0f9249c983f7b1fc2e87c6d18399ebb05dc7fd5419e02b2e915f734d872a65da2e3eeed1813951c427d33cc9a
   languageName: node
   linkType: hard
 
