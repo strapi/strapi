@@ -41,6 +41,7 @@ const CONTENT_TYPES = [
 const I18N_CONTENT_TYPES = ['basic-dp-i18n', 'relation-dp-i18n'];
 
 console.log('Setting up Strapi v4 project at:', V4_PROJECT_DIR);
+console.log('⚠️  Note: This will overwrite existing files in the v4 project.\n');
 
 // Ensure the v4 project directory exists
 if (!fs.existsSync(V4_PROJECT_DIR)) {
@@ -48,7 +49,7 @@ if (!fs.existsSync(V4_PROJECT_DIR)) {
   console.log('Created v4 project directory');
 }
 
-// Copy package.json
+// Write package.json (always overwrite completely)
 const packageJson = {
   name: 'complex-v4',
   version: '0.0.0',
@@ -64,6 +65,12 @@ const packageJson = {
     strapi: 'strapi',
     upgrade: 'npx @strapi/upgrade latest',
     'upgrade:dry': 'npx @strapi/upgrade latest --dry',
+    'develop:postgres': 'node scripts/develop-with-db.js postgres',
+    'develop:mariadb': 'node scripts/develop-with-db.js mariadb',
+    'develop:sqlite': 'node scripts/develop-with-db.js sqlite',
+    'seed:sqlite': 'node scripts/seed-with-db.js sqlite',
+    'seed:postgres': 'node scripts/seed-with-db.js postgres',
+    'seed:mariadb': 'node scripts/seed-with-db.js mariadb',
   },
   dependencies: {
     '@strapi/plugin-i18n': '4.26.0',
@@ -97,6 +104,7 @@ fs.writeFileSync(
   path.join(V4_PROJECT_DIR, 'package.json'),
   JSON.stringify(packageJson, null, 2) + '\n'
 );
+console.log('✅ Created/updated package.json');
 
 // Create config directory
 const configDir = path.join(V4_PROJECT_DIR, 'config');
@@ -337,7 +345,7 @@ CONTENT_TYPES.forEach((contentType) => {
     fs.mkdirSync(contentTypeDir, { recursive: true });
   }
 
-  // Copy schema
+  // Copy schema (remove polymorphic relations for v4 compatibility)
   const schemaSource = path.join(
     COMPLEX_DIR,
     'src',
@@ -354,8 +362,18 @@ CONTENT_TYPES.forEach((contentType) => {
     if (!fs.existsSync(schemaDir)) {
       fs.mkdirSync(schemaDir, { recursive: true });
     }
-    fs.copyFileSync(schemaSource, schemaDest);
-    console.log(`Copied schema for ${contentType}`);
+
+    // Read and modify schema to remove problematic polymorphic relations
+    const schema = JSON.parse(fs.readFileSync(schemaSource, 'utf8'));
+    if (schema.attributes) {
+      // Remove polymorphic relations that cause issues in v4
+      delete schema.attributes.morphToOne;
+      delete schema.attributes.morphOne;
+      delete schema.attributes.morphMany;
+    }
+
+    fs.writeFileSync(schemaDest, JSON.stringify(schema, null, 2) + '\n');
+    console.log(`Copied schema for ${contentType} (removed polymorphic relations)`);
   }
 
   // Create controller
@@ -496,14 +514,10 @@ DATABASE_CLIENT=sqlite
 
 fs.writeFileSync(path.join(V4_PROJECT_DIR, '.env.example'), envExample);
 
-// Copy .env.example to .env if .env doesn't exist
+// Copy .env.example to .env (always overwrite)
 const envPath = path.join(V4_PROJECT_DIR, '.env');
-if (!fs.existsSync(envPath)) {
-  fs.copyFileSync(path.join(V4_PROJECT_DIR, '.env.example'), envPath);
-  console.log('✅ Created .env file from .env.example');
-} else {
-  console.log('ℹ️  .env file already exists, skipping creation');
-}
+fs.copyFileSync(path.join(V4_PROJECT_DIR, '.env.example'), envPath);
+console.log('✅ Created/updated .env file from .env.example');
 
 // Create scripts directory
 const v4ScriptsDir = path.join(V4_PROJECT_DIR, 'scripts');
@@ -682,21 +696,162 @@ try {
 
 console.log('✅ Created database development scripts');
 
-// Update package.json to add the new scripts
-const packageJsonPath = path.join(V4_PROJECT_DIR, 'package.json');
-const existingPackageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-existingPackageJson.scripts = existingPackageJson.scripts || {};
-existingPackageJson.scripts['develop:postgres'] = 'node scripts/develop-with-db.js postgres';
-existingPackageJson.scripts['develop:mariadb'] = 'node scripts/develop-with-db.js mariadb';
-existingPackageJson.scripts['develop:sqlite'] = 'node scripts/develop-with-db.js sqlite';
-fs.writeFileSync(packageJsonPath, JSON.stringify(existingPackageJson, null, 2) + '\n');
+// Copy seed script (always overwrite)
+const seedScriptSource = path.join(SCRIPT_DIR, 'seed-v4-template.js');
+const seedScriptDest = path.join(v4ScriptsDir, 'seed.js');
+fs.copyFileSync(seedScriptSource, seedScriptDest);
+try {
+  fs.chmodSync(seedScriptDest, 0o755);
+} catch (error) {
+  // chmod might fail on Windows, that's okay
+}
+console.log('✅ Created/updated seed script');
 
-console.log('✅ Added database development scripts to package.json');
+// Create seed-with-db.js wrapper script
+const seedWithDbScript = `#!/usr/bin/env node
+
+const { execSync, spawn } = require('child_process');
+const path = require('path');
+
+const PROJECT_DIR = path.resolve(__dirname, '..');
+const DOCKER_COMPOSE_FILE = '${dockerComposePath.replace(/\\/g, '\\\\')}';
+
+const dbType = process.argv[2];
+const multiplier = process.argv[3] || '1';
+
+if (!dbType || !['postgres', 'mariadb', 'sqlite'].includes(dbType)) {
+  console.error('Error: Database type is required');
+  console.error('Usage: node scripts/seed-with-db.js <postgres|mariadb|sqlite> [multiplier]');
+  process.exit(1);
+}
+
+// Check if container is running
+function isContainerRunning(serviceName) {
+  try {
+    const output = execSync(
+      \`docker-compose -f \${DOCKER_COMPOSE_FILE} ps -q \${serviceName}\`,
+      { encoding: 'utf8', stdio: 'pipe', cwd: PROJECT_DIR }
+    ).trim();
+    if (!output) return false;
+    
+    const status = execSync(
+      \`docker inspect --format='{{.State.Running}}' \${output.split('\\n')[0]}\`,
+      { encoding: 'utf8', stdio: 'pipe' }
+    ).trim();
+    return status === 'true';
+  } catch (error) {
+    return false;
+  }
+}
+
+// Start container if not running
+function ensureContainerRunning(serviceName) {
+  if (isContainerRunning(serviceName)) {
+    console.log(\`✅ \${serviceName} container is already running\`);
+    return;
+  }
+  
+  console.log(\`Starting \${serviceName} container...\`);
+  try {
+    execSync(\`docker-compose -f \${DOCKER_COMPOSE_FILE} up -d \${serviceName}\`, {
+      cwd: PROJECT_DIR,
+      stdio: 'inherit',
+    });
+    console.log(\`✅ \${serviceName} container started\`);
+    
+    // Wait a bit for the database to be ready
+    if (dbType === 'postgres' || dbType === 'mariadb') {
+      console.log('Waiting for database to be ready...');
+      const start = Date.now();
+      while (Date.now() - start < 3000) {
+        // Blocking wait
+      }
+    }
+  } catch (error) {
+    console.error(\`Error starting \${serviceName} container: \${error.message}\`);
+    process.exit(1);
+  }
+}
+
+// Set up environment variables based on database type
+function getEnvVars() {
+  const env = { ...process.env };
+  
+  switch (dbType) {
+    case 'postgres':
+      env.DATABASE_CLIENT = 'postgres';
+      env.DATABASE_HOST = 'localhost';
+      env.DATABASE_PORT = '15432';
+      env.DATABASE_NAME = 'strapi';
+      env.DATABASE_USERNAME = 'strapi';
+      env.DATABASE_PASSWORD = 'strapi';
+      env.DATABASE_SSL = 'false';
+      break;
+      
+    case 'mariadb':
+      env.DATABASE_CLIENT = 'mysql';
+      env.DATABASE_HOST = 'localhost';
+      env.DATABASE_PORT = '13306';
+      env.DATABASE_NAME = 'strapi';
+      env.DATABASE_USERNAME = 'strapi';
+      env.DATABASE_PASSWORD = 'strapi';
+      env.DATABASE_SSL = 'false';
+      break;
+      
+    case 'sqlite':
+      env.DATABASE_CLIENT = 'sqlite';
+      break;
+  }
+  
+  return env;
+}
+
+// Run seed script
+function runSeed() {
+  if (dbType === 'postgres') {
+    ensureContainerRunning('postgres');
+  } else if (dbType === 'mariadb') {
+    ensureContainerRunning('mysql');
+  }
+  
+  const env = getEnvVars();
+  
+  console.log(\`\\n🌱 Seeding database (\${dbType}) with multiplier: \${multiplier}...\\n\`);
+  
+  // Spawn seed script process
+  const isWindows = process.platform === 'win32';
+  const seedProcess = spawn(isWindows ? 'node.exe' : 'node', ['scripts/seed.js', multiplier], {
+    cwd: PROJECT_DIR,
+    env,
+    stdio: 'inherit',
+    shell: !isWindows,
+  });
+  
+  seedProcess.on('exit', (code) => {
+    process.exit(code || 0);
+  });
+  
+  seedProcess.on('error', (error) => {
+    console.error('Error running seed script:', error);
+    process.exit(1);
+  });
+}
+
+runSeed();
+`;
+
+fs.writeFileSync(path.join(v4ScriptsDir, 'seed-with-db.js'), seedWithDbScript);
+try {
+  fs.chmodSync(path.join(v4ScriptsDir, 'seed-with-db.js'), 0o755);
+} catch (error) {
+  // chmod might fail on Windows, that's okay
+}
+console.log('✅ Created/updated seed-with-db.js wrapper script');
 
 console.log('\n✅ V4 project structure created successfully!');
 console.log(`\nProject location: ${V4_PROJECT_DIR}`);
 console.log('\nNext steps:');
 console.log('1. cd ../../../complex-v4');
-console.log('2. npm install (install dependencies)');
+console.log('2. yarn install (install dependencies)');
 console.log('3. Edit .env file if needed (app keys will be auto-generated)');
 console.log('4. npm run develop:postgres (or develop:mariadb, develop:sqlite)');
