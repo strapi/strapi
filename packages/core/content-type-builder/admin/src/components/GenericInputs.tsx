@@ -567,7 +567,7 @@ const getFieldUnits = ({
   minimum?: number;
   maximum?: number;
 }) => {
-  if (type && ['biginteger', 'integer', 'number'].includes(type)) {
+  if (type && !['string', 'uid', 'richtext', 'email', 'password', 'text'].includes(type)) {
     return {};
   }
   const maxValue = Math.max(minimum || 0, maximum || 0);
