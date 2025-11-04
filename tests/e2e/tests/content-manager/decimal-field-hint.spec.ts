@@ -8,10 +8,6 @@ import {
 } from '../../utils/content-types';
 
 test.describe('Decimal field hint with min/max values', () => {
-  test.describe.configure({ timeout: 500000 });
-
-  const contentTypeName = 'Country';
-
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -21,6 +17,7 @@ test.describe('Decimal field hint with min/max values', () => {
   test('should display correct hint for decimal field with min/max values in content manager', async ({
     page,
   }) => {
+    const contentTypeName = 'Country';
     await navToHeader(page, ['Content-Type Builder', contentTypeName], contentTypeName);
 
     await addAttributesToContentType(page, contentTypeName, [
@@ -30,7 +27,7 @@ test.describe('Decimal field hint with min/max values', () => {
         number: { format: 'decimal' },
         advanced: {
           minimum: 0,
-          maximum: 1000000,
+          maximum: 100,
         },
       },
     ]);
