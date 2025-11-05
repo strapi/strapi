@@ -92,21 +92,15 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
       editorRef.current.on('change', changeHandler);
 
       // Handle paste event to detect images
-      const handlePaste = (_cm: CodeMirror.Editor, event: ClipboardEvent) => {
+      const handlePaste = (editor: CodeMirror.Editor, event: ClipboardEvent) => {
         const items = event.clipboardData?.items;
         if (!items) return;
 
         // Collect all image files
-        const imageFiles: File[] = [];
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          if (item.type.indexOf('image') !== -1) {
-            const file = item.getAsFile();
-            if (file) {
-              imageFiles.push(file);
-            }
-          }
-        }
+        const imageFiles: File[] = Array.from(items)
+          .filter((item) => item.type.includes('image'))
+          .map((item) => item.getAsFile())
+          .filter((file): file is File => file !== null);
 
         // If we found images, prevent default and upload them
         if (imageFiles.length > 0) {

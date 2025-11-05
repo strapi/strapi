@@ -9,7 +9,7 @@ import { pluginId } from '../pluginId';
 
 const endpoint = `/${pluginId}`;
 
-interface Asset extends Omit<File, 'id' | 'hash'> {
+export interface Asset extends Omit<File, 'id' | 'hash'> {
   rawFile?: RawFile;
   id?: File['id'];
   hash?: File['hash'];
