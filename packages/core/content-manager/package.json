@@ -106,6 +106,7 @@
   "devDependencies": {
     "@strapi/admin": "5.30.0",
     "@strapi/database": "5.30.0",
+    "@strapi/upload": "5.30.0",
     "@testing-library/react": "15.0.7",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
