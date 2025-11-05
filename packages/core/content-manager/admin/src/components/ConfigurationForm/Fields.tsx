@@ -408,6 +408,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
                       {container.children.map((child, childIndex) => (
                         <Grid.Item
                           col={child.size}
+                          xs={12}
                           key={child.dndId}
                           direction="column"
                           alignItems="stretch"
@@ -601,7 +602,13 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
               <Grid.Root gap={4} width="100%">
                 {components[attribute.component].layout.map((row) =>
                   row.map(({ size, ...field }) => (
-                    <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+                    <Grid.Item
+                      key={field.name}
+                      col={size}
+                      xs={12}
+                      direction="column"
+                      alignItems="stretch"
+                    >
                       <Flex
                         alignItems="center"
                         background="neutral0"

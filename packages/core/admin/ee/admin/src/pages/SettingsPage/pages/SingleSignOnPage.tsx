@@ -251,6 +251,7 @@ export const SingleSignOnPage = () => {
                         <Grid.Item
                           key={field.name}
                           col={size}
+                          xs={12}
                           direction="column"
                           alignItems="stretch"
                         >
