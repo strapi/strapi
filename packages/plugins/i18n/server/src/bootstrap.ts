@@ -18,7 +18,7 @@ const registerModelsHooks = () => {
   strapi.documents.use(async (context, next) => {
     const schema: Schema.ContentType = context.contentType;
 
-    if (!['create', 'update', 'discardDraft'].includes(context.action)) {
+    if (!['create', 'update', 'discardDraft', 'publish'].includes(context.action)) {
       return next();
     }
 
@@ -33,7 +33,7 @@ const registerModelsHooks = () => {
 
     // Get original data before the update to compare what actually changed
     const originalData =
-      context.action === 'update' && context.params.documentId
+      'documentId' in context.params && context.params.documentId
         ? await strapi.db.query(schema.uid).findOne({
             where: { documentId: context.params.documentId },
             populate: attributesToPopulate,
@@ -43,10 +43,26 @@ const registerModelsHooks = () => {
     // Get the result of the document service action
     const result = (await next()) as any;
 
-    // @ts-expect-error true
-    const paramData = context.params.data;
-    const currentFields = copyNonLocalizedAttributes(schema, paramData);
+    // We may not have received a result with everything populated that we need
+    // Use the id and populate built from non localized fields to get the full
+    // result
+    let resultID;
+    // TODO: fix bug where an empty array can be returned
+    if (Array.isArray(result?.entries) && result.entries[0]?.id) {
+      resultID = result.entries[0].id;
+    } else if (result?.id) {
+      resultID = result.id;
+    } else {
+      return result;
+    }
+
+    const populatedResult = await strapi.db.query(schema.uid).findOne({
+      where: { id: resultID },
+      populate: attributesToPopulate,
+    });
+
     const originalFields = copyNonLocalizedAttributes(schema, originalData);
+    const currentFields = copyNonLocalizedAttributes(schema, populatedResult);
 
     // Only sync if there are actual changes to non-localized fields
     const shouldSync =
@@ -56,7 +72,7 @@ const registerModelsHooks = () => {
       });
 
     if (shouldSync) {
-      await getService('localizations').syncNonLocalizedAttributes(paramData, schema);
+      await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
     }
 
     return result;
