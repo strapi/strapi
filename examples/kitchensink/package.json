@@ -17,7 +17,7 @@
     "@strapi/provider-upload-aws-s3": "workspace:*",
     "@strapi/provider-upload-cloudinary": "workspace:*",
     "@strapi/strapi": "workspace:*",
-    "better-sqlite3": "11.3.0",
+    "better-sqlite3": "12.4.1",
     "lodash": "4.17.21",
     "mysql2": "3.9.8",
     "passport-google-oauth2": "0.2.0",
