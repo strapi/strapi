@@ -1,5 +1,4 @@
 import type { Schema } from '@strapi/types';
-import { isEqual } from 'lodash';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
@@ -27,18 +26,9 @@ const registerModelsHooks = () => {
     }
 
     // Build a populate array for all non localized fields within the schema
-    const { getNestedPopulateOfNonLocalizedAttributes, copyNonLocalizedAttributes } =
-      getService('content-types');
-    const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
+    const { getNestedPopulateOfNonLocalizedAttributes } = getService('content-types');
 
-    // Get original data before the update to compare what actually changed
-    const originalData =
-      'documentId' in context.params && context.params.documentId
-        ? await strapi.db.query(schema.uid).findOne({
-            where: { documentId: context.params.documentId },
-            populate: attributesToPopulate,
-          })
-        : null;
+    const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
 
     // Get the result of the document service action
     const result = (await next()) as any;
@@ -56,22 +46,11 @@ const registerModelsHooks = () => {
       return result;
     }
 
-    const populatedResult = await strapi.db.query(schema.uid).findOne({
-      where: { id: resultID },
-      populate: attributesToPopulate,
-    });
+    if (attributesToPopulate.length > 0) {
+      const populatedResult = await strapi.db
+        .query(schema.uid)
+        .findOne({ where: { id: resultID }, populate: attributesToPopulate });
 
-    const originalFields = copyNonLocalizedAttributes(schema, originalData);
-    const currentFields = copyNonLocalizedAttributes(schema, populatedResult);
-
-    // Only sync if there are actual changes to non-localized fields
-    const shouldSync =
-      !originalData ||
-      Object.keys(currentFields).some((key) => {
-        return !isEqual(currentFields[key], originalFields[key]);
-      });
-
-    if (shouldSync) {
       await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
     }
 
