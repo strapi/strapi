@@ -5,6 +5,16 @@
     "heading": { "type": "string", "required": true },
     "body": { "type": "richtext" },
     "author": { "type": "string" },
-    "publishedDate": { "type": "date" }
+    "publishedDate": { "type": "date" },
+    "relatedBasic": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::basic.basic"
+    },
+    "relatedBasicDp": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::basic-dp.basic-dp"
+    }
   }
 }

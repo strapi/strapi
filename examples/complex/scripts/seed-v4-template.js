@@ -84,12 +84,16 @@ function createImageBlockComponentForDynamicZone() {
   };
 }
 
-function createTextBlockComponent() {
+function createTextBlockComponent(options = {}) {
+  const { relatedBasicId = null, relatedBasicDpId = null } = options;
+
   return {
     heading: `Heading ${randomString(6)}`,
     body: `<p>Body content: ${randomString(20)}</p>`,
     author: `Author ${randomString(4)}`,
     publishedDate: randomDate().toISOString().split('T')[0],
+    relatedBasic: relatedBasicId,
+    relatedBasicDp: relatedBasicDpId,
   };
 }
 
@@ -102,10 +106,10 @@ function createMediaBlockComponent() {
   };
 }
 
-function createTextBlockComponentForDynamicZone() {
+function createTextBlockComponentForDynamicZone(options = {}) {
   return {
     __component: 'shared.text-block',
-    ...createTextBlockComponent(),
+    ...createTextBlockComponent(options),
   };
 }
 
@@ -346,6 +350,12 @@ async function seedRelation(strapi, basicEntries) {
   for (let i = 0; i < 5; i++) {
     try {
       const relatedBasics = basicEntries.slice(0, randomNumber(1, 3));
+      const firstRelatedBasic = relatedBasics[0] || basicEntries[0] || null;
+      const secondRelatedBasic =
+        relatedBasics[1] || relatedBasics[0] || basicEntries[1] || firstRelatedBasic;
+      const firstRelatedBasicId = firstRelatedBasic ? firstRelatedBasic.id : null;
+      const secondRelatedBasicId = secondRelatedBasic ? secondRelatedBasic.id : firstRelatedBasicId;
+
       const data = {
         name: `Relation ${randomString(6)}`,
         oneToOneBasic: relatedBasics[0]?.id || null,
@@ -357,10 +367,13 @@ async function seedRelation(strapi, basicEntries) {
           createSimpleInfoComponentForDynamicZone(),
           createImageBlockComponentForDynamicZone(),
         ],
-        textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+        textBlocks: [
+          createTextBlockComponent({ relatedBasicId: firstRelatedBasicId }),
+          createTextBlockComponent({ relatedBasicId: secondRelatedBasicId }),
+        ],
         mediaBlock: createMediaBlockComponent(),
         sections: [
-          createTextBlockComponentForDynamicZone(),
+          createTextBlockComponentForDynamicZone({ relatedBasicId: firstRelatedBasicId }),
           createMediaBlockComponentForDynamicZone(),
         ],
       };
@@ -407,7 +420,16 @@ async function seedRelationDp(strapi, basicDpEntries) {
       // Mix of published and draft basics
       const publishedRelated = publishedBasics.slice(0, randomNumber(0, 2));
       const draftRelated = draftBasics.slice(0, randomNumber(0, 2));
-      const relatedBasics = [...publishedRelated, ...draftRelated];
+      let relatedBasics = [...publishedRelated, ...draftRelated];
+      if (relatedBasics.length === 0 && allBasics.length > 0) {
+        relatedBasics = [allBasics[randomNumber(0, allBasics.length - 1)]];
+      }
+
+      const firstRelatedBasic = relatedBasics[0] || allBasics[0] || null;
+      const secondRelatedBasic =
+        relatedBasics[1] || relatedBasics[0] || allBasics[1] || firstRelatedBasic;
+      const firstRelatedBasicId = firstRelatedBasic ? firstRelatedBasic.id : null;
+      const secondRelatedBasicId = secondRelatedBasic ? secondRelatedBasic.id : firstRelatedBasicId;
 
       const entry = await strapi.entityService.create('api::relation-dp.relation-dp', {
         data: {
@@ -422,10 +444,13 @@ async function seedRelationDp(strapi, basicDpEntries) {
             createSimpleInfoComponentForDynamicZone(),
             createImageBlockComponentForDynamicZone(),
           ],
-          textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+          textBlocks: [
+            createTextBlockComponent({ relatedBasicDpId: firstRelatedBasicId }),
+            createTextBlockComponent({ relatedBasicDpId: secondRelatedBasicId }),
+          ],
           mediaBlock: createMediaBlockComponent(),
           sections: [
-            createTextBlockComponentForDynamicZone(),
+            createTextBlockComponentForDynamicZone({ relatedBasicDpId: firstRelatedBasicId }),
             createMediaBlockComponentForDynamicZone(),
           ],
           publishedAt: new Date(),
@@ -449,7 +474,16 @@ async function seedRelationDp(strapi, basicDpEntries) {
       // Mix of published and draft basics
       const publishedRelated = publishedBasics.slice(0, randomNumber(0, 2));
       const draftRelated = draftBasics.slice(0, randomNumber(0, 2));
-      const relatedBasics = [...publishedRelated, ...draftRelated];
+      let relatedBasics = [...publishedRelated, ...draftRelated];
+      if (relatedBasics.length === 0 && allBasics.length > 0) {
+        relatedBasics = [allBasics[randomNumber(0, allBasics.length - 1)]];
+      }
+
+      const firstRelatedBasic = relatedBasics[0] || allBasics[0] || null;
+      const secondRelatedBasic =
+        relatedBasics[1] || relatedBasics[0] || allBasics[1] || firstRelatedBasic;
+      const firstRelatedBasicId = firstRelatedBasic ? firstRelatedBasic.id : null;
+      const secondRelatedBasicId = secondRelatedBasic ? secondRelatedBasic.id : firstRelatedBasicId;
 
       const entry = await strapi.entityService.create('api::relation-dp.relation-dp', {
         data: {
@@ -464,10 +498,13 @@ async function seedRelationDp(strapi, basicDpEntries) {
             createSimpleInfoComponentForDynamicZone(),
             createImageBlockComponentForDynamicZone(),
           ],
-          textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+          textBlocks: [
+            createTextBlockComponent({ relatedBasicDpId: firstRelatedBasicId }),
+            createTextBlockComponent({ relatedBasicDpId: secondRelatedBasicId }),
+          ],
           mediaBlock: createMediaBlockComponent(),
           sections: [
-            createTextBlockComponentForDynamicZone(),
+            createTextBlockComponentForDynamicZone({ relatedBasicDpId: firstRelatedBasicId }),
             createMediaBlockComponentForDynamicZone(),
           ],
           // No publishedAt = draft
@@ -509,13 +546,20 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
 
   // Create entries in each locale
   for (const locale of locales) {
+    const basicsForLocale = allBasics.filter((basic) => basic.locale === locale);
+    const fallbackBasics = basicsForLocale.length > 0 ? basicsForLocale : allBasics;
+    const publishedBasicsForLocale = publishedBasics.filter((basic) => basic.locale === locale);
+    const draftBasicsForLocale = draftBasics.filter((basic) => basic.locale === locale);
+
     // Published entries - relate to BOTH published and draft basics to test all scenarios
     for (let i = 0; i < 5; i++) {
       try {
-        // Mix of published and draft basics
-        const publishedRelated = publishedBasics.slice(0, randomNumber(0, 2));
-        const draftRelated = draftBasics.slice(0, randomNumber(0, 2));
-        const relatedBasics = [...publishedRelated, ...draftRelated];
+        const publishedRelated = publishedBasicsForLocale.slice(0, randomNumber(0, 2));
+        const draftRelated = draftBasicsForLocale.slice(0, randomNumber(0, 2));
+        let relatedBasics = [...publishedRelated, ...draftRelated];
+        if (relatedBasics.length === 0 && fallbackBasics.length > 0) {
+          relatedBasics = [fallbackBasics[randomNumber(0, fallbackBasics.length - 1)]];
+        }
 
         const entry = await strapi.entityService.create('api::relation-dp-i18n.relation-dp-i18n', {
           data: {
@@ -558,10 +602,12 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
     // Draft entries - also relate to both published and draft basics
     for (let i = 0; i < 3; i++) {
       try {
-        // Mix of published and draft basics
-        const publishedRelated = publishedBasics.slice(0, randomNumber(0, 2));
-        const draftRelated = draftBasics.slice(0, randomNumber(0, 2));
-        const relatedBasics = [...publishedRelated, ...draftRelated];
+        const publishedRelated = publishedBasicsForLocale.slice(0, randomNumber(0, 2));
+        const draftRelated = draftBasicsForLocale.slice(0, randomNumber(0, 2));
+        let relatedBasics = [...publishedRelated, ...draftRelated];
+        if (relatedBasics.length === 0 && fallbackBasics.length > 0) {
+          relatedBasics = [fallbackBasics[randomNumber(0, fallbackBasics.length - 1)]];
+        }
 
         const entry = await strapi.entityService.create('api::relation-dp-i18n.relation-dp-i18n', {
           data: {

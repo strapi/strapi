@@ -2101,6 +2101,155 @@ async function validateComponentRelationFiltering(strapi) {
   return { errors, warnings };
 }
 
+async function validateComponentRelationTargets(strapi) {
+  console.log('\n🧩 Validating text-block component relations...\n');
+
+  const errors = [];
+  const warnings = [];
+
+  // Validate non-DP relation components retain their targets
+  try {
+    const relationEntries = await strapi.entityService.findMany('api::relation.relation', {
+      populate: {
+        textBlocks: {
+          populate: {
+            relatedBasic: { fields: ['id', 'documentId', 'publishedAt'] },
+          },
+        },
+      },
+      limit: -1,
+    });
+
+    let relationComponentsChecked = 0;
+    for (const entry of relationEntries) {
+      const textBlocks = entry?.textBlocks || [];
+      for (const textBlock of textBlocks) {
+        relationComponentsChecked += 1;
+        if (!textBlock?.relatedBasic) {
+          const componentId = textBlock?.id || 'unknown';
+          errors.push(
+            `relation entry ${entry.id}: text-block ${componentId} is missing relatedBasic relation`
+          );
+        }
+      }
+    }
+
+    if (relationComponentsChecked > 0) {
+      console.log(
+        `✅ Non-DP component relations validated: ${relationComponentsChecked} text-blocks checked`
+      );
+    } else {
+      const message =
+        '⚠️  No text-block components found on non-DP relation entries to validate component relations';
+      warnings.push(message);
+      console.log(message);
+    }
+  } catch (error) {
+    errors.push(
+      `Failed to load relation entries for component relation validation: ${error.message}`
+    );
+    console.error(error);
+  }
+
+  // Validate DP relation components point to draft targets after migration
+  try {
+    const basicDpEntries = await strapi.entityService.findMany('api::basic-dp.basic-dp', {
+      fields: ['id', 'documentId', 'publishedAt'],
+      publicationState: 'preview',
+      limit: -1,
+    });
+
+    const basicDpByDocumentId = new Map();
+    for (const entry of basicDpEntries) {
+      if (!entry.documentId) continue;
+      if (!basicDpByDocumentId.has(entry.documentId)) {
+        basicDpByDocumentId.set(entry.documentId, { published: [], drafts: [] });
+      }
+
+      const record = basicDpByDocumentId.get(entry.documentId);
+      if (entry.publishedAt) {
+        record.published.push(entry);
+      } else {
+        record.drafts.push(entry);
+      }
+    }
+
+    const relationDpEntries = await strapi.entityService.findMany('api::relation-dp.relation-dp', {
+      populate: {
+        textBlocks: {
+          populate: {
+            relatedBasicDp: { fields: ['id', 'documentId', 'publishedAt'] },
+          },
+        },
+      },
+      publicationState: 'preview',
+      limit: -1,
+    });
+
+    let draftComponentChecks = 0;
+    for (const entry of relationDpEntries) {
+      const isDraft = !entry.publishedAt;
+      const textBlocks = entry?.textBlocks || [];
+
+      for (const textBlock of textBlocks) {
+        const componentId = textBlock?.id || 'unknown';
+        const target = textBlock?.relatedBasicDp;
+
+        if (!target) {
+          errors.push(
+            `relation-dp entry ${entry.id}: text-block ${componentId} is missing relatedBasicDp relation`
+          );
+          continue;
+        }
+
+        if (!target.documentId) {
+          errors.push(
+            `relation-dp entry ${entry.id}: related basic-dp target ${target.id} on text-block ${componentId} is missing documentId`
+          );
+          continue;
+        }
+
+        const targetDocs = basicDpByDocumentId.get(target.documentId);
+        if (!targetDocs) {
+          errors.push(
+            `relation-dp entry ${entry.id}: related basic-dp target ${target.id} (documentId ${target.documentId}) not found`
+          );
+          continue;
+        }
+
+        if (isDraft) {
+          draftComponentChecks += 1;
+          if (target.publishedAt) {
+            errors.push(
+              `relation-dp draft entry ${entry.id}: text-block ${componentId} points to published basic-dp ${target.id} instead of a draft version`
+            );
+          } else if (!targetDocs.drafts.some((draft) => draft.id === target.id)) {
+            errors.push(
+              `relation-dp draft entry ${entry.id}: text-block ${componentId} points to basic-dp ${target.id}, but that draft version was not found in the documentId group ${target.documentId}`
+            );
+          }
+        }
+      }
+    }
+
+    if (draftComponentChecks > 0) {
+      console.log(
+        `✅ Draft relation-dp component targets validated: ${draftComponentChecks} text-block relations point to draft targets`
+      );
+    } else if (relationDpEntries.length > 0) {
+      const message =
+        '⚠️  No draft relation-dp component relations found to validate (expected at least one)';
+      warnings.push(message);
+      console.log(message);
+    }
+  } catch (error) {
+    errors.push(`Failed to validate relation-dp component targets: ${error.message}`);
+    console.error(error);
+  }
+
+  return { errors, warnings };
+}
+
 /**
  * Validate that migration matches discard() behavior expectations
  * Based on RELATION_MIGRATION_EXPECTATIONS.md analysis
@@ -2971,6 +3120,10 @@ async function validate(multiplier = 1) {
     // Validate component relation filtering
     const componentFilteringResult = await validateComponentRelationFiltering(app);
     allErrors.push(...(componentFilteringResult.errors || []));
+
+    // Validate component relation targets
+    const componentRelationTargetsResult = await validateComponentRelationTargets(app);
+    allErrors.push(...(componentRelationTargetsResult.errors || []));
 
     // Additional comprehensive validations
     const orphanedRelationsErrors = await validateOrphanedRelations(app);
