@@ -65,25 +65,31 @@ export async function resetTestDatabase() {
   ];
 
   const tablesToReset = allTableNames.filter(
-    (tableName) =>
-      !systemTables.includes(tableName) &&
-      !tableName.startsWith('strapi_') &&
-      !tableName.includes('_links') // Skip relation tables for now
+    (tableName) => !systemTables.includes(tableName) && !tableName.startsWith('strapi_')
   );
 
-  for (const tableName of tablesToReset) {
-    try {
-      // Truncate table
-      await strapi.db.connection(tableName).del();
+  // Use Strapi's built-in schema update mechanism to disable constraints (e.g. foreign key constraints)
+  await strapi.db.dialect.startSchemaUpdate();
 
-      // Restore initial data if any
-      const initialData = initialTestData[tableName];
-      if (initialData && initialData.length > 0) {
-        await strapi.db.connection(tableName).insert(initialData);
+  try {
+    // Reset each table individually to avoid foreign key issues
+    for (const tableName of tablesToReset) {
+      try {
+        // Clear the table
+        await strapi.db.connection(tableName).del();
+
+        // Restore initial data if any
+        const initialData = initialTestData[tableName];
+        if (initialData && initialData.length > 0) {
+          await strapi.db.connection(tableName).insert(initialData);
+        }
+      } catch (error) {
+        console.warn(`Could not reset table ${tableName}:`, error.message);
       }
-    } catch (error) {
-      console.warn(`Could not reset table ${tableName}:`, error.message);
     }
+  } finally {
+    // Always re-enable constraints
+    await strapi.db.dialect.endSchemaUpdate();
   }
 }
 
@@ -92,16 +98,26 @@ export async function resetTestDatabase() {
  * Call this in your describe block to automatically reset after each test
  */
 export function setupDatabaseReset() {
-  beforeAll(async () => {
-    await captureInitialTestData();
+  let isDataCaptured = false;
+
+  beforeEach(async () => {
+    if (!isDataCaptured) {
+      await captureInitialTestData();
+      isDataCaptured = true;
+    }
   });
 
   afterEach(async () => {
-    await resetTestDatabase();
+    if (isDataCaptured) {
+      await resetTestDatabase();
+    }
   });
 }
 
-// Legacy transaction wrapper - deprecated, use setupDatabaseReset instead
+/* -------------------------------------------------------------------------------------------------
+ * Legacy transaction wrapper
+ * -----------------------------------------------------------------------------------------------*/
+
 export const wrapInTransaction = (test) => {
   console.warn('wrapInTransaction is deprecated. Use setupDatabaseReset() instead.');
   return test;
