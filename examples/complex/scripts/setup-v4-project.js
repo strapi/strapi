@@ -140,7 +140,7 @@ module.exports = ({ env }) => {
         client: 'postgres',
         connection: {
           host: env('DATABASE_HOST', 'localhost'),
-          port: env.int('DATABASE_PORT', 15432),
+          port: env.int('DATABASE_PORT', 5432),
           database: env('DATABASE_NAME', 'strapi'),
           user: env('DATABASE_USERNAME', 'strapi'),
           password: env('DATABASE_PASSWORD', 'strapi'),
@@ -157,7 +157,7 @@ module.exports = ({ env }) => {
       client: 'mysql2',
       connection: {
         host: env('DATABASE_HOST', 'localhost'),
-        port: env.int('DATABASE_PORT', 13306),
+        port: env.int('DATABASE_PORT', 3306),
         database: env('DATABASE_NAME', 'strapi'),
         user: env('DATABASE_USERNAME', 'strapi'),
         password: env('DATABASE_PASSWORD', 'strapi'),
@@ -503,13 +503,13 @@ JWT_SECRET=toBeModified
 DATABASE_CLIENT=sqlite
 # DATABASE_CLIENT=postgres
 # DATABASE_HOST=localhost
-# DATABASE_PORT=15432
+# DATABASE_PORT=5432
 # DATABASE_NAME=strapi
 # DATABASE_USERNAME=strapi
 # DATABASE_PASSWORD=strapi
 # DATABASE_SSL=false
 # DATABASE_CLIENT=mysql
-# DATABASE_PORT=13306
+# DATABASE_PORT=3306
 `;
 
 fs.writeFileSync(path.join(V4_PROJECT_DIR, '.env.example'), envExample);
@@ -600,7 +600,7 @@ function getEnvVars() {
     case 'postgres':
       env.DATABASE_CLIENT = 'postgres';
       env.DATABASE_HOST = 'localhost';
-      env.DATABASE_PORT = '15432';
+      env.DATABASE_PORT = '5432';
       env.DATABASE_NAME = 'strapi';
       env.DATABASE_USERNAME = 'strapi';
       env.DATABASE_PASSWORD = 'strapi';
@@ -610,7 +610,7 @@ function getEnvVars() {
     case 'mariadb':
       env.DATABASE_CLIENT = 'mysql';
       env.DATABASE_HOST = 'localhost';
-      env.DATABASE_PORT = '13306';
+      env.DATABASE_PORT = '3306';
       env.DATABASE_NAME = 'strapi';
       env.DATABASE_USERNAME = 'strapi';
       env.DATABASE_PASSWORD = 'strapi';
@@ -786,7 +786,7 @@ function getEnvVars() {
     case 'postgres':
       env.DATABASE_CLIENT = 'postgres';
       env.DATABASE_HOST = 'localhost';
-      env.DATABASE_PORT = '15432';
+      env.DATABASE_PORT = '5432';
       env.DATABASE_NAME = 'strapi';
       env.DATABASE_USERNAME = 'strapi';
       env.DATABASE_PASSWORD = 'strapi';
@@ -796,7 +796,7 @@ function getEnvVars() {
     case 'mariadb':
       env.DATABASE_CLIENT = 'mysql';
       env.DATABASE_HOST = 'localhost';
-      env.DATABASE_PORT = '13306';
+      env.DATABASE_PORT = '3306';
       env.DATABASE_NAME = 'strapi';
       env.DATABASE_USERNAME = 'strapi';
       env.DATABASE_PASSWORD = 'strapi';
