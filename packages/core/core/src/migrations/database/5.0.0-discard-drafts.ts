@@ -171,9 +171,6 @@ type ComponentParentInstance = { uid: string; parentId: number | string };
 
 const componentParentSchemasCache = new Map<string, ParentSchemaInfo[]>();
 const joinTableExistsCache = new Map<string, boolean>();
-const componentParentInstanceCache = new Map<string, ComponentParentInstance | null>();
-const componentAncestorDpCache = new Map<string, boolean>();
-const parentDpCache = new Map<string, boolean>();
 const componentMetaCache = new Map<string, any>();
 
 const DUPLICATE_ERROR_CODES = new Set(['23505', 'ER_DUP_ENTRY', 'SQLITE_CONSTRAINT_UNIQUE']);
@@ -312,16 +309,23 @@ async function ensureTableExists(trx: Knex, tableName: string): Promise<boolean>
   return joinTableExistsCache.get(tableName)!;
 }
 
+type ComponentHierarchyCaches = {
+  parentInstanceCache: Map<string, ComponentParentInstance | null>;
+  ancestorDpCache: Map<string, boolean>;
+  parentDpCache: Map<string, boolean>;
+};
+
 async function findComponentParentInstance(
   trx: Knex,
   identifiers: any,
   componentUid: string,
   componentId: number | string,
-  excludeUid?: string
+  excludeUid: string | undefined,
+  caches: ComponentHierarchyCaches
 ): Promise<ComponentParentInstance | null> {
   const cacheKey = `${componentUid}:${componentId}:${excludeUid ?? 'ALL'}`;
-  if (componentParentInstanceCache.has(cacheKey)) {
-    return componentParentInstanceCache.get(cacheKey)!;
+  if (caches.parentInstanceCache.has(cacheKey)) {
+    return caches.parentInstanceCache.get(cacheKey)!;
   }
 
   const parentComponentIdColumn = getComponentJoinColumnInverseName(identifiers);
@@ -357,7 +361,7 @@ async function findComponentParentInstance(
           parentId: parentRow[parentEntityIdColumn],
         };
 
-        componentParentInstanceCache.set(cacheKey, parentInstance);
+        caches.parentInstanceCache.set(cacheKey, parentInstance);
         return parentInstance;
       }
     } catch {
@@ -365,7 +369,7 @@ async function findComponentParentInstance(
     }
   }
 
-  componentParentInstanceCache.set(cacheKey, null);
+  caches.parentInstanceCache.set(cacheKey, null);
   return null;
 }
 
@@ -381,11 +385,12 @@ const getComponentMeta = (componentUid: string) => {
 async function hasDraftPublishAncestorForParent(
   trx: Knex,
   identifiers: any,
-  parent: ComponentParentInstance
+  parent: ComponentParentInstance,
+  caches: ComponentHierarchyCaches
 ): Promise<boolean> {
   const cacheKey = `${parent.uid}:${parent.parentId}`;
-  if (parentDpCache.has(cacheKey)) {
-    return parentDpCache.get(cacheKey)!;
+  if (caches.parentDpCache.has(cacheKey)) {
+    return caches.parentDpCache.get(cacheKey)!;
   }
 
   const parentContentType = strapi.contentTypes[
@@ -393,13 +398,13 @@ async function hasDraftPublishAncestorForParent(
   ] as any;
   if (parentContentType) {
     const result = !!parentContentType?.options?.draftAndPublish;
-    parentDpCache.set(cacheKey, result);
+    caches.parentDpCache.set(cacheKey, result);
     return result;
   }
 
   const parentComponent = strapi.components[parent.uid as keyof typeof strapi.components] as any;
   if (!parentComponent) {
-    parentDpCache.set(cacheKey, false);
+    caches.parentDpCache.set(cacheKey, false);
     return false;
   }
 
@@ -407,9 +412,11 @@ async function hasDraftPublishAncestorForParent(
     trx,
     identifiers,
     parent.uid,
-    parent.parentId
+    parent.parentId,
+    undefined,
+    caches
   );
-  parentDpCache.set(cacheKey, result);
+  caches.parentDpCache.set(cacheKey, result);
   return result;
 }
 
@@ -418,11 +425,12 @@ async function hasDraftPublishAncestorForComponent(
   identifiers: any,
   componentUid: string,
   componentId: number | string,
-  excludeUid?: string
+  excludeUid: string | undefined,
+  caches: ComponentHierarchyCaches
 ): Promise<boolean> {
   const cacheKey = `${componentUid}:${componentId}:${excludeUid ?? 'ALL'}`;
-  if (componentAncestorDpCache.has(cacheKey)) {
-    return componentAncestorDpCache.get(cacheKey)!;
+  if (caches.ancestorDpCache.has(cacheKey)) {
+    return caches.ancestorDpCache.get(cacheKey)!;
   }
 
   const parent = await findComponentParentInstance(
@@ -430,16 +438,17 @@ async function hasDraftPublishAncestorForComponent(
     identifiers,
     componentUid,
     componentId,
-    excludeUid
+    excludeUid,
+    caches
   );
 
   if (!parent) {
-    componentAncestorDpCache.set(cacheKey, false);
+    caches.ancestorDpCache.set(cacheKey, false);
     return false;
   }
 
-  const result = await hasDraftPublishAncestorForParent(trx, identifiers, parent);
-  componentAncestorDpCache.set(cacheKey, result);
+  const result = await hasDraftPublishAncestorForParent(trx, identifiers, parent, caches);
+  caches.ancestorDpCache.set(cacheKey, result);
   return result;
 }
 
@@ -1352,9 +1361,6 @@ async function copyComponentRelations({
   // Process in batches to avoid MySQL query size limits
   const publishedIdsChunks = chunkArray(publishedIds, 1000);
 
-  const componentCloneCache = new Map<string, Map<string, number>>();
-  const componentTargetDraftMapCache = new Map<string, Map<number, number> | null>();
-
   for (const publishedIdsChunk of publishedIdsChunks) {
     // Get component relations for published entries
     const componentRelations = await trx(joinTableName)
@@ -1364,6 +1370,14 @@ async function copyComponentRelations({
     if (componentRelations.length === 0) {
       continue;
     }
+
+    const componentCloneCache = new Map<string, Map<string, number>>();
+    const componentTargetDraftMapCache = new Map<string, Map<number, number> | null>();
+    const componentHierarchyCaches: ComponentHierarchyCaches = {
+      parentInstanceCache: new Map(),
+      ancestorDpCache: new Map(),
+      parentDpCache: new Map(),
+    };
 
     // Filter component relations: only propagate if component's parent in the component hierarchy doesn't have draft/publish
     // This matches discardDraft() behavior via shouldPropagateComponentRelationToNewVersion
@@ -1392,7 +1406,8 @@ async function copyComponentRelations({
           identifiers,
           componentSchema.uid,
           componentId,
-          uid
+          uid,
+          componentHierarchyCaches
         );
 
         if (!componentParent) {
@@ -1409,7 +1424,8 @@ async function copyComponentRelations({
         const hasDPParent = await hasDraftPublishAncestorForParent(
           trx,
           identifiers,
-          componentParent
+          componentParent,
+          componentHierarchyCaches
         );
 
         if (hasDPParent) {
