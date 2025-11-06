@@ -1,7 +1,7 @@
 import type { Core, Modules } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils/index';
+import { setupDatabaseReset } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findPublishedArticlesDb } from './utils';
 
@@ -27,8 +27,10 @@ describe('Document Service', () => {
     await destroyTestSetup(testUtils);
   });
 
+  setupDatabaseReset();
+
   describe('Unpublish', () => {
-    testInTransaction('Can unpublish all locales of a document', async () => {
+    it('Can unpublish all locales of a document', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       // Publish first all locales
@@ -42,7 +44,7 @@ describe('Document Service', () => {
       expect(publishedArticles.length).toBe(0);
     });
 
-    testInTransaction('unpublish single locale of document', async () => {
+    it('unpublish single locale of document', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       // Publish first all locales

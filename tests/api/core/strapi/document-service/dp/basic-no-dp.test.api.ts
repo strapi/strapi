@@ -1,5 +1,5 @@
 import type { Core, UID } from '@strapi/types';
-import { testInTransaction } from '../../../../utils';
+import { setupDatabaseReset } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -40,8 +40,10 @@ describe('Document Service relations', () => {
     await builder.cleanup();
   });
 
+  setupDatabaseReset();
+
   describe('Create', () => {
-    testInTransaction('Can create', async () => {
+    it('Can create', async () => {
       // Create a new shop and check publishedAt value is a date
       const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
@@ -55,14 +57,14 @@ describe('Document Service relations', () => {
       expect(databaseShops.length).toBe(1);
     });
 
-    testInTransaction('Can not set publishedAt to null', async () => {
+    it('Can not set publishedAt to null', async () => {
       // Setting publishedAt to null should be ignored
       const shop = await shopDocuments.create({ data: { name: 'Shop1', publishedAt: null } });
       expect(shop.publishedAt).toBeISODate();
     });
   });
 
-  testInTransaction('Can update', async () => {
+  it('Can update', async () => {
     // Update a shop and check publishedAt value is a date
     const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
@@ -76,7 +78,7 @@ describe('Document Service relations', () => {
     expect(updatedShop.publishedAt).toBeISODate();
   });
 
-  testInTransaction('Can delete', async () => {
+  it('Can delete', async () => {
     // Delete a shop and check there are no other references in db
     const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
@@ -87,7 +89,7 @@ describe('Document Service relations', () => {
     expect(databaseShops.length).toBe(0);
   });
 
-  testInTransaction('Can find one', async () => {
+  it('Can find one', async () => {
     // Find a shop and check publishedAt value is a date
     const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
@@ -97,7 +99,7 @@ describe('Document Service relations', () => {
     expect(foundShop.name).toBe('Shop1');
   });
 
-  testInTransaction('Can find many', async () => {
+  it('Can find many', async () => {
     // Find many shops and check publishedAt value is a date
     await shopDocuments.create({ data: { name: 'Shop1' } });
     await shopDocuments.create({ data: { name: 'Shop2' } });
@@ -110,7 +112,7 @@ describe('Document Service relations', () => {
     expect(foundShops[1].name).toBe('Shop2');
   });
 
-  testInTransaction('Can not call publication methods', async () => {
+  it('Can not call publication methods', async () => {
     // publish method should not even exist in strapi.documents(uid)
     expect(shopDocuments.publish).toBeUndefined();
     expect(shopDocuments.unpublish).toBeUndefined();

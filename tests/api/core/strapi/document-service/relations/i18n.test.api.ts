@@ -5,7 +5,7 @@
  * TODO: Test for every relation type
  */
 import type { Core } from '@strapi/types';
-import { testInTransaction } from '../../../../utils';
+import { setupDatabaseReset } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -136,16 +136,15 @@ describe('Document Service relations', () => {
   });
 
   afterAll(async () => {
-    // Delete all locales that have been created
-    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
-
     await strapi.destroy();
     await builder.cleanup();
   });
 
+  setupDatabaseReset();
+
   describe('Non i18n Content Type (Shop) -> i18n Content Type (Product)', () => {
     describe('X to One', () => {
-      testInTransaction.skip('Can connect multiple product locales to the same shop', async () => {
+      it.skip('Can connect multiple product locales to the same shop', async () => {
         const document = await strapi.documents(SHOP_UID).create({
           // If we can connect multiple locales, should we allow an array of relations to connect on xToOne relations?
           data: {
@@ -175,7 +174,7 @@ describe('Document Service relations', () => {
         });
       });
 
-      testInTransaction.skip('Connecting multiple documents should throw an error', async () => {
+      it.skip('Connecting multiple documents should throw an error', async () => {
         expect(
           strapi.documents(SHOP_UID).create({
             data: {
@@ -190,7 +189,7 @@ describe('Document Service relations', () => {
     });
 
     describe('X to Many', () => {
-      testInTransaction('Can connect to single locale', async () => {
+      it('Can connect to single locale', async () => {
         const document = await strapi.documents(SHOP_UID).create({
           data: {
             name: 'test',
@@ -210,7 +209,7 @@ describe('Document Service relations', () => {
         });
       });
 
-      testInTransaction('Can connect to multiple locales', async () => {
+      it('Can connect to multiple locales', async () => {
         const document = await strapi.documents(SHOP_UID).create({
           data: {
             name: 'test',
@@ -233,7 +232,7 @@ describe('Document Service relations', () => {
   });
 
   describe('i18n Content Type (Product) -> Non i18n Content Type (Tag)', () => {
-    testInTransaction('Can create a document with relations', async () => {
+    it('Can create a document with relations', async () => {
       const document = await strapi.documents(PRODUCT_UID).create({
         data: {
           name: 'Skate',

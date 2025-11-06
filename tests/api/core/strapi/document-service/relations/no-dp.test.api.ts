@@ -3,7 +3,7 @@
  */
 import type { Core, UID } from '@strapi/types';
 
-import { testInTransaction } from '../../../../utils';
+import { setupDatabaseReset } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -153,13 +153,15 @@ describe('Relations interactions with disabled DP content types', () => {
     await builder.cleanup();
   });
 
+  setupDatabaseReset();
+
   describe('Non DP (Shop) -> DP (Product)', () => {
     const xToOneRelations = ['products_ow', 'products_oo', 'products_mo'];
     const xToManyRelations = ['products_om', 'products_mm', 'products_mw'];
     const allRelations = [...xToOneRelations, ...xToManyRelations];
 
     describe('X to X relation', () => {
-      testInTransaction('Connect to both draft and publish versions if not specified', async () => {
+      it('Connect to both draft and publish versions if not specified', async () => {
         // Create and populate the published versions of the relations
         const shopPublished = await shopDocuments.create({
           data: {
@@ -204,7 +206,7 @@ describe('Relations interactions with disabled DP content types', () => {
         });
       });
 
-      testInTransaction('Publishing DP side should copy draft relation', async () => {
+      it('Publishing DP side should copy draft relation', async () => {
         // Create shop targeting a draft product
         const shop = await shopDocuments.create({
           data: {
@@ -257,7 +259,7 @@ describe('Relations interactions with disabled DP content types', () => {
       });
 
       // Fetch relations, should fetch the status
-      testInTransaction('Populate relations in a specific status', async () => {
+      it('Populate relations in a specific status', async () => {
         const shop = await shopDocuments.create({
           data: {
             products_mo: { documentId: 'Skate', locale: 'en', status: 'draft' },
@@ -292,7 +294,7 @@ describe('Relations interactions with disabled DP content types', () => {
     });
 
     describe('X to One relation', () => {
-      testInTransaction('Can consecutively connect to draft and published versions', async () => {
+      it('Can consecutively connect to draft and published versions', async () => {
         // XToOne relations are not connected with an array,
         // the only way to connect both draft and published versions
         // is to make two separate requests
@@ -349,7 +351,7 @@ describe('Relations interactions with disabled DP content types', () => {
     });
 
     describe('X to Many relation', () => {
-      testInTransaction('Can connect to draft and published versions at once', async () => {
+      it('Can connect to draft and published versions at once', async () => {
         const shop = await shopDocuments.create({
           data: {
             name: 'Shop1',
@@ -405,7 +407,7 @@ describe('Relations interactions with disabled DP content types', () => {
   describe('DP (Product) -> Non DP (Shop)', () => {
     describe('X to X relation', () => {
       // Can connect to a shop
-      testInTransaction('Can connect to a shop', async () => {
+      it('Can connect to a shop', async () => {
         const product = await productDocuments.create({
           data: {
             name: 'Skate',

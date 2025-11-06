@@ -1,7 +1,7 @@
 import type { Core, Modules } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils/index';
+import { setupDatabaseReset } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
 
@@ -23,8 +23,10 @@ describe('Document Service', () => {
     await destroyTestSetup(testUtils);
   });
 
+  setupDatabaseReset();
+
   describe('Publish', () => {
-    testInTransaction('Publishing keeps creator fields from the draft', async () => {
+    it('Publishing keeps creator fields from the draft', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       await publishArticle({ documentId: articleDb.documentId });
@@ -43,7 +45,7 @@ describe('Document Service', () => {
       expect(publishedArticle.updatedBy).toBeDefined();
     });
 
-    testInTransaction('Can publish all locales of a document', async () => {
+    it('Can publish all locales of a document', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       const result = await publishArticle({
@@ -72,39 +74,36 @@ describe('Document Service', () => {
       });
     });
 
-    testInTransaction(
-      'Publishing an already published document should discard the original document',
-      async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+    it('Publishing an already published document should discard the original document', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        // Publish twice should not create two new published versions,
-        // the second published version should replace the first one
-        await publishArticle({ documentId: articleDb.documentId });
-        await publishArticle({ documentId: articleDb.documentId });
+      // Publish twice should not create two new published versions,
+      // the second published version should replace the first one
+      await publishArticle({ documentId: articleDb.documentId });
+      await publishArticle({ documentId: articleDb.documentId });
 
-        const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
-          findArticlesDb({
-            documentId: articleDb.documentId,
-            locale: 'en',
-            publishedAt: { $null: true },
-          }),
-          findArticlesDb({
-            documentId: articleDb.documentId,
-            locale: 'en',
-            publishedAt: { $notNull: true },
-          }),
-        ]);
+      const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
+        findArticlesDb({
+          documentId: articleDb.documentId,
+          locale: 'en',
+          publishedAt: { $null: true },
+        }),
+        findArticlesDb({
+          documentId: articleDb.documentId,
+          locale: 'en',
+          publishedAt: { $notNull: true },
+        }),
+      ]);
 
-        // All locales should have been published
-        expect(draftArticlesDb.length).toBeGreaterThan(0);
-        expect(publishedArticlesDb.length).toBe(draftArticlesDb.length);
-        publishedArticlesDb.forEach((article) => {
-          expect(article.publishedAt).not.toBeNull();
-        });
-      }
-    );
+      // All locales should have been published
+      expect(draftArticlesDb.length).toBeGreaterThan(0);
+      expect(publishedArticlesDb.length).toBe(draftArticlesDb.length);
+      publishedArticlesDb.forEach((article) => {
+        expect(article.publishedAt).not.toBeNull();
+      });
+    });
 
-    testInTransaction('Should publish default locale if no locale is provided', async () => {
+    it('Should publish default locale if no locale is provided', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       const result = await strapi
@@ -132,7 +131,7 @@ describe('Document Service', () => {
       });
     });
 
-    testInTransaction('Can publish a single locale', async () => {
+    it('Can publish a single locale', async () => {
       const articlesDb = await findArticlesDb({ documentId: 'Article1', publishedAt: null });
       const documentId = articlesDb.at(0)!.documentId;
 
@@ -163,7 +162,7 @@ describe('Document Service', () => {
       expect(publishedArticlesDb[0].locale).toBe('en');
     });
 
-    testInTransaction('publish multiple locales of the same document', async () => {
+    it('publish multiple locales of the same document', async () => {
       const articlesDb = await findArticlesDb({ documentId: 'Article1', publishedAt: null });
       const documentId = articlesDb.at(0)!.documentId;
 

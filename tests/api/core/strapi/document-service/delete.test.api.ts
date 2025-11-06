@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils';
+import { setupDatabaseReset } from '../../../utils';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
 
@@ -18,8 +18,10 @@ describe('Document Service', () => {
     await destroyTestSetup(testUtils);
   });
 
+  setupDatabaseReset();
+
   describe('Delete', () => {
-    testInTransaction('Can delete an entire document', async () => {
+    it('Can delete an entire document', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
       await strapi.documents(ARTICLE_UID).delete({ documentId: articleDb.documentId, locale: '*' });
 
@@ -28,7 +30,7 @@ describe('Document Service', () => {
       expect(articles).toHaveLength(0);
     });
 
-    testInTransaction('Can delete a document with a component', async (trx: any) => {
+    it('Can delete a document with a component', async () => {
       const componentData = {
         comp: {
           text: 'comp-1',
@@ -66,19 +68,17 @@ describe('Document Service', () => {
       const comp = await strapi.db
         .getConnection(compTable)
         .where({ id: updatedArticle.comp.id })
-        .transacting(trx)
         .first();
       const dz = await strapi.db
         .getConnection(dzTable)
         .where({ id: updatedArticle.dz.at(0)!.id })
-        .transacting(trx)
         .first();
 
       expect(comp).toBeUndefined();
       expect(dz).toBeUndefined();
     });
 
-    testInTransaction('Can delete a single document locale', async () => {
+    it('Can delete a single document locale', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
       await strapi.documents(ARTICLE_UID).delete({
         documentId: articleDb.documentId,
@@ -94,7 +94,7 @@ describe('Document Service', () => {
       });
     });
 
-    testInTransaction('Status is ignored when deleting a document', async () => {
+    it('Status is ignored when deleting a document', async () => {
       const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
       await strapi.documents(ARTICLE_UID).delete({
         documentId: articleDb.documentId,
