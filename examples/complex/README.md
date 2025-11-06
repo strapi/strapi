@@ -265,8 +265,8 @@ These commands will:
 
 **Note:** The database containers use non-standard ports to avoid conflicts:
 
-- PostgreSQL: port `15432` (instead of standard 5432)
-- MariaDB: port `13306` (instead of standard 3306)
+- PostgreSQL: port `5432` (instead of standard 5432)
+- MariaDB: port `3306` (instead of standard 3306)
 
 ### Standard Strapi Commands
 
