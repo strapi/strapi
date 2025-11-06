@@ -30,6 +30,7 @@ import type { UID } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { createId } from '@paralleldrive/cuid2';
 import { contentTypes } from '@strapi/utils';
+import createDebug from 'debug';
 import {
   getComponentJoinTableName,
   getComponentJoinColumnEntityName,
@@ -224,6 +225,8 @@ const joinTableExistsCache = new Map<string, boolean>();
 const componentMetaCache = new Map<string, any>();
 
 const DUPLICATE_ERROR_CODES = new Set(['23505', 'ER_DUP_ENTRY', 'SQLITE_CONSTRAINT_UNIQUE']);
+
+const debug = createDebug('strapi::migration::discard-drafts');
 
 const normalizeId = (value: any): number | null => {
   if (value == null) {
@@ -616,7 +619,7 @@ async function cloneComponentRelationJoinTables(
     const targetColumnName = joinTable.inverseJoinColumn.name;
 
     if (!componentMeta.relationsLogPrinted) {
-      console.log(
+      debug(
         `[cloneComponentRelationJoinTables] Inspecting join table ${joinTable.name} for component ${componentUid}`
       );
       componentMeta.relationsLogPrinted = true;
@@ -645,12 +648,12 @@ async function cloneComponentRelationJoinTables(
           draftMapCache
         );
 
-        console.log(
+        debug(
           `[cloneComponentRelationJoinTables] ${componentUid} join ${joinTable.name}: mapped ${targetColumnName} from ${originalTargetId} to ${clonedRelation[targetColumnName]} (target=${attribute.target})`
         );
       }
 
-      console.log(
+      debug(
         `[cloneComponentRelationJoinTables] inserting relation into ${joinTable.name} (component=${componentUid}, source=${newComponentId})`
       );
 
@@ -1446,7 +1449,7 @@ async function copyComponentRelations({
         ] as any;
 
         if (!componentSchema) {
-          console.log(
+          debug(
             `[copyComponentRelations] ${uid}: Keeping relation - unknown component type ${componentType} (entity: ${entityId}, componentId: ${componentId})`
           );
           return relation;
@@ -1462,13 +1465,13 @@ async function copyComponentRelations({
         );
 
         if (!componentParent) {
-          console.log(
+          debug(
             `[copyComponentRelations] ${uid}: Keeping relation - component ${componentType} (id: ${componentId}) is directly on entity ${entityId} (no nested parent found)`
           );
           return relation;
         }
 
-        console.log(
+        debug(
           `[copyComponentRelations] ${uid}: Component ${componentType} (id: ${componentId}, entity: ${entityId}) has parent in hierarchy: ${componentParent.uid} (parentId: ${componentParent.parentId})`
         );
 
@@ -1480,13 +1483,13 @@ async function copyComponentRelations({
         );
 
         if (hasDPParent) {
-          console.log(
+          debug(
             `[copyComponentRelations] Filtering: component ${componentType} (id: ${componentId}, entity: ${entityId}) has DP parent in hierarchy (${componentParent.uid})`
           );
           return null;
         }
 
-        console.log(
+        debug(
           `[copyComponentRelations] ${uid}: Keeping relation - component ${componentType} (id: ${componentId}, entity: ${entityId}) has no DP parent in hierarchy`
         );
 
@@ -1501,7 +1504,7 @@ async function copyComponentRelations({
 
     const filteredCount = componentRelations.length - relationsToProcess.length;
     if (filteredCount > 0) {
-      console.log(
+      debug(
         `[copyComponentRelations] ${uid}: Filtered ${filteredCount} of ${componentRelations.length} component relations (removed ${filteredCount} with DP parents)`
       );
     }
@@ -1645,7 +1648,7 @@ async function copyComponentRelations({
           }
         }
         if (insertedCount > 0 || skippedCount > 0) {
-          console.log(
+          debug(
             `[copyComponentRelations] ${uid}: Inserted ${insertedCount} component relations, skipped ${skippedCount} duplicates`
           );
         }
@@ -1689,7 +1692,7 @@ async function copyComponentRelations({
  * And then copy relations directly using database queries.
  */
 const migrateUp = async (trx: Knex, db: Database) => {
-  console.log('[migrateUp] Starting discard-drafts migration');
+  strapi.log.info('[discard-drafts] Migration started');
   const dpModels = [];
   for (const meta of db.metadata.values()) {
     const hasDP = await hasDraftAndPublish(trx, meta);
@@ -1698,32 +1701,41 @@ const migrateUp = async (trx: Knex, db: Database) => {
     }
   }
 
-  console.log(`[migrateUp] Found ${dpModels.length} models with draft/publish`);
+  debug(`Found ${dpModels.length} draft/publish content types to process`);
 
   /**
    * Create plain draft entries for all the entries that were published.
    */
+  strapi.log.info('[discard-drafts] Stage 1/3 – cloning published entries into draft rows');
   for (const model of dpModels) {
+    debug(` • cloning scalars for ${model.uid}`);
     await copyPublishedEntriesToDraft({ db, trx, uid: model.uid });
   }
+  strapi.log.info('[discard-drafts] Stage 1/3 complete');
 
   /**
    * Copy relations from published entries to draft entries using direct database queries.
    * This is much more efficient than calling discardDraft for each entry.
    */
+  strapi.log.info('[discard-drafts] Stage 2/3 – copying relations and components to drafts');
   for (const model of dpModels) {
+    debug(` • copying relations for ${model.uid}`);
     await copyRelationsToDrafts({ db, trx, uid: model.uid });
   }
+  strapi.log.info('[discard-drafts] Stage 2/3 complete');
 
   /**
    * Update JoinColumn relations (foreign keys) to point to draft versions
    * This matches discard() behavior: drafts relate to drafts
    */
+  strapi.log.info('[discard-drafts] Stage 3/3 – updating foreign key references to draft targets');
   for (const model of dpModels) {
+    debug(` • updating join columns for ${model.uid}`);
     await updateJoinColumnRelations({ db, trx, uid: model.uid });
   }
+  strapi.log.info('[discard-drafts] Stage 3/3 complete');
 
-  console.log('[migrateUp] Migration completed');
+  strapi.log.info('[discard-drafts] Migration completed successfully');
 };
 
 /**
