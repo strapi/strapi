@@ -14,6 +14,7 @@
 /* eslint-disable no-continue */
 import type { UID } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
+import { createId } from '@paralleldrive/cuid2';
 import { contentTypes } from '@strapi/utils';
 import {
   getComponentJoinTableName,
@@ -173,6 +174,101 @@ const joinTableExistsCache = new Map<string, boolean>();
 const componentParentInstanceCache = new Map<string, ComponentParentInstance | null>();
 const componentAncestorDpCache = new Map<string, boolean>();
 const parentDpCache = new Map<string, boolean>();
+const componentMetaCache = new Map<string, any>();
+
+const DUPLICATE_ERROR_CODES = new Set(['23505', 'ER_DUP_ENTRY', 'SQLITE_CONSTRAINT_UNIQUE']);
+
+const resolveInsertedId = (insertResult: any): number | null => {
+  if (insertResult == null) {
+    return null;
+  }
+
+  if (typeof insertResult === 'number') {
+    return insertResult;
+  }
+
+  if (Array.isArray(insertResult)) {
+    if (insertResult.length === 0) {
+      return null;
+    }
+
+    const first = insertResult[0];
+    if (first == null) {
+      return null;
+    }
+
+    if (typeof first === 'number') {
+      return first;
+    }
+
+    if (typeof first === 'object') {
+      if ('id' in first) {
+        return Number(first.id);
+      }
+
+      const idKey = Object.keys(first).find((key) => key.toLowerCase() === 'id');
+      if (idKey) {
+        return Number((first as Record<string, any>)[idKey]);
+      }
+    }
+  }
+
+  if (typeof insertResult === 'object' && 'id' in insertResult) {
+    return Number(insertResult.id);
+  }
+
+  return null;
+};
+
+const isDuplicateEntryError = (error: any): boolean => {
+  if (!error) {
+    return false;
+  }
+
+  if (DUPLICATE_ERROR_CODES.has(error.code)) {
+    return true;
+  }
+
+  const message = typeof error.message === 'string' ? error.message : '';
+  return message.includes('duplicate key') || message.includes('UNIQUE constraint failed');
+};
+
+const insertRowWithDuplicateHandling = async (
+  trx: Knex,
+  tableName: string,
+  row: Record<string, any>,
+  context: Record<string, any> = {}
+) => {
+  try {
+    const client = trx.client.config.client;
+
+    if (
+      client === 'postgres' ||
+      client === 'pg' ||
+      client === 'sqlite3' ||
+      client === 'better-sqlite3'
+    ) {
+      await trx(tableName).insert(row).onConflict().ignore();
+      return;
+    }
+
+    if (client === 'mysql' || client === 'mysql2') {
+      await trx.raw(`INSERT IGNORE INTO ?? SET ?`, [tableName, row]);
+      return;
+    }
+
+    await trx(tableName).insert(row);
+  } catch (error: any) {
+    if (!isDuplicateEntryError(error)) {
+      const details = JSON.stringify(context);
+      const wrapped = new Error(
+        `Failed to insert row into ${tableName}: ${error.message} | context=${details}`
+      );
+      (wrapped as any).cause = error;
+      throw wrapped;
+    }
+  }
+};
 
 function listComponentParentSchemas(componentUid: string): ParentSchemaInfo[] {
   if (!componentParentSchemasCache.has(componentUid)) {
@@ -273,6 +369,15 @@ async function findComponentParentInstance(
   return null;
 }
 
+const getComponentMeta = (componentUid: string) => {
+  if (!componentMetaCache.has(componentUid)) {
+    const meta = strapi.db.metadata.get(componentUid);
+    componentMetaCache.set(componentUid, meta ?? null);
+  }
+
+  return componentMetaCache.get(componentUid);
+};
+
 async function hasDraftPublishAncestorForParent(
   trx: Knex,
   identifiers: any,
@@ -336,6 +441,263 @@ async function hasDraftPublishAncestorForComponent(
   const result = await hasDraftPublishAncestorForParent(trx, identifiers, parent);
   componentAncestorDpCache.set(cacheKey, result);
   return result;
+}
+
+const resolveNowValue = (trx: Knex) => {
+  if (typeof trx.fn?.now === 'function') {
+    return trx.fn.now();
+  }
+
+  return new Date();
+};
+
+async function getDraftMapForTarget(
+  trx: Knex,
+  targetUid: string,
+  draftMapCache: Map<string, Map<number, number> | null>
+): Promise<Map<number, number> | null> {
+  if (draftMapCache.has(targetUid)) {
+    return draftMapCache.get(targetUid) ?? null;
+  }
+
+  const targetMeta = strapi.db.metadata.get(targetUid);
+  if (!targetMeta) {
+    draftMapCache.set(targetUid, null);
+    return null;
+  }
+
+  const map = await buildPublishedToDraftMap({
+    trx,
+    uid: targetUid,
+    meta: targetMeta,
+    options: { requireDraftAndPublish: true },
+  });
+
+  draftMapCache.set(targetUid, map ?? null);
+  return map ?? null;
+}
+
+async function mapTargetId(
+  trx: Knex,
+  originalId: number | string | null,
+  targetUid: string | undefined,
+  parentUid: string,
+  parentPublishedToDraftMap: Map<number, number>,
+  draftMapCache: Map<string, Map<number, number> | null>
+) {
+  if (originalId == null || !targetUid) {
+    return originalId;
+  }
+
+  if (targetUid === parentUid) {
+    return parentPublishedToDraftMap.get(Number(originalId)) ?? originalId;
+  }
+
+  const targetMap = await getDraftMapForTarget(trx, targetUid, draftMapCache);
+  if (!targetMap) {
+    return originalId;
+  }
+
+  return targetMap.get(Number(originalId)) ?? originalId;
+}
+
+const ensureObjectWithoutId = (row: Record<string, any>) => {
+  const cloned = { ...row };
+  if ('id' in cloned) {
+    delete cloned.id;
+  }
+  return cloned;
+};
+
+async function cloneComponentRelationJoinTables(
+  trx: Knex,
+  componentMeta: any,
+  componentUid: string,
+  originalComponentId: number,
+  newComponentId: number,
+  parentUid: string,
+  parentPublishedToDraftMap: Map<number, number>,
+  draftMapCache: Map<string, Map<number, number> | null>
+) {
+  for (const attribute of Object.values(componentMeta.attributes) as any) {
+    if (attribute.type !== 'relation' || !attribute.joinTable) {
+      continue;
+    }
+
+    const joinTable = attribute.joinTable;
+    const sourceColumnName = joinTable.joinColumn.name;
+    const targetColumnName = joinTable.inverseJoinColumn.name;
+
+    if (!componentMeta.relationsLogPrinted) {
+      console.log(
+        `[cloneComponentRelationJoinTables] Inspecting join table ${joinTable.name} for component ${componentUid}`
+      );
+      componentMeta.relationsLogPrinted = true;
+    }
+
+    const relations = await trx(joinTable.name)
+      .select('*')
+      .where(sourceColumnName, originalComponentId);
+
+    if (relations.length === 0) {
+      continue;
+    }
+
+    for (const relation of relations) {
+      const clonedRelation = ensureObjectWithoutId(relation);
+      clonedRelation[sourceColumnName] = newComponentId;
+
+      if (targetColumnName in clonedRelation) {
+        const originalTargetId = clonedRelation[targetColumnName];
+        clonedRelation[targetColumnName] = await mapTargetId(
+          trx,
+          clonedRelation[targetColumnName],
+          attribute.target,
+          parentUid,
+          parentPublishedToDraftMap,
+          draftMapCache
+        );
+
+        console.log(
+          `[cloneComponentRelationJoinTables] ${componentUid} join ${joinTable.name}: mapped ${targetColumnName} from ${originalTargetId} to ${clonedRelation[targetColumnName]} (target=${attribute.target})`
+        );
+      }
+
+      console.log(
+        `[cloneComponentRelationJoinTables] inserting relation into ${joinTable.name} (component=${componentUid}, source=${newComponentId})`
+      );
+
+      await insertRowWithDuplicateHandling(trx, joinTable.name, clonedRelation, {
+        componentUid,
+        originalComponentId,
+        newComponentId,
+        joinTable: joinTable.name,
+        sourceColumnName,
+        targetColumnName,
+        targetUid: attribute.target,
+        parentUid,
+      });
+    }
+  }
+}
+
+async function cloneComponentInstance({
+  trx,
+  componentUid,
+  componentId,
+  parentUid,
+  parentPublishedToDraftMap,
+  draftMapCache,
+}: {
+  trx: Knex;
+  componentUid: string;
+  componentId: number;
+  parentUid: string;
+  parentPublishedToDraftMap: Map<number, number>;
+  draftMapCache: Map<string, Map<number, number> | null>;
+}): Promise<number> {
+  const componentMeta = getComponentMeta(componentUid);
+  if (!componentMeta) {
+    return componentId;
+  }
+
+  const componentTableName = componentMeta.tableName;
+  const componentPrimaryKey = Number.isNaN(Number(componentId)) ? componentId : Number(componentId);
+  const componentRow = await trx(componentTableName)
+    .select('*')
+    .where('id', componentPrimaryKey)
+    .first();
+
+  if (!componentRow) {
+    return componentId;
+  }
+
+  const newComponentRow: Record<string, any> = ensureObjectWithoutId(componentRow);
+
+  if ('document_id' in newComponentRow) {
+    newComponentRow.document_id = createId();
+  }
+
+  if ('updated_at' in newComponentRow) {
+    newComponentRow.updated_at = resolveNowValue(trx);
+  }
+
+  if ('created_at' in newComponentRow && newComponentRow.created_at == null) {
+    newComponentRow.created_at = resolveNowValue(trx);
+  }
+
+  for (const attribute of Object.values(componentMeta.attributes) as any) {
+    if (attribute.type !== 'relation') {
+      continue;
+    }
+
+    const joinColumn = attribute.joinColumn;
+    if (!joinColumn) {
+      continue;
+    }
+
+    const columnName = joinColumn.name;
+    if (!columnName || !(columnName in newComponentRow)) {
+      continue;
+    }
+
+    newComponentRow[columnName] = await mapTargetId(
+      trx,
+      newComponentRow[columnName],
+      attribute.target,
+      parentUid,
+      parentPublishedToDraftMap,
+      draftMapCache
+    );
+  }
+
+  let insertResult;
+  try {
+    insertResult = await trx(componentTableName).insert(newComponentRow, ['id']);
+  } catch (error: any) {
+    insertResult = await trx(componentTableName).insert(newComponentRow);
+  }
+
+  let newComponentId = resolveInsertedId(insertResult);
+
+  if (!newComponentId) {
+    if ('document_id' in newComponentRow && newComponentRow.document_id) {
+      const insertedRow = await trx(componentTableName)
+        .select('id')
+        .where('document_id', newComponentRow.document_id)
+        .orderBy('id', 'desc')
+        .first();
+      newComponentId = insertedRow?.id ?? null;
+    }
+
+    if (!newComponentId) {
+      const insertedRow = await trx(componentTableName).select('id').orderBy('id', 'desc').first();
+      newComponentId = insertedRow?.id ?? null;
+    }
+  }
+
+  if (!newComponentId) {
+    throw new Error(`Failed to clone component ${componentUid} (id: ${componentId})`);
+  }
+
+  newComponentId = Number(newComponentId);
+
+  if (Number.isNaN(newComponentId)) {
+    throw new Error(`Invalid cloned component identifier for ${componentUid} (id: ${componentId})`);
+  }
+
+  await cloneComponentRelationJoinTables(
+    trx,
+    componentMeta,
+    componentUid,
+    Number(componentPrimaryKey),
+    newComponentId,
+    parentUid,
+    parentPublishedToDraftMap,
+    draftMapCache
+  );
+
+  return newComponentId;
 }
 
 type DraftMapOptions = {
@@ -990,6 +1352,9 @@ async function copyComponentRelations({
   // Process in batches to avoid MySQL query size limits
   const publishedIdsChunks = chunkArray(publishedIds, 1000);
 
+  const componentCloneCache = new Map<string, Map<string, number>>();
+  const componentTargetDraftMapCache = new Map<string, Map<number, number> | null>();
+
   for (const publishedIdsChunk of publishedIdsChunks) {
     // Get component relations for published entries
     const componentRelations = await trx(joinTableName)
@@ -1076,22 +1441,49 @@ async function copyComponentRelations({
 
     // Create new component relations for draft entries
     // Remove the 'id' field to avoid duplicate key errors
-    const mappedRelations = relationsToProcess
-      .map((relation) => {
-        const newEntityId = publishedToDraftMap.get(relation[entityIdColumn]);
+    const mappedRelations = (
+      await Promise.all(
+        relationsToProcess.map(async (relation) => {
+          const newEntityId = publishedToDraftMap.get(relation[entityIdColumn]);
 
-        if (!newEntityId) {
-          return null;
-        }
+          if (!newEntityId) {
+            return null;
+          }
 
-        // Create new component relation object without the 'id' field
-        const { id, ...relationWithoutId } = relation;
-        return {
-          ...relationWithoutId,
-          [entityIdColumn]: newEntityId,
-        };
-      })
-      .filter(Boolean) as Array<Record<string, any>>;
+          const componentId = relation[componentIdColumn];
+          const componentType = relation[componentTypeColumn];
+          const componentKey = `${componentId}:${newEntityId}`;
+
+          let cloneMap = componentCloneCache.get(componentType);
+          if (!cloneMap) {
+            cloneMap = new Map();
+            componentCloneCache.set(componentType, cloneMap);
+          }
+
+          let newComponentId = cloneMap.get(componentKey);
+
+          if (!newComponentId) {
+            newComponentId = await cloneComponentInstance({
+              trx,
+              componentUid: componentType,
+              componentId: Number(componentId),
+              parentUid: uid,
+              parentPublishedToDraftMap: publishedToDraftMap,
+              draftMapCache: componentTargetDraftMapCache,
+            });
+
+            cloneMap.set(componentKey, newComponentId);
+          }
+
+          const { id, ...relationWithoutId } = relation;
+          return {
+            ...relationWithoutId,
+            [entityIdColumn]: newEntityId,
+            [componentIdColumn]: newComponentId,
+          };
+        })
+      )
+    ).filter(Boolean) as Array<Record<string, any>>;
 
     // Deduplicate relations based on the unique constraint columns
     // This prevents duplicates within the same batch that could cause conflicts

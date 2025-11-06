@@ -2180,10 +2180,7 @@ async function validateComponentRelationTargets(strapi) {
           },
         },
         sections: {
-          populate: {
-            relatedBasicDp: { fields: ['id', 'documentId', 'publishedAt'] },
-            relatedRelationDp: { fields: ['id', 'documentId', 'publishedAt'] },
-          },
+          populate: '*',
         },
       },
       publicationState: 'preview',
