@@ -6,7 +6,7 @@ import type { Core } from '@strapi/types';
 import { createTestSetup, destroyTestSetup } from '../../../../utils/builder-helper';
 import resources from '../resources/index';
 import { ARTICLE_UID, CATEGORY_UID } from '../utils';
-import { setupDatabaseReset } from '../../../../utils';
+import { testInTransaction } from '../../../../utils';
 
 describe('Document Service relations', () => {
   let testUtils;
@@ -21,10 +21,8 @@ describe('Document Service relations', () => {
     await destroyTestSetup(testUtils);
   });
 
-  setupDatabaseReset();
-
   describe('Create', () => {
-    it('Can create a document with relations', async () => {
+    testInTransaction('Can create a document with relations', async () => {
       const article = await strapi.documents(ARTICLE_UID).create({
         data: {
           title: 'Article with author',
@@ -41,7 +39,7 @@ describe('Document Service relations', () => {
 
   // TODO
   describe.skip('Update', () => {
-    it('Can update a document with relations', async () => {
+    testInTransaction('Can update a document with relations', async () => {
       const article = await strapi.documents(ARTICLE_UID).update({
         documentId: 'Article1',
         locale: 'en',
@@ -59,75 +57,84 @@ describe('Document Service relations', () => {
   });
 
   describe('Publish', () => {
-    it('Publishing filters relations that do not have a published targeted document', async () => {
-      const article = await strapi.documents(ARTICLE_UID).create({
-        data: { title: 'Article with author', categories: ['Cat1'] },
-        populate: { categories: true },
-      });
+    testInTransaction(
+      'Publishing filters relations that do not have a published targeted document',
+      async () => {
+        const article = await strapi.documents(ARTICLE_UID).create({
+          data: { title: 'Article with author', categories: ['Cat1'] },
+          populate: { categories: true },
+        });
 
-      const publishedArticles = await strapi.documents(ARTICLE_UID).publish({
-        documentId: article.documentId,
-        populate: { categories: true },
-      });
-      const publishedArticle = publishedArticles.entries[0];
+        const publishedArticles = await strapi.documents(ARTICLE_UID).publish({
+          documentId: article.documentId,
+          populate: { categories: true },
+        });
+        const publishedArticle = publishedArticles.entries[0];
 
-      expect(publishedArticles.entries.length).toBe(1);
-      // Cat1 does not have a published document
-      expect(publishedArticle.categories.length).toBe(0);
-    });
+        expect(publishedArticles.entries.length).toBe(1);
+        // Cat1 does not have a published document
+        expect(publishedArticle.categories.length).toBe(0);
+      }
+    );
 
-    it('Publishing connects relation to the published targeted documents', async () => {
-      const article = await strapi.documents(ARTICLE_UID).create({
-        data: { title: 'Article with author', categories: ['Cat1'] },
-        populate: { categories: true },
-      });
+    testInTransaction(
+      'Publishing connects relation to the published targeted documents',
+      async () => {
+        const article = await strapi.documents(ARTICLE_UID).create({
+          data: { title: 'Article with author', categories: ['Cat1'] },
+          populate: { categories: true },
+        });
 
-      // Publish connected category
-      await strapi.documents(CATEGORY_UID).publish({ documentId: 'Cat1', locale: 'en' });
+        // Publish connected category
+        await strapi.documents(CATEGORY_UID).publish({ documentId: 'Cat1', locale: 'en' });
 
-      const publishedArticles = await strapi.documents(ARTICLE_UID).publish({
-        documentId: article.documentId,
-        locale: article.locale,
-        populate: { categories: true },
-      });
-      const publishedArticle = publishedArticles.entries[0];
+        const publishedArticles = await strapi.documents(ARTICLE_UID).publish({
+          documentId: article.documentId,
+          locale: article.locale,
+          populate: { categories: true },
+        });
+        const publishedArticle = publishedArticles.entries[0];
 
-      expect(publishedArticles.entries.length).toBe(1);
-      // Cat1 has a published document
-      expect(publishedArticle.categories.length).toBe(1);
-      expect(publishedArticle.categories[0].documentId).toBe('Cat1');
-    });
+        expect(publishedArticles.entries.length).toBe(1);
+        // Cat1 has a published document
+        expect(publishedArticle.categories.length).toBe(1);
+        expect(publishedArticle.categories[0].documentId).toBe('Cat1');
+      }
+    );
   });
 
   describe('Discard', () => {
-    it('Discarding draft brings back relations from the published version', async () => {
-      // Create article in draft with a relation
-      const draftArticle = await strapi.documents(ARTICLE_UID).create({
-        data: { title: 'Article with author', categories: ['Cat1'] },
-      });
+    testInTransaction(
+      'Discarding draft brings back relations from the published version',
+      async () => {
+        // Create article in draft with a relation
+        const draftArticle = await strapi.documents(ARTICLE_UID).create({
+          data: { title: 'Article with author', categories: ['Cat1'] },
+        });
 
-      const id = draftArticle.documentId;
+        const id = draftArticle.documentId;
 
-      // Publish documents
-      await strapi.documents(CATEGORY_UID).publish({ documentId: 'Cat1' });
-      await strapi.documents(ARTICLE_UID).publish({ documentId: id });
+        // Publish documents
+        await strapi.documents(CATEGORY_UID).publish({ documentId: 'Cat1' });
+        await strapi.documents(ARTICLE_UID).publish({ documentId: id });
 
-      // Update the draft article
-      await strapi.documents(ARTICLE_UID).update({
-        documentId: id,
-        data: { title: 'Updated Article with author', categories: [] },
-      });
+        // Update the draft article
+        await strapi.documents(ARTICLE_UID).update({
+          documentId: id,
+          data: { title: 'Updated Article with author', categories: [] },
+        });
 
-      // Discard the draft
-      const newDraftArticles = await strapi
-        .documents(ARTICLE_UID)
-        .discardDraft({ documentId: id, populate: ['categories'] });
+        // Discard the draft
+        const newDraftArticles = await strapi
+          .documents(ARTICLE_UID)
+          .discardDraft({ documentId: id, populate: ['categories'] });
 
-      // Validate the draft is discarded
-      const newDraftArticle = newDraftArticles.entries[0];
+        // Validate the draft is discarded
+        const newDraftArticle = newDraftArticles.entries[0];
 
-      expect(newDraftArticle.title).toBe('Article with author');
-      expect(newDraftArticle.categories.length).toBe(1);
-    });
+        expect(newDraftArticle.title).toBe('Article with author');
+        expect(newDraftArticle.categories.length).toBe(1);
+      }
+    );
   });
 });

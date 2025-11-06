@@ -5,7 +5,7 @@
  * This is only the case with unidirectional relations, but not bidirectional relations.
  */
 import type { Core } from '@strapi/types';
-import { setupDatabaseReset } from '../../../../utils';
+import { testInTransaction } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -157,9 +157,7 @@ describe('Document Service unidirectional relations', () => {
     await builder.cleanup();
   });
 
-  setupDatabaseReset();
-
-  it('Sync unidirectional relations on publish', async () => {
+  testInTransaction('Sync unidirectional relations on publish', async () => {
     // Publish tag. Product1 relations should target the new published tags id
     const tag1 = await strapi.documents(TAG_UID).publish({ documentId: 'Tag1' });
     const tag1Id = tag1.entries[0].id;
@@ -178,7 +176,7 @@ describe('Document Service unidirectional relations', () => {
     });
   });
 
-  it('Sync unidirectional relations on discard', async () => {
+  testInTransaction('Sync unidirectional relations on discard', async () => {
     // Discard tag. Product1 relations should target the new draft tags id
     await strapi.documents(TAG_UID).publish({ documentId: 'Tag1' });
     const tag1 = await strapi.documents(TAG_UID).discardDraft({ documentId: 'Tag1' });

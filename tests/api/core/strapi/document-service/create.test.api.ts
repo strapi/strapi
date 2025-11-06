@@ -1,7 +1,7 @@
 import type { Core, Modules } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { setupDatabaseReset } from '../../../utils/index';
+import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticlesDb, AUTHOR_UID } from './utils';
 
@@ -27,10 +27,8 @@ describe('Document Service', () => {
     await destroyTestSetup(testUtils);
   });
 
-  setupDatabaseReset();
-
   describe('Create', () => {
-    it('Can create a draft document', async () => {
+    testInTransaction('Can create a draft document', async () => {
       const data = {
         title: 'Article',
         comp: {
@@ -58,7 +56,7 @@ describe('Document Service', () => {
       expect(articles).toHaveLength(1);
     });
 
-    it('Can create an article in dutch', async () => {
+    testInTransaction('Can create an article in dutch', async () => {
       const article = await createArticle({
         locale: 'nl',
         data: { title: 'Article' },
@@ -72,7 +70,7 @@ describe('Document Service', () => {
       });
     });
 
-    it('Can draft and publish', async () => {
+    testInTransaction('Can draft and publish', async () => {
       const article = await createArticle({
         data: { title: 'Article' },
         status: 'published',
@@ -84,7 +82,7 @@ describe('Document Service', () => {
       });
     });
 
-    it('publishedAt attribute is ignored when creating document', async () => {
+    testInTransaction('publishedAt attribute is ignored when creating document', async () => {
       const article = await createArticle({
         data: { title: 'Article', publishedAt: new Date() },
       });
@@ -95,7 +93,7 @@ describe('Document Service', () => {
       });
     });
 
-    it('ignores locale parameter on non-localized content type', async () => {
+    testInTransaction('ignores locale parameter on non-localized content type', async () => {
       const author = await createAuthor({
         // Should be ignored on non-localized content types
         locale: 'nl',

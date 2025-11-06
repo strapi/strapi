@@ -3,7 +3,7 @@
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
 const { createAuthRequest } = require('api-tests/request');
-const { setupDatabaseReset } = require('../../../utils');
+const { testInTransaction } = require('../../../utils');
 
 const builder = createTestBuilder();
 let strapi;
@@ -147,9 +147,7 @@ describe('CM API - Document metadata', () => {
     await builder.cleanup();
   });
 
-  setupDatabaseReset();
-
-  it('Returns empty metadata when there is only a draft', async () => {
+  testInTransaction('Returns empty metadata when there is only a draft', async () => {
     const identifier = 'product-empty-metadata';
     const { documentId } = await createProduct(identifier, 'en', 'draft');
 
@@ -161,7 +159,7 @@ describe('CM API - Document metadata', () => {
     expect(meta.availableStatus).toEqual([]);
   });
 
-  it('Returns availableStatus when draft has a published version', async () => {
+  testInTransaction('Returns availableStatus when draft has a published version', async () => {
     const identifier = 'product-available-status';
 
     const draftProduct = await createProduct(identifier, 'en', 'draft');
@@ -186,31 +184,34 @@ describe('CM API - Document metadata', () => {
     ]);
   });
 
-  it('Returns availableStatus when published version has a draft version', async () => {
-    const identifier = 'product-available-status-published';
-    const draftProduct = await createProduct(identifier, 'en', 'draft');
-    const publishedProduct = (await strapi.documents(PRODUCT_UID).publish(draftProduct)).entries.at(
-      0
-    );
+  testInTransaction(
+    'Returns availableStatus when published version has a draft version',
+    async () => {
+      const identifier = 'product-available-status-published';
+      const draftProduct = await createProduct(identifier, 'en', 'draft');
+      const publishedProduct = (
+        await strapi.documents(PRODUCT_UID).publish(draftProduct)
+      ).entries.at(0);
 
-    const { meta } = await formatDocument(PRODUCT_UID, publishedProduct, {});
+      const { meta } = await formatDocument(PRODUCT_UID, publishedProduct, {});
 
-    expect(meta.availableLocales).toEqual([]);
-    expect(meta.availableStatus).toMatchObject([
-      {
-        locale: 'en',
-        publishedAt: null,
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-        createdBy: expect.any(Object),
-        updatedBy: expect.any(Object),
-        // TODO
-        // status: 'published',
-      },
-    ]);
-  });
+      expect(meta.availableLocales).toEqual([]);
+      expect(meta.availableStatus).toMatchObject([
+        {
+          locale: 'en',
+          publishedAt: null,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+          createdBy: expect.any(Object),
+          updatedBy: expect.any(Object),
+          // TODO
+          // status: 'published',
+        },
+      ]);
+    }
+  );
 
-  it('Returns available locales when there are multiple locales', async () => {
+  testInTransaction('Returns available locales when there are multiple locales', async () => {
     const identifier = 'product-available-locales';
     const defaultLocaleDocument = await createProduct(identifier, 'en', 'draft');
 
@@ -230,32 +231,35 @@ describe('CM API - Document metadata', () => {
     expect(meta.availableStatus).toEqual([]);
   });
 
-  it('Returns modified status when draft is different from published version', async () => {
-    // Published versions should have different dates
-    // We use the DB query layer here so we have control over the dates
-    const documentId = 'product-modified-status';
-    await createProductQuery(documentId, 'en', 'draft');
-    await createProductQuery(documentId, 'en', 'published', { updatedAt: '2024-02-11' });
-    await createProductQuery(documentId, 'fr', 'draft');
-    await createProductQuery(documentId, 'fr', 'published', { updatedAt: '2024-02-11' });
+  testInTransaction(
+    'Returns modified status when draft is different from published version',
+    async () => {
+      // Published versions should have different dates
+      // We use the DB query layer here so we have control over the dates
+      const documentId = 'product-modified-status';
+      await createProductQuery(documentId, 'en', 'draft');
+      await createProductQuery(documentId, 'en', 'published', { updatedAt: '2024-02-11' });
+      await createProductQuery(documentId, 'fr', 'draft');
+      await createProductQuery(documentId, 'fr', 'published', { updatedAt: '2024-02-11' });
 
-    const draftProduct = await getProduct(documentId, 'en', 'draft');
-    const { data, meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
+      const draftProduct = await getProduct(documentId, 'en', 'draft');
+      const { data, meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
 
-    expect(data.status).toBe('modified');
-    expect(meta.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
-    // expect(meta.availableStatus).toMatchObject([{ status: 'modified' }]);
+      expect(data.status).toBe('modified');
+      expect(meta.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
+      // expect(meta.availableStatus).toMatchObject([{ status: 'modified' }]);
 
-    const publishedProduct = await getProduct(documentId, 'en', 'published');
-    const { data: dataPublished, meta: metaPublished } = await formatDocument(
-      PRODUCT_UID,
-      publishedProduct,
-      {}
-    );
+      const publishedProduct = await getProduct(documentId, 'en', 'published');
+      const { data: dataPublished, meta: metaPublished } = await formatDocument(
+        PRODUCT_UID,
+        publishedProduct,
+        {}
+      );
 
-    expect(dataPublished.status).toBe('modified');
-    expect(metaPublished.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
-  });
+      expect(dataPublished.status).toBe('modified');
+      expect(metaPublished.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
+    }
+  );
 
   test('Return available locales, including any fields that require validation', async () => {
     // Create products with different locales with content for every kind of

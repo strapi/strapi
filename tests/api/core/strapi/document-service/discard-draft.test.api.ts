@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { setupDatabaseReset } from '../../../utils/index';
+import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
 
@@ -17,8 +17,6 @@ describe('Document Service', () => {
   afterAll(async () => {
     await destroyTestSetup(testUtils);
   });
-
-  setupDatabaseReset();
 
   describe('Discard Draft', () => {
     let documentId: string;
@@ -45,7 +43,7 @@ describe('Document Service', () => {
       );
     });
 
-    it('Can discard all locales of a draft', async () => {
+    testInTransaction('Discard all locale drafts of a document', async () => {
       // Discard drafts
       const result = await strapi.documents(ARTICLE_UID).discardDraft({ documentId, locale: '*' });
 
@@ -70,7 +68,7 @@ describe('Document Service', () => {
       });
     });
 
-    it('Can discard a single locale of a document', async () => {
+    testInTransaction('Discard a single locale of a document', async () => {
       // Discard english draft
       const result = await strapi.documents(ARTICLE_UID).discardDraft({ documentId, locale: 'en' });
 
@@ -98,7 +96,7 @@ describe('Document Service', () => {
       });
     });
 
-    it('Discard multiple locales of a document', async () => {
+    testInTransaction('Discard multiple locales of a document', async () => {
       // Discard 'en' and 'nl' drafts
       const localesToDiscard = ['en', 'nl'];
       const result = await strapi

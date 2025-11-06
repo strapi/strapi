@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { setupDatabaseReset } from '../../../utils';
+import { testInTransaction } from '../../../utils';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
 
@@ -18,10 +18,8 @@ describe('Document Service', () => {
     await destroyTestSetup(testUtils);
   });
 
-  setupDatabaseReset();
-
   describe('clone', () => {
-    it('clone a document locale', async () => {
+    testInTransaction('clone a document locale', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       const result = await strapi.documents(ARTICLE_UID).clone({
@@ -50,7 +48,7 @@ describe('Document Service', () => {
       expect(originalArticleDb).toMatchObject(articleDb);
     });
 
-    it('clone all document locales ', async () => {
+    testInTransaction('clone all document locales ', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       const result = await strapi.documents(ARTICLE_UID).clone({
@@ -79,7 +77,7 @@ describe('Document Service', () => {
       });
     });
 
-    it('clone a document with components', async () => {
+    testInTransaction('clone a document with components', async () => {
       const articlesDb = await findArticlesDb({ documentId: 'Article1' });
       const documentId = articlesDb.at(0)!.documentId;
 
@@ -114,10 +112,10 @@ describe('Document Service', () => {
       });
     });
 
-    it.todo('clone a document with media');
-    it.todo('clone a document with relations');
+    testInTransaction.todo('clone a document with media');
+    testInTransaction.todo('clone a document with relations');
 
-    it('clone non existing document', async () => {
+    testInTransaction('clone non existing document', async () => {
       const resultPromise = await strapi.documents(ARTICLE_UID).clone({
         documentId: '1234',
         data: {

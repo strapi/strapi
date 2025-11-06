@@ -15,8 +15,6 @@ async function captureInitialTestData() {
 
   initialTestData = {};
 
-  const dbClient = strapi.db.connection.client.config.client;
-
   // Use Strapi's built-in dialect system to get table names
   allTableNames = await strapi.db.dialect.schemaInspector.getTables();
 
@@ -35,6 +33,9 @@ async function captureInitialTestData() {
 
 /**
  * Reset all database tables to their initial state
+ *
+ * NOTE:
+ * Only use sparingly where needed as the operation is slower than testInTransaction
  */
 async function resetTestDatabase() {
   // Use Strapi's built-in schema update mechanism to disable constraints (e.g. foreign key constraints)
@@ -83,16 +84,37 @@ export function setupDatabaseReset() {
 }
 
 /* -------------------------------------------------------------------------------------------------
- * Legacy transaction wrapper
+ * testInTransaction
  * -----------------------------------------------------------------------------------------------*/
 
 export const wrapInTransaction = (test) => {
-  console.warn('wrapInTransaction is deprecated. Use setupDatabaseReset() instead.');
-  return test;
+  return async (...args) => {
+    await strapi.db.transaction(async ({ trx, rollback }) => {
+      await test(trx, ...args);
+      await rollback();
+    });
+  };
 };
 
-// Keep old interface for backward compatibility but log deprecation
+/**
+ * Resets the database by leveragin a transaction rollback
+ *
+ * NOTE:
+ * Alternatively, use setupDatabaseReset() which is slower but avoids errors thrown by asnyc operations
+ * executed after the test's transaction context has closed.
+ */
 export const testInTransaction = (...args: Parameters<jest.It>) => {
-  console.warn('testInTransaction is deprecated. Use setupDatabaseReset() instead.');
+  if (args.length > 1) {
+    return it(
+      args[0], // name
+      wrapInTransaction(args[1]), // fn
+      args[2] // timeout
+    );
+  }
   return it(...args);
 };
+
+testInTransaction.skip = it.skip as jest.It['skip'];
+testInTransaction.only = it.only as jest.It['only'];
+testInTransaction.todo = it.todo as jest.It['todo'];
+testInTransaction.each = it.each as jest.It['each'];
