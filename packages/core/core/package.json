@@ -72,7 +72,6 @@
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
     "configstore": "5.0.1",
-    "copyfiles": "2.4.1",
     "debug": "4.3.4",
     "delegates": "1.0.0",
     "dotenv": "16.4.5",
