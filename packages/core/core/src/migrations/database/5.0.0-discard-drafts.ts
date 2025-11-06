@@ -1,14 +1,28 @@
 /**
- * This migration is responsible for creating the draft counterpart for all the entries that were in a published state.
+ * Migration overview
+ * ===================
+ * 1. Create bare draft rows for every published entry, cloning only scalar fields (no relations/components yet).
+ *    We do this with a single INSERT … SELECT per content type to avoid touching the document service for every single v4 entry.
  *
- * In v4, entries could either be in a draft or published state, but not both at the same time.
- * In v5, we introduced the concept of document, and an entry can be in a draft or published state.
+ * 2. Rewire all relations so the newly created drafts behave exactly like calling `documentService.discardDraft()`
+ *    on every published entry:
+ *      - Join-table relations (self, manyToMany, etc.) are copied in bulk.
+ *      - Foreign keys (joinColumn relations) are updated so draft rows point to draft targets.
+ *      - Component relations are copied while respecting the discard logic: each draft gets its own component instance,
+ *        and the component’s relations (including nested components) are remapped to draft targets.
  *
- * This means the migration needs to create the draft counterpart if an entry was published.
+ * 3. Components are duplicated at the database layer (new component rows + join-table rows). We deliberately clone
+ *    instead of sharing component IDs so that draft edits don’t mutate published data.
  *
- * This migration performs the following steps:
- * 1. Creates draft entries for all published entries, without it's components, dynamic zones or relations.
- * 2. Copies relations from published entries to draft entries using direct database queries for efficiency.
+ * Why we do it this way
+ * ----------------------
+ * • Efficiency: calling the document service per entry would issue several queries per relation/component. The SQL
+ *   batches mirror the service’s behavior but execute in O(content types × batches), so the migration scales to
+ *   millions of entries.
+
+ * • Memory safety: any caches that track per-record information (component parent lookups, clone maps) are scoped to
+ *   a single batch of 1,000 entries. Schema-level caches (component metadata, join table names) remain global because
+ *   they’re tiny and reused.
  */
 
 /* eslint-disable no-continue */
