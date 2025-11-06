@@ -180,6 +180,42 @@ function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   return chunks;
 }
 
+const applyJoinTableOrdering = (qb: any, joinTable: any, sourceColumnName: string) => {
+  const seenColumns = new Set<string>();
+
+  const enqueueColumn = (column?: string, direction: 'asc' | 'desc' = 'asc') => {
+    if (!column || seenColumns.has(column)) {
+      return;
+    }
+
+    seenColumns.add(column);
+    qb.orderBy(column, direction);
+  };
+
+  enqueueColumn(sourceColumnName, 'asc');
+
+  if (Array.isArray(joinTable?.orderBy)) {
+    for (const clause of joinTable.orderBy) {
+      if (!clause || typeof clause !== 'object') {
+        continue;
+      }
+
+      const [column, direction] = Object.entries(clause)[0] ?? [];
+      if (!column) {
+        continue;
+      }
+
+      const normalizedDirection =
+        typeof direction === 'string' && direction.toLowerCase() === 'desc' ? 'desc' : 'asc';
+      enqueueColumn(column, normalizedDirection as 'asc' | 'desc');
+    }
+  }
+
+  enqueueColumn(joinTable?.orderColumnName, 'asc');
+  enqueueColumn(joinTable?.orderColumn, 'asc');
+  enqueueColumn('id', 'asc');
+};
+
 type ParentSchemaInfo = { uid: string; collectionName?: string };
 type ComponentParentInstance = { uid: string; parentId: number | string };
 
@@ -188,6 +224,34 @@ const joinTableExistsCache = new Map<string, boolean>();
 const componentMetaCache = new Map<string, any>();
 
 const DUPLICATE_ERROR_CODES = new Set(['23505', 'ER_DUP_ENTRY', 'SQLITE_CONSTRAINT_UNIQUE']);
+
+const normalizeId = (value: any): number | null => {
+  if (value == null) {
+    return null;
+  }
+
+  const num = Number(value);
+
+  if (Number.isNaN(num)) {
+    return null;
+  }
+
+  return num;
+};
+
+const getMappedValue = <T>(map: Map<number, T> | null | undefined, key: any): T | undefined => {
+  if (!map) {
+    return undefined;
+  }
+
+  const normalized = normalizeId(key);
+
+  if (normalized == null) {
+    return undefined;
+  }
+
+  return map.get(normalized);
+};
 
 const resolveInsertedId = (insertResult: any): number | null => {
   if (insertResult == null) {
@@ -769,7 +833,23 @@ async function buildPublishedToDraftMap({
     }
 
     const key = isLocalized ? `${draft.document_id}:${draft.locale || ''}` : draft.document_id;
-    draftByDocumentId.set(key, draft);
+    const existing = draftByDocumentId.get(key);
+    if (!existing) {
+      draftByDocumentId.set(key, draft);
+      continue;
+    }
+
+    const existingId = Number(existing.id);
+    const draftId = Number(draft.id);
+
+    if (Number.isNaN(existingId) || Number.isNaN(draftId)) {
+      draftByDocumentId.set(key, draft);
+      continue;
+    }
+
+    if (draftId > existingId) {
+      draftByDocumentId.set(key, draft);
+    }
   }
 
   const publishedToDraftMap = new Map<number, number>();
@@ -784,7 +864,14 @@ async function buildPublishedToDraftMap({
 
     const draft = draftByDocumentId.get(key);
     if (draft) {
-      publishedToDraftMap.set(published.id, draft.id);
+      const publishedId = normalizeId(published.id);
+      const draftId = normalizeId(draft.id);
+
+      if (publishedId == null || draftId == null) {
+        continue;
+      }
+
+      publishedToDraftMap.set(publishedId, draftId);
     }
   }
 
@@ -831,9 +918,13 @@ async function copyRelationsForContentType({
 
     for (const publishedIdsChunk of publishedIdsChunks) {
       // Get relations where the source is a published entry (in batches)
-      const relations = await trx(joinTable.name)
+      const relationsQuery = trx(joinTable.name)
         .select('*')
         .whereIn(sourceColumnName, publishedIdsChunk);
+
+      applyJoinTableOrdering(relationsQuery, joinTable, sourceColumnName);
+
+      const relations = await relationsQuery;
 
       if (relations.length === 0) {
         continue;
@@ -843,8 +934,8 @@ async function copyRelationsForContentType({
       // Remove the 'id' field to avoid duplicate key errors
       const newRelations = relations
         .map((relation) => {
-          const newSourceId = publishedToDraftMap.get(relation[sourceColumnName]);
-          const newTargetId = publishedToDraftMap.get(relation[targetColumnName]);
+          const newSourceId = getMappedValue(publishedToDraftMap, relation[sourceColumnName]);
+          const newTargetId = getMappedValue(publishedToDraftMap, relation[targetColumnName]);
 
           if (!newSourceId || !newTargetId) {
             // Skip if no mapping found
@@ -880,25 +971,47 @@ async function copyRelationsFromOtherContentTypes({
   uid: string;
   publishedToDraftMap: Map<number, number>;
 }) {
-  const targetIds = Array.from(publishedToDraftMap.keys());
   const targetMeta = strapi.db.metadata.get(uid);
-  if (!targetMeta) return;
+  if (!targetMeta) {
+    return;
+  }
 
-  // Get all draft entries for this content type (to check for existing old draft relations)
-  const draftEntries = (await trx(targetMeta.tableName)
-    .select(['id', 'document_id', 'locale'])
-    .whereNull('published_at')) as Array<{ id: number; document_id: string; locale: string }>;
+  const publishedTargetIds = Array.from(publishedToDraftMap.keys())
+    .map((value) => normalizeId(value))
+    .filter((value): value is number => value != null);
 
-  // Create a set of draft IDs for quick lookup
-  const draftIds = new Set(draftEntries.map((e) => e.id));
+  if (publishedTargetIds.length === 0) {
+    return;
+  }
 
-  // Iterate through all content types and components to find relations targeting our content type
-  const contentTypes = Object.values(strapi.contentTypes) as any[];
-  const components = Object.values(strapi.components) as any[];
+  const draftTargetIds = Array.from(publishedToDraftMap.values())
+    .map((value) => normalizeId(value))
+    .filter((value): value is number => value != null);
 
-  for (const model of [...contentTypes, ...components]) {
+  const models = [
+    ...(Object.values(strapi.contentTypes) as any[]),
+    ...(Object.values(strapi.components) as any[]),
+  ];
+
+  const buildRelationKey = (
+    relation: Record<string, any>,
+    sourceColumnName: string,
+    targetId: number | string | null
+  ) => {
+    const sourceId = normalizeId(relation[sourceColumnName]) ?? relation[sourceColumnName];
+    const fieldValue = 'field' in relation ? (relation.field ?? '') : '';
+    const componentTypeValue = 'component_type' in relation ? (relation.component_type ?? '') : '';
+
+    return `${sourceId ?? 'null'}::${targetId ?? 'null'}::${fieldValue}::${componentTypeValue}`;
+  };
+
+  for (const model of models) {
     const dbModel = strapi.db.metadata.get(model.uid);
-    if (!dbModel) continue;
+    if (!dbModel) {
+      continue;
+    }
+
+    const sourceHasDraftAndPublish = Boolean(model.options?.draftAndPublish);
 
     for (const attribute of Object.values(dbModel.attributes) as any) {
       if (attribute.type !== 'relation' || attribute.target !== uid) {
@@ -910,182 +1023,91 @@ async function copyRelationsFromOtherContentTypes({
         continue;
       }
 
-      // Skip component join tables - they are handled by copyComponentRelations
+      // Component join tables are handled separately when cloning components.
       if (joinTable.name.includes('_cmps')) {
         continue;
       }
 
-      const { name: targetColumnName } = joinTable.inverseJoinColumn;
+      // If the source content type also has draft/publish, its own cloning routine will recreate its relations.
+      if (sourceHasDraftAndPublish) {
+        continue;
+      }
+
       const { name: sourceColumnName } = joinTable.joinColumn;
+      const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
-      // Process in batches to avoid MySQL query size limits
-      const targetIdsChunks = chunkArray(targetIds, 1000);
+      const existingKeys = new Set<string>();
 
-      for (const targetIdsChunk of targetIdsChunks) {
-        // Get relations where the target is a published entry of our content type (in batches)
-        const relations = await trx(joinTable.name)
-          .select('*')
-          .whereIn(targetColumnName, targetIdsChunk);
+      if (draftTargetIds.length > 0) {
+        const draftIdChunks = chunkArray(draftTargetIds, 1000);
+        for (const draftChunk of draftIdChunks) {
+          const existingRelationsQuery = trx(joinTable.name)
+            .select('*')
+            .whereIn(targetColumnName, draftChunk);
 
+          applyJoinTableOrdering(existingRelationsQuery, joinTable, sourceColumnName);
+
+          const existingRelations = await existingRelationsQuery;
+
+          for (const relation of existingRelations) {
+            existingKeys.add(
+              buildRelationKey(relation, sourceColumnName, normalizeId(relation[targetColumnName]))
+            );
+          }
+        }
+      }
+
+      const publishedIdChunks = chunkArray(publishedTargetIds, 1000);
+
+      for (const chunk of publishedIdChunks) {
+        const relationsQuery = trx(joinTable.name).select('*').whereIn(targetColumnName, chunk);
+
+        applyJoinTableOrdering(relationsQuery, joinTable, sourceColumnName);
+
+        const relations = await relationsQuery;
         if (relations.length === 0) {
           continue;
         }
 
-        // For content types without draft/publish, we need special handling:
-        // Only create relations to new drafts if there isn't already a relation to an old draft with the same document_id
-        if (!model.options?.draftAndPublish) {
-          // Get all relations from this source model to any drafts (old or new)
-          const allSourceIds = [...new Set(relations.map((r) => r[sourceColumnName]))];
+        const newRelations: Array<Record<string, any>> = [];
 
-          if (allSourceIds.length > 0) {
-            // Get all relations from these sources to any drafts
-            const allDraftRelations = await trx(joinTable.name)
-              .select('*')
-              .whereIn(sourceColumnName, allSourceIds)
-              .whereIn(targetColumnName, Array.from(draftIds));
-
-            // Get document_ids for all draft targets
-            const draftTargetIds = [...new Set(allDraftRelations.map((r) => r[targetColumnName]))];
-            const draftTargetEntries =
-              draftTargetIds.length > 0
-                ? ((await trx(targetMeta.tableName)
-                    .select(['id', 'document_id', 'locale'])
-                    .whereIn('id', draftTargetIds)) as Array<{
-                    id: number;
-                    document_id: string;
-                    locale: string;
-                  }>)
-                : [];
-
-            const draftIdToDocumentId = new Map<number, string>();
-            for (const entry of draftTargetEntries) {
-              draftIdToDocumentId.set(entry.id, entry.document_id || '');
-            }
-
-            // Create a map: sourceId -> Set of document_ids it already relates to (via old drafts)
-            const sourceToDocumentIds = new Map<number, Set<string>>();
-            for (const draftRelation of allDraftRelations) {
-              const sourceId = draftRelation[sourceColumnName];
-              const draftTargetId = draftRelation[targetColumnName];
-              const documentId = draftIdToDocumentId.get(draftTargetId);
-              if (documentId) {
-                if (!sourceToDocumentIds.has(sourceId)) {
-                  sourceToDocumentIds.set(sourceId, new Set());
-                }
-                sourceToDocumentIds.get(sourceId)!.add(documentId);
-              }
-            }
-
-            // Get published entries for the current batch to get their document_ids
-            const publishedTargetEntries = (await trx(targetMeta.tableName)
-              .select(['id', 'document_id', 'locale'])
-              .whereIn('id', targetIdsChunk)) as Array<{
-              id: number;
-              document_id: string;
-              locale: string;
-            }>;
-
-            const publishedIdToDocumentId = new Map<number, string>();
-            for (const entry of publishedTargetEntries) {
-              publishedIdToDocumentId.set(entry.id, entry.document_id || '');
-            }
-
-            // Filter relations: only include those that don't already have a relation to an old draft with same document_id
-            const relationsToProcess = relations.filter((relation) => {
-              const sourceId = relation[sourceColumnName];
-              const publishedTargetId = relation[targetColumnName];
-              const publishedDocumentId = publishedIdToDocumentId.get(publishedTargetId);
-
-              if (!publishedDocumentId) {
-                return true; // Can't match, create new relation
-              }
-
-              const existingDocumentIds = sourceToDocumentIds.get(sourceId);
-              if (!existingDocumentIds || existingDocumentIds.size === 0) {
-                return true; // No old draft relation exists, create new one
-              }
-
-              // Check if source already relates to a draft with the same document_id
-              const hasMatchingOldDraft = existingDocumentIds.has(publishedDocumentId);
-
-              // Only create relation if there's no matching old draft
-              return !hasMatchingOldDraft;
-            });
-
-            // Create new relations pointing to draft entries
-            const newRelations = relationsToProcess
-              .map((relation) => {
-                const newTargetId = publishedToDraftMap.get(relation[targetColumnName]);
-
-                if (!newTargetId) {
-                  console.log(
-                    `[copyRelationsFromOtherContentTypes] No draft mapping for target ${relation[targetColumnName]} (relation from ${relation[sourceColumnName]} to ${relation[targetColumnName]})`
-                  );
-                  return null;
-                }
-
-                // Create new relation object without the 'id' field
-                const { id, ...relationWithoutId } = relation;
-                return {
-                  ...relationWithoutId,
-                  [targetColumnName]: newTargetId,
-                };
-              })
-              .filter(Boolean);
-
-            if (newRelations.length > 0) {
-              await trx.batchInsert(joinTable.name, newRelations, 1000);
-            }
-          } else {
-            // No source IDs to check, process all relations normally
-            const newRelations = relations
-              .map((relation) => {
-                const newTargetId = publishedToDraftMap.get(relation[targetColumnName]);
-
-                if (!newTargetId) {
-                  console.log(
-                    `[copyRelationsFromOtherContentTypes] No draft mapping for target ${relation[targetColumnName]} (relation from ${relation[sourceColumnName]} to ${relation[targetColumnName]})`
-                  );
-                  return null;
-                }
-
-                // Create new relation object without the 'id' field
-                const { id, ...relationWithoutId } = relation;
-                return {
-                  ...relationWithoutId,
-                  [targetColumnName]: newTargetId,
-                };
-              })
-              .filter(Boolean);
-
-            if (newRelations.length > 0) {
-              await trx.batchInsert(joinTable.name, newRelations, 1000);
-            }
+        for (const relation of relations) {
+          const newTargetId = getMappedValue(publishedToDraftMap, relation[targetColumnName]);
+          if (!newTargetId) {
+            continue;
           }
-        } else {
-          // For content types with draft/publish, copy all relations (standard behavior)
-          const newRelations = relations
-            .map((relation) => {
-              const newTargetId = publishedToDraftMap.get(relation[targetColumnName]);
 
-              if (!newTargetId) {
-                console.log(
-                  `[copyRelationsFromOtherContentTypes] No draft mapping for target ${relation[targetColumnName]} (relation from ${relation[sourceColumnName]} to ${relation[targetColumnName]})`
-                );
-                return null;
-              }
+          const key = buildRelationKey(relation, sourceColumnName, newTargetId);
+          if (existingKeys.has(key)) {
+            continue;
+          }
 
-              // Create new relation object without the 'id' field
-              const { id, ...relationWithoutId } = relation;
-              return {
-                ...relationWithoutId,
-                [targetColumnName]: newTargetId,
-              };
-            })
-            .filter(Boolean);
+          existingKeys.add(key);
 
-          if (newRelations.length > 0) {
-            await trx.batchInsert(joinTable.name, newRelations, 1000);
+          const { id, ...relationWithoutId } = relation;
+          newRelations.push({
+            ...relationWithoutId,
+            [targetColumnName]: newTargetId,
+          });
+        }
+
+        if (newRelations.length === 0) {
+          continue;
+        }
+
+        try {
+          await trx.batchInsert(joinTable.name, newRelations, 1000);
+        } catch (error: any) {
+          if (!isDuplicateEntryError(error)) {
+            throw error;
+          }
+
+          for (const relation of newRelations) {
+            await insertRowWithDuplicateHandling(trx, joinTable.name, relation, {
+              reason: 'duplicate-draft-target-relation',
+              sourceUid: model.uid,
+              targetUid: uid,
+            });
           }
         }
       }
@@ -1152,9 +1174,13 @@ async function copyRelationsToOtherContentTypes({
 
     for (const publishedIdsChunk of publishedIdsChunks) {
       // Get relations where the source is a published entry of our content type (in batches)
-      const relations = await trx(joinTable.name)
+      const relationsQuery = trx(joinTable.name)
         .select('*')
         .whereIn(sourceColumnName, publishedIdsChunk);
+
+      applyJoinTableOrdering(relationsQuery, joinTable, sourceColumnName);
+
+      const relations = await relationsQuery;
 
       if (relations.length === 0) {
         continue;
@@ -1164,7 +1190,7 @@ async function copyRelationsToOtherContentTypes({
       // Remove the 'id' field to avoid duplicate key errors
       const newRelations = relations
         .map((relation) => {
-          const newSourceId = publishedToDraftMap.get(relation[sourceColumnName]);
+          const newSourceId = getMappedValue(publishedToDraftMap, relation[sourceColumnName]);
 
           if (!newSourceId) {
             return null;
@@ -1174,7 +1200,10 @@ async function copyRelationsToOtherContentTypes({
           // This matches discard() behavior: drafts relate to drafts
           let newTargetId = relation[targetColumnName];
           if (targetPublishedToDraftMap) {
-            const mappedTargetId = targetPublishedToDraftMap.get(relation[targetColumnName]);
+            const mappedTargetId = getMappedValue(
+              targetPublishedToDraftMap,
+              relation[targetColumnName]
+            );
             if (mappedTargetId) {
               newTargetId = mappedTargetId;
             }
@@ -1287,6 +1316,10 @@ async function updateJoinColumnRelations({
     }
 
     const draftIds = Array.from(publishedToDraftMap.values());
+    if (draftIds.length === 0) {
+      continue;
+    }
+
     const draftIdsChunks = chunkArray(draftIds, 1000);
 
     for (const draftIdsChunk of draftIdsChunks) {
@@ -1299,10 +1332,14 @@ async function updateJoinColumnRelations({
       const updates = draftEntriesWithFk.reduce<
         Array<{ id: number | string; draftTargetId: number | string }>
       >((acc, draftEntry) => {
-        const publishedTargetId = draftEntry[foreignKeyColumn];
-        const draftTargetId = targetPublishedToDraftMap.get(publishedTargetId as number);
+        const publishedTargetIdRaw = draftEntry[foreignKeyColumn];
+        const normalizedPublishedTargetId = normalizeId(publishedTargetIdRaw);
+        const draftTargetId =
+          normalizedPublishedTargetId == null
+            ? undefined
+            : targetPublishedToDraftMap.get(normalizedPublishedTargetId);
 
-        if (draftTargetId && draftTargetId !== publishedTargetId) {
+        if (draftTargetId != null && normalizeId(draftTargetId) !== normalizedPublishedTargetId) {
           acc.push({ id: draftEntry.id as number | string, draftTargetId });
         }
 
@@ -1474,7 +1511,7 @@ async function copyComponentRelations({
     const mappedRelations = (
       await Promise.all(
         relationsToProcess.map(async (relation) => {
-          const newEntityId = publishedToDraftMap.get(relation[entityIdColumn]);
+          const newEntityId = getMappedValue(publishedToDraftMap, relation[entityIdColumn]);
 
           if (!newEntityId) {
             return null;

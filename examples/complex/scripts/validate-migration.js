@@ -66,6 +66,96 @@ function getExpectedCounts(multiplier = 1) {
   };
 }
 
+function buildLatestDraftIdMap(entries) {
+  const latestDraftIdByDocumentAndLocale = new Map();
+
+  for (const entry of entries) {
+    if (!entry?.documentId || entry.publishedAt) {
+      continue;
+    }
+
+    const key = `${entry.documentId}::${entry.locale || ''}`;
+    const entryId = Number(entry.id) || 0;
+    const currentMax = latestDraftIdByDocumentAndLocale.get(key) || 0;
+
+    if (entryId > currentMax) {
+      latestDraftIdByDocumentAndLocale.set(key, entryId);
+    }
+  }
+
+  return latestDraftIdByDocumentAndLocale;
+}
+
+function buildPopulateTreeFromMeta(meta) {
+  if (!meta) {
+    return undefined;
+  }
+
+  const populate = {};
+
+  for (const [fieldName, attribute] of Object.entries(meta.attributes)) {
+    if (!attribute) {
+      continue;
+    }
+
+    if (attribute.type === 'relation') {
+      populate[fieldName] = { populate: '*' };
+    } else if (attribute.type === 'component') {
+      populate[fieldName] = { populate: '*' };
+    } else if (attribute.type === 'dynamiczone') {
+      populate[fieldName] = { populate: '*' };
+    }
+  }
+
+  return Object.keys(populate).length > 0 ? populate : undefined;
+}
+
+function getEntityIdentifier(entity) {
+  if (!entity) {
+    return null;
+  }
+
+  if (entity.documentId) {
+    const locale = entity.locale || '';
+    return `${entity.documentId}::${locale}`;
+  }
+
+  if (entity.id != null) {
+    return `id:${entity.id}`;
+  }
+
+  return null;
+}
+
+function getEntityKey(entity) {
+  if (!entity?.documentId) {
+    return null;
+  }
+
+  return `${entity.documentId}::${entity.locale || ''}`;
+}
+
+function getEntityIdentifierArray(entities) {
+  if (!Array.isArray(entities)) {
+    return [];
+  }
+
+  return entities
+    .map((entity) => getEntityIdentifier(entity))
+    .filter((identifier) => identifier != null);
+}
+
+function summarizeRelationEntry(entry) {
+  return {
+    oneToOneBasic: getEntityIdentifier(entry.oneToOneBasic),
+    manyToOneBasic: getEntityIdentifier(entry.manyToOneBasic),
+    oneToManyBasics: getEntityIdentifierArray(entry.oneToManyBasics),
+    manyToManyBasics: getEntityIdentifierArray(entry.manyToManyBasics),
+    selfOne: getEntityIdentifier(entry.selfOne),
+    selfMany: getEntityIdentifierArray(entry.selfMany),
+  };
+}
+
 async function validateDocumentStructure(strapi, expected) {
   console.log('\n📄 Validating v5 document structure (draft/publish)...\n');
 
@@ -520,99 +610,8 @@ async function validateComponents(strapi) {
  */
 async function validateJoinColumnRelations(strapi) {
   console.log('\n🔗 Validating joinColumn relations (oneToOne, manyToOne)...\n');
-
-  const errors = [];
-  const warnings = [];
-
-  // Check relation-dp entries with joinColumn relations
-  const relationDpAll = await strapi.db.query('api::relation-dp.relation-dp').findMany({
-    publicationState: 'all',
-    populate: {
-      oneToOneBasic: true,
-      manyToOneBasic: true,
-    },
-  });
-
-  // Get all basic-dp entries (published and draft)
-  const basicDpAll = await strapi.db.query('api::basic-dp.basic-dp').findMany({
-    publicationState: 'all',
-  });
-  const basicDpByDocumentId = new Map();
-  for (const entry of basicDpAll) {
-    if (entry.documentId) {
-      if (!basicDpByDocumentId.has(entry.documentId)) {
-        basicDpByDocumentId.set(entry.documentId, []);
-      }
-      basicDpByDocumentId.get(entry.documentId).push(entry);
-    }
-  }
-
-  let oneToOneIssues = 0;
-  let manyToOneIssues = 0;
-  let joinColumnRelationsFound = 0;
-
-  for (const relationEntry of relationDpAll) {
-    // Check oneToOneBasic - this might use joinColumn
-    if (relationEntry.oneToOneBasic) {
-      joinColumnRelationsFound++;
-      const target = relationEntry.oneToOneBasic;
-
-      // Check if target is draft/publish enabled
-      const targetDocuments = basicDpByDocumentId.get(target.documentId || '');
-      if (targetDocuments && targetDocuments.length > 1) {
-        // Target has draft/publish - check if relation points to draft when entry is draft
-        if (!relationEntry.publishedAt && target.publishedAt) {
-          // Draft entry pointing to published target - this might be wrong
-          const draftTarget = targetDocuments.find((e) => !e.publishedAt);
-          if (draftTarget) {
-            errors.push(
-              `relation-dp ${relationEntry.id} (draft): oneToOneBasic points to published basic-dp ${target.id} instead of draft ${draftTarget.id}`
-            );
-            oneToOneIssues++;
-          }
-        }
-      }
-    }
-
-    // Check manyToOneBasic - this might use joinColumn
-    if (relationEntry.manyToOneBasic) {
-      joinColumnRelationsFound++;
-      const target = relationEntry.manyToOneBasic;
-
-      const targetDocuments = basicDpByDocumentId.get(target.documentId || '');
-      if (targetDocuments && targetDocuments.length > 1) {
-        // Target has draft/publish - check if relation points to draft when entry is draft
-        if (!relationEntry.publishedAt && target.publishedAt) {
-          const draftTarget = targetDocuments.find((e) => !e.publishedAt);
-          if (draftTarget) {
-            errors.push(
-              `relation-dp ${relationEntry.id} (draft): manyToOneBasic points to published basic-dp ${target.id} instead of draft ${draftTarget.id}`
-            );
-            manyToOneIssues++;
-          }
-        }
-      }
-    }
-  }
-
-  if (joinColumnRelationsFound > 0) {
-    if (oneToOneIssues === 0 && manyToOneIssues === 0) {
-      console.log(
-        `✅ All ${joinColumnRelationsFound} joinColumn relations are correctly preserved`
-      );
-    } else {
-      console.log(
-        `❌ Found ${oneToOneIssues + manyToOneIssues} issues with joinColumn relations (out of ${joinColumnRelationsFound} total)`
-      );
-    }
-  } else {
-    warnings.push('No joinColumn relations found to validate');
-    console.log(
-      `⚠️  No joinColumn relations found (oneToOne/manyToOne may use join tables instead)`
-    );
-  }
-
-  return { errors, warnings };
+  console.log('ℹ️  Join-column consistency is verified during relation target comparison');
+  return { errors: [], warnings: [] };
 }
 
 /**
@@ -753,14 +752,17 @@ async function validateRelationOrder(strapi) {
           populate: {
             manyToManyBasics: true,
           },
+          orderBy: { id: 'desc' },
         });
 
         if (draftEntry && draftEntry.manyToManyBasics) {
-          const publishedIds = entry.manyToManyBasics.map((r) => r.id);
-          const draftIds = draftEntry.manyToManyBasics.map((r) => r.id);
+          const publishedRefs = getEntityIdentifierArray(entry.manyToManyBasics);
+          const draftRefs = getEntityIdentifierArray(draftEntry.manyToManyBasics);
 
-          const sameLength = publishedIds.length === draftIds.length;
-          const sameOrder = sameLength && publishedIds.every((id, index) => id === draftIds[index]);
+          const sameLength = publishedRefs.length === draftRefs.length;
+          const sameOrder =
+            sameLength &&
+            publishedRefs.every((identifier, index) => identifier === draftRefs[index]);
 
           if (!sameOrder) {
             errors.push(
@@ -780,6 +782,7 @@ async function validateRelationOrder(strapi) {
       console.log(
         `❌ Found ${orderMismatches} order mismatches (out of ${orderChecked} entries checked)`
       );
+      errors.slice(0, 10).forEach((err) => console.log(`   - ${err}`));
     }
   } else {
     warnings.push('No ordered relations found to validate');
@@ -798,141 +801,131 @@ async function validateRelationCounts(strapi, preMigrationCounts) {
   const errors = [];
   const warnings = [];
 
-  if (!preMigrationCounts) {
-    warnings.push('Cannot validate relation counts: pre-migration counts not available');
-    console.log(`⚠️  Pre-migration counts not available, skipping relation count validation`);
-    return { errors: [], warnings };
+  const connection = strapi.db.connection;
+  const uid = 'api::relation-dp.relation-dp';
+  const meta = strapi.db.metadata.get(uid);
+
+  if (!meta) {
+    warnings.push(`Unable to load metadata for ${uid}`);
+    console.log(`⚠️  Skipping relation count validation: metadata missing`);
+    return { errors, warnings };
   }
 
-  // Get post-migration relation counts using raw queries
-  if (!knex) {
-    warnings.push('Cannot validate relation counts: knex not available');
-    console.log(`⚠️  knex not available, skipping relation count validation`);
-    return { errors: [], warnings };
-  }
+  const rawEntries = await connection(meta.tableName).select([
+    'id',
+    'document_id',
+    'locale',
+    'published_at',
+  ]);
 
-  const client = process.env.DATABASE_CLIENT || 'sqlite';
-  let dbConfig = {};
+  const entries = rawEntries.map((entry) => ({
+    id: Number(entry.id),
+    documentId: entry.document_id || entry.documentId,
+    locale: entry.locale || null,
+    publishedAt: entry.published_at || entry.publishedAt || null,
+  }));
 
-  switch (client) {
-    case 'postgres':
-    case 'pg':
-      dbConfig = {
-        client: 'postgres',
-        connection: {
-          host: process.env.DATABASE_HOST || 'localhost',
-          port: parseInt(process.env.DATABASE_PORT || '5432', 10),
-          database: process.env.DATABASE_NAME || 'strapi',
-          user: process.env.DATABASE_USERNAME || 'strapi',
-          password: process.env.DATABASE_PASSWORD || 'strapi',
-          ssl: process.env.DATABASE_SSL === 'true',
-        },
-      };
-      break;
-    case 'mysql':
-    case 'mysql2':
-      dbConfig = {
-        client: 'mysql',
-        connection: {
-          host: process.env.DATABASE_HOST || 'localhost',
-          port: parseInt(process.env.DATABASE_PORT || '3306', 10),
-          database: process.env.DATABASE_NAME || 'strapi',
-          user: process.env.DATABASE_USERNAME || 'strapi',
-          password: process.env.DATABASE_PASSWORD || 'strapi',
-          ssl: process.env.DATABASE_SSL === 'true',
-        },
-      };
-      break;
-    case 'sqlite':
-    case 'better-sqlite3':
-      dbConfig = {
-        client: 'better-sqlite3',
-        connection: {
-          filename: process.env.DATABASE_FILENAME || path.join(__dirname, '..', '.tmp', 'data.db'),
-        },
-        useNullAsDefault: true,
-      };
-      break;
-    default:
-      warnings.push(`Cannot validate relation counts: unknown database client ${client}`);
-      return { errors: [], warnings };
-  }
+  const latestDraftIdMap = buildLatestDraftIdMap(entries);
+  const publishedEntries = entries.filter((entry) => entry.publishedAt);
 
-  const db = knex(dbConfig);
+  const isRelationColumn = (columnName) =>
+    typeof columnName === 'string' &&
+    (columnName.includes('relation_dp') || columnName === 'entity_id');
 
-  try {
-    const parseCount = (result) => {
-      if (!result) return 0;
-      if (result.count !== undefined) {
-        return parseInt(result.count, 10) || 0;
-      }
-      const value = result['count(*)'] || result.count || Object.values(result)[0];
-      return parseInt(value, 10) || 0;
-    };
-
-    // Count relations in join tables
-    const relationTables = [
-      { name: 'relation_dps_self_ones', label: 'relation-dp selfOne' },
-      { name: 'relation_dps_self_manies', label: 'relation-dp selfMany' },
-      { name: 'relation_dps_one_to_one_basics', label: 'relation-dp oneToOneBasic' },
-      { name: 'relation_dps_one_to_many_basics', label: 'relation-dp oneToManyBasics' },
-      { name: 'relation_dps_many_to_one_basics', label: 'relation-dp manyToOneBasic' },
-      { name: 'relation_dps_many_to_many_basics', label: 'relation-dp manyToManyBasics' },
-    ];
-
-    console.log('Checking relation table counts:');
-    for (const table of relationTables) {
-      try {
-        const hasTable = await db.schema.hasTable(table.name);
-        if (hasTable) {
-          const postCount = await db(table.name).count('* as count').first();
-          const count = parseCount(postCount);
-          console.log(`   ${table.label}: ${count} relations`);
-          // Note: We can't compare to pre-migration counts without knowing v4 structure
-          // But we can verify the table exists and has data
-          if (count === 0) {
-            warnings.push(
-              `${table.label}: table exists but has no relations (may be normal if no data)`
-            );
+  const normalizeRows = (rows, columnName) =>
+    rows
+      .map((row) => {
+        const normalized = {};
+        for (const [key, value] of Object.entries(row)) {
+          if (key === 'id' || key === columnName) {
+            continue;
           }
-        } else {
-          // Table might not exist if relation uses joinColumn instead of joinTable
-          console.log(`   ${table.label}: table does not exist (may use joinColumn)`);
+
+          normalized[key] = value;
         }
-      } catch (e) {
-        warnings.push(`${table.label}: error checking table - ${e.message}`);
-      }
+
+        const sortedKeys = Object.keys(normalized).sort();
+        const ordered = {};
+        for (const key of sortedKeys) {
+          ordered[key] = normalized[key];
+        }
+        return JSON.stringify(ordered);
+      })
+      .sort();
+
+  for (const [fieldName, attribute] of Object.entries(meta.attributes)) {
+    const joinTable = attribute?.joinTable;
+    if (!joinTable) {
+      continue;
     }
 
-    // Check component relation counts
-    try {
-      const hasComponentTable = await db.schema.hasTable('relation_dps_cmps');
-      if (hasComponentTable) {
-        const componentCount = await db('relation_dps_cmps').count('* as count').first();
-        const count = parseCount(componentCount);
-        console.log(`   relation-dp components: ${count} relations`);
-        if (count === 0) {
-          warnings.push('relation-dp components: table exists but has no relations');
-        }
-      }
-    } catch (e) {
-      warnings.push(`Error checking component relations: ${e.message}`);
+    const tableName = joinTable.name;
+    const hasTable = await connection.schema.hasTable(tableName);
+    if (!hasTable) {
+      warnings.push(`Join table ${tableName} (field ${fieldName}) is missing`);
+      console.log(`⚠️  Join table ${tableName} (field ${fieldName}) is missing`);
+      continue;
     }
 
-    await db.destroy();
-  } catch (error) {
-    try {
-      await db.destroy();
-    } catch (e) {
-      // Ignore
+    const candidateColumns = [];
+    if (isRelationColumn(joinTable.joinColumn?.name)) {
+      candidateColumns.push(joinTable.joinColumn.name);
     }
-    errors.push(`Error validating relation counts: ${error.message}`);
+    if (isRelationColumn(joinTable.inverseJoinColumn?.name)) {
+      candidateColumns.push(joinTable.inverseJoinColumn.name);
+    }
+
+    if (candidateColumns.length === 0) {
+      continue;
+    }
+
+    for (const columnName of candidateColumns) {
+      for (const publishedEntry of publishedEntries) {
+        const key = `${publishedEntry.documentId}::${publishedEntry.locale || ''}`;
+        const draftId = latestDraftIdMap.get(key);
+
+        if (!draftId) {
+          errors.push(
+            `relation-dp documentId ${publishedEntry.documentId}: missing draft entry when checking ${fieldName}`
+          );
+          continue;
+        }
+
+        const publishedRows = await connection(tableName).where(columnName, publishedEntry.id);
+        const draftRows = await connection(tableName).where(columnName, draftId);
+
+        const publishedNormalized = normalizeRows(publishedRows, columnName);
+        const draftNormalized = normalizeRows(draftRows, columnName);
+
+        if (publishedNormalized.length !== draftNormalized.length) {
+          errors.push(
+            `relation-dp documentId ${publishedEntry.documentId}: ${fieldName} (${columnName}) row count differs (published=${publishedNormalized.length}, draft=${draftNormalized.length})`
+          );
+          continue;
+        }
+
+        const publishedUnique = new Set(publishedNormalized);
+        if (publishedUnique.size !== publishedNormalized.length) {
+          errors.push(
+            `relation-dp entry ${publishedEntry.id}: duplicate ${fieldName} rows detected in ${tableName}`
+          );
+        }
+
+        const draftUnique = new Set(draftNormalized);
+        if (draftUnique.size !== draftNormalized.length) {
+          errors.push(
+            `relation-dp entry ${draftId}: duplicate ${fieldName} rows detected in ${tableName}`
+          );
+        }
+      }
+    }
   }
 
   if (errors.length === 0 && warnings.length === 0) {
     console.log(`✅ Relation counts validated`);
   } else if (errors.length > 0) {
     console.log(`❌ Found ${errors.length} errors validating relation counts`);
+    errors.slice(0, 10).forEach((err) => console.log(`   - ${err}`));
   } else {
     console.log(`⚠️  Found ${warnings.length} warnings (see details above)`);
   }
@@ -1087,62 +1080,195 @@ async function validateRelationTargets(strapi) {
 
   const errors = [];
 
-  // Get all draft/publish content types
-  const relationDpAll = await strapi.db.query('api::relation-dp.relation-dp').findMany({
-    publicationState: 'all',
+  const relationDpAll = await strapi.entityService.findMany('api::relation-dp.relation-dp', {
+    publicationState: 'preview',
+    limit: -1,
     populate: {
-      oneToOneBasic: true,
-      manyToOneBasic: true,
+      oneToOneBasic: { populate: '*' },
+      manyToOneBasic: { populate: '*' },
+      oneToManyBasics: { populate: '*' },
+      manyToManyBasics: { populate: '*' },
+      selfOne: { populate: '*' },
+      selfMany: { populate: '*' },
     },
   });
 
-  const basicDpAll = await strapi.db.query('api::basic-dp.basic-dp').findMany({
-    publicationState: 'all',
+  const basicDpAll = await strapi.entityService.findMany('api::basic-dp.basic-dp', {
+    publicationState: 'preview',
+    limit: -1,
   });
 
-  // Group basic-dp by document_id
-  const basicDpByDocumentId = new Map();
-  for (const entry of basicDpAll) {
-    if (entry.documentId) {
-      if (!basicDpByDocumentId.has(entry.documentId)) {
-        basicDpByDocumentId.set(entry.documentId, []);
-      }
-      basicDpByDocumentId.get(entry.documentId).push(entry);
+  const relationDpByDocumentId = new Map();
+  const latestDraftIdByUid = {
+    'api::basic-dp.basic-dp': buildLatestDraftIdMap(basicDpAll),
+    'api::relation-dp.relation-dp': buildLatestDraftIdMap(relationDpAll),
+  };
+  for (const entry of relationDpAll) {
+    if (!entry.documentId) continue;
+    if (!relationDpByDocumentId.has(entry.documentId)) {
+      relationDpByDocumentId.set(entry.documentId, []);
     }
+    relationDpByDocumentId.get(entry.documentId).push(entry);
   }
 
-  // Check that draft entries point to draft targets
-  for (const relationEntry of relationDpAll) {
-    if (!relationEntry.publishedAt) {
-      // This is a draft entry - check its relations
-      if (relationEntry.oneToOneBasic) {
-        const target = relationEntry.oneToOneBasic;
-        const targetDocuments = basicDpByDocumentId.get(target.documentId || '');
-        if (targetDocuments && targetDocuments.length > 1 && target.publishedAt) {
-          // Draft entry pointing to published target - should point to draft
-          const draftTarget = targetDocuments.find((e) => !e.publishedAt);
-          if (draftTarget) {
-            errors.push(
-              `relation-dp ${relationEntry.id} (draft): oneToOneBasic points to published basic-dp ${target.id} instead of draft ${draftTarget.id}`
-            );
-          }
-        }
-      }
+  const compareSingle = (documentId, label, publishedId, draftId) => {
+    if (publishedId === draftId) {
+      return;
+    }
 
-      if (relationEntry.manyToOneBasic) {
-        const target = relationEntry.manyToOneBasic;
-        const targetDocuments = basicDpByDocumentId.get(target.documentId || '');
-        if (targetDocuments && targetDocuments.length > 1 && target.publishedAt) {
-          // Draft entry pointing to published target - should point to draft
-          const draftTarget = targetDocuments.find((e) => !e.publishedAt);
-          if (draftTarget) {
-            errors.push(
-              `relation-dp ${relationEntry.id} (draft): manyToOneBasic points to published basic-dp ${target.id} instead of draft ${draftTarget.id}`
-            );
-          }
-        }
+    if (publishedId == null && draftId == null) {
+      return;
+    }
+
+    const publishedLabel = publishedId ?? 'none';
+    const draftLabel = draftId ?? 'none';
+
+    errors.push(
+      `relation-dp documentId ${documentId}: ${label} mismatch – published=${publishedLabel}, draft=${draftLabel}`
+    );
+  };
+
+  const compareArray = (documentId, label, publishedIds, draftIds) => {
+    if (publishedIds.length !== draftIds.length) {
+      errors.push(
+        `relation-dp documentId ${documentId}: ${label} length mismatch – published=${publishedIds.length}, draft=${draftIds.length}`
+      );
+      return;
+    }
+
+    for (let index = 0; index < publishedIds.length; index += 1) {
+      if (publishedIds[index] !== draftIds[index]) {
+        errors.push(
+          `relation-dp documentId ${documentId}: ${label} order mismatch at position ${
+            index + 1
+          } – published=${publishedIds[index] ?? 'none'}, draft=${draftIds[index] ?? 'none'}`
+        );
       }
     }
+  };
+
+  for (const [documentId, entries] of relationDpByDocumentId.entries()) {
+    const publishedEntry = entries.find((entry) => entry.publishedAt);
+    if (!publishedEntry) {
+      continue;
+    }
+
+    const possibleDraftEntries = entries
+      .filter((entry) => !entry.publishedAt)
+      .sort((a, b) => Number(b.id) - Number(a.id));
+
+    const latestDraftEntry = possibleDraftEntries[0];
+
+    if (!latestDraftEntry) {
+      continue;
+    }
+
+    const publishedSummary = summarizeRelationEntry(publishedEntry);
+    const draftSummary = summarizeRelationEntry(latestDraftEntry);
+
+    compareSingle(
+      documentId,
+      'oneToOneBasic',
+      publishedSummary.oneToOneBasic,
+      draftSummary.oneToOneBasic
+    );
+    compareSingle(
+      documentId,
+      'manyToOneBasic',
+      publishedSummary.manyToOneBasic,
+      draftSummary.manyToOneBasic
+    );
+    compareArray(
+      documentId,
+      'oneToManyBasics',
+      publishedSummary.oneToManyBasics,
+      draftSummary.oneToManyBasics
+    );
+    compareArray(
+      documentId,
+      'manyToManyBasics',
+      publishedSummary.manyToManyBasics,
+      draftSummary.manyToManyBasics
+    );
+    compareSingle(documentId, 'selfOne', publishedSummary.selfOne, draftSummary.selfOne);
+    compareArray(documentId, 'selfMany', publishedSummary.selfMany, draftSummary.selfMany);
+
+    const ensureDraftTargetsUseDraftVersions = () => {
+      const ensureSingleTargetIsDraft = (target, targetUid, label, index) => {
+        if (!target) {
+          return;
+        }
+
+        const key = getEntityKey(target);
+        if (!key) {
+          return;
+        }
+
+        const targetDraftMap = latestDraftIdByUid[targetUid];
+        if (!targetDraftMap || targetDraftMap.size === 0) {
+          return;
+        }
+
+        const expectedDraftId = targetDraftMap.get(key);
+        const positionSuffix = index != null ? `[${index + 1}]` : '';
+
+        if (!expectedDraftId) {
+          errors.push(
+            `relation-dp documentId ${documentId}: ${label}${positionSuffix} has no draft counterpart for target documentId ${target.documentId}`
+          );
+          return;
+        }
+
+        if (Number(target.id) !== expectedDraftId) {
+          errors.push(
+            `relation-dp documentId ${documentId}: ${label}${positionSuffix} expected draft id ${expectedDraftId} but found ${target.id}`
+          );
+        }
+      };
+
+      const ensureArrayTargetsAreDraft = (targets, targetUid, label) => {
+        if (!Array.isArray(targets)) {
+          return;
+        }
+
+        targets.forEach((target, index) => {
+          ensureSingleTargetIsDraft(target, targetUid, label, index);
+        });
+      };
+
+      ensureSingleTargetIsDraft(
+        latestDraftEntry.oneToOneBasic,
+        'api::basic-dp.basic-dp',
+        'oneToOneBasic'
+      );
+      ensureSingleTargetIsDraft(
+        latestDraftEntry.manyToOneBasic,
+        'api::basic-dp.basic-dp',
+        'manyToOneBasic'
+      );
+      ensureArrayTargetsAreDraft(
+        latestDraftEntry.oneToManyBasics,
+        'api::basic-dp.basic-dp',
+        'oneToManyBasics'
+      );
+      ensureArrayTargetsAreDraft(
+        latestDraftEntry.manyToManyBasics,
+        'api::basic-dp.basic-dp',
+        'manyToManyBasics'
+      );
+      ensureSingleTargetIsDraft(
+        latestDraftEntry.selfOne,
+        'api::relation-dp.relation-dp',
+        'selfOne'
+      );
+      ensureArrayTargetsAreDraft(
+        latestDraftEntry.selfMany,
+        'api::relation-dp.relation-dp',
+        'selfMany'
+      );
+    };
+
+    ensureDraftTargetsUseDraftVersions();
   }
 
   if (errors.length === 0) {
@@ -1160,66 +1286,8 @@ async function validateRelationTargets(strapi) {
  */
 async function validateOrderPreservation(strapi) {
   console.log('\n📋 Validating relation order is preserved correctly...\n');
-
-  const errors = [];
-
-  // Check manyToMany relations have order preserved
-  const relationDpAll = await strapi.db.query('api::relation-dp.relation-dp').findMany({
-    publicationState: 'all',
-    populate: {
-      manyToManyBasics: true,
-      oneToManyBasics: true,
-    },
-  });
-
-  for (const entry of relationDpAll) {
-    if (entry.publishedAt) {
-      // Find corresponding draft
-      const draftEntry = await strapi.db.query('api::relation-dp.relation-dp').findOne({
-        where: {
-          documentId: entry.documentId,
-          publishedAt: null,
-        },
-        populate: {
-          manyToManyBasics: true,
-          oneToManyBasics: true,
-        },
-      });
-
-      if (draftEntry) {
-        // Check manyToManyBasics order
-        if (entry.manyToManyBasics && draftEntry.manyToManyBasics) {
-          const publishedIds = entry.manyToManyBasics.map((r) => r.id);
-          const draftIds = draftEntry.manyToManyBasics.map((r) => r.id);
-          if (publishedIds.join(',') !== draftIds.join(',')) {
-            errors.push(
-              `relation-dp ${entry.id}: manyToManyBasics order differs between published and draft`
-            );
-          }
-        }
-
-        // Check oneToManyBasics order
-        if (entry.oneToManyBasics && draftEntry.oneToManyBasics) {
-          const publishedIds = entry.oneToManyBasics.map((r) => r.id);
-          const draftIds = draftEntry.oneToManyBasics.map((r) => r.id);
-          if (publishedIds.join(',') !== draftIds.join(',')) {
-            errors.push(
-              `relation-dp ${entry.id}: oneToManyBasics order differs between published and draft`
-            );
-          }
-        }
-      }
-    }
-  }
-
-  if (errors.length === 0) {
-    console.log(`✅ Relation order is preserved correctly`);
-  } else {
-    console.log(`❌ Found ${errors.length} order preservation issues`);
-    errors.slice(0, 10).forEach((err) => console.log(`   - ${err}`));
-  }
-
-  return errors;
+  console.log('ℹ️  Relation ordering is verified during relation target comparison');
+  return [];
 }
 
 /**
