@@ -15,6 +15,11 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::basic-dp.basic-dp"
+    },
+    "relatedRelationDp": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-dp.relation-dp"
     }
   }
 }

@@ -85,7 +85,7 @@ function createImageBlockComponentForDynamicZone() {
 }
 
 function createTextBlockComponent(options = {}) {
-  const { relatedBasicId = null, relatedBasicDpId = null } = options;
+  const { relatedBasicId = null, relatedBasicDpId = null, relatedRelationDpId = null } = options;
 
   return {
     heading: `Heading ${randomString(6)}`,
@@ -94,6 +94,7 @@ function createTextBlockComponent(options = {}) {
     publishedDate: randomDate().toISOString().split('T')[0],
     relatedBasic: relatedBasicId,
     relatedBasicDp: relatedBasicDpId,
+    relatedRelationDp: relatedRelationDpId,
   };
 }
 
@@ -456,6 +457,28 @@ async function seedRelationDp(strapi, basicDpEntries) {
           publishedAt: new Date(),
         },
       });
+
+      await strapi.entityService.update('api::relation-dp.relation-dp', entry.id, {
+        data: {
+          textBlocks: [
+            createTextBlockComponent({
+              relatedBasicDpId: firstRelatedBasicId,
+              relatedRelationDpId: entry.id,
+            }),
+            createTextBlockComponent({
+              relatedBasicDpId: secondRelatedBasicId,
+              relatedRelationDpId: entry.id,
+            }),
+          ],
+          sections: [
+            createTextBlockComponentForDynamicZone({
+              relatedBasicDpId: firstRelatedBasicId,
+              relatedRelationDpId: entry.id,
+            }),
+            createMediaBlockComponentForDynamicZone(),
+          ],
+        },
+      });
       published.push(entry);
     } catch (error) {
       console.error(`  ❌ Failed to create relation-dp published entry ${i + 1}:`, error.message);
@@ -508,6 +531,28 @@ async function seedRelationDp(strapi, basicDpEntries) {
             createMediaBlockComponentForDynamicZone(),
           ],
           // No publishedAt = draft
+        },
+      });
+
+      await strapi.entityService.update('api::relation-dp.relation-dp', entry.id, {
+        data: {
+          textBlocks: [
+            createTextBlockComponent({
+              relatedBasicDpId: firstRelatedBasicId,
+              relatedRelationDpId: entry.id,
+            }),
+            createTextBlockComponent({
+              relatedBasicDpId: secondRelatedBasicId,
+              relatedRelationDpId: entry.id,
+            }),
+          ],
+          sections: [
+            createTextBlockComponentForDynamicZone({
+              relatedBasicDpId: firstRelatedBasicId,
+              relatedRelationDpId: entry.id,
+            }),
+            createMediaBlockComponentForDynamicZone(),
+          ],
         },
       });
       drafts.push(entry);

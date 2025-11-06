@@ -2176,6 +2176,13 @@ async function validateComponentRelationTargets(strapi) {
         textBlocks: {
           populate: {
             relatedBasicDp: { fields: ['id', 'documentId', 'publishedAt'] },
+            relatedRelationDp: { fields: ['id', 'documentId', 'publishedAt'] },
+          },
+        },
+        sections: {
+          populate: {
+            relatedBasicDp: { fields: ['id', 'documentId', 'publishedAt'] },
+            relatedRelationDp: { fields: ['id', 'documentId', 'publishedAt'] },
           },
         },
       },
@@ -2183,7 +2190,72 @@ async function validateComponentRelationTargets(strapi) {
       limit: -1,
     });
 
+    const relationDpByDocumentId = new Map();
+    for (const entry of relationDpEntries) {
+      if (!entry.documentId) continue;
+      if (!relationDpByDocumentId.has(entry.documentId)) {
+        relationDpByDocumentId.set(entry.documentId, { published: [], drafts: [] });
+      }
+
+      const record = relationDpByDocumentId.get(entry.documentId);
+      if (entry.publishedAt) {
+        record.published.push(entry);
+      } else {
+        record.drafts.push(entry);
+      }
+    }
+
     let draftComponentChecks = 0;
+    let relationSelfChecks = 0;
+
+    const ensureSelfRelationTarget = (entry, componentId, location, target) => {
+      relationSelfChecks += 1;
+
+      if (!target) {
+        errors.push(
+          `relation-dp ${entry.id}: ${location} text-block ${componentId} is missing relatedRelationDp relation`
+        );
+        return;
+      }
+
+      if (!target.documentId) {
+        errors.push(
+          `relation-dp ${entry.id}: ${location} text-block ${componentId} relatedRelationDp target ${target.id} is missing documentId`
+        );
+        return;
+      }
+
+      if (target.documentId !== entry.documentId) {
+        errors.push(
+          `relation-dp ${entry.id}: ${location} text-block ${componentId} expected relatedRelationDp to stay within document ${entry.documentId}, got ${target.documentId}`
+        );
+        return;
+      }
+
+      const entryIsDraft = !entry.publishedAt;
+      const targetIsDraft = !target.publishedAt;
+
+      if (entryIsDraft && !targetIsDraft) {
+        errors.push(
+          `relation-dp ${entry.id}: ${location} text-block ${componentId} points to published relatedRelationDp ${target.id} but should target the draft version`
+        );
+        return;
+      }
+
+      if (!entryIsDraft && targetIsDraft) {
+        errors.push(
+          `relation-dp ${entry.id}: ${location} text-block ${componentId} points to draft relatedRelationDp ${target.id} but should target the published version`
+        );
+        return;
+      }
+
+      if (target.id !== entry.id) {
+        errors.push(
+          `relation-dp ${entry.id}: ${location} text-block ${componentId} expected relatedRelationDp to reference entry ${entry.id}, got ${target.id}`
+        );
+      }
+    };
+
     for (const entry of relationDpEntries) {
       const isDraft = !entry.publishedAt;
       const textBlocks = entry?.textBlocks || [];
@@ -2196,6 +2268,7 @@ async function validateComponentRelationTargets(strapi) {
           errors.push(
             `relation-dp entry ${entry.id}: text-block ${componentId} is missing relatedBasicDp relation`
           );
+          ensureSelfRelationTarget(entry, componentId, 'repeatable', textBlock?.relatedRelationDp);
           continue;
         }
 
@@ -2203,6 +2276,7 @@ async function validateComponentRelationTargets(strapi) {
           errors.push(
             `relation-dp entry ${entry.id}: related basic-dp target ${target.id} on text-block ${componentId} is missing documentId`
           );
+          ensureSelfRelationTarget(entry, componentId, 'repeatable', textBlock?.relatedRelationDp);
           continue;
         }
 
@@ -2211,6 +2285,7 @@ async function validateComponentRelationTargets(strapi) {
           errors.push(
             `relation-dp entry ${entry.id}: related basic-dp target ${target.id} (documentId ${target.documentId}) not found`
           );
+          ensureSelfRelationTarget(entry, componentId, 'repeatable', textBlock?.relatedRelationDp);
           continue;
         }
 
@@ -2226,6 +2301,18 @@ async function validateComponentRelationTargets(strapi) {
             );
           }
         }
+
+        ensureSelfRelationTarget(entry, componentId, 'repeatable', textBlock?.relatedRelationDp);
+      }
+
+      const sections = entry?.sections || [];
+      for (const section of sections) {
+        if (!section || section.__component !== 'shared.text-block') {
+          continue;
+        }
+
+        const componentId = section?.id || 'unknown';
+        ensureSelfRelationTarget(entry, componentId, 'sections', section?.relatedRelationDp);
       }
     }
 
@@ -2236,6 +2323,17 @@ async function validateComponentRelationTargets(strapi) {
     } else if (relationDpEntries.length > 0) {
       const message =
         '⚠️  No draft relation-dp component relations found to validate (expected at least one)';
+      warnings.push(message);
+      console.log(message);
+    }
+
+    if (relationSelfChecks > 0) {
+      console.log(
+        `✅ Relation-dp text-block self-relations validated: ${relationSelfChecks} components checked`
+      );
+    } else if (relationDpEntries.length > 0) {
+      const message =
+        '⚠️  No relation-dp text-block components with relatedRelationDp found to validate';
       warnings.push(message);
       console.log(message);
     }
