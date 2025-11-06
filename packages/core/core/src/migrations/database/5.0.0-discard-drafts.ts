@@ -119,7 +119,7 @@ async function copyRelationsToDrafts({ db, trx, uid }: { db: Database; trx: Knex
   }
 
   // Create mapping from published entry ID to draft entry ID
-  const publishedToDraftMap = await createPublishedToDraftMap(trx, uid, meta);
+  const publishedToDraftMap = await buildPublishedToDraftMap({ trx, uid, meta });
 
   if (!publishedToDraftMap || publishedToDraftMap.size === 0) {
     return;
@@ -165,47 +165,233 @@ function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   return chunks;
 }
 
-/**
- * Helper to create publishedToDraftMap for a content type
- * This extracts the common logic used in copyRelationsToDrafts and updateJoinColumnRelations
- */
-async function createPublishedToDraftMap(
-  trx: Knex,
-  uid: string,
-  meta: any
-): Promise<Map<number, number> | null> {
-  // Get all published entries for this content type
-  const publishedEntries = (await trx(meta.tableName)
-    .select(['id', 'document_id', 'locale'])
-    .whereNotNull('published_at')) as Array<{ id: number; document_id: string; locale: string }>;
+type ParentSchemaInfo = { uid: string; collectionName?: string };
+type ComponentParentInstance = { uid: string; parentId: number | string };
 
-  // Get all draft entries for this content type
-  const draftEntries = (await trx(meta.tableName)
-    .select(['id', 'document_id', 'locale'])
-    .whereNull('published_at')) as Array<{ id: number; document_id: string; locale: string }>;
+const componentParentSchemasCache = new Map<string, ParentSchemaInfo[]>();
+const joinTableExistsCache = new Map<string, boolean>();
+const componentParentInstanceCache = new Map<string, ComponentParentInstance | null>();
+const componentAncestorDpCache = new Map<string, boolean>();
+const parentDpCache = new Map<string, boolean>();
+
+function listComponentParentSchemas(componentUid: string): ParentSchemaInfo[] {
+  if (!componentParentSchemasCache.has(componentUid)) {
+    const schemas = [
+      ...Object.values(strapi.contentTypes),
+      ...Object.values(strapi.components),
+    ] as any[];
+
+    const parents = schemas
+      .filter((schema) => {
+        if (!schema?.attributes) {
+          return false;
+        }
+
+        return Object.values(schema.attributes).some((attr: any) => {
+          if (attr.type === 'component') {
+            return attr.component === componentUid;
+          }
+
+          if (attr.type === 'dynamiczone') {
+            return attr.components?.includes(componentUid);
+          }
+
+          return false;
+        });
+      })
+      .map((schema) => ({ uid: schema.uid, collectionName: schema.collectionName }));
+
+    componentParentSchemasCache.set(componentUid, parents);
+  }
+
+  return componentParentSchemasCache.get(componentUid)!;
+}
+
+async function ensureTableExists(trx: Knex, tableName: string): Promise<boolean> {
+  if (!joinTableExistsCache.has(tableName)) {
+    const exists = await trx.schema.hasTable(tableName);
+    joinTableExistsCache.set(tableName, exists);
+  }
+
+  return joinTableExistsCache.get(tableName)!;
+}
+
+async function findComponentParentInstance(
+  trx: Knex,
+  identifiers: any,
+  componentUid: string,
+  componentId: number | string,
+  excludeUid?: string
+): Promise<ComponentParentInstance | null> {
+  const cacheKey = `${componentUid}:${componentId}:${excludeUid ?? 'ALL'}`;
+  if (componentParentInstanceCache.has(cacheKey)) {
+    return componentParentInstanceCache.get(cacheKey)!;
+  }
+
+  const parentComponentIdColumn = getComponentJoinColumnInverseName(identifiers);
+  const parentComponentTypeColumn = getComponentTypeColumn(identifiers);
+  const parentEntityIdColumn = getComponentJoinColumnEntityName(identifiers);
+
+  const potentialParents = listComponentParentSchemas(componentUid).filter(
+    (schema) => schema.uid !== excludeUid
+  );
+
+  for (const parentSchema of potentialParents) {
+    if (!parentSchema.collectionName) {
+      continue;
+    }
+
+    const parentJoinTableName = getComponentJoinTableName(parentSchema.collectionName, identifiers);
+
+    try {
+      if (!(await ensureTableExists(trx, parentJoinTableName))) {
+        continue;
+      }
+
+      const parentRow = await trx(parentJoinTableName)
+        .where({
+          [parentComponentIdColumn]: componentId,
+          [parentComponentTypeColumn]: componentUid,
+        })
+        .first(parentEntityIdColumn);
+
+      if (parentRow) {
+        const parentInstance: ComponentParentInstance = {
+          uid: parentSchema.uid,
+          parentId: parentRow[parentEntityIdColumn],
+        };
+
+        componentParentInstanceCache.set(cacheKey, parentInstance);
+        return parentInstance;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  componentParentInstanceCache.set(cacheKey, null);
+  return null;
+}
+
+async function hasDraftPublishAncestorForParent(
+  trx: Knex,
+  identifiers: any,
+  parent: ComponentParentInstance
+): Promise<boolean> {
+  const cacheKey = `${parent.uid}:${parent.parentId}`;
+  if (parentDpCache.has(cacheKey)) {
+    return parentDpCache.get(cacheKey)!;
+  }
+
+  const parentContentType = strapi.contentTypes[
+    parent.uid as keyof typeof strapi.contentTypes
+  ] as any;
+  if (parentContentType) {
+    const result = !!parentContentType?.options?.draftAndPublish;
+    parentDpCache.set(cacheKey, result);
+    return result;
+  }
+
+  const parentComponent = strapi.components[parent.uid as keyof typeof strapi.components] as any;
+  if (!parentComponent) {
+    parentDpCache.set(cacheKey, false);
+    return false;
+  }
+
+  const result = await hasDraftPublishAncestorForComponent(
+    trx,
+    identifiers,
+    parent.uid,
+    parent.parentId
+  );
+  parentDpCache.set(cacheKey, result);
+  return result;
+}
+
+async function hasDraftPublishAncestorForComponent(
+  trx: Knex,
+  identifiers: any,
+  componentUid: string,
+  componentId: number | string,
+  excludeUid?: string
+): Promise<boolean> {
+  const cacheKey = `${componentUid}:${componentId}:${excludeUid ?? 'ALL'}`;
+  if (componentAncestorDpCache.has(cacheKey)) {
+    return componentAncestorDpCache.get(cacheKey)!;
+  }
+
+  const parent = await findComponentParentInstance(
+    trx,
+    identifiers,
+    componentUid,
+    componentId,
+    excludeUid
+  );
+
+  if (!parent) {
+    componentAncestorDpCache.set(cacheKey, false);
+    return false;
+  }
+
+  const result = await hasDraftPublishAncestorForParent(trx, identifiers, parent);
+  componentAncestorDpCache.set(cacheKey, result);
+  return result;
+}
+
+type DraftMapOptions = {
+  requireDraftAndPublish?: boolean;
+};
+
+async function buildPublishedToDraftMap({
+  trx,
+  uid,
+  meta,
+  options = {},
+}: {
+  trx: Knex;
+  uid: string;
+  meta: any;
+  options?: DraftMapOptions;
+}): Promise<Map<number, number> | null> {
+  if (!meta) {
+    return null;
+  }
+
+  const model = strapi.getModel(uid as UID.ContentType);
+  const hasDraftAndPublishEnabled = contentTypes.hasDraftAndPublish(model);
+
+  if (options.requireDraftAndPublish && !hasDraftAndPublishEnabled) {
+    return null;
+  }
+
+  const [publishedEntries, draftEntries] = await Promise.all([
+    trx(meta.tableName).select(['id', 'document_id', 'locale']).whereNotNull('published_at') as any,
+    trx(meta.tableName).select(['id', 'document_id', 'locale']).whereNull('published_at') as any,
+  ]);
 
   if (publishedEntries.length === 0 || draftEntries.length === 0) {
     return null;
   }
 
-  // Check if this is a localized content type (i18n)
   const i18nService = strapi.plugin('i18n')?.service('content-types');
   const contentType = strapi.contentTypes[uid as keyof typeof strapi.contentTypes] as any;
   const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
 
-  // Create mapping from document_id (and locale if i18n) to draft entry ID
   const draftByDocumentId = new Map<string, (typeof draftEntries)[0]>();
   for (const draft of draftEntries) {
-    if (draft.document_id) {
-      const key = isLocalized ? `${draft.document_id}:${draft.locale || ''}` : draft.document_id;
-      draftByDocumentId.set(key, draft);
+    if (!draft.document_id) {
+      continue;
     }
+
+    const key = isLocalized ? `${draft.document_id}:${draft.locale || ''}` : draft.document_id;
+    draftByDocumentId.set(key, draft);
   }
 
-  // Create mapping from published entry ID to draft entry ID
   const publishedToDraftMap = new Map<number, number>();
   for (const published of publishedEntries) {
-    if (!published.document_id) continue;
+    if (!published.document_id) {
+      continue;
+    }
 
     const key = isLocalized
       ? `${published.document_id}:${published.locale || ''}`
@@ -523,68 +709,6 @@ async function copyRelationsFromOtherContentTypes({
 }
 
 /**
- * Helper to get publishedToDraftMap for a target content type
- */
-async function getTargetPublishedToDraftMap(
-  trx: Knex,
-  targetUid: string
-): Promise<Map<number, number> | null> {
-  const targetMeta = strapi.db.metadata.get(targetUid);
-  if (!targetMeta) return null;
-
-  // Check if target has draft/publish enabled
-  const targetModel = strapi.getModel(targetUid as UID.ContentType);
-  const targetHasDP = contentTypes.hasDraftAndPublish(targetModel);
-  if (!targetHasDP) {
-    return null; // Target doesn't have draft/publish, no mapping needed
-  }
-
-  // Get all published and draft entries for target content type
-  const targetPublishedEntries = (await trx(targetMeta.tableName)
-    .select(['id', 'document_id', 'locale'])
-    .whereNotNull('published_at')) as Array<{ id: number; document_id: string; locale: string }>;
-
-  const targetDraftEntries = (await trx(targetMeta.tableName)
-    .select(['id', 'document_id', 'locale'])
-    .whereNull('published_at')) as Array<{ id: number; document_id: string; locale: string }>;
-
-  // Check if target is localized
-  const i18nService = strapi.plugin('i18n')?.service('content-types');
-  const targetContentType = strapi.contentTypes[
-    targetUid as keyof typeof strapi.contentTypes
-  ] as any;
-  const isTargetLocalized = i18nService?.isLocalizedContentType(targetContentType) ?? false;
-
-  // Create mapping from document_id (and locale if i18n) to draft entry ID
-  const targetDraftByDocumentId = new Map<string, (typeof targetDraftEntries)[0]>();
-  for (const draft of targetDraftEntries) {
-    if (draft.document_id) {
-      const key = isTargetLocalized
-        ? `${draft.document_id}:${draft.locale || ''}`
-        : draft.document_id;
-      targetDraftByDocumentId.set(key, draft);
-    }
-  }
-
-  // Create mapping from published entry ID to draft entry ID
-  const targetPublishedToDraftMap = new Map<number, number>();
-  for (const published of targetPublishedEntries) {
-    if (!published.document_id) continue;
-
-    const key = isTargetLocalized
-      ? `${published.document_id}:${published.locale || ''}`
-      : published.document_id;
-
-    const draft = targetDraftByDocumentId.get(key);
-    if (draft) {
-      targetPublishedToDraftMap.set(published.id, draft.id);
-    }
-  }
-
-  return targetPublishedToDraftMap;
-}
-
-/**
  * Copy relations from this content type that target other content types (category 3)
  * Example: Article -> Categories/Tags
  */
@@ -627,7 +751,14 @@ async function copyRelationsToOtherContentTypes({
     // Get target content type's publishedToDraftMap if it has draft/publish (cached)
     const targetUid = attribute.target;
     if (!targetMapCache.has(targetUid)) {
-      targetMapCache.set(targetUid, await getTargetPublishedToDraftMap(trx, targetUid));
+      const targetMeta = strapi.db.metadata.get(targetUid);
+      const targetMap = await buildPublishedToDraftMap({
+        trx,
+        uid: targetUid,
+        meta: targetMeta,
+        options: { requireDraftAndPublish: true },
+      });
+      targetMapCache.set(targetUid, targetMap);
     }
     const targetPublishedToDraftMap = targetMapCache.get(targetUid);
 
@@ -723,7 +854,7 @@ async function updateJoinColumnRelations({
   }
 
   // Create mapping from published entry ID to draft entry ID
-  const publishedToDraftMap = await createPublishedToDraftMap(trx, uid, meta);
+  const publishedToDraftMap = await buildPublishedToDraftMap({ trx, uid, meta });
 
   if (!publishedToDraftMap || publishedToDraftMap.size === 0) {
     return;
@@ -754,7 +885,14 @@ async function updateJoinColumnRelations({
 
     // Get target content type's publishedToDraftMap if it has draft/publish (cached)
     if (!targetMapCache.has(targetUid)) {
-      targetMapCache.set(targetUid, await getTargetPublishedToDraftMap(trx, targetUid));
+      const targetMeta = strapi.db.metadata.get(targetUid);
+      const targetMap = await buildPublishedToDraftMap({
+        trx,
+        uid: targetUid,
+        meta: targetMeta,
+        options: { requireDraftAndPublish: true },
+      });
+      targetMapCache.set(targetUid, targetMap);
     }
     const targetPublishedToDraftMap = targetMapCache.get(targetUid);
 
@@ -871,79 +1009,27 @@ async function copyComponentRelations({
       componentRelations.map(async (relation) => {
         const componentId = relation[componentIdColumn];
         const componentType = relation[componentTypeColumn];
-        const entityId = relation[entityIdColumn]; // The entity that contains this component
+        const entityId = relation[entityIdColumn];
 
-        // Get component schema
         const componentSchema = strapi.components[
           componentType as keyof typeof strapi.components
         ] as any;
+
         if (!componentSchema) {
-          // Unknown component, keep relation
           console.log(
             `[copyComponentRelations] ${uid}: Keeping relation - unknown component type ${componentType} (entity: ${entityId}, componentId: ${componentId})`
           );
           return relation;
         }
 
-        // Find parent schemas for this component (what content types/components can contain this component)
-        // Exclude the current content type - we're processing it, so components directly on it should be kept
-        const parentSchemas = [
-          ...Object.values(strapi.contentTypes),
-          ...Object.values(strapi.components),
-        ].filter((schema: any) => {
-          // Exclude the current content type - components directly on it should be copied
-          if (schema.uid === uid) return false;
-          if (!schema?.attributes) return false;
-          return Object.values(schema.attributes).some((attr: any) => {
-            return (
-              (attr.type === 'component' && attr.component === componentSchema.uid) ||
-              (attr.type === 'dynamiczone' && attr.components?.includes(componentSchema.uid))
-            );
-          });
-        });
+        const componentParent = await findComponentParentInstance(
+          trx,
+          identifiers,
+          componentSchema.uid,
+          componentId,
+          uid
+        );
 
-        // Find the actual parent for this component instance in component hierarchy
-        // This finds what component (not the current content type) contains this component instance
-        // If component is directly on the current content type (not nested), this will be null
-        let componentParent: { uid: string; table: string; parentId: number | string } | null =
-          null;
-
-        for (const parentSchema of parentSchemas) {
-          if (!parentSchema.collectionName) continue;
-
-          const parentJoinTableName = getComponentJoinTableName(
-            parentSchema.collectionName,
-            identifiers
-          );
-          const parentEntityIdColumn = getComponentJoinColumnEntityName(identifiers);
-          const parentComponentIdColumn = getComponentJoinColumnInverseName(identifiers);
-          const parentComponentTypeColumn = getComponentTypeColumn(identifiers);
-
-          try {
-            const hasTable = await trx.schema.hasTable(parentJoinTableName);
-            if (!hasTable) continue;
-
-            const parentRow = await trx(parentJoinTableName)
-              .where({
-                [parentComponentIdColumn]: componentId,
-                [parentComponentTypeColumn]: componentSchema.uid,
-              })
-              .first(parentEntityIdColumn);
-
-            if (parentRow) {
-              componentParent = {
-                uid: parentSchema.uid,
-                table: parentSchema.collectionName,
-                parentId: parentRow[parentEntityIdColumn],
-              };
-              break;
-            }
-          } catch {
-            continue;
-          }
-        }
-
-        // If component has no parent in component hierarchy (it's directly on the current content type), keep relation
         if (!componentParent) {
           console.log(
             `[copyComponentRelations] ${uid}: Keeping relation - component ${componentType} (id: ${componentId}) is directly on entity ${entityId} (no nested parent found)`
@@ -955,113 +1041,23 @@ async function copyComponentRelations({
           `[copyComponentRelations] ${uid}: Component ${componentType} (id: ${componentId}, entity: ${entityId}) has parent in hierarchy: ${componentParent.uid} (parentId: ${componentParent.parentId})`
         );
 
-        // Component is nested - check if its parent in the component hierarchy has DP
-        // Recursively check if any parent in the component hierarchy has draft/publish
-        const checkComponentParentHasDP = async (
-          componentSchema: any,
-          componentId: number | string
-        ): Promise<boolean> => {
-          const parentSchemasForComponent = [
-            ...Object.values(strapi.contentTypes),
-            ...Object.values(strapi.components),
-          ].filter((schema: any) => {
-            if (!schema?.attributes) return false;
-            return Object.values(schema.attributes).some((attr: any) => {
-              return (
-                (attr.type === 'component' && attr.component === componentSchema.uid) ||
-                (attr.type === 'dynamiczone' && attr.components?.includes(componentSchema.uid))
-              );
-            });
-          });
+        const hasDPParent = await hasDraftPublishAncestorForParent(
+          trx,
+          identifiers,
+          componentParent
+        );
 
-          for (const parentSchema of parentSchemasForComponent) {
-            if (!parentSchema.collectionName) continue;
-
-            const parentJoinTableName = getComponentJoinTableName(
-              parentSchema.collectionName,
-              identifiers
-            );
-            try {
-              const hasTable = await trx.schema.hasTable(parentJoinTableName);
-              if (!hasTable) continue;
-
-              const parentEntityIdColumn = getComponentJoinColumnEntityName(identifiers);
-              const parentComponentIdColumn = getComponentJoinColumnInverseName(identifiers);
-              const parentComponentTypeColumn = getComponentTypeColumn(identifiers);
-
-              const parentRow = await trx(parentJoinTableName)
-                .where({
-                  [parentComponentIdColumn]: componentId,
-                  [parentComponentTypeColumn]: componentSchema.uid,
-                })
-                .first(parentEntityIdColumn);
-
-              if (parentRow) {
-                // Check if parent is a content type with DP
-                const parentContentType = strapi.contentTypes[
-                  parentSchema.uid as keyof typeof strapi.contentTypes
-                ] as any;
-                if (parentContentType?.options?.draftAndPublish) {
-                  return true; // Found DP parent
-                }
-
-                // If parent is a component, recurse
-                if (strapi.components[parentSchema.uid as keyof typeof strapi.components]) {
-                  const parentComponentSchema = strapi.components[
-                    parentSchema.uid as keyof typeof strapi.components
-                  ] as any;
-                  const hasDP = await checkComponentParentHasDP(
-                    parentComponentSchema,
-                    parentRow[parentEntityIdColumn]
-                  );
-                  if (hasDP) {
-                    return true;
-                  }
-                }
-              }
-            } catch {
-              continue;
-            }
-          }
-
-          return false; // No DP parent found
-        };
-
-        // Check if component's parent has DP
-        if (strapi.components[componentParent.uid as keyof typeof strapi.components]) {
-          // Parent is a component, recursively check its parents
-          const parentComponentSchema = strapi.components[
-            componentParent.uid as keyof typeof strapi.components
-          ] as any;
-          const hasDPParent = await checkComponentParentHasDP(
-            parentComponentSchema,
-            componentParent.parentId
+        if (hasDPParent) {
+          console.log(
+            `[copyComponentRelations] Filtering: component ${componentType} (id: ${componentId}, entity: ${entityId}) has DP parent in hierarchy (${componentParent.uid})`
           );
-          if (hasDPParent) {
-            // Component's parent in hierarchy has DP, filter out relation
-            console.log(
-              `[copyComponentRelations] Filtering: component ${componentType} (id: ${componentId}, entity: ${entityId}) has DP parent in hierarchy (${componentParent.uid})`
-            );
-            return null;
-          }
-        } else {
-          // Parent is a content type (not the one we're processing), check if it has DP
-          const parentContentType = strapi.contentTypes[
-            componentParent.uid as keyof typeof strapi.contentTypes
-          ] as any;
-          if (parentContentType?.options?.draftAndPublish) {
-            // Parent content type has DP, filter out relation
-            console.log(
-              `[copyComponentRelations] Filtering: component ${componentType} (id: ${componentId}, entity: ${entityId}) has DP parent content type (${componentParent.uid})`
-            );
-            return null;
-          }
+          return null;
         }
 
-        // No DP parent found, keep relation
         console.log(
           `[copyComponentRelations] ${uid}: Keeping relation - component ${componentType} (id: ${componentId}, entity: ${entityId}) has no DP parent in hierarchy`
         );
+
         return relation;
       })
     );
