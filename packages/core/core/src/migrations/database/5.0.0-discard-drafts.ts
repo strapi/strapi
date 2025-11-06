@@ -773,17 +773,38 @@ async function updateJoinColumnRelations({
         .whereIn('id', draftIdsChunk)
         .whereNotNull(foreignKeyColumn);
 
-      for (const draftEntry of draftEntriesWithFk) {
+      const updates = draftEntriesWithFk.reduce<
+        Array<{ id: number | string; draftTargetId: number | string }>
+      >((acc, draftEntry) => {
         const publishedTargetId = draftEntry[foreignKeyColumn];
-        const draftTargetId = targetPublishedToDraftMap.get(publishedTargetId);
+        const draftTargetId = targetPublishedToDraftMap.get(publishedTargetId as number);
 
         if (draftTargetId && draftTargetId !== publishedTargetId) {
-          // Update foreign key to point to draft target
-          await trx(meta.tableName)
-            .where('id', draftEntry.id)
-            .update({ [foreignKeyColumn]: draftTargetId });
+          acc.push({ id: draftEntry.id as number | string, draftTargetId });
         }
+
+        return acc;
+      }, []);
+
+      if (updates.length === 0) {
+        continue;
       }
+
+      const caseFragments = updates.map(() => 'WHEN ? THEN ?').join(' ');
+      const idsPlaceholders = updates.map(() => '?').join(', ');
+
+      await trx.raw(
+        `UPDATE ?? SET ?? = CASE ?? ${caseFragments} ELSE ?? END WHERE ?? IN (${idsPlaceholders})`,
+        [
+          meta.tableName,
+          foreignKeyColumn,
+          'id',
+          ...updates.flatMap(({ id, draftTargetId }) => [id, draftTargetId]),
+          foreignKeyColumn,
+          'id',
+          ...updates.map(({ id }) => id),
+        ]
+      );
     }
   }
 }
@@ -1122,8 +1143,8 @@ async function copyComponentRelations({
     });
 
     if (newComponentRelations.length > 0) {
-      // Insert component relations, ignoring duplicates
-      // Use INSERT ... ON CONFLICT DO NOTHING (PostgreSQL) or INSERT IGNORE (MySQL)
+      // Insert component relations while surfacing unexpected constraint issues.
+      // Use INSERT ... ON CONFLICT DO NOTHING (PostgreSQL) or catch duplicate key errors explicitly for other clients.
       const client = trx.client.config.client;
 
       if (client === 'postgres' || client === 'pg') {
@@ -1174,17 +1195,18 @@ async function copyComponentRelations({
           );
         }
       } else if (client === 'mysql' || client === 'mysql2') {
-        // MySQL: Use INSERT IGNORE
         try {
-          await trx(joinTableName).insert(newComponentRelations).onConflict().ignore();
+          await trx(joinTableName).insert(newComponentRelations);
         } catch (error: any) {
-          // If batch insert with onConflict fails, try one at a time
+          if (error.code !== 'ER_DUP_ENTRY') {
+            throw error;
+          }
+
           for (const relation of newComponentRelations) {
             try {
-              await trx(joinTableName).insert(relation).onConflict().ignore();
+              await trx(joinTableName).insert(relation);
             } catch (err: any) {
-              // Ignore duplicate key errors (MySQL error code ER_DUP_ENTRY)
-              if (err.code !== 'ER_DUP_ENTRY' && err.code !== '23505') {
+              if (err.code !== 'ER_DUP_ENTRY') {
                 throw err;
               }
             }
