@@ -60,6 +60,20 @@
     "enumerationField": {
       "type": "enumeration",
       "enum": ["one", "two", "three"]
+    },
+    "textBlocks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.text-block"
+    },
+    "mediaBlock": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.media-block"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["shared.text-block", "shared.media-block"]
     }
   }
 }

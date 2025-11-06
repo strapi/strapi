@@ -145,6 +145,35 @@
           "localized": true
         }
       }
+    },
+    "textBlocks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.text-block",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "mediaBlock": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.media-block",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["shared.text-block", "shared.media-block"],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

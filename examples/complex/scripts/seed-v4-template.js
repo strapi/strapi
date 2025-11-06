@@ -84,6 +84,38 @@ function createImageBlockComponentForDynamicZone() {
   };
 }
 
+function createTextBlockComponent() {
+  return {
+    heading: `Heading ${randomString(6)}`,
+    body: `<p>Body content: ${randomString(20)}</p>`,
+    author: `Author ${randomString(4)}`,
+    publishedDate: randomDate().toISOString().split('T')[0],
+  };
+}
+
+function createMediaBlockComponent() {
+  return {
+    title: `Media Title ${randomString(6)}`,
+    mediaUrl: `https://example.com/media/${randomString(8)}.${['jpg', 'mp4', 'mp3'][randomNumber(0, 2)]}`,
+    mediaType: ['image', 'video', 'audio'][randomNumber(0, 2)],
+    description: `Media description: ${randomString(15)}`,
+  };
+}
+
+function createTextBlockComponentForDynamicZone() {
+  return {
+    __component: 'shared.text-block',
+    ...createTextBlockComponent(),
+  };
+}
+
+function createMediaBlockComponentForDynamicZone() {
+  return {
+    __component: 'shared.media-block',
+    ...createMediaBlockComponent(),
+  };
+}
+
 // Inject invalid enum values via direct database query (bypasses validation)
 async function injectInvalidEnumValuesForTable(strapi, entries, tableName) {
   if (!entries || entries.length === 0) return;
@@ -132,7 +164,15 @@ async function seedBasic(strapi) {
   const entries = [];
   for (let i = 0; i < 5; i++) {
     try {
-      const data = createBasicFields();
+      const data = {
+        ...createBasicFields(),
+        textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+        mediaBlock: createMediaBlockComponent(),
+        sections: [
+          createTextBlockComponentForDynamicZone(),
+          createMediaBlockComponentForDynamicZone(),
+        ],
+      };
       const entry = await strapi.entityService.create('api::basic.basic', {
         data,
       });
@@ -165,6 +205,12 @@ async function seedBasicDp(strapi) {
       const entry = await strapi.entityService.create('api::basic-dp.basic-dp', {
         data: {
           ...createBasicFields(),
+          textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+          mediaBlock: createMediaBlockComponent(),
+          sections: [
+            createTextBlockComponentForDynamicZone(),
+            createMediaBlockComponentForDynamicZone(),
+          ],
           publishedAt: new Date(),
         },
       });
@@ -184,7 +230,15 @@ async function seedBasicDp(strapi) {
   for (let i = 0; i < 2; i++) {
     try {
       const entry = await strapi.entityService.create('api::basic-dp.basic-dp', {
-        data: createBasicFields(),
+        data: {
+          ...createBasicFields(),
+          textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+          mediaBlock: createMediaBlockComponent(),
+          sections: [
+            createTextBlockComponentForDynamicZone(),
+            createMediaBlockComponentForDynamicZone(),
+          ],
+        },
         // No publishedAt = draft
       });
       drafts.push(entry);
@@ -220,6 +274,12 @@ async function seedBasicDpI18n(strapi) {
         const entry = await strapi.entityService.create('api::basic-dp-i18n.basic-dp-i18n', {
           data: {
             ...createBasicFields(),
+            textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+            mediaBlock: createMediaBlockComponent(),
+            sections: [
+              createTextBlockComponentForDynamicZone(),
+              createMediaBlockComponentForDynamicZone(),
+            ],
             publishedAt: new Date(),
           },
           locale,
@@ -243,7 +303,15 @@ async function seedBasicDpI18n(strapi) {
     for (let i = 0; i < 2; i++) {
       try {
         const entry = await strapi.entityService.create('api::basic-dp-i18n.basic-dp-i18n', {
-          data: createBasicFields(),
+          data: {
+            ...createBasicFields(),
+            textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+            mediaBlock: createMediaBlockComponent(),
+            sections: [
+              createTextBlockComponentForDynamicZone(),
+              createMediaBlockComponentForDynamicZone(),
+            ],
+          },
           locale,
         });
         entries.drafts.push(entry);
@@ -284,11 +352,16 @@ async function seedRelation(strapi, basicEntries) {
         oneToManyBasics: relatedBasics.map((b) => b.id),
         manyToOneBasic: relatedBasics[0]?.id || null,
         manyToManyBasics: relatedBasics.map((b) => b.id),
-        // Omit polymorphic relations (morphToOne, morphOne, morphMany) - they cause issues when null
         simpleInfo: createSimpleInfoComponent(),
         content: [
           createSimpleInfoComponentForDynamicZone(),
           createImageBlockComponentForDynamicZone(),
+        ],
+        textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+        mediaBlock: createMediaBlockComponent(),
+        sections: [
+          createTextBlockComponentForDynamicZone(),
+          createMediaBlockComponentForDynamicZone(),
         ],
       };
       const entry = await strapi.entityService.create('api::relation.relation', {
@@ -349,6 +422,12 @@ async function seedRelationDp(strapi, basicDpEntries) {
             createSimpleInfoComponentForDynamicZone(),
             createImageBlockComponentForDynamicZone(),
           ],
+          textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+          mediaBlock: createMediaBlockComponent(),
+          sections: [
+            createTextBlockComponentForDynamicZone(),
+            createMediaBlockComponentForDynamicZone(),
+          ],
           publishedAt: new Date(),
         },
       });
@@ -384,6 +463,12 @@ async function seedRelationDp(strapi, basicDpEntries) {
           content: [
             createSimpleInfoComponentForDynamicZone(),
             createImageBlockComponentForDynamicZone(),
+          ],
+          textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+          mediaBlock: createMediaBlockComponent(),
+          sections: [
+            createTextBlockComponentForDynamicZone(),
+            createMediaBlockComponentForDynamicZone(),
           ],
           // No publishedAt = draft
         },
@@ -445,6 +530,12 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
               createSimpleInfoComponentForDynamicZone(),
               createImageBlockComponentForDynamicZone(),
             ],
+            textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+            mediaBlock: createMediaBlockComponent(),
+            sections: [
+              createTextBlockComponentForDynamicZone(),
+              createMediaBlockComponentForDynamicZone(),
+            ],
             publishedAt: new Date(),
           },
           locale,
@@ -484,6 +575,12 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
             content: [
               createSimpleInfoComponentForDynamicZone(),
               createImageBlockComponentForDynamicZone(),
+            ],
+            textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
+            mediaBlock: createMediaBlockComponent(),
+            sections: [
+              createTextBlockComponentForDynamicZone(),
+              createMediaBlockComponentForDynamicZone(),
             ],
             // No publishedAt = draft
           },

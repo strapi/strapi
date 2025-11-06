@@ -1,0 +1,10 @@
+{
+  "collectionName": "components_shared_text_blocks",
+  "info": { "displayName": "text-block", "description": "Text content block" },
+  "attributes": {
+    "heading": { "type": "string", "required": true },
+    "body": { "type": "richtext" },
+    "author": { "type": "string" },
+    "publishedDate": { "type": "date" }
+  }
+}

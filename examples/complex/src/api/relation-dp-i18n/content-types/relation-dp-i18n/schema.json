@@ -53,20 +53,6 @@
       "relation": "manyToMany",
       "target": "api::basic-dp-i18n.basic-dp-i18n"
     },
-    "morphToOne": {
-      "type": "relation",
-      "relation": "morphToOne"
-    },
-    "morphOne": {
-      "type": "relation",
-      "relation": "morphOne",
-      "target": "plugin::upload.file"
-    },
-    "morphMany": {
-      "type": "relation",
-      "relation": "morphMany",
-      "target": "plugin::upload.file"
-    },
     "simpleInfo": {
       "type": "component",
       "repeatable": false,
@@ -80,6 +66,35 @@
     "content": {
       "type": "dynamiczone",
       "components": ["shared.simple-info", "shared.image-block"],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "textBlocks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.text-block",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "mediaBlock": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.media-block",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["shared.text-block", "shared.media-block"],
       "pluginOptions": {
         "i18n": {
           "localized": true
