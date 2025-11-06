@@ -1,23 +1,115 @@
-// Note: any tests that would cause writes to the db should be wrapped with this method to prevent changes
-// Alternatively, we could truncate/insert the tables in afterEach which should be only marginally slower
-// TODO: move to utils
+interface TestData {
+  [tableName: string]: any[];
+}
+
+// Store initial database state for reset
+let initialTestData: TestData = {};
+let isTestDataCaptured = false;
+let allTableNames: string[] = [];
+
+/**
+ * Capture the initial state of all database tables for later restoration
+ */
+export async function captureInitialTestData() {
+  if (isTestDataCaptured) return;
+
+  initialTestData = {};
+
+  const dbClient = strapi.db.connection.client.config.client;
+  console.log('Detected database client:', dbClient);
+
+  // Use Strapi's built-in dialect system to get table names
+  allTableNames = await strapi.db.dialect.schemaInspector.getTables();
+
+  for (const tableName of allTableNames) {
+    try {
+      const data = await strapi.db.connection(tableName).select('*');
+      initialTestData[tableName] = data;
+    } catch (error) {
+      console.warn(`Could not capture data for table ${tableName}:`, error.message);
+      initialTestData[tableName] = [];
+    }
+  }
+
+  isTestDataCaptured = true;
+}
+
+/**
+ * Reset all database tables to their initial state
+ */
+export async function resetTestDatabase() {
+  if (!isTestDataCaptured) {
+    console.warn('Initial test data not captured. Call captureInitialTestData first.');
+    return;
+  }
+
+  // Skip system tables that shouldn't be reset
+  const systemTables = [
+    'strapi_core_store_settings',
+    'strapi_database_schema',
+    'strapi_migrations',
+    'strapi_webhooks',
+    'strapi_api_tokens',
+    'strapi_api_token_permissions',
+    'strapi_transfer_tokens',
+    'strapi_transfer_token_permissions',
+    'admin_permissions',
+    'admin_users',
+    'admin_roles',
+    'admin_users_roles_links',
+    'up_permissions',
+    'up_roles',
+    'up_users',
+    'up_users_role_links',
+    'i18n_locale',
+  ];
+
+  const tablesToReset = allTableNames.filter(
+    (tableName) =>
+      !systemTables.includes(tableName) &&
+      !tableName.startsWith('strapi_') &&
+      !tableName.includes('_links') // Skip relation tables for now
+  );
+
+  for (const tableName of tablesToReset) {
+    try {
+      // Truncate table
+      await strapi.db.connection(tableName).del();
+
+      // Restore initial data if any
+      const initialData = initialTestData[tableName];
+      if (initialData && initialData.length > 0) {
+        await strapi.db.connection(tableName).insert(initialData);
+      }
+    } catch (error) {
+      console.warn(`Could not reset table ${tableName}:`, error.message);
+    }
+  }
+}
+
+/**
+ * Setup database reset for a test suite
+ * Call this in your describe block to automatically reset after each test
+ */
+export function setupDatabaseReset() {
+  beforeAll(async () => {
+    await captureInitialTestData();
+  });
+
+  afterEach(async () => {
+    await resetTestDatabase();
+  });
+}
+
+// Legacy transaction wrapper - deprecated, use setupDatabaseReset instead
 export const wrapInTransaction = (test) => {
-  return async (...args) => {
-    await strapi.db.transaction(async ({ trx, rollback }) => {
-      await test(trx, ...args);
-      await rollback();
-    });
-  };
+  console.warn('wrapInTransaction is deprecated. Use setupDatabaseReset() instead.');
+  return test;
 };
 
+// Keep old interface for backward compatibility but log deprecation
 export const testInTransaction = (...args: Parameters<jest.It>) => {
-  if (args.length > 1) {
-    return it(
-      args[0], // name
-      wrapInTransaction(args[1]), // fn
-      args[2] // timeout
-    );
-  }
+  console.warn('testInTransaction is deprecated. Use setupDatabaseReset() instead.');
   return it(...args);
 };
 
