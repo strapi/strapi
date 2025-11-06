@@ -727,15 +727,8 @@ async function validateRelationOrder(strapi) {
   const relationDpAll = await strapi.db.query('api::relation-dp.relation-dp').findMany({
     publicationState: 'all',
     populate: {
-      manyToManyBasics: {
-        orderBy: 'id', // Use id as proxy for order
-      },
+      manyToManyBasics: true,
     },
-  });
-
-  // Get basic-dp entries to check order
-  const basicDpAll = await strapi.db.query('api::basic-dp.basic-dp').findMany({
-    publicationState: 'all',
   });
 
   let orderChecked = 0;
@@ -763,9 +756,13 @@ async function validateRelationOrder(strapi) {
         });
 
         if (draftEntry && draftEntry.manyToManyBasics) {
-          const publishedIds = entry.manyToManyBasics.map((r) => r.id).sort();
-          const draftIds = draftEntry.manyToManyBasics.map((r) => r.id).sort();
-          if (publishedIds.join(',') !== draftIds.join(',')) {
+          const publishedIds = entry.manyToManyBasics.map((r) => r.id);
+          const draftIds = draftEntry.manyToManyBasics.map((r) => r.id);
+
+          const sameLength = publishedIds.length === draftIds.length;
+          const sameOrder = sameLength && publishedIds.every((id, index) => id === draftIds[index]);
+
+          if (!sameOrder) {
             errors.push(
               `relation-dp ${entry.id}: manyToManyBasics order differs between published and draft`
             );
