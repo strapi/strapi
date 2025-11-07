@@ -14,8 +14,6 @@
     "develop:sqlite": "node scripts/develop-with-db.js sqlite",
     "start": "strapi start",
     "strapi": "strapi",
-    "upgrade": "npx @strapi/upgrade latest",
-    "upgrade:dry": "npx @strapi/upgrade latest --dry",
     "clone:v4": "node scripts/setup-v4-project.js",
     "db:start:postgres": "node scripts/db-postgres.js start",
     "db:start:mariadb": "node scripts/db-mariadb.js start",
