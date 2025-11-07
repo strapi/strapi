@@ -31,12 +31,6 @@ async function captureInitialTestData() {
   isTestDataCaptured = true;
 }
 
-/**
- * Reset all database tables to their initial state
- *
- * NOTE:
- * Only use sparingly where needed as the operation is slower than testInTransaction
- */
 async function resetTestDatabase() {
   // Use Strapi's built-in schema update mechanism to disable constraints (e.g. foreign key constraints)
   await strapi.db.dialect.startSchemaUpdate();
@@ -65,6 +59,9 @@ async function resetTestDatabase() {
 /**
  * Setup database reset for a test suite
  * Call this in your describe block to automatically reset after each test
+ *
+ * NOTE:
+ * Only use sparingly where needed as the operation is slower than testInTransaction
  */
 export function setupDatabaseReset() {
   let isDataCaptured = false;
