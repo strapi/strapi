@@ -75,6 +75,41 @@ function ensureContainerRunning(serviceName) {
   }
 }
 
+function runSeedIfNeeded() {
+  if (dbType !== 'sqlite') {
+    return;
+  }
+
+  const seedLockPath = path.join(MONOREPO_ROOT, '.cache', 'complex-v4-sqlite.seeded');
+  if (fs.existsSync(seedLockPath)) {
+    return;
+  }
+
+  const seedScript = path.join(MONOREPO_ROOT, 'examples/complex-v4/scripts/seed-sqlite.js');
+  if (!fs.existsSync(seedScript)) {
+    return;
+  }
+
+  try {
+    console.log('Seeding v4 sqlite dataset...');
+    execSync('(cd ../../../complex-v4 && yarn seed:sqlite)', {
+      cwd: COMPLEX_DIR,
+      stdio: 'inherit',
+    });
+
+    // ensure the process finishes fully
+    const start = Date.now();
+    while (Date.now() - start < 2000) {
+      // busy wait
+    }
+
+    fs.mkdirSync(path.dirname(seedLockPath), { recursive: true });
+    fs.writeFileSync(seedLockPath, 'seeded');
+  } catch (error) {
+    console.error('Failed to seed sqlite database', error.message);
+  }
+}
+
 // Set up environment variables based on database type
 function getEnvVars() {
   const env = { ...process.env };
@@ -102,6 +137,7 @@ function getEnvVars() {
 
     case 'sqlite':
       env.DATABASE_CLIENT = 'sqlite';
+      env.DATABASE_FILENAME = path.join(MONOREPO_ROOT, 'examples/complex/.tmp/data.db');
       break;
   }
 
@@ -114,6 +150,8 @@ function runValidate() {
     ensureContainerRunning('postgres');
   } else if (dbType === 'mariadb') {
     ensureContainerRunning('mysql');
+  } else if (dbType === 'sqlite') {
+    runSeedIfNeeded();
   }
 
   const env = getEnvVars();

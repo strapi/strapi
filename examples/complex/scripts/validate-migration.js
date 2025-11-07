@@ -1387,6 +1387,21 @@ async function validateForeignKeyIntegrity(strapi) {
         },
       };
       break;
+    case 'mysql':
+    case 'mysql2':
+    case 'mariadb':
+      dbConfig = {
+        client: 'mysql2',
+        connection: {
+          host: process.env.DATABASE_HOST || 'localhost',
+          port: parseInt(process.env.DATABASE_PORT || '3306', 10),
+          database: process.env.DATABASE_NAME || 'strapi',
+          user: process.env.DATABASE_USERNAME || 'strapi',
+          password: process.env.DATABASE_PASSWORD || 'strapi',
+          ssl: process.env.DATABASE_SSL === 'true',
+        },
+      };
+      break;
     default:
       console.log(`⚠️  Foreign key integrity check only supported for PostgreSQL`);
       return [];
@@ -1556,7 +1571,7 @@ async function validateNonDPContentTypeRelations(strapi) {
       case 'mysql':
       case 'mysql2':
         dbConfig = {
-          client: 'mysql',
+          client: 'mysql2',
           connection: {
             host: process.env.DATABASE_HOST || 'localhost',
             port: parseInt(process.env.DATABASE_PORT || '3306', 10),
@@ -1820,8 +1835,9 @@ async function validateComponentRelationFiltering(strapi) {
       break;
     case 'mysql':
     case 'mysql2':
+    case 'mariadb':
       dbConfig = {
-        client: 'mysql',
+        client: 'mysql2',
         connection: {
           host: process.env.DATABASE_HOST || 'localhost',
           port: parseInt(process.env.DATABASE_PORT || '3306', 10),
@@ -2793,8 +2809,9 @@ async function getPreMigrationCounts() {
       break;
     case 'mysql':
     case 'mysql2':
+    case 'mariadb':
       dbConfig = {
-        client: 'mysql',
+        client: 'mysql2',
         connection: {
           host: process.env.DATABASE_HOST || 'localhost',
           port: parseInt(process.env.DATABASE_PORT || '3306', 10),
@@ -2971,8 +2988,9 @@ async function checkDatabaseFormat() {
       break;
     case 'mysql':
     case 'mysql2':
+    case 'mariadb':
       dbConfig = {
-        client: 'mysql',
+        client: 'mysql2',
         connection: {
           host: process.env.DATABASE_HOST || 'localhost',
           port: parseInt(process.env.DATABASE_PORT || '3306', 10),
