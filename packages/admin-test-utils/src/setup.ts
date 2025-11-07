@@ -70,13 +70,6 @@ window.console = {
       // do nothing
     } else if (/Support for defaultProps will be removed/gi.test(message)) {
       // do nothing
-      // Ignore act() warnings from sonner components which update state asynchronously
-    } else if (
-      /An update to (ForwardRef\(Toaster\)|Toast) inside a test was not wrapped in act/i.test(
-        message
-      )
-    ) {
-      // do nothing
     } else {
       throw new Error(message);
     }
