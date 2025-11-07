@@ -399,7 +399,14 @@ const EnumerationInput = ({
   return (
     <Field.Root error={error} hint={hint} name={name} required={required}>
       <Field.Label>{label}</Field.Label>
-      <Combobox disabled={disabled} onChange={handleChange} placeholder={placeholder} value={value}>
+      <Combobox
+        disabled={disabled}
+        onChange={handleChange}
+        placeholder={placeholder}
+        value={value}
+        autocomplete={{ type: 'list', filter: 'contains' }}
+        onClear={() => handleChange('')}
+      >
         {options.map((option) => (
           <ComboboxOption value={option.value} key={option.value}>
             {option.label}
