@@ -1,10 +1,8 @@
 import * as React from 'react';
 
-import { Alert, AlertVariant, useCallbackRef, Link, Box } from '@strapi/design-system';
+import { Alert, AlertVariant, Link, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Toaster, toast } from 'sonner';
-
-import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
 
 interface NotificationLink {
   label: string;
@@ -51,7 +49,7 @@ const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
       toast.custom(
         (id) => {
           return (
-            <Box width="50rem" maxWidth="100vw" paddingLeft={4} paddingRight={4}>
+            <Box width="50rem" maxWidth="100%">
               <Notification
                 type={type}
                 message={message}
@@ -75,13 +73,13 @@ const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <Toaster position="top-center" offset={HEIGHT_TOP_NAVIGATION} />
+      <Toaster position="top-center" />
       <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>
     </>
   );
 };
 
-interface NotificationProps extends NotificationConfig {
+interface NotificationProps extends Omit<NotificationConfig, 'blockTransition' | 'timeout'> {
   clearNotification: () => void;
 }
 
@@ -94,17 +92,6 @@ const Notification = ({
   type,
 }: NotificationProps) => {
   const { formatMessage } = useIntl();
-  /**
-   * Chances are `onClose` won't be classed as stabilised,
-   * so we use `useCallbackRef` to avoid make it stable.
-   */
-  const onCloseCallback = useCallbackRef(onClose);
-
-  const handleClose = React.useCallback(() => {
-    onCloseCallback();
-
-    clearNotification();
-  }, [clearNotification, onCloseCallback]);
 
   const getVariant = (): AlertVariant => {
     switch (type) {
@@ -128,7 +115,10 @@ const Notification = ({
           </Link>
         ) : undefined
       }
-      onClose={handleClose}
+      onClose={() => {
+        onClose?.();
+        clearNotification();
+      }}
       closeLabel={formatMessage({
         id: 'global.close',
         defaultMessage: 'Close',
