@@ -84,3 +84,5 @@ const admin: Plugin.Config.AdminInput = {
 
 // eslint-disable-next-line import/no-default-export
 export default admin;
+
+export * from './exports';

@@ -1,5 +1,5 @@
 import { Form } from '@strapi/admin/strapi-admin';
-import { render as renderRTL } from '@tests/utils';
+import { render as renderRTL, waitFor } from '@tests/utils';
 
 import { Wysiwyg, WysiwygProps } from '../Field';
 
@@ -246,6 +246,44 @@ describe('Wysiwyg render and actions buttons', () => {
     await user.click(getByRole('button', { name: /Preview/ }));
 
     expect(getByRole('combobox', { name: 'Headings' })).toHaveAttribute('aria-disabled', 'true');
+  });
+});
+
+describe('Wysiwyg keyboard shortcuts', () => {
+  const originalWarn = console.warn;
+
+  beforeAll(() => {
+    console.warn = jest.fn();
+  });
+
+  afterAll(() => {
+    console.warn = originalWarn;
+  });
+
+  it('should register CodeMirror commands for keyboard shortcuts', async () => {
+    const { container } = render();
+
+    // Wait for the editor to be rendered
+    await waitFor(() => {
+      // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+      expect(container.querySelector('.CodeMirror')).toBeInTheDocument();
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const CodeMirror = require('codemirror5');
+
+    // Verify that CodeMirror commands are registered
+    expect(CodeMirror.commands.bold).toBeDefined();
+    expect(typeof CodeMirror.commands.bold).toBe('function');
+
+    expect(CodeMirror.commands.italic).toBeDefined();
+    expect(typeof CodeMirror.commands.italic).toBe('function');
+
+    expect(CodeMirror.commands.underline).toBeDefined();
+    expect(typeof CodeMirror.commands.underline).toBe('function');
+
+    expect(CodeMirror.commands.link).toBeDefined();
+    expect(typeof CodeMirror.commands.link).toBe('function');
   });
 });
 

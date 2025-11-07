@@ -5,6 +5,7 @@ import { styled } from 'styled-components';
 
 import { PreviewWysiwyg } from './PreviewWysiwyg';
 import { newlineAndIndentContinueMarkdownList } from './utils/continueList';
+import { markdownHandler } from './utils/utils';
 
 import type { FieldValue, InputProps } from '@strapi/admin/strapi-admin';
 
@@ -20,6 +21,7 @@ interface EditorProps extends Omit<FieldValue, 'initialValue'>, Omit<InputProps,
   isPreviewMode?: boolean;
   isExpandMode?: boolean;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
+  onPasteImage?: (files: File[]) => void;
 }
 
 const Editor = React.forwardRef<EditorApi, EditorProps>(
@@ -35,10 +37,16 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
       placeholder,
       textareaRef,
       value,
+      onPasteImage,
     },
     forwardedRef
   ) => {
     const onChangeRef = React.useRef(onChange);
+    const onPasteImageRef = React.useRef(onPasteImage);
+
+    React.useEffect(() => {
+      onPasteImageRef.current = onPasteImage;
+    }, [onPasteImage]);
 
     React.useEffect(() => {
       if (editorRef.current) {
@@ -52,6 +60,14 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
           Enter: 'newlineAndIndentContinueMarkdownList',
           Tab: false,
           'Shift-Tab': false,
+          'Cmd-B': 'bold',
+          'Ctrl-B': 'bold',
+          'Cmd-I': 'italic',
+          'Ctrl-I': 'italic',
+          'Cmd-U': 'underline',
+          'Ctrl-U': 'underline',
+          'Cmd-K': 'link',
+          'Ctrl-K': 'link',
         },
         readOnly: false,
         smartIndent: false,
@@ -60,12 +76,49 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
         inputStyle: 'contenteditable',
       });
 
-      // @ts-expect-error – doesn't think command exists?
+      // Register custom commands for markdown formatting
       CodeMirror.commands.newlineAndIndentContinueMarkdownList =
         newlineAndIndentContinueMarkdownList;
-      editorRef.current.on('change', (doc) => {
+
+      CodeMirror.commands.bold = () => markdownHandler(editorRef, 'Bold');
+      CodeMirror.commands.italic = () => markdownHandler(editorRef, 'Italic');
+      CodeMirror.commands.underline = () => markdownHandler(editorRef, 'Underline');
+      CodeMirror.commands.link = () => markdownHandler(editorRef, 'Link');
+
+      const changeHandler = (doc: CodeMirror.Editor) => {
         onChangeRef.current(name, doc.getValue());
-      });
+      };
+
+      editorRef.current.on('change', changeHandler);
+
+      // Handle paste event to detect images
+      const handlePaste = (editor: CodeMirror.Editor, event: ClipboardEvent) => {
+        const items = event.clipboardData?.items;
+        if (!items) return;
+
+        // Collect all image files
+        const imageFiles: File[] = Array.from(items)
+          .filter((item) => item.type.includes('image'))
+          .map((item) => item.getAsFile())
+          .filter((file): file is File => file !== null);
+
+        // If we found images, prevent default and upload them
+        if (imageFiles.length > 0) {
+          event.preventDefault();
+          if (onPasteImageRef.current) {
+            onPasteImageRef.current(imageFiles);
+          }
+        }
+      };
+
+      editorRef.current.on('paste', handlePaste);
+
+      return () => {
+        if (editorRef.current) {
+          editorRef.current.off('change', changeHandler);
+          editorRef.current.off('paste', handlePaste);
+        }
+      };
     }, [editorRef, textareaRef, name, placeholder]);
 
     React.useEffect(() => {
