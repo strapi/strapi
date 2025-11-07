@@ -1,5 +1,5 @@
 import type { Schema } from '@strapi/types';
-import { isEqual } from 'lodash';
+import { isEqual } from 'lodash/fp';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
