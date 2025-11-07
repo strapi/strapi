@@ -3,7 +3,7 @@ import type { Core, Modules } from '@strapi/types';
 import { omit } from 'lodash/fp';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils/index';
+import { setupDatabaseReset } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb } from './utils';
 
@@ -25,8 +25,10 @@ describe('Document Service', () => {
     await destroyTestSetup(testUtils);
   });
 
+  setupDatabaseReset();
+
   describe('Update', () => {
-    testInTransaction('Can update a draft', async () => {
+    it('Can update a draft', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       const data = {
@@ -55,7 +57,7 @@ describe('Document Service', () => {
       });
     });
 
-    testInTransaction('Can update a draft article in dutch', async () => {
+    it('Can update a draft article in dutch', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
 
       const data = { title: 'updated document' };
@@ -78,7 +80,7 @@ describe('Document Service', () => {
       expect(enLocale).toBeDefined();
     });
 
-    testInTransaction('Create a new locale for an existing document', async () => {
+    it('Create a new locale for an existing document', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
       const newName = 'updated document';
 
@@ -106,7 +108,7 @@ describe('Document Service', () => {
       expect(enLocale).toBeDefined();
     });
 
-    testInTransaction('Can update a draft and publish it', async () => {
+    it('Can update a draft and publish it', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       const article = await updateArticle({
@@ -121,7 +123,7 @@ describe('Document Service', () => {
       });
     });
 
-    testInTransaction('Returns null if document to update does not exist', async () => {
+    it('Returns null if document to update does not exist', async () => {
       const article = await updateArticle({
         documentId: 'does-not-exist',
         data: { title: 'updated document' },
@@ -130,50 +132,47 @@ describe('Document Service', () => {
       expect(article).toBeNull();
     });
 
-    testInTransaction(
-      'Preserves non-localized fields when updating localized content for new locale',
-      async () => {
-        // Covers issue https://github.com/strapi/strapi/issues/21594
+    it('Preserves non-localized fields when updating localized content for new locale', async () => {
+      // Covers issue https://github.com/strapi/strapi/issues/21594
 
-        const MIXED_CONTENT_UID = 'api::mixed-content.mixed-content';
+      const MIXED_CONTENT_UID = 'api::mixed-content.mixed-content';
 
-        // Create a document with both localized and non-localized fields
-        const originalDoc = await strapi.documents(MIXED_CONTENT_UID).create({
-          data: {
-            localizedText: 'Original Text',
-            sharedText: 'Shared Content',
-          },
-          locale: 'en',
-        });
-
-        const updatedDoc = await strapi.documents(MIXED_CONTENT_UID).update({
-          documentId: originalDoc.documentId,
-          locale: 'es',
-          data: {
-            localizedText: 'Texto Español',
-          },
-        });
-
-        expect(updatedDoc).toMatchObject({
-          documentId: originalDoc.documentId,
-          locale: 'es',
-          localizedText: 'Texto Español',
-          // Non-localized field should remain unchanged
-          sharedText: 'Shared Content',
-        });
-
-        const originalEnDoc = await strapi.documents(MIXED_CONTENT_UID).findOne({
-          documentId: originalDoc.documentId,
-          locale: 'en',
-        });
-
-        expect(originalEnDoc).toMatchObject({
-          documentId: originalDoc.documentId,
-          locale: 'en',
+      // Create a document with both localized and non-localized fields
+      const originalDoc = await strapi.documents(MIXED_CONTENT_UID).create({
+        data: {
           localizedText: 'Original Text',
           sharedText: 'Shared Content',
-        });
-      }
-    );
+        },
+        locale: 'en',
+      });
+
+      const updatedDoc = await strapi.documents(MIXED_CONTENT_UID).update({
+        documentId: originalDoc.documentId,
+        locale: 'es',
+        data: {
+          localizedText: 'Texto Español',
+        },
+      });
+
+      expect(updatedDoc).toMatchObject({
+        documentId: originalDoc.documentId,
+        locale: 'es',
+        localizedText: 'Texto Español',
+        // Non-localized field should remain unchanged
+        sharedText: 'Shared Content',
+      });
+
+      const originalEnDoc = await strapi.documents(MIXED_CONTENT_UID).findOne({
+        documentId: originalDoc.documentId,
+        locale: 'en',
+      });
+
+      expect(originalEnDoc).toMatchObject({
+        documentId: originalDoc.documentId,
+        locale: 'en',
+        localizedText: 'Original Text',
+        sharedText: 'Shared Content',
+      });
+    });
   });
 });

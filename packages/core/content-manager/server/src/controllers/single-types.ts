@@ -318,7 +318,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const document = await findDocument({}, model);
+    const document = await findDocument({}, model, { locale });
     if (!document) {
       return ctx.notFound();
     }
