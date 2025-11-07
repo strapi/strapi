@@ -110,7 +110,9 @@ async function copyPublishedEntriesToDraft({
       subQb
         .select(
           ...scalarAttributes.map((att: string) => {
-            // Override 'publishedAt' and 'updatedAt' attributes
+            // NOTE: these literals reference Strapi's built-in system columns. They never get shortened by
+            // the identifier migration (5.0.0-01-convert-identifiers-long-than-max-length) so we can safely
+            // compare/use them directly here.
             if (att === 'published_at') {
               return trx.raw('NULL as ??', 'published_at');
             }
@@ -704,6 +706,8 @@ async function cloneComponentInstance({
 
   const newComponentRow: Record<string, any> = ensureObjectWithoutId(componentRow);
 
+  // `document_id`, `created_at`, `updated_at` are Strapi system columns whose names remain stable across the
+  // identifier-shortening migration, so it’s safe to check them directly here.
   if ('document_id' in newComponentRow) {
     newComponentRow.document_id = createId();
   }
@@ -817,6 +821,8 @@ async function buildPublishedToDraftMap({
   }
 
   const [publishedEntries, draftEntries] = await Promise.all([
+    // `document_id`, `locale`, and `published_at` are core columns that keep their exact names after the
+    // identifier-shortening migration, so selecting them by literal is safe.
     trx(meta.tableName).select(['id', 'document_id', 'locale']).whereNotNull('published_at') as any,
     trx(meta.tableName).select(['id', 'document_id', 'locale']).whereNull('published_at') as any,
   ]);
