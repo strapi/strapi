@@ -14,6 +14,8 @@ const registrationSchema = yup
       })
       .required()
       .noUnknown(),
+    deviceId: yup.string().uuid().optional(),
+    rememberMe: yup.boolean().optional(),
   })
   .noUnknown();
 
@@ -32,6 +34,8 @@ const adminRegistrationSchema = yup
     firstname: validators.firstname.required(),
     lastname: validators.lastname.nullable(),
     password: validators.password.required(),
+    deviceId: yup.string().uuid().optional(),
+    rememberMe: yup.boolean().optional(),
   })
   .required()
   .noUnknown();

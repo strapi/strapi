@@ -30,19 +30,34 @@ const previewLoader = async ({ params }) => {
     const searchParams = new URLSearchParams({
       locale,
       status,
+      populate: '*',
     });
     const route = collectionType === 'collection-types' ? `${apiName}/${documentId}` : apiName;
 
-    const response = await fetch(`/api/${route}?${searchParams.toString()}`, {
-      headers,
-    });
+    // Make both fetch requests in parallel
+    const [mainResponse, unrelatedResponse] = await Promise.all([
+      fetch(`/api/${route}?${searchParams.toString()}`, { headers }),
+      fetch(`/api/homepage?status=draft`, { headers }),
+    ]);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (!mainResponse.ok) {
+      throw new Error(`HTTP error! status: ${mainResponse.status}`);
     }
 
-    const result = await response.json();
-    return result.data;
+    if (!unrelatedResponse.ok) {
+      throw new Error(`HTTP error! status: ${unrelatedResponse.status}`);
+    }
+
+    // Process both responses in parallel
+    const [mainResult, unrelatedResult] = await Promise.all([
+      mainResponse.json(),
+      unrelatedResponse.json(),
+    ]);
+
+    return {
+      main: mainResult.data,
+      unrelated: unrelatedResult.data,
+    };
   } catch (error) {
     console.error('Error fetching preview data:', error);
     throw error;

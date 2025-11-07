@@ -14,6 +14,7 @@ import { type UseDocument } from '../../../hooks/useDocument';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
+import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
@@ -46,6 +47,7 @@ const InputRenderer = ({
   document,
   ...inputProps
 }: InputRendererProps) => {
+  const localeKey = document?.document?.locale || 'default';
   const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const {
     edit: { components },
@@ -55,6 +57,8 @@ const InputRenderer = ({
     document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
+  const isInPreviewPopover = useHasInputPopoverParent();
+  const shouldIgnorePermissions = isInDynamicZone || isInPreviewPopover;
 
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
   const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
@@ -71,7 +75,7 @@ const InputRenderer = ({
   const readableFields = idToCheck ? canReadFields : canCreateFields;
 
   // Everything preview related
-  const previewProps = usePreviewInputManager(inputProps.name);
+  const previewProps = usePreviewInputManager(inputProps.name, inputProps.attribute);
   const props = { ...inputProps, ...previewProps };
 
   /**
@@ -98,12 +102,12 @@ const InputRenderer = ({
   /**
    * If the user can't read the field then we don't want to ever render it.
    */
-  if (!canUserReadField && !isInDynamicZone) {
+  if (!canUserReadField && !shouldIgnorePermissions) {
     return <NotAllowedInput hint={hint} {...props} />;
   }
 
   const fieldIsDisabled =
-    (!canUserEditField && !isInDynamicZone) || props.disabled || isFormDisabled;
+    (!canUserEditField && !shouldIgnorePermissions) || props.disabled || isFormDisabled;
 
   /**
    * Because a custom field has a unique prop but the type could be confused with either
@@ -126,6 +130,7 @@ const InputRenderer = ({
 
     return (
       <FormInputRenderer
+        key={`input-${props.name}-${localeKey}`}
         {...props}
         {...previewProps}
         hint={hint}
@@ -144,6 +149,7 @@ const InputRenderer = ({
     const CustomInput = fields[props.type];
     return (
       <CustomInput
+        key={`input-${props.name}-${localeKey}`}
         {...props}
         // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
         hint={hint}
@@ -158,32 +164,77 @@ const InputRenderer = ({
    */
   switch (props.type) {
     case 'blocks':
-      return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      return (
+        <BlocksInput
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          type={props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'component':
       return (
         <ComponentInput
+          key={`input-${props.name}-${localeKey}`}
           {...props}
           hint={hint}
           layout={components[props.attribute.component].layout}
           disabled={fieldIsDisabled}
         >
-          {(componentInputProps) => <InputRenderer {...componentInputProps} />}
+          {(componentInputProps) => (
+            <InputRenderer
+              key={`input-${componentInputProps.name}-${localeKey}`}
+              {...componentInputProps}
+            />
+          )}
         </ComponentInput>
       );
     case 'dynamiczone':
-      return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <DynamicZone
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'relation':
-      return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <RelationsInput
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'richtext':
-      return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      return (
+        <Wysiwyg
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          type={props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'uid':
-      return <UIDInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      return (
+        <UIDInput
+          key={`input-${props.name}-${localeKey}`}
+          {...props}
+          hint={hint}
+          type={props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
     /**
      * Enumerations are a special case because they require options.
      */
     case 'enumeration':
       return (
         <FormInputRenderer
+          key={`input-${props.name}-${localeKey}`}
           {...props}
           {...previewProps}
           hint={hint}
@@ -198,6 +249,7 @@ const InputRenderer = ({
       const { unique: _unique, mainField: _mainField, ...restProps } = props;
       return (
         <FormInputRenderer
+          key={`input-${props.name}-${localeKey}`}
           {...restProps}
           {...previewProps}
           hint={hint}
@@ -226,9 +278,7 @@ const useFieldHint = (
     return hint;
   }
 
-  const units = !['biginteger', 'integer', 'number', 'dynamiczone', 'component'].includes(
-    attribute.type
-  )
+  const units = ['string', 'uid', 'richtext', 'email', 'password', 'text'].includes(attribute.type)
     ? formatMessage(
         {
           id: 'content-manager.form.Input.hint.character.unit',

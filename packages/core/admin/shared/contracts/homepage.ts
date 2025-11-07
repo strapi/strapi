@@ -61,3 +61,40 @@ export declare namespace GetCountDocuments {
     error?: errors.ApplicationError;
   }
 }
+
+export declare namespace Homepage {
+  export type WidgetUID = string;
+  export type Width = 4 | 6 | 8 | 12;
+
+  export interface Layout {
+    version: number;
+    widgets: Array<{
+      uid: WidgetUID;
+      width: Width;
+    }>;
+    updatedAt: string;
+  }
+
+  export interface LayoutWrite {
+    widgets: Array<{
+      uid: WidgetUID;
+      width: Width;
+    }>;
+  }
+}
+
+export declare namespace GetHomepageLayout {
+  export interface Response {
+    data: Homepage.Layout;
+  }
+}
+
+export declare namespace UpdateHomepageLayout {
+  export interface Request {
+    body: Homepage.LayoutWrite;
+  }
+
+  export interface Response {
+    data: Homepage.Layout;
+  }
+}
