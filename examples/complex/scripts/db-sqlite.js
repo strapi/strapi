@@ -86,17 +86,39 @@ switch (command) {
     break;
 
   case 'wipe':
-    console.log('Wiping sqlite database...');
+    console.log('Wiping sqlite databases (v4 and v5)...');
+    let wipedCount = 0;
+
+    // Wipe v5 database
     try {
       if (fs.existsSync(DB_FILE)) {
         fs.unlinkSync(DB_FILE);
-        console.log('✅ Database wiped');
-      } else {
-        console.log('Database file does not exist, nothing to wipe.');
+        console.log(`✅ V5 database wiped: ${DB_FILE}`);
+        wipedCount++;
       }
     } catch (error) {
-      console.error(`Error wiping database: ${error.message}`);
+      console.error(`Error wiping v5 database: ${error.message}`);
       process.exit(1);
+    }
+
+    // Wipe v4 database (if it exists)
+    const MONOREPO_ROOT = path.resolve(COMPLEX_DIR, '../..');
+    const V4_DB_FILE = path.resolve(MONOREPO_ROOT, '..', 'complex-v4', '.tmp', 'data.db');
+    try {
+      if (fs.existsSync(V4_DB_FILE)) {
+        fs.unlinkSync(V4_DB_FILE);
+        console.log(`✅ V4 database wiped: ${V4_DB_FILE}`);
+        wipedCount++;
+      }
+    } catch (error) {
+      console.error(`Error wiping v4 database: ${error.message}`);
+      process.exit(1);
+    }
+
+    if (wipedCount === 0) {
+      console.log('No database files found to wipe.');
+    } else {
+      console.log(`✅ Wiped ${wipedCount} database file(s)`);
     }
     break;
 
