@@ -344,9 +344,21 @@ async function seedBasicDpI18n(strapi) {
 }
 
 // Seed relation content types
-async function seedRelation(strapi, basicEntries) {
+async function seedRelation(strapi, basicEntries, basicDpEntries) {
   console.log('Seeding relation...');
   const entries = [];
+
+  const dpTargets = basicDpEntries?.published || [];
+
+  const getRandomDpTargetId = () => {
+    if (dpTargets.length === 0) {
+      return null;
+    }
+
+    const index = randomNumber(0, dpTargets.length - 1);
+    const target = dpTargets[index];
+    return target?.id ?? null;
+  };
 
   for (let i = 0; i < 5; i++) {
     try {
@@ -356,6 +368,8 @@ async function seedRelation(strapi, basicEntries) {
         relatedBasics[1] || relatedBasics[0] || basicEntries[1] || firstRelatedBasic;
       const firstRelatedBasicId = firstRelatedBasic ? firstRelatedBasic.id : null;
       const secondRelatedBasicId = secondRelatedBasic ? secondRelatedBasic.id : firstRelatedBasicId;
+
+      const relatedBasicDpId = getRandomDpTargetId();
 
       const data = {
         name: `Relation ${randomString(6)}`,
@@ -369,12 +383,21 @@ async function seedRelation(strapi, basicEntries) {
           createImageBlockComponentForDynamicZone(),
         ],
         textBlocks: [
-          createTextBlockComponent({ relatedBasicId: firstRelatedBasicId }),
-          createTextBlockComponent({ relatedBasicId: secondRelatedBasicId }),
+          createTextBlockComponent({
+            relatedBasicId: firstRelatedBasicId,
+            relatedBasicDpId,
+          }),
+          createTextBlockComponent({
+            relatedBasicId: secondRelatedBasicId,
+            relatedBasicDpId,
+          }),
         ],
         mediaBlock: createMediaBlockComponent(),
         sections: [
-          createTextBlockComponentForDynamicZone({ relatedBasicId: firstRelatedBasicId }),
+          createTextBlockComponentForDynamicZone({
+            relatedBasicId: firstRelatedBasicId,
+            relatedBasicDpId,
+          }),
           createMediaBlockComponentForDynamicZone(),
         ],
       };
@@ -717,7 +740,7 @@ async function seedSingleRun(strapi) {
 
   // Seed relation types
   // Note: relation-dp relates to basic-dp, relation-dp-i18n relates to basic-dp-i18n
-  const relationEntries = await seedRelation(strapi, basicEntries);
+  const relationEntries = await seedRelation(strapi, basicEntries, basicDpEntries);
   const relationDpEntries = await seedRelationDp(strapi, basicDpEntries);
   const relationDpI18nEntries = await seedRelationDpI18n(strapi, basicDpI18nEntries);
 

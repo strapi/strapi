@@ -1497,6 +1497,7 @@ async function validateNonDPContentTypeRelations(strapi) {
 
   const errors = [];
   const warnings = [];
+  let basicDpAll = [];
 
   // Find content types without draft/publish that relate to content types with draft/publish
   // In the test schema, 'api::basic.basic' doesn't have DP, and 'api::relation.relation' doesn't have DP
@@ -1512,7 +1513,7 @@ async function validateNonDPContentTypeRelations(strapi) {
     });
 
     // Get all basic-dp entries (published and drafts)
-    const basicDpAll = await strapi.db.query('api::basic-dp.basic-dp').findMany({
+    basicDpAll = await strapi.db.query('api::basic-dp.basic-dp').findMany({
       publicationState: 'all',
     });
 
@@ -1739,6 +1740,45 @@ async function validateNonDPContentTypeRelations(strapi) {
     }
   } catch (error) {
     errors.push(`Error in non-DP relation validation: ${error.message}`);
+  }
+
+  try {
+    if (basicDpAll.length > 0) {
+      const componentMeta = strapi.db.metadata.get('shared.text-block');
+      const relationAttribute = componentMeta?.attributes?.relatedBasicDp;
+
+      if (relationAttribute?.joinTable) {
+        const joinTableName = relationAttribute.joinTable.name;
+        const sourceColumnName = relationAttribute.joinTable.joinColumn.name;
+        const targetColumnName = relationAttribute.joinTable.inverseJoinColumn.name;
+
+        const rows = await strapi.db
+          .getConnection()
+          .select(sourceColumnName, targetColumnName)
+          .from(joinTableName);
+
+        const latestDraftIdMap = buildLatestDraftIdMap(basicDpAll);
+        const draftIds = new Set(
+          Array.from(latestDraftIdMap?.values() || [])
+            .map((value) => Number(value))
+            .filter((value) => !Number.isNaN(value))
+        );
+
+        const linksToDraftTargets = rows.filter((row) =>
+          draftIds.has(Number(row[targetColumnName]))
+        );
+
+        if (draftIds.size > 0 && linksToDraftTargets.length === 0) {
+          errors.push(
+            'Non-DP component relations to basic-dp entries were not remapped to draft targets'
+          );
+        }
+      }
+    }
+  } catch (error) {
+    errors.push(
+      `Failed to validate component-based non-DP relations to draft targets: ${error.message}`
+    );
   }
 
   return { errors, warnings };
@@ -2179,6 +2219,7 @@ async function validateComponentRelationTargets(strapi) {
         textBlocks: {
           populate: {
             relatedBasic: { fields: ['id', 'documentId', 'publishedAt'] },
+            relatedBasicDp: { fields: ['id', 'documentId', 'publishedAt'] },
           },
         },
       },
@@ -2194,6 +2235,13 @@ async function validateComponentRelationTargets(strapi) {
           const componentId = textBlock?.id || 'unknown';
           errors.push(
             `relation entry ${entry.id}: text-block ${componentId} is missing relatedBasic relation`
+          );
+        }
+
+        if (!textBlock?.relatedBasicDp) {
+          const componentId = textBlock?.id || 'unknown';
+          errors.push(
+            `relation entry ${entry.id}: text-block ${componentId} is missing relatedBasicDp relation`
           );
         }
       }
