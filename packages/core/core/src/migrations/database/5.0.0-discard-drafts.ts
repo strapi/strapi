@@ -183,6 +183,22 @@ function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   return chunks;
 }
 
+/**
+ * Get appropriate batch size based on database client.
+ * SQLite has a limit on expression tree depth (1000), so we use smaller batches.
+ */
+function getBatchSize(trx: Knex, defaultSize: number = 1000): number {
+  const client = trx.client.config.client;
+  const isSQLite =
+    typeof client === 'string' && ['sqlite', 'sqlite3', 'better-sqlite3'].includes(client);
+
+  // SQLite documentation states that the maximum number of terms in a
+  // compound SELECT statement is 500 by default.
+  // See: https://www.sqlite.org/limits.html
+  // We use 250 to be safe and account for other query complexity.
+  return isSQLite ? Math.min(defaultSize, 250) : defaultSize;
+}
+
 const applyJoinTableOrdering = (qb: any, joinTable: any, sourceColumnName: string) => {
   const seenColumns = new Set<string>();
 
@@ -922,8 +938,8 @@ async function copyRelationsForContentType({
     const { name: sourceColumnName } = joinTable.joinColumn;
     const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
-    // Process in batches to avoid MySQL query size limits
-    const publishedIdsChunks = chunkArray(publishedIds, 1000);
+    // Process in batches to avoid MySQL query size limits and SQLite expression tree limits
+    const publishedIdsChunks = chunkArray(publishedIds, getBatchSize(trx, 1000));
 
     for (const publishedIdsChunk of publishedIdsChunks) {
       // Get relations where the source is a published entry (in batches)
@@ -962,7 +978,7 @@ async function copyRelationsForContentType({
         .filter(Boolean);
 
       if (newRelations.length > 0) {
-        await trx.batchInsert(joinTable.name, newRelations, 1000);
+        await trx.batchInsert(joinTable.name, newRelations, getBatchSize(trx, 1000));
       }
     }
   }
@@ -1048,7 +1064,7 @@ async function copyRelationsFromOtherContentTypes({
       const existingKeys = new Set<string>();
 
       if (draftTargetIds.length > 0) {
-        const draftIdChunks = chunkArray(draftTargetIds, 1000);
+        const draftIdChunks = chunkArray(draftTargetIds, getBatchSize(trx, 1000));
         for (const draftChunk of draftIdChunks) {
           const existingRelationsQuery = trx(joinTable.name)
             .select('*')
@@ -1066,7 +1082,7 @@ async function copyRelationsFromOtherContentTypes({
         }
       }
 
-      const publishedIdChunks = chunkArray(publishedTargetIds, 1000);
+      const publishedIdChunks = chunkArray(publishedTargetIds, getBatchSize(trx, 1000));
 
       for (const chunk of publishedIdChunks) {
         const relationsQuery = trx(joinTable.name).select('*').whereIn(targetColumnName, chunk);
@@ -1105,7 +1121,7 @@ async function copyRelationsFromOtherContentTypes({
         }
 
         try {
-          await trx.batchInsert(joinTable.name, newRelations, 1000);
+          await trx.batchInsert(joinTable.name, newRelations, getBatchSize(trx, 1000));
         } catch (error: any) {
           if (!isDuplicateEntryError(error)) {
             throw error;
@@ -1178,8 +1194,8 @@ async function copyRelationsToOtherContentTypes({
     }
     const targetPublishedToDraftMap = targetMapCache.get(targetUid);
 
-    // Process in batches to avoid MySQL query size limits
-    const publishedIdsChunks = chunkArray(publishedIds, 1000);
+    // Process in batches to avoid MySQL query size limits and SQLite expression tree limits
+    const publishedIdsChunks = chunkArray(publishedIds, getBatchSize(trx, 1000));
 
     for (const publishedIdsChunk of publishedIdsChunks) {
       // Get relations where the source is a published entry of our content type (in batches)
@@ -1329,7 +1345,7 @@ async function updateJoinColumnRelations({
       continue;
     }
 
-    const draftIdsChunks = chunkArray(draftIds, 1000);
+    const draftIdsChunks = chunkArray(draftIds, getBatchSize(trx, 1000));
 
     for (const draftIdsChunk of draftIdsChunks) {
       // Get draft entries with their foreign key values
@@ -1418,8 +1434,8 @@ async function copyComponentRelations({
 
   const publishedIds = Array.from(publishedToDraftMap.keys());
 
-  // Process in batches to avoid MySQL query size limits
-  const publishedIdsChunks = chunkArray(publishedIds, 1000);
+  // Process in batches to avoid MySQL query size limits and SQLite expression tree limits
+  const publishedIdsChunks = chunkArray(publishedIds, getBatchSize(trx, 1000));
 
   for (const publishedIdsChunk of publishedIdsChunks) {
     // Get component relations for published entries
@@ -1578,26 +1594,33 @@ async function copyComponentRelations({
 
     // Check which relations already exist in the database to avoid conflicts
     // We need to check all unique constraint columns (entity_id, cmp_id, field, component_type)
-    const existingRelations = await trx(joinTableName)
-      .select([entityIdColumn, componentIdColumn, fieldColumn, componentTypeColumn])
-      .where((qb) => {
-        // Build OR conditions for each relation we want to check
-        for (const relation of deduplicatedRelations) {
-          qb.orWhere((subQb) => {
-            subQb
-              .where(entityIdColumn, relation[entityIdColumn])
-              .where(componentIdColumn, relation[componentIdColumn])
-              .where(fieldColumn, relation[fieldColumn])
-              .where(componentTypeColumn, relation[componentTypeColumn]);
-          });
-        }
-      });
-
-    // Create a set of existing relation keys for fast lookup
+    // Batch the check to avoid SQLite expression tree depth limits
+    // Use smaller batches for OR queries (50 for SQLite, 100 for others)
+    const batchSize = getBatchSize(trx, 50);
+    const relationChunks = chunkArray(deduplicatedRelations, batchSize);
     const existingKeys = new Set<string>();
-    for (const existing of existingRelations) {
-      const key = `${existing[entityIdColumn]}_${existing[componentIdColumn]}_${existing[fieldColumn]}_${existing[componentTypeColumn]}`;
-      existingKeys.add(key);
+
+    for (const relationChunk of relationChunks) {
+      const existingRelations = await trx(joinTableName)
+        .select([entityIdColumn, componentIdColumn, fieldColumn, componentTypeColumn])
+        .where((qb) => {
+          // Build OR conditions for each relation in this chunk
+          for (const relation of relationChunk) {
+            qb.orWhere((subQb) => {
+              subQb
+                .where(entityIdColumn, relation[entityIdColumn])
+                .where(componentIdColumn, relation[componentIdColumn])
+                .where(fieldColumn, relation[fieldColumn])
+                .where(componentTypeColumn, relation[componentTypeColumn]);
+            });
+          }
+        });
+
+      // Add existing relation keys to the set
+      for (const existing of existingRelations) {
+        const key = `${existing[entityIdColumn]}_${existing[componentIdColumn]}_${existing[fieldColumn]}_${existing[componentTypeColumn]}`;
+        existingKeys.add(key);
+      }
     }
 
     // Filter out relations that already exist

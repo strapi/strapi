@@ -9,6 +9,9 @@ const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
 const MONOREPO_ROOT = path.resolve(COMPLEX_DIR, '../..');
 const DOCKER_COMPOSE_FILE = path.join(MONOREPO_ROOT, 'docker-compose.dev.yml');
 
+const V4_PROJECT_DIR = path.resolve(MONOREPO_ROOT, '..', 'complex-v4');
+const SQLITE_DB_FILE = path.join(COMPLEX_DIR, '.tmp', 'data.db');
+
 const dbType = process.argv[2];
 // Skip '--' if present (yarn passes it as an argument separator)
 let multiplierArgIndex = 3;
@@ -75,38 +78,52 @@ function ensureContainerRunning(serviceName) {
   }
 }
 
-function runSeedIfNeeded() {
+function copyV4DatabaseToV5() {
   if (dbType !== 'sqlite') {
     return;
   }
 
-  const seedLockPath = path.join(MONOREPO_ROOT, '.cache', 'complex-v4-sqlite.seeded');
-  if (fs.existsSync(seedLockPath)) {
-    return;
+  const v4DbPath = path.join(V4_PROJECT_DIR, '.tmp', 'data.db');
+  if (!fs.existsSync(v4DbPath)) {
+    console.warn(`⚠️  v4 sqlite database not found at ${v4DbPath}`);
+    console.warn('Make sure you have run: (cd ../../../complex-v4 && yarn seed:sqlite)');
+    process.exit(1);
   }
 
-  const seedScript = path.join(MONOREPO_ROOT, 'examples/complex-v4/scripts/seed-sqlite.js');
-  if (!fs.existsSync(seedScript)) {
-    return;
+  const v4DbSize = fs.statSync(v4DbPath).size;
+  if (v4DbSize === 0) {
+    console.error(`⚠️  v4 sqlite database is empty at ${v4DbPath}`);
+    process.exit(1);
   }
 
+  // Copy v4 database to v5 location (overwrite if exists)
   try {
-    console.log('Seeding v4 sqlite dataset...');
-    execSync('(cd ../../../complex-v4 && yarn seed:sqlite)', {
-      cwd: COMPLEX_DIR,
-      stdio: 'inherit',
-    });
+    fs.mkdirSync(path.dirname(SQLITE_DB_FILE), { recursive: true });
+    // Remove v5 database if it exists to ensure clean copy
+    if (fs.existsSync(SQLITE_DB_FILE)) {
+      fs.unlinkSync(SQLITE_DB_FILE);
+    }
+    fs.copyFileSync(v4DbPath, SQLITE_DB_FILE);
 
-    // ensure the process finishes fully
-    const start = Date.now();
-    while (Date.now() - start < 2000) {
-      // busy wait
+    // Verify the copy was successful
+    if (!fs.existsSync(SQLITE_DB_FILE)) {
+      console.error(`❌ Failed to copy database: target file does not exist at ${SQLITE_DB_FILE}`);
+      process.exit(1);
     }
 
-    fs.mkdirSync(path.dirname(seedLockPath), { recursive: true });
-    fs.writeFileSync(seedLockPath, 'seeded');
+    const copiedDbSize = fs.statSync(SQLITE_DB_FILE).size;
+    if (copiedDbSize !== v4DbSize) {
+      console.error(
+        `❌ Database copy size mismatch: source ${v4DbSize} bytes, target ${copiedDbSize} bytes`
+      );
+      process.exit(1);
+    }
+
+    console.log(`✅ Copied v4 sqlite database to ${SQLITE_DB_FILE} (${copiedDbSize} bytes)`);
+    console.log(`   Database will be used at: ${SQLITE_DB_FILE}`);
   } catch (error) {
-    console.error('Failed to seed sqlite database', error.message);
+    console.error('Failed to copy sqlite database:', error.message);
+    process.exit(1);
   }
 }
 
@@ -137,7 +154,7 @@ function getEnvVars() {
 
     case 'sqlite':
       env.DATABASE_CLIENT = 'sqlite';
-      env.DATABASE_FILENAME = path.join(MONOREPO_ROOT, 'examples/complex/.tmp/data.db');
+      env.DATABASE_FILENAME = SQLITE_DB_FILE;
       break;
   }
 
@@ -151,7 +168,7 @@ function runValidate() {
   } else if (dbType === 'mariadb') {
     ensureContainerRunning('mysql');
   } else if (dbType === 'sqlite') {
-    runSeedIfNeeded();
+    copyV4DatabaseToV5();
   }
 
   const env = getEnvVars();

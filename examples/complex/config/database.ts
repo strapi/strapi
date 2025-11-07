@@ -44,7 +44,12 @@ export default ({ env }) => {
     },
     sqlite: {
       connection: {
-        filename: path.join(__dirname, '..', '..', env('DATABASE_FILENAME', '.tmp/data.db')),
+        filename: (() => {
+          const dbFilename = env('DATABASE_FILENAME', '.tmp/data.db');
+          // If DATABASE_FILENAME is an absolute path, use it directly
+          // Otherwise, resolve it relative to the project root (examples/complex)
+          return path.isAbsolute(dbFilename) ? dbFilename : path.join(__dirname, '..', dbFilename);
+        })(),
       },
       useNullAsDefault: true,
     },
