@@ -4,6 +4,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import type { AdminUser } from '../../../../../shared/contracts/shared';
 import { GetAiToken } from '../../../../../shared/contracts/ai';
+import { getService } from '../../utils';
 
 export default {
   async getAiToken(ctx: Context) {
@@ -271,5 +272,12 @@ export default {
 
       throw fetchError;
     }
+  },
+  async getAIFeatureConfig(ctx: Context) {
+    const aiFeatureConfig = await strapi.get('ai').getAIFeatureConfig();
+
+    ctx.body = {
+      data: aiFeatureConfig,
+    };
   },
 };
