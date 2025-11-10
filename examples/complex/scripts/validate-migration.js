@@ -38,6 +38,105 @@ const EXPECTED_COUNTS_PER_RUN = {
   relationDpI18n: { published: 10, drafts: 6, total: 16 }, // 5+3 per locale × 2 locales
 };
 
+const INTENTIONAL_INVALID_FOREIGN_KEY_ID = 987654321;
+
+/**
+ * Normalizes CLI inputs into booleans while preserving an optional default.
+ */
+function parseBoolean(value, defaultValue = true) {
+  if (value === undefined) {
+    return true;
+  }
+
+  const normalized = String(value).toLowerCase();
+  if (['true', '1', 'yes', 'y', 'on'].includes(normalized)) {
+    return true;
+  }
+  if (['false', '0', 'no', 'n', 'off'].includes(normalized)) {
+    return false;
+  }
+
+  return defaultValue;
+}
+
+/**
+ * Parses the CLI flags supported by the validation script.
+ * Recognized options:
+ *   --invalid-fk / --no-invalid-fk indicate whether to expect injected FK corruption
+ *   <number> overrides the seed multiplier used during validation.
+ */
+function parseCliArgs(args) {
+  const options = {};
+
+  for (const arg of args) {
+    if (arg.startsWith('--')) {
+      const [flag, rawValue] = arg.split('=');
+
+      switch (flag) {
+        case '--invalid-fk':
+          options.expectInvalidFk = parseBoolean(rawValue, true);
+          break;
+        case '--no-invalid-fk':
+          options.expectInvalidFk = false;
+          break;
+        default:
+          break;
+      }
+    } else if (!Number.isNaN(Number(arg))) {
+      options.multiplier = arg;
+    }
+  }
+
+  return options;
+}
+
+/**
+ * Accepts multiple shapes (number/string/object) when the validator is invoked
+ * programmatically.
+ */
+function normalizeValidateOptions(input) {
+  if (input == null) {
+    return {};
+  }
+
+  if (typeof input === 'number') {
+    return { multiplier: input };
+  }
+
+  if (typeof input === 'string' && !input.startsWith('--')) {
+    return { multiplier: input };
+  }
+
+  if (typeof input === 'object') {
+    return { ...input };
+  }
+
+  return {};
+}
+
+/**
+ * Handles differing database driver shapes when returning `count(*)` results.
+ */
+function parseCountResult(result) {
+  if (!result) {
+    return 0;
+  }
+
+  if (result.count !== undefined) {
+    return parseInt(result.count, 10) || 0;
+  }
+
+  if (result['count(*)'] !== undefined) {
+    return parseInt(result['count(*)'], 10) || 0;
+  }
+
+  const first = Object.values(result)[0];
+  return parseInt(first, 10) || 0;
+}
+
+/**
+ * Scales the per-run expectations to match the multiplier used when seeding v4 data.
+ */
 function getExpectedCounts(multiplier = 1) {
   const mult = parseInt(multiplier, 10) || 1;
   return {
@@ -66,6 +165,10 @@ function getExpectedCounts(multiplier = 1) {
   };
 }
 
+/**
+ * Builds a lookup of the newest draft id per documentId/locale pair so we can
+ * compare published vs draft relations deterministically.
+ */
 function buildLatestDraftIdMap(entries) {
   const latestDraftIdByDocumentAndLocale = new Map();
 
@@ -86,6 +189,10 @@ function buildLatestDraftIdMap(entries) {
   return latestDraftIdByDocumentAndLocale;
 }
 
+/**
+ * Generates a `populate` tree for entity service queries that mirrors the schema
+ * so validation can traverse every nested relation/component.
+ */
 function buildPopulateTreeFromMeta(meta) {
   if (!meta) {
     return undefined;
@@ -110,6 +217,9 @@ function buildPopulateTreeFromMeta(meta) {
   return Object.keys(populate).length > 0 ? populate : undefined;
 }
 
+/**
+ * Normalizes an entity into a stable string we can compare across drafts/published entries.
+ */
 function getEntityIdentifier(entity) {
   if (!entity) {
     return null;
@@ -127,6 +237,9 @@ function getEntityIdentifier(entity) {
   return null;
 }
 
+/**
+ * Returns the documentId+locale pair used in the draft/publish maps.
+ */
 function getEntityKey(entity) {
   if (!entity?.documentId) {
     return null;
@@ -135,6 +248,9 @@ function getEntityKey(entity) {
   return `${entity.documentId}::${entity.locale || ''}`;
 }
 
+/**
+ * Applies `getEntityIdentifier` to an array while filtering nulls.
+ */
 function getEntityIdentifierArray(entities) {
   if (!Array.isArray(entities)) {
     return [];
@@ -145,6 +261,10 @@ function getEntityIdentifierArray(entities) {
     .filter((identifier) => identifier != null);
 }
 
+/**
+ * Captures the relational footprint of a `relation-dp` entry so we can compare
+ * published vs draft versions without relying on deep object equality.
+ */
 function summarizeRelationEntry(entry) {
   return {
     oneToOneBasic: getEntityIdentifier(entry.oneToOneBasic),
@@ -156,6 +276,10 @@ function summarizeRelationEntry(entry) {
   };
 }
 
+/**
+ * Verifies that every draft/publish content type now has matching draft + published
+ * rows per documentId (and locale when applicable).
+ */
 async function validateDocumentStructure(strapi, expected) {
   console.log('\n📄 Validating v5 document structure (draft/publish)...\n');
 
@@ -304,6 +428,10 @@ async function validateDocumentStructure(strapi, expected) {
   return errors;
 }
 
+/**
+ * Ensures relational integrity survived the migration by checking each association
+ * still points to an existing target and self-relations remain self-referential.
+ */
 async function validateRelationsPreserved(strapi) {
   console.log('\n🔗 Validating relations are preserved after migration...\n');
 
@@ -424,6 +552,109 @@ async function validateRelationsPreserved(strapi) {
   return errors;
 }
 
+/**
+ * Confirms the intentionally injected FK violations from the v4 seed still exist so
+ * we know the migration didn't silently "fix" them.
+ */
+async function validateIntentionalFkViolations(strapi) {
+  console.log('\n🚨 Checking intentionally injected foreign key violations...\n');
+
+  const errors = [];
+  const warnings = [];
+  const db = strapi.db.connection;
+  const invalidId = INTENTIONAL_INVALID_FOREIGN_KEY_ID;
+
+  try {
+    const relationDpMeta = strapi.db.metadata.get('api::relation-dp.relation-dp');
+    if (relationDpMeta) {
+      const relationDpTable = relationDpMeta.tableName;
+      const oneToOneColumn = relationDpMeta.attributes?.oneToOneBasic?.joinColumn?.name;
+      if (relationDpTable && oneToOneColumn) {
+        const result = await db(relationDpTable)
+          .where(oneToOneColumn, invalidId)
+          .count('* as count')
+          .first();
+        const count = parseCountResult(result);
+        if (count > 0) {
+          console.log(
+            `✅ relation-dp: found ${count} record(s) referencing intentionally invalid basic-dp id ${invalidId}`
+          );
+        } else {
+          errors.push(
+            `Expected relation-dp entries referencing intentionally invalid basic-dp id ${invalidId} (none found)`
+          );
+        }
+      } else {
+        warnings.push('Unable to inspect relation-dp oneToOneBasic for intentional FK violations');
+      }
+
+      const joinTable = relationDpMeta.attributes?.manyToManyBasics?.joinTable;
+      if (joinTable?.name && joinTable?.inverseJoinColumn?.name) {
+        const joinResult = await db(joinTable.name)
+          .where(joinTable.inverseJoinColumn.name, invalidId)
+          .count('* as count')
+          .first();
+        const joinCount = parseCountResult(joinResult);
+        if (joinCount > 0) {
+          console.log(
+            `✅ relation-dp manyToManyBasics: found ${joinCount} intentionally invalid reference(s)`
+          );
+        } else {
+          errors.push(
+            `Expected relation-dp manyToManyBasics entries referencing intentionally invalid basic-dp id ${invalidId} (none found)`
+          );
+        }
+      } else {
+        warnings.push(
+          'Unable to inspect relation-dp manyToManyBasics join table for intentional FK violations'
+        );
+      }
+    } else {
+      warnings.push('Unable to load metadata for api::relation-dp.relation-dp');
+    }
+
+    const relationMeta = strapi.db.metadata.get('api::relation.relation');
+    if (relationMeta) {
+      const relationTable = relationMeta.tableName;
+      const oneToOneColumn = relationMeta.attributes?.oneToOneBasic?.joinColumn?.name;
+      if (relationTable && oneToOneColumn) {
+        const relationResult = await db(relationTable)
+          .where(oneToOneColumn, invalidId)
+          .count('* as count')
+          .first();
+        const relationCount = parseCountResult(relationResult);
+        if (relationCount > 0) {
+          console.log(
+            `✅ relation: found ${relationCount} record(s) referencing intentionally invalid basic id ${invalidId}`
+          );
+        } else {
+          errors.push(
+            `Expected relation entries referencing intentionally invalid basic id ${invalidId} (none found)`
+          );
+        }
+      } else {
+        warnings.push('Unable to inspect relation oneToOneBasic for intentional FK violations');
+      }
+    } else {
+      warnings.push('Unable to load metadata for api::relation.relation');
+    }
+  } catch (error) {
+    errors.push(
+      `Failed to validate intentionally injected foreign key violations: ${error.message}`
+    );
+  }
+
+  if (warnings.length > 0) {
+    warnings.forEach((warning) => console.log(`⚠️  ${warning}`));
+  }
+
+  return { errors, warnings };
+}
+
+/**
+ * Compares the post-migration row counts against expected values, accounting for the
+ * extra drafts that get created during migration.
+ */
 async function validateCounts(strapi, expected) {
   console.log('\n📊 Validating entry counts...\n');
 
@@ -556,6 +787,10 @@ async function validateCounts(strapi, expected) {
   return { errors, checks };
 }
 
+/**
+ * Checks that component and dynamic-zone content survived the migration, including
+ * the presence of the required `__component` discriminator.
+ */
 async function validateComponents(strapi) {
   console.log('\n🧩 Validating components and dynamic zones...\n');
 
@@ -606,7 +841,8 @@ async function validateComponents(strapi) {
 }
 
 /**
- * Validate joinColumn relations (oneToOne, manyToOne without join tables)
+ * Placeholder that documents join-column coverage. Helpful for future expansion
+ * without producing noisy console output.
  */
 async function validateJoinColumnRelations(strapi) {
   console.log('\n🔗 Validating joinColumn relations (oneToOne, manyToOne)...\n');
@@ -615,7 +851,8 @@ async function validateJoinColumnRelations(strapi) {
 }
 
 /**
- * Validate document IDs are preserved correctly
+ * Ensures every draft/publish table retained its documentId metadata and that
+ * every document has a draft counterpart.
  */
 async function validateDocumentIds(strapi) {
   console.log('\n🆔 Validating document IDs are preserved...\n');
@@ -714,7 +951,8 @@ async function validateDocumentIds(strapi) {
 }
 
 /**
- * Validate relation order is preserved
+ * Verifies ordered many-to-many relations remained in sync between published and
+ * draft entries.
  */
 async function validateRelationOrder(strapi) {
   console.log('\n📋 Validating relation order is preserved...\n');
@@ -793,7 +1031,8 @@ async function validateRelationOrder(strapi) {
 }
 
 /**
- * Validate relation counts before and after migration
+ * Compares join-table row counts between published and draft rows to ensure cloning
+ * didn't drop or duplicate relations.
  */
 async function validateRelationCounts(strapi, preMigrationCounts) {
   console.log('\n📊 Validating relation counts before/after migration...\n');
@@ -934,7 +1173,8 @@ async function validateRelationCounts(strapi, preMigrationCounts) {
 }
 
 /**
- * Validate orphaned relations (relations pointing to non-existent entries)
+ * Detects relations that reference missing targets after migration, signalling
+ * that cloning or remapping failed.
  */
 async function validateOrphanedRelations(strapi) {
   console.log('\n🔍 Validating no orphaned relations exist...\n');
@@ -1022,7 +1262,8 @@ async function validateOrphanedRelations(strapi) {
 }
 
 /**
- * Validate scalar attributes are copied correctly
+ * Spot-checks scalar columns to confirm the draft rows created by the migration
+ * match their published counterparts.
  */
 async function validateScalarAttributes(strapi) {
   console.log('\n📝 Validating scalar attributes are preserved...\n');
@@ -1073,7 +1314,8 @@ async function validateScalarAttributes(strapi) {
 }
 
 /**
- * Validate relation targets (draft entries should point to draft targets)
+ * Confirms that newly created drafts reference the correct draft targets rather
+ * than falling back to published rows.
  */
 async function validateRelationTargets(strapi) {
   console.log('\n🎯 Validating relation targets point to correct draft/published versions...\n');
@@ -1291,7 +1533,8 @@ async function validateOrderPreservation(strapi) {
 }
 
 /**
- * Validate no duplicate entries exist
+ * Guards against duplicated documentId+status combos that would violate the
+ * draft/publish invariants.
  */
 async function validateDuplicateEntries(strapi) {
   console.log('\n🔍 Validating no duplicate entries...\n');
@@ -1356,7 +1599,8 @@ async function validateDuplicateEntries(strapi) {
 }
 
 /**
- * Validate foreign key integrity
+ * Uses raw SQL to ensure the database no longer contains orphaned component relations
+ * after migration (Postgres/MySQL only).
  */
 async function validateForeignKeyIntegrity(strapi) {
   console.log('\n🔗 Validating foreign key integrity...\n');
@@ -1463,7 +1707,8 @@ async function validateForeignKeyIntegrity(strapi) {
 }
 
 /**
- * Validate relation count mismatches (comparing before/after)
+ * Highlights relation discrepancies by comparing pre-migration row counts with the
+ * post-migration picture.
  */
 async function validateRelationCountMismatches(strapi, preMigrationCounts) {
   console.log('\n📊 Validating relation count mismatches...\n');
@@ -1503,9 +1748,8 @@ async function validateRelationCountMismatches(strapi, preMigrationCounts) {
 }
 
 /**
- * Validate non-DP content type relation handling
- * Relations from content types without draft/publish should only be created
- * if there isn't already a relation to an old draft with the same document_id
+ * Ensures relations coming from content types without draft/publish are handled
+ * exactly once during migration (no duplicate links to the new drafts).
  */
 async function validateNonDPContentTypeRelations(strapi) {
   console.log('\n🔗 Validating non-DP content type relation handling...\n');
@@ -1800,8 +2044,8 @@ async function validateNonDPContentTypeRelations(strapi) {
 }
 
 /**
- * Validate component relation filtering
- * Component relations should be filtered out if the component's parent has draft/publish enabled
+ * Replays the component filtering logic to confirm we skipped cloning component
+ * relations that sit beneath draft/publish-enabled parents.
  */
 async function validateComponentRelationFiltering(strapi) {
   console.log('\n🧩 Validating component relation filtering...\n');
@@ -2222,6 +2466,10 @@ async function validateComponentRelationFiltering(strapi) {
   return { errors, warnings };
 }
 
+/**
+ * Checks that repeatable component relations (e.g. text-block) point to the correct
+ * draft targets and keep self-references intact.
+ */
 async function validateComponentRelationTargets(strapi) {
   console.log('\n🧩 Validating text-block component relations...\n');
 
@@ -2475,8 +2723,8 @@ async function validateComponentRelationTargets(strapi) {
 }
 
 /**
- * Validate that migration matches discard() behavior expectations
- * Based on RELATION_MIGRATION_EXPECTATIONS.md analysis
+ * Compares the migration output against the expected behavior of `documentService.discard()`
+ * so we know the SQL path mirrors the runtime implementation.
  */
 async function validateDiscardBehaviorExpectations(strapi) {
   console.log('\n🎯 Validating discard() behavior expectations...\n');
@@ -2781,7 +3029,7 @@ async function validateDiscardBehaviorExpectations(strapi) {
 }
 
 /**
- * Get pre-migration counts using raw database queries (before Strapi loads)
+ * Grabs raw table counts before Strapi boots so we can compare v4 vs v5 states later.
  */
 async function getPreMigrationCounts() {
   if (!knex) {
@@ -2954,13 +3202,8 @@ async function getPreMigrationCounts() {
 }
 
 /**
- * Check if database is in v4 format before running migrations
- * v4 indicators:
- * - Tables don't have `document_id` column
- * - Draft/publish uses `published_at` directly on content type tables
- * v5 indicators:
- * - Tables have `document_id` column for draft/publish content types
- * - `strapi_database_schema` table exists
+ * Peeks at the database structure to warn when validation is executed against an
+ * already-migrated dataset (which would hide migration issues).
  */
 async function checkDatabaseFormat() {
   if (!knex) {
@@ -3167,11 +3410,26 @@ async function checkDatabaseFormat() {
   }
 }
 
-async function validate(multiplier = 1) {
-  const multiplierNum = parseInt(multiplier, 10) || 1;
+/**
+ * Primary validation workflow invoked from the CLI. It gathers pre-migration stats,
+ * boots Strapi, runs every consistency check, and reports a consolidated result.
+ */
+async function validate(options = {}) {
+  const normalizedOptions = normalizeValidateOptions(options);
+  const multiplierNum = parseInt(normalizedOptions.multiplier, 10) || 1;
+  const expectInvalidFk = normalizedOptions.expectInvalidFk === true;
   const expected = getExpectedCounts(multiplierNum);
 
   console.log(`🔍 Validating migrated data from v4 to v5 (multiplier: ${multiplierNum})...\n`);
+  if (expectInvalidFk) {
+    console.log(
+      '🚨 Expecting intentionally injected foreign key violations (--invalid-fk enabled).'
+    );
+  } else {
+    console.log(
+      'ℹ️  Skipping intentional foreign key validation (run with --invalid-fk to enable).'
+    );
+  }
 
   // Pre-check: Get counts before migrations run
   console.log('🔍 Getting pre-migration counts (before Strapi loads)...');
@@ -3227,6 +3485,11 @@ async function validate(multiplier = 1) {
 
   try {
     const allErrors = [];
+
+    if (expectInvalidFk) {
+      const intentionalFkResult = await validateIntentionalFkViolations(app);
+      allErrors.push(...(intentionalFkResult.errors || []));
+    }
 
     // Run all validations
     const countsResult = await validateCounts(app, expected);
@@ -3410,8 +3673,8 @@ async function validate(multiplier = 1) {
 }
 
 if (require.main === module) {
-  const multiplier = process.argv[2] || '1';
-  validate(multiplier)
+  const cliOptions = parseCliArgs(process.argv.slice(2));
+  validate(cliOptions)
     .then((success) => {
       process.exit(success ? 0 : 1);
     })

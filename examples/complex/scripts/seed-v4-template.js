@@ -7,7 +7,286 @@
 
 const strapi = require('@strapi/strapi')();
 
-// Helper to generate random data
+const INTENTIONAL_INVALID_FOREIGN_KEY_ID = 987654321;
+
+/**
+ * Parses CLI/string inputs into booleans, preserving a default when the flag is absent.
+ */
+function parseBoolean(value, defaultValue = true) {
+  if (value === undefined) {
+    return true;
+  }
+
+  const normalized = String(value).toLowerCase();
+  if (['true', '1', 'yes', 'y', 'on'].includes(normalized)) {
+    return true;
+  }
+  if (['false', '0', 'no', 'n', 'off'].includes(normalized)) {
+    return false;
+  }
+
+  return defaultValue;
+}
+
+/**
+ * Converts CLI arguments into seed options. Supports:
+ *   --invalid-fk / --no-invalid-fk to toggle corrupt FK injection
+ *   <number> to set the seed multiplier.
+ */
+function parseCliArgs(args) {
+  const options = {};
+
+  for (const arg of args) {
+    if (arg.startsWith('--')) {
+      const [flag, rawValue] = arg.split('=');
+
+      switch (flag) {
+        case '--invalid-fk':
+          options.injectInvalidFk = parseBoolean(rawValue, true);
+          break;
+        case '--no-invalid-fk':
+          options.injectInvalidFk = false;
+          break;
+        default:
+          break;
+      }
+    } else if (!Number.isNaN(Number(arg))) {
+      options.multiplier = arg;
+    }
+  }
+
+  return options;
+}
+
+/**
+ * Normalizes programmatic seed invocations so callers can pass a number, string, or object.
+ */
+function normalizeSeedOptions(input) {
+  if (input == null) {
+    return {};
+  }
+
+  if (typeof input === 'number') {
+    return { multiplier: input };
+  }
+
+  if (typeof input === 'string' && !input.startsWith('--')) {
+    return { multiplier: input };
+  }
+
+  if (typeof input === 'object') {
+    return { ...input };
+  }
+
+  return {};
+}
+
+const quoteIdentifier = (name) => `"${String(name).replace(/"/g, '""')}"`;
+
+/**
+ * Disables FK checks while the provided callback runs, then restores them.
+ * This is only used when injecting intentionally broken relations.
+ */
+async function withForeignKeyChecksDisabled(strapi, tables, callback) {
+  const db = strapi.db.connection;
+  const client = db.client.config.client;
+  const tableList = Array.isArray(tables) ? tables.filter(Boolean) : [];
+
+  const disable = async () => {
+    if (client === 'sqlite' || client === 'better-sqlite3') {
+      await db.raw('PRAGMA foreign_keys = OFF;');
+    } else if (client === 'mysql' || client === 'mysql2' || client === 'mariadb') {
+      await db.raw('SET FOREIGN_KEY_CHECKS = 0;');
+    } else if (client === 'postgres' || client === 'pg') {
+      for (const table of tableList) {
+        await db.raw(`ALTER TABLE ${quoteIdentifier(table)} DISABLE TRIGGER ALL;`);
+      }
+    }
+  };
+
+  const enable = async () => {
+    if (client === 'sqlite' || client === 'better-sqlite3') {
+      await db.raw('PRAGMA foreign_keys = ON;');
+    } else if (client === 'mysql' || client === 'mysql2' || client === 'mariadb') {
+      await db.raw('SET FOREIGN_KEY_CHECKS = 1;');
+    } else if (client === 'postgres' || client === 'pg') {
+      for (const table of tableList) {
+        await db.raw(`ALTER TABLE ${quoteIdentifier(table)} ENABLE TRIGGER ALL;`);
+      }
+    }
+  };
+
+  await disable();
+  try {
+    return await callback();
+  } finally {
+    try {
+      await enable();
+    } catch (error) {
+      console.error(`  ⚠️  Failed to re-enable foreign key checks: ${error.message}`);
+    }
+  }
+}
+
+/**
+ * Writes a handful of relations that point to a placeholder id so we can prove the
+ * v5 migration copes with legacy orphaned rows instead of crashing.
+ */
+async function injectInvalidForeignKeyViolations(strapi, context = {}) {
+  if (!context.injectInvalidFk) {
+    return;
+  }
+
+  const db = strapi.db.connection;
+  const invalidId = INTENTIONAL_INVALID_FOREIGN_KEY_ID;
+  const tablesToDisable = new Set();
+  const tasks = [];
+
+  try {
+    const relationDpMeta = strapi.db.metadata.get('api::relation-dp.relation-dp');
+    const relationDpEntries = context.relationDpEntries;
+    const relationDpTarget =
+      relationDpEntries?.published?.[0] ||
+      relationDpEntries?.drafts?.[0] ||
+      relationDpEntries?.all?.[0];
+
+    if (relationDpMeta && relationDpTarget) {
+      const relationDpTable = relationDpMeta.tableName;
+      const oneToOneColumn = relationDpMeta.attributes?.oneToOneBasic?.joinColumn?.name;
+      if (relationDpTable && oneToOneColumn) {
+        tablesToDisable.add(relationDpTable);
+        tasks.push(async () => {
+          await db(relationDpTable)
+            .where('id', relationDpTarget.id)
+            .update({
+              [oneToOneColumn]: invalidId,
+            });
+        });
+      }
+
+      const manyToManyAttr = relationDpMeta.attributes?.manyToManyBasics;
+      const joinTable = manyToManyAttr?.joinTable;
+      if (joinTable?.name && joinTable?.joinColumn?.name && joinTable?.inverseJoinColumn?.name) {
+        const joinTableName = joinTable.name;
+        const joinColumn = joinTable.joinColumn.name;
+        const inverseJoinColumn = joinTable.inverseJoinColumn.name;
+        tablesToDisable.add(joinTableName);
+
+        tasks.push(async () => {
+          const existing = await db(joinTableName)
+            .where({ [joinColumn]: relationDpTarget.id, [inverseJoinColumn]: invalidId })
+            .first();
+
+          if (existing) {
+            return;
+          }
+
+          let sample = await db(joinTableName).where(joinColumn, relationDpTarget.id).first();
+          if (!sample) {
+            sample = await db(joinTableName).first();
+          }
+
+          const row = {
+            [joinColumn]: relationDpTarget.id,
+            [inverseJoinColumn]: invalidId,
+          };
+
+          if (sample) {
+            for (const [key, value] of Object.entries(sample)) {
+              if (key === joinColumn || key === inverseJoinColumn || key === 'id') {
+                continue;
+              }
+
+              if (row[key] !== undefined) {
+                continue;
+              }
+
+              row[key] =
+                typeof value === 'number' && !Number.isNaN(value) ? Number(value) : (value ?? null);
+            }
+
+            if (Object.prototype.hasOwnProperty.call(sample, 'order')) {
+              const orderValue = Number(sample.order);
+              row.order = Number.isNaN(orderValue) ? 1000 : orderValue + 1000;
+            }
+            if (Object.prototype.hasOwnProperty.call(sample, 'position')) {
+              const positionValue = Number(sample.position);
+              row.position = Number.isNaN(positionValue) ? 1000 : positionValue + 1000;
+            }
+          } else if (
+            joinTable.orderColumn?.name ||
+            joinTable.orderColumn?.columnName ||
+            joinTable.orderColumn?.name
+          ) {
+            const orderColumnName = joinTable.orderColumn.columnName || joinTable.orderColumn.name;
+            if (orderColumnName) {
+              row[orderColumnName] = 1000;
+            }
+          }
+
+          const pivotColumns = Array.isArray(joinTable.pivotColumns) ? joinTable.pivotColumns : [];
+          for (const column of pivotColumns) {
+            const columnName =
+              typeof column === 'string'
+                ? column
+                : typeof column?.name === 'string'
+                  ? column.name
+                  : typeof column?.columnName === 'string'
+                    ? column.columnName
+                    : null;
+            if (!columnName || row[columnName] !== undefined) {
+              continue;
+            }
+
+            const defaultValue =
+              column && typeof column === 'object' && 'defaultValue' in column
+                ? column.defaultValue
+                : null;
+            row[columnName] = defaultValue;
+          }
+
+          await db(joinTableName).insert(row);
+        });
+      }
+    }
+
+    const relationMeta = strapi.db.metadata.get('api::relation.relation');
+    const relationEntries = context.relationEntries || [];
+    const relationTarget = relationEntries[0];
+    if (relationMeta && relationTarget) {
+      const relationTable = relationMeta.tableName;
+      const oneToOneColumn = relationMeta.attributes?.oneToOneBasic?.joinColumn?.name;
+      if (relationTable && oneToOneColumn) {
+        tablesToDisable.add(relationTable);
+        tasks.push(async () => {
+          await db(relationTable)
+            .where('id', relationTarget.id)
+            .update({
+              [oneToOneColumn]: invalidId,
+            });
+        });
+      }
+    }
+
+    if (tasks.length === 0) {
+      return;
+    }
+
+    console.log('  ⚙️  Temporarily disabling foreign key checks to inject invalid relations...');
+    await withForeignKeyChecksDisabled(strapi, Array.from(tablesToDisable), async () => {
+      for (const task of tasks) {
+        await task();
+      }
+    });
+
+    console.log(
+      `  ⚠️  Injected intentional foreign key violations using placeholder ID ${invalidId}`
+    );
+  } catch (error) {
+    console.error(`  ❌ Failed to inject invalid foreign key relations: ${error.message}`);
+  }
+}
+
 function randomString(length = 10) {
   return Math.random()
     .toString(36)
@@ -28,7 +307,6 @@ function randomDate() {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
-// Create basic field values
 function createBasicFields() {
   return {
     stringField: `String ${randomString(8)}`,
@@ -49,40 +327,30 @@ function createBasicFields() {
   };
 }
 
-// Create component data
-function createSimpleInfoComponent() {
-  return {
-    title: `Info Title ${randomString(6)}`,
-    description: `Description: ${randomString(15)}`,
-    count: randomNumber(1, 100),
-    active: randomBoolean(),
-  };
-}
+const createSimpleInfoComponent = () => ({
+  title: `Info Title ${randomString(6)}`,
+  description: `Description: ${randomString(15)}`,
+  count: randomNumber(1, 100),
+  active: randomBoolean(),
+});
 
-function createImageBlockComponent() {
-  return {
-    alt: `Image ${randomString(6)}`,
-    url: `https://example.com/images/${randomString(8)}.jpg`,
-    caption: `Caption: ${randomString(10)}`,
-    width: randomNumber(100, 2000),
-    height: randomNumber(100, 2000),
-  };
-}
+const createImageBlockComponent = () => ({
+  alt: `Image ${randomString(6)}`,
+  url: `https://example.com/images/${randomString(8)}.jpg`,
+  caption: `Caption: ${randomString(10)}`,
+  width: randomNumber(100, 2000),
+  height: randomNumber(100, 2000),
+});
 
-// Create component data for dynamic zones (requires __component field)
-function createSimpleInfoComponentForDynamicZone() {
-  return {
-    __component: 'shared.simple-info',
-    ...createSimpleInfoComponent(),
-  };
-}
+const createSimpleInfoComponentForDynamicZone = () => ({
+  __component: 'shared.simple-info',
+  ...createSimpleInfoComponent(),
+});
 
-function createImageBlockComponentForDynamicZone() {
-  return {
-    __component: 'shared.image-block',
-    ...createImageBlockComponent(),
-  };
-}
+const createImageBlockComponentForDynamicZone = () => ({
+  __component: 'shared.image-block',
+  ...createImageBlockComponent(),
+});
 
 function createTextBlockComponent(options = {}) {
   const { relatedBasicId = null, relatedBasicDpId = null, relatedRelationDpId = null } = options;
@@ -98,30 +366,27 @@ function createTextBlockComponent(options = {}) {
   };
 }
 
-function createMediaBlockComponent() {
-  return {
-    title: `Media Title ${randomString(6)}`,
-    mediaUrl: `https://example.com/media/${randomString(8)}.${['jpg', 'mp4', 'mp3'][randomNumber(0, 2)]}`,
-    mediaType: ['image', 'video', 'audio'][randomNumber(0, 2)],
-    description: `Media description: ${randomString(15)}`,
-  };
-}
+const createMediaBlockComponent = () => ({
+  title: `Media Title ${randomString(6)}`,
+  mediaUrl: `https://example.com/media/${randomString(8)}.${['jpg', 'mp4', 'mp3'][randomNumber(0, 2)]}`,
+  mediaType: ['image', 'video', 'audio'][randomNumber(0, 2)],
+  description: `Media description: ${randomString(15)}`,
+});
 
-function createTextBlockComponentForDynamicZone(options = {}) {
-  return {
-    __component: 'shared.text-block',
-    ...createTextBlockComponent(options),
-  };
-}
+const createTextBlockComponentForDynamicZone = (options = {}) => ({
+  __component: 'shared.text-block',
+  ...createTextBlockComponent(options),
+});
 
-function createMediaBlockComponentForDynamicZone() {
-  return {
-    __component: 'shared.media-block',
-    ...createMediaBlockComponent(),
-  };
-}
+const createMediaBlockComponentForDynamicZone = () => ({
+  __component: 'shared.media-block',
+  ...createMediaBlockComponent(),
+});
 
-// Inject invalid enum values via direct database query (bypasses validation)
+/**
+ * Bypasses Strapi validation to drop invalid enum values directly into the database.
+ * This checks that migrations surface unexpected scalars gracefully.
+ */
 async function injectInvalidEnumValuesForTable(strapi, entries, tableName) {
   if (!entries || entries.length === 0) return;
 
@@ -163,7 +428,10 @@ async function injectInvalidEnumValuesForTable(strapi, entries, tableName) {
   }
 }
 
-// Seed basic content types
+/**
+ * Seeds the non-DP sample type, injecting enough records to exercise repeatable
+ * components, dynamic zones, and validation edge cases.
+ */
 async function seedBasic(strapi) {
   console.log('Seeding basic...');
   const entries = [];
@@ -193,12 +461,15 @@ async function seedBasic(strapi) {
     }
   }
 
-  // Inject invalid enum values via direct DB query (bypasses validation)
   await injectInvalidEnumValuesForTable(strapi, entries, 'basics');
 
   return entries;
 }
 
+/**
+ * Seeds draft/publish content with a mix of published entries and drafts so the
+ * migration has meaningful data to clone.
+ */
 async function seedBasicDp(strapi) {
   console.log('Seeding basic-dp...');
   const published = [];
@@ -260,12 +531,14 @@ async function seedBasicDp(strapi) {
 
   const allEntries = [...published, ...drafts];
 
-  // Inject invalid enum values via direct DB query (bypasses validation)
   await injectInvalidEnumValuesForTable(strapi, allEntries, 'basic_dps');
 
   return { published, drafts, all: allEntries };
 }
 
+/**
+ * Same as `seedBasicDp`, but across multiple locales to stress the i18n pathways.
+ */
 async function seedBasicDpI18n(strapi) {
   console.log('Seeding basic-dp-i18n...');
   const locales = ['en', 'fr']; // Default locales
@@ -337,13 +610,15 @@ async function seedBasicDpI18n(strapi) {
 
   entries.all = [...entries.published, ...entries.drafts];
 
-  // Inject invalid enum values via direct DB query (bypasses validation)
   await injectInvalidEnumValuesForTable(strapi, entries.all, 'basic_dp_i18ns');
 
   return entries;
 }
 
-// Seed relation content types
+/**
+ * Creates relation records that reference both DP and non-DP entities so we can verify
+ * every association survives the migration.
+ */
 async function seedRelation(strapi, basicEntries, basicDpEntries) {
   console.log('Seeding relation...');
   const entries = [];
@@ -416,7 +691,6 @@ async function seedRelation(strapi, basicEntries, basicDpEntries) {
     }
   }
 
-  // Add self-referential relations (each entry references itself)
   for (const entry of entries) {
     await strapi.entityService.update('api::relation.relation', entry.id, {
       data: {
@@ -429,6 +703,10 @@ async function seedRelation(strapi, basicEntries, basicDpEntries) {
   return entries;
 }
 
+/**
+ * Builds DP relation entries pointing at both draft and published basics so migrations
+ * must remap targets in every combination.
+ */
 async function seedRelationDp(strapi, basicDpEntries) {
   console.log('Seeding relation-dp...');
   const published = [];
@@ -441,7 +719,6 @@ async function seedRelationDp(strapi, basicDpEntries) {
   // Create published entries - relate to BOTH published and draft basics
   for (let i = 0; i < 5; i++) {
     try {
-      // Mix of published and draft basics
       const publishedRelated = publishedBasics.slice(0, randomNumber(0, 2));
       const draftRelated = draftBasics.slice(0, randomNumber(0, 2));
       let relatedBasics = [...publishedRelated, ...draftRelated];
@@ -462,7 +739,6 @@ async function seedRelationDp(strapi, basicDpEntries) {
           oneToManyBasics: relatedBasics.map((b) => b.id),
           manyToOneBasic: relatedBasics[0]?.id || null,
           manyToManyBasics: relatedBasics.map((b) => b.id),
-          // Omit polymorphic relations (morphToOne, morphOne, morphMany) - they cause issues when null
           simpleInfo: createSimpleInfoComponent(),
           content: [
             createSimpleInfoComponentForDynamicZone(),
@@ -517,7 +793,6 @@ async function seedRelationDp(strapi, basicDpEntries) {
   // Create draft entries - also relate to both published and draft basics
   for (let i = 0; i < 3; i++) {
     try {
-      // Mix of published and draft basics
       const publishedRelated = publishedBasics.slice(0, randomNumber(0, 2));
       const draftRelated = draftBasics.slice(0, randomNumber(0, 2));
       let relatedBasics = [...publishedRelated, ...draftRelated];
@@ -538,7 +813,6 @@ async function seedRelationDp(strapi, basicDpEntries) {
           oneToManyBasics: relatedBasics.map((b) => b.id),
           manyToOneBasic: relatedBasics[0]?.id || null,
           manyToManyBasics: relatedBasics.map((b) => b.id),
-          // Omit polymorphic relations (morphToOne, morphOne, morphMany) - they cause issues when null
           simpleInfo: createSimpleInfoComponent(),
           content: [
             createSimpleInfoComponentForDynamicZone(),
@@ -590,7 +864,6 @@ async function seedRelationDp(strapi, basicDpEntries) {
     }
   }
 
-  // Add self-referential relations (each entry references itself)
   for (const entry of [...published, ...drafts]) {
     await strapi.entityService.update('api::relation-dp.relation-dp', entry.id, {
       data: {
@@ -603,6 +876,10 @@ async function seedRelationDp(strapi, basicDpEntries) {
   return { published, drafts, all: [...published, ...drafts] };
 }
 
+/**
+ * Localized counterpart of `seedRelationDp`, ensuring relations plus localization
+ * survive the migration.
+ */
 async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
   console.log('Seeding relation-dp-i18n...');
   const locales = ['en', 'fr'];
@@ -619,7 +896,6 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
     const publishedBasicsForLocale = publishedBasics.filter((basic) => basic.locale === locale);
     const draftBasicsForLocale = draftBasics.filter((basic) => basic.locale === locale);
 
-    // Published entries - relate to BOTH published and draft basics to test all scenarios
     for (let i = 0; i < 5; i++) {
       try {
         const publishedRelated = publishedBasicsForLocale.slice(0, randomNumber(0, 2));
@@ -667,7 +943,6 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
       }
     }
 
-    // Draft entries - also relate to both published and draft basics
     for (let i = 0; i < 3; i++) {
       try {
         const publishedRelated = publishedBasicsForLocale.slice(0, randomNumber(0, 2));
@@ -716,7 +991,6 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
     }
   }
 
-  // Add self-referential relations (each entry references itself)
   const allEntries = [...entries.published, ...entries.drafts];
   for (const entry of allEntries) {
     await strapi.entityService.update('api::relation-dp-i18n.relation-dp-i18n', entry.id, {
@@ -732,17 +1006,28 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
   return entries;
 }
 
-async function seedSingleRun(strapi) {
-  // Seed basic types first (they're referenced by relation types)
+/**
+ * Runs one full pass of the fixture generation pipeline. Used by the CLI loop and
+ * by integration tests to request a single dataset programmatically.
+ */
+async function seedSingleRun(strapi, options = {}) {
+  const injectInvalidFk = options.injectInvalidFk === true;
+
   const basicEntries = await seedBasic(strapi);
   const basicDpEntries = await seedBasicDp(strapi);
   const basicDpI18nEntries = await seedBasicDpI18n(strapi);
 
-  // Seed relation types
-  // Note: relation-dp relates to basic-dp, relation-dp-i18n relates to basic-dp-i18n
   const relationEntries = await seedRelation(strapi, basicEntries, basicDpEntries);
   const relationDpEntries = await seedRelationDp(strapi, basicDpEntries);
   const relationDpI18nEntries = await seedRelationDpI18n(strapi, basicDpI18nEntries);
+
+  if (injectInvalidFk) {
+    await injectInvalidForeignKeyViolations(strapi, {
+      relationEntries,
+      relationDpEntries,
+      injectInvalidFk,
+    });
+  }
 
   return {
     basicEntries,
@@ -754,16 +1039,22 @@ async function seedSingleRun(strapi) {
   };
 }
 
-async function seed(multiplier = 1) {
-  const multiplierNum = parseInt(multiplier, 10) || 1;
+/**
+ * User-facing entry point invoked from the CLI. Supports running the seed multiple
+ * times and optionally injecting orphaned relations.
+ */
+async function seed(options = {}) {
+  const normalizedOptions = normalizeSeedOptions(options);
+  const multiplierNum = parseInt(normalizedOptions.multiplier, 10) || 1;
+  const injectInvalidFk = normalizedOptions.injectInvalidFk === true;
 
-  console.log(`🌱 Starting seed (multiplier: ${multiplierNum})...\n`);
+  console.log(
+    `🌱 Starting seed (multiplier: ${multiplierNum}${injectInvalidFk ? ', invalid FK injection ENABLED' : ''})...\n`
+  );
 
   try {
     await strapi.load();
   } catch (error) {
-    // Migration errors can occur if the database already has migrations applied
-    // but Strapi is trying to recreate indexes/constraints
     if (error.message && (error.message.includes('already exists') || error.code === '42P07')) {
       console.error('\n❌ Migration error: Database already has migrations applied.');
       console.error(
@@ -775,7 +1066,6 @@ async function seed(multiplier = 1) {
       console.error(`   Error details: ${error.message}`);
       process.exit(1);
     } else {
-      // Re-throw if it's a different error
       throw error;
     }
   }
@@ -795,7 +1085,7 @@ async function seed(multiplier = 1) {
         console.log(`\n--- Run ${run} of ${multiplierNum} ---`);
       }
 
-      const stats = await seedSingleRun(strapi);
+      const stats = await seedSingleRun(strapi, { injectInvalidFk });
 
       totalStats.basic += stats.basicEntries.length;
       totalStats.basicDp.published += stats.basicDpEntries.published.length;
@@ -832,7 +1122,6 @@ async function seed(multiplier = 1) {
   } catch (error) {
     console.error('\n❌ Error seeding data:', error.message);
 
-    // Show detailed validation errors if available
     if (error.details && error.details.errors) {
       console.error('\n📋 Validation errors:');
       error.details.errors.forEach((err, index) => {
@@ -843,7 +1132,6 @@ async function seed(multiplier = 1) {
       });
     }
 
-    // Show full error stack in development
     if (process.env.NODE_ENV !== 'production') {
       console.error('\n📚 Full error details:');
       console.error(error);
@@ -856,8 +1144,8 @@ async function seed(multiplier = 1) {
 }
 
 if (require.main === module) {
-  const multiplier = process.argv[2] || '1';
-  seed(multiplier)
+  const cliOptions = parseCliArgs(process.argv.slice(2));
+  seed(cliOptions)
     .then(() => process.exit(0))
     .catch((error) => {
       console.error(error);
