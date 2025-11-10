@@ -381,7 +381,9 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(res.body.jwt).toEqual(expect.any(String));
       expect(res.body.refreshToken).toBeUndefined();
       const newSetCookie = res.headers['set-cookie'];
-      const newCookies = Array.isArray(newSetCookie) ? newSetCookie.join('\n') : String(newSetCookie || '');
+      const newCookies = Array.isArray(newSetCookie)
+        ? newSetCookie.join('\n')
+        : String(newSetCookie || '');
       expect(newCookies).toMatch(/strapi_up_refresh=/);
       expect(newCookies.toLowerCase()).toMatch(/httponly/);
     });

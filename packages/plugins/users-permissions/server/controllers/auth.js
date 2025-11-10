@@ -335,13 +335,13 @@ module.exports = ({ strapi }) => ({
 
     const upSessions = strapi.config.get('plugin::users-permissions.sessions');
     const cookieName = upSessions?.cookie?.name || 'strapi_up_refresh';
-    
+
     // Check for refresh token in cookie first (if httpOnly is configured), then in body
     let refreshToken = ctx.cookies.get(cookieName);
     if (!refreshToken) {
       refreshToken = ctx.request.body?.refreshToken;
     }
-    
+
     if (!refreshToken || typeof refreshToken !== 'string') {
       return ctx.badRequest('Missing refresh token');
     }
