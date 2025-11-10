@@ -14,8 +14,8 @@ const pluginsRegistry = (strapi: Core.Strapi) => {
     getAll() {
       return plugins;
     },
-    add(name: string, pluginConfig: Core.Plugin) {
-      if (has(name, plugins)) {
+    add(name: string, pluginConfig: Core.Plugin, options?: { force?: boolean }) {
+      if (has(name, plugins) && !options?.force) {
         throw new Error(`Plugin ${name} has already been registered.`);
       }
 
@@ -23,6 +23,24 @@ const pluginsRegistry = (strapi: Core.Strapi) => {
       plugins[name] = pluginModule;
 
       return plugins[name];
+    },
+
+    /**
+     * Removes a plugin by name
+     */
+    remove(name: string) {
+      delete plugins[name];
+      return this;
+    },
+
+    /**
+     * Clears all plugins
+     */
+    clear() {
+      for (const key of Object.keys(plugins)) {
+        delete plugins[key];
+      }
+      return this;
     },
   };
 };
