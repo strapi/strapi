@@ -278,9 +278,7 @@ const useFieldHint = (
     return hint;
   }
 
-  const units = !['biginteger', 'integer', 'number', 'dynamiczone', 'component'].includes(
-    attribute.type
-  )
+  const units = ['string', 'uid', 'richtext', 'email', 'password', 'text'].includes(attribute.type)
     ? formatMessage(
         {
           id: 'content-manager.form.Input.hint.character.unit',
