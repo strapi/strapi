@@ -310,6 +310,15 @@ const componentMetaCache = new Map<string, any>();
 
 const SKIPPED_RELATION_SAMPLE_LIMIT = 5;
 
+const supportsReturning = (trx: Knex) => {
+  const client = trx.client.config.client;
+  if (typeof client !== 'string') {
+    return false;
+  }
+
+  return ['postgres', 'pg'].includes(client.toLowerCase());
+};
+
 type SkippedRelationContext = {
   sourceUid: string;
   attributeName: string;
@@ -1140,9 +1149,13 @@ async function cloneComponentInstance({
   }
 
   let insertResult;
-  try {
-    insertResult = await trx(componentTableName).insert(newComponentRow, ['id']);
-  } catch (error: any) {
+  if (supportsReturning(trx)) {
+    try {
+      insertResult = await trx(componentTableName).insert(newComponentRow, ['id']);
+    } catch (error: any) {
+      insertResult = await trx(componentTableName).insert(newComponentRow);
+    }
+  } else {
     insertResult = await trx(componentTableName).insert(newComponentRow);
   }
 
