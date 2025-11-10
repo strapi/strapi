@@ -261,6 +261,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
         async bootstrap({ strapi: s }) {
           s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
           s.config.set('plugin::users-permissions.sessions.httpOnly', false);
+          s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
 
           // Enable public permission for refresh route
           const publicRole = await s.db
@@ -363,7 +364,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
         method: 'POST',
         url: '/local',
         headers: { 'x-strapi-refresh-cookie': 'httpOnly' },
-        body: { identifier: internals.user.email, password: 'Test12345!' },
+        body: { identifier: internals.user.email, password: internals.user.password },
       });
       const setCookie = loginRes.headers['set-cookie'];
       const cookieHeader = Array.isArray(setCookie) ? setCookie : [setCookie];
