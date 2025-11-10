@@ -4,11 +4,11 @@ export default (destination: string) => {
   }
 
   if (destination === 'plugin') {
-    return `plugins/{{ plugin }}/server`;
+    return `plugins/{{ plugin }}/server/src`;
   }
 
   if (destination === 'root') {
-    return './';
+    return '.';
   }
 
   return `api/{{ id }}`;

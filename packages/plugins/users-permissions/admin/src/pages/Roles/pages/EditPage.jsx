@@ -1,6 +1,15 @@
 import * as React from 'react';
 
-import { Button, Flex, TextInput, Textarea, Typography, Grid, Field } from '@strapi/design-system';
+import {
+  Button,
+  Flex,
+  TextInput,
+  Textarea,
+  Typography,
+  Grid,
+  Field,
+  Box,
+} from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import {
   Page,
@@ -110,7 +119,12 @@ export const EditPage = () => {
               }
               title={role.name}
               subtitle={role.description}
-              navigationAction={<BackButton fallback=".." />}
+              navigationAction={
+                // The back link for mobile works differently; it is placed higher up in the DOM.
+                <Box display={{ initial: 'none', medium: 'block' }}>
+                  <BackButton fallback=".." />
+                </Box>
+              }
             />
             <Layouts.Content>
               <Flex
