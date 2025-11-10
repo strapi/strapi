@@ -41,6 +41,66 @@ import {
 type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
 
+type MetadataWithOptionalPrimaryKey = {
+  primaryKey?: string | { columnName?: string; name?: string };
+  attributes?: Record<string, unknown>;
+};
+
+const DEFAULT_PRIMARY_KEY_COLUMN = 'id';
+
+type AttributeWithPrimaryFlag = {
+  columnName?: string;
+  column?: {
+    primary?: boolean;
+  };
+};
+
+/**
+ * Determines the primary-key column name for a schema, handling the various shapes
+ * metadata can take (string, object, attribute flag) and defaulting to `id`.
+ */
+const resolvePrimaryKeyColumn = (meta: MetadataWithOptionalPrimaryKey): string => {
+  const { primaryKey } = meta;
+
+  if (typeof primaryKey === 'string' && primaryKey) {
+    return primaryKey;
+  }
+
+  if (primaryKey && typeof primaryKey === 'object') {
+    const pkObject = primaryKey as { columnName?: string; name?: string };
+
+    const columnName = pkObject.columnName;
+    if (typeof columnName === 'string' && columnName) {
+      return columnName;
+    }
+
+    const name = pkObject.name;
+    if (typeof name === 'string' && name) {
+      return name;
+    }
+  }
+
+  const attributes = meta.attributes ?? {};
+  for (const [attributeName, attribute] of Object.entries(attributes)) {
+    const normalizedAttribute = attribute as AttributeWithPrimaryFlag | undefined;
+
+    if (!normalizedAttribute) {
+      continue;
+    }
+
+    const { column } = normalizedAttribute;
+    if (column?.primary === true) {
+      if (typeof normalizedAttribute.columnName === 'string' && normalizedAttribute.columnName) {
+        return normalizedAttribute.columnName;
+      }
+
+      return attributeName;
+    }
+  }
+
+  return DEFAULT_PRIMARY_KEY_COLUMN;
+};
+
 /**
  * Check if the model has draft and publish enabled.
  */
@@ -127,8 +187,9 @@ async function copyPublishedEntriesToDraft({
 }
 
 /**
- * Copy relations from published entries to draft entries using direct database queries.
- * This replaces the need to call discardDraft for each entry.
+ * Orchestrates the relation cloning pipeline for a single content type. We duplicate
+ * every category of relation (self, inbound, outbound, components) using direct SQL so
+ * the migration can scale without calling `discardDraft` entry by entry.
  */
 async function copyRelationsToDrafts({ db, trx, uid }: { db: Database; trx: Knex; uid: string }) {
   const meta = db.metadata.get(uid);
@@ -173,7 +234,8 @@ async function copyRelationsToDrafts({ db, trx, uid }: { db: Database; trx: Knex
 }
 
 /**
- * Helper to batch process arrays in chunks
+ * Splits large input arrays into smaller batches so we can run SQL queries without
+ * hitting parameter limits (SQLite) or payload limits (MySQL/Postgres).
  */
 function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   const chunks: T[][] = [];
@@ -183,6 +245,26 @@ function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   return chunks;
 }
 
+/**
+ * Chooses a safe batch size for bulk operations depending on the database engine,
+ * falling back to smaller units on engines (notably SQLite) that have low limits.
+ */
+function getBatchSize(trx: Knex, defaultSize: number = 1000): number {
+  const client = trx.client.config.client;
+  const isSQLite =
+    typeof client === 'string' && ['sqlite', 'sqlite3', 'better-sqlite3'].includes(client);
+
+  // SQLite documentation states that the maximum number of terms in a
+  // compound SELECT statement is 500 by default.
+  // See: https://www.sqlite.org/limits.html
+  // We use 250 to be safe and account for other query complexity.
+  return isSQLite ? Math.min(defaultSize, 250) : defaultSize;
+}
+
+/**
+ * Applies stable ordering to join-table queries so cloning work is deterministic and
+ * matches the ordering logic used by the entity service (important for tests and DZ order).
+ */
 const applyJoinTableOrdering = (qb: any, joinTable: any, sourceColumnName: string) => {
   const seenColumns = new Set<string>();
 
@@ -226,10 +308,39 @@ const componentParentSchemasCache = new Map<string, ParentSchemaInfo[]>();
 const joinTableExistsCache = new Map<string, boolean>();
 const componentMetaCache = new Map<string, any>();
 
+const SKIPPED_RELATION_SAMPLE_LIMIT = 5;
+
+const supportsReturning = (trx: Knex) => {
+  const client = trx.client.config.client;
+  if (typeof client !== 'string') {
+    return false;
+  }
+
+  return ['postgres', 'pg'].includes(client.toLowerCase());
+};
+
+type SkippedRelationContext = {
+  sourceUid: string;
+  attributeName: string;
+  targetUid?: string;
+  joinTable?: string;
+};
+
+type SkippedRelationStatsEntry = SkippedRelationContext & {
+  count: number;
+  samples: Set<string>;
+};
+
+const skippedRelationStats = new Map<string, SkippedRelationStatsEntry>();
+
 const DUPLICATE_ERROR_CODES = new Set(['23505', 'ER_DUP_ENTRY', 'SQLITE_CONSTRAINT_UNIQUE']);
 
 const debug = createDebug('strapi::migration::discard-drafts');
 
+/**
+ * Converts arbitrary id values into numbers when possible so we can safely index into
+ * mapping tables without worrying about string/number mismatches.
+ */
 const normalizeId = (value: any): number | null => {
   if (value == null) {
     return null;
@@ -244,6 +355,9 @@ const normalizeId = (value: any): number | null => {
   return num;
 };
 
+/**
+ * Wrapper around map lookups that first normalizes the provided identifier.
+ */
 const getMappedValue = <T>(map: Map<number, T> | null | undefined, key: any): T | undefined => {
   if (!map) {
     return undefined;
@@ -258,6 +372,10 @@ const getMappedValue = <T>(map: Map<number, T> | null | undefined, key: any): T 
   return map.get(normalized);
 };
 
+/**
+ * Extracts the inserted row identifier across the various shapes returned by different
+ * clients/drivers (numbers, objects, arrays). Falls back to `null` if nothing usable.
+ */
 const resolveInsertedId = (insertResult: any): number | null => {
   if (insertResult == null) {
     return null;
@@ -300,6 +418,10 @@ const resolveInsertedId = (insertResult: any): number | null => {
   return null;
 };
 
+/**
+ * Detects vendor-specific duplicate key errors so we can safely ignore them when our
+ * goal is to insert-or-ignore without branching on the client everywhere.
+ */
 const isDuplicateEntryError = (error: any): boolean => {
   if (!error) {
     return false;
@@ -313,6 +435,10 @@ const isDuplicateEntryError = (error: any): boolean => {
   return message.includes('duplicate key') || message.includes('UNIQUE constraint failed');
 };
 
+/**
+ * Inserts a row while tolerating duplicates across all supported clients. Used when
+ * bulk operations fall back to single inserts to resolve constraint conflicts.
+ */
 const insertRowWithDuplicateHandling = async (
   trx: Knex,
   tableName: string,
@@ -350,6 +476,110 @@ const insertRowWithDuplicateHandling = async (
   }
 };
 
+/**
+ * Normalizes identifiers into a comparable string so we can dedupe target ids
+ * regardless of whether they come in as numbers, strings, or objects.
+ */
+const toComparisonKey = (value: any): string => {
+  if (value === null || value === undefined) {
+    return 'null';
+  }
+
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+
+  return String(value);
+};
+
+/**
+ * Formats ids for log output while keeping the log lightweight and JSON-safe.
+ */
+const toDisplayValue = (value: any): string => {
+  if (value === null || value === undefined) {
+    return 'null';
+  }
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'bigint') {
+    return String(value);
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+};
+
+/**
+ * Tracks how many relation rows we skipped because their targets are missing, so we
+ * can emit a consolidated warning once the migration finishes copying relations.
+ */
+function recordSkippedRelations(context: SkippedRelationContext, skippedIds: any[]) {
+  if (!skippedIds.length) {
+    return;
+  }
+
+  const key = `${context.sourceUid}::${context.attributeName}::${context.joinTable ?? 'NO_JOIN_TABLE'}`;
+  let stats = skippedRelationStats.get(key);
+
+  if (!stats) {
+    stats = {
+      ...context,
+      count: 0,
+      samples: new Set<string>(),
+    };
+  }
+
+  stats.count += skippedIds.length;
+
+  for (const id of skippedIds) {
+    if (stats.samples.size >= SKIPPED_RELATION_SAMPLE_LIMIT) {
+      break;
+    }
+
+    stats.samples.add(toDisplayValue(id));
+  }
+
+  skippedRelationStats.set(key, stats);
+}
+
+/**
+ * Emits aggregated warnings for all skipped relations and resets the counters.
+ * This keeps the log readable even when millions of orphaned rows exist.
+ */
+function flushSkippedRelationLogs() {
+  if (skippedRelationStats.size === 0) {
+    return;
+  }
+
+  for (const stats of skippedRelationStats.values()) {
+    const sampleArray = Array.from(stats.samples);
+    const sampleText = sampleArray.length > 0 ? sampleArray.join(', ') : 'n/a';
+    const targetInfo = stats.targetUid ? `target=${stats.targetUid}` : 'target=unknown';
+    const joinTableInfo = stats.joinTable ? `joinTable=${stats.joinTable}` : 'joinTable=n/a';
+    const ellipsis = stats.count > sampleArray.length ? ', ...' : '';
+
+    strapi.log.warn(
+      `[discard-drafts] Skipped ${stats.count} relation(s) for ${stats.sourceUid}.${stats.attributeName} (${targetInfo}, ${joinTableInfo}). Example target ids: ${sampleText}${ellipsis}`
+    );
+  }
+
+  strapi.log.warn(
+    '[discard-drafts] Some join-table relations referenced missing targets and were skipped. Review these warnings and clean up orphaned relations before rerunning the migration if needed.'
+  );
+
+  skippedRelationStats.clear();
+}
+
+/**
+ * Returns every schema (content type or component) that can embed the provided component.
+ * Cached because we consult it repeatedly while remapping nested components.
+ */
 function listComponentParentSchemas(componentUid: string): ParentSchemaInfo[] {
   if (!componentParentSchemasCache.has(componentUid)) {
     const schemas = [
@@ -383,6 +613,10 @@ function listComponentParentSchemas(componentUid: string): ParentSchemaInfo[] {
   return componentParentSchemasCache.get(componentUid)!;
 }
 
+/**
+ * Memoized helper for checking whether a table exists. Avoids repeating expensive
+ * information_schema queries when we touch the same join table many times.
+ */
 async function ensureTableExists(trx: Knex, tableName: string): Promise<boolean> {
   if (!joinTableExistsCache.has(tableName)) {
     const exists = await trx.schema.hasTable(tableName);
@@ -392,12 +626,111 @@ async function ensureTableExists(trx: Knex, tableName: string): Promise<boolean>
   return joinTableExistsCache.get(tableName)!;
 }
 
+type FilterRelationsWithExistingTargetsParams<T> = {
+  trx: Knex;
+  targetUid?: string;
+  relations: T[];
+  getTargetId: (relation: T) => any;
+};
+
+/**
+ * Filters out relation rows whose target entity no longer exists, returning the safe
+ * rows along with a list of skipped ids so we can log them later.
+ */
+async function filterRelationsWithExistingTargets<T>({
+  trx,
+  targetUid,
+  relations,
+  getTargetId,
+}: FilterRelationsWithExistingTargetsParams<T>): Promise<{ relations: T[]; skippedIds: any[] }> {
+  if (!relations.length) {
+    return { relations, skippedIds: [] };
+  }
+
+  if (!targetUid) {
+    return { relations, skippedIds: [] };
+  }
+
+  const targetMeta = strapi.db.metadata.get(targetUid);
+  if (!targetMeta) {
+    return { relations, skippedIds: [] };
+  }
+
+  const tableName = targetMeta.tableName;
+  const primaryKeyColumn = resolvePrimaryKeyColumn(targetMeta);
+
+  if (!tableName) {
+    return { relations, skippedIds: [] };
+  }
+
+  const uniqueIdMap = new Map<string, any>();
+
+  for (const relation of relations) {
+    const targetId = getTargetId(relation);
+
+    if (targetId == null) {
+      continue;
+    }
+
+    const key = toComparisonKey(targetId);
+    if (!uniqueIdMap.has(key)) {
+      uniqueIdMap.set(key, targetId);
+    }
+  }
+
+  if (uniqueIdMap.size === 0) {
+    return { relations, skippedIds: [] };
+  }
+
+  const hasTable = await ensureTableExists(trx, tableName);
+  if (!hasTable) {
+    return { relations: [], skippedIds: Array.from(uniqueIdMap.values()) };
+  }
+
+  const existingKeys = new Set<string>();
+  const uniqueIds = Array.from(uniqueIdMap.values());
+  const idChunks = chunkArray(uniqueIds, getBatchSize(trx, 1000));
+
+  for (const chunk of idChunks) {
+    const rows = await trx(tableName).select(primaryKeyColumn).whereIn(primaryKeyColumn, chunk);
+    for (const row of rows) {
+      const value = row[primaryKeyColumn];
+      existingKeys.add(toComparisonKey(value));
+    }
+  }
+
+  const filteredRelations: T[] = [];
+  const skippedIds: any[] = [];
+
+  for (const relation of relations) {
+    const targetId = getTargetId(relation);
+
+    if (targetId == null) {
+      skippedIds.push(targetId);
+      continue;
+    }
+
+    if (existingKeys.has(toComparisonKey(targetId))) {
+      filteredRelations.push(relation);
+    } else {
+      skippedIds.push(targetId);
+    }
+  }
+
+  return { relations: filteredRelations, skippedIds };
+}
+
 type ComponentHierarchyCaches = {
   parentInstanceCache: Map<string, ComponentParentInstance | null>;
   ancestorDpCache: Map<string, boolean>;
   parentDpCache: Map<string, boolean>;
 };
 
+/**
+ * Locates the owning entity (content type or component) for a given component instance.
+ * This mirrors the document service logic we need in order to decide whether a relation
+ * should propagate to drafts, and is cached for performance.
+ */
 async function findComponentParentInstance(
   trx: Knex,
   identifiers: any,
@@ -456,6 +789,10 @@ async function findComponentParentInstance(
   return null;
 }
 
+/**
+ * Fetches and caches database metadata for a component uid. Saves repeated lookups while
+ * cloning the same component type thousands of times.
+ */
 const getComponentMeta = (componentUid: string) => {
   if (!componentMetaCache.has(componentUid)) {
     const meta = strapi.db.metadata.get(componentUid);
@@ -465,6 +802,10 @@ const getComponentMeta = (componentUid: string) => {
   return componentMetaCache.get(componentUid);
 };
 
+/**
+ * Determines whether a component's parent entity participates in draft/publish,
+ * short-circuiting a lot of recursion when deciding relation propagation rules.
+ */
 async function hasDraftPublishAncestorForParent(
   trx: Knex,
   identifiers: any,
@@ -503,6 +844,10 @@ async function hasDraftPublishAncestorForParent(
   return result;
 }
 
+/**
+ * Recursively checks whether a component lies beneath a draft/publish-enabled parent
+ * component or content type. We mirror discardDraft's propagation guard.
+ */
 async function hasDraftPublishAncestorForComponent(
   trx: Knex,
   identifiers: any,
@@ -535,6 +880,10 @@ async function hasDraftPublishAncestorForComponent(
   return result;
 }
 
+/**
+ * Abstracts `NOW()` handling so that timestamps stay consistent across databases—
+ * using Knex's native function when available and falling back to JS dates otherwise.
+ */
 const resolveNowValue = (trx: Knex) => {
   if (typeof trx.fn?.now === 'function') {
     return trx.fn.now();
@@ -543,6 +892,10 @@ const resolveNowValue = (trx: Knex) => {
   return new Date();
 };
 
+/**
+ * Builds or retrieves the published→draft id map for a target content type, caching
+ * the result so nested relation remapping can reuse the work.
+ */
 async function getDraftMapForTarget(
   trx: Knex,
   targetUid: string,
@@ -569,6 +922,10 @@ async function getDraftMapForTarget(
   return map ?? null;
 }
 
+/**
+ * Maps relation foreign keys so that draft entities reference draft targets when those
+ * targets exist; otherwise we preserve the original reference (matching discardDraft).
+ */
 async function mapTargetId(
   trx: Knex,
   originalId: number | string | null,
@@ -593,6 +950,9 @@ async function mapTargetId(
   return targetMap.get(Number(originalId)) ?? originalId;
 }
 
+/**
+ * Clones a database row and strips the `id` column so it can be reinserted as a new row.
+ */
 const ensureObjectWithoutId = (row: Record<string, any>) => {
   const cloned = { ...row };
   if ('id' in cloned) {
@@ -601,6 +961,10 @@ const ensureObjectWithoutId = (row: Record<string, any>) => {
   return cloned;
 };
 
+/**
+ * Duplicates join-table relations for a component instance while remapping any foreign
+ * keys to draft targets. Mirrors the runtime clone logic but operates entirely in SQL.
+ */
 async function cloneComponentRelationJoinTables(
   trx: Knex,
   componentMeta: any,
@@ -611,7 +975,9 @@ async function cloneComponentRelationJoinTables(
   parentPublishedToDraftMap: Map<number, number>,
   draftMapCache: Map<string, Map<number, number> | null>
 ) {
-  for (const attribute of Object.values(componentMeta.attributes) as any) {
+  for (const [attributeName, attribute] of Object.entries(componentMeta.attributes) as Array<
+    [string, any]
+  >) {
     if (attribute.type !== 'relation' || !attribute.joinTable) {
       continue;
     }
@@ -635,6 +1001,8 @@ async function cloneComponentRelationJoinTables(
       continue;
     }
 
+    const preparedRelations: Array<Record<string, any>> = [];
+
     for (const relation of relations) {
       const clonedRelation = ensureObjectWithoutId(relation);
       clonedRelation[sourceColumnName] = newComponentId;
@@ -655,11 +1023,42 @@ async function cloneComponentRelationJoinTables(
         );
       }
 
-      debug(
-        `[cloneComponentRelationJoinTables] inserting relation into ${joinTable.name} (component=${componentUid}, source=${newComponentId})`
+      preparedRelations.push(clonedRelation);
+    }
+
+    let relationsToInsert = preparedRelations;
+
+    if (preparedRelations.some((relation) => targetColumnName in relation)) {
+      const { relations: safeRelations, skippedIds } = await filterRelationsWithExistingTargets({
+        trx,
+        targetUid: attribute.target,
+        relations: preparedRelations,
+        getTargetId: (relation) => relation[targetColumnName],
+      });
+
+      recordSkippedRelations(
+        {
+          sourceUid: componentUid,
+          attributeName,
+          targetUid: attribute.target,
+          joinTable: joinTable.name,
+        },
+        skippedIds
       );
 
-      await insertRowWithDuplicateHandling(trx, joinTable.name, clonedRelation, {
+      relationsToInsert = safeRelations;
+    }
+
+    if (relationsToInsert.length === 0) {
+      continue;
+    }
+
+    for (const relation of relationsToInsert) {
+      debug(
+        `[cloneComponentRelationJoinTables] inserting relation into ${joinTable.name} (component=${componentUid}, source=${relation[sourceColumnName]})`
+      );
+
+      await insertRowWithDuplicateHandling(trx, joinTable.name, relation, {
         componentUid,
         originalComponentId,
         newComponentId,
@@ -673,6 +1072,10 @@ async function cloneComponentRelationJoinTables(
   }
 }
 
+/**
+ * Clones a component row (including nested relations) so the newly created draft entity
+ * owns its own copy, matching what the document service would have produced.
+ */
 async function cloneComponentInstance({
   trx,
   componentUid,
@@ -746,9 +1149,13 @@ async function cloneComponentInstance({
   }
 
   let insertResult;
-  try {
-    insertResult = await trx(componentTableName).insert(newComponentRow, ['id']);
-  } catch (error: any) {
+  if (supportsReturning(trx)) {
+    try {
+      insertResult = await trx(componentTableName).insert(newComponentRow, ['id']);
+    } catch (error: any) {
+      insertResult = await trx(componentTableName).insert(newComponentRow);
+    }
+  } else {
     insertResult = await trx(componentTableName).insert(newComponentRow);
   }
 
@@ -798,6 +1205,10 @@ type DraftMapOptions = {
   requireDraftAndPublish?: boolean;
 };
 
+/**
+ * Generates a map between published row ids and their corresponding draft ids so we can
+ * rewire relations in bulk. Handles localization nuances and caches the newest draft.
+ */
 async function buildPublishedToDraftMap({
   trx,
   uid,
@@ -922,8 +1333,8 @@ async function copyRelationsForContentType({
     const { name: sourceColumnName } = joinTable.joinColumn;
     const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
-    // Process in batches to avoid MySQL query size limits
-    const publishedIdsChunks = chunkArray(publishedIds, 1000);
+    // Process in batches to avoid MySQL query size limits and SQLite expression tree limits
+    const publishedIdsChunks = chunkArray(publishedIds, getBatchSize(trx, 1000));
 
     for (const publishedIdsChunk of publishedIdsChunks) {
       // Get relations where the source is a published entry (in batches)
@@ -962,7 +1373,7 @@ async function copyRelationsForContentType({
         .filter(Boolean);
 
       if (newRelations.length > 0) {
-        await trx.batchInsert(joinTable.name, newRelations, 1000);
+        await trx.batchInsert(joinTable.name, newRelations, getBatchSize(trx, 1000));
       }
     }
   }
@@ -1002,6 +1413,8 @@ async function copyRelationsFromOtherContentTypes({
     ...(Object.values(strapi.components) as any[]),
   ];
 
+  // Compose a stable key for join-table rows so we can detect duplicates regardless
+  // of ordering or whether we already created the “draft” relation earlier.
   const buildRelationKey = (
     relation: Record<string, any>,
     sourceColumnName: string,
@@ -1048,7 +1461,7 @@ async function copyRelationsFromOtherContentTypes({
       const existingKeys = new Set<string>();
 
       if (draftTargetIds.length > 0) {
-        const draftIdChunks = chunkArray(draftTargetIds, 1000);
+        const draftIdChunks = chunkArray(draftTargetIds, getBatchSize(trx, 1000));
         for (const draftChunk of draftIdChunks) {
           const existingRelationsQuery = trx(joinTable.name)
             .select('*')
@@ -1066,7 +1479,7 @@ async function copyRelationsFromOtherContentTypes({
         }
       }
 
-      const publishedIdChunks = chunkArray(publishedTargetIds, 1000);
+      const publishedIdChunks = chunkArray(publishedTargetIds, getBatchSize(trx, 1000));
 
       for (const chunk of publishedIdChunks) {
         const relationsQuery = trx(joinTable.name).select('*').whereIn(targetColumnName, chunk);
@@ -1105,7 +1518,7 @@ async function copyRelationsFromOtherContentTypes({
         }
 
         try {
-          await trx.batchInsert(joinTable.name, newRelations, 1000);
+          await trx.batchInsert(joinTable.name, newRelations, getBatchSize(trx, 1000));
         } catch (error: any) {
           if (!isDuplicateEntryError(error)) {
             throw error;
@@ -1145,7 +1558,9 @@ async function copyRelationsToOtherContentTypes({
   // Cache target publishedToDraftMap to avoid duplicate calls for same target
   const targetMapCache = new Map<string, Map<number, number> | null>();
 
-  for (const attribute of Object.values(meta.attributes) as any) {
+  for (const [attributeName, attribute] of Object.entries(meta.attributes) as Array<
+    [string, any]
+  >) {
     if (attribute.type !== 'relation' || attribute.target === uid) {
       // Skip self-referential relations (handled by copyRelationsForContentType)
       continue;
@@ -1178,8 +1593,8 @@ async function copyRelationsToOtherContentTypes({
     }
     const targetPublishedToDraftMap = targetMapCache.get(targetUid);
 
-    // Process in batches to avoid MySQL query size limits
-    const publishedIdsChunks = chunkArray(publishedIds, 1000);
+    // Process in batches to avoid MySQL query size limits and SQLite expression tree limits
+    const publishedIdsChunks = chunkArray(publishedIds, getBatchSize(trx, 1000));
 
     for (const publishedIdsChunk of publishedIdsChunks) {
       // Get relations where the source is a published entry of our content type (in batches)
@@ -1229,15 +1644,32 @@ async function copyRelationsToOtherContentTypes({
         })
         .filter(Boolean);
 
-      if (newRelations.length > 0) {
+      const { relations: safeRelations, skippedIds } = await filterRelationsWithExistingTargets({
+        trx,
+        targetUid,
+        relations: newRelations as Array<Record<string, any>>,
+        getTargetId: (relation) => relation[targetColumnName],
+      });
+
+      recordSkippedRelations(
+        {
+          sourceUid: uid,
+          attributeName,
+          targetUid,
+          joinTable: joinTable.name,
+        },
+        skippedIds
+      );
+
+      if (safeRelations.length > 0) {
         try {
-          await trx.batchInsert(joinTable.name, newRelations, 1000);
+          await trx.batchInsert(joinTable.name, safeRelations, 1000);
         } catch (error: any) {
           // If batch insert fails due to duplicates, try with conflict handling
           if (error.code === '23505' || error.message?.includes('duplicate key')) {
             const client = trx.client.config.client;
             if (client === 'postgres' || client === 'pg') {
-              for (const relation of newRelations) {
+              for (const relation of safeRelations) {
                 try {
                   await trx(joinTable.name).insert(relation).onConflict().ignore();
                 } catch (err: any) {
@@ -1329,7 +1761,7 @@ async function updateJoinColumnRelations({
       continue;
     }
 
-    const draftIdsChunks = chunkArray(draftIds, 1000);
+    const draftIdsChunks = chunkArray(draftIds, getBatchSize(trx, 1000));
 
     for (const draftIdsChunk of draftIdsChunks) {
       // Get draft entries with their foreign key values
@@ -1418,8 +1850,8 @@ async function copyComponentRelations({
 
   const publishedIds = Array.from(publishedToDraftMap.keys());
 
-  // Process in batches to avoid MySQL query size limits
-  const publishedIdsChunks = chunkArray(publishedIds, 1000);
+  // Process in batches to avoid MySQL query size limits and SQLite expression tree limits
+  const publishedIdsChunks = chunkArray(publishedIds, getBatchSize(trx, 1000));
 
   for (const publishedIdsChunk of publishedIdsChunks) {
     // Get component relations for published entries
@@ -1578,26 +2010,33 @@ async function copyComponentRelations({
 
     // Check which relations already exist in the database to avoid conflicts
     // We need to check all unique constraint columns (entity_id, cmp_id, field, component_type)
-    const existingRelations = await trx(joinTableName)
-      .select([entityIdColumn, componentIdColumn, fieldColumn, componentTypeColumn])
-      .where((qb) => {
-        // Build OR conditions for each relation we want to check
-        for (const relation of deduplicatedRelations) {
-          qb.orWhere((subQb) => {
-            subQb
-              .where(entityIdColumn, relation[entityIdColumn])
-              .where(componentIdColumn, relation[componentIdColumn])
-              .where(fieldColumn, relation[fieldColumn])
-              .where(componentTypeColumn, relation[componentTypeColumn]);
-          });
-        }
-      });
-
-    // Create a set of existing relation keys for fast lookup
+    // Batch the check to avoid SQLite expression tree depth limits
+    // Use smaller batches for OR queries (50 for SQLite, 100 for others)
+    const batchSize = getBatchSize(trx, 50);
+    const relationChunks = chunkArray(deduplicatedRelations, batchSize);
     const existingKeys = new Set<string>();
-    for (const existing of existingRelations) {
-      const key = `${existing[entityIdColumn]}_${existing[componentIdColumn]}_${existing[fieldColumn]}_${existing[componentTypeColumn]}`;
-      existingKeys.add(key);
+
+    for (const relationChunk of relationChunks) {
+      const existingRelations = await trx(joinTableName)
+        .select([entityIdColumn, componentIdColumn, fieldColumn, componentTypeColumn])
+        .where((qb) => {
+          // Build OR conditions for each relation in this chunk
+          for (const relation of relationChunk) {
+            qb.orWhere((subQb) => {
+              subQb
+                .where(entityIdColumn, relation[entityIdColumn])
+                .where(componentIdColumn, relation[componentIdColumn])
+                .where(fieldColumn, relation[fieldColumn])
+                .where(componentTypeColumn, relation[componentTypeColumn]);
+            });
+          }
+        });
+
+      // Add existing relation keys to the set
+      for (const existing of existingRelations) {
+        const key = `${existing[entityIdColumn]}_${existing[componentIdColumn]}_${existing[fieldColumn]}_${existing[componentTypeColumn]}`;
+        existingKeys.add(key);
+      }
     }
 
     // Filter out relations that already exist
@@ -1728,6 +2167,7 @@ const migrateUp = async (trx: Knex, db: Database) => {
     debug(` • copying relations for ${model.uid}`);
     await copyRelationsToDrafts({ db, trx, uid: model.uid });
   }
+  flushSkippedRelationLogs();
   strapi.log.info('[discard-drafts] Stage 2/3 complete');
 
   /**
