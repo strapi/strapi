@@ -4,6 +4,7 @@ export const config = {
     provider: 'local',
     sizeLimit: 1000000000, // 1GB
     actionOptions: {},
+    paginatedResponses: false, // Default to non-paginated responses
   },
   validator() {},
 };
