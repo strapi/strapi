@@ -260,7 +260,6 @@ const DynamicComponent = ({
                           <Grid.Item
                             col={12}
                             key={rowInd}
-                            s={12}
                             xs={12}
                             direction="column"
                             alignItems="stretch"

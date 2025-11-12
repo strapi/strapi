@@ -229,7 +229,7 @@ const HomePageCE = () => {
                       canResize,
                     }) => (
                       <React.Fragment key={widget.uid}>
-                        <Grid.Item col={widgetWidth} s={12}>
+                        <Grid.Item col={widgetWidth} xs={12}>
                           <WidgetRoot
                             uid={widget.uid}
                             title={widget.title}
