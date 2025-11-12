@@ -1,7 +1,7 @@
-import { render as renderRTL, waitFor, screen, server } from '@tests/utils';
-import { Route, Routes } from 'react-router-dom';
-import { rest } from 'msw';
 import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { render as renderRTL, waitFor, screen, server } from '@tests/utils';
+import { rest } from 'msw';
+import { Route, Routes } from 'react-router-dom';
 
 import { RelationSingle, RelationMultiple } from '../Relations';
 
