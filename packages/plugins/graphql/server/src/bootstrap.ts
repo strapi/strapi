@@ -137,8 +137,13 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
           return {
             willResolveField({ source, args, contextValue, info }) {
               if (!source && info.operation.operation === 'query') {
-                // NOTE: context.rootQueryArgs is intended for internal use only
-                contextValue.rootQueryArgs = args;
+                // Track which query field set the rootQueryArgs
+                const fieldName = info.fieldName;
+                // Set rootQueryArgs with the field name that originated it
+                contextValue.rootQueryArgs = {
+                  ...args,
+                  _originField: fieldName, // Track which field set this
+                };
               }
             },
           };

@@ -61,19 +61,48 @@ export default ({ strapi }: Context) => {
 
         const isTargetDraftAndPublishContentType =
           contentTypes.hasDraftAndPublish(targetContentType);
-        const defaultFilters = isTargetDraftAndPublishContentType
-          ? {
-              where: {
-                publishedAt: {
-                  $notNull: context.rootQueryArgs?.status
-                    ? // Filter by the same status as the root query if the argument is present
-                      context.rootQueryArgs?.status === 'published'
-                    : // Otherwise fallback to the published version
-                      true,
+
+        // Only inherit status if we're resolving within the same query tree that set it
+        // Simple check: only inherit if the origin field matches known content type patterns
+        let inheritedStatus = null;
+        if (context.rootQueryArgs?.status && context.rootQueryArgs?._originField) {
+          const originField = context.rootQueryArgs._originField;
+
+          // Only inherit from built-in content type queries (not custom resolvers)
+          // Built-in queries follow predictable patterns, custom resolvers don't
+          const isBuiltInQuery =
+            originField.endsWith('_connection') ||
+            // Check if this field exists in the auto-generated GraphQL schema
+            // by looking at the GraphQL service's type definitions
+            (() => {
+              try {
+                const graphqlService = strapi.plugin('graphql').service('content-api');
+                const schema = graphqlService.buildSchema();
+                const queryType = schema.getQueryType();
+
+                // If the field exists in the auto-generated Query type, it's built-in
+                return queryType?.getFields()?.[originField] !== undefined;
+              } catch {
+                // Fallback: assume it's custom if we can't check
+                return false;
+              }
+            })();
+
+          if (isBuiltInQuery) {
+            inheritedStatus = context.rootQueryArgs.status;
+          }
+        }
+
+        const statusToApply = args.status || inheritedStatus;
+
+        const defaultFilters =
+          isTargetDraftAndPublishContentType && statusToApply
+            ? {
+                where: {
+                  publishedAt: statusToApply === 'published' ? { $notNull: true } : { $null: true },
                 },
-              },
-            }
-          : {};
+              }
+            : {};
 
         const dbQuery = merge(defaultFilters, transformedQuery);
 
@@ -97,7 +126,7 @@ export default ({ strapi }: Context) => {
           return rawData;
         })();
 
-        const info = {
+        const sanitizeInfo = {
           args: sanitizedQuery,
           resourceUID: targetUID,
         };
@@ -122,12 +151,12 @@ export default ({ strapi }: Context) => {
         // If this is a to-many relation, it returns an object that
         // matches what the entity-response-collection's resolvers expect
         if (isToMany) {
-          return toEntityResponseCollection(data, info);
+          return toEntityResponseCollection(data, sanitizeInfo);
         }
 
         // Else, it returns an object that matches
         // what the entity-response's resolvers expect
-        return toEntityResponse(data, info);
+        return toEntityResponse(data, sanitizeInfo);
       };
     },
   };
