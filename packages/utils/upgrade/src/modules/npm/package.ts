@@ -63,24 +63,24 @@ export class Package implements PackageInterface {
   private async getRegistryFromPackageManager(): Promise<string | undefined> {
     try {
       const packageManagerName = await packageManager.getPreferred(this.cwd);
-      if (!packageManagerName) return;
-      switch (packageManagerName) {
-        case 'yarn': {
-          const { stdout } = await execa('yarn', ['config', 'get', 'npmRegistryServer'], {
-            timeout: 60_000,
-          });
-          return stdout.trim();
-        }
-        case 'npm': {
-          const { stdout } = await execa('npm', ['config', 'get', 'registry'], { timeout: 60_000 });
-          return stdout.trim();
-        }
-        default: {
-          this.logger.warn(`Unsupported package manager: ${packageManagerName}`);
-        }
+      if (!packageManagerName) return undefined;
+
+      const registryCommands = {
+        yarn: ['config', 'get', 'npmRegistryServer'],
+        npm: ['config', 'get', 'registry'],
+      } as const;
+
+      const command = registryCommands[packageManagerName as keyof typeof registryCommands];
+      if (!command) {
+        this.logger.warn(`Unsupported package manager: ${packageManagerName}`);
+        return undefined;
       }
-    } catch (_) {
+
+      const { stdout } = await execa(packageManagerName, command, { timeout: 10_000 });
+      return stdout.trim() || undefined;
+    } catch (error) {
       this.logger.warn('Failed to determine registry URL from package manager');
+      return undefined;
     }
   }
 

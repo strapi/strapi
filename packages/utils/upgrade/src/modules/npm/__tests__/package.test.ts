@@ -215,7 +215,7 @@ describe('Package registry URL determination', () => {
 
     expect(mockGetPreferred).toHaveBeenCalledWith(mockCwd);
     expect(mockExeca).toHaveBeenCalledWith('yarn', ['config', 'get', 'npmRegistryServer'], {
-      timeout: 60_000,
+      timeout: 10_000,
     });
     expect(global.fetch).toHaveBeenCalledWith('https://yarn-registry.example.com/@test/package');
   });
@@ -230,7 +230,7 @@ describe('Package registry URL determination', () => {
 
     expect(mockGetPreferred).toHaveBeenCalledWith(mockCwd);
     expect(mockExeca).toHaveBeenCalledWith('npm', ['config', 'get', 'registry'], {
-      timeout: 60_000,
+      timeout: 10_000,
     });
     expect(global.fetch).toHaveBeenCalledWith('https://npm-registry.example.com/@test/package');
   });
