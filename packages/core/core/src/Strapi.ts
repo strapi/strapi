@@ -457,6 +457,7 @@ class Strapi extends Container implements Core.Strapi {
     // // if schemas have changed, run repairs
     if (status === 'CHANGED') {
       await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+      await this.db.repair.removeOrphanMorphType({ pivot: 'related_type' });
     }
 
     // const alreadyRanComponentRepair = await this.store.get({
