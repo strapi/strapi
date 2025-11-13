@@ -5,7 +5,6 @@ import path from 'path';
 import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
-import '@strapi/types';
 import { env } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
 import {
@@ -22,6 +21,7 @@ import type {
   Plugins,
   TelemetryProperties,
   UpdateProjectSettings,
+  GetGuidedTourMeta,
 } from '../../../shared/contracts/admin';
 
 const { isUsingTypeScript } = tsUtils;
@@ -38,7 +38,7 @@ export default {
   // This returns an empty feature list for CE
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
-    return { data: { isEE: false, features: [], flags } };
+    return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
   },
 
   async init() {
@@ -102,6 +102,7 @@ export default {
       path.join(strapi.dirs.app.root, 'src', 'admin')
     );
     const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';
+    const aiLicenseKey = env('STRAPI_ADMIN_AI_LICENSE', undefined);
 
     const numberOfAllContentTypes = _.size(strapi.contentTypes);
     const numberOfComponents = _.size(strapi.components);
@@ -120,6 +121,7 @@ export default {
         useTypescriptOnServer,
         useTypescriptOnAdmin,
         isHostedOnStrapiCloud,
+        aiLicenseKey,
         numberOfAllContentTypes, // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
         numberOfComponents,
         numberOfDynamicZones: getNumberOfDynamicZones(),
@@ -184,5 +186,16 @@ export default {
     });
 
     return data;
+  },
+
+  async getGuidedTourMeta(ctx: Context) {
+    const isFirstSuperAdminUser = await getService('user').isFirstSuperAdminUser(ctx.state.user.id);
+
+    return {
+      data: {
+        isFirstSuperAdminUser,
+        schemas: strapi.contentTypes,
+      },
+    } satisfies GetGuidedTourMeta.Response;
   },
 };

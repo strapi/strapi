@@ -27,6 +27,8 @@ const insertLink = (editor: Editor, { url }: { url: string }) => {
         type: 'link',
         url: url ?? '',
         children: [{ type: 'text', text: url }],
+        rel: '',
+        target: '',
       };
 
       Transforms.insertNodes(editor, link);
@@ -38,8 +40,11 @@ const insertLink = (editor: Editor, { url }: { url: string }) => {
   }
 };
 
-const editLink = (editor: Editor, link: { url: string; text: string }) => {
-  const { url, text } = link;
+const editLink = (
+  editor: Editor,
+  link: { url: string; text: string; rel: string; target: string }
+) => {
+  const { url, text, rel, target } = link;
 
   if (!editor.selection) {
     return;
@@ -51,7 +56,7 @@ const editLink = (editor: Editor, link: { url: string; text: string }) => {
 
   if (linkEntry) {
     const [, linkPath] = linkEntry;
-    Transforms.setNodes(editor, { url }, { at: linkPath });
+    Transforms.setNodes(editor, { url, rel, target }, { at: linkPath });
 
     // If link text is different, we remove the old text and insert the new one
     if (text !== '' && text !== Editor.string(editor, linkPath)) {

@@ -15,6 +15,7 @@ import { Pagination } from '../../../../components/Pagination';
 import { SearchInput } from '../../../../components/SearchInput';
 import { Table } from '../../../../components/Table';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
@@ -43,7 +44,7 @@ const ListPageCE = () => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [idsToDelete, setIdsToDelete] = React.useState<Array<SanitizedAdminUser['id']>>([]);
   const { data, isError, isLoading } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }));
-
+  const { user: currentUser } = useAuth('ListPageCE', (auth) => auth);
   const { pagination, users = [] } = data ?? {};
 
   const CreateAction = useEnterprise(
@@ -146,7 +147,7 @@ const ListPageCE = () => {
             />
             <Filters.Root options={FILTERS}>
               <Filters.Trigger />
-              <Filters.Popover />
+              <Filters.Popover zIndex={499} />
               <Filters.List />
             </Filters.Root>
           </>
@@ -200,7 +201,7 @@ const ListPageCE = () => {
                             <Pencil />
                           </IconButton>
                         ) : null}
-                        {canDelete ? (
+                        {canDelete && currentUser?.id !== user.id ? (
                           <IconButton
                             onClick={handleDeleteClick(user.id)}
                             label={formatMessage(
@@ -288,14 +289,10 @@ const TABLE_HEADERS: Array<
     cellFormatter({ isActive }) {
       return (
         <Flex>
-          <Status
-            size="S"
-            borderWidth={0}
-            background="transparent"
-            color="neutral800"
-            variant={isActive ? 'success' : 'danger'}
-          >
-            <Typography>{isActive ? 'Active' : 'Inactive'}</Typography>
+          <Status size="S" variant={isActive ? 'success' : 'danger'}>
+            <Typography tag="span" variant="omega" fontWeight="bold">
+              {isActive ? 'Active' : 'Inactive'}
+            </Typography>
           </Status>
         </Flex>
       );

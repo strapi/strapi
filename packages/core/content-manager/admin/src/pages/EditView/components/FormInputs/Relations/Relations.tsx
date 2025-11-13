@@ -7,6 +7,7 @@ import {
   useNotification,
   useFocusInputField,
   useRBAC,
+  useIsDesktop,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -22,7 +23,6 @@ import {
   Field,
   FlexComponent,
   BoxComponent,
-  Loader,
   EmptyStateLayout,
 } from '@strapi/design-system';
 import { Cross, Drag, ArrowClockwise, Link as LinkIcon, Plus, WarningCircle } from '@strapi/icons';
@@ -725,7 +725,7 @@ const RelationModalWithContext = ({
           }}
           creatableStartIcon={<Plus fill="neutral500" />}
           name={name}
-          autocomplete="list"
+          autocomplete={{ type: 'list', filter: 'contains' }}
           placeholder={
             placeholder ||
             formatMessage({
@@ -1109,6 +1109,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     targetModel,
     mainField,
   } = data;
+  const isDesktop = useIsDesktop();
   const { currentDocumentMeta } = useDocumentContext('RelationsField');
 
   const { formatMessage } = useIntl();
@@ -1207,7 +1208,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
           data-handler-id={handlerId}
         >
           <FlexWrapper gap={1}>
-            {canDrag ? (
+            {canDrag && isDesktop ? (
               <IconButton
                 tag="div"
                 role="button"

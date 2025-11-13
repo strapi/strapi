@@ -2,11 +2,8 @@
 import { useState } from 'react';
 
 import { Layouts } from '@strapi/admin/strapi-admin';
-import { DesignSystemProvider } from '@strapi/design-system';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '@strapi/admin/strapi-admin/test';
 import { userEvent } from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { MemoryRouter } from 'react-router-dom';
 
 import { useDataManager } from '../../DataManager/useDataManager';
 import { ContentTypeBuilderNav } from '../ContentTypeBuilderNav';
@@ -58,19 +55,7 @@ jest.mock('../../DataManager/useDataManager.ts', () => {
 
 const mockedUseDataManager = jest.mocked(useDataManager);
 
-const makeApp = () => {
-  return (
-    <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-      <DesignSystemProvider>
-        <MemoryRouter>
-          <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
-            <div />
-          </Layouts.Root>
-        </MemoryRouter>
-      </DesignSystemProvider>
-    </IntlProvider>
-  );
-};
+const App = <ContentTypeBuilderNav />;
 
 describe('<ContentTypeBuilderNav />', () => {
   beforeEach(() => {
@@ -98,7 +83,6 @@ describe('<ContentTypeBuilderNav />', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const App = makeApp();
     const { container } = render(App);
 
     expect(container).toMatchSnapshot();
@@ -106,7 +90,6 @@ describe('<ContentTypeBuilderNav />', () => {
 
   describe('save button', () => {
     it('should render the save button', () => {
-      const App = makeApp();
       const { getByRole } = render(App);
 
       const saveButton = getByRole('button', { name: /save/i });
@@ -114,8 +97,6 @@ describe('<ContentTypeBuilderNav />', () => {
     });
 
     it('should be disabled when there are no changes', () => {
-      const App = makeApp();
-
       mockedUseDataManager.mockImplementationOnce(
         () =>
           ({
@@ -137,8 +118,6 @@ describe('<ContentTypeBuilderNav />', () => {
     it.each([true, false])(
       'should be disabled when not in development mode & isModified=%s',
       (isModified) => {
-        const App = makeApp();
-
         mockedUseDataManager.mockImplementation(
           () =>
             ({
@@ -159,8 +138,6 @@ describe('<ContentTypeBuilderNav />', () => {
     );
 
     it('should be enabled when there are changes', () => {
-      const App = makeApp();
-
       mockedUseDataManager.mockImplementation(
         () =>
           ({
@@ -183,7 +160,6 @@ describe('<ContentTypeBuilderNav />', () => {
   describe('unde redo discardAllChanges', () => {
     it('should render the undo item', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
       render(App);
 
       const moreActionsButton = screen.getByRole('button', { name: /More actions/i });
@@ -194,7 +170,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should render the redo item', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
+
       render(App);
 
       const moreActionsButton = screen.getByRole('button', { name: /More actions/i });
@@ -205,7 +181,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should render the discard item', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
+
       render(App);
 
       const moreActionsButton = screen.getByRole('button', { name: /More actions/i });
@@ -216,7 +192,6 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should render the undo item as disabled if not in development mode', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
 
       mockedUseDataManager.mockImplementation(
         () =>
@@ -241,7 +216,6 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should render the redo item as disabled if not in development mode', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
 
       mockedUseDataManager.mockImplementation(
         () =>
@@ -266,7 +240,6 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should render the discard item as disabled if not in development mode', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
 
       mockedUseDataManager.mockImplementation(
         () =>
@@ -298,7 +271,6 @@ describe('<ContentTypeBuilderNav />', () => {
       },
     ])('should enable the undo item when there are changes to undo', async (opts) => {
       const user = userEvent.setup();
-      const App = makeApp();
 
       mockedUseDataManager.mockImplementation(
         () =>
@@ -331,7 +303,6 @@ describe('<ContentTypeBuilderNav />', () => {
       },
     ])('should enable the redo item when there are changes to redo', async (opts) => {
       const user = userEvent.setup();
-      const App = makeApp();
 
       mockedUseDataManager.mockImplementation(
         () =>
@@ -364,7 +335,6 @@ describe('<ContentTypeBuilderNav />', () => {
       },
     ])('should enable the discard item when there are changes to discard', async (opts) => {
       const user = userEvent.setup();
-      const App = makeApp();
 
       mockedUseDataManager.mockImplementation(
         () =>
@@ -390,7 +360,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should open the discard confirmation modal', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
+
       const { getByRole } = render(App);
 
       const moreActionsButton = screen.getByRole('button', { name: /More actions/i });
@@ -406,7 +376,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should close the discard confirmation modal', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
+
       render(App);
 
       const moreActionsButton = screen.getByRole('button', { name: /More actions/i });
@@ -427,7 +397,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should call discardChanges after confirm', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
+
       render(App);
 
       const moreActionsButton = screen.getByRole('button', { name: /More actions/i });
@@ -444,7 +414,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should call undoHandler', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
+
       render(App);
 
       const moreActionsButton = screen.getByRole('button', { name: /More actions/i });
@@ -459,7 +429,7 @@ describe('<ContentTypeBuilderNav />', () => {
 
     it('should call redoHandler', async () => {
       const user = userEvent.setup();
-      const App = makeApp();
+
       render(App);
 
       const moreActionsButton = screen.getByRole('button', { name: /More actions/i });
@@ -476,7 +446,6 @@ describe('<ContentTypeBuilderNav />', () => {
 
   describe('search', () => {
     it('should render the search input', () => {
-      const App = makeApp();
       render(App);
 
       expect(screen.getByRole('textbox', { name: /search/i })).toBeInTheDocument();
@@ -485,7 +454,6 @@ describe('<ContentTypeBuilderNav />', () => {
     it('Should call search.onChange when the input value changes', async () => {
       const user = userEvent.setup();
 
-      const App = makeApp();
       render(App);
 
       const input = screen.getByRole('textbox', { name: /search/i });
@@ -498,7 +466,6 @@ describe('<ContentTypeBuilderNav />', () => {
     it('Should clear the search input when the clear button is clicked', async () => {
       const user = userEvent.setup();
 
-      const App = makeApp();
       render(App);
 
       const input = screen.getByRole('textbox', { name: /search/i });

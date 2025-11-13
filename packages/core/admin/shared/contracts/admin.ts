@@ -1,3 +1,4 @@
+import { Struct, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import type { File } from 'formidable';
 
@@ -103,6 +104,7 @@ export declare namespace TelemetryProperties {
       useTypescriptOnServer: boolean;
       useTypescriptOnAdmin: boolean;
       isHostedOnStrapiCloud: boolean;
+      aiLicenseKey?: string;
       numberOfAllContentTypes: number;
       numberOfComponents: number;
       numberOfDynamicZones: number;
@@ -214,6 +216,21 @@ export declare namespace GetLicenseLimitInformation {
       shouldStopCreate: boolean;
       type: string;
       isTrial: boolean;
+    };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * Meta data for the guided tour
+ */
+export declare namespace GetGuidedTourMeta {
+  export interface Request {}
+
+  export interface Response {
+    data: {
+      isFirstSuperAdminUser: boolean;
+      schemas: Record<UID.ContentType, Struct.ContentTypeSchema>;
     };
     error?: errors.ApplicationError;
   }

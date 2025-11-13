@@ -14,6 +14,7 @@ export type * as Features from './features';
 export type * as Fetch from './fetch';
 export type * as Metrics from './metrics';
 export type * as RequestContext from './request-context';
+export type * as SessionManager from './session-manager';
 export type * as Sanitizers from './sanitizers';
 export type * as Server from './server';
 export type * as Validators from './validators';

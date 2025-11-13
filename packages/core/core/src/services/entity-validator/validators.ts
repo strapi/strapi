@@ -25,6 +25,7 @@ export interface ValidatorMetas<
     name: string;
     value: TValue;
   };
+  data: Record<string, unknown>;
   componentContext?: ComponentContext;
   entity?: Modules.EntityValidator.Entity;
 }

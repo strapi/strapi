@@ -2,7 +2,7 @@ import type { Schema } from '@strapi/types';
 import * as transforms from '../transform';
 
 describe('Transforms', () => {
-  test('v4 - using json api format', () => {
+  test('v4 - using json api format', async () => {
     const contentType: Schema.ContentType = {
       globalId: 'test',
       kind: 'collectionType',
@@ -62,7 +62,7 @@ describe('Transforms', () => {
     } as any;
 
     expect(
-      transforms.transformResponse(
+      await transforms.transformResponse(
         {
           id: 1,
           documentId: 'abcd',
@@ -133,40 +133,40 @@ describe('Transforms', () => {
     });
   });
 
-  test('Leaves nil values untouched', () => {
-    expect(transforms.transformResponse()).toBeUndefined();
-    expect(transforms.transformResponse(null)).toBe(null);
+  test('Leaves nil values untouched', async () => {
+    expect(await transforms.transformResponse(undefined)).toBeUndefined();
+    expect(await transforms.transformResponse(null)).toBeNull();
   });
 
-  test('Throws if entry is not and object or an array of object', () => {
-    expect(() => transforms.transformResponse(0)).toThrow();
-    expect(() => transforms.transformResponse(new Date())).toThrow();
-    expect(() => transforms.transformResponse('azaz')).toThrow();
+  test('Throws if entry is not and object or an array of object', async () => {
+    await expect(() => transforms.transformResponse(0)).rejects.toThrow();
+    await expect(() => transforms.transformResponse(new Date())).rejects.toThrow();
+    await expect(() => transforms.transformResponse('azaz')).rejects.toThrow();
   });
 
-  test('Handles arrays of entries', () => {
-    expect(transforms.transformResponse([{ id: 1, title: 'Hello' }])).toStrictEqual({
+  test('Handles arrays of entries', async () => {
+    expect(await transforms.transformResponse([{ id: 1, title: 'Hello' }])).toStrictEqual({
       data: [{ id: 1, title: 'Hello' }],
       meta: {},
     });
   });
 
-  test('Handles single entry', () => {
-    expect(transforms.transformResponse({ id: 1, title: 'Hello' })).toStrictEqual({
+  test('Handles single entry', async () => {
+    expect(await transforms.transformResponse({ id: 1, title: 'Hello' })).toStrictEqual({
       data: { id: 1, title: 'Hello' },
       meta: {},
     });
   });
 
-  test('Accepts any meta', () => {
+  test('Accepts any meta', async () => {
     const someMeta = { foo: 'bar' };
-    expect(transforms.transformResponse({ id: 1, title: 'Hello' }, someMeta)).toStrictEqual({
+    expect(await transforms.transformResponse({ id: 1, title: 'Hello' }, someMeta)).toStrictEqual({
       data: { id: 1, title: 'Hello' },
       meta: someMeta,
     });
   });
 
-  test('Handles relations single value', () => {
+  test('Handles relations single value', async () => {
     const contentType: Schema.ContentType = {
       globalId: 'test',
       kind: 'collectionType',
@@ -194,7 +194,7 @@ describe('Transforms', () => {
     } as any;
 
     expect(
-      transforms.transformResponse(
+      await transforms.transformResponse(
         { id: 1, title: 'Hello', relation: { id: 1, value: 'test' } },
         undefined,
         { contentType }
@@ -212,7 +212,7 @@ describe('Transforms', () => {
     });
   });
 
-  test('Handles relations array value', () => {
+  test('Handles relations array value', async () => {
     const contentType: Schema.ContentType = {
       globalId: 'test',
       kind: 'collectionType',
@@ -240,7 +240,7 @@ describe('Transforms', () => {
     } as any;
 
     expect(
-      transforms.transformResponse(
+      await transforms.transformResponse(
         { id: 1, title: 'Hello', relation: [{ id: 1, value: 'test' }] },
         undefined,
         { contentType }
@@ -260,7 +260,7 @@ describe('Transforms', () => {
     });
   });
 
-  test('Handles relations recursively', () => {
+  test('Handles relations recursively', async () => {
     const contentType: Schema.ContentType = {
       globalId: 'test',
       kind: 'collectionType',
@@ -295,7 +295,7 @@ describe('Transforms', () => {
     } as any;
 
     expect(
-      transforms.transformResponse(
+      await transforms.transformResponse(
         {
           id: 1,
           title: 'Hello',
@@ -323,7 +323,7 @@ describe('Transforms', () => {
     });
   });
 
-  test('Handles media like relations', () => {
+  test('Handles media like relations', async () => {
     const contentType: Schema.ContentType = {
       globalId: 'test',
       kind: 'collectionType',
@@ -349,7 +349,7 @@ describe('Transforms', () => {
     } as any;
 
     expect(
-      transforms.transformResponse(
+      await transforms.transformResponse(
         { id: 1, title: 'Hello', media: [{ id: 1, value: 'test' }] },
         undefined,
         { contentType }
@@ -369,7 +369,7 @@ describe('Transforms', () => {
     });
   });
 
-  test('Handles components & dynamic zones', () => {
+  test('Handles components & dynamic zones', async () => {
     const contentType: Schema.ContentType = {
       globalId: 'test',
       kind: 'collectionType',
@@ -409,7 +409,7 @@ describe('Transforms', () => {
     } as any;
 
     expect(
-      transforms.transformResponse(
+      await transforms.transformResponse(
         {
           id: 1,
           title: 'Hello',

@@ -66,7 +66,12 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
 
     const id = value.id.$eq || value.id.$ne;
 
-    if (id && USER_FILTER_ATTRIBUTES.includes(key) && !acc.includes(id)) {
+    // Check if the attribute is a relation to admin::user
+    const attribute = attributes[key];
+    const isAdminUserRelation =
+      attribute?.type === 'relation' && 'target' in attribute && attribute.target === 'admin::user';
+
+    if (id && (isAdminUserRelation || USER_FILTER_ATTRIBUTES.includes(key)) && !acc.includes(id)) {
       acc.push(id);
     }
 
@@ -215,7 +220,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
       onChange={handleFilterChange}
     >
       <Filters.Trigger />
-      <Filters.Popover />
+      <Filters.Popover zIndex={499} />
       <Filters.List />
     </Filters.Root>
   );

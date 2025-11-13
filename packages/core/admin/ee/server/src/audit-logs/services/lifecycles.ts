@@ -1,5 +1,4 @@
 import type { Core } from '@strapi/types';
-import { scheduleJob } from 'node-schedule';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
@@ -47,7 +46,7 @@ const getEventMap = (defaultEvents: any) => {
 const getRetentionDays = (strapi: Core.Strapi) => {
   const featureConfig = strapi.ee.features.get('audit-logs');
   const licenseRetentionDays =
-    typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
+    typeof featureConfig === 'object' && featureConfig?.options?.retentionDays;
   const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
 
   // For enterprise plans, use 90 days by default, but allow users to override it
@@ -56,7 +55,7 @@ const getRetentionDays = (strapi: Core.Strapi) => {
   }
 
   // Allow users to override the license retention days, but not to increase it
-  if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
+  if (userRetentionDays && userRetentionDays <= licenseRetentionDays) {
     return userRetentionDays;
   }
 
@@ -156,9 +155,15 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
 
       // Manage audit logs auto deletion
       const retentionDays = getRetentionDays(strapi);
-      state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
-        const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-        auditLogsService.deleteExpiredEvents(expirationDate);
+
+      strapi.cron.add({
+        deleteExpiredAuditLogs: {
+          task: async () => {
+            const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+            auditLogsService.deleteExpiredEvents(expirationDate);
+          },
+          options: '0 0 * * *',
+        },
       });
 
       return this;
@@ -173,9 +178,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
         state.eventHubUnsubscribe();
       }
 
-      if (state.deleteExpiredJob) {
-        state.deleteExpiredJob.cancel();
-      }
+      strapi.cron.remove('deleteExpiredAuditLogs');
 
       return this;
     },

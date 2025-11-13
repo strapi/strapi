@@ -78,6 +78,8 @@ export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Recor
     return {
       ...attribute,
       targetAttribute: attribute.inversedBy || attribute.mappedBy || null,
+      // Explicitly preserve conditions if they exist
+      ...(attribute.conditions && { conditions: attribute.conditions }),
     };
   }
 

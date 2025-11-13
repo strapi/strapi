@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 import * as yup from 'yup';
 import { errors } from '@strapi/utils';
-import type { GetRecentDocuments } from '../../../../shared/contracts/homepage';
+import type { GetRecentDocuments, GetCountDocuments } from '../../../../shared/contracts/homepage';
 
 const createHomepageController = () => {
   const homepageService = strapi.plugin('content-manager').service('homepage');
@@ -31,6 +31,9 @@ const createHomepageController = () => {
       }
 
       return { data: await homepageService.getRecentlyUpdatedDocuments() };
+    },
+    async getCountDocuments(): Promise<GetCountDocuments.Response> {
+      return { data: await homepageService.getCountDocuments() };
     },
   } satisfies Core.Controller;
 };

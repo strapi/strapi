@@ -1,13 +1,22 @@
-import * as React from 'react';
-
 import { Flex, Menu, VisuallyHidden, Avatar, Typography, Badge } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useAuth } from '../../features/Auth';
+import { getInitials, getDisplayName } from '../../utils/users';
 
 const MenuTrigger = styled(Menu.Trigger)`
+  padding: 0;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    width: 4rem;
+    height: 4rem;
+    justify-content: center;
+  }
+`;
+
+const MenuIcon = styled(Flex)`
   height: ${({ theme }) => theme.spaces[7]};
   width: ${({ theme }) => theme.spaces[7]};
   border: none;
@@ -41,44 +50,54 @@ const StyledTypography = styled(Typography)`
 `;
 
 export interface NavUserProps {
-  initials: string;
-  children: React.ReactNode;
+  initials?: string;
+  children?: React.ReactNode;
+  showDisplayName?: boolean;
 }
 
-export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
+export const NavUser = ({
+  initials,
+  showDisplayName = false,
+  children,
+  ...props
+}: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const user = useAuth('User', (state) => state.user);
   const logout = useAuth('Logout', (state) => state.logout);
+  const userDisplayName = getDisplayName(user);
 
   const handleProfile = () => {
-    navigate('/me');
+    const redirection = '/me';
+    navigate(redirection);
   };
 
   const handleLogout = () => {
+    const redirection = '/auth/login';
     logout();
-    navigate('/auth/login');
+    navigate(redirection);
   };
 
   return (
-    <Flex
-      justifyContent="center"
-      padding={3}
-      borderStyle="solid"
-      borderWidth="1px 0 0 0"
-      borderColor="neutral150"
-      {...props}
-    >
+    <Flex {...props}>
       <Menu.Root>
-        <MenuTrigger endIcon={null} fullWidth justifyContent="center">
-          <Avatar.Item delayMs={0} fallback={initials} />
-          <VisuallyHidden tag="span">{children}</VisuallyHidden>
+        <MenuTrigger endIcon={null} fullWidth justifyContent="flex-start">
+          <Flex alignItems="center" gap={3}>
+            <MenuIcon justifyContent="center">
+              <Avatar.Item delayMs={0} fallback={initials || getInitials(user)} />
+            </MenuIcon>
+            {showDisplayName ? (
+              <Typography variant="omega">{children || userDisplayName}</Typography>
+            ) : (
+              <VisuallyHidden tag="span">{children || userDisplayName}</VisuallyHidden>
+            )}
+          </Flex>
         </MenuTrigger>
 
         <MenuContent popoverPlacement="top-start" zIndex={3}>
           <UserInfo direction="column" gap={0} alignItems="flex-start">
             <Typography variant="omega" fontWeight="bold" textTransform="none">
-              {children}
+              {children || userDisplayName}
             </Typography>
             <StyledTypography variant="pi" textColor="neutral600">
               {user?.email}
@@ -92,7 +111,7 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
 
           <Menu.Item onSelect={handleProfile}>
             {formatMessage({
-              id: 'global.profile',
+              id: 'global.profile.settings',
               defaultMessage: 'Profile settings',
             })}
           </Menu.Item>

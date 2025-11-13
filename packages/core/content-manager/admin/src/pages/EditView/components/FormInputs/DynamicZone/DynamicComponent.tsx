@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useForm, useField } from '@strapi/admin/strapi-admin';
+import { useForm, useField, createRulesEngine, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
   Box,
@@ -58,6 +58,8 @@ const DynamicComponent = ({
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
   const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
+  const rulesEngine = createRulesEngine();
+  const isDesktop = useIsDesktop();
 
   const {
     edit: { components },
@@ -137,19 +139,21 @@ const DynamicComponent = ({
       >
         <Trash />
       </IconButton>
-      <IconButton
-        variant="ghost"
-        onClick={(e) => e.stopPropagation()}
-        data-handler-id={handlerId}
-        ref={dragRef}
-        label={formatMessage({
-          id: getTranslation('components.DragHandle-label'),
-          defaultMessage: 'Drag',
-        })}
-        onKeyDown={handleKeyDown}
-      >
-        <Drag />
-      </IconButton>
+      {isDesktop && (
+        <IconButton
+          variant="ghost"
+          onClick={(e) => e.stopPropagation()}
+          data-handler-id={handlerId}
+          ref={dragRef}
+          label={formatMessage({
+            id: getTranslation('components.DragHandle-label'),
+            defaultMessage: 'Drag',
+          })}
+          onKeyDown={handleKeyDown}
+        >
+          <Drag />
+        </IconButton>
+      )}
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={null} paddingLeft={0} paddingRight={0}>
           <IconButton
@@ -176,7 +180,7 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index)}>
+                    <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index)}>
                       {displayName}
                     </Menu.Item>
                   ))}
@@ -196,7 +200,7 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
+                    <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index + 1)}>
                       {displayName}
                     </Menu.Item>
                   ))}
@@ -238,55 +242,70 @@ const DynamicComponent = ({
                 <AccordionContentRadius background="neutral0">
                   <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
                     <Grid.Root gap={4}>
-                      {components[componentUid]?.layout?.map((row, rowInd) => (
-                        <Grid.Item
-                          col={12}
-                          key={rowInd}
-                          s={12}
-                          xs={12}
-                          direction="column"
-                          alignItems="stretch"
-                        >
-                          <ResponsiveGridRoot gap={4}>
-                            {row.map(({ size, ...field }) => {
-                              const fieldName = `${name}.${index}.${field.name}`;
+                      {components[componentUid]?.layout?.map((row, rowInd) => {
+                        const visibleFields = row.filter(({ ...field }) => {
+                          const condition = field.attribute.conditions?.visible;
 
-                              const fieldWithTranslatedLabel = {
-                                ...field,
-                                label: formatMessage({
-                                  id: `content-manager.components.${componentUid}.${field.name}`,
-                                  defaultMessage: field.label,
-                                }),
-                              };
+                          if (condition) {
+                            return rulesEngine.evaluate(condition, value);
+                          }
 
-                              return (
-                                <ResponsiveGridItem
-                                  col={size}
-                                  key={fieldName}
-                                  s={12}
-                                  xs={12}
-                                  direction="column"
-                                  alignItems="stretch"
-                                >
-                                  {children ? (
-                                    children({
-                                      ...fieldWithTranslatedLabel,
-                                      document: currentDocument,
-                                      name: fieldName,
-                                    })
-                                  ) : (
-                                    <InputRenderer
-                                      {...fieldWithTranslatedLabel}
-                                      document={currentDocument}
-                                      name={fieldName}
-                                    />
-                                  )}
-                                </ResponsiveGridItem>
-                              );
-                            })}
-                          </ResponsiveGridRoot>
-                        </Grid.Item>
-                      ))}
+                          return true;
+                        });
+
+                        if (visibleFields.length === 0) {
+                          return null; // Skip rendering the entire grid row
+                        }
+                        return (
+                          <Grid.Item
+                            col={12}
+                            key={rowInd}
+                            s={12}
+                            xs={12}
+                            direction="column"
+                            alignItems="stretch"
+                          >
+                            <ResponsiveGridRoot gap={4}>
+                              {visibleFields.map(({ size, ...field }) => {
+                                const fieldName = `${name}.${index}.${field.name}`;
+
+                                const fieldWithTranslatedLabel = {
+                                  ...field,
+                                  label: formatMessage({
+                                    id: `content-manager.components.${componentUid}.${field.name}`,
+                                    defaultMessage: field.label,
+                                  }),
+                                };
+
+                                return (
+                                  <ResponsiveGridItem
+                                    col={size}
+                                    key={fieldName}
+                                    s={12}
+                                    xs={12}
+                                    direction="column"
+                                    alignItems="stretch"
+                                  >
+                                    {children ? (
+                                      children({
+                                        ...fieldWithTranslatedLabel,
+                                        document: currentDocument,
+                                        name: fieldName,
+                                      })
+                                    ) : (
+                                      <InputRenderer
+                                        {...fieldWithTranslatedLabel}
+                                        document={currentDocument}
+                                        name={fieldName}
+                                      />
+                                    )}
+                                  </ResponsiveGridItem>
+                                );
+                              })}
+                            </ResponsiveGridRoot>
+                          </Grid.Item>
+                        );
+                      })}
                     </Grid.Root>
                   </Box>
                 </AccordionContentRadius>

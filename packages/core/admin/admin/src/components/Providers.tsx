@@ -10,7 +10,7 @@ import { NotificationsProvider } from '../features/Notifications';
 import { StrapiAppProvider } from '../features/StrapiApp';
 import { TrackingProvider } from '../features/Tracking';
 
-import { GuidedTourProvider } from './GuidedTour/Provider';
+import { GuidedTourProvider } from './GuidedTour/GuidedTourProvider';
 import { LanguageProvider } from './LanguageProvider';
 import { Theme } from './Theme';
 

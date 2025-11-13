@@ -84,7 +84,26 @@ export const forms = {
       },
       advanced({ customField, data, step, extensions, ...rest }: any) {
         // Default section with no fields
-        const sections: FormTypeOptions = [{ sectionTitle: null, items: [] }];
+        const sections: FormTypeOptions = [
+          { sectionTitle: null, items: [] },
+          {
+            sectionTitle: { id: 'form.attribute.condition.section', defaultMessage: 'Conditions' },
+            items: [
+              {
+                name: 'conditions',
+                type: 'condition-form',
+                intlLabel: {
+                  id: 'form.attribute.condition.label',
+                  defaultMessage: 'Visibility condition',
+                },
+                description: {
+                  id: 'form.attribute.condition.desc',
+                  defaultMessage: 'Show this field only when a boolean/enum condition matches.',
+                },
+              },
+            ],
+          },
+        ];
         const injectedInputs = extensions.getAdvancedForm(['attribute', customField.type], {
           data,
           type: customField.type,
@@ -162,11 +181,14 @@ export const forms = {
             ...rest,
           });
 
+          let injected = false;
+
           const sections = baseForm.reduce((acc: Array<any>, current: any) => {
-            if (current.sectionTitle === null) {
+            if (current.sectionTitle === null || injected) {
               acc.push(current);
             } else {
               acc.push({ ...current, items: [...current.items, ...itemsToAdd] });
+              injected = true;
             }
 
             return acc;
