@@ -3,12 +3,16 @@ import semver from 'semver';
 import execa from 'execa';
 import { packageManager } from '@strapi/utils';
 
+import { ProxyAgent } from 'undici';
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
 
 import type { Package as PackageInterface, NPMPackage, NPMPackageVersion } from './types';
 import type { Version } from '../version';
 import { Logger } from '../logger';
+
+const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
+const agent = proxyUrl ? new ProxyAgent(proxyUrl) : undefined;
 
 export class Package implements PackageInterface {
   name: string;
@@ -109,12 +113,15 @@ export class Package implements PackageInterface {
   async refresh() {
     const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
 
-    const response = await fetch(packageURL);
+    const response = await fetch(packageURL, {
+      // @ts-expect-error Node.js fetch supports dispatcher (undici extension)
+      dispatcher: agent,
+    });
 
     // TODO: Use a validation library to make sure the response structure is correct
     assert(response.ok, `Request failed for ${packageURL}`);
 
-    this.npmPackage = await response.json();
+    this.npmPackage = (await response.json()) as NPMPackage;
 
     return this;
   }

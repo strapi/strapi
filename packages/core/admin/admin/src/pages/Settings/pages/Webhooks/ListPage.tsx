@@ -178,7 +178,7 @@ const ListPage = () => {
   }
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -412,7 +412,7 @@ const ListPage = () => {
       <Dialog.Root open={showModal} onOpenChange={setShowModal}>
         <ConfirmDialog onConfirm={confirmBulkDelete} />
       </Dialog.Root>
-    </Layouts.Root>
+    </>
   );
 };
 

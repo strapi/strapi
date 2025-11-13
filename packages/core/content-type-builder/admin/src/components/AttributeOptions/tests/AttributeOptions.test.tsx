@@ -5,7 +5,7 @@ import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import { FormModalNavigationProvider } from '../../FormModalNavigationProvider/FormModalNavigationProvider';
+import { FormModalNavigationProvider } from '../../FormModalNavigation/FormModalNavigationProvider';
 import { AttributeOptions } from '../AttributeOptions';
 
 import type { IconByType } from '../../AttributeIcon';

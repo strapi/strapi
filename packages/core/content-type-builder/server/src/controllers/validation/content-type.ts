@@ -3,7 +3,8 @@
 import { flatMap, getOr, has, snakeCase } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import type { Struct, Internal } from '@strapi/types';
+import type { Struct, Internal, UID } from '@strapi/types';
+
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
@@ -12,6 +13,7 @@ import { nestedComponentSchema } from './component';
 
 // Input flattens some fields of the "info" into the root type
 export type CreateContentTypeInput = {
+  uid?: UID.ContentType;
   contentType?: Partial<Struct.ContentTypeSchema> & Partial<Struct.ContentTypeSchemaInfo>;
   components?: Array<
     Partial<Struct.ComponentSchema> &
@@ -23,7 +25,7 @@ export type CreateContentTypeInput = {
   collectionName?: Struct.CollectionTypeSchema['collectionName'];
   pluralName: Struct.ContentTypeSchemaInfo['pluralName'];
   displayName: Struct.ContentTypeSchemaInfo['displayName'];
-  description: Struct.ContentTypeSchemaInfo['description'];
+  description?: Struct.ContentTypeSchemaInfo['description'];
   options?: Struct.SchemaOptions;
   draftAndPublish?: Struct.SchemaOptions['draftAndPublish'];
   pluginOptions?: Struct.ContentTypeSchema['pluginOptions'];
@@ -68,6 +70,7 @@ const createContentTypeSchema = (data: CreateContentTypeInput, { isEdition = fal
     'contentType.kind',
     data
   );
+
   const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
     modelType: modelTypes.CONTENT_TYPE,
   })

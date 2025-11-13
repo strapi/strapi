@@ -2,14 +2,22 @@ import { Menu } from '@strapi/design-system';
 import { useDispatch } from 'react-redux';
 import { styled } from 'styled-components';
 
-import { useDataManager } from '../../../../hooks/useDataManager';
 import { isAllowedContentTypesForRelations } from '../../../../utils';
+import { useDataManager } from '../../../DataManager/useDataManager';
 import { actions } from '../../../FormModal/reducer';
 
+import type { Internal, Schema } from '@strapi/types';
 interface RelationTargetPickerProps {
   oneThatIsCreatingARelationWithAnother: string;
-  target: string;
+  target: Internal.UID.ContentType;
 }
+
+type SelectOpts = {
+  uid: string;
+  plugin?: string;
+  title: string;
+  restrictRelationsTo: Schema.Attribute.RelationKind.Any[] | null;
+};
 
 export const RelationTargetPicker = ({
   oneThatIsCreatingARelationWithAnother,
@@ -22,21 +30,14 @@ export const RelationTargetPicker = ({
     isAllowedContentTypesForRelations
   );
 
-  const { plugin = null, schema: { displayName } = { displayName: 'error' } } =
-    contentTypes?.[target] ?? {};
+  const type = contentTypes[target];
+
+  if (!type) {
+    return null;
+  }
 
   const handleSelect =
-    ({
-      uid,
-      plugin,
-      title,
-      restrictRelationsTo,
-    }: {
-      uid: string;
-      plugin: boolean;
-      title: string;
-      restrictRelationsTo: any;
-    }) =>
+    ({ uid, plugin, title, restrictRelationsTo }: SelectOpts) =>
     () => {
       const selectedContentTypeFriendlyName = plugin ? `${plugin}_${title}` : title;
 
@@ -59,7 +60,7 @@ export const RelationTargetPicker = ({
    */
   return (
     <Menu.Root>
-      <MenuTrigger>{`${displayName} ${plugin ? `(from: ${plugin})` : ''}`}</MenuTrigger>
+      <MenuTrigger>{`${type.info.displayName} ${type.plugin ? `(from: ${type.plugin})` : ''}`}</MenuTrigger>
       <Menu.Content zIndex="popover">
         {allowedContentTypesForRelation.map(({ uid, title, restrictRelationsTo, plugin }) => (
           <Menu.Item key={uid} onSelect={handleSelect({ uid, plugin, title, restrictRelationsTo })}>

@@ -1,15 +1,33 @@
+import type { Context } from 'koa';
 import { isNil } from 'lodash/fp';
 import { env } from '@strapi/utils';
 import { getService } from '../utils';
+import path from 'path';
+import fs from 'fs';
+import crypto from 'crypto';
 
 export default {
   // NOTE: Overrides CE admin controller
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
+    const isAIConfigured = strapi.config.get('admin.ai', { enabled: false });
+    const isAILicense = strapi.ee.features.isEnabled('cms-ai');
+
     try {
-      return { data: { isEE: strapi.EE, features: strapi.ee.features.list(), flags } };
+      return {
+        data: {
+          isEE: strapi.EE,
+          isTrial: strapi.ee.isTrial,
+          features: strapi.ee.features.list(),
+          flags,
+          type: strapi.ee.type,
+          ai: {
+            enabled: isAILicense && isAIConfigured.enabled,
+          },
+        },
+      };
     } catch (err) {
-      return { data: { isEE: false, features: [], flags } };
+      return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
     }
   },
 
@@ -48,6 +66,9 @@ export default {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+      aiLicenseKey: env('STRAPI_ADMIN_AI_LICENSE'),
+      type: strapi.ee.type,
+      isTrial: strapi.ee.isTrial,
       features: strapi.ee.features.list() ?? [],
     };
 

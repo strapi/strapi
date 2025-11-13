@@ -163,18 +163,24 @@ const WysiwygNav = ({
       menu: (
         <>
           <Menu.Separator />
-          <Menu.Item onSelect={() => handleActionClick('Bold', editorRef)} disabled={isDisabled}>
+          <Menu.Item
+            startIcon={<Bold fill="neutral500" />}
+            onSelect={() => handleActionClick('Bold', editorRef)}
+            disabled={isDisabled}
+          >
             <Flex tag="span" gap={2}>
-              <Bold aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Blocks.modifiers.bold',
                 defaultMessage: 'Bold',
               })}
             </Flex>
           </Menu.Item>
-          <Menu.Item onSelect={() => handleActionClick('Italic', editorRef)} disabled={isDisabled}>
+          <Menu.Item
+            startIcon={<Italic fill="neutral500" />}
+            onSelect={() => handleActionClick('Italic', editorRef)}
+            disabled={isDisabled}
+          >
             <Flex tag="span" gap={2}>
-              <Italic aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Blocks.modifiers.italic',
                 defaultMessage: 'Italic',
@@ -182,11 +188,11 @@ const WysiwygNav = ({
             </Flex>
           </Menu.Item>
           <Menu.Item
+            startIcon={<Underline fill="neutral500" />}
             onSelect={() => handleActionClick('Underline', editorRef)}
             disabled={isDisabled}
           >
             <Flex tag="span" gap={2}>
-              <Underline aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Blocks.modifiers.underline',
                 defaultMessage: 'Underline',
@@ -194,11 +200,11 @@ const WysiwygNav = ({
             </Flex>
           </Menu.Item>
           <Menu.Item
+            startIcon={<StrikeThrough fill="neutral500" />}
             onSelect={() => handleActionClick('Strikethrough', editorRef)}
             disabled={isDisabled}
           >
             <Flex tag="span" gap={2}>
-              <StrikeThrough aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Blocks.modifiers.strikethrough',
                 defaultMessage: 'Strikethrough',
@@ -246,11 +252,11 @@ const WysiwygNav = ({
         <>
           <Menu.Separator />
           <Menu.Item
+            startIcon={<BulletList fill="neutral500" />}
             onSelect={() => handleActionClick('BulletList', editorRef)}
             disabled={isDisabled}
           >
             <Flex tag="span" gap={2}>
-              <BulletList aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Blocks.blocks.unorderedList',
                 defaultMessage: 'Bulleted list',
@@ -258,11 +264,11 @@ const WysiwygNav = ({
             </Flex>
           </Menu.Item>
           <Menu.Item
+            startIcon={<NumberList fill="neutral500" />}
             onSelect={() => handleActionClick('NumberList', editorRef)}
             disabled={isDisabled}
           >
             <Flex tag="span" gap={2}>
-              <NumberList aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Blocks.blocks.orderedList',
                 defaultMessage: 'Numbered list',
@@ -339,9 +345,12 @@ const WysiwygNav = ({
       menu: (
         <>
           <Menu.Separator />
-          <Menu.Item onSelect={() => handleActionClick('Code', editorRef)} disabled={isDisabled}>
+          <Menu.Item
+            startIcon={<Code fill="neutral500" />}
+            onSelect={() => handleActionClick('Code', editorRef)}
+            disabled={isDisabled}
+          >
             <Flex tag="span" gap={2}>
-              <Code aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Wysiwyg.blocks.code',
                 defaultMessage: 'Code',
@@ -349,14 +358,13 @@ const WysiwygNav = ({
             </Flex>
           </Menu.Item>
           <Menu.Item
-            startIcon={<Image />}
+            startIcon={<Image fill="neutral500" />}
             onSelect={() => {
               onToggleMediaLib();
             }}
             disabled={isDisabled}
           >
             <Flex tag="span" gap={2}>
-              <Image aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Blocks.blocks.image',
                 defaultMessage: 'Image',
@@ -364,21 +372,23 @@ const WysiwygNav = ({
             </Flex>
           </Menu.Item>
           <Menu.Item
-            startIcon={<Link />}
+            startIcon={<Link fill="neutral500" />}
             onSelect={() => handleActionClick('Link', editorRef)}
             disabled={isDisabled}
           >
             <Flex tag="span" gap={2}>
-              <Link aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Blocks.popover.link',
                 defaultMessage: 'Link',
               })}
             </Flex>
           </Menu.Item>
-          <Menu.Item onSelect={() => handleActionClick('Quote', editorRef)} disabled={isDisabled}>
+          <Menu.Item
+            startIcon={<Quotes fill="neutral500" />}
+            onSelect={() => handleActionClick('Quote', editorRef)}
+            disabled={isDisabled}
+          >
             <Flex tag="span" gap={2}>
-              <Quotes aria-hidden fill="neutral600" />
               {formatMessage({
                 id: 'components.Blocks.blocks.quote',
                 defaultMessage: 'Quote',
@@ -415,37 +425,37 @@ const WysiwygNav = ({
           onChange={(value) => handleActionClick(value, editorRef)}
           size="S"
         >
-          <SingleSelectOption value="h1" startIcon={<HeadingOne fill="neutral600" />}>
+          <SingleSelectOption value="h1" startIcon={<HeadingOne fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H1',
               defaultMessage: 'Heading 1',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h2" startIcon={<HeadingTwo fill="neutral600" />}>
+          <SingleSelectOption value="h2" startIcon={<HeadingTwo fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H2',
               defaultMessage: 'Heading 2',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h3" startIcon={<HeadingThree fill="neutral600" />}>
+          <SingleSelectOption value="h3" startIcon={<HeadingThree fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H3',
               defaultMessage: 'Heading 3',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h4" startIcon={<HeadingFour fill="neutral600" />}>
+          <SingleSelectOption value="h4" startIcon={<HeadingFour fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H4',
               defaultMessage: 'Heading 4',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h5" startIcon={<HeadingFive fill="neutral600" />}>
+          <SingleSelectOption value="h5" startIcon={<HeadingFive fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H5',
               defaultMessage: 'Heading 5',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h6" startIcon={<HeadingSix fill="neutral600" />}>
+          <SingleSelectOption value="h6" startIcon={<HeadingSix fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H6',
               defaultMessage: 'Heading 6',

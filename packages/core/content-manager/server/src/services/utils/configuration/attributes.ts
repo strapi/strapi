@@ -79,7 +79,7 @@ const isVisible = (schema: any, name: any) => {
     return false;
   }
 
-  if (isTimestamp(schema, name) || name === 'id') {
+  if (isTimestamp(schema, name) || name === 'id' || name === 'documentId') {
     return false;
   }
 

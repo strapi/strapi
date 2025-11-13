@@ -81,8 +81,8 @@ describe('<Input />', () => {
         padding-block: 8px;
       }
 
-      .c5 ::placeholder {
-        color: #8e8ea9;
+      .c5::placeholder {
+        color: #666687;
         opacity: 1;
       }
 

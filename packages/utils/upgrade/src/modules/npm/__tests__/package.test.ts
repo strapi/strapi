@@ -81,7 +81,10 @@ describe('Package class', () => {
   const packageInstance = new Package(packageName, mockCwd, mockLogger);
   it('should fetch package data and update npmPackage', async () => {
     await packageInstance.refresh();
-    expect(global.fetch).toHaveBeenCalledWith(`${constants.NPM_REGISTRY_URL}/${packageName}`);
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${constants.NPM_REGISTRY_URL}/${packageName}`,
+      expect.anything()
+    );
     expect(packageInstance.versionExists).toBeTruthy();
   });
 
@@ -136,7 +139,10 @@ describe('Package class', () => {
 
     await packageInstance.refresh();
 
-    expect(global.fetch).toHaveBeenCalledWith(`${constants.NPM_REGISTRY_URL}/${packageName}`);
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${constants.NPM_REGISTRY_URL}/${packageName}`,
+      expect.anything()
+    );
     expect(packageInstance.isLoaded).toBeTruthy();
     expect(packageInstance.getVersionsAsList().length).toBeGreaterThan(0);
   });
@@ -202,7 +208,10 @@ describe('Package registry URL determination', () => {
     const pkg = new Package('@test/package', mockCwd, mockLogger);
     await pkg.refresh();
 
-    expect(global.fetch).toHaveBeenCalledWith('https://custom-registry.example.com/@test/package');
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://custom-registry.example.com/@test/package',
+      expect.anything()
+    );
   });
 
   it('should use yarn registry when yarn is the preferred package manager', async () => {
@@ -217,7 +226,10 @@ describe('Package registry URL determination', () => {
     expect(mockExeca).toHaveBeenCalledWith('yarn', ['config', 'get', 'npmRegistryServer'], {
       timeout: 10_000,
     });
-    expect(global.fetch).toHaveBeenCalledWith('https://yarn-registry.example.com/@test/package');
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://yarn-registry.example.com/@test/package',
+      expect.anything()
+    );
   });
 
   it('should use npm registry when npm is the preferred package manager', async () => {
@@ -232,7 +244,10 @@ describe('Package registry URL determination', () => {
     expect(mockExeca).toHaveBeenCalledWith('npm', ['config', 'get', 'registry'], {
       timeout: 10_000,
     });
-    expect(global.fetch).toHaveBeenCalledWith('https://npm-registry.example.com/@test/package');
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://npm-registry.example.com/@test/package',
+      expect.anything()
+    );
   });
 
   it('should fallback to default registry when no other registry is available', async () => {
@@ -242,7 +257,10 @@ describe('Package registry URL determination', () => {
     const pkg = new Package('@test/package', mockCwd, mockLogger);
     await pkg.refresh();
 
-    expect(global.fetch).toHaveBeenCalledWith(`${constants.NPM_REGISTRY_URL}/@test/package`);
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${constants.NPM_REGISTRY_URL}/@test/package`,
+      expect.anything()
+    );
   });
 
   it('should handle trailing slashes in registry URLs', async () => {
@@ -253,7 +271,10 @@ describe('Package registry URL determination', () => {
     const pkg = new Package('@test/package', mockCwd, mockLogger);
     await pkg.refresh();
 
-    expect(global.fetch).toHaveBeenCalledWith('https://registry.example.com/@test/package');
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://registry.example.com/@test/package',
+      expect.anything()
+    );
   });
 
   it('should prioritize env var over package manager registry', async () => {
@@ -267,7 +288,7 @@ describe('Package registry URL determination', () => {
     const pkg = new Package('@test/package', mockCwd, mockLogger);
     await pkg.refresh();
 
-    expect(global.fetch).toHaveBeenCalledWith(`${envRegistry}/@test/package`);
+    expect(global.fetch).toHaveBeenCalledWith(`${envRegistry}/@test/package`, expect.anything());
     expect(mockExeca).not.toHaveBeenCalled();
   });
 });

@@ -7,25 +7,25 @@ const FIXTURE_FOLDER_PATH = '/1/2/3';
 
 describe('getFolderURL', () => {
   test('returns a path for the root of the media library', () => {
-    expect(getFolderURL(FIXTURE_PATHNAME, FIXTURE_QUERY)).toMatchInlineSnapshot(`"/media-library"`);
+    expect(getFolderURL(FIXTURE_PATHNAME, FIXTURE_QUERY)).toBe('/media-library');
   });
 
   test('returns a path for a folder', () => {
-    expect(
-      getFolderURL(FIXTURE_PATHNAME, FIXTURE_QUERY, { folder: FIXTURE_FOLDER })
-    ).toMatchInlineSnapshot(`"/media-library?folder=1"`);
+    expect(getFolderURL(FIXTURE_PATHNAME, FIXTURE_QUERY, { folder: FIXTURE_FOLDER })).toBe(
+      '/media-library?folder=1'
+    );
   });
 
   test('removes _q query parameter', () => {
     expect(
       getFolderURL(FIXTURE_PATHNAME, { ...FIXTURE_QUERY, _q: 'search' }, { folder: FIXTURE_FOLDER })
-    ).toMatchInlineSnapshot(`"/media-library?folder=1"`);
+    ).toBe('/media-library?folder=1');
   });
 
   test('keeps and stringifies query parameter', () => {
-    expect(
-      getFolderURL(FIXTURE_PATHNAME, { ...FIXTURE_QUERY }, { folder: FIXTURE_FOLDER })
-    ).toMatchInlineSnapshot(`"/media-library?folder=1"`);
+    expect(getFolderURL(FIXTURE_PATHNAME, { ...FIXTURE_QUERY }, { folder: FIXTURE_FOLDER })).toBe(
+      '/media-library?folder=1'
+    );
   });
 
   test('includes folderPath if provided', () => {
@@ -34,12 +34,12 @@ describe('getFolderURL', () => {
         folder: FIXTURE_FOLDER,
         folderPath: FIXTURE_FOLDER_PATH,
       })
-    ).toMatchInlineSnapshot(`"/media-library?folder=1&folderPath=/1/2/3"`);
+    ).toBe('/media-library?folder=1&folderPath=/1/2/3');
   });
 
-  test('includes fodlerPath if provided and folder is undefined', () => {
-    expect(
-      getFolderURL(FIXTURE_PATHNAME, FIXTURE_QUERY, { folderPath: FIXTURE_FOLDER_PATH })
-    ).toMatchInlineSnapshot(`"/media-library?folderPath=/1/2/3"`);
+  test('includes folderPath if provided and folder is undefined', () => {
+    expect(getFolderURL(FIXTURE_PATHNAME, FIXTURE_QUERY, { folderPath: FIXTURE_FOLDER_PATH })).toBe(
+      '/media-library?folderPath=/1/2/3'
+    );
   });
 });

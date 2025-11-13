@@ -35,8 +35,8 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   const canReadMainField = permissionChecker.can.read(null, mainField);
 
   if (!isMainFieldListable || !canReadMainField) {
-    // Default to 'id' if the actual main field shouldn't be displayed
-    return 'id';
+    // Default to 'documentId' if the actual main field shouldn't be displayed
+    return 'documentId';
   }
 
   // Edge cases
@@ -130,7 +130,9 @@ const validateStatus = (
   const isSourceDP = isDP(sourceModel);
 
   // Default to draft if not set
-  if (!isSourceDP) return { status: undefined };
+  if (!isSourceDP && sourceModel.modelType === 'contentType') {
+    return { status: undefined };
+  }
 
   switch (status) {
     case 'published':
@@ -450,7 +452,7 @@ export default {
       publishedAt?: Record<string, any>;
     } = {};
 
-    if (sourceSchema?.options?.draftAndPublish) {
+    if (sourceSchema?.options?.draftAndPublish || sourceSchema?.modelType === 'component') {
       if (targetSchema?.options?.draftAndPublish) {
         if (status === 'published') {
           filters.publishedAt = { $notNull: true };

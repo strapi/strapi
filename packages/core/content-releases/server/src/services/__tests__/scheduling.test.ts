@@ -1,4 +1,3 @@
-import { scheduleJob } from 'node-schedule';
 import createSchedulingService from '../scheduling';
 
 const baseStrapiMock = {
@@ -7,13 +6,17 @@ const baseStrapiMock = {
       isEnabled: jest.fn().mockReturnValue(true),
     },
   },
+  cron: {
+    add: jest.fn(),
+    remove: jest.fn(),
+  },
 };
 
-jest.mock('node-schedule', () => ({
-  scheduleJob: jest.fn(),
-}));
-
 describe('Scheduling service', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('set', () => {
     it('should throw an error if the release does not exist', async () => {
       const strapiMock = {
@@ -33,10 +36,6 @@ describe('Scheduling service', () => {
     });
 
     it('should cancel the previous job if it exists and create the new one', async () => {
-      const mockScheduleJob = jest.fn().mockReturnValue({ cancel: jest.fn() });
-      // @ts-expect-error - scheduleJob is a mock
-      scheduleJob.mockImplementation(mockScheduleJob);
-
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -53,21 +52,17 @@ describe('Scheduling service', () => {
       const schedulingService = createSchedulingService({ strapi: strapiMock });
       const scheduledJobs = await schedulingService.set('1', oldJobDate);
       expect(scheduledJobs.size).toBe(1);
-      expect(mockScheduleJob).toHaveBeenCalledWith(oldJobDate, expect.any(Function));
+      expect(strapiMock.cron.add).toHaveBeenCalledTimes(1);
 
-      const oldJob = scheduledJobs.get('1')!;
+      const oldTaskName = scheduledJobs.get('1')!;
 
       await schedulingService.set('1', newJobDate);
 
-      expect(oldJob.cancel).toHaveBeenCalled();
-      expect(mockScheduleJob).toHaveBeenCalledWith(newJobDate, expect.any(Function));
+      expect(strapiMock.cron.remove).toHaveBeenCalledWith(oldTaskName);
+      expect(strapiMock.cron.add).toHaveBeenCalledTimes(2);
     });
 
     it('should create a new job', async () => {
-      const mockScheduleJob = jest.fn().mockReturnValue({ cancel: jest.fn() });
-      // @ts-expect-error - scheduleJob is a mock
-      scheduleJob.mockImplementation(mockScheduleJob);
-
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -83,16 +78,12 @@ describe('Scheduling service', () => {
       const schedulingService = createSchedulingService({ strapi: strapiMock });
       const scheduledJobs = await schedulingService.set('1', date);
       expect(scheduledJobs.size).toBe(1);
-      expect(mockScheduleJob).toHaveBeenCalledWith(date, expect.any(Function));
+      expect(strapiMock.cron.add).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('cancel', () => {
     it('should cancel the job if it exists', async () => {
-      const mockScheduleJob = jest.fn().mockReturnValue({ cancel: jest.fn() });
-      // @ts-expect-error - scheduleJob is a mock
-      scheduleJob.mockImplementation(mockScheduleJob);
-
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -108,19 +99,18 @@ describe('Scheduling service', () => {
       const schedulingService = createSchedulingService({ strapi: strapiMock });
       const scheduledJobs = await schedulingService.set('1', date);
       expect(scheduledJobs.size).toBe(1);
-      expect(mockScheduleJob).toHaveBeenCalledWith(date, expect.any(Function));
+      expect(strapiMock.cron.add).toHaveBeenCalledTimes(1);
 
+      const taskName = scheduledJobs.get('1')!;
       schedulingService.cancel('1');
+
+      expect(strapiMock.cron.remove).toHaveBeenCalledWith(taskName);
       expect(scheduledJobs.size).toBe(0);
     });
   });
 
   describe('getAll', () => {
     it('should return all the scheduled jobs', async () => {
-      const mockScheduleJob = jest.fn().mockReturnValue({ cancel: jest.fn() });
-      // @ts-expect-error - scheduleJob is a mock
-      scheduleJob.mockImplementation(mockScheduleJob);
-
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -141,10 +131,6 @@ describe('Scheduling service', () => {
 
   describe('syncFromDatabase', () => {
     it('should sync the scheduled jobs from the database', async () => {
-      const mockScheduleJob = jest.fn().mockReturnValue({ cancel: jest.fn() });
-      // @ts-expect-error - scheduleJob is a mock
-      scheduleJob.mockImplementation(mockScheduleJob);
-
       const strapiMock = {
         ...baseStrapiMock,
         db: {
@@ -161,7 +147,7 @@ describe('Scheduling service', () => {
       const schedulingService = createSchedulingService({ strapi: strapiMock });
       const scheduledJobs = await schedulingService.syncFromDatabase();
       expect(scheduledJobs.size).toBe(1);
-      expect(mockScheduleJob).toHaveBeenCalledWith(expect.any(Date), expect.any(Function));
+      expect(strapiMock.cron.add).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -87,11 +87,7 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       await user.click(getByRole('button', { name: 'Reset logo' }));
 
       expect(onChangeLogoSpy).toHaveBeenCalledTimes(1);
-      expect(onChangeLogoSpy.mock.calls[0]).toMatchInlineSnapshot(`
-        [
-          null,
-        ]
-      `);
+      expect(onChangeLogoSpy.mock.calls[0]).toEqual([null]);
     });
 
     it('should render disabled actions if no update permissions', () => {

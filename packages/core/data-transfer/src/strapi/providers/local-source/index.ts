@@ -74,7 +74,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
    */
   #handleStreamError(streamType: string, err: Error) {
     const { message, stack } = err;
-    const errorMessage = `Error in ${streamType} read stream: ${message}`;
+    const errorMessage = `[Data transfer] Error in ${streamType} read stream: ${message}`;
     const formattedError = {
       message: errorMessage,
       stack,
