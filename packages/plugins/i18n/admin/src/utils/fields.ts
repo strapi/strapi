@@ -1,3 +1,5 @@
+import has from 'lodash/has';
+
 const LOCALIZED_FIELDS = [
   'biginteger',
   'boolean',
@@ -23,13 +25,6 @@ const LOCALIZED_FIELDS = [
 
 const doesPluginOptionsHaveI18nLocalized = (
   opts?: object
-): opts is { i18n: { localized: boolean } } =>
-  typeof opts === 'object' &&
-  opts !== null &&
-  'i18n' in opts &&
-  typeof opts.i18n === 'object' &&
-  opts.i18n !== null &&
-  'localized' in opts.i18n &&
-  typeof opts.i18n.localized === 'boolean';
+): opts is { i18n: { localized: boolean } } => has(opts, ['i18n', 'localized']);
 
 export { LOCALIZED_FIELDS, doesPluginOptionsHaveI18nLocalized };

@@ -34,6 +34,7 @@ const renderAdmin = async (
      */
     backendURL: createAbsoluteUrl(process.env.STRAPI_ADMIN_BACKEND_URL),
     isEE: false,
+    isTrial: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
     future: {
       isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => {
@@ -56,31 +57,41 @@ const renderAdmin = async (
       nps: false,
       promoteEE: true,
     },
+    ai: {
+      enabled: true,
+    },
   };
 
   const { get } = getFetchClient();
 
   interface ProjectType extends Pick<Window['strapi'], 'flags'> {
     isEE: boolean;
+    isTrial: boolean;
     features: {
       name: string;
     }[];
+    ai: {
+      enabled: boolean;
+    };
   }
 
   try {
     const {
       data: {
-        data: { isEE, features, flags },
+        data: { isEE, isTrial, features, flags, ai },
       },
     } = await get<{ data: ProjectType }>('/admin/project-type');
 
     window.strapi.isEE = isEE;
+    window.strapi.isTrialLicense = isTrial;
     window.strapi.flags = flags;
     window.strapi.features = {
       ...window.strapi.features,
       isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
     };
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
+    window.strapi.aiLicenseKey = process.env.STRAPI_ADMIN_AI_API_KEY;
+    window.strapi.ai = ai;
   } catch (err) {
     /**
      * If this fails, we simply don't activate any EE features.

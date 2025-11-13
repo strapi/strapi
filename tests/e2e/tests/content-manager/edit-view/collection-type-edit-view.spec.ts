@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { findAndClose } from '../../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -19,7 +20,7 @@ test.describe('Edit View', () => {
     test.fixme(
       'as a user I want to be warned if I try to publish content that has draft relations',
       async ({ page }) => {
-        await page.getByLabel('Content Manager').click();
+        await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
         await page.getByRole('link', { name: 'Create new entry' }).click();
 
         // Wait for the URL to match the CREATE_URL pattern
@@ -230,7 +231,7 @@ test.describe('Edit View', () => {
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American');
       await page
         .getByRole('textbox')
-        .nth(1)
+        .nth(2)
         .fill('I miss the denver broncos, now I can only watch it on the evening.');
 
       await page.getByRole('combobox', { name: 'authors' }).click();

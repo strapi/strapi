@@ -9,29 +9,25 @@ import { Outlet } from 'react-router-dom';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
 
-import { GuidedTourModal } from '../components/GuidedTour/Modal';
-import { useGuidedTour } from '../components/GuidedTour/Provider';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
+import { UpsellBanner } from '../components/UpsellBanner';
+import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
+import { useStrapiApp } from '../features/StrapiApp';
 import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
-import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
 
 const { version: strapiVersion } = packageInfo;
 
 const AdminLayout = () => {
-  const setGuidedTourVisibility = useGuidedTour(
-    'AdminLayout',
-    (state) => state.setGuidedTourVisibility
-  );
   const { formatMessage } = useIntl();
   const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
   const [userId, setUserId] = React.useState<string>();
@@ -64,18 +60,6 @@ const AdminLayout = () => {
     }
   }, [showReleaseNotification]);
 
-  const userRoles = useAuth('AuthenticatedApp', (state) => state.user?.roles);
-
-  React.useEffect(() => {
-    if (userRoles) {
-      const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
-
-      if (isUserSuperAdmin && appInfo?.autoReload) {
-        setGuidedTourVisibility(true);
-      }
-    }
-  }, [userRoles, appInfo?.autoReload, setGuidedTourVisibility]);
-
   React.useEffect(() => {
     hashAdminUserEmail(userInfo).then((id) => {
       if (id) {
@@ -90,16 +74,20 @@ const AdminLayout = () => {
     isLoading: isLoadingMenu,
     generalSectionLinks,
     pluginsSectionLinks,
+    topMobileNavigation,
+    burgerMobileNavigation,
   } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName));
 
-  /**
-   * Make sure the event is only send once after accessing the admin panel
-   * and not at runtime for example when regenerating the permissions with the ctb
-   * or with i18n
-   */
-  useOnce(() => {
-    trackUsage('didAccessAuthenticatedAdministration');
-  });
+  const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
+  const projectId = appInfo?.projectId;
+  React.useEffect(() => {
+    if (projectId) {
+      trackUsage('didAccessAuthenticatedAdministration', {
+        registeredWidgets: getAllWidgets().map((widget) => widget.uid),
+        projectId,
+      });
+    }
+  }, [projectId, getAllWidgets, trackUsage]);
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
@@ -121,14 +109,31 @@ const AdminLayout = () => {
             <SkipToContent>
               {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
             </SkipToContent>
-            <Flex alignItems="flex-start">
+            <Flex
+              height="100dvh"
+              direction={{
+                initial: 'column',
+                large: 'row',
+              }}
+              alignItems="flex-start"
+            >
               <LeftMenu
                 generalSectionLinks={generalSectionLinks}
                 pluginsSectionLinks={pluginsSectionLinks}
+                topMobileNavigation={topMobileNavigation}
+                burgerMobileNavigation={burgerMobileNavigation}
               />
-              <Box flex={1}>
+              <Box
+                flex={1}
+                overflow="auto"
+                width="100%"
+                height={{
+                  initial: 'auto',
+                  large: '100%',
+                }}
+              >
+                <UpsellBanner />
                 <Outlet />
-                <GuidedTourModal />
               </Box>
             </Flex>
           </Box>

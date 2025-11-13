@@ -63,6 +63,8 @@ export interface Scope {
   useTypescript?: boolean;
   useExample?: boolean;
   gitInit?: boolean;
+  shouldCreateGrowthSsoTrial: boolean;
+  isABTestEnabled: boolean;
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';

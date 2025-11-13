@@ -3,6 +3,9 @@ import _ from 'lodash';
 import { defaults } from 'lodash/fp';
 import { arrays, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
+import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import { createUser, hasSuperAdminRole } from '../domain/user';
 import type {
   AdminUser,
@@ -22,6 +25,11 @@ const { SUPER_ADMIN_CODE } = constants;
 const { ValidationError } = errors;
 const sanitizeUserRoles = (role: AdminRole): SanitizedAdminRole =>
   _.pick(role, ['id', 'name', 'description', 'code']);
+
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
+};
 
 /**
  * Remove private user fields
@@ -162,6 +170,31 @@ const isLastSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
 };
 
 /**
+ * Check if a user is the first super admin
+ * @param userId user's id to look for
+ */
+const isFirstSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
+  const currentUser = (await findOne(userId)) as AdminUser | null;
+
+  if (!currentUser || !hasSuperAdminRole(currentUser)) return false;
+
+  const [oldestUser] = await strapi.db.query('admin::user').findMany({
+    populate: {
+      roles: {
+        where: {
+          code: { $eq: SUPER_ADMIN_CODE },
+        },
+      },
+    },
+    orderBy: { createdAt: 'asc' },
+    limit: 1,
+    select: ['id'],
+  });
+
+  return oldestUser.id === currentUser.id;
+};
+
+/**
  * Check if a user with specific attributes exists in the database
  * @param attributes A partial user object
  */
@@ -274,6 +307,12 @@ const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
 
+  // Invalidate all sessions for the deleted user
+  const sessionManager = getSessionManager();
+  if (sessionManager && sessionManager.hasOrigin('admin')) {
+    await sessionManager('admin').invalidateRefreshToken(String(id));
+  }
+
   strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
 
   return deletedUser;
@@ -302,6 +341,12 @@ const deleteByIds = async (ids: (string | number)[]): Promise<AdminUser[]> => {
       where: { id },
       populate: ['roles'],
     });
+
+    // Invalidate all sessions for the deleted user
+    const sessionManager = getSessionManager();
+    if (sessionManager && sessionManager.hasOrigin('admin')) {
+      await sessionManager('admin').invalidateRefreshToken(String(id));
+    }
 
     deletedUsers.push(deletedUser);
   }
@@ -372,6 +417,185 @@ const getLanguagesInUse = async (): Promise<string[]> => {
   return users.map((user) => user.preferedLanguage || 'en');
 };
 
+/**
+ * In-memory cache for AI tokens
+ * Key format: `${projectId}:${userId}`
+ */
+const aiTokenCache = new Map<
+  string,
+  {
+    token: string;
+    expiresAt?: string;
+    expiresAtMs?: number;
+  }
+>();
+
+/**
+ * Generate an AI token for the user performing the request
+ */
+const getAiToken = async (): Promise<{ token: string; expiresAt?: string }> => {
+  const ERROR_PREFIX = 'AI token request failed:';
+
+  // Check if EE features are enabled first
+  if (!strapi.ee?.isEE) {
+    strapi.log.error(`${ERROR_PREFIX} Enterprise Edition features are not enabled`);
+    throw new Error('AI token request failed. Check server logs for details.');
+  }
+
+  // Get the EE license
+  // First try environment variable, then try reading from file
+  let eeLicense = process.env.STRAPI_LICENSE;
+
+  if (!eeLicense) {
+    try {
+      const licensePath = path.join(strapi.dirs.app.root, 'license.txt');
+      eeLicense = fs.readFileSync(licensePath).toString();
+    } catch (error) {
+      // License file doesn't exist or can't be read
+    }
+  }
+
+  if (!eeLicense) {
+    strapi.log.error(
+      `${ERROR_PREFIX} No EE license found. Please ensure STRAPI_LICENSE environment variable is set or license.txt file exists.`
+    );
+    throw new Error('AI token request failed. Check server logs for details.');
+  }
+
+  const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
+
+  if (!aiServerUrl) {
+    strapi.log.error(
+      `${ERROR_PREFIX} AI server URL not configured. Please set STRAPI_AI_URL environment variable.`
+    );
+    throw new Error('AI token request failed. Check server logs for details.');
+  }
+
+  // Create a secure user identifier using only user ID
+  const user = strapi.requestContext.get()?.state?.user as AdminUser | undefined;
+  if (!user) {
+    strapi.log.error(`${ERROR_PREFIX} No authenticated user in request context`);
+    throw new Error('AI token request failed. Check server logs for details.');
+  }
+
+  const userIdentifier = user.id.toString();
+
+  // Get project ID
+  const projectId = strapi.config.get('uuid');
+  if (!projectId) {
+    strapi.log.error(`${ERROR_PREFIX} Project ID not configured`);
+    throw new Error('AI token request failed. Check server logs for details.');
+  }
+
+  // Check cache for existing valid token
+  const cacheKey = `${projectId}:${userIdentifier}`;
+  const cachedToken = aiTokenCache.get(cacheKey);
+
+  if (cachedToken) {
+    const now = Date.now();
+    // Check if token is still valid (with buffer so it has time to  to be used)
+    const bufferMs = 2 * 60 * 1000; // 2 minutes
+
+    if (cachedToken.expiresAtMs && cachedToken.expiresAtMs - bufferMs > now) {
+      strapi.log.info('Using cached AI token');
+
+      return {
+        token: cachedToken.token,
+        expiresAt: cachedToken.expiresAt,
+      };
+    }
+
+    // Token expired or will expire soon, remove from cache
+    aiTokenCache.delete(cacheKey);
+  }
+
+  strapi.log.http('Contacting AI Server for token generation');
+
+  try {
+    // Call the AI server's getAiJWT endpoint
+    const response = await fetch(`${aiServerUrl}/auth/getAiJWT`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // No authorization header needed for public endpoint
+        // Add request ID for tracing
+        'X-Request-Id': crypto.randomUUID(),
+      },
+      body: JSON.stringify({
+        eeLicense,
+        userIdentifier,
+        projectId,
+      }),
+    });
+
+    if (!response.ok) {
+      let errorData;
+      let errorText;
+      try {
+        errorText = await response.text();
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText || 'Failed to parse error response' };
+      }
+
+      strapi.log.error(`${ERROR_PREFIX} ${errorData?.error || 'Unknown error'}`, {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+        errorText,
+        projectId,
+      });
+
+      throw new Error('AI token request failed. Check server logs for details.');
+    }
+
+    let data;
+    try {
+      data = (await response.json()) as {
+        jwt: string;
+        expiresAt?: string;
+      };
+    } catch (parseError) {
+      strapi.log.error(`${ERROR_PREFIX} Failed to parse AI server response`, parseError);
+      throw new Error('AI token request failed. Check server logs for details.');
+    }
+
+    if (!data.jwt) {
+      strapi.log.error(`${ERROR_PREFIX} Invalid response: missing JWT token`);
+      throw new Error('AI token request failed. Check server logs for details.');
+    }
+
+    strapi.log.info('AI token generated successfully', {
+      userId: user.id,
+      expiresAt: data.expiresAt,
+    });
+
+    // Cache the token if it has an expiration time
+    if (data.expiresAt) {
+      const expiresAtMs = new Date(data.expiresAt).getTime();
+      aiTokenCache.set(cacheKey, {
+        token: data.jwt,
+        expiresAt: data.expiresAt,
+        expiresAtMs,
+      });
+    }
+
+    // Return the AI JWT with metadata
+    // Note: Token expires in 1 hour, client should handle refresh
+    return {
+      token: data.jwt,
+      expiresAt: data.expiresAt, // 1 hour from generation
+    };
+  } catch (fetchError) {
+    if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+      strapi.log.error(`${ERROR_PREFIX} Request to AI server timed out`);
+      throw new Error('AI token request failed. Check server logs for details.');
+    }
+
+    throw fetchError;
+  }
+};
+
 export default {
   create,
   updateById,
@@ -390,4 +614,6 @@ export default {
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
   getLanguagesInUse,
+  isFirstSuperAdminUser,
+  getAiToken,
 };

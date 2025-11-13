@@ -1,6 +1,7 @@
 import { renderHook } from '@tests/utils';
 import axios from 'axios';
 
+import { useDeviceType, type DeviceType } from '../../hooks/useDeviceType';
 import { useInitQuery } from '../../services/admin';
 import { AppInfoProvider } from '../AppInfo';
 import { TrackingProvider, useTracking } from '../Tracking';
@@ -23,6 +24,10 @@ jest.mock('../../services/admin', () => ({
       useTypescriptOnServer: true,
     },
   }),
+}));
+
+jest.mock('../../hooks/useDeviceType', () => ({
+  useDeviceType: jest.fn().mockReturnValue('desktop'),
 }));
 
 const setup = () =>
@@ -49,43 +54,49 @@ describe('useTracking', () => {
     jest.clearAllMocks();
   });
 
-  it('should call axios.post with all attributes by default when calling trackUsage()', async () => {
-    const { result } = setup();
+  const devicesTypes = ['desktop', 'tablet', 'mobile'] as DeviceType[];
+  for (const deviceType of devicesTypes) {
+    test(`should call axios.post with all attributes by default when calling trackUsage() with deviceType ${deviceType}`, async () => {
+      jest.mocked(useDeviceType).mockReturnValue(deviceType);
+      const { result } = setup();
 
-    const res = await result.current.trackUsage('didAccessAuthenticatedAdministration');
+      const res = await result.current.trackUsage('didSaveContentType');
 
-    expect(axios.post).toBeCalledWith(
-      'https://analytics.strapi.io/api/v2/track',
-      {
-        userId: 'someTestUserId',
-        event: 'didAccessAuthenticatedAdministration',
-        eventProperties: {},
-        groupProperties: {
-          useTypescriptOnServer: true,
-          projectId: '1',
-          projectType: 'Community',
+      expect(axios.post).toBeCalledWith(
+        'https://analytics.strapi.io/api/v2/track',
+        {
+          userId: 'someTestUserId',
+          event: 'didSaveContentType',
+          eventProperties: {},
+          groupProperties: {
+            useTypescriptOnServer: true,
+            projectId: '1',
+            projectType: 'Community',
+          },
+          userProperties: {
+            deviceType,
+          },
         },
-        userProperties: {},
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Strapi-Event': 'didAccessAuthenticatedAdministration',
-        },
-      }
-    );
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Strapi-Event': 'didSaveContentType',
+          },
+        }
+      );
 
-    expect(res).toEqual({
-      success: true,
+      expect(res).toEqual({
+        success: true,
+      });
     });
-  });
+  }
 
   it('should not fire axios.post if strapi.telemetryDisabled is true', async () => {
     window.strapi.telemetryDisabled = true;
 
     const { result } = setup();
 
-    await result.current.trackUsage('didAccessAuthenticatedAdministration');
+    await result.current.trackUsage('didSaveContentType');
 
     expect(axios.post).not.toBeCalled();
 
@@ -97,7 +108,7 @@ describe('useTracking', () => {
 
     const { result } = setup();
 
-    const res = await result.current.trackUsage('didAccessAuthenticatedAdministration');
+    const res = await result.current.trackUsage('didSaveContentType');
 
     expect(axios.post).toHaveBeenCalled();
     expect(res).toEqual(null);
@@ -114,7 +125,7 @@ describe('useTracking', () => {
 
     const { result } = setup();
 
-    await result.current.trackUsage('didAccessAuthenticatedAdministration');
+    await result.current.trackUsage('didSaveContentType');
 
     expect(axios.post).not.toBeCalled();
   });

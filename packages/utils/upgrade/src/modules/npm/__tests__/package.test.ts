@@ -53,7 +53,7 @@ describe('Package class', () => {
   const packageInstance = new Package(packageName);
   it('should fetch package data and update npmPackage', async () => {
     await packageInstance.refresh();
-    expect(global.fetch).toHaveBeenCalledWith(packageInstance.packageURL);
+    expect(global.fetch).toHaveBeenCalledWith(packageInstance.packageURL, expect.anything());
     expect(packageInstance.versionExists).toBeTruthy();
   });
 
@@ -108,7 +108,7 @@ describe('Package class', () => {
 
     await packageInstance.refresh();
 
-    expect(global.fetch).toHaveBeenCalledWith(packageInstance.packageURL);
+    expect(global.fetch).toHaveBeenCalledWith(packageInstance.packageURL, expect.anything());
     expect(packageInstance.isLoaded).toBeTruthy();
     expect(packageInstance.getVersionsAsList().length).toBeGreaterThan(0);
   });

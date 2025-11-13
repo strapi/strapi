@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { PlusCircle as PicturePlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { AssetSource } from '../../../constants';
+import { useTracking } from '../../../hooks/useTracking';
 import { getTrad, rawFileToAsset } from '../../../utils';
 
 import type { FileWithRawFile } from './AddAssetStep';
@@ -61,7 +61,7 @@ export const FromComputerForm = ({
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    inputRef.current?.click();
+    // inputRef.current?.click();
   };
 
   const handleChange = () => {
@@ -159,14 +159,14 @@ export const FromComputerForm = ({
                   onChange={handleChange}
                 />
 
-                <Box position="relative">
+                {/* <Box position="relative">
                   <Button type="button" onClick={handleClick}>
                     {formatMessage({
                       id: getTrad('input.button.label'),
                       defaultMessage: 'Browse files',
                     })}
                   </Button>
-                </Box>
+                </Box> */}
               </Wrapper>
             </Flex>
           </MediaBox>

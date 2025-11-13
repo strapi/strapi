@@ -37,7 +37,7 @@ export interface MediaLibraryInputProps {
 export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibraryInputProps>(
   (
     {
-      attribute: { allowedTypes = ['videos', 'files', 'images', 'audios'], multiple = false } = {},
+      attribute: { allowedTypes = null, multiple = false } = {},
       label,
       hint,
       disabled = false,
@@ -49,7 +49,6 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
   ) => {
     const { formatMessage } = useIntl();
     const { onChange, value, error } = useField(name);
-    const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos', 'audios'];
     const [uploadedFiles, setUploadedFiles] = React.useState<Asset[] | File[]>([]);
     const [step, setStep] = React.useState<string | undefined>(undefined);
     const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -124,7 +123,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
       assets: FileWithoutIdHash[] | Asset[],
       callback: (assets?: AllowedFiles[], error?: string) => void
     ) => {
-      const allowedAssets = getAllowedFiles(fieldAllowedTypes, assets as AllowedFiles[]);
+      const allowedAssets = getAllowedFiles(allowedTypes, assets as AllowedFiles[]);
 
       if (allowedAssets.length > 0) {
         callback(allowedAssets);
@@ -138,7 +137,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
               defaultMessage: `You can't upload this type of file.`,
             },
             {
-              fileTypes: fieldAllowedTypes.join(','),
+              fileTypes: (allowedTypes ?? []).join(','),
             }
           ),
         });
@@ -171,10 +170,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
     let initiallySelectedAssets = selectedAssets;
 
     if (uploadedFiles.length > 0) {
-      const allowedUploadedFiles = getAllowedFiles(
-        fieldAllowedTypes,
-        uploadedFiles as AllowedFiles[]
-      );
+      const allowedUploadedFiles = getAllowedFiles(allowedTypes, uploadedFiles as AllowedFiles[]);
 
       initiallySelectedAssets = multiple
         ? [...allowedUploadedFiles, ...selectedAssets]
@@ -218,7 +214,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
 
         {step === STEPS.AssetSelect && (
           <AssetDialog
-            allowedTypes={fieldAllowedTypes as AllowedTypes[]}
+            allowedTypes={allowedTypes as AllowedTypes[]}
             initiallySelectedAssets={initiallySelectedAssets}
             folderId={folderId}
             onClose={() => {

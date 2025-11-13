@@ -4,7 +4,7 @@ import type { Core } from '@strapi/types';
 
 export type Config = {
   enabled?: boolean;
-  origin: string | string[] | ((ctx: any) => string | string[]);
+  origin: string | string[] | ((ctx: any) => string | string[] | Promise<string | string[]>);
   expose?: string | string[];
   maxAge?: number;
   credentials?: boolean;
@@ -20,6 +20,54 @@ const defaults: Config = {
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
   headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
   keepHeadersOnError: false,
+};
+
+/**
+ * Determines if a request origin is allowed based on the configured origin list
+ * @param requestOrigin - The origin from the request header
+ * @param configuredOrigin - The origin configuration (string, array, or function)
+ * @param ctx - The Koa context (for function-based origin)
+ * @returns The allowed origin string or empty string if blocked
+ */
+export const matchOrigin = async (
+  requestOrigin: string | undefined,
+  configuredOrigin:
+    | string
+    | string[]
+    | ((ctx: any) => string | string[] | Promise<string | string[]>),
+  ctx?: any
+): Promise<string> => {
+  if (!requestOrigin) {
+    return '*';
+  }
+
+  let originList: string | string[];
+
+  if (typeof configuredOrigin === 'function') {
+    originList = await configuredOrigin(ctx);
+  } else {
+    originList = configuredOrigin;
+  }
+
+  // Normalize originList into an array
+  let normalizedOrigins: string[];
+  if (Array.isArray(originList)) {
+    normalizedOrigins = originList;
+  } else if (originList === undefined || originList === null) {
+    // Handle undefined/null - treat as wildcard
+    normalizedOrigins = ['*'];
+  } else {
+    // Handle comma-separated string of origins
+    normalizedOrigins = originList.split(',').map((origin) => origin.trim());
+  }
+
+  // Check if wildcard is in the normalized origins
+  if (normalizedOrigins.includes('*')) {
+    return requestOrigin;
+  }
+
+  // Check if request origin is in the normalized origins
+  return normalizedOrigins.includes(requestOrigin) ? requestOrigin : '';
 };
 
 export const cors: Core.MiddlewareFactory<Config> = (config) => {
@@ -38,28 +86,8 @@ export const cors: Core.MiddlewareFactory<Config> = (config) => {
 
   return koaCors({
     async origin(ctx) {
-      if (!ctx.get('Origin')) {
-        return '*';
-      }
-
-      let originList: string | string[];
-
-      if (typeof origin === 'function') {
-        originList = await origin(ctx);
-      } else {
-        originList = origin;
-      }
-
-      if (Array.isArray(originList)) {
-        return originList.includes(ctx.get('Origin')) ? ctx.get('Origin') : '';
-      }
-
-      const parsedOrigin = originList.split(',').map((origin) => origin.trim());
-      if (parsedOrigin.length > 1) {
-        return parsedOrigin.includes(ctx.get('Origin')) ? ctx.get('Origin') : '';
-      }
-
-      return originList;
+      const requestOrigin = ctx.get('Origin');
+      return matchOrigin(requestOrigin, origin, ctx);
     },
     exposeHeaders: expose,
     maxAge,

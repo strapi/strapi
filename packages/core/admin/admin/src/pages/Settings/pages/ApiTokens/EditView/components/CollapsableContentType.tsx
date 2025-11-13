@@ -133,7 +133,7 @@ export const CollapsableContentType = ({
                             }}
                             disabled={disabled}
                           >
-                            {action.action}
+                            <span style={{ overflowWrap: 'anywhere' }}>{action.action}</span>
                           </Checkbox>
                           <button
                             type="button"

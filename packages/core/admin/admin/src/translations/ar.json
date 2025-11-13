@@ -212,6 +212,7 @@
   "app.components.LeftMenu.general": "عام",
   "app.components.LeftMenu.logo.alt": "شعار التطبيق",
   "app.components.LeftMenu.logout": "تسجيل خروج",
+  "app.components.LeftMenu.trialCountdown": "تنتهي محادة الاختبار في {date}.",
   "app.components.LeftMenu.navbrand.title": "Strapi لوحة القيادة",
   "app.components.LeftMenu.navbrand.workplace": "مكان العمل",
   "app.components.LeftMenu.plugins": "الإضافات",
