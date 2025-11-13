@@ -177,13 +177,6 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
         : [allowedUploadedFiles[0]];
     }
 
-    const handleClickAsset = (asset: File) => {
-      const selectedIndex = selectedAssets.findIndex((prevAsset) => prevAsset.id === asset.id);
-      if (selectedIndex >= 0) {
-        setSelectedIndex(selectedAssets.findIndex((prevAsset) => prevAsset.id === asset.id));
-      }
-    };
-
     const handleDoubleClickAsset = (asset: File) => {
       handleAssetEdit(asset);
     };
@@ -203,7 +196,6 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
           onEditAsset={handleAssetEdit}
           onNext={handleNext}
           onPrevious={handlePrevious}
-          onClickAsset={handleClickAsset}
           onDoubleClickAsset={handleDoubleClickAsset}
           error={error}
           hint={hint}
