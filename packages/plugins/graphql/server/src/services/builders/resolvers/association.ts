@@ -62,36 +62,27 @@ export default ({ strapi }: Context) => {
         const isTargetDraftAndPublishContentType =
           contentTypes.hasDraftAndPublish(targetContentType);
 
-        // Only inherit status if we're resolving within the same query tree that set it
-        // Simple check: only inherit if the origin field matches known content type patterns
-        let inheritedStatus = null;
-        if (context.rootQueryArgs?.status && context.rootQueryArgs?._originField) {
-          const originField = context.rootQueryArgs._originField;
+        // Helper to check if a field is from built-in queries (not custom resolvers)
+        const isBuiltInQueryField = (fieldName: string) => {
+          if (fieldName.endsWith('_connection')) return true;
 
-          // Only inherit from built-in content type queries (not custom resolvers)
-          // Built-in queries follow predictable patterns, custom resolvers don't
-          const isBuiltInQuery =
-            originField.endsWith('_connection') ||
-            // Check if this field exists in the auto-generated GraphQL schema
-            // by looking at the GraphQL service's type definitions
-            (() => {
-              try {
-                const graphqlService = strapi.plugin('graphql').service('content-api');
-                const schema = graphqlService.buildSchema();
-                const queryType = schema.getQueryType();
-
-                // If the field exists in the auto-generated Query type, it's built-in
-                return queryType?.getFields()?.[originField] !== undefined;
-              } catch {
-                // Fallback: assume it's custom if we can't check
-                return false;
-              }
-            })();
-
-          if (isBuiltInQuery) {
-            inheritedStatus = context.rootQueryArgs.status;
+          try {
+            const graphqlService = strapi.plugin('graphql').service('content-api');
+            const schema = graphqlService.buildSchema();
+            const queryType = schema.getQueryType();
+            return queryType?.getFields()?.[fieldName] !== undefined;
+          } catch {
+            return false;
           }
-        }
+        };
+
+        // Only inherit status from built-in queries to avoid conflicts with custom resolvers
+        const inheritedStatus =
+          context.rootQueryArgs?.status &&
+          context.rootQueryArgs?._originField &&
+          isBuiltInQueryField(context.rootQueryArgs._originField)
+            ? context.rootQueryArgs.status
+            : null;
 
         const statusToApply = args.status || inheritedStatus;
 
