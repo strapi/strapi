@@ -7,6 +7,7 @@ import {
   render as renderRTL,
   waitForElementToBeRemoved,
   waitFor,
+  screen,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -115,30 +116,26 @@ describe('Roles – EditPage', () => {
   it("can update a role's name, description and permissions", async () => {
     const { getByRole, user, getByText, findByRole, findByText } = render();
 
-    await waitForElementToBeRemoved(() => getByText('Loading content.'));
+    // await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    await waitFor(() => {
-      expect(getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
-    });
+    const textboxName = await screen.findByRole('textbox', { name: 'Name' });
+    const textboxDescription = await screen.findByRole('textbox', { name: 'Description' });
 
-    await user.type(getByRole('textbox', { name: 'Name' }), 'test');
-    await user.type(getByRole('textbox', { name: 'Description' }), 'testing');
+    await user.type(textboxName, 'test');
+    await user.type(textboxDescription, 'testing');
     await user.click(
       getByRole('button', {
         name: 'Address Define all allowed actions for the api::address plugin.',
       })
     );
 
-    await waitFor(() => {
-      expect(getByRole('checkbox', { name: 'create' })).toBeInTheDocument();
-    });
-
-    await user.click(getByRole('checkbox', { name: 'create' }));
+    const checkboxCreate = await screen.findByRole('checkbox', { name: 'create' });
+    await user.click(checkboxCreate);
 
     const button = await findByRole('button', { name: 'Save' });
-    /**
-     * @note user.click will not trigger the form.
-     */
+    // /**
+    //  * @note user.click will not trigger the form.
+    //  */
     fireEvent.click(button);
     await findByText('Role edited');
     await findByText('Authenticated');
