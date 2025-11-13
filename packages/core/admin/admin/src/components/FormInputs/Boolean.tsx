@@ -1,6 +1,7 @@
 import { forwardRef, memo } from 'react';
 
-import { Toggle, useComposedRefs, Field } from '@strapi/design-system';
+import { Toggle, useComposedRefs, Field, IconButton, Box } from '@strapi/design-system';
+import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
@@ -16,23 +17,45 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
+    const handleClear = () => {
+      field.onChange(name, null);
+    };
+
+    const showClearButton = field.value !== null;
+
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required} maxWidth="320px">
         <Field.Label action={labelAction}>{label}</Field.Label>
-        <Toggle
-          ref={composedRefs}
-          checked={field.value === null ? null : field.value || false}
-          offLabel={formatMessage({
-            id: 'app.components.ToggleCheckbox.off-label',
-            defaultMessage: 'False',
-          })}
-          onLabel={formatMessage({
-            id: 'app.components.ToggleCheckbox.on-label',
-            defaultMessage: 'True',
-          })}
-          onChange={field.onChange}
-          {...props}
-        />
+        <Box position="relative" display="inline-block">
+          <Toggle
+            ref={composedRefs}
+            checked={field.value === null ? null : field.value || false}
+            offLabel={formatMessage({
+              id: 'app.components.ToggleCheckbox.off-label',
+              defaultMessage: 'False',
+            })}
+            onLabel={formatMessage({
+              id: 'app.components.ToggleCheckbox.on-label',
+              defaultMessage: 'True',
+            })}
+            onChange={field.onChange}
+            name={name}
+            {...props}
+          />
+          {showClearButton && (
+            <Box position="absolute" top="-24px" right="-24px">
+              <IconButton
+                label={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+                size="S"
+                variant="ghost"
+                onClick={handleClear}
+                type="button"
+              >
+                <Cross />
+              </IconButton>
+            </Box>
+          )}
+        </Box>
         <Field.Hint />
         <Field.Error />
       </Field.Root>
