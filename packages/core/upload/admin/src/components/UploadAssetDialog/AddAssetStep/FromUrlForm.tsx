@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, Field, Modal, Textarea } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
 
+import { useTracking } from '../../../hooks/useTracking';
 import { getTrad, urlsToAssets, urlSchema } from '../../../utils';
 
 import type { FileWithRawFile } from './AddAssetStep';

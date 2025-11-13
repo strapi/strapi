@@ -15,13 +15,13 @@ import {
   Box,
   Button,
   ButtonProps,
+  Combobox,
+  ComboboxOption,
   Divider,
   Field,
   Flex,
   Grid,
   Modal,
-  SingleSelect,
-  SingleSelectOption,
   Tabs,
   Typography,
   useId,
@@ -399,19 +399,20 @@ const EnumerationInput = ({
   return (
     <Field.Root error={error} hint={hint} name={name} required={required}>
       <Field.Label>{label}</Field.Label>
-      <SingleSelect
+      <Combobox
         disabled={disabled}
-        // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
         onChange={handleChange}
+        onClear={() => handleChange('')}
         placeholder={placeholder}
         value={value}
+        autocomplete={{ type: 'list', filter: 'contains' }}
       >
         {options.map((option) => (
-          <SingleSelectOption value={option.value} key={option.value}>
+          <ComboboxOption value={option.value} key={option.value}>
             {option.label}
-          </SingleSelectOption>
+          </ComboboxOption>
         ))}
-      </SingleSelect>
+      </Combobox>
       <Field.Error />
       <Field.Hint />
     </Field.Root>

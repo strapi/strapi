@@ -48,6 +48,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 .c30 {
   padding-block-start: 16px;
   padding-block-end: 16px;
+  max-width: 100%;
 }
 
 .c33 {
@@ -81,7 +82,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c48 {
-  width: 100%;
+  width: 80dvw;
   overflow: hidden;
 }
 
@@ -503,10 +504,22 @@ border:1px solid #eaeaef .c22:focus-within .c27 {
   }
 }
 
+@media (min-width: 768px) {
+  .c30 {
+    max-width: 23.2rem;
+  }
+}
+
 @media (min-width: 1080px) {
   .c41 {
     margin-inline-start: 8px;
     margin-inline-end: 8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .c48 {
+    width: 100%;
   }
 }
 
@@ -530,6 +543,7 @@ border:1px solid #eaeaef .c22:focus-within .c27 {
 
 @media (min-width: 768px) {
   .c3 {
+    width: 23.2rem;
     position: sticky;
     top: 0;
     border-right: 1px solid #eaeaef;
@@ -671,7 +685,7 @@ border:1px solid #eaeaef .c22:focus-within .c27 {
           <div
             class="c30"
           >
-            <ol
+            <ul
               class="c31"
             >
               <li>
@@ -1116,7 +1130,7 @@ border:1px solid #eaeaef .c22:focus-within .c27 {
                   </ol>
                 </div>
               </li>
-            </ol>
+            </ul>
           </div>
         </div>
       </div>

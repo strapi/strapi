@@ -56,7 +56,7 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
    * pass the index.
    */
   removeFieldRow: (field: string, removeAtIndex?: number) => void;
-  resetForm: () => void;
+  resetForm: (newInitialValues?: TFormValues) => void;
   setErrors: (errors: FormErrors<TFormValues>) => void;
   setSubmitting: (isSubmitting: boolean) => void;
   setValues: (values: TFormValues) => void;
@@ -306,7 +306,8 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
 
     const modified = React.useMemo(
       () => !isEqual(initialValues.current, state.values),
-      [state.values]
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [state.values, initialValues.current]
     );
 
     const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
@@ -414,7 +415,10 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       []
     );
 
-    const resetForm: FormContextValue['resetForm'] = React.useCallback(() => {
+    const resetForm: FormContextValue['resetForm'] = React.useCallback((newInitialValues) => {
+      if (newInitialValues) {
+        initialValues.current = newInitialValues;
+      }
       dispatch({
         type: 'RESET_FORM',
         payload: {
@@ -797,7 +801,10 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
               defaultMessage: 'Confirmation',
             })}
           </Dialog.Header>
-          <Dialog.Body icon={<WarningCircle width="24px" height="24px" fill="danger600" />}>
+          <Dialog.Body
+            icon={<WarningCircle width="24px" height="24px" fill="danger600" />}
+            textAlign="center"
+          >
             {formatMessage({
               id: 'global.prompt.unsaved',
               defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
@@ -805,7 +812,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
           </Dialog.Body>
           <Dialog.Footer>
             <Dialog.Cancel>
-              <Button variant="tertiary">
+              <Button variant="tertiary" fullWidth>
                 {formatMessage({
                   id: 'app.components.Button.cancel',
                   defaultMessage: 'Cancel',
@@ -818,6 +825,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
                 blocker.proceed();
               }}
               variant="danger"
+              fullWidth
             >
               {formatMessage({
                 id: 'app.components.Button.confirm',
