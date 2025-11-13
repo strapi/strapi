@@ -120,7 +120,7 @@ const NpmPackageCard = ({
                 </Tooltip>
               )}
               {attributes.madeByStrapi && (
-                <Tooltip description={madeByStrapiMessage}>
+                <Tooltip label={madeByStrapiMessage}>
                   <Box
                     tag="img"
                     src={StrapiLogo}

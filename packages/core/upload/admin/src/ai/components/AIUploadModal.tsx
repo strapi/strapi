@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { createContext, useTracking } from '@strapi/admin/strapi-admin';
+import { createContext } from '@strapi/admin/strapi-admin';
 import { Alert, Button, Flex, Modal } from '@strapi/design-system';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
@@ -10,10 +10,10 @@ import {
   AddAssetStep,
   FileWithRawFile,
 } from '../../components/UploadAssetDialog/AddAssetStep/AddAssetStep';
-import { AssetType } from '../../constants';
 import { useBulkEdit } from '../../hooks/useBulkEdit';
+import { useTracking } from '../../hooks/useTracking';
 import { useUpload } from '../../hooks/useUpload';
-import { getTrad, typeFromMime } from '../../utils';
+import { getTrad } from '../../utils';
 
 import { AIAssetCard, AIAssetCardSkeletons } from './AIAssetCard';
 

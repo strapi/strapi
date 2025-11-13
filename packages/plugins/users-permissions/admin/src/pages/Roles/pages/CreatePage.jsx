@@ -1,8 +1,24 @@
 import * as React from 'react';
 
-import { Button, Flex, Grid, Textarea, TextInput, Typography, Field } from '@strapi/design-system';
+import {
+  Button,
+  Flex,
+  Grid,
+  Textarea,
+  TextInput,
+  Typography,
+  Field,
+  Box,
+} from '@strapi/design-system';
 import { Check } from '@strapi/icons';
-import { Page, useTracking, useNotification, useFetchClient, Layouts } from '@strapi/strapi/admin';
+import {
+  Page,
+  useTracking,
+  useNotification,
+  useFetchClient,
+  Layouts,
+  BackButton,
+} from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
@@ -93,6 +109,12 @@ export const CreatePage = () => {
                 id: 'Settings.roles.create.description',
                 defaultMessage: 'Define the rights given to the role',
               })}
+              navigationAction={
+                // The back link for mobile works differently; it is placed higher up in the DOM.
+                <Box display={{ initial: 'none', medium: 'block' }}>
+                  <BackButton fallback=".." />
+                </Box>
+              }
             />
             <Layouts.Content>
               <Flex
@@ -132,7 +154,7 @@ export const CreatePage = () => {
                             defaultMessage: 'Name',
                           })}
                         </Field.Label>
-                        <TextInput value={values.name || ''} onChange={handleChange} />
+                        <TextInput type="text" value={values.name || ''} onChange={handleChange} />
                         <Field.Error />
                       </Field.Root>
                     </Grid.Item>

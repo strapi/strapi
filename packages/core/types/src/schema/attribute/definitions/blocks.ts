@@ -53,6 +53,8 @@ export interface LinkInlineNode extends BaseNode {
   type: 'link';
   url: string;
   children: TextInlineNode[];
+  rel: string;
+  target: string;
 }
 
 interface ListItemInlineNode extends BaseNode {

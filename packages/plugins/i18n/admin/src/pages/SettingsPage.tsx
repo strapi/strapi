@@ -27,7 +27,7 @@ import { CreateLocale } from '../components/CreateLocale';
 import { LocaleTable } from '../components/LocaleTable';
 import { PERMISSIONS } from '../constants';
 import { useGetLocalesQuery } from '../services/locales';
-import { useGetSettingsQuery, useUpdateSettingsMutation } from '../services/settings';
+import { useGetSettingsQuery, useUpdatei18nSettingsMutation } from '../services/settings';
 import { getTranslation } from '../utils/getTranslation';
 
 const SettingsErrrorTooltip = ({
@@ -66,7 +66,7 @@ const SettingsPage = () => {
     isLoading: isLoadingSettings,
     error: settingsError,
   } = useGetSettingsQuery();
-  const [updateSettings] = useUpdateSettingsMutation();
+  const [updateSettings] = useUpdatei18nSettingsMutation();
 
   const handleToggleChange = async (checked: boolean) => {
     try {
@@ -112,7 +112,7 @@ const SettingsPage = () => {
         })}
       />
       <Layouts.Content>
-        {isAIAvailable && window.strapi.future.isEnabled('unstableAILocalizations') && (
+        {isAIAvailable && (
           <Flex background="neutral0" padding={6} marginBottom={6} shadow="filterShadow" hasRadius>
             <Flex direction="column" alignItems="stretch" gap={1} flex={1}>
               <Flex gap={1}>
