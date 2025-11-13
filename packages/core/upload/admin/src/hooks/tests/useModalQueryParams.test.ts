@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@tests/utils';
+import { renderHook, waitFor } from '@tests/utils';
 
 import { useModalQueryParams } from '../useModalQueryParams';
 
@@ -50,7 +50,7 @@ describe('useModalQueryParams', () => {
 
     await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangeFilters?.([{ some: 'thing' }]);
     });
 
@@ -73,7 +73,7 @@ describe('useModalQueryParams', () => {
 
     await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangeFolder?.({ id: 1 }, '/1');
     });
 
@@ -92,7 +92,7 @@ describe('useModalQueryParams', () => {
 
     await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangePage?.({ id: 1 });
     });
 
@@ -110,7 +110,7 @@ describe('useModalQueryParams', () => {
 
     await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangePageSize?.(5);
     });
 
@@ -125,7 +125,7 @@ describe('useModalQueryParams', () => {
 
     await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangePageSize?.('5');
     });
 
@@ -140,7 +140,7 @@ describe('useModalQueryParams', () => {
 
     await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangeSort?.('name:DESC');
     });
 
@@ -156,7 +156,7 @@ describe('useModalQueryParams', () => {
 
     await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangeSearch?.('something');
     });
 
@@ -172,15 +172,15 @@ describe('useModalQueryParams', () => {
 
     await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangePage?.({ id: 1 });
     });
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangeSearch?.('something');
     });
 
-    act(() => {
+    await waitFor(() => {
       result.current[1]?.onChangeSearch?.('');
     });
 
