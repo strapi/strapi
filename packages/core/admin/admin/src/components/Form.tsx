@@ -801,7 +801,10 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
               defaultMessage: 'Confirmation',
             })}
           </Dialog.Header>
-          <Dialog.Body icon={<WarningCircle width="24px" height="24px" fill="danger600" />}>
+          <Dialog.Body
+            icon={<WarningCircle width="24px" height="24px" fill="danger600" />}
+            textAlign="center"
+          >
             {formatMessage({
               id: 'global.prompt.unsaved',
               defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
@@ -809,7 +812,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
           </Dialog.Body>
           <Dialog.Footer>
             <Dialog.Cancel>
-              <Button variant="tertiary">
+              <Button variant="tertiary" fullWidth>
                 {formatMessage({
                   id: 'app.components.Button.cancel',
                   defaultMessage: 'Cancel',
@@ -822,6 +825,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
                 blocker.proceed();
               }}
               variant="danger"
+              fullWidth
             >
               {formatMessage({
                 id: 'app.components.Button.confirm',
