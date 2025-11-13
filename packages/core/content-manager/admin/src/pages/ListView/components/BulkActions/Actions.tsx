@@ -149,7 +149,6 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const { schema } = useDoc();
   const selectRow = useTable('UnpublishAction', (state) => state.selectRow);
   const hasPublishPermission = useDocumentRBAC('unpublishAction', (state) => state.canPublish);
-  const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
   const hasDraftAndPublishEnabled = Boolean(schema?.options?.draftAndPublish);
   const { unpublishMany: bulkUnpublishAction, isLoading } = useDocumentActions();
   const documentIds = documents.map(({ documentId }) => documentId);
@@ -191,22 +190,6 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
               defaultMessage: 'Are you sure you want to unpublish these entries?',
             })}
           </Typography>
-          {hasI18nEnabled && (
-            <Box textAlign="center" padding={3}>
-              <Typography textColor="danger500">
-                {formatMessage(
-                  {
-                    id: getTranslation('Settings.list.actions.unpublishAdditionalInfos'),
-                    defaultMessage:
-                      'This will unpublish the active locale versions <em>(from Internationalization)</em>',
-                  },
-                  {
-                    em: Emphasis,
-                  }
-                )}
-              </Typography>
-            </Box>
-          )}
         </Flex>
       ),
       confirmButton: formatMessage({

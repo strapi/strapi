@@ -543,6 +543,7 @@ border:1px solid #eaeaef .c22:focus-within .c27 {
 
 @media (min-width: 768px) {
   .c3 {
+    width: 23.2rem;
     position: sticky;
     top: 0;
     border-right: 1px solid #eaeaef;
