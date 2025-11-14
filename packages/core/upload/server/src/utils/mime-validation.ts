@@ -1,4 +1,3 @@
-import { fileTypeFromBuffer } from 'file-type';
 import { readFile } from 'node:fs/promises';
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
@@ -50,6 +49,8 @@ export async function detectMimeType(file: any): Promise<string | undefined> {
   }
 
   try {
+    const { fileTypeFromBuffer } = await import('file-type');
+
     const result = await fileTypeFromBuffer(new Uint8Array(buffer));
     return result?.mime;
   } catch (error) {
