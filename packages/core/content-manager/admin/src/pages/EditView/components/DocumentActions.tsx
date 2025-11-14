@@ -7,6 +7,8 @@ import {
   useAPIErrorHandler,
   useQueryParams,
   tours,
+  useGuidedTour,
+  GUIDED_TOUR_REQUIRED_ACTIONS,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -571,6 +573,7 @@ const PublishAction: DocumentActionComponent = ({
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+  const initialValues = useForm('PublishAction', ({ initialValues }) => initialValues);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
   const {
     currentDocument: { components },
@@ -597,6 +600,8 @@ const PublishAction: DocumentActionComponent = ({
     false
   );
   const rootDocumentMeta = useRelationModal('PublishAction', (state) => state.rootDocumentMeta);
+
+  const dispatchGuidedTour = useGuidedTour('PublishAction', (s) => s.dispatch);
 
   const { currentDocumentMeta } = useDocumentContext('PublishAction');
   const [updateDocumentMutation] = useUpdateDocumentMutation();
@@ -718,6 +723,15 @@ const PublishAction: DocumentActionComponent = ({
         const hasUnreadableRequiredField = Object.keys(schema.attributes).some((fieldName) => {
           const attribute = schema.attributes[fieldName];
 
+          // For components, check if any of the component fields are readable
+          if (attribute.type === 'component') {
+            const componentFields = (canReadFields ?? []).filter((field) =>
+              field.startsWith(`${fieldName}.`)
+            );
+            return componentFields.length === 0;
+          }
+
+          // For regular fields, check if the field itself is readable
           return attribute?.required && !(canReadFields ?? []).includes(fieldName);
         });
 
@@ -744,6 +758,7 @@ const PublishAction: DocumentActionComponent = ({
       }
       const { data } = handleInvisibleAttributes(transformData(formValues), {
         schema,
+        initialValues,
         components,
       });
       const res = await publish(
@@ -756,9 +771,13 @@ const PublishAction: DocumentActionComponent = ({
         data
       );
 
-      // Reset form if successful
+      // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
       if ('data' in res) {
-        resetForm();
+        resetForm(formValues);
+        dispatchGuidedTour({
+          type: 'set_completed_actions',
+          payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
+        });
       }
 
       if ('data' in res && collectionType !== SINGLE_TYPES) {
@@ -926,6 +945,7 @@ const UpdateAction: DocumentActionComponent = ({
   model,
   collectionType,
 }) => {
+  const dispatchGuidedTour = useGuidedTour('UpdateAction', (s) => s.dispatch);
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -1059,7 +1079,7 @@ const UpdateAction: DocumentActionComponent = ({
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           setErrors(formatValidationErrors(res.error));
         } else {
-          resetForm();
+          resetForm(document);
         }
       } else {
         const { data } = handleInvisibleAttributes(transformData(document), {
@@ -1158,6 +1178,10 @@ const UpdateAction: DocumentActionComponent = ({
         }
       }
     } finally {
+      dispatchGuidedTour({
+        type: 'set_completed_actions',
+        payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
+      });
       setSubmitting(false);
       if (onPreview) {
         onPreview();
@@ -1199,6 +1223,7 @@ const UpdateAction: DocumentActionComponent = ({
     schema,
     components,
     relationalModalSchema,
+    dispatchGuidedTour,
   ]);
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux

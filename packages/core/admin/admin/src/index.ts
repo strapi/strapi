@@ -25,7 +25,14 @@ export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
 
+/** @internal */
 export { tours } from './components/GuidedTour/Tours';
+/** @internal */
+export { useGuidedTour } from './components/GuidedTour/Context';
+/** @internal */
+export { GUIDED_TOUR_REQUIRED_ACTIONS } from './components/GuidedTour/utils/constants';
+
+export { RESPONSIVE_DEFAULT_SPACING } from './constants/theme';
 
 /**
  * Features
@@ -53,8 +60,13 @@ export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
 export { useElementOnScreen } from './hooks/useElementOnScreen';
+export { useDebounce } from './hooks/useDebounce';
+export { useMediaQuery, useIsDesktop, useIsTablet, useIsMobile } from './hooks/useMediaQuery';
+export { useDeviceType } from './hooks/useDeviceType';
 export { useAdminUsers } from './services/users';
 export { useGetCountDocumentsQuery } from './services/homepage';
+/** @internal */
+export { useAIAvailability } from './hooks/useAIAvailability';
 
 /**
  * Types
@@ -69,6 +81,7 @@ export type {
   SanitizedAdminRole,
   AdminRole,
   Entity,
+  FieldContentSourceMap,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';

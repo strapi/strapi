@@ -13,6 +13,8 @@ const contentManagerApi = adminApi.enhanceEndpoints({
     'RecentDocumentList',
     'GuidedTourMeta',
     'CountDocuments',
+    'UpcomingReleasesList',
+    'AILocalizationJobs',
   ],
 });
 

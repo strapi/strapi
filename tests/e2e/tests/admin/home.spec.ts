@@ -5,6 +5,8 @@ import { clickAndWait, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
 test.describe('Home as super admin', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
@@ -47,7 +49,7 @@ test.describe('Home as super admin', () => {
     await expect(profileWidget.getByText('ted.lasso@afcrichmond.co.uk')).toBeVisible();
   });
 
-  test('a user should see the key statistics widget', async ({ page }) => {
+  test('a super admin should see the key statistics widget', async ({ page }) => {
     const keyStatisticsWidget = page.getByLabel(/project statistics/i, { exact: true });
     await expect(keyStatisticsWidget).toBeVisible();
 
@@ -174,11 +176,14 @@ test.describe('Home as super admin', () => {
       await page
         .getByLabel('Drag & Drop here or')
         .setInputFiles('public/assets/administration_panel.png');
-      await page
-        .getByRole('button', { name: 'Upload 1 asset to the library' })
-        .waitFor({ state: 'visible', timeout: 5000 });
-      await page.getByRole('button', { name: 'Upload 1 asset to the library' }).click();
-      await page.getByLabel('Home').click();
+      const uploadButton = page.getByRole('button', { name: 'Upload 1 asset to the library' });
+      try {
+        await uploadButton.waitFor({ state: 'visible', timeout: 5000 });
+        await uploadButton.click();
+      } catch {
+        await page.getByRole('button', { name: /^finish$/i }).click();
+      }
+      await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
 
       // Create a content type and a component
       await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
@@ -278,18 +283,6 @@ test.describe('Home as super admin', () => {
       await page.getByRole('button', { name: /save/i }).click();
       await waitForRestart(page);
     }
-  });
-
-  test('a user should not see the key statistics widget if they are not a super admin', async ({
-    page,
-  }) => {
-    await navToHeader(page, ['Settings', 'Users'], 'Users');
-    await page.getByRole('button', { name: /invite new user/i }).click();
-    await page.getByRole('textbox', { name: /first name/i }).fill('New');
-    await page.getByRole('textbox', { name: /email/i }).fill('newadmin@example.com');
-    await page.getByRole('combobox', { name: "User's roles" }).click();
-    await page.getByRole('option', { name: 'Author' }).click();
-    await page.keyboard.press('Escape');
   });
 });
 

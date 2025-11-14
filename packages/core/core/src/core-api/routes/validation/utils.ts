@@ -2,6 +2,8 @@ import { transformUidToValidOpenApiName } from '@strapi/utils';
 import type { Internal } from '@strapi/types';
 import * as z from 'zod/v4';
 
+// Schema generation happens on-demand when schemas don't exist in the registry
+
 /**
  * Safely adds or updates a schema in Zod's global registry.
  *
@@ -22,14 +24,17 @@ export const safeGlobalRegistrySet = (id: Internal.UID.Schema, schema: z.ZodType
 
     const transformedId = transformUidToValidOpenApiName(id);
 
-    if (idMap.has(transformedId)) {
+    const isReplacing = idMap.has(transformedId);
+
+    if (isReplacing) {
       // Remove existing schema to prevent conflicts
-      strapi.log.debug(`Removing existing schema ${transformedId} from registry`);
       idMap.delete(transformedId);
     }
 
     // Register the new schema with the transformed ID
-    strapi.log.debug(`Registering schema ${transformedId} in global registry`);
+    strapi.log.debug(
+      `${isReplacing ? 'Replacing' : 'Registering'} schema ${transformedId} in global registry`
+    );
     z.globalRegistry.add(schema, { id: transformedId });
   } catch (error) {
     strapi.log.error(
@@ -77,13 +82,27 @@ export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.Zo
     // Return existing schema if already registered
     const mapItem = idMap.get(transformedId);
     if (mapItem) {
-      strapi.log.debug(`Schema ${transformedId} found in registry, returning existing schema`);
+      // Schema already exists, return it silently
       return mapItem;
     }
 
-    strapi.log.warn(
-      `Schema ${transformedId} not found in global registry, creating an any placeholder`
-    );
+    strapi.log.debug(`Schema ${transformedId} not found in registry, generating new schema`);
+
+    // Determine if this is a built-in schema or user content
+    const isBuiltInSchema = id.startsWith('plugin::') || id.startsWith('admin');
+
+    if (isBuiltInSchema) {
+      // Built-in schemas keep at debug level to avoid clutter
+      strapi.log.debug(`Initializing validation schema for ${transformedId}`);
+    } else {
+      // User content
+      const schemaName = transformedId
+        .replace('Document', '')
+        .replace('Entry', '')
+        .replace(/([A-Z])/g, ' $1')
+        .trim();
+      strapi.log.debug(`📝 Generating validation schema for "${schemaName}"`);
+    }
 
     // Temporary any placeholder before replacing with the actual schema type
     // Used to prevent infinite loops in cyclical data structures
@@ -95,7 +114,16 @@ export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.Zo
     // Replace the placeholder with the real schema
     safeGlobalRegistrySet(id, schema);
 
-    strapi.log.debug(`Schema ${transformedId} successfully created and registered`);
+    // Show completion for user content only
+    if (!isBuiltInSchema) {
+      const fieldCount = Object.keys((schema as any)?._def?.shape || {}).length || 0;
+      const schemaName = transformedId
+        .replace('Document', '')
+        .replace('Entry', '')
+        .replace(/([A-Z])/g, ' $1')
+        .trim();
+      strapi.log.debug(`   ✅ "${schemaName}" schema created with ${fieldCount} fields`);
+    }
 
     return schema;
   } catch (error) {
