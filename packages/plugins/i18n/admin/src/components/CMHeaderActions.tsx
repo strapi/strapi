@@ -9,6 +9,7 @@ import {
   FormErrors,
   useForm,
 } from '@strapi/admin/strapi-admin';
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import {
   type DocumentActionComponent,
   type DocumentActionProps,
@@ -28,15 +29,20 @@ import {
   SingleSelectOption,
   Dialog,
   type StatusVariant,
+  Box,
+  Link,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Download, Cross, Plus } from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus, Sparkle, Loader } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useAILocalizationJobsPolling } from '../hooks/useAILocalizationJobsPolling';
 import { useI18n } from '../hooks/useI18n';
+import { useGetAILocalizationJobsByDocumentQuery } from '../services/aiLocalizationJobs';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
+import { useGetSettingsQuery } from '../services/settings';
 import { cleanData } from '../utils/clean';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
@@ -56,6 +62,7 @@ interface LocaleOptionProps {
   locale: Locale;
   status: 'draft' | 'published' | 'modified';
   entryExists: boolean;
+  translationStatus?: 'processing' | 'failed' | 'completed' | undefined;
 }
 
 const statusVariants: Record<LocaleOptionProps['status'], StatusVariant> = {
@@ -107,6 +114,28 @@ const LocaleOption = ({
   );
 };
 
+const LocaleOptionStartIcon = ({
+  entryWithLocaleExists,
+  translationStatus,
+  index,
+}: {
+  entryWithLocaleExists: boolean;
+  translationStatus?: 'processing' | 'failed' | 'completed' | undefined;
+  index?: number;
+}) => {
+  const isAiAvailable = useAIAvailability();
+
+  if (!entryWithLocaleExists) {
+    return <Plus />;
+  }
+
+  if (isAiAvailable && index !== 0 && translationStatus === 'failed') {
+    return <WarningCircle fill="warning600" />;
+  }
+
+  return null;
+};
+
 const LocalePickerAction = ({
   document,
   meta,
@@ -125,20 +154,83 @@ const LocalePickerAction = ({
     documentId,
     params: { locale: currentDesiredLocale },
   });
+  const { data: jobData } = useGetAILocalizationJobsByDocumentQuery({
+    documentId: documentId!,
+    model: model!,
+    collectionType: collectionType!,
+  });
+  const { data: settings } = useGetSettingsQuery();
+  const isAiAvailable = useAIAvailability();
+  const setValues = useForm('LocalePickerAction', (state) => state.setValues);
 
   const handleSelect = React.useCallback(
     (value: string) => {
-      setQuery({
-        plugins: {
-          ...query.plugins,
-          i18n: {
-            locale: value,
+      setQuery(
+        {
+          plugins: {
+            ...query.plugins,
+            i18n: {
+              locale: value,
+            },
           },
         },
-      });
+        'push',
+        true
+      );
     },
     [query.plugins, setQuery]
   );
+
+  const nonTranslatedFields = React.useMemo(() => {
+    if (!schema?.attributes) return [];
+    return Object.keys(schema.attributes).filter((field) => {
+      const attribute = schema.attributes[field] as Record<string, unknown>;
+      return (attribute?.pluginOptions as any)?.i18n?.localized === false;
+    });
+  }, [schema?.attributes]);
+
+  const sourceLocaleData = React.useMemo(() => {
+    if (!Array.isArray(locales) || !meta?.availableLocales) return null;
+
+    const defaultLocale = locales.find((locale: Locale) => locale.isDefault);
+    const existingLocales = meta.availableLocales.map((loc) => loc.locale);
+
+    const sourceLocaleCode =
+      defaultLocale &&
+      existingLocales.includes(defaultLocale.code) &&
+      defaultLocale.code !== currentDesiredLocale
+        ? defaultLocale.code
+        : existingLocales.find((locale) => locale !== currentDesiredLocale);
+
+    if (!sourceLocaleCode) return null;
+
+    // Find the document data from availableLocales (now includes non-translatable fields)
+    const sourceLocaleDoc = meta.availableLocales.find((loc) => loc.locale === sourceLocaleCode);
+
+    return sourceLocaleDoc
+      ? { locale: sourceLocaleCode, data: sourceLocaleDoc as Record<string, unknown> }
+      : null;
+  }, [locales, meta?.availableLocales, currentDesiredLocale]);
+
+  /**
+   * Prefilling form with non-translatable fields from already existing locale
+   */
+  React.useEffect(() => {
+    // Only run when creating a new locale (no document ID yet) and when we have non-translatable fields
+    if (!document?.id && nonTranslatedFields.length > 0 && sourceLocaleData?.data) {
+      const dataToSet = nonTranslatedFields.reduce(
+        (acc: Record<string, unknown>, field: string) => {
+          acc[field] = sourceLocaleData.data[field];
+          return acc;
+        },
+        {}
+      );
+
+      if (Object.keys(dataToSet).length > 0) {
+        setValues(dataToSet);
+      }
+    }
+  }, [document?.id, nonTranslatedFields, sourceLocaleData?.data, setValues]);
 
   React.useEffect(() => {
     if (!Array.isArray(locales) || !hasI18n) {
@@ -159,9 +251,17 @@ const LocalePickerAction = ({
     ? locales.find((locale) => locale.code === currentDesiredLocale)
     : undefined;
 
+  // Use meta.availableLocales instead of document.localizations
+  // meta.availableLocales contains all locales for the document, even when creating new locales
+  const availableLocales = meta?.availableLocales ?? [];
+  const documentLocalizations = document?.localizations ?? [];
+
+  // Prefer meta.availableLocales as it's more reliable, fallback to document.localizations
+  const allLocalizations = availableLocales.length > 0 ? availableLocales : documentLocalizations;
+
   const allCurrentLocales = [
     { status: getDocumentStatus(document, meta), locale: currentLocale?.code },
-    ...(document?.localizations ?? []),
+    ...allLocalizations,
   ];
 
   if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
@@ -176,12 +276,16 @@ const LocalePickerAction = ({
     return canRead.includes(locale.code);
   });
 
+  const localesSortingDefaultFirst = displayedLocales.sort((a, b) =>
+    a.isDefault ? -1 : b.isDefault ? 1 : 0
+  );
+
   return {
     label: formatMessage({
       id: getTranslation('Settings.locales.modal.locales.label'),
       defaultMessage: 'Locales',
     }),
-    options: displayedLocales.map((locale) => {
+    options: localesSortingDefaultFirst.map((locale, index) => {
       const entryWithLocaleExists = allCurrentLocales.some((doc) => doc.locale === locale.code);
 
       const currentLocaleDoc = allCurrentLocales.find((doc) =>
@@ -189,6 +293,44 @@ const LocalePickerAction = ({
       );
 
       const permissionsToCheck = currentLocaleDoc ? canRead : canCreate;
+
+      if (isAiAvailable && settings?.data?.aiLocalizations) {
+        return {
+          _render: () => (
+            <React.Fragment key={index}>
+              <SingleSelectOption
+                disabled={!permissionsToCheck.includes(locale.code)}
+                key={locale.code}
+                startIcon={
+                  <LocaleOptionStartIcon
+                    entryWithLocaleExists={entryWithLocaleExists}
+                    translationStatus={jobData?.data?.status}
+                    index={index}
+                  />
+                }
+                value={locale.code}
+              >
+                <LocaleOption
+                  isDraftAndPublishEnabled={!!schema?.options?.draftAndPublish}
+                  locale={locale}
+                  status={currentLocaleDoc?.status}
+                  entryExists={entryWithLocaleExists}
+                />
+              </SingleSelectOption>
+              {localesSortingDefaultFirst.length > 1 && index === 0 && (
+                <Box paddingRight={4} paddingLeft={4} paddingTop={2} paddingBottom={2}>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTranslation('CMEditViewLocalePicker.locale.ai-translations'),
+                      defaultMessage: 'AI Translations',
+                    })}
+                  </Typography>
+                </Box>
+              )}
+            </React.Fragment>
+          ),
+        };
+      }
 
       return {
         disabled: !permissionsToCheck.includes(locale.code),
@@ -199,9 +341,10 @@ const LocalePickerAction = ({
             locale={locale}
             status={currentLocaleDoc?.status}
             entryExists={entryWithLocaleExists}
+            translationStatus={jobData?.data?.status}
           />
         ),
-        startIcon: !entryWithLocaleExists ? <Plus /> : null,
+        startIcon: <LocaleOptionStartIcon entryWithLocaleExists={entryWithLocaleExists} />,
       };
     }),
     customizeContent: () => currentLocale?.name,
@@ -237,6 +380,142 @@ const getDocumentStatus = (
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * AISettingsStatusAction
+ * -----------------------------------------------------------------------------------------------*/
+
+const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>`
+  display: flex;
+  gap: ${({ theme }) => theme.spaces[1]};
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  // Disabled state
+  ${({ $isAISettingEnabled, theme }) =>
+    !$isAISettingEnabled &&
+    `
+    background-color: ${theme.colors.neutral150};
+  `}
+
+  svg {
+    ${({ $isAISettingEnabled, theme }) =>
+      !$isAISettingEnabled &&
+      `
+        fill: ${theme.colors.neutral300};
+      `}
+  }
+`;
+
+const SpinningLoader = styled(Loader)`
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  animation: spin 2s linear infinite;
+`;
+
+const AITranslationStatusAction = ({ documentId, model, collectionType }: HeaderActionProps) => {
+  const { formatMessage } = useIntl();
+  const isAIAvailable = useAIAvailability();
+  const { data: settings } = useGetSettingsQuery();
+  const isAISettingEnabled = settings?.data?.aiLocalizations;
+  const { hasI18n } = useI18n();
+
+  // Poll for AI localizations jobs when AI is enabled and we have a documentId
+  const { status } = useAILocalizationJobsPolling({
+    documentId,
+    model,
+    collectionType,
+  });
+  const statusVariant = (() => {
+    if (status === 'failed') {
+      return 'warning';
+    }
+
+    if (isAISettingEnabled) {
+      return 'alternative';
+    }
+
+    return 'neutral';
+  })();
+
+  // Do not display this action when i18n is not available
+  if (!hasI18n) {
+    return null;
+  }
+
+  // Do not display this action when AI is not available
+  if (!isAIAvailable) {
+    return null;
+  }
+
+  return {
+    _status: {
+      message: (
+        <Box
+          height="100%"
+          aria-label={formatMessage({
+            id: getTranslation('CMEditViewAITranslation.status-aria-label'),
+            defaultMessage: 'AI Translation Status',
+          })}
+        >
+          <AITranslationStatusIcon
+            $isAISettingEnabled={Boolean(isAISettingEnabled)}
+            variant={statusVariant}
+            size="S"
+          >
+            {status === 'processing' ? <SpinningLoader /> : <Sparkle />}
+          </AITranslationStatusIcon>
+        </Box>
+      ),
+      tooltip: (
+        <Flex direction="column" padding={4} alignItems="flex-start" width="25rem">
+          <Typography variant="pi" fontWeight="600">
+            {formatMessage(
+              {
+                id: getTranslation('CMEditViewAITranslation.status-title'),
+                defaultMessage:
+                  '{enabled, select, true {AI translation enabled} false {AI translation disabled} other {AI translation disabled}}',
+              },
+              { enabled: isAISettingEnabled }
+            )}
+          </Typography>
+          <Typography variant="pi" paddingTop={1} paddingBottom={3}>
+            {formatMessage({
+              id: getTranslation('CMEditViewAITranslation.status-description'),
+              defaultMessage:
+                'Our AI translates content in all locales each time you save a modification in the default locale.',
+            })}
+          </Typography>
+          <Link
+            fontSize="inherit"
+            tag={NavLink}
+            to="/settings/internationalization"
+            style={{ alignSelf: 'flex-end' }}
+          >
+            <Typography variant="pi" textAlign="right">
+              {formatMessage(
+                {
+                  id: getTranslation('CMEditViewAITranslation.settings-link'),
+                  defaultMessage:
+                    '{enabled, select, true {Disable it in settings} false {Enable it in settings} other {Enable it in settings}}',
+                },
+                { enabled: isAISettingEnabled }
+              )}
+            </Typography>
+          </Link>
+        </Flex>
+      ),
+    },
+  };
+};
+
+/* -------------------------------------------------------------------------------------------------
  * FillFromAnotherLocaleAction
  * -----------------------------------------------------------------------------------------------*/
 
@@ -261,6 +540,10 @@ const FillFromAnotherLocaleAction = ({
     params: { locale: currentDesiredLocale },
   });
   const { data: locales = [] } = useGetLocalesQuery();
+
+  const isAIAvailable = useAIAvailability();
+  const { data: settings } = useGetSettingsQuery();
+  const isAISettingEnabled = settings?.data?.aiLocalizations;
 
   const availableLocales = Array.isArray(locales)
     ? locales.filter((locale) => meta?.availableLocales.some((l) => l.locale === locale.code))
@@ -290,9 +573,14 @@ const FillFromAnotherLocaleAction = ({
     return null;
   }
 
+  // Do not display this action when AI is available and AI translations are enabled
+  if (isAIAvailable && isAISettingEnabled) {
+    return null;
+  }
+
   return {
     type: 'icon',
-    icon: <Download />,
+    icon: <Earth />,
     disabled: availableLocales.length === 0,
     label: formatMessage({
       id: getTranslation('CMEditViewCopyLocale.copy-text'),
@@ -376,7 +664,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
-  const { delete: deleteAction } = useDocumentActions();
+  const { delete: deleteAction, isLoading } = useDocumentActions();
   const { hasI18n, canDelete } = useI18n();
 
   // Get the current locale object, using the URL instead of document so it works while creating
@@ -419,6 +707,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
           </Typography>
         </Flex>
       ),
+      loading: isLoading,
       onConfirm: async () => {
         const unableToDelete =
           // We are unable to delete a collection type without a document ID
@@ -477,6 +766,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
   model,
   collectionType,
   action,
+  meta,
 }: ExtendedDocumentActionProps) => {
   const locale = document?.locale ?? null;
   const [{ query }] = useQueryParams<{ status: 'draft' | 'published' }>();
@@ -544,23 +834,61 @@ const BulkLocaleAction: DocumentActionComponent = ({
       return [[], {}];
     }
 
-    const localizations = document.localizations ?? [];
+    const metaLocalizations = (meta?.availableLocales ?? []).map((locale) => ({
+      locale: locale.locale,
+      status: (locale.status ?? 'draft') as LocaleStatus['status'],
+    }));
+
+    const documentLocalizations = (
+      (document.localizations ?? []) as Array<{
+        locale?: string | null;
+        status?: Modules.Documents.Params.PublicationStatus.Kind | 'modified' | null;
+      }>
+    ).map((doc) => ({
+      locale: doc.locale ?? undefined,
+      status: (doc.status ?? 'draft') as LocaleStatus['status'],
+    }));
+
+    const localesMap = new Map<string, LocaleStatus>();
+
+    metaLocalizations.forEach(({ locale, status }) => {
+      if (locale) {
+        localesMap.set(locale, { locale, status });
+      }
+    });
+
+    documentLocalizations.forEach(({ locale, status }) => {
+      if (locale) {
+        localesMap.set(locale, { locale, status });
+      }
+    });
 
     // Build the rows for the bulk locale publish modal by combining the current
     // document with all the available locales from the document meta
-    const locales: LocaleStatus[] = localizations.map((doc: any) => {
-      const { locale, status } = doc;
-      return { locale, status };
-    });
+    const locales: LocaleStatus[] = [];
 
-    // Add the current document locale
-    locales.unshift({
-      locale: document.locale,
-      status: document.status,
-    });
+    if (document?.locale) {
+      locales.push({
+        locale: document.locale,
+        status: (document.status ?? 'draft') as LocaleStatus['status'],
+      });
+    }
+
+    locales.push(
+      ...Array.from(localesMap.entries())
+        .filter(([locale]) => locale !== document?.locale)
+        .map(([, value]) => value)
+    );
+
+    if (locales.length === 0 && document?.locale) {
+      locales.push({
+        locale: document.locale,
+        status: (document.status ?? 'draft') as LocaleStatus['status'],
+      });
+    }
 
     // Build the validation errors for each locale.
-    const allDocuments = [document, ...localizations];
+    const allDocuments = [document, ...(document.localizations ?? [])];
     const errors = allDocuments.reduce<FormErrors>((errs, document) => {
       if (!document) {
         return errs;
@@ -575,7 +903,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
     }, {});
 
     return [locales, errors];
-  }, [document, validate]);
+  }, [document, meta?.availableLocales, validate]);
 
   const isBulkPublish = action === 'bulk-publish';
   const localesForAction = selectedRows.reduce((acc: string[], selectedRow: LocaleStatus) => {
@@ -804,4 +1132,5 @@ export {
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
+  AITranslationStatusAction,
 };

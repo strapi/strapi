@@ -1,0 +1,15 @@
+{
+  "color-picker.description": "Виберіть будь-який колір",
+  "color-picker.input.aria-label": "Поле введення вибору кольору",
+  "color-picker.input.format": "HEX",
+  "color-picker.label": "Колір",
+  "color-picker.options.advanced.regex": "Шаблон RegExp",
+  "color-picker.options.advanced.regex.description": "Надайте регулярний вираз для перевірки значення HEX",
+  "color-picker.options.advanced.requiredField": "Обов'язкове поле",
+  "color-picker.options.advanced.requiredField.description": "Ви не зможете створити запис, якщо це поле порожнє",
+  "color-picker.settings": "Налаштування",
+  "color-picker.toggle.aria-label": "Перемикач вибору кольору",
+  "plugin.description.long": "Підтримуване Strapi користувацьке поле вибору кольору. Використовуйте повзунки насиченості та відтінку для вибору кольору та збереження значення у вигляді рядка HEX.",
+  "plugin.description.short": "Підтримуване Strapi користувацьке поле вибору кольору.",
+  "plugin.name": "Вибір кольору"
+}

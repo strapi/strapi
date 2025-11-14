@@ -10,7 +10,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.get('auth').register('admin', adminAuthStrategy);
   strapi.get('auth').register('content-api', apiTokenAuthStrategy);
 
-  if (strapi.config.get('admin.serveAdminPanel')) {
+  const shouldServeAdminPanel = strapi.config.get('admin.serveAdminPanel');
+
+  if (shouldServeAdminPanel) {
     registerAdminPanelRoute({ strapi });
   }
 };

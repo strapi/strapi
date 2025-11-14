@@ -1,3 +1,4 @@
+import { useIsDesktop } from '@strapi/admin/strapi-admin';
 import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Cross, Drag } from '@strapi/icons';
 
@@ -6,7 +7,7 @@ import {
   DisconnectButton,
   LinkEllipsis,
   FlexWrapper,
-} from '../../pages/EditView/components/FormInputs/Relations';
+} from '../../pages/EditView/components/FormInputs/Relations/Relations';
 
 import type { Data } from '@strapi/types';
 
@@ -19,6 +20,7 @@ interface RelationDragPreviewProps {
 }
 
 const RelationDragPreview = ({ status, displayedValue, width }: RelationDragPreviewProps) => {
+  const isDesktop = useIsDesktop();
   return (
     <Box style={{ width }}>
       <Flex
@@ -34,9 +36,11 @@ const RelationDragPreview = ({ status, displayedValue, width }: RelationDragPrev
         gap={4}
       >
         <FlexWrapper gap={1}>
-          <IconButton withTooltip={false} label="" variant="ghost">
-            <Drag />
-          </IconButton>
+          {isDesktop && (
+            <IconButton withTooltip={false} label="" variant="ghost">
+              <Drag />
+            </IconButton>
+          )}
           <Flex width="100%" minWidth={0} justifyContent="space-between">
             <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
               <LinkEllipsis href="">

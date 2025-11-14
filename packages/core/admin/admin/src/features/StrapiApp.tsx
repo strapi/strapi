@@ -16,6 +16,7 @@ interface StrapiAppContextValue
       | 'plugins'
       | 'runHookParallel'
       | 'runHookSeries'
+      | 'widgets'
     >,
     Pick<Router, 'menu' | 'settings'> {
   components: StrapiApp['library']['components'];

@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -67,7 +67,7 @@ jobs:
     if: ${{ needs.conditions.outputs.docs == 'true' || needs.conditions.outputs.global == 'true' }}
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -130,7 +130,7 @@ jobs:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.backend == 'true'
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -159,7 +159,7 @@ jobs:
       YARN_ENABLE_IMMUTABLE_INSTALLS: false
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -212,17 +212,13 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-
+          node-version: 22
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
@@ -242,9 +238,9 @@ jobs:
         # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@main
+        uses: trunk-io/analytics-uploader@v1
         with:
-          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
@@ -277,12 +273,10 @@ jobs:
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
-
       - name: Run [EE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
-          enableFutureFeatures: true
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@v4
@@ -295,9 +289,9 @@ jobs:
       # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@main
+        uses: trunk-io/analytics-uploader@v1
         with:
-          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
@@ -310,7 +304,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
 
@@ -334,7 +328,7 @@ jobs:
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
         shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
@@ -374,11 +368,11 @@ jobs:
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
         shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
-        image: bitnami/mysql:latest
+        image: bitnamilegacy/mysql:latest
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
@@ -413,7 +407,7 @@ jobs:
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
@@ -439,8 +433,8 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [20, 22]
-        shard: [1/4, 2/4, 3/4, 4/4]
+        node: [20, 22, 24]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
         image: postgres
@@ -482,11 +476,11 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [20, 22]
-        shard: [1/4, 2/4, 3/4, 4/4]
+        node: [20, 22, 24]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
-        image: bitnami/mysql:latest
+        image: bitnamilegacy/mysql:latest
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
@@ -524,7 +518,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [20, 22]
+        node: [20, 22, 24]
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4

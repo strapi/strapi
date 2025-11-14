@@ -7,6 +7,7 @@ import { isRelation, isConfigurable } from '../../utils/attributes';
 import { typeKinds } from '../constants';
 import createSchemaHandler from './schema-handler';
 import { CreateContentTypeInput } from '../../controllers/validation/content-type';
+import type { InternalRelationAttribute, InternalAttribute } from './types';
 
 const { ApplicationError } = errors;
 
@@ -24,38 +25,57 @@ const reuseUnsetPreviousProperties = (
       'pluginOptions',
       'inversedBy',
       'mappedBy',
+      'conditions', // Don't automatically preserve conditions
     ])
   );
 };
 
 export default function createComponentBuilder() {
   return {
-    setRelation(this: any, { key, uid, attribute }: any) {
+    setRelation(
+      this: any,
+      { key, uid, attribute }: { key: string; uid: string; attribute: InternalRelationAttribute }
+    ) {
       if (!_.has(attribute, 'target')) {
         return;
       }
 
       const targetCT = this.contentTypes.get(attribute.target);
+
+      if (!targetCT) {
+        throw new ApplicationError(`Content type ${attribute.target} not found`);
+      }
+
       const targetAttribute = targetCT.getAttribute(attribute.targetAttribute);
 
       if (!attribute.targetAttribute) {
         return;
       }
 
+      // When generating the inverse relation, preserve existing conditions if they exist
+      // If the target attribute already exists and has conditions, preserve them
+      const targetAttributeData = targetAttribute || {};
+
+      // If the source doesn't have conditions but the target does, preserve target's conditions
+
       targetCT.setAttribute(
         attribute.targetAttribute,
-        generateRelation({ key, attribute, uid, targetAttribute })
+        generateRelation({ key, attribute, uid, targetAttribute: targetAttributeData })
       );
     },
 
-    unsetRelation(this: any, attribute: any) {
-      if (!_.has(attribute, 'target')) {
+    unsetRelation(
+      this: any,
+      attribute: Schema.Attribute.Relation<Schema.Attribute.RelationKind.Any>
+    ) {
+      if (!('target' in attribute) || !attribute.target) {
         return;
       }
 
       const targetCT = this.contentTypes.get(attribute.target);
 
-      const targetAttributeName = attribute.inversedBy || attribute.mappedBy;
+      const relationAttribute = attribute as InternalRelationAttribute;
+      const targetAttributeName = relationAttribute.inversedBy || relationAttribute.mappedBy;
       const targetAttribute = targetCT.getAttribute(targetAttributeName);
 
       if (!targetAttribute) return;
@@ -63,11 +83,74 @@ export default function createComponentBuilder() {
       return targetCT.deleteAttribute(targetAttributeName);
     },
 
+    createContentTypeAttributes(
+      this: any,
+      uid: string,
+      attributes: CreateContentTypeInput['attributes']
+    ) {
+      if (!this.contentTypes.has(uid)) {
+        throw new ApplicationError('contentType.notFound');
+      }
+
+      const contentType = this.contentTypes.get(uid);
+
+      // support self referencing content type relation
+      Object.keys(attributes).forEach((key) => {
+        const { target } = attributes[key];
+        if (target === '__self__') {
+          attributes[key].target = uid;
+        }
+      });
+
+      contentType.setAttributes(this.convertAttributes(attributes));
+
+      Object.keys(attributes).forEach((key) => {
+        const attribute = attributes[key] as InternalAttribute;
+
+        if (isRelation(attribute)) {
+          const relationAttribute = attribute as InternalRelationAttribute;
+          if (['manyToMany', 'oneToOne'].includes(relationAttribute.relation)) {
+            if (
+              relationAttribute.target === uid &&
+              relationAttribute.targetAttribute !== undefined
+            ) {
+              // self referencing relation
+              const targetAttribute = attributes[
+                relationAttribute.targetAttribute
+              ] as InternalRelationAttribute;
+
+              if (targetAttribute.dominant === undefined) {
+                relationAttribute.dominant = true;
+              } else {
+                relationAttribute.dominant = false;
+              }
+            } else {
+              relationAttribute.dominant = true;
+            }
+          }
+
+          this.setRelation({
+            key,
+            uid,
+            attribute: relationAttribute,
+          });
+        }
+      });
+
+      return contentType;
+    },
+
     /**
      * Creates a content type in memory to be written to files later on
      */
     createContentType(this: any, infos: CreateContentTypeInput) {
-      const uid = createContentTypeUID(infos);
+      // TODO:: check for unique uid / singularName & pluralName & collectionName
+
+      if (infos.uid && infos.uid !== createContentTypeUID(infos)) {
+        throw new ApplicationError('contentType.invalidUID');
+      }
+
+      const uid = infos.uid ?? createContentTypeUID(infos);
 
       if (this.contentTypes.has(uid)) {
         throw new ApplicationError('contentType.alreadyExists');
@@ -85,14 +168,6 @@ export default function createComponentBuilder() {
       });
 
       this.contentTypes.set(uid, contentType);
-
-      // support self referencing content type relation
-      Object.keys(infos.attributes).forEach((key) => {
-        const { target } = infos.attributes[key];
-        if (target === '__self__') {
-          infos.attributes[key].target = uid;
-        }
-      });
 
       contentType
         .setUID(uid)
@@ -112,35 +187,9 @@ export default function createComponentBuilder() {
           draftAndPublish: infos.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
-        .set('config', infos.config)
-        .setAttributes(this.convertAttributes(infos.attributes));
+        .set('config', infos.config);
 
-      Object.keys(infos.attributes).forEach((key) => {
-        const attribute = infos.attributes[key];
-
-        if (isRelation(attribute)) {
-          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
-            if (attribute.target === uid && attribute.targetAttribute !== undefined) {
-              // self referencing relation
-              const targetAttribute = infos.attributes[attribute.targetAttribute];
-
-              if (targetAttribute.dominant === undefined) {
-                attribute.dominant = true;
-              } else {
-                attribute.dominant = false;
-              }
-            } else {
-              attribute.dominant = true;
-            }
-          }
-
-          this.setRelation({
-            key,
-            uid,
-            attribute,
-          });
-        }
-      });
+      this.createContentTypeAttributes(uid, infos.attributes);
 
       return contentType;
     },
@@ -168,23 +217,26 @@ export default function createComponentBuilder() {
       deletedKeys.forEach((key) => {
         const attribute = oldAttributes[key];
 
-        const targetAttributeName = attribute.inversedBy || attribute.mappedBy;
-
         // if the old relation has a target attribute. we need to remove it in the target type
-        if (isConfigurable(attribute) && isRelation(attribute) && !_.isNil(targetAttributeName)) {
-          this.unsetRelation(attribute);
+        if (isConfigurable(attribute) && isRelation(attribute)) {
+          const relationAttribute = attribute as InternalRelationAttribute;
+          const targetAttributeName = relationAttribute.inversedBy || relationAttribute.mappedBy;
+
+          if (targetAttributeName !== null && targetAttributeName !== undefined) {
+            this.unsetRelation(attribute);
+          }
         }
       });
 
       remainingKeys.forEach((key) => {
         const oldAttribute = oldAttributes[key];
-        const newAttribute = newAttributes[key];
+        const newAttribute = newAttributes[key] as InternalAttribute;
 
         if (!isRelation(oldAttribute) && isRelation(newAttribute)) {
           return this.setRelation({
             key,
             uid,
-            attribute: newAttributes[key],
+            attribute: newAttribute as InternalRelationAttribute,
           });
         }
 
@@ -193,56 +245,85 @@ export default function createComponentBuilder() {
         }
 
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
-          const oldTargetAttributeName = oldAttribute.inversedBy || oldAttribute.mappedBy;
+          const relationAttribute = newAttribute as InternalRelationAttribute;
+          const oldRelationAttribute = oldAttribute as InternalRelationAttribute;
+          const oldTargetAttributeName =
+            oldRelationAttribute.inversedBy || oldRelationAttribute.mappedBy;
 
-          const sameRelation = oldAttribute.relation === newAttribute.relation;
-          const targetAttributeHasChanged = oldTargetAttributeName !== newAttribute.targetAttribute;
+          const sameRelation = oldAttribute.relation === relationAttribute.relation;
+          const targetAttributeHasChanged =
+            oldTargetAttributeName !== relationAttribute.targetAttribute;
 
           if (!sameRelation || targetAttributeHasChanged) {
             this.unsetRelation(oldAttribute);
           }
 
           // keep extra options that were set manually on oldAttribute
-          reuseUnsetPreviousProperties(newAttribute, oldAttribute);
+          reuseUnsetPreviousProperties(relationAttribute, oldAttribute);
 
-          if (oldAttribute.inversedBy) {
-            newAttribute.dominant = true;
-          } else if (oldAttribute.mappedBy) {
-            newAttribute.dominant = false;
+          // Handle conditions explicitly - only preserve if present and not undefined in new attribute
+          const newAttributeFromInfos = newAttributes[key];
+          const hasNewConditions =
+            newAttributeFromInfos.conditions !== undefined &&
+            newAttributeFromInfos.conditions !== null;
+
+          if (oldAttribute.conditions) {
+            if (hasNewConditions) {
+              // Conditions are still present, keep them
+              relationAttribute.conditions = newAttributeFromInfos.conditions;
+            } else {
+              // Conditions were removed (undefined or null), ensure they're not preserved
+              delete relationAttribute.conditions;
+            }
+          } else if (hasNewConditions) {
+            // New conditions added
+            relationAttribute.conditions = newAttributeFromInfos.conditions;
+          }
+
+          if (oldRelationAttribute.inversedBy) {
+            relationAttribute.dominant = true;
+          } else if (oldRelationAttribute.mappedBy) {
+            relationAttribute.dominant = false;
           }
 
           return this.setRelation({
             key,
             uid,
-            attribute: newAttribute,
+            attribute: relationAttribute,
           });
         }
       });
 
       // add new relations
       newKeys.forEach((key) => {
-        const attribute = newAttributes[key];
+        const attribute = newAttributes[key] as InternalAttribute;
 
         if (isRelation(attribute)) {
-          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
-            if (attribute.target === uid && attribute.targetAttribute !== undefined) {
+          const relationAttribute = attribute as InternalRelationAttribute;
+          if (['manyToMany', 'oneToOne'].includes(relationAttribute.relation)) {
+            if (
+              relationAttribute.target === uid &&
+              relationAttribute.targetAttribute !== undefined
+            ) {
               // self referencing relation
-              const targetAttribute = newAttributes[attribute.targetAttribute];
+              const targetAttribute = newAttributes[
+                relationAttribute.targetAttribute
+              ] as InternalRelationAttribute;
 
               if (targetAttribute.dominant === undefined) {
-                attribute.dominant = true;
+                relationAttribute.dominant = true;
               } else {
-                attribute.dominant = false;
+                relationAttribute.dominant = false;
               }
             } else {
-              attribute.dominant = true;
+              relationAttribute.dominant = true;
             }
           }
 
           this.setRelation({
             key,
             uid,
-            attribute,
+            attribute: relationAttribute,
           });
         }
       });
@@ -292,13 +373,25 @@ const createContentTypeUID = ({
   singularName: string;
 }): Internal.UID.ContentType => `api::${singularName}.${singularName}`;
 
-const generateRelation = ({ key, attribute, uid, targetAttribute = {} }: any) => {
+const generateRelation = ({
+  key,
+  attribute,
+  uid,
+  targetAttribute = {},
+}: {
+  key: string;
+  attribute: InternalRelationAttribute;
+  uid: string;
+  targetAttribute?: Partial<InternalRelationAttribute>;
+}) => {
   const opts: any = {
     type: 'relation',
     target: uid,
-    autoPopulate: targetAttribute.autoPopulate,
     private: targetAttribute.private || undefined,
     pluginOptions: targetAttribute.pluginOptions || undefined,
+    // Preserve conditions from targetAttribute if they exist
+    // This allows each side of the relation to maintain its own conditions
+    ...(targetAttribute.conditions && { conditions: targetAttribute.conditions }),
   };
 
   switch (attribute.relation) {
@@ -339,10 +432,12 @@ const generateRelation = ({ key, attribute, uid, targetAttribute = {} }: any) =>
   // we do this just to make sure we have the same key order when writing to files
   const { type, relation, target, ...restOptions } = opts;
 
-  return {
+  const result = {
     type,
     relation,
     target,
     ...restOptions,
   };
+
+  return result;
 };

@@ -18,15 +18,12 @@ describe('RelativeTime', () => {
     spiedDateNow = setDateNow(1443686400000); // 2015-10-01 08:00:00
     render(<RelativeTime timestamp={new Date('2015-10-01 07:55:00')} />);
 
-    expect(screen.getByRole('time')).toMatchInlineSnapshot(`
-      <time
-        datetime="2015-10-01T07:55:00.000Z"
-        role="time"
-        title="10/1/2015 7:55 AM"
-      >
-        5 minutes ago
-      </time>
-    `);
+    const timeElement = screen.getByRole('time');
+
+    expect(timeElement).toBeInTheDocument();
+    expect(timeElement).toHaveTextContent('5 minutes ago');
+    expect(timeElement).toHaveAttribute('datetime', '2015-10-01T07:55:00.000Z');
+    expect(timeElement).toHaveAttribute('title', '10/1/2015 7:55 AM');
   });
 
   it('can display the relative time for a future date', () => {

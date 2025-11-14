@@ -13,9 +13,12 @@ describe('Admin Auth End to End', () => {
   let rq;
   let strapi;
   let utils;
-
   beforeAll(async () => {
-    strapi = await createStrapiInstance();
+    strapi = await createStrapiInstance({
+      async bootstrap({ strapi: s }) {
+        s.config.set('admin.rateLimit.enabled', false);
+      },
+    });
     rq = await createAuthRequest({ strapi });
     utils = createUtils(strapi);
 
@@ -37,6 +40,38 @@ describe('Admin Auth End to End', () => {
         url: '/admin/login',
         method: 'POST',
         body: superAdmin.loginInfo,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toMatchObject({
+        token: expect.any(String),
+        user: {
+          firstname: expect.stringOrNull(),
+          lastname: expect.stringOrNull(),
+          username: expect.stringOrNull(),
+          email: expect.any(String),
+          isActive: expect.any(Boolean),
+        },
+      });
+    });
+
+    test('Can login with password that no longer passes validation', async () => {
+      // insert a user with a password that is over 72 bytes, which is not valid
+      const longPassword = `aA1${'b'.repeat(100)}`;
+      const someUser = await utils.createUser({
+        email: 'some-user@strapi.io',
+        firstname: 'some',
+        lastname: 'user',
+        password: longPassword,
+      });
+
+      const res = await rq({
+        url: '/admin/login',
+        method: 'POST',
+        body: {
+          email: someUser.email,
+          password: longPassword,
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -113,80 +148,6 @@ describe('Admin Auth End to End', () => {
           name: 'ApplicationError',
           message: 'Missing credentials',
           details: {},
-        },
-      });
-    });
-  });
-
-  describe('Renew token', () => {
-    test('Renew token', async () => {
-      const authRes = await rq({
-        url: '/admin/login',
-        method: 'POST',
-        body: superAdmin.loginInfo,
-      });
-
-      expect(authRes.statusCode).toBe(200);
-      const { token } = authRes.body.data;
-
-      const res = await rq({
-        url: '/admin/renew-token',
-        method: 'POST',
-        body: {
-          token,
-        },
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data).toEqual({
-        token: expect.any(String),
-      });
-    });
-
-    test('Fails on invalid token', async () => {
-      const res = await rq({
-        url: '/admin/renew-token',
-        method: 'POST',
-        body: {
-          token: 'invalid-token',
-        },
-      });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
-        data: null,
-        error: {
-          status: 400,
-          name: 'ValidationError',
-          message: 'Invalid token',
-          details: {},
-        },
-      });
-    });
-
-    test('Fails on missing token', async () => {
-      const res = await rq({
-        url: '/admin/renew-token',
-        method: 'POST',
-        body: {},
-      });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
-        data: null,
-        error: {
-          status: 400,
-          message: 'token is a required field',
-          name: 'ValidationError',
-          details: {
-            errors: [
-              {
-                message: 'token is a required field',
-                name: 'ValidationError',
-                path: ['token'],
-              },
-            ],
-          },
         },
       });
     });
@@ -376,6 +337,42 @@ describe('Admin Auth End to End', () => {
             ],
           },
           message: '3 errors occurred',
+          name: 'ValidationError',
+        },
+      });
+    });
+
+    test('Fails on password of 73 bytes', async () => {
+      const password = `aA1${'b'.repeat(70)}`;
+      const res = await rq({
+        url: '/admin/register',
+        method: 'POST',
+        body: {
+          registrationToken: user.registrationToken,
+          userInfo: {
+            firstname: 'test',
+            lastname: 'Strapi',
+            password,
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        data: null,
+        error: {
+          status: 400,
+          details: {
+            errors: [
+              {
+                message: 'userInfo.password must be less than 73 bytes',
+                name: 'ValidationError',
+                value: password,
+                path: ['userInfo', 'password'],
+              },
+            ],
+          },
+          message: 'userInfo.password must be less than 73 bytes',
           name: 'ValidationError',
         },
       });

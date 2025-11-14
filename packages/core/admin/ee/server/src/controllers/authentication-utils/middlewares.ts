@@ -2,6 +2,12 @@ import type { Core } from '@strapi/types';
 import passport from 'koa-passport';
 import { getService } from '../../utils';
 import utils from './utils';
+import {
+  REFRESH_COOKIE_NAME,
+  buildCookieOptionsWithExpiry,
+  getSessionManager,
+  generateDeviceId,
+} from '../../../../../shared/utils/session-auth';
 
 const defaultConnectionError = () => new Error('Invalid connection payload');
 
@@ -91,25 +97,64 @@ const nonExistingUserScenario: Core.MiddlewareHandler =
     return next();
   };
 
-export const redirectWithAuth: Core.MiddlewareHandler = (ctx) => {
+export const redirectWithAuth: Core.MiddlewareHandler = async (ctx) => {
   const {
     params: { provider },
   } = ctx;
   const redirectUrls = utils.getPrefixedRedirectUrls();
-  const domain: string | undefined = strapi.config.get('admin.auth.domain');
   const { user } = ctx.state;
 
-  const jwt = getService('token').createJwtToken(user);
+  try {
+    const sessionManager = getSessionManager();
+    if (!sessionManager) {
+      strapi.log.error('SessionManager not available for SSO authentication');
+      return ctx.redirect(redirectUrls.error);
+    }
 
-  const isProduction = strapi.config.get('environment') === 'production';
+    const userId = String(user.id);
+    const deviceId = generateDeviceId();
 
-  const cookiesOptions = { httpOnly: false, secure: isProduction, overwrite: true, domain };
+    const { token: refreshToken, absoluteExpiresAt } = await sessionManager(
+      'admin'
+    ).generateRefreshToken(userId, deviceId, {
+      type: 'refresh',
+    });
 
-  const sanitizedUser = getService('user').sanitizeUser(user);
-  strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider });
+    const cookieOptions = buildCookieOptionsWithExpiry('refresh', absoluteExpiresAt);
+    ctx.cookies.set(REFRESH_COOKIE_NAME, refreshToken, cookieOptions);
 
-  ctx.cookies.set('jwtToken', jwt, cookiesOptions);
-  ctx.redirect(redirectUrls.success);
+    const accessResult = await sessionManager('admin').generateAccessToken(refreshToken);
+    if ('error' in accessResult) {
+      strapi.log.error('Failed to generate access token for SSO user');
+      return ctx.redirect(redirectUrls.error);
+    }
+
+    const { token: accessToken } = accessResult;
+
+    const configuredSecure = strapi.config.get('admin.auth.cookie.secure');
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isSecure = typeof configuredSecure === 'boolean' ? configuredSecure : isProduction;
+
+    const domain: string | undefined = strapi.config.get('admin.auth.domain');
+    ctx.cookies.set('jwtToken', accessToken, {
+      httpOnly: false,
+      secure: isSecure,
+      overwrite: true,
+      domain,
+    });
+
+    const sanitizedUser = getService('user').sanitizeUser(user);
+    strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider });
+
+    ctx.redirect(redirectUrls.success);
+  } catch (error) {
+    strapi.log.error('SSO authentication failed during token generation', error);
+    strapi.eventHub.emit('admin.auth.error', {
+      error: error instanceof Error ? error : new Error('Unknown SSO error'),
+      provider,
+    });
+    return ctx.redirect(redirectUrls.error);
+  }
 };
 
 export default {

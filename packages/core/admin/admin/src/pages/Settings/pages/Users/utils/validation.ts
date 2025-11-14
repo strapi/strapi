@@ -27,6 +27,17 @@ const COMMON_USER_SCHEMA = {
       ...translatedErrors.minLength,
       values: { min: 8 },
     })
+    .test(
+      'max-bytes',
+      {
+        id: 'components.Input.error.contain.maxBytes',
+        defaultMessage: 'Password must be less than 73 bytes',
+      },
+      function (value) {
+        if (!value) return true;
+        return new TextEncoder().encode(value).length <= 72;
+      }
+    )
     .matches(/[a-z]/, {
       id: 'components.Input.error.contain.lowercase',
       defaultMessage: 'Password must contain at least one lowercase character',

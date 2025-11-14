@@ -82,7 +82,7 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const hasDeletePermission = useDocumentRBAC('deleteAction', (state) => state.canDelete);
-  const { deleteMany: bulkDeleteAction } = useDocumentActions();
+  const { deleteMany: bulkDeleteAction, isLoading } = useDocumentActions();
   const documentIds = documents.map(({ documentId }) => documentId);
 
   const handleConfirmBulkDelete = async () => {
@@ -107,6 +107,7 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
         id: 'app.components.ConfirmDialog.title',
         defaultMessage: 'Confirmation',
       }),
+      loading: isLoading,
       content: (
         <Flex direction="column" alignItems="stretch" gap={2}>
           <Flex justifyContent="center">
@@ -148,9 +149,8 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const { schema } = useDoc();
   const selectRow = useTable('UnpublishAction', (state) => state.selectRow);
   const hasPublishPermission = useDocumentRBAC('unpublishAction', (state) => state.canPublish);
-  const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
   const hasDraftAndPublishEnabled = Boolean(schema?.options?.draftAndPublish);
-  const { unpublishMany: bulkUnpublishAction } = useDocumentActions();
+  const { unpublishMany: bulkUnpublishAction, isLoading } = useDocumentActions();
   const documentIds = documents.map(({ documentId }) => documentId);
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -178,6 +178,7 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
         id: 'app.components.ConfirmDialog.title',
         defaultMessage: 'Confirmation',
       }),
+      loading: isLoading,
       content: (
         <Flex direction="column" alignItems="stretch" gap={2}>
           <Flex justifyContent="center">
@@ -189,22 +190,6 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
               defaultMessage: 'Are you sure you want to unpublish these entries?',
             })}
           </Typography>
-          {hasI18nEnabled && (
-            <Box textAlign="center" padding={3}>
-              <Typography textColor="danger500">
-                {formatMessage(
-                  {
-                    id: getTranslation('Settings.list.actions.unpublishAdditionalInfos'),
-                    defaultMessage:
-                      'This will unpublish the active locale versions <em>(from Internationalization)</em>',
-                  },
-                  {
-                    em: Emphasis,
-                  }
-                )}
-              </Typography>
-            </Box>
-          )}
         </Flex>
       ),
       confirmButton: formatMessage({

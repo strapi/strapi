@@ -46,7 +46,7 @@ const webhooksSerivce = adminApi
           data: body,
         }),
         transformResponse: (response: Webhooks.CreateWebhook.Response) => response.data,
-        invalidatesTags: [{ type: 'Webhook', id: 'LIST' }],
+        invalidatesTags: [{ type: 'Webhook', id: 'LIST' }, 'HomepageKeyStatistics'],
       }),
       updateWebhook: builder.mutation<
         Webhooks.UpdateWebhook.Response['data'],
@@ -80,7 +80,10 @@ const webhooksSerivce = adminApi
           data: body,
         }),
         transformResponse: (response: Webhooks.DeleteWebhooks.Response) => response.data,
-        invalidatesTags: (_res, _err, { ids }) => ids.map((id) => ({ type: 'Webhook', id })),
+        invalidatesTags: (_res, _err, { ids }) => [
+          ...ids.map((id) => ({ type: 'Webhook' as const, id })),
+          'HomepageKeyStatistics',
+        ],
       }),
     }),
     overrideExisting: false,

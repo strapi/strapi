@@ -1,6 +1,14 @@
 import { render } from '@tests/utils';
 
-import { SettingsNav, SettingsNavProps } from '../SettingsNav';
+import { SettingsNav } from '../SettingsNav';
+
+jest.mock('../../../../../../ee/admin/src/hooks/useLicenseLimits', () => ({
+  useLicenseLimits: jest.fn(() => ({
+    license: {
+      features: [],
+    },
+  })),
+}));
 
 const menu = [
   {
@@ -118,11 +126,17 @@ const menu = [
       },
     ],
   },
-] satisfies SettingsNavProps['menu'];
+];
+
+jest.mock('../../../../hooks/useSettingsMenu', () => ({
+  useSettingsMenu: jest.fn(() => ({
+    menu,
+  })),
+}));
 
 describe('SettingsNav', () => {
   it('should render and match snapshot', () => {
-    const { getByText } = render(<SettingsNav menu={menu} />);
+    const { getByText } = render(<SettingsNav />);
 
     menu.forEach((menuItem) => {
       expect(getByText(menuItem.intlLabel.defaultMessage)).toBeInTheDocument();

@@ -36,7 +36,7 @@ import { useHistoryContext } from '../pages/History';
 import { getRemaingFieldsLayout } from './VersionContent';
 
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
-import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
+import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations/Relations';
 import type { RelationResult } from '../../services/relations';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
