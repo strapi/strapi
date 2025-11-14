@@ -173,19 +173,13 @@ const removeFieldsThatDontExistOnSchema = (schema: PartialSchema) => (data: AnyD
  * @internal
  * @description We need to remove null fields from the data-structure because it will pass it
  * to the specific inputs breaking them as most would prefer empty strings or `undefined` if
- * they're controlled / uncontrolled.
+ * they're controlled / uncontrolled. However, Boolean fields should preserve null values.
  */
-const removeNullValues = (data: AnyData) => {
-  return Object.entries(data).reduce<AnyData>((acc, [key, value]) => {
-    if (value === null) {
-      return acc;
-    }
-
-    acc[key] = value;
-
-    return acc;
-  }, {});
-};
+const removeNullValues = (schema: PartialSchema, components: ComponentsDictionary = {}) =>
+  traverseData(
+    (attribute, value) => value === null && attribute.type !== 'boolean',
+    () => undefined
+  )(schema, components);
 
 /* -------------------------------------------------------------------------------------------------
  * transformDocuments
@@ -203,7 +197,7 @@ const transformDocument =
     const transformations = pipe(
       removeFieldsThatDontExistOnSchema(schema),
       removeProhibitedFields(['password'])(schema, components),
-      removeNullValues,
+      removeNullValues(schema, components),
       prepareRelations(schema, components),
       prepareTempKeys(schema, components)
     );
