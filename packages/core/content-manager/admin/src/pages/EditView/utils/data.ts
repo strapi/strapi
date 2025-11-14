@@ -266,7 +266,7 @@ const handleInvisibleAttributes = (
     // Skip processing fields with visible: false - they should be passed through as-is
     // This function only handles conditions.visible (JSON Logic), not the visible boolean property
     if ('visible' in attrDef && attrDef.visible === false) {
-      // Pass through the value as-is from data or initialValues
+      // Pass through the value from data or initialValues
       const userProvided = Object.prototype.hasOwnProperty.call(data, attrName);
       if (userProvided) {
         result[attrName] = data[attrName];
@@ -365,17 +365,18 @@ const handleInvisibleAttributes = (
       continue;
     }
 
-    // 🟡 Handle scalar/primitive
     if (currentValue !== undefined) {
       result[attrName] = currentValue;
     } else if (initialValue !== undefined) {
       result[attrName] = initialValue;
-    } else {
-      if (attrName === 'id' || attrName === 'documentId') {
-        // If the attribute is 'id' or 'documentId', we don't want to set it to null
-        continue;
-      }
-      result[attrName] = null;
+    }
+  }
+
+  // Pass through any fields from data that aren't in the schema
+  // These might be added by plugins or other mechanisms
+  for (const [key, value] of Object.entries(data)) {
+    if (!(key in result) && !(key in (schema?.attributes || {}))) {
+      result[key] = value;
     }
   }
 
