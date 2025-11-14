@@ -125,7 +125,7 @@ const EntryValidationText = ({ validationErrors, status }: EntryValidationTextPr
     return (
       <Flex gap={2}>
         <CrossCircle fill="danger600" />
-        <Tooltip description={validationErrorsMessages}>
+        <Tooltip label={validationErrorsMessages}>
           <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="bold" ellipsis>
             {validationErrorsMessages}
           </TypographyMaxWidth>

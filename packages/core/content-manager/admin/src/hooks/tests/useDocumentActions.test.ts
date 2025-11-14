@@ -5,6 +5,12 @@ import { rest } from 'msw';
 import { mockData } from '../../../tests/mockData';
 import { useDocumentActions } from '../useDocumentActions';
 
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
+  useGetAIFeatureConfigQuery: () => ({ data: undefined }),
+  useAIAvailability: () => false,
+}));
+
 describe('useDocumentActions', () => {
   it('should return an object with the correct methods', () => {
     const { result } = renderHook(() => useDocumentActions());
