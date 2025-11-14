@@ -54,7 +54,7 @@ describe('AI Metadata Service', () => {
           isEnabled: jest.fn().mockReturnValue(true),
         },
       },
-      service: jest.fn().mockReturnValue({
+      get: jest.fn().mockReturnValue({
         getAiToken: jest.fn().mockResolvedValue({ token: 'mock-token' }),
       }),
       log: {

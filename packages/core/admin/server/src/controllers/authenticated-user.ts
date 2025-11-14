@@ -3,7 +3,7 @@ import type { AdminUser } from '../../../shared/contracts/shared';
 
 import { getService } from '../utils';
 import { validateProfileUpdateInput } from '../validation/user';
-import { GetMe, GetOwnPermissions, UpdateMe, GetAiToken } from '../../../shared/contracts/users';
+import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
 
 export default {
   async getMe(ctx: Context) {
@@ -51,23 +51,5 @@ export default {
       // @ts-expect-error - transform response type to sanitized permission
       data: userPermissions.map(sanitizePermission),
     } satisfies GetOwnPermissions.Response;
-  },
-
-  async getAiToken(ctx: Context) {
-    try {
-      // Security check: Ensure user is authenticated and has proper permissions
-      if (!ctx.state.user) {
-        return ctx.unauthorized('Authentication required');
-      }
-
-      const tokenData = await getService('user').getAiToken();
-
-      ctx.body = {
-        data: tokenData,
-      } satisfies GetAiToken.Response;
-    } catch (error) {
-      const errorMessage = 'AI token request failed. Check server logs for details.';
-      return ctx.internalServerError(errorMessage);
-    }
   },
 };
