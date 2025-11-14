@@ -67,6 +67,7 @@
   "containers.Edit.clickToJump": "Klicka för att gå till posten",
   "containers.Edit.delete": "Ta bort",
   "containers.Edit.delete-entry": "Ta bort denna posten",
+  "containers.edit.title.new": "Skapa en post",
   "containers.Edit.editing": "Redigerar...",
   "containers.Edit.information": "Information",
   "containers.Edit.information.by": "Av",
