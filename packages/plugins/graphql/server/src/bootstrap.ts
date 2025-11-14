@@ -149,7 +149,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   };
 
   type CustomOptions = {
-    cors?: Options;
+    cors?: boolean | Options;
     uploads: boolean;
     bodyParserConfig: boolean;
   };
@@ -198,7 +198,13 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const handler: Core.MiddlewareHandler[] = [];
 
   // add cors middleware
-  if (cors) {
+  if (serverConfig.cors === false) {
+    // Explicitly disabled - don't add middleware
+  } else if (serverConfig.cors === undefined || serverConfig.cors === true) {
+    // enable with defaults (backwards compatible)
+    handler.push(cors());
+  } else {
+    // Custom options object
     handler.push(cors(serverConfig.cors));
   }
 
