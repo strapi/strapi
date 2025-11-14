@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor, screen, server } from '@tests/utils';
+import { renderHook, waitFor, screen, server } from '@tests/utils';
 import { rest } from 'msw';
 
 import { useConfig } from '../useConfig';
@@ -56,14 +56,13 @@ describe('useConfig', () => {
     test('does call the proper mutation endpoint', async () => {
       const { result } = renderHook(() => useConfig());
 
-      act(() => {
-        result.current.mutateConfig.mutateAsync({
+      await waitFor(async () => {
+        await result.current.mutateConfig.mutateAsync({
           pageSize: 100,
           sort: 'name:DESC',
         });
+        expect(result.current.config.isLoading).toBe(true);
       });
-
-      expect(result.current.config.isLoading).toBe(true);
 
       await waitFor(() => expect(result.current.config.isLoading).toBe(false));
     });

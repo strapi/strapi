@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import { act, renderHook, screen, server } from '@tests/utils';
+import { renderHook, screen, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
@@ -38,7 +38,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
@@ -79,7 +79,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
@@ -113,7 +113,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.create(
           {
             model: mockData.contentManager.contentType,
@@ -153,7 +153,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.create(
           {
             model: mockData.contentManager.contentType,
@@ -185,7 +185,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -218,7 +218,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -246,7 +246,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.deleteMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -279,7 +279,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.deleteMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -307,7 +307,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -340,7 +340,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -368,7 +368,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -401,7 +401,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -429,7 +429,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.publish(
           {
             collectionType: 'collection-types',
@@ -468,7 +468,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.publish(
           {
             collectionType: 'collection-types',
@@ -501,7 +501,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
@@ -546,7 +546,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
@@ -580,7 +580,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -614,7 +614,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -642,7 +642,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublishMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -672,7 +672,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublishMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],

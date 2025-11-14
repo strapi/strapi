@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { DesignSystemProvider } from '@strapi/design-system';
-import { act, screen, renderHook } from '@testing-library/react';
+import { act, screen, renderHook, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import {
@@ -33,7 +33,7 @@ describe('AutoReloadOverlayBlocker', () => {
       wrapper,
     });
 
-    act(() => {
+    await waitFor(() => {
       result.current.lockAppWithAutoreload?.();
     });
 
@@ -45,11 +45,11 @@ describe('AutoReloadOverlayBlocker', () => {
       wrapper,
     });
 
-    act(() => {
+    await waitFor(() => {
       result.current.lockAppWithAutoreload?.();
     });
-    expect(screen.getByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
-    act(() => {
+    expect(await screen.findByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
+    await waitFor(() => {
       result.current.unlockAppWithAutoreload?.();
     });
     expect(screen.queryByRole('heading', { name: /Waiting for restart/ })).not.toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('AutoReloadOverlayBlocker', () => {
       wrapper,
     });
 
-    act(() => {
+    await waitFor(() => {
       result.current.lockAppWithAutoreload?.();
     });
 
@@ -69,7 +69,7 @@ describe('AutoReloadOverlayBlocker', () => {
     act(() => jest.advanceTimersByTime(MAX_ELAPSED_TIME));
 
     expect(
-      screen.getByRole('heading', { name: /The restart is taking longer than expected/ })
+      await screen.findByRole('heading', { name: /The restart is taking longer than expected/ })
     ).toBeInTheDocument();
   });
 });
