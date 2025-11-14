@@ -35,7 +35,7 @@
     "build:code": "nx run-many --target=build:code --nx-ignore-cycles",
     "build:types": "nx run-many --target=build:types --nx-ignore-cycles",
     "watch": "nx watch --all -- 'nx run-many --targets build:code,build:types --projects $NX_PROJECT_NAME'",
-    "build:size": "cd examples/getstarted && yarn build",
+    "build:size": "yarn build && cd examples/getstarted && yarn build",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "build:watch": "nx watch --all --nx-ignore-cycles -- nx run \\$NX_PROJECT_NAME:build --nx-ignore-cycles",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
