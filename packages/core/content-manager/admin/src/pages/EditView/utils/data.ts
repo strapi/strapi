@@ -262,6 +262,20 @@ const handleInvisibleAttributes = (
 
   for (const [attrName, attrDef] of Object.entries(schema.attributes)) {
     const fullPath = [...path, attrName].join('.');
+
+    // Skip processing fields with visible: false - they should be passed through as-is
+    // This function only handles conditions.visible (JSON Logic), not the visible boolean property
+    if ('visible' in attrDef && attrDef.visible === false) {
+      // Pass through the value as-is from data or initialValues
+      const userProvided = Object.prototype.hasOwnProperty.call(data, attrName);
+      if (userProvided) {
+        result[attrName] = data[attrName];
+      } else if (attrName in initialValues) {
+        result[attrName] = initialValues[attrName];
+      }
+      continue;
+    }
+
     const condition = attrDef?.conditions?.visible;
     const isVisible = condition ? rulesEngine.evaluate(condition, { ...data, ...result }) : true;
 
@@ -358,7 +372,7 @@ const handleInvisibleAttributes = (
       result[attrName] = initialValue;
     } else {
       if (attrName === 'id' || attrName === 'documentId') {
-        // If the attribute is 'id', we don't want to set it to null, as it should not be removed.
+        // If the attribute is 'id' or 'documentId', we don't want to set it to null
         continue;
       }
       result[attrName] = null;
