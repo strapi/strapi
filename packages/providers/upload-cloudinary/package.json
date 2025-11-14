@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@strapi/utils": "5.31.0",
-    "cloudinary": "^1.41.0",
+    "cloudinary": "^2.7.0",
     "into-stream": "^5.1.0"
   },
   "devDependencies": {

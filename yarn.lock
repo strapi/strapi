@@ -10112,7 +10112,7 @@ __metadata:
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
     "@strapi/utils": "npm:5.31.0"
-    cloudinary: "npm:^1.41.0"
+    cloudinary: "npm:^2.7.0"
     eslint-config-custom: "npm:5.31.0"
     into-stream: "npm:^5.1.0"
     tsconfig: "npm:5.31.0"
@@ -15363,24 +15363,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cloudinary-core@npm:^2.13.0":
-  version: 2.13.0
-  resolution: "cloudinary-core@npm:2.13.0"
-  peerDependencies:
-    lodash: ">=4.0"
-  checksum: 10c0/183cc22ecf19d4430787f3de0a7a489ecdfe522021de3f636f9e01e040bcf6bb7d8bddbb6d551d67bd2d74587587f9c77d12214602e90fc1a70d454101bad20d
-  languageName: node
-  linkType: hard
-
-"cloudinary@npm:^1.41.0":
-  version: 1.41.0
-  resolution: "cloudinary@npm:1.41.0"
+"cloudinary@npm:^2.7.0":
+  version: 2.8.0
+  resolution: "cloudinary@npm:2.8.0"
   dependencies:
-    cloudinary-core: "npm:^2.13.0"
-    core-js: "npm:^3.30.1"
     lodash: "npm:^4.17.21"
     q: "npm:^1.5.1"
-  checksum: 10c0/4ea615ed82d1080e4caa727e3f80d927ff2b46559db75e538d1c58ae6e38d99db4efae34ddcf05890c1ecf4bd0d1dd89bc97c0efcdb8d032798ea68a628e6454
+  checksum: 10c0/67e1830f5ab5d9378c021a2057d54d09757df3487f43015fa83885240055ad6ba193ef2392fa104ffa498e32b4e1e378da30661364b65dec81b159b58225f790
   languageName: node
   linkType: hard
 
@@ -16039,7 +16028,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:3.36.0, core-js@npm:^3.30.1":
+"core-js@npm:3.36.0":
   version: 3.36.0
   resolution: "core-js@npm:3.36.0"
   checksum: 10c0/62dcb41ba79ead581e4c5b2740ae18bfe6ee230e853893736d16edb01b580574d8645ff6c5513d1c75d59620f8451aee45c119d3c4f5ebc66cff5f003a816864
