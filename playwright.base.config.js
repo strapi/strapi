@@ -79,7 +79,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
     baseURL: `http://127.0.0.1:${port}`,
 
     /** Set timezone for consistency across any machine*/
-    timezoneId: 'Europe/Paris',
+    timezoneId: 'Africa/Accra',
 
     /* Default time each action such as `click()` can take */
     actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 10 * 1000),
