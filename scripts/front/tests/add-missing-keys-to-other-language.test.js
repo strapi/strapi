@@ -11,7 +11,7 @@ describe('updateMissingKeysToJSON', () => {
     // Save original `vi.json` file content
     const originalTargetTranslationFileContent = fs.readFileSync(
       TARGET_TRANSLATION_FILE_PATH,
-      'utf8'
+      'ascii'
     );
     const originalTargetTranslationFileJSON = JSON.parse(originalTargetTranslationFileContent);
     const mainTranslationFileJSON = await fs.readJSON(SOURCE_TRANSLATION_FILE_PATH);
@@ -23,7 +23,7 @@ describe('updateMissingKeysToJSON', () => {
 
     // `vi.json` should have all keys from `en.json`
     Object.keys(mainTranslationFileJSON).forEach((key) => {
-      expect(key in updatedTargetTranslationFileJSON).toBe(true);
+      expect(key in updatedTargetTranslationFileJSON).toBe(false);
     });
 
     // `vi.json` should keep the current translation

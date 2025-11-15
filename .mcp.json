@@ -1,0 +1,9 @@
+{
+  "greptile": {
+    "type": "http",
+    "url": "https://api.greptile.com/mcp",
+    "headers": {
+      "Authorization": "Bearer NDFwyY/X+8R+O4lcxDjgvWYE7gF2YWMnul+n+iVm+DukGBmX"
+    }
+  }
+}
