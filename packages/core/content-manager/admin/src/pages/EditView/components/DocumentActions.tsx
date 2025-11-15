@@ -20,6 +20,7 @@ import {
   VisuallyHidden,
   Menu,
   ButtonProps,
+  Tooltip,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
@@ -178,15 +179,36 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
     return null;
   }
 
+  const addHintTooltip = (action: Action, children: React.ReactNode) => {
+    return !action.disabled ? (
+      <Tooltip label={`Ctrl / Cmd + Enter to ${action.label}`}>
+        <Flex width="100%">{children}</Flex>
+      </Tooltip>
+    ) : (
+      children
+    );
+  };
+
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
       <tours.contentManager.Publish>
         <Flex gap={2}>
-          {primaryAction.label === 'Publish' ? (
-            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-          ) : (
-            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-          )}
+          {primaryAction.label === 'Publish'
+            ? addHintTooltip(
+                primaryAction,
+                <DocumentActionButton
+                  {...primaryAction}
+                  variant={primaryAction.variant || 'default'}
+                />
+              )
+            : addHintTooltip(
+                primaryAction,
+                <DocumentActionButton
+                  {...primaryAction}
+                  variant={primaryAction.variant || 'default'}
+                  buttonType="submit"
+                />
+              )}
 
           {restActions.length > 0 ? (
             <DocumentActionsMenu
@@ -222,9 +244,11 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
  * DocumentActionButton
  * -----------------------------------------------------------------------------------------------*/
 
-interface DocumentActionButtonProps extends Action {}
+interface DocumentActionButtonProps extends Action {
+  buttonType?: 'button' | 'submit' | 'reset';
+}
 
-const DocumentActionButton = (action: DocumentActionButtonProps) => {
+const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { toggleNotification } = useNotification();
 
@@ -268,6 +292,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
         paddingTop="7px"
         paddingBottom="7px"
         loading={action.loading}
+        type={buttonType}
       >
         {action.label}
       </Button>
@@ -708,11 +733,7 @@ const PublishAction: DocumentActionComponent = ({
       meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null)) &&
     document?.status !== 'modified';
 
-  if (!schema?.options?.draftAndPublish) {
-    return null;
-  }
-
-  const performPublish = async () => {
+  const performPublish = React.useCallback(async () => {
     setSubmitting(true);
 
     try {
@@ -720,20 +741,22 @@ const PublishAction: DocumentActionComponent = ({
         status: 'published',
       });
       if (errors) {
-        const hasUnreadableRequiredField = Object.keys(schema.attributes).some((fieldName) => {
-          const attribute = schema.attributes[fieldName];
+        const hasUnreadableRequiredField =
+          schema &&
+          Object.keys(schema.attributes).some((fieldName) => {
+            const attribute = schema.attributes[fieldName];
 
-          // For components, check if any of the component fields are readable
-          if (attribute.type === 'component') {
-            const componentFields = (canReadFields ?? []).filter((field) =>
-              field.startsWith(`${fieldName}.`)
-            );
-            return componentFields.length === 0;
-          }
+            // For components, check if any of the component fields are readable
+            if (attribute.type === 'component') {
+              const componentFields = (canReadFields ?? []).filter((field) =>
+                field.startsWith(`${fieldName}.`)
+              );
+              return componentFields.length === 0;
+            }
 
-          // For regular fields, check if the field itself is readable
-          return attribute?.required && !(canReadFields ?? []).includes(fieldName);
-        });
+            // For regular fields, check if the field itself is readable
+            return attribute?.required && !(canReadFields ?? []).includes(fieldName);
+          });
 
         if (hasUnreadableRequiredField) {
           toggleNotification({
@@ -868,13 +891,73 @@ const PublishAction: DocumentActionComponent = ({
         onPreview();
       }
     }
-  };
+  }, [
+    setSubmitting,
+    validate,
+    schema,
+    canReadFields,
+    toggleNotification,
+    formatMessage,
+    formValues,
+    initialValues,
+    components,
+    publish,
+    collectionType,
+    model,
+    documentId,
+    currentDocumentMeta.params,
+    resetForm,
+    dispatchGuidedTour,
+    navigate,
+    rawQuery,
+    idToPublish,
+    fromRelationModal,
+    fieldToConnect,
+    documentHistory,
+    parentDocumentMetaToUpdate,
+    getInitialFormValues,
+    parentDocumentData,
+    fieldToConnectUID,
+    updateDocumentMutation,
+    formatAPIError,
+    setErrors,
+    formatValidationErrors,
+    onPreview,
+    dispatch,
+    rootDocumentMeta,
+  ]);
 
   const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
   // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
   // see RFC "Count draft relations" in Notion
   const enableDraftRelationsCount = false;
   const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
+
+  // Auto-publish on CMD+Enter on macOS, and CTRL+Enter on Windows/Linux
+  React.useEffect(() => {
+    if (!schema?.options?.draftAndPublish) {
+      return;
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        if (!hasDraftRelations) {
+          performPublish();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [hasDraftRelations, performPublish, schema?.options?.draftAndPublish]);
+
+  if (!schema?.options?.draftAndPublish) {
+    return null;
+  }
 
   return {
     loading: isLoading,
@@ -1225,22 +1308,6 @@ const UpdateAction: DocumentActionComponent = ({
     relationalModalSchema,
     dispatchGuidedTour,
   ]);
-
-  // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        handleUpdate();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleUpdate]);
 
   return {
     loading: isLoading,
