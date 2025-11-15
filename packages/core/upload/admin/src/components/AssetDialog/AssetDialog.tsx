@@ -36,7 +36,7 @@ import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + 8rem)`};
+  min-height: ${() => `calc(60dvh + 8rem)`};
 `;
 
 export interface FileRow extends Asset {

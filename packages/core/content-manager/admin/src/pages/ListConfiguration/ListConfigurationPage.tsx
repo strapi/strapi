@@ -141,6 +141,7 @@ const ListConfiguration = () => {
               paddingBottom={6}
               paddingLeft={7}
               paddingRight={7}
+              position="relative"
             >
               <Settings />
               <Divider />
