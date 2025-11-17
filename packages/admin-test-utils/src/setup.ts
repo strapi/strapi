@@ -67,9 +67,7 @@ window.console = {
       /React does not recognize the .* prop on a DOM element/.test(message) ||
       /Unknown event handler property/.test(message)
     ) {
-      // do nothing
-    } else if (/Support for defaultProps will be removed/gi.test(message)) {
-      // do nothing
+      throw new Error(message);
     } else {
       throw new Error(message);
     }

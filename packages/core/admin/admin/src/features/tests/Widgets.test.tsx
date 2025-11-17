@@ -1,5 +1,5 @@
 import { server } from '@tests/server';
-import { act, renderHook, waitFor } from '@tests/utils';
+import { act, renderHook, screen, waitFor } from '@tests/utils';
 import { rest } from 'msw';
 
 import {
@@ -358,6 +358,9 @@ describe('useWidgets', () => {
         // Should not throw error, just handle it gracefully
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
+
+      // Wait for error notification to prevent act warnings from Sonner
+      await screen.findByText('Server error');
     });
 
     it('should handle network errors gracefully', async () => {
@@ -378,6 +381,9 @@ describe('useWidgets', () => {
         // Should not throw error, just handle it gracefully
         expect(mockSetFilteredWidgets).toHaveBeenCalled();
       });
+
+      // Wait for error notification to prevent act warnings from Sonner
+      await screen.findByText('Network error');
     });
   });
 
