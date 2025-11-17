@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useNavigatorOnline } from '../useNavigatorOnline';
 
@@ -22,7 +22,7 @@ describe('useNavigatorOnline', () => {
     jest.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(false);
     const { result } = renderHook(() => useNavigatorOnline());
 
-    await act(async () => {
+    await waitFor(() => {
       // Simulate a change from offline to online
       window.dispatchEvent(new window.Event('online'));
     });
@@ -37,7 +37,7 @@ describe('useNavigatorOnline', () => {
     jest.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(true);
     const { result } = renderHook(() => useNavigatorOnline());
 
-    await act(async () => {
+    await waitFor(() => {
       // Simulate a change from online to offline
       window.dispatchEvent(new window.Event('offline'));
     });

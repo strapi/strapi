@@ -26,7 +26,8 @@ import type { Schema } from '@strapi/types';
 
 const FIELD_SCHEMA = yup.object().shape({
   label: yup.string().required().nullable(),
-  description: yup.string(),
+  description: yup.string().nullable(),
+  placeholder: yup.string().nullable(),
   editable: yup.boolean(),
   size: yup.number().required(),
 });

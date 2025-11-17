@@ -1,5 +1,5 @@
 import { useFetchClient } from '@strapi/admin/strapi-admin';
-import { act, renderHook, screen } from '@tests/utils';
+import { renderHook, screen, waitFor } from '@tests/utils';
 
 import { useBulkMove, FileWithType, FolderWithType } from '../useBulkMove';
 
@@ -95,7 +95,7 @@ describe('useBulkMove', () => {
     } = setup();
     const { move } = current;
 
-    await act(async () => {
+    await waitFor(async () => {
       await move(FIXTURE_DESTINATION_FOLDER_ID, FIXTURE_ASSETS);
     });
     const { post } = useFetchClient();
@@ -113,7 +113,7 @@ describe('useBulkMove', () => {
     const { move } = current;
     const { post } = useFetchClient();
 
-    await act(async () => {
+    await waitFor(async () => {
       await move(FIXTURE_DESTINATION_FOLDER_ID, FIXTURE_ASSETS);
     });
 
@@ -133,7 +133,7 @@ describe('useBulkMove', () => {
     const { move } = current;
     const { post } = useFetchClient();
 
-    await act(async () => {
+    await waitFor(async () => {
       await move(FIXTURE_DESTINATION_FOLDER_ID, FIXTURE_FOLDERS);
     });
 
@@ -153,7 +153,7 @@ describe('useBulkMove', () => {
     const { move } = current;
     const { post } = useFetchClient();
 
-    await act(async () => {
+    await waitFor(async () => {
       await move(FIXTURE_DESTINATION_FOLDER_ID, [...FIXTURE_FOLDERS, ...FIXTURE_ASSETS]);
     });
 
@@ -170,7 +170,7 @@ describe('useBulkMove', () => {
   test('does re-fetch assets, if files were deleted', async () => {
     const { result } = setup();
 
-    await act(async () => {
+    await waitFor(async () => {
       await result.current.move(FIXTURE_DESTINATION_FOLDER_ID, FIXTURE_ASSETS);
     });
 
@@ -180,7 +180,7 @@ describe('useBulkMove', () => {
   test('does re-fetch folders, if folders were deleted', async () => {
     const { result } = setup();
 
-    await act(async () => {
+    await waitFor(async () => {
       await result.current.move(FIXTURE_DESTINATION_FOLDER_ID, FIXTURE_FOLDERS);
     });
 
