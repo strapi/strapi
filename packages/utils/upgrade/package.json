@@ -66,6 +66,7 @@
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
     "esbuild-register": "3.5.0",
+    "execa": "5.1.1",
     "fast-glob": "3.3.2",
     "fs-extra": "11.2.0",
     "jscodeshift": "17.1.2",

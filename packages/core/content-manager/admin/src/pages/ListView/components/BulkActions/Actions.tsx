@@ -13,6 +13,7 @@ import { useIntl } from 'react-intl';
 import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useDocumentActions } from '../../../../hooks/useDocumentActions';
+import { useDocumentLayout } from '../../../../hooks/useDocumentLayout';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
 import {
@@ -50,6 +51,7 @@ const BulkActionsRenderer = () => {
   const plugins = useStrapiApp('BulkActionsRenderer', (state) => state.plugins);
 
   const { model, collectionType } = useDoc();
+  const { list } = useDocumentLayout(model);
   const { selectedRows } = useTable('BulkActionsRenderer', (state) => state);
 
   return (
@@ -64,7 +66,11 @@ const BulkActionsRenderer = () => {
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
         ).getBulkActions()}
       >
-        {(actions) => actions.map((action) => <DocumentActionButton key={action.id} {...action} />)}
+        {(actions) =>
+          actions.map((action) => {
+            return list.settings.bulkable && <DocumentActionButton key={action.id} {...action} />;
+          })
+        }
       </DescriptionComponentRenderer>
     </Flex>
   );

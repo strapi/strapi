@@ -1,4 +1,3 @@
-import { fileTypeFromBuffer } from 'file-type';
 import { readFile } from 'node:fs/promises';
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
@@ -50,6 +49,13 @@ export async function detectMimeType(file: any): Promise<string | undefined> {
   }
 
   try {
+    /**
+     * Use dynamic import to support file-type which is ESM-only
+     * Static imports fail during CommonJS build since bundler can't transform ESM-only packages
+     * @see https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+     */
+    const { fileTypeFromBuffer } = await import('file-type');
+
     const result = await fileTypeFromBuffer(new Uint8Array(buffer));
     return result?.mime;
   } catch (error) {
