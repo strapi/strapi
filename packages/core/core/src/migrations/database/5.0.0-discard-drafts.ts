@@ -301,6 +301,109 @@ const applyJoinTableOrdering = (qb: any, joinTable: any, sourceColumnName: strin
   enqueueColumn('id', 'asc');
 };
 
+/**
+ * Builds a stable key for join-table relations to detect duplicates.
+ * Key format: sourceId::targetId::field::componentType
+ */
+const buildRelationKey = (
+  relation: Record<string, any>,
+  sourceColumnName: string,
+  targetId: number | string | null
+): string => {
+  const sourceId = normalizeId(relation[sourceColumnName]) ?? relation[sourceColumnName];
+  const fieldValue = 'field' in relation ? (relation.field ?? '') : '';
+  const componentTypeValue = 'component_type' in relation ? (relation.component_type ?? '') : '';
+
+  return `${sourceId ?? 'null'}::${targetId ?? 'null'}::${fieldValue}::${componentTypeValue}`;
+};
+
+/**
+ * Queries existing relations from a join table and builds a set of keys for duplicate detection.
+ */
+async function getExistingRelationKeys({
+  trx,
+  joinTable,
+  sourceColumnName,
+  targetColumnName,
+  sourceIds,
+}: {
+  trx: Knex;
+  joinTable: any;
+  sourceColumnName: string;
+  targetColumnName: string;
+  sourceIds: number[];
+}): Promise<Set<string>> {
+  const existingKeys = new Set<string>();
+
+  if (sourceIds.length === 0) {
+    return existingKeys;
+  }
+
+  const idChunks = chunkArray(sourceIds, getBatchSize(trx, 1000));
+  for (const chunk of idChunks) {
+    const existingRelationsQuery = trx(joinTable.name).select('*').whereIn(sourceColumnName, chunk);
+
+    applyJoinTableOrdering(existingRelationsQuery, joinTable, sourceColumnName);
+
+    const existingRelations = await existingRelationsQuery;
+
+    for (const relation of existingRelations) {
+      const targetId = normalizeId(relation[targetColumnName]) ?? relation[targetColumnName];
+      const key = buildRelationKey(relation, sourceColumnName, targetId);
+      existingKeys.add(key);
+    }
+  }
+
+  return existingKeys;
+}
+
+/**
+ * Inserts relations into a join table with database-specific duplicate handling.
+ * Tries batch insert first, then falls back to individual inserts with conflict handling.
+ */
+async function insertRelationsWithDuplicateHandling({
+  trx,
+  tableName,
+  relations,
+  context = {},
+}: {
+  trx: Knex;
+  tableName: string;
+  relations: Array<Record<string, any>>;
+  context?: Record<string, any>;
+}): Promise<void> {
+  if (relations.length === 0) {
+    return;
+  }
+
+  try {
+    await trx.batchInsert(tableName, relations, getBatchSize(trx, 1000));
+  } catch (error: any) {
+    // If batch insert fails due to duplicates, try with conflict handling
+    if (!isDuplicateEntryError(error)) {
+      throw error;
+    }
+
+    const client = trx.client.config.client;
+    if (client === 'postgres' || client === 'pg') {
+      for (const relation of relations) {
+        try {
+          await trx(tableName).insert(relation).onConflict().ignore();
+        } catch (err: any) {
+          if (err.code !== '23505' && !err.message?.includes('duplicate key')) {
+            throw err;
+          }
+        }
+      }
+    } else {
+      // MySQL and SQLite: use insertRowWithDuplicateHandling
+      for (const relation of relations) {
+        await insertRowWithDuplicateHandling(trx, tableName, relation, context);
+      }
+    }
+  }
+}
+
 type ParentSchemaInfo = { uid: string; collectionName?: string };
 type ComponentParentInstance = { uid: string; parentId: number | string };
 
@@ -1413,20 +1516,6 @@ async function copyRelationsFromOtherContentTypes({
     ...(Object.values(strapi.components) as any[]),
   ];
 
-  // Compose a stable key for join-table rows so we can detect duplicates regardless
-  // of ordering or whether we already created the “draft” relation earlier.
-  const buildRelationKey = (
-    relation: Record<string, any>,
-    sourceColumnName: string,
-    targetId: number | string | null
-  ) => {
-    const sourceId = normalizeId(relation[sourceColumnName]) ?? relation[sourceColumnName];
-    const fieldValue = 'field' in relation ? (relation.field ?? '') : '';
-    const componentTypeValue = 'component_type' in relation ? (relation.component_type ?? '') : '';
-
-    return `${sourceId ?? 'null'}::${targetId ?? 'null'}::${fieldValue}::${componentTypeValue}`;
-  };
-
   for (const model of models) {
     const dbModel = strapi.db.metadata.get(model.uid);
     if (!dbModel) {
@@ -1458,26 +1547,14 @@ async function copyRelationsFromOtherContentTypes({
       const { name: sourceColumnName } = joinTable.joinColumn;
       const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
-      const existingKeys = new Set<string>();
-
-      if (draftTargetIds.length > 0) {
-        const draftIdChunks = chunkArray(draftTargetIds, getBatchSize(trx, 1000));
-        for (const draftChunk of draftIdChunks) {
-          const existingRelationsQuery = trx(joinTable.name)
-            .select('*')
-            .whereIn(targetColumnName, draftChunk);
-
-          applyJoinTableOrdering(existingRelationsQuery, joinTable, sourceColumnName);
-
-          const existingRelations = await existingRelationsQuery;
-
-          for (const relation of existingRelations) {
-            existingKeys.add(
-              buildRelationKey(relation, sourceColumnName, normalizeId(relation[targetColumnName]))
-            );
-          }
-        }
-      }
+      // Query existing relations by target IDs to avoid duplicates
+      const existingKeys = await getExistingRelationKeys({
+        trx,
+        joinTable,
+        sourceColumnName,
+        targetColumnName,
+        sourceIds: draftTargetIds,
+      });
 
       const publishedIdChunks = chunkArray(publishedTargetIds, getBatchSize(trx, 1000));
 
@@ -1517,21 +1594,16 @@ async function copyRelationsFromOtherContentTypes({
           continue;
         }
 
-        try {
-          await trx.batchInsert(joinTable.name, newRelations, getBatchSize(trx, 1000));
-        } catch (error: any) {
-          if (!isDuplicateEntryError(error)) {
-            throw error;
-          }
-
-          for (const relation of newRelations) {
-            await insertRowWithDuplicateHandling(trx, joinTable.name, relation, {
-              reason: 'duplicate-draft-target-relation',
-              sourceUid: model.uid,
-              targetUid: uid,
-            });
-          }
-        }
+        await insertRelationsWithDuplicateHandling({
+          trx,
+          tableName: joinTable.name,
+          relations: newRelations,
+          context: {
+            reason: 'duplicate-draft-target-relation',
+            sourceUid: model.uid,
+            targetUid: uid,
+          },
+        });
       }
     }
   }
@@ -1661,30 +1733,43 @@ async function copyRelationsToOtherContentTypes({
         skippedIds
       );
 
-      if (safeRelations.length > 0) {
-        try {
-          await trx.batchInsert(joinTable.name, safeRelations, 1000);
-        } catch (error: any) {
-          // If batch insert fails due to duplicates, try with conflict handling
-          if (error.code === '23505' || error.message?.includes('duplicate key')) {
-            const client = trx.client.config.client;
-            if (client === 'postgres' || client === 'pg') {
-              for (const relation of safeRelations) {
-                try {
-                  await trx(joinTable.name).insert(relation).onConflict().ignore();
-                } catch (err: any) {
-                  if (err.code !== '23505' && !err.message?.includes('duplicate key')) {
-                    throw err;
-                  }
-                }
-              }
-            } else {
-              throw error;
-            }
-          } else {
-            throw error;
-          }
-        }
+      if (safeRelations.length === 0) {
+        continue;
+      }
+
+      // Check for existing relations to avoid duplicates (similar to copyRelationsFromOtherContentTypes)
+      // This is important when the target doesn't have D&P, as copyRelationsFromOtherContentTypes
+      // may have already created some relations
+      const draftSourceIds = Array.from(publishedToDraftMap.values())
+        .map((value) => normalizeId(value))
+        .filter((value): value is number => value != null);
+
+      const existingKeys = await getExistingRelationKeys({
+        trx,
+        joinTable,
+        sourceColumnName,
+        targetColumnName,
+        sourceIds: draftSourceIds,
+      });
+
+      // Filter out relations that already exist
+      const relationsToInsert = safeRelations.filter((relation) => {
+        const targetId = normalizeId(relation[targetColumnName]) ?? relation[targetColumnName];
+        const key = buildRelationKey(relation, sourceColumnName, targetId);
+        return !existingKeys.has(key);
+      });
+
+      if (relationsToInsert.length > 0) {
+        await insertRelationsWithDuplicateHandling({
+          trx,
+          tableName: joinTable.name,
+          relations: relationsToInsert,
+          context: {
+            reason: 'duplicate-relation-check',
+            sourceUid: uid,
+            targetUid,
+          },
+        });
       }
     }
   }
@@ -2046,20 +2131,18 @@ async function copyComponentRelations({
     });
 
     if (newComponentRelations.length > 0) {
-      // Insert component relations while surfacing unexpected constraint issues.
-      // Use INSERT ... ON CONFLICT DO NOTHING (PostgreSQL) or catch duplicate key errors explicitly for other clients.
+      // Insert component relations with PostgreSQL-specific ON CONFLICT handling
+      // Component relations use a different conflict resolution than regular relations
       const client = trx.client.config.client;
 
       if (client === 'postgres' || client === 'pg') {
         // PostgreSQL: Insert one at a time with ON CONFLICT DO NOTHING
-        // Use raw SQL for more reliable conflict handling
+        // Use raw SQL for more reliable conflict handling with specific conflict columns
         let insertedCount = 0;
         let skippedCount = 0;
         for (const relation of newComponentRelations) {
           try {
-            // Use raw SQL - ?? is for identifiers, ? is for values in Knex
             const orderValue = relation[orderColumn] ?? null;
-
             await trx.raw(
               `INSERT INTO ?? (??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?) 
                ON CONFLICT (??, ??, ??, ??) DO NOTHING`,
@@ -2083,13 +2166,10 @@ async function copyComponentRelations({
             );
             insertedCount += 1;
           } catch (error: any) {
-            // Ignore duplicate key errors (PostgreSQL error code 23505)
-            // This can happen if the record already exists in the database
             if (error.code !== '23505' && !error.message?.includes('duplicate key')) {
               throw error;
-            } else {
-              skippedCount += 1;
             }
+            skippedCount += 1;
           }
         }
         if (insertedCount > 0 || skippedCount > 0) {
@@ -2097,36 +2177,17 @@ async function copyComponentRelations({
             `[copyComponentRelations] ${uid}: Inserted ${insertedCount} component relations, skipped ${skippedCount} duplicates`
           );
         }
-      } else if (client === 'mysql' || client === 'mysql2') {
-        try {
-          await trx(joinTableName).insert(newComponentRelations);
-        } catch (error: any) {
-          if (error.code !== 'ER_DUP_ENTRY') {
-            throw error;
-          }
-
-          for (const relation of newComponentRelations) {
-            try {
-              await trx(joinTableName).insert(relation);
-            } catch (err: any) {
-              if (err.code !== 'ER_DUP_ENTRY') {
-                throw err;
-              }
-            }
-          }
-        }
       } else {
-        // SQLite: Try to insert and ignore errors
-        for (const relation of newComponentRelations) {
-          try {
-            await trx(joinTableName).insert(relation);
-          } catch (error: any) {
-            // Ignore duplicate key errors
-            if (error.code !== 'SQLITE_CONSTRAINT_UNIQUE' && error.code !== '23505') {
-              throw error;
-            }
-          }
-        }
+        // MySQL and SQLite: use standard insert with duplicate handling
+        await insertRelationsWithDuplicateHandling({
+          trx,
+          tableName: joinTableName,
+          relations: newComponentRelations,
+          context: {
+            reason: 'component-relation-insert',
+            sourceUid: uid,
+          },
+        });
       }
     }
   }
