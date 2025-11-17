@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import {
   FormModalNavigationProvider,
@@ -25,13 +25,13 @@ describe('FromModalNavigationProvider', () => {
     expect(currentStateWithoutFunctions).toEqual(INITIAL_STATE_DATA);
   });
 
-  it('updates the state when selecting a custom field for a new attribute', () => {
+  it('updates the state when selecting a custom field for a new attribute', async () => {
     const { result } = renderHook(() => useFormModalNavigation(), {
       wrapper: FormModalNavigationProvider,
     });
 
-    act(() => {
-      (result.current as any).onClickSelectCustomField({
+    await waitFor(() => {
+      result.current.onClickSelectCustomField({
         attributeType: 'text',
         customFieldUid: 'plugin::mycustomfields.color',
       });
@@ -49,13 +49,13 @@ describe('FromModalNavigationProvider', () => {
     expect(currentStateWithoutFunctions).toEqual(expected);
   });
 
-  it('updates the state when editing a custom field attribute', () => {
+  it('updates the state when editing a custom field attribute', async () => {
     const { result } = renderHook(() => useFormModalNavigation(), {
       wrapper: FormModalNavigationProvider,
     });
 
-    act(() => {
-      (result.current as any).onOpenModalEditCustomField({
+    await waitFor(() => {
+      result.current.onOpenModalEditCustomField({
         forTarget: 'contentType',
         targetUid: 'api::test.test',
         attributeName: 'color',
