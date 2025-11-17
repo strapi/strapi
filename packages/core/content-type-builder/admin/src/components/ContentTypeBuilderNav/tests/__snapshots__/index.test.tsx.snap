@@ -525,6 +525,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
 
 @media (min-width: 768px) {
   .c1 {
+    width: 23.2rem;
     position: sticky;
     top: 0;
     border-right: 1px solid #eaeaef;
