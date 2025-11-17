@@ -43,6 +43,16 @@
       "relation": "manyToMany",
       "target": "api::basic-dp.basic-dp"
     },
+    "manyToOneBasicNoDp": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::basic.basic"
+    },
+    "manyToManyBasicsNoDp": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::basic.basic"
+    },
     "simpleInfo": {
       "type": "component",
       "repeatable": false,

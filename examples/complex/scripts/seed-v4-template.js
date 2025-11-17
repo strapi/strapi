@@ -383,6 +383,249 @@ const createMediaBlockComponentForDynamicZone = () => ({
   ...createMediaBlockComponent(),
 });
 
+const pickCyclic = (items, index, fallback = null) => {
+  if (!Array.isArray(items) || items.length === 0) {
+    return fallback ?? null;
+  }
+
+  const normalizedIndex = ((index % items.length) + items.length) % items.length;
+  return items[normalizedIndex] ?? fallback ?? null;
+};
+
+async function updateBasicComponentRelations(strapi, basicEntries, basicDpEntries) {
+  if (!Array.isArray(basicEntries) || basicEntries.length === 0) {
+    return;
+  }
+
+  const publishedDpEntries = Array.isArray(basicDpEntries?.published)
+    ? basicDpEntries.published
+    : [];
+  const draftDpEntries = Array.isArray(basicDpEntries?.drafts) ? basicDpEntries.drafts : [];
+  const fallbackDpEntries = Array.isArray(basicDpEntries?.all)
+    ? basicDpEntries.all
+    : [...publishedDpEntries, ...draftDpEntries];
+
+  // Ensure we have at least one published target for each basic entry
+  if (publishedDpEntries.length === 0 && fallbackDpEntries.length > 0) {
+    console.warn(
+      '  ⚠️  WARNING: No published basic-dp entries available, using fallback entries for component relations'
+    );
+  }
+
+  for (let index = 0; index < basicEntries.length; index += 1) {
+    const entry = basicEntries[index];
+    if (!entry) {
+      continue;
+    }
+
+    const nextBasic = pickCyclic(basicEntries, index + 1, entry);
+    const altBasic = pickCyclic(basicEntries, index + 2, nextBasic);
+
+    // Always try to get a published target first, fallback to any entry if needed
+    let publishedTarget = pickCyclic(publishedDpEntries, index, null);
+    if (!publishedTarget && fallbackDpEntries.length > 0) {
+      // If no published entries, use any entry but prefer published ones
+      const fallback = pickCyclic(fallbackDpEntries, index, null);
+      // Only use fallback if it's actually published, otherwise try to find a published one
+      if (fallback && fallback.publishedAt) {
+        publishedTarget = fallback;
+      } else if (publishedDpEntries.length > 0) {
+        // If we have published entries but index is out of bounds, wrap around
+        publishedTarget = publishedDpEntries[index % publishedDpEntries.length];
+      }
+    }
+
+    // For draft target, prefer draft entries but fallback to published if needed
+    let draftTarget = pickCyclic(draftDpEntries, index, null);
+    if (!draftTarget) {
+      // If no draft entries available, use published as fallback
+      draftTarget = publishedTarget ?? pickCyclic(fallbackDpEntries, index + 1, null);
+    }
+
+    const publishedTargetId = publishedTarget?.id ?? null;
+    const draftTargetId = draftTarget?.id ?? publishedTargetId;
+
+    // Ensure we have at least one published target in the textBlocks
+    const textBlocks = [
+      createTextBlockComponent({
+        relatedBasicId: nextBasic?.id ?? null,
+        relatedBasicDpId: publishedTargetId, // First text-block always targets published if available
+      }),
+      createTextBlockComponent({
+        relatedBasicId: altBasic?.id ?? nextBasic?.id ?? null,
+        relatedBasicDpId: draftTargetId, // Second text-block targets draft
+      }),
+    ];
+
+    const sections = [
+      createTextBlockComponentForDynamicZone({
+        relatedBasicId: nextBasic?.id ?? null,
+        relatedBasicDpId: draftTargetId, // Dynamic zone targets draft
+      }),
+      createMediaBlockComponentForDynamicZone(),
+    ];
+
+    await strapi.entityService.update('api::basic.basic', entry.id, {
+      data: {
+        textBlocks,
+        sections,
+      },
+    });
+  }
+}
+
+async function updateBasicDpComponentRelations(
+  strapi,
+  basicEntries,
+  publishedEntries,
+  draftEntries
+) {
+  const safeBasicEntries = Array.isArray(basicEntries) ? basicEntries : [];
+  const safePublishedEntries = Array.isArray(publishedEntries) ? publishedEntries : [];
+  const safeDraftEntries = Array.isArray(draftEntries) ? draftEntries : [];
+  const hasBasics = safeBasicEntries.length > 0;
+
+  const updateEntry = async (entry, index, stage) => {
+    if (!entry) {
+      return;
+    }
+
+    const primaryBasic = hasBasics
+      ? pickCyclic(safeBasicEntries, index, safeBasicEntries[0])
+      : null;
+    const secondaryBasic = hasBasics ? pickCyclic(safeBasicEntries, index + 1, primaryBasic) : null;
+
+    // Always ensure we have a published target available
+    const publishedTarget = pickCyclic(safePublishedEntries, index, null);
+    const draftTarget = pickCyclic(safeDraftEntries, index, publishedTarget);
+
+    // For draft entries: ensure at least one text-block targets a published entry
+    // For published entries: ensure at least one text-block targets a published entry
+    // This ensures the validation requirement is met
+    const firstTarget =
+      stage === 'draft'
+        ? (publishedTarget ?? draftTarget) // Draft entries: first target should be published if available
+        : (publishedTarget ?? draftTarget); // Published entries: first target should be published
+    const secondTarget =
+      stage === 'draft'
+        ? (draftTarget ?? publishedTarget) // Draft entries: second target can be draft
+        : (draftTarget ?? publishedTarget); // Published entries: second target can be draft
+
+    const textBlocks = [
+      createTextBlockComponent({
+        relatedBasicId: primaryBasic?.id ?? null,
+        relatedBasicDpId: firstTarget?.id ?? null, // First always targets published (if available)
+      }),
+      createTextBlockComponent({
+        relatedBasicId: secondaryBasic?.id ?? primaryBasic?.id ?? null,
+        relatedBasicDpId: secondTarget?.id ?? firstTarget?.id ?? null, // Second targets draft (or published if no draft)
+      }),
+    ];
+
+    const sections = [
+      createTextBlockComponentForDynamicZone({
+        relatedBasicId: primaryBasic?.id ?? null,
+        relatedBasicDpId: secondTarget?.id ?? firstTarget?.id ?? null, // Dynamic zone can target either
+      }),
+      createMediaBlockComponentForDynamicZone(),
+    ];
+
+    await strapi.entityService.update('api::basic-dp.basic-dp', entry.id, {
+      data: {
+        textBlocks,
+        sections,
+      },
+    });
+  };
+
+  for (let index = 0; index < safePublishedEntries.length; index += 1) {
+    await updateEntry(safePublishedEntries[index], index, 'published');
+  }
+
+  for (let index = 0; index < safeDraftEntries.length; index += 1) {
+    await updateEntry(safeDraftEntries[index], index, 'draft');
+  }
+}
+
+async function updateBasicDpI18nComponentRelations(
+  strapi,
+  basicEntries,
+  basicDpEntries,
+  localizedEntries
+) {
+  const safeBasicEntries = Array.isArray(basicEntries) ? basicEntries : [];
+  const safePublishedDp = Array.isArray(basicDpEntries?.published) ? basicDpEntries.published : [];
+  const safeDraftDp = Array.isArray(basicDpEntries?.drafts) ? basicDpEntries.drafts : [];
+  const fallbackDp = Array.isArray(basicDpEntries?.all)
+    ? basicDpEntries.all
+    : [...safePublishedDp, ...safeDraftDp];
+
+  const hasBasics = safeBasicEntries.length > 0;
+
+  const updateEntry = async (entry, index, stage) => {
+    if (!entry) {
+      return;
+    }
+
+    const primaryBasic = hasBasics
+      ? pickCyclic(safeBasicEntries, index, safeBasicEntries[0])
+      : null;
+    const secondaryBasic = hasBasics ? pickCyclic(safeBasicEntries, index + 1, primaryBasic) : null;
+
+    const publishedTarget =
+      pickCyclic(safePublishedDp, index, pickCyclic(fallbackDp, index, null)) ??
+      pickCyclic(safeDraftDp, index, null);
+    const draftTarget =
+      pickCyclic(safeDraftDp, index, publishedTarget) ??
+      pickCyclic(fallbackDp, index + 1, publishedTarget);
+
+    const firstTarget =
+      stage === 'draft' ? (draftTarget ?? publishedTarget) : (publishedTarget ?? draftTarget);
+    const secondTarget =
+      stage === 'draft' ? (publishedTarget ?? draftTarget) : (draftTarget ?? publishedTarget);
+
+    const textBlocks = [
+      createTextBlockComponent({
+        relatedBasicId: primaryBasic?.id ?? null,
+        relatedBasicDpId: firstTarget?.id ?? secondTarget?.id ?? null,
+      }),
+      createTextBlockComponent({
+        relatedBasicId: secondaryBasic?.id ?? primaryBasic?.id ?? null,
+        relatedBasicDpId: secondTarget?.id ?? firstTarget?.id ?? null,
+      }),
+    ];
+
+    const sections = [
+      createTextBlockComponentForDynamicZone({
+        relatedBasicId: primaryBasic?.id ?? null,
+        relatedBasicDpId: secondTarget?.id ?? firstTarget?.id ?? null,
+      }),
+      createMediaBlockComponentForDynamicZone(),
+    ];
+
+    await strapi.entityService.update('api::basic-dp-i18n.basic-dp-i18n', entry.id, {
+      data: {
+        textBlocks,
+        sections,
+      },
+      locale: entry.locale,
+    });
+  };
+
+  const safePublishedEntries = Array.isArray(localizedEntries?.published)
+    ? localizedEntries.published
+    : [];
+  const safeDraftEntries = Array.isArray(localizedEntries?.drafts) ? localizedEntries.drafts : [];
+
+  for (let index = 0; index < safePublishedEntries.length; index += 1) {
+    await updateEntry(safePublishedEntries[index], index, 'published');
+  }
+
+  for (let index = 0; index < safeDraftEntries.length; index += 1) {
+    await updateEntry(safeDraftEntries[index], index, 'draft');
+  }
+}
+
 /**
  * Bypasses Strapi validation to drop invalid enum values directly into the database.
  * This checks that migrations surface unexpected scalars gracefully.
@@ -470,7 +713,7 @@ async function seedBasic(strapi) {
  * Seeds draft/publish content with a mix of published entries and drafts so the
  * migration has meaningful data to clone.
  */
-async function seedBasicDp(strapi) {
+async function seedBasicDp(strapi, basicEntries) {
   console.log('Seeding basic-dp...');
   const published = [];
   const drafts = [];
@@ -531,6 +774,7 @@ async function seedBasicDp(strapi) {
 
   const allEntries = [...published, ...drafts];
 
+  await updateBasicDpComponentRelations(strapi, basicEntries, published, drafts);
   await injectInvalidEnumValuesForTable(strapi, allEntries, 'basic_dps');
 
   return { published, drafts, all: allEntries };
@@ -539,7 +783,7 @@ async function seedBasicDp(strapi) {
 /**
  * Same as `seedBasicDp`, but across multiple locales to stress the i18n pathways.
  */
-async function seedBasicDpI18n(strapi) {
+async function seedBasicDpI18n(strapi, basicEntries, basicDpEntries) {
   console.log('Seeding basic-dp-i18n...');
   const locales = ['en', 'fr']; // Default locales
   const entries = { published: [], drafts: [] };
@@ -610,6 +854,7 @@ async function seedBasicDpI18n(strapi) {
 
   entries.all = [...entries.published, ...entries.drafts];
 
+  await updateBasicDpI18nComponentRelations(strapi, basicEntries, basicDpEntries, entries);
   await injectInvalidEnumValuesForTable(strapi, entries.all, 'basic_dp_i18ns');
 
   return entries;
@@ -623,17 +868,14 @@ async function seedRelation(strapi, basicEntries, basicDpEntries) {
   console.log('Seeding relation...');
   const entries = [];
 
-  const dpTargets = basicDpEntries?.published || [];
-
-  const getRandomDpTargetId = () => {
-    if (dpTargets.length === 0) {
-      return null;
-    }
-
-    const index = randomNumber(0, dpTargets.length - 1);
-    const target = dpTargets[index];
-    return target?.id ?? null;
-  };
+  const publishedDpTargets = Array.isArray(basicDpEntries?.published)
+    ? basicDpEntries.published
+    : [];
+  const draftDpTargets = Array.isArray(basicDpEntries?.drafts) ? basicDpEntries.drafts : [];
+  const fallbackDpTargets =
+    Array.isArray(basicDpEntries?.all) && basicDpEntries.all.length > 0
+      ? basicDpEntries.all
+      : [...publishedDpTargets, ...draftDpTargets];
 
   for (let i = 0; i < 5; i++) {
     try {
@@ -644,7 +886,15 @@ async function seedRelation(strapi, basicEntries, basicDpEntries) {
       const firstRelatedBasicId = firstRelatedBasic ? firstRelatedBasic.id : null;
       const secondRelatedBasicId = secondRelatedBasic ? secondRelatedBasic.id : firstRelatedBasicId;
 
-      const relatedBasicDpId = getRandomDpTargetId();
+      const publishedDpTarget =
+        pickCyclic(publishedDpTargets, i, pickCyclic(fallbackDpTargets, i, null)) ??
+        pickCyclic(draftDpTargets, i, null);
+      const draftDpTarget =
+        pickCyclic(draftDpTargets, i, publishedDpTarget) ??
+        pickCyclic(fallbackDpTargets, i + 1, publishedDpTarget);
+
+      const publishedDpTargetId = publishedDpTarget?.id ?? null;
+      const draftDpTargetId = draftDpTarget?.id ?? publishedDpTargetId;
 
       const data = {
         name: `Relation ${randomString(6)}`,
@@ -660,18 +910,18 @@ async function seedRelation(strapi, basicEntries, basicDpEntries) {
         textBlocks: [
           createTextBlockComponent({
             relatedBasicId: firstRelatedBasicId,
-            relatedBasicDpId,
+            relatedBasicDpId: publishedDpTargetId,
           }),
           createTextBlockComponent({
             relatedBasicId: secondRelatedBasicId,
-            relatedBasicDpId,
+            relatedBasicDpId: draftDpTargetId,
           }),
         ],
         mediaBlock: createMediaBlockComponent(),
         sections: [
           createTextBlockComponentForDynamicZone({
             relatedBasicId: firstRelatedBasicId,
-            relatedBasicDpId,
+            relatedBasicDpId: draftDpTargetId,
           }),
           createMediaBlockComponentForDynamicZone(),
         ],
@@ -707,7 +957,7 @@ async function seedRelation(strapi, basicEntries, basicDpEntries) {
  * Builds DP relation entries pointing at both draft and published basics so migrations
  * must remap targets in every combination.
  */
-async function seedRelationDp(strapi, basicDpEntries) {
+async function seedRelationDp(strapi, basicDpEntries, basicEntries = []) {
   console.log('Seeding relation-dp...');
   const published = [];
   const drafts = [];
@@ -719,11 +969,16 @@ async function seedRelationDp(strapi, basicDpEntries) {
   // Create published entries - relate to BOTH published and draft basics
   for (let i = 0; i < 5; i++) {
     try {
-      const publishedRelated = publishedBasics.slice(0, randomNumber(0, 2));
-      const draftRelated = draftBasics.slice(0, randomNumber(0, 2));
-      let relatedBasics = [...publishedRelated, ...draftRelated];
+      const publishedTarget =
+        pickCyclic(publishedBasics, i, pickCyclic(allBasics, i, null)) ??
+        pickCyclic(draftBasics, i, null);
+      const draftTarget =
+        pickCyclic(draftBasics, i, publishedTarget) ??
+        pickCyclic(allBasics, i + 1, publishedTarget);
+
+      const relatedBasics = [publishedTarget, draftTarget].filter(Boolean);
       if (relatedBasics.length === 0 && allBasics.length > 0) {
-        relatedBasics = [allBasics[randomNumber(0, allBasics.length - 1)]];
+        relatedBasics.push(pickCyclic(allBasics, i, allBasics[0]));
       }
 
       const firstRelatedBasic = relatedBasics[0] || allBasics[0] || null;
@@ -732,6 +987,13 @@ async function seedRelationDp(strapi, basicDpEntries) {
       const firstRelatedBasicId = firstRelatedBasic ? firstRelatedBasic.id : null;
       const secondRelatedBasicId = secondRelatedBasic ? secondRelatedBasic.id : firstRelatedBasicId;
 
+      // Also relate to basic (without D&P) to test the duplicate relation issue
+      const relatedBasicNoDp = pickCyclic(basicEntries, i, basicEntries[0] || null);
+      const relatedBasicsNoDp =
+        basicEntries.length > 0
+          ? [relatedBasicNoDp, pickCyclic(basicEntries, i + 1, relatedBasicNoDp)].filter(Boolean)
+          : [];
+
       const entry = await strapi.entityService.create('api::relation-dp.relation-dp', {
         data: {
           name: `Relation DP Published ${i + 1} ${randomString(4)}`,
@@ -739,6 +1001,8 @@ async function seedRelationDp(strapi, basicDpEntries) {
           oneToManyBasics: relatedBasics.map((b) => b.id),
           manyToOneBasic: relatedBasics[0]?.id || null,
           manyToManyBasics: relatedBasics.map((b) => b.id),
+          manyToOneBasicNoDp: relatedBasicNoDp?.id || null,
+          manyToManyBasicsNoDp: relatedBasicsNoDp.map((b) => b.id),
           simpleInfo: createSimpleInfoComponent(),
           content: [
             createSimpleInfoComponentForDynamicZone(),
@@ -750,7 +1014,9 @@ async function seedRelationDp(strapi, basicDpEntries) {
           ],
           mediaBlock: createMediaBlockComponent(),
           sections: [
-            createTextBlockComponentForDynamicZone({ relatedBasicDpId: firstRelatedBasicId }),
+            createTextBlockComponentForDynamicZone({
+              relatedBasicDpId: draftTarget?.id ?? firstRelatedBasicId,
+            }),
             createMediaBlockComponentForDynamicZone(),
           ],
           publishedAt: new Date(),
@@ -771,7 +1037,7 @@ async function seedRelationDp(strapi, basicDpEntries) {
           ],
           sections: [
             createTextBlockComponentForDynamicZone({
-              relatedBasicDpId: firstRelatedBasicId,
+              relatedBasicDpId: draftTarget?.id ?? firstRelatedBasicId,
               relatedRelationDpId: entry.id,
             }),
             createMediaBlockComponentForDynamicZone(),
@@ -793,11 +1059,15 @@ async function seedRelationDp(strapi, basicDpEntries) {
   // Create draft entries - also relate to both published and draft basics
   for (let i = 0; i < 3; i++) {
     try {
-      const publishedRelated = publishedBasics.slice(0, randomNumber(0, 2));
-      const draftRelated = draftBasics.slice(0, randomNumber(0, 2));
-      let relatedBasics = [...publishedRelated, ...draftRelated];
+      const draftTarget =
+        pickCyclic(draftBasics, i, pickCyclic(allBasics, i, null)) ??
+        pickCyclic(publishedBasics, i, null);
+      const publishedTarget =
+        pickCyclic(publishedBasics, i, draftTarget) ?? pickCyclic(allBasics, i + 1, draftTarget);
+
+      const relatedBasics = [draftTarget, publishedTarget].filter(Boolean);
       if (relatedBasics.length === 0 && allBasics.length > 0) {
-        relatedBasics = [allBasics[randomNumber(0, allBasics.length - 1)]];
+        relatedBasics.push(pickCyclic(allBasics, i, allBasics[0]));
       }
 
       const firstRelatedBasic = relatedBasics[0] || allBasics[0] || null;
@@ -806,6 +1076,13 @@ async function seedRelationDp(strapi, basicDpEntries) {
       const firstRelatedBasicId = firstRelatedBasic ? firstRelatedBasic.id : null;
       const secondRelatedBasicId = secondRelatedBasic ? secondRelatedBasic.id : firstRelatedBasicId;
 
+      // Also relate to basic (without D&P) to test the duplicate relation issue
+      const relatedBasicNoDp = pickCyclic(basicEntries, i, basicEntries[0] || null);
+      const relatedBasicsNoDp =
+        basicEntries.length > 0
+          ? [relatedBasicNoDp, pickCyclic(basicEntries, i + 1, relatedBasicNoDp)].filter(Boolean)
+          : [];
+
       const entry = await strapi.entityService.create('api::relation-dp.relation-dp', {
         data: {
           name: `Relation DP Draft ${i + 1} ${randomString(4)}`,
@@ -813,6 +1090,8 @@ async function seedRelationDp(strapi, basicDpEntries) {
           oneToManyBasics: relatedBasics.map((b) => b.id),
           manyToOneBasic: relatedBasics[0]?.id || null,
           manyToManyBasics: relatedBasics.map((b) => b.id),
+          manyToOneBasicNoDp: relatedBasicNoDp?.id || null,
+          manyToManyBasicsNoDp: relatedBasicsNoDp.map((b) => b.id),
           simpleInfo: createSimpleInfoComponent(),
           content: [
             createSimpleInfoComponentForDynamicZone(),
@@ -824,7 +1103,9 @@ async function seedRelationDp(strapi, basicDpEntries) {
           ],
           mediaBlock: createMediaBlockComponent(),
           sections: [
-            createTextBlockComponentForDynamicZone({ relatedBasicDpId: firstRelatedBasicId }),
+            createTextBlockComponentForDynamicZone({
+              relatedBasicDpId: draftTarget?.id ?? firstRelatedBasicId,
+            }),
             createMediaBlockComponentForDynamicZone(),
           ],
           // No publishedAt = draft
@@ -845,7 +1126,7 @@ async function seedRelationDp(strapi, basicDpEntries) {
           ],
           sections: [
             createTextBlockComponentForDynamicZone({
-              relatedBasicDpId: firstRelatedBasicId,
+              relatedBasicDpId: draftTarget?.id ?? firstRelatedBasicId,
               relatedRelationDpId: entry.id,
             }),
             createMediaBlockComponentForDynamicZone(),
@@ -1014,11 +1295,12 @@ async function seedSingleRun(strapi, options = {}) {
   const injectInvalidFk = options.injectInvalidFk === true;
 
   const basicEntries = await seedBasic(strapi);
-  const basicDpEntries = await seedBasicDp(strapi);
-  const basicDpI18nEntries = await seedBasicDpI18n(strapi);
+  const basicDpEntries = await seedBasicDp(strapi, basicEntries);
+  await updateBasicComponentRelations(strapi, basicEntries, basicDpEntries);
+  const basicDpI18nEntries = await seedBasicDpI18n(strapi, basicEntries, basicDpEntries);
 
   const relationEntries = await seedRelation(strapi, basicEntries, basicDpEntries);
-  const relationDpEntries = await seedRelationDp(strapi, basicDpEntries);
+  const relationDpEntries = await seedRelationDp(strapi, basicDpEntries, basicEntries);
   const relationDpI18nEntries = await seedRelationDpI18n(strapi, basicDpI18nEntries);
 
   if (injectInvalidFk) {
@@ -1037,6 +1319,109 @@ async function seedSingleRun(strapi, options = {}) {
     relationDpEntries,
     relationDpI18nEntries,
   };
+}
+
+/**
+ * Verifies that seeded data has the expected component relations
+ */
+async function verifySeededData(strapi) {
+  console.log('\n🔍 Verifying seeded component relations...\n');
+
+  try {
+    // Check basic entries
+    const basicEntries = await strapi.entityService.findMany('api::basic.basic', {
+      populate: {
+        textBlocks: {
+          populate: {
+            relatedBasicDp: { fields: ['id', 'publishedAt'] },
+          },
+        },
+      },
+    });
+
+    let basicPublishedTargets = 0;
+    let basicDraftTargets = 0;
+    for (const entry of basicEntries) {
+      for (const textBlock of entry.textBlocks || []) {
+        const target = textBlock?.relatedBasicDp;
+        if (target) {
+          if (target.publishedAt) {
+            basicPublishedTargets += 1;
+          } else {
+            basicDraftTargets += 1;
+          }
+        }
+      }
+    }
+    console.log(
+      `  Basic entries: ${basicPublishedTargets} text-blocks target published, ${basicDraftTargets} target drafts`
+    );
+
+    // Check basic-dp entries
+    // Use db.query to get both draft and published entries
+    const basicDpEntries = await strapi.db.query('api::basic-dp.basic-dp').findMany({
+      populate: {
+        textBlocks: {
+          populate: {
+            relatedBasicDp: { fields: ['id', 'publishedAt'] },
+          },
+        },
+      },
+    });
+
+    let publishedEntriesWithPublishedTargets = 0;
+    let publishedEntriesWithDraftTargets = 0;
+    let draftEntriesWithPublishedTargets = 0;
+    let draftEntriesWithDraftTargets = 0;
+
+    for (const entry of basicDpEntries) {
+      const isPublished = !!entry.publishedAt;
+      let hasPublishedTarget = false;
+      let hasDraftTarget = false;
+
+      for (const textBlock of entry.textBlocks || []) {
+        const target = textBlock?.relatedBasicDp;
+        if (target) {
+          if (target.publishedAt) {
+            hasPublishedTarget = true;
+          } else {
+            hasDraftTarget = true;
+          }
+        }
+      }
+
+      if (isPublished) {
+        if (hasPublishedTarget) publishedEntriesWithPublishedTargets += 1;
+        if (hasDraftTarget) publishedEntriesWithDraftTargets += 1;
+      } else {
+        if (hasPublishedTarget) draftEntriesWithPublishedTargets += 1;
+        if (hasDraftTarget) draftEntriesWithDraftTargets += 1;
+      }
+    }
+
+    console.log(
+      `  Basic-dp published: ${publishedEntriesWithPublishedTargets} have published targets, ${publishedEntriesWithDraftTargets} have draft targets`
+    );
+    console.log(
+      `  Basic-dp drafts: ${draftEntriesWithPublishedTargets} have published targets, ${draftEntriesWithDraftTargets} have draft targets`
+    );
+
+    if (basicPublishedTargets === 0) {
+      console.log('  ⚠️  WARNING: No basic entries have text-blocks targeting published basic-dp');
+    }
+    if (publishedEntriesWithPublishedTargets === 0) {
+      console.log(
+        '  ⚠️  WARNING: No published basic-dp entries have text-blocks targeting published basic-dp'
+      );
+    }
+    if (draftEntriesWithPublishedTargets === 0) {
+      console.log(
+        '  ⚠️  WARNING: No draft basic-dp entries have text-blocks targeting published basic-dp'
+      );
+    }
+  } catch (error) {
+    console.error(`  ❌ Error verifying seeded data: ${error.message}`);
+  }
 }
 
 /**
@@ -1061,7 +1446,7 @@ async function seed(options = {}) {
         '   The seed script expects a clean database or one that has been properly migrated.'
       );
       console.error('\n   Try one of these solutions:');
-      console.error('   1. Wipe the database first (from v5 project): yarn db:wipe:postgres');
+      console.error('   1. Wipe the database first (from v5 project): yarn db:wipe:{your db type}');
       console.error('   2. Or ensure the database is in a clean state before seeding\n');
       console.error(`   Error details: ${error.message}`);
       process.exit(1);
@@ -1102,6 +1487,9 @@ async function seed(options = {}) {
       totalStats.relationDpI18n.drafts += stats.relationDpI18nEntries.drafts.length;
       totalStats.relationDpI18n.total += stats.relationDpI18nEntries.all.length;
     }
+
+    // Verify seeded data
+    await verifySeededData(strapi);
 
     console.log('\n✅ Seed completed successfully!');
     console.log(`\nTotal created (${multiplierNum} run${multiplierNum > 1 ? 's' : ''}):`);
