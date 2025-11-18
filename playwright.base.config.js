@@ -42,7 +42,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
   timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
 
   /* Global setup to set localStorage for all tests */
-  globalSetup: require.resolve('./tests/e2e/browser/utils/global-setup.ts'),
+  globalSetup: require.resolve('./tests/utils/global-setup.ts'),
 
   expect: {
     /**
@@ -96,7 +96,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
       : 'off',
 
     /* Use the storage state with localStorage set globally */
-    storageState: './tests/e2e/browser/playwright-storage-state.json',
+    storageState: './tests/e2e/playwright-storage-state.json',
   },
 
   /* Configure projects for major browsers */

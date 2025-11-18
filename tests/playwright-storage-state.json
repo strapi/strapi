@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://127.0.0.1:8000",
+      "localStorage": [
+        {
+          "name": "STRAPI_GUIDED_TOUR",
+          "value": "{\"tours\":{\"contentTypeBuilder\":{\"currentStep\":0,\"length\":5,\"isCompleted\":false},\"contentManager\":{\"currentStep\":0,\"length\":4,\"isCompleted\":false},\"apiTokens\":{\"currentStep\":0,\"length\":4,\"isCompleted\":false},\"strapiCloud\":{\"currentStep\":0,\"length\":0,\"isCompleted\":false}},\"enabled\":false,\"completedActions\":[]}"
+        }
+      ]
+    }
+  ]
+}

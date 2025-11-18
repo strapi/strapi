@@ -1,16 +1,20 @@
 'use strict';
 
 const path = require('path');
-const execa = require('execa');
 const fs = require('node:fs/promises');
 const yargs = require('yargs');
 
 const chalk = require('chalk');
-const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
+const {
+  loadDomainConfigs,
+  calculateTestAppsRequired,
+  runCliTests,
+} = require('../utils/runners/cli-runner');
+const { publishYalc, setupTestApps, getCurrentTestApps } = require('../utils/runners/shared-setup');
 
 const cwd = path.resolve(__dirname, '../..');
 const testAppDirectory = path.join(cwd, 'test-apps', 'cli');
-const testRoot = path.join(cwd, 'tests', 'e2e', 'cli');
+const testRoot = path.join(cwd, 'tests', 'cli');
 const testsDir = path.join(testRoot, 'tests');
 const templateDir = path.join(cwd, 'tests', 'e2e', 'app-template');
 
@@ -59,41 +63,14 @@ yargs
          * Publishing all packages to the yalc store
          */
         console.log('Running yalc...');
-        await execa('node', [path.join(__dirname, '../..', 'scripts', 'yalc-publish.js')]);
+        await publishYalc(cwd);
         console.log('Complete');
 
-        const loadDomainConfigs = async (domain) => {
-          try {
-            const configPath = path.join(testsDir, domain, 'config.js');
-            await fs.access(configPath);
-            // Import config.js and call it as a function
-            const config = require(configPath);
-            if (typeof config === 'function') {
-              return await config(argv);
-            }
-            return config;
-          } catch (e) {
-            // use default config
-            return {
-              testApps: 1,
-            };
-          }
-        };
+        // Load domain configs
+        const domainConfigs = await loadDomainConfigs(testsDir, domains, argv);
 
-        // Load the domain configs into an object with keys of the name of the test domain
-        const domainConfigs = {};
-        await Promise.all(
-          domains.map(async (domain) => {
-            domainConfigs[domain] = await loadDomainConfigs(domain);
-          })
-        );
-
-        // Determine the number of simultaneous test apps we need by taking the concurrency number of highest testApps requested from config
-        const testAppsRequired = Object.entries(domainConfigs)
-          .map(([, value]) => value.testApps) // Extract testApps values from config
-          .sort((a, b) => b - a) // Sort in descending order
-          .slice(0, concurrency) // Take the top X values
-          .reduce((acc, value) => acc + value, 0); // Sum up the values
+        // Determine the number of test apps required
+        const testAppsRequired = calculateTestAppsRequired(domainConfigs, concurrency);
 
         if (testAppsRequired === 0) {
           throw new Error('No test apps to spawn');
@@ -103,69 +80,21 @@ yargs
           path.join(testAppDirectory, `test-app-${i}`)
         );
 
-        let currentTestApps = [];
-
-        try {
-          currentTestApps = await fs
-            .readdir(testAppDirectory)
-            .then((paths) => paths.map((appPath) => path.join(testAppDirectory, appPath)));
-        } catch (err) {
-          // no test apps exist, okay to fail silently
-        }
+        const currentTestApps = await getCurrentTestApps(testAppDirectory);
 
         /**
-         * If we don't have enough test apps, we make enough.
-         * You can also force this setup if desired, e.g. you
-         * update the app-template.
+         * Setup test apps if needed
          */
-        if (setup || currentTestApps.length < testAppsRequired) {
-          /**
-           * this will effectively clean the entire directory beforehand
-           * as opposed to cleaning the ones we aim to spawn.
-           */
-          await Promise.all(
-            currentTestApps.map(async (appPath) => {
-              console.log(`Cleaning test app at path: ${chalk.bold(appPath)}`);
-              await cleanTestApp(appPath);
-            })
-          );
+        const wasSetup = await setupTestApps({
+          testAppDirectory,
+          testAppPaths,
+          templateDir,
+          setup,
+          currentTestApps,
+          setupTestEnvironment: null, // CLI doesn't need browser-specific setup
+        });
 
-          currentTestApps = [];
-
-          /**
-           * Generate the test apps and modify the configuration as needed
-           */
-          await Promise.all(
-            testAppPaths.map(async (appPath) => {
-              console.log(`Generating test apps at path: ${chalk.bold(appPath)}`);
-              await generateTestApp({
-                appPath,
-                database: {
-                  client: 'sqlite',
-                  connection: {
-                    filename: './.tmp/data.db',
-                  },
-                  useNullAsDefault: true,
-                },
-                template: templateDir,
-                link: true,
-              });
-
-              /**
-               * Because we're running multiple test apps at the same time
-               * and the env file is generated by the generator with no way
-               * to override it, we manually remove the PORT key/value so when
-               * we set it further down for each playwright instance it works.
-               */
-              const pathToEnv = path.join(appPath, '.env');
-              const envFile = (await fs.readFile(pathToEnv)).toString();
-              const envWithoutPort = envFile.replace('PORT=1337', '');
-              await fs.writeFile(pathToEnv, envWithoutPort);
-
-              currentTestApps.push(appPath);
-            })
-          );
-
+        if (wasSetup) {
           console.log(
             `${chalk.green('Successfully')} setup test apps for the following domains: ${chalk.bold(
               domains.join(', ')
@@ -178,80 +107,18 @@ yargs
         }
 
         /**
-         * Run the tests in parallel based on concurrency value
-         * */
-        const availableTestApps = [...currentTestApps];
-
-        const batches = [];
-
-        for (let i = 0; i < domains.length; i += concurrency) {
-          batches.push(domains.slice(i, i + concurrency));
-        }
-
-        // eslint-disable-next-line no-plusplus
-        for (let i = 0; i < batches.length; i++) {
-          const batch = batches[i];
-          let failingTests = 0;
-          await Promise.all(
-            batch.map(async (domain) => {
-              const config = domainConfigs[domain];
-
-              if (availableTestApps.length < config.testApps) {
-                console.error('Not enough test apps available; aborting');
-                process.exit(1);
-              }
-
-              // claim testApps for this domain to use
-              const testApps = availableTestApps.splice(-1 * config.testApps);
-
-              /**
-               * We do not start up the apps; the test runner is responsible for that if it's necessary,
-               * but most CLI commands don't need a started instance of strapi
-               * Instead, we just pass in the path of the test apps assigned for this test runner via env
-               *  */
-              try {
-                const env = {
-                  TEST_APPS: testApps.join(','),
-                  JWT_SECRET: 'test-jwt-secret',
-                };
-
-                const domainDir = path.join(testsDir, domain);
-                const jestConfigPath = path.join(cwd, 'jest.config.cli.js');
-                console.log('Running jest for domain', domain, 'in', domainDir);
-                // run the command 'jest --rootDir <domainDir>'
-                await execa(
-                  'jest',
-                  [
-                    '--config',
-                    jestConfigPath,
-                    '--rootDir',
-                    domainDir,
-                    '--color',
-                    '--verbose',
-                    '--runInBand', // tests must not run concurrently
-                    ...argv._,
-                  ],
-                  {
-                    stdio: 'inherit',
-                    cwd: domainDir, // run from the domain directory
-                    env, // pass it our custom env values
-                    timeout: 2 * 60 * 1000, // 2 minutes
-                  }
-                );
-              } catch (err) {
-                // If any tests fail
-                console.error('Test suite failed for', domain);
-                failingTests += 1;
-              }
-
-              // make them available again for the next batch
-              availableTestApps.push(...testApps);
-            })
-          );
-          if (failingTests > 0) {
-            throw new Error(`${failingTests} tests failed`);
-          }
-        }
+         * Run CLI tests
+         */
+        await runCliTests({
+          cwd,
+          testsDir,
+          testAppDirectory,
+          domains,
+          domainConfigs,
+          testAppPaths,
+          concurrency,
+          argv,
+        });
       } catch (err) {
         console.error(chalk.red('Error running CLI tests:'));
         /**
@@ -272,7 +139,8 @@ yargs
     description: 'clean the test app directory of all test apps',
     async handler() {
       try {
-        const currentTestApps = await fs.readdir(testAppDirectory);
+        const { cleanTestApp } = require('../helpers/test-app');
+        const currentTestApps = await getCurrentTestApps(testAppDirectory);
 
         if (currentTestApps.length === 0) {
           console.log('No CLI test apps to clean');
@@ -280,8 +148,7 @@ yargs
         }
 
         await Promise.all(
-          currentTestApps.map(async (testAppName) => {
-            const appPath = path.join(testAppDirectory, testAppName);
+          currentTestApps.map(async (appPath) => {
             console.log(`Cleaning test app at path: ${chalk.bold(appPath)}`);
             await cleanTestApp(appPath);
           })
