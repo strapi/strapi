@@ -14,4 +14,24 @@ const importData = async () => {
   process.exit(0);
 };
 
-importData();
+// Only execute if this file is run directly as a script with a file path argument
+// This prevents execution when the module is imported/required (e.g., by Jest)
+// Don't execute if we're in a test environment or being imported
+const isTestEnvironment =
+  process.env.NODE_ENV === 'test' ||
+  process.env.JEST_WORKER_ID !== undefined ||
+  typeof jest !== 'undefined';
+
+const isDirectExecution =
+  !isTestEnvironment &&
+  typeof require.main !== 'undefined' &&
+  require.main === module &&
+  process.argv.length > 2 &&
+  process.argv[2];
+
+if (isDirectExecution) {
+  importData();
+}
+
+// Export the function for use as a module
+module.exports = { resetDatabaseAndImportDataFromPath };

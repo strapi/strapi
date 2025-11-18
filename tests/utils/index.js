@@ -1,14 +1,25 @@
 'use strict';
 
 // Export utilities for CLI tests
-// Note: instances.getTestApps() is used by CLI tests
-const testApp = require('./test-app');
+// Note: We lazy-load helpers to avoid importing heavy dependencies when Jest loads test files
+const { getTestApps } = require('./get-test-apps');
+
+// Lazy load helpers to avoid triggering imports of create-strapi-app
+let helpersCache = null;
+const getHelpers = () => {
+  if (!helpersCache) {
+    helpersCache = require('./helpers');
+  }
+  return helpersCache;
+};
 
 module.exports = {
   fs: require('./fs'),
   seed: require('./scripts/dts-import'),
   instances: {
-    getTestApps: testApp.getTestApps,
+    getTestApps,
   },
-  helpers: require('./helpers'),
+  get helpers() {
+    return getHelpers();
+  },
 };

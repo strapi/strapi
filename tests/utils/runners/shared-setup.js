@@ -3,7 +3,7 @@
 const path = require('path');
 const execa = require('execa');
 const fs = require('node:fs/promises');
-const { cleanTestApp, generateTestApp } = require('../test-app');
+const { cleanTestApp, generateTestApp } = require('../../helpers/test-app');
 
 const pathExists = async (filePath) => {
   try {
