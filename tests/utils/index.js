@@ -15,7 +15,7 @@ const getHelpers = () => {
 
 module.exports = {
   fs: require('./fs'),
-  seed: require('./scripts/dts-import'),
+  seed: require('./dts-import'),
   instances: {
     getTestApps,
   },

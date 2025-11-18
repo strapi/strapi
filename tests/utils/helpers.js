@@ -1,5 +1,8 @@
 'use strict';
 
+const path = require('path');
+const dotenv = require('dotenv');
+const fs = require('node:fs/promises');
 const stripAnsi = require('strip-ansi');
 
 const normalizeLineEndings = (str) => str.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -40,7 +43,40 @@ const expectConsoleLinesToInclude = (received, expected) => {
   });
 };
 
+/**
+ * Load environment variables from a test app's .env file
+ * This ensures consistent environment setup for both browser and CLI tests
+ * when loading Strapi directly (not as a server process)
+ *
+ * @param {string} appPath - Path to the test app directory
+ * @returns {Promise<void>}
+ */
+const loadTestAppEnv = async (appPath) => {
+  const envPath = path.join(appPath, '.env');
+  try {
+    await fs.access(envPath);
+    // Load .env file into process.env
+    dotenv.config({ path: envPath });
+  } catch (err) {
+    // .env file doesn't exist, which is okay - use defaults
+    // Set default values if .env doesn't exist
+    if (!process.env.APP_KEYS) {
+      process.env.APP_KEYS = 'test-key-1,test-key-2,test-key-3,test-key-4';
+    }
+    if (!process.env.ADMIN_JWT_SECRET) {
+      process.env.ADMIN_JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret';
+    }
+    if (!process.env.API_TOKEN_SALT) {
+      process.env.API_TOKEN_SALT = 'test-api-token-salt';
+    }
+    if (!process.env.TRANSFER_TOKEN_SALT) {
+      process.env.TRANSFER_TOKEN_SALT = 'test-transfer-token-salt';
+    }
+  }
+};
+
 module.exports = {
   expectConsoleLinesToEqual,
   expectConsoleLinesToInclude,
+  loadTestAppEnv,
 };
