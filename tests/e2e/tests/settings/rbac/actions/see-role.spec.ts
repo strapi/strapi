@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-import { sharedSetup } from '../../../utils/setup';
-import { navToHeader, clickAndWait } from '../../../utils/shared';
+import { sharedSetup } from '../../../../../utils/setup';
+import { navToHeader, clickAndWait } from '../../../../../utils/shared';
 
 test.describe('RBAC - See Roles', () => {
   // Runs before each test

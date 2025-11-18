@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { toggleRateLimiting } from '../../../utils/rate-limit';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, TITLE_LOGIN } from '../../e2e/constants';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, TITLE_LOGIN } from '../../constants';
 import { login } from '../../../utils/login';
 
 test.describe('Login', () => {

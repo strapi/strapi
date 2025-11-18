@@ -1,7 +1,7 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
 
-import { sharedSetup } from '../../../utils/setup';
-import { navToHeader, clickAndWait } from '../../../utils/shared';
+import { sharedSetup } from '../../../../../utils/setup';
+import { navToHeader, clickAndWait } from '../../../../../utils/shared';
 
 // Constants for the scenario
 const OLD_ROLE = { name: 'Editor' };

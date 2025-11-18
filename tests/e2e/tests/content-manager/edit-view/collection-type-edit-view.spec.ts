@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
-import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../e2e/constants';
+import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {

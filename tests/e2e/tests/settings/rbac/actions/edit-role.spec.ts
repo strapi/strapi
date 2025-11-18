@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
-import { sharedSetup } from '../../../utils/setup';
-import { navToHeader, clickAndWait } from '../../../utils/shared';
+import { sharedSetup } from '../../../../../utils/setup';
+import { navToHeader, clickAndWait } from '../../../../../utils/shared';
 
 // Constants for the edited role
 const EDITED_ROLE = { name: 'Contractor', description: 'Role with contractor capabilities' };

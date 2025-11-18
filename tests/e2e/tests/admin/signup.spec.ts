@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ADMIN_EMAIL_ADDRESS, TITLE_HOME } from '../../e2e/constants';
+import { ADMIN_EMAIL_ADDRESS, TITLE_HOME } from '../../constants';
 
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { fillValidSignUpForm } from '../../../utils/signup';
