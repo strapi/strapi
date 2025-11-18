@@ -10,9 +10,9 @@ const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
 
 const cwd = path.resolve(__dirname, '../..');
 const testAppDirectory = path.join(cwd, 'test-apps', 'cli');
-const testRoot = path.join(cwd, 'tests', 'cli');
+const testRoot = path.join(cwd, 'tests', 'e2e', 'cli');
 const testsDir = path.join(testRoot, 'tests');
-const templateDir = path.join(testRoot, 'app-template');
+const templateDir = path.join(cwd, 'tests', 'e2e', 'app-template');
 
 yargs
   .parserConfiguration({
@@ -216,13 +216,14 @@ yargs
                 };
 
                 const domainDir = path.join(testsDir, domain);
+                const jestConfigPath = path.join(cwd, 'jest.config.cli.js');
                 console.log('Running jest for domain', domain, 'in', domainDir);
                 // run the command 'jest --rootDir <domainDir>'
                 await execa(
                   'jest',
                   [
                     '--config',
-                    '../../../../jest.config.cli.js',
+                    jestConfigPath,
                     '--rootDir',
                     domainDir,
                     '--color',

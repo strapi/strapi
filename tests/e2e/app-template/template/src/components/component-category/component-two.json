@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_component_category_component_twos",
+  "info": {
+    "displayName": "component_two",
+    "icon": "arrowUp"
+  },
+  "options": {},
+  "attributes": {
+    "shorttext": {
+      "type": "string"
+    },
+    "nested_component": {
+      "type": "component",
+      "repeatable": true,
+      "component": "component-category.component"
+    }
+  }
+}

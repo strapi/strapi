@@ -12,9 +12,9 @@ const { createConfig } = require('../../playwright.base.config');
 
 const cwd = path.resolve(__dirname, '../..');
 const testAppDirectory = path.join(cwd, 'test-apps', 'e2e');
-const testRoot = path.join(cwd, 'tests', 'e2e');
+const testRoot = path.join(cwd, 'tests', 'e2e', 'browser');
 const testDomainRoot = path.join(testRoot, 'tests');
-const templateDir = path.join(testRoot, 'app-template');
+const templateDir = path.join(cwd, 'tests', 'e2e', 'app-template');
 
 const pathExists = async (path) => {
   try {
