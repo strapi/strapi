@@ -5,6 +5,34 @@ const execa = require('execa');
 const fs = require('node:fs/promises');
 const { cleanTestApp, generateTestApp } = require('../test-app');
 
+const pathExists = async (filePath) => {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
+/**
+ * Updates the env file for a generated test app (browser-specific)
+ * - Uses e2e/app-template/config/features.js to enable future features in the generated app
+ */
+const setupTestEnvironment = async (generatedAppPath, templateDir) => {
+  /*
+   * Enable future features in the generated app manually since a template
+   * does not allow the config folder.
+   */
+  const testRootFeaturesConfigPath = path.join(templateDir, 'config', 'features.js');
+  const hasFeaturesConfig = await pathExists(testRootFeaturesConfigPath);
+
+  if (!hasFeaturesConfig) return;
+
+  const configFeatures = await fs.readFile(testRootFeaturesConfigPath);
+  const appFeaturesConfigPath = path.join(generatedAppPath, 'config', 'features.js');
+  await fs.writeFile(appFeaturesConfigPath, configFeatures);
+};
+
 /**
  * Publish all packages to yalc store
  */
@@ -88,7 +116,20 @@ const setupTestApps = async ({
 const getCurrentTestApps = async (testAppDirectory) => {
   try {
     const apps = await fs.readdir(testAppDirectory);
-    return apps.map((appName) => path.join(testAppDirectory, appName));
+    // Filter to only return directories that match test-app-* pattern
+    // This excludes test-results and other non-test-app directories
+    const testAppPattern = /^test-app-\d+$/;
+    const testAppPaths = [];
+    for (const appName of apps) {
+      if (testAppPattern.test(appName)) {
+        const appPath = path.join(testAppDirectory, appName);
+        const stats = await fs.stat(appPath);
+        if (stats.isDirectory()) {
+          testAppPaths.push(appPath);
+        }
+      }
+    }
+    return testAppPaths;
   } catch (err) {
     // no test apps exist, okay to fail silently
     return [];
@@ -99,4 +140,5 @@ module.exports = {
   publishYalc,
   setupTestApps,
   getCurrentTestApps,
+  setupTestEnvironment,
 };

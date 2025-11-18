@@ -2,12 +2,12 @@
 
 const path = require('path');
 const execa = require('execa');
-const fs = require('node:fs/promises');
 
 /**
  * Load domain-specific configuration
  */
 const loadDomainConfigs = async (testsDir, domains, argv) => {
+  const fs = require('node:fs/promises');
   const loadDomainConfig = async (domain) => {
     try {
       const configPath = path.join(testsDir, domain, 'config.js');
@@ -50,94 +50,37 @@ const calculateTestAppsRequired = (domainConfigs, concurrency) => {
 };
 
 /**
- * Run CLI (Jest) tests
+ * Run Jest test command
  */
-const runCliTests = async ({
-  cwd,
-  testsDir,
-  testAppDirectory,
-  domains,
-  domainConfigs,
-  testAppPaths,
-  concurrency,
-  argv,
-}) => {
-  const availableTestApps = [...testAppPaths];
+const runCLI = async ({ domainDir, jestConfigPath, testApps, testArgs }) => {
+  const env = {
+    TEST_APPS: testApps.join(','),
+    JWT_SECRET: 'test-jwt-secret',
+  };
 
-  const batches = [];
-
-  for (let i = 0; i < domains.length; i += concurrency) {
-    batches.push(domains.slice(i, i + concurrency));
-  }
-
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < batches.length; i++) {
-    const batch = batches[i];
-    let failingTests = 0;
-    await Promise.all(
-      batch.map(async (domain) => {
-        const config = domainConfigs[domain];
-
-        if (availableTestApps.length < config.testApps) {
-          console.error('Not enough test apps available; aborting');
-          process.exit(1);
-        }
-
-        // claim testApps for this domain to use
-        const testApps = availableTestApps.splice(-1 * config.testApps);
-
-        /**
-         * We do not start up the apps; the test runner is responsible for that if it's necessary,
-         * but most CLI commands don't need a started instance of strapi
-         * Instead, we just pass in the path of the test apps assigned for this test runner via env
-         *  */
-        try {
-          const env = {
-            TEST_APPS: testApps.join(','),
-            JWT_SECRET: 'test-jwt-secret',
-          };
-
-          const domainDir = path.join(testsDir, domain);
-          const jestConfigPath = path.join(cwd, 'jest.config.cli.js');
-          console.log('Running jest for domain', domain, 'in', domainDir);
-          // run the command 'jest --rootDir <domainDir>'
-          await execa(
-            'jest',
-            [
-              '--config',
-              jestConfigPath,
-              '--rootDir',
-              domainDir,
-              '--color',
-              '--verbose',
-              '--runInBand', // tests must not run concurrently
-              ...argv._,
-            ],
-            {
-              stdio: 'inherit',
-              cwd: domainDir, // run from the domain directory
-              env, // pass it our custom env values
-              timeout: 2 * 60 * 1000, // 2 minutes
-            }
-          );
-        } catch (err) {
-          // If any tests fail
-          console.error('Test suite failed for', domain);
-          failingTests += 1;
-        }
-
-        // make them available again for the next batch
-        availableTestApps.push(...testApps);
-      })
-    );
-    if (failingTests > 0) {
-      throw new Error(`${failingTests} tests failed`);
+  await execa(
+    'jest',
+    [
+      '--config',
+      jestConfigPath,
+      '--rootDir',
+      domainDir,
+      '--color',
+      '--verbose',
+      '--runInBand', // tests must not run concurrently
+      ...testArgs,
+    ],
+    {
+      stdio: 'inherit',
+      cwd: domainDir, // run from the domain directory
+      env, // pass it our custom env values
+      timeout: 2 * 60 * 1000, // 2 minutes
     }
-  }
+  );
 };
 
 module.exports = {
   loadDomainConfigs,
   calculateTestAppsRequired,
-  runCliTests,
+  runCLI,
 };
