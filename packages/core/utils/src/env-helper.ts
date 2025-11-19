@@ -3,9 +3,9 @@ import _ from 'lodash';
 export type Env = typeof envFn & typeof utils;
 
 function envFn(key: string, defaultValue: string): string;
-function envFn(key: string, defaultValue?: string | null | undefined): string | undefined;
-function envFn(key: string, defaultValue?: string | null | undefined): string | undefined {
-  return _.has(process.env, key) ? process.env[key] : (defaultValue ?? undefined);
+function envFn(key: string, defaultValue?: string | undefined): string | undefined;
+function envFn(key: string, defaultValue?: string): string | undefined {
+  return _.has(process.env, key) ? process.env[key] : defaultValue;
 }
 
 function getKey(key: string) {
@@ -13,63 +13,47 @@ function getKey(key: string) {
 }
 
 function int(key: string, defaultValue: number): number;
-function int(key: string, defaultValue?: number | null | undefined): number | undefined;
-function int(key: string, defaultValue?: number | null | undefined): number | undefined {
+function int(key: string, defaultValue?: number | undefined): number | undefined;
+function int(key: string, defaultValue?: number | undefined): number | undefined {
   if (!_.has(process.env, key)) {
-    return defaultValue ?? undefined;
+    return defaultValue;
   }
 
-  const stringValue = getKey(key);
-  const maybeInt = parseInt(stringValue, 10);
-
-  if (Number.isNaN(maybeInt) && stringValue !== 'NaN') {
-    throw new Error(`env.int encountered an invalid value for ${key}`);
-  }
-
-  return maybeInt;
+  return parseInt(getKey(key), 10);
 }
 
 function float(key: string, defaultValue: number): number;
-function float(key: string, defaultValue?: number | null | undefined): number | undefined;
-function float(key: string, defaultValue?: number | null | undefined): number | undefined {
+function float(key: string, defaultValue?: number | undefined): number | undefined;
+function float(key: string, defaultValue?: number): number | undefined {
   if (!_.has(process.env, key)) {
-    return defaultValue ?? undefined;
+    return defaultValue;
   }
 
-  const stringValue = getKey(key);
-  const maybeFloat = parseFloat(stringValue);
-
-  if (Number.isNaN(maybeFloat) && stringValue !== 'NaN') {
-    throw new Error(`env.float encountered an invalid value for ${key}`);
-  }
-
-  return maybeFloat;
+  return parseFloat(getKey(key));
 }
 
 function bool(key: string, defaultValue: boolean): boolean;
-function bool(key: string, defaultValue?: boolean | null | undefined): boolean | undefined;
-function bool(key: string, defaultValue?: boolean | null | undefined): boolean | undefined {
+function bool(key: string, defaultValue?: boolean | undefined): boolean | undefined;
+function bool(key: string, defaultValue?: boolean): boolean | undefined {
   if (!_.has(process.env, key)) {
-    return defaultValue ?? undefined;
+    return defaultValue;
   }
 
   return getKey(key) === 'true';
 }
 
 function json<T extends object>(key: string, defaultValue: T): T;
-function json<T extends object>(key: string, defaultValue?: T | null | undefined): T | undefined;
-function json(key: string, defaultValue?: object | null | undefined): object | undefined {
+function json<T extends object>(key: string, defaultValue?: T | undefined): T | undefined;
+function json(key: string, defaultValue?: object) {
   if (!_.has(process.env, key)) {
-    return defaultValue ?? undefined;
+    return defaultValue;
   }
 
   try {
     return JSON.parse(getKey(key));
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(
-        `env.json encountered an invalid json environment value for ${key}: ${error.message}`
-      );
+      throw new Error(`Invalid json environment variable ${key}: ${error.message}`);
     }
 
     throw error;
@@ -77,10 +61,10 @@ function json(key: string, defaultValue?: object | null | undefined): object | u
 }
 
 function array(key: string, defaultValue: string[]): string[];
-function array(key: string, defaultValue?: string[] | null | undefined): string[] | undefined;
-function array(key: string, defaultValue?: string[] | null | undefined): string[] | undefined {
+function array(key: string, defaultValue?: string[] | undefined): string[] | undefined;
+function array(key: string, defaultValue?: string[]): string[] | undefined {
   if (!_.has(process.env, key)) {
-    return defaultValue ?? undefined;
+    return defaultValue;
   }
 
   let value = getKey(key);
@@ -95,46 +79,39 @@ function array(key: string, defaultValue?: string[] | null | undefined): string[
 }
 
 function date(key: string, defaultValue: Date): Date;
-function date(key: string, defaultValue?: Date | null | undefined): Date | undefined;
-function date(key: string, defaultValue?: Date | null | undefined): Date | undefined {
+function date(key: string, defaultValue?: Date | undefined): Date | undefined;
+function date(key: string, defaultValue?: Date): Date | undefined {
   if (!_.has(process.env, key)) {
-    return defaultValue ?? undefined;
+    return defaultValue;
   }
 
-  const maybeDate = new Date(getKey(key));
-
-  if (Number.isNaN(maybeDate.getTime())) {
-    throw new Error(`env.date encountered an invalid value for ${key}`);
-  }
-
-  return maybeDate;
+  return new Date(getKey(key));
 }
 
-/** Gets a value from env that matches oneOf provided values */
+/**
+ * Gets a value from env that matches oneOf provided values
+ * @param {string} key
+ * @param {string[]} expectedValues
+ * @param {string|undefined} defaultValue
+ * @returns {string|undefined}
+ */
 function oneOf<T extends string>(key: string, expectedValues: T[], defaultValue: T): T;
 function oneOf<T extends string>(
   key: string,
   expectedValues: T[],
-  defaultValue?: T | null | undefined
+  defaultValue?: T | undefined
 ): T | undefined;
-function oneOf(
-  key: string,
-  expectedValues: string[],
-  defaultValue?: string | null | undefined
-): string | undefined {
+function oneOf(key: string, expectedValues?: string[], defaultValue?: string) {
   if (!expectedValues) {
     throw new Error(`env.oneOf requires expectedValues`);
   }
 
-  if (defaultValue != null && !expectedValues.includes(defaultValue)) {
+  if (defaultValue && !expectedValues.includes(defaultValue)) {
     throw new Error(`env.oneOf requires defaultValue to be included in expectedValues`);
   }
 
   const rawValue = env(key, defaultValue);
-
-  return rawValue != null && expectedValues.includes(rawValue)
-    ? rawValue
-    : (defaultValue ?? undefined);
+  return expectedValues.includes(rawValue) ? rawValue : defaultValue;
 }
 
 const utils = {

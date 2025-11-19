@@ -20,13 +20,8 @@ describe('Env helper', () => {
       expect(envHelper.int('NO_VAR')).toBeUndefined();
     });
 
-    test('Throws if var is not castable', () => {
+    test('Returns NaN if var is not castable', () => {
       process.env.NOT_INT_VAR = '';
-      expect(() => envHelper.int('NOT_INT_VAR')).toThrow(/invalid value/);
-    });
-
-    test('Returns NaN if explicitly set to NaN', () => {
-      process.env.NOT_INT_VAR = 'NaN';
       expect(envHelper.int('NOT_INT_VAR')).toEqual(Number.NaN);
     });
 
@@ -41,24 +36,9 @@ describe('Env helper', () => {
       expect(envHelper.float('NO_VAR')).toBeUndefined();
     });
 
-    test('Throws if var is not castable', () => {
+    test('Returns NaN if var is not castable', () => {
       process.env.NOT_FLOAT_VAR = '';
-      expect(() => envHelper.float('NOT_FLOAT_VAR')).toThrow(/invalid value/);
-    });
-
-    test('Returns NaN if explicitly set to NaN', () => {
-      process.env.NOT_FLOAT_VAR = 'NaN';
       expect(envHelper.float('NOT_FLOAT_VAR')).toEqual(Number.NaN);
-    });
-
-    test('Returns Infinity if explicitly set to Infinity', () => {
-      process.env.NOT_FLOAT_VAR = 'Infinity';
-      expect(envHelper.float('NOT_FLOAT_VAR')).toEqual(Number.POSITIVE_INFINITY);
-    });
-
-    test('Returns -Infinity if explicitly set to -Infinity', () => {
-      process.env.NOT_FLOAT_VAR = '-Infinity';
-      expect(envHelper.float('NOT_FLOAT_VAR')).toEqual(Number.NEGATIVE_INFINITY);
     });
 
     test('Returns a valid float when possible', () => {
@@ -97,7 +77,9 @@ describe('Env helper', () => {
 
     test('Throws if var is not a valid json', () => {
       process.env.JSON_VAR = '{"}';
-      expect(() => envHelper.json('JSON_VAR')).toThrow(/invalid json environment variable/);
+      expect(() => {
+        envHelper.json('JSON_VAR');
+      }).toThrow('Invalid json environment variable');
     });
 
     test.each([
@@ -150,9 +132,9 @@ describe('Env helper', () => {
       expect(envHelper.date('NO_VAR')).toBeUndefined();
     });
 
-    test('Throws if var is not castable', () => {
+    test('Returns InvalidDate if var is not castable', () => {
       process.env.NOT_DATE_VAR = 'random string';
-      expect(() => envHelper.date('NOT_DATE_VAR')).toThrow(/invalid value/);
+      expect(envHelper.date('NOT_DATE_VAR').getTime()).toEqual(Number.NaN);
     });
 
     test('Returns a valid date when possible', () => {
@@ -163,7 +145,7 @@ describe('Env helper', () => {
 
   describe('env with union cast', () => {
     test('Throws if expectedValues is not provided', () => {
-      expect(() => envHelper.oneOf('NO_VAR', undefined as any)).toThrow();
+      expect(() => envHelper.oneOf('NO_VAR')).toThrow();
     });
 
     test('Throws if defaultValue not included in expectedValues', () => {
