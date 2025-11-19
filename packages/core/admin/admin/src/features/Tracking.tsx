@@ -18,6 +18,16 @@ export interface TelemetryProperties {
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
+  licenseInfo?: {
+    customerId: string;
+    subscriptionId?: string;
+    licenseKey: string;
+    type: 'bronze' | 'silver' | 'gold' | 'growth' | 'enterprise';
+    isTrial: boolean;
+    expireAt: string;
+    projectHash?: string;
+    dependencyHash?: string;
+  };
 }
 
 export interface TrackingContextValue {

@@ -108,6 +108,16 @@ export declare namespace TelemetryProperties {
       numberOfAllContentTypes: number;
       numberOfComponents: number;
       numberOfDynamicZones: number;
+      licenseInfo?: {
+        customerId: string;
+        subscriptionId?: string;
+        licenseKey: string;
+        type: 'bronze' | 'silver' | 'gold' | 'growth' | 'enterprise';
+        isTrial: boolean;
+        expireAt: string;
+        projectHash?: string;
+        dependencyHash?: string;
+      };
     };
     error?: errors.ApplicationError;
   }
