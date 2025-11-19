@@ -95,11 +95,15 @@ function date(key: string, defaultValue?: Date): Date | undefined {
  * @param {string|undefined} defaultValue
  * @returns {string|undefined}
  */
-function oneOf<T extends string>(key: string, expectedValues: T[], defaultValue: T): T;
-function oneOf<T extends string>(
+function oneOf<T extends string, TDefault extends T = T>(
   key: string,
   expectedValues: T[],
-  defaultValue?: T | undefined
+  defaultValue: TDefault
+): T;
+function oneOf<T extends string, TDefault extends T = T>(
+  key: string,
+  expectedValues: T[],
+  defaultValue?: TDefault | undefined
 ): T | undefined;
 function oneOf(key: string, expectedValues?: string[], defaultValue?: string) {
   if (!expectedValues) {
