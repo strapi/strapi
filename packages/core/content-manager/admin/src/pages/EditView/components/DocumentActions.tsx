@@ -181,7 +181,17 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
 
   const addHintTooltip = (action: Action, children: React.ReactNode) => {
     return !action.disabled ? (
-      <Tooltip label={`Ctrl / Cmd + Enter to ${action.label}`}>
+      <Tooltip
+        label={formatMessage(
+          {
+            id: 'content-manager.containers.EditView.saveHint',
+            defaultMessage: 'Ctrl / Cmd + Enter to {action}',
+          },
+          {
+            action: action.label,
+          }
+        )}
+      >
         <Flex width="100%">{children}</Flex>
       </Tooltip>
     ) : (

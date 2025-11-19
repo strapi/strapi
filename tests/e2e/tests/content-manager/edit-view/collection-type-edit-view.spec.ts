@@ -265,6 +265,10 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
       await expect(page.getByText('Modified')).not.toBeVisible();
 
+      // Press Ctrl + Enter to publish the document
+      await page.keyboard.press('Control+Enter');
+      await findAndClose(page, 'Published Document');
+
       /**
        * Now we go back to the list view to confirm our new entry has been correctly added to the database.
        */
