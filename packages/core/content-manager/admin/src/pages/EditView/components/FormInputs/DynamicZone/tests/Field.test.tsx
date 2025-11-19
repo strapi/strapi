@@ -125,7 +125,7 @@ describe('DynamicZone', () => {
         })
       );
 
-      expect(screen.getByText('test comp - toto')).toBeInTheDocument();
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
     });
 
     it('should call the removeComponentFromDynamicZone callback when the RemoveButton is clicked', async () => {

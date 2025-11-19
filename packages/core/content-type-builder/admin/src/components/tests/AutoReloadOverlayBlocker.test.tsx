@@ -37,7 +37,7 @@ describe('AutoReloadOverlayBlocker', () => {
       result.current.lockAppWithAutoreload?.();
     });
 
-    expect(screen.getByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
   });
 
   it('should unlock the app', async () => {
@@ -64,7 +64,7 @@ describe('AutoReloadOverlayBlocker', () => {
       result.current.lockAppWithAutoreload?.();
     });
 
-    expect(screen.getByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Waiting for restart/ })).toBeInTheDocument();
 
     act(() => jest.advanceTimersByTime(MAX_ELAPSED_TIME));
 
