@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
-import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
+import { clickAndWait, findAndClose } from '../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -229,10 +228,8 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American');
-      await page
-        .getByRole('textbox')
-        .nth(2)
-        .fill('I miss the denver broncos, now I can only watch it on the evening.');
+      const contentBlock = page.getByRole('textbox').filter({ hasText: 'Drag' });
+      await contentBlock.fill('I miss the denver broncos, now I can only watch it on the evening.');
 
       await page.getByRole('combobox', { name: 'authors' }).click();
 
