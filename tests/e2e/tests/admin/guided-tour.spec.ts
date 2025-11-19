@@ -7,6 +7,7 @@ import { waitForRestart } from '../../utils/restart';
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 describeOnCondition(edition !== 'EE')('Guided tour', () => {
+  test.use({ viewport: { width: 1920, height: 1080 } });
   test.beforeEach(async ({ page }) => {
     await setGuidedTourLocalStorage(page, { ...STRAPI_GUIDED_TOUR_CONFIG, enabled: true });
 
@@ -39,18 +40,27 @@ describeOnCondition(edition !== 'EE')('Guided tour', () => {
     );
     const nextButton = page.getByRole('button', { name: 'Next' });
     const gotItButton = page.getByRole('button', { name: 'Got it' });
-    await expect(
-      page.getByRole('dialog', { name: 'Welcome to the Content-Type Builder!' })
-    ).toBeVisible();
-    await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Collection Types' })).toBeVisible();
-    await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Single Types' })).toBeVisible();
-    await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Components' })).toBeVisible();
-    await nextButton.click();
-    await expect(page.getByRole('dialog', { name: 'Your turn — Build something!' })).toBeVisible();
-    await nextButton.click();
+
+    await page
+      .getByRole('dialog', { name: 'Welcome to the Content-Type Builder!' })
+      .getByRole('button', { name: 'Next' })
+      .click();
+    await page
+      .getByRole('dialog', { name: 'Collection Types' })
+      .getByRole('button', { name: 'Next' })
+      .click();
+    await page
+      .getByRole('dialog', { name: 'Single Types' })
+      .getByRole('button', { name: 'Next' })
+      .click();
+    await page
+      .getByRole('dialog', { name: 'Components' })
+      .getByRole('button', { name: 'Next' })
+      .click();
+    await page
+      .getByRole('dialog', { name: 'Your turn — Build something!' })
+      .getByRole('button', { name: 'Next' })
+      .click();
 
     // Create collection type
     await page.getByRole('button', { name: 'Create new collection type' }).click();
