@@ -1,3 +1,4 @@
+import { useIsDesktop } from '@strapi/admin/strapi-admin';
 import { Flex, FlexComponent, Typography } from '@strapi/design-system';
 import { Cross, Drag, Pencil } from '@strapi/icons';
 import { styled } from 'styled-components';
@@ -8,6 +9,7 @@ interface CardDragPreviewProps {
 }
 
 const CardDragPreview = ({ label, isSibling = false }: CardDragPreviewProps) => {
+  const isDesktop = useIsDesktop();
   return (
     <FieldContainer
       background={isSibling ? 'neutral100' : 'primary100'}
@@ -20,9 +22,11 @@ const CardDragPreview = ({ label, isSibling = false }: CardDragPreviewProps) => 
       maxWidth="min-content"
     >
       <Flex gap={3}>
-        <DragButton alignItems="center" cursor="all-scroll" padding={3}>
-          <Drag />
-        </DragButton>
+        {isDesktop && (
+          <DragButton alignItems="center" cursor="all-scroll" padding={3}>
+            <Drag />
+          </DragButton>
+        )}
 
         <Typography
           textColor={isSibling ? undefined : 'primary600'}

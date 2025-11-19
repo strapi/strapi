@@ -11,6 +11,7 @@ import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 
@@ -18,6 +19,7 @@ import { LogoInput, LogoInputProps } from './components/LogoInput';
 import { DIMENSION, SIZE } from './utils/constants';
 
 const AdminSeatInfoCE = () => null;
+const AIUageDataCE = () => null;
 
 /* -------------------------------------------------------------------------------------------------
  * ApplicationInfoPage
@@ -26,6 +28,7 @@ const AdminSeatInfoCE = () => null;
 const ApplicationInfoPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
+  const { get } = useFetchClient();
   const { logos: serverLogos, updateProjectSettings } = useConfiguration('ApplicationInfoPage');
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
@@ -47,6 +50,19 @@ const ApplicationInfoPage = () => {
           '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AdminSeatInfo'
         )
       ).AdminSeatInfoEE
+  );
+  const isAiEnabled = window.strapi.ai?.enabled !== false;
+  const AIUsageData = useEnterprise(
+    AIUageDataCE,
+    async () =>
+      (
+        await import(
+          '../../../../../../ee/admin/src/pages/SettingsPage/pages/ApplicationInfoPage/components/AIUsage'
+        )
+      ).AIUsage,
+    {
+      enabled: isAiEnabled,
+    }
   );
 
   const {
@@ -95,11 +111,15 @@ const ApplicationInfoPage = () => {
     return null;
   }
 
+  if (!AIUsageData) {
+    return null;
+  }
+
   const isSaveDisabled =
     logos.auth.custom === serverLogos.auth.custom && logos.menu.custom === serverLogos.menu.custom;
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -152,7 +172,7 @@ const ApplicationInfoPage = () => {
                 </Typography>
 
                 <Grid.Root gap={5} tag="dl">
-                  <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.strapiVersion',
@@ -174,7 +194,7 @@ const ApplicationInfoPage = () => {
                       )}
                     </Flex>
                   </Grid.Item>
-                  <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.edition-title',
@@ -201,7 +221,7 @@ const ApplicationInfoPage = () => {
                     </Flex>
                   </Grid.Item>
 
-                  <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="start">
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.node-version',
@@ -211,6 +231,7 @@ const ApplicationInfoPage = () => {
                     <Typography tag="dd">{nodeVersion}</Typography>
                   </Grid.Item>
                   <AdminSeatInfo />
+                  <AIUsageData />
                 </Grid.Root>
               </Flex>
               {canRead && (
@@ -240,7 +261,7 @@ const ApplicationInfoPage = () => {
                     )}
                   </Typography>
                   <Grid.Root paddingTop={4} gap={4}>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <LogoInput
                         canUpdate={canUpdate}
                         customLogo={logos.menu.custom}
@@ -256,7 +277,7 @@ const ApplicationInfoPage = () => {
                         onChangeLogo={handleChangeLogo('menu')}
                       />
                     </Grid.Item>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <LogoInput
                         canUpdate={canUpdate}
                         customLogo={logos.auth.custom}
@@ -279,7 +300,7 @@ const ApplicationInfoPage = () => {
           </Layouts.Content>
         </form>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 

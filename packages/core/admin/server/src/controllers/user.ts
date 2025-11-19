@@ -121,6 +121,11 @@ export default {
 
   async deleteOne(ctx: Context) {
     const { id } = ctx.params as DeleteOne.Params;
+    const user = ctx.state.user as AdminUser | undefined;
+
+    if (user && user.id === id) {
+      throw new ApplicationError('You cannot delete your own user');
+    }
 
     const deletedUser = await getService('user').deleteById(id);
 
@@ -139,8 +144,14 @@ export default {
    */
   async deleteMany(ctx: Context) {
     const { body } = ctx.request as DeleteMany.Request;
+    const user = ctx.state.user as AdminUser | undefined;
     await validateUsersDeleteInput(body);
+    const idsSet = new Set(body.ids);
 
+    // Prevent self-deletion
+    if (user && idsSet.has(user.id)) {
+      throw new ApplicationError('You cannot delete your own user');
+    }
     const users = await getService('user').deleteByIds(body.ids);
 
     const sanitizedUsers = users.map(getService('user').sanitizeUser);

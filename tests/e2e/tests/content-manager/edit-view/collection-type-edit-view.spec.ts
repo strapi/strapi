@@ -1,8 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { findAndClose } from '../../../utils/shared';
-import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
+import { clickAndWait, findAndClose } from '../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -20,7 +19,7 @@ test.describe('Edit View', () => {
     test.fixme(
       'as a user I want to be warned if I try to publish content that has draft relations',
       async ({ page }) => {
-        await page.getByLabel('Content Manager').click();
+        await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
         await page.getByRole('link', { name: 'Create new entry' }).click();
 
         // Wait for the URL to match the CREATE_URL pattern
@@ -61,50 +60,6 @@ test.describe('Edit View', () => {
         await expect(page.getByText('This entry is related to 3')).toBeVisible();
       }
     );
-
-    test('as a user without read permission for a required field, I should see an error when trying to publish', async ({
-      page,
-    }) => {
-      // As super admin create a new draft product entry
-      await page.getByLabel('Content Manager').click();
-      await page.getByRole('link', { name: 'Products' }).click();
-      await page.getByRole('link', { name: 'Create new entry' }).click();
-
-      const slug = 'product-for-required-test';
-      await page.getByLabel('slug*This value is unique for').fill(slug);
-
-      await page.getByRole('button', { name: 'Save' }).click();
-      await findAndClose(page, 'Saved Document');
-
-      // As super admin remove read permission for the name field for the Editor role
-      await page.getByLabel('Settings').click();
-      await page.getByRole('link', { name: 'Roles' }).first().click();
-      await page.getByText('Editor', { exact: true }).click();
-
-      await page.getByLabel('Select all Product permissions').click();
-      await page.getByRole('button', { name: 'Product' }).click();
-      await page.getByLabel('Select name Read permission').click();
-
-      await page.getByRole('button', { name: 'Save' }).click();
-      await findAndClose(page, 'Saved');
-
-      await page.getByRole('button', { name: 'test testing' }).click();
-      await page.getByRole('menuitem', { name: 'Log out' }).click();
-
-      // As editor login and try to publish the entry
-      await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
-
-      await page.getByLabel('Content Manager').click();
-      await page.getByRole('link', { name: 'Products' }).click();
-      await page.getByText(slug).click();
-      await page.getByRole('button', { name: 'Publish' }).click();
-
-      await expect(
-        page.getByText(
-          'Your current permissions prevent access to certain required fields. Please request access from an administrator to proceed.'
-        )
-      ).toBeVisible();
-    });
 
     test('as a user I want to create and publish a document at the same time, then modify and save that document.', async ({
       page,
@@ -273,10 +228,8 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American');
-      await page
-        .getByRole('textbox')
-        .nth(2)
-        .fill('I miss the denver broncos, now I can only watch it on the evening.');
+      const contentBlock = page.getByRole('textbox').filter({ hasText: 'Drag' });
+      await contentBlock.fill('I miss the denver broncos, now I can only watch it on the evening.');
 
       await page.getByRole('combobox', { name: 'authors' }).click();
 

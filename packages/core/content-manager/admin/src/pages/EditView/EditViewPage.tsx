@@ -7,6 +7,7 @@ import {
   useNotification,
   useQueryParams,
   tours,
+  RESPONSIVE_DEFAULT_SPACING,
 } from '@strapi/admin/strapi-admin';
 import { Grid, Main, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -128,7 +129,7 @@ const EditViewPage = () => {
   };
 
   return (
-    <Main paddingLeft={10} paddingRight={10}>
+    <Main paddingLeft={RESPONSIVE_DEFAULT_SPACING} paddingRight={RESPONSIVE_DEFAULT_SPACING}>
       <Page.Title>{pageTitle}</Page.Title>
       {isSingleType && (
         <tours.contentManager.Introduction>
@@ -193,8 +194,15 @@ const EditViewPage = () => {
                 </>
               ) : null}
             </Tabs.List>
-            <Grid.Root paddingTop={8} gap={4}>
-              <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
+            <Grid.Root
+              paddingTop={{
+                initial: 2,
+                medium: 4,
+                large: 8,
+              }}
+              gap={4}
+            >
+              <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
                 <Tabs.Content value="draft">
                   <tours.contentManager.Fields>
                     <Box />
@@ -205,7 +213,7 @@ const EditViewPage = () => {
                   <FormLayout layout={layout} document={doc} />
                 </Tabs.Content>
               </Grid.Item>
-              <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
+              <Grid.Item col={3} xs={12} direction="column" alignItems="stretch">
                 <Panels />
               </Grid.Item>
             </Grid.Root>

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useDroppable, DndContext, UniqueIdentifier, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useField, useForm } from '@strapi/admin/strapi-admin';
+import { useField, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Modal,
   Box,
@@ -408,6 +408,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
                       {container.children.map((child, childIndex) => (
                         <Grid.Item
                           col={child.size}
+                          xs={12}
                           key={child.dndId}
                           direction="column"
                           alignItems="stretch"
@@ -483,6 +484,7 @@ const TEMP_FIELD_NAME = '_TEMP_';
  * opens a modal  to edit the details of said field.
  */
 const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps) => {
+  const isDesktop = useIsDesktop();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
   const { value } = useField<FormField>(name);
@@ -527,28 +529,31 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
         onClick={() => {
           setIsModalOpen(true);
         }}
+        position="relative"
       >
-        <DragButton
-          ref={setActivatorNodeRef}
-          tag="span"
-          withTooltip={false}
-          label={formatMessage(
-            {
-              id: getTranslation('components.DraggableCard.move.field'),
-              defaultMessage: 'Move {item}',
-            },
-            { item: value.label }
-          )}
-          {...listeners}
-        >
-          <Drag />
-        </DragButton>
+        {isDesktop && (
+          <DragButton
+            ref={setActivatorNodeRef}
+            tag="span"
+            withTooltip={false}
+            label={formatMessage(
+              {
+                id: getTranslation('components.DraggableCard.move.field'),
+                defaultMessage: 'Move {item}',
+              },
+              { item: value.label }
+            )}
+            {...listeners}
+          >
+            <Drag />
+          </DragButton>
+        )}
         <Flex direction="column" alignItems="flex-start" grow={1} overflow="hidden">
           <Flex gap={3} justifyContent="space-between" width="100%">
             <Typography ellipsis fontWeight="bold">
               {value.label}
             </Typography>
-            <Flex>
+            <Flex position="relative">
               <IconButton
                 type="button"
                 variant="ghost"
@@ -597,7 +602,13 @@ const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps
               <Grid.Root gap={4} width="100%">
                 {components[attribute.component].layout.map((row) =>
                   row.map(({ size, ...field }) => (
-                    <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+                    <Grid.Item
+                      key={field.name}
+                      col={size}
+                      xs={12}
+                      direction="column"
+                      alignItems="stretch"
+                    >
                       <Flex
                         alignItems="center"
                         background="neutral0"

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { findAndClose, navToHeader } from '../../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -18,7 +18,7 @@ test.describe('Edit View', () => {
     test.fixme(
       'as a user I want to be warned if I try to publish content that has draft relations on components within a dynamic zone',
       async ({ page }) => {
-        await page.getByLabel('Content Manager').click();
+        await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
         await page.getByRole('link', { name: 'Shop' }).click();
 
         await page.waitForURL(SHOP_URL);
@@ -128,13 +128,11 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
       await page.keyboard.press('Escape'); // close the menu since we're not actioning on it atm.
 
-      await page.getByRole('textbox').nth(2).click();
-      await page
-        .getByRole('textbox')
-        .nth(2)
-        .fill(
-          "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
-        );
+      const contentBlock = page.getByRole('textbox').filter({ hasText: 'Drag' });
+      await contentBlock.click();
+      await contentBlock.fill(
+        "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
+      );
 
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
@@ -200,13 +198,11 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
-      await page.getByRole('textbox').nth(2).click();
-      await page
-        .getByRole('textbox')
-        .nth(2)
-        .fill(
-          "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
-        );
+      const contentBlock = page.getByRole('textbox').filter({ hasText: 'Drag' });
+      await contentBlock.click();
+      await contentBlock.fill(
+        "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
+      );
 
       await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
 
@@ -314,30 +310,42 @@ test.describe('Edit View', () => {
     test('as a user I want to add a component to a dynamic zone at a specific position', async ({
       page,
     }) => {
-      await page.getByLabel('Content Manager').click();
       await navToHeader(page, ['Content Manager', 'Shop'], 'UK Shop');
 
       // There should be a dynamic zone with two components
-      const components = await page
+      const componentsLocator = page
         .getByRole('listitem')
-        .filter({ has: page.getByRole('heading') })
-        .all();
-      expect(components).toHaveLength(3);
-      expect(components[0]).toHaveText(/product carousel/i);
-      expect(components[1]).toHaveText(/content and image/i);
-      expect(components[2]).toHaveText(/product carousel/i);
+        .filter({ has: page.getByRole('heading') });
+      await expect(componentsLocator).toHaveCount(3);
+      await expect(componentsLocator.nth(0)).toHaveText(/product carousel/i);
+      await expect(componentsLocator.nth(1)).toHaveText(/content and image/i);
+      await expect(componentsLocator.nth(2)).toHaveText(/product carousel/i);
 
       // Add components at specific locations:
       // - very last position
-      await components[1].getByRole('button', { name: /more actions/i }).click();
+      const moreActionsBtn1 = componentsLocator
+        .nth(1)
+        .getByRole('button', { name: /more actions/i });
+      await moreActionsBtn1.waitFor({ state: 'visible' });
+      await moreActionsBtn1.click({ force: true });
       await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
       await page.getByRole('menuitem', { name: /product carousel/i }).dispatchEvent('click');
+
       // - very first position
-      await components[0].getByRole('button', { name: /more actions/i }).click();
+      const moreActionsBtn2 = componentsLocator
+        .nth(0)
+        .getByRole('button', { name: /more actions/i });
+      await moreActionsBtn2.waitFor({ state: 'visible' });
+      await moreActionsBtn2.click({ force: true });
       await page.getByRole('menuitem', { name: /add component above/i }).dispatchEvent('click');
       await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
+
       // - middle position
-      await components[1].getByRole('button', { name: /more actions/i }).click();
+      const moreActionsBtn3 = componentsLocator
+        .nth(1)
+        .getByRole('button', { name: /more actions/i });
+      await moreActionsBtn3.waitFor({ state: 'visible' });
+      await moreActionsBtn3.click({ force: true });
       await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
       await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
 

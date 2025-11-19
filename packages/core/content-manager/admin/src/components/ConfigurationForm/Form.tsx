@@ -84,7 +84,7 @@ const ConfigurationForm = ({
   }, [layout, settings]);
 
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Form initialValues={initialValues} onSubmit={onSubmit} method="PUT">
           <Header name={settings.displayName ?? ''} />
@@ -108,7 +108,7 @@ const ConfigurationForm = ({
                 })}
               </Typography>
               <Grid.Root>
-                <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                   <InputRenderer
                     type="enumeration"
                     label={formatMessage({
@@ -176,7 +176,7 @@ const ConfigurationForm = ({
           </Layouts.Content>
         </Form>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import { ProvidersOptions } from '../../../shared/contracts/admin';
 import {
-  type RenewToken,
+  type AccessTokenExchange,
   type Login,
   type ResetPassword,
   type RegisterAdmin,
@@ -10,7 +10,12 @@ import {
 } from '../../../shared/contracts/authentication';
 import { Check } from '../../../shared/contracts/permissions';
 import { GetProviders, IsSSOLocked } from '../../../shared/contracts/providers';
-import { type GetOwnPermissions, type GetMe, type UpdateMe } from '../../../shared/contracts/users';
+import {
+  type GetOwnPermissions,
+  type GetMe,
+  type UpdateMe,
+  type GetAiToken,
+} from '../../../shared/contracts/users';
 
 import { adminApi } from './api';
 
@@ -53,6 +58,15 @@ const authService = adminApi
         },
         invalidatesTags: ['Me'],
       }),
+      getAiToken: builder.query<GetAiToken.Response['data'], void>({
+        query: () => ({
+          method: 'GET',
+          url: '/admin/users/me/ai-token',
+        }),
+        transformResponse(res: GetAiToken.Response) {
+          return res.data;
+        },
+      }),
       /**
        * Permissions
        */
@@ -77,10 +91,11 @@ const authService = adminApi
         },
         invalidatesTags: ['Me'],
       }),
-      logout: builder.mutation<void, void>({
-        query: () => ({
+      logout: builder.mutation<void, { deviceId?: string } | void>({
+        query: (body) => ({
           method: 'POST',
           url: '/admin/logout',
+          data: body,
         }),
       }),
       resetPassword: builder.mutation<
@@ -96,13 +111,16 @@ const authService = adminApi
           return res.data;
         },
       }),
-      renewToken: builder.mutation<RenewToken.Response['data'], RenewToken.Request['body']>({
+      accessTokenExchange: builder.mutation<
+        AccessTokenExchange.Response['data'],
+        AccessTokenExchange.Request['body']
+      >({
         query: (body) => ({
           method: 'POST',
-          url: '/admin/renew-token',
+          url: '/admin/access-token',
           data: body,
         }),
-        transformResponse(res: RenewToken.Response) {
+        transformResponse(res: AccessTokenExchange.Response) {
           return res.data;
         },
       }),
@@ -193,7 +211,7 @@ const authService = adminApi
         invalidatesTags: ['ProvidersOptions'],
       }),
     }),
-    overrideExisting: false,
+    overrideExisting: true,
   });
 
 const {
@@ -201,7 +219,7 @@ const {
   useLazyCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
-  useRenewTokenMutation,
+  useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
   useResetPasswordMutation,
@@ -210,6 +228,8 @@ const {
   useGetRegistrationInfoQuery,
   useForgotPasswordMutation,
   useGetMyPermissionsQuery,
+  useGetAiTokenQuery,
+  useLazyGetAiTokenQuery,
   useIsSSOLockedQuery,
   useGetProvidersQuery,
   useGetProviderOptionsQuery,
@@ -221,7 +241,7 @@ export {
   useLazyCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
-  useRenewTokenMutation,
+  useAccessTokenExchangeMutation,
   useLogoutMutation,
   useUpdateMeMutation,
   useResetPasswordMutation,
@@ -230,6 +250,8 @@ export {
   useGetRegistrationInfoQuery,
   useForgotPasswordMutation,
   useGetMyPermissionsQuery,
+  useGetAiTokenQuery,
+  useLazyGetAiTokenQuery,
   useIsSSOLockedQuery,
   useGetProvidersQuery,
   useGetProviderOptionsQuery,

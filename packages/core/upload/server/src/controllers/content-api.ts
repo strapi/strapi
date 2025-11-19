@@ -134,7 +134,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const uploadedFiles = await getService('upload').upload({
         data,
-        files,
+        files: Array.isArray(files) ? files : [files],
       });
 
       ctx.body = await sanitizeOutput(uploadedFiles as any, ctx);
