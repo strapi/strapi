@@ -76,6 +76,7 @@ const ListViewPage = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
   usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
+  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
 
   const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);

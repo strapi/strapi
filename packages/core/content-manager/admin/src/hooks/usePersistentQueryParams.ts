@@ -1,38 +1,43 @@
 import { useEffect } from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
+import get from 'lodash/get';
+import set from 'lodash/set';
 import { useLocation } from 'react-router-dom';
 
-const filterObjectKeys = (obj: object, keys: string[]) => {
-  return keys.reduce(
-    (prev, curr) => {
-      if (Object.hasOwn(obj, curr)) {
-        return {
-          ...prev,
-          // @ts-expect-error – this is fine, if you want to fix it, please do.
-          [curr]: obj[curr],
-        };
-      }
+type PropertyPath = Parameters<typeof get>[1];
 
-      return prev;
-    },
-    {} as Record<string, unknown>
-  );
+const filterObjectKeys = (obj: object, keys: PropertyPath[]) => {
+  const result: Record<string, unknown> = {};
+
+  for (const path of keys) {
+    const value = get(obj, path);
+
+    if (value !== undefined) {
+      set(result, path, value);
+    }
+  }
+
+  return result;
 };
 
-export const usePersistentPartialQueryParams = (keyPrefix: string, keysToPersist: string[]) => {
+export const usePersistentPartialQueryParams = (
+  keyPrefix: string,
+  keysToPersist: PropertyPath[],
+  pathnameInKey = true
+) => {
   const { pathname } = useLocation();
   const [{ query }, setQuery] = useQueryParams();
-  const localStorageKey = `${keyPrefix}${pathname}`;
+  const localStorageKey = `${keyPrefix}${pathnameInKey ? pathname : ''}`;
 
   // load query params from local storge
   useEffect(() => {
     const savedQueryParams = window.localStorage.getItem(localStorageKey);
     if (!savedQueryParams) return;
 
-    let parsedSavedParams;
+    let parsedSavedParams: Record<string, unknown>;
     try {
-      parsedSavedParams = JSON.parse(savedQueryParams) as object;
+      parsedSavedParams = JSON.parse(savedQueryParams);
     } catch {
       return;
     }
