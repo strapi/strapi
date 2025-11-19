@@ -162,7 +162,7 @@ describe('Env helper', () => {
       expect(envHelper.oneOf('NO_VAR', ['lorem', 'ipsum'], 'ipsum')).toBe('ipsum');
     });
 
-    test('Return defaultValue if value exists and but is not in expectedValues', () => {
+    test('Return defaultValue if value exists but is not in expectedValues', () => {
       process.env.WITH_VAR = 'test';
       expect(envHelper.oneOf('WITH_VAR', ['lorem', 'ipsum'], 'ipsum')).toBe('ipsum');
     });
