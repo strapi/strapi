@@ -44,7 +44,7 @@ export const usePersistentPartialQueryParams = (
     if (Object.keys(parsedSavedParams).length === 0) return;
 
     const filteredQuery = filterObjectKeys(parsedSavedParams, keysToPersist);
-    setQuery({ ...query, ...filteredQuery }, 'push', true);
+    setQuery({ ...filteredQuery, ...query }, 'push', true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localStorageKey]);
 
