@@ -51,10 +51,15 @@ const command = () => {
             exitWith(1, 'Only one remote source (from) or destination (to) option may be provided')
         )
       )
-      .hook('preAction', async (thisCommand) => {
-        const opts = thisCommand.opts();
-        const hasEnvUrl = process.env.STRAPI_TRANSFER_URL;
-        const hasEnvToken = process.env.STRAPI_TRANSFER_TOKEN;
+      .hook(
+        'preAction',
+        ifOptions(
+          // Only run interactive prompts if neither --from nor --to is provided
+          (opts) => !opts.from && !opts.to,
+          async (thisCommand) => {
+            const opts = thisCommand.opts();
+            const hasEnvUrl = process.env.STRAPI_TRANSFER_URL;
+            const hasEnvToken = process.env.STRAPI_TRANSFER_TOKEN;
 
         const logDocumentation = () => {
           console.info(
@@ -97,10 +102,10 @@ const command = () => {
           logEnvironmentVariables();
 
           if (opts.from) {
-            return opts.from;
+            return 'from';
           }
           if (opts.to) {
-            return opts.to;
+            return 'to';
           }
 
           const { dir } = await inquirer.prompt([
@@ -180,7 +185,9 @@ const command = () => {
         const direction = await determineDirection();
         opts[direction] = await determineUrl(direction);
         opts[`${direction}Token`] = await determineToken(direction);
-      })
+          }
+        )
+      )
       // If --from is used, validate the URL and token
       .hook(
         'preAction',

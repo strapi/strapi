@@ -89,6 +89,7 @@ describe('Transfer', () => {
   const destinationToken = 'test-token';
 
   const sourceUrl = new URL('http://two.localhost/admin');
+  const sourceToken = 'test-source-token';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -171,7 +172,58 @@ describe('Transfer', () => {
     });
   });
 
-  it.todo('uses local Strapi destination when to is not specified');
+  describe('--from', () => {
+    it('exits with error when auth is not provided', async () => {
+      await expectExit(1, async () => {
+        await transferAction({ to: undefined, from: sourceUrl } as any);
+      });
+
+      expect(console.error).toHaveBeenCalledWith(expect.stringMatching(/missing token/i));
+
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).not.toHaveBeenCalled();
+    });
+
+    it('uses source url and token provided by user', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+        } as any);
+      });
+
+      expect(console.error).not.toHaveBeenCalled();
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: sourceUrl,
+          auth: {
+            type: 'token',
+            token: sourceToken,
+          },
+        })
+      );
+    });
+
+    it('uses local Strapi destination when to is not specified', async () => {
+      await expectExit(0, async () => {
+        await transferAction({
+          to: undefined,
+          from: sourceUrl,
+          fromToken: sourceToken,
+        } as any);
+      });
+
+      expect(console.error).not.toHaveBeenCalled();
+      expect(mockDataTransfer.strapi.providers.createLocalStrapiDestinationProvider).toHaveBeenCalled();
+      expect(
+        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+      ).toHaveBeenCalled();
+    });
+  });
 
   it('uses restore as the default strategy', async () => {
     await expectExit(0, async () => {
