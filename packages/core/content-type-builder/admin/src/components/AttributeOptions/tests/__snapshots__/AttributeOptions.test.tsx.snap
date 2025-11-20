@@ -102,6 +102,17 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   min-width: 100%;
 }
 
+.c14 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+}
+
+.c16 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
 .c12 {
   height: 1px;
   border: none;
@@ -170,17 +181,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 .c7[data-disabled] {
   cursor: not-allowed;
   color: #a5a5ba;
-}
-
-.c14 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 12px;
-}
-
-.c16 {
-  grid-column: span 12;
-  max-width: 100%;
 }
 
 .c21 svg {

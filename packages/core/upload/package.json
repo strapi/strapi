@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upload",
-  "version": "5.30.0",
+  "version": "5.31.1",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -62,13 +62,14 @@
   "dependencies": {
     "@mux/mux-player-react": "3.1.0",
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "2.0.0-rc.30",
-    "@strapi/icons": "2.0.0-rc.30",
-    "@strapi/provider-upload-local": "5.30.0",
-    "@strapi/utils": "5.30.0",
+    "@strapi/design-system": "2.0.1",
+    "@strapi/icons": "2.0.1",
+    "@strapi/provider-upload-local": "5.31.1",
+    "@strapi/utils": "5.31.1",
     "byte-size": "8.1.1",
     "cropperjs": "1.6.1",
     "date-fns": "2.30.0",
+    "file-type": "21.0.0",
     "formik": "2.4.5",
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
@@ -88,8 +89,8 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.30.0",
-    "@strapi/types": "5.30.0",
+    "@strapi/admin": "5.31.1",
+    "@strapi/types": "5.31.1",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -115,7 +116,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {
