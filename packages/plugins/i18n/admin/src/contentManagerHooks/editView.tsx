@@ -1,15 +1,16 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
+import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content-manager/strapi-admin';
 import { Flex, Tooltip, VisuallyHidden } from '@strapi/design-system';
 import { Earth } from '@strapi/icons';
-import { MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
+import { useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { getTranslation } from '../utils/getTranslation';
 
 import type { EditFieldLayout, EditLayout } from '@strapi/content-manager/strapi-admin';
-
 interface MutateEditViewArgs {
   layout: EditLayout;
 }
@@ -48,61 +49,39 @@ const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs 
   } satisfies Pick<MutateEditViewArgs, 'layout'>;
 };
 
-const addLabelActionToField = (field: EditFieldLayout) => {
-  const isFieldLocalized = doesFieldHaveI18nPluginOpt(field.attribute.pluginOptions)
-    ? field.attribute.pluginOptions.i18n.localized
-    : true || ['uid', 'relation'].includes(field.attribute.type);
-
-  const labelActionProps = {
-    title: {
-      id: isFieldLocalized
-        ? getTranslation('Field.localized')
-        : getTranslation('Field.not-localized'),
-      defaultMessage: isFieldLocalized
-        ? 'This value is unique for the selected locale'
-        : 'This value is the same across all locales',
-    },
-    icon: isFieldLocalized ? <Earth /> : null,
-  };
-
-  return {
-    ...field,
-    labelAction: isFieldLocalized ? <LabelAction {...labelActionProps} /> : null,
-  };
-};
-
-const doesFieldHaveI18nPluginOpt = (
-  pluginOpts?: object
-): pluginOpts is { i18n: { localized: boolean } } => {
-  if (!pluginOpts) {
-    return false;
-  }
-
-  return (
-    'i18n' in pluginOpts &&
-    typeof pluginOpts.i18n === 'object' &&
-    pluginOpts.i18n !== null &&
-    'localized' in pluginOpts.i18n
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * LabelAction
- * -----------------------------------------------------------------------------------------------*/
+const addLabelActionToField = (field: EditFieldLayout) => ({
+  ...field,
+  labelAction: <LabelAction name={field.name} attribute={field.attribute} />,
+});
 
 interface LabelActionProps {
-  title: MessageDescriptor;
-  icon: React.ReactNode;
+  name: string;
+  attribute: EditFieldLayout['attribute'];
 }
 
-const LabelAction = ({ title, icon }: LabelActionProps) => {
+const LabelAction = ({ name, attribute }: LabelActionProps) => {
   const { formatMessage } = useIntl();
+  const { slug: model } = useParams<{ slug: string }>();
+  const { edit } = useDocumentLayout(model!);
+
+  const isLocalized = React.useMemo<boolean>(() => {
+    return getEffectiveLocalization(name, attribute, edit);
+  }, [name, attribute, edit]);
+
+  if (!isLocalized) {
+    return null;
+  }
+
+  const title = {
+    id: getTranslation('Field.localized'),
+    defaultMessage: 'This value is unique for the selected locale',
+  } as const;
 
   return (
     <Span tag="span">
       <VisuallyHidden tag="span">{formatMessage(title)}</VisuallyHidden>
       <Tooltip label={formatMessage(title)}>
-        {React.cloneElement(icon as React.ReactElement, {
+        {React.cloneElement((<Earth />) as React.ReactElement, {
           'aria-hidden': true,
           focusable: false, // See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable
         })}
@@ -123,5 +102,60 @@ const Span = styled(Flex)`
     }
   }
 `;
+
+/**
+ * Compute effective localization for a specific field occurrence based on:
+ * - Content type i18n setting
+ * - Ancestor attribute (dynamic zone or component) i18n setting
+ * - Field-level i18n setting for root fields
+ */
+const getEffectiveLocalization = (
+  name: string,
+  attribute: EditFieldLayout['attribute'],
+  edit: EditLayout
+): boolean => {
+  const contentTypeLocalized =
+    !!(edit.options as any)?.i18n && !!(edit.options as any).i18n.localized;
+
+  if (!contentTypeLocalized) {
+    return false;
+  }
+
+  const path = name.split('.');
+  const topLevelAttrName = path[0];
+  const topLevelField = findTopLevelField(edit, topLevelAttrName);
+  if (!topLevelField) {
+    return false;
+  }
+
+  // If the top-level attribute is a component or a dynamic zone, all nested fields inherit it.
+  if (
+    topLevelField.attribute.type === 'component' ||
+    topLevelField.attribute.type === 'dynamiczone'
+  ) {
+    return getBooleanLocalized(getPluginOptions(topLevelField.attribute));
+  }
+
+  // Otherwise, we're dealing with a root-level field.
+  return getBooleanLocalized(getPluginOptions(attribute));
+};
+
+const getBooleanLocalized = (pluginOptions?: unknown): boolean => {
+  if (pluginOptions && typeof pluginOptions === 'object') {
+    const i18n = (pluginOptions as { i18n?: { localized?: boolean } }).i18n;
+    return i18n?.localized === true;
+  }
+  return false;
+};
+
+const getPluginOptions = (attr: EditFieldLayout['attribute']) => {
+  return attr && typeof attr === 'object' && 'pluginOptions' in (attr as object)
+    ? (attr as { pluginOptions?: unknown }).pluginOptions
+    : undefined;
+};
+
+const findTopLevelField = (edit: EditLayout, name: string) => {
+  return edit.layout.flat(2).find((f) => f.name === name) ?? undefined;
+};
 
 export { mutateEditViewHook };

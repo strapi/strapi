@@ -310,6 +310,13 @@ const RepeatableComponent = ({
                           defaultMessage: field.label,
                         });
 
+                        const clonedLabelAction = React.isValidElement(field.labelAction)
+                          ? React.cloneElement(field.labelAction as React.ReactElement, {
+                              name: completeFieldName,
+                              attribute: field.attribute,
+                            })
+                          : field.labelAction;
+
                         return (
                           <ResponsiveGridItem
                             col={size}
@@ -323,6 +330,7 @@ const RepeatableComponent = ({
                               ...field,
                               label: translatedLabel,
                               name: completeFieldName,
+                              labelAction: clonedLabelAction,
                               document: currentDocument,
                             })}
                           </ResponsiveGridItem>

@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { useField, createRulesEngine } from '@strapi/admin/strapi-admin';
 import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -64,6 +66,13 @@ const NonRepeatableComponent = ({
                     defaultMessage: field.label,
                   });
 
+                  const clonedLabelAction = React.isValidElement(field.labelAction)
+                    ? React.cloneElement(field.labelAction as React.ReactElement, {
+                        name: completeFieldName,
+                        attribute: field.attribute,
+                      })
+                    : field.labelAction;
+
                   return (
                     <ResponsiveGridItem
                       col={size}
@@ -77,6 +86,7 @@ const NonRepeatableComponent = ({
                         ...field,
                         label: translatedLabel,
                         name: completeFieldName,
+                        labelAction: clonedLabelAction,
                         document: currentDocument,
                       })}
                     </ResponsiveGridItem>
