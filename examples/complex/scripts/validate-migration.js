@@ -4052,11 +4052,38 @@ async function validateComponentRelationPublicationState(strapi) {
 
           const targets = await db(targetMeta.tableName)
             .whereIn('id', targetIds)
-            .select('id', 'published_at');
+            .select('id', 'published_at', 'document_id');
 
           const targetPublicationState = new Map(
             targets.map((t) => [t.id, t.published_at !== null ? 'published' : 'draft'])
           );
+
+          // Build map from draft target ID to published target ID (using document_id)
+          // This helps us check if a draft target has a corresponding published target
+          const draftToPublishedTargetMap = new Map();
+          if (targetHasDP) {
+            const targetsByDocumentId = new Map();
+            for (const target of targets) {
+              const docId = target.document_id;
+              // Skip targets without document_id (shouldn't happen after migration, but be safe)
+              if (!docId) continue;
+              if (!targetsByDocumentId.has(docId)) {
+                targetsByDocumentId.set(docId, { published: null, draft: null });
+              }
+              const docTargets = targetsByDocumentId.get(docId);
+              if (target.published_at !== null) {
+                docTargets.published = target.id;
+              } else {
+                docTargets.draft = target.id;
+              }
+            }
+            // Build reverse map: draft ID -> published ID
+            for (const [docId, docTargets] of targetsByDocumentId.entries()) {
+              if (docTargets.draft && docTargets.published) {
+                draftToPublishedTargetMap.set(docTargets.draft, docTargets.published);
+              }
+            }
+          }
 
           // Build map from component ID to entity ID
           const componentToEntity = new Map();
@@ -4066,7 +4093,8 @@ async function validateComponentRelationPublicationState(strapi) {
             }
           }
 
-          // Check each relation for publication state mismatch
+          // Track relations per component to check for data loss
+          const componentRelationsMap = new Map();
           for (const relation of relations) {
             const componentId = relation[sourceColumn];
             const targetId = relation[targetColumn];
@@ -4079,6 +4107,13 @@ async function validateComponentRelationPublicationState(strapi) {
 
             if (!entityState || !targetState) continue;
 
+            // Track all relations for this component
+            if (!componentRelationsMap.has(componentId)) {
+              componentRelationsMap.set(componentId, []);
+            }
+            const componentRels = componentRelationsMap.get(componentId);
+            componentRels.push({ targetId, targetState });
+
             // Draft components should point to draft targets (this is the critical issue to fix)
             // If a draft component points to a published target, it should have been converted
             // to point to the draft version of that target during migration.
@@ -4087,9 +4122,75 @@ async function validateComponentRelationPublicationState(strapi) {
                 `[Component Publication State Mismatch] Draft entity ${uid}:${entityId} has component ${componentType}:${componentId} with relation ${attrName} pointing to published target ${targetUid}:${targetId}. Draft components should point to draft targets. This should have been converted during migration.`
               );
             }
-            // Published components pointing to draft targets: This is technically invalid but may have
-            // existed in v4. We leave these alone (don't validate or fix them) as they're pre-existing
-            // invalid state, not something we created during migration.
+          }
+
+          // Check for data loss: published components should have the correct published -> published relation
+          // If a published component points to a draft target, check if it also has the corresponding
+          // published target. If not, it's data loss. If yes, it's a duplicate issue.
+          for (const [componentId, componentRels] of componentRelationsMap.entries()) {
+            const entityId = componentToEntity.get(componentId);
+            if (!entityId) continue;
+
+            const entityState = entityPublicationState.get(entityId);
+            if (entityState !== 'published') continue;
+
+            const publishedTargets = componentRels.filter((rel) => rel.targetState === 'published');
+            const draftTargets = componentRels.filter((rel) => rel.targetState === 'draft');
+
+            // If published component has draft targets, check if corresponding published targets exist
+            if (draftTargets.length > 0) {
+              const missingPublishedTargets = [];
+              for (const draftRel of draftTargets) {
+                const correspondingPublishedId = draftToPublishedTargetMap.get(draftRel.targetId);
+                if (correspondingPublishedId) {
+                  // Check if component has relation to the corresponding published target
+                  const hasCorrespondingPublished = publishedTargets.some(
+                    (rel) => rel.targetId === correspondingPublishedId
+                  );
+                  if (!hasCorrespondingPublished) {
+                    missingPublishedTargets.push({
+                      draftId: draftRel.targetId,
+                      publishedId: correspondingPublishedId,
+                    });
+                  }
+                }
+              }
+
+              if (missingPublishedTargets.length > 0) {
+                // Actual data loss: published component points to draft targets but missing corresponding published targets
+                const missingIds = missingPublishedTargets
+                  .map(
+                    (m) => `draft ${m.draftId} (should also point to published ${m.publishedId})`
+                  )
+                  .join(', ');
+                errors.push(
+                  `[Component Publication State Mismatch - Data Loss] Published entity ${uid}:${entityId} has component ${componentType}:${componentId} with relation ${attrName} pointing to draft targets but missing corresponding published targets: ${missingIds}. This indicates the original published -> published relations were lost during migration, causing data loss.`
+                );
+              } else if (publishedTargets.length > 0) {
+                // Duplicate issue: published component has both published and draft targets
+                // (will cause data loss when cleanup scripts run)
+                const draftTargetIds = draftTargets.map((r) => r.targetId).join(', ');
+                errors.push(
+                  `[Component Publication State Mismatch] Published entity ${uid}:${entityId} has component ${componentType}:${componentId} with relation ${attrName} pointing to BOTH published and draft targets (draft targets: ${draftTargetIds}). The draft target relations were incorrectly created during migration and will cause data loss when cleanup scripts run.`
+                );
+              } else {
+                // Only draft targets, but no corresponding published targets found
+                // This could be because the draft targets don't have published counterparts
+                // (e.g., they were created as drafts only). Check if any draft targets should have published counterparts.
+                const draftTargetIds = draftTargets.map((r) => r.targetId).join(', ');
+                const hasAnyCorrespondingPublished = draftTargets.some((rel) =>
+                  draftToPublishedTargetMap.has(rel.targetId)
+                );
+                if (hasAnyCorrespondingPublished) {
+                  // Some draft targets have published counterparts, but component doesn't point to them
+                  errors.push(
+                    `[Component Publication State Mismatch - Data Loss] Published entity ${uid}:${entityId} has component ${componentType}:${componentId} with relation ${attrName} that ONLY points to draft targets (${draftTargetIds}), but some of these draft targets have corresponding published targets that should be referenced instead. This indicates the original published -> published relations were lost during migration, causing data loss.`
+                  );
+                }
+                // If no corresponding published targets exist, this might be acceptable
+                // (e.g., if the targets were created as drafts only in v4)
+              }
+            }
           }
         }
       }
