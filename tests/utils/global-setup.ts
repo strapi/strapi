@@ -51,7 +51,7 @@ async function globalSetup() {
   await setGuidedTourLocalStorage(page, STRAPI_GUIDED_TOUR_CONFIG);
 
   // Save the storage state to be used by all tests - save it in the e2e directory
-  const storageStatePath = path.join(__dirname, '..', 'playwright-storage-state.json');
+  const storageStatePath = path.join(__dirname, '..', 'e2e', 'playwright-storage-state.json');
   await context.storageState({ path: storageStatePath });
 
   await browser.close();
