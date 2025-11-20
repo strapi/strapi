@@ -3493,17 +3493,18 @@ async function validateComponentRelationTargets(strapi) {
         }
       } else {
         draftEntriesChecked += 1;
-        // Note: The migration may map all targets to drafts, which is acceptable.
-        // We only warn if there are no targets at all.
+        // Draft entries MUST only reference draft targets, not published ones
+        // This is a hard requirement - draft->published relations will be cleaned up by
+        // the unidirectional join table operation, causing data loss.
+        if (entryPublishedTargets > 0) {
+          errors.push(
+            `basic-dp draft entry ${entry.id}: has ${entryPublishedTargets} text-block(s) pointing to published basic-dp entries (drafts must only reference drafts)`
+          );
+        }
+        // We only error if there are no targets at all.
         if (entryPublishedTargets === 0 && entryDraftTargets === 0) {
           errors.push(
             `basic-dp draft entry ${entry.id}: expected at least one text-block with a relatedBasicDp relation`
-          );
-        }
-        // Only warn about missing published targets (soft requirement)
-        if (entryPublishedTargets === 0 && entryDraftTargets > 0) {
-          warnings.push(
-            `basic-dp draft entry ${entry.id}: all text-blocks target draft basic-dp entries (expected at least one published target)`
           );
         }
       }
@@ -3865,6 +3866,24 @@ async function validateComponentRelationTargets(strapi) {
         }
 
         const componentId = section?.id || 'unknown';
+        const sectionTarget = section?.relatedBasicDp;
+
+        // For draft entries, ensure sections also only reference draft targets
+        if (isDraft && sectionTarget) {
+          if (sectionTarget.publishedAt) {
+            errors.push(
+              `relation-dp draft entry ${entry.id}: sections text-block ${componentId} points to published basic-dp ${sectionTarget.id} instead of a draft version`
+            );
+          } else {
+            const targetDocs = basicDpByDocumentId.get(sectionTarget.documentId);
+            if (targetDocs && !targetDocs.drafts.some((draft) => draft.id === sectionTarget.id)) {
+              errors.push(
+                `relation-dp draft entry ${entry.id}: sections text-block ${componentId} points to basic-dp ${sectionTarget.id}, but that draft version was not found in the documentId group ${sectionTarget.documentId}`
+              );
+            }
+          }
+        }
+
         ensureSelfRelationTarget(entry, componentId, 'sections', section?.relatedRelationDp);
       }
     }
@@ -3892,6 +3911,197 @@ async function validateComponentRelationTargets(strapi) {
     }
   } catch (error) {
     errors.push(`Failed to validate relation-dp component targets: ${error.message}`);
+    console.error(error);
+  }
+
+  return { errors, warnings };
+}
+
+/**
+ * Validates that component relations respect publication state consistency:
+ * - Draft components should have relations to draft targets (when target has D&P)
+ * - Published components should have relations to published targets (when target has D&P)
+ *
+ * This catches the bug where the migration creates:
+ * - Draft components pointing to published targets (should be draft targets)
+ * - Published components pointing to draft targets (should be published targets)
+ */
+async function validateComponentRelationPublicationState(strapi) {
+  console.log('\n🔍 Validating component relation publication state consistency...\n');
+
+  const errors = [];
+  const warnings = [];
+
+  try {
+    if (!knex) {
+      warnings.push('Cannot validate component publication state: knex not available');
+      console.log('⚠️  knex not available, skipping component publication state validation');
+      return { errors: [], warnings };
+    }
+
+    const db = strapi.db.connection;
+
+    // Get all content types with draft/publish
+    const dpContentTypes = Object.values(strapi.contentTypes).filter(
+      (ct) => ct?.options?.draftAndPublish
+    );
+
+    for (const contentType of dpContentTypes) {
+      const uid = contentType.uid;
+      const meta = strapi.db.metadata.get(uid);
+      if (!meta) continue;
+
+      const collectionName = contentType.collectionName;
+      if (!collectionName) continue;
+
+      const identifiers = strapi.db.metadata.identifiers;
+      const componentJoinTableName = identifiers.getNameFromTokens([
+        { name: collectionName, compressible: true },
+        { name: 'components', shortName: 'cmps', compressible: false },
+      ]);
+      const entityIdColumn = identifiers.getNameFromTokens([
+        { name: 'entity', compressible: false },
+        { name: 'id', compressible: false },
+      ]);
+      const componentIdColumn = identifiers.getNameFromTokens([
+        { name: 'component', shortName: 'cmp', compressible: false },
+        { name: 'id', compressible: false },
+      ]);
+      const componentTypeColumn = identifiers.getNameFromTokens([
+        { name: 'component_type', compressible: false },
+      ]);
+
+      // Check if component join table exists
+      const hasComponentTable = await db.schema.hasTable(componentJoinTableName);
+      if (!hasComponentTable) continue;
+
+      // Get all component relations for this content type
+      const componentRelations = await db(componentJoinTableName).select('*');
+
+      if (componentRelations.length === 0) continue;
+
+      // Group by entity ID to check publication state
+      const relationsByEntity = new Map();
+      for (const rel of componentRelations) {
+        const entityId = rel[entityIdColumn];
+        if (!relationsByEntity.has(entityId)) {
+          relationsByEntity.set(entityId, []);
+        }
+        relationsByEntity.get(entityId).push(rel);
+      }
+
+      // Get entity publication states
+      const entityIds = Array.from(relationsByEntity.keys());
+      const entities = await db(meta.tableName)
+        .whereIn('id', entityIds)
+        .select('id', 'published_at');
+
+      const entityPublicationState = new Map(
+        entities.map((e) => [e.id, e.published_at !== null ? 'published' : 'draft'])
+      );
+
+      // Get all component IDs to check their relations
+      const componentIds = [...new Set(componentRelations.map((r) => r[componentIdColumn]))];
+      const componentTypes = [...new Set(componentRelations.map((r) => r[componentTypeColumn]))];
+
+      // For each component type, check its relations
+      for (const componentType of componentTypes) {
+        const componentMeta = strapi.db.metadata.get(componentType);
+        if (!componentMeta) continue;
+
+        // Check all relation attributes in the component
+        for (const [attrName, attr] of Object.entries(componentMeta.attributes || {})) {
+          if (attr.type !== 'relation' || !attr.joinTable) continue;
+
+          const targetUid = attr.target;
+          if (!targetUid) continue;
+
+          // Check if target has draft/publish
+          const targetContentType = strapi.contentTypes[targetUid];
+          const targetHasDP = targetContentType?.options?.draftAndPublish;
+          if (!targetHasDP) continue; // Skip if target doesn't have D&P
+
+          const relationJoinTable = attr.joinTable.name;
+          const sourceColumn = attr.joinTable.joinColumn.name;
+          const targetColumn = attr.joinTable.inverseJoinColumn.name;
+
+          // Check if relation join table exists
+          const hasRelationTable = await db.schema.hasTable(relationJoinTable);
+          if (!hasRelationTable) continue;
+
+          // Get all relations from components of this type
+          const componentTypeIds = componentRelations
+            .filter((r) => r[componentTypeColumn] === componentType)
+            .map((r) => r[componentIdColumn]);
+
+          if (componentTypeIds.length === 0) continue;
+
+          // Get relations from these components
+          const relations = await db(relationJoinTable)
+            .whereIn(sourceColumn, componentTypeIds)
+            .select(sourceColumn, targetColumn);
+
+          if (relations.length === 0) continue;
+
+          // Get target publication states
+          const targetMeta = strapi.db.metadata.get(targetUid);
+          if (!targetMeta) continue;
+
+          const targetIds = [...new Set(relations.map((r) => r[targetColumn]).filter(Boolean))];
+          if (targetIds.length === 0) continue;
+
+          const targets = await db(targetMeta.tableName)
+            .whereIn('id', targetIds)
+            .select('id', 'published_at');
+
+          const targetPublicationState = new Map(
+            targets.map((t) => [t.id, t.published_at !== null ? 'published' : 'draft'])
+          );
+
+          // Build map from component ID to entity ID
+          const componentToEntity = new Map();
+          for (const rel of componentRelations) {
+            if (rel[componentTypeColumn] === componentType) {
+              componentToEntity.set(rel[componentIdColumn], rel[entityIdColumn]);
+            }
+          }
+
+          // Check each relation for publication state mismatch
+          for (const relation of relations) {
+            const componentId = relation[sourceColumn];
+            const targetId = relation[targetColumn];
+            const entityId = componentToEntity.get(componentId);
+
+            if (!entityId || !targetId) continue;
+
+            const entityState = entityPublicationState.get(entityId);
+            const targetState = targetPublicationState.get(targetId);
+
+            if (!entityState || !targetState) continue;
+
+            // Draft components should point to draft targets (this is the critical issue to fix)
+            // If a draft component points to a published target, it should have been converted
+            // to point to the draft version of that target during migration.
+            if (entityState === 'draft' && targetState === 'published') {
+              errors.push(
+                `[Component Publication State Mismatch] Draft entity ${uid}:${entityId} has component ${componentType}:${componentId} with relation ${attrName} pointing to published target ${targetUid}:${targetId}. Draft components should point to draft targets. This should have been converted during migration.`
+              );
+            }
+            // Published components pointing to draft targets: This is technically invalid but may have
+            // existed in v4. We leave these alone (don't validate or fix them) as they're pre-existing
+            // invalid state, not something we created during migration.
+          }
+        }
+      }
+    }
+
+    if (errors.length === 0) {
+      console.log('✅ All component relations have correct publication state consistency');
+    } else {
+      console.log(`❌ Found ${errors.length} component relation publication state mismatch(es)`);
+    }
+  } catch (error) {
+    errors.push(`Failed to validate component publication state: ${error.message}`);
     console.error(error);
   }
 
@@ -4780,6 +4990,10 @@ async function validate(options = {}) {
     // Validate component relation targets
     const componentRelationTargetsResult = await validateComponentRelationTargets(app);
     allErrors.push(...(componentRelationTargetsResult.errors || []));
+
+    // Validate component relation publication state consistency
+    const componentPublicationStateResult = await validateComponentRelationPublicationState(app);
+    allErrors.push(...(componentPublicationStateResult.errors || []));
 
     // Additional comprehensive validations
     const orphanedRelationsErrors = await validateOrphanedRelations(app);
