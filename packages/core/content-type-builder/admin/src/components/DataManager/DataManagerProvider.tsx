@@ -45,7 +45,15 @@ const selectState = (state: Record<string, unknown>) =>
  * Generates a unique session identifier for CTB tracking
  */
 const generateSessionId = (): string => {
-  return `ctb-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+  // Use cryptographically secure random number generator
+  const randomBytes = new Uint8Array(8);
+  window.crypto.getRandomValues(randomBytes);
+  // Convert to base36 string (similar to Math.random().toString(36))
+  const randomString = Array.from(randomBytes)
+    .map((byte) => byte.toString(36))
+    .join('')
+    .substring(0, 13);
+  return `ctb-${Date.now()}-${randomString}`;
 };
 
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
