@@ -83,7 +83,6 @@ test.describe('Boolean Component - Clear Button Functionality', () => {
     await navToHeader(page, ['Content Manager', 'Cat'], 'Cat');
     await page.getByRole('gridcell', { name: 'Boolean Clear Persist Cat' }).click();
     await expect(booleanFieldContainer).not.toBeChecked();
-    //await expect(await booleanField.getAttribute('aria-checked')).toBe('mixed');
     await expect(clearButton).not.toBeVisible();
   });
 });
