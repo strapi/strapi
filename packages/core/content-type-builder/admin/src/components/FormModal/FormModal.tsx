@@ -3,7 +3,6 @@ import { useState } from 'react';
 
 import {
   useStrapiApp,
-  useTracking,
   useNotification,
   ConfirmDialog,
   useGuidedTour,
@@ -34,6 +33,7 @@ import { BooleanRadioGroup } from '../BooleanRadioGroup';
 import { CheckboxWithNumberField } from '../CheckboxWithNumberField';
 import { ContentTypeRadioGroup } from '../ContentTypeRadioGroup';
 import { CustomRadioGroup } from '../CustomRadioGroup';
+import { useCTBTracking } from '../DataManager/useCTBTracking';
 import { useDataManager } from '../DataManager/useDataManager';
 import { DraftAndPublishToggle } from '../DraftAndPublishToggle';
 import { FormModalEndActions } from '../FormModalEndActions';
@@ -101,7 +101,7 @@ export const FormModal = () => {
   const reducerState = useSelector(selectState, shallowEqual);
 
   const navigate = useNavigate();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
   const { formatMessage } = useIntl();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI: any = ctbPlugin?.apis.forms;

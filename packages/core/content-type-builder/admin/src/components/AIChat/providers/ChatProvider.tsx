@@ -10,9 +10,9 @@ import {
 } from 'react';
 
 import { UIMessage, useChat } from '@ai-sdk/react';
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 
+import { useCTBTracking } from '../../DataManager/useCTBTracking';
 import { useDataManager } from '../../DataManager/useDataManager';
 import { FeedbackProvider } from '../FeedbackModal';
 import { useAIChat } from '../hooks/useAIFetch';
@@ -66,7 +66,7 @@ export const BaseChatProvider = ({
   // Files
   const [attachments, setAttachments] = useState<Attachment[]>([]);
 
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
 
   // DataManager
   const { components, contentTypes } = useDataManager();

@@ -16,6 +16,7 @@ import isEqual from 'lodash/isEqual';
 import mapValues from 'lodash/mapValues';
 import { useIntl } from 'react-intl';
 import { useSelector, useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import { getTrad } from '../../utils/getTrad';
 import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
@@ -40,10 +41,18 @@ interface DataManagerProviderProps {
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_dataManagerProvider'] || initialState) as State;
 
+/**
+ * Generates a unique session identifier for CTB tracking
+ */
+const generateSessionId = (): string => {
+  return `ctb-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+};
+
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
   const state = useSelector(selectState);
   const dispatchGuidedTour = useGuidedTour('DataManagerProvider', (s) => s.dispatch);
+  const location = useLocation();
 
   const {
     components,
@@ -67,6 +76,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const { onCloseModal } = useFormModalNavigation();
 
   const [isSaving, setIsSaving] = React.useState(false);
+  const [ctbSessionId, setCtbSessionId] = React.useState<string>(() => generateSessionId());
+  const previousLocationRef = React.useRef<string | null>(null);
 
   const isModified = React.useMemo(() => {
     return !(isEqual(components, initialComponents) && isEqual(contentTypes, initialContentTypes));
@@ -113,6 +124,9 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   React.useEffect(() => {
     getDataRef.current();
+    // Generate new session ID when CTB is accessed (on mount)
+    setCtbSessionId(generateSessionId());
+    previousLocationRef.current = location.pathname;
 
     return () => {
       // Reload the plugin so the cycle is new again
@@ -120,6 +134,42 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Update global ref for FormModalNavigationProvider to access session ID
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // @ts-expect-error - accessing module-level ref to share session ID across provider boundaries
+      if (!window.__CTB_SESSION_ID_REF__) {
+        // @ts-expect-error - initializing global ref for session ID sharing
+        window.__CTB_SESSION_ID_REF__ = { current: null as string | null };
+      }
+      // @ts-expect-error - updating global ref with current session ID
+      window.__CTB_SESSION_ID_REF__.current = ctbSessionId;
+    }
+  }, [ctbSessionId]);
+
+  // Detect navigation away and back to CTB
+  React.useEffect(() => {
+    const currentPath = location.pathname;
+    const previousPath = previousLocationRef.current;
+    const CTB_PATH = '/plugins/content-type-builder';
+
+    // Check if we navigated away from CTB and came back
+    if (previousPath) {
+      const isCTBPath = currentPath.includes(CTB_PATH);
+      const wasCTBPath = previousPath.includes(CTB_PATH);
+
+      // If we were in CTB, navigated away, and came back, generate new session ID
+      if (wasCTBPath && !isCTBPath) {
+        // We navigated away from CTB - session will be regenerated when we come back
+      } else if (!wasCTBPath && isCTBPath) {
+        // We came back to CTB after navigating away - generate new session ID
+        setCtbSessionId(generateSessionId());
+      }
+    }
+
+    previousLocationRef.current = currentPath;
+  }, [location.pathname]);
 
   React.useEffect(() => {
     if (!autoReload) {
@@ -168,6 +218,16 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       contentTypes: mutatedCTs,
     });
 
+    // Track that the save button was clicked
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (trackUsage as any)(
+      'willUpdateCTBSchema' as any,
+      {
+        ...trackingEventProperties,
+        ctbSessionId,
+      } as any
+    );
+
     const isSendingContentTypes = Object.keys(state.current.contentTypes).length > 0;
 
     lockAppWithAutoreload();
@@ -176,11 +236,14 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await fetchClient.post(`/content-type-builder/update-schema`, { data: requestData });
 
       if (isSendingContentTypes) {
+        // Note: didCreateGuidedTourCollectionType doesn't accept properties
         trackUsage('didCreateGuidedTourCollectionType');
       }
 
       // Make sure the server has restarted
       await serverRestartWatcher();
+      // Generate new session ID after server restart
+      setCtbSessionId(generateSessionId());
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
       // Update the app's permissions
@@ -192,7 +255,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
 
-      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: false });
+      trackUsage('didUpdateCTBSchema', {
+        ...trackingEventProperties,
+        success: false,
+        ctbSessionId,
+      } as any);
     } finally {
       setIsSaving(false);
       unlockAppWithAutoreload();
@@ -203,7 +270,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       });
 
-      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: true });
+      trackUsage('didUpdateCTBSchema', {
+        ...trackingEventProperties,
+        success: true,
+        ctbSessionId,
+      } as any);
     }
   };
 
@@ -243,6 +314,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     componentsGroupedByCategory,
     sortedContentTypesList,
     isLoading,
+    ctbSessionId,
     addAttribute(payload) {
       dispatch(actions.addAttribute(payload));
     },
@@ -276,6 +348,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     },
     removeAttribute(payload) {
       if (payload.forTarget === 'contentType') {
+        // Note: willDeleteFieldOfContentType doesn't accept properties
         trackUsage('willDeleteFieldOfContentType');
       }
 

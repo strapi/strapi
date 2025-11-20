@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
-import { useNotification, useTracking } from '@strapi/admin/strapi-admin';
+import { useNotification } from '@strapi/admin/strapi-admin';
 
+import { useCTBTracking } from '../../DataManager/useCTBTracking';
 import { useStrapiChat } from '../providers/ChatProvider';
 
 import { FeedbackReasonIds, useFetchSendFeedback } from './useAIFetch';
@@ -11,7 +12,7 @@ export const useFeedback = () => {
   const { fetch: sendFeedback, isPending, error } = useFetchSendFeedback();
   const { id, messages, schemas } = useStrapiChat();
   const { toggleNotification } = useNotification();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
   const { t } = useTranslations();
 
   // Keep track of messages that have received feedback
