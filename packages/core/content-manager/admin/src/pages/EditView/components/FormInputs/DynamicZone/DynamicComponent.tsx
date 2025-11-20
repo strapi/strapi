@@ -268,12 +268,20 @@ const DynamicComponent = ({
                               {visibleFields.map(({ size, ...field }) => {
                                 const fieldName = `${name}.${index}.${field.name}`;
 
+                                const clonedLabelAction = React.isValidElement(field.labelAction)
+                                  ? React.cloneElement(field.labelAction as React.ReactElement, {
+                                      name: fieldName,
+                                      attribute: field.attribute,
+                                    })
+                                  : field.labelAction;
+
                                 const fieldWithTranslatedLabel = {
                                   ...field,
                                   label: formatMessage({
                                     id: `content-manager.components.${componentUid}.${field.name}`,
                                     defaultMessage: field.label,
                                   }),
+                                  labelAction: clonedLabelAction,
                                 };
 
                                 return (
