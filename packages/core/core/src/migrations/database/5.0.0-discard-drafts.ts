@@ -1026,8 +1026,73 @@ async function getDraftMapForTarget(
 }
 
 /**
+ * Builds a reverse map from draft IDs to published IDs for a target content type.
+ * This is needed to check if a target ID is already a draft and find its published version.
+ */
+async function getDraftToPublishedMap(
+  trx: Knex,
+  targetUid: string,
+  reverseMapCache: Map<string, Map<number, number> | null>
+): Promise<Map<number, number> | null> {
+  if (reverseMapCache.has(targetUid)) {
+    return reverseMapCache.get(targetUid) ?? null;
+  }
+
+  const targetMeta = strapi.db.metadata.get(targetUid);
+  if (!targetMeta) {
+    reverseMapCache.set(targetUid, null);
+    return null;
+  }
+
+  const draftToPublishedMap = new Map<number, number>();
+  const draftMap = await getDraftMapForTarget(trx, targetUid, new Map());
+  if (draftMap) {
+    // Reverse the published->draft map to get draft->published
+    for (const [publishedId, draftId] of draftMap.entries()) {
+      draftToPublishedMap.set(draftId, publishedId);
+    }
+    debug(
+      `[getDraftToPublishedMap] ${targetUid}: Built reverse map with ${draftToPublishedMap.size} entries (draft->published)`
+    );
+  } else {
+    debug(`[getDraftToPublishedMap] ${targetUid}: No draft map found, returning null`);
+  }
+
+  reverseMapCache.set(targetUid, draftToPublishedMap.size > 0 ? draftToPublishedMap : null);
+  return draftToPublishedMap.size > 0 ? draftToPublishedMap : null;
+}
+
+/**
+ * Checks if a target ID is published or draft by querying the database.
+ */
+async function getTargetPublicationState(
+  trx: Knex,
+  targetId: number | string,
+  targetUid: string
+): Promise<'published' | 'draft' | null> {
+  const targetMeta = strapi.db.metadata.get(targetUid);
+  if (!targetMeta) {
+    return null;
+  }
+
+  const target = await trx(targetMeta.tableName)
+    .select('published_at')
+    .where('id', targetId)
+    .first();
+
+  if (!target) {
+    return null;
+  }
+
+  return target.published_at !== null ? 'published' : 'draft';
+}
+
+/**
  * Maps relation foreign keys so that draft entities reference draft targets when those
  * targets exist; otherwise we preserve the original reference (matching discardDraft).
+ *
+ * When mapping for a draft component: maps published targets → draft targets
+ * When mapping for a published component: maps draft targets → published targets (if needed)
  */
 async function mapTargetId(
   trx: Knex,
@@ -1035,14 +1100,25 @@ async function mapTargetId(
   targetUid: string | undefined,
   parentUid: string,
   parentPublishedToDraftMap: Map<number, number>,
-  draftMapCache: Map<string, Map<number, number> | null>
+  draftMapCache: Map<string, Map<number, number> | null>,
+  isForDraftEntity: boolean = true,
+  reverseMapCache?: Map<string, Map<number, number> | null>
 ) {
   if (originalId == null || !targetUid) {
     return originalId;
   }
 
   if (targetUid === parentUid) {
-    return parentPublishedToDraftMap.get(Number(originalId)) ?? originalId;
+    if (isForDraftEntity) {
+      return parentPublishedToDraftMap.get(Number(originalId)) ?? originalId;
+    }
+    // For published entity, if we got a draft ID, find the published version
+    const effectiveReverseCache = reverseMapCache ?? new Map();
+    const reverseMap = await getDraftToPublishedMap(trx, targetUid, effectiveReverseCache);
+    if (reverseMap) {
+      return reverseMap.get(Number(originalId)) ?? originalId;
+    }
+    return originalId;
   }
 
   const targetMap = await getDraftMapForTarget(trx, targetUid, draftMapCache);
@@ -1050,7 +1126,36 @@ async function mapTargetId(
     return originalId;
   }
 
-  return targetMap.get(Number(originalId)) ?? originalId;
+  // Check if the original ID is already a draft or published
+  const targetState = await getTargetPublicationState(trx, Number(originalId), targetUid);
+
+  if (isForDraftEntity) {
+    // For draft entities: map published targets to draft targets
+    if (targetState === 'published') {
+      return targetMap.get(Number(originalId)) ?? originalId;
+    }
+    if (targetState === 'draft') {
+      // Already a draft, keep it
+      return originalId;
+    }
+    // If we can't determine state, try the map lookup
+    return targetMap.get(Number(originalId)) ?? originalId;
+  }
+  // For published entities: map draft targets to published targets
+  if (targetState === 'draft') {
+    const effectiveReverseCache = reverseMapCache ?? new Map();
+    const reverseMap = await getDraftToPublishedMap(trx, targetUid, effectiveReverseCache);
+    if (reverseMap) {
+      return reverseMap.get(Number(originalId)) ?? originalId;
+    }
+    return originalId;
+  }
+  if (targetState === 'published') {
+    // Already published, keep it
+    return originalId;
+  }
+  // If we can't determine state, assume it's published
+  return originalId;
 }
 
 /**
@@ -1076,7 +1181,9 @@ async function cloneComponentRelationJoinTables(
   newComponentId: number,
   parentUid: string,
   parentPublishedToDraftMap: Map<number, number>,
-  draftMapCache: Map<string, Map<number, number> | null>
+  draftMapCache: Map<string, Map<number, number> | null>,
+  isForDraftEntity: boolean = true,
+  reverseMapCache?: Map<string, Map<number, number> | null>
 ) {
   for (const [attributeName, attribute] of Object.entries(componentMeta.attributes) as Array<
     [string, any]
@@ -1118,7 +1225,9 @@ async function cloneComponentRelationJoinTables(
           attribute.target,
           parentUid,
           parentPublishedToDraftMap,
-          draftMapCache
+          draftMapCache,
+          isForDraftEntity,
+          reverseMapCache
         );
 
         debug(
@@ -1157,8 +1266,18 @@ async function cloneComponentRelationJoinTables(
     }
 
     for (const relation of relationsToInsert) {
+      // CRITICAL: Ensure we're only creating relations for the NEW component, not the original
+      // The sourceColumnName must be newComponentId to ensure we don't accidentally modify
+      // the original published component's relations
+      if (relation[sourceColumnName] !== newComponentId) {
+        debug(
+          `[cloneComponentRelationJoinTables] ERROR: Relation source ${relation[sourceColumnName]} does not match newComponentId ${newComponentId} - skipping to prevent modifying original component relations`
+        );
+        continue;
+      }
+
       debug(
-        `[cloneComponentRelationJoinTables] inserting relation into ${joinTable.name} (component=${componentUid}, source=${relation[sourceColumnName]})`
+        `[cloneComponentRelationJoinTables] inserting relation into ${joinTable.name} (component=${componentUid}, source=${relation[sourceColumnName]}, target=${relation[targetColumnName]})`
       );
 
       await insertRowWithDuplicateHandling(trx, joinTable.name, relation, {
@@ -1186,6 +1305,8 @@ async function cloneComponentInstance({
   parentUid,
   parentPublishedToDraftMap,
   draftMapCache,
+  isForDraftEntity = true,
+  reverseMapCache,
 }: {
   trx: Knex;
   componentUid: string;
@@ -1193,6 +1314,8 @@ async function cloneComponentInstance({
   parentUid: string;
   parentPublishedToDraftMap: Map<number, number>;
   draftMapCache: Map<string, Map<number, number> | null>;
+  isForDraftEntity?: boolean;
+  reverseMapCache?: Map<string, Map<number, number> | null>;
 }): Promise<number> {
   const componentMeta = getComponentMeta(componentUid);
   if (!componentMeta) {
@@ -1247,7 +1370,9 @@ async function cloneComponentInstance({
       attribute.target,
       parentUid,
       parentPublishedToDraftMap,
-      draftMapCache
+      draftMapCache,
+      isForDraftEntity,
+      reverseMapCache
     );
   }
 
@@ -1298,7 +1423,9 @@ async function cloneComponentInstance({
     newComponentId,
     parentUid,
     parentPublishedToDraftMap,
-    draftMapCache
+    draftMapCache,
+    isForDraftEntity,
+    reverseMapCache
   );
 
   return newComponentId;
@@ -1896,6 +2023,190 @@ async function updateJoinColumnRelations({
 }
 
 /**
+ * Fixes existing v4 draft entries' component relations by converting published targets to draft targets.
+ * This ensures that draft components point to draft targets, not published ones.
+ */
+async function fixExistingDraftComponentRelations({ trx, uid }: { trx: Knex; uid: string }) {
+  const meta = strapi.db.metadata.get(uid);
+  if (!meta) {
+    return;
+  }
+
+  const contentType = strapi.contentTypes[uid as keyof typeof strapi.contentTypes] as any;
+  const collectionName = contentType?.collectionName;
+  if (!collectionName) {
+    return;
+  }
+
+  const identifiers = strapi.db.metadata.identifiers;
+  const joinTableName = getComponentJoinTableName(collectionName, identifiers);
+  const entityIdColumn = getComponentJoinColumnEntityName(identifiers);
+  const componentIdColumn = getComponentJoinColumnInverseName(identifiers);
+  const componentTypeColumn = getComponentTypeColumn(identifiers);
+
+  const hasTable = await trx.schema.hasTable(joinTableName);
+  if (!hasTable) {
+    return;
+  }
+
+  // Get all draft entity IDs (including existing v4 drafts, not just newly created ones)
+  const draftEntities = await trx(meta.tableName).select('id').whereNull('published_at');
+
+  if (draftEntities.length === 0) {
+    return;
+  }
+
+  const draftIds = draftEntities.map((e) => Number(e.id));
+  const draftIdsChunks = chunkArray(draftIds, getBatchSize(trx, 1000));
+
+  for (const draftIdsChunk of draftIdsChunks) {
+    // Get components that belong to draft entities
+    const componentRelations = await trx(joinTableName)
+      .select('*')
+      .whereIn(entityIdColumn, draftIdsChunk);
+
+    if (componentRelations.length === 0) {
+      continue;
+    }
+
+    const componentTypes = [...new Set(componentRelations.map((r) => r[componentTypeColumn]))];
+    const draftMapCache = new Map<string, Map<number, number> | null>();
+
+    for (const componentType of componentTypes) {
+      const componentMeta = strapi.db.metadata.get(componentType);
+      if (!componentMeta) continue;
+
+      for (const [, attr] of Object.entries(componentMeta.attributes || {}) as Array<
+        [string, any]
+      >) {
+        if (attr.type !== 'relation' || !attr.joinTable) continue;
+
+        const targetUid = attr.target;
+        if (!targetUid) continue;
+
+        const targetContentType = strapi.contentTypes[targetUid];
+        const targetHasDP = targetContentType?.options?.draftAndPublish;
+        if (!targetHasDP) continue;
+
+        const relationJoinTable = attr.joinTable.name;
+        const sourceColumn = attr.joinTable.joinColumn.name;
+        const targetColumn = attr.joinTable.inverseJoinColumn.name;
+
+        const hasRelationTable = await trx.schema.hasTable(relationJoinTable);
+        if (!hasRelationTable) continue;
+
+        // Get component IDs that belong to draft entities
+        const componentIds = componentRelations
+          .filter((r) => r[componentTypeColumn] === componentType)
+          .map((r) => Number(r[componentIdColumn]));
+
+        if (componentIds.length === 0) continue;
+
+        // Get all relations for these components
+        const relations = await trx(relationJoinTable)
+          .whereIn(sourceColumn, componentIds)
+          .select('id', sourceColumn, targetColumn);
+
+        if (relations.length === 0) continue;
+
+        // Get target publication states
+        const targetMeta = strapi.db.metadata.get(targetUid);
+        if (!targetMeta) continue;
+
+        const targetIds = [...new Set(relations.map((r) => r[targetColumn]).filter(Boolean))];
+        if (targetIds.length === 0) continue;
+
+        const targets = await trx(targetMeta.tableName)
+          .whereIn('id', targetIds)
+          .select('id', 'published_at');
+
+        const targetPublicationState = new Map(
+          targets.map((t) => [Number(t.id), t.published_at !== null ? 'published' : 'draft'])
+        );
+
+        // Get draft map for target to convert published targets to draft targets
+        const targetDraftMap = await getDraftMapForTarget(trx, targetUid, draftMapCache);
+        if (!targetDraftMap || targetDraftMap.size === 0) continue;
+
+        // Find relations from draft components to published targets and convert them
+        const relationsToUpdate: Array<{
+          relationId: number;
+          componentId: number;
+          oldTargetId: number;
+          newTargetId: number;
+        }> = [];
+
+        for (const relation of relations) {
+          const targetId = Number(relation[targetColumn]);
+          const targetState = targetPublicationState.get(targetId);
+
+          if (targetState === 'published') {
+            // This is a relation from a draft component to a published target - convert to draft target
+            const draftTargetId = targetDraftMap.get(targetId);
+            if (draftTargetId != null) {
+              relationsToUpdate.push({
+                relationId: relation.id,
+                componentId: Number(relation[sourceColumn]),
+                oldTargetId: targetId,
+                newTargetId: draftTargetId,
+              });
+            }
+          }
+        }
+
+        if (relationsToUpdate.length > 0) {
+          debug(
+            `[fixExistingDraftComponentRelations] ${uid}: Converting ${relationsToUpdate.length} relations from draft components to published targets -> draft targets (component type: ${componentType}, target: ${targetUid})`
+          );
+
+          const updateChunks = chunkArray(relationsToUpdate, getBatchSize(trx, 1000));
+          for (const updateChunk of updateChunks) {
+            for (const update of updateChunk) {
+              try {
+                // Check if relation to draft target already exists
+                const existingRelation = await trx(relationJoinTable)
+                  .where(sourceColumn, update.componentId)
+                  .where(targetColumn, update.newTargetId)
+                  .where('id', '!=', update.relationId)
+                  .first();
+
+                if (existingRelation) {
+                  // If relation to draft target already exists, delete the published target relation
+                  await trx(relationJoinTable).where('id', update.relationId).delete();
+                  debug(
+                    `[fixExistingDraftComponentRelations] ${uid}: Deleted relation ${update.relationId} (component ${update.componentId} -> published target ${update.oldTargetId}), draft relation already exists (-> ${update.newTargetId})`
+                  );
+                } else {
+                  // Update the relation to point to draft target
+                  const updated = await trx(relationJoinTable)
+                    .where('id', update.relationId)
+                    .update({ [targetColumn]: update.newTargetId });
+                  if (updated > 0) {
+                    debug(
+                      `[fixExistingDraftComponentRelations] ${uid}: Updated relation ${update.relationId} (component ${update.componentId} -> published target ${update.oldTargetId} -> draft target ${update.newTargetId})`
+                    );
+                  }
+                }
+              } catch (error: any) {
+                // If update fails due to duplicate key, try deleting the published target relation instead
+                if (isDuplicateEntryError(error)) {
+                  await trx(relationJoinTable).where('id', update.relationId).delete();
+                  debug(
+                    `[fixExistingDraftComponentRelations] ${uid}: Deleted relation ${update.relationId} due to duplicate key error (component ${update.componentId})`
+                  );
+                } else {
+                  throw error;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
  * Copy component relations from published entries to draft entries
  */
 async function copyComponentRelations({
@@ -1950,6 +2261,7 @@ async function copyComponentRelations({
 
     const componentCloneCache = new Map<string, Map<string, number>>();
     const componentTargetDraftMapCache = new Map<string, Map<number, number> | null>();
+    const componentTargetReverseMapCache = new Map<string, Map<number, number> | null>();
     const componentHierarchyCaches: ComponentHierarchyCaches = {
       parentInstanceCache: new Map(),
       ancestorDpCache: new Map(),
@@ -2063,6 +2375,8 @@ async function copyComponentRelations({
               parentUid: uid,
               parentPublishedToDraftMap: publishedToDraftMap,
               draftMapCache: componentTargetDraftMapCache,
+              isForDraftEntity: true,
+              reverseMapCache: componentTargetReverseMapCache,
             });
 
             cloneMap.set(componentKey, newComponentId);
@@ -2230,6 +2544,18 @@ const migrateUp = async (trx: Knex, db: Database) => {
   }
   flushSkippedRelationLogs();
   strapi.log.info('[discard-drafts] Stage 2/3 complete');
+
+  /**
+   * Fix existing v4 draft entries' component relations to ensure they point to draft targets.
+   * In v4, draft entries might have had components pointing to published targets. These need
+   * to be converted to point to the draft versions of those targets.
+   */
+  strapi.log.info('[discard-drafts] Stage 2.5/3 – fixing existing draft component relations');
+  for (const model of dpModels) {
+    debug(` • fixing existing draft component relations for ${model.uid}`);
+    await fixExistingDraftComponentRelations({ trx, uid: model.uid });
+  }
+  strapi.log.info('[discard-drafts] Stage 2.5/3 complete');
 
   /**
    * Update JoinColumn relations (foreign keys) to point to draft versions
