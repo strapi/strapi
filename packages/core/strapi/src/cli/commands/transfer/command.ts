@@ -45,7 +45,7 @@ const command = () => {
       .hook(
         'preAction',
         ifOptions(
-          (opts) =>
+          async (opts) =>
             (opts.from && opts.to) || (opts.from && opts.toToken) || (opts.to && opts.fromToken),
           async () =>
             exitWith(1, 'Only one remote source (from) or destination (to) option may be provided')
@@ -55,7 +55,7 @@ const command = () => {
         'preAction',
         ifOptions(
           // Only run interactive prompts if neither --from nor --to is provided
-          (opts) => !opts.from && !opts.to,
+          async (opts) => !opts.from && !opts.to,
           async (thisCommand) => {
             const opts = thisCommand.opts();
             const hasEnvUrl = process.env.STRAPI_TRANSFER_URL;
@@ -192,7 +192,7 @@ const command = () => {
       .hook(
         'preAction',
         ifOptions(
-          (opts) => opts.from,
+          async (opts) => opts.from,
           async (thisCommand) => {
             assertUrlHasProtocol(thisCommand.opts().from, ['https:', 'http:']);
             if (!thisCommand.opts().fromToken) {
@@ -220,7 +220,7 @@ const command = () => {
       .hook(
         'preAction',
         ifOptions(
-          (opts) => opts.to,
+          async (opts) => opts.to,
           async (thisCommand) => {
             assertUrlHasProtocol(thisCommand.opts().to, ['https:', 'http:']);
             if (!thisCommand.opts().toToken) {
