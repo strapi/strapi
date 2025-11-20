@@ -318,7 +318,7 @@ yargs
               domainBatch.map(async (domain, j) => {
                 const testAppPath = testAppPaths[j];
                 const port = 8000 + j;
-                const pathToPlaywrightConfig = path.join(testAppPath, 'playwright.config.js');
+                const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
 
                 console.log(
                   `Creating playwright config for domain: ${domain}, at path: ${testAppPath}`
@@ -338,6 +338,18 @@ module.exports = config
                 `;
 
                 await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
+
+                // Add the config file to git so it persists through git clean
+                await execa('git', [...gitUser, 'add', pathToPlaywrightConfig], {
+                  stdio: 'inherit',
+                  cwd: testAppPath,
+                });
+                await execa('git', [...gitUser, 'commit', '-m', 'Add playwright config'], {
+                  stdio: 'inherit',
+                  cwd: testAppPath,
+                }).catch(() => {
+                  // Ignore error if there's nothing to commit (file already tracked)
+                });
 
                 console.log(`Running ${domain} e2e tests`);
 
