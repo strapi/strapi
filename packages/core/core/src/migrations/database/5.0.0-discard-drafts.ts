@@ -1266,7 +1266,7 @@ async function cloneComponentRelationJoinTables(
     }
 
     for (const relation of relationsToInsert) {
-      // CRITICAL: Ensure we're only creating relations for the NEW component, not the original
+      // Ensure we're only creating relations for the NEW component, not the original
       // The sourceColumnName must be newComponentId to ensure we don't accidentally modify
       // the original published component's relations
       if (relation[sourceColumnName] !== newComponentId) {
