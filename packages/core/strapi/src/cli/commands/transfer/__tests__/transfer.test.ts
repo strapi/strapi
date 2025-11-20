@@ -218,10 +218,10 @@ describe('Transfer', () => {
       });
 
       expect(console.error).not.toHaveBeenCalled();
-      expect(mockDataTransfer.strapi.providers.createLocalStrapiDestinationProvider).toHaveBeenCalled();
       expect(
-        mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider
+        mockDataTransfer.strapi.providers.createLocalStrapiDestinationProvider
       ).toHaveBeenCalled();
+      expect(mockDataTransfer.strapi.providers.createRemoteStrapiSourceProvider).toHaveBeenCalled();
     });
   });
 
