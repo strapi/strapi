@@ -81,6 +81,7 @@ export default (strapi: Core.Strapi): Sender => {
         groupProperties: {
           ...anonymousGroupProperties,
           projectType: strapi.EE ? 'Enterprise' : 'Community',
+          ...strapi.ee,
           ...payload.groupProperties,
         },
       }),
