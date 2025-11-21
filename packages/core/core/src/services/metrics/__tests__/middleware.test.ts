@@ -55,16 +55,31 @@ describe('Metrics middleware', () => {
     const middleware = createMiddleware({ sendEvent, strapi: mockStrapi });
 
     for (let i = 0; i < 2000; i += 1) {
+      const mockRes = {
+        once: jest.fn((event, callback) => {
+          // Simulate event emission immediately
+          process.nextTick(() => callback());
+        }),
+      };
+      const mockResponse = { status: 200 };
+
       await middleware(
         {
           request: {
             method: 'GET',
             url: '/api/articles',
           },
+          res: mockRes,
+          response: mockResponse,
         } as any,
         jest.fn()
       );
     }
+
+    // Wait for all async callbacks to complete
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
 
     expect(sendEvent).toHaveBeenCalledTimes(1000);
   });
@@ -76,12 +91,22 @@ describe('Metrics middleware', () => {
     const middleware = createMiddleware({ sendEvent, strapi: mockStrapi });
 
     for (let i = 0; i < 2000; i += 1) {
+      const mockRes = {
+        once: jest.fn((event, callback) => {
+          // Simulate event emission immediately
+          process.nextTick(() => callback());
+        }),
+      };
+      const mockResponse = { status: 200 };
+
       await middleware(
         {
           request: {
             method: 'GET',
             url: '/api/articles',
           },
+          res: mockRes,
+          response: mockResponse,
         } as any,
         jest.fn()
       );
@@ -89,15 +114,30 @@ describe('Metrics middleware', () => {
 
     Date.now = () => new Date('2021-01-02T00:01:00Z').getTime(); // 1 day and 1 minute later.
 
+    const mockRes = {
+      once: jest.fn((event, callback) => {
+        // Simulate event emission immediately
+        process.nextTick(() => callback());
+      }),
+    };
+    const mockResponse = { status: 200 };
+
     await middleware(
       {
         request: {
           method: 'GET',
           url: '/api/articles',
         },
+        res: mockRes,
+        response: mockResponse,
       } as any,
       jest.fn()
     );
+
+    // Wait for all async callbacks to complete
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
 
     expect(sendEvent).toHaveBeenCalledTimes(1001);
   });
