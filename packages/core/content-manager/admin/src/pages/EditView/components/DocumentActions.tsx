@@ -744,7 +744,8 @@ const PublishAction: DocumentActionComponent = ({
       meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null)) &&
     document?.status !== 'modified';
 
-  const performPublish = React.useCallback(async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const performPublish = async () => {
     setSubmitting(true);
 
     try {
@@ -902,41 +903,7 @@ const PublishAction: DocumentActionComponent = ({
         onPreview();
       }
     }
-  }, [
-    setSubmitting,
-    validate,
-    schema,
-    canReadFields,
-    toggleNotification,
-    formatMessage,
-    formValues,
-    initialValues,
-    components,
-    publish,
-    collectionType,
-    model,
-    documentId,
-    currentDocumentMeta.params,
-    resetForm,
-    dispatchGuidedTour,
-    navigate,
-    rawQuery,
-    idToPublish,
-    fromRelationModal,
-    fieldToConnect,
-    documentHistory,
-    parentDocumentMetaToUpdate,
-    getInitialFormValues,
-    parentDocumentData,
-    fieldToConnectUID,
-    updateDocumentMutation,
-    formatAPIError,
-    setErrors,
-    formatValidationErrors,
-    onPreview,
-    dispatch,
-    rootDocumentMeta,
-  ]);
+  };
 
   const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
   // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
@@ -1105,7 +1072,7 @@ const UpdateAction: DocumentActionComponent = ({
   );
   const { schema } = useDoc();
 
-  const handleUpdate = React.useCallback(async () => {
+  const handleUpdate = async () => {
     setSubmitting(true);
 
     try {
@@ -1281,44 +1248,7 @@ const UpdateAction: DocumentActionComponent = ({
         onPreview();
       }
     }
-  }, [
-    setSubmitting,
-    modified,
-    validate,
-    isCloning,
-    documentId,
-    collectionType,
-    toggleNotification,
-    formatMessage,
-    clone,
-    model,
-    cloneMatch?.params.origin,
-    currentDocumentMeta.params,
-    document,
-    navigate,
-    rawQuery,
-    setErrors,
-    formatValidationErrors,
-    update,
-    resetForm,
-    create,
-    fromRelationModal,
-    fieldToConnect,
-    documentHistory,
-    parentDocumentMetaToUpdate,
-    dispatch,
-    getInitialFormValues,
-    parentDocumentData,
-    fieldToConnectUID,
-    updateDocumentMutation,
-    formatAPIError,
-    onPreview,
-    initialValues,
-    schema,
-    components,
-    relationalModalSchema,
-    dispatchGuidedTour,
-  ]);
+  };
 
   return {
     loading: isLoading,
