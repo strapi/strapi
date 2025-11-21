@@ -15,7 +15,7 @@ describe('Metrics middleware', () => {
   });
 
   test('Ignores request with extension in them', async () => {
-    const sendEvent = jest.fn();
+    const sendEvent = jest.fn().mockResolvedValue(undefined);
 
     const middleware = createMiddleware({ sendEvent, strapi: mockStrapi });
 
@@ -33,7 +33,7 @@ describe('Metrics middleware', () => {
   });
 
   test.each(['OPTIONS', 'HEAD'])('Ignores %s method', async (method) => {
-    const sendEvent = jest.fn();
+    const sendEvent = jest.fn().mockResolvedValue(undefined);
 
     const middleware = createMiddleware({ sendEvent, strapi: mockStrapi });
 
@@ -51,7 +51,7 @@ describe('Metrics middleware', () => {
   });
 
   test('Stops sending after 1000 events', async () => {
-    const sendEvent = jest.fn();
+    const sendEvent = jest.fn().mockResolvedValue(undefined);
     const middleware = createMiddleware({ sendEvent, strapi: mockStrapi });
 
     for (let i = 0; i < 2000; i += 1) {
@@ -85,7 +85,7 @@ describe('Metrics middleware', () => {
   });
 
   test('Resets counter after 24 hours', async () => {
-    const sendEvent = jest.fn();
+    const sendEvent = jest.fn().mockResolvedValue(undefined);
     Date.now = () => new Date('2021-01-01T00:00:00Z').getTime();
 
     const middleware = createMiddleware({ sendEvent, strapi: mockStrapi });
