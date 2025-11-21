@@ -1,8 +1,10 @@
 import { screen, render as renderRTL } from '@tests/utils';
 
-import { ComponentPicker, ComponentPickerProps } from '../ComponentPicker';
-
-import { dynamicComponentsByCategory } from './fixtures';
+import {
+  ComponentPicker,
+  ComponentPickerProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/ComponentPicker';
+import { dynamicComponentsByCategory } from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/tests/fixtures';
 
 describe('ComponentPicker', () => {
   const Component = (props?: Partial<ComponentPickerProps>) => (

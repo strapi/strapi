@@ -1,6 +1,6 @@
 import type { Plugin } from '@strapi/types';
 
-import { createHomepageService } from './homepage';
+import { createHomepageService } from '@content-manager/server/homepage/services/homepage';
 
 export const services = {
   homepage: createHomepageService,

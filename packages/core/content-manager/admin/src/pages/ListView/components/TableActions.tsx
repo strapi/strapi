@@ -13,20 +13,18 @@ import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { Document, useDoc } from '../../../hooks/useDocument';
-import { useDocumentActions } from '../../../hooks/useDocumentActions';
-import { isBaseQueryError } from '../../../utils/api';
-import { DocumentActionsMenu } from '../../EditView/components/DocumentActions';
-
-import { AutoCloneFailureModalBody } from './AutoCloneFailureModal';
-
-import type { ProhibitedCloningField } from '../../../../../shared/contracts/collection-types';
 import type {
   ContentManagerPlugin,
   DocumentActionComponent,
   DocumentActionProps,
-} from '../../../content-manager';
+} from '@content-manager/admin/content-manager';
+import { useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { Document, useDoc } from '@content-manager/admin/hooks/useDocument';
+import { useDocumentActions } from '@content-manager/admin/hooks/useDocumentActions';
+import { DocumentActionsMenu } from '@content-manager/admin/pages/EditView/components/DocumentActions';
+import { AutoCloneFailureModalBody } from '@content-manager/admin/pages/ListView/components/AutoCloneFailureModal';
+import { isBaseQueryError } from '@content-manager/admin/utils/api';
+import type { ProhibitedCloningField } from '@content-manager/shared/contracts/collection-types';
 
 /* -------------------------------------------------------------------------------------------------
  * TableActions

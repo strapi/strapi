@@ -1,5 +1,5 @@
-import createConfigurationService from '../configuration';
-import storeUtils from '../utils/store';
+import createConfigurationService from '@content-manager/server/services/configuration';
+import storeUtils from '@content-manager/server/services/utils/store';
 
 const createCfg = (opts = {}) => {
   return createConfigurationService({

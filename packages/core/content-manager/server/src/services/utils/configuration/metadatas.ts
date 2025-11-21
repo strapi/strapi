@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { getService } from '../../../utils';
+import { getService } from '@content-manager/server/utils';
 import {
   isSortable,
   isSearchable,
@@ -7,7 +7,7 @@ import {
   isListable,
   isRelation,
   getDefaultMainField,
-} from './attributes';
+} from '@content-manager/server/services/utils/configuration/attributes';
 
 function createDefaultMetadatas(schema: any) {
   return {

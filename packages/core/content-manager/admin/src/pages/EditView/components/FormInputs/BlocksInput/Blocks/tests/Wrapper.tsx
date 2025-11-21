@@ -5,15 +5,18 @@ import { IntlProvider } from 'react-intl';
 import { type Editor, createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 
-import { type BlocksStore, BlocksEditorProvider } from '../../BlocksEditor';
-import { modifiers } from '../../Modifiers';
-import { codeBlocks } from '../Code';
-import { headingBlocks } from '../Heading';
-import { imageBlocks } from '../Image';
-import { linkBlocks } from '../Link';
-import { listBlocks } from '../List';
-import { paragraphBlocks } from '../Paragraph';
-import { quoteBlocks } from '../Quote';
+import { codeBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Code';
+import { headingBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Heading';
+import { imageBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Image';
+import { linkBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Link';
+import { listBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/List';
+import { paragraphBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Paragraph';
+import { quoteBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Quote';
+import {
+  type BlocksStore,
+  BlocksEditorProvider,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { modifiers } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Modifiers';
 
 const defaultBaseEditor = createEditor();
 

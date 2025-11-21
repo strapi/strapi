@@ -1,5 +1,5 @@
-import { GetPreviewUrl } from '../../../../shared/contracts/preview';
-import { contentManagerApi } from '../../services/api';
+import { contentManagerApi } from '@content-manager/admin/services/api';
+import { GetPreviewUrl } from '@content-manager/shared/contracts/preview';
 
 const previewApi = contentManagerApi.injectEndpoints({
   endpoints: (builder) => ({

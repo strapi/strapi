@@ -1,8 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { GetInitData } from '../../../shared/contracts/init';
-
-import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
+import type { ContentManagerLink } from '@content-manager/admin/hooks/useContentManagerInitData';
+import { GetInitData } from '@content-manager/shared/contracts/init';
 
 interface AppState {
   collectionTypeLinks: ContentManagerLink[];

@@ -1,6 +1,10 @@
 import _ from 'lodash';
-import { getService } from '../../../utils';
-import { isListable, hasEditableAttribute, hasRelationAttribute } from './attributes';
+import { getService } from '@content-manager/server/utils';
+import {
+  isListable,
+  hasEditableAttribute,
+  hasRelationAttribute,
+} from '@content-manager/server/services/utils/configuration/attributes';
 
 const DEFAULT_LIST_LENGTH = 4;
 const MAX_ROW_SIZE = 12;

@@ -1,12 +1,21 @@
 import { Tooltip, Typography } from '@strapi/design-system';
 import isEmpty from 'lodash/isEmpty';
 
-import { CellValue } from './CellValue';
-import { SingleComponent, RepeatableComponent } from './Components';
-import { MediaSingle, MediaMultiple } from './Media';
-import { RelationMultiple, RelationSingle } from './Relations';
+import type { ListFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { CellValue } from '@content-manager/admin/pages/ListView/components/TableCells/CellValue';
+import {
+  SingleComponent,
+  RepeatableComponent,
+} from '@content-manager/admin/pages/ListView/components/TableCells/Components';
+import {
+  MediaSingle,
+  MediaMultiple,
+} from '@content-manager/admin/pages/ListView/components/TableCells/Media';
+import {
+  RelationMultiple,
+  RelationSingle,
+} from '@content-manager/admin/pages/ListView/components/TableCells/Relations';
 
-import type { ListFieldLayout } from '../../../../hooks/useDocumentLayout';
 import type { Schema, Data } from '@strapi/types';
 
 interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {

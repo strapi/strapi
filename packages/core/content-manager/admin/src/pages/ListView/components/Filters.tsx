@@ -11,13 +11,13 @@ import {
 import { Combobox, ComboboxOption, useCollator } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { CREATOR_FIELDS } from '../../../constants/attributes';
-import { useContentTypeSchema } from '../../../hooks/useContentTypeSchema';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { Schema } from '../../../hooks/useDocument';
-import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
-import { getMainField } from '../../../utils/attributes';
-import { getDisplayName } from '../../../utils/users';
+import { CREATOR_FIELDS } from '@content-manager/admin/constants/attributes';
+import { useContentTypeSchema } from '@content-manager/admin/hooks/useContentTypeSchema';
+import { useDebounce } from '@content-manager/admin/hooks/useDebounce';
+import { Schema } from '@content-manager/admin/hooks/useDocument';
+import { useGetContentTypeConfigurationQuery } from '@content-manager/admin/services/contentTypes';
+import { getMainField } from '@content-manager/admin/utils/attributes';
+import { getDisplayName } from '@content-manager/admin/utils/users';
 
 /**
  * If new attributes are added, this list needs to be updated.

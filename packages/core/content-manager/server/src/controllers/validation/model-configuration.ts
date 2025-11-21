@@ -1,7 +1,10 @@
 import { yup } from '@strapi/utils';
-import { getService } from '../../utils';
-import { isListable, hasEditableAttribute } from '../../services/utils/configuration/attributes';
-import { isValidDefaultSort } from '../../services/utils/configuration/settings';
+import { getService } from '@content-manager/server/utils';
+import {
+  isListable,
+  hasEditableAttribute,
+} from '@content-manager/server/services/utils/configuration/attributes';
+import { isValidDefaultSort } from '@content-manager/server/services/utils/configuration/settings';
 
 /**
  * Creates the validation schema for content-type configurations

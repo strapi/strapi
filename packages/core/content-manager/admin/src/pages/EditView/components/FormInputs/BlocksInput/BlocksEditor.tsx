@@ -9,22 +9,27 @@ import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
 
-import { getTranslation } from '../../../../../utils/translations';
-
-import { codeBlocks } from './Blocks/Code';
-import { headingBlocks } from './Blocks/Heading';
-import { imageBlocks } from './Blocks/Image';
-import { linkBlocks } from './Blocks/Link';
-import { listBlocks } from './Blocks/List';
-import { paragraphBlocks } from './Blocks/Paragraph';
-import { quoteBlocks } from './Blocks/Quote';
-import { BlocksContent, type BlocksContentProps } from './BlocksContent';
-import { BlocksToolbar } from './BlocksToolbar';
-import { EditorLayout } from './EditorLayout';
-import { type ModifiersStore, modifiers } from './Modifiers';
-import { withImages } from './plugins/withImages';
-import { withLinks } from './plugins/withLinks';
-import { withStrapiSchema } from './plugins/withStrapiSchema';
+import { codeBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Code';
+import { headingBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Heading';
+import { imageBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Image';
+import { linkBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Link';
+import { listBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/List';
+import { paragraphBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Paragraph';
+import { quoteBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Quote';
+import {
+  BlocksContent,
+  type BlocksContentProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksContent';
+import { BlocksToolbar } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksToolbar';
+import { EditorLayout } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/EditorLayout';
+import {
+  type ModifiersStore,
+  modifiers,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Modifiers';
+import { withImages } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/plugins/withImages';
+import { withLinks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/plugins/withLinks';
+import { withStrapiSchema } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/plugins/withStrapiSchema';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 import type { Schema } from '@strapi/types';
 

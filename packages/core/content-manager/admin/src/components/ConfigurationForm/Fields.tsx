@@ -22,13 +22,17 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { getTranslation } from '../../utils/translations';
-import { ComponentIcon } from '../ComponentIcon';
-
-import { EditFieldForm, EditFieldFormProps } from './EditFieldForm';
-
-import type { ConfigurationFormData, EditFieldSpacerLayout } from './Form';
-import type { EditLayout } from '../../hooks/useDocumentLayout';
+import { ComponentIcon } from '@content-manager/admin/components/ComponentIcon';
+import {
+  EditFieldForm,
+  EditFieldFormProps,
+} from '@content-manager/admin/components/ConfigurationForm/EditFieldForm';
+import type {
+  ConfigurationFormData,
+  EditFieldSpacerLayout,
+} from '@content-manager/admin/components/ConfigurationForm/Form';
+import type { EditLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 type FormField = ConfigurationFormData['layout'][number]['children'][number];
 type Field = Omit<ConfigurationFormData['layout'][number]['children'][number], '__temp_key__'>;

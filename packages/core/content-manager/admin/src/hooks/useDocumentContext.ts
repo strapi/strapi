@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 
-import { useDoc, useDocument, type UseDocument } from '../hooks/useDocument';
-import { useRelationModal } from '../pages/EditView/components/FormInputs/Relations/RelationModal';
-import { buildValidParams } from '../utils/api';
+import { useDoc, useDocument, type UseDocument } from '@content-manager/admin/hooks/useDocument';
+import { useRelationModal } from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/RelationModal';
+import { buildValidParams } from '@content-manager/admin/utils/api';
 
 interface DocumentMeta {
   /**

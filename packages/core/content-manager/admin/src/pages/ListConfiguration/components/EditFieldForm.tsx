@@ -4,12 +4,11 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
 
-import { FieldTypeIcon } from '../../../components/FieldTypeIcon';
-import { capitalise } from '../../../utils/strings';
-import { getTranslation } from '../../../utils/translations';
-
-import type { ListFieldLayout } from '../../../hooks/useDocumentLayout';
-import type { FormData } from '../ListConfigurationPage';
+import { FieldTypeIcon } from '@content-manager/admin/components/FieldTypeIcon';
+import type { ListFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import type { FormData } from '@content-manager/admin/pages/ListConfiguration/ListConfigurationPage';
+import { capitalise } from '@content-manager/admin/utils/strings';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface EditFieldFormProps extends Pick<ListFieldLayout, 'attribute'> {
   name: string;

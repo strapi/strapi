@@ -16,17 +16,25 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
-import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
-import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
-import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
-import { getIn } from '../../../../../utils/objects';
-import { getTranslation } from '../../../../../utils/translations';
-import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
-import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
-
-import type { ComponentPickerProps } from './ComponentPicker';
+import { COMPONENT_ICONS } from '@content-manager/admin/components/ComponentIcon';
+import { ItemTypes } from '@content-manager/admin/constants/dragAndDrop';
+import { useDocumentContext } from '@content-manager/admin/hooks/useDocumentContext';
+import { useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import {
+  type UseDragAndDropOptions,
+  useDragAndDrop,
+} from '@content-manager/admin/hooks/useDragAndDrop';
+import type { ComponentPickerProps } from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/ComponentPicker';
+import {
+  ResponsiveGridItem,
+  ResponsiveGridRoot,
+} from '@content-manager/admin/pages/EditView/components/FormLayout';
+import {
+  InputRenderer,
+  type InputRendererProps,
+} from '@content-manager/admin/pages/EditView/components/InputRenderer';
+import { getIn } from '@content-manager/admin/utils/objects';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface DynamicComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,

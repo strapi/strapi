@@ -1,4 +1,4 @@
-import { getIn, setIn, isObject } from '../objects';
+import { getIn, setIn, isObject } from '@content-manager/admin/utils/objects';
 
 describe('object', () => {
   describe('getIn', () => {

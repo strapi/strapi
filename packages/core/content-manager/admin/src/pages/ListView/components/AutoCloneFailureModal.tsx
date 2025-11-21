@@ -2,9 +2,8 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import { ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { getTranslation } from '../../../utils/translations';
-
-import type { ProhibitedCloningField } from '../../../../../shared/contracts/collection-types';
+import { getTranslation } from '@content-manager/admin/utils/translations';
+import type { ProhibitedCloningField } from '@content-manager/shared/contracts/collection-types';
 
 type Reason = ProhibitedCloningField[1];
 

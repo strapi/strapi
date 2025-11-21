@@ -3,10 +3,8 @@
  */
 import { stringify } from 'qs';
 
-import { SINGLE_TYPES } from '../constants/collections';
-
-import { contentManagerApi } from './api';
-
+import { SINGLE_TYPES } from '@content-manager/admin/constants/collections';
+import { contentManagerApi } from '@content-manager/admin/services/api';
 import type {
   Clone,
   Create,
@@ -22,7 +20,7 @@ import type {
   Publish,
   Unpublish,
   Update,
-} from '../../../shared/contracts/collection-types';
+} from '@content-manager/shared/contracts/collection-types';
 
 const documentApi = contentManagerApi.injectEndpoints({
   overrideExisting: true,

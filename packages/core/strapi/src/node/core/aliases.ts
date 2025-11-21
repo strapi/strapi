@@ -7,9 +7,10 @@ import { StrapiMonorepo } from './monorepo';
  * from `src` to `lib`.
  *
  * This file is currently read by:
- * - Webpack when running the dev server (only when running in this monorepo)
+ * - Vite when running the dev server (only when running in this monorepo)
  */
 const devAliases: Record<string, string> = {
+  // Cross-package aliases
   '@strapi/admin/strapi-admin': './packages/core/admin/admin/src',
   '@strapi/content-releases/strapi-admin': './packages/core/content-releases/admin/src',
   '@strapi/content-manager/strapi-admin': './packages/core/content-manager/admin/src',
@@ -24,6 +25,10 @@ const devAliases: Record<string, string> = {
   '@strapi/plugin-sentry/strapi-admin': './packages/plugins/sentry/admin/src',
   '@strapi/plugin-users-permissions/strapi-admin': './packages/plugins/users-permissions/admin/src',
   '@strapi/review-workflows/strapi-admin': './packages/core/review-workflows/admin/src',
+  // Internal package aliases for content-manager
+  '@content-manager/admin': './packages/core/content-manager/admin/src',
+  '@content-manager/server': './packages/core/content-manager/server/src',
+  '@content-manager/shared': './packages/core/content-manager/shared',
 };
 
 const getMonorepoAliases = ({ monorepo }: { monorepo?: StrapiMonorepo }) => {

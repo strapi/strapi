@@ -3,8 +3,11 @@ import * as React from 'react';
 import { RenderOptions, render as renderRTL, screen } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { type HistoryContextValue, HistoryProvider } from '../../pages/History';
-import { VersionHeader } from '../VersionHeader';
+import { VersionHeader } from '@content-manager/admin/history/components/VersionHeader';
+import {
+  type HistoryContextValue,
+  HistoryProvider,
+} from '@content-manager/admin/history/pages/History';
 
 import type { UID } from '@strapi/types';
 

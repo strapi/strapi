@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { NoPermissions } from '../NoPermissionsPage';
+import { NoPermissions } from '@content-manager/admin/pages/NoPermissionsPage';
 
 describe('NoPermissions', () => {
   it('renders and matches the snapshot', () => {

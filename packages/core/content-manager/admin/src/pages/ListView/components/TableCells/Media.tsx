@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Avatar, Flex, Tooltip, Typography, TypographyComponent } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { prefixFileUrlWithBackendUrl } from '../../../../utils/urls';
+import { prefixFileUrlWithBackendUrl } from '@content-manager/admin/utils/urls';
 
 import type { Data } from '@strapi/types';
 

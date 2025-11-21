@@ -1,4 +1,4 @@
-import { buildValidParams } from '../api';
+import { buildValidParams } from '@content-manager/admin/utils/api';
 
 describe('api', () => {
   describe('buildValidQueryParams', () => {

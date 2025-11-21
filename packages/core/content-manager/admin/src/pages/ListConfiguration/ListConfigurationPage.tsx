@@ -13,18 +13,20 @@ import { Divider, Flex, Main } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router-dom';
 
-import { SINGLE_TYPES } from '../../constants/collections';
-import { useDoc } from '../../hooks/useDocument';
-import { ListFieldLayout, ListLayout, useDocLayout } from '../../hooks/useDocumentLayout';
-import { useTypedSelector } from '../../modules/hooks';
-import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
-import { setIn } from '../../utils/objects';
-
-import { Header } from './components/Header';
-import { Settings } from './components/Settings';
-import { SortDisplayedFields } from './components/SortDisplayedFields';
-
-import type { Metadatas } from '../../../../shared/contracts/content-types';
+import { SINGLE_TYPES } from '@content-manager/admin/constants/collections';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import {
+  ListFieldLayout,
+  ListLayout,
+  useDocLayout,
+} from '@content-manager/admin/hooks/useDocumentLayout';
+import { useTypedSelector } from '@content-manager/admin/modules/hooks';
+import { Header } from '@content-manager/admin/pages/ListConfiguration/components/Header';
+import { Settings } from '@content-manager/admin/pages/ListConfiguration/components/Settings';
+import { SortDisplayedFields } from '@content-manager/admin/pages/ListConfiguration/components/SortDisplayedFields';
+import { useUpdateContentTypeConfigurationMutation } from '@content-manager/admin/services/contentTypes';
+import { setIn } from '@content-manager/admin/utils/objects';
+import type { Metadatas } from '@content-manager/shared/contracts/content-types';
 
 interface FormData extends Pick<ListLayout, 'settings'> {
   layout: Array<Pick<ListFieldLayout, 'sortable' | 'name'> & { label: string }>;

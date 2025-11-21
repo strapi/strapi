@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { DocumentStatus } from '../DocumentStatus';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
 
 describe('DocumentStatus', () => {
   it('should render a draft status by default', () => {

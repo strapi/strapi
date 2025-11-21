@@ -11,20 +11,19 @@ import { useNotifyAT } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 
-import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
-import { HOOKS } from '../constants/hooks';
-import { AppState, setInitialData } from '../modules/app';
-import { useTypedDispatch, useTypedSelector } from '../modules/hooks';
-import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
-import { useGetInitialDataQuery } from '../services/init';
-import { getTranslation } from '../utils/translations';
-
-import type { Component } from '../../../shared/contracts/components';
+import { COLLECTION_TYPES, SINGLE_TYPES } from '@content-manager/admin/constants/collections';
+import { HOOKS } from '@content-manager/admin/constants/hooks';
+import { AppState, setInitialData } from '@content-manager/admin/modules/app';
+import { useTypedDispatch, useTypedSelector } from '@content-manager/admin/modules/hooks';
+import { useGetAllContentTypeSettingsQuery } from '@content-manager/admin/services/contentTypes';
+import { useGetInitialDataQuery } from '@content-manager/admin/services/init';
+import { getTranslation } from '@content-manager/admin/utils/translations';
+import type { Component } from '@content-manager/shared/contracts/components';
 import type {
   ContentType,
   FindContentTypesSettings,
-} from '../../../shared/contracts/content-types';
-import type { GetInitData } from '../../../shared/contracts/init';
+} from '@content-manager/shared/contracts/content-types';
+import type { GetInitData } from '@content-manager/shared/contracts/init';
 
 const { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } = HOOKS;
 

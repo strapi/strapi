@@ -33,33 +33,39 @@ import { useIntl } from 'react-intl';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { styled } from 'styled-components';
 
-import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
-import { COLLECTION_TYPES } from '../../../../../constants/collections';
-import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { PERMISSIONS } from '../../../../../constants/plugin';
-import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
-import { useDebounce } from '../../../../../hooks/useDebounce';
-import { useDocument } from '../../../../../hooks/useDocument';
-import { type DocumentMeta, useDocumentContext } from '../../../../../hooks/useDocumentContext';
-import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
+import { RelationDragPreviewProps } from '@content-manager/admin/components/DragPreviews/RelationDragPreview';
+import { COLLECTION_TYPES } from '@content-manager/admin/constants/collections';
+import { ItemTypes } from '@content-manager/admin/constants/dragAndDrop';
+import { PERMISSIONS } from '@content-manager/admin/constants/plugin';
+import { DocumentRBAC, useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { useDebounce } from '@content-manager/admin/hooks/useDebounce';
+import { useDocument } from '@content-manager/admin/hooks/useDocument';
+import {
+  type DocumentMeta,
+  useDocumentContext,
+} from '@content-manager/admin/hooks/useDocumentContext';
+import { type EditFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
   UseDragAndDropOptions,
   useDragAndDrop,
-} from '../../../../../hooks/useDragAndDrop';
+} from '@content-manager/admin/hooks/useDragAndDrop';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
+import { useComponent } from '@content-manager/admin/pages/EditView/components/FormInputs/ComponentContext';
+import {
+  RelationModalRenderer,
+  getCollectionType,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/RelationModal';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
   RelationResult,
-} from '../../../../../services/relations';
-import { type MainField } from '../../../../../utils/attributes';
-import { getRelationLabel } from '../../../../../utils/relations';
-import { getTranslation } from '../../../../../utils/translations';
-import { DocumentStatus } from '../../DocumentStatus';
-import { useComponent } from '../ComponentContext';
-import { RelationModalRenderer, getCollectionType } from '../Relations/RelationModal';
+} from '@content-manager/admin/services/relations';
+import { type MainField } from '@content-manager/admin/utils/attributes';
+import { getRelationLabel } from '@content-manager/admin/utils/relations';
+import { getTranslation } from '@content-manager/admin/utils/translations';
+import type { FindAvailable } from '@content-manager/shared/contracts/relations';
 
-import type { FindAvailable } from '../../../../../../../shared/contracts/relations';
 import type { Schema } from '@strapi/types';
 
 /**

@@ -1,6 +1,6 @@
 import type { UID, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
-import type { Document } from '../document-manager';
+import type { Document } from '@content-manager/server/services/document-manager';
 
 const { isVisibleAttribute } = contentTypes;
 

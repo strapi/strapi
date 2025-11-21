@@ -2,9 +2,8 @@
  * Related to the InputUID component, not the UIDs of content-types.
  */
 
-import { GenerateUID, CheckUIDAvailability } from '../../../shared/contracts/uid';
-
-import { contentManagerApi } from './api';
+import { contentManagerApi } from '@content-manager/admin/services/api';
+import { GenerateUID, CheckUIDAvailability } from '@content-manager/shared/contracts/uid';
 
 const uidApi = contentManagerApi.injectEndpoints({
   endpoints: (builder) => ({

@@ -3,7 +3,7 @@ import {
   getAttributeSchemaFromPath,
   parseFieldMetaData,
   PreviewFieldError,
-} from '../fieldUtils';
+} from '@content-manager/admin/preview/utils/fieldUtils';
 
 import type { Schema, Modules } from '@strapi/types';
 

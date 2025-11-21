@@ -1,10 +1,10 @@
 import { Quotes } from '@strapi/icons';
 import { styled } from 'styled-components';
 
-import { type BlocksStore } from '../BlocksEditor';
-import { baseHandleConvert } from '../utils/conversions';
-import { pressEnterTwiceToExit } from '../utils/enterKey';
-import { type Block } from '../utils/types';
+import { type BlocksStore } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { baseHandleConvert } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/conversions';
+import { pressEnterTwiceToExit } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/enterKey';
+import { type Block } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
 
 const Blockquote = styled.blockquote.attrs({ role: 'blockquote' })`
   font-weight: ${({ theme }) => theme.fontWeights.regular};

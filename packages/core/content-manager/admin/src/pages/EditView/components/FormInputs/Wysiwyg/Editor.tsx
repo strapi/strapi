@@ -3,8 +3,8 @@ import * as React from 'react';
 import CodeMirror, { EditorFromTextArea } from 'codemirror5';
 import { styled } from 'styled-components';
 
-import { PreviewWysiwyg } from './PreviewWysiwyg';
-import { newlineAndIndentContinueMarkdownList } from './utils/continueList';
+import { PreviewWysiwyg } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/PreviewWysiwyg';
+import { newlineAndIndentContinueMarkdownList } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/utils/continueList';
 
 import type { FieldValue, InputProps } from '@strapi/admin/strapi-admin';
 

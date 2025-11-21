@@ -1,4 +1,4 @@
-import componentsService from '../components';
+import componentsService from '@content-manager/server/services/components';
 
 const configuration = {
   test: 'value',

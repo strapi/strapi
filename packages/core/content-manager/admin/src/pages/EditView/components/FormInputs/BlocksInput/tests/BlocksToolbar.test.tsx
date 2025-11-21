@@ -8,16 +8,19 @@ import { act, render, screen } from '@tests/utils';
 import { type Descendant, type Editor, type Location, createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
-import { codeBlocks } from '../Blocks/Code';
-import { headingBlocks } from '../Blocks/Heading';
-import { imageBlocks } from '../Blocks/Image';
-import { linkBlocks } from '../Blocks/Link';
-import { listBlocks } from '../Blocks/List';
-import { paragraphBlocks } from '../Blocks/Paragraph';
-import { quoteBlocks } from '../Blocks/Quote';
-import { type BlocksStore, BlocksEditorProvider } from '../BlocksEditor';
-import { BlocksToolbar } from '../BlocksToolbar';
-import { modifiers } from '../Modifiers';
+import { codeBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Code';
+import { headingBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Heading';
+import { imageBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Image';
+import { linkBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Link';
+import { listBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/List';
+import { paragraphBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Paragraph';
+import { quoteBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Quote';
+import {
+  type BlocksStore,
+  BlocksEditorProvider,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { BlocksToolbar } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksToolbar';
+import { modifiers } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Modifiers';
 
 const defaultInitialValue: Descendant[] = [
   {

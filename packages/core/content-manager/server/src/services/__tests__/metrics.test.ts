@@ -1,4 +1,4 @@
-import metricsServiceLoader from '../metrics';
+import metricsServiceLoader from '@content-manager/server/services/metrics';
 
 let metricsService;
 

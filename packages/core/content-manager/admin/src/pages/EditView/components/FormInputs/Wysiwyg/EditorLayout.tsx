@@ -5,7 +5,7 @@ import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { PreviewWysiwyg } from './PreviewWysiwyg';
+import { PreviewWysiwyg } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/PreviewWysiwyg';
 
 interface EditorLayoutProps {
   children: React.ReactNode;

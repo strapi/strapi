@@ -6,7 +6,7 @@ import { PlusCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { getTranslation } from '../../../../../utils/translations';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface InitializerProps {
   disabled?: boolean;

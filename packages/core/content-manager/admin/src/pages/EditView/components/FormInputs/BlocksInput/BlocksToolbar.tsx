@@ -17,16 +17,22 @@ import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from
 import { ReactEditor } from 'slate-react';
 import { css, styled } from 'styled-components';
 
-import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
-
+import {
+  EditorToolbarObserver,
+  type ObservedComponent,
+} from '@content-manager/admin/pages/EditView/components/EditorToolbarObserver';
 import {
   type BlocksStore,
   type SelectorBlockKey,
   isSelectorBlockKey,
   useBlocksEditorContext,
-} from './BlocksEditor';
-import { insertLink } from './utils/links';
-import { type Block, getEntries, getKeys } from './utils/types';
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { insertLink } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/links';
+import {
+  type Block,
+  getEntries,
+  getKeys,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
 
 const ToolbarWrapper = styled<FlexComponent>(Flex)`
   &[aria-disabled='true'] {

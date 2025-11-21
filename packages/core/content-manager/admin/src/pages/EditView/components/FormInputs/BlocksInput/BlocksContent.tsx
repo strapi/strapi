@@ -15,15 +15,21 @@ import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
 import { styled, CSSProperties, css } from 'styled-components';
 
-import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop';
-import { getTranslation } from '../../../../../utils/translations';
-
-import { decorateCode } from './Blocks/Code';
-import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
-import { useConversionModal } from './BlocksToolbar';
-import { type ModifiersStore } from './Modifiers';
-import { getEntries, isLinkNode, isListNode } from './utils/types';
+import { ItemTypes } from '@content-manager/admin/constants/dragAndDrop';
+import { useDragAndDrop, DIRECTIONS } from '@content-manager/admin/hooks/useDragAndDrop';
+import { decorateCode } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Code';
+import {
+  type BlocksStore,
+  useBlocksEditorContext,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { useConversionModal } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksToolbar';
+import { type ModifiersStore } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Modifiers';
+import {
+  getEntries,
+  isLinkNode,
+  isListNode,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within

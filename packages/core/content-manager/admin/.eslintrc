@@ -10,7 +10,48 @@
     },
     {
       "files": ["**/*.ts", "**/*.tsx"],
-      "extends": ["custom/front/typescript"]
+      "extends": ["custom/front/typescript"],
+      "rules": {
+        /**
+         * Allow import aliases for content-manager
+         */
+        "import/no-unresolved": [
+          "error",
+          {
+            "ignore": ["^@content-manager/"]
+          }
+        ],
+        "import/order": [
+          "error",
+          {
+            "groups": [
+              ["external", "internal", "builtin"],
+              "parent",
+              ["sibling", "index"],
+              "object",
+              "type"
+            ],
+            "pathGroups": [
+              {
+                "pattern": "react",
+                "group": "external",
+                "position": "before"
+              },
+              {
+                "pattern": "@content-manager/**",
+                "group": "internal",
+                "position": "after"
+              }
+            ],
+            "pathGroupsExcludedImportTypes": ["react"],
+            "newlines-between": "always",
+            "alphabetize": {
+              "order": "asc",
+              "caseInsensitive": true
+            }
+          }
+        ]
+      }
     },
     {
       "files": ["./tests/*", "**/*.test.*"],

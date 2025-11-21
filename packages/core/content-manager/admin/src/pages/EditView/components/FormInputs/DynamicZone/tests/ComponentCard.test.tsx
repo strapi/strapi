@@ -1,6 +1,6 @@
 import { screen, render } from '@tests/utils';
 
-import { ComponentCard } from '../ComponentCard';
+import { ComponentCard } from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/ComponentCard';
 
 describe('ComponentCard', () => {
   it('should call the onClick handler when passed', async () => {

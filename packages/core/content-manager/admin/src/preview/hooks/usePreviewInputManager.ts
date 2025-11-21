@@ -3,10 +3,10 @@ import * as React from 'react';
 import { useField } from '@strapi/admin/strapi-admin';
 import { Schema } from '@strapi/types';
 
-import { useHasInputPopoverParent } from '../components/InputPopover';
-import { usePreviewContext } from '../pages/Preview';
-import { INTERNAL_EVENTS } from '../utils/constants';
-import { getSendMessage } from '../utils/getSendMessage';
+import { useHasInputPopoverParent } from '@content-manager/admin/preview/components/InputPopover';
+import { usePreviewContext } from '@content-manager/admin/preview/pages/Preview';
+import { INTERNAL_EVENTS } from '@content-manager/admin/preview/utils/constants';
+import { getSendMessage } from '@content-manager/admin/preview/utils/getSendMessage';
 
 type PreviewInputProps = Pick<
   Required<React.InputHTMLAttributes<HTMLInputElement>>,

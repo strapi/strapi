@@ -4,7 +4,7 @@ import { Accordion, Box, Flex, FlexComponent, Typography } from '@strapi/design-
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { ComponentIcon } from '../../../../../components/ComponentIcon';
+import { ComponentIcon } from '@content-manager/admin/components/ComponentIcon';
 
 interface ComponentCategoryProps {
   category: string;

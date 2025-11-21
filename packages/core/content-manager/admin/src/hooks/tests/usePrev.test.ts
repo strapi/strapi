@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 
-import { usePrev } from '../usePrev';
+import { usePrev } from '@content-manager/admin/hooks/usePrev';
 
 describe('usePrev', () => {
   const setup = () => renderHook(({ state }) => usePrev(state), { initialProps: { state: 0 } });

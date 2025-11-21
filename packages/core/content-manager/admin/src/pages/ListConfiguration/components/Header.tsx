@@ -3,9 +3,9 @@ import { Button } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
-import { COLLECTION_TYPES } from '../../../constants/collections';
-import { capitalise } from '../../../utils/strings';
-import { getTranslation } from '../../../utils/translations';
+import { COLLECTION_TYPES } from '@content-manager/admin/constants/collections';
+import { capitalise } from '@content-manager/admin/utils/strings';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface HeaderProps {
   collectionType: string;

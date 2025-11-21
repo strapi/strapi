@@ -1,4 +1,4 @@
-import uidServiceLoader from '../uid';
+import uidServiceLoader from '@content-manager/server/services/uid';
 
 describe('Test uid service', () => {
   describe('generateUIDField', () => {

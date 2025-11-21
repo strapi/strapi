@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Flex, FlexComponent, Typography, TypographyComponent } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { ComponentIcon, ComponentIconProps } from '../../../../../components/ComponentIcon';
+import { ComponentIcon, ComponentIconProps } from '@content-manager/admin/components/ComponentIcon';
 
 interface ComponentCardProps extends Pick<ComponentIconProps, 'icon'> {
   children: React.ReactNode;

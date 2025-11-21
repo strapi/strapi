@@ -1,12 +1,12 @@
 import type { UID } from '@strapi/types';
-import { getService } from '../utils';
-import { getDocumentLocaleAndStatus } from './validation/dimensions';
+import { getService } from '@content-manager/server/utils';
+import { getDocumentLocaleAndStatus } from '@content-manager/server/controllers/validation/dimensions';
 
 import {
   validateGenerateUIDInput,
   validateCheckUIDAvailabilityInput,
   validateUIDField,
-} from './validation';
+} from '@content-manager/server/controllers/validation';
 
 export default {
   async generateUID(ctx: any) {

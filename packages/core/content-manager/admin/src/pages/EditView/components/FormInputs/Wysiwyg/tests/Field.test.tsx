@@ -1,7 +1,10 @@
 import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL } from '@tests/utils';
 
-import { Wysiwyg, WysiwygProps } from '../Field';
+import {
+  Wysiwyg,
+  WysiwygProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/Field';
 
 /**
  * TODO: these should be in the JEST setup.

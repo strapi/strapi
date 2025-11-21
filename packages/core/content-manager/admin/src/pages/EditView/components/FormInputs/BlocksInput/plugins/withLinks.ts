@@ -1,6 +1,6 @@
 import { type BaseEditor, Path, Transforms, Range, Point, Editor } from 'slate';
 
-import { insertLink } from '../utils/links';
+import { insertLink } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/links';
 
 interface LinkEditor extends BaseEditor {
   lastInsertedLinkPath: Path | null;

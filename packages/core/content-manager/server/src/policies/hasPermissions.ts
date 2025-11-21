@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 import { policy } from '@strapi/utils';
-import { validateHasPermissionsInput } from '../validation/policies/hasPermissions';
+import { validateHasPermissionsInput } from '@content-manager/server/validation/policies/hasPermissions';
 
 const { createPolicy } = policy;
 

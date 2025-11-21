@@ -1,5 +1,5 @@
 import type { Plugin } from '@strapi/types';
-import { previewRouter } from './preview';
+import { previewRouter } from '@content-manager/server/preview/routes/preview';
 
 /**
  * The routes will be merged with the other Content Manager routers,

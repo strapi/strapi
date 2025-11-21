@@ -4,24 +4,32 @@ import { Page, useNotification, useAPIErrorHandler } from '@strapi/admin/strapi-
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
-import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
-import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';
-import { ComponentsDictionary, extractContentTypeComponents } from '../hooks/useContentTypeSchema';
+import { TEMP_FIELD_NAME } from '@content-manager/admin/components/ConfigurationForm/Fields';
+import {
+  ConfigurationForm,
+  ConfigurationFormProps,
+} from '@content-manager/admin/components/ConfigurationForm/Form';
+import {
+  ComponentsDictionary,
+  extractContentTypeComponents,
+} from '@content-manager/admin/hooks/useContentTypeSchema';
 import {
   DEFAULT_SETTINGS,
   EditLayout,
   convertEditLayoutToFieldLayouts,
-} from '../hooks/useDocumentLayout';
-import { useTypedSelector } from '../modules/hooks';
+} from '@content-manager/admin/hooks/useDocumentLayout';
+import { useTypedSelector } from '@content-manager/admin/modules/hooks';
 import {
   useGetComponentConfigurationQuery,
   useUpdateComponentConfigurationMutation,
-} from '../services/components';
-import { useGetInitialDataQuery } from '../services/init';
-import { setIn } from '../utils/objects';
-
-import type { Component, FindComponentConfiguration } from '../../../shared/contracts/components';
-import type { Metadatas } from '../../../shared/contracts/content-types';
+} from '@content-manager/admin/services/components';
+import { useGetInitialDataQuery } from '@content-manager/admin/services/init';
+import { setIn } from '@content-manager/admin/utils/objects';
+import type {
+  Component,
+  FindComponentConfiguration,
+} from '@content-manager/shared/contracts/components';
+import type { Metadatas } from '@content-manager/shared/contracts/content-types';
 
 /* -------------------------------------------------------------------------------------------------
  * ComponentConfigurationPage

@@ -1,5 +1,9 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { ContentManagerPlugin, DocumentActionComponent, PanelComponent } from '../content-manager';
+import {
+  ContentManagerPlugin,
+  DocumentActionComponent,
+  PanelComponent,
+} from '@content-manager/admin/content-manager';
 
 jest.mock('../pages/EditView/components/Panels', () => ({
   ActionsPanel: () => ({

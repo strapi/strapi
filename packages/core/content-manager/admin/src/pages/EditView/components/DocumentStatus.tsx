@@ -1,7 +1,7 @@
 import { Status, StatusProps, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { capitalise } from '../../../utils/strings';
+import { capitalise } from '@content-manager/admin/utils/strings';
 
 interface DocumentStatusProps extends Omit<StatusProps, 'children' | 'variant'> {
   /**

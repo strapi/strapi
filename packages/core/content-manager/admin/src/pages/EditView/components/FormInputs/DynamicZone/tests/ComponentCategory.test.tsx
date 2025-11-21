@@ -1,7 +1,10 @@
 import { Accordion } from '@strapi/design-system';
 import { render as renderRTL } from '@tests/utils';
 
-import { ComponentCategory, ComponentCategoryProps } from '../ComponentCategory';
+import {
+  ComponentCategory,
+  ComponentCategoryProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/ComponentCategory';
 
 describe('ComponentCategory', () => {
   const render = (props?: Partial<ComponentCategoryProps>) => ({

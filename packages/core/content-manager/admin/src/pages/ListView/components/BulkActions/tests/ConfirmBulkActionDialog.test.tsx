@@ -9,7 +9,7 @@ import {
   ConfirmBulkActionDialog,
   ConfirmBulkActionDialogProps,
   ConfirmDialogPublishAll,
-} from '../ConfirmBulkActionDialog';
+} from '@content-manager/admin/pages/ListView/components/BulkActions/ConfirmBulkActionDialog';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),

@@ -1,7 +1,10 @@
 import type { Core } from '@strapi/types';
 import * as yup from 'yup';
 import { errors } from '@strapi/utils';
-import type { GetRecentDocuments, GetCountDocuments } from '../../../../shared/contracts/homepage';
+import type {
+  GetRecentDocuments,
+  GetCountDocuments,
+} from '@content-manager/shared/contracts/homepage';
 
 const createHomepageController = () => {
   const homepageService = strapi.plugin('content-manager').service('homepage');

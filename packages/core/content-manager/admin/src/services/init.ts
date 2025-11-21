@@ -1,6 +1,5 @@
-import { contentManagerApi } from './api';
-
-import type { GetInitData } from '../../../shared/contracts/init';
+import { contentManagerApi } from '@content-manager/admin/services/api';
+import type { GetInitData } from '@content-manager/shared/contracts/init';
 
 const initApi = contentManagerApi.injectEndpoints({
   endpoints: (builder) => ({

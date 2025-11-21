@@ -1,6 +1,6 @@
 import type { Plugin } from '@strapi/types';
-import history from './history';
-import preview from './preview';
+import history from '@content-manager/server/history';
+import preview from '@content-manager/server/preview';
 
 const register: Plugin.LoadedPlugin['register'] = async ({ strapi }) => {
   await history.register?.({ strapi });

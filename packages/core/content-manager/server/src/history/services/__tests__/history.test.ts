@@ -1,6 +1,6 @@
 import type { UID } from '@strapi/types';
-import { HISTORY_VERSION_UID } from '../../constants';
-import { createHistoryService } from '../history';
+import { HISTORY_VERSION_UID } from '@content-manager/server/history/constants';
+import { createHistoryService } from '@content-manager/server/history/services/history';
 
 const createMock = jest.fn();
 const userId = 'user-id';

@@ -2,9 +2,8 @@
 import { render, screen } from '@testing-library/react';
 import { Transforms, createEditor } from 'slate';
 
-import { headingBlocks } from '../Heading';
-
-import { Wrapper } from './Wrapper';
+import { headingBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Heading';
+import { Wrapper } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/tests/Wrapper';
 
 describe('Heading', () => {
   it('renders a heading block properly', () => {

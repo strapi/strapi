@@ -2,10 +2,10 @@ import * as React from 'react';
 
 import { useNotification, useAPIErrorHandler } from '@strapi/admin/strapi-admin';
 
-import { useGetInitialDataQuery } from '../services/init';
+import { useGetInitialDataQuery } from '@content-manager/admin/services/init';
+import type { Component } from '@content-manager/shared/contracts/components';
+import type { ContentType } from '@content-manager/shared/contracts/content-types';
 
-import type { Component } from '../../../shared/contracts/components';
-import type { ContentType } from '../../../shared/contracts/content-types';
 import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------

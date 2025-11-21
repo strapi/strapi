@@ -1,7 +1,11 @@
 import { renderHook as renderRTLHook, waitFor } from '@tests/utils';
 import { Routes, Route } from 'react-router-dom';
 
-import { DocumentRBAC, DocumentRBACProps, useDocumentRBAC } from '../DocumentRBAC';
+import {
+  DocumentRBAC,
+  DocumentRBACProps,
+  useDocumentRBAC,
+} from '@content-manager/admin/features/DocumentRBAC';
 
 import type { Permission } from '@strapi/admin/strapi-admin';
 

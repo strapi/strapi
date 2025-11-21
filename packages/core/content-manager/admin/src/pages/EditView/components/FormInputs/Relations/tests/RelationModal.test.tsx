@@ -1,5 +1,9 @@
-import { DocumentMeta } from '../../../../../../hooks/useDocumentContext';
-import { reducer, type State, type Action } from '../RelationModal';
+import { DocumentMeta } from '@content-manager/admin/hooks/useDocumentContext';
+import {
+  reducer,
+  type State,
+  type Action,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/RelationModal';
 
 describe('Document Modal Reducer', () => {
   // Sample documents for testing

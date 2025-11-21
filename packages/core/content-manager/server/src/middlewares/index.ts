@@ -1,3 +1,3 @@
-import routing from './routing';
+import routing from '@content-manager/server/middlewares/routing';
 
 export { routing };

@@ -1,12 +1,12 @@
 import { CheckCircle, Feather, Pencil, PuzzlePiece } from '@strapi/icons';
 
-import { PLUGIN_ID } from './constants/plugin';
-import { ContentManagerPlugin } from './content-manager';
-import { historyAdmin } from './history';
-import { reducer } from './modules/reducers';
-import { previewAdmin } from './preview';
-import { routes } from './router';
-import { prefixPluginTranslations } from './utils/translations';
+import { PLUGIN_ID } from '@content-manager/admin/constants/plugin';
+import { ContentManagerPlugin } from '@content-manager/admin/content-manager';
+import { historyAdmin } from '@content-manager/admin/history';
+import { reducer } from '@content-manager/admin/modules/reducers';
+import { previewAdmin } from '@content-manager/admin/preview';
+import { routes } from '@content-manager/admin/router';
+import { prefixPluginTranslations } from '@content-manager/admin/utils/translations';
 
 import type { WidgetArgs } from '@strapi/admin/strapi-admin';
 

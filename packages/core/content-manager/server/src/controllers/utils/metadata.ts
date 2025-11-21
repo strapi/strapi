@@ -1,14 +1,17 @@
 import type { UID } from '@strapi/types';
 import { async } from '@strapi/utils';
 
-import { getService } from '../../utils';
+import { getService } from '@content-manager/server/utils';
 
-import { DocumentVersion, GetMetadataOptions } from '../../services/document-metadata';
+import {
+  DocumentVersion,
+  GetMetadataOptions,
+} from '@content-manager/server/services/document-metadata';
 
 import type {
   AvailableLocaleDocument,
   AvailableStatusDocument,
-} from '../../../../shared/contracts/collection-types';
+} from '@content-manager/shared/contracts/collection-types';
 
 /**
  * Format a document with metadata. Making sure the metadata response is

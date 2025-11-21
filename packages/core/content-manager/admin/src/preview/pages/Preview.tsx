@@ -23,22 +23,22 @@ import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { GetPreviewUrl } from '../../../../shared/contracts/preview';
-import { COLLECTION_TYPES } from '../../constants/collections';
-import { DocumentRBAC } from '../../features/DocumentRBAC';
-import { type UseDocument, useDocument } from '../../hooks/useDocument';
-import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
-import { Blocker } from '../../pages/EditView/components/Blocker';
-import { FormLayout } from '../../pages/EditView/components/FormLayout';
-import { handleInvisibleAttributes } from '../../pages/EditView/utils/data';
-import { buildValidParams } from '../../utils/api';
-import { createYupSchema } from '../../utils/validation';
-import { InputPopover } from '../components/InputPopover';
-import { PreviewHeader } from '../components/PreviewHeader';
-import { useGetPreviewUrlQuery } from '../services/preview';
-import { PUBLIC_EVENTS } from '../utils/constants';
-import { getSendMessage } from '../utils/getSendMessage';
-import { previewScript } from '../utils/previewScript';
+import { COLLECTION_TYPES } from '@content-manager/admin/constants/collections';
+import { DocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { type UseDocument, useDocument } from '@content-manager/admin/hooks/useDocument';
+import { type EditLayout, useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { Blocker } from '@content-manager/admin/pages/EditView/components/Blocker';
+import { FormLayout } from '@content-manager/admin/pages/EditView/components/FormLayout';
+import { handleInvisibleAttributes } from '@content-manager/admin/pages/EditView/utils/data';
+import { InputPopover } from '@content-manager/admin/preview/components/InputPopover';
+import { PreviewHeader } from '@content-manager/admin/preview/components/PreviewHeader';
+import { useGetPreviewUrlQuery } from '@content-manager/admin/preview/services/preview';
+import { PUBLIC_EVENTS } from '@content-manager/admin/preview/utils/constants';
+import { getSendMessage } from '@content-manager/admin/preview/utils/getSendMessage';
+import { previewScript } from '@content-manager/admin/preview/utils/previewScript';
+import { buildValidParams } from '@content-manager/admin/utils/api';
+import { createYupSchema } from '@content-manager/admin/utils/validation';
+import { GetPreviewUrl } from '@content-manager/shared/contracts/preview';
 
 import type { Schema, UID } from '@strapi/types';
 

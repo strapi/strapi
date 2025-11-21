@@ -1,9 +1,9 @@
+import { COLLECTION_TYPES } from '@content-manager/admin/constants/collections';
+import { contentManagerApi } from '@content-manager/admin/services/api';
 import {
   GetHistoryVersions,
   RestoreHistoryVersion,
-} from '../../../../shared/contracts/history-versions';
-import { COLLECTION_TYPES } from '../../constants/collections';
-import { contentManagerApi } from '../../services/api';
+} from '@content-manager/shared/contracts/history-versions';
 
 import type { Data } from '@strapi/types';
 

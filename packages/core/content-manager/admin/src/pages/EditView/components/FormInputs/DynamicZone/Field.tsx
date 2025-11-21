@@ -11,19 +11,27 @@ import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
-import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
-import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
-import { getTranslation } from '../../../../../utils/translations';
-import { transformDocument } from '../../../utils/data';
-import { createDefaultForm } from '../../../utils/forms';
-import { ComponentProvider, useComponent } from '../ComponentContext';
+import { useDocumentContext } from '@content-manager/admin/hooks/useDocumentContext';
+import { type EditFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import {
+  ComponentProvider,
+  useComponent,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/ComponentContext';
+import { AddComponentButton } from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/AddComponentButton';
+import { ComponentPicker } from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/ComponentPicker';
+import {
+  DynamicComponent,
+  DynamicComponentProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/DynamicComponent';
+import {
+  DynamicZoneLabel,
+  DynamicZoneLabelProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/DynamicZoneLabel';
+import type { InputRendererProps } from '@content-manager/admin/pages/EditView/components/InputRenderer';
+import { transformDocument } from '@content-manager/admin/pages/EditView/utils/data';
+import { createDefaultForm } from '@content-manager/admin/pages/EditView/utils/forms';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
-import { AddComponentButton } from './AddComponentButton';
-import { ComponentPicker } from './ComponentPicker';
-import { DynamicComponent, DynamicComponentProps } from './DynamicComponent';
-import { DynamicZoneLabel, DynamicZoneLabelProps } from './DynamicZoneLabel';
-
-import type { InputRendererProps } from '../../InputRenderer';
 import type { Schema } from '@strapi/types';
 
 interface DynamicZoneContextValue {

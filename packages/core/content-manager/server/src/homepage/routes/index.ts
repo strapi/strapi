@@ -1,5 +1,5 @@
 import type { Plugin } from '@strapi/types';
-import { homepageRouter } from './homepage';
+import { homepageRouter } from '@content-manager/server/homepage/routes/homepage';
 
 /**
  * The routes will be merged with the other Content Manager routers,

@@ -1,4 +1,4 @@
-import { getDocumentLocaleAndStatus } from '../dimensions';
+import { getDocumentLocaleAndStatus } from '@content-manager/server/controllers/validation/dimensions';
 
 describe('getDocumentDimensions', () => {
   const modelWithDraftAndPublishUID = 'application::model.model';

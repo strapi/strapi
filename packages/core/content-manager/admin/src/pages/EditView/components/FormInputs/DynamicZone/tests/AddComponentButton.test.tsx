@@ -1,6 +1,9 @@
 import { render as renderRTL } from '@tests/utils';
 
-import { AddComponentButton, AddComponentButtonProps } from '../AddComponentButton';
+import {
+  AddComponentButton,
+  AddComponentButtonProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/AddComponentButton';
 
 describe('<AddComponentButton />', () => {
   const render = (props?: Partial<AddComponentButtonProps>) => ({

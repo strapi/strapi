@@ -1,4 +1,4 @@
-import { routing } from '../middlewares';
+import { routing } from '@content-manager/server/middlewares';
 
 export default {
   type: 'admin',

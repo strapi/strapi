@@ -1,6 +1,6 @@
 import type { UID } from '@strapi/types';
-import { HISTORY_VERSION_UID } from '../../constants';
-import { createLifecyclesService } from '../lifecycles';
+import { HISTORY_VERSION_UID } from '@content-manager/server/history/constants';
+import { createLifecyclesService } from '@content-manager/server/history/services/lifecycles';
 
 const mockGetRequestContext = jest.fn(() => {
   return {

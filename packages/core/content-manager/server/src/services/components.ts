@@ -1,12 +1,12 @@
 import { has, isNil, mapValues } from 'lodash/fp';
 
 import type { UID, Struct, Core } from '@strapi/types';
-import type { Configuration } from '../../../shared/contracts/content-types';
-import type { ConfigurationUpdate } from './configuration';
+import type { Configuration } from '@content-manager/shared/contracts/content-types';
+import type { ConfigurationUpdate } from '@content-manager/server/services/configuration';
 
-import { getService } from '../utils';
-import storeUtils from './utils/store';
-import createConfigurationService from './configuration';
+import { getService } from '@content-manager/server/utils';
+import storeUtils from '@content-manager/server/services/utils/store';
+import createConfigurationService from '@content-manager/server/services/configuration';
 
 const STORE_KEY_PREFIX = 'components';
 

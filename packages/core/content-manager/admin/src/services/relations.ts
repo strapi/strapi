@@ -1,12 +1,11 @@
 import { generateNKeysBetween } from 'fractional-indexing';
 
+import { contentManagerApi } from '@content-manager/admin/services/api';
 import {
   RelationResult as RelResult,
   FindAvailable,
   FindExisting,
-} from '../../../shared/contracts/relations';
-
-import { contentManagerApi } from './api';
+} from '@content-manager/shared/contracts/relations';
 
 import type { Modules } from '@strapi/types';
 import type { errors } from '@strapi/utils';

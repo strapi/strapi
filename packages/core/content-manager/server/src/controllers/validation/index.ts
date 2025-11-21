@@ -3,7 +3,7 @@ import { Schema, UID } from '@strapi/types';
 import { yup, validateYupSchema, errors } from '@strapi/utils';
 import { ValidateOptions } from 'yup/lib/types';
 import { TestContext } from 'yup';
-import createModelConfigurationSchema from './model-configuration';
+import createModelConfigurationSchema from '@content-manager/server/controllers/validation/model-configuration';
 
 const { PaginationError, ValidationError } = errors;
 const TYPES = ['singleType', 'collectionType'];

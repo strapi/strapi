@@ -1,7 +1,7 @@
 import { merge, isEmpty, set, propEq } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
-import { getService } from '../../utils';
+import { getService } from '@content-manager/server/utils';
 
 const { isVisibleAttribute, isScalarAttribute, getDoesAttributeRequireValidation } =
   strapiUtils.contentTypes;

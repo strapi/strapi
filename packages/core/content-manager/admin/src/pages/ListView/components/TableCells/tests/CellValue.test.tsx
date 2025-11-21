@@ -1,7 +1,10 @@
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import { CellValue, CellValueProps } from '../CellValue';
+import {
+  CellValue,
+  CellValueProps,
+} from '@content-manager/admin/pages/ListView/components/TableCells/CellValue';
 
 const CellValueWithProvider = (type: CellValueProps['type'], value: CellValueProps['value']) => {
   return (

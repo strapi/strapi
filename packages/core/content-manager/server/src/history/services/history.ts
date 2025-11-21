@@ -2,14 +2,14 @@ import type { Core, Data, Modules, Schema } from '@strapi/types';
 import { errors, traverseEntity } from '@strapi/utils';
 import { omit } from 'lodash/fp';
 
-import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
-import type { HistoryVersions } from '../../../../shared/contracts';
+import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '@content-manager/server/history/constants';
+import type { HistoryVersions } from '@content-manager/shared/contracts';
 import type {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
-} from '../../../../shared/contracts/history-versions';
-import { createServiceUtils } from './utils';
-import { getService as getContentManagerService } from '../../utils';
+} from '@content-manager/shared/contracts/history-versions';
+import { createServiceUtils } from '@content-manager/server/history/services/utils';
+import { getService as getContentManagerService } from '@content-manager/server/utils';
 
 // Needed because the query engine doesn't return any types yet
 type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &

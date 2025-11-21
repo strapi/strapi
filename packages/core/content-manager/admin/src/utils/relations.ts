@@ -1,5 +1,5 @@
-import type { MainField } from './attributes';
-import type { RelationResult } from '../../../shared/contracts/relations';
+import type { MainField } from '@content-manager/admin/utils/attributes';
+import type { RelationResult } from '@content-manager/shared/contracts/relations';
 
 /**
  * @internal

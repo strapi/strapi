@@ -4,12 +4,11 @@ import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { Typography, Loader, useNotifyAT, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../../../hooks/useDocument';
-import { useGetRelationsQuery } from '../../../../services/relations';
-import { getRelationLabel } from '../../../../utils/relations';
-import { getTranslation } from '../../../../utils/translations';
-
-import type { CellContentProps } from './CellContent';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import type { CellContentProps } from '@content-manager/admin/pages/ListView/components/TableCells/CellContent';
+import { useGetRelationsQuery } from '@content-manager/admin/services/relations';
+import { getRelationLabel } from '@content-manager/admin/utils/relations';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 /* -------------------------------------------------------------------------------------------------
  * RelationSingle

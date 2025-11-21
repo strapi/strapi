@@ -1,4 +1,4 @@
-import { getProhibitedCloningFields } from '../clone';
+import { getProhibitedCloningFields } from '@content-manager/server/controllers/utils/clone';
 
 describe('Populate', () => {
   const fakeModels = {

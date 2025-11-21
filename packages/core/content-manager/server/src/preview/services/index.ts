@@ -1,7 +1,7 @@
 import type { Plugin } from '@strapi/types';
 
-import { createPreviewService } from './preview';
-import { createPreviewConfigService } from './preview-config';
+import { createPreviewService } from '@content-manager/server/preview/services/preview';
+import { createPreviewConfigService } from '@content-manager/server/preview/services/preview-config';
 
 export const services = {
   preview: createPreviewService,

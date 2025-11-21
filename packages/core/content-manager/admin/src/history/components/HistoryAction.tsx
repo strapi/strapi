@@ -4,7 +4,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import type { DocumentActionComponent } from '../../content-manager';
+import type { DocumentActionComponent } from '@content-manager/admin/content-manager';
 
 const HistoryAction: DocumentActionComponent = ({ model, document }) => {
   const { formatMessage } = useIntl();

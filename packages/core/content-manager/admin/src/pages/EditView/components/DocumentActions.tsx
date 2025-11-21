@@ -29,27 +29,28 @@ import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
 
-import { Create, Publish } from '../../../../../shared/contracts/collection-types';
-import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
-import { SINGLE_TYPES } from '../../../constants/collections';
-import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc, useDocument } from '../../../hooks/useDocument';
-import { useDocumentActions } from '../../../hooks/useDocumentActions';
-import { useDocumentContext } from '../../../hooks/useDocumentContext';
-import { usePreviewContext } from '../../../preview/pages/Preview';
-import { CLONE_PATH, LIST_PATH } from '../../../router';
+import { PUBLISHED_AT_ATTRIBUTE_NAME } from '@content-manager/admin/constants/attributes';
+import { SINGLE_TYPES } from '@content-manager/admin/constants/collections';
+import type { DocumentActionComponent } from '@content-manager/admin/content-manager';
+import { useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { useDoc, useDocument } from '@content-manager/admin/hooks/useDocument';
+import { useDocumentActions } from '@content-manager/admin/hooks/useDocumentActions';
+import { useDocumentContext } from '@content-manager/admin/hooks/useDocumentContext';
+import { useRelationModal } from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/RelationModal';
+import type { RelationsFormValue } from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/Relations';
+import {
+  AnyData,
+  handleInvisibleAttributes,
+} from '@content-manager/admin/pages/EditView/utils/data';
+import { usePreviewContext } from '@content-manager/admin/preview/pages/Preview';
+import { CLONE_PATH, LIST_PATH } from '@content-manager/admin/router';
 import {
   useGetDraftRelationCountQuery,
   useUpdateDocumentMutation,
-} from '../../../services/documents';
-import { isBaseQueryError, buildValidParams } from '../../../utils/api';
-import { getTranslation } from '../../../utils/translations';
-import { AnyData, handleInvisibleAttributes } from '../utils/data';
-
-import { useRelationModal } from './FormInputs/Relations/RelationModal';
-
-import type { RelationsFormValue } from './FormInputs/Relations/Relations';
-import type { DocumentActionComponent } from '../../../content-manager';
+} from '@content-manager/admin/services/documents';
+import { isBaseQueryError, buildValidParams } from '@content-manager/admin/utils/api';
+import { getTranslation } from '@content-manager/admin/utils/translations';
+import { Create, Publish } from '@content-manager/shared/contracts/collection-types';
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/

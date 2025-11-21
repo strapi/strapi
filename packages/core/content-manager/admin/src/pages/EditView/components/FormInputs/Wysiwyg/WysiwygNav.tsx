@@ -31,9 +31,16 @@ import {
 import { EditorFromTextArea } from 'codemirror5';
 import { useIntl } from 'react-intl';
 
-import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
-
-import { listHandler, markdownHandler, quoteAndCodeHandler, titleHandler } from './utils/utils';
+import {
+  EditorToolbarObserver,
+  type ObservedComponent,
+} from '@content-manager/admin/pages/EditView/components/EditorToolbarObserver';
+import {
+  listHandler,
+  markdownHandler,
+  quoteAndCodeHandler,
+  titleHandler,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/utils/utils';
 
 interface WysiwygNavProps {
   disabled?: boolean;

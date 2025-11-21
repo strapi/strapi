@@ -1,9 +1,9 @@
 import type { UID, Modules } from '@strapi/types';
 import { setCreatorFields, async, errors } from '@strapi/utils';
 
-import { getDocumentLocaleAndStatus } from './validation/dimensions';
-import { getService } from '../utils';
-import { formatDocumentWithMetadata } from './utils/metadata';
+import { getDocumentLocaleAndStatus } from '@content-manager/server/controllers/validation/dimensions';
+import { getService } from '@content-manager/server/utils';
+import { formatDocumentWithMetadata } from '@content-manager/server/controllers/utils/metadata';
 
 type OptionsWithPopulate = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 

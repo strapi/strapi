@@ -4,9 +4,9 @@ import { within } from '@testing-library/react';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
-import { HistoryProvider } from '../../pages/History';
-import { mockHistoryVersionsData } from '../../tests/mockData';
-import { VersionsList } from '../VersionsList';
+import { VersionsList } from '@content-manager/admin/history/components/VersionsList';
+import { HistoryProvider } from '@content-manager/admin/history/pages/History';
+import { mockHistoryVersionsData } from '@content-manager/admin/history/tests/mockData';
 
 const LocationDisplay = () => {
   const location = useLocation();

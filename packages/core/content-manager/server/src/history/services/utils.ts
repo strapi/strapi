@@ -2,10 +2,10 @@ import { difference, omit } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
 import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 
-import { FIELDS_TO_IGNORE } from '../constants';
-import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
-import type { HistoryVersions } from '../../../../shared/contracts';
-import type { RelationResult } from '../../../../shared/contracts/relations';
+import { FIELDS_TO_IGNORE } from '@content-manager/server/history/constants';
+import type { CreateHistoryVersion } from '@content-manager/shared/contracts/history-versions';
+import type { HistoryVersions } from '@content-manager/shared/contracts';
+import type { RelationResult } from '@content-manager/shared/contracts/relations';
 
 const DEFAULT_RETENTION_DAYS = 90;
 

@@ -2,9 +2,8 @@
 import { render, screen } from '@testing-library/react';
 import { Editor, Transforms, createEditor } from 'slate';
 
-import { paragraphBlocks } from '../Paragraph';
-
-import { Wrapper } from './Wrapper';
+import { paragraphBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Paragraph';
+import { Wrapper } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/tests/Wrapper';
 
 describe('Paragraph', () => {
   it('renders a heading block properly', () => {

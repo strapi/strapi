@@ -1,6 +1,9 @@
 import { has, assoc, mapValues, prop } from 'lodash/fp';
-import { getService } from '../utils';
-import { createModelConfigurationSchema, validateKind } from './validation';
+import { getService } from '@content-manager/server/utils';
+import {
+  createModelConfigurationSchema,
+  validateKind,
+} from '@content-manager/server/controllers/validation';
 
 const hasEditMainField = has('edit.mainField');
 const getEditMainField = prop('edit.mainField');

@@ -1,9 +1,8 @@
-import { contentManagerApi } from './api';
-
+import { contentManagerApi } from '@content-manager/admin/services/api';
 import type {
   FindComponentConfiguration,
   UpdateComponentConfiguration,
-} from '../../../shared/contracts/components';
+} from '@content-manager/shared/contracts/components';
 
 const componentsApi = contentManagerApi.injectEndpoints({
   endpoints: (builder) => ({

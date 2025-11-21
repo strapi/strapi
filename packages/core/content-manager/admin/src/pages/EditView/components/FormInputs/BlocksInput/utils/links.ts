@@ -1,6 +1,6 @@
 import { Transforms, Editor, Element as SlateElement, Node, Range } from 'slate';
 
-import { type Block } from './types';
+import { type Block } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
 
 const removeLink = (editor: Editor) => {
   Transforms.unwrapNodes(editor, {

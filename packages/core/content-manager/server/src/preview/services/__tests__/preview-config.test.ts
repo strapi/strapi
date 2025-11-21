@@ -1,4 +1,4 @@
-import { createPreviewConfigService } from '../preview-config';
+import { createPreviewConfigService } from '@content-manager/server/preview/services/preview-config';
 
 const getConfig = (enabled: boolean, handler: () => void) => {
   return {

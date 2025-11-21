@@ -2,12 +2,12 @@ import { useIsDesktop } from '@strapi/admin/strapi-admin';
 import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Cross, Drag } from '@strapi/icons';
 
-import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
 import {
   DisconnectButton,
   LinkEllipsis,
   FlexWrapper,
-} from '../../pages/EditView/components/FormInputs/Relations/Relations';
+} from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/Relations';
 
 import type { Data } from '@strapi/types';
 

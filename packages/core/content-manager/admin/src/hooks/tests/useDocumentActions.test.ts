@@ -2,8 +2,9 @@ import { errors } from '@strapi/utils';
 import { renderHook, screen, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
 
+import { useDocumentActions } from '@content-manager/admin/hooks/useDocumentActions';
+
 import { mockData } from '../../../tests/mockData';
-import { useDocumentActions } from '../useDocumentActions';
 
 jest.mock('@strapi/admin/strapi-admin/ee', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin/ee'),

@@ -4,9 +4,8 @@ import * as React from 'react';
 import { Form } from '@strapi/admin/strapi-admin';
 import { render, screen } from '@tests/utils';
 
-import { BlocksInput } from '../BlocksInput';
-
-import { blocksData } from './mock-schema';
+import { BlocksInput } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksInput';
+import { blocksData } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/tests/mock-schema';
 
 type BlocksEditorProps = React.ComponentProps<typeof BlocksInput>;
 

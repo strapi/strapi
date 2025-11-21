@@ -4,7 +4,10 @@
     "rootDir": "../",
     "baseUrl": ".",
     "paths": {
-      "@tests/*": ["./tests/*"]
+      "@tests/*": ["./tests/*"],
+      "@content-manager/admin/*": ["./src/*"],
+      "@content-manager/server/*": ["../server/src/*"],
+      "@content-manager/shared/*": ["../shared/*"]
     }
   },
   "include": ["./src", "../shared", "./tests", "./custom.d.ts"]

@@ -8,26 +8,25 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 
-import { HOOKS } from '../constants/hooks';
-import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
-import { BaseQueryError } from '../utils/api';
-import { getMainField } from '../utils/attributes';
-
-import { useContentTypeSchema } from './useContentTypeSchema';
+import { HOOKS } from '@content-manager/admin/constants/hooks';
+import { useContentTypeSchema } from '@content-manager/admin/hooks/useContentTypeSchema';
 import {
   type ComponentsDictionary,
   type Document,
   type Schema,
   useDoc,
   useDocument,
-} from './useDocument';
-
-import type { ComponentConfiguration } from '../../../shared/contracts/components';
+} from '@content-manager/admin/hooks/useDocument';
+import { useGetContentTypeConfigurationQuery } from '@content-manager/admin/services/contentTypes';
+import { BaseQueryError } from '@content-manager/admin/utils/api';
+import { getMainField } from '@content-manager/admin/utils/attributes';
+import type { ComponentConfiguration } from '@content-manager/shared/contracts/components';
 import type {
   Metadatas,
   FindContentTypeConfiguration,
   Settings,
-} from '../../../shared/contracts/content-types';
+} from '@content-manager/shared/contracts/content-types';
+
 import type { Filters, InputProps, Table } from '@strapi/admin/strapi-admin';
 import type { Schema as SchemaUtils } from '@strapi/types';
 

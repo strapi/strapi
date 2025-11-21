@@ -28,24 +28,25 @@ import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 
-import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
-import { useContentTypeSchema } from '../../../../hooks/useContentTypeSchema';
-import { useDocumentActions } from '../../../../hooks/useDocumentActions';
-import { useDocLayout } from '../../../../hooks/useDocumentLayout';
-import { contentManagerApi } from '../../../../services/api';
+import type { BulkActionComponent } from '@content-manager/admin/content-manager';
+import { useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { useContentTypeSchema } from '@content-manager/admin/hooks/useContentTypeSchema';
+import type { Document } from '@content-manager/admin/hooks/useDocument';
+import { useDocumentActions } from '@content-manager/admin/hooks/useDocumentActions';
+import { useDocLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
+import {
+  ConfirmDialogPublishAll,
+  ConfirmDialogPublishAllProps,
+} from '@content-manager/admin/pages/ListView/components/BulkActions/ConfirmBulkActionDialog';
+import { contentManagerApi } from '@content-manager/admin/services/api';
 import {
   useGetAllDocumentsQuery,
   usePublishManyDocumentsMutation,
-} from '../../../../services/documents';
-import { buildValidParams } from '../../../../utils/api';
-import { getTranslation } from '../../../../utils/translations';
-import { createYupSchema } from '../../../../utils/validation';
-import { DocumentStatus } from '../../../EditView/components/DocumentStatus';
-
-import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
-
-import type { BulkActionComponent } from '../../../../content-manager';
-import type { Document } from '../../../../hooks/useDocument';
+} from '@content-manager/admin/services/documents';
+import { buildValidParams } from '@content-manager/admin/utils/api';
+import { getTranslation } from '@content-manager/admin/utils/translations';
+import { createYupSchema } from '@content-manager/admin/utils/validation';
 
 const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
   max-width: 300px;

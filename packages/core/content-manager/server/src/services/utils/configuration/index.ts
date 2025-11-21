@@ -1,7 +1,16 @@
-import { createModelConfigurationSchema } from '../../../controllers/validation';
-import { createDefaultSettings, syncSettings } from './settings';
-import { createDefaultMetadatas, syncMetadatas } from './metadatas';
-import { createDefaultLayouts, syncLayouts } from './layouts';
+import { createModelConfigurationSchema } from '@content-manager/server/controllers/validation';
+import {
+  createDefaultSettings,
+  syncSettings,
+} from '@content-manager/server/services/utils/configuration/settings';
+import {
+  createDefaultMetadatas,
+  syncMetadatas,
+} from '@content-manager/server/services/utils/configuration/metadatas';
+import {
+  createDefaultLayouts,
+  syncLayouts,
+} from '@content-manager/server/services/utils/configuration/layouts';
 
 async function validateCustomConfig(schema: any) {
   try {

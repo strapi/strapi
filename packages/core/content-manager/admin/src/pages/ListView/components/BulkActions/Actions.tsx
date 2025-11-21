@@ -10,22 +10,23 @@ import { Box, ButtonProps, Flex, Typography } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
-import { useDoc } from '../../../../hooks/useDocument';
-import { useDocumentActions } from '../../../../hooks/useDocumentActions';
-import { useDocumentLayout } from '../../../../hooks/useDocumentLayout';
-import { buildValidParams } from '../../../../utils/api';
-import { getTranslation } from '../../../../utils/translations';
+import type {
+  BulkActionComponent,
+  ContentManagerPlugin,
+} from '@content-manager/admin/content-manager';
+import { useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import { useDocumentActions } from '@content-manager/admin/hooks/useDocumentActions';
+import { useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
 import {
   DialogOptions,
   DocumentActionButton,
   ModalOptions,
   NotificationOptions,
-} from '../../../EditView/components/DocumentActions';
-
-import { PublishAction } from './PublishAction';
-
-import type { BulkActionComponent, ContentManagerPlugin } from '../../../../content-manager';
+} from '@content-manager/admin/pages/EditView/components/DocumentActions';
+import { PublishAction } from '@content-manager/admin/pages/ListView/components/BulkActions/PublishAction';
+import { buildValidParams } from '@content-manager/admin/utils/api';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface BulkActionDescription {
   dialog?: DialogOptions | NotificationOptions | ModalOptions;

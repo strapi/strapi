@@ -6,9 +6,12 @@ import { type Text, Editor, Node, Transforms, Path } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled, type CSSProperties, css } from 'styled-components';
 
-import { type BlocksStore } from '../BlocksEditor';
-import { baseHandleConvert } from '../utils/conversions';
-import { isListNode, type Block } from '../utils/types';
+import { type BlocksStore } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { baseHandleConvert } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/conversions';
+import {
+  isListNode,
+  type Block,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
 
 const listStyle = css`
   display: flex;

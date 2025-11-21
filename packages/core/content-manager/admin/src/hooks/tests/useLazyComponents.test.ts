@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@tests/utils';
 
-import { useLazyComponents } from '../useLazyComponents';
+import { useLazyComponents } from '@content-manager/admin/hooks/useLazyComponents';
 
 describe('useLazyComponents', () => {
   test('lazy loads the components', async () => {

@@ -1,10 +1,10 @@
 import { async, errors } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 import { pick } from 'lodash/fp';
-import { getService as getContentManagerService } from '../../utils';
-import { getService } from '../utils';
-import type { HistoryVersions } from '../../../../shared/contracts';
-import { validateRestoreVersion } from './validation/history-version';
+import { getService as getContentManagerService } from '@content-manager/server/utils';
+import { getService } from '@content-manager/server/history/utils';
+import type { HistoryVersions } from '@content-manager/shared/contracts';
+import { validateRestoreVersion } from '@content-manager/server/history/controllers/validation/history-version';
 
 /**
  * Parses pagination params and makes sure they're within valid ranges

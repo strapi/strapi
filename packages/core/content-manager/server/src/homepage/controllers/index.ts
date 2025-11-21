@@ -1,5 +1,5 @@
 import type { Plugin } from '@strapi/types';
-import { createHomepageController } from './homepage';
+import { createHomepageController } from '@content-manager/server/homepage/controllers/homepage';
 
 export const controllers = {
   homepage: createHomepageController,

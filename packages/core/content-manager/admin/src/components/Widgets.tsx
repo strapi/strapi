@@ -17,12 +17,10 @@ import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled, DefaultTheme } from 'styled-components';
 
-import { DocumentStatus } from '../pages/EditView/components/DocumentStatus';
-import { useGetRecentDocumentsQuery } from '../services/homepage';
-
-import { RelativeTime } from './RelativeTime';
-
-import type { RecentDocument } from '../../../shared/contracts/homepage';
+import { RelativeTime } from '@content-manager/admin/components/RelativeTime';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
+import { useGetRecentDocumentsQuery } from '@content-manager/admin/services/homepage';
+import type { RecentDocument } from '@content-manager/shared/contracts/homepage';
 
 const BASE_MAX_WIDTH = '14.4rem';
 

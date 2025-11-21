@@ -16,10 +16,10 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
-import { useDoc } from '../../../hooks/useDocument';
-import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
-import { useTypedSelector } from '../../../modules/hooks';
-import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import { useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { useTypedSelector } from '@content-manager/admin/modules/hooks';
+import { checkIfAttributeIsDisplayable } from '@content-manager/admin/utils/attributes';
 
 interface ViewSettingsMenuProps extends FieldPickerProps {}
 
