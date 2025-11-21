@@ -42,6 +42,7 @@ jest.mock('@strapi/data-transfer', () => {
         ...acutal.strapi.providers,
         createLocalStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testLocalSource' }),
         createLocalStrapiDestinationProvider: jest.fn().mockReturnValue({ name: 'testLocalDest' }),
+        createRemoteStrapiSourceProvider: jest.fn().mockReturnValue({ name: 'testRemoteSource' }),
         createRemoteStrapiDestinationProvider: jest
           .fn()
           .mockReturnValue({ name: 'testRemoteDest' }),
