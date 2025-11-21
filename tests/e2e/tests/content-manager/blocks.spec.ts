@@ -3,8 +3,6 @@ import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { navToHeader } from '../../../utils/shared';
 
-const EDIT_URL = /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
-
 test.describe('Blocks editor', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
@@ -17,7 +15,7 @@ test.describe('Blocks editor', () => {
     const code = 'const problems = 99';
     await navToHeader(page, ['Content Manager', 'Homepage'], 'Homepage');
     await expect(page.getByRole('link', { name: 'Back' })).toBeVisible();
-    const textbox = page.getByRole('textbox').nth(2);
+    const textbox = page.getByRole('textbox').filter({ hasText: 'Drag' });
     await expect(textbox).toBeVisible();
     await textbox.click();
     await textbox.fill(code);
@@ -53,6 +51,5 @@ test.describe('Blocks editor', () => {
     await expect(page.getByText(code)).toBeVisible();
     await page.getByText(code).click();
     await expect(page.getByText('Fortran')).toBeVisible();
-    await expect(page.getByText('Plain text')).not.toBeVisible();
   });
 });

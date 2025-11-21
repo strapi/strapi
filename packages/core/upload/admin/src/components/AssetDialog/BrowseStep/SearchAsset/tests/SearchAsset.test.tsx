@@ -38,7 +38,7 @@ describe('SearchAsset', () => {
     fireEvent.click(searchButton);
 
     // Now it should show the searchbar
-    const searchInput = getByRole('textbox', { name: 'search' });
+    const searchInput = getByRole('searchbox', { name: 'search' });
     expect(searchInput).toBeInTheDocument();
     expect(searchInput).toHaveValue('');
   });
@@ -47,7 +47,7 @@ describe('SearchAsset', () => {
     const queryValue = 'michka';
     const { getByRole } = render(makeApp(queryValue));
 
-    const input = getByRole('textbox', {
+    const input = getByRole('searchbox', {
       name: 'search',
     }) as HTMLInputElement;
 
@@ -63,7 +63,8 @@ describe('SearchAsset', () => {
     if (button) {
       fireEvent.click(button);
     }
-    const input = getByRole('textbox', {
+
+    const input = getByRole('searchbox', {
       name: 'search',
     });
 

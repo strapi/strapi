@@ -118,7 +118,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                     })}
                   </Typography>
                   <Grid.Root gap={4}>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         name="restrictedAccess"
                         hint={formatMessage({
@@ -150,7 +150,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                       </Field.Root>
                     </Grid.Item>
                     {values.restrictedAccess && (
-                      <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                         <Field.Root
                           name="password"
                           error={
