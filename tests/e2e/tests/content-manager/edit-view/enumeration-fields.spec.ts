@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { navToHeader, findAndClose } from '../../../utils/shared';
-import { waitForRestart } from '../../../utils/restart';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { navToHeader, findAndClose } from '../../../../utils/shared';
+import { waitForRestart } from '../../../../utils/restart';
 
 test.describe('Edit View - Enumeration Fields Testing', () => {
   test.beforeEach(async ({ page }) => {
