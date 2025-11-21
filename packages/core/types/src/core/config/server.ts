@@ -30,6 +30,26 @@ export interface AdminProp {
   autoOpen?: boolean;
 }
 
+export interface ProxyProp {
+  global?: string;
+  http?: string;
+  https?: string;
+  fetch?: string;
+}
+
+export interface WebhooksProp {
+  populateRelations?: boolean;
+  [key: string]: any;
+}
+
+export interface HttpProp {
+  serverOptions?: {
+    requestTimeout?: number;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
 export interface Server {
   // required
   host: string;
@@ -40,11 +60,14 @@ export interface Server {
   socket?: string | number;
   emitErrors?: boolean;
   url?: string;
-  proxy?: boolean;
+  absoluteUrl?: string;
+  proxy?: boolean | ProxyProp;
   globalProxy?: string;
   cron?: CronProp;
   dirs?: DirsProp;
   logger?: LoggerProp;
   transfer?: TransferProp;
   admin?: AdminProp;
+  webhooks?: WebhooksProp;
+  http?: HttpProp;
 }
