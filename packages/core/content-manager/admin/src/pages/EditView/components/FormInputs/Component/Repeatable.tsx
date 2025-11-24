@@ -25,6 +25,7 @@ import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
+import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
@@ -44,6 +45,27 @@ import type { Schema } from '@strapi/types';
  * -----------------------------------------------------------------------------------------------*/
 
 type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
+type LabelActionProp = React.ReactNode;
+
+const renderLabelAction = (
+  labelAction: LabelActionProp,
+  args: {
+    name: string;
+    attribute: unknown;
+  }
+): React.ReactNode => {
+  if (React.isValidElement(labelAction)) {
+    const element = labelAction as React.ReactElement;
+    return React.createElement(element.type as React.ComponentType<Record<string, unknown>>, {
+      ...element.props,
+      ...args,
+    });
+  }
+
+  return labelAction as React.ReactNode;
+};
+
+type FieldWithLabelAction = EditFieldLayout & { labelAction?: LabelActionProp };
 
 const RepeatableComponent = ({
   attribute,
@@ -310,12 +332,13 @@ const RepeatableComponent = ({
                           defaultMessage: field.label,
                         });
 
-                        const clonedLabelAction = React.isValidElement(field.labelAction)
-                          ? React.cloneElement(field.labelAction as React.ReactElement, {
-                              name: completeFieldName,
-                              attribute: field.attribute,
-                            })
-                          : field.labelAction;
+                        const clonedLabelAction = renderLabelAction(
+                          (field as FieldWithLabelAction).labelAction,
+                          {
+                            name: completeFieldName,
+                            attribute: field.attribute,
+                          }
+                        );
 
                         return (
                           <ResponsiveGridItem

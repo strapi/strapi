@@ -64,9 +64,7 @@ const LabelAction = ({ name, attribute }: LabelActionProps) => {
   const { slug: model } = useParams<{ slug: string }>();
   const { edit } = useDocumentLayout(model!);
 
-  const isLocalized = React.useMemo<boolean>(() => {
-    return getEffectiveLocalization(name, attribute, edit);
-  }, [name, attribute, edit]);
+  const isLocalized = isFieldLocalized(name, attribute, edit);
 
   if (!isLocalized) {
     return null;
@@ -81,10 +79,8 @@ const LabelAction = ({ name, attribute }: LabelActionProps) => {
     <Span tag="span">
       <VisuallyHidden tag="span">{formatMessage(title)}</VisuallyHidden>
       <Tooltip label={formatMessage(title)}>
-        {React.cloneElement((<Earth />) as React.ReactElement, {
-          'aria-hidden': true,
-          focusable: false, // See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable
-        })}
+        <Earth aria-hidden focusable={false} />
+        {/* See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable */}
       </Tooltip>
     </Span>
   );
@@ -109,11 +105,11 @@ const Span = styled(Flex)`
  * - Ancestor attribute (dynamic zone or component) i18n setting
  * - Field-level i18n setting for root fields
  */
-const getEffectiveLocalization = (
+const isFieldLocalized = (
   name: string,
   attribute: EditFieldLayout['attribute'],
   edit: EditLayout
-): boolean => {
+) => {
   const contentTypeLocalized =
     !!(edit.options as any)?.i18n && !!(edit.options as any).i18n.localized;
 
@@ -123,7 +119,7 @@ const getEffectiveLocalization = (
 
   const path = name.split('.');
   const topLevelAttrName = path[0];
-  const topLevelField = findTopLevelField(edit, topLevelAttrName);
+  const topLevelField = getAttributeParentField(edit, topLevelAttrName);
   if (!topLevelField) {
     return false;
   }
@@ -154,7 +150,7 @@ const getPluginOptions = (attr: EditFieldLayout['attribute']) => {
     : undefined;
 };
 
-const findTopLevelField = (edit: EditLayout, name: string) => {
+const getAttributeParentField = (edit: EditLayout, name: string) => {
   return edit.layout.flat(2).find((f) => f.name === name) ?? undefined;
 };
 
