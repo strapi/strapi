@@ -1,30 +1,19 @@
 import type { Core, Data, UID } from '@strapi/types';
-import { async, contentTypes } from '@strapi/utils';
+import { async as asyncMap } from '@strapi/utils';
 
-const hasDraftAndPublish = (uid: UID.CollectionType) => {
+declare const strapi: Core.Strapi;
+
+const hasDraftAndPublish = (uid: UID.Schema) => {
   const model = strapi.getModel(uid);
   return contentTypes.hasDraftAndPublish(model);
 };
 
-/**
- * TODO: Find a better way to encode keys than this
- * This converts an object into a string by joining its keys and values,
- * so it can be used as a key in a Map.
- *
- * @example
- * const obj = { a: 1, b: 2 };
- * const key = encodeKey(obj);
- *      ^ "a:::1&&b:::2"
- */
-const encodeKey = (obj: any) => {
-  // Ignore status field for models without draft and publish
+const encodeKey = (obj: Record<string, any>) => {
   if (!hasDraftAndPublish(obj.uid)) {
     delete obj.status;
   }
-
-  // Sort keys to always keep the same order when encoding
-  const keys = Object.keys(obj).sort();
-  return keys.map((key) => `${key}:::${obj[key]}`).join('&&');
+  const keys = Object.keys(obj).sort((a, b) => a.localeCompare(b));
+  return keys.map((k) => `${k}:::${obj[k]}`).join('&&');
 };
 
 interface KeyFields {
@@ -35,105 +24,94 @@ interface KeyFields {
 }
 
 export interface IdMap {
-  loadedIds: Map<string, string>;
-  toLoadIds: Map<string, KeyFields>;
-  // Make the Keys type to be the params of add
-  add(keys: KeyFields): void;
+  add(fields: KeyFields): void;
   load(): Promise<void>;
-  get(keys: KeyFields): string | undefined;
+  get(fields: KeyFields): string | undefined;
   clear(): void;
 }
 
-/**
- * Holds a registry of document ids and their corresponding entity ids.
- */
-const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
-  const loadedIds = new Map();
-  const toLoadIds = new Map();
+const getEffectiveLocale = (input: string | null | undefined, uid: UID.Schema): string | undefined => {
+  if (input) return input;
+  const model = strapi.getModel(uid);
+  const isLocalized = !!model?.pluginOptions?.i18n?.localized;
+  return isLocalized ? 'en' : undefined;
+};
+
+const createIdMap = (): IdMap => {
+  const loaded = new Map<string, string>();
+  const toLoad = new Map<string, KeyFields>();
 
   return {
-    loadedIds,
-    toLoadIds,
-    /**
-     * Register a new document id and its corresponding entity id.
-     */
-    add(keyFields: KeyFields) {
-      const key = encodeKey({ status: 'published', locale: null, ...keyFields });
+    add(fields: KeyFields) {
+      const locale = getEffectiveLocale(fields.locale ?? null, fields.uid as UID.Schema);
+      const key = encodeKey({
+        uid: fields.uid,
+        documentId: fields.documentId,
+        locale: locale ?? null,
+        status: fields.status ?? 'published',
+      });
 
-      // If the id is already loaded, do nothing
-      if (loadedIds.has(key)) return;
-      // If the id is already in the toLoadIds, do nothing
-      if (toLoadIds.has(key)) return;
-
-      // Add the id to the toLoadIds
-      toLoadIds.set(key, keyFields);
+      if (loaded.has(key) || toLoad.has(key)) return;
+      toLoad.set(key, { ...fields, locale });
     },
 
-    /**
-     * Load all ids from the registry.
-     */
     async load() {
-      // Document Id to Entry Id queries are batched by its uid and locale
-      // TODO: Add publication state too
-      const loadIdValues = Array.from(toLoadIds.values());
+      const entries = Array.from(toLoad.entries());
+      const grouped: Record<string, any> = {};
 
-      // 1. Group ids to query together
-      const idsByUidAndLocale = loadIdValues.reduce((acc, { documentId, ...rest }) => {
-        const key = encodeKey(rest);
-        const ids = acc[key] || { ...rest, documentIds: [] };
-        ids.documentIds.push(documentId);
-        return { ...acc, [key]: ids };
-      }, {});
-
-      // 2. Query ids
-      await async.map(
-        Object.values(idsByUidAndLocale),
-        async ({ uid, locale, documentIds, status }: any) => {
-          const findParams = {
-            select: ['id', 'documentId', 'locale', 'publishedAt'],
-            where: {
-              documentId: { $in: documentIds },
-              locale: locale || null,
-            },
-          } as any;
-
-          if (hasDraftAndPublish(uid)) {
-            findParams.where.publishedAt = status === 'draft' ? null : { $ne: null };
-          }
-
-          const result = await strapi?.db?.query(uid).findMany(findParams);
-
-          // 3. Store result in loadedIds
-          result?.forEach(({ documentId, id, locale, publishedAt }: any) => {
-            const key = encodeKey({
-              documentId,
-              uid,
-              locale,
-              status: publishedAt ? 'published' : 'draft',
-            });
-            loadedIds.set(key, id);
-          });
+      for (const [key, fields] of entries) {
+        const groupKey = encodeKey({
+          uid: fields.uid,
+          locale: fields.locale ?? null,
+          status: fields.status ?? 'published',
+        });
+        if (!grouped[groupKey]) {
+          grouped[groupKey] = { ...fields, documentIds: [] };
         }
-      );
+        grouped[groupKey].documentIds.push(fields.documentId);
+      }
 
-      // 4. Clear toLoadIds
-      toLoadIds.clear();
+      await asyncMap(Object.values(grouped), async (group: any) => {
+        const locale = getEffectiveLocale(group.locale ?? null, group.uid);
+        const where: any = { documentId: { $in: group.documentIds } };
+        if (locale !== undefined) where.locale = locale;
+        if (hasDraftAndPublish(group.uid)) {
+          where.publishedAt = group.status === 'draft' ? null : { $ne: null };
+        }
+
+        const results = await strapi.db.query(group.uid).findMany({
+          select: ['id', 'documentId', 'locale', 'publishedAt'],
+          where,
+        });
+
+        for (const r of results) {
+          const key = encodeKey({
+            uid: group.uid,
+            documentId: r.documentId,
+            locale: r.locale ?? locale,
+            status: r.publishedAt ? 'published' : 'draft',
+          });
+          loaded.set(key, r.id);
+        }
+      });
+
+      toLoad.clear();
     },
 
-    /**
-     * Get the entity id for a given document id.
-     */
-    get(keys: KeyFields) {
-      const key = encodeKey({ status: 'published', locale: null, ...keys });
-      return loadedIds.get(key);
+    get(fields: KeyFields) {
+      const locale = getEffectiveLocale(fields.locale ?? null, fields.uid as UID.Schema);
+      const key = encodeKey({
+        uid: fields.uid,
+        documentId: fields.documentId,
+        locale: locale ?? null,
+        status: fields.status ?? 'published',
+      });
+      return loaded.get(key);
     },
 
-    /**
-     * Clear the registry.
-     */
     clear() {
-      loadedIds.clear();
-      toLoadIds.clear();
+      loaded.clear();
+      toLoad.clear();
     },
   };
 };
