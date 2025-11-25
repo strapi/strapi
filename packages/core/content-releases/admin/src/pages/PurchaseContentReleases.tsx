@@ -31,7 +31,7 @@ const PurchaseContentReleases = () => {
           overflow={'hidden'}
         >
           <Grid.Root>
-            <Grid.Item col={6} s={12} alignItems={'flex-start'}>
+            <Grid.Item col={6} xs={12} alignItems={'flex-start'}>
               <Flex direction="column" alignItems="flex-start" padding={7} width={'100%'}>
                 <Flex>
                   <PaperPlane fill="primary600" width={`24px`} height={`24px`} />
@@ -115,7 +115,7 @@ const PurchaseContentReleases = () => {
                 </Flex>
               </Flex>
             </Grid.Item>
-            <Grid.Item col={6} s={12} background="primary100" minHeight={'280px'}>
+            <Grid.Item col={6} xs={12} background="primary100" minHeight={'280px'}>
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <img
                   src={illustration}

@@ -1,9 +1,11 @@
 import { join } from 'path';
-import type { NodePlopAPI } from 'plop';
+import type { ActionType, NodePlopAPI } from 'plop';
 import fs from 'fs-extra';
 import tsUtils from '@strapi/typescript-utils';
 
 import validateInput from './utils/validate-input';
+import getFilePath from './utils/get-file-path';
+import { appendToFile } from './utils/extend-plugin-index-files';
 
 export default (plop: NodePlopAPI) => {
   // API generator
@@ -49,12 +51,24 @@ export default (plop: NodePlopAPI) => {
         return [];
       }
 
-      const filePath =
-        answers.isPluginApi && answers.plugin ? 'plugins/{{ plugin }}/server' : 'api/{{ id }}';
+      const filePath = getFilePath(
+        answers.destination || (answers.isPluginApi && answers.plugin ? 'plugin' : 'api')
+      );
       const currentDir = process.cwd();
-      const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
+      let language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
-      const baseActions = [
+      if (answers.plugin) {
+        // The tsconfig in plugins is located just outside the server src, not in the root of the plugin.
+        const pluginServerDir = join(
+          currentDir,
+          'src',
+          filePath.replace('{{ plugin }}', answers.plugin),
+          '../'
+        );
+        language = tsUtils.isUsingTypeScriptSync(pluginServerDir) ? 'ts' : 'js';
+      }
+
+      const baseActions: Array<ActionType> = [
         {
           type: 'add',
           path: `${filePath}/controllers/{{ id }}.${language}`,
@@ -65,20 +79,78 @@ export default (plop: NodePlopAPI) => {
           path: `${filePath}/services/{{ id }}.${language}`,
           templateFile: `templates/${language}/service.${language}.hbs`,
         },
+        {
+          type: 'add',
+          path: `${filePath}/routes/${answers.plugin ? 'content-api/' : ''}{{ id }}.${language}`,
+          templateFile: `templates/${language}/single-route.${language}.hbs`,
+        },
       ];
 
       if (answers.isPluginApi) {
-        return baseActions;
+        const indexFiles = ['controllers', 'services', 'routes'];
+
+        indexFiles.forEach((type) => {
+          const indexPath = join(plop.getDestBasePath(), `${filePath}/${type}/index.${language}`);
+          const exists = fs.existsSync(indexPath);
+
+          if (!exists && type !== 'routes') {
+            baseActions.push({
+              type: 'add',
+              path: `${filePath}/${type}/index.${language}`,
+              templateFile: `templates/${language}/plugin/plugin.index.${language}.hbs`,
+              skipIfExists: true,
+            });
+          }
+
+          if (type === 'routes') {
+            const indexPath = join(plop.getDestBasePath(), `${filePath}/${type}/index.${language}`);
+            const exists = fs.existsSync(indexPath);
+
+            if (!exists) {
+              baseActions.push({
+                type: 'add',
+                path: `${filePath}/${type}/index.${language}`,
+                templateFile: `templates/${language}/plugin/plugin.routes.index.${language}.hbs`,
+                skipIfExists: true,
+              });
+            }
+
+            const routeIndexFiles = ['content-api', 'admin'];
+
+            routeIndexFiles.forEach((routeType) => {
+              const routeTypeIndexPath = join(
+                plop.getDestBasePath(),
+                `${filePath}/${type}/${routeType}/index.${language}`
+              );
+              const routeTypeExists = fs.existsSync(routeTypeIndexPath);
+
+              if (!routeTypeExists) {
+                baseActions.push({
+                  type: 'add',
+                  path: `${filePath}/${type}/${routeType}/index.${language}`,
+                  templateFile: `templates/${language}/plugin/plugin.routes.type.index.${language}.hbs`,
+                  data: { type: routeType },
+                  skipIfExists: true,
+                });
+              }
+            });
+          }
+
+          baseActions.push({
+            type: 'modify',
+            path: `${filePath}/${type}/${type === 'routes' ? 'content-api/' : ''}index.${language}`,
+            transform(template: string) {
+              if (type === 'routes') {
+                return appendToFile(template, { type: 'routes', singularName: answers.id });
+              }
+
+              return appendToFile(template, { type: 'index', singularName: answers.id });
+            },
+          });
+        });
       }
 
-      return [
-        {
-          type: 'add',
-          path: `${filePath}/routes/{{ id }}.${language}`,
-          templateFile: `templates/${language}/single-route.${language}.hbs`,
-        },
-        ...baseActions,
-      ];
+      return baseActions;
     },
   });
 };

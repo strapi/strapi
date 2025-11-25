@@ -37,11 +37,8 @@ test.describe('Relations on the fly - Create a Relation inside a new component a
     await expect(page.getByRole('status', { name: 'Draft' }).first()).toBeVisible();
 
     // Step 7. Close the relation modal to see the updated relation on the root document
-    const closeButton = page.getByRole('button', { name: 'Close modal' });
-    await closeButton.click();
-
-    // Wait for the modal to be closed
-    await expect(page.getByText('Create a relation')).not.toBeVisible();
+    await expect(page.getByText('Edit a relation')).toBeVisible();
+    await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
 
     // Wait for the button to be visible with a more specific selector
     await expect(page.getByRole('button', { name: 'Nike Zoom Kd Iv Gold C800' })).toBeVisible();

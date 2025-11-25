@@ -113,7 +113,16 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
     /**
      * scalar types
      */
-    case 'string':
+    case 'string': {
+      return {
+        default: yup.string(),
+        required: validators.required,
+        unique: validators.unique,
+        minLength: validators.minLength,
+        maxLength: validators.maxLength.max(255).test(maxLengthIsGreaterThanOrEqualToMinLength),
+        regex: yup.string().test(isValidRegExpPattern),
+      };
+    }
     case 'text': {
       return {
         default: yup.string(),

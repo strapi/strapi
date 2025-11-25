@@ -1,6 +1,6 @@
 {
   "name": "create-strapi",
-  "version": "5.29.0",
+  "version": "5.31.2",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi",
@@ -36,10 +36,10 @@
     "bin/"
   ],
   "dependencies": {
-    "create-strapi-app": "5.29.0"
+    "create-strapi-app": "5.31.2"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   }
 }

@@ -532,7 +532,7 @@ test.describe('Edit view', () => {
     /**
      * Unpublish the articles
      */
-    await expect(page.getByText('2 entries ready to unpublish')).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Ready to unpublish' })).toHaveCount(2);
     await page
       .getByLabel('Unpublish multiple locales')
       .getByRole('button', { name: 'Unpublish' })
@@ -544,6 +544,49 @@ test.describe('Edit view', () => {
     await expect(
       page.getByLabel('Unpublish multiple locales').getByRole('button', { name: 'Unpublish' })
     ).toBeDisabled();
+  });
+
+  test('As a user I want to see non translatable fields pre-filled when creating a new locale of a document', async ({
+    page,
+  }) => {
+    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.getByRole('button', { name: /add another field to this collection type/i }).click();
+    await page
+      .getByRole('button', { name: 'Text Small or long text like title or description' })
+      .click();
+    await page.getByLabel('Name', { exact: true }).fill('nonTranslatableField');
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByLabel('Enable localization for this').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+
+    // Create a new entry in the english locale
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
+    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await page.getByLabel('name').fill('Translatable name (only for this locale)');
+    await page.getByLabel('nonTranslatableField').fill('Non translatable value (for all locales)');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved Document');
+
+    // Switch to french locale
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'French (fr)' }).click();
+
+    // The non translatable field should be pre-filled with the value from the english locale
+    await expect(page.getByLabel('nonTranslatableField')).toHaveValue(
+      'Non translatable value (for all locales)'
+    );
+    // The translatable field should be empty though
+    await expect(page.getByLabel('name')).toHaveValue('');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved Document');
+
+    // Remove the field from the content type
+    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.getByRole('button', { name: 'Delete nonTranslatableField' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
   });
 });
 

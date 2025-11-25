@@ -2,7 +2,7 @@
 import * as React from 'react';
 
 import { Flex, Tooltip, VisuallyHidden } from '@strapi/design-system';
-import { Earth, EarthStriked } from '@strapi/icons';
+import { Earth } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
