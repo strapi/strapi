@@ -365,7 +365,13 @@ const Stage = ({
                     type: 'permissions' as const,
                   },
                 ].map(({ size, ...field }) => (
-                  <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+                  <Grid.Item
+                    key={field.name}
+                    col={size}
+                    xs={12}
+                    direction="column"
+                    alignItems="stretch"
+                  >
                     <InputRenderer {...field} />
                   </Grid.Item>
                 ))}

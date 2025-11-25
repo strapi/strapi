@@ -262,7 +262,7 @@ const CreatePage = () => {
                         </UsersRoleNumber>
                       </Flex>
                       <Grid.Root gap={4}>
-                        <Grid.Item col={6} direction="column" alignItems="stretch">
+                        <Grid.Item m={6} xs={12} direction="column" alignItems="stretch">
                           <Field.Root
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
@@ -278,7 +278,7 @@ const CreatePage = () => {
                             <Field.Error />
                           </Field.Root>
                         </Grid.Item>
-                        <Grid.Item col={6} direction="column" alignItems="stretch">
+                        <Grid.Item m={6} xs={12} direction="column" alignItems="stretch">
                           <Field.Root
                             name="description"
                             error={errors.description && formatMessage({ id: errors.description })}
