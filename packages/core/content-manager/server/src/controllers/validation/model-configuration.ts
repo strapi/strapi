@@ -51,8 +51,8 @@ const createMetadasSchema = (schema: any) => {
             .object()
             .shape({
               label: yup.string(),
-              description: yup.string(),
-              placeholder: yup.string(),
+              description: yup.string().nullable(),
+              placeholder: yup.string().nullable(),
               editable: yup.boolean(),
               visible: yup.boolean(),
               mainField: yup.lazy((value) => {

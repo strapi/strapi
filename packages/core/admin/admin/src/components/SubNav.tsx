@@ -32,6 +32,7 @@ const MainSubNav = styled(DSSubNav)`
   z-index: 2;
 
   ${({ theme }) => theme.breakpoints.medium} {
+    width: 23.2rem;
     position: sticky;
     top: 0;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};

@@ -294,7 +294,14 @@ const PasswordSection = () => {
       ].map((row, index) => (
         <Grid.Root key={index} gap={5}>
           {row.map(({ size, ...field }) => (
-            <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+            <Grid.Item
+              key={field.name}
+              xs={12}
+              m={6}
+              col={size}
+              direction="column"
+              alignItems="stretch"
+            >
               <InputRenderer {...field} />
             </Grid.Item>
           ))}
@@ -416,7 +423,14 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
             type: 'enumeration' as const,
           },
         ].map(({ size, ...field }) => (
-          <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+          <Grid.Item
+            key={field.name}
+            xs={12}
+            m={6}
+            col={size}
+            direction="column"
+            alignItems="stretch"
+          >
             <InputRenderer {...field} />
           </Grid.Item>
         ))}
@@ -481,7 +495,14 @@ const UserInfoSection = () => {
             type: 'string' as const,
           },
         ].map(({ size, ...field }) => (
-          <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+          <Grid.Item
+            key={field.name}
+            xs={12}
+            m={6}
+            col={size}
+            direction="column"
+            alignItems="stretch"
+          >
             <InputRenderer {...field} />
           </Grid.Item>
         ))}

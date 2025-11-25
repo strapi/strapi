@@ -532,7 +532,7 @@ test.describe('Edit view', () => {
     /**
      * Unpublish the articles
      */
-    await expect(page.getByText('2 entries ready to unpublish')).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Ready to unpublish' })).toHaveCount(2);
     await page
       .getByLabel('Unpublish multiple locales')
       .getByRole('button', { name: 'Unpublish' })

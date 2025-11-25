@@ -168,11 +168,11 @@ exports[`Header renders 1`] = `
 }
 
 .c4:hover>span {
-  color: #7b79ff;
+  color: #4945ff;
 }
 
 .c4:hover svg path {
-  fill: #7b79ff;
+  fill: #4945ff;
 }
 
 .c4:active {
@@ -288,6 +288,7 @@ exports[`Header renders 1`] = `
               <button
                 aria-disabled="false"
                 class="c11 c12 c13"
+                type="button"
               >
                 <span
                   aria-hidden="true"
@@ -314,6 +315,7 @@ exports[`Header renders 1`] = `
               <button
                 aria-disabled="false"
                 class="c11 c12 c15"
+                type="button"
               >
                 <span
                   aria-hidden="true"

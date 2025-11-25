@@ -224,13 +224,13 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 
 @media (min-width: 520px) {
   .c3 {
-    grid-column: span 12;
+    grid-column: span 6;
   }
 }
 
 @media (min-width: 768px) {
   .c3 {
-    grid-column: span 12;
+    grid-column: span 4;
   }
 }
 

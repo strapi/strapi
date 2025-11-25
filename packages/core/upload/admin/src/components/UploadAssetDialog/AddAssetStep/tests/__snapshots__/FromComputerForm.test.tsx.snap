@@ -217,6 +217,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
       <button
         aria-disabled="false"
         class="c14 c15 c16"
+        type="button"
       >
         <span
           class="c17"

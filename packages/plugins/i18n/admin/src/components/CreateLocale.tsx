@@ -303,7 +303,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   return (
     <Grid.Root gap={4}>
       {translatedForm.map(({ size, ...field }) => (
-        <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+        <Grid.Item key={field.name} xs={12} m={size} direction="column" alignItems="stretch">
           <FormRenderer {...field} />
         </Grid.Item>
       ))}
@@ -346,7 +346,7 @@ const AdvancedForm = ({ isDefaultLocale }: AdvancedFormProps) => {
   return (
     <Grid.Root gap={4}>
       {form.map(({ size, ...field }) => (
-        <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+        <Grid.Item key={field.name} xs={12} m={size} direction="column" alignItems="stretch">
           <FormRenderer {...field} />
         </Grid.Item>
       ))}
@@ -399,7 +399,14 @@ const EnumerationInput = ({
   return (
     <Field.Root error={error} hint={hint} name={name} required={required}>
       <Field.Label>{label}</Field.Label>
-      <Combobox disabled={disabled} onChange={handleChange} placeholder={placeholder} value={value}>
+      <Combobox
+        disabled={disabled}
+        onChange={handleChange}
+        onClear={() => handleChange('')}
+        placeholder={placeholder}
+        value={value}
+        autocomplete={{ type: 'list', filter: 'contains' }}
+      >
         {options.map((option) => (
           <ComboboxOption value={option.value} key={option.value}>
             {option.label}
