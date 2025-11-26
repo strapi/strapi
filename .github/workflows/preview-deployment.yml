@@ -58,7 +58,7 @@ jobs:
           PAYLOAD=$(jq -n \
             --arg repo_url "$REPO_URL" \
             --arg branch "$PR_BRANCH" \
-            --arg pr_number "$PR_NUMBER" \
+            --argjson pr_number "$PR_NUMBER" \
             --arg mode "cms-repo" \
             --arg duration "24h" \
             --arg env "development" \
