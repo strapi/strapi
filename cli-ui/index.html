@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strapi CLI UI</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 0;
+        background: radial-gradient(circle at 10% 10%, #1a1f35, #0c0f1d 50%), #0c0f1d;
+        color: #f3f4f6;
+      }
+
+      header {
+        padding: 24px;
+        text-align: center;
+        background: linear-gradient(120deg, #8b5cf6, #3b82f6);
+        color: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 16px;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        color: #0b1020;
+        background: linear-gradient(120deg, #a78bfa, #60a5fa);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.3);
+        filter: brightness(1.05);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: progress;
+      }
+
+      .output {
+        background: #0b1020;
+        border-radius: 10px;
+        padding: 12px;
+        color: #e5e7eb;
+        font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco,
+          Consolas, 'Liberation Mono', 'Courier New', monospace;
+        white-space: pre-wrap;
+        min-height: 180px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .meta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 0.9rem;
+        color: #c7d2fe;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .badge {
+        padding: 4px 8px;
+        background: rgba(96, 165, 250, 0.2);
+        border-radius: 999px;
+        border: 1px solid rgba(96, 165, 250, 0.6);
+      }
+
+      form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+        color: #e0e7ff;
+        font-size: 0.95rem;
+      }
+
+      input,
+      select {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Strapi CLI Launcher</h1>
+      <p>Click to run curated CLI commands without memorizing the syntax.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Available commands</h2>
+        <p>These buttons call the Strapi creator and cloud CLIs shipped in this repository.</p>
+        <div class="grid" id="commands"></div>
+      </section>
+
+      <section class="card">
+        <div class="meta">
+          <span class="badge" id="status">Idle</span>
+          <span id="commandLabel"></span>
+        </div>
+        <div class="output" id="output">Run a command to see its output here.</div>
+      </section>
+
+      <section class="card">
+        <h2>Create a project (same prompts as the CLI)</h2>
+        <p>Pick the answers you would type in the Strapi CLI wizard to scaffold a new app.</p>
+        <form id="createForm">
+          <label>
+            Project name
+            <input type="text" name="projectName" placeholder="my-strapi-app" required />
+          </label>
+          <label>
+            Installation type
+            <select name="quickstart">
+              <option value="true">Quickstart (SQLite)</option>
+              <option value="false">Custom (bring your own DB)</option>
+            </select>
+          </label>
+          <label>
+            Language
+            <select name="language">
+              <option value="javascript">JavaScript</option>
+              <option value="typescript">TypeScript</option>
+            </select>
+          </label>
+          <label>
+            Package manager
+            <select name="packageManager">
+              <option value="npm">npm</option>
+              <option value="yarn">yarn</option>
+              <option value="pnpm">pnpm</option>
+            </select>
+          </label>
+          <label>
+            Template (optional)
+            <input type="text" name="template" placeholder="github:user/repo" />
+          </label>
+        </form>
+        <div class="actions">
+          <button id="createBtn" style="max-width: 260px">Create project</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Strapi Cloud deploy</h2>
+        <p>Use the Cloud CLI to deploy from a local project directory.</p>
+        <form id="deployForm">
+          <label>
+            Project path to deploy
+            <input type="text" name="cwd" placeholder="/absolute/path/to/project" />
+          </label>
+          <label>
+            Environment (optional)
+            <input type="text" name="environment" placeholder="production" />
+          </label>
+          <label>
+            Flags
+            <select name="force">
+              <option value="false">Ask for confirmation</option>
+              <option value="true">Force deploy without prompt</option>
+            </select>
+          </label>
+          <label>
+            Logging
+            <select name="verbose">
+              <option value="normal">Normal</option>
+              <option value="debug">Debug</option>
+              <option value="silent">Silent</option>
+            </select>
+          </label>
+        </form>
+        <div class="actions">
+          <button id="deployBtn" style="max-width: 260px">Deploy to Strapi Cloud</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const commandsEl = document.getElementById('commands');
+      const outputEl = document.getElementById('output');
+      const statusEl = document.getElementById('status');
+      const commandLabelEl = document.getElementById('commandLabel');
+      const createForm = document.getElementById('createForm');
+      const createBtn = document.getElementById('createBtn');
+      const deployForm = document.getElementById('deployForm');
+      const deployBtn = document.getElementById('deployBtn');
+
+      const setStatus = (text, tone = 'info') => {
+        statusEl.textContent = text;
+        const colors = {
+          info: 'rgba(96, 165, 250, 0.2)',
+          success: 'rgba(52, 211, 153, 0.2)',
+          error: 'rgba(248, 113, 113, 0.2)',
+        };
+        statusEl.style.background = colors[tone] || colors.info;
+      };
+
+      const renderCommands = (commands) => {
+        commandsEl.innerHTML = '';
+        commands.forEach((cmd) => {
+          const btn = document.createElement('button');
+          btn.textContent = cmd.label;
+          btn.title = cmd.command;
+          btn.onclick = () => runCommand(cmd.id, cmd.label);
+          commandsEl.appendChild(btn);
+        });
+      };
+
+      const runCommand = async (id, label) => {
+        setStatus('Running…', 'info');
+        outputEl.textContent = '';
+        commandLabelEl.textContent = label;
+        toggleButtons(true);
+
+        try {
+          const res = await fetch('/api/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Command failed');
+          }
+
+          setStatus(`Exit code ${data.exitCode}`, data.exitCode === 0 ? 'success' : 'error');
+          outputEl.textContent = formatOutput(data);
+        } catch (error) {
+          setStatus('Error', 'error');
+          outputEl.textContent = error.message;
+        } finally {
+          toggleButtons(false);
+        }
+      };
+
+      const formatOutput = (data) => {
+        return [
+          `Command: ${data.command}`,
+          `Exit code: ${data.exitCode}`,
+          '',
+          data.stdout || '(no stdout)',
+          data.stderr ? `\nErrors:\n${data.stderr}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n');
+      };
+
+      const toggleButtons = (disabled) => {
+        commandsEl.querySelectorAll('button').forEach((btn) => {
+          btn.disabled = disabled;
+        });
+        createBtn.disabled = disabled;
+        deployBtn.disabled = disabled;
+      };
+
+      const readForm = (form) => Object.fromEntries(new FormData(form).entries());
+
+      const runCreate = async () => {
+        const payload = readForm(createForm);
+        payload.quickstart = payload.quickstart === 'true';
+        payload.language = payload.language || 'javascript';
+        payload.packageManager = payload.packageManager || 'npm';
+        if (!payload.projectName) {
+          alert('Please enter a project name');
+          return;
+        }
+        await execute('/api/create', payload, `Create ${payload.projectName}`);
+      };
+
+      const runDeploy = async () => {
+        const payload = readForm(deployForm);
+        payload.force = payload.force === 'true';
+        payload.debug = payload.verbose === 'debug';
+        payload.silent = payload.verbose === 'silent';
+        delete payload.verbose;
+        await execute('/api/deploy', payload, 'Strapi Cloud deploy');
+      };
+
+      const execute = async (url, body, label) => {
+        setStatus('Running…', 'info');
+        outputEl.textContent = '';
+        commandLabelEl.textContent = label;
+        toggleButtons(true);
+
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Command failed');
+          }
+          setStatus(`Exit code ${data.exitCode}`, data.exitCode === 0 ? 'success' : 'error');
+          outputEl.textContent = formatOutput(data);
+        } catch (error) {
+          setStatus('Error', 'error');
+          outputEl.textContent = error.message;
+        } finally {
+          toggleButtons(false);
+        }
+      };
+
+      const bootstrap = async () => {
+        const res = await fetch('/api/commands');
+        const data = await res.json();
+        renderCommands(data.commands);
+      };
+
+      createBtn.addEventListener('click', () => runCreate());
+      deployBtn.addEventListener('click', () => runDeploy());
+
+      bootstrap();
+    </script>
+  </body>
+</html>
