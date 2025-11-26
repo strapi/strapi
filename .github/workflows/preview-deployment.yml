@@ -61,7 +61,7 @@ jobs:
             --argjson pr_number "$PR_NUMBER" \
             --arg mode "cms-repo" \
             --arg duration "24h" \
-            --arg env "development" \
+            --arg env "production" \
             --arg requested_by "$REQUESTED_BY" \
             '{
               repository_url: $repo_url,
