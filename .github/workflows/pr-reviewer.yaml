@@ -1,8 +1,6 @@
 name: PR Review with Progress Tracking
 
-# This example demonstrates how to use the track_progress feature to get
-# visual progress tracking for PR reviews, similar to v0.x agent mode.
-
+# This workflow triggers an AI-powered code review when the 'AI Review' label is added to a pull request.
 on:
   pull_request:
     types: [labeled]
