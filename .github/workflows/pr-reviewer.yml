@@ -1,8 +1,6 @@
 name: PR Review with Progress Tracking
 
-# This example demonstrates how to use the track_progress feature to get
-# visual progress tracking for PR reviews, similar to v0.x agent mode.
-
+# This workflow triggers an AI-powered code review when the 'AI Review' label is added to a pull request.
 on:
   pull_request:
     types: [labeled]
@@ -77,8 +75,3 @@ jobs:
           claude_args: |
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
 
-# When track_progress is enabled:
-# - Creates a tracking comment with progress checkboxes
-# - Includes all PR context (comments, attachments, images)
-# - Updates progress as the review proceeds
-# - Marks as completed when done
