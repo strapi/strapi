@@ -152,7 +152,7 @@ jobs:
             - **Branch**: `${{ github.event.pull_request.head.ref }}`
             - **Preview URL**: [${{ steps.deploy.outputs.app_url }}](${{ steps.deploy.outputs.app_url }})
           comment_tag: preview-deployment
-          mode: recreate
+          mode: upsert
 
       - name: Comment on failed deployment
         if: steps.deploy.outcome == 'failure'
@@ -171,7 +171,7 @@ jobs:
             ---
             *You can retry by pushing a new commit or removing and re-adding the `marrakech-hackathon-deploy` label.*
           comment_tag: preview-deployment
-          mode: recreate
+          mode: upsert
 
       - name: Fail workflow if deployment failed
         if: steps.deploy.outcome == 'failure'
