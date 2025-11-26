@@ -20,14 +20,14 @@ jobs:
     outputs:
       should_deploy: ${{ steps.check.outputs.has_label }}
     steps:
-      - name: Check for marrakech-hackathon-deploy label
+      - name: Check for hackathon-deploy-preview label
         id: check
         run: |
-          if [[ "${{ github.event.action }}" == "labeled" && "${{ github.event.label.name }}" == "marrakech-hackathon-deploy" ]]; then
+          if [[ "${{ github.event.action }}" == "labeled" && "${{ github.event.label.name }}" == "hackathon-deploy-preview" ]]; then
             echo "has_label=true" >> $GITHUB_OUTPUT
           elif [[ "${{ github.event.action }}" == "synchronize" ]]; then
             labels='${{ toJSON(github.event.pull_request.labels.*.name) }}'
-            if echo "$labels" | jq -e 'index("marrakech-hackathon-deploy")' > /dev/null; then
+            if echo "$labels" | jq -e 'index("hackathon-deploy-preview")' > /dev/null; then
               echo "has_label=true" >> $GITHUB_OUTPUT
             else
               echo "has_label=false" >> $GITHUB_OUTPUT
@@ -81,7 +81,7 @@ jobs:
             --retry 3 \
             --retry-delay 5 \
             -X POST \
-            -H "Authorization: Bearer ${{ secrets.MARRAKECH_HACKATHON_DEPLOY_AUTH }}" \
+            -H "Authorization: Bearer ${{ secrets.HACKATHON_DEPLOY_PREVIEW_AUTH }}" \
             -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
             "$PREVIEW_API_URL/preview-app")
@@ -171,7 +171,7 @@ jobs:
             Please check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
 
             ---
-            *You can retry by pushing a new commit or removing and re-adding the `marrakech-hackathon-deploy` label.*
+            *You can retry by pushing a new commit or removing and re-adding the `hackathon-deploy-preview` label.*
           comment_tag: preview-deployment
           mode: upsert
 
