@@ -2,7 +2,7 @@ import _ from 'lodash';
 import * as pathToRegexp from 'path-to-regexp';
 
 import type { Core } from '@strapi/types';
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import pascalCase from './utils/pascal-case';
 import queryParams from './utils/query-params';
@@ -47,7 +47,7 @@ const parsePathWithVariables = (routePath: string): string => {
  *
  * @returns {object } Swagger path params object
  */
-const getPathParams = (routePath: string): OpenAPIV3.ParameterObject[] => {
+const getPathParams = (routePath: string): OpenAPIV3_1.ParameterObject[] => {
   const { tokens } = pathToRegexp.parse(routePath);
 
   return tokens.reduce((acc, param) => {
@@ -66,7 +66,7 @@ const getPathParams = (routePath: string): OpenAPIV3.ParameterObject[] => {
     });
 
     return acc;
-  }, [] as OpenAPIV3.ParameterObject[]);
+  }, [] as OpenAPIV3_1.ParameterObject[]);
 };
 
 const getPathWithPrefix = (prefix: string | undefined, route: Core.Route) => {
@@ -114,7 +114,7 @@ const getPaths = ({ routeInfo, uniqueName, contentTypeInfo, kind }: ApiInfo) => 
       isListOfEntities: kind !== 'singleType' && isListOfEntities,
     });
 
-    const swaggerConfig: OpenAPIV3.OperationObject = {
+    const swaggerConfig: OpenAPIV3_1.OperationObject = {
       responses,
       tags: [_.upperFirst(uniqueName)],
       parameters: [],

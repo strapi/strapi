@@ -1,7 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { addDocumentMiddlewares } from './middlewares/documentation';
-
-export async function register({ strapi }: { strapi: Core.Strapi }) {
-  await addDocumentMiddlewares({ strapi });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function register({ strapi: _strapi }: { strapi: Core.Strapi }) {
+  // Register plugin
 }

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Core, Struct } from '@strapi/types';
 
 import cleanSchemaAttributes from './utils/clean-schema-attributes';
@@ -35,11 +35,11 @@ const getRequiredAttributes = (allAttributes: Struct.SchemaAttributes) => {
 const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiInfo) => {
   // Store response and request schemas in an object
   let strapiComponentSchemas = {};
-  const schemas: OpenAPIV3.ComponentsObject = {};
+  const schemas: OpenAPIV3_1.ComponentsObject = {};
   const typeName = pascalCase(uniqueName);
 
   // adds a ComponentSchema to the Schemas so it can be used as Ref
-  const didAddStrapiComponentsToSchemas = (schemaName: string, schema: OpenAPIV3.SchemaObject) => {
+  const didAddStrapiComponentsToSchemas = (schemaName: string, schema: OpenAPIV3_1.SchemaObject) => {
     if (!Object.keys(schema) || !Object.keys(schema.properties!)) return false;
 
     // Add the Strapi components to the schema

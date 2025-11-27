@@ -230,7 +230,9 @@ describe('Documentation plugin | Documentation service', () => {
       const mockFinalDoc = lastMockCall[1];
       // The generation data is dynamically added, it cannot be modified by the user
       const { 'x-generation-date': generationConfig, ...mockFinalDocInfo } = mockFinalDoc.info;
-      expect(mockFinalDocInfo).toEqual(userConfig.info);
+      const { termsOfService: _termsOfService, ...expectedInfo } = userConfig.info;
+      expect(mockFinalDocInfo).toEqual(expectedInfo);
+      expect(mockFinalDoc.info.termsOfService).toBeUndefined();
       expect(mockFinalDoc['x-strapi-config']).toEqual(userConfig['x-strapi-config']);
       expect(mockFinalDoc.externalDocs).toEqual(userConfig.externalDocs);
       expect(mockFinalDoc.security).toEqual(userConfig.security);

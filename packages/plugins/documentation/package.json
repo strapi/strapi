@@ -1,7 +1,7 @@
 {
   "name": "@strapi/plugin-documentation",
   "version": "5.50.0",
-  "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
+  "description": "Create an OpenAPI Document and visualize your API with Scalar.",
   "homepage": "https://strapi.io",
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"
@@ -66,6 +66,7 @@
     "@strapi/admin": "5.50.0",
     "@strapi/design-system": "2.2.1",
     "@strapi/icons": "2.2.1",
+    "@strapi/openapi": "5.50.0",
     "@strapi/utils": "5.50.0",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.2.0",
@@ -114,7 +115,7 @@
   "strapi": {
     "displayName": "Documentation",
     "name": "documentation",
-    "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
+    "description": "Create an OpenAPI Document and visualize your API with Scalar.",
     "kind": "plugin"
   }
 }
