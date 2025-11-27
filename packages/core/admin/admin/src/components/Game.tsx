@@ -50,6 +50,42 @@ export const Game = ({ children }: GameProps) => {
   const theme = useTheme();
 
   const gameUrl = `https://rocket-dodge.apps.staging.strapi.team?theme=${currentTheme}`;
+
+  // Konami code: ↑ ↑ ↓ ↓ ← → ← → B A
+  useEffect(() => {
+    const konamiCode = [
+      'ArrowUp',
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'ArrowLeft',
+      'ArrowRight',
+      'b',
+      'a',
+    ];
+    let konamiIndex = 0;
+
+    const handleKonamiCode = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if (key === konamiCode[konamiIndex].toLowerCase()) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+          setIsGameOpen(true);
+          konamiIndex = 0;
+        }
+      } else {
+        konamiIndex = 0;
+      }
+    };
+
+    window.addEventListener('keydown', handleKonamiCode);
+    return () => {
+      window.removeEventListener('keydown', handleKonamiCode);
+    };
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
