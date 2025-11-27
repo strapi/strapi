@@ -1,4 +1,4 @@
-import { act, renderHook } from '@tests/utils';
+import { renderHook, waitFor } from '@tests/utils';
 
 import { useSelectionState } from '../useSelectionState';
 
@@ -34,13 +34,13 @@ describe('useSelectionState', () => {
   test('selectOne', async () => {
     const { result } = setup(['id'], []);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectOne(FIXTURE[0]);
     });
 
     expect(result.current[0]).toStrictEqual([FIXTURE[0]]);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectOne(FIXTURE[1]);
     });
 
@@ -50,13 +50,13 @@ describe('useSelectionState', () => {
   test('selectOne - multiple keys', async () => {
     const { result } = setup(['id', 'name'], []);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectOne(FIXTURE[0]);
     });
 
     expect(result.current[0]).toStrictEqual([FIXTURE[0]]);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectOne(FIXTURE[1]);
     });
 
@@ -66,114 +66,114 @@ describe('useSelectionState', () => {
   test('selectOne deselect', async () => {
     const { result } = setup(['id'], FIXTURE);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectOne(FIXTURE[0]);
     });
 
     expect(result.current[0]).toStrictEqual([FIXTURE[1]]);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectOne(FIXTURE[1]);
     });
 
     expect(result.current[0]).toStrictEqual([]);
   });
 
-  test('selectAll', () => {
+  test('selectAll', async () => {
     const { result } = setup(['id'], []);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectAll(FIXTURE);
     });
 
     expect(result.current[0]).toStrictEqual(FIXTURE);
   });
 
-  test('selectAll - multiple keys', () => {
+  test('selectAll - multiple keys', async () => {
     const { result } = setup(['id', 'name'], []);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectAll(FIXTURE);
     });
 
     expect(result.current[0]).toStrictEqual(FIXTURE);
   });
 
-  test('selectAll - reset', () => {
+  test('selectAll - reset', async () => {
     const { result } = setup(['id'], []);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectAll([]);
     });
 
     expect(result.current[0]).toStrictEqual([]);
   });
 
-  test('selectOnly', () => {
+  test('selectOnly', async () => {
     const { result } = setup(['id'], []);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectOnly(FIXTURE[0]);
     });
 
     expect(result.current[0]).toStrictEqual([FIXTURE[0]]);
   });
 
-  test('selectOnly - multiple keys', () => {
+  test('selectOnly - multiple keys', async () => {
     const { result } = setup(['id', 'name'], []);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectOnly(FIXTURE[0]);
     });
 
     expect(result.current[0]).toStrictEqual([FIXTURE[0]]);
   });
 
-  test('selectMultiple - no previously selected + multiple keys', () => {
+  test('selectMultiple - no previously selected + multiple keys', async () => {
     const { result } = setup(['id', 'name'], []);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectMultiple(FIXTURE);
     });
 
     expect(result.current[0]).toStrictEqual(FIXTURE);
   });
 
-  test('selectMultiple - already selected item + multiple keys', () => {
+  test('selectMultiple - already selected item + multiple keys', async () => {
     const alreadySelectedItem = { id: 0, name: 'already selected' };
     const { result } = setup(['id', 'name'], [alreadySelectedItem]);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectMultiple(FIXTURE);
     });
 
     expect(result.current[0]).toStrictEqual([alreadySelectedItem, ...FIXTURE]);
   });
 
-  test('selectMultiple - no duplicates + multiple keys', () => {
+  test('selectMultiple - no duplicates + multiple keys', async () => {
     const { result } = setup(['id', 'name'], FIXTURE);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].selectMultiple(FIXTURE);
     });
 
     expect(result.current[0]).toStrictEqual(FIXTURE);
   });
 
-  test('deselectMultiple - multiple keys', () => {
+  test('deselectMultiple - multiple keys', async () => {
     const { result } = setup(['id', 'name'], FIXTURE);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].deselectMultiple(FIXTURE);
     });
 
     expect(result.current[0]).toStrictEqual([]);
   });
 
-  test('deselectMultiple - some items to deselect + multiple keys', () => {
+  test('deselectMultiple - some items to deselect + multiple keys', async () => {
     const { result } = setup(['id', 'name'], FIXTURE);
 
-    act(() => {
+    await waitFor(() => {
       result.current[1].deselectMultiple([FIXTURE[0]]);
     });
 
