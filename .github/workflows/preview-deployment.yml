@@ -145,6 +145,8 @@ jobs:
           message: |
             ## Preview deployment
 
+            Test the changes in this PR using a hosted Strapi app available for 24 hours
+
             | Status | Preview URL |
             |---|---|
             | ⏳ Building | 🔗 [${{ steps.deploy.outputs.app_url }}](${{ steps.deploy.outputs.app_url }}) |
