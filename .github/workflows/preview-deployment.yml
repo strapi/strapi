@@ -143,16 +143,11 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            ## 🚀 Preview Deployment Started
+            ## Preview deployment
 
-            A preview deployment has been triggered for this PR.
-
-            ### Deployment Information
-            - **App ID**: `${{ steps.deploy.outputs.app_id }}`
-            - **Build ID**: `${{ steps.deploy.outputs.build_id }}`
-            - **Status**: Building
-            - **Branch**: `${{ github.event.pull_request.head.ref }}`
-            - **Preview URL**: [${{ steps.deploy.outputs.app_url }}](${{ steps.deploy.outputs.app_url }})
+            | Status | Preview URL |
+            |---|---|
+            | ⏳ Building | 🔗 [${{ steps.deploy.outputs.app_url }}](${{ steps.deploy.outputs.app_url }}) |
           comment_tag: preview-deployment
           mode: upsert
 
@@ -161,7 +156,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            ## ❌ Preview Deployment Failed
+            ## Preview deployment
 
             Failed to trigger preview deployment. This could be due to:
             - API service is temporarily unavailable
