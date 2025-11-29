@@ -31,6 +31,11 @@
     "scripts/*"
   ],
   "scripts": {
+    "test": "yarn test:unit && yarn test:e2e",
+    "test:unit": "jest --config=jest.config.unit.js",
+    "test:e2e": "jest --config=jest.config.e2e.js",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "build": "lerna run build --stream",
     "build": "nx run-many --targets build:code,build:types --nx-ignore-cycles",
     "build:code": "nx run-many --target=build:code --nx-ignore-cycles",
     "build:types": "nx run-many --target=build:types --nx-ignore-cycles",

@@ -1,0 +1,111 @@
+name: Strapi CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: strapi_test
+          POSTGRES_USER: strapi
+          POSTGRES_PASSWORD: strapi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'yarn'
+        
+    - name: Install Dependencies
+      run: yarn install --frozen-lockfile
+      
+    - name: Lint
+      run: yarn lint
+      
+    - name: Run Unit Tests
+      run: yarn test:unit
+      
+    - name: Build Strapi
+      run: yarn build
+      
+    - name: Run E2E Tests
+      run: yarn test:e2e
+      
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: |
+          test-results/
+          coverage/
+        retention-days: 5
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        
+    - name: Install Dependencies
+      run: yarn install --frozen-lockfile --production
+      
+    - name: Deploy to Staging
+      run: echo "Deploying to staging environment"
+      # Add your staging deployment commands here
+      # For example: 
+      # - uses: some-deployment-action@v1
+      #   with:
+      #     target: staging
+
+  deploy-production:
+    name: Deploy to Production
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        
+    - name: Install Dependencies
+      run: yarn install --frozen-lockfile --production
+      
+    - name: Deploy to Production
+      run: echo "Deploying to production environment"
+      # Add your production deployment commands here
+      # For example:
+      # - uses: some-deployment-action@v1
+      #   with:
+      #     target: production
