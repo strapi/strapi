@@ -123,9 +123,9 @@ const ListViewPage = () => {
     params,
   });
 
-  const handleRefresh = React.useCallback(() => {
+  const handleRefresh = () => {
     refetchDocuments();
-  }, [refetchDocuments]);
+  };
 
   /**
    * If the API returns an error, display a notification
