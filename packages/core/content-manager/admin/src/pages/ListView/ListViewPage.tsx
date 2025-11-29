@@ -60,6 +60,8 @@ import type { Modules } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 
+const refreshContentDefaultMessage = 'Refresh Content';
+
 /* -------------------------------------------------------------------------------------------------
  * ListViewPage
  * -----------------------------------------------------------------------------------------------*/
@@ -273,7 +275,7 @@ const ListViewPage = () => {
                   disabled={isFetching}
                   label={formatMessage({
                     id: 'content-manager.listView.refresh',
-                    defaultMessage: 'Refresh Content',
+                    defaultMessage: refreshContentDefaultMessage,
                   })}
                   onClick={handleRefresh}
                 >
@@ -358,7 +360,7 @@ const ListViewPage = () => {
                 disabled={isFetching}
                 label={formatMessage({
                   id: 'content-manager.listView.refresh',
-                  defaultMessage: 'Refresh ontent',
+                  defaultMessage: refreshContentDefaultMessage,
                 })}
                 onClick={handleRefresh}
               >
