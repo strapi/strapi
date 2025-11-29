@@ -214,14 +214,6 @@ const ListViewPage = () => {
     model,
   ]);
 
-  if (isFetching) {
-    return <Page.Loading />;
-  }
-
-  if (error) {
-    return <Page.Error />;
-  }
-
   const contentTypeTitle = schema?.info.displayName
     ? formatMessage({ id: schema.info.displayName, defaultMessage: schema.info.displayName })
     : formatMessage({
@@ -239,7 +231,11 @@ const ListViewPage = () => {
 
   let content = null;
 
-  if (!isFetching && results.length === 0) {
+  if (isFetching) {
+    content = <Page.Loading />;
+  } else if (error) {
+    content = <Page.Error />;
+  } else if (!isFetching && results.length === 0) {
     content = (
       <Box background="neutral0" shadow="filterShadow" hasRadius>
         <EmptyStateLayout
