@@ -320,7 +320,7 @@ export const AIAssetCard = ({
   return (
     <CardContainer>
       <Grid.Root>
-        <Grid.Item col={5} alignItems="stretch">
+        <Grid.Item m={5} xs={12} alignItems="stretch">
           <StyledCard width="100%" height="100%" shadow="none" borderRadius={0} padding={0}>
             <CardHeader style={{ borderStyle: 'none' }}>
               <AssetCardActions asset={asset} />
@@ -350,7 +350,7 @@ export const AIAssetCard = ({
           </StyledCard>
         </Grid.Item>
 
-        <Grid.Item col={7} flex={1}>
+        <Grid.Item m={7} xs={12} flex={1}>
           <Flex direction="column" height="100%" alignItems="stretch" flex={1} padding={4} gap={2}>
             <Field.Root name="caption">
               <Flex alignItems="center" gap={2}>
@@ -479,7 +479,7 @@ export const AIAssetCardSkeletons = ({ count = 1 }: { count?: number }) => {
           </Card>
         </Grid.Item>
 
-        <Grid.Item col={7} flex={1}>
+        <Grid.Item m={7} xs={12} flex={1}>
           <Flex direction="column" height="100%" alignItems="stretch" flex={1} padding={4} gap={2}>
             <Box>
               <SkeletonBox width="60px" height="16px" marginBottom={1} />

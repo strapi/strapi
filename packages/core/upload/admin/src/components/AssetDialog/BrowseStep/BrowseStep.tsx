@@ -354,6 +354,9 @@ export const BrowseStep = ({
                 return (
                   <Grid.Item
                     col={3}
+                    m={4}
+                    s={6}
+                    xs={12}
                     key={`folder-${folder.id}`}
                     direction="column"
                     alignItems="stretch"

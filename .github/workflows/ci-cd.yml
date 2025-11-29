@@ -1,0 +1,105 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: strapi_test
+          POSTGRES_USER: strapi
+          POSTGRES_PASSWORD: strapi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+
+      - name: Install Dependencies
+        run: |
+          yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Run Unit Tests
+        run: yarn test:unit
+
+      - name: Build
+        run: yarn build
+
+      - name: Run E2E Tests
+        uses: cypress-io/github-action@v5
+        with:
+          build: yarn build
+          start: yarn develop
+          wait-on: 'http://localhost:1337'
+        env:
+          DATABASE_CLIENT: postgres
+          DATABASE_NAME: strapi_test
+          DATABASE_USERNAME: strapi
+          DATABASE_PASSWORD: strapi
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            test-results/
+            cypress/screenshots/
+            cypress/videos/
+            coverage/
+          retention-days: 7
+
+  deploy-staging:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Jenkins Build
+        uses: appleboy/jenkins-cli-action@v1.0.0
+        with:
+          url: http://your-jenkins-server:8080
+          username: ${{ secrets.JENKINS_USERNAME }}
+          password: ${{ secrets.JENKINS_API_TOKEN }}
+          job: strapi-pipeline
+          parameters: 'ENVIRONMENT=staging'
+
+  deploy-production:
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Production Deployment
+        uses: appleboy/jenkins-cli-action@v1.0.0
+        with:
+          url: http://your-jenkins-server:8080
+          username: ${{ secrets.JENKINS_USERNAME }}
+          password: ${{ secrets.JENKINS_API_TOKEN }}
+          job: strapi-pipeline
+          parameters: 'ENVIRONMENT=production'
