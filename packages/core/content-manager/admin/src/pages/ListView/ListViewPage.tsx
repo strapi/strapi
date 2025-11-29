@@ -271,16 +271,6 @@ const ListViewPage = () => {
             endActions={
               <>
                 <InjectionZone area="listView.actions" />
-                <IconButton
-                  disabled={isFetching}
-                  label={formatMessage({
-                    id: 'content-manager.listView.refresh',
-                    defaultMessage: refreshContentDefaultMessage,
-                  })}
-                  onClick={handleRefresh}
-                >
-                  <ArrowClockwise />
-                </IconButton>
                 <ViewSettingsMenu
                   setHeaders={handleSetHeaders}
                   resetHeaders={() => setDisplayedHeaders(list.layout)}
@@ -304,6 +294,16 @@ const ListViewPage = () => {
                   />
                 )}
                 {list.settings.filterable && schema ? <Filters schema={schema} /> : null}
+                <IconButton
+                  disabled={isFetching}
+                  label={formatMessage({
+                    id: 'content-manager.listView.refresh',
+                    defaultMessage: refreshContentDefaultMessage,
+                  })}
+                  onClick={handleRefresh}
+                >
+                  <ArrowClockwise />
+                </IconButton>
               </>
             }
           />
@@ -356,16 +356,6 @@ const ListViewPage = () => {
           endActions={
             <>
               <InjectionZone area="listView.actions" />
-              <IconButton
-                disabled={isFetching}
-                label={formatMessage({
-                  id: 'content-manager.listView.refresh',
-                  defaultMessage: refreshContentDefaultMessage,
-                })}
-                onClick={handleRefresh}
-              >
-                <ArrowClockwise />
-              </IconButton>
               <ViewSettingsMenu
                 setHeaders={handleSetHeaders}
                 resetHeaders={() => setDisplayedHeaders(list.layout)}
@@ -392,6 +382,16 @@ const ListViewPage = () => {
               {list.settings.filterable && schema ? (
                 <Filters disabled={results.length === 0} schema={schema} />
               ) : null}
+              <IconButton
+                disabled={isFetching}
+                label={formatMessage({
+                  id: 'content-manager.listView.refresh',
+                  defaultMessage: refreshContentDefaultMessage,
+                })}
+                onClick={handleRefresh}
+              >
+                <ArrowClockwise />
+              </IconButton>
             </>
           }
         />
