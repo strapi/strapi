@@ -1,7 +1,7 @@
 import type { errors } from '@strapi/utils';
 
 /**
- * GET /users/me/ai-token - Get AI token for the current admin user
+ * GET /ai-token - Get an AI token for the current admin user
  */
 export declare namespace GetAiToken {
   export interface Request {
