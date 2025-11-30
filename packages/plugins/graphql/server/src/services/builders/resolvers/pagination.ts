@@ -15,18 +15,18 @@ export default ({ strapi }: Context) => ({
     const contentType = strapi.getModel(resourceUID);
     let total: number;
 
-    // If total is provided externally, skip compute
+    // If total is provided externally, skip compute.
     if (typeof precomputedTotal === "number") {
       total = precomputedTotal;
     } else {
-      // Run validation unless explicitly skipped
+      // Run validation unless explicitly skipped.
       if (skipValidation !== true) {
         await strapi.contentAPI.validate.query(args, contentType, {
           auth: ctx?.state?.auth,
         });
       }
 
-      // Sanitize query unless explicitly skipped
+      // Sanitize query unless explicitly skipped.
       const sanitizedQuery = skipSanitize
         ? args
         : await strapi.contentAPI.sanitize.query(args, contentType, {
