@@ -57,6 +57,24 @@ export class UploadRouteValidator extends AbstractRouteValidator {
   }
 
   /**
+   * Paginated files response schema
+   * Used when pagination parameters are included in the request
+   */
+  get paginatedFiles() {
+    return z.object({
+      data: z.array(this.file),
+      meta: z.object({
+        pagination: z.object({
+          page: z.number().int(),
+          pageSize: z.number().int(),
+          pageCount: z.number().int(),
+          total: z.number().int(),
+        }),
+      }),
+    });
+  }
+
+  /**
    * File ID parameter validation
    */
   get fileId() {
