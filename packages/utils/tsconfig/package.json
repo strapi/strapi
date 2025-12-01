@@ -1,8 +1,8 @@
 {
   "name": "tsconfig",
-  "version": "5.30.1",
+  "version": "5.31.2",
   "private": true,
   "devDependencies": {
-    "@tsconfig/node18": "18.2.2"
+    "@tsconfig/node20": "20.1.6"
   }
 }
