@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { login } from '../../../utils/login';
-import { prunePermissions } from '../../../scripts/endpoints';
+import { prunePermissions } from '../../../utils/scripts/endpoints';
 import { findAndClose, navToHeader } from '../../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
