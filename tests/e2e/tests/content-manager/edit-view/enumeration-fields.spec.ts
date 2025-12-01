@@ -25,6 +25,8 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByLabel('Required field').click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    // Wait for the Save button to be enabled after the dialog closes
+    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
 
@@ -63,6 +65,8 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
     await clickAndWait(page, page.getByRole('link', { name: 'Cat', exact: true }));
     await expect(page.getByRole('heading', { name: 'Cat', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Delete hair' }).click();
+    // Wait for the Save button to be enabled after deleting the field
+    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
   });
