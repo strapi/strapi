@@ -219,10 +219,12 @@ const InputRenderer = ({
         />
       );
     case 'uid':
+      // These props are not needed for the generic form input renderer.
+      const { unique: _uniqueUID, ...restUIDProps } = props;
       return (
         <UIDInput
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...restUIDProps}
           hint={hint}
           type={props.type}
           disabled={fieldIsDisabled}
