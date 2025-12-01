@@ -31,7 +31,7 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
     await waitForRestart(page);
 
     // Go to the content manager and create a new entry
-    await navToHeader(page, ['Content Manager', 'Cat'], 'Cat');
+    await navToHeader(page, ['Content Manager', { text: 'Cat', exact: true }], 'Cat');
     await page.getByRole('link', { name: 'Create new entry' }).first().click();
 
     await page.getByLabel('name*').fill('Zoe');

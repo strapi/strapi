@@ -1,6 +1,6 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
 
-type NavItem = string | [string, string] | Locator;
+type NavItem = string | [string, string] | Locator | { text: string; exact?: boolean };
 
 /**
  * Execute a test suite only if the condition is true
@@ -67,11 +67,20 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
     // 1. Uses name^= to only ensure starts with, because for example badge notifications cause "Settings" to really be "Settings 1"
     // 2. To avoid duplicates, we accept a locator
     // 3. To avoid duplicates and writing complex locators, we accept an array to pass to locateFirstAfter, which matches item0 then finds the next item1 in the dom
+    // 4. To avoid partial matches (e.g., "Cat" matching "Category"), accept an object with { text: string, exact?: boolean }
     let item;
     if (typeof navItem === 'string') {
       item = page.locator(`role=link[name^="${navItem}"]`).last();
     } else if (Array.isArray(navItem)) {
       item = await locateFirstAfter(page, navItem[0], navItem[1]);
+    } else if (navItem && typeof navItem === 'object' && 'text' in navItem) {
+      // Object format: { text: string, exact?: boolean }
+      const { text, exact = false } = navItem;
+      if (exact) {
+        item = page.getByRole('link', { name: text, exact: true });
+      } else {
+        item = page.locator(`role=link[name^="${text}"]`).last();
+      }
     } else {
       // it's a Locator
       item = navItem;
