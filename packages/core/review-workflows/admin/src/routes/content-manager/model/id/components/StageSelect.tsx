@@ -183,7 +183,6 @@ export const StageSelect = ({ isCompact }: { isCompact?: boolean }) => {
     {
       slug: collectionType,
       model: model,
-      // @ts-expect-error – `id` is not correctly typed in the DS.
       id: document?.documentId,
       params,
     },

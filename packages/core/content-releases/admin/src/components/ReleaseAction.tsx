@@ -156,7 +156,7 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
         id: 'content-manager-list-view.add-to-release',
         defaultMessage: 'Add to Release',
       }),
-      content: ({ onClose }) => {
+      content: ({ onClose }: { onClose: () => void }) => {
         return (
           <Formik
             onSubmit={async (values) => {
