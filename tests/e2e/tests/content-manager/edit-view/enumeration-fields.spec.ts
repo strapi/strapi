@@ -14,8 +14,8 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
   test('should test enumeration fields - required vs non-required behavior', async ({ page }) => {
     // Navigate to Content-Type Builder first
     await navToHeader(page, ['Content-Type Builder'], 'Article');
-    // Then click on Cat and wait for the page to load
-    await clickAndWait(page, page.getByRole('link', { name: 'Cat' }));
+    // Then click on Cat and wait for the page to load (use exact match to avoid matching "Category")
+    await clickAndWait(page, page.getByRole('link', { name: 'Cat', exact: true }));
     await expect(page.getByRole('heading', { name: 'Cat', exact: true })).toBeVisible();
 
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
@@ -60,7 +60,7 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
 
     // Clean Cat content type
     await navToHeader(page, ['Content-Type Builder'], 'Article');
-    await clickAndWait(page, page.getByRole('link', { name: 'Cat' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Cat', exact: true }));
     await expect(page.getByRole('heading', { name: 'Cat', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Delete hair' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
