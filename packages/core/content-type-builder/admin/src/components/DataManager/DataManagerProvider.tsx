@@ -170,17 +170,21 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
     const isSendingContentTypes = Object.keys(state.current.contentTypes).length > 0;
 
-    lockAppWithAutoreload();
-
     try {
-      await fetchClient.post(`/content-type-builder/update-schema`, { data: requestData });
+      const res = await fetchClient.post(`/content-type-builder/update-schema`, {
+        data: requestData,
+      });
 
       if (isSendingContentTypes) {
         trackUsage('didCreateGuidedTourCollectionType');
       }
 
-      // Make sure the server has restarted
-      await serverRestartWatcher();
+      // If soft reset was used on the server, no restart wait or overlay is necessary
+      if (!(res?.data?.data?.softReset === true)) {
+        // Show overlay and wait for restart only when falling back to reload
+        lockAppWithAutoreload();
+        await serverRestartWatcher();
+      }
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
       // Update the app's permissions

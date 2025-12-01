@@ -23,6 +23,15 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
 
   app.use((ctx, next) => requestCtx.run(ctx, () => next()));
 
+  // Gate requests during softReset: await completion with a short timeout
+  app.use(async (ctx, next) => {
+    if (typeof (strapi as any).waitForSoftReset === 'function') {
+      // await with timeout to minimize 503s during short swaps
+      await (strapi as any).waitForSoftReset(1500);
+    }
+    return next();
+  });
+
   const router = new Router();
 
   const routeManager = createRouteManager(strapi);
@@ -80,7 +89,25 @@ const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
     },
 
     initRouting() {
+      // Append new routes, then compact to remove duplicates while preserving latest definitions
       registerAllRoutes(strapi);
+
+      const stack: any[] = (this.router as any).stack || [];
+      const seen = new Set<string>();
+      const compacted: any[] = [];
+
+      for (let i = stack.length - 1; i >= 0; i -= 1) {
+        const layer = stack[i];
+        // Koa-router layer has path and methods
+        const methods = Array.isArray(layer.methods) ? layer.methods.join(',') : '*';
+        const key = `${methods} ${layer.path}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          compacted.unshift(layer);
+        }
+      }
+
+      (this.router as any).stack = compacted;
 
       return this;
     },

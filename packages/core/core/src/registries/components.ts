@@ -29,8 +29,8 @@ const componentsRegistry = () => {
     /**
      * Registers a component
      */
-    set(uid: UID.Component, component: Struct.ComponentSchema) {
-      if (has(uid, components)) {
+    set(uid: UID.Component, component: Struct.ComponentSchema, options?: { force?: boolean }) {
+      if (has(uid, components) && !options?.force) {
         throw new Error(`Component ${uid} has already been registered.`);
       }
 
@@ -42,10 +42,23 @@ const componentsRegistry = () => {
     /**
      * Registers a map of components for a specific namespace
      */
-    add(newComponents: Record<UID.Component, Struct.ComponentSchema>) {
+    add(
+      newComponents: Record<UID.Component, Struct.ComponentSchema>,
+      options?: { force?: boolean }
+    ) {
       for (const uid of Object.keys(newComponents) as UID.Component[]) {
-        this.set(uid, newComponents[uid]);
+        this.set(uid, newComponents[uid], { force: options?.force });
       }
+    },
+
+    /**
+     * Removes all components (used for rebuilding from disk)
+     */
+    clear() {
+      for (const uid of Object.keys(components) as UID.Component[]) {
+        delete components[uid];
+      }
+      return this;
     },
   };
 };

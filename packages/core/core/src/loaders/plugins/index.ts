@@ -136,7 +136,7 @@ export default async function loadPlugins(strapi: Core.Strapi) {
   await applyUserExtension(plugins);
 
   for (const pluginName of Object.keys(plugins)) {
-    strapi.get('plugins').add(pluginName, plugins[pluginName]);
+    strapi.get('plugins').add(pluginName, plugins[pluginName], { force: true });
   }
 }
 

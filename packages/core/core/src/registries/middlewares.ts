@@ -33,7 +33,10 @@ const middlewaresRegistry = () => {
     /**
      * Registers a middleware
      */
-    set(uid: UID.Middleware, middleware: Core.Middleware) {
+    set(uid: UID.Middleware, middleware: Core.Middleware, options?: { force?: boolean }) {
+      if (has(uid, middlewares) && !options?.force) {
+        throw new Error(`Middleware ${uid} has already been registered.`);
+      }
       middlewares[uid] = middleware;
       return this;
     },
@@ -41,12 +44,16 @@ const middlewaresRegistry = () => {
     /**
      * Registers a map of middlewares for a specific namespace
      */
-    add(namespace: string, rawMiddlewares: Record<string, Core.Middleware> = {}) {
+    add(
+      namespace: string,
+      rawMiddlewares: Record<string, Core.Middleware> = {},
+      options?: { force?: boolean }
+    ) {
       for (const middlewareName of Object.keys(rawMiddlewares)) {
         const middleware = rawMiddlewares[middlewareName];
         const uid = addNamespace(middlewareName, namespace) as UID.Middleware;
 
-        if (has(uid, middlewares)) {
+        if (has(uid, middlewares) && !options?.force) {
           throw new Error(`Middleware ${uid} has already been registered.`);
         }
         middlewares[uid] = middleware;
@@ -66,6 +73,18 @@ const middlewaresRegistry = () => {
       const newMiddleware = extendFn(currentMiddleware);
       middlewares[uid] = newMiddleware;
 
+      return this;
+    },
+
+    /**
+     * Removes all middlewares for a specific namespace
+     */
+    removeNamespace(namespace: string) {
+      for (const uid of Object.keys(middlewares) as UID.Middleware[]) {
+        if (hasNamespace(uid, namespace)) {
+          delete middlewares[uid];
+        }
+      }
       return this;
     },
   };

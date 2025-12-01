@@ -9,6 +9,7 @@ interface LifecyclesState {
   bootstrap?: boolean;
   register?: boolean;
   destroy?: boolean;
+  softReset?: boolean;
 }
 
 export interface RawModule {
@@ -22,12 +23,14 @@ export interface RawModule {
   bootstrap?: (params: { strapi: Core.Strapi }) => Promise<void>;
   register?: (params: { strapi: Core.Strapi }) => Promise<void>;
   destroy?: (params: { strapi: Core.Strapi }) => Promise<void>;
+  softReset?: (params: { strapi: Core.Strapi }) => Promise<void>;
 }
 
 export interface Module {
   bootstrap: () => Promise<void>;
   register: () => Promise<void>;
   destroy: () => Promise<void>;
+  softReset: () => Promise<void>;
   load: () => void;
   routes: Core.Module['routes'];
   config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider.get, we should use it directly
@@ -81,6 +84,13 @@ export const createModule = (
       }
       called.bootstrap = true;
       await (rawModule.bootstrap && rawModule.bootstrap({ strapi }));
+    },
+    async softReset() {
+      if (called.softReset) {
+        return;
+      }
+      called.softReset = true;
+      await (rawModule.softReset && rawModule.softReset({ strapi }));
     },
     async register() {
       if (called.register) {

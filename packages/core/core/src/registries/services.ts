@@ -57,7 +57,10 @@ const servicesRegistry = (strapi: Core.Strapi) => {
     /**
      * Registers a service
      */
-    set(uid: string, service: ServiceFactory) {
+    set(uid: string, service: ServiceFactory, options?: { force?: boolean }) {
+      if (has(uid, services) && !options?.force) {
+        throw new Error(`Service ${uid} has already been registered.`);
+      }
       services[uid] = service;
       delete instantiatedServices[uid];
       return this;
@@ -66,12 +69,12 @@ const servicesRegistry = (strapi: Core.Strapi) => {
     /**
      * Registers a map of services for a specific namespace
      */
-    add(namespace: string, newServices: ServiceFactoryMap) {
+    add(namespace: string, newServices: ServiceFactoryMap, options?: { force?: boolean }) {
       for (const serviceName of Object.keys(newServices)) {
         const service = newServices[serviceName];
         const uid = addNamespace(serviceName, namespace);
 
-        if (has(uid, services)) {
+        if (has(uid, services) && !options?.force) {
           throw new Error(`Service ${uid} has already been registered.`);
         }
         services[uid] = service;
@@ -92,6 +95,20 @@ const servicesRegistry = (strapi: Core.Strapi) => {
 
       const newService = extendFn(currentService);
       instantiatedServices[uid] = newService;
+
+      return this;
+    },
+
+    /**
+     * Removes all services for a specific namespace (e.g. api::blog)
+     */
+    removeNamespace(namespace: string) {
+      for (const uid of Object.keys(services)) {
+        if (hasNamespace(uid, namespace)) {
+          delete services[uid];
+          delete instantiatedServices[uid as UID.Service];
+        }
+      }
 
       return this;
     },
