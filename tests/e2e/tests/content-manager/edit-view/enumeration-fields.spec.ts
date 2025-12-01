@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
-import { navToHeader, findAndClose } from '../../../../utils/shared';
+import { navToHeader, findAndClose, clickAndWait } from '../../../../utils/shared';
 import { waitForRestart } from '../../../../utils/restart';
 
 test.describe('Edit View - Enumeration Fields Testing', () => {
@@ -12,8 +12,11 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
   });
 
   test('should test enumeration fields - required vs non-required behavior', async ({ page }) => {
-    // Navigate to Content Manager
-    await navToHeader(page, ['Content-Type Builder', 'Cat'], 'Cat');
+    // Navigate to Content-Type Builder first
+    await navToHeader(page, ['Content-Type Builder'], 'Article');
+    // Then click on Cat and wait for the page to load
+    await clickAndWait(page, page.getByRole('link', { name: 'Cat' }));
+    await expect(page.getByRole('heading', { name: 'Cat', exact: true })).toBeVisible();
 
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
     await page.getByRole('button', { name: 'Enumeration' }).click();
@@ -56,7 +59,9 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
     await findAndClose(page, 'Published document');
 
     // Clean Cat content type
-    await navToHeader(page, ['Content-Type Builder', 'Cat'], 'Cat');
+    await navToHeader(page, ['Content-Type Builder'], 'Article');
+    await clickAndWait(page, page.getByRole('link', { name: 'Cat' }));
+    await expect(page.getByRole('heading', { name: 'Cat', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Delete hair' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);

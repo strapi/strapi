@@ -251,6 +251,9 @@ test.describe('Edit View', () => {
       // Check that we can save with keyboard shortcuts
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American...');
       await page.keyboard.press('Control+Enter');
+      // Wait for the save to complete - the Save button will be disabled during save, then enabled again
+      await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled({ timeout: 5000 });
+      await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled({ timeout: 10000 });
       await findAndClose(page, 'Saved Document');
 
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
