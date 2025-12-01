@@ -5,6 +5,7 @@ import { createdLocale } from './5.0.0-03-locale';
 import { createdPublishedAt } from './5.0.0-04-published-at';
 import { dropSlugFieldsIndex } from './5.0.0-05-drop-slug-unique-index';
 import { addDocumentIdIndexes } from './5.0.0-06-add-document-id-indexes';
+import { migrateIdsFromIntToBigInt } from './5.0.0-06-migrate-ids-from-int-to-bigint';
 
 /**
  * List of all the internal migrations. The array order will be the order in which they are executed.
@@ -22,4 +23,5 @@ export const internalMigrations: Migration[] = [
   createdPublishedAt,
   dropSlugFieldsIndex,
   addDocumentIdIndexes,
+  migrateIdsFromIntToBigInt,
 ];
