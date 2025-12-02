@@ -38,7 +38,8 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
 
     const date = new Date();
     const hours = date.getHours();
-    const hoursFuture = hours + 2 < 10 ? `0${hours + 2}` : hours + 2;
+    const hoursFuture = (hours + 2) % 24;
+    const hoursFutureFormatted = hoursFuture < 10 ? `0${hoursFuture}` : `${hoursFuture}`;
 
     await page
       .getByRole('combobox', {
@@ -55,7 +56,7 @@ describeOnCondition(edition === 'EE')('Homepage - Content Releases Widgets', () 
     await page.getByLabel(formattedDate).click();
 
     await page.getByRole('combobox', { name: 'Time', exact: true }).click();
-    await page.getByRole('option', { name: `${hoursFuture}:00`, exact: true }).click();
+    await page.getByRole('option', { name: `${hoursFutureFormatted}:00`, exact: true }).click();
 
     await page.getByRole('button', { name: /continue/i }).click();
     await findAndClose(page, 'Release created');
