@@ -32,6 +32,7 @@ const MainSubNav = styled(DSSubNav)`
   z-index: 2;
 
   ${({ theme }) => theme.breakpoints.medium} {
+    width: 23.2rem;
     position: sticky;
     top: 0;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
@@ -101,7 +102,7 @@ const Link = (
           <Typography
             tag="div"
             lineHeight="32px"
-            width="100%"
+            width={{ initial: '80dvw', medium: '100%' }}
             overflow="hidden"
             style={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           >
@@ -139,10 +140,16 @@ const Header = ({ label }: { label: string }) => {
   );
 };
 
-const Sections = ({ children, ...props }: { children: React.ReactNode[]; [key: string]: any }) => {
+const Sections = ({
+  children,
+  ...props
+}: {
+  children: React.ReactNode[];
+  [key: string]: unknown;
+}) => {
   return (
-    <Box paddingTop={4} paddingBottom={4}>
-      <Flex tag="ol" gap="5" direction="column" alignItems="stretch" {...props}>
+    <Box paddingTop={4} paddingBottom={4} maxWidth={{ initial: '100%', medium: '23.2rem' }}>
+      <Flex tag="ul" gap="5" direction="column" alignItems="stretch" {...props}>
         {children.map((child, index) => {
           return <li key={index}>{child}</li>;
         })}
@@ -313,26 +320,24 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
           </Box>
         </SubSectionHeader>
       </Flex>
-      {
-        <Flex
-          tag="ul"
-          id={listId}
-          direction="column"
-          gap="2px"
-          alignItems={'stretch'}
-          style={{
-            maxHeight: isOpen ? '1000px' : 0,
-            overflow: 'hidden',
-            transition: isOpen
-              ? 'max-height 1s ease-in-out'
-              : 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
-          }}
-        >
-          {children.map((child, index) => {
-            return <SubSectionLinkWrapper key={index}>{child}</SubSectionLinkWrapper>;
-          })}
-        </Flex>
-      }
+      <Flex
+        tag="ul"
+        id={listId}
+        direction="column"
+        gap="2px"
+        alignItems={'stretch'}
+        style={{
+          maxHeight: isOpen ? '1000px' : 0,
+          overflow: 'hidden',
+          transition: isOpen
+            ? 'max-height 1s ease-in-out'
+            : 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
+        }}
+      >
+        {children.map((child, index) => {
+          return <SubSectionLinkWrapper key={index}>{child}</SubSectionLinkWrapper>;
+        })}
+      </Flex>
     </Box>
   );
 };

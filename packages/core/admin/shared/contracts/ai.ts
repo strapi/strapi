@@ -1,7 +1,7 @@
 import type { errors } from '@strapi/utils';
 
 /**
- * GET /users/me/ai-token - Get AI token for the current admin user
+ * GET /ai-token - Get an AI token for the current admin user
  */
 export declare namespace GetAiToken {
   export interface Request {
@@ -40,5 +40,23 @@ export declare namespace GetAiUsage {
       currentTermStart: string;
       currentTermEnd: string;
     };
+  }
+}
+
+/**
+ * GET /ai-feature-config - Get AI feature config
+ */
+export declare namespace GetAIFeatureConfig {
+  export interface Request {
+    query: {};
+    body: {};
+  }
+
+  export interface Response {
+    data: {
+      isAIi18nConfigured: boolean;
+      isAIMediaLibraryConfigured: boolean;
+    };
+    error?: errors.ApplicationError;
   }
 }

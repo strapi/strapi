@@ -159,7 +159,7 @@ export async function* getBatchToDiscard({
  */
 const migrateUp = async (trx: Knex, db: Database) => {
   const dpModels = [];
-  for (const meta of db.metadata.values()) {
+  for (const meta of Array.from(db.metadata.values())) {
     const hasDP = await hasDraftAndPublish(trx, meta);
     if (hasDP) {
       dpModels.push(meta);

@@ -107,13 +107,9 @@ const MainNavIcons = ({
         return isDesktop || (!isDesktop && linkMobile) ? (
           <Flex tag="li" key={link.to}>
             <GuidedTourTooltip to={link.to}>
-              {isDesktop ? (
-                <NavLink.Tooltip label={labelValue}>
-                  <LinkElement />
-                </NavLink.Tooltip>
-              ) : (
+              <NavLink.Tooltip position={isDesktop ? 'right' : 'bottom'} label={labelValue}>
                 <LinkElement />
-              )}
+              </NavLink.Tooltip>
             </GuidedTourTooltip>
           </Flex>
         ) : null;

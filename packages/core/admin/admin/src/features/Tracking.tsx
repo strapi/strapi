@@ -194,7 +194,9 @@ export interface EventWithoutProperties {
     | 'didEditFieldNameOnContentType'
     | 'didCreateRelease'
     | 'didStartNewChat'
-    | 'didLaunchGuidedtour';
+    | 'didLaunchGuidedtour'
+    | 'didEditAICaption'
+    | 'didEditAIAlternativeText';
   properties?: never;
 }
 

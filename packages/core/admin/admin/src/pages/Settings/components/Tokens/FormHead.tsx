@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Dialog, Flex, Tooltip } from '@strapi/design-system';
+import { Box, Button, Dialog, Flex, Tooltip } from '@strapi/design-system';
 import { Check, ArrowClockwise, Eye, EyeStriked } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
@@ -209,7 +209,12 @@ export const FormHead = <TToken extends Token | null>({
           )
         )
       }
-      navigationAction={<BackButton />}
+      navigationAction={
+        // The back link for mobile works differently; it is placed higher up in the DOM.
+        <Box display={{ initial: 'none', medium: 'block' }}>
+          <BackButton />
+        </Box>
+      }
       ellipsis
     />
   );

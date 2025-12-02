@@ -506,6 +506,7 @@
   "global.documentation": "Documentación",
   "global.enabled": "Habilitado",
   "global.finish": "Terminar",
+  "global.localeToggle.label": "Seleccionar idioma de la interfaz",
   "global.marketplace": "Marketplace",
   "global.name": "Nombre",
   "global.none": "Ninguno",

@@ -560,11 +560,15 @@ export const fillAttribute = async (
     }
 
     if (isNumber(advanced.maximum)) {
-      await page.getByLabel('Maximum').fill(advanced.maximum.toString());
+      const checkbox = page.getByRole('checkbox', { name: 'Maximum value' });
+      await ensureCheckbox(checkbox, true);
+      await page.getByRole('textbox', { name: 'Maximum value' }).fill(advanced.maximum.toString());
     }
 
     if (isNumber(advanced.minimum)) {
-      await page.getByLabel('Minimum').fill(advanced.minimum.toString());
+      const checkbox = page.getByRole('checkbox', { name: 'Minimum value' });
+      await ensureCheckbox(checkbox, true);
+      await page.getByRole('textbox', { name: 'Minimum value' }).fill(advanced.minimum.toString());
     }
 
     if (isString(advanced.default)) {

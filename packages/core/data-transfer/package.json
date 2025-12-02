@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "5.27.0",
+  "version": "5.31.2",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -42,9 +42,9 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/logger": "5.27.0",
-    "@strapi/types": "5.27.0",
-    "@strapi/utils": "5.27.0",
+    "@strapi/logger": "5.31.2",
+    "@strapi/types": "5.31.2",
+    "@strapi/utils": "5.31.2",
     "chalk": "4.1.2",
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
@@ -61,12 +61,12 @@
     "ws": "8.17.1"
   },
   "devDependencies": {
-    "@strapi/database": "5.27.0",
+    "@strapi/database": "5.31.2",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
-    "@types/node": "18.19.24",
+    "@types/node": "24.10.0",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.3",
@@ -79,7 +79,7 @@
     "typescript": "5.4.4"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   }
 }
