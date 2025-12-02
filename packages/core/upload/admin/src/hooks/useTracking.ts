@@ -1,8 +1,5 @@
-import {
-  useTracking as useStrapiTracking,
-  TrackingEvent,
-  useAIAvailability,
-} from '@strapi/admin/strapi-admin';
+import { useTracking as useStrapiTracking, TrackingEvent } from '@strapi/admin/strapi-admin';
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 
 import { useSettings } from '../hooks/useSettings';
 

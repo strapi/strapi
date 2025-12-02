@@ -6,7 +6,6 @@ import {
   fireEvent,
   render as renderRTL,
   waitForElementToBeRemoved,
-  waitFor,
   screen,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -114,9 +113,7 @@ describe('Roles – EditPage', () => {
   });
 
   it("can update a role's name, description and permissions", async () => {
-    const { getByRole, user, getByText, findByRole, findByText } = render();
-
-    // await waitForElementToBeRemoved(() => getByText('Loading content.'));
+    const { user } = render();
 
     const textboxName = await screen.findByRole('textbox', { name: 'Name' });
     const textboxDescription = await screen.findByRole('textbox', { name: 'Description' });
@@ -124,7 +121,7 @@ describe('Roles – EditPage', () => {
     await user.type(textboxName, 'test');
     await user.type(textboxDescription, 'testing');
     await user.click(
-      getByRole('button', {
+      screen.getByRole('button', {
         name: 'Address Define all allowed actions for the api::address plugin.',
       })
     );
@@ -132,13 +129,13 @@ describe('Roles – EditPage', () => {
     const checkboxCreate = await screen.findByRole('checkbox', { name: 'create' });
     await user.click(checkboxCreate);
 
-    const button = await findByRole('button', { name: 'Save' });
-    // /**
-    //  * @note user.click will not trigger the form.
-    //  */
+    const button = await screen.findByRole('button', { name: 'Save' });
+    /**
+     * @note user.click will not trigger the form.
+     */
     fireEvent.click(button);
-    await findByText('Role edited');
-    await findByText('Authenticated');
+    await screen.findByText('Role edited');
+    await screen.findByText('Authenticated');
   });
 
   it('will update the Advanced Settings panel when you click on the cog icon of a specific permission', async () => {
