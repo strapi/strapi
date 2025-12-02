@@ -41,10 +41,7 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
     };
   }
 
-  const { data, error, isLoading } = useQuery<
-    GetFiles.Response['data'],
-    GetFiles.Response['error']
-  >(
+  const { data, error, isLoading } = useQuery<GetFiles.Response, GetFiles.Response['error']>(
     [pluginId, 'assets', params],
     async () => {
       const { data } = await get('/upload/files', { params });
@@ -56,10 +53,10 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
       staleTime: 0,
       cacheTime: 0,
       select(data) {
-        if (data?.results && Array.isArray(data.results)) {
+        if (data?.data && Array.isArray(data.data)) {
           return {
             ...data,
-            results: data.results
+            results: data.data
               /**
                * Filter out assets that don't have a name.
                * So we don't try to render them as assets
@@ -75,6 +72,7 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
                 mime: asset.mime ?? '',
                 ext: asset.ext ?? '',
               })),
+            pagination: data.meta.pagination,
           };
         }
 

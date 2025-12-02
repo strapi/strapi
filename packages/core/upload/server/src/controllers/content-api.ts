@@ -38,9 +38,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await validateQuery(ctx.query, ctx);
       const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-      const files = await getService('upload').findMany(sanitizedQuery);
+      const { results, pagination } = await getService('upload').findPage(sanitizedQuery);
 
-      ctx.body = await sanitizeOutput(files, ctx);
+      const sanitizedResults = await sanitizeOutput(results, ctx);
+
+      ctx.body = {
+        data: sanitizedResults,
+        meta: { pagination },
+      };
     },
 
     async findOne(ctx: Context) {

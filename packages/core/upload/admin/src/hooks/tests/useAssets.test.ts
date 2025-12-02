@@ -8,7 +8,15 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   useFetchClient: jest.fn().mockReturnValue({
     get: jest.fn().mockResolvedValue({
       data: {
-        id: 1,
+        data: [],
+        meta: {
+          pagination: {
+            page: 1,
+            pageSize: 10,
+            pageCount: 1,
+            total: 0,
+          },
+        },
       },
     }),
   }),
@@ -165,7 +173,7 @@ describe('useAssets', () => {
 
     (get as jest.Mock).mockReturnValue({
       data: {
-        results: [
+        data: [
           {
             name: null,
             mime: 'image/jpeg',
@@ -177,6 +185,14 @@ describe('useAssets', () => {
             ext: 'jpg',
           },
         ],
+        meta: {
+          pagination: {
+            page: 1,
+            pageSize: 10,
+            pageCount: 1,
+            total: 2,
+          },
+        },
       },
     });
 
@@ -198,7 +214,7 @@ describe('useAssets', () => {
 
     (get as jest.Mock).mockReturnValue({
       data: {
-        results: [
+        data: [
           {
             name: 'test 1',
             mime: null,
@@ -220,11 +236,19 @@ describe('useAssets', () => {
             ext: 'jpg',
           },
         ],
+        meta: {
+          pagination: {
+            page: 1,
+            pageSize: 10,
+            pageCount: 1,
+            total: 4,
+          },
+        },
       },
     });
 
     const { result } = setup({});
 
-    await waitFor(() => expect(result.current.data?.results ?? []).toHaveLength(0));
+    await waitFor(() => expect(result.current.data?.results ?? []).toHaveLength(4));
   });
 });
