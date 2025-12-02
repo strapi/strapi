@@ -261,6 +261,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
         async bootstrap({ strapi: s }) {
           s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
           s.config.set('plugin::users-permissions.sessions.httpOnly', false);
+          s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
 
           // Enable public permission for refresh route
           const publicRole = await s.db
@@ -356,14 +357,14 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(cookies.toLowerCase()).toMatch(/httponly/);
     });
 
-    test('Even with cookie set, missing body yields 400', async () => {
+    test('Cookie-based refresh works when httpOnly is configured', async () => {
       const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
 
       const loginRes = await rqAuth({
         method: 'POST',
         url: '/local',
         headers: { 'x-strapi-refresh-cookie': 'httpOnly' },
-        body: { identifier: internals.user.email, password: 'Test12345!' },
+        body: { identifier: internals.user.email, password: internals.user.password },
       });
       const setCookie = loginRes.headers['set-cookie'];
       const cookieHeader = Array.isArray(setCookie) ? setCookie : [setCookie];
@@ -377,8 +378,15 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
         },
         body: {},
       });
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toBe('Missing refresh token');
+      expect(res.statusCode).toBe(200);
+      expect(res.body.jwt).toEqual(expect.any(String));
+      expect(res.body.refreshToken).toBeUndefined();
+      const newSetCookie = res.headers['set-cookie'];
+      const newCookies = Array.isArray(newSetCookie)
+        ? newSetCookie.join('\n')
+        : String(newSetCookie || '');
+      expect(newCookies).toMatch(/strapi_up_refresh=/);
+      expect(newCookies.toLowerCase()).toMatch(/httponly/);
     });
   });
 
