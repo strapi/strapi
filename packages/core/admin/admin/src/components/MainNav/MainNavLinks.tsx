@@ -75,6 +75,7 @@ const MainNavIcons = ({
         const LinkElement = () => (
           <NavLink.Link
             to={link.to}
+            target={link.target}
             onClick={() => handleClickOnLink(link.to)}
             aria-label={labelValue}
           >

@@ -16,6 +16,7 @@ export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'> 
 };
 export type MobileMenuItem = {
   to: string;
+  target?: string;
   link?: string;
 };
 
