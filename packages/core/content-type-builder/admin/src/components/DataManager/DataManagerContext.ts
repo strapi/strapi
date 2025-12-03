@@ -137,7 +137,6 @@ export interface DataManagerContextValue {
     canRedo: boolean;
     canDiscardAll: boolean;
   };
-  ctbSessionId: string;
 }
 
 // @ts-expect-error need to pass initial value to params

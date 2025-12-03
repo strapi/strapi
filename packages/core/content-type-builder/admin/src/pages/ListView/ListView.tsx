@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import { Navigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { useCTBTracking } from '../../components/DataManager/useCTBTracking';
+import { useCTBTracking } from '../../components/CTBSession/ctbSession';
 import { useDataManager } from '../../components/DataManager/useDataManager';
 import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
 import { List } from '../../components/List';

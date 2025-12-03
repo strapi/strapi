@@ -31,7 +31,7 @@ import { styled } from 'styled-components';
 import { getTrad } from '../utils/getTrad';
 
 import { AttributeRow, type AttributeRowProps } from './AttributeRow';
-import { useCTBTracking } from './DataManager/useCTBTracking';
+import { useCTBTracking } from './CTBSession/ctbSession';
 import { useDataManager } from './DataManager/useDataManager';
 import { NestedTFooter, TFooter } from './Footers';
 import { useFormModalNavigation } from './FormModalNavigation/useFormModalNavigation';

@@ -12,7 +12,7 @@ import {
 import { UIMessage, useChat } from '@ai-sdk/react';
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 
-import { useCTBTracking } from '../../DataManager/useCTBTracking';
+import { useCTBTracking } from '../../CTBSession/ctbSession';
 import { useDataManager } from '../../DataManager/useDataManager';
 import { FeedbackProvider } from '../FeedbackModal';
 import { useAIChat } from '../hooks/useAIFetch';

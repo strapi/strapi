@@ -18,6 +18,7 @@ import { prefetchAIToken } from '../../components/AIChat/lib/aiClient';
 import { ChatProvider } from '../../components/AIChat/providers/ChatProvider';
 import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
+import { CTBSessionProvider } from '../../components/CTBSession/CTBSessionProvider';
 import DataManagerProvider from '../../components/DataManager/DataManagerProvider';
 import { ExitPrompt } from '../../components/ExitPrompt';
 import { FormModal } from '../../components/FormModal/FormModal';
@@ -62,30 +63,32 @@ const App = () => {
     <Page.Protect permissions={PERMISSIONS.main}>
       <Page.Title>{title}</Page.Title>
       <AutoReloadOverlayBlockerProvider>
-        <FormModalNavigationProvider>
-          <DataManagerProvider>
-            <ExitPrompt />
-            <ChatProvider>
-              <>
-                {autoReload && <FormModal />}
-                <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
-                  <Suspense fallback={<Page.Loading />}>
-                    <Routes>
-                      <Route path="content-types/create-content-type" element={<EmptyState />} />
-                      <Route path="content-types/:contentTypeUid" element={<ListView />} />
-                      <Route
-                        path={`component-categories/:categoryUid/:componentUid`}
-                        element={<ListView />}
-                      />
-                      <Route path="*" element={<ListView />} />
-                    </Routes>
-                  </Suspense>
-                </Layouts.Root>
-                <Chat />
-              </>
-            </ChatProvider>
-          </DataManagerProvider>
-        </FormModalNavigationProvider>
+        <CTBSessionProvider>
+          <FormModalNavigationProvider>
+            <DataManagerProvider>
+              <ExitPrompt />
+              <ChatProvider>
+                <>
+                  {autoReload && <FormModal />}
+                  <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
+                    <Suspense fallback={<Page.Loading />}>
+                      <Routes>
+                        <Route path="content-types/create-content-type" element={<EmptyState />} />
+                        <Route path="content-types/:contentTypeUid" element={<ListView />} />
+                        <Route
+                          path={`component-categories/:categoryUid/:componentUid`}
+                          element={<ListView />}
+                        />
+                        <Route path="*" element={<ListView />} />
+                      </Routes>
+                    </Suspense>
+                  </Layouts.Root>
+                  <Chat />
+                </>
+              </ChatProvider>
+            </DataManagerProvider>
+          </FormModalNavigationProvider>
+        </CTBSessionProvider>
       </AutoReloadOverlayBlockerProvider>
     </Page.Protect>
   );

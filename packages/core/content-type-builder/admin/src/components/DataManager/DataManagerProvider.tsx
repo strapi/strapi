@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  useTracking,
   useStrapiApp,
   useNotification,
   useAppInfo,
@@ -20,6 +19,8 @@ import { useLocation } from 'react-router-dom';
 
 import { getTrad } from '../../utils/getTrad';
 import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
+import { useCTBTracking } from '../CTBSession/ctbSession';
+import { useCTBSession } from '../CTBSession/useCTBSession';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
 import { DataManagerContext, type DataManagerContextValue } from './DataManagerContext';
@@ -41,26 +42,12 @@ interface DataManagerProviderProps {
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_dataManagerProvider'] || initialState) as State;
 
-/**
- * Generates a unique session identifier for CTB tracking
- */
-const generateSessionId = (): string => {
-  // Use cryptographically secure random number generator
-  const randomBytes = new Uint8Array(8);
-  window.crypto.getRandomValues(randomBytes);
-  // Convert to base36 string (similar to Math.random().toString(36))
-  const randomString = Array.from(randomBytes)
-    .map((byte) => byte.toString(36))
-    .join('')
-    .substring(0, 13);
-  return `ctb-${Date.now()}-${randomString}`;
-};
-
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
   const state = useSelector(selectState);
   const dispatchGuidedTour = useGuidedTour('DataManagerProvider', (s) => s.dispatch);
   const location = useLocation();
+  const { sessionId: ctbSessionId, regenerateSessionId } = useCTBSession();
 
   const {
     components,
@@ -79,12 +66,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const plugin = getPlugin('content-type-builder');
   const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
   const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
   const refetchPermissions = useAuth('DataManagerProvider', (state) => state.refetchPermissions);
   const { onCloseModal } = useFormModalNavigation();
 
   const [isSaving, setIsSaving] = React.useState(false);
-  const [ctbSessionId, setCtbSessionId] = React.useState<string>(() => generateSessionId());
   const previousLocationRef = React.useRef<string | null>(null);
 
   const isModified = React.useMemo(() => {
@@ -132,8 +118,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   React.useEffect(() => {
     getDataRef.current();
-    // Generate new session ID when CTB is accessed (on mount)
-    setCtbSessionId(generateSessionId());
     previousLocationRef.current = location.pathname;
 
     return () => {
@@ -143,41 +127,24 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update global ref for FormModalNavigationProvider to access session ID
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // @ts-expect-error - accessing module-level ref to share session ID across provider boundaries
-      if (!window.__CTB_SESSION_ID_REF__) {
-        // @ts-expect-error - initializing global ref for session ID sharing
-        window.__CTB_SESSION_ID_REF__ = { current: null as string | null };
-      }
-      // @ts-expect-error - updating global ref with current session ID
-      window.__CTB_SESSION_ID_REF__.current = ctbSessionId;
-    }
-  }, [ctbSessionId]);
-
-  // Detect navigation away and back to CTB
+  // Detect navigation away and back to CTB to regenerate session
   React.useEffect(() => {
     const currentPath = location.pathname;
     const previousPath = previousLocationRef.current;
     const CTB_PATH = '/plugins/content-type-builder';
 
-    // Check if we navigated away from CTB and came back
     if (previousPath) {
       const isCTBPath = currentPath.includes(CTB_PATH);
       const wasCTBPath = previousPath.includes(CTB_PATH);
 
-      // If we were in CTB, navigated away, and came back, generate new session ID
-      if (wasCTBPath && !isCTBPath) {
-        // We navigated away from CTB - session will be regenerated when we come back
-      } else if (!wasCTBPath && isCTBPath) {
-        // We came back to CTB after navigating away - generate new session ID
-        setCtbSessionId(generateSessionId());
+      // Regenerate session when returning to CTB after navigating away
+      if (!wasCTBPath && isCTBPath) {
+        regenerateSessionId();
       }
     }
 
     previousLocationRef.current = currentPath;
-  }, [location.pathname]);
+  }, [location.pathname, regenerateSessionId]);
 
   React.useEffect(() => {
     if (!autoReload) {
@@ -226,15 +193,11 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       contentTypes: mutatedCTs,
     });
 
-    // Track that the save button was clicked
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (trackUsage as any)(
-      'willUpdateCTBSchema' as any,
-      {
-        ...trackingEventProperties,
-        ctbSessionId,
-      } as any
-    );
+    // Track that the save button was clicked (includes session ID via useCTBTracking)
+    trackUsage('willUpdateCTBSchema', {
+      ...trackingEventProperties,
+      ctbSessionId,
+    });
 
     const isSendingContentTypes = Object.keys(state.current.contentTypes).length > 0;
 
@@ -251,7 +214,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       // Make sure the server has restarted
       await serverRestartWatcher();
       // Generate new session ID after server restart
-      setCtbSessionId(generateSessionId());
+      regenerateSessionId();
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
       // Update the app's permissions
@@ -267,7 +230,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         ...trackingEventProperties,
         success: false,
         ctbSessionId,
-      } as any);
+      });
     } finally {
       setIsSaving(false);
       unlockAppWithAutoreload();
@@ -282,7 +245,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         ...trackingEventProperties,
         success: true,
         ctbSessionId,
-      } as any);
+      });
     }
   };
 
@@ -322,7 +285,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     componentsGroupedByCategory,
     sortedContentTypesList,
     isLoading,
-    ctbSessionId,
     addAttribute(payload) {
       dispatch(actions.addAttribute(payload));
     },

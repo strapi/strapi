@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
 
-import { useCTBTracking } from '../../DataManager/useCTBTracking';
+import { useCTBTracking } from '../../CTBSession/ctbSession';
 import { useStrapiChat } from '../providers/ChatProvider';
 
 import { FeedbackReasonIds, useFetchSendFeedback } from './useAIFetch';

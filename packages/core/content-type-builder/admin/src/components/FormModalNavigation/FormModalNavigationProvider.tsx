@@ -2,6 +2,8 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 
+import { useCTBSession } from '../CTBSession/useCTBSession';
+
 import { FormModalNavigationContext } from './FormModalNavigationContext';
 
 import type { TrackingEvent } from '@strapi/admin/strapi-admin';
@@ -9,21 +11,6 @@ import type { Internal, Struct } from '@strapi/types';
 
 type FormModalNavigationProviderProps = {
   children: React.ReactNode;
-};
-
-// Global ref to store session ID from DataManagerProvider
-// This allows FormModalNavigationProvider (which is outside DataManagerProvider) to access the session ID
-const getSessionIdRef = () => {
-  if (typeof window !== 'undefined') {
-    // @ts-expect-error - accessing global window property for session ID sharing
-    if (!window.__CTB_SESSION_ID_REF__) {
-      // @ts-expect-error - initializing global ref for session ID sharing
-      window.__CTB_SESSION_ID_REF__ = { current: null as string | null };
-    }
-    // @ts-expect-error - returning global ref for session ID access
-    return window.__CTB_SESSION_ID_REF__;
-  }
-  return { current: null as string | null };
 };
 
 export type Tab = 'basic' | 'advanced';
@@ -110,21 +97,18 @@ export type NavigateToAddCompoToDZModalPayload = {
 export const FormModalNavigationProvider = ({ children }: FormModalNavigationProviderProps) => {
   const [state, setFormModalNavigationState] = useState(INITIAL_STATE_DATA);
   const { trackUsage: originalTrackUsage } = useTracking();
+  const { sessionId } = useCTBSession();
 
-  // Create a trackUsage that includes session ID from global ref
+  // Create a trackUsage that includes session ID from CTBSessionContext
   const trackUsage = useCallback(
     <TEvent extends TrackingEvent>(event: TEvent['name'], properties?: TEvent['properties']) => {
-      const sessionIdRef = getSessionIdRef();
-      const sessionId = sessionIdRef.current;
-      if (sessionId) {
-        const propertiesWithSessionId = properties
-          ? { ...properties, ctbSessionId: sessionId }
-          : { ctbSessionId: sessionId };
-        return originalTrackUsage(event, propertiesWithSessionId as any);
-      }
-      return originalTrackUsage(event, properties);
+      const propertiesWithSessionId = {
+        ...(properties as Record<string, unknown>),
+        ctbSessionId: sessionId,
+      };
+      return originalTrackUsage(event, propertiesWithSessionId as TEvent['properties']);
     },
-    [originalTrackUsage]
+    [originalTrackUsage, sessionId]
   );
 
   const onClickSelectCustomField = useCallback(

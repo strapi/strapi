@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
-import { useCTBTracking } from '../DataManager/useCTBTracking';
+import { useCTBTracking } from '../CTBSession/ctbSession';
 import { useDataManager } from '../DataManager/useDataManager';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 

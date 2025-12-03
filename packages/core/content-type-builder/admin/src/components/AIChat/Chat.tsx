@@ -5,7 +5,7 @@ import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
 import { styled } from 'styled-components';
 
-import { useCTBTracking } from '../DataManager/useCTBTracking';
+import { useCTBTracking } from '../CTBSession/ctbSession';
 
 import { Alert } from './components/Alert';
 import { AnimatedBox } from './components/AnimatedBox';
