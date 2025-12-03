@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { tours, useTracking, useGuidedTour, useAppInfo } from '@strapi/admin/strapi-admin';
+import { tours, useGuidedTour, useAppInfo } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system';
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
 import { styled } from 'styled-components';
+
+import { useCTBTracking } from '../CTBSession/ctbSession';
 
 import { Alert } from './components/Alert';
 import { AnimatedBox } from './components/AnimatedBox';
@@ -41,7 +43,7 @@ const ResponsiveFlex = styled(Flex)`
 const ChatSuggestions = () => {
   const { sendMessage } = useStrapiChat();
   const { t } = useTranslations();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
 
   const SUGGESTIONS = [
     t('chat.input.defaults.generate', 'Generate a product schema'),
