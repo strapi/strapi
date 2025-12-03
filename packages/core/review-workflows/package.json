@@ -72,7 +72,7 @@
     "@strapi/admin": "5.31.2",
     "@strapi/content-manager": "5.31.2",
     "@strapi/types": "5.31.2",
-    "@testing-library/react": "15.0.7",
+    "@testing-library/react": "16.3.0",
     "msw": "1.3.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
