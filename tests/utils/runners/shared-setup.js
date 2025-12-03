@@ -16,7 +16,7 @@ const pathExists = async (filePath) => {
 
 /**
  * Updates the env file for a generated test app (browser-specific)
- * - Uses e2e/app-template/config/features.js to enable future features in the generated app
+ * - Uses app-template/config/features.js to enable future features in the generated app
  */
 const setupTestEnvironment = async (generatedAppPath, templateDir) => {
   /*

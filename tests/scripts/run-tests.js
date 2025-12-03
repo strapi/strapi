@@ -56,7 +56,7 @@ yargs
       const testRoot = path.join(cwd, 'tests', type);
       const testAppDirectory = path.join(cwd, 'test-apps', type);
       const testDomainRoot = path.join(testRoot, 'tests');
-      const templateDir = path.join(cwd, 'tests', 'e2e', 'app-template');
+      const templateDir = path.join(cwd, 'tests', 'app-template');
 
       try {
         // Load dotenv for e2e tests
