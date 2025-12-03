@@ -216,7 +216,6 @@ const PreviewHeader = () => {
         </Flex>
         <Flex gap={2}>
           <IconButton
-            type="button"
             label={formatMessage({
               id: 'preview.copy.label',
               defaultMessage: 'Copy preview link',
