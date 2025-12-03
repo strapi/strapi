@@ -51,7 +51,9 @@ const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSi
 
   return (
     <Tooltip label={fileName}>
-      <FileWrapper>{fileExtension}</FileWrapper>
+      <span>
+        <FileWrapper>{fileExtension}</FileWrapper>
+      </span>
     </Tooltip>
   );
 };
