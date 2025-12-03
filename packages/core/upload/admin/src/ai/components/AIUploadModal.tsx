@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { createContext } from '@strapi/admin/strapi-admin';
+import { createContext, useNotification } from '@strapi/admin/strapi-admin';
 import { Alert, Button, Flex, Modal } from '@strapi/design-system';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
@@ -11,6 +11,7 @@ import {
   FileWithRawFile,
 } from '../../components/UploadAssetDialog/AddAssetStep/AddAssetStep';
 import { useBulkEdit } from '../../hooks/useBulkEdit';
+import { useTracking } from '../../hooks/useTracking';
 import { useUpload } from '../../hooks/useUpload';
 import { getTrad } from '../../utils';
 
@@ -43,6 +44,7 @@ const StyledAlert = styled(Alert)`
 
 const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
   const state = useAIUploadModalContext('ModalContent', (s) => s.state);
   const dispatch = useAIUploadModalContext('ModalContent', (s) => s.dispatch);
   const folderId = useAIUploadModalContext('ModalContent', (s) => s.folderId);
@@ -50,6 +52,7 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const { edit, isLoading: isSaving } = useBulkEdit();
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadError, setUploadError] = React.useState<Error | null>(null);
+  const { trackUsage } = useTracking();
 
   const handleCaptionChange = (assetId: number, caption: string) => {
     dispatch({
@@ -76,6 +79,15 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
       );
 
       if (assetsToUpdate.length > 0) {
+        if (assetsToUpdate.some((asset) => asset.wasCaptionChanged)) {
+          trackUsage('didEditAICaption');
+        }
+
+        if (assetsToUpdate.some((asset) => asset.wasAltTextChanged)) {
+          trackUsage('didEditAIAlternativeText');
+        }
+
+        // Update assets
         const updates = assetsToUpdate.map((asset) => ({
           id: asset.file.id!,
           fileInfo: {
@@ -94,7 +106,12 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
           await edit(updates);
           dispatch({ type: 'clear_unsaved_changes' });
         } catch (err) {
-          console.error('Failed to save asset changes:', err);
+          toggleNotification({
+            type: 'danger',
+            message:
+              (err instanceof Error ? err.message : null) ||
+              formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+          });
           return; // Don't close modal on error
         }
       }

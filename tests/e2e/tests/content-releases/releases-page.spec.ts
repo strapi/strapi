@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clickAndWait, describeOnCondition, navToHeader } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 import { resetFiles } from '../../utils/file-reset';
 import { sharedSetup } from '../../utils/setup';
@@ -160,9 +160,10 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(publishConfirmationDialog).toBeVisible();
     await publishConfirmationDialog.getByRole('button', { name: 'Publish' }).click();
 
+    await findAndClose(page, 'Published document');
+
     // Disable draft & publish for the Article content type
-    await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await navToHeader(page, ['Content-Type Builder', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('button', { name: 'Edit', exact: true }));
     await clickAndWait(page, page.getByRole('tab', { name: /advanced settings/i }));
     await page.getByLabel('Draft & publish').click();

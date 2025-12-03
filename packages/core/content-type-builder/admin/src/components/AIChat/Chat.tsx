@@ -340,6 +340,7 @@ const ChatInput = (props: React.FormHTMLAttributes<HTMLFormElement>) => {
                 <IconButton
                   label={t('chat.tooltips.send-message', 'Send')}
                   variant="default"
+                  type="submit"
                   // allow sending an empty message if there are attachments
                   disabled={input.trim().length === 0 && attachments.length === 0}
                 >
@@ -418,6 +419,7 @@ const Chat = () => {
             onClick={isChatOpen ? closeChat : openChat}
             label={isChatOpen ? closeChatLabel : openChatLabel}
             variant="default"
+            size="L"
           >
             <Sparkle />
           </IconButton>

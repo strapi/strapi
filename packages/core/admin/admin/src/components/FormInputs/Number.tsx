@@ -24,7 +24,7 @@ const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
             // See https://github.com/strapi/strapi/issues/22533
             field.onChange(name, value ?? null);
           }}
-          step={type === 'float' || type == 'decimal' ? 0.01 : 1}
+          step={type === 'float' || type === 'decimal' ? 0.01 : 1}
           value={field.value ?? undefined}
           {...props}
         />

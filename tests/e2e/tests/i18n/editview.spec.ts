@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 
 interface ValidationType {
@@ -532,7 +532,7 @@ test.describe('Edit view', () => {
     /**
      * Unpublish the articles
      */
-    await expect(page.getByText('2 entries ready to unpublish')).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Ready to unpublish' })).toHaveCount(2);
     await page
       .getByLabel('Unpublish multiple locales')
       .getByRole('button', { name: 'Unpublish' })
@@ -545,4 +545,132 @@ test.describe('Edit view', () => {
       page.getByLabel('Unpublish multiple locales').getByRole('button', { name: 'Unpublish' })
     ).toBeDisabled();
   });
+
+  test('As a user I want to see non translatable fields pre-filled when creating a new locale of a document', async ({
+    page,
+  }) => {
+    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.getByRole('button', { name: /add another field to this collection type/i }).click();
+    await page
+      .getByRole('button', { name: 'Text Small or long text like title or description' })
+      .click();
+    await page.getByLabel('Name', { exact: true }).fill('nonTranslatableField');
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByLabel('Enable localization for this').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+
+    // Create a new entry in the english locale
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
+    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await page.getByLabel('name').fill('Translatable name (only for this locale)');
+    await page.getByLabel('nonTranslatableField').fill('Non translatable value (for all locales)');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved Document');
+
+    // Switch to french locale
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'French (fr)' }).click();
+
+    // The non translatable field should be pre-filled with the value from the english locale
+    await expect(page.getByLabel('nonTranslatableField')).toHaveValue(
+      'Non translatable value (for all locales)'
+    );
+    // The translatable field should be empty though
+    await expect(page.getByLabel('name')).toHaveValue('');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Saved Document');
+
+    // Remove the field from the content type
+    await navToHeader(page, ['Content-Type Builder', 'Products'], 'Products');
+    await page.getByRole('button', { name: 'Delete nonTranslatableField' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+  });
 });
+
+describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')(() => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await page.goto('/admin');
+    await login({ page });
+  });
+
+  test('As a user I want to enable AI translation', async ({ page }) => {
+    // Navigate to an Article
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
+
+    // Assert the AI translation status is visible and disabled
+    const aiTranslationStatus = page.getByLabel('AI Translation Status');
+    await expect(aiTranslationStatus).toBeVisible();
+    aiTranslationStatus.hover();
+    await expect(page.getByRole('tooltip', { name: /AI translation disabled/ })).toBeVisible();
+
+    // Go to i18n settings
+    const enableLink = page.getByRole('link', { name: 'Enable it in settings' });
+    await clickAndWait(page, enableLink);
+    await page.waitForURL(/\/admin\/settings\/internationalization/);
+
+    // Enable the setting
+    const checkbox = await page.getByRole('checkbox');
+    await expect(checkbox).not.toBeChecked();
+    await checkbox.click();
+    await findAndClose(page, 'Changes saved');
+    await expect(checkbox).toBeChecked();
+
+    // Navigate back to the Article
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
+
+    // Assert the AI translation status is visible and enabled
+    await expect(aiTranslationStatus).toBeVisible();
+    aiTranslationStatus.hover();
+    await expect(page.getByRole('tooltip', { name: /AI translation enabled/ })).toBeVisible();
+  });
+});
+
+describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_AI_LOCALIZATIONS === 'true')(
+  'Unstable edit view',
+  () => {
+    test.beforeEach(async ({ page }) => {
+      await resetDatabaseAndImportDataFromPath('with-admin.tar');
+      await page.goto('/admin');
+      await login({ page });
+    });
+
+    test('As a user I want to enable AI translation', async ({ page }) => {
+      // Navigate to an Article
+      await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+      await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
+
+      // Assert the AI translation status is visible and disabled
+      const aiTranslationStatus = page.getByLabel('AI Translation Status');
+      await expect(aiTranslationStatus).toBeVisible();
+      aiTranslationStatus.hover();
+      await expect(page.getByRole('tooltip', { name: /AI translation disabled/ })).toBeVisible();
+
+      // Go to i18n settings
+      const enableLink = page.getByRole('link', { name: 'Enable it in settings' });
+      await clickAndWait(page, enableLink);
+      await page.waitForURL(/\/admin\/settings\/internationalization/);
+
+      // Enable the setting
+      const checkbox = await page.getByRole('checkbox');
+      await expect(checkbox).not.toBeChecked();
+      await checkbox.click();
+      await findAndClose(page, 'Changes saved');
+      await expect(checkbox).toBeChecked();
+
+      // Navigate back to the Article
+      await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+      await page.getByRole('row', { name: 'Why I prefer football over soccer' }).click();
+
+      // Assert the AI translation status is visible and enabled
+      await expect(aiTranslationStatus).toBeVisible();
+      aiTranslationStatus.hover();
+      await expect(page.getByRole('tooltip', { name: /AI translation enabled/ })).toBeVisible();
+    });
+  }
+);

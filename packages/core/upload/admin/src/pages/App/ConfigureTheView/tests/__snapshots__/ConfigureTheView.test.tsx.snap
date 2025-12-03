@@ -232,11 +232,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c8:hover>span {
-  color: #7b79ff;
+  color: #4945ff;
 }
 
 .c8:hover svg path {
-  fill: #7b79ff;
+  fill: #4945ff;
 }
 
 .c8:active {
@@ -273,6 +273,17 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c27 {
   display: flex;
+}
+
+.c22 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c24 {
+  grid-column: span 12;
+  max-width: 100%;
 }
 
 .c30 {
@@ -323,17 +334,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c3:focus-visible {
   outline: none;
-}
-
-.c22 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-}
-
-.c24 {
-  grid-column: span 12;
-  max-width: 100%;
 }
 
 .c0 {
@@ -401,10 +401,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-
-}
-
 @media (min-width: 520px) {
   .c24 {
     grid-column: span 12;
@@ -413,7 +409,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 @media (min-width: 768px) {
   .c24 {
-    grid-column: span 12;
+    grid-column: span 6;
   }
 }
 
@@ -421,6 +417,10 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   .c24 {
     grid-column: span 6;
   }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
 }
 
 @media (min-width: 768px) {
@@ -685,7 +685,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
               </div>
             </div>
           </div>
-          x
         </form>
       </main>
     </div>
