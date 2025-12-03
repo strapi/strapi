@@ -12,8 +12,10 @@ interface CTBSessionProviderProps {
  *
  * @returns Session ID in format: ctb-{uuid}
  */
-export const generateSessionId = (): string => {
-  return `ctb-${crypto.randomUUID()}`;
+export const generateSessionId = (): string | undefined => {
+  if (crypto.randomUUID) {
+    return `ctb-${crypto.randomUUID()}`;
+  }
 };
 
 /**
@@ -25,11 +27,7 @@ export const generateSessionId = (): string => {
  * Usage:
  * ```tsx
  * <CTBSessionProvider>
- *   <DataManagerProvider>
- *     <FormModalNavigationProvider>
  *       {children}
- *     </FormModalNavigationProvider>
- *   </DataManagerProvider>
  * </CTBSessionProvider>
  * ```
  */

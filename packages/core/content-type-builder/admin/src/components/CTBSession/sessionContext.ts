@@ -16,7 +16,7 @@ export interface CTBSessionContextValue {
    * Unique identifier for the current CTB session
    * Format: ctb-{uuid}
    */
-  sessionId: string;
+  sessionId: string | undefined;
 
   /**
    * Generates and sets a new session ID
