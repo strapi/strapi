@@ -3,6 +3,10 @@ import type * as UID from '../uid';
 
 import type * as EntityService from './entity-service';
 
+/**
+ * Represents an entity with an ID and additional dynamic properties.
+ * Can be null if the entity doesn't exist.
+ */
 export type Entity = {
   id: number;
   [key: string]: unknown;
