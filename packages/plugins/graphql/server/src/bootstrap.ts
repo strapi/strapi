@@ -6,6 +6,7 @@ import {
 } from '@apollo/server/plugin/landingPage/default';
 import { koaMiddleware } from '@as-integrations/koa';
 import depthLimit from 'graphql-depth-limit';
+import type { GraphQLResolveInfo } from 'graphql';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
@@ -23,6 +24,14 @@ const merge = mergeWith((a, b) => {
 
 type StrapiGraphQLContext = BaseContext & {
   rootQueryArgs?: Record<string, unknown>;
+  graphql?: {
+    defaultResolve: (
+      parent?: unknown,
+      args?: unknown,
+      context?: unknown,
+      info?: GraphQLResolveInfo
+    ) => unknown;
+  };
 };
 
 export const determineLandingPage = (

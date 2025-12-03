@@ -159,8 +159,22 @@ const wrapResolvers = ({
       fieldDefinition.resolve = async (parent, args, context, info) => {
         await authorize({ context });
 
+        // Inject graphql.defaultResolve for custom resolvers to fall back to
+        const enrichedContext = {
+          ...context,
+          graphql: {
+            ...(context as any).graphql,
+            defaultResolve: (
+              customParent: unknown = parent,
+              customArgs: unknown = args,
+              customContext: unknown = context,
+              customInfo: GraphQLResolveInfo = info
+            ) => baseResolver(customParent, customArgs, customContext, customInfo),
+          },
+        };
+
         // Execute middlewares (including the policy middleware which will always be included)
-        return first(boundMiddlewares)!(parent, args, context, info);
+        return first(boundMiddlewares)!(parent, args, enrichedContext, info);
       };
     }
   });
