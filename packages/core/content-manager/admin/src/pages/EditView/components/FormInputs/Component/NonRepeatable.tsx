@@ -5,34 +5,12 @@ import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
-import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import type { ComponentInputProps } from './Input';
 
 type NonRepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
-type LabelActionProp = React.ReactNode;
-
-const renderLabelAction = (
-  labelAction: LabelActionProp,
-  args: {
-    name: string;
-    attribute: unknown;
-  }
-): React.ReactNode => {
-  if (React.isValidElement(labelAction)) {
-    const element = labelAction as React.ReactElement;
-    return React.createElement(element.type as React.ComponentType<Record<string, unknown>>, {
-      ...element.props,
-      ...args,
-    });
-  }
-
-  return labelAction as React.ReactNode;
-};
-
-type FieldWithLabelAction = EditFieldLayout & { labelAction?: LabelActionProp };
 
 const NonRepeatableComponent = ({
   attribute,
@@ -88,14 +66,6 @@ const NonRepeatableComponent = ({
                     defaultMessage: field.label,
                   });
 
-                  const clonedLabelAction = renderLabelAction(
-                    (field as FieldWithLabelAction).labelAction,
-                    {
-                      name: completeFieldName,
-                      attribute: field.attribute,
-                    }
-                  );
-
                   return (
                     <ResponsiveGridItem
                       col={size}
@@ -109,7 +79,6 @@ const NonRepeatableComponent = ({
                         ...field,
                         label: translatedLabel,
                         name: completeFieldName,
-                        labelAction: clonedLabelAction,
                         document: currentDocument,
                       })}
                     </ResponsiveGridItem>

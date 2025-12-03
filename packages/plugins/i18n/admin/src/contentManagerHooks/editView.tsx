@@ -51,7 +51,9 @@ const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs 
 
 const addLabelActionToField = (field: EditFieldLayout) => ({
   ...field,
-  labelAction: <LabelAction name={field.name} attribute={field.attribute} />,
+  labelAction: (props: { name: string; attribute: unknown }) => (
+    <LabelAction name={props.name} attribute={props.attribute as EditFieldLayout['attribute']} />
+  ),
 });
 
 interface LabelActionProps {

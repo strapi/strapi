@@ -616,9 +616,15 @@ const RelationsInput = ({
     );
   }
 
+  // Handle labelAction if it's a function (defensive check for type safety)
+  const renderedLabelAction =
+    typeof labelAction === 'function'
+      ? labelAction({ name, attribute: props.attribute })
+      : labelAction;
+
   return (
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
-      <Field.Label action={labelAction}>{label}</Field.Label>
+      <Field.Label action={renderedLabelAction}>{label}</Field.Label>
       <DocumentRBAC permissions={permissions} model={relation.model}>
         <RelationModalWithContext
           relation={relation}

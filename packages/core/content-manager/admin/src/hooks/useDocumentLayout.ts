@@ -54,10 +54,13 @@ interface ListLayout {
   settings: LayoutSettings;
 }
 interface EditFieldSharedProps
-  extends Omit<InputProps, 'hint' | 'label' | 'type'>,
+  extends Omit<InputProps, 'hint' | 'label' | 'labelAction' | 'type'>,
     Pick<Filters.Filter, 'mainField'> {
   hint?: string;
   label: string;
+  labelAction?:
+    | React.ReactNode
+    | ((props: { name: string; attribute: unknown }) => React.ReactNode);
   size: number;
   unique?: boolean;
   visible?: boolean;

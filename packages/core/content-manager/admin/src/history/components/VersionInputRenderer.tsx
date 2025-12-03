@@ -79,13 +79,18 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       : field.value;
   }
 
+  const renderedLabelAction =
+    typeof props.labelAction === 'function'
+      ? props.labelAction({ name: props.name, attribute: props.attribute })
+      : props.labelAction;
+
   if (
     !formattedFieldValue ||
     (formattedFieldValue.results.length === 0 && formattedFieldValue.meta.missingCount === 0)
   ) {
     return (
       <>
-        <Field.Label action={props.labelAction}>{props.label}</Field.Label>
+        <Field.Label action={renderedLabelAction}>{props.label}</Field.Label>
         <Box marginTop={1}>
           {/* @ts-expect-error – we dont need closeLabel */}
           <StyledAlert variant="default">
@@ -261,17 +266,25 @@ type VersionInputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  * Checks if the i18n plugin added a label action to the field and modifies it
  * to adapt the wording for the history page.
  */
-const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) => {
-  if (!React.isValidElement(labelAction)) {
-    return labelAction;
+const getLabelAction = (
+  labelAction: VersionInputRendererProps['labelAction'],
+  name: string,
+  attribute: unknown
+) => {
+  // If labelAction is a function, call it first to get the React element
+  const renderedLabelAction =
+    typeof labelAction === 'function' ? labelAction({ name, attribute }) : labelAction;
+
+  if (!React.isValidElement(renderedLabelAction)) {
+    return renderedLabelAction;
   }
 
   // TODO: find a better way to do this rather than access internals
-  const labelActionTitleId = labelAction.props.title.id;
+  const labelActionTitleId = renderedLabelAction.props.title.id;
 
   if (labelActionTitleId === 'i18n.Field.localized') {
-    return React.cloneElement(labelAction, {
-      ...labelAction.props,
+    return React.cloneElement(renderedLabelAction, {
+      ...renderedLabelAction.props,
       title: {
         id: 'history.content.localized',
         defaultMessage:
@@ -281,8 +294,8 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
   }
 
   if (labelActionTitleId === 'i18n.Field.not-localized') {
-    return React.cloneElement(labelAction, {
-      ...labelAction.props,
+    return React.cloneElement(renderedLabelAction, {
+      ...renderedLabelAction.props,
       title: {
         id: 'history.content.not-localized',
         defaultMessage:
@@ -292,7 +305,7 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
   }
 
   // Label action is unrelated to i18n, don't touch it.
-  return labelAction;
+  return renderedLabelAction;
 };
 
 /**
@@ -309,7 +322,7 @@ const VersionInputRenderer = ({
   labelAction,
   ...props
 }: VersionInputRendererProps) => {
-  const customLabelAction = getLabelAction(labelAction);
+  const customLabelAction = getLabelAction(labelAction, props.name, props.attribute);
 
   const { formatMessage } = useIntl();
   const version = useHistoryContext('VersionContent', (state) => state.selectedVersion);

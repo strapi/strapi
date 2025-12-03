@@ -76,7 +76,15 @@ const InputRenderer = ({
 
   // Everything preview related
   const previewProps = usePreviewInputManager(inputProps.name, inputProps.attribute);
-  const props = { ...inputProps, ...previewProps };
+  const combinedProps = { ...inputProps, ...previewProps };
+
+  // Handle labelAction if it's a function
+  const renderedLabelAction =
+    typeof combinedProps.labelAction === 'function'
+      ? combinedProps.labelAction({ name: combinedProps.name, attribute: combinedProps.attribute })
+      : combinedProps.labelAction;
+
+  const props = { ...combinedProps, labelAction: renderedLabelAction };
 
   /**
    * Component fields are always readable and editable,

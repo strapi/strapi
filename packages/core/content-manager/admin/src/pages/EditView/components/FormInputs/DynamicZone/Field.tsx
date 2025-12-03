@@ -39,8 +39,7 @@ const [DynamicZoneProvider, useDynamicZone] = createContext<DynamicZoneContextVa
 
 interface DynamicZoneProps
   extends Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size' | 'hint'>,
-    Pick<InputProps, 'hint'>,
-    Pick<DynamicZoneLabelProps, 'labelAction'> {
+    Pick<InputProps, 'hint'> {
   children?: (props: InputRendererProps) => React.ReactNode;
 }
 
@@ -244,6 +243,10 @@ const DynamicZone = ({
 
   const ariaDescriptionId = React.useId();
 
+  // Handle labelAction if it's a function (defensive check for type safety)
+  const renderedLabelAction =
+    typeof labelAction === 'function' ? labelAction({ name, attribute }) : labelAction;
+
   return (
     <DynamicZoneProvider isInDynamicZone>
       <Flex direction="column" alignItems="stretch" gap={6}>
@@ -252,7 +255,7 @@ const DynamicZone = ({
             <DynamicZoneLabel
               hint={hint}
               label={label}
-              labelAction={labelAction}
+              labelAction={renderedLabelAction}
               name={name}
               numberOfComponents={dynamicDisplayedComponentsLength}
               required={required}
