@@ -67,6 +67,7 @@
   "containers.Edit.clickToJump": "Klicke, um zu einem Eintrag zu springen",
   "containers.Edit.delete": "Löschen",
   "containers.Edit.delete-entry": "Diesen Eintrag löschen",
+  "containers.edit.title.new": "Eintrag erstellen",
   "containers.Edit.editing": "Bearbeite...",
   "containers.Edit.information": "Informationen",
   "containers.Edit.information.by": "Von",
