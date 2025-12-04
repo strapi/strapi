@@ -30,7 +30,20 @@ const NOT_ALLOWED_FILTERS = [
   'dynamiczone',
   'password',
   'blocks',
-];
+] as const satisfies readonly string[];
+
+type NotAllowedFilterType = (typeof NOT_ALLOWED_FILTERS)[number];
+
+/**
+ * Type guard to check if an attribute type is allowed for filtering.
+ * This enables TypeScript to properly narrow the type after the check.
+ */
+const isAllowedFilterType = (
+  type: string
+): type is Exclude<string, NotAllowedFilterType> => {
+  return !(NOT_ALLOWED_FILTERS as readonly string[]).includes(type);
+};
+
 const DEFAULT_ALLOWED_FILTERS = ['createdAt', 'updatedAt'];
 const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 
@@ -107,7 +120,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
     const allowedFields = fields.filter((field) => {
       const attribute = attributes[field] ?? {};
 
-      return attribute.type && !NOT_ALLOWED_FILTERS.includes(attribute.type);
+      return attribute.type && isAllowedFilterType(attribute.type);
     });
 
     const filters = [
@@ -120,7 +133,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
       .map((name) => {
         const attribute = attributes[name];
 
-        if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {
+        if (!isAllowedFilterType(attribute.type)) {
           return null;
         }
 
@@ -130,8 +143,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
           name,
           label: label ?? '',
           mainField: getMainField(attribute, mainFieldName, { schemas, components: {} }),
-          // @ts-expect-error – TODO: this is filtered out above in the `allowedFields` call but TS complains, is there a better way to solve this?
-          type: attribute.type,
+          type: attribute.type as Filters.Filter['type'],
         };
 
         if (
