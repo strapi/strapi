@@ -1,7 +1,10 @@
 import { render as renderRTL, screen, fireEvent } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
-import { ViewSettingsMenu, ViewSettingsMenuProps } from '../ViewSettingsMenu';
+import {
+  ViewSettingsMenu,
+  ViewSettingsMenuProps,
+} from '@content-manager/admin/pages/ListView/components/ViewSettingsMenu';
 
 const LocationDisplay = () => {
   const location = useLocation();

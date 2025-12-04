@@ -1,24 +1,27 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { INJECTION_ZONES } from './components/InjectionZone';
-import { PLUGIN_ID } from './constants/plugin';
+import { INJECTION_ZONES } from '@content-manager/admin/components/InjectionZone';
+import { PLUGIN_ID } from '@content-manager/admin/constants/plugin';
+import type { Document } from '@content-manager/admin/hooks/useDocument';
 import {
   DEFAULT_ACTIONS,
   type DocumentActionPosition,
   type DocumentActionDescription,
-} from './pages/EditView/components/DocumentActions';
+} from '@content-manager/admin/pages/EditView/components/DocumentActions';
 import {
   DEFAULT_HEADER_ACTIONS,
   type HeaderActionDescription,
-} from './pages/EditView/components/Header';
-import { ActionsPanel, type PanelDescription } from './pages/EditView/components/Panels';
+} from '@content-manager/admin/pages/EditView/components/Header';
+import {
+  ActionsPanel,
+  type PanelDescription,
+} from '@content-manager/admin/pages/EditView/components/Panels';
 import {
   DEFAULT_BULK_ACTIONS,
   type BulkActionDescription,
-} from './pages/ListView/components/BulkActions/Actions';
-import { DEFAULT_TABLE_ROW_ACTIONS } from './pages/ListView/components/TableActions';
+} from '@content-manager/admin/pages/ListView/components/BulkActions/Actions';
+import { DEFAULT_TABLE_ROW_ACTIONS } from '@content-manager/admin/pages/ListView/components/TableActions';
+import type { DocumentMetadata } from '@content-manager/shared/contracts/collection-types';
 
-import type { Document } from './hooks/useDocument';
-import type { DocumentMetadata } from '../../shared/contracts/collection-types';
 import type { DescriptionComponent, PluginConfig } from '@strapi/admin/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------

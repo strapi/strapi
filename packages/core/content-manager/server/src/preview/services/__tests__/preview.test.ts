@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import { createPreviewService } from '../preview';
+import { createPreviewService } from '@content-manager/server/preview/services/preview';
 
 const mockConfig = {
   isConfigured: jest.fn(),

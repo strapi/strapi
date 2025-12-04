@@ -4,10 +4,10 @@ import { useForm, InputRenderer, type InputProps } from '@strapi/admin/strapi-ad
 import { Flex, Grid, Typography, useCollator } from '@strapi/design-system';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 
-import { useDoc } from '../../../hooks/useDocument';
-import { type EditFieldLayout } from '../../../hooks/useDocumentLayout';
-import { getTranslation } from '../../../utils/translations';
-import { type FormData } from '../ListConfigurationPage';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import { type EditFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { type FormData } from '@content-manager/admin/pages/ListConfiguration/ListConfigurationPage';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 import type { DistributiveOmit } from 'react-redux';
 

@@ -1,5 +1,5 @@
 import type { Plugin } from '@strapi/types';
-import { createHistoryVersionController } from './history-version';
+import { createHistoryVersionController } from '@content-manager/server/history/controllers/history-version';
 
 export const controllers = {
   'history-version': createHistoryVersionController,

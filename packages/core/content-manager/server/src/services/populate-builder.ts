@@ -1,6 +1,10 @@
 import { isNil } from 'lodash/fp';
 import type { UID } from '@strapi/types';
-import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
+import {
+  type Populate,
+  getDeepPopulate,
+  getQueryPopulate,
+} from '@content-manager/server/services/utils/populate';
 
 /**
  * Builder to create a Strapi populate object.

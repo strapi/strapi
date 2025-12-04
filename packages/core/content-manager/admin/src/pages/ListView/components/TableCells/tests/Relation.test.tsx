@@ -3,7 +3,10 @@ import { render as renderRTL, waitFor, screen, server } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
-import { RelationSingle, RelationMultiple } from '../Relations';
+import {
+  RelationSingle,
+  RelationMultiple,
+} from '@content-manager/admin/pages/ListView/components/TableCells/Relations';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),

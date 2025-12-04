@@ -193,19 +193,21 @@ const LocalePickerAction = ({
     if (!Array.isArray(locales) || !meta?.availableLocales) return null;
 
     const defaultLocale = locales.find((locale: Locale) => locale.isDefault);
-    const existingLocales = meta.availableLocales.map((loc) => loc.locale);
+    const existingLocales = meta.availableLocales.map((loc: any) => loc.locale);
 
     const sourceLocaleCode =
       defaultLocale &&
       existingLocales.includes(defaultLocale.code) &&
       defaultLocale.code !== currentDesiredLocale
         ? defaultLocale.code
-        : existingLocales.find((locale) => locale !== currentDesiredLocale);
+        : existingLocales.find((locale: any) => locale !== currentDesiredLocale);
 
     if (!sourceLocaleCode) return null;
 
     // Find the document data from availableLocales (now includes non-translatable fields)
-    const sourceLocaleDoc = meta.availableLocales.find((loc) => loc.locale === sourceLocaleCode);
+    const sourceLocaleDoc = meta.availableLocales.find(
+      (loc: any) => loc.locale === sourceLocaleCode
+    );
 
     return sourceLocaleDoc
       ? { locale: sourceLocaleCode, data: sourceLocaleDoc as Record<string, unknown> }
@@ -372,7 +374,7 @@ const getDocumentStatus = (
   /**
    * We're viewing a draft, but the document could have a published version
    */
-  if (docStatus === 'draft' && statuses.find((doc) => doc.publishedAt !== null)) {
+  if (docStatus === 'draft' && statuses.find((doc: any) => doc.publishedAt !== null)) {
     return 'published';
   }
 
@@ -546,7 +548,7 @@ const FillFromAnotherLocaleAction = ({
   const isAISettingEnabled = settings?.data?.aiLocalizations;
 
   const availableLocales = Array.isArray(locales)
-    ? locales.filter((locale) => meta?.availableLocales.some((l) => l.locale === locale.code))
+    ? locales.filter((locale) => meta?.availableLocales.some((l: any) => l.locale === locale.code))
     : [];
 
   const fillFromLocale = (onClose: () => void) => async () => {
@@ -834,7 +836,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
       return [[], {}];
     }
 
-    const metaLocalizations = (meta?.availableLocales ?? []).map((locale) => ({
+    const metaLocalizations = (meta?.availableLocales ?? []).map((locale: any) => ({
       locale: locale.locale,
       status: (locale.status ?? 'draft') as LocaleStatus['status'],
     }));
@@ -851,13 +853,13 @@ const BulkLocaleAction: DocumentActionComponent = ({
 
     const localesMap = new Map<string, LocaleStatus>();
 
-    metaLocalizations.forEach(({ locale, status }) => {
+    metaLocalizations.forEach(({ locale, status }: { locale: any; status: any }) => {
       if (locale) {
         localesMap.set(locale, { locale, status });
       }
     });
 
-    documentLocalizations.forEach(({ locale, status }) => {
+    documentLocalizations.forEach(({ locale, status }: { locale: any; status: any }) => {
       if (locale) {
         localesMap.set(locale, { locale, status });
       }

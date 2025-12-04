@@ -1,5 +1,8 @@
-import { testData } from '../../../../tests/data';
-import { handleInvisibleAttributes, removeProhibitedFields } from '../data';
+import {
+  handleInvisibleAttributes,
+  removeProhibitedFields,
+} from '@content-manager/admin/pages/EditView/utils/data';
+import { testData } from '@content-manager/admin/tests/data';
 
 const defaultFieldsValues = {
   name: 'name',

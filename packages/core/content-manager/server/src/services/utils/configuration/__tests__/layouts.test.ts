@@ -1,4 +1,4 @@
-import { syncLayouts } from '../layouts';
+import { syncLayouts } from '@content-manager/server/services/utils/configuration/layouts';
 
 jest.mock('../../../../utils', () => ({
   getService: jest.fn().mockReturnValue({

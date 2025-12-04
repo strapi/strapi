@@ -1,7 +1,7 @@
 import { intersection, prop } from 'lodash/fp';
 import { relations } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
-import type { Configuration } from '../../../shared/contracts/content-types';
+import type { Configuration } from '@content-manager/shared/contracts/content-types';
 
 const { getRelationalFields } = relations;
 

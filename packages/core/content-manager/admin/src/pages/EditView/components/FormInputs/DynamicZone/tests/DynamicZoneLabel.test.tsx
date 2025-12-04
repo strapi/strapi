@@ -1,7 +1,10 @@
 import { Earth } from '@strapi/icons';
 import { render as renderRTL } from '@tests/utils';
 
-import { DynamicZoneLabel, DynamicZoneLabelProps } from '../DynamicZoneLabel';
+import {
+  DynamicZoneLabel,
+  DynamicZoneLabelProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/DynamicZoneLabel';
 
 const LabelAction = () => {
   return (

@@ -1,5 +1,5 @@
 import type { Plugin } from '@strapi/types';
-import { historyVersionRouter } from './history-version';
+import { historyVersionRouter } from '@content-manager/server/history/routes/history-version';
 
 /**
  * The routes will me merged with the other Content Manager routers,

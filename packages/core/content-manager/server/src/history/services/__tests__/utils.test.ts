@@ -1,4 +1,4 @@
-import { createServiceUtils } from '../utils';
+import { createServiceUtils } from '@content-manager/server/history/services/utils';
 
 const baseStrapiMock = {
   plugin: jest.fn(() => {}),

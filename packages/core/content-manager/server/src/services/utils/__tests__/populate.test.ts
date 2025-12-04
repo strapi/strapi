@@ -1,4 +1,4 @@
-import { getDeepPopulate } from '../populate';
+import { getDeepPopulate } from '@content-manager/server/services/utils/populate';
 
 describe('Populate', () => {
   const fakeModels = {

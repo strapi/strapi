@@ -6,9 +6,18 @@ import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
-import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
-import { editLink, removeLink } from '../utils/links';
-import { isLinkNode, type Block } from '../utils/types';
+import {
+  type BlocksStore,
+  useBlocksEditorContext,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import {
+  editLink,
+  removeLink,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/links';
+import {
+  isLinkNode,
+  type Block,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
 
 const StyledLink = styled(Box)`
   text-decoration: none;

@@ -1,4 +1,4 @@
-import { checkIfAttributeIsDisplayable } from '../attributes';
+import { checkIfAttributeIsDisplayable } from '@content-manager/admin/utils/attributes';
 
 describe('attributes', () => {
   describe('checkIfAttributeIsDisplayable', () => {

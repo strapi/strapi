@@ -5,12 +5,11 @@ import { Flex, Searchbar, useCollator, useFilter, Divider, Loader } from '@strap
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 
-import { useContentManagerInitData } from '../hooks/useContentManagerInitData';
-import { useContentTypeSchema } from '../hooks/useContentTypeSchema';
-import { useTypedSelector } from '../modules/hooks';
-import { getTranslation } from '../utils/translations';
-
-import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
+import { useContentManagerInitData } from '@content-manager/admin/hooks/useContentManagerInitData';
+import type { ContentManagerLink } from '@content-manager/admin/hooks/useContentManagerInitData';
+import { useContentTypeSchema } from '@content-manager/admin/hooks/useContentTypeSchema';
+import { useTypedSelector } from '@content-manager/admin/modules/hooks';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
   const [search, setSearch] = React.useState('');

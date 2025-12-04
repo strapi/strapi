@@ -1,4 +1,5 @@
-import type { ComponentsDictionary, Document } from '../../../hooks/useDocument';
+import type { ComponentsDictionary, Document } from '@content-manager/admin/hooks/useDocument';
+
 import type { Schema } from '@strapi/types';
 
 type AnyData = Omit<Document, 'id'>;

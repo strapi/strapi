@@ -14,14 +14,12 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
-import { ItemTypes } from '../../../constants/dragAndDrop';
-import { useDragAndDrop } from '../../../hooks/useDragAndDrop';
-import { getTranslation } from '../../../utils/translations';
-
-import { EditFieldForm } from './EditFieldForm';
-
-import type { ListFieldLayout } from '../../../hooks/useDocumentLayout';
+import { CardDragPreview } from '@content-manager/admin/components/DragPreviews/CardDragPreview';
+import { ItemTypes } from '@content-manager/admin/constants/dragAndDrop';
+import type { ListFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { useDragAndDrop } from '@content-manager/admin/hooks/useDragAndDrop';
+import { EditFieldForm } from '@content-manager/admin/pages/ListConfiguration/components/EditFieldForm';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 type DraggableCardProps = Omit<ListFieldLayout, 'label'> & {
   label: string;

@@ -12,9 +12,9 @@ import {
 import { Editor } from 'slate';
 import { styled } from 'styled-components';
 
-import { type BlocksStore } from '../BlocksEditor';
-import { baseHandleConvert } from '../utils/conversions';
-import { type Block } from '../utils/types';
+import { type BlocksStore } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { baseHandleConvert } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/conversions';
+import { type Block } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
 
 const H1 = styled<TypographyComponent<'h1'>>(Typography).attrs({ tag: 'h1' })`
   font-size: 4.2rem;

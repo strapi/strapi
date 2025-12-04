@@ -1,4 +1,4 @@
-import { getPopulateForValidation } from '../populate';
+import { getPopulateForValidation } from '@content-manager/server/services/utils/populate';
 
 describe('getPopulateForValidation', () => {
   const fakeModels = {

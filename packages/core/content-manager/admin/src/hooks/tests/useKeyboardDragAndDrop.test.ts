@@ -2,7 +2,7 @@ import type { KeyboardEvent } from 'react';
 
 import { renderHook, waitFor } from '@testing-library/react';
 
-import { useKeyboardDragAndDrop } from '../useKeyboardDragAndDrop';
+import { useKeyboardDragAndDrop } from '@content-manager/admin/hooks/useKeyboardDragAndDrop';
 
 describe('useKeyboardDragAndDrop', () => {
   const event = (key: string) =>

@@ -1,4 +1,7 @@
-import type { INTERNAL_EVENTS, PUBLIC_EVENTS } from './constants';
+import type {
+  INTERNAL_EVENTS,
+  PUBLIC_EVENTS,
+} from '@content-manager/admin/preview/utils/constants';
 
 type MessageType =
   | (typeof INTERNAL_EVENTS)[keyof typeof INTERNAL_EVENTS]

@@ -1,6 +1,6 @@
 import { useStrapiApp, InjectionZoneComponent } from '@strapi/admin/strapi-admin';
 
-import { PLUGIN_ID } from '../constants/plugin';
+import { PLUGIN_ID } from '@content-manager/admin/constants/plugin';
 
 const INJECTION_ZONES = {
   editView: { informations: [], 'right-links': [] },

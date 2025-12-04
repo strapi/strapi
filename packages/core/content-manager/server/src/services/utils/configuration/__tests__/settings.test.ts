@@ -1,4 +1,4 @@
-import * as settingsService from '../settings';
+import * as settingsService from '@content-manager/server/services/utils/configuration/settings';
 
 jest.mock('@strapi/utils', () => ({
   ...jest.requireActual('@strapi/utils'),

@@ -2,7 +2,10 @@ import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { DynamicZone, DynamicZoneProps } from '../Field';
+import {
+  DynamicZone,
+  DynamicZoneProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/Field';
 
 const TEST_NAME = 'DynamicZoneComponent';
 

@@ -5,11 +5,9 @@ import { Box, BoxProps, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { EditLayout } from '../../../hooks/useDocumentLayout';
-
-import { InputRenderer } from './InputRenderer';
-
-import type { UseDocument } from '../../../hooks/useDocument';
+import type { UseDocument } from '@content-manager/admin/hooks/useDocument';
+import { EditLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { InputRenderer } from '@content-manager/admin/pages/EditView/components/InputRenderer';
 
 export const ResponsiveGridRoot = styled(Grid.Root)`
   container-type: inline-size;

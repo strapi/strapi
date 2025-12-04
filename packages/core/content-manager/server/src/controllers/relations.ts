@@ -3,9 +3,12 @@ import { prop, uniq, uniqBy, concat, flow, isEmpty } from 'lodash/fp';
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
 
-import { getService } from '../utils';
-import { validateFindAvailable, validateFindExisting } from './validation/relations';
-import { isListable } from '../services/utils/configuration/attributes';
+import { getService } from '@content-manager/server/utils';
+import {
+  validateFindAvailable,
+  validateFindExisting,
+} from '@content-manager/server/controllers/validation/relations';
+import { isListable } from '@content-manager/server/services/utils/configuration/attributes';
 
 const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 

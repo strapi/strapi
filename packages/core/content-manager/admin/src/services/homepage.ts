@@ -1,6 +1,5 @@
-import * as Homepage from '../../../shared/contracts/homepage';
-
-import { contentManagerApi } from './api';
+import { contentManagerApi } from '@content-manager/admin/services/api';
+import * as Homepage from '@content-manager/shared/contracts/homepage';
 
 const homepageService = contentManagerApi
   .enhanceEndpoints({

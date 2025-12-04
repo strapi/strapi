@@ -5,9 +5,8 @@ import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { css, styled } from 'styled-components';
 
-import { getTranslation } from '../../../../../utils/translations';
-
-import { useBlocksEditorContext } from './BlocksEditor';
+import { useBlocksEditorContext } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface EditorLayoutProps {
   children: React.ReactNode;

@@ -3,9 +3,11 @@ import * as React from 'react';
 import { Box, Flex, Accordion, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getTranslation } from '../../../../../utils/translations';
-
-import { ComponentCategory, ComponentCategoryProps } from './ComponentCategory';
+import {
+  ComponentCategory,
+  ComponentCategoryProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/ComponentCategory';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface ComponentPickerProps {
   dynamicComponentsByCategory?: Record<string, NonNullable<ComponentCategoryProps['components']>>;

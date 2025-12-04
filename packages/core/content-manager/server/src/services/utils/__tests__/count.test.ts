@@ -1,4 +1,4 @@
-import { getDeepRelationsCount } from '../count';
+import { getDeepRelationsCount } from '@content-manager/server/services/utils/count';
 
 const fakeModels = {
   component: {

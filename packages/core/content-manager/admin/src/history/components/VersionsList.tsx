@@ -6,12 +6,11 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-import { RelativeTime } from '../../components/RelativeTime';
-import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
-import { getDisplayName } from '../../utils/users';
-import { useHistoryContext } from '../pages/History';
-
-import type { HistoryVersions } from '../../../../shared/contracts';
+import { RelativeTime } from '@content-manager/admin/components/RelativeTime';
+import { useHistoryContext } from '@content-manager/admin/history/pages/History';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
+import { getDisplayName } from '@content-manager/admin/utils/users';
+import type { HistoryVersions } from '@content-manager/shared/contracts';
 
 /* -------------------------------------------------------------------------------------------------
  * BlueText

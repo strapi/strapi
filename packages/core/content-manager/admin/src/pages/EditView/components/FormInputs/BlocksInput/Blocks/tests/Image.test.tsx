@@ -5,10 +5,9 @@ import { ReactElement } from 'react';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Editor, Transforms, createEditor } from 'slate';
 
-import { mockImage } from '../../tests/mock-schema';
-import { imageBlocks } from '../Image';
-
-import { Wrapper } from './Wrapper';
+import { imageBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Image';
+import { Wrapper } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/tests/Wrapper';
+import { mockImage } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/tests/mock-schema';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),

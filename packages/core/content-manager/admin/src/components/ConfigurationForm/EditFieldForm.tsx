@@ -9,15 +9,14 @@ import { Button, Flex, Grid, Modal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
-import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '../../constants/attributes';
-import { useGetInitialDataQuery } from '../../services/init';
-import { capitalise } from '../../utils/strings';
-import { getTranslation } from '../../utils/translations';
-import { FieldTypeIcon } from '../FieldTypeIcon';
+import { TEMP_FIELD_NAME } from '@content-manager/admin/components/ConfigurationForm/Fields';
+import type { ConfigurationFormData } from '@content-manager/admin/components/ConfigurationForm/Form';
+import { FieldTypeIcon } from '@content-manager/admin/components/FieldTypeIcon';
+import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '@content-manager/admin/constants/attributes';
+import { useGetInitialDataQuery } from '@content-manager/admin/services/init';
+import { capitalise } from '@content-manager/admin/utils/strings';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
-import { TEMP_FIELD_NAME } from './Fields';
-
-import type { ConfigurationFormData } from './Form';
 import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------

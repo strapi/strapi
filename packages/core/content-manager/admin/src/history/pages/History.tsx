@@ -6,26 +6,26 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Navigate, useParams, NavLink } from 'react-router-dom';
 
-import { COLLECTION_TYPES } from '../../constants/collections';
-import { PERMISSIONS } from '../../constants/plugin';
-import { DocumentRBAC } from '../../features/DocumentRBAC';
-import { useDocument } from '../../hooks/useDocument';
-import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
-import { useGetContentTypeConfigurationQuery } from '../../services/contentTypes';
-import { buildValidParams } from '../../utils/api';
-import { VersionContent } from '../components/VersionContent';
-import { VersionHeader } from '../components/VersionHeader';
-import { VersionsList } from '../components/VersionsList';
-import { useGetHistoryVersionsQuery } from '../services/historyVersion';
-
+import { COLLECTION_TYPES } from '@content-manager/admin/constants/collections';
+import { PERMISSIONS } from '@content-manager/admin/constants/plugin';
+import { DocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { VersionContent } from '@content-manager/admin/history/components/VersionContent';
+import { VersionHeader } from '@content-manager/admin/history/components/VersionHeader';
+import { VersionsList } from '@content-manager/admin/history/components/VersionsList';
+import { useGetHistoryVersionsQuery } from '@content-manager/admin/history/services/historyVersion';
+import { useDocument } from '@content-manager/admin/hooks/useDocument';
+import { type EditLayout, useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { useGetContentTypeConfigurationQuery } from '@content-manager/admin/services/contentTypes';
+import { buildValidParams } from '@content-manager/admin/utils/api';
 import type {
   ContentType,
   FindContentTypeConfiguration,
-} from '../../../../shared/contracts/content-types';
+} from '@content-manager/shared/contracts/content-types';
 import type {
   HistoryVersionDataResponse,
   GetHistoryVersions,
-} from '../../../../shared/contracts/history-versions';
+} from '@content-manager/shared/contracts/history-versions';
+
 import type { UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------

@@ -18,18 +18,20 @@ import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
-import { SINGLE_TYPES } from '../constants/collections';
-import { type AnyData, transformDocument } from '../pages/EditView/utils/data';
-import { createDefaultForm } from '../pages/EditView/utils/forms';
-import { useGetDocumentQuery } from '../services/documents';
-import { buildValidParams } from '../utils/api';
-import { createYupSchema } from '../utils/validation';
+import { SINGLE_TYPES } from '@content-manager/admin/constants/collections';
+import {
+  useContentTypeSchema,
+  ComponentsDictionary,
+} from '@content-manager/admin/hooks/useContentTypeSchema';
+import { useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { type AnyData, transformDocument } from '@content-manager/admin/pages/EditView/utils/data';
+import { createDefaultForm } from '@content-manager/admin/pages/EditView/utils/forms';
+import { useGetDocumentQuery } from '@content-manager/admin/services/documents';
+import { buildValidParams } from '@content-manager/admin/utils/api';
+import { createYupSchema } from '@content-manager/admin/utils/validation';
+import type { FindOne } from '@content-manager/shared/contracts/collection-types';
+import type { ContentType } from '@content-manager/shared/contracts/content-types';
 
-import { useContentTypeSchema, ComponentsDictionary } from './useContentTypeSchema';
-import { useDocumentLayout } from './useDocumentLayout';
-
-import type { FindOne } from '../../../shared/contracts/collection-types';
-import type { ContentType } from '../../../shared/contracts/content-types';
 import type { Modules } from '@strapi/types';
 
 interface UseDocumentArgs {

@@ -6,7 +6,7 @@ import type {
   GetCountDocuments,
   GetRecentDocuments,
   RecentDocument,
-} from '../../../../shared/contracts/homepage';
+} from '@content-manager/shared/contracts/homepage';
 
 const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;

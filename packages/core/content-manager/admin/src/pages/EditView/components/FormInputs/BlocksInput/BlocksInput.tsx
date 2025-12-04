@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useField, type InputProps } from '@strapi/admin/strapi-admin';
 import { Field, Flex } from '@strapi/design-system';
 
-import { BlocksEditor } from './BlocksEditor';
+import { BlocksEditor } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
 
 import type { Schema } from '@strapi/types';
 

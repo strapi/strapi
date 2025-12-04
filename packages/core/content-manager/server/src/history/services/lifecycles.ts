@@ -3,11 +3,11 @@ import { contentTypes } from '@strapi/utils';
 
 import { omit, castArray } from 'lodash/fp';
 
-import { getService } from '../utils';
-import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
+import { getService } from '@content-manager/server/history/utils';
+import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '@content-manager/server/history/constants';
 
-import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
-import { createServiceUtils } from './utils';
+import type { CreateHistoryVersion } from '@content-manager/shared/contracts/history-versions';
+import { createServiceUtils } from '@content-manager/server/history/services/utils';
 
 /**
  * Filters out actions that should not create a history version.

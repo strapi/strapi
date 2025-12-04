@@ -3,8 +3,8 @@ import { groupBy, pick, uniq } from 'lodash/fp';
 import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
 
-import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
-import { getPopulateForValidation } from './utils/populate';
+import type { DocumentMetadata } from '@content-manager/shared/contracts/collection-types';
+import { getPopulateForValidation } from '@content-manager/server/services/utils/populate';
 
 const { getScalarAttributes } = contentTypes;
 

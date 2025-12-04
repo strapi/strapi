@@ -1,7 +1,8 @@
 import { type FieldContentSourceMap } from '@strapi/admin/strapi-admin';
 
-import type { PREVIEW_ERROR_MESSAGES } from './constants';
-import type { PreviewContextValue } from '../pages/Preview';
+import type { PreviewContextValue } from '@content-manager/admin/preview/pages/Preview';
+import type { PREVIEW_ERROR_MESSAGES } from '@content-manager/admin/preview/utils/constants';
+
 import type { Modules, Schema, Struct, UID } from '@strapi/types';
 
 type PreviewErrorMessage = keyof typeof PREVIEW_ERROR_MESSAGES;

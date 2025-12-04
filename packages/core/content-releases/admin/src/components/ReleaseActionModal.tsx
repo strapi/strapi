@@ -275,7 +275,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
           values={formik.values}
         />
       ),
-      footer: ({ onClose }) => (
+      footer: ({ onClose }: { onClose: () => void }) => (
         <Modal.Footer>
           <Button onClick={onClose} variant="tertiary" name="cancel">
             {formatMessage({

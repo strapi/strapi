@@ -2,9 +2,11 @@ import { Form } from '@strapi/admin/strapi-admin';
 import { screen, fireEvent, render as renderRTL } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { DynamicComponent, DynamicComponentProps } from '../DynamicComponent';
-
-import { dynamicComponentsByCategory } from './fixtures';
+import {
+  DynamicComponent,
+  DynamicComponentProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/DynamicComponent';
+import { dynamicComponentsByCategory } from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/tests/fixtures';
 
 /**
  * We _could_ unmock this and use it, but it requires more

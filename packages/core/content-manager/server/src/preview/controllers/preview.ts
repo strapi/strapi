@@ -1,9 +1,9 @@
 import type { Core, UID } from '@strapi/types';
 
-import { Preview } from '../../../../shared/contracts';
+import { Preview } from '@content-manager/shared/contracts';
 
-import { getService } from '../utils';
-import { validatePreviewUrl } from './validation/preview';
+import { getService } from '@content-manager/server/preview/utils';
+import { validatePreviewUrl } from '@content-manager/server/preview/controllers/validation/preview';
 
 const createPreviewController = () => {
   return {

@@ -32,28 +32,27 @@ import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { InjectionZone } from '../../components/InjectionZone';
-import { HOOKS } from '../../constants/hooks';
-import { PERMISSIONS } from '../../constants/plugin';
-import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { useDoc } from '../../hooks/useDocument';
+import { InjectionZone } from '@content-manager/admin/components/InjectionZone';
+import { HOOKS } from '@content-manager/admin/constants/hooks';
+import { PERMISSIONS } from '@content-manager/admin/constants/plugin';
+import { DocumentRBAC, useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
 import {
   ListFieldLayout,
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
-} from '../../hooks/useDocumentLayout';
-import { usePrev } from '../../hooks/usePrev';
-import { useGetAllDocumentsQuery } from '../../services/documents';
-import { buildValidParams } from '../../utils/api';
-import { getTranslation } from '../../utils/translations';
-import { getDisplayName } from '../../utils/users';
-import { DocumentStatus } from '../EditView/components/DocumentStatus';
-
-import { BulkActionsRenderer } from './components/BulkActions/Actions';
-import { Filters } from './components/Filters';
-import { TableActions } from './components/TableActions';
-import { CellContent } from './components/TableCells/CellContent';
-import { ViewSettingsMenu } from './components/ViewSettingsMenu';
+} from '@content-manager/admin/hooks/useDocumentLayout';
+import { usePrev } from '@content-manager/admin/hooks/usePrev';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
+import { BulkActionsRenderer } from '@content-manager/admin/pages/ListView/components/BulkActions/Actions';
+import { Filters } from '@content-manager/admin/pages/ListView/components/Filters';
+import { TableActions } from '@content-manager/admin/pages/ListView/components/TableActions';
+import { CellContent } from '@content-manager/admin/pages/ListView/components/TableCells/CellContent';
+import { ViewSettingsMenu } from '@content-manager/admin/pages/ListView/components/ViewSettingsMenu';
+import { useGetAllDocumentsQuery } from '@content-manager/admin/services/documents';
+import { buildValidParams } from '@content-manager/admin/utils/api';
+import { getTranslation } from '@content-manager/admin/utils/translations';
+import { getDisplayName } from '@content-manager/admin/utils/users';
 
 import type { Modules } from '@strapi/types';
 

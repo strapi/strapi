@@ -22,17 +22,17 @@ import { useIntl } from 'react-intl';
 import { useMatch } from 'react-router-dom';
 import { styled, keyframes } from 'styled-components';
 
-import { useDebounce } from '../../../../hooks/useDebounce';
-import { useDocumentContext } from '../../../../hooks/useDocumentContext';
-import { CLONE_PATH } from '../../../../router';
+import { useDebounce } from '@content-manager/admin/hooks/useDebounce';
+import { useDocumentContext } from '@content-manager/admin/hooks/useDocumentContext';
+import { CLONE_PATH } from '@content-manager/admin/router';
 import {
   useGenerateUIDMutation,
   useGetAvailabilityQuery,
   useGetDefaultUIDQuery,
-} from '../../../../services/uid';
-import { buildValidParams } from '../../../../utils/api';
+} from '@content-manager/admin/services/uid';
+import { buildValidParams } from '@content-manager/admin/utils/api';
+import type { CheckUIDAvailability } from '@content-manager/shared/contracts/uid';
 
-import type { CheckUIDAvailability } from '../../../../../../shared/contracts/uid';
 import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------

@@ -5,15 +5,16 @@ import { Box, Flex, VisuallyHidden, Typography, Menu } from '@strapi/design-syst
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../../hooks/useDocument';
-import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
-import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
-import { getTranslation } from '../../../utils/translations';
-
-import { DraggableCard, DraggableCardProps } from './DraggableCard';
-
-import type { ListLayout } from '../../../hooks/useDocumentLayout';
-import type { FormData } from '../ListConfigurationPage';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import type { ListLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import {
+  DraggableCard,
+  DraggableCardProps,
+} from '@content-manager/admin/pages/ListConfiguration/components/DraggableCard';
+import type { FormData } from '@content-manager/admin/pages/ListConfiguration/ListConfigurationPage';
+import { useGetContentTypeConfigurationQuery } from '@content-manager/admin/services/contentTypes';
+import { checkIfAttributeIsDisplayable } from '@content-manager/admin/utils/attributes';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface SortDisplayedFieldsProps extends Pick<ListLayout, 'layout'> {}
 

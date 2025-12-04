@@ -1,7 +1,7 @@
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../tests/helpers/create-context';
-import relations from '../relations';
+import relations from '@content-manager/server/controllers/relations';
+import createContext from 'strapi/tests/helpers/create-context';
 
 const contentTypes = {
   main: {

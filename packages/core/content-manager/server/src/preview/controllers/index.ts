@@ -1,5 +1,5 @@
 import type { Plugin } from '@strapi/types';
-import { createPreviewController } from './preview';
+import { createPreviewController } from '@content-manager/server/preview/controllers/preview';
 
 export const controllers = {
   preview: createPreviewController,

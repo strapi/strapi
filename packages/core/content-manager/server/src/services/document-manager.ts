@@ -3,8 +3,12 @@ import { omit, pipe } from 'lodash/fp';
 import { contentTypes, errors, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
-import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
-import { sumDraftCounts } from './utils/draft';
+import {
+  buildDeepPopulate,
+  getDeepPopulate,
+  getDeepPopulateDraftCount,
+} from '@content-manager/server/services/utils/populate';
+import { sumDraftCounts } from '@content-manager/server/services/utils/draft';
 
 type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];

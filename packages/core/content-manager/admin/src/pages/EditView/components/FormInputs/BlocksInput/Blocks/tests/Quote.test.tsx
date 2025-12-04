@@ -2,9 +2,8 @@
 import { render, screen } from '@testing-library/react';
 import { Editor, Transforms, createEditor } from 'slate';
 
-import { quoteBlocks } from '../Quote';
-
-import { Wrapper } from './Wrapper';
+import { quoteBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Quote';
+import { Wrapper } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/tests/Wrapper';
 
 describe('Quote', () => {
   it('renders a quote block properly', () => {

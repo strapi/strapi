@@ -1,8 +1,8 @@
 import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-import { getService } from '../utils';
-import type { HandlerParams } from './preview-config';
+import { getService } from '@content-manager/server/preview/utils';
+import type { HandlerParams } from '@content-manager/server/preview/services/preview-config';
 
 /**
  * Responsible of routing an entry to a preview URL.

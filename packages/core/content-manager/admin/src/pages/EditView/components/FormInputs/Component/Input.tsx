@@ -5,16 +5,15 @@ import { Field, Flex, IconButton } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
-import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
-import { getTranslation } from '../../../../../utils/translations';
-import { transformDocument } from '../../../utils/data';
-import { createDefaultForm } from '../../../utils/forms';
-import { type InputRendererProps } from '../../InputRenderer';
-
-import { Initializer } from './Initializer';
-import { NonRepeatableComponent } from './NonRepeatable';
-import { RepeatableComponent } from './Repeatable';
+import { useDocumentContext } from '@content-manager/admin/hooks/useDocumentContext';
+import { EditFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { Initializer } from '@content-manager/admin/pages/EditView/components/FormInputs/Component/Initializer';
+import { NonRepeatableComponent } from '@content-manager/admin/pages/EditView/components/FormInputs/Component/NonRepeatable';
+import { RepeatableComponent } from '@content-manager/admin/pages/EditView/components/FormInputs/Component/Repeatable';
+import { type InputRendererProps } from '@content-manager/admin/pages/EditView/components/InputRenderer';
+import { transformDocument } from '@content-manager/admin/pages/EditView/utils/data';
+import { createDefaultForm } from '@content-manager/admin/pages/EditView/utils/forms';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface ComponentInputProps
   extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,

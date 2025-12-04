@@ -14,21 +14,20 @@ import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { SINGLE_TYPES } from '../../constants/collections';
-import { PERMISSIONS } from '../../constants/plugin';
-import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { useDoc, type UseDocument } from '../../hooks/useDocument';
-import { useDocumentLayout } from '../../hooks/useDocumentLayout';
-import { useLazyComponents } from '../../hooks/useLazyComponents';
-import { useOnce } from '../../hooks/useOnce';
-import { getTranslation } from '../../utils/translations';
-import { createYupSchema } from '../../utils/validation';
-
-import { Blocker } from './components/Blocker';
-import { FormLayout } from './components/FormLayout';
-import { Header } from './components/Header';
-import { Panels } from './components/Panels';
-import { handleInvisibleAttributes } from './utils/data';
+import { SINGLE_TYPES } from '@content-manager/admin/constants/collections';
+import { PERMISSIONS } from '@content-manager/admin/constants/plugin';
+import { DocumentRBAC, useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { useDoc, type UseDocument } from '@content-manager/admin/hooks/useDocument';
+import { useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { useLazyComponents } from '@content-manager/admin/hooks/useLazyComponents';
+import { useOnce } from '@content-manager/admin/hooks/useOnce';
+import { Blocker } from '@content-manager/admin/pages/EditView/components/Blocker';
+import { FormLayout } from '@content-manager/admin/pages/EditView/components/FormLayout';
+import { Header } from '@content-manager/admin/pages/EditView/components/Header';
+import { Panels } from '@content-manager/admin/pages/EditView/components/Panels';
+import { handleInvisibleAttributes } from '@content-manager/admin/pages/EditView/utils/data';
+import { getTranslation } from '@content-manager/admin/utils/translations';
+import { createYupSchema } from '@content-manager/admin/utils/validation';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage

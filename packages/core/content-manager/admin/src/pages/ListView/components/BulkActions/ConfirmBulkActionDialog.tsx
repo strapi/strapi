@@ -10,11 +10,10 @@ import { Button, Flex, Dialog, Typography } from '@strapi/design-system';
 import { Check, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../../../hooks/useDocument';
-import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
-import { getTranslation } from '../../../../utils/translations';
-
-import { Emphasis } from './Actions';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import { Emphasis } from '@content-manager/admin/pages/ListView/components/BulkActions/Actions';
+import { useGetManyDraftRelationCountQuery } from '@content-manager/admin/services/documents';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 interface ConfirmBulkActionDialogProps {
   endAction: React.ReactNode;
