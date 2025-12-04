@@ -180,27 +180,34 @@ export default (db: Database) => {
   const diffColumns = (oldColumn: Column, column: Column): ColumnDiff => {
     const changes: string[] = [];
 
-    const isIgnoredType = ['increments'].includes(column.type);
+    const isIgnoredType = ['increments', 'bigIncrements'].includes(column.type);
+    const isOldIgnoredType = ['increments', 'bigIncrements'].includes(oldColumn.type);
     const oldType = oldColumn.type;
     const type = db.dialect.getSqlType(column.type);
 
-    if (oldType !== type && !isIgnoredType) {
+    // Treat increments and bigIncrements as equivalent during comparison
+    const bothAreIncrements = isOldIgnoredType && isIgnoredType;
+
+    if (oldType !== type && !isIgnoredType && !bothAreIncrements) {
       changes.push('type');
     }
 
     // NOTE: compare args at some point and split them into specific properties instead
 
-    if (oldColumn.notNullable !== column.notNullable) {
-      changes.push('notNullable');
-    }
+    // Skip property comparisons for auto-increment columns (they're managed by the DB)
+    if (!bothAreIncrements) {
+      if (oldColumn.notNullable !== column.notNullable) {
+        changes.push('notNullable');
+      }
 
-    const hasSameDefault = diffDefault(oldColumn, column);
-    if (!hasSameDefault) {
-      changes.push('defaultTo');
-    }
+      const hasSameDefault = diffDefault(oldColumn, column);
+      if (!hasSameDefault) {
+        changes.push('defaultTo');
+      }
 
-    if (oldColumn.unsigned !== column.unsigned && db.dialect.supportsUnsigned()) {
-      changes.push('unsigned');
+      if (oldColumn.unsigned !== column.unsigned && db.dialect.supportsUnsigned()) {
+        changes.push('unsigned');
+      }
     }
 
     return {

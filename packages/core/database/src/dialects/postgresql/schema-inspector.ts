@@ -12,6 +12,7 @@ interface RawColumn {
   character_maximum_length: number;
   column_default: string;
   is_nullable: string;
+  is_primary: boolean;
 }
 
 interface RawIndex {
@@ -37,9 +38,23 @@ const SQL_QUERIES = {
       AND table_name != 'spatial_ref_sys';
   `,
   LIST_COLUMNS: /* sql */ `
-    SELECT data_type, column_name, character_maximum_length, column_default, is_nullable
-    FROM information_schema.columns
-    WHERE table_schema = ? AND table_name = ?;
+    SELECT 
+      c.data_type, 
+      c.column_name, 
+      c.character_maximum_length, 
+      c.column_default, 
+      c.is_nullable,
+      CASE WHEN tc.constraint_type = 'PRIMARY KEY' THEN true ELSE false END as is_primary
+    FROM information_schema.columns c
+    LEFT JOIN information_schema.key_column_usage kcu 
+      ON c.column_name = kcu.column_name 
+      AND c.table_name = kcu.table_name 
+      AND c.table_schema = kcu.table_schema
+    LEFT JOIN information_schema.table_constraints tc 
+      ON kcu.constraint_name = tc.constraint_name 
+      AND kcu.table_schema = tc.table_schema 
+      AND tc.constraint_type = 'PRIMARY KEY'
+    WHERE c.table_schema = ? AND c.table_name = ?;
   `,
   INDEX_LIST: /* sql */ `
     SELECT
@@ -108,7 +123,10 @@ const toStrapiType = (column: RawColumn) => {
 
   switch (rootType) {
     case 'integer': {
-      // find a way to figure out the increments
+      if (column.is_primary === true) {
+        return { type: 'increments', args: [{ primaryKey: true }] };
+      }
+
       return { type: 'integer' };
     }
     case 'text': {
@@ -137,6 +155,10 @@ const toStrapiType = (column: RawColumn) => {
       return { type: 'double' };
     }
     case 'bigint': {
+      if (column.is_primary === true) {
+        return { type: 'bigIncrements', args: [{ primaryKey: true }] };
+      }
+
       return { type: 'bigInteger' };
     }
     case 'jsonb': {
