@@ -1,17 +1,17 @@
-export interface AppProp {
+export interface App {
   keys: string[];
 }
 
-export interface CronProp {
+export interface Cron {
   enabled?: boolean;
   tasks?: object;
 }
 
-export interface DirsProp {
+export interface Dirs {
   public?: string;
 }
 
-export interface LoggerProp {
+export interface Logger {
   updates?: {
     enabled?: boolean;
   };
@@ -20,29 +20,29 @@ export interface LoggerProp {
   };
 }
 
-export interface TransferProp {
+export interface ServerTransfer {
   remote?: {
     enabled?: boolean;
   };
 }
 
-export interface AdminProp {
+export interface ServerAdmin {
   autoOpen?: boolean;
 }
 
-export interface ProxyProp {
+export interface Proxy {
   global?: string;
   http?: string;
   https?: string;
   fetch?: string;
 }
 
-export interface WebhooksProp {
+export interface Webhooks {
   populateRelations?: boolean;
   [key: string]: any;
 }
 
-export interface HttpProp {
+export interface Http {
   serverOptions?: {
     requestTimeout?: number;
     [key: string]: any;
@@ -54,20 +54,20 @@ export interface Server {
   // required
   host: string;
   port: number;
-  app: AppProp;
+  app: App;
 
   // optional
   socket?: string | number;
   emitErrors?: boolean;
   url?: string;
   absoluteUrl?: string;
-  proxy?: boolean | ProxyProp;
+  proxy?: boolean | Proxy;
   globalProxy?: string;
-  cron?: CronProp;
-  dirs?: DirsProp;
-  logger?: LoggerProp;
-  transfer?: TransferProp;
-  admin?: AdminProp;
-  webhooks?: WebhooksProp;
-  http?: HttpProp;
+  cron?: Cron;
+  dirs?: Dirs;
+  logger?: Logger;
+  transfer?: ServerTransfer;
+  admin?: ServerAdmin;
+  webhooks?: Webhooks;
+  http?: Http;
 }

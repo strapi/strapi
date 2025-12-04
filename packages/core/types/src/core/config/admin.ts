@@ -1,8 +1,8 @@
-export interface ApiTokenProp {
+export interface ApiToken {
   salt: string;
 }
 
-export interface AuthSessionsProp {
+export interface AuthSessions {
   options?: {
     algorithm?: string;
     [key: string]: any;
@@ -14,59 +14,59 @@ export interface AuthSessionsProp {
   idleSessionLifespan?: number;
 }
 
-export interface AuthCookieProp {
+export interface AuthCookie {
   secure?: boolean;
   domain?: string;
   path?: string;
-  sameSite?: 'strict' | 'lax' | 'none';
+  sameSite?: 'strict' | 'lax' | 'none' | boolean;
 }
 
-export interface AuthEventsProp {
+export interface AuthEvents {
   onConnectionSuccess?: (user: any, provider: string) => void | Promise<void>;
   onConnectionError?: (error: Error, provider: string) => void | Promise<void>;
 }
 
-export interface AuthProviderProp {
+export interface AuthProvider {
   [key: string]: any;
 }
 
-export interface AuthProp {
+export interface Auth {
   secret: string;
   domain?: string;
-  cookie?: AuthCookieProp;
-  sessions?: AuthSessionsProp;
-  events?: AuthEventsProp;
-  providers?: AuthProviderProp[];
+  cookie?: AuthCookie;
+  sessions?: AuthSessions;
+  events?: AuthEvents;
+  providers?: AuthProvider[];
   options?: {
     expiresIn?: string | number;
     [key: string]: any;
   };
 }
 
-export interface TransferTokenProp {
+export interface TransferToken {
   salt: string;
 }
 
-export interface SecretsProp {
+export interface Secrets {
   encryptionKey: string;
 }
 
-export interface AuditLogsProp {
+export interface AuditLogs {
   enabled?: boolean;
   retentionDays?: number;
 }
 
-export interface HistoryProp {
+export interface History {
   retentionDays?: number;
 }
 
-export interface ForgotPasswordProp {
+export interface ForgotPassword {
   emailTemplate?: string;
   from?: string;
   replyTo?: string;
 }
 
-export interface RateLimitProp {
+export interface RateLimit {
   enabled?: boolean;
   interval?: number;
   max?: number;
@@ -77,15 +77,15 @@ export interface RateLimitProp {
   store?: string;
 }
 
-export interface TransferProp {
-  token: TransferTokenProp;
+export interface Transfer {
+  token: TransferToken;
 }
 
-export interface FirstPublisedAtFieldProp {
+export interface FirstPublisedAtField {
   enabled: boolean;
 }
 
-export interface FlagsProp {
+export interface Flags {
   nps?: boolean | undefined;
   promoteEE?: boolean | undefined;
 }
@@ -97,25 +97,25 @@ export interface PreviewHandlerParams {
   [key: string]: any;
 }
 
-export interface PreviewConfigProp {
+export interface PreviewConfig {
   allowedOrigins?: string[];
   handler: (uid: string, params: PreviewHandlerParams) => string | null | undefined;
 }
 
-export interface PreviewProp {
+export interface Preview {
   enabled: boolean;
-  config: PreviewConfigProp;
+  config: PreviewConfig;
 }
 
-export interface AiProp {
+export interface Ai {
   enabled?: boolean;
 }
 
 export interface Admin {
   // required
-  apiToken: ApiTokenProp;
-  transfer: TransferProp;
-  auth: AuthProp;
+  apiToken: ApiToken;
+  transfer: Transfer;
+  auth: Auth;
 
   // optional - server configuration
   host?: string;
@@ -128,13 +128,13 @@ export interface Admin {
   url?: string;
 
   // optional - features and security
-  secrets?: SecretsProp;
-  auditLogs?: AuditLogsProp;
-  history?: HistoryProp;
-  preview?: PreviewProp;
-  ai?: AiProp;
-  forgotPassword?: ForgotPasswordProp;
-  rateLimit?: RateLimitProp;
-  firstPublishedAtField?: FirstPublisedAtFieldProp;
-  flags?: FlagsProp;
+  secrets?: Secrets;
+  auditLogs?: AuditLogs;
+  history?: History;
+  preview?: Preview;
+  ai?: Ai;
+  forgotPassword?: ForgotPassword;
+  rateLimit?: RateLimit;
+  firstPublishedAtField?: FirstPublisedAtField;
+  flags?: Flags;
 }
