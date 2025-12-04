@@ -202,7 +202,7 @@ const EditViewPage = () => {
               }}
               gap={4}
             >
-              <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
+              <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
                 <Tabs.Content value="draft">
                   <tours.contentManager.Fields>
                     <Box />
@@ -213,7 +213,7 @@ const EditViewPage = () => {
                   <FormLayout layout={layout} document={doc} />
                 </Tabs.Content>
               </Grid.Item>
-              <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
+              <Grid.Item col={3} xs={12} direction="column" alignItems="stretch">
                 <Panels />
               </Grid.Item>
             </Grid.Root>

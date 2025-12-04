@@ -1,9 +1,9 @@
 import * as React from 'react';
 
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { UID } from '@strapi/types';
 import { useParams } from 'react-router-dom';
 
-import { useAIAvailability } from '../../../hooks/useAIAvailability';
 import { useGetGuidedTourMetaQuery } from '../../../services/admin';
 import { CompletedActions, useGuidedTour } from '../Context';
 import { tours, type StepContentProps } from '../Tours';
