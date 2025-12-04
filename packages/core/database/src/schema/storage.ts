@@ -10,7 +10,7 @@ export default (db: Database) => {
 
   const createSchemaTable = () => {
     return db.getSchemaConnection().createTable(TABLE_NAME, (t) => {
-      t.increments('id');
+      t.bigIncrements('id');
       t.json('schema');
       t.datetime('time', { useTz: false });
       t.string('hash');

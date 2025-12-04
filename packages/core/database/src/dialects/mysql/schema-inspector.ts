@@ -11,9 +11,9 @@ interface RawColumn {
   column_name: string;
   character_maximum_length: number;
   column_default: string;
-  is_nullable: string;
   column_type: string;
-  column_key: string;
+  is_nullable: string;
+  is_primary: '0' | '1';
 }
 
 interface RawIndex {
@@ -35,17 +35,25 @@ const SQL_QUERIES = {
     AND table_schema = schema();
   `,
   LIST_COLUMNS: /* sql */ `
-    SELECT
-      c.data_type as data_type,
-      c.column_name as column_name,
-      c.character_maximum_length as character_maximum_length,
-      c.column_default as column_default,
+    SELECT 
+      c.data_type as data_type, 
+      c.column_name as column_name, 
+      c.character_maximum_length as character_maximum_length, 
+      c.column_default as column_default, 
       c.is_nullable as is_nullable,
       c.column_type as column_type,
-      c.column_key as column_key
+      MAX(CASE WHEN tc.constraint_type = 'PRIMARY KEY' THEN 1 ELSE 0 END) = 1 as is_primary
     FROM information_schema.columns c
-    WHERE table_schema = database()
-    AND table_name = ?;
+    LEFT JOIN information_schema.key_column_usage kcu 
+      ON c.column_name = kcu.column_name 
+      AND c.table_name = kcu.table_name 
+      AND c.table_schema = kcu.table_schema
+    LEFT JOIN information_schema.table_constraints tc 
+      ON kcu.constraint_name = tc.constraint_name 
+      AND kcu.table_schema = tc.table_schema 
+      AND tc.constraint_type = 'PRIMARY KEY'
+    WHERE c.table_schema = database() AND c.table_name = ?
+    GROUP BY c.column_name, c.data_type, c.character_maximum_length, c.column_default, c.is_nullable, c.column_type;
   `,
   INDEX_LIST: /* sql */ `
     show index from ??;
@@ -86,8 +94,8 @@ const toStrapiType = (column: RawColumn) => {
 
   switch (rootType) {
     case 'int': {
-      if (column.column_key === 'PRI') {
-        return { type: 'increments', args: [{ primary: true, primaryKey: true }], unsigned: false };
+      if (column.is_primary === '1') {
+        return { type: 'increments', args: [{ primaryKey: true }], unsigned: false };
       }
 
       return { type: 'integer' };
@@ -99,6 +107,10 @@ const toStrapiType = (column: RawColumn) => {
       return { type: 'double' };
     }
     case 'bigint': {
+      if (column.is_primary === '1') {
+        return { type: 'bigIncrements', args: [{ primaryKey: true }] };
+      }
+
       return { type: 'bigInteger' };
     }
     case 'enum': {

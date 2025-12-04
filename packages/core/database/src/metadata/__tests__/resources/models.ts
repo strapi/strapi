@@ -4,7 +4,7 @@ export const auxComponent = {
   tableName: 'components_default_long_component_names',
   attributes: {
     id: {
-      type: 'increments',
+      type: 'bigincrements',
     },
     longcomponentname: {
       type: 'string',
@@ -28,7 +28,7 @@ export const baseModel = {
   tableName: 'complexes',
   attributes: {
     id: {
-      type: 'increments',
+      type: 'bigincrements',
     },
     documentId: {
       type: 'string',

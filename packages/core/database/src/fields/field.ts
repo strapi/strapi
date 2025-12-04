@@ -1,8 +1,10 @@
-export default class Field {
-  config: unknown;
+import type { Attribute } from '../types';
 
-  constructor(config: unknown) {
-    this.config = config;
+export default class Field {
+  attribute: Attribute;
+
+  constructor(attribute: Attribute) {
+    this.attribute = attribute;
   }
 
   toDB(value: unknown) {

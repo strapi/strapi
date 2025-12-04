@@ -61,7 +61,7 @@ const toStrapiType = (column: RawColumn) => {
   switch (rootType) {
     case 'integer': {
       if (column.pk) {
-        return { type: 'increments', args: [{ primary: true, primaryKey: true }] };
+        return { type: 'increments', args: [{ primaryKey: true }] };
       }
 
       return { type: 'integer' };
@@ -70,6 +70,10 @@ const toStrapiType = (column: RawColumn) => {
       return { type: 'float', args: [10, 2] };
     }
     case 'bigint': {
+      if (column.pk) {
+        return { type: 'bigIncrements', args: [{ primaryKey: true }] };
+      }
+
       return { type: 'bigInteger' };
     }
     case 'varchar': {

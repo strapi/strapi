@@ -2,6 +2,7 @@ import type { Attribute, ScalarAttribute, RelationalAttribute } from '../types';
 
 const SCALAR_TYPES = [
   'increments',
+  'bigincrements',
   'password',
   'email',
   'string',
