@@ -30,7 +30,7 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
           filters: validator.filters.optional(),
         },
       },
-      response: validator.files,
+      response: validator.paginatedFiles,
     },
     {
       method: 'GET',

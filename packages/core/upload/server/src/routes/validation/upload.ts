@@ -50,10 +50,27 @@ export class UploadRouteValidator extends AbstractRouteValidator {
   }
 
   /**
-   * Array of files schema
+   * Array of files schema (for backwards compatibility, non-paginated responses)
    */
   get files() {
     return z.array(this.file);
+  }
+
+  /**
+   * Paginated files response schema
+   */
+  get paginatedFiles() {
+    return z.object({
+      data: z.array(this.file),
+      meta: z.object({
+        pagination: z.object({
+          page: z.number().int().positive(),
+          pageSize: z.number().int().positive(),
+          pageCount: z.number().int().nonnegative(),
+          total: z.number().int().nonnegative(),
+        }),
+      }),
+    });
   }
 
   /**

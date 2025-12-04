@@ -5,13 +5,19 @@ import { useNotifyAT } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
-import { Query, GetFiles } from '../../../shared/contracts/files';
+import { Query, GetFiles, File, Pagination } from '../../../shared/contracts/files';
 import { pluginId } from '../pluginId';
 
 interface UseAssetsOptions {
   skipWhen?: boolean;
   query?: Query;
 }
+
+// Type for the transformed response that maintains backward compatibility
+type TransformedAssetsResponse = {
+  results: (File & { mime: string; ext: string })[];
+  pagination: Pagination;
+};
 
 export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {}) => {
   const { formatMessage } = useIntl();
@@ -42,12 +48,14 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
   }
 
   const { data, error, isLoading } = useQuery<
-    GetFiles.Response['data'],
-    GetFiles.Response['error']
+    GetFiles.Response,
+    GetFiles.Response['error'],
+    TransformedAssetsResponse,
+    any
   >(
     [pluginId, 'assets', params],
     async () => {
-      const { data } = await get('/upload/files', { params });
+      const { data } = await get<GetFiles.Response>('/upload/files', { params });
 
       return data;
     },
@@ -55,11 +63,10 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
       enabled: !skipWhen,
       staleTime: 0,
       cacheTime: 0,
-      select(data) {
-        if (data?.results && Array.isArray(data.results)) {
+      select(data: GetFiles.Response): TransformedAssetsResponse {
+        if (data?.data && Array.isArray(data.data)) {
           return {
-            ...data,
-            results: data.results
+            results: data.data
               /**
                * Filter out assets that don't have a name.
                * So we don't try to render them as assets
@@ -75,10 +82,20 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
                 mime: asset.mime ?? '',
                 ext: asset.ext ?? '',
               })),
+            pagination: data.meta.pagination,
           };
         }
 
-        return data;
+        // Fallback for empty/invalid data
+        return {
+          results: [],
+          pagination: {
+            page: 1,
+            pageSize: 10,
+            pageCount: 0,
+            total: 0,
+          },
+        };
       },
     }
   );
