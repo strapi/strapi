@@ -71,7 +71,7 @@
     "@strapi/generators": "5.31.3",
     "@strapi/icons": "2.0.1",
     "@strapi/utils": "5.31.3",
-    "ai": "5.0.26",
+    "ai": "5.0.52",
     "date-fns": "2.30.0",
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
