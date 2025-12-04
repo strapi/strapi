@@ -21,6 +21,15 @@ export default [
   },
   {
     method: 'GET',
+    path: '/spec/:version?',
+    handler: 'documentation.getSpec',
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
+  {
+    method: 'GET',
     path: '/login',
     handler: 'documentation.loginView',
     config: {

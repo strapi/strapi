@@ -1,70 +1,169 @@
-<!-- HTML for static distribution bundle build --><!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Swagger UI</title>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="<%=backendUrl%>/plugins/documentation/swagger-ui.css"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      href="<%=backendUrl%>/plugins/documentation/favicon-32x32.png"
-      sizes="32x32"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      href="<%=backendUrl%>/plugins/documentation/favicon-16x16.png"
-      sizes="16x16"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Documentation - Strapi</title>
     <style>
-      html {
-        box-sizing: border-box;
-        overflow: -moz-scrollbars-vertical;
-        overflow-y: scroll;
+      /* Strapi Design System - Complete Color Palette */
+      :root {
+        --strapi-primary-600: #4945ff;
+        --strapi-primary-500: #7b79ff;
+        --strapi-primary-700: #271fe0;
+        --strapi-primary-200: #d9d8ff;
+        --strapi-primary-100: #f0f0ff;
+        --strapi-neutral-0: #ffffff;
+        --strapi-neutral-100: #f6f6f9;
+        --strapi-neutral-150: #eaeaef;
+        --strapi-neutral-200: #dcdce4;
+        --strapi-neutral-300: #c0c0cf;
+        --strapi-neutral-600: #666687;
+        --strapi-neutral-700: #4a4a6a;
+        --strapi-neutral-800: #32324d;
+        --strapi-neutral-900: #212134;
       }
 
-      *,
-      *:before,
-      *:after {
-        box-sizing: inherit;
+      * {
+        box-sizing: border-box;
       }
 
       body {
         margin: 0;
-        background: #fafafa;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+          'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        background-color: var(--strapi-neutral-100);
+        color: var(--strapi-neutral-800);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      /* Scalar Theme Variables - Strapi Design System */
+      /* Using Scalar's documented structure: https://guides.scalar.com/scalar/scalar-api-references/themes */
+
+      .light-mode {
+        /* Text Colors - Strapi Design System */
+        --scalar-color-1: #32324d; /* neutral-800 - Primary text */
+        --scalar-color-2: rgba(50, 50, 77, 0.6); /* neutral-800 at 60% - Secondary text */
+        --scalar-color-3: rgba(50, 50, 77, 0.4); /* neutral-800 at 40% - Tertiary text */
+        --scalar-color-accent: #4945ff; /* primary-600 - Accent color */
+
+        /* Background Colors - Strapi Design System */
+        --scalar-background-1: #ffffff; /* neutral-0 - Main background */
+        --scalar-background-2: #f6f6f9; /* neutral-100 - Secondary background */
+        --scalar-background-3: #eaeaef; /* neutral-150 - Tertiary background */
+        --scalar-background-accent: #f0f0ff; /* primary-100 - Accent background */
+
+        /* Border Color - Strapi Design System */
+        --scalar-border-color: rgba(0, 0, 0, 0.08); /* neutral-200 equivalent */
+      }
+
+      .dark-mode {
+        /* Text Colors - Strapi Dark Theme */
+        --scalar-color-1: rgba(255, 255, 255, 0.81);
+        --scalar-color-2: rgba(255, 255, 255, 0.443);
+        --scalar-color-3: rgba(255, 255, 255, 0.282);
+        --scalar-color-accent: #7b79ff; /* primary-500 for dark mode */
+
+        /* Background Colors - Strapi Dark Theme */
+        --scalar-background-1: #212134; /* neutral-900 */
+        --scalar-background-2: #32324d; /* neutral-800 */
+        --scalar-background-3: #4a4a6a; /* neutral-700 */
+        --scalar-background-accent: #4945ff1f; /* primary with opacity */
+      }
+
+      /* Sidebar styling - Strapi theme */
+      .light-mode .sidebar {
+        --scalar-sidebar-background-1: #ffffff; /* neutral-0 */
+        --scalar-sidebar-item-hover-color: currentColor;
+        --scalar-sidebar-item-hover-background: #f6f6f9; /* neutral-100 - Hover state */
+        --scalar-sidebar-item-active-background: #f0f0ff; /* primary-100 - Active state (Strapi style) */
+        --scalar-sidebar-border-color: rgba(0, 0, 0, 0.08); /* neutral-200 */
+        --scalar-sidebar-color-1: #32324d; /* neutral-800 - Primary text */
+        --scalar-sidebar-color-2: #666687; /* neutral-600 - Secondary text */
+        --scalar-sidebar-color-active: #271fe0; /* primary-700 - Active text (Strapi style) */
+        --scalar-sidebar-search-background: #f6f6f9; /* neutral-100 */
+        --scalar-sidebar-search-border-color: rgba(0, 0, 0, 0.08);
+        --scalar-sidebar-search-color: #666687; /* neutral-600 */
+      }
+
+      .dark-mode .sidebar {
+        --scalar-sidebar-background-1: #212134;
+        --scalar-sidebar-item-hover-color: currentColor;
+        --scalar-sidebar-item-hover-background: #32324d;
+        --scalar-sidebar-item-active-background: #4a4a6a;
+        --scalar-sidebar-border-color: rgba(255, 255, 255, 0.1);
+        --scalar-sidebar-color-1: rgba(255, 255, 255, 0.81);
+        --scalar-sidebar-color-2: rgba(255, 255, 255, 0.443);
+        --scalar-sidebar-color-active: #7b79ff;
+        --scalar-sidebar-search-background: #32324d;
+        --scalar-sidebar-search-border-color: rgba(255, 255, 255, 0.1);
+        --scalar-sidebar-search-color: rgba(255, 255, 255, 0.282);
+      }
+
+      /* Typography - Strapi fonts */
+      :root {
+        --scalar-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+          'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        --scalar-font-code: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas,
+          'Courier New', monospace;
+      }
+
+      /* Hide theme selector */
+      [data-theme-selector],
+      .theme-selector,
+      button[aria-label*='theme'],
+      button[aria-label*='Theme'] {
+        display: none !important;
+      }
+
+      /* Additional Strapi-specific styling */
+      .light-mode {
+        /* Buttons - Strapi primary color */
+        --scalar-button-1-background: #4945ff;
+        --scalar-button-1-color: #ffffff;
+        --scalar-button-1-hover-background: #271fe0;
+      }
+
+      /* Code blocks - Strapi style */
+      .light-mode code,
+      .light-mode pre {
+        background-color: #eaeaef !important; /* neutral-150 */
+        border: 1px solid #dcdce4 !important; /* neutral-200 */
+        border-radius: 4px !important;
+      }
+
+      /* Links - Strapi style */
+      .light-mode a {
+        color: #4945ff !important; /* primary-600 */
+      }
+
+      .light-mode a:hover {
+        color: #271fe0 !important; /* primary-700 */
+      }
+
+      /* Active sidebar items - Strapi style (font weight) */
+      .light-mode .sidebar [data-active='true'],
+      .light-mode .sidebar .active {
+        font-weight: 500 !important;
       }
     </style>
   </head>
-
   <body>
-    <div id="swagger-ui"></div>
-    <script class="custom-swagger-ui">
-      window.onload = function() {
-        const ui = SwaggerUIBundle({
-          url: "https://petstore.swagger.io/v2/swagger.json",
-          spec: <%=spec%>,
-          dom_id: '#swagger-ui',
-          docExpansion: "none",
-          deepLinking: true,
-          presets: [
-            SwaggerUIBundle.presets.apis,
-            SwaggerUIStandalonePreset,
-          ],
-          plugins: [
-            SwaggerUIBundle.plugins.DownloadUrl,
-          ],
-          layout: "StandaloneLayout",
-        });
-
-        window.ui = ui;
-      }
+    <div id="app"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference@latest"></script>
+    <script>
+      Scalar.createApiReference('#app', {
+        url: '<%=specUrl%>',
+        showDeveloperTools: 'never',
+        hideClientButton: true,
+        defaultHttpClient: {
+          targetKey: 'node',
+          clientKey: 'undici',
+        },
+        title: 'API Documentation',
+        operationTitleSource: 'summary',
+      });
     </script>
-
-    <script src="<%=backendUrl%>/plugins/documentation/swagger-ui-bundle.js"></script>
-    <script src="<%=backendUrl%>/plugins/documentation/swagger-ui-standalone-preset.js"></script>
   </body>
 </html>

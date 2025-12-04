@@ -15,15 +15,16 @@ const validation = {
   validateSettings: validateYupSchema(
     yup.object().shape({
       restrictedAccess: yup.boolean(),
-      password: yup
-        .string()
-        .min(8)
-        .matches(/[a-z]/, '${path} must contain at least one lowercase character')
-        .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
-        .matches(/\d/, '${path} must contain at least one number')
-        .when('restrictedAccess', (value, initSchema) => {
-          return value ? initSchema.required('password is required') : initSchema;
-        }),
+      password: yup.string().when('restrictedAccess', (value, initSchema) => {
+        return value
+          ? initSchema
+              .required('password is required')
+              .min(8)
+              .matches(/[a-z]/, '${path} must contain at least one lowercase character')
+              .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
+              .matches(/\d/, '${path} must contain at least one number')
+          : initSchema;
+      }),
     })
   ),
 };
@@ -47,11 +48,43 @@ export default {
     }
   },
 
+  async getSpec(ctx: Koa.Context) {
+    try {
+      const version = ctx.params.version;
+      const docService = getService('documentation');
+      const specVersion = version || docService.getDocumentationVersion();
+
+      const openAPISpecsPath = path.join(
+        strapi.dirs.app.extensions,
+        'documentation',
+        'documentation',
+        specVersion,
+        'full_documentation.json'
+      );
+
+      if (!fs.existsSync(openAPISpecsPath)) {
+        ctx.status = 404;
+        ctx.body = { error: 'Documentation version not found', version: specVersion };
+        return;
+      }
+
+      const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
+      const parsedSpec = JSON.parse(documentation);
+
+      ctx.body = parsedSpec;
+      ctx.type = 'application/json';
+    } catch (err) {
+      strapi.log.error('Error serving spec:', err);
+      ctx.status = 500;
+      ctx.body = { error: 'Failed to load documentation' };
+    }
+  },
+
   async index(ctx: Koa.Context, next: Koa.Next) {
     try {
       /**
        * We don't expose the specs using koa-static or something else due to security reasons.
-       * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
+       * That's why, we need to read the file locally and send the specs through it when we serve the documentation UI.
        */
       const { major, minor, patch } = ctx.params;
       const version =
@@ -68,13 +101,24 @@ export default {
       );
 
       try {
-        const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
+        // Verify the spec file exists
+        if (!fs.existsSync(openAPISpecsPath)) {
+          ctx.status = 404;
+          ctx.body = 'Documentation not found';
+          return;
+        }
 
         const layout = (await import('../public/index.html')).default;
 
+        // Build the spec URL - use relative path to avoid CORS issues
+        const specUrl = `${strapi.config.server.url}/documentation/spec/${version}`;
+
+        // Scalar uses data-url for spec
+        // All styling is handled via CSS variables in the HTML template
+        // This avoids JSON escaping issues in HTML attributes
         const filledLayout = _.template(layout)({
           backendUrl: strapi.config.server.url,
-          spec: JSON.stringify(JSON.parse(documentation)),
+          specUrl,
         });
 
         try {

@@ -24,6 +24,8 @@
   "notification.generate.success": "Doc generated",
   "notification.update.success": "Settings updated successfully",
   "pages.PluginPage.Button.open": "Open documentation",
+  "pages.PluginPage.openInNewPage": "Open in new page",
+  "pages.PluginPage.title": "API documentation",
   "pages.PluginPage.header.description": "Configure the documentation plugin",
   "pages.PluginPage.table.generated": "Last generated",
   "pages.PluginPage.table.icon.regenerate": "Regenerate {target}",

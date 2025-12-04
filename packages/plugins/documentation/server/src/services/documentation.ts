@@ -2,8 +2,8 @@ import path from 'path';
 import fs from 'fs-extra';
 import { produce } from 'immer';
 import type { Core } from '@strapi/types';
+import { generate as generateOpenAPI } from '@strapi/openapi';
 
-import { builApiEndpointPath, buildComponentSchema } from './helpers';
 import { getPluginsThatNeedDocumentation } from './utils/get-plugins-that-need-documentation';
 import { getService } from '../utils';
 
@@ -106,20 +106,43 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
-     * @description - Creates the Swagger json files
+     * @description - Creates the OpenAPI documentation using @strapi/openapi
      */
     async generateFullDoc(versionOpt?: string) {
       const version = versionOpt ?? this.getDocumentationVersion();
 
-      const apis = this.getPluginAndApiInfo();
-      const apisThatNeedGeneratedDocumentation = apis.filter(
-        ({ name }) => !overrideService.isEnabled(name)
-      );
+      // Use Strapi's built-in OpenAPI generator
+      const { document: generatedOpenAPISpec } = generateOpenAPI(strapi, {
+        type: 'content-api',
+      });
 
-      // Initialize the generated documentation with defaults
+      // Merge with plugin configuration
       const generatedDocumentation = await produce(config, async (draft) => {
-        if (draft.servers?.length === 0) {
-          // When no servers found set the defaults
+        // Start with the generated OpenAPI spec from @strapi/openapi
+        // Merge paths, components, and tags from generated spec
+        draft.openapi = generatedOpenAPISpec.openapi;
+        draft.paths = { ...generatedOpenAPISpec.paths };
+        draft.components = { ...generatedOpenAPISpec.components };
+        draft.tags = generatedOpenAPISpec.tags ? [...generatedOpenAPISpec.tags] : [];
+
+        // Override with plugin config values (info, servers, etc.)
+        if (config.info) {
+          draft.info = {
+            ...generatedOpenAPISpec.info,
+            ...config.info,
+            version, // Use the specified version
+            'x-generation-date': new Date().toISOString(),
+          };
+        } else {
+          draft.info = {
+            ...generatedOpenAPISpec.info,
+            version,
+            'x-generation-date': new Date().toISOString(),
+          };
+        }
+
+        // Set servers if not provided in config
+        if (!draft.servers || draft.servers.length === 0) {
           const serverUrl = strapi.config.get('server.absoluteUrl');
           const apiPath = strapi.config.get('api.rest.prefix');
           draft.servers = [
@@ -130,31 +153,48 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
           ];
         }
 
+        // Ensure components exist
         if (!draft.components) {
           draft.components = {};
         }
 
-        // Set the generated date
-        draft.info['x-generation-date'] = new Date().toISOString();
+        // Merge security schemes from config if provided
+        if (config.components?.securitySchemes) {
+          draft.components.securitySchemes = {
+            ...draft.components.securitySchemes,
+            ...config.components.securitySchemes,
+          };
+        }
+
+        // Add default security scheme if not present
+        if (!draft.components.securitySchemes?.bearerAuth) {
+          draft.components.securitySchemes = {
+            ...draft.components.securitySchemes,
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+            },
+          };
+        }
+
+        // Add default security if not present
+        if (!draft.security) {
+          draft.security = [
+            {
+              bearerAuth: [],
+            },
+          ];
+        }
+
         // Set the plugins that need documentation
-        draft['x-strapi-config'].plugins = pluginsThatNeedDocumentation;
+        draft['x-strapi-config'] = {
+          ...draft['x-strapi-config'],
+          plugins: pluginsThatNeedDocumentation,
+        };
 
         // Delete the mutateDocumentation key from the config so it doesn't end up in the spec
         delete draft['x-strapi-config'].mutateDocumentation;
-
-        // Generate the documentation for each api and update the generatedDocumentation
-        for (const api of apisThatNeedGeneratedDocumentation) {
-          const newApiPath = builApiEndpointPath(api);
-          const generatedSchemas = buildComponentSchema(api);
-
-          if (generatedSchemas) {
-            draft.components.schemas = { ...draft.components.schemas, ...generatedSchemas };
-          }
-
-          if (newApiPath) {
-            draft.paths = { ...draft.paths, ...newApiPath };
-          }
-        }
 
         // When overrides are present update the generatedDocumentation
         if (overrideService.registeredOverrides.length > 0) {

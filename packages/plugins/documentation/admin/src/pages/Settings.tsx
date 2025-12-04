@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Main } from '@strapi/design-system';
 import { useAPIErrorHandler, Page, useNotification } from '@strapi/strapi/admin';
 import { FormikHelpers } from 'formik';
@@ -14,14 +12,11 @@ import type { SettingsInput } from '../types';
 const SettingsPage = () => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
-  const {
-    _unstableFormatAPIError: formatAPIError,
-    _unstableFormatValidationErrors: formatValidationErrors,
-  } = useAPIErrorHandler();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { data, isError, isLoading, isFetching } = useGetInfoQuery();
   const [updateSettings] = useUpdateSettingsMutation();
 
-  const onUpdateSettings = async (body: SettingsInput, formik: FormikHelpers<SettingsInput>) => {
+  const onUpdateSettings = async (body: SettingsInput, _formik: FormikHelpers<SettingsInput>) => {
     return updateSettings({ body })
       .unwrap()
       .then(() => {
