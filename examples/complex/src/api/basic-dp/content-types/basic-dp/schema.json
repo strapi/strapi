@@ -73,7 +73,12 @@
     },
     "sections": {
       "type": "dynamiczone",
-      "components": ["shared.text-block", "shared.media-block"]
+      "components": ["shared.text-block", "shared.media-block", "shared.header"]
+    },
+    "header": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.header"
     }
   }
 }

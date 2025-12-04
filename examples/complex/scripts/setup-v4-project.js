@@ -8,8 +8,18 @@ const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
 const MONOREPO_ROOT = path.resolve(COMPLEX_DIR, '../..');
 const V4_PROJECT_DIR = path.resolve(MONOREPO_ROOT, '..', 'complex-v4');
 
-// From v4 project, find docker-compose file (could be in parent strapi-v5 or current dir)
+// From v4 project, find docker-compose file (could be in monorepo root, parent strapi-v5, or current dir)
 function findDockerComposeFile(v4ProjectDir) {
+  // Try monorepo root (strapi-discard-drafts)
+  const monorepoDockerCompose = path.resolve(
+    v4ProjectDir,
+    '..',
+    'strapi-discard-drafts',
+    'docker-compose.dev.yml'
+  );
+  if (fs.existsSync(monorepoDockerCompose)) {
+    return monorepoDockerCompose;
+  }
   // Try parent directory (strapi-v5)
   const parentDockerCompose = path.resolve(
     v4ProjectDir,
@@ -25,8 +35,8 @@ function findDockerComposeFile(v4ProjectDir) {
   if (fs.existsSync(currentDockerCompose)) {
     return currentDockerCompose;
   }
-  // Return default location
-  return parentDockerCompose;
+  // Return monorepo location as default
+  return monorepoDockerCompose;
 }
 
 const CONTENT_TYPES = [
@@ -373,6 +383,7 @@ CONTENT_TYPES.forEach((contentType) => {
     }
 
     fs.writeFileSync(schemaDest, JSON.stringify(schema, null, 2) + '\n');
+    // TODO: stop removing polymorphic relations
     console.log(`Copied schema for ${contentType} (removed polymorphic relations)`);
   }
 
@@ -563,8 +574,33 @@ function isContainerRunning(serviceName) {
   }
 }
 
+// Check if any postgres container is running on port 5432
+function findRunningPostgresContainer() {
+  try {
+    const output = execSync(
+      \`docker ps --filter "publish=5432" --filter "ancestor=postgres" --format "{{.Names}}"\`,
+      { encoding: 'utf8', stdio: 'pipe' }
+    ).trim();
+    if (output) {
+      return output.split('\\n')[0];
+    }
+  } catch (error) {
+    // Ignore errors
+  }
+  return null;
+}
+
 // Start container if not running
 function ensureContainerRunning(serviceName) {
+  // For postgres, check if there's already a container running on port 5432
+  if (serviceName === 'postgres') {
+    const existingContainer = findRunningPostgresContainer();
+    if (existingContainer) {
+      console.log(\`✅ Using existing postgres container: \${existingContainer}\`);
+      return;
+    }
+  }
+  
   if (isContainerRunning(serviceName)) {
     console.log(\`✅ \${serviceName} container is already running\`);
     return;
@@ -749,8 +785,33 @@ function isContainerRunning(serviceName) {
   }
 }
 
+// Check if any postgres container is running on port 5432
+function findRunningPostgresContainer() {
+  try {
+    const output = execSync(
+      \`docker ps --filter "publish=5432" --filter "ancestor=postgres" --format "{{.Names}}"\`,
+      { encoding: 'utf8', stdio: 'pipe' }
+    ).trim();
+    if (output) {
+      return output.split('\\n')[0];
+    }
+  } catch (error) {
+    // Ignore errors
+  }
+  return null;
+}
+
 // Start container if not running
 function ensureContainerRunning(serviceName) {
+  // For postgres, check if there's already a container running on port 5432
+  if (serviceName === 'postgres') {
+    const existingContainer = findRunningPostgresContainer();
+    if (existingContainer) {
+      console.log(\`✅ Using existing postgres container: \${existingContainer}\`);
+      return;
+    }
+  }
+  
   if (isContainerRunning(serviceName)) {
     console.log(\`✅ \${serviceName} container is already running\`);
     return;

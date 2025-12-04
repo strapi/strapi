@@ -6,6 +6,9 @@
  */
 
 const strapi = require('@strapi/strapi')();
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 
 const INTENTIONAL_INVALID_FOREIGN_KEY_ID = 987654321;
 
@@ -383,6 +386,210 @@ const createMediaBlockComponentForDynamicZone = () => ({
   ...createMediaBlockComponent(),
 });
 
+/**
+ * Creates a simple 1x1 pixel PNG image buffer for testing
+ */
+function createTestImageBuffer() {
+  // Minimal valid PNG: 1x1 pixel, transparent
+  const pngHeader = Buffer.from([
+    0x89,
+    0x50,
+    0x4e,
+    0x47,
+    0x0d,
+    0x0a,
+    0x1a,
+    0x0a, // PNG signature
+    0x00,
+    0x00,
+    0x00,
+    0x0d, // IHDR chunk length
+    0x49,
+    0x48,
+    0x44,
+    0x52, // IHDR
+    0x00,
+    0x00,
+    0x00,
+    0x01, // width: 1
+    0x00,
+    0x00,
+    0x00,
+    0x01, // height: 1
+    0x08,
+    0x06,
+    0x00,
+    0x00,
+    0x00, // bit depth, color type, compression, filter, interlace
+    0x1f,
+    0x15,
+    0xc4,
+    0x89, // CRC
+    0x00,
+    0x00,
+    0x00,
+    0x0a, // IDAT chunk length
+    0x49,
+    0x44,
+    0x41,
+    0x54, // IDAT
+    0x78,
+    0x9c,
+    0x63,
+    0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x05,
+    0x00,
+    0x01, // compressed data
+    0x0d,
+    0x0a,
+    0x2d,
+    0xb4, // CRC
+    0x00,
+    0x00,
+    0x00,
+    0x00, // IEND chunk length
+    0x49,
+    0x45,
+    0x4e,
+    0x44, // IEND
+    0xae,
+    0x42,
+    0x60,
+    0x82, // CRC
+  ]);
+  return pngHeader;
+}
+
+/**
+ * Creates a media file using the upload plugin
+ */
+async function createMediaFile(strapi, options = {}) {
+  // Use a simple, safe filename - avoid hyphens in case they cause issues
+  const index = options.index !== undefined ? options.index : Math.floor(Math.random() * 10000);
+  const name = `testimage${index}.png`;
+  const isDraft = options.isDraft || false;
+
+  try {
+    const fileBuffer = createTestImageBuffer();
+
+    // Create a temporary file for v4 upload API (which requires a filepath)
+    const tempDir = os.tmpdir();
+    const tempFilePath = path.join(tempDir, name);
+    fs.writeFileSync(tempFilePath, fileBuffer);
+
+    try {
+      // The upload service expects originalFilename (camelCase) - see upload.ts line 190
+      // It uses: filename: file.originalFilename ?? 'unamed'
+      // We need to ensure originalFilename is set and is just the filename (no path)
+      const filenameOnly = path.basename(tempFilePath);
+
+      // Debug: verify the filename is valid
+      if (!filenameOnly || filenameOnly.includes('/') || filenameOnly.includes('\\')) {
+        throw new Error(`Invalid filename generated: ${filenameOnly}`);
+      }
+
+      // InputFile extends FormidableFile
+      // Formidable files have: name, path, size, type
+      // The upload service uses: originalFilename (line 190), filepath (line 201), mimetype, size
+      // We need to provide both Formidable properties and upload service properties
+      const file = {
+        filepath: tempFilePath, // Used by upload service (line 201)
+        path: tempFilePath, // Formidable compatibility
+        originalFilename: filenameOnly, // Used by upload service (line 190) - MUST be just filename
+        name: filenameOnly, // Formidable compatibility
+        size: fileBuffer.length,
+        mimetype: 'image/png',
+        type: 'image/png', // Formidable compatibility
+      };
+
+      // Verify the file object structure
+      if (!file.originalFilename) {
+        throw new Error('originalFilename is missing from file object');
+      }
+
+      const uploadResult = await strapi
+        .plugin('upload')
+        .service('upload')
+        .upload({
+          files: file,
+          data: {
+            fileInfo: {
+              alternativeText: `Test image ${name}`,
+              caption: name,
+              name: name.replace('.png', ''),
+            },
+          },
+        });
+
+      const uploadedFile = uploadResult[0];
+
+      // In v4, files don't have draft/publish, but we can track them for testing
+      // For v5 migration testing, we'll create files that will be used by draft components
+      return uploadedFile;
+    } finally {
+      // Clean up temporary file
+      try {
+        if (fs.existsSync(tempFilePath)) {
+          fs.unlinkSync(tempFilePath);
+        }
+      } catch (cleanupError) {
+        // Ignore cleanup errors
+      }
+    }
+  } catch (error) {
+    console.error(`  ⚠️  Failed to create media file ${name}:`, error.message);
+    // Return null if upload fails - this allows the seed to continue
+    return null;
+  }
+}
+
+/**
+ * Creates multiple media files (both for published and draft use)
+ */
+async function createMediaFiles(strapi, count = 5) {
+  console.log(`  📸 Creating ${count} media files...`);
+  const mediaFiles = [];
+  for (let i = 0; i < count; i++) {
+    const file = await createMediaFile(strapi, {
+      index: i + 1,
+      isDraft: i % 2 === 1, // Alternate between draft and published usage
+    });
+    if (file) {
+      mediaFiles.push(file);
+    }
+  }
+  console.log(`  ✅ Created ${mediaFiles.length} media files`);
+  return mediaFiles;
+}
+
+/**
+ * Creates a logo component with a media file reference
+ */
+function createLogoComponent(mediaFileId = null) {
+  return {
+    name: `Logo ${randomString(6)}`,
+    logo: mediaFileId,
+  };
+}
+
+/**
+ * Creates a header component containing a logo component
+ */
+function createHeaderComponent(logoComponent = null) {
+  return {
+    title: `Header ${randomString(6)}`,
+    headerlogo: logoComponent || createLogoComponent(),
+  };
+}
+
+const createHeaderComponentForDynamicZone = (logoComponent = null) => ({
+  __component: 'shared.header',
+  ...createHeaderComponent(logoComponent),
+});
+
 const pickCyclic = (items, index, fallback = null) => {
   if (!Array.isArray(items) || items.length === 0) {
     return fallback ?? null;
@@ -522,10 +729,16 @@ async function updateBasicDpComponentRelations(
       }),
     ];
 
+    // Ensure dynamic zone has components with relations to both draft and published
+    // This tests the bug where components are incorrectly skipped
     const sections = [
       createTextBlockComponentForDynamicZone({
         relatedBasicId: primaryBasic?.id ?? null,
-        relatedBasicDpId: secondTarget?.id ?? firstTarget?.id ?? null, // Dynamic zone can target either
+        relatedBasicDpId: firstTarget?.id ?? null, // First component targets published
+      }),
+      createTextBlockComponentForDynamicZone({
+        relatedBasicId: secondaryBasic?.id ?? primaryBasic?.id ?? null,
+        relatedBasicDpId: secondTarget?.id ?? firstTarget?.id ?? null, // Second component targets draft (or published)
       }),
       createMediaBlockComponentForDynamicZone(),
     ];
@@ -713,22 +926,33 @@ async function seedBasic(strapi) {
  * Seeds draft/publish content with a mix of published entries and drafts so the
  * migration has meaningful data to clone.
  */
-async function seedBasicDp(strapi, basicEntries) {
+async function seedBasicDp(strapi, basicEntries, mediaFiles = []) {
   console.log('Seeding basic-dp...');
   const published = [];
   const drafts = [];
 
   // Create published entries
+  // IMPORTANT: Ensure ALL published entries have media in components to test the bug:
+  // "Image field shows empty in draft but has an image in published"
   for (let i = 0; i < 3; i++) {
     try {
+      // Use media files for published entries - ensure we always have media to test the bug
+      // The bug is: published has media, but after migration, draft version is missing media
+      // The reason for the bug is that the draft media relations point to the published rather than draft media files.
+      const publishedMediaFile = mediaFiles[i % mediaFiles.length] || mediaFiles[0] || null;
+      const publishedLogo = publishedMediaFile ? createLogoComponent(publishedMediaFile.id) : null;
+      const publishedHeader = publishedLogo ? createHeaderComponent(publishedLogo) : null;
+
       const entry = await strapi.entityService.create('api::basic-dp.basic-dp', {
         data: {
           ...createBasicFields(),
           textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
           mediaBlock: createMediaBlockComponent(),
+          header: publishedHeader,
           sections: [
             createTextBlockComponentForDynamicZone(),
             createMediaBlockComponentForDynamicZone(),
+            ...(publishedHeader ? [createHeaderComponentForDynamicZone(publishedLogo)] : []),
           ],
           publishedAt: new Date(),
         },
@@ -748,14 +972,21 @@ async function seedBasicDp(strapi, basicEntries) {
   // Create draft entries
   for (let i = 0; i < 2; i++) {
     try {
+      // Use media files for draft entries - IMPORTANT: use different files to test draft media relations
+      const draftMediaFile = mediaFiles[(i + 3) % mediaFiles.length] || null;
+      const draftLogo = draftMediaFile ? createLogoComponent(draftMediaFile.id) : null;
+      const draftHeader = draftLogo ? createHeaderComponent(draftLogo) : null;
+
       const entry = await strapi.entityService.create('api::basic-dp.basic-dp', {
         data: {
           ...createBasicFields(),
           textBlocks: [createTextBlockComponent(), createTextBlockComponent()],
           mediaBlock: createMediaBlockComponent(),
+          header: draftHeader,
           sections: [
             createTextBlockComponentForDynamicZone(),
             createMediaBlockComponentForDynamicZone(),
+            ...(draftHeader ? [createHeaderComponentForDynamicZone(draftLogo)] : []),
           ],
         },
         // No publishedAt = draft
@@ -957,7 +1188,7 @@ async function seedRelation(strapi, basicEntries, basicDpEntries) {
  * Builds DP relation entries pointing at both draft and published basics so migrations
  * must remap targets in every combination.
  */
-async function seedRelationDp(strapi, basicDpEntries, basicEntries = []) {
+async function seedRelationDp(strapi, basicDpEntries, basicEntries = [], mediaFiles = []) {
   console.log('Seeding relation-dp...');
   const published = [];
   const drafts = [];
@@ -994,6 +1225,11 @@ async function seedRelationDp(strapi, basicDpEntries, basicEntries = []) {
           ? [relatedBasicNoDp, pickCyclic(basicEntries, i + 1, relatedBasicNoDp)].filter(Boolean)
           : [];
 
+      // Use media files for published entries - ensure we always have media to test the bug
+      const publishedMediaFile = mediaFiles[i % mediaFiles.length] || mediaFiles[0] || null;
+      const publishedLogo = publishedMediaFile ? createLogoComponent(publishedMediaFile.id) : null;
+      const publishedHeader = publishedLogo ? createHeaderComponent(publishedLogo) : null;
+
       const entry = await strapi.entityService.create('api::relation-dp.relation-dp', {
         data: {
           name: `Relation DP Published ${i + 1} ${randomString(4)}`,
@@ -1013,11 +1249,13 @@ async function seedRelationDp(strapi, basicDpEntries, basicEntries = []) {
             createTextBlockComponent({ relatedBasicDpId: secondRelatedBasicId }),
           ],
           mediaBlock: createMediaBlockComponent(),
+          header: publishedHeader,
           sections: [
             createTextBlockComponentForDynamicZone({
               relatedBasicDpId: draftTarget?.id ?? firstRelatedBasicId,
             }),
             createMediaBlockComponentForDynamicZone(),
+            ...(publishedHeader ? [createHeaderComponentForDynamicZone(publishedLogo)] : []),
           ],
           publishedAt: new Date(),
         },
@@ -1083,6 +1321,11 @@ async function seedRelationDp(strapi, basicDpEntries, basicEntries = []) {
           ? [relatedBasicNoDp, pickCyclic(basicEntries, i + 1, relatedBasicNoDp)].filter(Boolean)
           : [];
 
+      // Use media files for draft entries - IMPORTANT: use different files to test draft media relations
+      const draftMediaFile = mediaFiles[(i + 5) % mediaFiles.length] || null;
+      const draftLogo = draftMediaFile ? createLogoComponent(draftMediaFile.id) : null;
+      const draftHeader = draftLogo ? createHeaderComponent(draftLogo) : null;
+
       const entry = await strapi.entityService.create('api::relation-dp.relation-dp', {
         data: {
           name: `Relation DP Draft ${i + 1} ${randomString(4)}`,
@@ -1102,11 +1345,13 @@ async function seedRelationDp(strapi, basicDpEntries, basicEntries = []) {
             createTextBlockComponent({ relatedBasicDpId: secondRelatedBasicId }),
           ],
           mediaBlock: createMediaBlockComponent(),
+          header: draftHeader,
           sections: [
             createTextBlockComponentForDynamicZone({
               relatedBasicDpId: draftTarget?.id ?? firstRelatedBasicId,
             }),
             createMediaBlockComponentForDynamicZone(),
+            ...(draftHeader ? [createHeaderComponentForDynamicZone(draftLogo)] : []),
           ],
           // No publishedAt = draft
         },
@@ -1294,13 +1539,16 @@ async function seedRelationDpI18n(strapi, basicDpI18nEntries) {
 async function seedSingleRun(strapi, options = {}) {
   const injectInvalidFk = options.injectInvalidFk === true;
 
+  // Create media files first - these will be used by components in both draft and published entries
+  const mediaFiles = await createMediaFiles(strapi, 10);
+
   const basicEntries = await seedBasic(strapi);
-  const basicDpEntries = await seedBasicDp(strapi, basicEntries);
+  const basicDpEntries = await seedBasicDp(strapi, basicEntries, mediaFiles);
   await updateBasicComponentRelations(strapi, basicEntries, basicDpEntries);
   const basicDpI18nEntries = await seedBasicDpI18n(strapi, basicEntries, basicDpEntries);
 
   const relationEntries = await seedRelation(strapi, basicEntries, basicDpEntries);
-  const relationDpEntries = await seedRelationDp(strapi, basicDpEntries, basicEntries);
+  const relationDpEntries = await seedRelationDp(strapi, basicDpEntries, basicEntries, mediaFiles);
   const relationDpI18nEntries = await seedRelationDpI18n(strapi, basicDpI18nEntries);
 
   if (injectInvalidFk) {
@@ -1318,6 +1566,7 @@ async function seedSingleRun(strapi, options = {}) {
     relationEntries,
     relationDpEntries,
     relationDpI18nEntries,
+    mediaFiles,
   };
 }
 

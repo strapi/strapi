@@ -16,6 +16,25 @@ const DB_PASSWORD = 'strapi';
 
 // Try to find the container name dynamically, fallback to expected name
 function getContainerName() {
+  // First, try to find any running postgres container (most reliable)
+  try {
+    const output = execSync(
+      `docker ps --filter "ancestor=postgres" --filter "status=running" --format "{{.Names}}"`,
+      {
+        encoding: 'utf8',
+      }
+    ).trim();
+    if (output) {
+      const names = output.split('\n').filter((n) => n.trim());
+      if (names.length > 0) {
+        return names[0];
+      }
+    }
+  } catch (error) {
+    // Continue to next method
+  }
+
+  // Second, try docker-compose method
   try {
     const output = execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} ps -q postgres`, {
       cwd: MONOREPO_ROOT,
@@ -29,20 +48,13 @@ function getContainerName() {
       return nameOutput.replace(/^\//, ''); // Remove leading slash
     }
   } catch (error) {
-    // Fallback to expected name pattern
+    // Continue to fallback
   }
-  // Fallback: try to find by image name
-  try {
-    const output = execSync(`docker ps --filter "ancestor=postgres" --format "{{.Names}}"`, {
-      encoding: 'utf8',
-    }).trim();
-    if (output) {
-      return output.split('\n')[0];
-    }
-  } catch (error) {
-    // Continue to default
-  }
-  return 'strapi-v5_postgres_1';
+
+  // Final fallback: try to get project name from docker-compose file location
+  // Docker Compose uses the directory name as the project name by default
+  const projectName = path.basename(MONOREPO_ROOT).replace(/-/g, '_');
+  return `${projectName}_postgres_1`;
 }
 
 const command = process.argv[2];
@@ -151,6 +163,20 @@ switch (command) {
     break;
 
   case 'wipe':
+    // Ensure container is running first
+    console.log('Ensuring postgres container is running...');
+    try {
+      execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} up -d postgres`, {
+        stdio: 'inherit',
+        cwd: MONOREPO_ROOT,
+      });
+      // Wait a moment for container to be ready
+      execSync('sleep 2', { stdio: 'inherit' });
+    } catch (error) {
+      console.error(`Error starting postgres container: ${error.message}`);
+      process.exit(1);
+    }
+
     console.log('Wiping postgres database...');
     {
       const containerName = getContainerName();

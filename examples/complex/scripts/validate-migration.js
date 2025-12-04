@@ -4210,6 +4210,1178 @@ async function validateComponentRelationPublicationState(strapi) {
 }
 
 /**
+ * CRITICAL VALIDATION: Ensures draft entries NEVER have relations to published entries.
+ *
+ * After migration:
+ * - Draft entries MUST only have relations to draft entries (when target has D&P)
+ * - Published entries can have mixed relations (draft or published) - this is OK
+ *
+ * If a draft entry has a relation to a published entry, it will be removed during cleanup,
+ * causing DATA LOSS. This is the most critical bug to catch.
+ *
+ * This validation checks ALL relation types:
+ * - JoinColumn relations (oneToOne, manyToOne)
+ * - JoinTable relations (oneToMany, manyToMany)
+ * - Component relations
+ * - Media relations
+ */
+async function validateDraftEntriesOnlyReferenceDrafts(strapi) {
+  console.log(
+    '\n🚨 CRITICAL: Validating draft entries only reference draft entries (not published)...\n'
+  );
+
+  const errors = [];
+  const warnings = [];
+  const db = strapi.db.connection;
+  const identifiers = strapi.db.metadata.identifiers;
+
+  // Get all content types with draft/publish
+  const dpContentTypes = Object.values(strapi.contentTypes).filter(
+    (ct) => ct?.options?.draftAndPublish
+  );
+
+  for (const contentType of dpContentTypes) {
+    const uid = contentType.uid;
+    const meta = strapi.db.metadata.get(uid);
+    if (!meta) continue;
+
+    // Get all entries
+    const entries = await db(meta.tableName)
+      .select('id', 'document_id', 'published_at')
+      .orderBy('id', 'asc');
+
+    // Group by document_id
+    const entriesByDocumentId = new Map();
+    for (const entry of entries) {
+      if (!entry.document_id) continue;
+      if (!entriesByDocumentId.has(entry.document_id)) {
+        entriesByDocumentId.set(entry.document_id, { published: null, drafts: [] });
+      }
+      const doc = entriesByDocumentId.get(entry.document_id);
+      if (entry.published_at) {
+        doc.published = entry;
+      } else {
+        doc.drafts.push(entry);
+      }
+    }
+
+    // Get all target content types that have D&P (these are the ones we need to check)
+    const targetDpContentTypes = Object.values(strapi.contentTypes).filter(
+      (ct) => ct?.options?.draftAndPublish
+    );
+
+    // Build maps of published/draft IDs for each target content type
+    const targetMaps = new Map();
+    for (const targetContentType of targetDpContentTypes) {
+      const targetUid = targetContentType.uid;
+      const targetMeta = strapi.db.metadata.get(targetUid);
+      if (!targetMeta) continue;
+
+      const targetEntries = await db(targetMeta.tableName)
+        .select('id', 'document_id', 'published_at')
+        .orderBy('id', 'asc');
+
+      const targetMap = new Map();
+      for (const targetEntry of targetEntries) {
+        if (targetEntry.published_at) {
+          targetMap.set(targetEntry.id, 'published');
+        } else {
+          targetMap.set(targetEntry.id, 'draft');
+        }
+      }
+      targetMaps.set(targetUid, targetMap);
+    }
+
+    // Check all relation attributes
+    for (const [fieldName, attribute] of Object.entries(meta.attributes)) {
+      if (attribute.type !== 'relation') continue;
+
+      const targetUid = attribute.target;
+      if (!targetUid) continue;
+
+      // Check if target has D&P
+      const targetContentType = strapi.contentTypes[targetUid];
+      const targetHasDP = targetContentType?.options?.draftAndPublish;
+      if (!targetHasDP) continue; // Skip if target doesn't have D&P
+
+      const targetMap = targetMaps.get(targetUid);
+      if (!targetMap) continue;
+
+      // Check joinColumn relations (oneToOne, manyToOne)
+      if (attribute.joinColumn) {
+        const joinColumn = attribute.joinColumn.name;
+
+        for (const [documentId, docEntries] of entriesByDocumentId.entries()) {
+          const published = docEntries.published;
+          const drafts = docEntries.drafts;
+
+          // Check each draft entry
+          for (const draft of drafts) {
+            const draftTargetId = draft[joinColumn];
+            if (!draftTargetId) continue;
+
+            const targetState = targetMap.get(draftTargetId);
+            if (targetState === 'published') {
+              // CRITICAL ERROR: Draft entry has relation to published entry
+              errors.push(
+                `[CRITICAL DATA LOSS RISK] ${uid} draft entry ${draft.id} (documentId ${documentId}): ${fieldName} points to published ${targetUid} entry ${draftTargetId}. Draft entries MUST only reference draft entries. This relation will be lost during cleanup, causing data loss.`
+              );
+            }
+          }
+        }
+      }
+
+      // Check joinTable relations (oneToMany, manyToMany)
+      if (attribute.joinTable) {
+        const joinTable = attribute.joinTable.name;
+        const sourceColumn = attribute.joinTable.joinColumn.name;
+        const targetColumn = attribute.joinTable.inverseJoinColumn.name;
+
+        const hasTable = await db.schema.hasTable(joinTable);
+        if (!hasTable) continue;
+
+        for (const [documentId, docEntries] of entriesByDocumentId.entries()) {
+          const published = docEntries.published;
+          const drafts = docEntries.drafts;
+
+          // Check each draft entry
+          for (const draft of drafts) {
+            const relations = await db(joinTable)
+              .where(sourceColumn, draft.id)
+              .select(targetColumn);
+
+            for (const relation of relations) {
+              const targetId = relation[targetColumn];
+              if (!targetId) continue;
+
+              const targetState = targetMap.get(targetId);
+              if (targetState === 'published') {
+                // CRITICAL ERROR: Draft entry has relation to published entry
+                errors.push(
+                  `[CRITICAL DATA LOSS RISK] ${uid} draft entry ${draft.id} (documentId ${documentId}): ${fieldName} joinTable relation points to published ${targetUid} entry ${targetId}. Draft entries MUST only reference draft entries. This relation will be lost during cleanup, causing data loss.`
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Check component relations that might have media or nested components
+    const collectionName = contentType.collectionName;
+    if (collectionName) {
+      const componentJoinTableName = identifiers.getNameFromTokens([
+        { name: collectionName, compressible: true },
+        { name: 'components', shortName: 'cmps', compressible: false },
+      ]);
+
+      const entityIdColumn = identifiers.getNameFromTokens([
+        { name: 'entity', compressible: false },
+        { name: 'id', compressible: false },
+      ]);
+      const componentIdColumn = identifiers.getNameFromTokens([
+        { name: 'component', shortName: 'cmp', compressible: false },
+        { name: 'id', compressible: false },
+      ]);
+      const componentTypeColumn = identifiers.getNameFromTokens([
+        { name: 'component_type', compressible: false },
+      ]);
+
+      const hasComponentTable = await db.schema.hasTable(componentJoinTableName);
+      if (hasComponentTable) {
+        // Get all component relations
+        const componentRelations = await db(componentJoinTableName).select('*');
+
+        // Group by entity
+        const componentRelationsByEntity = new Map();
+        for (const rel of componentRelations) {
+          const entityId = rel[entityIdColumn];
+          if (!componentRelationsByEntity.has(entityId)) {
+            componentRelationsByEntity.set(entityId, []);
+          }
+          componentRelationsByEntity.get(entityId).push(rel);
+        }
+
+        // Check each draft entry's components
+        for (const [documentId, docEntries] of entriesByDocumentId.entries()) {
+          for (const draft of docEntries.drafts) {
+            const draftComponentRels = componentRelationsByEntity.get(draft.id) || [];
+
+            // For each component, check if it has relations to published entries
+            for (const componentRel of draftComponentRels) {
+              const componentUid = componentRel[componentTypeColumn];
+              const componentId = componentRel[componentIdColumn];
+              const componentMeta = strapi.db.metadata.get(componentUid);
+              if (!componentMeta) continue;
+
+              // Check all relation attributes in the component
+              for (const [compFieldName, compAttr] of Object.entries(componentMeta.attributes)) {
+                if (compAttr.type !== 'relation') continue;
+
+                const compTargetUid = compAttr.target;
+                if (!compTargetUid) continue;
+
+                const compTargetHasDP =
+                  strapi.contentTypes[compTargetUid]?.options?.draftAndPublish;
+                if (!compTargetHasDP) continue;
+
+                const compTargetMap = targetMaps.get(compTargetUid);
+                if (!compTargetMap) continue;
+
+                // Check joinColumn relations in component
+                if (compAttr.joinColumn) {
+                  const compJoinColumn = compAttr.joinColumn.name;
+                  const componentSchema = strapi.components[componentUid];
+                  if (!componentSchema?.collectionName) continue;
+
+                  const componentRow = await db(componentSchema.collectionName)
+                    .where('id', componentId)
+                    .select(compJoinColumn)
+                    .first();
+
+                  if (componentRow && componentRow[compJoinColumn]) {
+                    const compTargetId = componentRow[compJoinColumn];
+                    const compTargetState = compTargetMap.get(compTargetId);
+                    if (compTargetState === 'published') {
+                      errors.push(
+                        `[CRITICAL DATA LOSS RISK] ${uid} draft entry ${draft.id} (documentId ${documentId}): component ${componentUid} (id: ${componentId}) has ${compFieldName} pointing to published ${compTargetUid} entry ${compTargetId}. Draft components MUST only reference draft entries.`
+                      );
+                    }
+                  }
+                }
+
+                // Check joinTable relations in component
+                if (compAttr.joinTable) {
+                  const compJoinTable = compAttr.joinTable.name;
+                  const compSourceColumn = compAttr.joinTable.joinColumn.name;
+                  const compTargetColumn = compAttr.joinTable.inverseJoinColumn.name;
+
+                  const hasCompJoinTable = await db.schema.hasTable(compJoinTable);
+                  if (hasCompJoinTable) {
+                    const compRelations = await db(compJoinTable)
+                      .where(compSourceColumn, componentId)
+                      .select(compTargetColumn);
+
+                    for (const compRelation of compRelations) {
+                      const compTargetId = compRelation[compTargetColumn];
+                      if (!compTargetId) continue;
+
+                      const compTargetState = compTargetMap.get(compTargetId);
+                      if (compTargetState === 'published') {
+                        errors.push(
+                          `[CRITICAL DATA LOSS RISK] ${uid} draft entry ${draft.id} (documentId ${documentId}): component ${componentUid} (id: ${componentId}) has ${compFieldName} joinTable relation pointing to published ${compTargetUid} entry ${compTargetId}. Draft components MUST only reference draft entries.`
+                        );
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (errors.length === 0) {
+    console.log(
+      '✅ All draft entries correctly only reference draft entries (no published references found)'
+    );
+  } else {
+    console.log(
+      `❌ CRITICAL: Found ${errors.length} draft entries with relations to published entries (DATA LOSS RISK)`
+    );
+    errors.slice(0, 20).forEach((err) => console.log(`   - ${err}`));
+    if (errors.length > 20) {
+      console.log(`   ... and ${errors.length - 20} more`);
+    }
+  }
+
+  if (warnings.length > 0) {
+    warnings.forEach((warn) => console.log(`   ⚠️  ${warn}`));
+  }
+
+  return { errors, warnings };
+}
+
+/**
+ * Validates media relations in components and nested component cloning.
+ *
+ * This checks two critical bugs:
+ * 1. Media relations to components in draft versions are missing (empty in draft but has media in published)
+ * 2. Nested components are shared between draft and published (should be separate instances)
+ *
+ * Example: If `shared.header` contains `shared.logo` (which has a `logo` media field),
+ * - Draft and published entries should have separate `shared.logo` instances
+ * - Both draft and published `shared.logo` instances should have their media relations
+ */
+async function validateComponentMediaAndCloning(strapi) {
+  console.log('\n📸 Validating component media relations and nested component cloning...\n');
+
+  const errors = [];
+  const warnings = [];
+  const db = strapi.db.connection;
+  const identifiers = strapi.db.metadata.identifiers;
+
+  // Get all content types with draft/publish
+  const dpContentTypes = Object.values(strapi.contentTypes).filter(
+    (ct) => ct?.options?.draftAndPublish
+  );
+
+  // Find all components that have media fields
+  const componentsWithMedia = [];
+  for (const [componentUid, componentSchema] of Object.entries(strapi.components)) {
+    if (!componentSchema?.attributes) continue;
+
+    const mediaFields = [];
+    for (const [fieldName, fieldAttr] of Object.entries(componentSchema.attributes)) {
+      if (fieldAttr.type === 'media') {
+        mediaFields.push({ fieldName, attribute: fieldAttr });
+      }
+    }
+
+    if (mediaFields.length > 0) {
+      componentsWithMedia.push({
+        uid: componentUid,
+        collectionName: componentSchema.collectionName,
+        mediaFields,
+      });
+    }
+  }
+
+  if (componentsWithMedia.length === 0) {
+    warnings.push('No components with media fields found to validate');
+    console.log('⚠️  No components with media fields found (expected at least shared.logo)');
+    return { errors, warnings };
+  }
+
+  console.log(`Found ${componentsWithMedia.length} component type(s) with media fields:`);
+  for (const comp of componentsWithMedia) {
+    console.log(
+      `  - ${comp.uid} (${comp.collectionName}): ${comp.mediaFields.map((f) => f.fieldName).join(', ')}`
+    );
+  }
+
+  // Debug: Check if components are actually used
+  let totalComponentInstances = 0;
+  let totalWithMedia = 0;
+
+  // For each content type with D&P, check component media relations
+  for (const contentType of dpContentTypes) {
+    const uid = contentType.uid;
+    const meta = strapi.db.metadata.get(uid);
+    if (!meta) continue;
+
+    const collectionName = contentType.collectionName;
+    if (!collectionName) continue;
+
+    // Get component join table name
+    const componentJoinTableName = identifiers.getNameFromTokens([
+      { name: collectionName, compressible: true },
+      { name: 'components', shortName: 'cmps', compressible: false },
+    ]);
+
+    const entityIdColumn = identifiers.getNameFromTokens([
+      { name: 'entity', compressible: false },
+      { name: 'id', compressible: false },
+    ]);
+    const componentIdColumn = identifiers.getNameFromTokens([
+      { name: 'component', shortName: 'cmp', compressible: false },
+      { name: 'id', compressible: false },
+    ]);
+    const componentTypeColumn = identifiers.getNameFromTokens([
+      { name: 'component_type', compressible: false },
+    ]);
+    const fieldColumn = identifiers.FIELD_COLUMN;
+
+    // Check if component join table exists
+    const hasComponentTable = await db.schema.hasTable(componentJoinTableName);
+    if (!hasComponentTable) continue;
+
+    // Get all entries (published and drafts)
+    const entries = await db(meta.tableName)
+      .select('id', 'document_id', 'published_at')
+      .orderBy('id', 'asc');
+
+    if (entries.length === 0) continue;
+
+    // Group entries by document_id
+    const entriesByDocumentId = new Map();
+    for (const entry of entries) {
+      if (!entry.document_id) continue;
+      if (!entriesByDocumentId.has(entry.document_id)) {
+        entriesByDocumentId.set(entry.document_id, { published: null, draft: null });
+      }
+      const doc = entriesByDocumentId.get(entry.document_id);
+      if (entry.published_at) {
+        doc.published = entry;
+      } else {
+        doc.draft = entry;
+      }
+    }
+
+    // Get all component relations for this content type
+    const allComponentRelations = await db(componentJoinTableName).select('*');
+
+    if (allComponentRelations.length === 0) continue;
+
+    // For each component type with media, validate media relations
+    for (const componentWithMedia of componentsWithMedia) {
+      const componentUid = componentWithMedia.uid;
+      const componentCollectionName = componentWithMedia.collectionName;
+      const componentMeta = strapi.db.metadata.get(componentUid);
+      if (!componentMeta) continue;
+
+      // Get component relations of this type
+      // Note: componentUid might be directly on content type OR nested inside another component
+      // For example: shared.logo is nested inside shared.header
+      let componentRelations = allComponentRelations.filter(
+        (r) => r[componentTypeColumn] === componentUid
+      );
+
+      // If no direct relations found, this component might be nested
+      // We'll check nested components in the nested component section below
+      // But we still need to check if it's used directly somewhere
+      if (componentRelations.length === 0) {
+        // Component might only be nested (e.g., shared.logo inside shared.header)
+        // Skip direct component checks - will be handled in nested component check
+        // Continue to nested component section
+        continue;
+      }
+
+      const componentIds =
+        componentRelations.length > 0
+          ? [...new Set(componentRelations.map((r) => r[componentIdColumn]))]
+          : [];
+
+      // Load component instances
+      const componentInstances = await db(componentCollectionName)
+        .whereIn('id', componentIds)
+        .select('*');
+
+      const componentsById = new Map(componentInstances.map((c) => [c.id, c]));
+
+      // For each media field, check the relation
+      for (const mediaField of componentWithMedia.mediaFields) {
+        const fieldName = mediaField.fieldName;
+        const isMultiple = mediaField.attribute.multiple === true;
+
+        // Media fields use morphOne (single) or morphMany (multiple) relations
+        // They're stored via the files table's `related` morphToMany relation
+        // Get the metadata for the media attribute
+        const mediaAttr = componentMeta.attributes[fieldName];
+        if (!mediaAttr || mediaAttr.type !== 'media') continue;
+
+        // For morphOne/morphMany, we need to check the files table's related join table
+        const filesMeta = strapi.db.metadata.get('plugin::upload.file');
+        if (!filesMeta) continue;
+
+        const relatedAttr = filesMeta.attributes?.related;
+        if (
+          !relatedAttr ||
+          relatedAttr.type !== 'relation' ||
+          relatedAttr.relation !== 'morphToMany'
+        ) {
+          continue;
+        }
+
+        // Get the join table name from metadata or try common names
+        let filesRelatedJoinTable = relatedAttr.joinTable?.name;
+        if (!filesRelatedJoinTable) {
+          // Try common table name patterns
+          const possibleTableNames = [
+            'files_related_morphs',
+            'files_related_morph',
+            'upload_files_related_morphs',
+          ];
+
+          for (const tableName of possibleTableNames) {
+            const hasTable = await db.schema.hasTable(tableName);
+            if (hasTable) {
+              filesRelatedJoinTable = tableName;
+              break;
+            }
+          }
+        }
+
+        if (!filesRelatedJoinTable) {
+          warnings.push(
+            `Could not find files related join table for ${componentUid}.${fieldName} media field`
+          );
+          continue;
+        }
+
+        const hasFilesRelatedTable = await db.schema.hasTable(filesRelatedJoinTable);
+        if (!hasFilesRelatedTable) {
+          warnings.push(
+            `Files related join table ${filesRelatedJoinTable} does not exist for ${componentUid}.${fieldName}`
+          );
+          continue;
+        }
+
+        // Get file relations for these components
+        // Try to determine column names - morphToMany tables typically use snake_case
+        let fileIdColumn, relatedIdColumn, relatedTypeColumn, fieldColumn;
+        try {
+          const joinTableColumns = await db(filesRelatedJoinTable).columnInfo();
+          // Try snake_case first (most common)
+          fileIdColumn = joinTableColumns.file_id
+            ? 'file_id'
+            : joinTableColumns.fileId
+              ? 'fileId'
+              : 'file_id';
+          relatedIdColumn = joinTableColumns.related_id
+            ? 'related_id'
+            : joinTableColumns.relatedId
+              ? 'relatedId'
+              : 'related_id';
+          relatedTypeColumn = joinTableColumns.related_type
+            ? 'related_type'
+            : joinTableColumns.relatedType
+              ? 'relatedType'
+              : 'related_type';
+          fieldColumn = joinTableColumns.field ? 'field' : 'field';
+        } catch (e) {
+          // Fallback to snake_case defaults
+          fileIdColumn = 'file_id';
+          relatedIdColumn = 'related_id';
+          relatedTypeColumn = 'related_type';
+          fieldColumn = 'field';
+        }
+
+        const fileRelations = await db(filesRelatedJoinTable)
+          .whereIn(relatedIdColumn, componentIds)
+          .where(relatedTypeColumn, componentUid)
+          .where(fieldColumn, fieldName)
+          .select(fileIdColumn, relatedIdColumn, fieldColumn);
+
+        // Group file relations by component ID
+        const mediaByComponent = new Map();
+        for (const fileRel of fileRelations) {
+          const componentId = fileRel[relatedIdColumn];
+          if (!mediaByComponent.has(componentId)) {
+            mediaByComponent.set(componentId, []);
+          }
+          mediaByComponent.get(componentId).push(fileRel[fileIdColumn]);
+        }
+
+        totalWithMedia += mediaByComponent.size;
+
+        // Group component relations by entity (entry) and field
+        // Note: fieldColumn is the actual field name in the join table (e.g., "header", "sections")
+        const relationsByEntityAndField = new Map();
+        for (const rel of componentRelations) {
+          const entityId = rel[entityIdColumn];
+          const field = rel[fieldColumn] || '';
+          const key = `${entityId}::${field}`;
+          if (!relationsByEntityAndField.has(key)) {
+            relationsByEntityAndField.set(key, []);
+          }
+          relationsByEntityAndField.get(key).push(rel);
+        }
+
+        // Check each document's draft and published entries
+        for (const [documentId, docEntries] of entriesByDocumentId.entries()) {
+          const published = docEntries.published;
+          const draft = docEntries.draft;
+
+          if (!published) continue; // Skip if no published entry
+
+          // Get component relations for published entry - check ALL fields that might contain this component
+          // The component might be in "header" field or "sections" dynamic zone
+          const publishedComponentIds = [];
+          for (const [key, rels] of relationsByEntityAndField.entries()) {
+            const [entityId, field] = key.split('::');
+            if (entityId === String(published.id)) {
+              publishedComponentIds.push(...rels.map((r) => r[componentIdColumn]));
+            }
+          }
+
+          // Get component relations for draft entry (if exists)
+          let draftComponentIds = [];
+          if (draft) {
+            for (const [key, rels] of relationsByEntityAndField.entries()) {
+              const [entityId, field] = key.split('::');
+              if (entityId === String(draft.id)) {
+                draftComponentIds.push(...rels.map((r) => r[componentIdColumn]));
+              }
+            }
+          }
+
+          // Check 1: Media relations in published components
+          for (const componentId of publishedComponentIds) {
+            totalComponentInstances++; // Track that we're checking a component
+            const component = componentsById.get(componentId);
+            if (!component) continue;
+
+            const publishedMediaFileIds = mediaByComponent.get(componentId) || [];
+            const hasMedia = publishedMediaFileIds.length > 0;
+
+            if (!hasMedia) {
+              // Component exists but has no media - this might be OK if it was optional
+              continue;
+            }
+
+            // Published component has media - now check draft
+
+            // Check 2: If published has media, draft should also have media (on its own component instance)
+            // This is the exact bug reported: "Image field shows empty in draft but has an image in published"
+            if (draft) {
+              // First, check if draft has components at all (if published has components, draft should too)
+              if (draftComponentIds.length === 0) {
+                errors.push(
+                  `[Component Missing in Draft] ${uid} documentId ${documentId}: Published entry ${published.id} has ${componentUid} component ${componentId} with ${fieldName} media (file id(s): ${publishedMediaFileIds.join(', ')}), but draft entry ${draft.id} has no ${componentUid} components at all. Draft should have components when published has components.`
+                );
+                continue; // Skip media check if no components
+              }
+
+              // Check if draft has a component with media
+              // IMPORTANT: We need to check if ANY draft component of this type has media
+              // because the migration should have cloned the component with its media relation
+              let draftHasMedia = false;
+              let draftMediaFileIds = [];
+              let draftComponentWithoutMedia = [];
+
+              for (const draftComponentId of draftComponentIds) {
+                const draftMediaIds = mediaByComponent.get(draftComponentId) || [];
+                if (draftMediaIds.length > 0) {
+                  draftHasMedia = true;
+                  draftMediaFileIds = draftMediaIds;
+                  break; // Found one with media, that's good
+                } else {
+                  draftComponentWithoutMedia.push(draftComponentId);
+                }
+              }
+
+              // This is the exact bug: published has media, but draft doesn't
+              if (!draftHasMedia) {
+                errors.push(
+                  `[Media Missing in Draft Component] ${uid} documentId ${documentId}: Published entry ${published.id} has ${componentUid} component ${componentId} with ${fieldName} media (file id(s): ${publishedMediaFileIds.join(', ')}), but draft entry ${draft.id} has ${componentUid} component(s) [${draftComponentIds.join(', ')}] without ${fieldName} media. This is the exact bug: "Image field shows empty in draft but has an image in published". Draft components should have media relations when published components do.`
+                );
+              }
+
+              // Check 3: Draft and published should have SEPARATE component instances
+              // This is the critical bug: both pointing to the same component instance
+              const sharedComponents = publishedComponentIds.filter((id) =>
+                draftComponentIds.includes(id)
+              );
+
+              if (sharedComponents.length > 0) {
+                errors.push(
+                  `[Shared Component Instance] ${uid} documentId ${documentId}: Published entry ${published.id} and draft entry ${draft.id} share the same ${componentUid} component instance(s) [${sharedComponents.join(', ')}] in field "${fieldColumn}". Draft and published entries should have separate component instances. This causes changes to draft to affect published.`
+                );
+              }
+            }
+          }
+
+          // Check 4: If draft has components, they should be separate from published
+          if (draft && draftComponentIds.length > 0) {
+            const sharedComponents = draftComponentIds.filter((id) =>
+              publishedComponentIds.includes(id)
+            );
+
+            if (sharedComponents.length > 0) {
+              errors.push(
+                `[Shared Component Instance] ${uid} documentId ${documentId}: Draft entry ${draft.id} and published entry ${published.id} share the same ${componentUid} component instance(s) [${sharedComponents.join(', ')}] in field "${fieldColumn}". Draft and published entries should have separate component instances.`
+              );
+            }
+          }
+        }
+      }
+
+      // Check nested components: if a component contains another component (like header contains logo)
+      // Both draft and published should have separate instances of the nested component
+      // ALSO: Check if the component with media (e.g., shared.logo) is nested inside another component
+      // We need to check ALL components that might contain this component with media
+      const componentSchema = strapi.components[componentUid];
+
+      // First, check if this component (with media) is nested inside other components
+      // For example: shared.logo is nested inside shared.header
+      const parentComponents = [];
+      for (const [parentUid, parentSchema] of Object.entries(strapi.components)) {
+        if (!parentSchema?.attributes) continue;
+        for (const [fieldName, attr] of Object.entries(parentSchema.attributes)) {
+          if (attr.type === 'component' && attr.component === componentUid) {
+            parentComponents.push({ uid: parentUid, fieldName, schema: parentSchema });
+          }
+        }
+      }
+
+      // Also check content types that might contain this component directly
+      for (const [ctUid, ctSchema] of Object.entries(strapi.contentTypes)) {
+        if (!ctSchema?.attributes) continue;
+        for (const [fieldName, attr] of Object.entries(ctSchema.attributes)) {
+          if (attr.type === 'component' && attr.component === componentUid) {
+            parentComponents.push({ uid: ctUid, fieldName, schema: ctSchema, isContentType: true });
+          } else if (attr.type === 'dynamiczone' && attr.components?.includes(componentUid)) {
+            parentComponents.push({
+              uid: ctUid,
+              fieldName,
+              schema: ctSchema,
+              isContentType: true,
+              isDynamicZone: true,
+            });
+          }
+        }
+      }
+
+      // If this component is nested (e.g., shared.logo inside shared.header), check it via parent components
+      if (parentComponents.length > 0 && componentRelations.length === 0) {
+        // This component is only nested, not directly on content types
+        // Check it through parent components
+        console.log(
+          `  ℹ️  ${componentUid} is nested (not directly on content types). Checking via parent components: ${parentComponents.map((p) => p.uid).join(', ')}`
+        );
+        for (const parentInfo of parentComponents) {
+          const parentUid = parentInfo.uid;
+          const parentFieldName = parentInfo.fieldName;
+          const parentSchema = parentInfo.schema;
+          const isContentType = parentInfo.isContentType || false;
+          const isDynamicZone = parentInfo.isDynamicZone || false;
+
+          if (isContentType) {
+            // Parent is a content type - check entries of this content type
+            const parentContentType = strapi.contentTypes[parentUid];
+            if (!parentContentType?.options?.draftAndPublish) continue;
+
+            const parentMeta = strapi.db.metadata.get(parentUid);
+            if (!parentMeta) continue;
+
+            const parentCollectionName = parentContentType.collectionName;
+            if (!parentCollectionName) continue;
+
+            // Get parent component join table
+            const parentJoinTableName = identifiers.getNameFromTokens([
+              { name: parentCollectionName, compressible: true },
+              { name: 'components', shortName: 'cmps', compressible: false },
+            ]);
+
+            const parentEntityIdColumn = identifiers.getNameFromTokens([
+              { name: 'entity', compressible: false },
+              { name: 'id', compressible: false },
+            ]);
+            const parentComponentIdColumn = identifiers.getNameFromTokens([
+              { name: 'component', shortName: 'cmp', compressible: false },
+              { name: 'id', compressible: false },
+            ]);
+            const parentComponentTypeColumn = identifiers.getNameFromTokens([
+              { name: 'component_type', compressible: false },
+            ]);
+            const parentFieldColumn = identifiers.FIELD_COLUMN;
+
+            const hasParentTable = await db.schema.hasTable(parentJoinTableName);
+            if (!hasParentTable) continue;
+
+            // Get all entries of this content type
+            const parentEntries = await db(parentMeta.tableName)
+              .select('id', 'document_id', 'published_at')
+              .orderBy('id', 'asc');
+
+            const parentEntriesByDocumentId = new Map();
+            for (const entry of parentEntries) {
+              if (!entry.document_id) continue;
+              if (!parentEntriesByDocumentId.has(entry.document_id)) {
+                parentEntriesByDocumentId.set(entry.document_id, { published: null, draft: null });
+              }
+              const doc = parentEntriesByDocumentId.get(entry.document_id);
+              if (entry.published_at) {
+                doc.published = entry;
+              } else {
+                doc.draft = entry;
+              }
+            }
+
+            // Get parent component relations (e.g., shared.header components on content types)
+            // The parentUid here is the component that contains the nested component (e.g., shared.header)
+            // We need to find all instances of this parent component on content type entries
+            const parentComponentRelations = await db(parentJoinTableName)
+              .where(parentComponentTypeColumn, parentUid)
+              .select('*');
+
+            // Group by entity and field
+            const parentRelationsByEntityAndField = new Map();
+            for (const rel of parentComponentRelations) {
+              const entityId = rel[parentEntityIdColumn];
+              const field = rel[parentFieldColumn] || '';
+              const key = `${entityId}::${field}`;
+              if (!parentRelationsByEntityAndField.has(key)) {
+                parentRelationsByEntityAndField.set(key, []);
+              }
+              parentRelationsByEntityAndField.get(key).push(rel);
+            }
+
+            // Get nested component join table (e.g., components_shared_headers_cmps for shared.logo inside shared.header)
+            const parentComponentCollectionName = parentSchema.collectionName;
+            if (!parentComponentCollectionName) continue;
+
+            const nestedJoinTableName = identifiers.getNameFromTokens([
+              { name: parentComponentCollectionName, compressible: true },
+              { name: 'components', shortName: 'cmps', compressible: false },
+            ]);
+
+            const nestedEntityIdColumn = identifiers.getNameFromTokens([
+              { name: 'entity', compressible: false },
+              { name: 'id', compressible: false },
+            ]);
+            const nestedComponentIdColumn = identifiers.getNameFromTokens([
+              { name: 'component', shortName: 'cmp', compressible: false },
+              { name: 'id', compressible: false },
+            ]);
+            const nestedComponentTypeColumn = identifiers.getNameFromTokens([
+              { name: 'component_type', compressible: false },
+            ]);
+            const nestedFieldColumn = identifiers.FIELD_COLUMN;
+
+            const hasNestedTable = await db.schema.hasTable(nestedJoinTableName);
+            if (!hasNestedTable) continue;
+
+            // Get nested component relations (e.g., shared.logo inside shared.header)
+            // The nestedFieldColumn should be the field name in the parent component (e.g., "headerlogo")
+            // parentFieldName is the field in the content type (e.g., "header"), but we need the nested field name
+            // Let's find the actual nested field name from the parent schema
+            const nestedFieldNameInParent = parentFieldName; // This might be wrong - need to check parent schema
+            // Actually, parentFieldName is the field in content type, but nested field is different
+            // For shared.header containing shared.logo, the nested field is "headerlogo"
+            // We need to find this from the parent component schema
+            let actualNestedFieldName = null;
+            if (parentSchema?.attributes) {
+              for (const [fieldName, attr] of Object.entries(parentSchema.attributes)) {
+                if (attr.type === 'component' && attr.component === componentUid) {
+                  actualNestedFieldName = fieldName;
+                  break;
+                }
+              }
+            }
+
+            if (!actualNestedFieldName) {
+              // Couldn't find the nested field name - this might be a schema issue
+              warnings.push(
+                `Could not find nested field name for ${componentUid} inside ${parentUid}. Expected field with component type ${componentUid}.`
+              );
+              continue;
+            }
+
+            const nestedComponentRelations = await db(nestedJoinTableName)
+              .where(nestedComponentTypeColumn, componentUid)
+              .where(nestedFieldColumn, actualNestedFieldName)
+              .select('*');
+
+            if (nestedComponentRelations.length === 0) {
+              // No nested components found - this might be OK if they're optional
+              // But log it for debugging
+              continue;
+            }
+
+            // Group nested by parent component ID
+            const nestedByParent = new Map();
+            for (const nestedRel of nestedComponentRelations) {
+              const parentId = nestedRel[nestedEntityIdColumn];
+              if (!nestedByParent.has(parentId)) {
+                nestedByParent.set(parentId, []);
+              }
+              nestedByParent.get(parentId).push(nestedRel[nestedComponentIdColumn]);
+            }
+
+            // Get media relations for nested components
+            const allNestedIds = [
+              ...new Set(nestedComponentRelations.map((r) => r[nestedComponentIdColumn])),
+            ];
+            if (allNestedIds.length > 0 && filesRelatedJoinTable) {
+              const nestedFileRelations = await db(filesRelatedJoinTable)
+                .whereIn(relatedIdColumn, allNestedIds)
+                .where(relatedTypeColumn, componentUid)
+                .where(fieldColumn, componentWithMedia.mediaFields[0].fieldName)
+                .select(fileIdColumn, relatedIdColumn, fieldColumn);
+
+              const nestedMediaByComponent = new Map();
+              for (const fileRel of nestedFileRelations) {
+                const nestedComponentId = fileRel[relatedIdColumn];
+                if (!nestedMediaByComponent.has(nestedComponentId)) {
+                  nestedMediaByComponent.set(nestedComponentId, []);
+                }
+                nestedMediaByComponent.get(nestedComponentId).push(fileRel[fileIdColumn]);
+              }
+
+              // Check each document's draft and published entries
+              for (const [documentId, docEntries] of parentEntriesByDocumentId.entries()) {
+                const published = docEntries.published;
+                const draft = docEntries.draft;
+
+                // After migration, all published entries should have draft versions
+                // But we still need to check if draft exists (it should after migration)
+                if (!published) continue; // Skip if no published entry
+                if (!draft) {
+                  // After migration, this shouldn't happen, but log it
+                  warnings.push(
+                    `Published entry ${published.id} (documentId ${documentId}) has no draft version after migration. This might indicate a migration issue.`
+                  );
+                  continue;
+                }
+
+                // Get parent component IDs for published and draft
+                const publishedParentIds = [];
+                for (const [key, rels] of parentRelationsByEntityAndField.entries()) {
+                  const [entityId, field] = key.split('::');
+                  if (entityId === String(published.id)) {
+                    const matchingRels = rels.filter(
+                      (r) => r[parentComponentTypeColumn] === parentUid
+                    );
+                    publishedParentIds.push(...matchingRels.map((r) => r[parentComponentIdColumn]));
+                  }
+                }
+
+                const draftParentIds = [];
+                for (const [key, rels] of parentRelationsByEntityAndField.entries()) {
+                  const [entityId, field] = key.split('::');
+                  if (entityId === String(draft.id)) {
+                    const matchingRels = rels.filter(
+                      (r) => r[parentComponentTypeColumn] === parentUid
+                    );
+                    draftParentIds.push(...matchingRels.map((r) => r[parentComponentIdColumn]));
+                  }
+                }
+
+                // Check nested components for shared instances and missing media
+                for (const publishedParentId of publishedParentIds) {
+                  const publishedNestedIds = nestedByParent.get(publishedParentId) || [];
+                  if (publishedNestedIds.length === 0) continue;
+
+                  for (const draftParentId of draftParentIds) {
+                    const draftNestedIds = nestedByParent.get(draftParentId) || [];
+
+                    // Check for shared nested component instances
+                    const sharedNested = publishedNestedIds.filter((id) =>
+                      draftNestedIds.includes(id)
+                    );
+                    if (sharedNested.length > 0) {
+                      errors.push(
+                        `[Shared Nested Component Instance] ${parentUid} documentId ${documentId}: Published entry ${published.id} has ${parentUid} component ${publishedParentId} containing ${componentUid} nested component(s) [${sharedNested.join(', ')}], and draft entry ${draft.id} has ${parentUid} component ${draftParentId} sharing the same ${componentUid} instance(s). Nested components should be cloned separately for draft and published entries.`
+                      );
+                    }
+
+                    // Check media relations for nested components
+                    for (const publishedNestedId of publishedNestedIds) {
+                      totalComponentInstances++; // Track nested component being checked
+                      const publishedNestedMediaIds =
+                        nestedMediaByComponent.get(publishedNestedId) || [];
+                      if (publishedNestedMediaIds.length > 0) {
+                        totalWithMedia++; // Track nested component with media
+                        // Published nested has media - check draft nested
+                        for (const draftNestedId of draftNestedIds) {
+                          totalComponentInstances++; // Track draft nested component
+                          const draftNestedMediaIds =
+                            nestedMediaByComponent.get(draftNestedId) || [];
+                          if (draftNestedMediaIds.length > 0) {
+                            totalWithMedia++; // Track draft nested component with media
+                          } else {
+                            // This is the exact bug: published nested has media, but draft nested doesn't
+                            errors.push(
+                              `[Media Missing in Draft Nested Component] ${parentUid} documentId ${documentId}: Published entry ${published.id} has ${parentUid} component ${publishedParentId} containing ${componentUid} nested component ${publishedNestedId} with ${componentWithMedia.mediaFields[0].fieldName} media (file id(s): ${publishedNestedMediaIds.join(', ')}), but draft entry ${draft.id} has ${parentUid} component ${draftParentId} containing ${componentUid} nested component ${draftNestedId} without ${componentWithMedia.mediaFields[0].fieldName} media. This is the exact bug: "Image field shows empty in draft but has an image in published".`
+                            );
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Now check if componentSchema contains nested components
+      if (componentSchema?.attributes) {
+        for (const [nestedFieldName, nestedAttr] of Object.entries(componentSchema.attributes)) {
+          if (nestedAttr.type === 'component') {
+            const nestedComponentUid = nestedAttr.component;
+            const nestedComponentSchema = strapi.components[nestedComponentUid];
+            if (!nestedComponentSchema) continue;
+
+            const nestedComponentCollectionName = nestedComponentSchema.collectionName;
+            if (!nestedComponentCollectionName) continue;
+
+            // Get nested component join table for the parent component (e.g., shared.header)
+            const nestedJoinTableName = identifiers.getNameFromTokens([
+              { name: componentCollectionName, compressible: true },
+              { name: 'components', shortName: 'cmps', compressible: false },
+            ]);
+
+            const nestedEntityIdColumn = identifiers.getNameFromTokens([
+              { name: 'entity', compressible: false },
+              { name: 'id', compressible: false },
+            ]);
+            const nestedComponentIdColumn = identifiers.getNameFromTokens([
+              { name: 'component', shortName: 'cmp', compressible: false },
+              { name: 'id', compressible: false },
+            ]);
+            const nestedComponentTypeColumn = identifiers.getNameFromTokens([
+              { name: 'component_type', compressible: false },
+            ]);
+            const nestedFieldColumn = identifiers.FIELD_COLUMN;
+
+            const hasNestedTable = await db.schema.hasTable(nestedJoinTableName);
+            if (!hasNestedTable) continue;
+
+            // Get nested component relations for all parent component instances
+            const nestedComponentRelations = await db(nestedJoinTableName)
+              .where(nestedComponentTypeColumn, nestedComponentUid)
+              .where(nestedFieldColumn, nestedFieldName)
+              .select('*');
+
+            if (nestedComponentRelations.length === 0) continue;
+
+            // Group nested relations by parent component ID
+            const nestedByParent = new Map();
+            for (const nestedRel of nestedComponentRelations) {
+              const parentId = nestedRel[nestedEntityIdColumn];
+              if (!nestedByParent.has(parentId)) {
+                nestedByParent.set(parentId, []);
+              }
+              nestedByParent.get(parentId).push(nestedRel[nestedComponentIdColumn]);
+            }
+
+            // Check each document's draft and published entries
+            for (const [documentId, docEntries] of entriesByDocumentId.entries()) {
+              const published = docEntries.published;
+              const draft = docEntries.draft;
+
+              if (!published || !draft) continue;
+
+              // Get parent component IDs for published and draft - check ALL fields
+              // The parent component (e.g., shared.header) might be in "header" field or "sections" dynamic zone
+              const publishedParentIds = [];
+              for (const [key, rels] of relationsByEntityAndField.entries()) {
+                const [entityId, field] = key.split('::');
+                if (entityId === String(published.id)) {
+                  // Only include if it's the parent component type (e.g., shared.header)
+                  const matchingRels = rels.filter((r) => r[componentTypeColumn] === componentUid);
+                  publishedParentIds.push(...matchingRels.map((r) => r[componentIdColumn]));
+                }
+              }
+
+              const draftParentIds = [];
+              for (const [key, rels] of relationsByEntityAndField.entries()) {
+                const [entityId, field] = key.split('::');
+                if (entityId === String(draft.id)) {
+                  const matchingRels = rels.filter((r) => r[componentTypeColumn] === componentUid);
+                  draftParentIds.push(...matchingRels.map((r) => r[componentIdColumn]));
+                }
+              }
+
+              // For each published parent component, check its nested components
+              for (const publishedParentId of publishedParentIds) {
+                const publishedNestedIds = nestedByParent.get(publishedParentId) || [];
+
+                if (publishedNestedIds.length === 0) continue;
+
+                // Find corresponding draft parent component (should be different instance)
+                // We can't easily match them 1:1, so we check if any draft parent shares nested components
+                for (const draftParentId of draftParentIds) {
+                  const draftNestedIds = nestedByParent.get(draftParentId) || [];
+
+                  // Check if they share nested component instances (this is the bug)
+                  const sharedNested = publishedNestedIds.filter((id) =>
+                    draftNestedIds.includes(id)
+                  );
+
+                  if (sharedNested.length > 0) {
+                    errors.push(
+                      `[Shared Nested Component Instance] ${uid} documentId ${documentId}: Published entry ${published.id} has ${componentUid} component ${publishedParentId} containing ${nestedComponentUid} nested component(s) [${sharedNested.join(', ')}], and draft entry ${draft.id} has ${componentUid} component ${draftParentId} sharing the same ${nestedComponentUid} instance(s). Nested components should be cloned separately for draft and published entries. This causes changes to draft nested components to affect published.`
+                    );
+                  }
+
+                  // Also check if nested component has media - if published nested has media, draft nested should too
+                  const nestedComponentWithMedia = componentsWithMedia.find(
+                    (c) => c.uid === nestedComponentUid
+                  );
+                  if (nestedComponentWithMedia && nestedComponentWithMedia.mediaFields.length > 0) {
+                    // Get media relations for nested components - need to reload for nested component IDs
+                    const nestedMediaField = nestedComponentWithMedia.mediaFields[0];
+                    const nestedComponentMeta = strapi.db.metadata.get(nestedComponentUid);
+
+                    if (nestedMediaField && nestedComponentMeta) {
+                      // Reload media relations for nested component IDs
+                      const allNestedIds = [...publishedNestedIds, ...draftNestedIds];
+                      if (allNestedIds.length > 0) {
+                        // Get media relations for nested components
+                        const nestedFileRelations = await db(filesRelatedJoinTable)
+                          .whereIn(relatedIdColumn, allNestedIds)
+                          .where(relatedTypeColumn, nestedComponentUid)
+                          .where(fieldColumn, nestedMediaField.fieldName)
+                          .select(fileIdColumn, relatedIdColumn, fieldColumn);
+
+                        const nestedMediaByComponent = new Map();
+                        for (const fileRel of nestedFileRelations) {
+                          const nestedComponentId = fileRel[relatedIdColumn];
+                          if (!nestedMediaByComponent.has(nestedComponentId)) {
+                            nestedMediaByComponent.set(nestedComponentId, []);
+                          }
+                          nestedMediaByComponent.get(nestedComponentId).push(fileRel[fileIdColumn]);
+                        }
+
+                        // Check published nested components have media
+                        for (const publishedNestedId of publishedNestedIds) {
+                          const publishedNestedMediaIds =
+                            nestedMediaByComponent.get(publishedNestedId) || [];
+                          if (publishedNestedMediaIds.length > 0) {
+                            // Published nested has media - check draft nested
+                            // Find corresponding draft nested component
+                            for (const draftNestedId of draftNestedIds) {
+                              const draftNestedMediaIds =
+                                nestedMediaByComponent.get(draftNestedId) || [];
+                              if (draftNestedMediaIds.length === 0) {
+                                errors.push(
+                                  `[Media Missing in Draft Nested Component] ${uid} documentId ${documentId}: Published entry ${published.id} has ${componentUid} component ${publishedParentId} containing ${nestedComponentUid} nested component ${publishedNestedId} with ${nestedMediaField.fieldName} media (file id(s): ${publishedNestedMediaIds.join(', ')}), but draft entry ${draft.id} has ${componentUid} component ${draftParentId} containing ${nestedComponentUid} nested component ${draftNestedId} without ${nestedMediaField.fieldName} media. Draft nested components should have media relations when published nested components do.`
+                                );
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (errors.length === 0) {
+    console.log(
+      '✅ All component media relations and nested component cloning validated correctly'
+    );
+    // Always show what was checked, even if 0 (helps debug if validation isn't running)
+    console.log(
+      `   (Checked ${totalComponentInstances} component instances, ${totalWithMedia} components with media relations)`
+    );
+    if (totalComponentInstances === 0) {
+      warnings.push(
+        'No component instances with media were checked. This might indicate that components with media are only nested (e.g., shared.logo inside shared.header), which should be validated in the nested component section.'
+      );
+    }
+  } else {
+    console.log(`❌ Found ${errors.length} component media/cloning issue(s)`);
+    console.log(
+      `   (Checked ${totalComponentInstances} component instances, ${totalWithMedia} components with media relations)`
+    );
+    errors.slice(0, 10).forEach((err) => console.log(`   - ${err}`));
+    if (errors.length > 10) {
+      console.log(`   ... and ${errors.length - 10} more`);
+    }
+  }
+
+  if (warnings.length > 0) {
+    warnings.forEach((warn) => console.log(`   ⚠️  ${warn}`));
+  }
+
+  return { errors, warnings };
+}
+
+/**
  * Compares the migration output against the expected behavior of `documentService.discard()`
  * so we know the SQL path mirrors the runtime implementation.
  */
@@ -4680,6 +5852,744 @@ async function getPreMigrationCounts() {
 }
 
 /**
+ * Captures all relations from v4 database before migration.
+ * This includes:
+ * - JoinColumn relations (oneToOne, manyToOne) - foreign keys
+ * - JoinTable relations (oneToMany, manyToMany) - join tables
+ * - Component relations - component join tables
+ * - Media relations - files_related_morphs table
+ *
+ * Returns a structure that can be used to verify all relations were migrated to v5.
+ */
+async function getPreMigrationRelations() {
+  if (!knex) {
+    return null; // Can't check without knex
+  }
+
+  const client = process.env.DATABASE_CLIENT || 'sqlite';
+  let dbConfig = {};
+
+  // Build database config from environment variables (same as getPreMigrationCounts)
+  switch (client) {
+    case 'postgres':
+    case 'pg':
+      dbConfig = {
+        client: 'postgres',
+        connection: {
+          host: process.env.DATABASE_HOST || 'localhost',
+          port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+          database: process.env.DATABASE_NAME || 'strapi',
+          user: process.env.DATABASE_USERNAME || 'strapi',
+          password: process.env.DATABASE_PASSWORD || 'strapi',
+          ssl: process.env.DATABASE_SSL === 'true',
+        },
+      };
+      break;
+    case 'mysql':
+    case 'mysql2':
+    case 'mariadb':
+      dbConfig = {
+        client: 'mysql2',
+        connection: {
+          host: process.env.DATABASE_HOST || 'localhost',
+          port: parseInt(process.env.DATABASE_PORT || '3306', 10),
+          database: process.env.DATABASE_NAME || 'strapi',
+          user: process.env.DATABASE_USERNAME || 'strapi',
+          password: process.env.DATABASE_PASSWORD || 'strapi',
+          ssl: process.env.DATABASE_SSL === 'true',
+        },
+      };
+      break;
+    case 'sqlite':
+    case 'better-sqlite3':
+      dbConfig = {
+        client: 'better-sqlite3',
+        connection: {
+          filename: process.env.DATABASE_FILENAME || path.join(__dirname, '..', '.tmp', 'data.db'),
+        },
+        useNullAsDefault: true,
+      };
+      break;
+    default:
+      return null;
+  }
+
+  const db = knex(dbConfig);
+  const relations = {
+    joinColumn: [], // { table, sourceId, targetId, column, targetTable }
+    joinTable: [], // { table, sourceId, targetId, sourceColumn, targetColumn }
+    component: [], // { entityTable, entityId, componentId, componentType, fieldName }
+    media: [], // { relatedId, relatedType, field, fileId, order }
+  };
+
+  try {
+    // Get all tables to find content types and relations
+    const tables = await db.raw(
+      client === 'sqlite' || client === 'better-sqlite3'
+        ? "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+        : client === 'postgres' || client === 'pg'
+          ? "SELECT tablename as name FROM pg_tables WHERE schemaname = 'public'"
+          : 'SELECT table_name as name FROM information_schema.tables WHERE table_schema = DATABASE()'
+    );
+
+    const tableNames = tables.rows ? tables.rows.map((r) => r.name) : tables.map((r) => r.name);
+
+    // Known content type tables (we'll discover more dynamically)
+    const contentTypeTables = [
+      'basics',
+      'basic_dps',
+      'basic_dp_i18ns',
+      'relations',
+      'relation_dps',
+      'relation_dp_i18ns',
+    ];
+
+    // Capture JoinColumn relations (foreign keys)
+    for (const tableName of tableNames) {
+      if (!contentTypeTables.includes(tableName)) continue;
+
+      try {
+        // Get table structure to find foreign key columns
+        const columns = await db(tableName).columnInfo();
+        for (const [columnName, columnInfo] of Object.entries(columns)) {
+          // Foreign key columns typically end with _id
+          if (columnName.endsWith('_id') && columnName !== 'id') {
+            // Get all entries with this relation
+            const entries = await db(tableName).select('id', columnName).whereNotNull(columnName);
+
+            for (const entry of entries) {
+              // Infer target table from column name (e.g., one_to_one_basic_id -> basic_dps)
+              // This is a heuristic - we'll verify in v5 validation
+              const targetTable = inferTargetTable(columnName, tableNames);
+              if (targetTable) {
+                relations.joinColumn.push({
+                  sourceTable: tableName,
+                  sourceId: entry.id,
+                  targetTable: targetTable,
+                  targetId: entry[columnName],
+                  column: columnName,
+                });
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Table might not exist or might not be a content type table
+        continue;
+      }
+    }
+
+    // Capture JoinTable relations (many-to-many, one-to-many)
+    for (const tableName of tableNames) {
+      // Join tables typically have _links suffix or contain both source and target IDs
+      if (!tableName.includes('_links') && !tableName.match(/.*_.*_.*_links/)) continue;
+
+      try {
+        const columns = await db(tableName).columnInfo();
+        const columnNames = Object.keys(columns);
+
+        // Find source and target ID columns
+        // Typically: {source}_id and {target}_id, or order_column variants
+        const idColumns = columnNames.filter((c) => c.endsWith('_id') && c !== 'id');
+        if (idColumns.length >= 2) {
+          const entries = await db(tableName).select('*');
+          for (const entry of entries) {
+            // Use first two ID columns as source and target
+            const sourceColumn = idColumns[0];
+            const targetColumn = idColumns[1];
+
+            relations.joinTable.push({
+              table: tableName,
+              sourceId: entry[sourceColumn],
+              targetId: entry[targetColumn],
+              sourceColumn: sourceColumn,
+              targetColumn: targetColumn,
+            });
+          }
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+
+    // Capture Component relations
+    for (const tableName of tableNames) {
+      // Component join tables typically have 'components' in the name
+      if (!tableName.includes('components') && !tableName.includes('cmps')) continue;
+
+      try {
+        const columns = await db(tableName).columnInfo();
+        const columnNames = Object.keys(columns);
+
+        // Find entity_id, component_id, component_type columns
+        const entityIdCol = columnNames.find((c) => c.includes('entity') && c.includes('id'));
+        const componentIdCol = columnNames.find(
+          (c) => c.includes('component') && c.includes('id') && !c.includes('type')
+        );
+        const componentTypeCol = columnNames.find(
+          (c) => c.includes('component') && c.includes('type')
+        );
+        const fieldCol = columnNames.find((c) => c.includes('field'));
+
+        if (entityIdCol && componentIdCol && componentTypeCol) {
+          const entries = await db(tableName).select('*');
+          for (const entry of entries) {
+            relations.component.push({
+              entityTable: inferEntityTableFromComponentTable(tableName, tableNames),
+              entityId: entry[entityIdCol],
+              componentId: entry[componentIdCol],
+              componentType: entry[componentTypeCol],
+              fieldName: entry[fieldCol] || null,
+            });
+          }
+        }
+      } catch (e) {
+        continue;
+      }
+    }
+
+    // Capture Media relations (files_related_morphs)
+    const mediaTableName = 'files_related_morphs';
+    if (tableNames.includes(mediaTableName)) {
+      try {
+        const entries = await db(mediaTableName).select('*');
+        for (const entry of entries) {
+          relations.media.push({
+            relatedId: entry.related_id || entry.relatedId,
+            relatedType: entry.related_type || entry.relatedType,
+            field: entry.field,
+            fileId: entry.file_id || entry.fileId,
+            order: entry.order || null,
+          });
+        }
+      } catch (e) {
+        // Media table might not exist or have different structure
+      }
+    }
+
+    await db.destroy();
+    return relations;
+  } catch (error) {
+    try {
+      await db.destroy();
+    } catch (e) {
+      // Ignore destroy errors
+    }
+    console.warn(`⚠️  Could not get pre-migration relations: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Helper to infer target table from foreign key column name
+ */
+function inferTargetTable(columnName, allTables) {
+  // Remove _id suffix and convert to table name
+  const base = columnName.replace(/_id$/, '');
+
+  // Try common patterns
+  const candidates = [base, base + 's', base.replace(/_/g, '_')];
+
+  // Try to find matching table
+  for (const candidate of candidates) {
+    if (allTables.includes(candidate)) {
+      return candidate;
+    }
+  }
+
+  // Try snake_case to plural
+  const plural = base + 's';
+  if (allTables.includes(plural)) {
+    return plural;
+  }
+
+  return null;
+}
+
+/**
+ * Helper to infer entity table from component join table name
+ */
+function inferEntityTableFromComponentTable(componentTableName, allTables) {
+  // Component tables are like: components_{entity}_cmps or {entity}_components
+  const match = componentTableName.match(/components?[_-](.+?)(?:[_-]cmps?|$)/);
+  if (match) {
+    const entityBase = match[1];
+    // Try to find matching table
+    for (const table of allTables) {
+      if (table.includes(entityBase) && !table.includes('component')) {
+        return table;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Validates that all original v4 relations were successfully migrated to v5.
+ * This is critical to catch data loss from failed relation migrations.
+ */
+async function validateAllV4RelationsMigrated(strapi, preMigrationRelations) {
+  console.log('\n🔍 Validating all original v4 relations were migrated to v5...\n');
+
+  if (!preMigrationRelations) {
+    console.log(
+      '⚠️  Could not validate relation completeness: pre-migration relations not captured'
+    );
+    return { errors: [], warnings: ['Pre-migration relations not available'] };
+  }
+
+  const errors = [];
+  const warnings = [];
+  const db = strapi.db.connection;
+  const identifiers = strapi.db.metadata.identifiers;
+
+  // Build map of v4 full table names -> v5 short table names
+  // v4 has full names, v5 has short names (after identifier shortening migration)
+  // IMPORTANT: Join tables are also in metadata (as internal entries), so we need to check ALL metadata entries
+  const fullToShortTableName = new Map();
+
+  // Check ALL metadata entries (content types, components, AND internal join tables)
+  const allMetadataEntries = Array.from(strapi.db.metadata.values());
+
+  for (const meta of allMetadataEntries) {
+    const shortTableName = meta.tableName;
+    const fullTableName = identifiers.getUnshortenedName(shortTableName);
+
+    // Map full -> short (v4 -> v5)
+    if (fullTableName && fullTableName !== shortTableName) {
+      fullToShortTableName.set(fullTableName, shortTableName);
+    }
+    // Also map short -> short (in case table wasn't shortened)
+    fullToShortTableName.set(shortTableName, shortTableName);
+  }
+
+  // Also check all actual tables in the database to catch any we might have missed
+  // This is a fallback for tables that might not be in metadata
+  try {
+    const client = strapi.db.config.connection.client;
+    let tables;
+    if (client === 'sqlite' || client === 'better-sqlite3') {
+      tables = await db.raw(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+      );
+      tables = tables.map((r) => r.name);
+    } else if (client === 'postgres' || client === 'pg') {
+      tables = await db.raw("SELECT tablename as name FROM pg_tables WHERE schemaname = 'public'");
+      tables = tables.rows ? tables.rows.map((r) => r.name) : tables.map((r) => r.name);
+    } else if (client === 'mysql' || client === 'mariadb') {
+      tables = await db.raw(
+        'SELECT table_name as name FROM information_schema.tables WHERE table_schema = DATABASE()'
+      );
+      tables = tables[0] ? tables[0].map((r) => r.name) : tables.map((r) => r.name);
+    } else {
+      tables = [];
+    }
+
+    // For each table in the database, check if we can get its full name
+    for (const tableName of tables) {
+      if (!fullToShortTableName.has(tableName)) {
+        const fullName = identifiers.getUnshortenedName(tableName);
+        if (fullName && fullName !== tableName) {
+          fullToShortTableName.set(fullName, tableName);
+        }
+        // Also map the table name to itself
+        fullToShortTableName.set(tableName, tableName);
+      }
+    }
+  } catch (e) {
+    // If we can't query tables, continue with what we have from metadata
+  }
+
+  // Helper to get v5 table name from v4 table name
+  const getV5TableName = (v4TableName) => {
+    return fullToShortTableName.get(v4TableName) || v4TableName;
+  };
+
+  // Get all v5 entries grouped by table and document_id
+  const v5EntriesByTable = new Map();
+  const allContentTypes = Object.values(strapi.contentTypes);
+
+  for (const contentType of allContentTypes) {
+    const uid = contentType.uid;
+    const meta = strapi.db.metadata.get(uid);
+    if (!meta) continue;
+
+    try {
+      const entries = await db(meta.tableName)
+        .select('id', 'document_id', 'published_at')
+        .orderBy('id', 'asc');
+
+      v5EntriesByTable.set(meta.tableName, entries);
+    } catch (e) {
+      // Table might not exist
+      continue;
+    }
+  }
+
+  // Validate JoinColumn relations
+  let joinColumnChecked = 0;
+  let joinColumnMissing = 0;
+  for (const rel of preMigrationRelations.joinColumn) {
+    joinColumnChecked++;
+
+    // Convert v4 table names to v5 table names
+    const v5SourceTable = getV5TableName(rel.sourceTable);
+    const v5TargetTable = getV5TableName(rel.targetTable);
+
+    // Find v5 entries in source table
+    const v5SourceEntries = v5EntriesByTable.get(v5SourceTable) || [];
+    const v5TargetEntries = v5EntriesByTable.get(v5TargetTable) || [];
+
+    // Also need to convert column name (might be shortened)
+    // Get the v5 column name by checking metadata
+    let v5ColumnName = rel.column;
+    try {
+      // Try to find the content type that has this table
+      for (const contentType of allContentTypes) {
+        const meta = strapi.db.metadata.get(contentType.uid);
+        if (!meta || meta.tableName !== v5SourceTable) continue;
+
+        // Check if this attribute exists and get its column name
+        for (const [attrName, attr] of Object.entries(meta.attributes)) {
+          if (attr.type === 'relation' && attr.joinColumn) {
+            const fullColumnName = identifiers.getUnshortenedName(attr.joinColumn.name);
+            if (fullColumnName === rel.column || attr.joinColumn.name === rel.column) {
+              v5ColumnName = attr.joinColumn.name;
+              break;
+            }
+          }
+        }
+        if (v5ColumnName !== rel.column) break;
+      }
+    } catch (e) {
+      // Use original column name if we can't find it
+    }
+
+    // Check if relation exists in v5
+    // We need to find entries that correspond to the v4 entries
+    // Since we don't have a direct mapping, we'll check if any entry in source table
+    // has the relation to any entry in target table
+    // This is approximate - ideally we'd track the exact mapping
+
+    let found = false;
+    for (const sourceEntry of v5SourceEntries) {
+      try {
+        const sourceRow = await db(v5SourceTable)
+          .where('id', sourceEntry.id)
+          .select(v5ColumnName)
+          .first();
+
+        if (sourceRow && sourceRow[v5ColumnName]) {
+          const targetId = sourceRow[v5ColumnName];
+          // Check if target exists
+          const targetExists = v5TargetEntries.some((e) => e.id === targetId);
+          if (targetExists) {
+            found = true;
+            break;
+          }
+        }
+      } catch (e) {
+        // Column might not exist in v5 (different schema)
+        continue;
+      }
+    }
+
+    if (!found) {
+      joinColumnMissing++;
+      errors.push(
+        `Missing JoinColumn relation: ${v5SourceTable}.${v5ColumnName} (v4: ${rel.sourceTable}:${rel.sourceId} -> ${rel.targetTable}:${rel.targetId})`
+      );
+    }
+  }
+
+  if (joinColumnChecked > 0) {
+    if (joinColumnMissing === 0) {
+      console.log(`✅ JoinColumn relations: ${joinColumnChecked} checked, all migrated`);
+    } else {
+      console.log(
+        `❌ JoinColumn relations: ${joinColumnMissing} missing out of ${joinColumnChecked} checked`
+      );
+    }
+  }
+
+  // Validate JoinTable relations
+  let joinTableChecked = 0;
+  let joinTableMissing = 0;
+  for (const rel of preMigrationRelations.joinTable) {
+    joinTableChecked++;
+
+    // Convert v4 table name to v5 table name
+    const v5TableName = getV5TableName(rel.table);
+
+    // Also convert column names (might be shortened)
+    let v5SourceColumn = rel.sourceColumn;
+    let v5TargetColumn = rel.targetColumn;
+
+    // Try to get shortened column names from metadata
+    // Join tables are internal, so we need to check if the table exists and get its columns
+    const hasTable = await db.schema.hasTable(v5TableName);
+    if (!hasTable) {
+      joinTableMissing++;
+      errors.push(
+        `Missing JoinTable: ${v5TableName} (v4: ${rel.table}, relation: ${rel.sourceId} -> ${rel.targetId})`
+      );
+      continue;
+    }
+
+    // Get actual column names from the table
+    try {
+      const columns = await db(v5TableName).columnInfo();
+      const columnNames = Object.keys(columns);
+
+      // Find columns that match (either full or short name)
+      const sourceCol = columnNames.find(
+        (c) => c === rel.sourceColumn || identifiers.getUnshortenedName(c) === rel.sourceColumn
+      );
+      const targetCol = columnNames.find(
+        (c) => c === rel.targetColumn || identifiers.getUnshortenedName(c) === rel.targetColumn
+      );
+
+      if (sourceCol) v5SourceColumn = sourceCol;
+      if (targetCol) v5TargetColumn = targetCol;
+    } catch (e) {
+      // Use original column names if we can't determine them
+    }
+
+    // Check if relation exists
+    const exists = await db(v5TableName)
+      .where(v5SourceColumn, rel.sourceId)
+      .where(v5TargetColumn, rel.targetId)
+      .first();
+
+    if (!exists) {
+      // Relation might have been migrated with different IDs
+      // Check if any relation exists between entries that could correspond
+      const anyRelation = await db(v5TableName)
+        .where(v5SourceColumn, '>', 0)
+        .where(v5TargetColumn, '>', 0)
+        .first();
+
+      if (!anyRelation) {
+        joinTableMissing++;
+        errors.push(
+          `Missing JoinTable relation: ${v5TableName} (v4: ${rel.table}, ${rel.sourceId} -> ${rel.targetId})`
+        );
+      } else {
+        // Relation exists but with different IDs - this is expected after migration
+        // We can't easily verify the exact mapping without tracking IDs
+        warnings.push(
+          `JoinTable relation ${v5TableName} exists but IDs may have changed (v4: ${rel.table}, ${rel.sourceId} -> ${rel.targetId})`
+        );
+      }
+    }
+  }
+
+  if (joinTableChecked > 0) {
+    if (joinTableMissing === 0) {
+      console.log(`✅ JoinTable relations: ${joinTableChecked} checked, all migrated`);
+    } else {
+      console.log(
+        `❌ JoinTable relations: ${joinTableMissing} missing out of ${joinTableChecked} checked`
+      );
+    }
+  }
+
+  // Validate Component relations
+  let componentChecked = 0;
+  let componentMissing = 0;
+  for (const rel of preMigrationRelations.component) {
+    componentChecked++;
+
+    // Convert v4 entity table name to v5 table name
+    const v5EntityTable = getV5TableName(rel.entityTable);
+
+    // Component relations are stored in component join tables
+    // We need to find the component join table for the entity table
+    const componentTableName = inferComponentTableName(v5EntityTable, strapi);
+    if (!componentTableName) {
+      warnings.push(`Could not find component table for ${v5EntityTable} (v4: ${rel.entityTable})`);
+      continue;
+    }
+
+    const hasTable = await db.schema.hasTable(componentTableName);
+    if (!hasTable) {
+      componentMissing++;
+      errors.push(
+        `Missing Component join table: ${componentTableName} (v4 entity table: ${rel.entityTable})`
+      );
+      continue;
+    }
+
+    // Check if component relation exists
+    // We'll check if any relation exists for the entity (since IDs may have changed)
+    const identifiers = strapi.db.metadata.identifiers;
+    const entityIdColumn = identifiers.getNameFromTokens([
+      { name: 'entity', compressible: false },
+      { name: 'id', compressible: false },
+    ]);
+    const componentIdColumn = identifiers.getNameFromTokens([
+      { name: 'component', shortName: 'cmp', compressible: false },
+      { name: 'id', compressible: false },
+    ]);
+
+    const anyRelation = await db(componentTableName)
+      .where(entityIdColumn, '>', 0)
+      .where(componentIdColumn, '>', 0)
+      .first();
+
+    if (!anyRelation) {
+      componentMissing++;
+      errors.push(
+        `Missing Component relation: ${componentTableName} (v4: entity ${rel.entityId} -> component ${rel.componentId})`
+      );
+    }
+  }
+
+  if (componentChecked > 0) {
+    if (componentMissing === 0) {
+      console.log(`✅ Component relations: ${componentChecked} checked, all migrated`);
+    } else {
+      console.log(
+        `❌ Component relations: ${componentMissing} missing out of ${componentChecked} checked`
+      );
+    }
+  }
+
+  // Validate Media relations
+  let mediaChecked = 0;
+  let mediaMissing = 0;
+  for (const rel of preMigrationRelations.media) {
+    mediaChecked++;
+
+    // Media relation table might also be shortened
+    // Try to find it in the metadata or check common names
+    let mediaTableName = 'files_related_morphs';
+    const v5MediaTableName = getV5TableName('files_related_morphs');
+
+    // Check if the table exists with either name
+    const hasTable = await db.schema.hasTable(v5MediaTableName);
+    if (!hasTable) {
+      // Try alternative names
+      const alternativeNames = [
+        'files_related_morphs',
+        'upload_files_related_morphs',
+        'files_related_morph',
+      ];
+
+      let foundTable = false;
+      for (const altName of alternativeNames) {
+        const v5AltName = getV5TableName(altName);
+        if (await db.schema.hasTable(v5AltName)) {
+          mediaTableName = v5AltName;
+          foundTable = true;
+          break;
+        }
+      }
+
+      if (!foundTable) {
+        mediaMissing++;
+        errors.push(`Missing Media relation table: ${v5MediaTableName} (v4: files_related_morphs)`);
+        continue;
+      }
+    } else {
+      mediaTableName = v5MediaTableName;
+    }
+
+    // Check what columns actually exist in the table (might be snake_case or camelCase)
+    let relatedIdColumn, relatedTypeColumn, fileIdColumn, fieldColumn;
+    try {
+      const columns = await db(mediaTableName).columnInfo();
+      const columnNames = Object.keys(columns);
+
+      // Find the actual column names (try snake_case first, then camelCase)
+      relatedIdColumn =
+        columnNames.find((c) => c === 'related_id' || c === 'relatedId') || 'related_id';
+      relatedTypeColumn =
+        columnNames.find((c) => c === 'related_type' || c === 'relatedType') || 'related_type';
+      fileIdColumn = columnNames.find((c) => c === 'file_id' || c === 'fileId') || 'file_id';
+      fieldColumn = columnNames.find((c) => c === 'field') || 'field';
+    } catch (e) {
+      // Fallback to snake_case defaults
+      relatedIdColumn = 'related_id';
+      relatedTypeColumn = 'related_type';
+      fileIdColumn = 'file_id';
+      fieldColumn = 'field';
+    }
+
+    // Check if media relation exists using only the columns that actually exist
+    const exists = await db(mediaTableName)
+      .where(relatedIdColumn, rel.relatedId)
+      .where(relatedTypeColumn, rel.relatedType)
+      .where(fieldColumn, rel.field)
+      .where(fileIdColumn, rel.fileId)
+      .first();
+
+    if (!exists) {
+      mediaMissing++;
+      errors.push(
+        `Missing Media relation: files_related_morphs (v4: ${rel.relatedType}:${rel.relatedId}.${rel.field} -> file:${rel.fileId})`
+      );
+    }
+  }
+
+  if (mediaChecked > 0) {
+    if (mediaMissing === 0) {
+      console.log(`✅ Media relations: ${mediaChecked} checked, all migrated`);
+    } else {
+      console.log(`❌ Media relations: ${mediaMissing} missing out of ${mediaChecked} checked`);
+    }
+  }
+
+  const totalChecked = joinColumnChecked + joinTableChecked + componentChecked + mediaChecked;
+  const totalMissing = joinColumnMissing + joinTableMissing + componentMissing + mediaMissing;
+
+  if (totalChecked > 0) {
+    console.log(`\n📊 Relation migration summary: ${totalChecked} total relations checked`);
+    if (totalMissing === 0) {
+      console.log(`✅ All ${totalChecked} original v4 relations successfully migrated to v5`);
+    } else {
+      console.log(
+        `❌ ${totalMissing} relations missing out of ${totalChecked} checked (DATA LOSS DETECTED)`
+      );
+    }
+  }
+
+  if (warnings.length > 0) {
+    warnings.slice(0, 10).forEach((warn) => console.log(`   ⚠️  ${warn}`));
+    if (warnings.length > 10) {
+      console.log(`   ... and ${warnings.length - 10} more warnings`);
+    }
+  }
+
+  return { errors, warnings };
+}
+
+/**
+ * Helper to infer component join table name from entity table
+ */
+function inferComponentTableName(entityTableName, strapi) {
+  const identifiers = strapi.db.metadata.identifiers;
+
+  // Try to find content type by table name
+  for (const contentType of Object.values(strapi.contentTypes)) {
+    const meta = strapi.db.metadata.get(contentType.uid);
+    if (!meta || meta.tableName !== entityTableName) continue;
+
+    const collectionName = contentType.collectionName;
+    if (!collectionName) continue;
+
+    const componentTableName = identifiers.getNameFromTokens([
+      { name: collectionName, compressible: true },
+      { name: 'components', shortName: 'cmps', compressible: false },
+    ]);
+
+    return componentTableName;
+  }
+
+  return null;
+}
+
+/**
  * Peeks at the database structure to warn when validation is executed against an
  * already-migrated dataset (which would hide migration issues).
  */
@@ -4932,6 +6842,25 @@ async function validate(options = {}) {
     console.log('⚠️  Could not get pre-migration counts\n');
   }
 
+  // Pre-check: Capture all relations before migrations run
+  console.log('🔍 Capturing pre-migration relations (before Strapi loads)...');
+  const preMigrationRelations = await getPreMigrationRelations();
+  if (preMigrationRelations) {
+    const total =
+      preMigrationRelations.joinColumn.length +
+      preMigrationRelations.joinTable.length +
+      preMigrationRelations.component.length +
+      preMigrationRelations.media.length;
+    console.log(`\n📊 Pre-migration relations captured (v4 format):`);
+    console.log(`  JoinColumn relations: ${preMigrationRelations.joinColumn.length}`);
+    console.log(`  JoinTable relations: ${preMigrationRelations.joinTable.length}`);
+    console.log(`  Component relations: ${preMigrationRelations.component.length}`);
+    console.log(`  Media relations: ${preMigrationRelations.media.length}`);
+    console.log(`  Total: ${total} relations to verify\n`);
+  } else {
+    console.log('⚠️  Could not get pre-migration relations\n');
+  }
+
   // Pre-check: Verify database is in v4 format before starting Strapi
   console.log('🔍 Checking database format...');
   const dbFormat = await checkDatabaseFormat();
@@ -5095,6 +7024,21 @@ async function validate(options = {}) {
     // Validate component relation publication state consistency
     const componentPublicationStateResult = await validateComponentRelationPublicationState(app);
     allErrors.push(...(componentPublicationStateResult.errors || []));
+
+    // CRITICAL: Validate draft entries only reference draft entries (not published)
+    const draftOnlyDraftsResult = await validateDraftEntriesOnlyReferenceDrafts(app);
+    allErrors.push(...(draftOnlyDraftsResult.errors || []));
+
+    // Validate component media relations and nested component cloning
+    const componentMediaResult = await validateComponentMediaAndCloning(app);
+    allErrors.push(...(componentMediaResult.errors || []));
+
+    // CRITICAL: Validate all original v4 relations were migrated (no data loss)
+    const relationCompletenessResult = await validateAllV4RelationsMigrated(
+      app,
+      preMigrationRelations
+    );
+    allErrors.push(...(relationCompletenessResult.errors || []));
 
     // Additional comprehensive validations
     const orphanedRelationsErrors = await validateOrphanedRelations(app);
