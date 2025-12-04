@@ -2,14 +2,28 @@ import _ from 'lodash';
 import utils from '@strapi/utils';
 
 import type { Context } from 'koa';
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
 import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
 import { validateUploadBody } from './validation/content-api/upload';
-import { FileInfo } from '../types';
+import { FileInfo, Config } from '../types';
 
 const { ValidationError } = utils.errors;
+
+type Pagination = {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+};
+
+type PaginatedResponse<T> = {
+  data: T[];
+  meta: {
+    pagination: Pagination;
+  };
+};
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sanitizeOutput = async (data: unknown | unknown[], ctx: Context) => {
@@ -33,12 +47,29 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return strapi.contentAPI.sanitize.query(data, schema, { auth });
   };
 
+  const transformPagination = (
+    files: Modules.EntityService.PaginatedResult<typeof FILE_MODEL_UID>
+  ): PaginatedResponse<unknown> => {
+    return {
+      data: files.results,
+      meta: {
+        pagination: files.pagination,
+      },
+    };
+  };
+
   return {
     async find(ctx: Context) {
       await validateQuery(ctx.query, ctx);
       const sanitizedQuery = await sanitizeQuery(ctx.query, ctx);
 
-      const files = await getService('upload').findMany(sanitizedQuery);
+      // Get plugin configuration to determine pagination behavior
+      const config = strapi.config.get<Config>('plugin::upload');
+      const usePagination = config?.paginatedResponses ?? false;
+
+      const files = usePagination
+        ? await transformPagination(await getService('upload').findPage(sanitizedQuery))
+        : await getService('upload').findMany(sanitizedQuery);
 
       ctx.body = await sanitizeOutput(files, ctx);
     },
