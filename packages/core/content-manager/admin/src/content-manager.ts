@@ -1,6 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { INJECTION_ZONES } from './components/InjectionZone';
 import { PLUGIN_ID } from './constants/plugin';
+import { BlocksRegistry, type CustomBlockConfig } from './core/BlocksRegistry';
 import {
   DEFAULT_ACTIONS,
   type DocumentActionPosition,
@@ -129,6 +130,7 @@ class ContentManagerPlugin {
   ];
   editViewSidePanels: PanelComponent[] = [ActionsPanel];
   headerActions: HeaderActionComponent[] = [];
+  blocksRegistry = new BlocksRegistry();
 
   constructor() {}
 
@@ -200,6 +202,10 @@ class ContentManagerPlugin {
     }
   }
 
+  addBlocks(blocks: CustomBlockConfig | CustomBlockConfig[]) {
+    this.blocksRegistry.register(blocks);
+  }
+
   get config() {
     return {
       id: PLUGIN_ID,
@@ -210,6 +216,7 @@ class ContentManagerPlugin {
         addDocumentAction: this.addDocumentAction.bind(this),
         addDocumentHeaderAction: this.addDocumentHeaderAction.bind(this),
         addEditViewSidePanel: this.addEditViewSidePanel.bind(this),
+        addBlocks: this.addBlocks.bind(this),
         getBulkActions: () => this.bulkActions,
         getDocumentActions: (position?: DocumentActionPosition) => {
           /**
@@ -229,6 +236,7 @@ class ContentManagerPlugin {
         },
         getEditViewSidePanels: () => this.editViewSidePanels,
         getHeaderActions: () => this.headerActions,
+        getBlocksRegistry: () => this.blocksRegistry,
       },
     } satisfies PluginConfig;
   }

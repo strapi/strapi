@@ -142,28 +142,61 @@ const imageNodeValidator = yup.object().shape({
   children: yup.array().of(inlineNodeValidator).required(),
 });
 
-// TODO: remove the any and replace with a correct Type
-const blockNodeValidator: any = yup.lazy((value: { type: string }) => {
-  switch (value.type) {
-    case 'paragraph':
-      return paragraphNodeValidator;
-    case 'heading':
-      return headingNodeValidator;
-    case 'quote':
-      return quoteNodeValidator;
-    case 'list':
-      return listNodeValidator;
-    case 'image':
-      return imageNodeValidator;
-    case 'code':
-      return codeBlockValidator;
-    default:
-      return yup.mixed().test('invalid-type', 'Block node is of invalid type', () => {
-        return false;
-      });
-  }
-});
+// Create a function that returns the block validator to allow access to strapi instance
+const createBlockNodeValidator = (strapi: any) => {
+  // Create helpers object that will be passed to custom block validator functions
+  const helpers = {
+    textNodeValidator,
+    linkNodeValidator,
+    inlineNodeValidator,
+    checkValidLink,
+  };
 
-const blocksValidatorSchema = yup.array().of(blockNodeValidator);
+  return yup.lazy((value: { type: string }) => {
+    // Handle built-in block types
+    switch (value.type) {
+      case 'paragraph':
+        return paragraphNodeValidator;
+      case 'heading':
+        return headingNodeValidator;
+      case 'quote':
+        return quoteNodeValidator;
+      case 'list':
+        return listNodeValidator;
+      case 'image':
+        return imageNodeValidator;
+      case 'code':
+        return codeBlockValidator;
+      default:
+        // Check for custom blocks
+        try {
+          const customBlocks = strapi.get('custom-blocks').getAll();
 
-export const blocksValidator = () => blocksValidatorSchema;
+          // Look for a custom block that matches this type
+          for (const [, customBlock] of Object.entries(customBlocks)) {
+            const block = customBlock as any;
+            if (block.name === value.type) {
+              // Call the validator function with helpers
+              return block.validator(helpers);
+            }
+          }
+        } catch (error) {
+          // If custom blocks service is not available, fall through to error
+        }
+
+        return yup
+          .mixed()
+          .test('invalid-type', `Block node type '${value.type}' is not supported`, () => {
+            return false;
+          });
+    }
+  });
+};
+
+export const blocksValidator = () => {
+  // Access the global strapi instance that's available in the entity validator context
+  const blockNodeValidator = createBlockNodeValidator(strapi);
+  // @ts-expect-error - blockNodeValidator uses yup.lazy which has type compatibility issues
+  const blocksValidatorSchema = yup.array().of(blockNodeValidator);
+  return blocksValidatorSchema;
+};
