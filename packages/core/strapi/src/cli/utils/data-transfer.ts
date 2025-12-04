@@ -8,7 +8,7 @@ import { merge } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
-import { readableBytes, exitWith } from './helpers';
+import { readableBytes, readableTime, exitWith } from './helpers';
 import { getParseListWithChoices, parseInteger, confirmMessage } from './commander';
 
 const {
@@ -282,7 +282,7 @@ const loadersFactory = (defaultLoaders: Loaders = {} as Loaders) => {
       ? (stageData?.endTime || Date.now()) - stageData.startTime
       : 0;
     const size = `size: ${readableBytes(stageData?.bytes ?? 0)}`;
-    const elapsed = `elapsed: ${elapsedTime} ms`;
+    const elapsed = `elapsed: ${readableTime(elapsedTime ?? 0)}`;
     const speed =
       elapsedTime > 0 ? `(${readableBytes(((stageData?.bytes ?? 0) * 1000) / elapsedTime)}/s)` : '';
 
