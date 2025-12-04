@@ -132,7 +132,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }: ApiI
       type: 'object',
       ...(requiredAttributes.length && { required: requiredAttributes }),
       properties: {
-        id: { type: 'number' },
+        id: { oneOf: [{ type: 'string' }, { type: 'number' }] },
         documentId: { type: 'string' },
         ...cleanSchemaAttributes(attributes, { didAddStrapiComponentsToSchemas }),
       },
