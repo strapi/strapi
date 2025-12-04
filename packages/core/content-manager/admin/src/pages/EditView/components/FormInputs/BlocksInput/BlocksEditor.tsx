@@ -28,6 +28,43 @@ import { withStrapiSchema } from './plugins/withStrapiSchema';
 
 import type { Schema } from '@strapi/types';
 
+/**
+ * Checks if the blocks content is effectively empty.
+ * An empty blocks value is defined as:
+ * - null or undefined
+ * - an empty array
+ * - an array with a single paragraph containing only empty text
+ */
+const isBlocksValueEmpty = (value: Descendant[]): boolean => {
+  if (!value || value.length === 0) {
+    return true;
+  }
+
+  // Check if content is a single empty paragraph
+  if (value.length === 1) {
+    const firstBlock = value[0];
+    if (
+      'type' in firstBlock &&
+      firstBlock.type === 'paragraph' &&
+      'children' in firstBlock &&
+      Array.isArray(firstBlock.children) &&
+      firstBlock.children.length === 1
+    ) {
+      const firstChild = firstBlock.children[0];
+      if (
+        'type' in firstChild &&
+        firstChild.type === 'text' &&
+        'text' in firstChild &&
+        firstChild.text === ''
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
 /* -------------------------------------------------------------------------------------------------
  * BlocksEditorProvider
  * -----------------------------------------------------------------------------------------------*/
@@ -213,7 +250,12 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           // Set a new debounce timeout
           debounceTimeout.current = setTimeout(() => {
             incrementSlateUpdatesCount();
-            onChange(name, state as Schema.Attribute.BlocksValue);
+            // Normalize empty blocks content to undefined
+            // This fixes the issue where an empty blocks field always contains a single empty paragraph
+            const normalizedValue = isBlocksValueEmpty(state)
+              ? undefined
+              : (state as Schema.Attribute.BlocksValue);
+            onChange(name, normalizedValue);
             debounceTimeout.current = null;
           }, 300);
         }
