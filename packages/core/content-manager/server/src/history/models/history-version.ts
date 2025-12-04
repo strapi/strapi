@@ -7,7 +7,7 @@ const historyVersion: Model = {
   singularName: 'history-version',
   attributes: {
     id: {
-      type: 'increments',
+      type: 'bigincrements',
     },
     contentType: {
       type: 'string',
