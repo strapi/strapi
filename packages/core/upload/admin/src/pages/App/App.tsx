@@ -8,7 +8,7 @@ import { Route, Routes } from 'react-router-dom';
 import { useConfig } from '../../hooks/useConfig';
 import { getTrad } from '../../utils';
 
-import { MediaLibrary } from './MediaLibrary/MediaLibrary';
+import { MediaLibrary } from './MediaLibrary';
 
 import type { Configuration } from '../../../../shared/contracts/configuration';
 
