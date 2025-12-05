@@ -139,6 +139,34 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'completed'
 
+      # Invalid bug report template actions
+      - name: 'Comment: invalid bug report template'
+        if: "${{ github.event.label.name == 'flag: invalid template' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            We ask that you please follow the issue template.
+            A proper issue submission let's us better understand the origin of your bug and therefore help you. You can see the template guidelines for bug reports [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
+
+            Please create a new issue and completely fill out the issue template, you can [open a new issue here](https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.yml).
+
+            Thank you.
+      - name: 'Close: invalid bug report template'
+        if: "${{ github.event.label.name == 'flag: invalid template' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'not_planned'
+
       # Redirect questions to community sources
       - name: 'Comment: redirect question to community'
         if: "${{ github.event.label.name == 'flag: question' }}"
