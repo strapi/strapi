@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { findAndClose, navToHeader } from '../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Bulk locale actions', () => {
   test.describe.configure({ timeout: 500000 });
