@@ -98,6 +98,9 @@ describe('useBulkRemove', () => {
     });
 
     expect(post).toHaveBeenCalledWith('/upload/actions/bulk-delete', expect.any(Object));
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been successfully deleted.');
   });
 
   test('does properly collect all asset ids', async () => {
@@ -114,6 +117,9 @@ describe('useBulkRemove', () => {
     expect(post).toHaveBeenCalledWith(expect.any(String), {
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
     });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been successfully deleted.');
   });
 
   test('does properly collect all folder ids', async () => {
@@ -130,6 +136,9 @@ describe('useBulkRemove', () => {
     expect(post).toHaveBeenCalledWith(expect.any(String), {
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),
     });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been successfully deleted.');
   });
 
   test('does properly collect folder and asset ids', async () => {
@@ -147,6 +156,9 @@ describe('useBulkRemove', () => {
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),
     });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been successfully deleted.');
   });
 
   test('does re-fetch assets, if files were deleted', async () => {
