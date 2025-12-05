@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
-import { clickAndWait, describeOnCondition, navToHeader } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { findAndClose } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, navToHeader } from '../../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { findAndClose } from '../../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const releaseName = 'Trent Crimm: The Independent';

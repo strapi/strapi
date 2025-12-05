@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { clickAndWait, findAndClose, navToHeader } from '../../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -128,13 +128,11 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
       await page.keyboard.press('Escape'); // close the menu since we're not actioning on it atm.
 
-      await page.getByRole('textbox').nth(2).click();
-      await page
-        .getByRole('textbox')
-        .nth(2)
-        .fill(
-          "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
-        );
+      const contentBlock = page.getByRole('textbox').filter({ hasText: 'Drag' });
+      await contentBlock.click();
+      await contentBlock.fill(
+        "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
+      );
 
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
@@ -200,13 +198,11 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
-      await page.getByRole('textbox').nth(2).click();
-      await page
-        .getByRole('textbox')
-        .nth(2)
-        .fill(
-          "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
-        );
+      const contentBlock = page.getByRole('textbox').filter({ hasText: 'Drag' });
+      await contentBlock.click();
+      await contentBlock.fill(
+        "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
+      );
 
       await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
 

@@ -413,7 +413,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 @media (min-width: 768px) {
   .c24 {
-    grid-column: span 12;
+    grid-column: span 6;
   }
 }
 

@@ -93,7 +93,7 @@ Some helpers have been added to allow you to modify the playwright configuration
 
 The test-app you create uses a [template](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/installation/templates.html) found at `e2e/app-template` in this folder we can store our premade content schemas & any customisations we may need such as other plugins / custom fields / endpoints etc.
 
-If you add anything to the template, be sure to add this information to [the docs](/testing/e2e/app-template).
+If you add anything to the template, be sure to add this information to [the docs](/guides/e2e/app-template).
 
 ## Running tests with environment variables (needed to run EE tests)
 

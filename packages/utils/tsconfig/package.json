@@ -1,6 +1,6 @@
 {
   "name": "tsconfig",
-  "version": "5.31.0",
+  "version": "5.31.3",
   "private": true,
   "devDependencies": {
     "@tsconfig/node20": "20.1.6"

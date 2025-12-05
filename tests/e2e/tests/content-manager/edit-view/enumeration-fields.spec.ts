@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { navToHeader, findAndClose } from '../../../utils/shared';
-import { waitForRestart } from '../../../utils/restart';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { navToHeader, findAndClose, clickAndWait } from '../../../../utils/shared';
+import { waitForRestart } from '../../../../utils/restart';
 
 test.describe('Edit View - Enumeration Fields Testing', () => {
   test.beforeEach(async ({ page }) => {
@@ -12,8 +12,11 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
   });
 
   test('should test enumeration fields - required vs non-required behavior', async ({ page }) => {
-    // Navigate to Content Manager
-    await navToHeader(page, ['Content-Type Builder', 'Cat'], 'Cat');
+    // Navigate to Content-Type Builder first
+    await navToHeader(page, ['Content-Type Builder'], 'Article');
+    // Then click on Cat and wait for the page to load (use exact match to avoid matching "Category")
+    await clickAndWait(page, page.getByRole('link', { name: 'Cat', exact: true }));
+    await expect(page.getByRole('heading', { name: 'Cat', exact: true })).toBeVisible();
 
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
     await page.getByRole('button', { name: 'Enumeration' }).click();
@@ -22,11 +25,13 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByLabel('Required field').click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    // Wait for the Save button to be enabled after the dialog closes
+    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
 
     // Go to the content manager and create a new entry
-    await navToHeader(page, ['Content Manager', 'Cat'], 'Cat');
+    await navToHeader(page, ['Content Manager', { text: 'Cat', exact: true }], 'Cat');
     await page.getByRole('link', { name: 'Create new entry' }).first().click();
 
     await page.getByLabel('name*').fill('Zoe');
@@ -56,8 +61,12 @@ test.describe('Edit View - Enumeration Fields Testing', () => {
     await findAndClose(page, 'Published document');
 
     // Clean Cat content type
-    await navToHeader(page, ['Content-Type Builder', 'Cat'], 'Cat');
+    await navToHeader(page, ['Content-Type Builder'], 'Article');
+    await clickAndWait(page, page.getByRole('link', { name: 'Cat', exact: true }));
+    await expect(page.getByRole('heading', { name: 'Cat', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Delete hair' }).click();
+    // Wait for the Save button to be enabled after deleting the field
+    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
   });

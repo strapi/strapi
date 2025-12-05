@@ -115,7 +115,7 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
 
             <Modal.Body>
               <Grid.Root gap={4}>
-                <Grid.Item xs={12} col={12} direction="column" alignItems="stretch">
+                <Grid.Item xs={12} direction="column" alignItems="stretch">
                   <Field.Root id="folder-destination">
                     <Field.Label>
                       {formatMessage({

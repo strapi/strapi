@@ -11,7 +11,12 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
   const aiLocalizationJobsService = getService('ai-localization-jobs');
 
-  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = ['media', 'relation', 'boolean'];
+  const UNSUPPORTED_ATTRIBUTE_TYPES: Schema.Attribute.Kind[] = [
+    'media',
+    'relation',
+    'boolean',
+    'enumeration',
+  ];
   const IGNORED_FIELDS = [
     'id',
     'documentId',
@@ -152,7 +157,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       let token: string;
       try {
-        const tokenData = await strapi.service('admin::user').getAiToken();
+        const tokenData = await strapi.get('ai').getAiToken();
         token = tokenData.token;
       } catch (error) {
         await aiLocalizationJobsService.upsertJobForDocument({
