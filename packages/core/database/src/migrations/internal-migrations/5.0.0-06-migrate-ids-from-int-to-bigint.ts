@@ -3,134 +3,130 @@
  *
  * This migration handles:
  * - Primary key columns (id) in all content type tables
- * - Foreign key columns in join tables and relation tables
+ * - Foreign key columns in join tables (marked with internalIntegerId: true)
+ * - Direct foreign key columns from relations with useJoinTable: false
  * - Proper handling of foreign key constraints (drop before, recreate after)
- * - Database-specific conversion logic for MySQL, PostgreSQL, and SQLite
  *
- * Note: This migration must run BEFORE schema sync to avoid conflicts.
+ * Database-specific behavior:
+ * - PostgreSQL: ALTER COLUMN TYPE BIGINT
+ * - MySQL: MODIFY COLUMN BIGINT UNSIGNED (preserving nullability)
+ * - SQLite: Skipped (INTEGER is already 64-bit)
  */
 import type { Knex } from 'knex';
 
 import debug from 'debug';
 import type { Migration } from '../common';
 import type { Database } from '../../index';
+import type { ForeignKey } from '../../schema/types';
+import type { Attribute } from '../../types';
 
 const migrationDebug = debug('strapi::database::migration::bigint');
 
 /**
- * Get all foreign keys that reference a specific column in a table
+ * Column that needs to be converted from INTEGER to BIGINT
  */
-const getForeignKeysReferencingColumn = async (
-  knex: Knex,
-  db: Database,
-  tableName: string,
-  columnName: string
-): Promise<
-  Array<{
-    table: string;
-    column: string;
-    name: string;
-    onDelete?: string;
-    onUpdate?: string;
-  }>
-> => {
-  switch (db.dialect.client) {
-    case 'postgres': {
-      const schemaName = db.getSchemaName();
+interface ColumnToConvert {
+  table: string;
+  column: string;
+  isPrimaryKey: boolean;
+}
 
-      const query = `
-        SELECT 
-          tc.table_name as table,
-          kcu.column_name as column,
-          tc.constraint_name as name,
-          rc.delete_rule as "onDelete",
-          rc.update_rule as "onUpdate"
-        FROM information_schema.table_constraints tc
-        JOIN information_schema.key_column_usage kcu 
-          ON tc.constraint_name = kcu.constraint_name
-          AND tc.table_schema = kcu.table_schema
-        JOIN information_schema.constraint_column_usage ccu
-          ON tc.constraint_name = ccu.constraint_name
-          AND tc.table_schema = ccu.table_schema
-        JOIN information_schema.referential_constraints rc
-          ON tc.constraint_name = rc.constraint_name
-          AND tc.table_schema = rc.constraint_schema
-        WHERE tc.constraint_type = 'FOREIGN KEY'
-          AND ccu.table_name = ?
-          AND ccu.column_name = ?
-          ${schemaName ? 'AND tc.table_schema = ?' : ''}
-      `;
+/**
+ * Collects all columns that need conversion from metadata.
+ * Uses metadata as source of truth instead of DB introspection.
+ */
+const collectColumnsToConvert = async (knex: Knex, db: Database): Promise<ColumnToConvert[]> => {
+  const columns: ColumnToConvert[] = [];
 
-      const result = await knex.raw(
-        query,
-        schemaName ? [tableName, columnName, schemaName] : [tableName, columnName]
-      );
-      return result.rows;
+  for (const meta of db.metadata.values()) {
+    const tableName = meta.tableName;
+    const hasTable = await knex.schema.hasTable(tableName);
+
+    if (hasTable === false) {
+      migrationDebug(`Table ${tableName} does not exist, skipping`);
+      continue;
     }
 
-    case 'mysql': {
-      const query = `
-        SELECT 
-          kcu.TABLE_NAME as \`table\`,
-          kcu.COLUMN_NAME as \`column\`,
-          kcu.CONSTRAINT_NAME as \`name\`,
-          rc.DELETE_RULE as \`onDelete\`,
-          rc.UPDATE_RULE as \`onUpdate\`
-        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
-        JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
-          ON kcu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
-          AND kcu.TABLE_SCHEMA = rc.CONSTRAINT_SCHEMA
-        WHERE kcu.REFERENCED_TABLE_NAME = ?
-          AND kcu.REFERENCED_COLUMN_NAME = ?
-          AND kcu.TABLE_SCHEMA = database()
-          AND kcu.REFERENCED_TABLE_SCHEMA = database()
-      `;
+    for (const [attributeName, attribute] of Object.entries(meta.attributes)) {
+      const attr = attribute as Attribute;
 
-      const [result] = await knex.raw(query, [tableName, columnName]);
-      return result;
-    }
-
-    case 'sqlite': {
-      // SQLite: Query all tables and check their foreign keys
-      const tables = await knex.raw(`
-        SELECT name FROM sqlite_master 
-        WHERE type='table' AND name NOT LIKE 'sqlite_%'
-      `);
-
-      const foreignKeys: Array<{
-        table: string;
-        column: string;
-        name: string;
-        onDelete?: string;
-        onUpdate?: string;
-      }> = [];
-
-      for (const { name: table } of tables) {
-        const fkInfo = await knex.raw(`PRAGMA foreign_key_list(${table})`);
-
-        for (const fk of fkInfo) {
-          if (fk.table === tableName && fk.to === columnName) {
-            foreignKeys.push({
-              table,
-              column: fk.from,
-              name: `fk_${table}_${fk.from}`,
-              onDelete: fk.on_delete,
-              onUpdate: fk.on_update,
-            });
-          }
-        }
+      // ID columns: identified by bigIncrements type in metadata
+      // (metadata already uses bigIncrements, but DB may still be INTEGER)
+      if (attr.type === 'bigincrements') {
+        const columnName = attr.columnName ?? attributeName;
+        columns.push({
+          table: tableName,
+          column: columnName,
+          isPrimaryKey: true,
+        });
+        continue;
       }
 
-      return foreignKeys;
-    }
+      // FK columns in join tables: biginteger with internalIntegerId
+      if (
+        attr.type === 'biginteger' &&
+        'internalIntegerId' in attr &&
+        attr.internalIntegerId === true
+      ) {
+        const columnName = attr.columnName ?? attributeName;
+        columns.push({
+          table: tableName,
+          column: columnName,
+          isPrimaryKey: false,
+        });
+        continue;
+      }
 
-    default:
-      return [];
+      // Direct FK columns: relation with joinColumn and owner
+      if (
+        attr.type === 'relation' &&
+        'joinColumn' in attr &&
+        attr.joinColumn !== undefined &&
+        'owner' in attr &&
+        attr.owner === true
+      ) {
+        const columnName = attr.joinColumn.name;
+        // Only add if column actually exists in this table
+        const hasColumn = await knex.schema.hasColumn(tableName, columnName);
+        if (hasColumn) {
+          columns.push({
+            table: tableName,
+            column: columnName,
+            isPrimaryKey: false,
+          });
+        }
+      }
+    }
   }
+
+  return columns;
 };
 
 /**
- * Check if a column is an integer type (and not already bigint)
+ * Collects foreign keys from metadata that reference tables being converted.
+ */
+const collectForeignKeysFromMetadata = (db: Database): (ForeignKey & { sourceTable: string })[] => {
+  const foreignKeys: (ForeignKey & { sourceTable: string })[] = [];
+
+  for (const meta of db.metadata.values()) {
+    if (meta.foreignKeys === undefined || meta.foreignKeys.length === 0) {
+      continue;
+    }
+
+    for (const fk of meta.foreignKeys) {
+      foreignKeys.push({
+        ...fk,
+        // Add source table info for recreation
+        sourceTable: meta.tableName,
+      } as ForeignKey & { sourceTable: string });
+    }
+  }
+
+  return foreignKeys;
+};
+
+/**
+ * Check if a column is currently INTEGER type (needs conversion)
  */
 const isIntegerColumn = async (
   knex: Knex,
@@ -138,19 +134,18 @@ const isIntegerColumn = async (
   tableName: string,
   columnName: string
 ): Promise<boolean> => {
-  const schemaName = db.getSchemaName();
-
   switch (db.dialect.client) {
     case 'postgres': {
+      const schemaName = db.getSchemaName();
       const result = await knex.raw(
         `
         SELECT data_type 
         FROM information_schema.columns 
         WHERE table_name = ? 
           AND column_name = ?
-          ${schemaName ? 'AND table_schema = ?' : ''}
+          ${schemaName !== null ? 'AND table_schema = ?' : ''}
       `,
-        schemaName ? [tableName, columnName, schemaName] : [tableName, columnName]
+        schemaName !== null ? [tableName, columnName, schemaName] : [tableName, columnName]
       );
 
       const dataType = result.rows[0]?.data_type?.toLowerCase();
@@ -173,16 +168,31 @@ const isIntegerColumn = async (
       return dataType === 'int' || dataType === 'integer';
     }
 
-    case 'sqlite': {
-      const result = await knex.raw(`PRAGMA table_info(${tableName})`);
-      const column = result.find((col: any) => col.name === columnName);
-      const dataType = column?.type?.toLowerCase();
-      return dataType === 'integer' || dataType === 'int';
-    }
-
     default:
       return false;
   }
+};
+
+/**
+ * Get column nullability for MySQL (to preserve it during conversion)
+ */
+const isColumnNullable = async (
+  knex: Knex,
+  tableName: string,
+  columnName: string
+): Promise<boolean> => {
+  const [result] = await knex.raw(
+    `
+    SELECT IS_NULLABLE 
+    FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_NAME = ? 
+      AND COLUMN_NAME = ?
+      AND TABLE_SCHEMA = database()
+  `,
+    [tableName, columnName]
+  );
+
+  return result[0]?.IS_NULLABLE === 'YES';
 };
 
 /**
@@ -193,106 +203,112 @@ const convertColumnToBigInt = async (
   db: Database,
   tableName: string,
   columnName: string,
-  isPrimaryKey: boolean = false
+  isPrimaryKey: boolean
 ): Promise<void> => {
-  migrationDebug(`Converting ${tableName}.${columnName} to BIGINT`);
+  migrationDebug(`Converting ${tableName}.${columnName} to BIGINT (isPK: ${isPrimaryKey})`);
 
   switch (db.dialect.client) {
     case 'postgres': {
-      // PostgreSQL: Use ALTER COLUMN with USING clause to convert data
-      if (isPrimaryKey) {
-        await knex.raw(`ALTER TABLE ?? ALTER COLUMN ?? TYPE BIGINT USING ??::BIGINT`, [
-          tableName,
-          columnName,
-          columnName,
-        ]);
-      } else {
-        await knex.raw(`ALTER TABLE ?? ALTER COLUMN ?? TYPE BIGINT USING ??::BIGINT`, [
-          tableName,
-          columnName,
-          columnName,
-        ]);
-      }
+      await knex.raw(`ALTER TABLE ?? ALTER COLUMN ?? TYPE BIGINT USING ??::BIGINT`, [
+        tableName,
+        columnName,
+        columnName,
+      ]);
       break;
     }
 
     case 'mysql': {
-      // MySQL: Use MODIFY COLUMN
       if (isPrimaryKey) {
         await knex.raw(`ALTER TABLE ?? MODIFY COLUMN ?? BIGINT UNSIGNED NOT NULL AUTO_INCREMENT`, [
           tableName,
           columnName,
         ]);
       } else {
-        await knex.raw(`ALTER TABLE ?? MODIFY COLUMN ?? BIGINT UNSIGNED`, [tableName, columnName]);
+        // Preserve nullability for FK columns
+        const isNullable = await isColumnNullable(knex, tableName, columnName);
+        const nullConstraint = isNullable ? '' : ' NOT NULL';
+        await knex.raw(`ALTER TABLE ?? MODIFY COLUMN ?? BIGINT UNSIGNED${nullConstraint}`, [
+          tableName,
+          columnName,
+        ]);
       }
       break;
     }
 
-    case 'sqlite': {
-      // SQLite: Requires table recreation due to limited ALTER TABLE support
-      // This is complex, so we'll handle it by recreating the table
-      await recreateTableWithBigInt(knex, tableName, columnName, isPrimaryKey);
+    // SQLite: Skip - INTEGER is already 64-bit
+    case 'sqlite':
+      migrationDebug(
+        `Skipping SQLite column ${tableName}.${columnName} - INTEGER is already 64-bit`
+      );
       break;
-    }
 
     default:
-      migrationDebug(`Unsupported database dialect: ${db.dialect.client}`);
-      break;
+      throw new Error(`Unsupported database dialect: ${db.dialect.client}`);
   }
 };
 
 /**
- * SQLite-specific: Recreate table with BIGINT column
- * SQLite doesn't support ALTER COLUMN, so we need to:
- * 1. Create new table with updated schema
- * 2. Copy data
- * 3. Drop old table
- * 4. Rename new table
+ * Drop all foreign keys that will be affected by the migration
  */
-const recreateTableWithBigInt = async (
+const dropForeignKeys = async (
   knex: Knex,
-  tableName: string,
-  columnName: string,
-  isPrimaryKey: boolean
+  db: Database,
+  foreignKeys: (ForeignKey & { sourceTable: string })[]
 ): Promise<void> => {
-  const tempTableName = `${tableName}_temp_bigint`;
+  for (const fk of foreignKeys) {
+    migrationDebug(`Dropping FK ${fk.name} from ${fk.sourceTable}`);
 
-  // Get table info
-  const tableInfo = await knex.raw(`PRAGMA table_info(${tableName})`);
+    if (db.dialect.client === 'postgres') {
+      await knex.raw(`ALTER TABLE ?? DROP CONSTRAINT IF EXISTS ??`, [fk.sourceTable, fk.name]);
+    } else if (db.dialect.client === 'mysql') {
+      // MySQL: Check if FK exists before dropping
+      const [exists] = await knex.raw(
+        `
+        SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+        WHERE CONSTRAINT_NAME = ? 
+          AND TABLE_NAME = ? 
+          AND TABLE_SCHEMA = database()
+          AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+      `,
+        [fk.name, fk.sourceTable]
+      );
 
-  // Build CREATE TABLE statement for temp table
-  // Note: We need to quote column names to handle reserved keywords like "order"
-  const columnDefs = tableInfo
-    .map((col: any) => {
-      const quotedName = `"${col.name}"`;
-      if (col.name === columnName) {
-        // Convert to BIGINT
-        if (isPrimaryKey) {
-          return `${quotedName} INTEGER PRIMARY KEY`;
-        }
-        return `${quotedName} INTEGER${col.notnull ? ' NOT NULL' : ''}${col.dflt_value ? ` DEFAULT ${col.dflt_value}` : ''}`;
+      if (exists.length > 0) {
+        await knex.raw(`ALTER TABLE ?? DROP FOREIGN KEY ??`, [fk.sourceTable, fk.name]);
       }
-      return `${quotedName} ${col.type}${col.notnull ? ' NOT NULL' : ''}${col.dflt_value ? ` DEFAULT ${col.dflt_value}` : ''}${col.pk && col.name !== columnName ? ' PRIMARY KEY' : ''}`;
-    })
-    .join(', ');
+    }
+  }
+};
 
-  // Create temp table
-  await knex.raw(`CREATE TABLE "${tempTableName}" (${columnDefs})`);
+/**
+ * Recreate all foreign keys after column conversion
+ */
+const recreateForeignKeys = async (
+  knex: Knex,
+  db: Database,
+  foreignKeys: (ForeignKey & { sourceTable: string })[]
+): Promise<void> => {
+  for (const fk of foreignKeys) {
+    migrationDebug(`Recreating FK ${fk.name} on ${fk.sourceTable}`);
 
-  // Copy data - quote all identifiers
-  const quotedColumnNames = tableInfo.map((col: any) => `"${col.name}"`).join(', ');
-  await knex.raw(
-    `INSERT INTO "${tempTableName}" (${quotedColumnNames}) SELECT ${quotedColumnNames} FROM "${tableName}"`
-  );
+    let sql = `ALTER TABLE ?? ADD CONSTRAINT ?? FOREIGN KEY (??) REFERENCES ?? (??)`;
+    const params: string[] = [
+      fk.sourceTable,
+      fk.name,
+      fk.columns[0],
+      fk.referencedTable,
+      fk.referencedColumns[0],
+    ];
 
-  // Drop old table
-  await knex.raw(`DROP TABLE "${tableName}"`);
+    if (fk.onDelete !== undefined && fk.onDelete !== null) {
+      sql += ` ON DELETE ${fk.onDelete}`;
+    }
+    if (fk.onUpdate !== undefined && fk.onUpdate !== null) {
+      sql += ` ON UPDATE ${fk.onUpdate}`;
+    }
 
-  // Rename temp table
-  await knex.raw(`ALTER TABLE "${tempTableName}" RENAME TO "${tableName}"`);
-
-  // Note: Foreign keys and indexes need to be recreated by the calling code
+    await knex.raw(sql, params);
+  }
 };
 
 /**
@@ -302,162 +318,81 @@ export const migrateIdsFromIntToBigInt: Migration = {
   name: '5.0.0-06-migrate-ids-from-int-to-bigint',
 
   async up(knex, db) {
-    migrationDebug('Starting migration from INTEGER to BIGINT for all ID columns');
+    // SQLite: Skip entirely - INTEGER is already 64-bit
+    if (db.dialect.client === 'sqlite') {
+      migrationDebug('Skipping migration for SQLite - INTEGER is already 64-bit');
+      return;
+    }
 
-    // Disable foreign key checks during migration (database-specific)
-    const disableForeignKeyChecks = async () => {
-      switch (db.dialect.client) {
-        case 'mysql':
-          await knex.raw('SET FOREIGN_KEY_CHECKS = 0');
-          break;
-        case 'sqlite':
-          await knex.raw('PRAGMA foreign_keys = OFF');
-          break;
-        case 'postgres':
-          break;
-        default:
-          throw new Error(`Unsupported database dialect: ${db.dialect.client}`);
-        // PostgreSQL: We'll drop and recreate FKs manually
-      }
-    };
+    migrationDebug('Starting migration from INTEGER to BIGINT');
 
-    const enableForeignKeyChecks = async () => {
-      switch (db.dialect.client) {
-        case 'mysql':
-          await knex.raw('SET FOREIGN_KEY_CHECKS = 1');
-          break;
-        case 'sqlite':
-          await knex.raw('PRAGMA foreign_keys = ON');
-          break;
-        case 'postgres':
-          break;
-        default:
-          throw new Error(`Unsupported database dialect: ${db.dialect.client}`);
+    // Collect columns to convert from metadata
+    const columnsToConvert = await collectColumnsToConvert(knex, db);
+
+    if (columnsToConvert.length === 0) {
+      migrationDebug('No columns to convert');
+      return;
+    }
+
+    migrationDebug(`Found ${columnsToConvert.length} columns to convert`);
+
+    // Collect foreign keys from metadata
+    const foreignKeys = collectForeignKeysFromMetadata(db) as (ForeignKey & {
+      sourceTable: string;
+    })[];
+
+    // Filter to only columns that are actually INTEGER (not already BIGINT)
+    const columnsNeedingConversion: ColumnToConvert[] = [];
+    for (const col of columnsToConvert) {
+      const needsConversion = await isIntegerColumn(knex, db, col.table, col.column);
+      if (needsConversion) {
+        columnsNeedingConversion.push(col);
+      } else {
+        migrationDebug(`Skipping ${col.table}.${col.column} - already BIGINT`);
       }
-    };
+    }
+
+    if (columnsNeedingConversion.length === 0) {
+      migrationDebug('All columns already converted');
+      return;
+    }
+
+    migrationDebug(`Converting ${columnsNeedingConversion.length} columns`);
+
+    // Disable FK checks for MySQL
+    if (db.dialect.client === 'mysql') {
+      await knex.raw('SET FOREIGN_KEY_CHECKS = 0');
+    }
 
     try {
-      await disableForeignKeyChecks();
-
-      // Track foreign keys we need to recreate
-      const droppedForeignKeys: Array<{
-        table: string;
-        column: string;
-        name: string;
-        referencedTable: string;
-        referencedColumn: string;
-        onDelete?: string;
-        onUpdate?: string;
-      }> = [];
-
-      // Step 1: Convert all primary key columns
-      for (const meta of db.metadata.values()) {
-        const tableName = meta.tableName;
-        const hasTable = await knex.schema.hasTable(tableName);
-
-        if (!hasTable) {
-          continue;
-        }
-
-        // Check if ID column exists and is integer
-        const hasIdColumn = await knex.schema.hasColumn(tableName, 'id');
-        if (!hasIdColumn) {
-          continue;
-        }
-
-        const isInteger = await isIntegerColumn(knex, db, tableName, 'id');
-        if (!isInteger) {
-          migrationDebug(`Skipping ${tableName}.id - already BIGINT or not INTEGER`);
-          continue;
-        }
-
-        migrationDebug(`Processing table: ${tableName}`);
-
-        // Get all foreign keys referencing this table's ID
-        const referencingFKs = await getForeignKeysReferencingColumn(knex, db, tableName, 'id');
-
-        // Drop foreign keys referencing this column (for PostgreSQL and MySQL)
-        if (db.dialect.client === 'postgres' || db.dialect.client === 'mysql') {
-          for (const fk of referencingFKs) {
-            migrationDebug(`Dropping FK ${fk.name} from ${fk.table}.${fk.column}`);
-            try {
-              if (db.dialect.client === 'postgres') {
-                await knex.raw(`ALTER TABLE ?? DROP CONSTRAINT IF EXISTS ??`, [fk.table, fk.name]);
-              } else if (db.dialect.client === 'mysql') {
-                await knex.raw(`ALTER TABLE ?? DROP FOREIGN KEY ??`, [fk.table, fk.name]);
-              }
-
-              droppedForeignKeys.push({
-                table: fk.table,
-                column: fk.column,
-                name: fk.name,
-                referencedTable: tableName,
-                referencedColumn: 'id',
-                onDelete: fk.onDelete,
-                onUpdate: fk.onUpdate,
-              });
-            } catch (error) {
-              migrationDebug(
-                `Error dropping FK ${fk.name}: ${error instanceof Error ? error.message : String(error)}`
-              );
-            }
-          }
-        }
-
-        // Convert primary key column
-        await convertColumnToBigInt(knex, db, tableName, 'id', true);
-
-        // Convert foreign key columns in other tables that reference this PK
-        for (const fk of referencingFKs) {
-          const fkTableExists = await knex.schema.hasTable(fk.table);
-          if (!fkTableExists) {
-            continue;
-          }
-
-          const fkColumnIsInteger = await isIntegerColumn(knex, db, fk.table, fk.column);
-          if (fkColumnIsInteger) {
-            await convertColumnToBigInt(knex, db, fk.table, fk.column, false);
-          }
-        }
+      // Drop foreign keys first (for Postgres, MySQL handles via FK_CHECKS)
+      if (db.dialect.client === 'postgres') {
+        await dropForeignKeys(knex, db, foreignKeys);
       }
 
-      // Step 2: Recreate foreign keys for PostgreSQL and MySQL
-      if (db.dialect.client === 'postgres' || db.dialect.client === 'mysql') {
-        for (const fk of droppedForeignKeys) {
-          migrationDebug(`Recreating FK ${fk.name} on ${fk.table}.${fk.column}`);
-          try {
-            let fkSQL = `ALTER TABLE ?? ADD CONSTRAINT ?? FOREIGN KEY (??) REFERENCES ?? (??)`;
-            const fkParams: any[] = [
-              fk.table,
-              fk.name,
-              fk.column,
-              fk.referencedTable,
-              fk.referencedColumn,
-            ];
+      // Convert all columns - PKs first, then FKs
+      const pkColumns = columnsNeedingConversion.filter((c) => c.isPrimaryKey);
+      const fkColumns = columnsNeedingConversion.filter((c) => c.isPrimaryKey === false);
 
-            // Add ON DELETE and ON UPDATE clauses if present
-            if (fk.onDelete) {
-              fkSQL += ` ON DELETE ${fk.onDelete.toUpperCase()}`;
-            }
-            if (fk.onUpdate) {
-              fkSQL += ` ON UPDATE ${fk.onUpdate.toUpperCase()}`;
-            }
-
-            await knex.raw(fkSQL, fkParams);
-          } catch (error) {
-            migrationDebug(
-              `Error recreating FK ${fk.name}: ${error instanceof Error ? error.message : String(error)}`
-            );
-          }
-        }
+      for (const col of pkColumns) {
+        await convertColumnToBigInt(knex, db, col.table, col.column, true);
       }
 
-      await enableForeignKeyChecks();
+      for (const col of fkColumns) {
+        await convertColumnToBigInt(knex, db, col.table, col.column, false);
+      }
+
+      // Recreate foreign keys (for Postgres, MySQL handles via FK_CHECKS)
+      if (db.dialect.client === 'postgres') {
+        await recreateForeignKeys(knex, db, foreignKeys);
+      }
 
       migrationDebug('Migration completed successfully');
-    } catch (error) {
-      await enableForeignKeyChecks();
-      throw error;
+    } finally {
+      // Re-enable FK checks for MySQL (always, even on error)
+      if (db.dialect.client === 'mysql') {
+        await knex.raw('SET FOREIGN_KEY_CHECKS = 1');
+      }
     }
   },
 
