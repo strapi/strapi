@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { findAndClose, navToHeader } from '../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { findAndClose, navToHeader } from '../../../utils/shared';
 
 const EDIT_URL_AUTHOR =
   /\/admin\/content-manager\/collection-types\/api::author.author\/[^/]+(\?.*)?/;

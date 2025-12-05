@@ -81,6 +81,7 @@
   "containers.EditSettingsView.modal-form.edit-field": "Edita el campo",
   "containers.EditView.add.new-entry": "Agregar una entrada",
   "containers.EditView.notification.errors": "El formulario contiene algunos errores",
+  "containers.EditView.saveHint": "Ctrl / Cmd + Enter para {action}",
   "containers.Home.introduction": "Para editar sus registros vaya al link en específico en el menu de la izquierda. Este plugin no tiene una manera de editar configuraciones y aún esta en continuo desarrollo.",
   "containers.Home.pluginHeaderDescription": "Gestiona sus registros en una bella y poderoza interfaz.",
   "containers.Home.pluginHeaderTitle": "Gestor de Contenido",

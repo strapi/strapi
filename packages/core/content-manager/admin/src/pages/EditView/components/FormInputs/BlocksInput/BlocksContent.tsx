@@ -25,7 +25,7 @@ import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
-const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
+const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
   outline: none;
   display: flex;
@@ -33,7 +33,7 @@ const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
   gap: ${({ theme }) => theme.spaces[3]};
   height: 100%;
   // For fullscreen align input in the center with fixed width
-  width: ${(props) => (props.isExpandedMode ? '512px' : '100%')};
+  width: ${(props) => (props.$isExpandedMode ? '512px' : '100%')};
   margin: auto;
 
   > *:last-child {
@@ -41,8 +41,8 @@ const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
   }
 `;
 
-const Wrapper = styled<BoxComponent>(Box)<{ isOverDropTarget: boolean }>`
-  position: ${({ isOverDropTarget }) => isOverDropTarget && 'relative'};
+const Wrapper = styled<BoxComponent>(Box)<{ $isOverDropTarget: boolean }>`
+  position: ${({ $isOverDropTarget }) => $isOverDropTarget && 'relative'};
 `;
 
 type DragDirection = (typeof DIRECTIONS)[keyof typeof DIRECTIONS];
@@ -192,7 +192,7 @@ const DragAndDropElement = ({
   }, [editor.selection]);
 
   return (
-    <Wrapper ref={composedBoxRefs} isOverDropTarget={isOverDropTarget}>
+    <Wrapper ref={composedBoxRefs} $isOverDropTarget={isOverDropTarget}>
       {isOverDropTarget && (
         <DropPlaceholder
           borderStyle="solid"
@@ -600,7 +600,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         aria-labelledby={ariaLabelId}
         readOnly={disabled}
         placeholder={placeholder}
-        isExpandedMode={isExpandedMode}
+        $isExpandedMode={isExpandedMode}
         decorate={decorateCode}
         renderElement={renderElement}
         renderLeaf={renderLeaf}

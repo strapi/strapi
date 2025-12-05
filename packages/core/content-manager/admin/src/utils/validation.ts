@@ -206,7 +206,7 @@ const createAttributeSchema = (
     case 'biginteger':
       return yup.string().matches(/^-?\d*$/);
     case 'boolean':
-      return yup.boolean();
+      return yup.boolean().nullable();
     case 'blocks':
       return yup.mixed().test('isBlocks', translatedErrors.json, (value) => {
         if (!value || Array.isArray(value)) {

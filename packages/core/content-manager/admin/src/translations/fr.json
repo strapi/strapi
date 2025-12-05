@@ -84,6 +84,7 @@
   "containers.EditSettingsView.modal-form.edit-field": "Editer le champ",
   "containers.EditView.add.new-entry": "Ajouter une nouvelle entrée",
   "containers.EditView.notification.errors": "Le formulaire contient des erreurs",
+  "containers.EditView.saveHint": "Ctrl / Cmd + Entrée pour {action}",
   "containers.Home.introduction": "Pour éditer du contenu, choisissez un type de données dans le menu de gauche.",
   "containers.Home.pluginHeaderDescription": "Créer et modifier votre type de contenu",
   "containers.Home.pluginHeaderTitle": "Type de contenu",

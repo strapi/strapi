@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, findAndClose } from '../../../utils/shared';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { clickAndWait, findAndClose } from '../../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -250,7 +250,7 @@ test.describe('Edit View', () => {
 
       // Check that we can save with keyboard shortcuts
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American...');
-      await page.keyboard.press('Control+Enter');
+      await page.getByRole('textbox', { name: 'title' }).press('Enter');
       await findAndClose(page, 'Saved Document');
 
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
@@ -264,6 +264,10 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('tab', { name: 'Draft' })).toBeEnabled();
       await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
       await expect(page.getByText('Modified')).not.toBeVisible();
+
+      // Press Ctrl + Enter to publish the document
+      await page.keyboard.press('Control+Enter');
+      await findAndClose(page, 'Published Document');
 
       /**
        * Now we go back to the list view to confirm our new entry has been correctly added to the database.
