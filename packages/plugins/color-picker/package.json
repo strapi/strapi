@@ -64,8 +64,8 @@
   },
   "devDependencies": {
     "@strapi/strapi": "5.31.3",
-    "@testing-library/react": "15.0.7",
-    "@testing-library/user-event": "14.5.2",
+    "@testing-library/react": "16.3.0",
+    "@testing-library/user-event": "14.6.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
