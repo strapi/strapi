@@ -9516,7 +9516,7 @@ __metadata:
     supertest: "npm:6.3.3"
     tsconfig: "npm:5.31.3"
     typescript: "npm:5.4.4"
-    undici: "npm:6.21.2"
+    undici: "npm:6.21.3"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
   languageName: unknown
@@ -10323,7 +10323,7 @@ __metadata:
     typedoc-github-wiki-theme: "npm:1.1.0"
     typedoc-plugin-markdown: "npm:3.17.1"
     typescript: "npm:5.4.4"
-    undici: "npm:6.21.2"
+    undici: "npm:6.21.3"
     zod: "npm:3.25.67"
   languageName: unknown
   linkType: soft
@@ -10398,7 +10398,7 @@ __metadata:
     rimraf: "npm:5.0.5"
     semver: "npm:7.5.4"
     simple-git: "npm:3.21.0"
-    undici: "npm:6.21.2"
+    undici: "npm:6.21.3"
   bin:
     upgrade: ./bin/upgrade.js
   languageName: unknown
@@ -32646,10 +32646,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.21.2":
-  version: 6.21.2
-  resolution: "undici@npm:6.21.2"
-  checksum: 10c0/799bbc02b77dda9b6b12d56d2620a3a4d4cf087908d6a548acc3ce32f21b5c27467f75c2c4b30fab281daf341210be3d685e8fe99854288de541715ae5735027
+"undici@npm:6.21.3":
+  version: 6.21.3
+  resolution: "undici@npm:6.21.3"
+  checksum: 10c0/294da109853fad7a6ef5a172ad0ca3fb3f1f60cf34703d062a5ec967daf69ad8c03b52e6d536c5cba3bb65615769bf08e5b30798915cbccdddaca01045173dda
   languageName: node
   linkType: hard
 
