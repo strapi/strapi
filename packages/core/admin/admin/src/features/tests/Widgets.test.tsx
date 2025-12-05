@@ -1,5 +1,5 @@
 import { server } from '@tests/server';
-import { act, renderHook, waitFor } from '@tests/utils';
+import { waitFor, renderHook } from '@tests/utils';
 import { rest } from 'msw';
 
 import {
@@ -158,7 +158,7 @@ describe('useWidgets', () => {
     it('should move widget to new position and update state', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.moveWidget('widget-1', 2);
       });
 
@@ -173,7 +173,7 @@ describe('useWidgets', () => {
     it('should handle horizontal drop', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.moveWidget('widget-1', 2, 1, true);
       });
 
@@ -188,7 +188,7 @@ describe('useWidgets', () => {
     it('should handle vertical drop within same row', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.moveWidget('widget-1', 1, 0, false);
       });
 
@@ -205,7 +205,7 @@ describe('useWidgets', () => {
     it('should delete widget and update state', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.deleteWidget('widget-1');
       });
 
@@ -223,7 +223,7 @@ describe('useWidgets', () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
       const newWidget = createMockWidget('widget-4', 'Widget 4');
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.addWidget(newWidget);
       });
 
@@ -235,7 +235,7 @@ describe('useWidgets', () => {
     it('should not add widget if it already exists', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.addWidget(mockWidgets[0]);
       });
 
@@ -250,7 +250,7 @@ describe('useWidgets', () => {
     it('should resize widgets and update columnWidths', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.handleWidgetResize('widget-1', 'widget-2', 8, 4);
       });
 
@@ -271,7 +271,7 @@ describe('useWidgets', () => {
       mockCanResizeBetweenWidgets.mockReturnValue(false);
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.handleWidgetResize('widget-1', 'widget-2', 8, 4);
       });
 
@@ -284,7 +284,7 @@ describe('useWidgets', () => {
       mockIsValidResizeOperation.mockReturnValue(false);
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.handleWidgetResize('widget-1', 'widget-2', 8, 4);
       });
 
@@ -296,10 +296,10 @@ describe('useWidgets', () => {
   });
 
   describe('drag state management', () => {
-    it('should handle drag start', () => {
+    it('should handle drag start', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      act(() => {
+      await waitFor(() => {
         result.current.handleDragStart('widget-1');
       });
 
@@ -307,18 +307,18 @@ describe('useWidgets', () => {
       expect(result.current.draggedWidgetId).toBe('widget-1');
     });
 
-    it('should handle drag end', () => {
+    it('should handle drag end', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
       // Start dragging first
-      act(() => {
+      await waitFor(() => {
         result.current.handleDragStart('widget-1');
       });
 
       expect(result.current.isDraggingWidget).toBe(true);
 
       // End dragging
-      act(() => {
+      await waitFor(() => {
         result.current.handleDragEnd();
       });
 
@@ -328,10 +328,10 @@ describe('useWidgets', () => {
   });
 
   describe('columnWidths state management', () => {
-    it('should update columnWidths when setColumnWidths is called', () => {
+    it('should update columnWidths when setColumnWidths is called', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      act(() => {
+      await waitFor(() => {
         result.current.setColumnWidths(mockColumnWidths);
       });
 
@@ -350,7 +350,7 @@ describe('useWidgets', () => {
 
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.moveWidget('widget-1', 2);
       });
 
@@ -370,7 +370,7 @@ describe('useWidgets', () => {
 
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.moveWidget('widget-1', 2);
       });
 
@@ -398,7 +398,7 @@ describe('useWidgets', () => {
     it('should handle moveWidget with non-existent widget', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.moveWidget('non-existent', 1);
       });
 
@@ -411,7 +411,7 @@ describe('useWidgets', () => {
     it('should handle deleteWidget with non-existent widget', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.deleteWidget('non-existent');
       });
 
@@ -424,7 +424,7 @@ describe('useWidgets', () => {
     it('should handle resize with invalid widget IDs', async () => {
       const { result } = renderHook(() => useWidgets(defaultProps));
 
-      await act(async () => {
+      await waitFor(() => {
         result.current.handleWidgetResize('invalid-1', 'invalid-2', 8, 4);
       });
 

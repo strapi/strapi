@@ -1,6 +1,6 @@
 # Test Data Sets
 
-The CLI e2e tests currently only support one app-template, therefore any modifications to the schema of the template must be reflected in all datasets.
+Both CLI and e2e tests share the same app-template (`tests/app-template`), therefore any modifications to the schema of the template must be reflected in all datasets used by both test types.
 
 The following test data set is available for CLI e2e testing. It includes all Strapi data, such as transfer tokens, api tokens, admin and u&p users and are imported with a custom data-transfer script.
 

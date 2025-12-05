@@ -102,6 +102,7 @@
   "containers.EditSettingsView.modal-form.edit-field": "Edit the field",
   "containers.EditView.add.new-entry": "Add an entry",
   "containers.EditView.notification.errors": "The form contains some errors",
+  "containers.EditView.saveHint": "Ctrl / Cmd + Enter to {action}",
   "containers.Home.introduction": "To edit your entries go to the specific link in the left menu. This plugin doesn't have a proper way to edit settings and it's still under active development.",
   "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",
   "containers.Home.pluginHeaderTitle": "Content Manager",

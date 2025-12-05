@@ -2,7 +2,7 @@
 
 const coffee = require('coffee');
 
-const utils = require('../../../utils');
+const utils = require('../../../../utils');
 
 describe('routes:list', () => {
   let appPath;
