@@ -196,10 +196,14 @@ yargs
                 // If exit code is 0, there are no changes, skip commit
               } catch (err) {
                 // Exit code 1 means there are changes, proceed with commit
-                await execa('git', [...gitUser, 'commit', '-m', 'initial commit'], {
-                  stdio: 'inherit',
-                  cwd: testAppPath,
-                });
+                await execa(
+                  'git',
+                  [...gitUser, '-c', 'commit.gpgsign=false', 'commit', '-m', 'initial commit'],
+                  {
+                    stdio: 'inherit',
+                    cwd: testAppPath,
+                  }
+                );
               }
 
               // Start Strapi and wait for it to be ready to generate files
@@ -296,10 +300,21 @@ yargs
                 // If exit code is 0, there are no changes, skip commit
               } catch (err) {
                 // Exit code 1 means there are changes, proceed with commit
-                await execa('git', [...gitUser, 'commit', '-m', 'commit generated files'], {
-                  stdio: 'inherit',
-                  cwd: testAppPath,
-                });
+                await execa(
+                  'git',
+                  [
+                    ...gitUser,
+                    '-c',
+                    'commit.gpgsign=false',
+                    'commit',
+                    '-m',
+                    'commit generated files',
+                  ],
+                  {
+                    stdio: 'inherit',
+                    cwd: testAppPath,
+                  }
+                );
               }
             })();
           }
@@ -344,10 +359,21 @@ module.exports = config
                   stdio: 'inherit',
                   cwd: testAppPath,
                 });
-                await execa('git', [...gitUser, 'commit', '-m', 'Add playwright config'], {
-                  stdio: 'inherit',
-                  cwd: testAppPath,
-                }).catch(() => {
+                await execa(
+                  'git',
+                  [
+                    ...gitUser,
+                    '-c',
+                    'commit.gpgsign=false',
+                    'commit',
+                    '-m',
+                    'Add playwright config',
+                  ],
+                  {
+                    stdio: 'inherit',
+                    cwd: testAppPath,
+                  }
+                ).catch(() => {
                   // Ignore error if there's nothing to commit (file already tracked)
                 });
 
