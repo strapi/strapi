@@ -8,8 +8,8 @@ import { BulkActions } from '../BulkActions';
 
 import type { BulkActionsProps } from '../BulkActions';
 
-jest.mock('../../../../../hooks/useBulkRemove');
-jest.mock('../../../../../components/BulkMoveDialog/BulkMoveDialog');
+jest.mock('../../../../hooks/useBulkRemove');
+jest.mock('../../../../components/BulkMoveDialog/BulkMoveDialog');
 
 const setup = (
   props: BulkActionsProps = {
