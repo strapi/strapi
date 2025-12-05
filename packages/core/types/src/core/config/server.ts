@@ -1,50 +1,81 @@
-export interface AppProp {
+export interface App {
   keys: string[];
 }
 
-export interface CronProp {
-  enabled?: boolean;
-  tasks?: object;
+export interface Cron {
+  enabled?: boolean | undefined;
+  tasks?: object | undefined;
 }
 
-export interface DirsProp {
-  public?: string;
+export interface Dirs {
+  public?: string | undefined;
 }
 
-export interface LoggerProp {
-  updates?: {
-    enabled?: boolean;
-  };
-  startup?: {
-    enabled?: boolean;
-  };
+export interface Logger {
+  updates?:
+    | {
+        enabled?: boolean | undefined;
+      }
+    | undefined;
+  startup?:
+    | {
+        enabled?: boolean | undefined;
+      }
+    | undefined;
 }
 
-export interface TransferProp {
-  remote?: {
-    enabled?: boolean;
-  };
+export interface ServerTransfer {
+  remote?:
+    | {
+        enabled?: boolean | undefined;
+      }
+    | undefined;
 }
 
-export interface AdminProp {
-  autoOpen?: boolean;
+export interface ServerAdmin {
+  autoOpen?: boolean | undefined;
+}
+
+export interface Proxy {
+  global?: string | undefined;
+  http?: string | undefined;
+  https?: string | undefined;
+  fetch?: string | undefined;
+}
+
+export interface Webhooks {
+  populateRelations?: boolean | undefined;
+  [key: string]: unknown;
+}
+
+export interface Http {
+  serverOptions?:
+    | {
+        requestTimeout?: number | undefined;
+        [key: string]: unknown;
+      }
+    | undefined;
+  [key: string]: unknown;
 }
 
 export interface Server {
   // required
   host: string;
   port: number;
-  app: AppProp;
+  app: App;
 
   // optional
-  socket?: string | number;
-  emitErrors?: boolean;
-  url?: string;
-  proxy?: boolean;
-  globalProxy?: string;
-  cron?: CronProp;
-  dirs?: DirsProp;
-  logger?: LoggerProp;
-  transfer?: TransferProp;
-  admin?: AdminProp;
+  socket?: string | number | undefined;
+  emitErrors?: boolean | undefined;
+  url?: string | undefined;
+  absoluteUrl?: string | undefined;
+  proxy?: boolean | Proxy | undefined;
+  globalProxy?: string | undefined;
+  cron?: Cron | undefined;
+  dirs?: Dirs | undefined;
+  logger?: Logger | undefined;
+  transfer?: ServerTransfer | undefined;
+  admin?: ServerAdmin | undefined;
+  webhooks?: Webhooks | undefined;
+  http?: Http | undefined;
 }

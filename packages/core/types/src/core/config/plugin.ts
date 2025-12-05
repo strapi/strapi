@@ -1,9 +1,9 @@
 export interface Plugin {
   [key: string]:
     | {
-        enabled: boolean;
-        resolve?: string;
-        config?: object;
+        enabled?: boolean | undefined;
+        resolve?: string | undefined;
+        config?: unknown | undefined;
       }
     | boolean;
 }
