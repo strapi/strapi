@@ -1827,10 +1827,11 @@ async function copyRelationsToOtherContentTypes({
               targetPublishedToDraftMap,
               relation[targetColumnName]
             );
-            if (mappedTargetId) {
+            if (mappedTargetId !== undefined) {
               newTargetId = mappedTargetId;
             }
             // If no draft mapping, keep published target (target might not have DP or was deleted)
+            // This will be fixed by fixExistingDraftRelations if needed
           }
 
           // Create new relation object without the 'id' field
@@ -2018,6 +2019,175 @@ async function updateJoinColumnRelations({
           ...updates.map(({ id }) => id),
         ]
       );
+    }
+  }
+}
+
+/**
+ * Fixes existing v4 draft entries' join table relations by converting published targets to draft targets.
+ * This ensures that draft entries point to draft targets, not published ones.
+ */
+async function fixExistingDraftRelations({ trx, uid }: { trx: Knex; uid: string }) {
+  const meta = strapi.db.metadata.get(uid);
+  if (!meta) {
+    return;
+  }
+
+  // Get all draft entity IDs (including existing v4 drafts, not just newly created ones)
+  const draftEntities = await trx(meta.tableName).select('id').whereNull('published_at');
+
+  if (draftEntities.length === 0) {
+    return;
+  }
+
+  const draftIds = draftEntities.map((e) => Number(e.id));
+  const draftIdsChunks = chunkArray(draftIds, getBatchSize(trx, 1000));
+  const draftMapCache = new Map<string, Map<number, number> | null>();
+
+  for (const [attributeName, attribute] of Object.entries(meta.attributes) as Array<
+    [string, any]
+  >) {
+    if (attribute.type !== 'relation') {
+      continue;
+    }
+
+    const joinTable = attribute.joinTable;
+    if (!joinTable) {
+      continue;
+    }
+
+    // Skip component join tables - they are handled by fixExistingDraftComponentRelations
+    if (joinTable.name.includes('_cmps')) {
+      continue;
+    }
+
+    // Skip self-referential relations - they're handled by copyRelationsForContentType
+    if (attribute.target === uid) {
+      continue;
+    }
+
+    const targetUid = attribute.target;
+    if (!targetUid) {
+      continue;
+    }
+
+    const targetContentType = strapi.contentTypes[targetUid];
+    const targetHasDP = targetContentType?.options?.draftAndPublish;
+    if (!targetHasDP) {
+      continue;
+    }
+
+    const { name: sourceColumnName } = joinTable.joinColumn;
+    const { name: targetColumnName } = joinTable.inverseJoinColumn;
+
+    // Get draft map for target to convert published targets to draft targets
+    const targetDraftMap = await getDraftMapForTarget(trx, targetUid, draftMapCache);
+    if (!targetDraftMap || targetDraftMap.size === 0) {
+      continue;
+    }
+
+    // Get target publication states
+    const targetMeta = strapi.db.metadata.get(targetUid);
+    if (!targetMeta) {
+      continue;
+    }
+
+    for (const draftIdsChunk of draftIdsChunks) {
+      // Get all relations for these draft entries
+      const relations = await trx(joinTable.name)
+        .whereIn(sourceColumnName, draftIdsChunk)
+        .select('id', sourceColumnName, targetColumnName);
+
+      if (relations.length === 0) {
+        continue;
+      }
+
+      const targetIds = [...new Set(relations.map((r) => r[targetColumnName]).filter(Boolean))];
+      if (targetIds.length === 0) {
+        continue;
+      }
+
+      const targets = await trx(targetMeta.tableName)
+        .whereIn('id', targetIds)
+        .select('id', 'published_at');
+
+      const targetPublicationState = new Map(
+        targets.map((t) => [Number(t.id), t.published_at !== null ? 'published' : 'draft'])
+      );
+
+      // Find relations from draft entries to published targets and convert them
+      const relationsToUpdate: Array<{
+        relationId: number;
+        sourceId: number;
+        oldTargetId: number;
+        newTargetId: number;
+      }> = [];
+
+      for (const relation of relations) {
+        const targetId = Number(relation[targetColumnName]);
+        const targetState = targetPublicationState.get(targetId);
+
+        if (targetState === 'published') {
+          // This is a relation from a draft entry to a published target - convert to draft target
+          const draftTargetId = targetDraftMap.get(targetId);
+          if (draftTargetId != null) {
+            relationsToUpdate.push({
+              relationId: relation.id,
+              sourceId: Number(relation[sourceColumnName]),
+              oldTargetId: targetId,
+              newTargetId: draftTargetId,
+            });
+          }
+        }
+      }
+
+      if (relationsToUpdate.length > 0) {
+        debug(
+          `[fixExistingDraftRelations] ${uid}: Converting ${relationsToUpdate.length} relations from draft entries to published targets -> draft targets (attribute: ${attributeName}, target: ${targetUid})`
+        );
+
+        const updateChunks = chunkArray(relationsToUpdate, getBatchSize(trx, 1000));
+        for (const updateChunk of updateChunks) {
+          for (const update of updateChunk) {
+            try {
+              // Check if relation to draft target already exists
+              const existingRelation = await trx(joinTable.name)
+                .where(sourceColumnName, update.sourceId)
+                .where(targetColumnName, update.newTargetId)
+                .where('id', '!=', update.relationId)
+                .first();
+
+              if (existingRelation) {
+                // If relation to draft target already exists, delete the published target relation
+                await trx(joinTable.name).where('id', update.relationId).delete();
+                debug(
+                  `[fixExistingDraftRelations] ${uid}: Deleted relation ${update.relationId} (entry ${update.sourceId} -> published target ${update.oldTargetId}), draft relation already exists (-> ${update.newTargetId})`
+                );
+              } else {
+                // Update the relation to point to draft target
+                const updated = await trx(joinTable.name)
+                  .where('id', update.relationId)
+                  .update({ [targetColumnName]: update.newTargetId });
+                if (updated > 0) {
+                  debug(
+                    `[fixExistingDraftRelations] ${uid}: Updated relation ${update.relationId} (entry ${update.sourceId} -> published target ${update.oldTargetId} -> draft target ${update.newTargetId})`
+                  );
+                }
+              }
+            } catch (error: any) {
+              // If update fails due to duplicate key, try deleting the published target relation instead
+              if (isDuplicateEntryError(error)) {
+                await trx(joinTable.name).where('id', update.relationId).delete();
+                debug(
+                  `[fixExistingDraftRelations] ${uid}: Deleted relation ${update.relationId} due to duplicate key error (entry ${update.sourceId})`
+                );
+              } else {
+                throw error;
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -2526,47 +2696,59 @@ const migrateUp = async (trx: Knex, db: Database) => {
   /**
    * Create plain draft entries for all the entries that were published.
    */
-  strapi.log.info('[discard-drafts] Stage 1/3 – cloning published entries into draft rows');
+  strapi.log.info('[discard-drafts] Stage 1/5 – cloning published entries into draft rows');
   for (const model of dpModels) {
     debug(` • cloning scalars for ${model.uid}`);
     await copyPublishedEntriesToDraft({ db, trx, uid: model.uid });
   }
-  strapi.log.info('[discard-drafts] Stage 1/3 complete');
+  strapi.log.info('[discard-drafts] Stage 1/5 complete');
 
   /**
    * Copy relations from published entries to draft entries using direct database queries.
    * This is much more efficient than calling discardDraft for each entry.
    */
-  strapi.log.info('[discard-drafts] Stage 2/3 – copying relations and components to drafts');
+  strapi.log.info('[discard-drafts] Stage 2/5 – copying relations and components to drafts');
   for (const model of dpModels) {
     debug(` • copying relations for ${model.uid}`);
     await copyRelationsToDrafts({ db, trx, uid: model.uid });
   }
   flushSkippedRelationLogs();
-  strapi.log.info('[discard-drafts] Stage 2/3 complete');
+  strapi.log.info('[discard-drafts] Stage 2/5 complete');
+
+  /**
+   * Fix existing v4 draft entries' join table relations to ensure they point to draft targets.
+   * In v4, draft entries might have had relations pointing to published targets. These need
+   * to be converted to point to the draft versions of those targets.
+   */
+  strapi.log.info('[discard-drafts] Stage 3/5 – fixing existing draft relations');
+  for (const model of dpModels) {
+    debug(` • fixing existing draft relations for ${model.uid}`);
+    await fixExistingDraftRelations({ trx, uid: model.uid });
+  }
+  strapi.log.info('[discard-drafts] Stage 3/5 complete');
 
   /**
    * Fix existing v4 draft entries' component relations to ensure they point to draft targets.
    * In v4, draft entries might have had components pointing to published targets. These need
    * to be converted to point to the draft versions of those targets.
    */
-  strapi.log.info('[discard-drafts] Stage 2.5/3 – fixing existing draft component relations');
+  strapi.log.info('[discard-drafts] Stage 4/5 – fixing existing draft component relations');
   for (const model of dpModels) {
     debug(` • fixing existing draft component relations for ${model.uid}`);
     await fixExistingDraftComponentRelations({ trx, uid: model.uid });
   }
-  strapi.log.info('[discard-drafts] Stage 2.5/3 complete');
+  strapi.log.info('[discard-drafts] Stage 4/5 complete');
 
   /**
    * Update JoinColumn relations (foreign keys) to point to draft versions
    * This matches discard() behavior: drafts relate to drafts
    */
-  strapi.log.info('[discard-drafts] Stage 3/3 – updating foreign key references to draft targets');
+  strapi.log.info('[discard-drafts] Stage 5/5 – updating foreign key references to draft targets');
   for (const model of dpModels) {
     debug(` • updating join columns for ${model.uid}`);
     await updateJoinColumnRelations({ db, trx, uid: model.uid });
   }
-  strapi.log.info('[discard-drafts] Stage 3/3 complete');
+  strapi.log.info('[discard-drafts] Stage 5/5 complete');
 
   strapi.log.info('[discard-drafts] Migration completed successfully');
 };

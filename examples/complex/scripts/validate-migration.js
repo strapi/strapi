@@ -4226,9 +4226,7 @@ async function validateComponentRelationPublicationState(strapi) {
  * - Media relations
  */
 async function validateDraftEntriesOnlyReferenceDrafts(strapi) {
-  console.log(
-    '\n🚨 CRITICAL: Validating draft entries only reference draft entries (not published)...\n'
-  );
+  console.log('\n🔍 Validating draft entries only reference draft entries (not published)...\n');
 
   const errors = [];
   const warnings = [];
@@ -6034,8 +6032,25 @@ async function getPreMigrationRelations() {
         if (entityIdCol && componentIdCol && componentTypeCol) {
           const entries = await db(tableName).select('*');
           for (const entry of entries) {
+            const inferredEntityTable = inferEntityTableFromComponentTable(tableName, tableNames);
+
+            // Skip if we couldn't infer the entity table
+            if (!inferredEntityTable) {
+              continue;
+            }
+
+            // Skip if the inferred "entity table" is actually a component table
+            // Component tables start with "components_" and are not entity tables
+            // Content type tables don't start with "components_" (they're like relation_dps, basic_dps, etc.)
+            if (inferredEntityTable.startsWith('components_')) {
+              // This is a nested component relation (component inside component)
+              // We can't easily validate these without knowing which entity uses the parent component
+              // Skip during capture - these will be validated by other means
+              continue;
+            }
+
             relations.component.push({
-              entityTable: inferEntityTableFromComponentTable(tableName, tableNames),
+              entityTable: inferredEntityTable,
               entityId: entry[entityIdCol],
               componentId: entry[componentIdCol],
               componentType: entry[componentTypeCol],
@@ -6110,17 +6125,41 @@ function inferTargetTable(columnName, allTables) {
  * Helper to infer entity table from component join table name
  */
 function inferEntityTableFromComponentTable(componentTableName, allTables) {
-  // Component tables are like: components_{entity}_cmps or {entity}_components
-  const match = componentTableName.match(/components?[_-](.+?)(?:[_-]cmps?|$)/);
-  if (match) {
-    const entityBase = match[1];
-    // Try to find matching table
-    for (const table of allTables) {
-      if (table.includes(entityBase) && !table.includes('component')) {
-        return table;
-      }
+  // Component join tables:
+  // - v4: {collectionName}_components
+  // - v5: {collectionName}_cmps
+  // Extract the collection name by removing the suffix
+
+  let entityBase = null;
+
+  // Remove v5 suffix: _cmps
+  if (componentTableName.endsWith('_cmps')) {
+    entityBase = componentTableName.slice(0, -5); // Remove '_cmps'
+  }
+  // Remove v4 suffix: _components
+  else if (componentTableName.endsWith('_components')) {
+    entityBase = componentTableName.slice(0, -11); // Remove '_components'
+  }
+
+  if (!entityBase) {
+    return null;
+  }
+
+  // Try to find exact match first
+  if (allTables.includes(entityBase)) {
+    return entityBase;
+  }
+
+  // Try to find matching table (contains entityBase but not 'component' or 'cmp')
+  for (const table of allTables) {
+    if (
+      table === entityBase ||
+      (table.includes(entityBase) && !table.includes('component') && !table.includes('cmp'))
+    ) {
+      return table;
     }
   }
+
   return null;
 }
 
@@ -6355,33 +6394,316 @@ async function validateAllV4RelationsMigrated(strapi, preMigrationRelations) {
       // Use original column names if we can't determine them
     }
 
-    // Check if relation exists
-    const exists = await db(v5TableName)
+    // First, check if relation exists with original IDs (for published entries or non-D&P)
+    const publishedRelationExists = await db(v5TableName)
       .where(v5SourceColumn, rel.sourceId)
       .where(v5TargetColumn, rel.targetId)
       .first();
 
-    if (!exists) {
-      // Relation might have been migrated with different IDs
-      // Check if any relation exists between entries that could correspond
-      const anyRelation = await db(v5TableName)
-        .where(v5SourceColumn, '>', 0)
-        .where(v5TargetColumn, '>', 0)
-        .first();
+    // Check if this is a component relation (component join tables have "components" or "_cmps" in the name)
+    // Component relations have component IDs as sources, not content type entry IDs
+    const isComponentRelation = v5TableName.includes('components') || v5TableName.includes('_cmps');
 
-      if (!anyRelation) {
+    if (isComponentRelation) {
+      // For component relations, we need to validate that the relation was migrated
+      // Components don't have draft/publish, but they belong to entities that do
+      // Component IDs may have changed during migration, so we need to check more carefully
+
+      // First, try to find the component in any component join table
+      // The sourceId is a component ID, so we need to find which component join table contains it
+      const identifiers = strapi.db.metadata.identifiers;
+      const componentIdColumn = identifiers.getNameFromTokens([
+        { name: 'component', shortName: 'cmp', compressible: false },
+        { name: 'id', compressible: false },
+      ]);
+      const componentTypeColumn = identifiers.getNameFromTokens([
+        { name: 'component_type', compressible: false },
+      ]);
+
+      let componentFound = false;
+      let componentType = null;
+
+      // Search all content types for component join tables to find the component
+      for (const contentType of Object.values(strapi.contentTypes)) {
+        const meta = strapi.db.metadata.get(contentType.uid);
+        if (!meta || !contentType.collectionName) continue;
+
+        const candidateComponentTableName = identifiers.getNameFromTokens([
+          { name: contentType.collectionName, compressible: true },
+          { name: 'components', shortName: 'cmps', compressible: false },
+        ]);
+
+        const hasTable = await db.schema.hasTable(candidateComponentTableName);
+        if (!hasTable) continue;
+
+        // Check if this component ID exists in this table
+        const componentRow = await db(candidateComponentTableName)
+          .where(componentIdColumn, rel.sourceId)
+          .first();
+
+        if (componentRow) {
+          componentFound = true;
+          componentType = componentRow[componentTypeColumn];
+          break;
+        }
+      }
+
+      // Also check nested component tables
+      if (!componentFound) {
+        for (const [componentUid, componentSchema] of Object.entries(strapi.components)) {
+          if (!componentSchema.collectionName) continue;
+
+          const nestedComponentTableName = identifiers.getNameFromTokens([
+            { name: componentSchema.collectionName, compressible: true },
+            { name: 'components', shortName: 'cmps', compressible: false },
+          ]);
+
+          const hasTable = await db.schema.hasTable(nestedComponentTableName);
+          if (!hasTable) continue;
+
+          const componentRow = await db(nestedComponentTableName)
+            .where(componentIdColumn, rel.sourceId)
+            .first();
+
+          if (componentRow) {
+            componentFound = true;
+            componentType = componentRow[componentTypeColumn];
+            break;
+          }
+        }
+      }
+
+      // Check if the relation exists (either with original IDs or migrated IDs)
+      if (!publishedRelationExists) {
+        // Check if any relation exists in this table
+        const anyRelation = await db(v5TableName)
+          .where(v5SourceColumn, '>', 0)
+          .where(v5TargetColumn, '>', 0)
+          .first();
+
+        if (!anyRelation) {
+          // No relations at all in this table - definitely missing
+          joinTableMissing++;
+          errors.push(
+            `Missing JoinTable relation: ${v5TableName} (v4: ${rel.table}, component ${rel.sourceId} -> target ${rel.targetId}). Table exists but has no relations.`
+          );
+        } else if (!componentFound) {
+          // Component not found - it may have been deleted or IDs changed significantly
+          // This could be a problem, but we can't be 100% sure without knowing the mapping
+          warnings.push(
+            `Could not verify component relation: ${v5TableName} (v4: ${rel.table}, component ${rel.sourceId} -> target ${rel.targetId}). Component ${rel.sourceId} not found in any component join table. Relation may still exist with different component ID.`
+          );
+        } else {
+          // Component found, but specific relation doesn't exist
+          // Check if component has any relation to the target (IDs may have changed)
+          const componentHasAnyRelation = await db(v5TableName)
+            .where(v5SourceColumn, rel.sourceId)
+            .where(v5TargetColumn, '>', 0)
+            .first();
+
+          if (!componentHasAnyRelation) {
+            joinTableMissing++;
+            errors.push(
+              `Missing JoinTable relation: ${v5TableName} (v4: ${rel.table}, component ${rel.sourceId} (${componentType}) -> target ${rel.targetId}). Component exists but has no relations in this join table.`
+            );
+          }
+        }
+      } else if (!componentFound) {
+        // Relation exists but component not found - this is suspicious
+        warnings.push(
+          `Component relation exists but component not found: ${v5TableName} (v4: ${rel.table}, component ${rel.sourceId} -> target ${rel.targetId}). Component ${rel.sourceId} not found in any component join table.`
+        );
+      }
+      continue;
+    }
+
+    // Find source and target content types by searching all tables
+    // We need to find which content type tables contain these IDs
+    let sourceTable = null;
+    let targetTable = null;
+    let sourceEntry = null;
+    let targetEntry = null;
+
+    // Try to find source and target from metadata first
+    // Join tables are stored in metadata, so we can look up the relation attribute
+    let sourceUid = null;
+    let targetUid = null;
+
+    // Search metadata for this join table to find the relation attribute
+    for (const [uid, meta] of strapi.db.metadata.entries()) {
+      if (!meta.attributes) continue;
+      for (const [attrName, attr] of Object.entries(meta.attributes)) {
+        if (attr.type === 'relation' && attr.joinTable && attr.joinTable.name === v5TableName) {
+          sourceUid = uid;
+          targetUid = attr.target;
+          break;
+        }
+      }
+      if (sourceUid) break;
+    }
+
+    // If we found the source UID, get its table name
+    if (sourceUid) {
+      const sourceMeta = strapi.db.metadata.get(sourceUid);
+      if (sourceMeta && v5EntriesByTable.has(sourceMeta.tableName)) {
+        const entries = v5EntriesByTable.get(sourceMeta.tableName);
+        const found = entries.find((e) => Number(e.id) === Number(rel.sourceId));
+        if (found) {
+          sourceTable = sourceMeta.tableName;
+          sourceEntry = found;
+        }
+      }
+    }
+
+    // If we found the target UID, get its table name
+    if (targetUid) {
+      const targetMeta = strapi.db.metadata.get(targetUid);
+      if (targetMeta && v5EntriesByTable.has(targetMeta.tableName)) {
+        const entries = v5EntriesByTable.get(targetMeta.tableName);
+        const found = entries.find((e) => Number(e.id) === Number(rel.targetId));
+        if (found) {
+          targetTable = targetMeta.tableName;
+          targetEntry = found;
+        }
+      }
+    }
+
+    // If we couldn't find entries from metadata, search all tables
+    if (!sourceEntry) {
+      for (const [tableName, entries] of v5EntriesByTable.entries()) {
+        const found = entries.find((e) => Number(e.id) === Number(rel.sourceId));
+        if (found) {
+          sourceTable = tableName;
+          sourceEntry = found;
+          break;
+        }
+      }
+    }
+
+    if (!targetEntry) {
+      for (const [tableName, entries] of v5EntriesByTable.entries()) {
+        const found = entries.find((e) => Number(e.id) === Number(rel.targetId));
+        if (found) {
+          targetTable = tableName;
+          targetEntry = found;
+          break;
+        }
+      }
+    }
+
+    // If we can't find the entries, the relation definitely can't exist
+    if (!sourceEntry || !targetEntry) {
+      // Check if the relation exists anyway (maybe entries were renumbered but relation preserved)
+      if (!publishedRelationExists) {
         joinTableMissing++;
         errors.push(
           `Missing JoinTable relation: ${v5TableName} (v4: ${rel.table}, ${rel.sourceId} -> ${rel.targetId})`
         );
-      } else {
-        // Relation exists but with different IDs - this is expected after migration
-        // We can't easily verify the exact mapping without tracking IDs
-        warnings.push(
-          `JoinTable relation ${v5TableName} exists but IDs may have changed (v4: ${rel.table}, ${rel.sourceId} -> ${rel.targetId})`
+      }
+      continue;
+    }
+
+    // Check if source and target have draft/publish enabled
+    const sourceContentType = allContentTypes.find(
+      (ct) => strapi.db.metadata.get(ct.uid)?.tableName === sourceTable
+    );
+    const targetContentType = allContentTypes.find(
+      (ct) => strapi.db.metadata.get(ct.uid)?.tableName === targetTable
+    );
+
+    const sourceHasDP = sourceContentType?.options?.draftAndPublish;
+    const targetHasDP = targetContentType?.options?.draftAndPublish;
+
+    // If neither has D&P, the relation should exist with same IDs
+    if (!sourceHasDP && !targetHasDP) {
+      if (!publishedRelationExists) {
+        joinTableMissing++;
+        errors.push(
+          `Missing JoinTable relation: ${v5TableName} (v4: ${rel.table}, ${rel.sourceId} -> ${rel.targetId})`
         );
       }
+      continue;
     }
+
+    // For D&P content types, we need to verify the relation was migrated correctly
+    // The v4 relation could have been:
+    // 1. Published -> Published (should still exist AND draft->draft should exist)
+    // 2. Draft -> Published (should be converted to draft->draft)
+    // 3. Published -> Draft (should be converted to draft->draft, or published->published if target has no draft)
+
+    const sourceIsPublished = sourceEntry.published_at !== null;
+    const targetIsPublished = targetEntry.published_at !== null;
+
+    // Find draft versions of source and target
+    let draftSourceId = null;
+    let draftTargetId = null;
+
+    if (sourceHasDP && sourceEntry.document_id) {
+      const sourceEntries = v5EntriesByTable.get(sourceTable) || [];
+      const draftSource = sourceEntries.find(
+        (e) => e.document_id === sourceEntry.document_id && !e.published_at
+      );
+      if (draftSource) {
+        draftSourceId = draftSource.id;
+      }
+    } else {
+      // Source doesn't have D&P, use original ID
+      draftSourceId = rel.sourceId;
+    }
+
+    if (targetHasDP && targetEntry.document_id) {
+      const targetEntries = v5EntriesByTable.get(targetTable) || [];
+      const draftTarget = targetEntries.find(
+        (e) => e.document_id === targetEntry.document_id && !e.published_at
+      );
+      if (draftTarget) {
+        draftTargetId = draftTarget.id;
+      }
+    } else {
+      // Target doesn't have D&P, use original ID
+      draftTargetId = rel.targetId;
+    }
+
+    // Check if draft->draft relation exists (this is what the migration should create)
+    let draftRelationExists = false;
+    if (draftSourceId && draftTargetId) {
+      draftRelationExists = !!(await db(v5TableName)
+        .where(v5SourceColumn, draftSourceId)
+        .where(v5TargetColumn, draftTargetId)
+        .first());
+    }
+
+    // Determine if we should error:
+    // - If source was published in v4, we expect draft->draft relation to exist
+    // - If source was draft in v4, the relation should exist with the same IDs (after fixExistingDraftRelations)
+    // - Published->published relation should exist if both were published in v4
+    const shouldHaveDraftRelation = sourceHasDP && sourceIsPublished; // Only if source was published
+    const shouldHavePublishedRelation = sourceIsPublished && targetIsPublished;
+
+    if (shouldHaveDraftRelation && !draftRelationExists) {
+      // Source was published, so we expect a draft->draft relation
+      joinTableMissing++;
+      errors.push(
+        `Missing JoinTable relation (draft->draft): ${v5TableName} (v4: ${rel.table}, ${rel.sourceId} -> ${rel.targetId}, expected draft: ${draftSourceId} -> ${draftTargetId})`
+      );
+    } else if (!sourceIsPublished && sourceHasDP) {
+      // Source was already a draft in v4, so the relation should exist with the same IDs
+      // (after fixExistingDraftRelations converted any published targets to draft targets)
+      if (!publishedRelationExists && !draftRelationExists) {
+        joinTableMissing++;
+        errors.push(
+          `Missing JoinTable relation: ${v5TableName} (v4: ${rel.table}, ${rel.sourceId} -> ${rel.targetId})`
+        );
+      }
+    } else if (shouldHavePublishedRelation && !publishedRelationExists && !draftRelationExists) {
+      // If both were published, at least one relation should exist
+      // (published->published OR draft->draft)
+      joinTableMissing++;
+      errors.push(
+        `Missing JoinTable relation: ${v5TableName} (v4: ${rel.table}, ${rel.sourceId} -> ${rel.targetId})`
+      );
+    }
+    // If relation exists (either published or draft), it's correctly migrated
   }
 
   if (joinTableChecked > 0) {
@@ -6400,12 +6722,184 @@ async function validateAllV4RelationsMigrated(strapi, preMigrationRelations) {
   for (const rel of preMigrationRelations.component) {
     componentChecked++;
 
-    // Convert v4 entity table name to v5 table name
-    const v5EntityTable = getV5TableName(rel.entityTable);
+    // If entityTable is null, we couldn't infer it during capture
+    // Try to find it by looking up the component table in metadata
+    let v5EntityTable = null;
+    let componentTableName = null;
 
-    // Component relations are stored in component join tables
-    // We need to find the component join table for the entity table
-    const componentTableName = inferComponentTableName(v5EntityTable, strapi);
+    if (rel.entityTable) {
+      // Convert v4 entity table name to v5 table name
+      v5EntityTable = getV5TableName(rel.entityTable);
+
+      // Check if the entity table is actually a component table (starts with "components_")
+      // Component tables are not entity tables - they're component storage tables
+      // This is a nested component relation (component inside component)
+      if (v5EntityTable && v5EntityTable.startsWith('components_')) {
+        // This is a nested component - the "entity table" is actually the parent component table
+        // The entityId in rel.entityId is the parent component ID from v4
+        // We need to check the nested component join table for this parent component
+        const parentComponentCollectionName = v5EntityTable.replace(/^components_/, '');
+
+        // Get the nested component join table (e.g., components_shared_headers_cmps)
+        const identifiers = strapi.db.metadata.identifiers;
+        const nestedComponentTableName = identifiers.getNameFromTokens([
+          { name: parentComponentCollectionName, compressible: true },
+          { name: 'components', shortName: 'cmps', compressible: false },
+        ]);
+
+        const hasNestedTable = await db.schema.hasTable(nestedComponentTableName);
+        if (!hasNestedTable) {
+          componentMissing++;
+          errors.push(
+            `Missing nested component join table: ${nestedComponentTableName} (v4: ${rel.entityTable}) for nested component ${rel.componentType}:${rel.componentId}`
+          );
+          continue;
+        }
+
+        const nestedEntityIdColumn = identifiers.getNameFromTokens([
+          { name: 'entity', compressible: false },
+          { name: 'id', compressible: false },
+        ]);
+        const nestedComponentIdColumn = identifiers.getNameFromTokens([
+          { name: 'component', shortName: 'cmp', compressible: false },
+          { name: 'id', compressible: false },
+        ]);
+        const nestedComponentTypeColumn = identifiers.getNameFromTokens([
+          { name: 'component_type', compressible: false },
+        ]);
+
+        // Check if the nested component relation exists
+        // The entityId in the relation is the parent component ID from v4
+        // After migration, component IDs should be preserved (or we can check if any relation exists)
+        const nestedRelationExists = await db(nestedComponentTableName)
+          .where(nestedEntityIdColumn, rel.entityId)
+          .where(nestedComponentTypeColumn, rel.componentType)
+          .where(nestedComponentIdColumn, rel.componentId)
+          .first();
+
+        if (!nestedRelationExists) {
+          // Check if the nested component exists at all (IDs may have changed)
+          const nestedComponentExists = await db(nestedComponentTableName)
+            .where(nestedComponentTypeColumn, rel.componentType)
+            .where(nestedComponentIdColumn, rel.componentId)
+            .first();
+
+          if (!nestedComponentExists) {
+            // Check if parent component exists
+            const parentComponentExists = await db(v5EntityTable).where('id', rel.entityId).first();
+
+            if (!parentComponentExists) {
+              componentMissing++;
+              errors.push(
+                `Missing nested component relation: parent component ${parentComponentCollectionName}:${rel.entityId} not found, nested component ${rel.componentType}:${rel.componentId}`
+              );
+            } else {
+              // Parent exists but nested component doesn't - check if any nested components exist for this parent
+              const anyNestedForParent = await db(nestedComponentTableName)
+                .where(nestedEntityIdColumn, rel.entityId)
+                .first();
+
+              if (!anyNestedForParent) {
+                componentMissing++;
+                errors.push(
+                  `Missing nested component relation: parent component ${parentComponentCollectionName}:${rel.entityId} exists but has no nested component ${rel.componentType}:${rel.componentId}`
+                );
+              } else {
+                // Parent has nested components but not this specific one - IDs may have changed
+                warnings.push(
+                  `Could not verify nested component relation: parent ${parentComponentCollectionName}:${rel.entityId} -> nested ${rel.componentType}:${rel.componentId}. Parent exists and has nested components, but this specific nested component not found. IDs may have changed during migration.`
+                );
+              }
+            }
+          } else {
+            // Nested component exists but not linked to this parent - this is an error
+            componentMissing++;
+            errors.push(
+              `Missing nested component relation: nested component ${rel.componentType}:${rel.componentId} exists but is not linked to parent component ${parentComponentCollectionName}:${rel.entityId}`
+            );
+          }
+        }
+        continue;
+      }
+
+      // Component relations are stored in component join tables
+      // We need to find the component join table for the entity table
+      componentTableName = inferComponentTableName(v5EntityTable, strapi);
+    } else {
+      // Entity table is null - try to find it by searching metadata
+      // Look for content types that have component attributes matching this component type
+      for (const contentType of Object.values(strapi.contentTypes)) {
+        const meta = strapi.db.metadata.get(contentType.uid);
+        if (!meta || !contentType.collectionName) continue;
+
+        // Check if this content type has a component attribute that matches rel.componentType
+        const hasMatchingComponent = Object.values(meta.attributes || {}).some(
+          (attr) =>
+            attr.type === 'component' &&
+            (attr.component === rel.componentType ||
+              attr.component === rel.componentType?.replace('shared.', 'shared.') ||
+              attr.component === rel.componentType?.replace(/^shared\./, ''))
+        );
+
+        if (hasMatchingComponent) {
+          // Found a content type that uses this component - use its table
+          v5EntityTable = meta.tableName;
+          componentTableName = inferComponentTableName(v5EntityTable, strapi);
+          if (componentTableName) {
+            break;
+          }
+        }
+      }
+
+      // If we still couldn't find it, try to validate by searching all component join tables
+      if (!componentTableName) {
+        // We couldn't infer the entity table, but we can still validate the relation exists
+        // by searching all component join tables for this component type
+        let found = false;
+        const identifiers = strapi.db.metadata.identifiers;
+        const componentIdColumn = identifiers.getNameFromTokens([
+          { name: 'component', shortName: 'cmp', compressible: false },
+          { name: 'id', compressible: false },
+        ]);
+        const componentTypeColumn = identifiers.getNameFromTokens([
+          { name: 'component_type', compressible: false },
+        ]);
+
+        // Search all content types for component join tables
+        for (const contentType of Object.values(strapi.contentTypes)) {
+          const meta = strapi.db.metadata.get(contentType.uid);
+          if (!meta || !contentType.collectionName) continue;
+
+          const candidateComponentTableName = identifiers.getNameFromTokens([
+            { name: contentType.collectionName, compressible: true },
+            { name: 'components', shortName: 'cmps', compressible: false },
+          ]);
+
+          const hasTable = await db.schema.hasTable(candidateComponentTableName);
+          if (!hasTable) continue;
+
+          // Check if this component exists in this table
+          const componentExists = await db(candidateComponentTableName)
+            .where(componentTypeColumn, rel.componentType)
+            .where(componentIdColumn, rel.componentId)
+            .first();
+
+          if (componentExists) {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          componentMissing++;
+          errors.push(
+            `Missing Component relation: component ${rel.componentType}:${rel.componentId} (could not find in any component join table, entity table was null in v4 capture)`
+          );
+        }
+        continue;
+      }
+    }
+
     if (!componentTableName) {
       warnings.push(`Could not find component table for ${v5EntityTable} (v4: ${rel.entityTable})`);
       continue;
@@ -7025,7 +7519,7 @@ async function validate(options = {}) {
     const componentPublicationStateResult = await validateComponentRelationPublicationState(app);
     allErrors.push(...(componentPublicationStateResult.errors || []));
 
-    // CRITICAL: Validate draft entries only reference draft entries (not published)
+    // Validate draft entries only reference draft entries (not published)
     const draftOnlyDraftsResult = await validateDraftEntriesOnlyReferenceDrafts(app);
     allErrors.push(...(draftOnlyDraftsResult.errors || []));
 
@@ -7033,7 +7527,7 @@ async function validate(options = {}) {
     const componentMediaResult = await validateComponentMediaAndCloning(app);
     allErrors.push(...(componentMediaResult.errors || []));
 
-    // CRITICAL: Validate all original v4 relations were migrated (no data loss)
+    // Validate all original v4 relations were migrated (no data loss)
     const relationCompletenessResult = await validateAllV4RelationsMigrated(
       app,
       preMigrationRelations
