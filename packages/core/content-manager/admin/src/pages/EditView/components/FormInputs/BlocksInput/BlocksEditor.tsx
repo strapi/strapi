@@ -287,7 +287,9 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
         <Slate
           editor={editor}
-          initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
+          initialValue={
+            value?.length ? value : [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
+          }
           onChange={handleSlateChange}
           key={key}
         >
