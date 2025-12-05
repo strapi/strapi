@@ -211,6 +211,17 @@ const getComponentAttributes = (schema: Model) => {
   );
 };
 
+const getMediaAttributes = (schema: Model) => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isMediaAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    [] as string[]
+  );
+};
+
 const getScalarAttributes = (schema: Model) => {
   return _.reduce(
     schema.attributes,
@@ -270,6 +281,7 @@ export {
   constants,
   getNonWritableAttributes,
   getComponentAttributes,
+  getMediaAttributes,
   getScalarAttributes,
   getRelationalAttributes,
   getWritableAttributes,
