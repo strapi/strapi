@@ -12,7 +12,7 @@ export const createStorage = (opts: Options) => {
 
   const createMigrationTable = () => {
     return db.getSchemaConnection().createTable(tableName, (table) => {
-      table.increments('id');
+      table.bigIncrements('id');
       table.string('name');
       table.datetime('time', { useTz: false });
     });

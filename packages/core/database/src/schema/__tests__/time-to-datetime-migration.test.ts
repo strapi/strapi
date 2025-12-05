@@ -57,6 +57,7 @@ describe('PostgreSQL Date Time Type Conversions in Schema Builder', () => {
       dialect: {
         startSchemaUpdate: jest.fn(),
         endSchemaUpdate: jest.fn(),
+        getSqlType: jest.fn().mockImplementation((type) => type),
         schemaInspector: {
           getIndexes: jest.fn().mockResolvedValue([]),
           getForeignKeys: jest.fn().mockResolvedValue([]),
