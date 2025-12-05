@@ -340,4 +340,5 @@ export {
   BlocksEditorProvider,
   useBlocksEditorContext,
   isSelectorBlockKey,
+  normalizeBlocksState,
 };
