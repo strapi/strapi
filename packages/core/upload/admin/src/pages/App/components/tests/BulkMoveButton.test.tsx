@@ -4,13 +4,13 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
-import { useBulkMove } from '../../../../../hooks/useBulkMove';
+import { useBulkMove } from '../../../../hooks/useBulkMove';
 import { BulkMoveButton } from '../BulkMoveButton';
 
 import type { BulkMoveButtonProps } from '../BulkMoveButton';
 
-jest.mock('../../../../../hooks/useBulkMove');
-jest.mock('../../../../../hooks/useFolderStructure');
+jest.mock('../../../../hooks/useBulkMove');
+jest.mock('../../../../hooks/useFolderStructure');
 
 const FIXTURE_SELECTION = [
   {

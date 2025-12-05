@@ -5,12 +5,12 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
-import { useBulkRemove } from '../../../../../hooks/useBulkRemove';
+import { useBulkRemove } from '../../../../hooks/useBulkRemove';
 import { BulkDeleteButton } from '../BulkDeleteButton';
 
 import type { BulkDeleteButtonProps } from '../BulkDeleteButton';
 
-jest.mock('../../../../../hooks/useBulkRemove');
+jest.mock('../../../../hooks/useBulkRemove');
 
 const setup = (
   props: BulkDeleteButtonProps = {
