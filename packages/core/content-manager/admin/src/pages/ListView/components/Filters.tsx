@@ -30,7 +30,20 @@ const NOT_ALLOWED_FILTERS = [
   'dynamiczone',
   'password',
   'blocks',
-];
+] as const satisfies readonly string[];
+
+type NotAllowedFilterType = (typeof NOT_ALLOWED_FILTERS)[number];
+
+/**
+ * Type guard to check if an attribute type is allowed for filtering.
+ * This enables TypeScript to properly narrow the type after the check.
+ */
+const isAllowedFilterType = (
+  type: string
+): type is Exclude<string, NotAllowedFilterType> => {
+  return !(NOT_ALLOWED_FILTERS as readonly string[]).includes(type);
+};
+
 const DEFAULT_ALLOWED_FILTERS = ['createdAt', 'updatedAt'];
 const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 
@@ -107,89 +120,117 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
     const allowedFields = fields.filter((field) => {
       const attribute = attributes[field] ?? {};
 
-      return attribute.type && !NOT_ALLOWED_FILTERS.includes(attribute.type);
+      return attribute.type && isAllowedFilterType(attribute.type);
     });
 
-    return (
-      [
-        'id',
-        'documentId',
-        ...allowedFields,
-        ...DEFAULT_ALLOWED_FILTERS,
-        ...(canReadAdminUsers ? CREATOR_FIELDS : []),
-      ]
-        .map((name) => {
-          const attribute = attributes[name];
+    const filters = [
+      'id',
+      'documentId',
+      ...allowedFields,
+      ...DEFAULT_ALLOWED_FILTERS,
+      ...(canReadAdminUsers ? CREATOR_FIELDS : []),
+    ]
+      .map((name) => {
+        const attribute = attributes[name];
 
-          if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {
-            return null;
-          }
+        if (!isAllowedFilterType(attribute.type)) {
+          return null;
+        }
 
-          const { mainField: mainFieldName = '', label } = metadata[name].list;
+        const { mainField: mainFieldName = '', label } = metadata[name].list;
 
-          let filter: Filters.Filter = {
-            name,
-            label: label ?? '',
-            mainField: getMainField(attribute, mainFieldName, { schemas, components: {} }),
-            // @ts-expect-error – TODO: this is filtered out above in the `allowedFields` call but TS complains, is there a better way to solve this?
-            type: attribute.type,
-          };
+        let filter: Filters.Filter = {
+          name,
+          label: label ?? '',
+          mainField: getMainField(attribute, mainFieldName, { schemas, components: {} }),
+          type: attribute.type as Filters.Filter['type'],
+        };
 
-          if (
-            attribute.type === 'relation' &&
-            'target' in attribute &&
-            attribute.target === 'admin::user'
-          ) {
-            filter = {
-              ...filter,
-              input: AdminUsersFilter,
-              options: users.map((user) => ({
-                label: getDisplayName(user),
-                value: user.id.toString(),
-              })),
-              operators: [
-                {
-                  label: formatMessage({
-                    id: 'components.FilterOptions.FILTER_TYPES.$eq',
-                    defaultMessage: 'is',
-                  }),
-                  value: '$eq',
-                },
-                {
-                  label: formatMessage({
-                    id: 'components.FilterOptions.FILTER_TYPES.$ne',
-                    defaultMessage: 'is not',
-                  }),
-                  value: '$ne',
-                },
-              ],
-              mainField: {
-                name: 'id',
-                type: 'integer',
+        if (
+          attribute.type === 'relation' &&
+          'target' in attribute &&
+          attribute.target === 'admin::user'
+        ) {
+          filter = {
+            ...filter,
+            input: AdminUsersFilter,
+            options: users.map((user) => ({
+              label: getDisplayName(user),
+              value: user.id.toString(),
+            })),
+            operators: [
+              {
+                label: formatMessage({
+                  id: 'components.FilterOptions.FILTER_TYPES.$eq',
+                  defaultMessage: 'is',
+                }),
+                value: '$eq',
               },
-            };
-          }
+              {
+                label: formatMessage({
+                  id: 'components.FilterOptions.FILTER_TYPES.$ne',
+                  defaultMessage: 'is not',
+                }),
+                value: '$ne',
+              },
+            ],
+            mainField: {
+              name: 'id',
+              type: 'integer',
+            },
+          };
+        }
 
-          if (attribute.type === 'enumeration') {
-            filter = {
-              ...filter,
-              options: attribute.enum.map((value) => ({
-                label: value,
-                value,
-              })),
-            };
-          }
+        if (attribute.type === 'enumeration') {
+          filter = {
+            ...filter,
+            options: attribute.enum.map((value) => ({
+              label: value,
+              value,
+            })),
+          };
+        }
 
-          return filter;
-        })
-        .filter(Boolean) as Filters.Filter[]
-    ).toSorted((a, b) => formatter.compare(a.label, b.label));
+        return filter;
+      })
+      .filter(Boolean) as Filters.Filter[];
+
+    // Add status filter for content types with draft and publish enabled
+    if (options?.draftAndPublish) {
+      filters.push({
+        name: 'publishedAt',
+        label: formatMessage({
+          id: 'content-manager.containers.list.table-headers.status',
+          defaultMessage: 'Status',
+        }),
+        type: 'enumeration',
+        operators: [
+          {
+            label: formatMessage({
+              id: 'content-manager.containers.List.draft',
+              defaultMessage: 'Draft',
+            }),
+            value: '$null',
+          },
+          {
+            label: formatMessage({
+              id: 'content-manager.containers.List.published',
+              defaultMessage: 'Published',
+            }),
+            value: '$notNull',
+          },
+        ],
+      });
+    }
+
+    return filters.toSorted((a, b) => formatter.compare(a.label, b.label));
   }, [
     allPermissions,
     canReadAdminUsers,
     model,
     attributes,
     metadata,
+    options?.draftAndPublish,
     schemas,
     users,
     formatMessage,
