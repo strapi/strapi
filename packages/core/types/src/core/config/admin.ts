@@ -3,44 +3,48 @@ export interface ApiToken {
 }
 
 export interface AuthSessions {
-  options?: {
-    algorithm?: string;
-    [key: string]: any;
-  };
-  accessTokenLifespan?: number;
-  maxRefreshTokenLifespan?: number;
-  idleRefreshTokenLifespan?: number;
-  maxSessionLifespan?: number;
-  idleSessionLifespan?: number;
+  options?:
+    | {
+        algorithm?: string | undefined;
+        [key: string]: unknown;
+      }
+    | undefined;
+  accessTokenLifespan?: number | undefined;
+  maxRefreshTokenLifespan?: number | undefined;
+  idleRefreshTokenLifespan?: number | undefined;
+  maxSessionLifespan?: number | undefined;
+  idleSessionLifespan?: number | undefined;
 }
 
 export interface AuthCookie {
-  secure?: boolean;
-  domain?: string;
-  path?: string;
-  sameSite?: 'strict' | 'lax' | 'none' | boolean;
+  secure?: boolean | undefined;
+  domain?: string | undefined;
+  path?: string | undefined;
+  sameSite?: 'strict' | 'lax' | 'none' | boolean | null | undefined;
 }
 
 export interface AuthEvents {
-  onConnectionSuccess?: (user: any, provider: string) => void | Promise<void>;
-  onConnectionError?: (error: Error, provider: string) => void | Promise<void>;
+  onConnectionSuccess?: (user: unknown, provider: string) => void | Promise<void> | undefined;
+  onConnectionError?: (error: Error, provider: string) => void | Promise<void> | undefined;
 }
 
 export interface AuthProvider {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Auth {
   secret: string;
-  domain?: string;
-  cookie?: AuthCookie;
-  sessions?: AuthSessions;
-  events?: AuthEvents;
-  providers?: AuthProvider[];
-  options?: {
-    expiresIn?: string | number;
-    [key: string]: any;
-  };
+  domain?: string | undefined;
+  cookie?: AuthCookie | undefined;
+  sessions?: AuthSessions | undefined;
+  events?: AuthEvents | undefined;
+  providers?: AuthProvider[] | undefined;
+  options?:
+    | {
+        expiresIn?: string | number | undefined;
+        [key: string]: unknown;
+      }
+    | undefined;
 }
 
 export interface TransferToken {
@@ -52,29 +56,29 @@ export interface Secrets {
 }
 
 export interface AuditLogs {
-  enabled?: boolean;
-  retentionDays?: number;
+  enabled?: boolean | undefined;
+  retentionDays?: number | undefined;
 }
 
 export interface History {
-  retentionDays?: number;
+  retentionDays?: number | undefined;
 }
 
 export interface ForgotPassword {
-  emailTemplate?: string;
-  from?: string;
-  replyTo?: string;
+  emailTemplate?: string | undefined;
+  from?: string | undefined;
+  replyTo?: string | undefined;
 }
 
 export interface RateLimit {
-  enabled?: boolean;
-  interval?: number;
-  max?: number;
-  delayAfter?: number;
-  timeWait?: number;
-  prefixKey?: number;
-  whitelist?: string;
-  store?: string;
+  enabled?: boolean | undefined;
+  interval?: number | undefined;
+  max?: number | undefined;
+  delayAfter?: number | undefined;
+  timeWait?: number | undefined;
+  prefixKey?: number | undefined;
+  whitelist?: string | undefined;
+  store?: string | undefined;
 }
 
 export interface Transfer {
@@ -94,11 +98,11 @@ export interface PreviewHandlerParams {
   documentId: string;
   locale?: string;
   status?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PreviewConfig {
-  allowedOrigins?: string[];
+  allowedOrigins?: string[] | undefined;
   handler: (uid: string, params: PreviewHandlerParams) => string | null | undefined;
 }
 
@@ -108,7 +112,7 @@ export interface Preview {
 }
 
 export interface Ai {
-  enabled?: boolean;
+  enabled?: boolean | undefined;
 }
 
 export interface Admin {
@@ -118,23 +122,23 @@ export interface Admin {
   auth: Auth;
 
   // optional - server configuration
-  host?: string;
-  port?: number;
-  serveAdminPanel?: boolean;
-  autoOpen?: boolean;
-  watchIgnoreFiles?: string[];
-  path?: string;
-  absoluteUrl?: string;
-  url?: string;
+  host?: string | undefined;
+  port?: number | undefined;
+  serveAdminPanel?: boolean | undefined;
+  autoOpen?: boolean | undefined;
+  watchIgnoreFiles?: string[] | undefined;
+  path?: string | undefined;
+  absoluteUrl?: string | undefined;
+  url?: string | undefined;
 
   // optional - features and security
-  secrets?: Secrets;
-  auditLogs?: AuditLogs;
-  history?: History;
-  preview?: Preview;
-  ai?: Ai;
-  forgotPassword?: ForgotPassword;
-  rateLimit?: RateLimit;
-  firstPublishedAtField?: FirstPublisedAtField;
-  flags?: Flags;
+  secrets?: Secrets | undefined;
+  auditLogs?: AuditLogs | undefined;
+  history?: History | undefined;
+  preview?: Preview | undefined;
+  ai?: Ai | undefined;
+  forgotPassword?: ForgotPassword | undefined;
+  rateLimit?: RateLimit | undefined;
+  firstPublishedAtField?: FirstPublisedAtField | undefined;
+  flags?: Flags | undefined;
 }

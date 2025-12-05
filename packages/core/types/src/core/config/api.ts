@@ -1,16 +1,16 @@
 export interface ResponsesProp {
-  privateAttributes?: string[];
+  privateAttributes?: string[] | undefined;
 }
 
 export interface RestProp {
-  prefix?: string;
-  port?: number;
-  defaultLimit?: number;
-  maxLimit?: number;
-  withCount?: boolean;
+  prefix?: string | undefined;
+  port?: number | undefined;
+  defaultLimit?: number | undefined;
+  maxLimit?: number | undefined;
+  withCount?: boolean | undefined;
 }
 
 export interface Api {
-  responses?: ResponsesProp;
-  rest?: RestProp;
+  responses?: ResponsesProp | undefined;
+  rest?: RestProp | undefined;
 }
