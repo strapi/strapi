@@ -4,3 +4,4 @@ src/files/
 dist
 jest.config.js
 rollup.config.mjs
+scripts/copy-files.mjs
