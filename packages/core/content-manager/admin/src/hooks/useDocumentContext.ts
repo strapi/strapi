@@ -48,12 +48,17 @@ function useDocumentContext(consumerName: string): DocumentContextValue {
   );
 
   // Then try to get the same state from the URL
-  const { collectionType, model, id: documentId } = useDoc();
+  const { collectionType, model, id: documentId, origin } = useDoc();
   const [{ query }] = useQueryParams();
 
   // TODO: look into why we never seem to pass any params
   const params = React.useMemo(() => buildValidParams(query ?? {}), [query]);
-  const urlDocumentMeta: DocumentMeta = { collectionType, model, documentId: documentId!, params };
+  const urlDocumentMeta: DocumentMeta = {
+    collectionType,
+    model,
+    documentId: documentId! || origin,
+    params,
+  };
   const urlDocument = useDocument(urlDocumentMeta);
 
   /**
