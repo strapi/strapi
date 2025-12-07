@@ -9,37 +9,9 @@ import { BlocksInput } from '../BlocksInput';
 
 import { blocksData } from './mock-schema';
 
-type BlocksEditorProps = React.ComponentProps<typeof BlocksInput>;
-
-const setup = ({
-  initialValues = {
-    'blocks-editor': blocksData,
-  },
-  ...props
-}: Partial<BlocksEditorProps> & { initialValues?: object } = {}) =>
-  render(
-    <BlocksInput
-      label="blocks type"
-      name="blocks-editor"
-      hint="blocks description"
-      placeholder="blocks placeholder"
-      disabled={false}
-      type="blocks"
-      {...props}
-    />,
-    {
-      renderOptions: {
-        wrapper: ({ children }) => (
-          <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
-            {children}
-          </Form>
-        ),
-      },
-    }
-  );
-
 const mockEditable = jest.fn(({ onKeyDown }) => (
-  <div role="textbox" contentEditable data-testid="mock-editable" onKeyDown={onKeyDown} />
+  // Fixed A11y: Removed explicit role="textbox" (implied by contentEditable) and added tabIndex
+  <div contentEditable tabIndex={0} data-testid="mock-editable" onKeyDown={onKeyDown} />
 ));
 
 jest.mock('slate-react', () => ({
@@ -63,7 +35,25 @@ describe('BlocksInput IME', () => {
       ],
     };
 
-    setup({ initialValues });
+    render(
+      <BlocksInput
+        label="blocks type"
+        name="blocks-editor"
+        hint="blocks description"
+        placeholder="blocks placeholder"
+        disabled={false}
+        type="blocks"
+      />,
+      {
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
+              {children}
+            </Form>
+          ),
+        },
+      }
+    );
 
     const editor = await screen.findByTestId('mock-editable');
 
@@ -90,7 +80,25 @@ describe('BlocksInput IME', () => {
       ],
     };
 
-    setup({ initialValues });
+    render(
+      <BlocksInput
+        label="blocks type"
+        name="blocks-editor"
+        hint="blocks description"
+        placeholder="blocks placeholder"
+        disabled={false}
+        type="blocks"
+      />,
+      {
+        renderOptions: {
+          wrapper: ({ children }) => (
+            <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
+              {children}
+            </Form>
+          ),
+        },
+      }
+    );
 
     const editor = await screen.findByTestId('mock-editable');
 
