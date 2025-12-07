@@ -2,8 +2,8 @@
 import * as React from 'react';
 
 import { Form } from '@strapi/admin/strapi-admin';
-import { render, screen, fireEvent } from '@tests/utils';
 import { createEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@tests/utils';
 
 import { BlocksInput } from '../BlocksInput';
 
@@ -38,7 +38,6 @@ const setup = ({
     }
   );
 
-
 const mockEditable = jest.fn(({ onKeyDown }) => (
   <div role="textbox" contentEditable data-testid="mock-editable" onKeyDown={onKeyDown} />
 ));
@@ -52,7 +51,6 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useElementOnScreen: jest.fn(() => ({ current: null })),
 }));
-
 
 describe('BlocksInput IME', () => {
   it('should not prevent default behavior when pressing Enter during composition', async () => {
