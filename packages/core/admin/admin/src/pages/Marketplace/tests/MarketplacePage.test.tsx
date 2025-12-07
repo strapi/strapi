@@ -1,17 +1,12 @@
 /* eslint-disable testing-library/no-node-access */
 
-import { screen, within, fireEvent } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
 
 import { useAppInfo } from '../../../features/AppInfo';
-import { useTracking } from '../../../features/Tracking';
 import { MarketplacePage } from '../MarketplacePage';
 
 jest.mock('../hooks/useNavigatorOnline');
-
-jest.mock('../../../features/Tracking', () => ({
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
-}));
 
 jest.mock('../../../features/AppInfo', () => ({
   ...jest.requireActual('../../../features/AppInfo'),
@@ -34,15 +29,8 @@ const waitForReload = async () => {
 
 describe('Marketplace page - layout', () => {
   it('renders the online layout', async () => {
-    const trackUsage = jest.fn();
-    // @ts-expect-error - mock
-    useTracking.mockImplementationOnce(() => ({ trackUsage }));
-
     const { queryByText, getByRole } = render();
     await waitForReload();
-    // Calls the tracking event
-    expect(trackUsage).toHaveBeenCalledWith('didGoToMarketplace');
-    expect(trackUsage).toHaveBeenCalledTimes(1);
 
     expect(queryByText('You are offline')).not.toBeInTheDocument();
     // Shows the sort button

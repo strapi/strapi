@@ -110,11 +110,13 @@ const updateDocument = async (ctx: any, opts?: Options) => {
   const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
-  return documentManager.update(documentVersion?.documentId || id, model, {
+  const updatedDocument = await documentManager.update(documentVersion?.documentId || id, model, {
     data: sanitizedBody as any,
     populate: opts?.populate,
     locale,
   });
+
+  return updatedDocument;
 };
 
 export default {
@@ -420,7 +422,7 @@ export default {
       const isUpdate = !isCreate;
       if (isUpdate) {
         // check if the document exists
-        const documentExists = documentManager.exists(model, id)!;
+        const documentExists = await documentManager.exists(model, id);
 
         if (!documentExists) {
           throw new errors.NotFoundError('Document not found');

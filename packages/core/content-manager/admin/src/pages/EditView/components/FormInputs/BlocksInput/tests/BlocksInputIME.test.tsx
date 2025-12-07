@@ -38,6 +38,7 @@ const setup = ({
     }
   );
 
+
 const mockEditable = jest.fn(({ onKeyDown }) => (
   <div role="textbox" contentEditable data-testid="mock-editable" onKeyDown={onKeyDown} />
 ));
@@ -46,6 +47,12 @@ jest.mock('slate-react', () => ({
   ...jest.requireActual('slate-react'),
   Editable: (props: any) => mockEditable(props),
 }));
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useElementOnScreen: jest.fn(() => ({ current: null })),
+}));
+
 
 describe('BlocksInput IME', () => {
   it('should not prevent default behavior when pressing Enter during composition', async () => {

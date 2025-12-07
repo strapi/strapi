@@ -2,10 +2,11 @@ import { omit, assoc, merge, curry } from 'lodash/fp';
 
 import { async, contentTypes as contentTypesUtils, validate, errors } from '@strapi/utils';
 
-import { UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
+import { copyNonLocalizedFields } from './internationalization';
 import * as components from './components';
 
 import { createEntriesService } from './entries';
@@ -16,7 +17,9 @@ import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
+import * as bidirectionalRelations from './utils/bidirectional-relations';
 import entityValidator from '../entity-validator';
+import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 
 const { validators } = validate;
 
@@ -209,6 +212,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const queryParams = await async.pipe(
       validateParams,
       DP.filterDataPublishedAt,
+      filterDataFirstPublishedAt,
       DP.setStatusToDraft(contentType),
       DP.statusToLookup(contentType),
       DP.statusToData(contentType),
@@ -239,9 +243,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
+        const mergedData = await copyNonLocalizedFields(contentType, documentId, {
+          ...queryParams.data,
+          documentId,
+        });
+
         updatedDraft = await entries.create({
           ...queryParams,
-          data: { ...queryParams.data, documentId },
+          data: mergedData,
         });
         emitEvent('entry.create', updatedDraft);
       }
@@ -263,7 +272,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       DP.defaultStatus(contentType),
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
-      i18n.localeToLookup(contentType),
+      i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid)
     )(params);
 
@@ -300,7 +309,18 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     ]);
 
     // Load any unidirectional relation targetting the old published entries
-    const relationsToSync = await unidirectionalRelations.load(uid, {
+    const relationsToSync = await unidirectionalRelations.load(
+      uid,
+      {
+        newVersions: draftsToPublish,
+        oldVersions: oldPublishedVersions,
+      },
+      {
+        shouldPropagateRelation: components.createComponentRelationFilter(),
+      }
+    );
+
+    const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
       newVersions: draftsToPublish,
       oldVersions: oldPublishedVersions,
     });
@@ -308,16 +328,27 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
+    // Add firstPublishedAt to draft if it doesn't exist
+    const updatedDraft = await async.map(draftsToPublish, (draft: any) =>
+      addFirstPublishedAtToDraft(draft, entries.update, contentType)
+    );
+
     // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(draftsToPublish, (draft: any) =>
+    const publishedEntries = await async.map(updatedDraft, (draft: any) =>
       entries.publish(draft, queryParams)
     );
 
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(
-      [...oldPublishedVersions, ...draftsToPublish],
+      [...oldPublishedVersions, ...updatedDraft],
       publishedEntries,
       relationsToSync
+    );
+
+    await bidirectionalRelations.sync(
+      [...oldPublishedVersions, ...updatedDraft],
+      publishedEntries,
+      bidirectionalRelationsToSync
     );
 
     publishedEntries.forEach(emitEvent('entry.publish'));
@@ -374,7 +405,18 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     ]);
 
     // Load any unidirectional relation targeting the old drafts
-    const relationsToSync = await unidirectionalRelations.load(uid, {
+    const relationsToSync = await unidirectionalRelations.load(
+      uid,
+      {
+        newVersions: versionsToDraft,
+        oldVersions: oldDrafts,
+      },
+      {
+        shouldPropagateRelation: components.createComponentRelationFilter(),
+      }
+    );
+
+    const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
       newVersions: versionsToDraft,
       oldVersions: oldDrafts,
     });
@@ -392,6 +434,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       [...oldDrafts, ...versionsToDraft],
       draftEntries,
       relationsToSync
+    );
+
+    await bidirectionalRelations.sync(
+      [...oldDrafts, ...versionsToDraft],
+      draftEntries,
+      bidirectionalRelationsToSync
     );
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));

@@ -25,6 +25,7 @@ export interface ValidatorMetas<
     name: string;
     value: TValue;
   };
+  data: Record<string, unknown>;
   componentContext?: ComponentContext;
   entity?: Modules.EntityValidator.Entity;
 }
@@ -443,6 +444,10 @@ export const uidValidator = (
     return schema;
   }
 
+  if (metas.attr.regex) {
+    return schema.matches(new RegExp(metas.attr.regex));
+  }
+
   return schema.matches(/^[A-Za-z0-9-_.~]*$/);
 };
 
@@ -506,7 +511,7 @@ export const Validators = {
   password: stringValidator,
   email: emailValidator,
   enumeration: enumerationValidator,
-  boolean: () => yup.boolean(),
+  boolean: () => yup.boolean().nullable(),
   uid: uidValidator,
   json: () => yup.mixed(),
   integer: integerValidator,

@@ -12,7 +12,7 @@ const registerProviderActionSchema = yup
           .string()
           .matches(
             /^[a-z]([a-z|.|-]+)[a-z]$/,
-            (v) => `${v.path}: The id can only contain lowercase letters, dots and hyphens.`
+            (v) => `${v.path}: The uid can only contain lowercase letters, dots and hyphens.`
           )
           .required(),
         section: yup.string().oneOf(['contentTypes', 'plugins', 'settings', 'internal']).required(),

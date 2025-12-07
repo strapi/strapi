@@ -220,10 +220,9 @@ class ContentManagerPlugin {
            * and not mandatory to avoid a breaking change.
            */
           if (position) {
-            return this.documentActions.filter(
-              (action) =>
-                action.position == undefined || [action.position].flat().includes(position)
-            );
+            return this.documentActions.filter((action) => {
+              return action.position == undefined || [action.position].flat().includes(position);
+            });
           }
 
           return this.documentActions;

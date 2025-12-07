@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-import { Form, Layouts } from '@strapi/admin/strapi-admin';
+import { Form, Layouts, useForm, createRulesEngine } from '@strapi/admin/strapi-admin';
 import { Box, Divider, Flex, Grid, Typography } from '@strapi/design-system';
-import { Schema } from '@strapi/types';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
@@ -20,6 +19,7 @@ import type { Metadatas } from '../../../../shared/contracts/content-types';
 import type { GetInitData } from '../../../../shared/contracts/init';
 import type { ComponentsDictionary, Document } from '../../hooks/useDocument';
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
+import type { Schema } from '@strapi/types';
 
 const createLayoutFromFields = <T extends EditFieldLayout | UnknownField>(fields: T[]) => {
   return (
@@ -103,13 +103,23 @@ function getRemaingFieldsLayout({
  * -----------------------------------------------------------------------------------------------*/
 
 const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
+  const fieldValues = useForm('Fields', (state) => state.values);
+  const rulesEngine = createRulesEngine();
   if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
     const [row] = panel;
     const [field] = row;
+    const condition = field.attribute?.conditions?.visible;
+
+    if (condition) {
+      const isVisible = rulesEngine.evaluate(condition, fieldValues);
+      if (!isVisible) {
+        return null; // Skip rendering the dynamic zone if the condition is not met
+      }
+    }
 
     return (
       <Grid.Root key={field.name} gap={4}>
-        <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
+        <Grid.Item xs={12} direction="column" alignItems="stretch">
           <VersionInputRenderer {...field} />
         </Grid.Item>
       </Grid.Root>
@@ -128,24 +138,39 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
       borderColor="neutral150"
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
-        {panel.map((row, gridRowIndex) => (
-          <Grid.Root key={gridRowIndex} gap={4}>
-            {row.map(({ size, ...field }) => {
-              return (
-                <Grid.Item
-                  col={size}
-                  key={field.name}
-                  s={12}
-                  xs={12}
-                  direction="column"
-                  alignItems="stretch"
-                >
-                  <VersionInputRenderer {...field} />
-                </Grid.Item>
-              );
-            })}
-          </Grid.Root>
-        ))}
+        {panel.map((row, gridRowIndex) => {
+          const visibleFields = row.filter((field) => {
+            const condition = field.attribute?.conditions?.visible;
+
+            if (condition) {
+              return rulesEngine.evaluate(condition, fieldValues);
+            }
+
+            return true;
+          });
+
+          if (visibleFields.length === 0) {
+            return null; // Skip rendering the entire grid row
+          }
+
+          return (
+            <Grid.Root key={gridRowIndex} gap={4}>
+              {visibleFields.map(({ size, ...field }) => {
+                return (
+                  <Grid.Item
+                    col={size}
+                    key={field.name}
+                    xs={12}
+                    direction="column"
+                    alignItems="stretch"
+                  >
+                    <VersionInputRenderer {...field} />
+                  </Grid.Item>
+                );
+              })}
+            </Grid.Root>
+          );
+        })}
       </Flex>
     </Box>
   );

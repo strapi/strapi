@@ -93,6 +93,17 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   display: flex;
 }
 
+.c1 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c3 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
 .c9 {
   border: 1px solid #dcdce4;
   padding-block: 8px;
@@ -130,27 +141,13 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   flex: 1;
   font-size: 1.4rem;
   line-height: 2.2rem;
+  min-height: 2.2rem;
 }
 
 .c14 {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
-}
-
-.c1 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-}
-
-.c3 {
-  grid-column: span 12;
-  max-width: 100%;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-
 }
 
 @media (min-width: 520px) {
@@ -161,7 +158,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 @media (min-width: 768px) {
   .c3 {
-    grid-column: span 12;
+    grid-column: span 6;
   }
 }
 
@@ -169,6 +166,10 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   .c3 {
     grid-column: span 6;
   }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
 }
 
 <div>

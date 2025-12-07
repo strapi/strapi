@@ -8,13 +8,7 @@ import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 
 import { Editor, EditorApi } from './Editor';
 import { EditorLayout } from './EditorLayout';
-import {
-  insertFile,
-  listHandler,
-  markdownHandler,
-  quoteAndCodeHandler,
-  titleHandler,
-} from './utils/utils';
+import { insertFile } from './utils/utils';
 import { WysiwygFooter } from './WysiwygFooter';
 import { WysiwygNav } from './WysiwygNav';
 
@@ -46,51 +40,6 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
       setIsExpandMode((prev) => !prev);
     };
 
-    const handleActionClick = (
-      value: string,
-      currentEditorRef: React.MutableRefObject<EditorFromTextArea>,
-      togglePopover?: () => void
-    ) => {
-      switch (value) {
-        case 'Link':
-        case 'Strikethrough': {
-          markdownHandler(currentEditorRef, value);
-          togglePopover?.();
-          break;
-        }
-        case 'Code':
-        case 'Quote': {
-          quoteAndCodeHandler(currentEditorRef, value);
-          togglePopover?.();
-          break;
-        }
-        case 'Bold':
-        case 'Italic':
-        case 'Underline': {
-          markdownHandler(currentEditorRef, value);
-          break;
-        }
-        case 'BulletList':
-        case 'NumberList': {
-          listHandler(currentEditorRef, value);
-          togglePopover?.();
-          break;
-        }
-        case 'h1':
-        case 'h2':
-        case 'h3':
-        case 'h4':
-        case 'h5':
-        case 'h6': {
-          titleHandler(currentEditorRef, value);
-          break;
-        }
-        default: {
-          // Nothing
-        }
-      }
-    };
-
     const handleSelectAssets = (files: any[]) => {
       const formattedFiles = files.map((f) => ({
         alt: f.alternativeText || f.name,
@@ -116,7 +65,6 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
               isExpandMode={isExpandMode}
               editorRef={editorRef}
               isPreviewMode={isPreviewMode}
-              onActionClick={handleActionClick}
               onToggleMediaLib={handleToggleMediaLib}
               onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
               disabled={disabled}

@@ -2,11 +2,13 @@
 
 exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c0 {
-  margin-inline-start: -250px;
-  top: 4.6rem;
+  margin-block-start: 16px;
+  top: 5.6rem;
   left: 50%;
-  width: 50rem;
+  width: 100%;
+  max-width: 50rem;
   z-index: 700;
+  transform: translateX(-50%);
   position: fixed;
 }
 
@@ -63,7 +65,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c1 {
-  gap: 8px;
+  gap: 16px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
@@ -314,8 +316,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   padding-block: 8px;
 }
 
-.c35 ::placeholder {
-  color: #8e8ea9;
+.c35::placeholder {
+  color: #666687;
   opacity: 1;
 }
 
@@ -354,7 +356,17 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c14 {
   min-width: 100%;
-  padding-inline: 4px;
+}
+
+.c15 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c17 {
+  grid-column: span 12;
+  max-width: 100%;
 }
 
 .c3 {
@@ -362,13 +374,14 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   position: fixed;
   inset: 0;
   z-index: 300;
+  will-change: opacity;
 }
 
 .c4 {
   max-width: 83rem;
   max-height: 90vh;
   height: auto;
-  width: 60%;
+  width: calc(100% - 40px);
   overflow: hidden;
   margin: 0 auto;
   display: flex;
@@ -383,16 +396,25 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   z-index: 310;
 }
 
+.c4 >form {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .c7 {
   border-bottom: solid 1px #eaeaef;
 }
 
 .c13 {
-  padding-inline: 40px;
+  padding-inline: 32px;
 }
 
 .c13>div {
   padding-block: 40px;
+  margin: 0 -2px 0 -2px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 
 .c13>div>div {
@@ -402,17 +424,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c40 {
   border-top: solid 1px #eaeaef;
   flex: 1;
-}
-
-.c15 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-}
-
-.c17 {
-  grid-column: span 12;
-  max-width: 100%;
 }
 
 .c38 {
@@ -504,26 +515,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .c3 {
-    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c4[data-state='open'] {
-    animation-duration: 200ms;
-    animation-timing-function: cubic-bezier(.4,0,.2,1);
-    animation-name: iWCnzW;
-  }
-
-  .c4[data-state='closed'] {
-    animation-duration: 120ms;
-    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    animation-name: jgufbq;
-  }
-}
-
 @media (min-width: 520px) {
   .c17 {
     grid-column: span 12;
@@ -539,6 +530,32 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 @media (min-width: 1080px) {
   .c17 {
     grid-column: span 6;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c3 {
+    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+@media (min-width: 768px) {
+  .c4 {
+    width: calc(100% - 48px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c4[data-state='open'] {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(.4,0,.2,1);
+    animation-name: iWCnzW;
+  }
+
+  .c4[data-state='closed'] {
+    animation-duration: 120ms;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-name: jgufbq;
   }
 }
 
@@ -666,6 +683,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         aria-disabled="false"
                         class="c9 c10 c11"
                         data-state="closed"
+                        type="button"
                       >
                         <svg
                           aria-hidden="true"
@@ -690,6 +708,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         aria-disabled="false"
                         class="c9 c10 c11"
                         data-state="closed"
+                        type="button"
                       >
                         <svg
                           aria-hidden="true"
@@ -714,6 +733,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         aria-disabled="false"
                         class="c9 c10 c11"
                         data-state="closed"
+                        type="button"
                       >
                         <svg
                           aria-hidden="true"
@@ -738,6 +758,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         aria-disabled="false"
                         class="c9 c10 c11"
                         data-state="closed"
+                        type="button"
                       >
                         <svg
                           aria-hidden="true"
@@ -899,6 +920,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           class="c35"
                           id=":ra:"
                           name="name"
+                          type="text"
                           value="Screenshot 2.png"
                         />
                       </div>
@@ -922,6 +944,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           class="c35"
                           id=":rb:"
                           name="alternativeText"
+                          type="text"
                           value=""
                         />
                       </div>
@@ -950,6 +973,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           class="c35"
                           id=":rc:"
                           name="caption"
+                          type="text"
                         />
                       </div>
                     </div>
@@ -1058,6 +1082,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
         <button
           aria-disabled="false"
           class="c41 c42 c43"
+          type="button"
         >
           <span
             class="c44"
@@ -1071,6 +1096,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
           <button
             aria-disabled="false"
             class="c41 c42 c46"
+            type="button"
           >
             <span
               class="c44"
@@ -1093,6 +1119,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
           <button
             aria-disabled="false"
             class="c41 c42 c47"
+            type="button"
           >
             <span
               class="c44"

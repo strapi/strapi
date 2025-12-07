@@ -3,3 +3,4 @@ node_modules/
 dist/
 bin/
 templates/
+rollup.config.mjs

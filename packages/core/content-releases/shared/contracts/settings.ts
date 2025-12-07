@@ -4,7 +4,7 @@
  */
 
 import { errors } from '@strapi/utils';
-import { Utils } from '@strapi/types';
+import type { Utils } from '@strapi/types';
 
 export interface Settings {
   defaultTimezone: string | null | undefined;

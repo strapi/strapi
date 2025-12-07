@@ -24,17 +24,25 @@ const ASSET_FIXTURES = [
   },
 ];
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const setup = (props?: Partial<CarouselAssetsProps>) =>
   render(
     <CarouselAssets
       assets={ASSET_FIXTURES}
       label="Carousel"
-      onAddAsset={jest.fn}
-      onDeleteAsset={jest.fn}
-      onDeleteAssetFromMediaLibrary={jest.fn}
-      onEditAsset={jest.fn}
-      onNext={jest.fn}
-      onPrevious={jest.fn}
+      onAddAsset={jest.fn()}
+      onDeleteAsset={jest.fn()}
+      onDeleteAssetFromMediaLibrary={jest.fn()}
+      onEditAsset={jest.fn()}
+      onNext={jest.fn()}
+      onPrevious={jest.fn()}
+      onDoubleClickAsset={jest.fn()}
       selectedAssetIndex={0}
       {...props}
     />
@@ -96,5 +104,11 @@ describe('MediaLibraryInput | Carousel | CarouselAssets', () => {
     const { getByText } = setup({ labelAction: <div>localized</div> });
 
     expect(getByText('localized')).toBeInTheDocument();
+  });
+
+  it('should not render the edit button if disabled', () => {
+    const { queryByRole } = setup({ disabled: true });
+
+    expect(queryByRole('button', { name: 'edit' })).not.toBeInTheDocument();
   });
 });

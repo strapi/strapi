@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { useTracking, useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { Button, Popover } from '@strapi/design-system';
 import { Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { FilterList } from '../../../components/FilterList/FilterList';
 import { FilterPopover } from '../../../components/FilterPopover/FilterPopover';
+import { useTracking } from '../../../hooks/useTracking';
 import { displayedFilters } from '../../../utils';
 
 import type { Query } from '../../../../../shared/contracts/files';

@@ -7,6 +7,7 @@ import {
   useRBAC,
   isFetchError,
 } from '@strapi/admin/strapi-admin';
+import { unstable_useContentManagerContext as useContentManagerContext } from '@strapi/content-manager/strapi-admin';
 import {
   Box,
   Button,
@@ -16,7 +17,6 @@ import {
   Modal,
   Field,
 } from '@strapi/design-system';
-import { UID } from '@strapi/types';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 
@@ -33,6 +33,7 @@ import {
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
 import type { BulkActionComponent } from '@strapi/content-manager/strapi-admin';
+import type { UID } from '@strapi/types';
 
 const getContentPermissions = (subject: string) => {
   const permissions = {
@@ -63,6 +64,7 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
   const {
     allowedActions: { canCreate },
   } = useRBAC(releasePermissions);
+  const { hasDraftAndPublish } = useContentManagerContext();
 
   // Get all the releases not published
   const response = useGetReleasesQuery();
@@ -139,7 +141,7 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
     }
   };
 
-  if (!canCreate || !canPublish) return null;
+  if (!hasDraftAndPublish || !canCreate || !canPublish) return null;
 
   return {
     actionType: 'release',

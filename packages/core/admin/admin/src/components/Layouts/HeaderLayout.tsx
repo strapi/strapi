@@ -2,6 +2,10 @@ import * as React from 'react';
 
 import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
 
+import { HEIGHT_TOP_NAVIGATION, RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
+import { useDeviceType } from '../../hooks/useDeviceType';
+import { useElementOnScreen } from '../../hooks/useElementOnScreen';
+
 /* -------------------------------------------------------------------------------------------------
  * BaseHeaderLayout
  * -----------------------------------------------------------------------------------------------*/
@@ -25,20 +29,21 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     if (sticky) {
       return (
         <Box
+          display="flex"
           paddingLeft={6}
           paddingRight={6}
-          paddingTop={3}
-          paddingBottom={3}
+          paddingTop={2}
+          paddingBottom={2}
           position="fixed"
           top={0}
-          right={0}
           background="neutral0"
           shadow="tableShadow"
           width={`${width}px`}
-          zIndex={1}
+          zIndex={2}
+          minHeight={HEIGHT_TOP_NAVIGATION}
           data-strapi-header-sticky
         >
-          <Flex justifyContent="space-between">
+          <Flex alignItems="center" justifyContent="space-between" wrap="wrap" width="100%">
             <Flex>
               {navigationAction && <Box paddingRight={3}>{navigationAction}</Box>}
               <Box>
@@ -64,25 +69,38 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     return (
       <Box
         ref={ref}
-        paddingLeft={10}
-        paddingRight={10}
-        paddingBottom={8}
-        paddingTop={navigationAction ? 6 : 8}
+        paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+        paddingRight={RESPONSIVE_DEFAULT_SPACING}
+        paddingBottom={{
+          initial: 4,
+          large: 8,
+        }}
+        paddingTop={{
+          initial: 4,
+          large: navigationAction ? 6 : 8,
+        }}
         background="neutral100"
         data-strapi-header
       >
-        {navigationAction ? <Box paddingBottom={2}>{navigationAction}</Box> : null}
-        <Flex justifyContent="space-between">
-          <Flex minWidth={0}>
-            <Typography tag="h1" variant="alpha" {...props}>
-              {title}
-            </Typography>
-            {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
+        <Flex direction="column" alignItems="initial" gap={2}>
+          {navigationAction}
+          <Flex justifyContent="space-between" wrap="wrap" gap={4}>
+            <Flex minWidth={0}>
+              <Typography tag="h1" variant="alpha" {...props}>
+                {title}
+              </Typography>
+              {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
+            </Flex>
+            {primaryAction}
           </Flex>
-          {primaryAction}
         </Flex>
         {isSubtitleString ? (
-          <Typography variant="epsilon" textColor="neutral600" tag="p">
+          <Typography
+            variant="epsilon"
+            textColor="neutral600"
+            tag="p"
+            paddingTop={{ initial: 4, large: 0 }}
+          >
             {subtitle}
           </Typography>
         ) : (
@@ -102,69 +120,50 @@ interface HeaderLayoutProps extends BaseHeaderLayoutProps {}
 const HeaderLayout = (props: HeaderLayoutProps) => {
   const baseHeaderLayoutRef = React.useRef<HTMLDivElement>(null);
   const [headerSize, setHeaderSize] = React.useState<DOMRect | null>(null);
+  const [isVisible, setIsVisible] = React.useState(true);
+  const deviceType = useDeviceType();
 
-  const [containerRef, isVisible] = useElementOnScreen<HTMLDivElement>({
+  const containerRef = useElementOnScreen<HTMLDivElement>(setIsVisible, {
     root: null,
     rootMargin: '0px',
     threshold: 0,
   });
 
-  useResizeObserver(containerRef, () => {
+  useResizeObserver([containerRef], () => {
     if (containerRef.current) {
-      setHeaderSize(containerRef.current.getBoundingClientRect());
+      const newSize = containerRef.current.getBoundingClientRect();
+      setHeaderSize((prevSize) => {
+        // Only update if size actually changed
+        if (!prevSize || prevSize.height !== newSize.height || prevSize.width !== newSize.width) {
+          return newSize;
+        }
+        return prevSize;
+      });
     }
   });
 
   React.useEffect(() => {
-    if (baseHeaderLayoutRef.current) {
-      setHeaderSize(baseHeaderLayoutRef.current.getBoundingClientRect());
+    if (containerRef.current) {
+      setHeaderSize(containerRef.current.getBoundingClientRect());
     }
-  }, [baseHeaderLayoutRef]);
+  }, [containerRef]);
+
+  if (deviceType === 'mobile') {
+    return <BaseHeaderLayout {...props} />;
+  }
 
   return (
-    <>
-      <div style={{ height: headerSize?.height }} ref={containerRef}>
+    <div ref={containerRef}>
+      <div style={{ height: headerSize?.height }}>
         {isVisible && <BaseHeaderLayout ref={baseHeaderLayoutRef} {...props} />}
       </div>
 
       {!isVisible && <BaseHeaderLayout {...props} sticky width={headerSize?.width} />}
-    </>
+    </div>
   );
 };
 
 HeaderLayout.displayName = 'HeaderLayout';
-
-/**
- * useElementOnScreen: hook that returns a ref to an element and a boolean indicating if the element is in the viewport.
- */
-const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
-  options?: IntersectionObserverInit
-): [containerRef: React.RefObject<TElement>, isVisible: boolean] => {
-  const containerRef = React.useRef<TElement>(null);
-
-  const [isVisible, setIsVisible] = React.useState<boolean>(true);
-
-  const callback: IntersectionObserverCallback = ([entry]) => {
-    setIsVisible(entry.isIntersecting);
-  };
-
-  React.useEffect(() => {
-    const containerEl = containerRef.current;
-    const observer = new IntersectionObserver(callback, options);
-
-    if (containerEl) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      if (containerEl) {
-        observer.disconnect();
-      }
-    };
-  }, [containerRef, options]);
-
-  return [containerRef, isVisible];
-};
 
 /**
  * useResizeObserver: hook that observes the size of an element and calls a callback when it changes.

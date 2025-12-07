@@ -5,7 +5,8 @@ import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import { FormModalNavigationProvider } from '../../FormModalNavigationProvider/FormModalNavigationProvider';
+import { CTBSessionProvider } from '../../CTBSession/CTBSessionProvider';
+import { FormModalNavigationProvider } from '../../FormModalNavigation/FormModalNavigationProvider';
 import { AttributeOptions } from '../AttributeOptions';
 
 import type { IconByType } from '../../AttributeIcon';
@@ -61,13 +62,15 @@ const makeApp = () => {
     <IntlProvider locale="en" messages={{}} textComponent="span">
       <DesignSystemProvider>
         <MemoryRouter>
-          <FormModalNavigationProvider>
-            <AttributeOptions
-              attributes={mockAttributes}
-              forTarget="contentType"
-              kind="collectionType"
-            />
-          </FormModalNavigationProvider>
+          <CTBSessionProvider>
+            <FormModalNavigationProvider>
+              <AttributeOptions
+                attributes={mockAttributes}
+                forTarget="contentType"
+                kind="collectionType"
+              />
+            </FormModalNavigationProvider>
+          </CTBSessionProvider>
         </MemoryRouter>
       </DesignSystemProvider>
     </IntlProvider>

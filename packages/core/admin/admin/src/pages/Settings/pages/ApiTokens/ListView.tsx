@@ -1,14 +1,13 @@
 import * as React from 'react';
 
-import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { Box, EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import { Data } from '@strapi/types';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
+import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -20,6 +19,8 @@ import { useRBAC } from '../../../../hooks/useRBAC';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
 import { API_TOKEN_TYPE } from '../../components/Tokens/constants';
 import { Table } from '../../components/Tokens/Table';
+
+import type { Data } from '@strapi/types';
 
 const TABLE_HEADERS = [
   {
@@ -67,15 +68,11 @@ export const ListView = () => {
   } = useRBAC(permissions);
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
-  const startSection = useGuidedTour('ListView', (state) => state.startSection);
+
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   React.useEffect(() => {
-    startSection('apiTokens');
-  }, [startSection]);
-
-  React.useEffect(() => {
-    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
+    navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) }, { replace: true });
   }, [navigate]);
 
   const headers = TABLE_HEADERS.map((header) => ({
@@ -133,6 +130,12 @@ export const ListView = () => {
 
   return (
     <>
+      {apiTokens.length > 0 && (
+        <tours.apiTokens.Introduction>
+          {/* Invisible Anchor */}
+          <Box />
+        </tours.apiTokens.Introduction>
+      )}
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },

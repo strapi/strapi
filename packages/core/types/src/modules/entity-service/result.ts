@@ -129,19 +129,6 @@ type ParseStringFields<
   TSchemaUID extends UID.Schema,
   TFields extends Params.Fields.StringNotation<TSchemaUID>,
 > = TFields;
-// type C = MatchFirst<
-//   [
-//     [
-//       StrictEqual<TFields, Params.Fields.WildcardNotation>,
-//       Schema.NonPopulatableAttributeNames<TSchemaUID>
-//     ],
-//     // [Extends<TFields, Params.Fields.SingleAttribute<TSchemaUID>>, TFields]
-//     [
-//       Extends<TFields, `${string},${string}`>,
-//       Array.Values<String.Split<Extract<TFields, string>, ','>>
-//     ]
-//   ]
-// >;
 
 type ExtractPopulate<
   TSchemaUID extends UID.Schema,

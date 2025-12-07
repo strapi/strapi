@@ -68,7 +68,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     if (!this.strapi) {
       throw new ProviderInitializationError('Could not access local strapi');
     }
-
+    this.strapi.db.lifecycles.disable();
     this.transaction = utils.transaction.createTransaction(this.strapi);
   }
 
@@ -101,8 +101,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
+    assertValidStrapi(this.strapi);
     this.transaction?.end();
-
+    this.strapi.db.lifecycles.enable();
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
       await this.strapi?.destroy();
@@ -341,7 +342,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
           const fileId = fileEntitiesMapper?.[uploadData.id];
           if (!fileId) {
-            callback(new Error(`File ID not found for ID: ${uploadData.id}`));
+            return callback(new Error(`File ID not found for ID: ${uploadData.id}`));
           }
 
           try {
@@ -388,9 +389,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
                 provider,
               },
             });
-            callback();
+            return callback();
           } catch (error) {
-            callback(new Error(`Error while uploading asset ${chunk.filename} ${error}`));
+            return callback(new Error(`Error while uploading asset ${chunk.filename} ${error}`));
           }
         });
       },

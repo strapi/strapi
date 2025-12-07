@@ -15,11 +15,15 @@ frontend:
   - 'jest-preset.front.js'
   - 'fileTransformer.js'
 api:
+  - 'tests/scripts/run-api-tests.js'
+  - 'tests/scripts/generate-test-app.js'
   - 'tests/api/**'
 e2e:
+  - 'tests/scripts/run-e2e-tests.js'
   - 'tests/e2e/**'
   - 'playwright.base.config.js'
 cli:
+  - 'tests/scripts/run-cli-tests.js'
   - 'tests/cli/**'
 docs:
   - 'docs/**'

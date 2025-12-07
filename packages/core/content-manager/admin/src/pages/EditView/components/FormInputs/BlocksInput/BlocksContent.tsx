@@ -25,7 +25,7 @@ import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
-const StyledEditable = styled(Editable) <{ isExpandedMode: boolean }>`
+const StyledEditable = styled(Editable) <{ $isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
   outline: none;
   display: flex;
@@ -33,7 +33,7 @@ const StyledEditable = styled(Editable) <{ isExpandedMode: boolean }>`
   gap: ${({ theme }) => theme.spaces[3]};
   height: 100%;
   // For fullscreen align input in the center with fixed width
-  width: ${(props) => (props.isExpandedMode ? '512px' : '100%')};
+  width: ${(props) => (props.$isExpandedMode ? '512px' : '100%')};
   margin: auto;
 
   > *:last-child {
@@ -41,9 +41,10 @@ const StyledEditable = styled(Editable) <{ isExpandedMode: boolean }>`
   }
 `;
 
-const Wrapper = styled<BoxComponent>(Box) <{ isOverDropTarget: boolean }>`
-  position: ${({ isOverDropTarget }) => isOverDropTarget && 'relative'};
+const Wrapper = styled<BoxComponent>(Box) <{ $isOverDropTarget: boolean }>`
+  position: ${({ $isOverDropTarget }) => $isOverDropTarget && 'relative'};
 `;
+
 
 type DragDirection = (typeof DIRECTIONS)[keyof typeof DIRECTIONS];
 
@@ -192,7 +193,7 @@ const DragAndDropElement = ({
   }, [editor.selection]);
 
   return (
-    <Wrapper ref={composedBoxRefs} isOverDropTarget={isOverDropTarget}>
+    <Wrapper ref={composedBoxRefs} $isOverDropTarget={isOverDropTarget}>
       {isOverDropTarget && (
         <DropPlaceholder
           borderStyle="solid"
@@ -353,6 +354,8 @@ const baseRenderElement = ({
     </DragAndDropElement>
   );
 };
+
+const dragNoop = () => true;
 
 interface BlocksContentProps {
   placeholder?: string;
@@ -549,9 +552,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       case 'Escape':
         return ReactEditor.blur(editor);
     }
-
     handleKeyboardShortcuts(event);
-
     // Check if a snippet was triggered
     if (event.key === ' ') {
       checkSnippet(event);
@@ -564,27 +565,26 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
    *  We are overriding it to check if the selection is not fully within the visible area of the editor,
    *  we use scrollBy one line to the bottom
    */
-  const handleScrollSelectionIntoView = () => {
-    if (!editor.selection) return;
-    const domRange = ReactEditor.toDOMRange(editor, editor.selection);
-    const domRect = domRange.getBoundingClientRect();
-    const blocksInput = blocksRef.current;
 
-    if (!blocksInput) {
+  const handleScrollSelectionIntoView = React.useCallback(() => {
+    if (!editor.selection || !blocksRef.current) {
       return;
     }
 
-    const editorRect = blocksInput.getBoundingClientRect();
+    const domRange = ReactEditor.toDOMRange(editor, editor.selection);
+    const domRect = domRange.getBoundingClientRect();
+
+    const editorRect = blocksRef.current.getBoundingClientRect();
 
     // Check if the selection is not fully within the visible area of the editor
     if (domRect.top < editorRect.top || domRect.bottom > editorRect.bottom) {
       // Scroll by one line to the bottom
-      blocksInput.scrollBy({
+      blocksRef.current.scrollBy({
         top: 28, // 20px is the line-height + 8px line gap
         behavior: 'smooth',
       });
     }
-  };
+  }, [editor]);
 
   return (
     <Box
@@ -604,19 +604,15 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         aria-labelledby={ariaLabelId}
         readOnly={disabled}
         placeholder={placeholder}
-        isExpandedMode={isExpandedMode}
+        $isExpandedMode={isExpandedMode}
         decorate={decorateCode}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
         // As we have our own handler to drag and drop the elements returing true will skip slate's own event handler
-        onDrop={() => {
-          return true;
-        }}
-        onDragStart={() => {
-          return true;
-        }}
+        onDrop={dragNoop}
+        onDragStart={dragNoop}
       />
       {modalElement}
     </Box>

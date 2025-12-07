@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import * as React from 'react';
 
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
@@ -81,8 +81,8 @@ describe('<Input />', () => {
         padding-block: 8px;
       }
 
-      .c5 ::placeholder {
-        color: #8e8ea9;
+      .c5::placeholder {
+        color: #666687;
         opacity: 1;
       }
 

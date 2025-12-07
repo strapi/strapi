@@ -61,7 +61,7 @@
   "Roles.components.List.empty.withSearch": "Nessun ruolo corrisponde alla ricerca ({search})...",
   "Settings.PageTitle": "Impostazioni - {name}",
   "Settings.application.description": "Vedi i dettagli del tuo progetto",
-  "Settings.application.edition-title": "PIANO ATTUALE",
+  "Settings.application.edition-title": "Edizione attuale",
   "Settings.application.link-pricing": "Vedi tutti i prezzi",
   "Settings.application.link-upgrade": "Aggiorna il tuo progetto",
   "Settings.application.node-version": "VERSIONE NODE",

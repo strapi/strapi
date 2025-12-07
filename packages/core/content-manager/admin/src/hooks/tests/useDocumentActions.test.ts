@@ -1,27 +1,36 @@
 import { errors } from '@strapi/utils';
-import { act, renderHook, screen, server } from '@tests/utils';
+import { renderHook, screen, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
 import { useDocumentActions } from '../useDocumentActions';
 
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
+  useGetAIFeatureConfigQuery: () => ({ data: undefined }),
+  useAIAvailability: () => false,
+}));
+
 describe('useDocumentActions', () => {
-  it('should return an object with the correct methods', () => {
+  it('should return an object with the correct methods', async () => {
     const { result } = renderHook(() => useDocumentActions());
 
-    expect(result.current).toEqual({
-      autoClone: expect.any(Function),
-      publishMany: expect.any(Function),
-      clone: expect.any(Function),
-      create: expect.any(Function),
-      discard: expect.any(Function),
-      delete: expect.any(Function),
-      deleteMany: expect.any(Function),
-      getDocument: expect.any(Function),
-      publish: expect.any(Function),
-      update: expect.any(Function),
-      unpublish: expect.any(Function),
-      unpublishMany: expect.any(Function),
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        autoClone: expect.any(Function),
+        publishMany: expect.any(Function),
+        clone: expect.any(Function),
+        create: expect.any(Function),
+        discard: expect.any(Function),
+        delete: expect.any(Function),
+        deleteMany: expect.any(Function),
+        getDocument: expect.any(Function),
+        publish: expect.any(Function),
+        update: expect.any(Function),
+        unpublish: expect.any(Function),
+        unpublishMany: expect.any(Function),
+        isLoading: expect.any(Boolean),
+      });
     });
   });
 
@@ -31,14 +40,13 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
             documentId: '12345',
           },
           {
-            documentId: '12345',
             title: 'test',
             content: 'the brown fox jumps over the lazy dog',
           }
@@ -47,16 +55,14 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "data": {
-            "content": "the brown fox jumps over the lazy dog",
-            "documentId": "12345",
-            "id": 2,
-            "title": "test",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        data: {
+          content: 'the brown fox jumps over the lazy dog',
+          documentId: '67890',
+          id: 2,
+          title: 'test',
+        },
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -75,7 +81,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
@@ -91,15 +97,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't clone entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't clone entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't clone entry.");
     });
@@ -111,7 +115,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.create(
           {
             model: mockData.contentManager.contentType,
@@ -125,16 +129,14 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "data": {
-            "content": "the brown fox jumps over the lazy dog",
-            "documentId": "12345",
-            "id": 1,
-            "title": "test",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        data: {
+          content: 'the brown fox jumps over the lazy dog',
+          documentId: '12345',
+          id: 1,
+          title: 'test',
+        },
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -153,7 +155,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.create(
           {
             model: mockData.contentManager.contentType,
@@ -167,15 +169,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-            {
-              "error": {
-                "details": {},
-                "message": "Couldn't create entry.",
-                "name": "ApplicationError",
-              },
-            }
-          `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't create entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't create entry.");
     });
@@ -187,7 +187,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -197,13 +197,11 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -222,7 +220,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -232,15 +230,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-                {
-                  "error": {
-                    "details": {},
-                    "message": "Couldn't delete entry.",
-                    "name": "ApplicationError",
-                  },
-                }
-              `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't delete entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't delete entry.");
     });
@@ -252,7 +248,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.deleteMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -264,11 +260,9 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "count": 2,
-        }
-      `);
+      expect(response).toEqual({
+        count: 2,
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -287,7 +281,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.deleteMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -297,15 +291,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-                {
-                  "error": {
-                    "details": {},
-                    "message": "Couldn't delete entries.",
-                    "name": "ApplicationError",
-                  },
-                }
-              `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't delete entries.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't delete entries.");
     });
@@ -317,7 +309,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -327,13 +319,11 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -352,7 +342,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -362,15 +352,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't discard entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't discard entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't discard entry.");
     });
@@ -382,7 +370,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -392,13 +380,11 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -417,7 +403,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -427,15 +413,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-                {
-                  "error": {
-                    "details": {},
-                    "message": "Couldn't delete entry.",
-                    "name": "ApplicationError",
-                  },
-                }
-              `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't delete entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't delete entry.");
     });
@@ -447,7 +431,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.publish(
           {
             collectionType: 'collection-types',
@@ -462,14 +446,12 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "publishedAt": "2024-01-23T16:23:38.948Z",
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        publishedAt: '2024-01-23T16:23:38.948Z',
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -488,7 +470,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.publish(
           {
             collectionType: 'collection-types',
@@ -503,15 +485,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't publish entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't publish entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't publish entry.");
     });
@@ -523,7 +503,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
@@ -539,19 +519,17 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "data": {
-            "content": "the brown fox jumps over the lazy dog",
-            "createdAt": "",
-            "documentId": "12345",
-            "id": 1,
-            "name": "Entry 1",
-            "publishedAt": "",
-            "updatedAt": "",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        data: {
+          content: 'the brown fox jumps over the lazy dog',
+          createdAt: '',
+          documentId: '12345',
+          id: 1,
+          name: 'Entry 1',
+          publishedAt: '',
+          updatedAt: '',
+        },
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -570,7 +548,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
@@ -586,15 +564,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't update entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't update entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't update entry.");
     });
@@ -606,7 +582,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -616,14 +592,12 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "publishedAt": null,
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        publishedAt: null,
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -642,7 +616,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -652,15 +626,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't unpublish entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't unpublish entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't unpublish entry.");
     });
@@ -672,7 +644,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublishMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -681,11 +653,9 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-          {
-            "count": 2,
-          }
-      `);
+      expect(response).toEqual({
+        count: 2,
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -704,7 +674,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublishMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -713,15 +683,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't unpublish entries.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          name: 'ApplicationError',
+          message: "Couldn't unpublish entries.",
+          details: {},
+        },
+      });
 
       await screen.findByText("Couldn't unpublish entries.");
     });

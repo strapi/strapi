@@ -1,5 +1,6 @@
 // TODO: find a better naming convention for the file that was an index file before
 import { Box, Grid, KeyboardNavigable, Typography } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
 import { AssetCard } from '../AssetCard/AssetCard';
 
@@ -7,6 +8,12 @@ import { Draggable } from './Draggable';
 
 import type { File } from '../../../../shared/contracts/files';
 import type { AllowedTypes } from '../AssetCard/AssetCard';
+
+const DraggableAssetCard = styled(AssetCard)`
+  && {
+    cursor: inherit;
+  }
+`;
 
 export interface AssetGridListProps {
   allowedTypes?: AllowedTypes[];
@@ -47,7 +54,7 @@ export const AssetGridList = ({
             return (
               <Grid.Item key={asset.id} col={3} height="100%">
                 <Draggable index={index} moveItem={onReorderAsset} id={asset.id}>
-                  <AssetCard
+                  <DraggableAssetCard
                     allowedTypes={allowedTypes}
                     asset={asset}
                     isSelected={isSelected}
@@ -61,7 +68,16 @@ export const AssetGridList = ({
           }
 
           return (
-            <Grid.Item col={3} key={asset.id} height="100%" direction="column" alignItems="stretch">
+            <Grid.Item
+              col={3}
+              m={4}
+              s={6}
+              xs={12}
+              key={asset.id}
+              height="100%"
+              direction="column"
+              alignItems="stretch"
+            >
               <AssetCard
                 key={asset.id}
                 allowedTypes={allowedTypes}

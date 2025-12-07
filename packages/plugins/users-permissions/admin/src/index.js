@@ -1,10 +1,10 @@
-import pluginPkg from '../../package.json';
+import { strapi as pkgStrapi } from '../../package.json';
 
 import { PERMISSIONS } from './constants';
 import getTrad from './utils/getTrad';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-const name = pluginPkg.strapi.name;
+const name = pkgStrapi.name;
 
 export default {
   register(app) {

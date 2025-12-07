@@ -146,6 +146,7 @@ npm-debug.log
 # Playwright
 ############################
 playwright-report
+tests/e2e/playwright-storage-state.json
 test-results
 !tests/e2e/data/*.tar
 tests/e2e/.env
@@ -153,10 +154,16 @@ tests/e2e/.env
 tests/cli/.env
 
 ############################
+# AI tools
+############################
+CLAUDE.local.md
+
+############################
 # Strapi
 ############################
 examples/**/types/generated
 .nx/cache
+.nx/workspace-data
 
 # Ignore yarn.lock inside templates
 templates/yarn.lock

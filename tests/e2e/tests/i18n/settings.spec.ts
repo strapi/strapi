@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { prunePermissions } from '../../scripts/endpoints';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { prunePermissions } from '../../../utils/scripts/endpoints';
+import { findAndClose, navToHeader } from '../../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -22,13 +22,11 @@ test.describe('Settings', () => {
     /**
      * Get to the settings page
      */
-    await clickAndWait(page, page.getByRole('link', { name: 'Settings' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Internationalization' }));
+    await navToHeader(page, ['Settings', 'Internationalization'], 'Internationalization');
 
     /**
      * Assert that the page has the expected elements & data, the locales installed in the test-app.
      */
-    await expect(page.getByRole('heading', { name: 'Internationalization' })).toBeVisible();
     expect(await page.getByRole('row').all()).toHaveLength(5);
     for (const locale of LOCALES) {
       expect(page.getByRole('gridcell', { name: locale, exact: true })).toBeVisible();
@@ -45,14 +43,12 @@ test.describe('Settings', () => {
     await page.getByRole('option', { name: 'Italian (it)' }).click();
     await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Locale successfully added');
+    await findAndClose(page, 'Locale successfully added');
 
     /**
      * Next, we'll navigate to our shop single type & add the a localised version of this document.
      */
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
-    await expect(page.getByRole('heading', { name: 'UK Shop' })).toBeVisible();
+    await navToHeader(page, ['Content Manager', 'Shop'], 'UK Shop');
     await page.getByRole('combobox', { name: 'Locales' }).click();
     expect(await page.getByRole('option').all()).toHaveLength(5);
     for (const locale of [...LOCALES, 'Italian (it)']) {
@@ -110,8 +106,11 @@ test.describe('Settings', () => {
      * Create the missing components in the "content" dynamic zone.
      */
     await page.getByRole('button', { name: 'There are 2 missing components' }).click();
+    // Click the button in the DZ component picker
     await page.getByRole('button', { name: 'Product carousel' }).click();
+    // Click the DZ component toggle button
     await page.getByRole('button', { name: 'Product carousel' }).click();
+
     await page
       .getByRole('region', { name: /Product carousel/ })
       .getByRole('textbox', { name: 'title' })
@@ -124,7 +123,7 @@ test.describe('Settings', () => {
      * Successfully publish the entry once the data is valid.
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
   });
 
   test('As a user I want to delete an existing locale and have the content deleted as well', async ({
@@ -135,9 +134,7 @@ test.describe('Settings', () => {
      * We'll assert that the default locale is "English (en)" and that we have 2 entries.
      * and that all the expected locales exist in the select dropdown.
      */
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
-    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('English (en)');
     expect(await page.getByRole('row').all()).toHaveLength(3);
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
@@ -149,21 +146,17 @@ test.describe('Settings', () => {
     /**
      * Next, we'll delete the french locale
      */
-    await page.getByRole('link', { name: 'Settings' }).click();
-    await page.getByRole('link', { name: 'Internationalization' }).click();
-    await expect(page.getByRole('heading', { name: 'Internationalization' })).toBeVisible();
+    await navToHeader(page, ['Settings', 'Internationalization'], 'Internationalization');
     await page.getByRole('button', { name: 'Delete French (fr) locale' }).click();
 
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await findAndClose(page, 'Success:Locale successfully deleted');
+    await findAndClose(page, 'Locale successfully deleted');
 
     /**
      * Finally, go back to the list view, the english articles should be there,
      * but we should not see the french locale option anymore.
      */
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
-    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('English (en)');
     expect(await page.getByRole('row').all()).toHaveLength(3);
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
@@ -182,9 +175,7 @@ test.describe('Settings', () => {
     /**
      * Go to the list view first to assert the current state of the data.
      */
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Products' }));
-    await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
       'English (en)'
     );
@@ -197,19 +188,20 @@ test.describe('Settings', () => {
     /**
      * Next, change the display name of our default locale – "English (en)" to "UK English"
      */
-    await page.getByRole('link', { name: 'Settings' }).click();
-    await page.getByRole('link', { name: 'Internationalization' }).click();
-    await expect(page.getByRole('heading', { name: 'Internationalization' })).toBeVisible();
+    await navToHeader(page, ['Settings', 'Internationalization'], 'Internationalization');
     await page.getByRole('gridcell', { name: 'English (en)', exact: true }).click();
     await page.getByRole('textbox', { name: 'Locale display name' }).fill('UK English');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Locale successfully edited');
+    await findAndClose(page, 'Locale successfully edited');
 
     /**
      * Lets go back to the list view and assert that the changes are reflected.
      */
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
-    expect(await page.getByRole('row').all()).toHaveLength(2);
+    /**
+     * It is 4 because it contains also the header row
+     */
+    expect(await page.getByRole('row').all()).toHaveLength(4);
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('UK English');
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of ['UK English', ...LOCALES].filter((locale) => locale !== 'English (en)')) {
