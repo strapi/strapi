@@ -25,7 +25,7 @@ import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
-const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
+const StyledEditable = styled(Editable) <{ isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
   outline: none;
   display: flex;
@@ -41,13 +41,13 @@ const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
   }
 `;
 
-const Wrapper = styled<BoxComponent>(Box)<{ isOverDropTarget: boolean }>`
+const Wrapper = styled<BoxComponent>(Box) <{ isOverDropTarget: boolean }>`
   position: ${({ isOverDropTarget }) => isOverDropTarget && 'relative'};
 `;
 
 type DragDirection = (typeof DIRECTIONS)[keyof typeof DIRECTIONS];
 
-const DropPlaceholder = styled<BoxComponent>(Box)<{
+const DropPlaceholder = styled<BoxComponent>(Box) <{
   dragDirection: DragDirection | null;
   placeholderMargin: 1 | 2;
 }>`
@@ -61,7 +61,7 @@ const DropPlaceholder = styled<BoxComponent>(Box)<{
   `}
 `;
 
-const DragItem = styled<FlexComponent>(Flex)<{ $dragVisibility: CSSProperties['visibility'] }>`
+const DragItem = styled<FlexComponent>(Flex) <{ $dragVisibility: CSSProperties['visibility'] }>`
   // Style each block rendered using renderElement()
   & > [data-slate-node='element'] {
     width: 100%;
@@ -78,7 +78,7 @@ const DragItem = styled<FlexComponent>(Flex)<{ $dragVisibility: CSSProperties['v
   }
 `;
 
-const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton)<{
+const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton) <{
   $dragHandleTopMargin?: CSSProperties['marginTop'];
 }>`
   user-select: none;
@@ -537,7 +537,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     // Find the right block-specific handlers for enter and backspace key presses
     switch (event.key) {
       case 'Enter':
-        if (!event.isComposing) {
+        if (!event.nativeEvent.isComposing) {
           event.preventDefault();
           return handleEnter(event);
         }
