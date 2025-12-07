@@ -7,22 +7,43 @@ import { render, screen, fireEvent } from '@tests/utils';
 
 import { BlocksInput } from '../BlocksInput';
 
-import { blocksData } from './mock-schema';
-
-const mockEditable = jest.fn(({ onKeyDown }) => (
-  // Fixed A11y: Removed explicit role="textbox" (implied by contentEditable) and added tabIndex
-  <div contentEditable tabIndex={0} data-testid="mock-editable" onKeyDown={onKeyDown} />
-));
+// Mock Component
+const MockEditable = ({ onKeyDown }: { onKeyDown: React.KeyboardEventHandler }) => (
+  <textarea data-testid="mock-editable" onKeyDown={onKeyDown} />
+);
 
 jest.mock('slate-react', () => ({
   ...jest.requireActual('slate-react'),
-  Editable: (props: any) => mockEditable(props),
+  Editable: (props: any) => <MockEditable {...props} />,
 }));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useElementOnScreen: jest.fn(() => ({ current: null })),
 }));
+
+// Test Helper
+const renderBlocksInput = (initialValues: any) => {
+  return render(
+    <BlocksInput
+      label="blocks type"
+      name="blocks-editor"
+      hint="blocks description"
+      placeholder="blocks placeholder"
+      disabled={false}
+      type="blocks"
+    />,
+    {
+      renderOptions: {
+        wrapper: ({ children }) => (
+          <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
+            {children}
+          </Form>
+        ),
+      },
+    }
+  );
+};
 
 describe('BlocksInput IME', () => {
   it('should not prevent default behavior when pressing Enter during composition', async () => {
@@ -35,25 +56,7 @@ describe('BlocksInput IME', () => {
       ],
     };
 
-    render(
-      <BlocksInput
-        label="blocks type"
-        name="blocks-editor"
-        hint="blocks description"
-        placeholder="blocks placeholder"
-        disabled={false}
-        type="blocks"
-      />,
-      {
-        renderOptions: {
-          wrapper: ({ children }) => (
-            <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
-              {children}
-            </Form>
-          ),
-        },
-      }
-    );
+    renderBlocksInput(initialValues);
 
     const editor = await screen.findByTestId('mock-editable');
 
@@ -80,25 +83,7 @@ describe('BlocksInput IME', () => {
       ],
     };
 
-    render(
-      <BlocksInput
-        label="blocks type"
-        name="blocks-editor"
-        hint="blocks description"
-        placeholder="blocks placeholder"
-        disabled={false}
-        type="blocks"
-      />,
-      {
-        renderOptions: {
-          wrapper: ({ children }) => (
-            <Form method="POST" onSubmit={jest.fn()} initialValues={initialValues}>
-              {children}
-            </Form>
-          ),
-        },
-      }
-    );
+    renderBlocksInput(initialValues);
 
     const editor = await screen.findByTestId('mock-editable');
 
@@ -115,3 +100,4 @@ describe('BlocksInput IME', () => {
     expect(preventDefaultSpy).toHaveBeenCalled();
   });
 });
+
