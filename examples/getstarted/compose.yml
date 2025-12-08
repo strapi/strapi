@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: strapi-empty-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi
+      POSTGRES_DB: strapi
+    ports:
+      - '5100:5432'
+    volumes:
+      - ./.tmp/postgres:/var/lib/postgresql/data
+  mysql:
+    image: mysql:8.0
+    container_name: strapi-empty-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: strapi
+      MYSQL_DATABASE: strapi
+      MYSQL_USER: strapi
+      MYSQL_PASSWORD: strapi
+    ports:
+      - '5101:3306'
+    volumes:
+      - ./.tmp/mysql:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
