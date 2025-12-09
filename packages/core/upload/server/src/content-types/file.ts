@@ -22,7 +22,7 @@ export default {
     },
     attributes: {
       name: {
-        type: 'text',
+        type: 'string',
         configurable: false,
         required: true,
       },
