@@ -13,7 +13,6 @@ export default (db: Database) => {
   return {
     /**
      * Returns a knex schema builder instance
-     * @param {string} table - table name
      */
     getSchemaBuilder(trx: Knex.Transaction) {
       return db.getSchemaConnection(trx);
@@ -274,12 +273,21 @@ const createHelpers = (db: Database) => {
    * Creates a table in a database
    */
   const createTable = async (schemaBuilder: Knex.SchemaBuilder, table: Table) => {
-    await schemaBuilder.createTable(table.name, (tableBuilder) => {
+    await schemaBuilder.createTable(table.name, async (tableBuilder) => {
       // columns
       (table.columns || []).forEach((column) => createColumn(tableBuilder, column));
 
-      // indexes
-      (table.indexes || []).forEach((index) => createIndex(tableBuilder, index));
+      // indexes that don't require key length
+      const indexesWithoutKeyLength = (table.indexes || []).filter(
+        (index) =>
+          !(
+            (db.config.connection.client === 'mysql' ||
+              db.config.connection.client === 'mariadb') &&
+            index.keyLength !== undefined &&
+            index.type !== 'primary'
+          )
+      );
+      indexesWithoutKeyLength.forEach((index) => createIndex(tableBuilder, index));
 
       // foreign keys
 
@@ -289,6 +297,48 @@ const createHelpers = (db: Database) => {
         );
       }
     });
+
+    // Create indexes with key length separately using raw SQL
+    const indexesWithKeyLength = (table.indexes || []).filter(
+      (index) =>
+        (db.config.connection.client === 'mysql' || db.config.connection.client === 'mariadb') &&
+        index.keyLength !== undefined &&
+        index.type !== 'primary'
+    );
+
+    if (indexesWithKeyLength.length > 0) {
+      for (const index of indexesWithKeyLength) {
+        const { type, columns, name, keyLength } = index;
+
+        const columnSpecsSql = columns
+          .map((col) => {
+            if (typeof keyLength === 'number') {
+              return `??(${keyLength})`;
+            }
+            if (typeof keyLength === 'object' && keyLength[col] !== undefined) {
+              return `??(${keyLength[col]})`;
+            }
+            return '??';
+          })
+          .join(', ');
+
+        const columnValues = columns.map((col) => col);
+
+        if (type === 'unique') {
+          await db.connection.raw(`CREATE UNIQUE INDEX ?? ON ?? (${columnSpecsSql})`, [
+            name,
+            table.name,
+            ...columnValues,
+          ]);
+        } else {
+          await db.connection.raw(`CREATE INDEX ?? ON ?? (${columnSpecsSql})`, [
+            name,
+            table.name,
+            ...columnValues,
+          ]);
+        }
+      }
+    }
   };
 
   /**
@@ -388,7 +438,17 @@ const createHelpers = (db: Database) => {
         createForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
-      for (const updatedIndex of table.indexes.updated) {
+      // Create indexes that don't require key length
+      const updatedIndexesWithoutKeyLength = table.indexes.updated.filter(
+        (index) =>
+          !(
+            (db.config.connection.client === 'mysql' ||
+              db.config.connection.client === 'mariadb') &&
+            index.object.keyLength !== undefined &&
+            index.object.type !== 'primary'
+          )
+      );
+      for (const updatedIndex of updatedIndexesWithoutKeyLength) {
         debug(`Recreating updated index ${updatedIndex.name} on ${table.name}`);
         createIndex(tableBuilder, updatedIndex.object);
       }
@@ -398,11 +458,74 @@ const createHelpers = (db: Database) => {
         createForeignKey(tableBuilder, addedForeignKey);
       }
 
-      for (const addedIndex of table.indexes.added) {
+      const addedIndexesWithoutKeyLength = table.indexes.added.filter(
+        (index) =>
+          !(
+            (db.config.connection.client === 'mysql' ||
+              db.config.connection.client === 'mariadb') &&
+            index.keyLength !== undefined &&
+            index.type !== 'primary'
+          )
+      );
+      for (const addedIndex of addedIndexesWithoutKeyLength) {
         debug(`Creating index ${addedIndex.name} on ${table.name}`);
         createIndex(tableBuilder, addedIndex);
       }
     });
+
+    // Create indexes with key length separately using raw SQL
+    const updatedIndexesWithKeyLength = table.indexes.updated.filter(
+      (index) =>
+        (db.config.connection.client === 'mysql' || db.config.connection.client === 'mariadb') &&
+        index.object.keyLength !== undefined &&
+        index.object.type !== 'primary'
+    );
+
+    const addedIndexesWithKeyLength = table.indexes.added.filter(
+      (index) =>
+        (db.config.connection.client === 'mysql' || db.config.connection.client === 'mariadb') &&
+        index.keyLength !== undefined &&
+        index.type !== 'primary'
+    );
+
+    const indexesWithKeyLength = [...updatedIndexesWithKeyLength, ...addedIndexesWithKeyLength];
+
+    if (indexesWithKeyLength.length > 0) {
+      for (const indexDiff of indexesWithKeyLength) {
+        const index = 'object' in indexDiff ? indexDiff.object : indexDiff;
+        const { type, columns, name, keyLength } = index;
+
+        const columnSpecsSql = columns
+          .map((col) => {
+            if (typeof keyLength === 'number') {
+              return `??(${keyLength})`;
+            }
+            if (typeof keyLength === 'object' && keyLength[col] !== undefined) {
+              return `??(${keyLength[col]})`;
+            }
+            return '??';
+          })
+          .join(', ');
+
+        const columnValues = columns.map((col) => col);
+
+        debug(`Creating index ${name} with key length on ${table.name}`);
+
+        if (type === 'unique') {
+          await db.connection.raw(`CREATE UNIQUE INDEX ?? ON ?? (${columnSpecsSql})`, [
+            name,
+            table.name,
+            ...columnValues,
+          ]);
+        } else {
+          await db.connection.raw(`CREATE INDEX ?? ON ?? (${columnSpecsSql})`, [
+            name,
+            table.name,
+            ...columnValues,
+          ]);
+        }
+      }
+    }
   };
 
   /**

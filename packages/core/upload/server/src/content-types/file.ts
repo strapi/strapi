@@ -124,6 +124,7 @@ export default {
         name: `upload_files_name_index`,
         columns: ['name'],
         type: null,
+        keyLength: 512,
       },
       {
         name: `upload_files_size_index`,

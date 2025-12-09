@@ -26,6 +26,7 @@ export interface Index {
   columns: string[];
   name: string;
   type?: IndexType;
+  keyLength?: number | Record<string, number>;
 }
 
 export interface ForeignKey {
