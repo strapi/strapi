@@ -15,6 +15,7 @@
 import type { Knex } from 'knex';
 
 import debug from 'debug';
+import { identifiers } from '../../utils/identifiers';
 import type { Migration } from '../common';
 import type { Database } from '../../index';
 import type { ForeignKey } from '../../schema/types';
@@ -97,28 +98,89 @@ const collectColumnsToConvert = async (knex: Knex, db: Database): Promise<Column
         }
       }
     }
+
+    // Also collect FK columns from meta.foreignKeys (e.g., component join tables like entity_id)
+    // These columns might be biginteger without internalIntegerId flag
+    if (meta.foreignKeys !== undefined && meta.foreignKeys.length > 0) {
+      for (const fk of meta.foreignKeys) {
+        for (const columnName of fk.columns) {
+          // Check if we already added this column
+          const alreadyAdded = columns.some(
+            (c) => c.table === tableName && c.column === columnName
+          );
+          if (alreadyAdded === false) {
+            // Only add if column actually exists in this table
+            const hasColumn = await knex.schema.hasColumn(tableName, columnName);
+            if (hasColumn) {
+              columns.push({
+                table: tableName,
+                column: columnName,
+                isPrimaryKey: false,
+              });
+            }
+          }
+        }
+      }
+    }
   }
 
   return columns;
 };
 
 /**
- * Collects foreign keys from metadata that reference tables being converted.
+ * Collects foreign keys from metadata.
+ * Derives foreign keys from relations with joinColumn (like createdBy/updatedBy)
+ * and also includes foreign keys explicitly defined in meta.foreignKeys (for join tables).
  */
 const collectForeignKeysFromMetadata = (db: Database): (ForeignKey & { sourceTable: string })[] => {
   const foreignKeys: (ForeignKey & { sourceTable: string })[] = [];
 
   for (const meta of db.metadata.values()) {
-    if (meta.foreignKeys === undefined || meta.foreignKeys.length === 0) {
-      continue;
+    // Collect foreign keys from relations with joinColumn (e.g., createdBy, updatedBy)
+    for (const [
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _,
+      attr,
+    ] of Object.entries(meta.attributes)) {
+      // Relations with joinColumn and owner create foreign keys
+      if (
+        attr.type === 'relation' &&
+        'joinColumn' in attr &&
+        attr.joinColumn !== undefined &&
+        'owner' in attr &&
+        attr.owner === true &&
+        attr.joinColumn.referencedTable !== undefined
+      ) {
+        const columnNameFull = attr.joinColumn.name;
+        const columnName = identifiers.getName(columnNameFull);
+        const fkName = identifiers.getFkIndexName([meta.tableName, columnName]);
+
+        foreignKeys.push({
+          name: fkName,
+          columns: [columnName],
+          referencedTable: attr.joinColumn.referencedTable,
+          referencedColumns: [attr.joinColumn.referencedColumn ?? 'id'],
+          onDelete: 'SET NULL', // Default for creator fields, matches schema.ts
+          onUpdate: undefined,
+          sourceTable: meta.tableName,
+        } as ForeignKey & { sourceTable: string });
+      }
     }
 
-    for (const fk of meta.foreignKeys) {
-      foreignKeys.push({
-        ...fk,
-        // Add source table info for recreation
-        sourceTable: meta.tableName,
-      } as ForeignKey & { sourceTable: string });
+    // Also include foreign keys explicitly defined in metadata (for join tables)
+    if (meta.foreignKeys !== undefined && meta.foreignKeys.length > 0) {
+      for (const fk of meta.foreignKeys) {
+        // Avoid duplicates - if we already added this FK from relations above
+        const alreadyAdded = foreignKeys.some(
+          (existing) => existing.name === fk.name && existing.sourceTable === meta.tableName
+        );
+        if (alreadyAdded === false) {
+          foreignKeys.push({
+            ...fk,
+            sourceTable: meta.tableName,
+          } as ForeignKey & { sourceTable: string });
+        }
+      }
     }
   }
 
@@ -143,9 +205,9 @@ const isIntegerColumn = async (
         FROM information_schema.columns 
         WHERE table_name = ? 
           AND column_name = ?
-          ${schemaName !== null ? 'AND table_schema = ?' : ''}
+          ${schemaName ? 'AND table_schema = ?' : ''}
       `,
-        schemaName !== null ? [tableName, columnName, schemaName] : [tableName, columnName]
+        schemaName ? [tableName, columnName, schemaName] : [tableName, columnName]
       );
 
       const dataType = result.rows[0]?.data_type?.toLowerCase();
@@ -359,41 +421,25 @@ export const migrateIdsFromIntToBigInt: Migration = {
 
     migrationDebug(`Converting ${columnsNeedingConversion.length} columns`);
 
-    // Disable FK checks for MySQL
-    if (db.dialect.client === 'mysql') {
-      await knex.raw('SET FOREIGN_KEY_CHECKS = 0');
+    // Drop foreign keys first (required for both Postgres and MySQL)
+    await dropForeignKeys(knex, db, foreignKeys);
+
+    // Convert all columns - PKs first, then FKs
+    const pkColumns = columnsNeedingConversion.filter((c) => c.isPrimaryKey);
+    const fkColumns = columnsNeedingConversion.filter((c) => c.isPrimaryKey === false);
+
+    for (const col of pkColumns) {
+      await convertColumnToBigInt(knex, db, col.table, col.column, true);
     }
 
-    try {
-      // Drop foreign keys first (for Postgres, MySQL handles via FK_CHECKS)
-      if (db.dialect.client === 'postgres') {
-        await dropForeignKeys(knex, db, foreignKeys);
-      }
-
-      // Convert all columns - PKs first, then FKs
-      const pkColumns = columnsNeedingConversion.filter((c) => c.isPrimaryKey);
-      const fkColumns = columnsNeedingConversion.filter((c) => c.isPrimaryKey === false);
-
-      for (const col of pkColumns) {
-        await convertColumnToBigInt(knex, db, col.table, col.column, true);
-      }
-
-      for (const col of fkColumns) {
-        await convertColumnToBigInt(knex, db, col.table, col.column, false);
-      }
-
-      // Recreate foreign keys (for Postgres, MySQL handles via FK_CHECKS)
-      if (db.dialect.client === 'postgres') {
-        await recreateForeignKeys(knex, db, foreignKeys);
-      }
-
-      migrationDebug('Migration completed successfully');
-    } finally {
-      // Re-enable FK checks for MySQL (always, even on error)
-      if (db.dialect.client === 'mysql') {
-        await knex.raw('SET FOREIGN_KEY_CHECKS = 1');
-      }
+    for (const col of fkColumns) {
+      await convertColumnToBigInt(knex, db, col.table, col.column, false);
     }
+
+    // Recreate foreign keys after conversion
+    await recreateForeignKeys(knex, db, foreignKeys);
+
+    migrationDebug('Migration completed successfully');
   },
 
   async down() {
