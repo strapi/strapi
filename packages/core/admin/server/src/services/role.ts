@@ -379,6 +379,12 @@ const assignPermissions = async (
 };
 
 const addPermissions = async (roleId: Data.ID, permissions: any) => {
+  // Log the incoming permissions for debugging
+  console.log('[MCP DEBUG] addPermissions called with:', {
+    roleId,
+    permissions: JSON.stringify(permissions, null, 2),
+  });
+
   const { conditionProvider, createMany } = getService('permission');
   const { sanitizeConditions } = permissionDomain;
 

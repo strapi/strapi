@@ -42,4 +42,9 @@ module.exports = ({ env }) => ({
       // enabled: false,
     },
   },
+  mcp: {
+    enabled: env.bool('MCP_ENABLED', true),
+    host: env('MCP_HOST', '127.0.0.1'),
+    port: env.int('MCP_PORT', 4001),
+  },
 });
