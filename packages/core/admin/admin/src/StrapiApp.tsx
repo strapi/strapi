@@ -28,6 +28,7 @@ import {
 } from './reducer';
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
+import { setFavicon } from './utils/favicon';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
 import type { DefaultTheme } from 'styled-components';
@@ -269,6 +270,7 @@ class StrapiApp {
 
     if (customConfig.head?.favicon) {
       this.configurations.head.favicon = customConfig.head.favicon;
+      setFavicon(this.configurations.head.favicon);
     }
 
     if (customConfig.theme) {
