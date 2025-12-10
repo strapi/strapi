@@ -1,5 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 
+import { StrapiApp } from '@strapi/admin/strapi-admin';
 import { Cloud } from '@strapi/icons';
 
 import { Initializer } from './components/Initializer';
@@ -10,7 +11,7 @@ const pluginName = 'Deploy';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     const { backendURL } = window.strapi;
 
     // Only add the plugin menu link and registering it if the project is on development (localhost).
@@ -23,6 +24,7 @@ export default {
           defaultMessage: pluginName,
         },
         Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
+        permissions: [],
       });
       const plugin = {
         id: pluginId,

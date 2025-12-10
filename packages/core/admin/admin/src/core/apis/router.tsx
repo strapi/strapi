@@ -135,7 +135,7 @@ class Router {
 
   public addMenuLink = (
     link: Omit<MenuItem, 'Component'> & {
-      Component: () => Promise<{ default: React.ComponentType }>;
+      Component?: () => Promise<{ default: React.ComponentType }>;
     }
   ) => {
     invariant(link.to, `[${link.intlLabel.defaultMessage}]: link.to should be defined`);
