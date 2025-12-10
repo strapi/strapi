@@ -1,10 +1,16 @@
 /**
- * Request-scoped model cache for performance optimization.
+ * Model cache for performance optimization.
  *
- * This cache prevents redundant calls to getModel() within a single request,
+ * Prevents redundant getModel() calls which can number 100-200+ for complex
+ * populate queries.
  *
- * The cache is request-scoped and must be cleared after each request to prevent
- * stale data from being cached across requests.
+ * Usage patterns:
+ * - Instance-scoped: In permission managers (created per request, garbage collection handles cleanup)
+ * - Function-scoped: In validateParams (cleared defensively, but garbage collection handles it)
+ *
+ * Note: Models don't change at runtime (changes require server restart), so this
+ * cache could theoretically be global. Current scoping provides isolation and
+ * predictable memory behavior.
  *
  * @example
  * ```typescript
@@ -16,7 +22,7 @@
  */
 
 /**
- * Creates a request-scoped cache for getModel() calls.
+ * Creates cache for getModel() calls.
  *
  * @param getModelFn - The underlying getModel function to cache
  * @returns An object with cached getModel function and clear method
