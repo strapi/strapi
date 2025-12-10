@@ -22,11 +22,7 @@ export default {
           id: `${pluginId}.Plugin.name`,
           defaultMessage: pluginName,
         },
-        Component: async () => {
-          const { App } = await import('./pages/App');
-
-          return App;
-        },
+        Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
       });
       const plugin = {
         id: pluginId,
