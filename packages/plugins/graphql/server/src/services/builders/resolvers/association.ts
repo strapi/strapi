@@ -9,6 +9,9 @@ const { ApplicationError } = errors;
 export default ({ strapi }: Context) => {
   const { service: getGraphQLService } = strapi.plugin('graphql');
 
+  // Cache for built-in query field lookups to avoid rebuilding the schema repeatedly
+  const builtInFieldCache = new Map<string, boolean>();
+
   const { isMorphRelation, isMedia } = getGraphQLService('utils').attributes;
   const { transformArgs } = getGraphQLService('builders').utils;
   const { toEntityResponse, toEntityResponseCollection } = getGraphQLService('format').returnTypes;
@@ -63,15 +66,23 @@ export default ({ strapi }: Context) => {
           contentTypes.hasDraftAndPublish(targetContentType);
 
         // Helper to check if a field is from built-in queries (not custom resolvers)
+        // Use a memoization cache to avoid rebuilding the schema on every call.
         const isBuiltInQueryField = (fieldName: string) => {
           if (fieldName.endsWith('_connection')) return true;
+
+          if (builtInFieldCache.has(fieldName)) {
+            return builtInFieldCache.get(fieldName) as boolean;
+          }
 
           try {
             const graphqlService = strapi.plugin('graphql').service('content-api');
             const schema = graphqlService.buildSchema();
             const queryType = schema.getQueryType();
-            return queryType?.getFields()?.[fieldName] !== undefined;
+            const result = queryType?.getFields()?.[fieldName] !== undefined;
+            builtInFieldCache.set(fieldName, result ?? false);
+            return result;
           } catch {
+            builtInFieldCache.set(fieldName, false);
             return false;
           }
         };
