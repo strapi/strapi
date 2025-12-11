@@ -278,6 +278,7 @@ exports[`Header renders 1`] = `
             >
               <h1
                 class="c9"
+                style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;"
               >
                 Media Library
               </h1>
