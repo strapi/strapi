@@ -201,7 +201,7 @@ export const FeedbackModal: React.FC = () => {
             </Flex>
             <Grid.Root width="100%" gap={2}>
               {feedbackReasons.map((reason) => (
-                <Grid.Item key={reason.id} col={6}>
+                <Grid.Item key={reason.id} col={6} xs={12}>
                   <FeedbackOption
                     key={reason.id}
                     id={reason.id}
