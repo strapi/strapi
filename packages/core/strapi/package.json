@@ -141,7 +141,6 @@
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
     "concurrently": "8.2.2",
-    "copyfiles": "2.4.1",
     "css-loader": "^6.10.0",
     "dotenv": "16.4.5",
     "esbuild-loader": "4.3.0",
