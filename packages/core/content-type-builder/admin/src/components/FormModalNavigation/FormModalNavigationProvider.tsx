@@ -2,8 +2,11 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 
+import { useCTBSession } from '../CTBSession/useCTBSession';
+
 import { FormModalNavigationContext } from './FormModalNavigationContext';
 
+import type { TrackingEvent } from '@strapi/admin/strapi-admin';
 import type { Internal, Struct } from '@strapi/types';
 
 type FormModalNavigationProviderProps = {
@@ -93,7 +96,20 @@ export type NavigateToAddCompoToDZModalPayload = {
 
 export const FormModalNavigationProvider = ({ children }: FormModalNavigationProviderProps) => {
   const [state, setFormModalNavigationState] = useState(INITIAL_STATE_DATA);
-  const { trackUsage } = useTracking();
+  const { trackUsage: originalTrackUsage } = useTracking();
+  const { sessionId } = useCTBSession();
+
+  // Create a trackUsage that includes session ID from CTBSessionContext
+  const trackUsage = useCallback(
+    <TEvent extends TrackingEvent>(event: TEvent['name'], properties?: TEvent['properties']) => {
+      const propertiesWithSessionId = {
+        ...(properties as Record<string, unknown>),
+        ctbSessionId: sessionId,
+      };
+      return originalTrackUsage(event, propertiesWithSessionId as TEvent['properties']);
+    },
+    [originalTrackUsage, sessionId]
+  );
 
   const onClickSelectCustomField = useCallback(
     ({ attributeType, customFieldUid }: SelectCustomFieldPayload) => {
