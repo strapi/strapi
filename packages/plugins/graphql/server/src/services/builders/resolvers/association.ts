@@ -65,16 +65,8 @@ export default ({ strapi }: Context) => {
         // Helper to check if a field is from built-in queries (not custom resolvers)
         // Use the precomputed lookup populated by the content-api service at schema build time.
         const isBuiltInQueryField = (fieldName: string) => {
-          try {
-            const graphqlService = strapi.plugin('graphql').service('content-api');
-            if (typeof graphqlService.isBuiltInQueryField === 'function') {
-              return graphqlService.isBuiltInQueryField(fieldName);
-            }
-          } catch {
-            // If anything goes wrong, conservatively return false
-          }
-
-          return false;
+          const graphqlService = strapi.plugin('graphql').service('content-api');
+          return graphqlService.isBuiltInQueryField(fieldName);
         };
 
         // Only inherit status from built-in queries to avoid conflicts with custom resolvers
