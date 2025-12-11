@@ -1799,6 +1799,22 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Punjabi (Gurmukhi, India) (pa-Guru-IN)",
   },
   {
+    "code": "pap",
+    "name": "Papiamento (pap)",
+  },
+  {
+    "code": "pap-AW",
+    "name": "Papiamento (Aruba) (pap-AW)",
+  },
+  {
+    "code": "pap-CW",
+    "name": "Papiamentu (Curaçao) (pap-CW)",
+  },
+  {
+    "code": "pap-BQ",
+    "name": "Papiamentu (Bonaire) (pap-BQ)",
+  },
+  {
     "code": "ro",
     "name": "Romanian (ro)",
   },
