@@ -1,7 +1,5 @@
 import assert from 'node:assert';
 import semver from 'semver';
-import execa from 'execa';
-import { packageManager } from '@strapi/utils';
 
 import { ProxyAgent } from 'undici';
 import * as constants from './constants';
@@ -64,44 +62,12 @@ export class Package implements PackageInterface {
     );
   }
 
-  private async getRegistryFromPackageManager(): Promise<string | undefined> {
-    try {
-      const packageManagerName = await packageManager.getPreferred(this.cwd);
-      if (!packageManagerName) return undefined;
-
-      const registryCommands = {
-        yarn: ['config', 'get', 'npmRegistryServer'],
-        npm: ['config', 'get', 'registry'],
-      } as const;
-
-      const command = registryCommands[packageManagerName as keyof typeof registryCommands];
-      if (!command) {
-        this.logger.warn(`Unsupported package manager: ${packageManagerName}`);
-        return undefined;
-      }
-
-      const { stdout } = await execa(packageManagerName, command, { timeout: 10_000 });
-      return stdout.trim() || undefined;
-    } catch (error) {
-      this.logger.warn('Failed to determine registry URL from package manager');
-      return undefined;
-    }
-  }
-
-  private async determineRegistryUrl(): Promise<string> {
-    if (process.env.NPM_REGISTRY_URL) {
-      this.logger.debug(`Using NPM_REGISTRY_URL: ${process.env.NPM_REGISTRY_URL}`);
-      return process.env.NPM_REGISTRY_URL.replace(/\/$/, '');
-    }
-
-    const packageManagerRegistry = await this.getRegistryFromPackageManager();
-    if (packageManagerRegistry) {
-      this.logger.debug(`Using package manager registry: ${packageManagerRegistry}`);
-      return packageManagerRegistry.replace(/\/$/, '');
-    }
-
-    this.logger.debug(`Using default registry: ${constants.NPM_REGISTRY_URL}`);
-    return constants.NPM_REGISTRY_URL.replace(/\/$/, '');
+  private getRegistryUrl(): string {
+    // Use NPM_REGISTRY_URL env var if set, otherwise use default registry
+    // This avoids spawning external processes (execa) to query package manager config
+    const registry = process.env.NPM_REGISTRY_URL || constants.NPM_REGISTRY_URL;
+    this.logger.debug(`Using registry: ${registry}`);
+    return registry.replace(/\/$/, '');
   }
 
   findVersion(version: Version.SemVer): NPMPackageVersion | undefined {
@@ -111,7 +77,7 @@ export class Package implements PackageInterface {
   }
 
   async refresh() {
-    const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
+    const packageURL = `${this.getRegistryUrl()}/${this.name}`;
 
     const response = await fetch(packageURL, {
       // @ts-expect-error Node.js fetch supports dispatcher (undici extension)
