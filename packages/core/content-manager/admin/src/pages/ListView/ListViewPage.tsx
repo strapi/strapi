@@ -110,7 +110,7 @@ const ListViewPage = () => {
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
-  const { data, error, isFetching } = useGetAllDocumentsQuery({
+  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery({
     model,
     params,
   });
@@ -204,7 +204,7 @@ const ListViewPage = () => {
     model,
   ]);
 
-  if (isFetching) {
+  if (isLoading) {
     return <Page.Loading />;
   }
 
