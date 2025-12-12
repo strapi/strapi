@@ -2,11 +2,16 @@ import { useField, createRulesEngine } from '@strapi/admin/strapi-admin';
 import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
-import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
-import { ComponentProvider, useComponent } from '../ComponentContext';
-
-import type { ComponentInputProps } from './Input';
+import { useDocumentContext } from '@content-manager/admin/hooks/useDocumentContext';
+import type { ComponentInputProps } from '@content-manager/admin/pages/EditView/components/FormInputs/Component/Input';
+import {
+  ComponentProvider,
+  useComponent,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/ComponentContext';
+import {
+  ResponsiveGridItem,
+  ResponsiveGridRoot,
+} from '@content-manager/admin/pages/EditView/components/FormLayout';
 
 type NonRepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
 

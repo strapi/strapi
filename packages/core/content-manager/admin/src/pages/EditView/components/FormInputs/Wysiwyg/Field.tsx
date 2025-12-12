@@ -4,13 +4,15 @@ import { useField, useStrapiApp, type InputProps } from '@strapi/admin/strapi-ad
 import { Field, Flex } from '@strapi/design-system';
 import { EditorFromTextArea } from 'codemirror5';
 
-import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
-
-import { Editor, EditorApi } from './Editor';
-import { EditorLayout } from './EditorLayout';
-import { insertFile } from './utils/utils';
-import { WysiwygFooter } from './WysiwygFooter';
-import { WysiwygNav } from './WysiwygNav';
+import {
+  Editor,
+  EditorApi,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/Editor';
+import { EditorLayout } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/EditorLayout';
+import { insertFile } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/utils/utils';
+import { WysiwygFooter } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/WysiwygFooter';
+import { WysiwygNav } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/WysiwygNav';
+import { prefixFileUrlWithBackendUrl } from '@content-manager/admin/utils/urls';
 
 import type { Schema } from '@strapi/types';
 

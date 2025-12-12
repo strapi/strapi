@@ -1,4 +1,4 @@
-import { getDisplayName } from '../users';
+import { getDisplayName } from '@content-manager/admin/utils/users';
 
 describe('getDisplayName', () => {
   it('should return username if username is defined', () => {

@@ -1,5 +1,5 @@
-import { ComponentsDictionary, Schema } from '../../../../hooks/useDocument';
-import { createDefaultForm } from '../forms';
+import { ComponentsDictionary, Schema } from '@content-manager/admin/hooks/useDocument';
+import { createDefaultForm } from '@content-manager/admin/pages/EditView/utils/forms';
 
 describe('forms', () => {
   describe('createDefaultForm', () => {

@@ -1,5 +1,5 @@
-import { getService } from '../utils';
-import { createModelConfigurationSchema } from './validation';
+import { getService } from '@content-manager/server/utils';
+import { createModelConfigurationSchema } from '@content-manager/server/controllers/validation';
 
 export default {
   findComponents(ctx: any) {

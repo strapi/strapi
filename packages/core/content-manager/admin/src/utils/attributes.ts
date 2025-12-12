@@ -1,4 +1,5 @@
-import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
+import type { ComponentsDictionary, Schema } from '@content-manager/admin/hooks/useDocument';
+
 import type { Schema as SchemaUtils } from '@strapi/types';
 
 const checkIfAttributeIsDisplayable = (attribute: SchemaUtils.Attribute.AnyAttribute) => {

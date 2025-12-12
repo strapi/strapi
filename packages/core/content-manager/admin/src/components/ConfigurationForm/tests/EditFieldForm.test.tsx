@@ -2,8 +2,11 @@ import { Form } from '@strapi/admin/strapi-admin';
 import { Modal } from '@strapi/design-system';
 import { fireEvent, render as renderRTL, screen } from '@tests/utils';
 
-import { EditFieldForm, EditFieldFormProps } from '../EditFieldForm';
-import { ConfigurationFormData } from '../Form';
+import {
+  EditFieldForm,
+  EditFieldFormProps,
+} from '@content-manager/admin/components/ConfigurationForm/EditFieldForm';
+import { ConfigurationFormData } from '@content-manager/admin/components/ConfigurationForm/Form';
 
 const ALL_ATTRIBUTES = [
   'string',

@@ -13,7 +13,7 @@ import {
 import {
   useKeyboardDragAndDrop,
   type UseKeyboardDragAndDropCallbacks,
-} from './useKeyboardDragAndDrop';
+} from '@content-manager/admin/hooks/useKeyboardDragAndDrop';
 
 import type { Data } from '@strapi/types';
 

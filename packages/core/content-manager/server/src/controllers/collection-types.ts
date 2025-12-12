@@ -3,11 +3,14 @@ import { isNil } from 'lodash/fp';
 import { setCreatorFields, async, errors } from '@strapi/utils';
 import type { Modules, UID } from '@strapi/types';
 
-import { getService } from '../utils';
-import { validateBulkActionInput } from './validation';
-import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
-import { getDocumentLocaleAndStatus } from './validation/dimensions';
-import { formatDocumentWithMetadata } from './utils/metadata';
+import { getService } from '@content-manager/server/utils';
+import { validateBulkActionInput } from '@content-manager/server/controllers/validation';
+import {
+  getProhibitedCloningFields,
+  excludeNotCreatableFields,
+} from '@content-manager/server/controllers/utils/clone';
+import { getDocumentLocaleAndStatus } from '@content-manager/server/controllers/validation/dimensions';
+import { formatDocumentWithMetadata } from '@content-manager/server/controllers/utils/metadata';
 
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 

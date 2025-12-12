@@ -1,7 +1,7 @@
 import { within } from '@testing-library/react';
 import { render, screen } from '@tests/utils';
 
-import { AutoCloneFailureModalBody } from '../AutoCloneFailureModal';
+import { AutoCloneFailureModalBody } from '@content-manager/admin/pages/ListView/components/AutoCloneFailureModal';
 
 describe('AutoCloneFailureModalBody', () => {
   it('renders the titles correctly', () => {

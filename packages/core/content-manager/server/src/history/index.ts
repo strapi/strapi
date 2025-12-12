@@ -1,9 +1,9 @@
 import type { Plugin } from '@strapi/types';
-import { controllers } from './controllers';
-import { services } from './services';
-import { routes } from './routes';
-import { getService } from './utils';
-import { historyVersion } from './models/history-version';
+import { controllers } from '@content-manager/server/history/controllers';
+import { services } from '@content-manager/server/history/services';
+import { routes } from '@content-manager/server/history/routes';
+import { getService } from '@content-manager/server/history/utils';
+import { historyVersion } from '@content-manager/server/history/models/history-version';
 
 /**
  * Check once if the feature is enabled before loading it,

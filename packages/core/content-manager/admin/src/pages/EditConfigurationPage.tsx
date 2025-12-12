@@ -3,16 +3,18 @@ import * as React from 'react';
 import { Page, useNotification, useTracking, useAPIErrorHandler } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
-import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
-import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';
-import { useDoc } from '../hooks/useDocument';
-import { useDocLayout } from '../hooks/useDocumentLayout';
-import { useTypedSelector } from '../modules/hooks';
-import { useUpdateContentTypeConfigurationMutation } from '../services/contentTypes';
-import { useGetInitialDataQuery } from '../services/init';
-import { setIn } from '../utils/objects';
-
-import type { Metadatas } from '../../../shared/contracts/content-types';
+import { TEMP_FIELD_NAME } from '@content-manager/admin/components/ConfigurationForm/Fields';
+import {
+  ConfigurationForm,
+  ConfigurationFormProps,
+} from '@content-manager/admin/components/ConfigurationForm/Form';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import { useDocLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { useTypedSelector } from '@content-manager/admin/modules/hooks';
+import { useUpdateContentTypeConfigurationMutation } from '@content-manager/admin/services/contentTypes';
+import { useGetInitialDataQuery } from '@content-manager/admin/services/init';
+import { setIn } from '@content-manager/admin/utils/objects';
+import type { Metadatas } from '@content-manager/shared/contracts/content-types';
 
 const EditConfigurationPage = () => {
   const { trackUsage } = useTracking();

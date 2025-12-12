@@ -1,4 +1,4 @@
-import { getQueryPopulate } from '../populate';
+import { getQueryPopulate } from '@content-manager/server/services/utils/populate';
 
 const getFilterQuery = (conditions: any) => ({
   filters: {

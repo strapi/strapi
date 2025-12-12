@@ -1,5 +1,5 @@
 import type { Model } from '@strapi/database';
-import { HISTORY_VERSION_UID } from '../constants';
+import { HISTORY_VERSION_UID } from '@content-manager/server/history/constants';
 
 const historyVersion: Model = {
   uid: HISTORY_VERSION_UID,

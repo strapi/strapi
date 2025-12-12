@@ -9,18 +9,16 @@ import { Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useMatch } from 'react-router-dom';
 
-import { InjectionZone } from '../../../components/InjectionZone';
-import { useDoc } from '../../../hooks/useDocument';
-import { CLONE_PATH } from '../../../router';
-
-import { DocumentActions } from './DocumentActions';
-
+import { InjectionZone } from '@content-manager/admin/components/InjectionZone';
 import type {
   ContentManagerPlugin,
   DocumentActionProps,
   PanelComponent,
   PanelComponentProps,
-} from '../../../content-manager';
+} from '@content-manager/admin/content-manager';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import { DocumentActions } from '@content-manager/admin/pages/EditView/components/DocumentActions';
+import { CLONE_PATH } from '@content-manager/admin/router';
 
 interface PanelDescription {
   title: string;

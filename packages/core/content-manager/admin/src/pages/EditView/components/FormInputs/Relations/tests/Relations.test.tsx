@@ -1,7 +1,10 @@
 import { RenderOptions, fireEvent, render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { RelationsInput, RelationsFieldProps } from '../Relations';
+import {
+  RelationsInput,
+  RelationsFieldProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/Relations';
 
 const render = (
   {

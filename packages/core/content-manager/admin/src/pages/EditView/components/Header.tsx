@@ -24,7 +24,7 @@ import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
 
-import { RelativeTime } from '../../../components/RelativeTime';
+import { RelativeTime } from '@content-manager/admin/components/RelativeTime';
 import {
   CREATED_AT_ATTRIBUTE_NAME,
   CREATED_BY_ATTRIBUTE_NAME,
@@ -32,18 +32,19 @@ import {
   PUBLISHED_BY_ATTRIBUTE_NAME,
   UPDATED_AT_ATTRIBUTE_NAME,
   UPDATED_BY_ATTRIBUTE_NAME,
-} from '../../../constants/attributes';
-import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../constants/collections';
-import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
-import { useDocumentActions } from '../../../hooks/useDocumentActions';
-import { CLONE_PATH, LIST_PATH } from '../../../router';
-import { getDisplayName } from '../../../utils/users';
-
-import { DocumentActionsMenu } from './DocumentActions';
-import { DocumentStatus } from './DocumentStatus';
-
-import type { ContentManagerPlugin, DocumentActionComponent } from '../../../content-manager';
+} from '@content-manager/admin/constants/attributes';
+import { COLLECTION_TYPES, SINGLE_TYPES } from '@content-manager/admin/constants/collections';
+import type {
+  ContentManagerPlugin,
+  DocumentActionComponent,
+} from '@content-manager/admin/content-manager';
+import { useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import { useDocumentActions } from '@content-manager/admin/hooks/useDocumentActions';
+import { DocumentActionsMenu } from '@content-manager/admin/pages/EditView/components/DocumentActions';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
+import { CLONE_PATH, LIST_PATH } from '@content-manager/admin/router';
+import { getDisplayName } from '@content-manager/admin/utils/users';
 
 /* -------------------------------------------------------------------------------------------------
  * Header

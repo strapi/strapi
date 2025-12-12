@@ -1,6 +1,9 @@
 import { render, screen } from '@tests/utils';
 
-import { DocumentActions, DocumentActionsMenu } from '../DocumentActions';
+import {
+  DocumentActions,
+  DocumentActionsMenu,
+} from '@content-manager/admin/pages/EditView/components/DocumentActions';
 
 describe('DocumentActions', () => {
   it('it should render a single button when there is only one action', () => {

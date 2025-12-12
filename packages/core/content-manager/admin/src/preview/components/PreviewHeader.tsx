@@ -15,13 +15,15 @@ import { useIntl } from 'react-intl';
 import { Link, type To } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { InjectionZone } from '../../components/InjectionZone';
-import { DocumentActionButton } from '../../pages/EditView/components/DocumentActions';
-import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
-import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
-import { usePreviewContext } from '../pages/Preview';
-
-import type { ContentManagerPlugin, DocumentActionProps } from '../../content-manager';
+import { InjectionZone } from '@content-manager/admin/components/InjectionZone';
+import type {
+  ContentManagerPlugin,
+  DocumentActionProps,
+} from '@content-manager/admin/content-manager';
+import { DocumentActionButton } from '@content-manager/admin/pages/EditView/components/DocumentActions';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
+import { getDocumentStatus } from '@content-manager/admin/pages/EditView/EditViewPage';
+import { usePreviewContext } from '@content-manager/admin/preview/pages/Preview';
 
 /* -------------------------------------------------------------------------------------------------
  * ClosePreviewButton

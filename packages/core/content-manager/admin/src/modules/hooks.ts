@@ -1,7 +1,7 @@
 import { Dispatch } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
-import { State } from './reducers';
+import { State } from '@content-manager/admin/modules/reducers';
 
 import type { Store } from '@strapi/admin/strapi-admin';
 

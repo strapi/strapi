@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import createFieldSizesService from '../field-sizes';
+import createFieldSizesService from '@content-manager/server/services/field-sizes';
 
 const { ApplicationError } = errors;
 

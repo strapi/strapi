@@ -1,6 +1,6 @@
 import { Permission } from '@strapi/admin/strapi-admin';
 
-import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
+import type { ComponentsDictionary, Schema } from '@content-manager/admin/hooks/useDocument';
 
 const testData = {
   contentType: {

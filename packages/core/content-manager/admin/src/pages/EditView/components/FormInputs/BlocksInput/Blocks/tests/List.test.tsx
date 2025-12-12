@@ -5,9 +5,8 @@ import { render, screen } from '@testing-library/react';
 import { Editor, Transforms, createEditor } from 'slate';
 import { ReactEditor } from 'slate-react';
 
-import { listBlocks } from '../List';
-
-import { Wrapper } from './Wrapper';
+import { listBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/List';
+import { Wrapper } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/tests/Wrapper';
 
 const mockEvent = {
   preventDefault: jest.fn(),

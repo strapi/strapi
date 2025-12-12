@@ -6,7 +6,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 
-import { useGetPreviewUrlQuery } from '../services/preview';
+import { useGetPreviewUrlQuery } from '@content-manager/admin/preview/services/preview';
 
 import type { PanelComponent } from '@strapi/content-manager/strapi-admin';
 import type { UID } from '@strapi/types';

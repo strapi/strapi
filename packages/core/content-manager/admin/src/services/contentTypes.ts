@@ -1,10 +1,9 @@
+import { contentManagerApi } from '@content-manager/admin/services/api';
 import {
   FindContentTypeConfiguration,
   UpdateContentTypeConfiguration,
   FindContentTypesSettings,
-} from '../../../shared/contracts/content-types';
-
-import { contentManagerApi } from './api';
+} from '@content-manager/shared/contracts/content-types';
 
 const contentTypesApi = contentManagerApi.injectEndpoints({
   endpoints: (builder) => ({

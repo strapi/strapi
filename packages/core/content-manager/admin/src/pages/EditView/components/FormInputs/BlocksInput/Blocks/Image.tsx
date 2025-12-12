@@ -7,9 +7,12 @@ import { type Element, Transforms, Editor } from 'slate';
 import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import { styled, css } from 'styled-components';
 
-import { prefixFileUrlWithBackendUrl } from '../../../../../../utils/urls';
-import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
-import { type Block } from '../utils/types';
+import {
+  useBlocksEditorContext,
+  type BlocksStore,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { type Block } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
+import { prefixFileUrlWithBackendUrl } from '@content-manager/admin/utils/urls';
 
 import type { Schema } from '@strapi/types';
 

@@ -2,7 +2,7 @@ import { prop } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
 import type { Core, Struct } from '@strapi/types';
-import { getService } from '../utils';
+import { getService } from '@content-manager/server/utils';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   canConfigureContentType({

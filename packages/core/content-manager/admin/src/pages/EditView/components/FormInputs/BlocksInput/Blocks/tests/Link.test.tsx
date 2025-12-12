@@ -1,9 +1,8 @@
 import { render, screen } from '@tests/utils';
 import { ReactEditor } from 'slate-react';
 
-import { linkBlocks } from '../Link';
-
-import { Wrapper } from './Wrapper';
+import { linkBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Link';
+import { Wrapper } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/tests/Wrapper';
 
 describe('Link', () => {
   beforeEach(() => {

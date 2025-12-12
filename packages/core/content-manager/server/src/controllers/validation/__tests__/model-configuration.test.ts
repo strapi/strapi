@@ -1,4 +1,4 @@
-import modelConfigurationValidation from '../model-configuration';
+import modelConfigurationValidation from '@content-manager/server/controllers/validation/model-configuration';
 
 describe('model-configuration validation', () => {
   // Mock strapi service

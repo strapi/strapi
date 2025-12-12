@@ -3,7 +3,7 @@ import * as React from 'react';
 import sanitizeHtml from 'sanitize-html';
 import { styled } from 'styled-components';
 
-import { md } from './utils/mdRenderer';
+import { md } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/utils/mdRenderer';
 
 interface PreviewWysiwygProps {
   data?: string;

@@ -1,4 +1,4 @@
-import { getService } from '../utils';
+import { getService } from '@content-manager/server/utils';
 
 export default {
   getInitData(ctx: any) {

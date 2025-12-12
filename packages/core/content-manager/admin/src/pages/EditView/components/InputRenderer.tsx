@@ -8,24 +8,26 @@ import {
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
-import { SINGLE_TYPES } from '../../../constants/collections';
-import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { type UseDocument } from '../../../hooks/useDocument';
-import { useDocumentContext } from '../../../hooks/useDocumentContext';
-import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
-import { useLazyComponents } from '../../../hooks/useLazyComponents';
-import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
-import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
+import { SINGLE_TYPES } from '@content-manager/admin/constants/collections';
+import { useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { type UseDocument } from '@content-manager/admin/hooks/useDocument';
+import { useDocumentContext } from '@content-manager/admin/hooks/useDocumentContext';
+import { useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import type { EditFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { useLazyComponents } from '@content-manager/admin/hooks/useLazyComponents';
+import { BlocksInput } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksInput';
+import { ComponentInput } from '@content-manager/admin/pages/EditView/components/FormInputs/Component/Input';
+import {
+  DynamicZone,
+  useDynamicZone,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/Field';
+import { NotAllowedInput } from '@content-manager/admin/pages/EditView/components/FormInputs/NotAllowed';
+import { RelationsInput } from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/Relations';
+import { UIDInput } from '@content-manager/admin/pages/EditView/components/FormInputs/UID';
+import { Wysiwyg } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/Field';
+import { useHasInputPopoverParent } from '@content-manager/admin/preview/components/InputPopover';
+import { usePreviewInputManager } from '@content-manager/admin/preview/hooks/usePreviewInputManager';
 
-import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
-import { ComponentInput } from './FormInputs/Component/Input';
-import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
-import { NotAllowedInput } from './FormInputs/NotAllowed';
-import { RelationsInput } from './FormInputs/Relations/Relations';
-import { UIDInput } from './FormInputs/UID';
-import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
-
-import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 

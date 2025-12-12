@@ -11,8 +11,9 @@ import { useGetAIFeatureConfigQuery, useAIAvailability } from '@strapi/admin/str
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
-import { useRelationModal } from '../pages/EditView/components/FormInputs/Relations/RelationModal';
-import { usePreviewContext } from '../preview/pages/Preview';
+import type { Document } from '@content-manager/admin/hooks/useDocument';
+import { useRelationModal } from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/RelationModal';
+import { usePreviewContext } from '@content-manager/admin/preview/pages/Preview';
 import {
   useAutoCloneDocumentMutation,
   useCloneDocumentMutation,
@@ -26,11 +27,9 @@ import {
   useUnpublishDocumentMutation,
   useUnpublishManyDocumentsMutation,
   useUpdateDocumentMutation,
-} from '../services/documents';
-import { BaseQueryError } from '../utils/api';
-import { getTranslation } from '../utils/translations';
-
-import type { Document } from './useDocument';
+} from '@content-manager/admin/services/documents';
+import { BaseQueryError } from '@content-manager/admin/utils/api';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 import type {
   AutoClone,
   Clone,
@@ -44,7 +43,7 @@ import type {
   Update,
   Unpublish,
   BulkUnpublish,
-} from '../../../shared/contracts/collection-types';
+} from '@content-manager/shared/contracts/collection-types';
 
 const DEFAULT_UNEXPECTED_ERROR_MSG = {
   id: 'notification.error',

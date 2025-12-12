@@ -5,20 +5,22 @@ import { Box, Divider, Flex, Grid, Typography } from '@strapi/design-system';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../hooks/useDocument';
-import { useTypedSelector } from '../../modules/hooks';
+import { VersionInputRenderer } from '@content-manager/admin/history/components/VersionInputRenderer';
+import {
+  HistoryContextValue,
+  useHistoryContext,
+} from '@content-manager/admin/history/pages/History';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import type { ComponentsDictionary, Document } from '@content-manager/admin/hooks/useDocument';
+import type { EditFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { useTypedSelector } from '@content-manager/admin/modules/hooks';
 import {
   prepareTempKeys,
   removeFieldsThatDontExistOnSchema,
-} from '../../pages/EditView/utils/data';
-import { HistoryContextValue, useHistoryContext } from '../pages/History';
+} from '@content-manager/admin/pages/EditView/utils/data';
+import type { Metadatas } from '@content-manager/shared/contracts/content-types';
+import type { GetInitData } from '@content-manager/shared/contracts/init';
 
-import { VersionInputRenderer } from './VersionInputRenderer';
-
-import type { Metadatas } from '../../../../shared/contracts/content-types';
-import type { GetInitData } from '../../../../shared/contracts/init';
-import type { ComponentsDictionary, Document } from '../../hooks/useDocument';
-import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 
 const createLayoutFromFields = <T extends EditFieldLayout | UnknownField>(fields: T[]) => {

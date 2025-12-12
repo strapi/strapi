@@ -13,13 +13,15 @@ import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
-import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '../../constants/attributes';
-import { capitalise } from '../../utils/strings';
-import { getTranslation } from '../../utils/translations';
-
-import { Fields, FieldsProps, TEMP_FIELD_NAME } from './Fields';
-
-import type { EditFieldLayout, EditLayout } from '../../hooks/useDocumentLayout';
+import {
+  Fields,
+  FieldsProps,
+  TEMP_FIELD_NAME,
+} from '@content-manager/admin/components/ConfigurationForm/Fields';
+import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '@content-manager/admin/constants/attributes';
+import type { EditFieldLayout, EditLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { capitalise } from '@content-manager/admin/utils/strings';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 /* -------------------------------------------------------------------------------------------------
  * ConfigurationForm

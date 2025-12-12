@@ -1,7 +1,7 @@
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
-import { getTranslation } from '../utils/translations';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 const NoPermissions = () => {
   const { formatMessage } = useIntl();

@@ -5,6 +5,11 @@
     "rootDir": "../",
     "baseUrl": ".",
     "types": ["lodash", "jest"],
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "@content-manager/admin/*": ["../admin/src/*"],
+      "@content-manager/server/*": ["./src/*"],
+      "@content-manager/shared/*": ["../shared/*"]
+    }
   }
 }

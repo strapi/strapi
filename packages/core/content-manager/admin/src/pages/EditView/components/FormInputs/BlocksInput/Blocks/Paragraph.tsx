@@ -4,9 +4,9 @@ import { Typography } from '@strapi/design-system';
 import { Paragraph } from '@strapi/icons';
 import { type Text, Editor, Transforms } from 'slate';
 
-import { type BlocksStore } from '../BlocksEditor';
-import { baseHandleConvert } from '../utils/conversions';
-import { type Block } from '../utils/types';
+import { type BlocksStore } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { baseHandleConvert } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/conversions';
+import { type Block } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
 
 const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
   paragraph: {

@@ -2,7 +2,10 @@ import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, waitFor, act, screen } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { UIDInput, UIDInputProps } from '../UID';
+import {
+  UIDInput,
+  UIDInputProps,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/UID';
 
 const waitForInput = async () => {
   await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());

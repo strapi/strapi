@@ -4,15 +4,18 @@ import { createContext, useNotification } from '@strapi/admin/strapi-admin';
 import { Box, Popover } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { type UseDocument } from '../../hooks/useDocument';
-import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
-import { usePreviewContext } from '../pages/Preview';
-import { INTERNAL_EVENTS, PREVIEW_ERROR_MESSAGES } from '../utils/constants';
+import { type UseDocument } from '@content-manager/admin/hooks/useDocument';
+import { InputRenderer } from '@content-manager/admin/pages/EditView/components/InputRenderer';
+import { usePreviewContext } from '@content-manager/admin/preview/pages/Preview';
+import {
+  INTERNAL_EVENTS,
+  PREVIEW_ERROR_MESSAGES,
+} from '@content-manager/admin/preview/utils/constants';
 import {
   parseFieldMetaData,
   getAttributeSchemaFromPath,
   PreviewFieldError,
-} from '../utils/fieldUtils';
+} from '@content-manager/admin/preview/utils/fieldUtils';
 
 /* -------------------------------------------------------------------------------------------------
  * Context utils

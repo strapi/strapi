@@ -4,8 +4,8 @@ import { pick } from 'lodash/fp';
 import type { Core, UID } from '@strapi/types';
 import { validateYupSchema, errors } from '@strapi/utils';
 
-import { Preview } from '../../../../../shared/contracts';
-import type { HandlerParams } from '../../services/preview-config';
+import { Preview } from '@content-manager/shared/contracts';
+import type { HandlerParams } from '@content-manager/server/preview/services/preview-config';
 
 const getPreviewUrlSchema = yup
   .object()

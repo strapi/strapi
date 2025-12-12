@@ -15,9 +15,9 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, useParams, type To } from 'react-router-dom';
 
-import { PERMISSIONS } from '../../constants/plugin';
-import { useHistoryContext } from '../pages/History';
-import { useRestoreVersionMutation } from '../services/historyVersion';
+import { PERMISSIONS } from '@content-manager/admin/constants/plugin';
+import { useHistoryContext } from '@content-manager/admin/history/pages/History';
+import { useRestoreVersionMutation } from '@content-manager/admin/history/services/historyVersion';
 
 import type { UID } from '@strapi/types';
 

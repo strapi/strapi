@@ -1,7 +1,7 @@
 import { NotificationConfig } from '@strapi/admin/strapi-admin';
 import { MessageDescriptor } from 'react-intl';
 
-import { previewScript } from './previewScript';
+import { previewScript } from '@content-manager/admin/preview/utils/previewScript';
 
 const scriptResponse = previewScript(false);
 

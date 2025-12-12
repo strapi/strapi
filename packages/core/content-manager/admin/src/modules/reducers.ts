@@ -1,6 +1,6 @@
 import { combineReducers } from '@reduxjs/toolkit';
 
-import { reducer as appReducer } from './app';
+import { reducer as appReducer } from '@content-manager/admin/modules/app';
 
 const reducer = combineReducers({
   app: appReducer,

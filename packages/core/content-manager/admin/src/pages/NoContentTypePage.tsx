@@ -5,7 +5,7 @@ import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
-import { getTranslation } from '../utils/translations';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 const NoContentType = () => {
   const { formatMessage } = useIntl();

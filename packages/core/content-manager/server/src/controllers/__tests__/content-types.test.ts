@@ -1,7 +1,7 @@
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../tests/helpers/create-context';
-import contentTypes from '../content-types';
+import contentTypes from '@content-manager/server/controllers/content-types';
+import createContext from 'strapi/tests/helpers/create-context';
 
 describe('Content Types', () => {
   test('findContentTypesSettings', async () => {

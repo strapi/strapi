@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { NotAllowedInput } from '../NotAllowed';
+import { NotAllowedInput } from '@content-manager/admin/pages/EditView/components/FormInputs/NotAllowed';
 
 describe('<NotAllowedInput />', () => {
   it('renders a disabled text field', () => {

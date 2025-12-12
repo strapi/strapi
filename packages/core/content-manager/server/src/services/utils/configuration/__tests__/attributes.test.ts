@@ -1,4 +1,7 @@
-import { isSortable, isVisible } from '../attributes';
+import {
+  isSortable,
+  isVisible,
+} from '@content-manager/server/services/utils/configuration/attributes';
 
 const createMockSchema = (attrs: any, timestamps = true) => {
   return {

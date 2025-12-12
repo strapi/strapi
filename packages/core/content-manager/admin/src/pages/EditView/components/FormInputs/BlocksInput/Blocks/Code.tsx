@@ -8,11 +8,14 @@ import { BaseRange, Element, Editor, Node, NodeEntry, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
-import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
-import { codeLanguages } from '../utils/constants';
-import { baseHandleConvert } from '../utils/conversions';
-import { pressEnterTwiceToExit } from '../utils/enterKey';
-import { type Block } from '../utils/types';
+import {
+  useBlocksEditorContext,
+  type BlocksStore,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { codeLanguages } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/constants';
+import { baseHandleConvert } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/conversions';
+import { pressEnterTwiceToExit } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/enterKey';
+import { type Block } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/utils/types';
 
 import 'prismjs/themes/prism-solarizedlight.css';
 import 'prismjs/components/prism-asmatmel';

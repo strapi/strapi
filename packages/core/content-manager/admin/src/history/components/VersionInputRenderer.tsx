@@ -12,32 +12,31 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { HistoryVersionDataResponse } from '../../../../shared/contracts/history-versions';
-import { COLLECTION_TYPES } from '../../constants/collections';
-import { useDocumentRBAC } from '../../features/DocumentRBAC';
-import { useDoc } from '../../hooks/useDocument';
-import { useDocLayout } from '../../hooks/useDocumentLayout';
-import { useLazyComponents } from '../../hooks/useLazyComponents';
-import { useTypedSelector } from '../../modules/hooks';
-import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
-import { BlocksInput } from '../../pages/EditView/components/FormInputs/BlocksInput/BlocksInput';
-import { ComponentInput } from '../../pages/EditView/components/FormInputs/Component/Input';
+import { COLLECTION_TYPES } from '@content-manager/admin/constants/collections';
+import { useDocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { getRemaingFieldsLayout } from '@content-manager/admin/history/components/VersionContent';
+import { useHistoryContext } from '@content-manager/admin/history/pages/History';
+import { useDoc } from '@content-manager/admin/hooks/useDocument';
+import { useDocLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import type { EditFieldLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { useLazyComponents } from '@content-manager/admin/hooks/useLazyComponents';
+import { useTypedSelector } from '@content-manager/admin/modules/hooks';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
+import { BlocksInput } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/BlocksInput';
+import { ComponentInput } from '@content-manager/admin/pages/EditView/components/FormInputs/Component/Input';
 import {
   DynamicZone,
   useDynamicZone,
-} from '../../pages/EditView/components/FormInputs/DynamicZone/Field';
-import { NotAllowedInput } from '../../pages/EditView/components/FormInputs/NotAllowed';
-import { UIDInput } from '../../pages/EditView/components/FormInputs/UID';
-import { Wysiwyg } from '../../pages/EditView/components/FormInputs/Wysiwyg/Field';
-import { useFieldHint } from '../../pages/EditView/components/InputRenderer';
-import { getRelationLabel } from '../../utils/relations';
-import { useHistoryContext } from '../pages/History';
+} from '@content-manager/admin/pages/EditView/components/FormInputs/DynamicZone/Field';
+import { NotAllowedInput } from '@content-manager/admin/pages/EditView/components/FormInputs/NotAllowed';
+import type { RelationsFieldProps } from '@content-manager/admin/pages/EditView/components/FormInputs/Relations/Relations';
+import { UIDInput } from '@content-manager/admin/pages/EditView/components/FormInputs/UID';
+import { Wysiwyg } from '@content-manager/admin/pages/EditView/components/FormInputs/Wysiwyg/Field';
+import { useFieldHint } from '@content-manager/admin/pages/EditView/components/InputRenderer';
+import type { RelationResult } from '@content-manager/admin/services/relations';
+import { getRelationLabel } from '@content-manager/admin/utils/relations';
+import { HistoryVersionDataResponse } from '@content-manager/shared/contracts/history-versions';
 
-import { getRemaingFieldsLayout } from './VersionContent';
-
-import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
-import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations/Relations';
-import type { RelationResult } from '../../services/relations';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 

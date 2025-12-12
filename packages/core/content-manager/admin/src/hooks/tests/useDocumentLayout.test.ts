@@ -2,8 +2,9 @@ import { errors } from '@strapi/utils';
 import { renderHook, screen, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
 
+import { useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+
 import { mockData } from '../../../tests/mockData';
-import { useDocumentLayout } from '../useDocumentLayout';
 
 describe('useDocumentLayout', () => {
   it('should return a correctly formatted edit layout after loading', async () => {

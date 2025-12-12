@@ -3,9 +3,8 @@
 import { render, screen } from '@tests/utils';
 import { createEditor, Transforms, Editor } from 'slate';
 
-import { codeBlocks } from '../Code';
-
-import { Wrapper } from './Wrapper';
+import { codeBlocks } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/Code';
+import { Wrapper } from '@content-manager/admin/pages/EditView/components/FormInputs/BlocksInput/Blocks/tests/Wrapper';
 
 describe('Code', () => {
   it('renders a code block properly', () => {

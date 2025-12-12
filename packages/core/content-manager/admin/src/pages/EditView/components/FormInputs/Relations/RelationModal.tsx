@@ -26,21 +26,23 @@ import { useIntl } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
-import { PERMISSIONS } from '../../../../../constants/plugin';
-import { buildValidParams } from '../../../../../exports';
-import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
-import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useDocument';
-import { type DocumentMeta } from '../../../../../hooks/useDocumentContext';
-import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
-import { useLazyGetDocumentQuery } from '../../../../../services/documents';
-import { createYupSchema } from '../../../../../utils/validation';
-import { DocumentActionButton } from '../../../components/DocumentActions';
-import { DocumentStatus } from '../../DocumentStatus';
-import { FormLayout } from '../../FormLayout';
-import { ComponentProvider } from '../ComponentContext';
-
-import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
+import { COLLECTION_TYPES, SINGLE_TYPES } from '@content-manager/admin/constants/collections';
+import { PERMISSIONS } from '@content-manager/admin/constants/plugin';
+import type {
+  ContentManagerPlugin,
+  DocumentActionProps,
+} from '@content-manager/admin/content-manager';
+import { buildValidParams } from '@content-manager/admin/exports';
+import { DocumentRBAC } from '@content-manager/admin/features/DocumentRBAC';
+import { useDoc, useDocument, type UseDocument } from '@content-manager/admin/hooks/useDocument';
+import { type DocumentMeta } from '@content-manager/admin/hooks/useDocumentContext';
+import { useDocumentLayout } from '@content-manager/admin/hooks/useDocumentLayout';
+import { DocumentActionButton } from '@content-manager/admin/pages/EditView/components/DocumentActions';
+import { DocumentStatus } from '@content-manager/admin/pages/EditView/components/DocumentStatus';
+import { ComponentProvider } from '@content-manager/admin/pages/EditView/components/FormInputs/ComponentContext';
+import { FormLayout } from '@content-manager/admin/pages/EditView/components/FormLayout';
+import { useLazyGetDocumentQuery } from '@content-manager/admin/services/documents';
+import { createYupSchema } from '@content-manager/admin/utils/validation';
 
 export function getCollectionType(url: string) {
   const regex = new RegExp(`(${COLLECTION_TYPES}|${SINGLE_TYPES})`);

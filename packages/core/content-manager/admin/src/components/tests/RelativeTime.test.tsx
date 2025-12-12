@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { RelativeTime } from '../RelativeTime';
+import { RelativeTime } from '@content-manager/admin/components/RelativeTime';
 
 const setDateNow = (now: number): jest.Spied<typeof Date.now> =>
   jest.spyOn(Date, 'now').mockReturnValue(now);

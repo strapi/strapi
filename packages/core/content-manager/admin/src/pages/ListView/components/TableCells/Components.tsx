@@ -2,8 +2,8 @@ import { Badge, Tooltip, Typography, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { CellContentProps } from './CellContent';
-import { CellValue } from './CellValue';
+import { CellContentProps } from '@content-manager/admin/pages/ListView/components/TableCells/CellContent';
+import { CellValue } from '@content-manager/admin/pages/ListView/components/TableCells/CellValue';
 
 import type { Schema } from '@strapi/types';
 

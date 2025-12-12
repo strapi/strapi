@@ -1,9 +1,9 @@
 import type { Plugin } from '@strapi/types';
 
-import { routes } from './routes';
-import { controllers } from './controllers';
-import { services } from './services';
-import { getService } from './utils';
+import { routes } from '@content-manager/server/preview/routes';
+import { controllers } from '@content-manager/server/preview/controllers';
+import { services } from '@content-manager/server/preview/services';
+import { getService } from '@content-manager/server/preview/utils';
 
 /**
  * Check once if the feature is enabled before loading it,

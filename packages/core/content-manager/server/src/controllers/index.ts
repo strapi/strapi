@@ -1,13 +1,13 @@
-import collectionTypes from './collection-types';
-import components from './components';
-import contentTypes from './content-types';
-import init from './init';
-import relations from './relations';
-import singleTypes from './single-types';
-import uid from './uid';
-import history from '../history';
-import preview from '../preview';
-import homepage from '../homepage';
+import collectionTypes from '@content-manager/server/controllers/collection-types';
+import components from '@content-manager/server/controllers/components';
+import contentTypes from '@content-manager/server/controllers/content-types';
+import init from '@content-manager/server/controllers/init';
+import relations from '@content-manager/server/controllers/relations';
+import singleTypes from '@content-manager/server/controllers/single-types';
+import uid from '@content-manager/server/controllers/uid';
+import history from '@content-manager/server/history';
+import preview from '@content-manager/server/preview';
+import homepage from '@content-manager/server/homepage';
 
 export default {
   'collection-types': collectionTypes,

@@ -1,7 +1,7 @@
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { Header, HeaderProps } from '../Header';
+import { Header, HeaderProps } from '@content-manager/admin/pages/EditView/components/Header';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),

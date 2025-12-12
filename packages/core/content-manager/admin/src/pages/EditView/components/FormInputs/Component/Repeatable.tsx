@@ -23,20 +23,28 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
-import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
-import { usePrev } from '../../../../../hooks/usePrev';
-import { getIn } from '../../../../../utils/objects';
-import { getTranslation } from '../../../../../utils/translations';
-import { transformDocument } from '../../../utils/data';
-import { createDefaultForm } from '../../../utils/forms';
-import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
-import { ComponentProvider, useComponent } from '../ComponentContext';
+import { ItemTypes } from '@content-manager/admin/constants/dragAndDrop';
+import { useDocumentContext } from '@content-manager/admin/hooks/useDocumentContext';
+import {
+  useDragAndDrop,
+  type UseDragAndDropOptions,
+} from '@content-manager/admin/hooks/useDragAndDrop';
+import { usePrev } from '@content-manager/admin/hooks/usePrev';
+import { Initializer } from '@content-manager/admin/pages/EditView/components/FormInputs/Component/Initializer';
+import type { ComponentInputProps } from '@content-manager/admin/pages/EditView/components/FormInputs/Component/Input';
+import {
+  ComponentProvider,
+  useComponent,
+} from '@content-manager/admin/pages/EditView/components/FormInputs/ComponentContext';
+import {
+  ResponsiveGridItem,
+  ResponsiveGridRoot,
+} from '@content-manager/admin/pages/EditView/components/FormLayout';
+import { transformDocument } from '@content-manager/admin/pages/EditView/utils/data';
+import { createDefaultForm } from '@content-manager/admin/pages/EditView/utils/forms';
+import { getIn } from '@content-manager/admin/utils/objects';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
-import { Initializer } from './Initializer';
-
-import type { ComponentInputProps } from './Input';
 import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------

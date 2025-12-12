@@ -1,8 +1,7 @@
 /* eslint-disable check-file/no-index */
 
-import { type ContentManagerPlugin } from '../content-manager';
-
-import { HistoryAction } from './components/HistoryAction';
+import { type ContentManagerPlugin } from '@content-manager/admin/content-manager';
+import { HistoryAction } from '@content-manager/admin/history/components/HistoryAction';
 
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';

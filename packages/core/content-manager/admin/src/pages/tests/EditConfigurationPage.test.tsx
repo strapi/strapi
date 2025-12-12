@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react';
 import { render, waitFor } from '@tests/utils';
 import { Routes, Route } from 'react-router-dom';
 
-import { EditConfigurationPage } from '../EditConfigurationPage';
+import { EditConfigurationPage } from '@content-manager/admin/pages/EditConfigurationPage';
 
 const EDIT_ATTRIBUTES = [
   [

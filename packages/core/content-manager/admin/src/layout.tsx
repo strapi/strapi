@@ -5,14 +5,14 @@ import { Page, Layouts, SubNav, useIsMobile } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
-import { DragLayer, DragLayerProps } from './components/DragLayer';
-import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
-import { ComponentDragPreview } from './components/DragPreviews/ComponentDragPreview';
-import { RelationDragPreview } from './components/DragPreviews/RelationDragPreview';
-import { LeftMenu } from './components/LeftMenu';
-import { ItemTypes } from './constants/dragAndDrop';
-import { useContentManagerInitData } from './hooks/useContentManagerInitData';
-import { getTranslation } from './utils/translations';
+import { DragLayer, DragLayerProps } from '@content-manager/admin/components/DragLayer';
+import { CardDragPreview } from '@content-manager/admin/components/DragPreviews/CardDragPreview';
+import { ComponentDragPreview } from '@content-manager/admin/components/DragPreviews/ComponentDragPreview';
+import { RelationDragPreview } from '@content-manager/admin/components/DragPreviews/RelationDragPreview';
+import { LeftMenu } from '@content-manager/admin/components/LeftMenu';
+import { ItemTypes } from '@content-manager/admin/constants/dragAndDrop';
+import { useContentManagerInitData } from '@content-manager/admin/hooks/useContentManagerInitData';
+import { getTranslation } from '@content-manager/admin/utils/translations';
 
 /* -------------------------------------------------------------------------------------------------
  * Layout
