@@ -1,7 +1,15 @@
 import semver from 'semver';
+import type { ExecaReturnValue, SyncOptions } from 'execa';
 import { Package, npmPackageFactory } from '../package';
 import * as constants from '../constants';
 import { Logger } from '../../logger';
+
+jest.mock('execa');
+jest.mock('@strapi/utils', () => ({
+  packageManager: {
+    getPreferred: jest.fn(),
+  },
+}));
 
 const mockNpmPackage = {
   _id: '@test/test',
@@ -164,8 +172,14 @@ describe('Package class', () => {
 
 describe('Package registry URL determination', () => {
   let originalEnv: NodeJS.ProcessEnv;
+  let mockExeca: jest.MockedFunction<
+    (command: string, args?: readonly string[], options?: SyncOptions) => Promise<ExecaReturnValue>
+  >;
+  let mockGetPreferred: jest.MockedFunction<(cwd: string) => Promise<string | null>>;
 
   beforeAll(() => {
+    mockExeca = jest.requireMock('execa');
+    mockGetPreferred = jest.requireMock('@strapi/utils').packageManager.getPreferred;
     const mockFetchPromise = Promise.resolve({
       ok: true,
       json: () => Promise.resolve(mockNpmPackage),
@@ -179,6 +193,8 @@ describe('Package registry URL determination', () => {
   beforeEach(() => {
     originalEnv = { ...process.env };
     jest.clearAllMocks();
+    mockExeca.mockResolvedValue({ stdout: '' } as ExecaReturnValue);
+    mockGetPreferred.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -198,8 +214,91 @@ describe('Package registry URL determination', () => {
     );
   });
 
-  it('should use default registry when NPM_REGISTRY_URL is not set', async () => {
+  it('should use yarn registry with npmRegistryServer for Yarn Berry (v2+)', async () => {
     delete process.env.NPM_REGISTRY_URL;
+    const yarnRegistry = 'https://yarn-registry.example.com/';
+    mockGetPreferred.mockResolvedValue('yarn');
+    // First call is yarn --version, second is yarn config get
+    mockExeca
+      .mockResolvedValueOnce({ stdout: '4.0.0' } as ExecaReturnValue)
+      .mockResolvedValueOnce({ stdout: yarnRegistry } as ExecaReturnValue);
+
+    const pkg = new Package('@test/package', mockCwd, mockLogger);
+    await pkg.refresh();
+
+    expect(mockGetPreferred).toHaveBeenCalledWith(mockCwd);
+    expect(mockExeca).toHaveBeenCalledWith('yarn', ['--version'], { timeout: 5_000 });
+    expect(mockExeca).toHaveBeenCalledWith('yarn', ['config', 'get', 'npmRegistryServer'], {
+      timeout: 10_000,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://yarn-registry.example.com/@test/package',
+      expect.anything()
+    );
+  });
+
+  it('should use yarn registry with registry key for Yarn Classic (v1)', async () => {
+    delete process.env.NPM_REGISTRY_URL;
+    const yarnRegistry = 'https://yarn-v1-registry.example.com/';
+    mockGetPreferred.mockResolvedValue('yarn');
+    // First call is yarn --version (v1), second is yarn config get registry
+    mockExeca
+      .mockResolvedValueOnce({ stdout: '1.22.22' } as ExecaReturnValue)
+      .mockResolvedValueOnce({ stdout: yarnRegistry } as ExecaReturnValue);
+
+    const pkg = new Package('@test/package', mockCwd, mockLogger);
+    await pkg.refresh();
+
+    expect(mockGetPreferred).toHaveBeenCalledWith(mockCwd);
+    expect(mockExeca).toHaveBeenCalledWith('yarn', ['--version'], { timeout: 5_000 });
+    expect(mockExeca).toHaveBeenCalledWith('yarn', ['config', 'get', 'registry'], {
+      timeout: 10_000,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://yarn-v1-registry.example.com/@test/package',
+      expect.anything()
+    );
+  });
+
+  it('should fallback to default registry when Yarn Classic returns literal "undefined" string', async () => {
+    delete process.env.NPM_REGISTRY_URL;
+    mockGetPreferred.mockResolvedValue('yarn');
+    // Yarn Classic (v1) returns the literal string "undefined" when npmRegistryServer is not set
+    mockExeca
+      .mockResolvedValueOnce({ stdout: '1.22.22' } as ExecaReturnValue)
+      .mockResolvedValueOnce({ stdout: 'undefined' } as ExecaReturnValue);
+
+    const pkg = new Package('@test/package', mockCwd, mockLogger);
+    await pkg.refresh();
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${constants.NPM_REGISTRY_URL}/@test/package`,
+      expect.anything()
+    );
+  });
+
+  it('should use npm registry when npm is the preferred package manager', async () => {
+    delete process.env.NPM_REGISTRY_URL;
+    const npmRegistry = 'https://npm-registry.example.com/';
+    mockGetPreferred.mockResolvedValue('npm');
+    mockExeca.mockResolvedValue({ stdout: npmRegistry } as ExecaReturnValue);
+
+    const pkg = new Package('@test/package', mockCwd, mockLogger);
+    await pkg.refresh();
+
+    expect(mockGetPreferred).toHaveBeenCalledWith(mockCwd);
+    expect(mockExeca).toHaveBeenCalledWith('npm', ['config', 'get', 'registry'], {
+      timeout: 10_000,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://npm-registry.example.com/@test/package',
+      expect.anything()
+    );
+  });
+
+  it('should fallback to default registry when no other registry is available', async () => {
+    delete process.env.NPM_REGISTRY_URL;
+    mockGetPreferred.mockResolvedValue(null);
 
     const pkg = new Package('@test/package', mockCwd, mockLogger);
     await pkg.refresh();
@@ -211,8 +310,10 @@ describe('Package registry URL determination', () => {
   });
 
   it('should handle trailing slashes in registry URLs', async () => {
+    delete process.env.NPM_REGISTRY_URL;
     const registryWithSlash = 'https://registry.example.com/';
-    process.env.NPM_REGISTRY_URL = registryWithSlash;
+    mockGetPreferred.mockResolvedValue('npm');
+    mockExeca.mockResolvedValue({ stdout: registryWithSlash } as ExecaReturnValue);
 
     const pkg = new Package('@test/package', mockCwd, mockLogger);
     await pkg.refresh();
@@ -221,5 +322,20 @@ describe('Package registry URL determination', () => {
       'https://registry.example.com/@test/package',
       expect.anything()
     );
+  });
+
+  it('should prioritize env var over package manager registry', async () => {
+    const envRegistry = 'https://env-registry.example.com';
+    const npmRegistry = 'https://npm-registry.example.com';
+
+    process.env.NPM_REGISTRY_URL = envRegistry;
+    mockGetPreferred.mockResolvedValue('npm');
+    mockExeca.mockResolvedValue({ stdout: npmRegistry } as ExecaReturnValue);
+
+    const pkg = new Package('@test/package', mockCwd, mockLogger);
+    await pkg.refresh();
+
+    expect(global.fetch).toHaveBeenCalledWith(`${envRegistry}/@test/package`, expect.anything());
+    expect(mockExeca).not.toHaveBeenCalled();
   });
 });

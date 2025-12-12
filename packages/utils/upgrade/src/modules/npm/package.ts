@@ -1,5 +1,7 @@
 import assert from 'node:assert';
 import semver from 'semver';
+import execa from 'execa';
+import { packageManager } from '@strapi/utils';
 
 import { ProxyAgent } from 'undici';
 import * as constants from './constants';
@@ -62,12 +64,67 @@ export class Package implements PackageInterface {
     );
   }
 
-  private getRegistryUrl(): string {
-    // Use NPM_REGISTRY_URL env var if set, otherwise use default registry
-    // This avoids spawning external processes (execa) to query package manager config
-    const registry = process.env.NPM_REGISTRY_URL || constants.NPM_REGISTRY_URL;
-    this.logger.debug(`Using registry: ${registry}`);
-    return registry.replace(/\/$/, '');
+  private async getYarnMajorVersion(): Promise<number> {
+    try {
+      const { stdout } = await execa('yarn', ['--version'], { timeout: 5_000 });
+      const version = stdout.trim();
+      return parseInt(version.split('.')[0], 10);
+    } catch {
+      // Default to Yarn Berry (v2+) if version check fails
+      return 2;
+    }
+  }
+
+  private async getRegistryFromPackageManager(): Promise<string | undefined> {
+    try {
+      const packageManagerName = await packageManager.getPreferred(this.cwd);
+      if (!packageManagerName) return undefined;
+
+      let command: readonly string[];
+
+      if (packageManagerName === 'yarn') {
+        const yarnMajorVersion = await this.getYarnMajorVersion();
+        // Yarn Classic (v1) uses 'registry', Yarn Berry (v2+) uses 'npmRegistryServer'
+        command =
+          yarnMajorVersion >= 2
+            ? ['config', 'get', 'npmRegistryServer']
+            : ['config', 'get', 'registry'];
+      } else if (packageManagerName === 'npm') {
+        command = ['config', 'get', 'registry'];
+      } else {
+        this.logger.warn(`Unsupported package manager: ${packageManagerName}`);
+        return undefined;
+      }
+
+      const { stdout } = await execa(packageManagerName, [...command], { timeout: 10_000 });
+      const registry = stdout.trim();
+
+      // Yarn Classic (v1) may return literal "undefined" for unset config values
+      if (!registry || registry === 'undefined') {
+        return undefined;
+      }
+
+      return registry;
+    } catch (error) {
+      this.logger.warn('Failed to determine registry URL from package manager');
+      return undefined;
+    }
+  }
+
+  private async determineRegistryUrl(): Promise<string> {
+    if (process.env.NPM_REGISTRY_URL) {
+      this.logger.debug(`Using NPM_REGISTRY_URL: ${process.env.NPM_REGISTRY_URL}`);
+      return process.env.NPM_REGISTRY_URL.replace(/\/$/, '');
+    }
+
+    const packageManagerRegistry = await this.getRegistryFromPackageManager();
+    if (packageManagerRegistry) {
+      this.logger.debug(`Using package manager registry: ${packageManagerRegistry}`);
+      return packageManagerRegistry.replace(/\/$/, '');
+    }
+
+    this.logger.debug(`Using default registry: ${constants.NPM_REGISTRY_URL}`);
+    return constants.NPM_REGISTRY_URL.replace(/\/$/, '');
   }
 
   findVersion(version: Version.SemVer): NPMPackageVersion | undefined {
@@ -77,7 +134,7 @@ export class Package implements PackageInterface {
   }
 
   async refresh() {
-    const packageURL = `${this.getRegistryUrl()}/${this.name}`;
+    const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
 
     const response = await fetch(packageURL, {
       // @ts-expect-error Node.js fetch supports dispatcher (undici extension)
