@@ -62,6 +62,32 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
     });
   };
 
+  // Compute a masked copy of values that excludes fields that are hidden, so
+  // dependent fields don't evaluate against stale values. We do NOT mutate the
+  // form state to avoid toggling the modified flag.
+  const maskedValues = React.useMemo(() => {
+    const schema = document.schema;
+    if (!schema) return fieldValues;
+
+    const hidden = new Set<string>();
+    // First pass: determine hidden fields at the top level
+    for (const [name, attr] of Object.entries(schema.attributes ?? {})) {
+      const condition = (attr as any)?.conditions?.visible;
+      if (condition) {
+        const isVisible = rulesEngine.evaluate(condition, fieldValues);
+        if (!isVisible) hidden.add(name);
+      }
+    }
+
+    if (hidden.size === 0) return fieldValues;
+
+    const copy: Record<string, unknown> = { ...fieldValues };
+    for (const key of hidden) {
+      if (key in copy) delete (copy as any)[key];
+    }
+    return copy;
+  }, [document.schema, fieldValues, rulesEngine]);
+
   return (
     <Flex
       direction="column"
@@ -79,7 +105,7 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
           const condition = attribute?.conditions?.visible;
 
           if (condition) {
-            const isVisible = rulesEngine.evaluate(condition, fieldValues);
+            const isVisible = rulesEngine.evaluate(condition, maskedValues);
             if (!isVisible) {
               return null; // Skip rendering the dynamic zone if the condition is not met
             }
@@ -114,7 +140,7 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
                   const condition = attribute?.conditions?.visible;
 
                   if (condition) {
-                    return rulesEngine.evaluate(condition, fieldValues);
+                    return rulesEngine.evaluate(condition, maskedValues);
                   }
 
                   return true;
