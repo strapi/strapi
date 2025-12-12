@@ -138,9 +138,12 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
     threshold: 0,
   });
 
-  useResizeObserver([containerRef], () => {
-    if (containerRef.current) {
-      const newSize = containerRef.current.getBoundingClientRect();
+  useResizeObserver([containerRef, baseHeaderLayoutRef], () => {
+    const measuredElement = baseHeaderLayoutRef.current ?? containerRef.current;
+
+    if (measuredElement) {
+      const newSize = measuredElement.getBoundingClientRect();
+
       setHeaderSize((prevSize) => {
         // Only update if size actually changed
         if (!prevSize || prevSize.height !== newSize.height || prevSize.width !== newSize.width) {
@@ -152,8 +155,10 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   });
 
   React.useEffect(() => {
-    if (containerRef.current) {
-      setHeaderSize(containerRef.current.getBoundingClientRect());
+    if (baseHeaderLayoutRef.current || containerRef.current) {
+      const measuredElement = baseHeaderLayoutRef.current ?? containerRef.current;
+
+      setHeaderSize(measuredElement?.getBoundingClientRect() ?? null);
     }
   }, [containerRef]);
 
