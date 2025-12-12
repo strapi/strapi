@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { omit, difference, isNil, isEmpty, map, isArray, uniq, isNumber } from 'lodash/fp';
+import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import type { Update, ApiToken, ApiTokenBody } from '../../../shared/contracts/api-token';
 import constants from './constants';
@@ -155,10 +156,9 @@ const exists = async (whereParams: WhereParams = {}): Promise<boolean> => {
  * Return a secure sha512 hash of an accessKey
  */
 const hash = (accessKey: string) => {
-  return crypto
-    .createHmac('sha512', strapi.config.get('admin.apiToken.salt'))
-    .update(accessKey)
-    .digest('hex');
+  const apiTokenCfg = strapi.config.get<Core.Config.Admin['apiToken']>('admin.apiToken');
+  const salt = apiTokenCfg?.salt;
+  return crypto.createHmac('sha512', salt).update(accessKey).digest('hex');
 };
 
 const getExpirationFields = (lifespan: ApiTokenBody['lifespan']) => {
@@ -251,7 +251,8 @@ const regenerate = async (id: string | number): Promise<ApiToken> => {
 };
 
 const checkSaltIsDefined = () => {
-  if (!strapi.config.get('admin.apiToken.salt')) {
+  const apiTokenCfg = strapi.config.get<Core.Config.Admin['apiToken']>('admin.apiToken');
+  if (!apiTokenCfg?.salt) {
     // TODO V5: stop reading API_TOKEN_SALT
     if (process.env.API_TOKEN_SALT) {
       process.emitWarning(`[deprecated] In future versions, Strapi will stop reading directly from the environment variable API_TOKEN_SALT. Please set apiToken.salt in config/admin.js instead.

@@ -8,8 +8,8 @@ describe('Encryption Service', () => {
     global.strapi = {
       config: {
         get: jest.fn((key) => {
-          if (key === 'admin.secrets.encryptionKey') {
-            return ENCRYPTION_KEY;
+          if (key === 'admin.secrets') {
+            return { encryptionKey: ENCRYPTION_KEY };
           }
           return undefined;
         }),
@@ -65,7 +65,8 @@ describe('Encryption Service', () => {
       const encrypted = encryption.encrypt('cannot decrypt this');
 
       const wrongKey = crypto.randomBytes(32).toString('hex');
-      (global.strapi.config.get as jest.Mock).mockReturnValueOnce(wrongKey);
+      // return the secrets object shape so getHashedKey reads encryptionKey
+      (global.strapi.config.get as jest.Mock).mockReturnValueOnce({ encryptionKey: wrongKey });
 
       const result = encryption.decrypt(encrypted!);
 
