@@ -373,14 +373,15 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c20 {
   border-radius: 4px;
+  border: 1px solid #eaeaef;
 }
 
-border:1px solid #eaeaef .c20:focus-within .c25 {
+.c20:focus-within .c25 {
   fill: #4945ff;
 }
 
 .c24 {
-  border: 1px solid #eaeaef height:16px;
+  border: 1px solid #eaeaef;
   padding: 0 0 0 8px;
   color: #32324d;
   outline: none;
@@ -396,6 +397,25 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
 .c24:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c24 >input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.c24 >input::-ms-reveal {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.c24 >input::-webkit-search-decoration,
+.c24 >input::-webkit-search-cancel-button,
+.c24 >input::-webkit-search-results-button,
+.c24 >input::-webkit-search-results-decoration {
+  display: none;
 }
 
 .c0 {
@@ -662,6 +682,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
                     id=":r2:"
                     name="search_contentType"
                     placeholder="Search"
+                    type="search"
                     value=""
                   />
                 </div>
@@ -704,6 +725,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
                           aria-disabled="false"
                           class="c36 c37 c38"
                           data-state="closed"
+                          type="button"
                         >
                           <svg
                             aria-hidden="true"
@@ -820,6 +842,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
                           aria-disabled="false"
                           class="c36 c37 c38"
                           data-state="closed"
+                          type="button"
                         >
                           <svg
                             aria-hidden="true"
@@ -908,6 +931,7 @@ border:1px solid #eaeaef .c20:focus-within .c25 {
                           aria-disabled="false"
                           class="c36 c37 c38"
                           data-state="closed"
+                          type="button"
                         >
                           <svg
                             aria-hidden="true"

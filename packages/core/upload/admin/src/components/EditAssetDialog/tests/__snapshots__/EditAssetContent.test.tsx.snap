@@ -340,6 +340,17 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   min-width: 100%;
 }
 
+.c13 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c15 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
 .c1 {
   background: #32324d33;
   position: fixed;
@@ -395,17 +406,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c38 {
   border-top: solid 1px #eaeaef;
   flex: 1;
-}
-
-.c13 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-}
-
-.c15 {
-  grid-column: span 12;
-  max-width: 100%;
 }
 
 .c36 {
@@ -497,6 +497,24 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   }
 }
 
+@media (min-width: 520px) {
+  .c15 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 768px) {
+  .c15 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c15 {
+    grid-column: span 6;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .c1 {
     animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
@@ -520,24 +538,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
     animation-duration: 120ms;
     animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     animation-name: jgufbq;
-  }
-}
-
-@media (min-width: 520px) {
-  .c15 {
-    grid-column: span 12;
-  }
-}
-
-@media (min-width: 768px) {
-  .c15 {
-    grid-column: span 12;
-  }
-}
-
-@media (min-width: 1080px) {
-  .c15 {
-    grid-column: span 6;
   }
 }
 
@@ -667,6 +667,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         aria-disabled="false"
                         class="c7 c8 c9"
                         data-state="closed"
+                        type="button"
                       >
                         <svg
                           aria-hidden="true"
@@ -691,6 +692,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         aria-disabled="false"
                         class="c7 c8 c9"
                         data-state="closed"
+                        type="button"
                       >
                         <svg
                           aria-hidden="true"
@@ -715,6 +717,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         aria-disabled="false"
                         class="c7 c8 c9"
                         data-state="closed"
+                        type="button"
                       >
                         <svg
                           aria-hidden="true"
@@ -739,6 +742,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                         aria-disabled="false"
                         class="c7 c8 c9"
                         data-state="closed"
+                        type="button"
                       >
                         <svg
                           aria-hidden="true"
@@ -1061,6 +1065,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
         <button
           aria-disabled="false"
           class="c39 c40 c41"
+          type="button"
         >
           <span
             class="c42"
@@ -1074,6 +1079,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
           <button
             aria-disabled="false"
             class="c39 c40 c44"
+            type="button"
           >
             <span
               class="c42"
@@ -1096,6 +1102,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
           <button
             aria-disabled="false"
             class="c39 c40 c45"
+            type="button"
           >
             <span
               class="c42"
