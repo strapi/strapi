@@ -42,4 +42,7 @@ module.exports = ({ env }) => ({
       // enabled: false,
     },
   },
+  proxy: {
+    koa: true,
+  },
 });
