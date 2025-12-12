@@ -67,6 +67,7 @@
   "containers.Edit.clickToJump": "Kattintson a bejegyzésre ugráshoz",
   "containers.Edit.delete": "Törlés",
   "containers.Edit.delete-entry": "Bejegyzés törlése",
+  "containers.edit.title.new": "Bejegyzés létrehozása",
   "containers.Edit.editing": "Szerkesztés...",
   "containers.Edit.information": "Információ",
   "containers.Edit.information.by": "által",
