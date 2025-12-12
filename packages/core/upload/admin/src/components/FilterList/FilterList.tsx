@@ -54,10 +54,15 @@ export const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }: Fi
       if (filterName !== undefined) {
         const filterType = Object.keys(filterName)[0];
         const filterValue = filterName[filterType];
+        // Handle string values
         if (typeof filterValue === 'string') {
           const decodedValue = decodeURIComponent(filterValue);
           return prevFilter[name]?.[filterType] !== decodedValue;
         }
+        // Handle complex filters (objects and arrays) by comparing JSON
+        // This handles cases like: { mime: { $not: { $contains: ['image', 'video'] } } }
+        const prevFilterValue = prevFilter[name]?.[filterType];
+        return JSON.stringify(filterValue) !== JSON.stringify(prevFilterValue);
       }
 
       return true;
