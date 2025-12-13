@@ -19,7 +19,14 @@ import {
 
 import type { UID } from '@strapi/types';
 
-import { contentTypes, traverseEntity, sanitize, async, traverse } from '@strapi/utils';
+import {
+  contentTypes,
+  traverseEntity,
+  sanitize,
+  async,
+  traverse,
+  createModelCache,
+} from '@strapi/utils';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
 const {
@@ -51,9 +58,12 @@ export default ({ action, ability, model }: any) => {
 
   const { removeDisallowedFields } = sanitize.visitors;
 
+  // Create request-scoped model cache to avoid redundant getModel() calls
+  const modelCache = createModelCache(strapi.getModel.bind(strapi));
+
   const ctx = {
     schema,
-    getModel: strapi.getModel.bind(strapi),
+    getModel: modelCache.getModel,
   };
 
   const createSanitizeQuery = (options = {} as any) => {

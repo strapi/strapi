@@ -15,7 +15,15 @@ import {
   isObject,
 } from 'lodash/fp';
 
-import { contentTypes, traverseEntity, traverse, validate, async, errors } from '@strapi/utils';
+import {
+  contentTypes,
+  traverseEntity,
+  traverse,
+  validate,
+  async,
+  errors,
+  createModelCache,
+} from '@strapi/utils';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
 const { ValidationError } = errors;
@@ -46,9 +54,12 @@ const throwInvalidKey = ({ key, path }: { key: string; path?: string | null }) =
 export default ({ action, ability, model }: any) => {
   const schema = strapi.getModel(model);
 
+  // Create request-scoped model cache to avoid redundant getModel() calls
+  const modelCache = createModelCache(strapi.getModel.bind(strapi));
+
   const ctx = {
     schema,
-    getModel: strapi.getModel.bind(strapi),
+    getModel: modelCache.getModel,
   };
 
   const createValidateQuery = (options = {} as any) => {

@@ -1,6 +1,12 @@
 import { omit, assoc, merge, curry } from 'lodash/fp';
 
-import { async, contentTypes as contentTypesUtils, validate, errors } from '@strapi/utils';
+import {
+  async,
+  contentTypes as contentTypesUtils,
+  validate,
+  errors,
+  createModelCache,
+} from '@strapi/utils';
 
 import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
@@ -45,11 +51,18 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   };
 
   const validateParams = async (params: any) => {
-    const ctx = { schema: contentType, getModel };
+    // Create request-scoped model cache to avoid redundant getModel() calls
+    const modelCache = createModelCache(getModel);
+
+    const ctx = { schema: contentType, getModel: modelCache.getModel };
+
     await validators.validateFilters(ctx, params.filters, filtersValidations);
     await validators.validateSort(ctx, params.sort, sortValidations);
     await validators.validateFields(ctx, params.fields, fieldValidations);
     await validators.validatePopulate(ctx, params.populate, populateValidations);
+
+    // Clean up cache after validation
+    modelCache.clear();
 
     // Strip lookup from params, it's only used internally
     if (params.lookup) {
