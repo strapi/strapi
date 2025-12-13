@@ -1,3 +1,4 @@
+import { StrapiApp } from '@strapi/admin/strapi-admin';
 import { Information } from '@strapi/icons';
 
 import { PERMISSIONS } from './constants';
@@ -6,7 +7,7 @@ import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     app.addMenuLink({
       to: `plugins/${pluginId}`,
       icon: Information,
@@ -15,10 +16,7 @@ export default {
         defaultMessage: 'Documentation',
       },
       permissions: PERMISSIONS.main,
-      Component: async () => {
-        const { App } = await import('./pages/App');
-        return App;
-      },
+      Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
       position: 9,
     });
 
@@ -27,7 +25,7 @@ export default {
       name: pluginId,
     });
   },
-  bootstrap(app: any) {
+  bootstrap(app: StrapiApp) {
     app.addSettingsLink('global', {
       intlLabel: {
         id: `${pluginId}.plugin.name`,
@@ -35,10 +33,7 @@ export default {
       },
       id: 'documentation',
       to: pluginId,
-      Component: async () => {
-        const { SettingsPage } = await import('./pages/Settings');
-        return SettingsPage;
-      },
+      Component: () => import('./pages/Settings').then((mod) => ({ default: mod.SettingsPage })),
       permissions: PERMISSIONS.main,
     });
   },

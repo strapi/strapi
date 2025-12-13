@@ -1,3 +1,4 @@
+import { StrapiApp } from '@strapi/admin/strapi-admin';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
@@ -34,7 +35,7 @@ import type { DocumentActionComponent } from '@strapi/content-manager/strapi-adm
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     app.addMiddlewares([extendCTBAttributeInitialDataMiddleware, extendCTBInitialDataMiddleware]);
     app.addMiddlewares([() => i18nApi.middleware]);
     app.addReducers({

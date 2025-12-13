@@ -66,9 +66,10 @@ const admin: Plugin.Config.AdminInput = {
         },
         licenseOnly: true,
         permissions: [],
-        async Component() {
-          const { PurchaseReviewWorkflows } = await import('./routes/purchase-review-workflows');
-          return { default: PurchaseReviewWorkflows };
+        Component() {
+          return import('./routes/purchase-review-workflows').then((mod) => ({
+            default: mod.PurchaseReviewWorkflows,
+          }));
         },
       });
     }
