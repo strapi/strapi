@@ -36,11 +36,19 @@ export interface BaseAttribute {
   };
   searchable?: boolean;
   enum?: string[];
+  /**
+   * Marks biginteger attributes created internally by Strapi (FK columns in join tables).
+   * Used to distinguish from user-defined biginteger attributes for type coercion.
+   * When true, biginteger values are cast to numbers; otherwise kept as strings.
+   * @internal
+   */
+  internalIntegerId?: boolean;
 }
 
 export interface ScalarAttribute extends BaseAttribute {
   type:
     | 'increments'
+    | 'bigincrements'
     | 'password'
     | 'email'
     | 'string'

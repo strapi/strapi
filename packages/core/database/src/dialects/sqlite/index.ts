@@ -54,6 +54,14 @@ export default class SqliteDialect extends Dialect {
       case 'timestamp': {
         return 'datetime';
       }
+      case 'bigIncrements': {
+        // SQLite requires INTEGER (not bigint) for AUTOINCREMENT
+        return 'increments';
+      }
+      case 'bigInteger': {
+        // SQLite doesn't have a separate bigint type, uses INTEGER
+        return 'integer';
+      }
       default: {
         return type;
       }

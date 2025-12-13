@@ -139,9 +139,11 @@ const expectedModels = [
     uid: 'countries_components',
     tableName: 'countries_components',
     attributes: {
-      id: { type: 'increments' },
-      entity_id: { type: 'integer', column: { unsigned: true } },
-      component_id: { type: 'integer', column: { unsigned: true } },
+      id: {
+        type: 'bigincrements',
+      },
+      entity_id: { type: 'biginteger', column: { unsigned: true } },
+      component_id: { type: 'biginteger', column: { unsigned: true } },
       component_type: { type: 'string' },
       field: { type: 'string' },
       order: { type: 'float', column: { unsigned: true, defaultTo: null } },
@@ -171,7 +173,9 @@ const expectedModels = [
     singularName: 'country',
     tableName: 'countries',
     attributes: {
-      id: { type: 'increments' },
+      id: {
+        type: 'bigincrements',
+      },
       documentId: { type: 'string' },
       name: { default: 'my name', type: 'string' },
       categories: { type: 'relation', relation: 'oneToMany', target: 'api::category.category' },
@@ -245,7 +249,9 @@ const expectedModels = [
     singularName: 'category',
     tableName: 'categories',
     attributes: {
-      id: { type: 'increments' },
+      id: {
+        type: 'bigincrements',
+      },
       documentId: { type: 'string' },
       name: { type: 'string' },
     },
@@ -261,7 +267,11 @@ const expectedModels = [
     uid: 'api::empty.empty',
     singularName: 'empty',
     tableName: 'empty',
-    attributes: { id: { type: 'increments' } },
+    attributes: {
+      id: {
+        type: 'bigincrements',
+      },
+    },
     lifecycles: {},
   },
 ];

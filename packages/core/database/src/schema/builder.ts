@@ -234,7 +234,9 @@ const createHelpers = (db: Database) => {
   const createColumn = (tableBuilder: Knex.TableBuilder, column: Column) => {
     const { type, name, args = [], defaultTo, unsigned, notNullable } = column;
 
-    const col = (tableBuilder[type as keyof Knex.TableBuilder] as any)(name, ...args);
+    // Apply dialect-specific type conversions (e.g., bigInteger -> integer for SQLite)
+    const dialectType = db.dialect.getSqlType(type);
+    const col = (tableBuilder[dialectType as keyof Knex.TableBuilder] as any)(name, ...args);
 
     if (unsigned === true) {
       col.unsigned();
@@ -365,6 +367,8 @@ const createHelpers = (db: Database) => {
 
         if (object.type === 'increments') {
           createColumn(tableBuilder, { ...object, type: 'integer' }).alter();
+        } else if (object.type === 'bigIncrements') {
+          createColumn(tableBuilder, { ...object, type: 'bigInteger' }).alter();
         } else {
           createColumn(tableBuilder, object).alter();
         }
@@ -374,7 +378,10 @@ const createHelpers = (db: Database) => {
       for (const addedColumn of table.columns.added) {
         debug(`Creating column ${addedColumn.name} on ${table.name}`);
 
-        if (addedColumn.type === 'increments' && !db.dialect.canAddIncrements()) {
+        if (
+          (addedColumn.type === 'increments' || addedColumn.type === 'bigIncrements') &&
+          !db.dialect.canAddIncrements()
+        ) {
           tableBuilder.integer(addedColumn.name).unsigned();
           tableBuilder.primary([addedColumn.name]);
         } else {

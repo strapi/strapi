@@ -255,21 +255,23 @@ const createMorphToMany = (
     tableName: joinTableName,
     attributes: {
       [ID]: {
-        type: 'increments',
+        type: 'bigincrements',
       },
       [joinColumnName]: {
-        type: 'integer',
+        type: 'biginteger',
         column: {
           unsigned: true,
         },
         // This must be set explicitly so that it is used instead of shortening the attribute name, which is already shortened
         columnName: joinColumnName,
+        internalIntegerId: true,
       },
       [idColumnName]: {
-        type: 'integer',
+        type: 'biginteger',
         column: {
           unsigned: true,
         },
+        internalIntegerId: true,
       },
       [typeColumnName]: {
         type: 'string',
@@ -469,23 +471,25 @@ const createJoinTable = (
     tableName: joinTableName,
     attributes: {
       [ID]: {
-        type: 'increments',
+        type: 'bigincrements',
       },
       [joinColumnName]: {
-        type: 'integer',
+        type: 'biginteger',
         column: {
           unsigned: true,
         },
         // This must be set explicitly so that it is used instead of shortening the attribute name, which is already shortened
         columnName: joinColumnName,
+        internalIntegerId: true,
       },
       [inverseJoinColumnName]: {
-        type: 'integer',
+        type: 'biginteger',
         column: {
           unsigned: true,
         },
         // This must be set explicitly so that it is used instead of shortening the attribute name, which is already shortened
         columnName: inverseJoinColumnName,
+        internalIntegerId: true,
       },
       // TODO: add extra pivot attributes -> user should use an intermediate entity
     },
