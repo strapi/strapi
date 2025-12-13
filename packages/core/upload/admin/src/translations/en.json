@@ -117,6 +117,8 @@
   "sort.label": "Sort by",
   "sort.name_asc": "Alphabetical order (A to Z)",
   "sort.name_desc": "Reverse alphabetical order (Z to A)",
+  "sort.size_asc": "Smallest size",
+  "sort.size_desc": "Largest size",
   "sort.updated_at_asc": "Oldest updates",
   "sort.updated_at_desc": "Most recent updates",
   "list.table.header.actions": "actions",
