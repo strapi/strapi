@@ -1,13 +1,12 @@
 import os from 'os';
 import path from 'path';
-import crypto from 'crypto';
 import fs from 'fs';
 import fse from 'fs-extra';
 import _ from 'lodash';
 import { extension } from 'mime-types';
 import {
+  async,
   sanitize,
-  strings,
   contentTypes as contentTypesUtils,
   errors,
   file as fileUtils,
@@ -47,21 +46,15 @@ const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const randomSuffix = () => crypto.randomBytes(5).toString('hex');
+  const fileService = getService('file');
 
-  const generateFileName = (name: string) => {
-    const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
-
-    return `${baseName}_${randomSuffix()}`;
-  };
-
-  const sendMediaMetrics = (data: Pick<File, 'caption' | 'alternativeText'>) => {
+  const sendMediaMetrics = async (data: Pick<File, 'caption' | 'alternativeText'>) => {
     if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
-      strapi.telemetry.send('didSaveMediaWithCaption');
+      await getService('metrics').trackUsage('didSaveMediaWithCaption');
     }
 
     if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
-      strapi.telemetry.send('didSaveMediaWithAlternativeText');
+      await getService('metrics').trackUsage('didSaveMediaWithAlternativeText');
     }
   };
 
@@ -133,6 +126,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     } = {}
   ): Promise<Omit<UploadableFile, 'getStream'>> {
     const fileService = getService('file');
+    const imageManipulationService = getService('image-manipulation');
 
     if (!isValidFilename(filename)) {
       throw new ApplicationError('File name contains invalid characters');
@@ -156,7 +150,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       caption: fileInfo.caption,
       folder: fileInfo.folder,
       folderPath: await fileService.getFolderPath(fileInfo.folder),
-      hash: generateFileName(basename),
+      hash: imageManipulationService.generateFileName(basename),
       ext,
       mime: type,
       size: bytesToKbytes(size),
@@ -229,7 +223,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       files,
     }: {
       data: Record<string, unknown>;
-      files: InputFile | InputFile[];
+      files: InputFile[];
     },
     opts?: CommonOptions
   ) {
@@ -442,7 +436,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     }
 
-    sendMediaMetrics(fileValues);
+    await sendMediaMetrics(fileValues);
 
     const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
 
@@ -462,7 +456,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
     }
 
-    sendMediaMetrics(fileValues);
+    await sendMediaMetrics(fileValues);
 
     const res = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
 
@@ -471,27 +465,45 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
-  function findOne(id: ID, populate = {}) {
+  async function findOne(id: ID, populate = {}) {
     const query = strapi.get('query-params').transform(FILE_MODEL_UID, {
       populate,
     });
 
-    return strapi.db.query(FILE_MODEL_UID).findOne({
+    const file = await strapi.db.query(FILE_MODEL_UID).findOne({
       where: { id },
       ...query,
     });
+
+    if (!file) return file;
+
+    // Sign file URLs if using private provider
+    return fileService.signFileUrls(file);
   }
 
-  function findMany(query: any = {}): Promise<File[]> {
-    return strapi.db
+  async function findMany(query: any = {}): Promise<File[]> {
+    const files = await strapi.db
       .query(FILE_MODEL_UID)
       .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
+
+    // Sign file URLs if using private provider
+    return async.map(files, (file: File) => fileService.signFileUrls(file));
   }
 
-  function findPage(query: any = {}) {
-    return strapi.db
+  async function findPage(query: any = {}) {
+    const result = await strapi.db
       .query(FILE_MODEL_UID)
       .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, query));
+
+    // Sign file URLs if using private provider
+    const signedResults = await async.map(result.results, (file: File) =>
+      fileService.signFileUrls(file)
+    );
+
+    return {
+      ...result,
+      results: signedResults,
+    };
   }
 
   async function remove(file: File) {
@@ -527,11 +539,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res as Settings | null;
   }
 
-  function setSettings(value: Settings) {
+  async function setSettings(value: Settings) {
     if (value.responsiveDimensions === true) {
-      strapi.telemetry.send('didEnableResponsiveDimensions');
+      await getService('metrics').trackUsage('didEnableResponsiveDimensions');
     } else {
-      strapi.telemetry.send('didDisableResponsiveDimensions');
+      await getService('metrics').trackUsage('didDisableResponsiveDimensions');
     }
 
     return strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });

@@ -19,6 +19,7 @@ import {
 import { login } from '../../../reducer';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
 const RESET_PASSWORD_SCHEMA = yup.object().shape({
@@ -29,6 +30,20 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
+    // bcrypt has a max length of 72 bytes (not characters!)
+    .test(
+      'required-byte-size',
+      {
+        id: 'components.Input.error.contain.maxBytes',
+        defaultMessage: 'Password must be less than 73 bytes',
+      },
+      function (value) {
+        if (!value || typeof value !== 'string') return true; // validated elsewhere
+
+        const byteSize = getByteSize(value);
+        return byteSize <= 72;
+      }
+    )
     .matches(/[a-z]/, {
       message: {
         id: 'components.Input.error.contain.lowercase',

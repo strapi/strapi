@@ -15,7 +15,7 @@
   "control-card.stop-crop": "Zatrzymaj przycinanie",
   "filter.add": "Dodaj filtr",
   "form.button.replace-media": "Zamień",
-  "form.input.decription.file-alt": "Ten tekst zostanie wyświetlony, jeżeli medium nie będzie mogło zostać pokazane.",
+  "form.input.description.file-alt": "Ten tekst zostanie wyświetlony, jeżeli medium nie będzie mogło zostać pokazane.",
   "form.input.label.file-alt": "Tekst alternatywny",
   "form.input.label.file-caption": "Podpis",
   "form.input.label.file-name": "Nazwa pliku",

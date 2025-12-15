@@ -50,8 +50,10 @@ const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSi
   const fileName = name.length > 100 ? `${name.substring(0, 100)}...` : name;
 
   return (
-    <Tooltip description={fileName}>
-      <FileWrapper>{fileExtension}</FileWrapper>
+    <Tooltip label={fileName}>
+      <span>
+        <FileWrapper>{fileExtension}</FileWrapper>
+      </span>
     </Tooltip>
   );
 };

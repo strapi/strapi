@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import * as React from 'react';
 
 import { TextInput, Toggle, Field } from '@strapi/design-system';
 import PropTypes from 'prop-types';

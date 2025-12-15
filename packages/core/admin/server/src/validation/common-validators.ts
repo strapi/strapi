@@ -23,6 +23,11 @@ export const username = yup.string().min(1);
 export const password = yup
   .string()
   .min(8)
+  .test('required-byte-size', '${path} must be less than 73 bytes', function (value) {
+    if (!value) return true;
+    const byteSize = new TextEncoder().encode(value).length;
+    return byteSize <= 72;
+  })
   .matches(/[a-z]/, '${path} must contain at least one lowercase character')
   .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
   .matches(/\d/, '${path} must contain at least one number');

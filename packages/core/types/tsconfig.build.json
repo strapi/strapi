@@ -3,7 +3,6 @@
   "compilerOptions": {
     "outDir": "dist",
     "noEmit": false,
-    "emitDeclarationOnly": true,
     "allowJs": false
   },
   "include": ["src"],

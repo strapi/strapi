@@ -24,14 +24,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 
 }
 
-@media (prefers-reduced-motion: no-preference) {
-
-}
-
-@media (prefers-reduced-motion: no-preference) {
-
-}
-
 @media (min-width: 520px) {
 
 }
@@ -41,6 +33,18 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 }
 
 @media (min-width: 1080px) {
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (min-width: 768px) {
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
 
 }
 

@@ -1,0 +1,3 @@
+{
+  "setup-worktree": ["yarn install", "yarn build"]
+}

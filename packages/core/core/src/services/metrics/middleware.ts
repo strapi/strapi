@@ -2,24 +2,30 @@ import type { Core } from '@strapi/types';
 import type { Sender } from './sender';
 
 interface State {
-  currentDay: number | null;
+  expires: number;
   counter: number;
 }
 
-const createMiddleware = ({ sendEvent }: { sendEvent: Sender }) => {
+function nextResetDate(): number {
+  return Date.now() + 24 * 60 * 60 * 1000; // Now + 24 hours.
+}
+
+const createMiddleware = ({ sendEvent, strapi }: { sendEvent: Sender; strapi: Core.Strapi }) => {
   const state: State = {
-    currentDay: null,
+    expires: nextResetDate(),
     counter: 0,
   };
 
   const middleware: Core.MiddlewareHandler = async (ctx, next) => {
     const { url, method } = ctx.request;
 
-    if (!url.includes('.') && ['GET', 'PUT', 'POST', 'DELETE'].includes(method)) {
-      const dayOfMonth = new Date().getDate();
-
-      if (dayOfMonth !== state.currentDay) {
-        state.currentDay = dayOfMonth;
+    if (
+      !url.includes('.') &&
+      url.includes(strapi.config.get('api.rest.prefix')) &&
+      ['GET', 'PUT', 'POST', 'DELETE'].includes(method)
+    ) {
+      if (Date.now() > state.expires) {
+        state.expires = nextResetDate();
         state.counter = 0;
       }
 

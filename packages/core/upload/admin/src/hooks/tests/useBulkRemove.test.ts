@@ -1,5 +1,5 @@
 import { useFetchClient } from '@strapi/admin/strapi-admin';
-import { act, renderHook, screen } from '@tests/utils';
+import { renderHook, screen, waitFor } from '@tests/utils';
 
 import { BulkDeleteFiles } from '../../../../shared/contracts/files';
 import { BulkDeleteFolders } from '../../../../shared/contracts/folders';
@@ -67,6 +67,14 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
       return Promise.resolve(res);
     }),
   }),
+  adminApi: {
+    util: {
+      invalidateTags: jest.fn((tags) => ({
+        type: 'adminApi/util/invalidateTags',
+        payload: tags,
+      })),
+    },
+  },
 }));
 
 function setup(...args: Parameters<typeof useBulkRemove>) {
@@ -85,11 +93,14 @@ describe('useBulkRemove', () => {
     const { remove } = current;
     const { post } = useFetchClient();
 
-    await act(async () => {
+    await waitFor(async () => {
       await remove(FIXTURE_ASSETS);
     });
 
     expect(post).toHaveBeenCalledWith('/upload/actions/bulk-delete', expect.any(Object));
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been successfully deleted.');
   });
 
   test('does properly collect all asset ids', async () => {
@@ -99,13 +110,16 @@ describe('useBulkRemove', () => {
     const { remove } = current;
     const { post } = useFetchClient();
 
-    await act(async () => {
+    await waitFor(async () => {
       await remove(FIXTURE_ASSETS);
     });
 
     expect(post).toHaveBeenCalledWith(expect.any(String), {
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
     });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been successfully deleted.');
   });
 
   test('does properly collect all folder ids', async () => {
@@ -115,13 +129,16 @@ describe('useBulkRemove', () => {
     const { remove } = current;
     const { post } = useFetchClient();
 
-    await act(async () => {
+    await waitFor(async () => {
       await remove(FIXTURE_FOLDERS);
     });
 
     expect(post).toHaveBeenCalledWith(expect.any(String), {
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),
     });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been successfully deleted.');
   });
 
   test('does properly collect folder and asset ids', async () => {
@@ -131,7 +148,7 @@ describe('useBulkRemove', () => {
     const { remove } = current;
     const { post } = useFetchClient();
 
-    await act(async () => {
+    await waitFor(async () => {
       await remove([...FIXTURE_FOLDERS, ...FIXTURE_ASSETS]);
     });
 
@@ -139,12 +156,15 @@ describe('useBulkRemove', () => {
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),
     });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been successfully deleted.');
   });
 
   test('does re-fetch assets, if files were deleted', async () => {
     const { result } = setup();
 
-    await act(async () => {
+    await waitFor(async () => {
       await result.current.remove(FIXTURE_ASSETS);
     });
 
@@ -154,7 +174,7 @@ describe('useBulkRemove', () => {
   test('does re-fetch folders, if folders were deleted', async () => {
     const { result } = setup();
 
-    await act(async () => {
+    await waitFor(async () => {
       await result.current.remove(FIXTURE_FOLDERS);
     });
 

@@ -15,7 +15,7 @@
   "control-card.stop-crop": "Deja de recortar",
   "filter.add": "Añadir filtro",
   "form.button.replace-media": "Reemplazar multimedia",
-  "form.input.decription.file-alt": "Este texto se mostrará si el recurso no se puede mostrar.",
+  "form.input.description.file-alt": "Este texto se mostrará si el recurso no se puede mostrar.",
   "form.input.label.file-alt": "Texto alternativo",
   "form.input.label.file-caption": "Subtítulo",
   "form.input.label.file-name": "Nombre del archivo",

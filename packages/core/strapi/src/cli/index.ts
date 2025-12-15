@@ -5,6 +5,7 @@ import { commands as strapiCommands } from './commands';
 import { createLogger } from './utils/logger';
 import { loadTsConfig } from './utils/tsconfig';
 import { CLIContext } from './types';
+import { version } from '../../package.json';
 
 const createCLI = async (argv: string[], command = new Command()) => {
   // Initial program setup
@@ -14,12 +15,7 @@ const createCLI = async (argv: string[], command = new Command()) => {
   command.helpOption('-h, --help', 'Display help for command');
   command.addHelpCommand('help [command]', 'Display help for command');
 
-  command.version(
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../package.json').version,
-    '-v, --version',
-    'Output the version number'
-  );
+  command.version(version, '-v, --version', 'Output the version number');
 
   const cwd = process.cwd();
 

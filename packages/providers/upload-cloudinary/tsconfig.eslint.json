@@ -3,6 +3,6 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src", "packup.config.ts"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

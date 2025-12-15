@@ -92,4 +92,27 @@ describe('Test type integer', () => {
       field: 543,
     });
   });
+
+  test('Clearing the value should set it to null', async () => {
+    const res = await rq.post('/content-manager/collection-types/api::withinteger.withinteger', {
+      body: {
+        field: 123,
+      },
+    });
+
+    const updatedRes = await rq.put(
+      `/content-manager/collection-types/api::withinteger.withinteger/${res.body.data.documentId}`,
+      {
+        body: {
+          field: null,
+        },
+      }
+    );
+
+    expect(updatedRes.statusCode).toBe(200);
+    expect(updatedRes.body.data).toMatchObject({
+      documentId: res.body.data.documentId,
+      field: null,
+    });
+  });
 });

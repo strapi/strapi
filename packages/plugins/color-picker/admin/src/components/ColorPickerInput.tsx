@@ -10,7 +10,7 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
-import { useField, type InputProps, type FieldValue } from '@strapi/strapi/admin';
+import { type InputProps, useField } from '@strapi/strapi/admin';
 import { HexColorPicker } from 'react-colorful';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -73,25 +73,22 @@ const ColorPickerPopover = styled(Popover.Content)`
   min-height: 270px;
 `;
 
-type ColorPickerInputProps = InputProps &
-  FieldValue & {
-    labelAction?: React.ReactNode;
-  };
+type ColorPickerInputProps = InputProps & {
+  labelAction?: React.ReactNode;
+};
 
 export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerInputProps>(
-  (
-    { hint, disabled = false, labelAction, label, name, required = false, onChange, value, error },
-    forwardedRef
-  ) => {
+  ({ hint, disabled, labelAction, label, name, required, ...props }, forwardedRef) => {
     const [showColorPicker, setShowColorPicker] = React.useState(false);
     const colorPickerButtonRef = React.useRef<HTMLButtonElement>(null!);
     const { formatMessage } = useIntl();
-    const color = value || '#000000';
+    const field = useField(name);
+    const color = field.value ?? '#000000';
 
     const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
 
     return (
-      <Field.Root name={name} id={name} error={error} hint={hint} required={required}>
+      <Field.Root name={name} id={name} error={field.error} hint={hint} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
           <Field.Label action={labelAction}>{label}</Field.Label>
           <Popover.Root onOpenChange={setShowColorPicker}>
@@ -114,7 +111,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                   <ColorPreview color={color} />
                   <Typography
                     style={{ textTransform: 'uppercase' }}
-                    textColor={value ? undefined : 'neutral600'}
+                    textColor={field.value ? undefined : 'neutral600'}
                     variant="omega"
                   >
                     {color}
@@ -124,7 +121,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
               </ColorPickerToggle>
             </Popover.Trigger>
             <ColorPickerPopover sideOffset={4}>
-              <ColorPicker color={color} onChange={(hexValue) => onChange(name, hexValue)} />
+              <ColorPicker color={color} onChange={(hexValue) => field.onChange(name, hexValue)} />
               <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
                 <Box paddingRight={2}>
                   <Typography variant="omega" tag="label" textColor="neutral600">
@@ -141,9 +138,11 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                       defaultMessage: 'Color picker input',
                     })}
                     style={{ textTransform: 'uppercase' }}
-                    value={value}
+                    name={name}
+                    defaultValue={color}
                     placeholder="#000000"
-                    onChange={onChange}
+                    onChange={field.onChange}
+                    {...props}
                   />
                 </Field.Root>
               </Flex>

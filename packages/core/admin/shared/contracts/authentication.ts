@@ -9,12 +9,17 @@ export declare namespace Login {
     query: {
       user: Pick<AdminUser, 'email' | 'password'>;
     };
-    body: Pick<AdminUser, 'email' | 'password'>;
+    body: Pick<AdminUser, 'email' | 'password'> & {
+      deviceId?: string;
+      rememberMe?: boolean;
+    };
   }
 
   export interface Response {
     data: {
+      // Primary token for the client to use. This is the short‑lived access token.
       token: string;
+      accessToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
     errors?: errors.ApplicationError | errors.NotImplementedError;
@@ -22,20 +27,18 @@ export declare namespace Login {
 }
 
 /**
- * /renew-token - Renew an admin user's token
+ * /access-token - Exchange a refresh cookie for an access token
  */
-export declare namespace RenewToken {
+export declare namespace AccessTokenExchange {
   export interface Request {
-    body: {
-      token: string;
-    };
+    body?: {};
   }
 
   export interface Response {
     data: {
       token: string;
     };
-    errors?: errors.ApplicationError | errors.ValidationError<'Invalid token'>;
+    errors?: errors.ApplicationError | errors.UnauthorizedError;
   }
 }
 
@@ -67,12 +70,15 @@ export declare namespace Register {
     body: {
       registrationToken: string;
       userInfo: Pick<AdminUser, 'firstname' | 'lastname' | 'email' | 'password'>;
+      deviceId?: string;
+      rememberMe?: boolean;
     };
   }
 
   export interface Response {
     data: {
       token: string;
+      accessToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
     errors?: errors.ApplicationError | errors.YupValidationError;
@@ -84,12 +90,16 @@ export declare namespace Register {
  */
 export declare namespace RegisterAdmin {
   export interface Request {
-    body: Pick<AdminUser, 'email' | 'firstname' | 'lastname' | 'password'>;
+    body: Pick<AdminUser, 'email' | 'firstname' | 'lastname' | 'password'> & {
+      deviceId?: string;
+      rememberMe?: boolean;
+    };
   }
 
   export interface Response {
     data: {
       token: string;
+      accessToken?: string;
       user: Omit<SanitizedAdminUser, 'permissions'>;
     };
     errors?: errors.ApplicationError | errors.YupValidationError;
@@ -131,8 +141,9 @@ export declare namespace ResetPassword {
  */
 export declare namespace Logout {
   export interface Request {
-    query: {
-      token: string;
+    query: {};
+    body: {
+      deviceId?: string;
     };
   }
   export interface Response {

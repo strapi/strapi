@@ -15,7 +15,7 @@ module.exports = ({ strapi }) => {
   }
 
   if (strapi.plugin('documentation')) {
-    const specPath = path.join(__dirname, '../documentation/content-api.yaml');
+    const specPath = path.join(__dirname, '../../documentation/content-api.yaml');
     const spec = fs.readFileSync(specPath, 'utf8');
 
     strapi

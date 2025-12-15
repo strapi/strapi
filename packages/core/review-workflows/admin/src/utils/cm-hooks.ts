@@ -1,6 +1,4 @@
-/* eslint-disable check-file/filename-naming-convention */
-
-import { REVIEW_WORKFLOW_COLUMNS } from '../routes/content-manager/[model]/constants';
+import { REVIEW_WORKFLOW_COLUMNS } from '../routes/content-manager/model/constants';
 
 import type { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
 

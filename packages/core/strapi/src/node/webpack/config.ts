@@ -1,6 +1,6 @@
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
-import { ESBuildMinifyPlugin } from 'esbuild-loader';
+import { EsbuildPlugin } from 'esbuild-loader';
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -193,7 +193,7 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration
     optimization: {
       minimize: ctx.options.minify,
       minimizer: [
-        new ESBuildMinifyPlugin({
+        new EsbuildPlugin({
           target,
           css: true, // Apply minification to CSS assets
         }),

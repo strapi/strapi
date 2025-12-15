@@ -8,6 +8,7 @@ import {
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
+  AITranslationStatusAction,
 } from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
@@ -70,7 +71,11 @@ export default {
 
     const contentManager = app.getPlugin('content-manager');
 
-    contentManager.apis.addDocumentHeaderAction([LocalePickerAction, FillFromAnotherLocaleAction]);
+    contentManager.apis.addDocumentHeaderAction([
+      AITranslationStatusAction,
+      LocalePickerAction,
+      FillFromAnotherLocaleAction,
+    ]);
     contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
       actions.splice(indexOfDeleteAction, 0, DeleteLocaleAction);
@@ -139,28 +144,6 @@ export default {
       });
 
       ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
-        validator: (args: any) => ({
-          i18n: yup.object().shape({
-            localized: yup.bool().test({
-              name: 'ensure-unique-localization',
-              message: getTranslation('plugin.schema.i18n.ensure-unique-localization'),
-              test(value) {
-                if (value === undefined || value) {
-                  return true;
-                }
-
-                const unique = get(args, ['3', 'modifiedData', 'unique'], null);
-
-                // Unique fields must be localized
-                if (unique && !value) {
-                  return false;
-                }
-
-                return true;
-              },
-            }),
-          }),
-        }),
         form: {
           advanced({ contentTypeSchema, forTarget, type, step }: any) {
             if (forTarget !== 'contentType') {
@@ -169,7 +152,7 @@ export default {
 
             const hasI18nEnabled = get(
               contentTypeSchema,
-              ['schema', 'pluginOptions', 'i18n', 'localized'],
+              ['pluginOptions', 'i18n', 'localized'],
               false
             );
 

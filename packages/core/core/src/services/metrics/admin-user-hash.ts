@@ -6,6 +6,7 @@ import type { Core } from '@strapi/types';
  */
 const generateAdminUserHash = (strapi: Core.Strapi) => {
   const ctx = strapi?.requestContext?.get();
+
   if (!ctx?.state?.user?.email) {
     return '';
   }

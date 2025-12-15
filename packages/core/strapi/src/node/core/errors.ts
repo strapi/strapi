@@ -1,6 +1,7 @@
 import boxen from 'boxen';
 import chalk from 'chalk';
 import os from 'node:os';
+import { errors } from '@strapi/utils';
 
 const isError = (err: unknown): err is Error => err instanceof Error;
 
@@ -24,6 +25,34 @@ const handleUnexpectedError = (err: unknown) => {
     console.log(
       chalk.red(
         boxen(err.stack, {
+          padding: 1,
+          align: 'left',
+        })
+      )
+    );
+  }
+
+  if (err instanceof errors.YupValidationError) {
+    const message = [];
+    const size = err.details.errors.length;
+
+    for (const error of err.details.errors) {
+      // No need to repeat the error message as it's the same as the err.message
+      if (size === 1) {
+        message.push(`  value: ${error.value}`);
+        continue;
+      }
+
+      message.push(
+        [`  [${error.name}]`, `    message: ${error.message}`, `      value: ${error.value}`].join(
+          '\n'
+        )
+      );
+    }
+
+    console.log(
+      chalk.red(
+        boxen(['Details:', message.join('\n\n')].join('\n'), {
           padding: 1,
           align: 'left',
         })

@@ -9,47 +9,39 @@ import {
 } from '@strapi/design-system';
 import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
 import { styled } from 'styled-components';
-
 /* -------------------------------------------------------------------------------------------------
  * Link
  * -----------------------------------------------------------------------------------------------*/
 const MainNavLinkWrapper = styled(RouterLink)`
   text-decoration: none;
   display: flex;
+  align-items: center;
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
   color: ${({ theme }) => theme.colors.neutral500};
   position: relative;
-  width: fit-content;
+  width: 100%;
   padding-block: 0.6rem;
   padding-inline: 0.6rem;
-
-  &:hover,
-  &.active {
-    background: ${({ theme }) => theme.colors.neutral100};
-  }
 
   &:hover {
     svg path {
       fill: ${({ theme }) => theme.colors.neutral600};
     }
-    color: ${({ theme }) => theme.colors.neutral700};
+    background: ${({ theme }) => theme.colors.neutral100};
   }
 
   &.active {
     svg path {
       fill: ${({ theme }) => theme.colors.primary600};
     }
-
-    color: ${({ theme }) => theme.colors.primary600};
-    font-weight: 500;
+    background: ${({ theme }) => theme.colors.primary100};
   }
 `;
 
-const LinkImpl = ({ children, ...props }: LinkProps) => {
-  return <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>;
-};
-
+const LinkImpl = ({ children, ...props }: LinkProps) => (
+  <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>
+);
 /* -------------------------------------------------------------------------------------------------
  * Tooltip
  * -----------------------------------------------------------------------------------------------*/

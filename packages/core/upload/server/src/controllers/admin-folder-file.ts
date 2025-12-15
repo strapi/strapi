@@ -42,7 +42,7 @@ export default {
     } = await folderService.deleteByIds(body.folderIds);
 
     if (deletedFiles.length + deletedFolders.length > 1) {
-      strapi.telemetry.send('didBulkDeleteMediaLibraryElements', {
+      await getService('metrics').trackUsage('didBulkDeleteMediaLibraryElements', {
         eventProperties: {
           rootFolderNumber: deletedFolders.length,
           rootAssetNumber: deletedFiles.length,
@@ -238,7 +238,7 @@ export default {
       where: { id: { $in: fileIds } },
     });
 
-    strapi.telemetry.send('didBulkMoveMediaLibraryElements', {
+    await getService('metrics').trackUsage('didBulkMoveMediaLibraryElements', {
       eventProperties: {
         rootFolderNumber: updatedFolders.length,
         rootAssetNumber: updatedFiles.length,

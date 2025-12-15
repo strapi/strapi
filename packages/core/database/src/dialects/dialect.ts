@@ -1,8 +1,10 @@
 import type { Database } from '..';
-import type { Schema } from '../schema';
+import type { ForeignKey, Index, Schema } from '../schema';
 
 export interface SchemaInspector {
   getSchema(): Promise<Schema>;
+  getIndexes(tableName: string): Promise<Index[]>;
+  getForeignKeys(tableName: string): Promise<ForeignKey[]>;
   getTables(): Promise<string[]>;
 }
 
@@ -73,5 +75,21 @@ export default class Dialect {
 
   canAddIncrements() {
     return true;
+  }
+
+  /**
+   * Get column type conversion SQL for complex type changes
+   * Override in specific dialects to handle database-specific conversions
+   * @param currentType - The current database data type
+   * @param targetType - The target Strapi type
+   * @returns Conversion SQL details or null if no special handling needed
+   */
+  getColumnTypeConversionSQL(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    currentType: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    targetType: string
+  ): { sql: string; typeClause: string; warning?: string } | null {
+    return null;
   }
 }

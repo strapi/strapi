@@ -102,7 +102,6 @@ describe('Wysiwyg render and actions buttons', () => {
   it('should render strikethrough markdown when clicking the strikethrough button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('button', { name: 'More' }));
     await user.click(getByRole('button', { name: 'Strikethrough' }));
 
     expect(getByText('~~Strikethrough~~')).toBeInTheDocument();
@@ -111,8 +110,7 @@ describe('Wysiwyg render and actions buttons', () => {
   it('should render bullet list markdown when clicking the bullet list button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('button', { name: 'More' }));
-    await user.click(getByRole('button', { name: 'BulletList' }));
+    await user.click(getByRole('button', { name: 'Bulleted list' }));
 
     expect(getByText('-')).toBeInTheDocument();
   });
@@ -120,8 +118,7 @@ describe('Wysiwyg render and actions buttons', () => {
   it('should render number list markdown when clicking the number list button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('button', { name: 'More' }));
-    await user.click(getByRole('button', { name: 'NumberList' }));
+    await user.click(getByRole('button', { name: 'Numbered list' }));
 
     expect(getByText('1.')).toBeInTheDocument();
   });
@@ -139,7 +136,6 @@ describe('Wysiwyg render and actions buttons', () => {
   it('should render link markdown when clicking the link button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('button', { name: 'More' }));
     await user.click(getByRole('button', { name: 'Link' }));
 
     expect(getByText('[Link](link)')).toBeInTheDocument();
@@ -148,82 +144,80 @@ describe('Wysiwyg render and actions buttons', () => {
   it('should render quote markdown when clicking the quote button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('button', { name: 'More' }));
     await user.click(getByRole('button', { name: 'Quote' }));
 
     expect(getByText('>Quote')).toBeInTheDocument();
   });
 
-  it('should render h1 markdown when clicking the h1 button', async () => {
+  it('should render Heading 1 markdown when clicking the Heading 1 button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('combobox', { name: 'Add a title' }));
-    await user.click(getByRole('option', { name: 'h1' }));
+    await user.click(getByRole('combobox', { name: 'Headings' }));
+    await user.click(getByRole('option', { name: 'Heading 1' }));
 
     expect(getByText('#')).toBeInTheDocument();
   });
 
-  it('should render h2 markdown when clicking the h2 button', async () => {
+  it('should render Heading 2 markdown when clicking the Heading 2 button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('combobox', { name: 'Add a title' }));
-    await user.click(getByRole('option', { name: 'h2' }));
+    await user.click(getByRole('combobox', { name: 'Headings' }));
+    await user.click(getByRole('option', { name: 'Heading 2' }));
 
     expect(getByText('##')).toBeInTheDocument();
   });
 
-  it('should render h3 markdown when clicking the h3 button', async () => {
+  it('should render Heading 3 markdown when clicking the Heading 3 button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('combobox', { name: 'Add a title' }));
-    await user.click(getByRole('option', { name: 'h3' }));
+    await user.click(getByRole('combobox', { name: 'Headings' }));
+    await user.click(getByRole('option', { name: 'Heading 3' }));
 
     expect(getByText('###')).toBeInTheDocument();
   });
 
-  it('should render h4 markdown when clicking the h4 button', async () => {
+  it('should render Heading 4 markdown when clicking the Heading 4 button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('combobox', { name: 'Add a title' }));
-    await user.click(getByRole('option', { name: 'h4' }));
+    await user.click(getByRole('combobox', { name: 'Headings' }));
+    await user.click(getByRole('option', { name: 'Heading 4' }));
 
     expect(getByText('####')).toBeInTheDocument();
   });
 
-  it('should render h5 markdown when clicking the h5 button', async () => {
+  it('should render Heading 5 markdown when clicking the Heading 5 button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('combobox', { name: 'Add a title' }));
-    await user.click(getByRole('option', { name: 'h5' }));
+    await user.click(getByRole('combobox', { name: 'Headings' }));
+    await user.click(getByRole('option', { name: 'Heading 5' }));
 
     expect(getByText('#####')).toBeInTheDocument();
   });
 
-  it('should render h6 markdown when clicking the h6 button', async () => {
+  it('should render Heading 6 markdown when clicking the Heading 6 button', async () => {
     const { user, getByText, getByRole } = render();
 
-    await user.click(getByRole('combobox', { name: 'Add a title' }));
-    await user.click(getByRole('option', { name: 'h6' }));
+    await user.click(getByRole('combobox', { name: 'Headings' }));
+    await user.click(getByRole('option', { name: 'Heading 6' }));
 
     expect(getByText('######')).toBeInTheDocument();
   });
 
-  it('should render h1 markdown when clicking the h4 button then clicking on the h1 button', async () => {
+  it('should render Heading 1 markdown when clicking the Heading 4 button then clicking on the Heading 1 button', async () => {
     const { user, getByText, getByRole, queryByText } = render();
 
-    await user.click(getByRole('combobox', { name: 'Add a title' }));
-    await user.click(getByRole('option', { name: 'h1' }));
-    await user.click(getByRole('combobox', { name: 'Add a title' }));
-    await user.click(getByRole('option', { name: 'h4' }));
-    await user.click(getByRole('combobox', { name: 'Add a title' }));
-    await user.click(getByRole('option', { name: 'h1' }));
+    await user.click(getByRole('combobox', { name: 'Headings' }));
+    await user.click(getByRole('option', { name: 'Heading 1' }));
+    await user.click(getByRole('combobox', { name: 'Headings' }));
+    await user.click(getByRole('option', { name: 'Heading 4' }));
+    await user.click(getByRole('combobox', { name: 'Headings' }));
+    await user.click(getByRole('option', { name: 'Heading 1' }));
 
     expect(queryByText('####')).not.toBeInTheDocument();
     expect(getByText('#')).toBeInTheDocument();
   });
 
   // PREVIEW MODE TESTS
-
   it('should disable bold button when editor is on preview mode', async () => {
     const { user, getByRole } = render();
 
@@ -246,19 +240,12 @@ describe('Wysiwyg render and actions buttons', () => {
     expect(getByRole('button', { name: 'Underline' })).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('should disabled the more button when editor is on preview mode', async () => {
-    const { user, getByRole } = render();
-
-    await user.click(getByRole('button', { name: /Preview/ }));
-    expect(getByRole('button', { name: 'More' })).toHaveAttribute('aria-disabled', 'true');
-  });
-
   it('should disable titles buttons when editor is on preview mode', async () => {
     const { user, getByRole } = render();
 
     await user.click(getByRole('button', { name: /Preview/ }));
 
-    expect(getByRole('combobox', { name: 'Add a title' })).toHaveAttribute('aria-disabled', 'true');
+    expect(getByRole('combobox', { name: 'Headings' })).toHaveAttribute('aria-disabled', 'true');
   });
 });
 

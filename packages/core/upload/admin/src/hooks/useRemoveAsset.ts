@@ -1,12 +1,23 @@
-import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import {
+  useNotification,
+  useFetchClient,
+  FetchResponse,
+  adminApi,
+} from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient, UseMutationResult } from 'react-query';
+import { useDispatch } from 'react-redux';
 
 import { pluginId } from '../pluginId';
 
 import type { DeleteFile } from '../../../shared/contracts/files';
 
-export const useRemoveAsset = (onSuccess: () => void) => {
+type UseRemoveAsset = {
+  removeAsset: (assetId: number) => Promise<void>;
+} & UseMutationResult<FetchResponse<DeleteFile.Response>, Error, number>;
+
+export const useRemoveAsset = (onSuccess: () => void): UseRemoveAsset => {
+  const dispatch = useDispatch();
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
@@ -26,6 +37,7 @@ export const useRemoveAsset = (onSuccess: () => void) => {
             defaultMessage: 'Elements have been successfully deleted.',
           }),
         });
+        dispatch(adminApi.util.invalidateTags(['HomepageKeyStatistics']));
 
         onSuccess();
       },

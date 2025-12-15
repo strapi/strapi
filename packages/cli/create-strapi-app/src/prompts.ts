@@ -75,4 +75,19 @@ async function installDependencies(packageManager: string) {
   return installDependencies;
 }
 
-export { directory, typescript, example, gitInit, installDependencies };
+async function enableABTests() {
+  const { enableABTests } = await inquirer.prompt<{
+    enableABTests: boolean;
+  }>([
+    {
+      type: 'confirm',
+      name: 'enableABTests',
+      message: `Participate in anonymous A/B testing (to improve Strapi)?`,
+      default: false,
+    },
+  ]);
+
+  return enableABTests;
+}
+
+export { directory, typescript, example, gitInit, installDependencies, enableABTests };

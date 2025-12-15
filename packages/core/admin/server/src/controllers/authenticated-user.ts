@@ -28,7 +28,6 @@ export default {
       const isValid = await authServer.validatePassword(currentPassword, ctx.state.user.password);
 
       if (!isValid) {
-        // @ts-expect-error - refactor ctx bad request to take a second argument
         return ctx.badRequest('ValidationError', {
           currentPassword: ['Invalid credentials'],
         });

@@ -1,8 +1,15 @@
-import React from 'react';
+import * as React from 'react';
 
 import { render, waitFor } from '@strapi/strapi/admin/test';
 
 import { ProvidersPage } from '../index';
+
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
 
 jest.mock('@strapi/strapi/admin', () => ({
   ...jest.requireActual('@strapi/strapi/admin'),

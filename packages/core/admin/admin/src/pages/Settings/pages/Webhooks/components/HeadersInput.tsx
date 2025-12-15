@@ -60,7 +60,7 @@ const HeadersInput = () => {
         {value.map((val, index) => {
           return (
             <Grid.Root key={`${index}-${JSON.stringify(val.key)}`} gap={4} padding={2}>
-              <Grid.Item col={6} direction="column" alignItems="stretch">
+              <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                 <HeaderCombobox
                   name={`headers.${index}.key`}
                   aria-label={`row ${index + 1} key`}
@@ -70,7 +70,7 @@ const HeadersInput = () => {
                   })}
                 />
               </Grid.Item>
-              <Grid.Item col={6} direction="column" alignItems="stretch">
+              <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                 <Flex alignItems="flex-end" gap={2}>
                   <Box style={{ flex: 1 }}>
                     <StringInput
@@ -80,7 +80,7 @@ const HeadersInput = () => {
                         id: 'Settings.webhooks.value',
                         defaultMessage: 'Value',
                       })}
-                      type="string"
+                      type="text"
                     />
                   </Box>
                   <IconButton
@@ -149,10 +149,12 @@ const HeaderCombobox = ({ name, label, ...restProps }: HeaderComboboxProps) => {
     field.onChange(name, value);
   };
 
-  const handleCreateOption = (value: string) => {
+  const handleCreateOption = (value?: string) => {
     setOptions((prev) => [...prev, value as HTTPHeaders]);
 
-    handleChange(value);
+    if (value) {
+      handleChange(value);
+    }
   };
 
   return (

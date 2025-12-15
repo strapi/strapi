@@ -1,12 +1,5 @@
 import { createAuditLogsLifecycleService } from '../lifecycles';
-import createEventHub from '../../../../../../../core/dist/services/event-hub';
-import { scheduleJob } from 'node-schedule';
-
 import '@strapi/types';
-
-jest.mock('node-schedule', () => ({
-  scheduleJob: jest.fn(),
-}));
 
 describe('Audit logs service', () => {
   const mockSubscribe = jest.fn();
@@ -38,6 +31,10 @@ describe('Audit logs service', () => {
     get: jest.fn(() => ({
       deleteExpiredEvents: jest.fn(),
     })),
+    cron: {
+      add: jest.fn(),
+      remove: jest.fn(),
+    },
     config: {
       get(key: any) {
         switch (key) {
@@ -51,7 +48,16 @@ describe('Audit logs service', () => {
       },
     },
     eventHub: {
-      ...createEventHub(),
+      subs: {} as Record<string, (...args: unknown[]) => unknown>,
+      emit(eventName: string, ...args: unknown[]) {
+        this.subs[eventName](...args);
+      },
+      on(eventName: string, func: (...args: unknown[]) => unknown) {
+        this.subs[eventName] = func;
+        return () => {
+          delete this.subs[eventName];
+        };
+      },
       subscribe: mockSubscribe,
     },
     hook: () => ({
@@ -71,6 +77,9 @@ describe('Audit logs service', () => {
     // Should not subscribe to events at first
     const lifecycle = createAuditLogsLifecycleService(strapi);
     await lifecycle.register();
+    const destroySpy = jest.spyOn(lifecycle, 'destroy');
+    const registerSpy = jest.spyOn(lifecycle, 'register');
+
     expect(mockSubscribe).not.toHaveBeenCalled();
 
     // Should subscribe to events when license gets enabled
@@ -83,25 +92,27 @@ describe('Audit logs service', () => {
     jest.mocked(strapi.ee.features.isEnabled).mockImplementationOnce(() => false);
     await strapi.eventHub.emit('ee.disable');
     expect(mockSubscribe).not.toHaveBeenCalled();
+    expect(destroySpy).toHaveBeenCalled();
 
     // Should recreate the service when license updates
-    const destroySpy = jest.spyOn(lifecycle, 'destroy');
-    const registerSpy = jest.spyOn(lifecycle, 'register');
     await strapi.eventHub.emit('ee.update');
     expect(destroySpy).toHaveBeenCalled();
     expect(registerSpy).toHaveBeenCalled();
   });
 
   it('should create a cron job that executed one time a day', async () => {
-    // @ts-expect-error scheduleJob
-    const mockScheduleJob = scheduleJob.mockImplementationOnce(
-      jest.fn((rule, callback) => callback())
-    );
+    // Mock Strapi EE feature to be enabled for this test
+    jest.mocked(strapi.ee.features.isEnabled).mockReturnValueOnce(true);
 
     const lifecycle = createAuditLogsLifecycleService(strapi);
     await lifecycle.register();
 
-    expect(mockScheduleJob).toHaveBeenCalledTimes(1);
-    expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
+    // Verify that strapi.cron.add was called with the correct job configuration
+    expect(strapi.cron.add).toHaveBeenCalledWith({
+      deleteExpiredAuditLogs: {
+        task: expect.any(Function),
+        options: '0 0 * * *',
+      },
+    });
   });
 });

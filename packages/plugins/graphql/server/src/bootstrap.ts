@@ -1,5 +1,5 @@
-import { isEmpty, mergeWith, isArray, isObject } from 'lodash/fp';
-import { ApolloServer, type ApolloServerOptions } from '@apollo/server';
+import { isEmpty, mergeWith, isArray, isObject, isFunction } from 'lodash/fp';
+import { ApolloServer, type ApolloServerPlugin, type ApolloServerOptions } from '@apollo/server';
 import {
   ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginLandingPageProductionDefault,
@@ -10,6 +10,7 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
 import type { Core } from '@strapi/types';
+import type { Options } from '@koa/cors';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
@@ -19,6 +20,92 @@ const merge = mergeWith((a, b) => {
     return a.concat(b);
   }
 });
+
+type StrapiGraphQLContext = BaseContext & {
+  rootQueryArgs?: Record<string, unknown>;
+};
+
+export const determineLandingPage = (
+  strapi: Core.Strapi
+): ApolloServerPlugin<StrapiGraphQLContext> => {
+  const { config } = strapi.plugin('graphql');
+  const utils = strapi.plugin('graphql').service('utils');
+
+  /**
+   * configLanding page may be one of the following:
+   *
+   * - true: always use "playground" even in production
+   * - false: never show "playground" even in non-production
+   * - undefined: default Apollo behavior (hide playground on production)
+   * - a function that returns an Apollo plugin that implements renderLandingPage
+   ** */
+  const configLandingPage = config('landingPage');
+
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  const localLanding = () => {
+    strapi.log.debug('Apollo landing page: local');
+    utils.playground.setEnabled(true);
+    return ApolloServerPluginLandingPageLocalDefault();
+  };
+
+  const prodLanding = () => {
+    strapi.log.debug('Apollo landing page: production');
+    utils.playground.setEnabled(false);
+    return ApolloServerPluginLandingPageProductionDefault();
+  };
+
+  const userLanding = (userFunction: (strapi?: Core.Strapi) => ApolloServerPlugin | boolean) => {
+    strapi.log.debug('Apollo landing page: from user-defined function...');
+    const result = userFunction(strapi);
+    if (result === true) {
+      return localLanding();
+    }
+    if (result === false) {
+      return prodLanding();
+    }
+    strapi.log.debug('Apollo landing page: user-defined');
+    return result;
+  };
+
+  // DEPRECATED, remove in Strapi v6
+  const playgroundAlways = config('playgroundAlways');
+  if (playgroundAlways !== undefined) {
+    strapi.log.warn(
+      'The graphql config playgroundAlways is deprecated. This will be removed in Strapi 6. Please use landingPage instead. '
+    );
+  }
+  if (playgroundAlways === false) {
+    strapi.log.warn(
+      'graphql config playgroundAlways:false has no effect, please use landingPage:false to disable Graphql Playground in all environments'
+    );
+  }
+
+  if (playgroundAlways || configLandingPage === true) {
+    return localLanding();
+  }
+
+  // if landing page has been disabled, use production
+  if (configLandingPage === false) {
+    return prodLanding();
+  }
+
+  // If user did not define any settings, use our defaults
+  if (configLandingPage === undefined) {
+    return isProduction ? prodLanding() : localLanding();
+  }
+
+  // if user provided a landing page function, return that
+  if (isFunction(configLandingPage)) {
+    return userLanding(configLandingPage);
+  }
+
+  // If no other setting could be found, default to production settings
+  strapi.log.warn(
+    'Your Graphql landing page has been disabled because there is a problem with your Graphql settings'
+  );
+  return prodLanding();
+};
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   // Generate the GraphQL schema for the content API
@@ -34,25 +121,45 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
   const path: string = config('endpoint');
 
-  // TODO: rename playgroundAlways since it's not playground anymore
-  const playgroundEnabled = !(process.env.NODE_ENV === 'production' && !config('playgroundAlways'));
-
-  let landingPage;
-  if (playgroundEnabled) {
-    landingPage = ApolloServerPluginLandingPageLocalDefault();
-    strapi.log.debug('Using Apollo sandbox landing page');
-  } else {
-    landingPage = ApolloServerPluginLandingPageProductionDefault();
-    strapi.log.debug('Using Apollo production landing page');
-  }
+  const landingPage = determineLandingPage(strapi);
+  /**
+   * We need the arguments passed to the root query to be available in the association resolver
+   * so we can forward those arguments along to any relations.
+   *
+   * In order to do that we are currently storing the arguments in context.
+   * There is likely a better solution, but for now this is the simplest fix we could find.
+   *
+   * @see https://github.com/strapi/strapi/issues/23524
+   */
+  const pluginAddRootQueryArgs: ApolloServerPlugin<StrapiGraphQLContext> = {
+    async requestDidStart() {
+      return {
+        async executionDidStart() {
+          return {
+            willResolveField({ source, args, contextValue, info }) {
+              if (!source && info.operation.operation === 'query') {
+                // Track which query field set the rootQueryArgs
+                const fieldName = info.fieldName;
+                // Set rootQueryArgs with the field name that originated it
+                contextValue.rootQueryArgs = {
+                  ...args,
+                  _originField: fieldName, // Track which field set this
+                };
+              }
+            },
+          };
+        },
+      };
+    },
+  };
 
   type CustomOptions = {
-    cors: boolean;
+    cors?: boolean | Options;
     uploads: boolean;
     bodyParserConfig: boolean;
   };
 
-  const defaultServerConfig: ApolloServerOptions<BaseContext> & CustomOptions = {
+  const defaultServerConfig: ApolloServerOptions<StrapiGraphQLContext> & CustomOptions = {
     // Schema
     schema,
 
@@ -63,12 +170,12 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     formatError: formatGraphqlError,
 
     // Misc
-    cors: false,
+    cors: undefined,
     uploads: false,
     bodyParserConfig: true,
     // send 400 http status instead of 200 for input validation errors
     status400ForVariableCoercionErrors: true,
-    plugins: [landingPage],
+    plugins: [landingPage, pluginAddRootQueryArgs],
 
     cache: 'bounded' as const,
   };
@@ -76,7 +183,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const serverConfig = merge(
     defaultServerConfig,
     config('apolloServer')
-  ) as ApolloServerOptions<BaseContext> & CustomOptions;
+  ) as ApolloServerOptions<StrapiGraphQLContext> & CustomOptions;
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);
@@ -96,8 +203,14 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const handler: Core.MiddlewareHandler[] = [];
 
   // add cors middleware
-  if (cors) {
+  if (serverConfig.cors === false) {
+    // Explicitly disabled - don't add middleware
+  } else if (serverConfig.cors === undefined || serverConfig.cors === true) {
+    // enable with defaults (backwards compatible)
     handler.push(cors());
+  } else {
+    // Custom options object
+    handler.push(cors(serverConfig.cors));
   }
 
   // add koa bodyparser middleware
@@ -121,7 +234,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     const isPlaygroundRequest =
       ctx.request.method === 'GET' &&
       ctx.request.url === path && // Matches the GraphQL endpoint
-      playgroundEnabled && // Only allow if the Playground is enabled
+      strapi.plugin('graphql').service('utils').playground.isEnabled() && // Only allow if the Playground is enabled
       ctx.request.header.accept?.includes('text/html'); // Specific to Playground UI loading
 
     // Skip authentication for the GraphQL Playground UI

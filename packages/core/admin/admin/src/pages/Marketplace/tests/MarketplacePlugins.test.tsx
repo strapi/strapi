@@ -320,7 +320,7 @@ describe('Marketplace page - plugins tab', () => {
     if (removeButton && removeButton?.tagName === 'BUTTON') {
       await user.click(removeButton);
       await waitForReload();
-      expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(`"?page=1"`);
+      expect(screen.getByTestId('location')).toHaveTextContent('?page=1');
     }
   });
 
@@ -369,9 +369,7 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(getByRole('option', { name: 'Newest' }));
 
     await waitForReload();
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-      `"?sort=submissionDate:desc&page=1"`
-    );
+    expect(screen.getByTestId('location')).toHaveTextContent('?sort=submissionDate:desc&page=1');
   });
 
   it('shows github stars and weekly downloads count for each plugin', async () => {
@@ -410,22 +408,16 @@ describe('Marketplace page - plugins tab', () => {
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-      `"?pageSize=24&page=2"`
-    );
+    expect(screen.getByTestId('location')).toHaveTextContent('?pageSize=24&page=2');
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-      `"?pageSize=24&page=1"`
-    );
+    expect(screen.getByTestId('location')).toHaveTextContent('?pageSize=24&page=1');
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-      `"?pageSize=24&page=3"`
-    );
+    expect(screen.getByTestId('location')).toHaveTextContent('?pageSize=24&page=3');
   });
 });

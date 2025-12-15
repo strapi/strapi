@@ -15,6 +15,7 @@ export const Permissions = ({ ...props }) => {
   return (
     <Grid.Root gap={0} shadow="filterShadow" hasRadius background="neutral0">
       <Grid.Item
+        xs={12}
         col={7}
         paddingTop={6}
         paddingBottom={6}
@@ -22,6 +23,7 @@ export const Permissions = ({ ...props }) => {
         paddingRight={7}
         direction="column"
         alignItems="stretch"
+        gap={6}
       >
         <Flex direction="column" alignItems="stretch" gap={2}>
           <Typography variant="delta" tag="h2">

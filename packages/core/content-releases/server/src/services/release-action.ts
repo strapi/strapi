@@ -253,7 +253,8 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
           const acc = await accPromise;
           const contentTypeModel = strapi.getModel(contentTypeUid);
 
-          const workflow = await workflowsService.getAssignedWorkflow(contentTypeUid, {
+          // Workflows service may not be available depending on the license
+          const workflow = await workflowsService?.getAssignedWorkflow(contentTypeUid, {
             populate: 'stageRequiredToPublish',
           });
 

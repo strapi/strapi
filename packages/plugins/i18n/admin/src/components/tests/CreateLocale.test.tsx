@@ -56,7 +56,7 @@ describe('Create Locale', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(await screen.findByText(/Success/)).toBeInTheDocument();
+    expect(await screen.findByText(/locale successfully added/i)).toBeInTheDocument();
   });
 
   it('should show an error if the creation fails', async () => {

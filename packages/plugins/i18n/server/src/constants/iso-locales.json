@@ -632,6 +632,10 @@
     "name": "English (Jamaica) (en-JM)"
   },
   {
+    "code": "en-JP",
+    "name": "English (Japan) (en-JP)"
+  },
+  {
     "code": "en-JE",
     "name": "English (Jersey) (en-JE)"
   },
@@ -1798,6 +1802,22 @@
   {
     "code": "pa-Guru-IN",
     "name": "Punjabi (Gurmukhi, India) (pa-Guru-IN)"
+  },
+  {
+    "code": "pap",
+    "name": "Papiamento (pap)"
+  },
+  {
+    "code": "pap-AW",
+    "name": "Papiamento (Aruba) (pap-AW)"
+  },
+  {
+    "code": "pap-CW",
+    "name": "Papiamentu (Curaçao) (pap-CW)"
+  },
+  {
+    "code": "pap-BQ",
+    "name": "Papiamentu (Bonaire) (pap-BQ)"
   },
   {
     "code": "ro",

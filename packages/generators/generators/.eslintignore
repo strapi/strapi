@@ -3,3 +3,4 @@ node_modules/
 src/files/
 dist
 jest.config.js
+rollup.config.mjs

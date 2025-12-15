@@ -91,7 +91,7 @@ export const FormApiTokenContainer = ({
           })}
         </Typography>
         <Grid.Root gap={5}>
-          <Grid.Item key="name" col={6} xs={12} direction="column" alignItems="stretch">
+          <Grid.Item key="name" m={6} xs={12} direction="column" alignItems="stretch">
             <TokenName
               error={errors['name']}
               value={values['name']}
@@ -99,7 +99,7 @@ export const FormApiTokenContainer = ({
               onChange={onChange}
             />
           </Grid.Item>
-          <Grid.Item key="description" col={6} xs={12} direction="column" alignItems="stretch">
+          <Grid.Item key="description" m={6} xs={12} direction="column" alignItems="stretch">
             <TokenDescription
               error={errors['description']}
               value={values['description']}
@@ -107,7 +107,7 @@ export const FormApiTokenContainer = ({
               onChange={onChange}
             />
           </Grid.Item>
-          <Grid.Item key="lifespan" col={6} xs={12} direction="column" alignItems="stretch">
+          <Grid.Item key="lifespan" m={6} xs={12} direction="column" alignItems="stretch">
             <LifeSpanInput
               isCreating={isCreating}
               error={errors['lifespan']}
@@ -117,7 +117,7 @@ export const FormApiTokenContainer = ({
             />
           </Grid.Item>
 
-          <Grid.Item key="type" col={6} xs={12} direction="column" alignItems="stretch">
+          <Grid.Item key="type" m={6} xs={12} direction="column" alignItems="stretch">
             <TokenTypeSelect
               value={values['type']}
               error={errors['type']}

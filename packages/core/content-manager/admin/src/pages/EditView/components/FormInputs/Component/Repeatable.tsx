@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { useField, useNotification, useForm } from '@strapi/admin/strapi-admin';
+import {
+  useField,
+  useNotification,
+  useForm,
+  createRulesEngine,
+  useIsDesktop,
+} from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -9,7 +15,6 @@ import {
   Accordion,
   IconButton,
   useComposedRefs,
-  Grid,
   BoxComponent,
 } from '@strapi/design-system';
 import { Plus, Drag, Trash } from '@strapi/icons';
@@ -19,13 +24,14 @@ import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDoc } from '../../../../../hooks/useDocument';
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
@@ -51,7 +57,8 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const { components } = useDoc();
+  const { currentDocument } = useDocumentContext('RepeatableComponent');
+  const components = currentDocument.components;
 
   const {
     value = [],
@@ -65,6 +72,8 @@ const RepeatableComponent = ({
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
+
+  const rulesEngine = createRulesEngine();
 
   React.useEffect(() => {
     const hasNestedErrors = rawError && Array.isArray(rawError) && rawError.length > 0;
@@ -243,8 +252,9 @@ const RepeatableComponent = ({
         onValueChange={handleValueChange}
         aria-describedby={ariaDescriptionId}
       >
-        {value.map(({ __temp_key__: key, id }, index) => {
+        {value.map(({ __temp_key__: key, id, ...currentComponentValues }, index) => {
           const nameWithIndex = `${name}.${index}`;
+
           return (
             <ComponentProvider
               key={key}
@@ -272,9 +282,21 @@ const RepeatableComponent = ({
                 __temp_key__={key}
               >
                 {layout.map((row, index) => {
+                  const visibleFields = row.filter(({ ...field }) => {
+                    const condition = field.attribute.conditions?.visible;
+                    if (condition) {
+                      return rulesEngine.evaluate(condition, currentComponentValues);
+                    }
+
+                    return true;
+                  });
+
+                  if (visibleFields.length === 0) {
+                    return null; // Skip rendering the entire grid row
+                  }
                   return (
-                    <Grid.Root gap={4} key={index}>
-                      {row.map(({ size, ...field }) => {
+                    <ResponsiveGridRoot gap={4} key={index}>
+                      {visibleFields.map(({ size, ...field }) => {
                         /**
                          * Layouts are built from schemas so they don't understand the complete
                          * schema tree, for components we append the parent name to the field name
@@ -289,7 +311,7 @@ const RepeatableComponent = ({
                         });
 
                         return (
-                          <Grid.Item
+                          <ResponsiveGridItem
                             col={size}
                             key={completeFieldName}
                             s={12}
@@ -301,11 +323,12 @@ const RepeatableComponent = ({
                               ...field,
                               label: translatedLabel,
                               name: completeFieldName,
+                              document: currentDocument,
                             })}
-                          </Grid.Item>
+                          </ResponsiveGridItem>
                         );
                       })}
-                    </Grid.Root>
+                    </ResponsiveGridRoot>
                   );
                 })}
               </Component>
@@ -387,6 +410,7 @@ const Component = ({
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
   const displayValue = useForm('RepeatableComponent', (state) => {
     return getIn(state.values, [...name.split('.'), mainField.name]);
@@ -437,6 +461,7 @@ const Component = ({
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
               <IconButton
+                disabled={disabled}
                 variant="ghost"
                 onClick={onDeleteComponent}
                 label={formatMessage({
@@ -446,19 +471,22 @@ const Component = ({
               >
                 <Trash />
               </IconButton>
-              <IconButton
-                ref={composedAccordionRefs}
-                variant="ghost"
-                onClick={(e) => e.stopPropagation()}
-                data-handler-id={handlerId}
-                label={formatMessage({
-                  id: getTranslation('components.DragHandle-label'),
-                  defaultMessage: 'Drag',
-                })}
-                onKeyDown={handleKeyDown}
-              >
-                <Drag />
-              </IconButton>
+              {isDesktop && (
+                <IconButton
+                  disabled={disabled}
+                  ref={composedAccordionRefs}
+                  variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
+                  data-handler-id={handlerId}
+                  label={formatMessage({
+                    id: getTranslation('components.DragHandle-label'),
+                    defaultMessage: 'Drag',
+                  })}
+                  onKeyDown={handleKeyDown}
+                >
+                  <Drag />
+                </IconButton>
+              )}
             </Accordion.Actions>
           </Accordion.Header>
           <Accordion.Content>

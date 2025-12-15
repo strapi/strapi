@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Popover, Tag } from '@strapi/design-system';
 import { Plus, Filter as FilterIcon, Cross } from '@strapi/icons';
-import { Schema } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import {
@@ -20,6 +19,8 @@ import { useQueryParams } from '../hooks/useQueryParams';
 import { createContext } from './Context';
 import { Form, InputProps } from './Form';
 import { InputRenderer } from './FormInputs/Renderer';
+
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Root
@@ -107,8 +108,14 @@ const Trigger = React.forwardRef<HTMLButtonElement, Filters.TriggerProps>(
 /* -------------------------------------------------------------------------------------------------
  * Popover
  * -----------------------------------------------------------------------------------------------*/
-
-const PopoverImpl = () => {
+/**
+ * The zIndex property is used to override the zIndex of the Portal element of the Popover.
+ * This is needed to ensure that the DatePicker is rendered above the Popover when opened.
+ * The issue was that both the DatePicker and the Popover are rendered in a Portal and have the same zIndex.
+ * On init, since the DatePicker is rendered before the Popover in the DOM,
+ * it's causing the issue of appearing behind the Popover.
+ */
+const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
   const [{ query }, setQuery] = useQueryParams<Filters.Query>();
   const { formatMessage } = useIntl();
   const options = useFilters('Popover', ({ options }) => options);
@@ -166,12 +173,12 @@ const PopoverImpl = () => {
       ],
     };
 
-    setQuery({ filters: newFilterQuery, page: 1 });
+    setQuery({ filters: newFilterQuery, page: 1 }, 'push', true);
     setOpen(false);
   };
 
   return (
-    <Popover.Content>
+    <Popover.Content style={{ zIndex }}>
       <Box padding={3}>
         <Form
           method="POST"
