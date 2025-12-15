@@ -28,7 +28,6 @@ import {
 } from './reducer';
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
-import { setFavicon } from './utils/favicon';
 
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
 import type { DefaultTheme } from 'styled-components';
@@ -43,7 +42,6 @@ const {
 interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>> {
   config?: {
     auth?: { logo: string };
-    head?: { favicon: string };
     locales?: string[];
     menu?: { logo: string };
     notifications?: { releases: boolean };
@@ -102,7 +100,6 @@ class StrapiApp {
 
   configurations = {
     authLogo: Logo,
-    head: { favicon: '' },
     locales: ['en'],
     menuLogo: Logo,
     notifications: { releases: true },
@@ -266,11 +263,6 @@ class StrapiApp {
 
     if (customConfig.menu?.logo) {
       this.configurations.menuLogo = customConfig.menu.logo;
-    }
-
-    if (customConfig.head?.favicon) {
-      this.configurations.head.favicon = customConfig.head.favicon;
-      setFavicon(this.configurations.head.favicon);
     }
 
     if (customConfig.theme) {

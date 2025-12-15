@@ -31,7 +31,12 @@ module.exports = [
       handlers: responseHandlers,
     },
   },
-  'strapi::favicon',
+  {
+    name: 'strapi::favicon',
+    config: {
+      path: 'faviconi.png',
+    },
+  },
   'strapi::public',
   {
     name: 'global::test-middleware',
