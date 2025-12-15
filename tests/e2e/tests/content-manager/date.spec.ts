@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { clickAndWait } from '../../utils/shared';
-import { createContent } from '../../utils/content-creation';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
+import { clickAndWait } from '../../../utils/shared';
+import { createContent } from '../../../utils/content-creation';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
 
 // Helper to get date in MM/DD/YYYY format consistently
 function toMMDDYYYY(date: Date) {

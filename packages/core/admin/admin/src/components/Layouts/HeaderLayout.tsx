@@ -86,7 +86,16 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           {navigationAction}
           <Flex justifyContent="space-between" wrap="wrap" gap={4}>
             <Flex minWidth={0}>
-              <Typography tag="h1" variant="alpha" {...props}>
+              <Typography
+                tag="h1"
+                variant="alpha"
+                {...props}
+                style={{
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word',
+                  maxWidth: '100%',
+                }}
+              >
                 {title}
               </Typography>
               {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}

@@ -12,20 +12,20 @@ const getDecryptionStrategy = (algorithm: Algorithm): EncryptionStrategy => {
     },
     aes128(key: string): Decipheriv {
       const hashedKey = scryptSync(key, '', 32);
-      const initVector: BinaryLike | null = hashedKey.slice(16);
-      const securityKey: CipherKey = hashedKey.slice(0, 16);
+      const initVector: BinaryLike | null = hashedKey.subarray(16);
+      const securityKey: CipherKey = hashedKey.subarray(0, 16);
       return createDecipheriv(algorithm, securityKey, initVector);
     },
     aes192(key: string): Decipheriv {
       const hashedKey = scryptSync(key, '', 40);
-      const initVector: BinaryLike | null = hashedKey.slice(24);
-      const securityKey: CipherKey = hashedKey.slice(0, 24);
+      const initVector: BinaryLike | null = hashedKey.subarray(24);
+      const securityKey: CipherKey = hashedKey.subarray(0, 24);
       return createDecipheriv(algorithm, securityKey, initVector);
     },
     aes256(key: string): Decipheriv {
       const hashedKey = scryptSync(key, '', 48);
-      const initVector: BinaryLike | null = hashedKey.slice(32);
-      const securityKey: CipherKey = hashedKey.slice(0, 32);
+      const initVector: BinaryLike | null = hashedKey.subarray(32);
+      const securityKey: CipherKey = hashedKey.subarray(0, 32);
       return createDecipheriv(algorithm, securityKey, initVector);
     },
   };

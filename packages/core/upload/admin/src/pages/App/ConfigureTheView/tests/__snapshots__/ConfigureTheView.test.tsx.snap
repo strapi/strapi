@@ -493,6 +493,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                     >
                       <h1
                         class="c13"
+                        style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;"
                       >
                         Configure the view - Media Library
                       </h1>

@@ -78,7 +78,7 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
     return z
       .object({
         documentId: this.documentID,
-        id: z.number(),
+        id: z.union([z.string(), z.number()]),
       })
       .extend(attributesSchema.shape);
   }

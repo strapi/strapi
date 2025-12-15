@@ -1476,6 +1476,14 @@
     "name": "Lithuanian (Lithuania) (lt-LT)"
   },
   {
+    "code": "lb",
+    "name": "Luxembourgish (lb)"
+  },
+  {
+    "code": "lb-LU",
+    "name": "Luxembourgish (Luxembourg) (lb-LU)"
+  },
+  {
     "code": "lu",
     "name": "Luba-Katanga (lu)"
   },
@@ -1794,6 +1802,22 @@
   {
     "code": "pa-Guru-IN",
     "name": "Punjabi (Gurmukhi, India) (pa-Guru-IN)"
+  },
+  {
+    "code": "pap",
+    "name": "Papiamento (pap)"
+  },
+  {
+    "code": "pap-AW",
+    "name": "Papiamento (Aruba) (pap-AW)"
+  },
+  {
+    "code": "pap-CW",
+    "name": "Papiamentu (Curaçao) (pap-CW)"
+  },
+  {
+    "code": "pap-BQ",
+    "name": "Papiamentu (Bonaire) (pap-BQ)"
   },
   {
     "code": "ro",
