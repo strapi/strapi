@@ -1479,6 +1479,14 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Lithuanian (Lithuania) (lt-LT)",
   },
   {
+    "code": "lb",
+    "name": "Luxembourgish (lb)",
+  },
+  {
+    "code": "lb-LU",
+    "name": "Luxembourgish (Luxembourg) (lb-LU)",
+  },
+  {
     "code": "lu",
     "name": "Luba-Katanga (lu)",
   },
