@@ -76,7 +76,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     expect(mutatedField.labelAction).toBeUndefined();
   });
 
-  it('injects a labelAction element when content type is localized (top-level field)', () => {
+  it('injects a labelAction element when content type is localized (root-level field)', () => {
     const titleField: EditFieldLayout = {
       attribute: { type: 'string', pluginOptions: { i18n: { localized: true } } } as any,
       disabled: false,
@@ -107,8 +107,9 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     }
   });
 
-  it('inherits localization from a component attribute when name is dotted', async () => {
+  it('does not show localization icon for a non-localized component field', () => {
     const componentUid = 'shared.button';
+
     const layout = makeEditLayout({
       ctLocalized: true,
       topFields: [
@@ -117,7 +118,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
             attribute: {
               type: 'component',
               component: componentUid,
-              pluginOptions: { i18n: { localized: true } },
+              pluginOptions: { i18n: { localized: false } },
             } as any,
             disabled: false,
             hint: '',
@@ -135,24 +136,7 @@ describe('mutateEditViewHook – label action injection and localization', () =>
       ],
       components: {
         [componentUid]: {
-          layout: [
-            [
-              {
-                attribute: { type: 'string' } as any,
-                disabled: false,
-                hint: '',
-                label: 'Label',
-                name: 'label',
-                mainField: 'id' as any,
-                placeholder: '',
-                required: false,
-                size: 12,
-                unique: false,
-                visible: true,
-                type: 'string' as any,
-              },
-            ],
-          ],
+          layout: [],
           settings: { displayName: 'Button' } as any,
         },
       },
@@ -161,16 +145,11 @@ describe('mutateEditViewHook – label action injection and localization', () =>
     mockUseDocumentLayout.mockReturnValue({ edit: layout });
 
     const { layout: mutated } = mutateEditViewHook({ layout });
-    const inner = mutated.components[componentUid].layout[0][0];
-    const action = inner.labelAction as React.ReactElement;
+    const action = mutated.layout[0][0][0].labelAction as React.ReactElement;
 
-    // Simulate CM cloning that injects the full dotted path
-    const dotted = React.cloneElement(action, {
-      name: 'cta.label',
-      attribute: inner.attribute,
-    });
-
-    render(dotted);
-    expect(screen.getByText(/This value is unique for the selected locale/i)).toBeInTheDocument();
+    render(action);
+    expect(
+      screen.queryByText(/This value is unique for the selected locale/i)
+    ).not.toBeInTheDocument();
   });
 });

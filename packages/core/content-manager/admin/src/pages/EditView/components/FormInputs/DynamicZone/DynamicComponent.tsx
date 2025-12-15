@@ -20,7 +20,6 @@ import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
-import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
@@ -28,26 +27,6 @@ import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 
 import type { ComponentPickerProps } from './ComponentPicker';
-
-type LabelActionProp = React.ReactNode;
-
-const renderLabelAction = (
-  labelAction: React.ReactNode,
-  args: {
-    name: string;
-    attribute: unknown;
-  }
-): React.ReactNode => {
-  if (React.isValidElement(labelAction)) {
-    const element = labelAction as React.ReactElement;
-    return React.createElement(element.type as React.ComponentType<Record<string, unknown>>, {
-      ...element.props,
-      ...args,
-    });
-  }
-
-  return labelAction as React.ReactNode;
-};
 
 interface DynamicComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
@@ -61,8 +40,6 @@ interface DynamicComponentProps
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
   children?: (props: InputRendererProps) => React.ReactNode;
 }
-
-type FieldWithLabelAction = EditFieldLayout & { labelAction?: LabelActionProp };
 
 const DynamicComponent = ({
   componentUid,
@@ -291,21 +268,12 @@ const DynamicComponent = ({
                               {visibleFields.map(({ size, ...field }) => {
                                 const fieldName = `${name}.${index}.${field.name}`;
 
-                                const clonedLabelAction = renderLabelAction(
-                                  (field as FieldWithLabelAction).labelAction,
-                                  {
-                                    name: fieldName,
-                                    attribute: field.attribute,
-                                  }
-                                );
-
                                 const fieldWithTranslatedLabel = {
                                   ...field,
                                   label: formatMessage({
                                     id: `content-manager.components.${componentUid}.${field.name}`,
                                     defaultMessage: field.label,
                                   }),
-                                  labelAction: clonedLabelAction,
                                 };
 
                                 return (
