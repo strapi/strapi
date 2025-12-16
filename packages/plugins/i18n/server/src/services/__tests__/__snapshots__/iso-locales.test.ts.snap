@@ -331,6 +331,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Cherokee (United States) (chr-US)",
   },
   {
+    "code": "ny",
+    "name": "Chichewa",
+  },
+  {
     "code": "cgg",
     "name": "Chiga (cgg)",
   },
@@ -421,6 +425,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "da-DK",
     "name": "Danish (Denmark) (da-DK)",
+  },
+  {
+    "code": "dwr",
+    "name": "Dawro",
   },
   {
     "code": "dua",
@@ -1111,6 +1119,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Galician (Spain) (gl-ES)",
   },
   {
+    "code": "gmv",
+    "name": "Gamo",
+  },
+  {
     "code": "lao",
     "name": "Laotian (Laos) (lao)",
   },
@@ -1159,6 +1171,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "German (Switzerland) (de-CH)",
   },
   {
+    "code": "gof",
+    "name": "Gofa",
+  },
+  {
     "code": "el",
     "name": "Greek (el)",
   },
@@ -1205,6 +1221,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "ha-Latn-NG",
     "name": "Hausa (Latin, Nigeria) (ha-Latn-NG)",
+  },
+  {
+    "code": "ht",
+    "name": "Haitian",
   },
   {
     "code": "haw",
