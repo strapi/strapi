@@ -55,7 +55,6 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          echo "Publish flow: $TYPE"
           # Ensure registry is set
           npm config set registry "$REGISTRY"
 
