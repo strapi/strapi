@@ -29,6 +29,10 @@ on:
         type: string
         default: 'https://registry.npmjs.org/'
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   publish:
     name: Publish packages
