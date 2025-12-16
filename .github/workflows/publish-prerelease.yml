@@ -8,7 +8,7 @@ on:
         default: 'experimental'
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
