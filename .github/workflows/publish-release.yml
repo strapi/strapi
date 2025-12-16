@@ -23,16 +23,29 @@ on:
 
 jobs:
   publish:
-    name: 'Publish (reusable)'
-    uses: ./.github/workflows/publish-npm.yml
+    name: 'Publish'
+    runs-on: ubuntu-latest
     if: github.repository == 'strapi/strapi'
-    permissions:
-      contents: write
-      id-token: write
-    with:
-      tag: ${{ github.event.inputs.distTag }}
-      # Pass through the requested bump type (patch/minor/prepatch/etc.) so
-      # the publish script can use it as before.
-      version: ${{ github.event.inputs.version }}
-      type: 'release'
-      fetch_depth: 0
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_SECRET }}
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0 # Fetch full history
+      - name: Setup npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: yarn
+      - run: ./scripts/publish.sh
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+          DIST_TAG: ${{ github.event.inputs.distTag }}
+          PREID: ${{ github.event.inputs.distTag }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_ACTOR: ${{ github.actor }}

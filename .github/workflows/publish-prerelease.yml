@@ -8,15 +8,22 @@ on:
         default: 'experimental'
 
 permissions:
-  contents: write
-  id-token: write
+  contents: read # to fetch code (actions/checkout)
 
 jobs:
   publish:
     name: 'Publish'
-    uses: ./.github/workflows/publish-npm.yml
+    runs-on: ubuntu-latest
     if: github.repository == 'strapi/strapi'
-    with:
-      tag: ${{ github.event.inputs.dist-tag }}
-      version: '0.0.0-experimental.${{ github.sha }}'
-      type: 'prerelease'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: yarn
+      - run: ./scripts/pre-publish.sh
+        env:
+          VERSION: '0.0.0-experimental.${{ github.sha }}'
+          DIST_TAG: ${{ github.event.inputs.dist-tag }}

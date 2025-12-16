@@ -6,14 +6,21 @@ on:
 
 permissions:
   contents: read # to fetch code (actions/checkout)
-  id-token: write
 
 jobs:
   publish:
     name: 'Publish'
+    runs-on: ubuntu-latest
     if: github.repository == 'strapi/strapi'
-    uses: ./.github/workflows/publish-npm.yml
-    with:
-      tag: 'next'
-      version: '0.0.0-next.${{ github.sha }}'
-      type: 'prerelease'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: yarn
+      - run: ./scripts/pre-publish.sh --yes
+        env:
+          VERSION: '0.0.0-next.${{ github.sha }}'
+          DIST_TAG: next
