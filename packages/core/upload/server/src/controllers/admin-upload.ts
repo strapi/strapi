@@ -188,42 +188,14 @@ export default {
 
     const aiMetadataService = getService('aiMetadata');
 
-    // AFTER upload - use thumbnail versions for AI processing
+    // AFTER upload - generate AI metadata for images
     if (await aiMetadataService.isEnabled()) {
       try {
-        // Use thumbnail URLs instead of original files
-        const thumbnailFiles = uploadedFiles.map(
-          (file) =>
-            ({
-              filepath: file.formats?.thumbnail?.url || file.url, // Use thumbnail if available
-              mimetype: file.mime,
-              originalFilename: file.name,
-              size: file.formats?.thumbnail?.size || file.size,
-              provider: file.provider,
-            }) as unknown as any
-        );
-
-        const metadataResults = await aiMetadataService.processFiles(thumbnailFiles);
-
+        const metadataResults = await aiMetadataService.processFiles(uploadedFiles);
         // Update the uploaded files with AI metadata
-        await Promise.all(
-          uploadedFiles.map(async (uploadedFile, index) => {
-            const aiMetadata = metadataResults[index];
-            if (aiMetadata) {
-              await uploadService.updateFileInfo(
-                uploadedFile.id,
-                {
-                  alternativeText: aiMetadata.altText,
-                  caption: aiMetadata.caption,
-                },
-                { user }
-              );
-
-              uploadedFiles[index].alternativeText = aiMetadata.altText;
-              uploadedFiles[index].caption = aiMetadata.caption;
-            }
-          })
-        );
+        await aiMetadataService.updateFilesWithAIMetadata(uploadedFiles, metadataResults, {
+          user,
+        });
       } catch (error) {
         strapi.log.warn('AI metadata generation failed, proceeding without AI enhancements', {
           error: error instanceof Error ? error.message : String(error),

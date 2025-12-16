@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { createAIMetadataService } from '../ai-metadata';
-import type { InputFile } from '../../types';
+import type { File } from '../../types';
 
 // Mock dependencies
 jest.mock('node:fs/promises');
@@ -60,6 +60,9 @@ describe('AI Metadata Service', () => {
       log: {
         http: jest.fn(),
         warn: jest.fn(),
+        debug: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
       },
       plugin: jest.fn().mockImplementation((pluginName) => {
         if (pluginName === 'upload') {
@@ -130,27 +133,35 @@ describe('AI Metadata Service', () => {
   });
 
   describe('processFiles', () => {
-    const mockImageFile: InputFile = {
-      filepath: '/tmp/image.jpg',
-      mimetype: 'image/jpeg',
-      originalFilename: 'image.jpg',
+    const mockImageFile: File = {
+      id: 1,
+      name: 'image.jpg',
+      url: '/tmp/image.jpg',
+      mime: 'image/jpeg',
       size: 1024,
       provider: 'local',
-    } as InputFile;
+      hash: 'hash1',
+    } as File;
 
-    const mockImageFile2: InputFile = {
-      filepath: 'image2.png',
-      mimetype: 'image/png',
-      originalFilename: 'image2.png',
+    const mockImageFile2: File = {
+      id: 2,
+      name: 'image2.png',
+      url: 'image2.png',
+      mime: 'image/png',
       size: 2048,
-    } as InputFile;
+      provider: 'cloudinary',
+      hash: 'hash2',
+    } as File;
 
-    const mockPdfFile: InputFile = {
-      filepath: '/tmp/document.pdf',
-      mimetype: 'application/pdf',
-      originalFilename: 'document.pdf',
+    const mockPdfFile: File = {
+      id: 3,
+      name: 'document.pdf',
+      url: '/tmp/document.pdf',
+      mime: 'application/pdf',
       size: 2048,
-    } as InputFile;
+      provider: 'local',
+      hash: 'hash3',
+    } as File;
 
     beforeEach(() => {
       // Mock strapi config
