@@ -179,6 +179,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   getService('metrics').startCron(strapi);
 
   apiTokenService.checkSaltIsDefined();
+  getService('service-account-token').checkSaltIsDefined();
   transferService.token.checkSaltIsDefined();
   tokenService.checkSecretIsDefined();
 

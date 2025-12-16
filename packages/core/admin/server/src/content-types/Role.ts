@@ -53,5 +53,13 @@ export default {
       mappedBy: 'role',
       target: 'admin::permission',
     },
+    serviceAccountTokens: {
+      configurable: false,
+      private: true,
+      type: 'relation',
+      relation: 'manyToMany',
+      inversedBy: 'roles',
+      target: 'admin::service-account-token',
+    },
   },
 };

@@ -78,6 +78,14 @@ export const ADMIN_PERMISSIONS_CE = {
       update: [{ action: 'admin::api-tokens.update', subject: null }],
       regenerate: [{ action: 'admin::api-tokens.regenerate', subject: null }],
     },
+    'service-accounts': {
+      main: [{ action: 'admin::service-accounts.access', subject: null }],
+      create: [{ action: 'admin::service-accounts.create', subject: null }],
+      delete: [{ action: 'admin::service-accounts.delete', subject: null }],
+      read: [{ action: 'admin::service-accounts.read', subject: null }],
+      update: [{ action: 'admin::service-accounts.update', subject: null }],
+      regenerate: [{ action: 'admin::service-accounts.regenerate', subject: null }],
+    },
     'transfer-tokens': {
       main: [{ action: 'admin::transfer.tokens.access', subject: null }],
       create: [{ action: 'admin::transfer.tokens.create', subject: null }],
@@ -203,6 +211,11 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       // Init the search params directly
       to: '/settings/users?pageSize=10&page=1&sort=firstname',
       id: 'users',
+    },
+    {
+      intlLabel: { id: 'Settings.serviceAccounts.title', defaultMessage: 'Service Accounts' },
+      to: '/settings/service-accounts',
+      id: 'service-accounts',
     },
     ...(!window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS) &&
     window.strapi?.flags?.promoteEE

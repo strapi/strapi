@@ -124,6 +124,7 @@ interface FormHeadProps<TToken extends Token | null> {
   showToken?: boolean;
   isSubmitting: boolean;
   regenerateUrl: string;
+  regenerateComponent?: React.ReactNode;
 }
 
 export const FormHead = <TToken extends Token | null>({
@@ -137,6 +138,7 @@ export const FormHead = <TToken extends Token | null>({
   canRegenerate,
   isSubmitting,
   regenerateUrl,
+  regenerateComponent,
 }: FormHeadProps<TToken>) => {
   const { formatMessage } = useIntl();
   const handleRegenerate = (newKey: string) => {
@@ -147,18 +149,22 @@ export const FormHead = <TToken extends Token | null>({
     toggleToken?.();
   };
 
+  const RegenerateButton =
+    regenerateComponent ||
+    (canRegenerate && token?.id ? (
+      <Regenerate
+        onRegenerate={handleRegenerate}
+        url={`${regenerateUrl}${token?.id ?? ''}`}
+      />
+    ) : null);
+
   return (
     <Layouts.Header
       title={token?.name || formatMessage(title)}
       primaryAction={
         canEditInputs ? (
           <Flex gap={2}>
-            {canRegenerate && token?.id && (
-              <Regenerate
-                onRegenerate={handleRegenerate}
-                url={`${regenerateUrl}${token?.id ?? ''}`}
-              />
-            )}
+            {RegenerateButton}
             {token?.id && toggleToken && (
               <tours.apiTokens.ViewAPIToken>
                 <Tooltip
@@ -200,13 +206,7 @@ export const FormHead = <TToken extends Token | null>({
             </Button>
           </Flex>
         ) : (
-          canRegenerate &&
-          token?.id && (
-            <Regenerate
-              onRegenerate={handleRegenerate}
-              url={`${regenerateUrl}${token?.id ?? ''}`}
-            />
-          )
+          RegenerateButton
         )
       }
       navigationAction={

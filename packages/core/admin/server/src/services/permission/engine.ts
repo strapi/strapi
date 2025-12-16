@@ -77,6 +77,15 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
     },
 
     /**
+     * Generate an ability from a list of permissions
+     * @param permissions - array of permissions
+     * @param user - optional user object for conditions evaluation
+     */
+    generateAbility(permissions: Permission[], user?: AdminUser): Promise<Ability> {
+      return engine.generateAbility(permissions as any, user);
+    },
+
+    /**
      * Check many permissions based on an ability
      */
     checkMany: curry((ability: Ability, permissions: Permission[]) => {

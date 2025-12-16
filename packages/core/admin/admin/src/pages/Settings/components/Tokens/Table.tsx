@@ -15,6 +15,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
+import { ServiceAccountToken } from '../../../../../../shared/contracts/service-account';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { tours } from '../../../../components/GuidedTour/Tours';
@@ -30,15 +31,15 @@ import type { Data } from '@strapi/types';
  * -----------------------------------------------------------------------------------------------*/
 
 interface TableProps
-  extends Pick<TableImpl.Props<SanitizedTransferToken | ApiToken>, 'headers' | 'isLoading'> {
+  extends Pick<TableImpl.Props<SanitizedTransferToken | ApiToken | ServiceAccountToken>, 'headers' | 'isLoading'> {
   onConfirmDelete: (id: Data.ID) => void;
   permissions: {
     canRead: boolean;
     canDelete: boolean;
     canUpdate: boolean;
   };
-  tokens: SanitizedTransferToken[] | ApiToken[];
-  tokenType: 'api-token' | 'transfer-token';
+  tokens: SanitizedTransferToken[] | ApiToken[] | ServiceAccountToken[];
+  tokenType: 'api-token' | 'transfer-token' | 'service-account';
 }
 
 const Table = ({
@@ -99,6 +100,13 @@ const Table = ({
                     {token.description}
                   </Typography>
                 </TableImpl.Cell>
+                {tokenType === 'service-account' && 'roles' in token && (
+                  <TableImpl.Cell maxWidth="25rem">
+                    <Typography textColor="neutral800" ellipsis>
+                      {typeof token.roles === 'string' ? token.roles : token.roles.map((r) => r.name).join(', ')}
+                    </Typography>
+                  </TableImpl.Cell>
+                )}
                 <TableImpl.Cell>
                   <Typography textColor="neutral800">
                     {/* @ts-expect-error One of the tokens doesn't have createdAt */}

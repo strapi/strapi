@@ -123,6 +123,36 @@ export const ROUTES_CE: RouteObject[] = [
   },
   {
     lazy: async () => {
+      const { ProtectedListView } = await import('./pages/ServiceAccounts/ListView');
+
+      return {
+        Component: ProtectedListView,
+      };
+    },
+    path: 'service-accounts',
+  },
+  {
+    lazy: async () => {
+      const { ProtectedCreateView } = await import('./pages/ServiceAccounts/CreateView');
+
+      return {
+        Component: ProtectedCreateView,
+      };
+    },
+    path: 'service-accounts/create',
+  },
+  {
+    lazy: async () => {
+      const { ProtectedEditView } = await import('./pages/ServiceAccounts/EditView/EditViewPage');
+
+      return {
+        Component: ProtectedEditView,
+      };
+    },
+    path: 'service-accounts/:id',
+  },
+  {
+    lazy: async () => {
       const { ProtectedCreateView } = await import('./pages/TransferTokens/CreateView');
 
       return {

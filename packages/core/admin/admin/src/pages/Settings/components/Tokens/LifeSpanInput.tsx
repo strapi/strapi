@@ -5,6 +5,7 @@ import { getDateOfExpiration } from '../../pages/ApiTokens/EditView/utils/getDat
 import { isErrorMessageMessageDescriptor } from '../../utils/forms';
 
 import type { ApiToken } from '../../../../../../shared/contracts/api-token';
+import type { ServiceAccountToken } from '../../../../../../shared/contracts/service-account';
 import type { TransferToken } from '../../../../../../shared/contracts/transfer';
 
 interface LifeSpanInputProps {
@@ -12,7 +13,7 @@ interface LifeSpanInputProps {
   value?: string | number | null;
   onChange: (event: { target: { name: string; value: string } }) => void;
   isCreating: boolean;
-  token: Partial<TransferToken> | Partial<ApiToken> | null;
+  token: Partial<TransferToken> | Partial<ApiToken> | Partial<ServiceAccountToken> | null;
 }
 
 export const LifeSpanInput = ({

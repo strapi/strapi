@@ -4,6 +4,7 @@ type SettingsPermissions =
   | 'api-tokens'
   | 'project-settings'
   | 'roles'
+  | 'service-accounts'
   | 'transfer-tokens'
   | 'users'
   | 'webhooks';

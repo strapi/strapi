@@ -8,6 +8,7 @@ import apiTokens from './api-tokens';
 import contentApi from './content-api';
 import transfer from './transfer';
 import homepage from './homepage';
+import serviceAccounts from './service-accounts';
 
 const routes = {
   admin: {
@@ -23,6 +24,7 @@ const routes = {
       ...contentApi,
       ...transfer,
       ...homepage,
+      ...serviceAccounts,
     ],
   },
 };
