@@ -1,0 +1,90 @@
+name: 'Publish to npm'
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'The npm tag to publish with'
+        required: true
+        default: 'latest'
+        type: string
+      version:
+        description: 'The version to publish (if not set, uses the version from package.json)'
+        required: false
+        default: ''
+        type: string
+      fetch_depth:
+        description: 'Git fetch depth for checkout. Use `0` for full history'
+        required: false
+        default: '1'
+        type: string
+      type:
+        description: 'Publish flow to run: release | prerelease | nightly'
+        required: false
+        type: string
+        default: 'release'
+      registry:
+        description: 'Registry URL to publish to'
+        required: false
+        type: string
+        default: 'https://registry.npmjs.org/'
+
+jobs:
+  publish:
+    name: Publish packages
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: ${{ inputs.fetch_depth }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: yarn
+
+      - name: Publish packages (run publish scripts)
+        env:
+          TAG: ${{ inputs.tag }}
+          VERSION: ${{ inputs.version }}
+          TYPE: ${{ inputs.type }}
+          REGISTRY: ${{ inputs.registry }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          echo "Publish flow: $TYPE"
+          # Ensure registry is set
+          npm config set registry "$REGISTRY"
+
+          # For now we only support the flow where a VERSION input is provided.
+          # Fail early and give a clear message so callers pass the `version` input.
+          if [ -z "${VERSION:-}" ]; then
+            echo "ERROR: this workflow requires the 'version' input to be set for now." >&2
+            echo "Please call this reusable workflow with 'version' set (e.g. 1.2.3 or 0.0.0-experimental.<sha>)." >&2
+            exit 1
+          fi
+
+          if [ "$TYPE" = "release" ]; then
+            echo "Running release flow: ./scripts/publish.sh"
+            export DIST_TAG="$TAG"
+            export PREID="$TAG"
+            echo "Using provided VERSION=$VERSION"
+            export VERSION
+            ./scripts/publish.sh
+          elif [ "$TYPE" = "prerelease" ]; then
+            echo "Running prerelease flow: ./scripts/pre-publish.sh"
+            echo "Using provided VERSION=$VERSION"
+            export VERSION
+            export DIST_TAG="$TAG"
+            ./scripts/pre-publish.sh
+          else
+            echo "Unknown publish type: $TYPE" >&2
+            exit 1
+          fi
