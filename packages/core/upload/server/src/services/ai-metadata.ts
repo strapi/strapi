@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 import { z } from 'zod';
-import { InputFile } from '../types';
+import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
@@ -27,9 +27,116 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       return aiMetadata;
     },
 
-    async processFiles(
-      files: InputFile[]
-    ): Promise<Array<{ altText: string; caption: string } | null>> {
+    async countImagesWithoutMetadata() {
+      const count = await strapi.db.query('plugin::upload.file').count({
+        where: {
+          mime: {
+            $startsWith: 'image/',
+          },
+          $or: [
+            { alternativeText: { $null: true } },
+            { alternativeText: '' },
+            { caption: { $null: true } },
+            { caption: '' },
+          ],
+        },
+      });
+
+      return count;
+    },
+
+    /**
+     * Update files with AI-generated metadata
+     * Shared logic used by both upload flow and batch processing
+     */
+    async updateFilesWithAIMetadata(
+      files: File[],
+      metadataResults: Array<{ altText: string; caption: string } | null>,
+      options?: {
+        user?: { id: string | number };
+      }
+    ): Promise<{ processed: number; errors: Array<{ fileId: number; error: string }> }> {
+      const uploadService = strapi.plugin('upload').service('upload');
+      let processed = 0;
+      const errors: Array<{ fileId: number; error: string }> = [];
+
+      await Promise.all(
+        files.map(async (file, index) => {
+          const aiMetadata = metadataResults[index];
+          if (aiMetadata) {
+            try {
+              await uploadService.updateFileInfo(
+                file.id,
+                {
+                  alternativeText: aiMetadata.altText,
+                  caption: aiMetadata.caption,
+                },
+                options?.user ? { user: options.user } : undefined
+              );
+
+              // Update in-memory file object (needed for upload flow response)
+              file.alternativeText = aiMetadata.altText;
+              file.caption = aiMetadata.caption;
+
+              processed += 1;
+            } catch (error) {
+              errors.push({
+                fileId: file.id,
+                error: error instanceof Error ? error.message : 'Unknown error updating file',
+              });
+            }
+          }
+        })
+      );
+
+      return { processed, errors };
+    },
+
+    /**
+     * Checks for images without metadata and generates metadata for them
+     */
+    async processExistingFiles() {
+      if (!(await this.isEnabled())) {
+        throw new Error('AI Metadata service is not enabled');
+      }
+
+      // Query all images without metadata
+      const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
+        where: {
+          mime: {
+            $startsWith: 'image/',
+          },
+          $or: [
+            { alternativeText: { $null: true } },
+            { alternativeText: '' },
+            { caption: { $null: true } },
+            { caption: '' },
+          ],
+        },
+      });
+
+      if (files.length === 0) {
+        strapi.log.info('No images without metadata found');
+        return { processed: 0, errors: [] };
+      }
+
+      try {
+        const metadataResults = await this.processFiles(files);
+        const updatedImages = await this.updateFilesWithAIMetadata(files, metadataResults);
+
+        return updatedImages;
+      } catch (error) {
+        strapi.log.error('AI metadata generation failed', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
+      }
+    },
+
+    /**
+     * Processes provided files for AI metadata generation
+     */
+    async processFiles(files: File[]): Promise<Array<{ altText: string; caption: string } | null>> {
       if (!(await this.isEnabled()) || !aiServerUrl) {
         throw new Error('AI Metadata service is not enabled');
       }
@@ -38,7 +145,19 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       // We need to maintain the original indices so we can map AI results back correctly
       const imageFiles = files
         .map((file, index) => ({ file, originalIndex: index }))
-        .filter(({ file }) => file.mimetype?.startsWith('image/'));
+        .filter(({ file }) => file.mime?.startsWith('image/'));
+
+      // Convert filtered image files to InputFile format (uses thumbnails when available)
+      const imageInputFiles = imageFiles.map(({ file }) => {
+        const thumbnail = (file.formats as any)?.thumbnail;
+        return {
+          filepath: thumbnail?.url || file.url || '',
+          mimetype: file.mime,
+          originalFilename: file.name,
+          size: thumbnail?.size || file.size,
+          provider: file.provider,
+        } as InputFile;
+      });
 
       // If no image files, return sparse array with all nulls to avoid calling the AI server
       // This maintains the same array length as input files for proper index alignment
@@ -48,7 +167,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const formData = new FormData();
 
-      for (const { file } of imageFiles) {
+      for (const file of imageInputFiles) {
         const fullUrl =
           file.provider === 'local'
             ? strapi.config.get('server.absoluteUrl') + file.filepath
@@ -56,6 +175,11 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const resp = await fetch(fullUrl);
         if (!resp.ok) {
+          strapi.log.error('Failed to fetch image', {
+            fullUrl,
+            status: resp.status,
+            statusText: resp.statusText,
+          });
           throw new Error(`Failed to fetch image from URL: ${fullUrl} (${resp.status})`);
         }
         const ab = await resp.arrayBuffer();
@@ -73,7 +197,11 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
       }
 
-      strapi.log.http('Contacting AI Server for media metadata generation');
+      strapi.log.http('Contacting AI Server for media metadata generation', {
+        aiServerUrl,
+        imageCount: imageFiles.length,
+      });
+
       const res = await fetch(`${aiServerUrl}/media-library/generate-metadata`, {
         method: 'POST',
         body: formData,
@@ -83,7 +211,8 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       if (!res.ok) {
-        throw Error(`AI metadata generation failed`, { cause: await res.text() });
+        const errorText = await res.text();
+        throw Error(`AI metadata generation failed`, { cause: errorText });
       }
 
       const responseSchema = z.object({

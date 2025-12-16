@@ -22,7 +22,7 @@ import type { InitialState } from './reducer';
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const { put } = useFetchClient();
+  const { put, post } = useFetchClient();
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
@@ -60,6 +60,36 @@ export const SettingsPage = () => {
         });
       },
       onError(err: any) {
+        toggleNotification({
+          type: 'danger',
+          message: err.message || formatMessage({ id: 'notification.error' }),
+        });
+      },
+    }
+  );
+
+  const { mutateAsync: generateAIMetadata, isLoading: isGeneratingAI } = useMutation<
+    {
+      processed: number;
+      total: number;
+      errors: Array<{ fileId: number; error: string }>;
+      message: string;
+    },
+    { message: string },
+    void
+  >(
+    async () => {
+      const { data } = await post('/upload/actions/generate-ai-metadata', {});
+      return data;
+    },
+    {
+      onSuccess(data) {
+        toggleNotification({
+          type: 'success',
+          message: data.message || 'AI metadata generated successfully',
+        });
+      },
+      onError(err) {
         toggleNotification({
           type: 'danger',
           message: err.message || formatMessage({ id: 'notification.error' }),
@@ -184,6 +214,19 @@ export const SettingsPage = () => {
                         </Field.Root>
                       </Grid.Item>
                     </Grid.Root>
+                    <Flex paddingTop={4}>
+                      <Button
+                        variant="secondary"
+                        startIcon={<Sparkle />}
+                        loading={isGeneratingAI}
+                        onClick={() => generateAIMetadata()}
+                      >
+                        {formatMessage({
+                          id: getTrad('settings.form.aiMetadata.generateButton'),
+                          defaultMessage: 'Generate metadata for existing images',
+                        })}
+                      </Button>
+                    </Flex>
                   </Flex>
                 </Box>
               )}

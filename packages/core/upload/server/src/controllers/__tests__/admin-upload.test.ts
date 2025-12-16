@@ -55,6 +55,38 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     mockAiMetadataService = {
       isEnabled: jest.fn(),
       processFiles: jest.fn(),
+      updateFilesWithAIMetadata: jest
+        .fn()
+        .mockImplementation(async (files, metadataResults, options) => {
+          let processed = 0;
+          const errors: Array<{ fileId: number; error: string }> = [];
+
+          await Promise.all(
+            files.map(async (file: any, index: number) => {
+              const aiMetadata = metadataResults[index];
+              if (aiMetadata) {
+                try {
+                  await uploadService.updateFileInfo(
+                    file.id,
+                    {
+                      alternativeText: aiMetadata.altText,
+                      caption: aiMetadata.caption,
+                    },
+                    options?.user ? { user: options.user } : undefined
+                  );
+                  processed += 1;
+                } catch (error) {
+                  errors.push({
+                    fileId: file.id,
+                    error: error instanceof Error ? error.message : 'Unknown error updating file',
+                  });
+                }
+              }
+            })
+          );
+
+          return { processed, errors };
+        }),
     };
 
     uploadService = {
@@ -403,8 +435,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       expect(mockAiMetadataService.processFiles).toHaveBeenCalledWith([
         expect.objectContaining({
-          filepath: '/uploads/test.jpg',
-          mimetype: 'image/jpeg',
+          id: 1,
+          name: 'test.jpg',
+          url: '/uploads/test.jpg',
+          mime: 'image/jpeg',
+          provider: 'local',
         }),
       ]);
     });

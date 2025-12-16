@@ -217,5 +217,21 @@ export const routes = {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/actions/generate-ai-metadata',
+      handler: 'admin-file.generateAIMetadata',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.assets.update'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };

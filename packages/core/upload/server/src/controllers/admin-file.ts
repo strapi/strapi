@@ -82,4 +82,61 @@ export default {
 
     ctx.body = body;
   },
+
+  async generateAIMetadata(ctx: Context) {
+    const { userAbility } = ctx.state;
+
+    const pm = strapi.service('admin::permission').createPermissionsManager({
+      ability: userAbility,
+      action: ACTIONS.update,
+      model: FILE_MODEL_UID,
+    });
+
+    if (!pm.isAllowed) {
+      return ctx.forbidden();
+    }
+
+    const aiMetadataService = getService('aiMetadata');
+
+    // Check if AI service is enabled
+    if (!(await aiMetadataService.isEnabled())) {
+      return ctx.badRequest('AI Metadata service is not enabled');
+    }
+
+    try {
+      // Get count first
+      const count = await aiMetadataService.countImagesWithoutMetadata();
+
+      if (count === 0) {
+        ctx.body = {
+          processed: 0,
+          total: 0,
+          errors: [],
+          message: 'No images without metadata found',
+        };
+        return;
+      }
+
+      // Process all images without metadata
+      const result = await aiMetadataService.processExistingFiles();
+
+      ctx.body = {
+        processed: result.processed,
+        total: count,
+        errors: result.errors,
+        message: `Processed ${result.processed} out of ${count} images`,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to generate AI metadata';
+      const cause = error instanceof Error && error.cause ? String(error.cause) : undefined;
+
+      strapi.log.error('AI metadata generation failed in controller', {
+        message,
+        cause,
+        error,
+      });
+
+      ctx.badRequest(cause ? `${message}: ${cause}` : message);
+    }
+  },
 };
