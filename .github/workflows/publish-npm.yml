@@ -1,4 +1,4 @@
-name: 'Publish to npm'
+name: 'publish-npm.yml'
 
 on:
   workflow_dispatch:
@@ -41,13 +41,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          registry-url: 'https://registry.npmjs.org/'
 
       - run: yarn
-
-      - name: Debug npm auth
-        run: |
-          echo "Registry: $(npm config get registry 2>/dev/null || echo '<unset>')"
-          npm whoami || echo "not authenticated"
 
       - name: Debug OIDC availability
         run: |
@@ -82,14 +78,11 @@ jobs:
         env:
           TAG: ${{ inputs.tag }}
           VERSION: ${{ inputs.version }}
-          REGISTRY: https://registry.npmjs.org/
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          # Ensure registry is set
-          npm config set registry "$REGISTRY"
 
           DIST_TAG="$TAG"
 
