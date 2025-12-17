@@ -9213,6 +9213,7 @@ __metadata:
     scheduler: "npm:0.23.0"
     semver: "npm:7.5.4"
     sift: "npm:16.0.1"
+    sonner: "npm:2.0.7"
     styled-components: "npm:6.1.8"
     typescript: "npm:5.4.4"
     use-context-selector: "npm:1.4.1"
@@ -30580,6 +30581,16 @@ __metadata:
     ip-address: "npm:^9.0.5"
     smart-buffer: "npm:^4.2.0"
   checksum: 10c0/ac77b515c260473cc7c4452f09b20939e22510ce3ae48385c516d1d5784374d5cc75be3cb18ff66cc985a7f4f2ef8fef84e984c5ec70aad58355ed59241f40a8
+  languageName: node
+  linkType: hard
+
+"sonner@npm:2.0.7":
+  version: 2.0.7
+  resolution: "sonner@npm:2.0.7"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+    react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+  checksum: 10c0/6966ab5e892ed6aab579a175e4a24f3b48747f0fc21cb68c3e33cb41caa7a0eebeb098c210545395e47a18d585eb8734ae7dd12d2bd18c8a3294a1ee73f997d9
   languageName: node
   linkType: hard
 
