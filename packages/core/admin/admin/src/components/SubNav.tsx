@@ -338,9 +338,7 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
         style={{
           maxHeight: isOpen ? `${contentHeight}px` : 0,
           overflow: 'hidden',
-          transition: isOpen
-            ? 'max-height 1s ease-in-out'
-            : 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
+          transition: 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
         }}
       >
         {children.map((child, index) => {
