@@ -44,6 +44,40 @@ jobs:
 
       - run: yarn
 
+      - name: Debug npm auth
+        run: |
+          echo "Registry: $(npm config get registry 2>/dev/null || echo '<unset>')"
+          npm whoami || echo "not authenticated"
+
+      - name: Debug OIDC availability
+        run: |
+          echo "ACTIONS_ID_TOKEN_REQUEST_URL=${ACTIONS_ID_TOKEN_REQUEST_URL:-<missing>}"
+          if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ]; then
+            echo "No ACTIONS_ID_TOKEN_REQUEST_URL available (id-token permission may be missing)"
+            exit 0
+          fi
+          echo "ACTIONS_ID_TOKEN_REQUEST_TOKEN present: ${ACTIONS_ID_TOKEN_REQUEST_TOKEN:+yes}"
+          # Try requesting an id token for a sample audience. Replace 'npm' with the audience
+          # you configured in the npm OIDC trust if needed.
+          TOKEN=$(curl -s -X GET "${ACTIONS_ID_TOKEN_REQUEST_URL}?audience=npm" -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}")
+          if [ -z "${TOKEN}" ]; then
+            echo "Failed to obtain id token (empty response)"
+          else
+            echo "Obtained id token length: ${#TOKEN}"
+            # Try to decode JWT payload to inspect claims (aud, repository, repository_owner)
+            PAYLOAD=$(echo "${TOKEN}" | cut -d '.' -f2)
+            # Add base64 padding if necessary
+            PAD=$((4 - ${#PAYLOAD} % 4))
+            if [ "$PAD" -lt 4 ]; then
+              PAD_STR=$(printf '%*s' "$PAD" '' | tr ' ' '=')
+              PAYLOAD="${PAYLOAD}${PAD_STR}"
+            fi
+            echo "Decoded ID token payload (raw JSON):"
+            echo "${PAYLOAD}" | base64 --decode 2>/dev/null || echo "(failed to base64-decode payload)"
+            echo "Attempting pretty-print (jq or python fallback):"
+            echo "${PAYLOAD}" | base64 --decode 2>/dev/null | jq . || (echo "jq not available or failed; using python fallback" && echo "${PAYLOAD}" | base64 --decode 2>/dev/null | python3 -c 'import sys,json;print(json.dumps(json.load(sys.stdin),indent=2))') || true
+          fi
+
       - name: Publish packages (run publish scripts)
         env:
           TAG: ${{ inputs.tag }}
