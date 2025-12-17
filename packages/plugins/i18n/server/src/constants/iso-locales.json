@@ -260,6 +260,10 @@
     "name": "Bosnian (bs)"
   },
   {
+    "code": "bs-BA",
+    "name": "Bosnian (Bosnia and Herzegovina) (bs-BA)"
+  },
+  {
     "code": "bs-Cyrl",
     "name": "Bosnian (Cyrillic)"
   },
@@ -274,10 +278,6 @@
   {
     "code": "bs-Latn-BA",
     "name": "Bosnian (Latin, Bosnia and Herzegovina)"
-  },
-  {
-    "code": "bs-BA",
-    "name": "Bosnian (Bosnia and Herzegovina) (bs-BA)"
   },
   {
     "code": "br",
