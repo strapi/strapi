@@ -157,7 +157,8 @@ const exists = async (whereParams: WhereParams = {}): Promise<boolean> => {
  */
 const hash = (accessKey: string) => {
   const apiTokenCfg = strapi.config.get<Core.Config.Admin['apiToken']>('admin.apiToken');
-  const salt = apiTokenCfg?.salt;
+  const salt = apiTokenCfg.salt;
+
   return crypto.createHmac('sha512', salt).update(accessKey).digest('hex');
 };
 
