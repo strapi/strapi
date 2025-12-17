@@ -328,6 +328,10 @@
     "name": "Cherokee (United States) (chr-US)"
   },
   {
+    "code": "ny",
+    "name": "Chichewa"
+  },
+  {
     "code": "cgg",
     "name": "Chiga (cgg)"
   },
@@ -418,6 +422,10 @@
   {
     "code": "da-DK",
     "name": "Danish (Denmark) (da-DK)"
+  },
+  {
+    "code": "dwr",
+    "name": "Dawro"
   },
   {
     "code": "dua",
@@ -662,6 +670,10 @@
   {
     "code": "en-MG",
     "name": "English (Madagascar) (en-MG)"
+  },
+  {
+    "code": "en-MM",
+    "name": "English (Myanmar) (en-MM)"
   },
   {
     "code": "en-MW",
@@ -1108,6 +1120,10 @@
     "name": "Galician (Spain) (gl-ES)"
   },
   {
+    "code": "gmv",
+    "name": "Gamo"
+  },
+  {
     "code": "lao",
     "name": "Laotian (Laos) (lao)"
   },
@@ -1156,6 +1172,10 @@
     "name": "German (Switzerland) (de-CH)"
   },
   {
+    "code": "gof",
+    "name": "Gofa"
+  },
+  {
     "code": "el",
     "name": "Greek (el)"
   },
@@ -1202,6 +1222,10 @@
   {
     "code": "ha-Latn-NG",
     "name": "Hausa (Latin, Nigeria) (ha-Latn-NG)"
+  },
+  {
+    "code": "ht",
+    "name": "Haitian"
   },
   {
     "code": "haw",
@@ -1474,6 +1498,14 @@
   {
     "code": "lt-LT",
     "name": "Lithuanian (Lithuania) (lt-LT)"
+  },
+  {
+    "code": "lb",
+    "name": "Luxembourgish (lb)"
+  },
+  {
+    "code": "lb-LU",
+    "name": "Luxembourgish (Luxembourg) (lb-LU)"
   },
   {
     "code": "lu",
@@ -1794,6 +1826,22 @@
   {
     "code": "pa-Guru-IN",
     "name": "Punjabi (Gurmukhi, India) (pa-Guru-IN)"
+  },
+  {
+    "code": "pap",
+    "name": "Papiamento (pap)"
+  },
+  {
+    "code": "pap-AW",
+    "name": "Papiamento (Aruba) (pap-AW)"
+  },
+  {
+    "code": "pap-CW",
+    "name": "Papiamentu (Curaçao) (pap-CW)"
+  },
+  {
+    "code": "pap-BQ",
+    "name": "Papiamentu (Bonaire) (pap-BQ)"
   },
   {
     "code": "ro",

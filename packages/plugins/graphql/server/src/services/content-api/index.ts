@@ -33,6 +33,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   let registry: any;
   // Builders Instances
   let builders: any;
+  // Cached set of built-in query fields (populated at bootstrap)
+  let builtInQueryFields: Set<string> = new Set();
 
   const buildSchema = () => {
     const isShadowCRUDEnabled = !!config('shadowCRUD');
@@ -99,8 +101,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // eg: removes registered subscriptions if they're disabled in the config)
     const prunedNexusSchema = pruneSchema(wrappedNexusSchema);
 
+    // Populate builtInQueryFields set for use by resolvers to avoid runtime schema builds
+    try {
+      const queryType = prunedNexusSchema.getQueryType();
+      const fields = queryType ? Object.keys(queryType.getFields() || {}) : [];
+      builtInQueryFields = new Set(fields);
+    } catch (e) {
+      // ignore; leave set empty
+    }
+
     return prunedNexusSchema;
   };
+
+  const getBuiltInQueryFields = () => builtInQueryFields;
+
+  const isBuiltInQueryField = (fieldName: string) =>
+    builtInQueryFields.has(fieldName) || fieldName.endsWith('_connection');
 
   const buildMergedSchema = ({ registry }: { registry: TypeRegistry }) => {
     // Here we extract types, plugins & typeDefs from a temporary generated
@@ -192,5 +208,5 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     }
   };
 
-  return { buildSchema };
+  return { buildSchema, getBuiltInQueryFields, isBuiltInQueryField };
 };
