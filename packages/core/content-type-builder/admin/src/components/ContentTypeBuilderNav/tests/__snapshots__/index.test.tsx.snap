@@ -998,7 +998,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                         <ul
                           class="c40"
                           id=":r9:"
-                          style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
+                          style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
                         >
                           <li
                             class="c52"
@@ -1072,7 +1072,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                         <ul
                           class="c40"
                           id=":ra:"
-                          style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
+                          style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
                         >
                           <li
                             class="c52"
