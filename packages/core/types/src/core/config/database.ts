@@ -9,25 +9,25 @@ type IfClientIs<TClient extends ClientKind, TClientKind extends ClientKind, TOnT
 >;
 
 type SSLConfig = {
-  rejectUnauthorized?: boolean | undefined;
-  key?: string | undefined;
-  cert?: string | undefined;
-  ca?: string | undefined;
-  capath?: string | undefined;
-  cipher?: string | undefined;
+  rejectUnauthorized?: boolean;
+  key?: string;
+  cert?: string;
+  ca?: string;
+  capath?: string;
+  cipher?: string;
 };
 
 type PoolConfig = {
-  min?: number | undefined;
-  max?: number | undefined;
-  acquireTimeoutMillis?: number | undefined;
-  createTimeoutMillis?: number | undefined;
-  destroyTimeoutMillis?: number | undefined;
-  idleTimeoutMillis?: number | undefined;
-  reapIntervalMillis?: number | undefined;
-  createRetryIntervalMillis?: number | undefined;
+  min?: number;
+  max?: number;
+  acquireTimeoutMillis?: number;
+  createTimeoutMillis?: number;
+  destroyTimeoutMillis?: number;
+  idleTimeoutMillis?: number;
+  reapIntervalMillis?: number;
+  createRetryIntervalMillis?: number;
   // Todo: add types for these callbacks
-  afterCreate?: (conn: unknown, done: (err?: Error, conn?: unknown) => void) => void | undefined;
+  afterCreate?: (conn: unknown, done: (err?: Error, conn?: unknown) => void) => void;
 };
 
 type Connection<TClient extends ClientKind> = {
@@ -36,9 +36,9 @@ type Connection<TClient extends ClientKind> = {
   password: string;
   port: number;
   host: string;
-  ssl?: SSLConfig | boolean | undefined;
-  connectionString?: string | undefined;
-  timezone?: string | undefined;
+  ssl?: SSLConfig | boolean;
+  connectionString?: string;
+  timezone?: string;
 } & { [key: string]: unknown } & IfClientIs<TClient, 'postgres', { schema?: string }, unknown>;
 
 type SqliteConnection = {
@@ -49,18 +49,18 @@ export interface Database<TClient extends ClientKind> {
   connection: {
     client: TClient;
     connection: IfClientIs<TClient, 'sqlite', SqliteConnection, Connection<TClient>>;
-    debug?: boolean | undefined;
-    pool?: PoolConfig | undefined;
-    acquireConnectionTimeout?: number | undefined;
+    debug?: boolean;
+    pool?: PoolConfig;
+    acquireConnectionTimeout?: number;
   } & { [key: string]: unknown } & IfClientIs<
       TClient,
       'sqlite',
-      { useNullAsDefault?: boolean | undefined },
+      { useNullAsDefault?: boolean },
       unknown
     >;
   settings?: {
-    forceMigration?: boolean | undefined;
-    runMigrations?: boolean | undefined;
-    useTypescriptMigrations?: boolean | undefined;
+    forceMigration?: boolean;
+    runMigrations?: boolean;
+    useTypescriptMigrations?: boolean;
   };
 }

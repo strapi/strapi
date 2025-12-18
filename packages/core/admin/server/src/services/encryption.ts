@@ -8,7 +8,7 @@ const getHashedKey = (): Buffer | null => {
   const secrets = strapi.config.get<Core.Config.Admin['secrets']>('admin.secrets');
   const rawKey: string | undefined = secrets?.encryptionKey;
   if (!rawKey) {
-    strapi.log.warn('Encryption key is missing from config');
+    strapi.log.warn('Encryption key is missing from admin.secrets.encryptionKey configuration');
     return null;
   }
 

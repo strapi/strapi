@@ -3,23 +3,23 @@ export interface App {
 }
 
 export interface Cron {
-  enabled?: boolean | undefined;
-  tasks?: object | undefined;
+  enabled?: boolean;
+  tasks?: object;
 }
 
 export interface Dirs {
-  public?: string | undefined;
+  public?: string;
 }
 
 export interface Logger {
   updates?:
     | {
-        enabled?: boolean | undefined;
+        enabled?: boolean;
       }
     | undefined;
   startup?:
     | {
-        enabled?: boolean | undefined;
+        enabled?: boolean;
       }
     | undefined;
 }
@@ -27,31 +27,31 @@ export interface Logger {
 export interface ServerTransfer {
   remote?:
     | {
-        enabled?: boolean | undefined;
+        enabled?: boolean;
       }
     | undefined;
 }
 
 export interface ServerAdmin {
-  autoOpen?: boolean | undefined;
+  autoOpen?: boolean;
 }
 
 export interface Proxy {
-  global?: string | undefined;
-  http?: string | undefined;
-  https?: string | undefined;
-  fetch?: string | undefined;
+  global?: string;
+  http?: string;
+  https?: string;
+  fetch?: string;
 }
 
 export interface Webhooks {
-  populateRelations?: boolean | undefined;
+  populateRelations?: boolean;
   [key: string]: unknown;
 }
 
 export interface Http {
   serverOptions?:
     | {
-        requestTimeout?: number | undefined;
+        requestTimeout?: number;
         [key: string]: unknown;
       }
     | undefined;
@@ -65,17 +65,17 @@ export interface Server {
   app: App;
 
   // optional
-  socket?: string | number | undefined;
-  emitErrors?: boolean | undefined;
-  url?: string | undefined;
-  absoluteUrl?: string | undefined;
-  proxy?: boolean | Proxy | undefined;
-  globalProxy?: string | undefined;
-  cron?: Cron | undefined;
-  dirs?: Dirs | undefined;
-  logger?: Logger | undefined;
-  transfer?: ServerTransfer | undefined;
-  admin?: ServerAdmin | undefined;
-  webhooks?: Webhooks | undefined;
-  http?: Http | undefined;
+  socket?: string | number;
+  emitErrors?: boolean;
+  url?: string;
+  absoluteUrl?: string;
+  proxy?: boolean | Proxy;
+  globalProxy?: string;
+  cron?: Cron;
+  dirs?: Dirs;
+  logger?: Logger;
+  transfer?: ServerTransfer;
+  admin?: ServerAdmin;
+  webhooks?: Webhooks;
+  http?: Http;
 }
