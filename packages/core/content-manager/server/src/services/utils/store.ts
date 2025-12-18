@@ -4,6 +4,8 @@ const keys = {
   CONFIGURATION: 'configuration',
 };
 
+const STORE_KEY_PREFIX = 'plugin_content_manager_';
+
 const getStore = () => strapi.store({ type: 'plugin', name: 'content_manager' });
 
 /** Model configuration */
@@ -31,9 +33,7 @@ const getModelConfigurations = async (keys: string[]) => {
     return {};
   }
 
-  // getStore() adds plugin_content_manager_ prefix automatically, but we bypass it for batch queries
-  const contentManagerPrefix = 'plugin_content_manager_';
-  const configKeys = keys.map((k) => `${contentManagerPrefix}${configurationKey(k)}`);
+  const configKeys = keys.map((k) => `${STORE_KEY_PREFIX}${configurationKey(k)}`);
   const results = await strapi.db.query('strapi::core-store').findMany({
     where: {
       key: { $in: configKeys },
@@ -42,7 +42,7 @@ const getModelConfigurations = async (keys: string[]) => {
 
   const configMap: Record<string, any> = {};
   for (const result of results) {
-    const originalKey = result.key.replace(`${contentManagerPrefix}configuration_`, '');
+    const originalKey = result.key.replace(`${STORE_KEY_PREFIX}configuration_`, '');
     const value = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
     configMap[originalKey] = _.merge({}, EMPTY_CONFIG, value);
   }
@@ -78,7 +78,7 @@ const setModelConfiguration = async (key: string, value: any) => {
 const deleteKey = (key: any) => {
   return strapi.db
     .query('strapi::core-store')
-    .delete({ where: { key: `plugin_content_manager_configuration_${key}` } });
+    .delete({ where: { key: `${STORE_KEY_PREFIX}configuration_${key}` } });
 };
 
 const findByKey = async (key: any) => {
@@ -93,7 +93,7 @@ const findByKey = async (key: any) => {
   return results.map(({ value }) => JSON.parse(value));
 };
 
-const getAllConfigurations = () => findByKey('plugin_content_manager_configuration');
+const getAllConfigurations = () => findByKey(`${STORE_KEY_PREFIX}configuration`);
 
 export default {
   getAllConfigurations,

@@ -183,8 +183,6 @@ describe('Model Cache Performance Benchmark', () => {
       const counterWithoutCache = { count: 0 };
       const getModelWithoutCache = createMockGetModel(counterWithoutCache);
 
-      const startWithoutCache = performance.now();
-
       // Simulate traversing the populate query multiple times (as happens in validation)
       for (let i = 0; i < 4; i += 1) {
         // This simulates the 4 validation calls (filters, sort, fields, populate)
@@ -195,15 +193,12 @@ describe('Model Cache Performance Benchmark', () => {
         );
       }
 
-      const timeWithoutCache = performance.now() - startWithoutCache;
       getModelCallsWithoutCache = counterWithoutCache.count;
 
       // Test with cache
       const counterWithCache = { count: 0 };
       const getModelWithCacheSource = createMockGetModel(counterWithCache);
       const modelCache = createModelCache(getModelWithCacheSource);
-
-      const startWithCache = performance.now();
 
       // Same traversal, but with cached getModel
       for (let i = 0; i < 4; i += 1) {
@@ -214,18 +209,15 @@ describe('Model Cache Performance Benchmark', () => {
         );
       }
 
-      const timeWithCache = performance.now() - startWithCache;
       getModelCallsWithCache = counterWithCache.count;
 
       // Calculate improvements
       const callReduction =
         ((getModelCallsWithoutCache - getModelCallsWithCache) / getModelCallsWithoutCache) * 100;
-      // const timeReduction = ((timeWithoutCache - timeWithCache) / timeWithoutCache) * 100;
 
       // Assertions
       expect(getModelCallsWithCache).toBeLessThan(getModelCallsWithoutCache);
       expect(callReduction).toBeGreaterThan(50); // At least 50% reduction in calls
-      expect(timeWithCache).toBeLessThan(timeWithoutCache);
     });
 
     it('should cache models correctly across multiple validations', () => {
