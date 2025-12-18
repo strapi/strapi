@@ -267,6 +267,22 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Bosnian (Bosnia and Herzegovina) (bs-BA)",
   },
   {
+    "code": "bs-Cyrl",
+    "name": "Bosnian (Cyrillic)",
+  },
+  {
+    "code": "bs-Cyrl-BA",
+    "name": "Bosnian (Cyrillic, Bosnia and Herzegovina)",
+  },
+  {
+    "code": "bs-Latn",
+    "name": "Bosnian (Latin)",
+  },
+  {
+    "code": "bs-Latn-BA",
+    "name": "Bosnian (Latin, Bosnia and Herzegovina)",
+  },
+  {
     "code": "br",
     "name": "Breton (br)",
   },
@@ -1641,6 +1657,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "mn",
     "name": "Mongolian (mn)",
+  },
+  {
+    "code": "mn-Cyrl",
+    "name": "Mongolian (Cyrillic)",
   },
   {
     "code": "mfe",
