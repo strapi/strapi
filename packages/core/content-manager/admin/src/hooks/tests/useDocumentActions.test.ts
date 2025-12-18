@@ -137,6 +137,9 @@ describe('useDocumentActions', () => {
           title: 'test',
         },
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Saved document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -202,6 +205,9 @@ describe('useDocumentActions', () => {
         id: 1,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Deleted document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -263,6 +269,9 @@ describe('useDocumentActions', () => {
       expect(response).toEqual({
         count: 2,
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Successfully deleted.');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -324,6 +333,9 @@ describe('useDocumentActions', () => {
         id: 1,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Changes discarded');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -385,6 +397,9 @@ describe('useDocumentActions', () => {
         id: 1,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Deleted document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -452,6 +467,9 @@ describe('useDocumentActions', () => {
         publishedAt: '2024-01-23T16:23:38.948Z',
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Published document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -530,6 +548,9 @@ describe('useDocumentActions', () => {
           updatedAt: '',
         },
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Saved document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -598,6 +619,9 @@ describe('useDocumentActions', () => {
         publishedAt: null,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Unpublished document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -656,6 +680,9 @@ describe('useDocumentActions', () => {
       expect(response).toEqual({
         count: 2,
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Successfully unpublished.');
     });
 
     it('should return the errors when unsuccessful', async () => {
