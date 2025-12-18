@@ -2,7 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import coffee from 'coffee';
 
-import utils from '../../../utils';
+import { getTestApps } from '../../../../utils/get-test-apps';
 
 /**
  * This test ensures that `strapi openapi generate` includes content API routes
@@ -13,7 +13,7 @@ describe('openapi:generate', () => {
   const OUTPUT_FILE = 'openapi-spec.json';
 
   beforeAll(async () => {
-    const testApps = utils.instances.getTestApps();
+    const testApps = getTestApps();
     appPath = testApps.at(0);
   });
 

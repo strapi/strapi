@@ -2,7 +2,7 @@
 
 import { ReactElement } from 'react';
 
-import { act, render as renderRTL, screen } from '@tests/utils';
+import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Editor, Transforms, createEditor } from 'slate';
 
 import { mockImage } from '../../tests/mock-schema';
@@ -99,7 +99,7 @@ describe('Image', () => {
     const baseEditor = createEditor();
     baseEditor.children = [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }];
 
-    await act(async () =>
+    await waitFor(() =>
       Transforms.select(baseEditor, {
         anchor: { path: [0, 0], offset: 0 },
         focus: { path: [0, 0], offset: 0 },
@@ -146,7 +146,7 @@ describe('Image', () => {
       },
     ];
 
-    await act(async () =>
+    await waitFor(() =>
       Transforms.select(baseEditor, {
         anchor: { path: [0, 1, 0], offset: 0 },
         focus: { path: [0, 1, 0], offset: 0 },

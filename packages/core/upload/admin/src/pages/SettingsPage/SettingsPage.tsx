@@ -59,8 +59,11 @@ export const SettingsPage = () => {
           message: formatMessage({ id: 'notification.form.success.fields' }),
         });
       },
-      onError(err) {
-        console.error(err);
+      onError(err: any) {
+        toggleNotification({
+          type: 'danger',
+          message: err.message || formatMessage({ id: 'notification.error' }),
+        });
       },
     }
   );
@@ -131,7 +134,7 @@ export const SettingsPage = () => {
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Flex direction="column" alignItems="stretch" gap={1}>
                     <Grid.Root gap={6}>
-                      <Grid.Item col={8} s={12} direction="column" alignItems="stretch">
+                      <Grid.Item col={8} xs={12} direction="column" alignItems="stretch">
                         <Flex gap={2}>
                           <Box color="alternative700">
                             <Sparkle />
@@ -156,7 +159,7 @@ export const SettingsPage = () => {
                       </Grid.Item>
                       <Grid.Item
                         col={4}
-                        s={12}
+                        xs={12}
                         direction="column"
                         alignItems="end"
                         justifyContent={'center'}
@@ -196,7 +199,7 @@ export const SettingsPage = () => {
                     </Typography>
                   </Flex>
                   <Grid.Root gap={6}>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.responsiveDimensions.description'),
@@ -230,7 +233,7 @@ export const SettingsPage = () => {
                         <Field.Hint />
                       </Field.Root>
                     </Grid.Item>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.sizeOptimization.description'),
@@ -264,7 +267,7 @@ export const SettingsPage = () => {
                         <Field.Hint />
                       </Field.Root>
                     </Grid.Item>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.autoOrientation.description'),

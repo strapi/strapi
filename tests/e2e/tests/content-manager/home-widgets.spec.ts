@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
 
 test.describe('Homepage - Content Manager Widgets', () => {
   test.beforeEach(async ({ page }) => {
@@ -70,6 +70,48 @@ test.describe('Homepage - Content Manager Widgets', () => {
       mostRecentModifiedEntry.getByRole('gridcell', { name: 'West Ham post match analysis' })
     ).toBeVisible();
     await expect(mostRecentModifiedEntry.getByRole('gridcell', { name: 'Modified' })).toBeVisible();
+  });
+
+  test('a user should see entries per locale in the last published entries widget', async ({
+    page,
+  }) => {
+    const recentlyPublishedWidget = page.getByLabel(/last published entries/i);
+    await expect(recentlyPublishedWidget).toBeVisible();
+
+    // Create and publish an English article
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await page.waitForURL(
+      /\/admin\/content-manager\/collection-types\/api::article\.article\/create/
+    );
+    const titleFieldEnglish = page.getByLabel(/title/i);
+    await titleFieldEnglish.fill('West Ham Football Team');
+    await page.getByRole('button', { name: /publish/i }).click();
+    await findAndClose(page, 'Published document');
+
+    // Create and publish a French entry
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await page.getByRole('combobox', { name: 'Select a locale' }).click();
+    await page.getByRole('option', { name: 'French (fr)' }).click();
+    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await page.waitForURL(
+      /\/admin\/content-manager\/collection-types\/api::article\.article\/create/
+    );
+    const titleFieldFrench = page.getByLabel(/title/i);
+    await titleFieldFrench.fill("L'équipe de West Ham");
+    await page.getByRole('button', { name: /publish/i }).click();
+    await findAndClose(page, 'Published document');
+
+    // Go back to the home page, the recently published widget should show entries from different locales
+    await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
+    const englishEntry = recentlyPublishedWidget
+      .getByRole('row')
+      .filter({ hasText: 'West Ham Football Team' });
+    const frenchEntry = recentlyPublishedWidget
+      .getByRole('row')
+      .filter({ hasText: "L'équipe de West Ham" });
+    await expect(englishEntry).toBeVisible();
+    await expect(frenchEntry).toBeVisible();
   });
 
   test('a user should see the entries chart widget', async ({ page }) => {

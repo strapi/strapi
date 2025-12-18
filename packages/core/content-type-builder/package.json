@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.28.0",
+  "version": "5.33.0",
   "description": "Create and manage content types",
   "repository": {
     "type": "git",
@@ -67,10 +67,10 @@
     "@dnd-kit/utilities": "3.2.2",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.0.0-rc.30",
-    "@strapi/generators": "5.28.0",
-    "@strapi/icons": "2.0.0-rc.30",
-    "@strapi/utils": "5.28.0",
+    "@strapi/design-system": "2.0.1",
+    "@strapi/generators": "5.33.0",
+    "@strapi/icons": "2.0.1",
+    "@strapi/utils": "5.33.0",
     "ai": "5.0.26",
     "date-fns": "2.30.0",
     "fs-extra": "11.2.0",
@@ -88,11 +88,11 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.28.0",
-    "@strapi/types": "5.28.0",
-    "@testing-library/dom": "10.1.0",
-    "@testing-library/react": "15.0.7",
-    "@testing-library/user-event": "14.5.2",
+    "@strapi/admin": "5.33.0",
+    "@strapi/types": "5.33.0",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.0",
+    "@testing-library/user-event": "14.6.1",
     "@types/fs-extra": "11.0.4",
     "@types/micromatch": "^4.0.9",
     "@types/pluralize": "0.0.30",
@@ -112,7 +112,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {
