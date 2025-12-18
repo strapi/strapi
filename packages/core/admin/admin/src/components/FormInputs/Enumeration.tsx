@@ -22,7 +22,7 @@ const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
         <SingleSelect
           ref={composedRefs}
           onChange={(value) => {
-            field.onChange(name, value);
+            field.onChange(name, value === '' ? null : value);
           }}
           value={field.value}
           {...props}

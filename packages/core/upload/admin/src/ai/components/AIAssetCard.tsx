@@ -29,7 +29,7 @@ import { styled } from 'styled-components';
 import { AudioPreview } from '../../components/AssetCard/AudioPreview';
 import { VideoPreview } from '../../components/AssetCard/VideoPreview';
 import { type Asset, EditAssetContent } from '../../components/EditAssetDialog/EditAssetContent';
-import { AssetType } from '../../constants';
+import { AssetType, DocType } from '../../enums';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { useRemoveAsset } from '../../hooks/useRemoveAsset';
 import {
@@ -162,7 +162,7 @@ const AssetCardActions = ({ asset }: { asset: File }) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface AssetProps {
-  assetType: AssetType;
+  assetType: AssetType | DocType;
   thumbnailUrl: string;
   assetUrl: string;
   asset: File;
@@ -269,7 +269,7 @@ const StyledCard = styled(Card)`
   padding: 0;
 `;
 
-const getAssetBadgeLabel = (assetType: AssetType) => {
+const getAssetBadgeLabel = (assetType: AssetType | DocType) => {
   switch (assetType) {
     case AssetType.Image:
       return { id: getTrad('settings.section.image.label'), defaultMessage: 'IMAGE' };
@@ -277,6 +277,14 @@ const getAssetBadgeLabel = (assetType: AssetType) => {
       return { id: getTrad('settings.section.video.label'), defaultMessage: 'VIDEO' };
     case AssetType.Audio:
       return { id: getTrad('settings.section.audio.label'), defaultMessage: 'AUDIO' };
+    case DocType.Pdf:
+      return { id: getTrad('settings.section.pdf.label'), defaultMessage: 'PDF' };
+    case DocType.Csv:
+      return { id: getTrad('settings.section.csv.label'), defaultMessage: 'CSV' };
+    case DocType.Xls:
+      return { id: getTrad('settings.section.xls.label'), defaultMessage: 'XLS' };
+    case DocType.Zip:
+      return { id: getTrad('settings.section.zip.label'), defaultMessage: 'ZIP' };
     default:
       return { id: getTrad('settings.section.doc.label'), defaultMessage: 'DOC' };
   }
@@ -312,7 +320,7 @@ export const AIAssetCard = ({
   return (
     <CardContainer>
       <Grid.Root>
-        <Grid.Item col={5} alignItems="stretch">
+        <Grid.Item m={5} xs={12} alignItems="stretch">
           <StyledCard width="100%" height="100%" shadow="none" borderRadius={0} padding={0}>
             <CardHeader style={{ borderStyle: 'none' }}>
               <AssetCardActions asset={asset} />
@@ -342,7 +350,7 @@ export const AIAssetCard = ({
           </StyledCard>
         </Grid.Item>
 
-        <Grid.Item col={7} flex={1}>
+        <Grid.Item m={7} xs={12} flex={1}>
           <Flex direction="column" height="100%" alignItems="stretch" flex={1} padding={4} gap={2}>
             <Field.Root name="caption">
               <Flex alignItems="center" gap={2}>
@@ -471,7 +479,7 @@ export const AIAssetCardSkeletons = ({ count = 1 }: { count?: number }) => {
           </Card>
         </Grid.Item>
 
-        <Grid.Item col={7} flex={1}>
+        <Grid.Item m={7} xs={12} flex={1}>
           <Flex direction="column" height="100%" alignItems="stretch" flex={1} padding={4} gap={2}>
             <Box>
               <SkeletonBox width="60px" height="16px" marginBottom={1} />

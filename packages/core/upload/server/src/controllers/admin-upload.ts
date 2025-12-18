@@ -8,6 +8,7 @@ import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
 import { FileInfo } from '../types';
+import { enforceUploadSecurity } from '../utils/mime-validation';
 
 export default {
   async bulkUpdateFileInfo(ctx: Context) {
@@ -86,8 +87,24 @@ export default {
       throw new errors.ApplicationError('Cannot replace a file with multiple ones');
     }
 
+    const securityResults = await enforceUploadSecurity(files, strapi);
+
+    if (securityResults.errors.length > 0) {
+      const { error } = securityResults.errors[0];
+      switch (error.code) {
+        case 'MIME_TYPE_NOT_ALLOWED':
+          throw new errors.ValidationError(error.message, error.details);
+        default:
+          throw new errors.ApplicationError(error.message, error.details);
+      }
+    }
+
     const data = (await validateUploadBody(body)) as { fileInfo: FileInfo };
-    const replacedFile = await uploadService.replace(id, { data, file: files }, { user });
+    const replacedFile = await uploadService.replace(
+      id,
+      { data, file: securityResults.validFiles[0] },
+      { user }
+    );
 
     // Sign file urls for private providers
     const signedFile = await getService('file').signFileUrls(replacedFile);
@@ -112,9 +129,41 @@ export default {
       return ctx.forbidden();
     }
 
-    const data = await validateUploadBody(body, Array.isArray(files));
+    const securityResults = await enforceUploadSecurity(files, strapi);
 
-    let filesArray = Array.isArray(files) ? files : [files];
+    if (securityResults.validFiles.length === 0) {
+      throw new errors.ValidationError(
+        securityResults.errors[0].error.message,
+        securityResults.errors[0].error.details
+      );
+    }
+
+    let filteredBody = body;
+    if (body?.fileInfo && Array.isArray(body.fileInfo)) {
+      const filteredFileInfo = body.fileInfo.filter((fi: string) => {
+        const info = typeof fi === 'string' ? JSON.parse(fi) : fi;
+        return securityResults.validFileNames.includes(info.name);
+      });
+
+      if (filteredFileInfo.length === 1) {
+        filteredBody = {
+          ...body,
+          fileInfo: filteredFileInfo[0],
+        };
+      } else {
+        filteredBody = {
+          ...body,
+          fileInfo: filteredFileInfo,
+        };
+      }
+    }
+
+    const isMultipleFiles =
+      Array.isArray(filteredBody.fileInfo) && filteredBody.fileInfo.length > 1;
+
+    const data = await validateUploadBody(filteredBody, isMultipleFiles);
+
+    let filesArray = securityResults.validFiles;
 
     if (
       data.fileInfo &&
@@ -134,7 +183,7 @@ export default {
     // Upload files first to get thumbnails
     const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
     if (uploadedFiles.some((file) => file.mime?.startsWith('image/'))) {
-      strapi.telemetry.send('didUploadImage');
+      await getService('metrics').trackUsage('didUploadImage');
     }
 
     const aiMetadataService = getService('aiMetadata');

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { tours, useTracking, useGuidedTour, useAppInfo } from '@strapi/admin/strapi-admin';
+import { tours, useGuidedTour, useAppInfo } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system';
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
 import { styled } from 'styled-components';
+
+import { useCTBTracking } from '../CTBSession/ctbSession';
 
 import { Alert } from './components/Alert';
 import { AnimatedBox } from './components/AnimatedBox';
@@ -41,7 +43,7 @@ const ResponsiveFlex = styled(Flex)`
 const ChatSuggestions = () => {
   const { sendMessage } = useStrapiChat();
   const { t } = useTranslations();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
 
   const SUGGESTIONS = [
     t('chat.input.defaults.generate', 'Generate a product schema'),
@@ -340,6 +342,7 @@ const ChatInput = (props: React.FormHTMLAttributes<HTMLFormElement>) => {
                 <IconButton
                   label={t('chat.tooltips.send-message', 'Send')}
                   variant="default"
+                  type="submit"
                   // allow sending an empty message if there are attachments
                   disabled={input.trim().length === 0 && attachments.length === 0}
                 >
@@ -363,10 +366,29 @@ const Chat = () => {
     useStrapiChat();
   const { attachFiles } = useAttachments();
   const { t } = useTranslations();
+  const state = useGuidedTour('Chat', (s) => s.state);
   const currentEnvironment = useAppInfo('Chat', (state) => state.currentEnvironment);
 
   // Disable AI Chat in production mode
   const isProduction = currentEnvironment === 'production';
+
+  // Auto-open chat when AIChat guided tour step is active
+  useEffect(() => {
+    const isAIChatStepActive =
+      state.enabled &&
+      state.tours.contentTypeBuilder?.currentStep === 1 && // AIChat is step 1 in contentTypeBuilderStepsAI
+      !state.tours.contentTypeBuilder?.isCompleted;
+
+    if (isAIChatStepActive && !isChatOpen && openChat) {
+      openChat();
+    }
+  }, [
+    state.tours.contentTypeBuilder?.currentStep,
+    state.tours.contentTypeBuilder?.isCompleted,
+    state.enabled,
+    isChatOpen,
+    openChat,
+  ]);
 
   // Labels
   const openChatLabel = t('chat.tooltips.open-chat', 'Open chat');

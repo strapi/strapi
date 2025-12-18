@@ -1,13 +1,13 @@
-import { useId, useState ,useEffect, useRef} from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import {
-  Box,
-  SubNav as DSSubNav,
-  Flex,
-  Typography,
-  IconButton,
   Badge,
+  Box,
+  Flex,
+  IconButton,
   ScrollArea,
+  SubNav as DSSubNav,
+  Typography,
 } from '@strapi/design-system';
 import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
@@ -32,6 +32,7 @@ const MainSubNav = styled(DSSubNav)`
   z-index: 2;
 
   ${({ theme }) => theme.breakpoints.medium} {
+    width: 23.2rem;
     position: sticky;
     top: 0;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
@@ -309,7 +310,15 @@ const SubSectionLinkWrapper = styled.li`
 
 const SubSection = ({ label, children }: { label: string; children: React.ReactNode[] }) => {
   const [isOpen, setOpenLinks] = useState(true);
+  const [contentHeight, setContentHeight] = useState(0);
   const listId = useId();
+  const contentRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight);
+    }
+  }, [children]);
 
   const handleClick = () => {
     setOpenLinks((prev) => !prev);
@@ -335,17 +344,16 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
         </SubSectionHeader>
       </Flex>
       <Flex
+        ref={contentRef}
         tag="ul"
         id={listId}
         direction="column"
         gap="2px"
         alignItems={'stretch'}
         style={{
-          maxHeight: isOpen ? '1000px' : 0,
+          maxHeight: isOpen ? `${contentHeight}px` : 0,
           overflow: 'hidden',
-          transition: isOpen
-            ? 'max-height 1s ease-in-out'
-            : 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
+          transition: 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
         }}
       >
         {children.map((child, index) => {
