@@ -1,7 +1,8 @@
 import pipe from 'lodash/fp/pipe';
+// eslint-disable-next-line import/default
 import qs from 'qs';
 
-import { getCookieValue } from './cookies';
+import { getCookieValue, setCookie } from './cookies';
 
 import type { errors } from '@strapi/utils';
 
@@ -21,6 +22,85 @@ export type ApiError =
 const STORAGE_KEYS = {
   TOKEN: 'jwtToken',
   USER: 'userInfo',
+};
+
+/**
+ * Module-level promise to ensure only one token refresh happens at a time
+ */
+let refreshPromise: Promise<string | null> | null = null;
+
+/**
+ * Check if the URL is an auth path that should not trigger token refresh
+ */
+const isAuthPath = (url: string) => /\/admin\/(login|logout|access-token)\b/.test(url);
+
+/**
+ * Store the new token in the appropriate storage (localStorage or cookie)
+ */
+const storeToken = (token: string): void => {
+  // Check if the original token was stored in localStorage (persist mode)
+  const wasPersistedToLocalStorage = Boolean(localStorage.getItem(STORAGE_KEYS.TOKEN));
+
+  if (wasPersistedToLocalStorage) {
+    localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+  } else {
+    setCookie(STORAGE_KEYS.TOKEN, token);
+  }
+};
+
+/**
+ * Refresh the access token by calling the /admin/access-token endpoint.
+ * This uses a low-level fetch to avoid recursion through the interceptor.
+ * Returns the new token on success, or null on failure.
+ */
+const refreshAccessToken = async (): Promise<string | null> => {
+  const backendURL = window.strapi.backendURL;
+
+  try {
+    const response = await fetch(`${backendURL}/admin/access-token`, {
+      method: 'POST',
+      credentials: 'include', // Include cookies for the refresh token
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const result = await response.json();
+    const token = result?.data?.token as string | undefined;
+
+    if (!token) {
+      return null;
+    }
+
+    storeToken(token);
+    return token;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Attempt to refresh the token if not already refreshing.
+ * Returns the new token on success, throws an error on failure.
+ */
+const attemptTokenRefresh = async (): Promise<string> => {
+  if (!refreshPromise) {
+    refreshPromise = refreshAccessToken().finally(() => {
+      refreshPromise = null;
+    });
+  }
+
+  const newToken = await refreshPromise;
+  if (!newToken) {
+    throw new Error('Token refresh failed');
+  }
+
+  return newToken;
 };
 
 type FetchResponse<TData = any> = {
@@ -119,11 +199,16 @@ type FetchClient = {
  */
 const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const backendURL = window.strapi.backendURL;
-  const defaultHeader = {
+
+  /**
+   * Create default headers with the current token.
+   * This is a function so we can get a fresh token after refresh.
+   */
+  const getDefaultHeaders = () => ({
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${getToken()}`,
-  };
+  });
 
   const isFormDataRequest = (body: unknown) => body instanceof FormData;
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
@@ -148,11 +233,15 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
        * when the status code falls in the 200 to 299 (inclusive) range
        */
       if (!response.ok && result.error && !validateStatus?.(response.status)) {
-        throw new FetchError(result.error.message, { data: result });
+        const fetchError = new FetchError(result.error.message, { data: result });
+        fetchError.status = response.status;
+        throw fetchError;
       }
 
       if (!response.ok && !validateStatus?.(response.status)) {
-        throw new FetchError('Unknown Server Error');
+        const fetchError = new FetchError('Unknown Server Error');
+        fetchError.status = response.status;
+        throw fetchError;
       }
 
       return { data: result };
@@ -163,6 +252,35 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       } else {
         throw error;
       }
+    }
+  };
+
+  /**
+   * Execute a fetch request with automatic token refresh on 401 errors.
+   * @param url - The request URL (used to check if it's an auth path)
+   * @param executeFetch - Function that performs the actual fetch
+   * @param executeRetry - Function that performs the retry with fresh headers
+   */
+  const withTokenRefresh = async <TData>(
+    url: string,
+    executeFetch: () => Promise<FetchResponse<TData>>,
+    executeRetry: () => Promise<FetchResponse<TData>>
+  ): Promise<FetchResponse<TData>> => {
+    try {
+      return await executeFetch();
+    } catch (error) {
+      // Only attempt refresh for 401 errors on non-auth paths
+      if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
+        try {
+          await attemptTokenRefresh();
+          // Retry with fresh headers (new token)
+          return await executeRetry();
+        } catch {
+          // If refresh fails, throw the original error
+          throw error;
+        }
+      }
+      throw error;
     }
   };
 
@@ -198,100 +316,113 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
   const fetchClient: FetchClient = {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
-      const headers = new Headers({
-        ...defaultHeader,
-        ...options?.headers,
-      });
-      /**
-       * this applies all our transformations to the URL
-       * - normalizing (making sure it has the correct slash)
-       * - appending our BaseURL which comes from the window.strapi object
-       * - serializing our params with QS
-       */
       const createRequestUrl = makeCreateRequestUrl(options);
-      const response = await fetch(createRequestUrl(url), {
-        signal: options?.signal ?? defaultOptions.signal,
-        method: 'GET',
-        headers,
-      });
 
-      return responseInterceptor<TData>(response, options?.validateStatus);
+      const executeRequest = async () => {
+        const headers = new Headers({
+          ...getDefaultHeaders(),
+          ...options?.headers,
+        });
+
+        const response = await fetch(createRequestUrl(url), {
+          signal: options?.signal ?? defaultOptions.signal,
+          method: 'GET',
+          headers,
+        });
+
+        return responseInterceptor<TData>(response, options?.validateStatus);
+      };
+
+      return withTokenRefresh(url, executeRequest, executeRequest);
     },
     post: async <TData, TSend = any>(
       url: string,
       data?: TSend,
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
-      const headers = new Headers({
-        ...defaultHeader,
-        ...options?.headers,
-      });
-
       const createRequestUrl = makeCreateRequestUrl(options);
 
-      /**
-       * we have to remove the Content-Type value if it was a formData request
-       * the browser will automatically set the header value
-       */
-      if (isFormDataRequest(data)) {
-        headers.delete('Content-Type');
-      }
+      const executeRequest = async () => {
+        const headers = new Headers({
+          ...getDefaultHeaders(),
+          ...options?.headers,
+        });
 
-      const response = await fetch(createRequestUrl(url), {
-        signal: options?.signal ?? defaultOptions.signal,
-        method: 'POST',
-        headers,
-        body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
-      });
-      return responseInterceptor<TData>(response, options?.validateStatus);
+        /**
+         * we have to remove the Content-Type value if it was a formData request
+         * the browser will automatically set the header value
+         */
+        if (isFormDataRequest(data)) {
+          headers.delete('Content-Type');
+        }
+
+        const response = await fetch(createRequestUrl(url), {
+          signal: options?.signal ?? defaultOptions.signal,
+          method: 'POST',
+          headers,
+          body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
+        });
+        return responseInterceptor<TData>(response, options?.validateStatus);
+      };
+
+      return withTokenRefresh(url, executeRequest, executeRequest);
     },
     put: async <TData, TSend = any>(
       url: string,
       data?: TSend,
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
-      const headers = new Headers({
-        ...defaultHeader,
-        ...options?.headers,
-      });
-
       const createRequestUrl = makeCreateRequestUrl(options);
 
-      /**
-       * we have to remove the Content-Type value if it was a formData request
-       * the browser will automatically set the header value
-       */
-      if (isFormDataRequest(data)) {
-        headers.delete('Content-Type');
-      }
+      const executeRequest = async () => {
+        const headers = new Headers({
+          ...getDefaultHeaders(),
+          ...options?.headers,
+        });
 
-      const response = await fetch(createRequestUrl(url), {
-        signal: options?.signal ?? defaultOptions.signal,
-        method: 'PUT',
-        headers,
-        body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
-      });
+        /**
+         * we have to remove the Content-Type value if it was a formData request
+         * the browser will automatically set the header value
+         */
+        if (isFormDataRequest(data)) {
+          headers.delete('Content-Type');
+        }
 
-      return responseInterceptor<TData>(response, options?.validateStatus);
+        const response = await fetch(createRequestUrl(url), {
+          signal: options?.signal ?? defaultOptions.signal,
+          method: 'PUT',
+          headers,
+          body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
+        });
+
+        return responseInterceptor<TData>(response, options?.validateStatus);
+      };
+
+      return withTokenRefresh(url, executeRequest, executeRequest);
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
-      const headers = new Headers({
-        ...defaultHeader,
-        ...options?.headers,
-      });
-
       const createRequestUrl = makeCreateRequestUrl(options);
-      const response = await fetch(createRequestUrl(url), {
-        signal: options?.signal ?? defaultOptions.signal,
-        method: 'DELETE',
-        headers,
-      });
-      return responseInterceptor<TData>(response, options?.validateStatus);
+
+      const executeRequest = async () => {
+        const headers = new Headers({
+          ...getDefaultHeaders(),
+          ...options?.headers,
+        });
+
+        const response = await fetch(createRequestUrl(url), {
+          signal: options?.signal ?? defaultOptions.signal,
+          method: 'DELETE',
+          headers,
+        });
+        return responseInterceptor<TData>(response, options?.validateStatus);
+      };
+
+      return withTokenRefresh(url, executeRequest, executeRequest);
     },
   };
 
   return fetchClient;
 };
 
-export { getFetchClient, isFetchError, FetchError };
+export { getFetchClient, isFetchError, FetchError, attemptTokenRefresh, storeToken };
 export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };
