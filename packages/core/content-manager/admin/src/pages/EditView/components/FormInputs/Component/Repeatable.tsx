@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { useField, useNotification, useForm, createRulesEngine } from '@strapi/admin/strapi-admin';
+import {
+  useField,
+  useNotification,
+  useForm,
+  createRulesEngine,
+  useIsDesktop,
+} from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -404,6 +410,7 @@ const Component = ({
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
   const displayValue = useForm('RepeatableComponent', (state) => {
     return getIn(state.values, [...name.split('.'), mainField.name]);
@@ -464,20 +471,22 @@ const Component = ({
               >
                 <Trash />
               </IconButton>
-              <IconButton
-                disabled={disabled}
-                ref={composedAccordionRefs}
-                variant="ghost"
-                onClick={(e) => e.stopPropagation()}
-                data-handler-id={handlerId}
-                label={formatMessage({
-                  id: getTranslation('components.DragHandle-label'),
-                  defaultMessage: 'Drag',
-                })}
-                onKeyDown={handleKeyDown}
-              >
-                <Drag />
-              </IconButton>
+              {isDesktop && (
+                <IconButton
+                  disabled={disabled}
+                  ref={composedAccordionRefs}
+                  variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
+                  data-handler-id={handlerId}
+                  label={formatMessage({
+                    id: getTranslation('components.DragHandle-label'),
+                    defaultMessage: 'Drag',
+                  })}
+                  onKeyDown={handleKeyDown}
+                >
+                  <Drag />
+                </IconButton>
+              )}
             </Accordion.Actions>
           </Accordion.Header>
           <Accordion.Content>

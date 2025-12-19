@@ -1,7 +1,6 @@
-import { Data } from '@strapi/types';
+import { Struct, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import type { File } from 'formidable';
-import type { GuidedTourCompletedActions } from '../../server/src/services/guided-tour';
 
 export interface Logo {
   name: string;
@@ -105,6 +104,7 @@ export declare namespace TelemetryProperties {
       useTypescriptOnServer: boolean;
       useTypescriptOnAdmin: boolean;
       isHostedOnStrapiCloud: boolean;
+      aiLicenseKey?: string;
       numberOfAllContentTypes: number;
       numberOfComponents: number;
       numberOfDynamicZones: number;
@@ -230,7 +230,7 @@ export declare namespace GetGuidedTourMeta {
   export interface Response {
     data: {
       isFirstSuperAdminUser: boolean;
-      completedActions: GuidedTourCompletedActions[];
+      schemas: Record<UID.ContentType, Struct.ContentTypeSchema>;
     };
     error?: errors.ApplicationError;
   }

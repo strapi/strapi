@@ -213,6 +213,7 @@ export const ReviewWorkflowsListView = () => {
                       {canRead || canUpdate ? (
                         <IconButton
                           tag={Link}
+                          onClick={(e) => e.stopPropagation()}
                           to={workflow.id.toString()}
                           label={formatMessage(
                             {

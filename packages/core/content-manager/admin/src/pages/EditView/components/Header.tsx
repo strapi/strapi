@@ -7,6 +7,8 @@ import {
   useNotification,
   useStrapiApp,
   useQueryParams,
+  useIsDesktop,
+  useDebounce,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -16,6 +18,7 @@ import {
   Typography,
   IconButton,
   Dialog,
+  Popover,
 } from '@strapi/design-system';
 import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -65,7 +68,19 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
     : documentTitle;
 
   return (
-    <Flex direction="column" alignItems="flex-start" paddingTop={6} paddingBottom={4} gap={2}>
+    <Flex
+      direction="column"
+      alignItems="flex-start"
+      paddingTop={{
+        initial: 4,
+        large: 6,
+      }}
+      paddingBottom={{
+        initial: 0,
+        large: 4,
+      }}
+      gap={2}
+    >
       <BackButton
         fallback={
           params.collectionType === SINGLE_TYPES
@@ -73,7 +88,19 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
             : `../${COLLECTION_TYPES}/${params.slug}`
         }
       />
-      <Flex width="100%" justifyContent="space-between" gap="80px" alignItems="flex-start">
+      <Flex
+        width="100%"
+        justifyContent="space-between"
+        gap={{
+          initial: 2,
+          medium: '8rem',
+        }}
+        alignItems="flex-start"
+        direction={{
+          initial: 'column',
+          medium: 'row',
+        }}
+      >
         <Typography variant="alpha" tag="h1">
           {title}
         </Typography>
@@ -112,7 +139,22 @@ interface HeaderActionDescription {
     startIcon?: React.ReactNode;
     textValue?: string;
     value: string;
+    /**
+     * @internal
+     * @description
+     * Internal SelectOption renderer used to display the status of AI translation background jobs
+     */
+    _render?: () => React.ReactNode;
   }>;
+  /**
+   * @internal
+   * @description
+   * Internal document header action to display the status of AI translation background jobs
+   */
+  _status?: {
+    message: React.ReactNode;
+    tooltip?: React.ReactNode;
+  };
   onSelect?: (value: string) => void;
   value?: string;
   customizeContent?: (value: string) => React.ReactNode;
@@ -377,38 +419,97 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               aria-label={action.label}
               {...action}
             >
-              {action.options.map(({ label, ...option }) => (
-                <SingleSelectOption key={option.value} {...option}>
-                  {label}
-                </SingleSelectOption>
-              ))}
+              {action.options.map(({ label, ...option }) => {
+                if (option._render) {
+                  return option._render();
+                }
+
+                return (
+                  <SingleSelectOption key={option.value} {...option}>
+                    {label}
+                  </SingleSelectOption>
+                );
+              })}
             </SingleSelect>
           );
+        } else if (action._status) {
+          return (
+            <HeaderActionStatus tooltip={action._status?.tooltip} key={action.id}>
+              {action._status.message}
+            </HeaderActionStatus>
+          );
         } else {
-          if (action.type === 'icon') {
-            return (
-              <React.Fragment key={action.id}>
-                <IconButton
-                  disabled={action.disabled}
-                  label={action.label}
-                  size="S"
-                  onClick={handleClick(action)}
-                >
-                  {action.icon}
-                </IconButton>
-                {action.dialog ? (
-                  <HeaderActionDialog
-                    {...action.dialog}
-                    isOpen={dialogId === action.id}
-                    onClose={handleClose}
-                  />
-                ) : null}
-              </React.Fragment>
-            );
-          }
+          return (
+            <React.Fragment key={action.id}>
+              <IconButton
+                disabled={action.disabled}
+                label={action.label}
+                size="S"
+                onClick={handleClick(action)}
+              >
+                {action.icon}
+              </IconButton>
+              {action.dialog ? (
+                <HeaderActionDialog
+                  {...action.dialog}
+                  isOpen={dialogId === action.id}
+                  onClose={handleClose}
+                />
+              ) : null}
+            </React.Fragment>
+          );
         }
       })}
     </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * HeaderActionStatus
+ * -----------------------------------------------------------------------------------------------*/
+
+interface HeaderActionStatusProps {
+  tooltip: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const HeaderActionStatus = ({ tooltip, children }: HeaderActionStatusProps) => {
+  const [open, setOpen] = React.useState(false);
+  // Debounce the open/close so the user can hover over the popover content before it closes
+  const debouncedOpen = useDebounce(open, 100);
+
+  const handleMouseEnter = () => {
+    if (tooltip) {
+      setOpen(true);
+    }
+  };
+  const handleMouseLeave = () => {
+    if (tooltip) {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <Popover.Root open={debouncedOpen} onOpenChange={setOpen}>
+      <Popover.Anchor
+        style={{ alignSelf: 'stretch' }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        aria-describedby="document-header-action-status"
+      >
+        <Box height="100%">{children}</Box>
+      </Popover.Anchor>
+      <Popover.Content
+        role="tooltip"
+        id="document-header-action-status"
+        side="bottom"
+        align="center"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {tooltip}
+      </Popover.Content>
+    </Popover.Root>
   );
 };
 
@@ -455,18 +556,21 @@ const HeaderActionDialog = ({
 const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
-  return {
-    label: formatMessage({
-      id: 'app.links.configure-view',
-      defaultMessage: 'Configure the view',
-    }),
-    icon: <ListPlus />,
-    onClick: () => {
-      navigate(`../${collectionType}/${model}/configurations/edit`);
-    },
-    position: 'header',
-  };
+  return isDesktop
+    ? {
+        label: formatMessage({
+          id: 'app.links.configure-view',
+          defaultMessage: 'Configure the view',
+        }),
+        icon: <ListPlus />,
+        onClick: () => {
+          navigate(`../${collectionType}/${model}/configurations/edit`);
+        },
+        position: 'header',
+      }
+    : null;
 };
 
 ConfigureTheViewAction.type = 'configure-the-view';
@@ -475,18 +579,21 @@ ConfigureTheViewAction.position = 'header';
 const EditTheModelAction: DocumentActionComponent = ({ model }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
-  return {
-    label: formatMessage({
-      id: 'content-manager.link-to-ctb',
-      defaultMessage: 'Edit the model',
-    }),
-    icon: <Pencil />,
-    onClick: () => {
-      navigate(`/plugins/content-type-builder/content-types/${model}`);
-    },
-    position: 'header',
-  };
+  return isDesktop
+    ? {
+        label: formatMessage({
+          id: 'content-manager.link-to-ctb',
+          defaultMessage: 'Edit the model',
+        }),
+        icon: <Pencil />,
+        onClick: () => {
+          navigate(`/plugins/content-type-builder/content-types/${model}`);
+        },
+        position: 'header',
+      }
+    : null;
 };
 
 EditTheModelAction.type = 'edit-the-model';

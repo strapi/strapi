@@ -1,8 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { clickAndWait, describeOnCondition } from '../../utils/shared';
-import { waitForRestart } from '../../utils/restart';
-import { resetFiles } from '../../utils/file-reset';
-import { sharedSetup } from '../../utils/setup';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  navToHeader,
+} from '../../../utils/shared';
+import { waitForRestart } from '../../../utils/restart';
+import { resetFiles } from '../../../utils/file-reset';
+import { sharedSetup } from '../../../utils/setup';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -24,7 +29,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     page,
   }) => {
     // Navigate to the releases page
-    await page.getByRole('link', { name: 'Releases' }).click();
+    await navToHeader(page, ['Releases'], 'Releases');
 
     await expect(page.getByRole('link', { name: `Trent Crimm: The Independent` })).toBeVisible();
 
@@ -47,7 +52,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
 
     // Navigate back to the release page to see the newly created release
-    await page.getByRole('link', { name: 'Releases' }).click();
+    await navToHeader(page, ['Releases'], 'Releases');
     await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 
@@ -55,7 +60,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     page,
   }) => {
     // Navigate to the releases page
-    await clickAndWait(page, page.getByRole('link', { name: 'Releases' }));
+    await navToHeader(page, ['Releases'], 'Releases');
 
     // Open the create release dialog
     await clickAndWait(page, page.getByRole('button', { name: 'New release' }));
@@ -95,14 +100,14 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
 
     // Navigate back to the release page to see the newly created release
-    await clickAndWait(page, page.getByRole('link', { name: 'Releases' }));
+    await navToHeader(page, ['Releases'], 'Releases');
     await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 
   test('A user should be able to perform bulk release on entries', async ({ page }) => {
     await test.step('bulk release', async () => {
       // Navigate to the releases page
-      await clickAndWait(page, page.getByRole('link', { name: 'Releases' }));
+      await navToHeader(page, ['Releases'], 'Releases');
       await page.getByRole('button', { name: 'New release' }).click();
       await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
       // Create a new release
@@ -160,9 +165,10 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(publishConfirmationDialog).toBeVisible();
     await publishConfirmationDialog.getByRole('button', { name: 'Publish' }).click();
 
+    await findAndClose(page, 'Published document');
+
     // Disable draft & publish for the Article content type
-    await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await navToHeader(page, ['Content-Type Builder', 'Article'], 'Article');
     await clickAndWait(page, page.getByRole('button', { name: 'Edit', exact: true }));
     await clickAndWait(page, page.getByRole('tab', { name: /advanced settings/i }));
     await page.getByLabel('Draft & publish').click();

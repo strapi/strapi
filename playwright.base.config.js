@@ -42,7 +42,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
   timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
 
   /* Global setup to set localStorage for all tests */
-  globalSetup: require.resolve('./tests/e2e/utils/global-setup.ts'),
+  globalSetup: require.resolve('./tests/utils/global-setup.ts'),
 
   expect: {
     /**

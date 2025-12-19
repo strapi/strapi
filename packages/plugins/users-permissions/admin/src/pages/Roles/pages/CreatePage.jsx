@@ -4,14 +4,21 @@ import {
   Button,
   Flex,
   Grid,
-  Main,
   Textarea,
   TextInput,
   Typography,
   Field,
+  Box,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
-import { Page, useTracking, useNotification, useFetchClient, Layouts } from '@strapi/strapi/admin';
+import {
+  Page,
+  useTracking,
+  useNotification,
+  useFetchClient,
+  Layouts,
+  BackButton,
+} from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
@@ -68,7 +75,7 @@ export const CreatePage = () => {
   };
 
   return (
-    <Main>
+    <Page.Main>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -102,6 +109,12 @@ export const CreatePage = () => {
                 id: 'Settings.roles.create.description',
                 defaultMessage: 'Define the rights given to the role',
               })}
+              navigationAction={
+                // The back link for mobile works differently; it is placed higher up in the DOM.
+                <Box display={{ initial: 'none', medium: 'block' }}>
+                  <BackButton fallback=".." />
+                </Box>
+              }
             />
             <Layouts.Content>
               <Flex
@@ -125,7 +138,7 @@ export const CreatePage = () => {
                   </Typography>
 
                   <Grid.Root gap={4}>
-                    <Grid.Item col={6} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         name="name"
                         error={
@@ -141,11 +154,11 @@ export const CreatePage = () => {
                             defaultMessage: 'Name',
                           })}
                         </Field.Label>
-                        <TextInput value={values.name || ''} onChange={handleChange} />
+                        <TextInput type="text" value={values.name || ''} onChange={handleChange} />
                         <Field.Error />
                       </Field.Root>
                     </Grid.Item>
-                    <Grid.Item col={6} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         name="description"
                         error={
@@ -183,7 +196,7 @@ export const CreatePage = () => {
           </Form>
         )}
       </Formik>
-    </Main>
+    </Page.Main>
   );
 };
 

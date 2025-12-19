@@ -7,5 +7,5 @@
       "@tests/*": ["./tests/*"]
     }
   },
-  "include": ["src", "../shared", "tests"]
+  "include": ["src", "../shared", "tests", "custom.d.ts"]
 }

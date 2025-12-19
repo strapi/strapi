@@ -15,13 +15,13 @@ import {
   Box,
   Button,
   ButtonProps,
+  Combobox,
+  ComboboxOption,
   Divider,
   Field,
   Flex,
   Grid,
   Modal,
-  SingleSelect,
-  SingleSelectOption,
   Tabs,
   Typography,
   useId,
@@ -130,7 +130,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
         type: 'success',
         message: formatMessage({
           id: getTranslation('Settings.locales.modal.create.success'),
-          defaultMessage: 'Created locale',
+          defaultMessage: 'Locale successfully added',
         }),
       });
 
@@ -303,7 +303,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   return (
     <Grid.Root gap={4}>
       {translatedForm.map(({ size, ...field }) => (
-        <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+        <Grid.Item key={field.name} xs={12} m={size} direction="column" alignItems="stretch">
           <FormRenderer {...field} />
         </Grid.Item>
       ))}
@@ -346,7 +346,7 @@ const AdvancedForm = ({ isDefaultLocale }: AdvancedFormProps) => {
   return (
     <Grid.Root gap={4}>
       {form.map(({ size, ...field }) => (
-        <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+        <Grid.Item key={field.name} xs={12} m={size} direction="column" alignItems="stretch">
           <FormRenderer {...field} />
         </Grid.Item>
       ))}
@@ -399,19 +399,20 @@ const EnumerationInput = ({
   return (
     <Field.Root error={error} hint={hint} name={name} required={required}>
       <Field.Label>{label}</Field.Label>
-      <SingleSelect
+      <Combobox
         disabled={disabled}
-        // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
         onChange={handleChange}
+        onClear={() => handleChange('')}
         placeholder={placeholder}
         value={value}
+        autocomplete={{ type: 'list', filter: 'contains' }}
       >
         {options.map((option) => (
-          <SingleSelectOption value={option.value} key={option.value}>
+          <ComboboxOption value={option.value} key={option.value}>
             {option.label}
-          </SingleSelectOption>
+          </ComboboxOption>
         ))}
-      </SingleSelect>
+      </Combobox>
       <Field.Error />
       <Field.Hint />
     </Field.Root>

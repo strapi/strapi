@@ -50,6 +50,15 @@ describe('metrics', () => {
             };
           },
         },
+        plugin() {
+          return {
+            service() {
+              return {
+                getSettings: () => Promise.resolve({ aiMetadata: false }),
+              };
+            },
+          };
+        },
       } as any;
       strapi.db.connection = { raw };
 

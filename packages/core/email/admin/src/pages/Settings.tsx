@@ -194,7 +194,7 @@ const SettingsPage = () => {
                   </Flex>
 
                   <Grid.Root gap={5}>
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root name="shipper-email">
                         <Field.Label>
                           {formatMessage({
@@ -208,12 +208,14 @@ const SettingsPage = () => {
                             defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
                           })}
                           disabled
+                          readOnly
                           value={data.settings.defaultFrom}
+                          type="email"
                         />
                       </Field.Root>
                     </Grid.Item>
 
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root name="response-email">
                         <Field.Label>
                           {formatMessage({
@@ -227,12 +229,14 @@ const SettingsPage = () => {
                             defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
                           })}
                           disabled
+                          readOnly
                           value={data.settings.defaultReplyTo}
+                          type="email"
                         />
                       </Field.Root>
                     </Grid.Item>
 
-                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root name="email-provider">
                         <Field.Label>
                           {formatMessage({
@@ -271,7 +275,7 @@ const SettingsPage = () => {
                 </Typography>
 
                 <Grid.Root gap={5}>
-                  <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                  <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                     <Field.Root
                       name="test-address"
                       error={
@@ -295,10 +299,11 @@ const SettingsPage = () => {
                           id: 'email.Settings.email.plugin.placeholder.testAddress',
                           defaultMessage: 'ex: developer@example.com',
                         })}
+                        type="email"
                       />
                     </Field.Root>
                   </Grid.Item>
-                  <Grid.Item col={7} s={12} direction="column" alignItems="start">
+                  <Grid.Item col={7} xs={12} direction="column" alignItems="start">
                     <Button
                       loading={mutation.isLoading}
                       disabled={!isTestAddressValid}

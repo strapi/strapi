@@ -60,7 +60,7 @@ describe('Edit Locale', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(await screen.findByText(/Success/)).toBeInTheDocument();
+    expect(await screen.findByText(/locale successfully edited/i)).toBeInTheDocument();
   });
 
   it('should show an error if the update fails', async () => {

@@ -1427,6 +1427,8 @@ describe('List', () => {
           {
             type: 'link',
             url: 'https://strapi.io',
+            rel: '',
+            target: '',
             children: [
               {
                 type: 'text',
@@ -1457,6 +1459,8 @@ describe('List', () => {
               {
                 type: 'link',
                 url: 'https://strapi.io',
+                rel: '',
+                target: '',
                 children: [
                   {
                     type: 'text',

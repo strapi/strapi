@@ -159,6 +159,20 @@ const pipe =
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
+/**
+ * Normalize the blocks state to null if the editor state is considered empty,
+ * otherwise return the state
+ */
+const normalizeBlocksState = (
+  editor: Editor,
+  value: Schema.Attribute.BlocksValue | Descendant[]
+): Schema.Attribute.BlocksValue | Descendant[] | null => {
+  const isEmpty =
+    value.length === 1 && Editor.isEmpty(editor, value[0] as Schema.Attribute.BlocksNode);
+
+  return isEmpty ? null : value;
+};
+
 interface BlocksEditorProps
   extends Pick<FieldValue<Schema.Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
     BlocksContentProps {
@@ -213,12 +227,14 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           // Set a new debounce timeout
           debounceTimeout.current = setTimeout(() => {
             incrementSlateUpdatesCount();
-            onChange(name, state as Schema.Attribute.BlocksValue);
+
+            // Normalize the state (empty editor becomes null)
+            onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
             debounceTimeout.current = null;
           }, 300);
         }
       },
-      [editor.operations, incrementSlateUpdatesCount, name, onChange]
+      [editor, incrementSlateUpdatesCount, name, onChange]
     );
 
     // Clean up the timeout on unmount
@@ -232,8 +248,16 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     // Ensure the editor is in sync after discard
     React.useEffect(() => {
+      // Normalize empty states for comparison to avoid losing focus on the editor when content is deleted
+      const normalizedValue = value?.length ? value : null;
+      const normalizedEditorState = normalizeBlocksState(editor, editor.children);
+
       // Compare the field value with the editor state to check for a stale selection
-      if (value && JSON.stringify(editor.children) !== JSON.stringify(value)) {
+      if (
+        normalizedValue &&
+        normalizedEditorState &&
+        JSON.stringify(normalizedEditorState) !== JSON.stringify(normalizedValue)
+      ) {
         // When there is a diff, unset selection to avoid an invalid state
         Transforms.deselect(editor);
       }
@@ -263,7 +287,9 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
         <Slate
           editor={editor}
-          initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
+          initialValue={
+            value?.length ? value : [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
+          }
           onChange={handleSlateChange}
           key={key}
         >
@@ -314,4 +340,5 @@ export {
   BlocksEditorProvider,
   useBlocksEditorContext,
   isSelectorBlockKey,
+  normalizeBlocksState,
 };

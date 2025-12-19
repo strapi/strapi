@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { useFetchClient, FetchClient } from '@strapi/admin/strapi-admin';
+import { useFetchClient, FetchClient, adminApi } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
+import { useDispatch } from 'react-redux';
 
 import { File, RawFile, CreateFile } from '../../../shared/contracts/files';
 import { pluginId } from '../pluginId';
@@ -14,27 +15,35 @@ interface Asset extends Omit<File, 'id' | 'hash'> {
   hash?: File['hash'];
 }
 
-const uploadAsset = (
-  asset: Asset,
+const uploadAssets = (
+  assets: Asset | Asset[],
   folderId: number | null,
   signal: AbortSignal,
   onProgress: (progress: number) => void,
   post: FetchClient['post']
 ) => {
-  const { rawFile, caption, name, alternativeText } = asset;
+  const assetsArray = Array.isArray(assets) ? assets : [assets];
   const formData = new FormData();
 
-  formData.append('files', rawFile!);
+  // Add all files to the form data
+  assetsArray.forEach((asset) => {
+    if (asset.rawFile) {
+      formData.append('files', asset.rawFile);
+    }
+  });
 
-  formData.append(
-    'fileInfo',
-    JSON.stringify({
-      name,
-      caption,
-      alternativeText,
-      folder: folderId,
-    })
-  );
+  // Add each fileInfo as a separate stringified field
+  assetsArray.forEach((asset) => {
+    formData.append(
+      'fileInfo',
+      JSON.stringify({
+        name: asset.name,
+        caption: asset.caption,
+        alternativeText: asset.alternativeText,
+        folder: folderId,
+      })
+    );
+  });
 
   /**
    * onProgress is not possible using native fetch
@@ -47,6 +56,7 @@ const uploadAsset = (
 };
 
 export const useUpload = () => {
+  const dispatch = useDispatch();
   const [progress, setProgress] = React.useState(0);
   const queryClient = useQueryClient();
   const abortController = new AbortController();
@@ -56,21 +66,22 @@ export const useUpload = () => {
   const mutation = useMutation<
     CreateFile.Response['data'],
     CreateFile.Response['error'],
-    { asset: Asset; folderId: number | null }
+    { assets: Asset | Asset[]; folderId: number | null }
   >(
-    ({ asset, folderId }) => {
-      return uploadAsset(asset, folderId, signal, setProgress, post);
+    ({ assets, folderId }) => {
+      return uploadAssets(assets, folderId, signal, setProgress, post);
     },
     {
       onSuccess() {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
         queryClient.refetchQueries([pluginId, 'asset-count'], { active: true });
+        dispatch(adminApi.util.invalidateTags(['HomepageKeyStatistics', 'AIUsage']));
       },
     }
   );
 
-  const upload = (asset: Asset, folderId: number | null) =>
-    mutation.mutateAsync({ asset, folderId });
+  const upload = (assets: Asset | Asset[], folderId: number | null) =>
+    mutation.mutateAsync({ assets, folderId });
 
   const cancel = () => abortController.abort();
 

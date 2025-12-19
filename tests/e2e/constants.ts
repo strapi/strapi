@@ -1,4 +1,4 @@
-export const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('./app-template/src/constants');
+export const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('../app-template/src/constants');
 
 // NOTE: anything included here needs to be included in all test datasets exports
 export const ALLOWED_CONTENT_TYPES = [
@@ -15,6 +15,10 @@ export const ALLOWED_CONTENT_TYPES = [
   'api::match.match',
   'api::upcoming-match.upcoming-match',
   'api::unique.unique',
+  'api::condition.condition',
+  'api::country.country',
+  'api::cat.cat',
+  'api::dog.dog',
   'plugin::content-manager.history-version',
   /**
    * I18N

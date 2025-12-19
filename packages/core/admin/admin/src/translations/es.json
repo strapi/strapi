@@ -531,6 +531,7 @@
   "global.documentation": "Documentación",
   "global.enabled": "Habilitado",
   "global.finish": "Terminar",
+  "global.localeToggle.label": "Seleccionar idioma de la interfaz",
   "global.marketplace": "Marketplace",
   "global.name": "Nombre",
   "global.none": "Ninguno",
@@ -582,5 +583,14 @@
   "components.Blocks.blocks.heading5": "Título 5",
   "components.Blocks.blocks.heading6": "Título 6",
   "components.Blocks.blocks.image": "Imagen",
+  "widget.key-statistics.title": "Estadísticas del proyecto",
+  "widget.key-statistics.list.admins": "Administradores",
+  "widget.key-statistics.list.apiTokens": "Tokens de API",
+  "widget.key-statistics.list.assets": "Recursos",
+  "widget.key-statistics.list.components": "Componentes",
+  "widget.key-statistics.list.contentTypes": "Tipos de contenido",
+  "widget.key-statistics.list.entries": "Entradas",
+  "widget.key-statistics.list.locales": "Idiomas",
+  "widget.key-statistics.list.webhooks": "Webhooks",
   "widget.profile.title": "Perfil"
 }

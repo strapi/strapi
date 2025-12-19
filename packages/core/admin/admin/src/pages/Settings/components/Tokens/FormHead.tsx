@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { Button, Dialog, Flex, Tooltip } from '@strapi/design-system';
+import { Box, Button, Dialog, Flex, Tooltip } from '@strapi/design-system';
 import { Check, ArrowClockwise, Eye, EyeStriked } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { tours } from '../../../../components/GuidedTour/Tours';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
@@ -159,29 +160,31 @@ export const FormHead = <TToken extends Token | null>({
               />
             )}
             {token?.id && toggleToken && (
-              <Tooltip
-                label={
-                  !canShowToken &&
-                  formatMessage({
-                    id: 'Settings.tokens.encryptionKeyMissing',
-                    defaultMessage:
-                      'In order to view the token, you need a valid encryption key in the admin configuration',
-                  })
-                }
-              >
-                <Button
-                  type="button"
-                  startIcon={showToken ? <EyeStriked /> : <Eye />}
-                  variant="secondary"
-                  onClick={() => toggleToken?.()}
-                  disabled={!canShowToken}
+              <tours.apiTokens.ViewAPIToken>
+                <Tooltip
+                  label={
+                    !canShowToken &&
+                    formatMessage({
+                      id: 'Settings.tokens.encryptionKeyMissing',
+                      defaultMessage:
+                        'In order to view the token, you need a valid encryption key in the admin configuration',
+                    })
+                  }
                 >
-                  {formatMessage({
-                    id: 'Settings.tokens.viewToken',
-                    defaultMessage: 'View token',
-                  })}
-                </Button>
-              </Tooltip>
+                  <Button
+                    type="button"
+                    startIcon={showToken ? <EyeStriked /> : <Eye />}
+                    variant="secondary"
+                    onClick={() => toggleToken?.()}
+                    disabled={!canShowToken}
+                  >
+                    {formatMessage({
+                      id: 'Settings.tokens.viewToken',
+                      defaultMessage: 'View token',
+                    })}
+                  </Button>
+                </Tooltip>
+              </tours.apiTokens.ViewAPIToken>
             )}
             <Button
               disabled={isSubmitting}
@@ -206,7 +209,12 @@ export const FormHead = <TToken extends Token | null>({
           )
         )
       }
-      navigationAction={<BackButton />}
+      navigationAction={
+        // The back link for mobile works differently; it is placed higher up in the DOM.
+        <Box display={{ initial: 'none', medium: 'block' }}>
+          <BackButton />
+        </Box>
+      }
       ellipsis
     />
   );

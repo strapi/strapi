@@ -1,0 +1,47 @@
+name: Label Q1 Q2 2024 Issues
+on:
+  workflow_dispatch: # Allows manual triggering from the Github UI
+
+permissions:
+  issues: write # Required to close issues and post comments
+  contents: read # Needed by most GitHub Actions
+
+jobs:
+  close-inactive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label old issues
+        run: |
+          # issues last updated between 01/01/2024 and 06/01/2024 will be labeled
+          DATE1="2024-01-01"
+          DATE2="2024-06-01"
+          LABEL="stale-q1-q2-2024"
+
+          echo "Labeling issues updated between $DATE1 and $DATE2 with $LABEL"
+
+          # Get all issues last updated between the two dates
+          # Exclude issues with 'status: confirmed', 'severity: high' or 'severity: critical' and 'issue: security' label and issues in milestones
+          # NOTE: This will only process the first 100 issues due to pagination limitation
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/search/issues?q=repo:${{ github.repository }}+is:issue+is:open+updated:${DATE1}..${DATE2}+no:milestone+-label:%22severity:%20high%22+-label:%22status%20confirmed%22+-label:%22severity:%20critical%22+-label:%22issue:%20security%22&per_page=100" | \
+            jq -r --arg label "$LABEL" ' 
+              .items[] | 
+              select(any(.labels[]?; .name == $label) | not) |
+              .number
+            ' | while read issue_number; do
+              if [ ! -z "$issue_number" ]; then
+                echo "Labeling issue #$issue_number with $LABEL" 
+                
+                # Add the label
+                curl -s -X POST \
+                  -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "https://api.github.com/repos/${{ github.repository }}/issues/$issue_number/labels" \
+                  -d "{\"labels\": [\"$LABEL\"]}"
+                
+                echo "Labeled issue #$issue_number"
+              else
+                echo "No issue found."
+              fi
+            done

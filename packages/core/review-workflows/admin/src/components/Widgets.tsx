@@ -11,13 +11,21 @@ import { useGetRecentlyAssignedDocumentsQuery } from '../services/content-manage
 
 import type { RecentDocument } from '../../../shared/contracts/homepage';
 
-const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 'block' })`
+const CellTypography = styled(Typography)`
+  display: block;
+  max-width: 14.4rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
-const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) => {
+const RecentDocumentsTable = ({
+  documents,
+  type,
+}: {
+  documents: RecentDocument[];
+  type: 'assigned';
+}) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
@@ -31,7 +39,7 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
   };
 
   const handleRowClick = (document: RecentDocument) => () => {
-    trackUsage('willEditEntryFromHome');
+    trackUsage('willEditEntryFromHome', { entryType: type });
     const link = getEditViewLink(document);
     navigate(link);
   };
@@ -83,7 +91,7 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
                 <IconButton
                   tag={Link}
                   to={getEditViewLink(document)}
-                  onClick={() => trackUsage('willEditEntryFromHome')}
+                  onClick={() => trackUsage('willEditEntryFromHome', { entryType: type })}
                   label={formatMessage({
                     id: 'content-manager.actions.edit.label',
                     defaultMessage: 'Edit',
@@ -128,7 +136,7 @@ const AssignedWidget = () => {
     );
   }
 
-  return <RecentDocumentsTable documents={data} />;
+  return <RecentDocumentsTable documents={data} type="assigned" />;
 };
 
 export { AssignedWidget };

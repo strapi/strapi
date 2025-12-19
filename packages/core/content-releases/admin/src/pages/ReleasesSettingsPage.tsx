@@ -125,7 +125,7 @@ const ReleasesSettingsPage = () => {
   });
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -193,7 +193,7 @@ const ReleasesSettingsPage = () => {
                       })}
                     </Typography>
                     <Grid.Root>
-                      <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                         <TimezoneDropdown />
                       </Grid.Item>
                     </Grid.Root>
@@ -204,7 +204,7 @@ const ReleasesSettingsPage = () => {
           }}
         </Form>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 

@@ -3,6 +3,7 @@ import { ExternalLink, Check, ClockCounterClockwise } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
+import { RESPONSIVE_DEFAULT_SPACING } from '../../../constants/theme';
 import { useTypedSelector } from '../../../core/store/hooks';
 import darkIllustration from '../assets/purchase-page-content-history-illustration-dark.svg';
 import lightIllustration from '../assets/purchase-page-content-history-illustration-light.svg';
@@ -13,7 +14,7 @@ const PurchaseContentHistory = () => {
 
   const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
-    <Layouts.Root>
+    <>
       <Main>
         <Layouts.Header
           title={formatMessage({
@@ -22,8 +23,8 @@ const PurchaseContentHistory = () => {
           })}
         />
         <Box
-          marginLeft={10}
-          marginRight={10}
+          marginLeft={RESPONSIVE_DEFAULT_SPACING}
+          marginRight={RESPONSIVE_DEFAULT_SPACING}
           shadow="filterShadow"
           hasRadius
           background="neutral0"
@@ -31,7 +32,7 @@ const PurchaseContentHistory = () => {
           overflow={'hidden'}
         >
           <Grid.Root>
-            <Grid.Item col={6} s={12} alignItems={'flex-start'}>
+            <Grid.Item xs={12} m={6} alignItems={'flex-start'}>
               <Flex direction="column" alignItems="flex-start" padding={7} width={'100%'}>
                 <Flex>
                   <ClockCounterClockwise fill="primary600" width={`24px`} height={`24px`} />
@@ -114,7 +115,7 @@ const PurchaseContentHistory = () => {
                 </Flex>
               </Flex>
             </Grid.Item>
-            <Grid.Item col={6} s={12} background="primary100" minHeight={'280px'}>
+            <Grid.Item xs={12} m={6} background="primary100" minHeight={'280px'}>
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <img
                   src={illustration}
@@ -136,7 +137,7 @@ const PurchaseContentHistory = () => {
           </Grid.Root>
         </Box>
       </Main>
-    </Layouts.Root>
+    </>
   );
 };
 

@@ -41,6 +41,7 @@ async function createApp(scope: Scope) {
     packageManager,
     gitInit,
     runApp,
+    isABTestEnabled,
   } = scope;
 
   const shouldRunSeed = useExample && installDependencies;
@@ -253,6 +254,10 @@ async function createApp(scope: Scope) {
 
       logger.fatal('Failed to start your Strapi application');
     }
+  }
+
+  if (isABTestEnabled) {
+    await trackUsage({ event: 'didEnableABTest', scope });
   }
 }
 
