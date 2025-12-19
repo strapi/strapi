@@ -2,15 +2,9 @@ import { expect, test } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
 import { login } from '../../../../utils/login';
 import { createContent, fillField } from '../../../../utils/content-creation';
-import { findAndClose, navToHeader, clickAndWait } from '../../../../utils/shared';
+import { findAndClose, navToHeader } from '../../../../utils/shared';
 import { resetFiles } from '../../../../utils/file-reset';
-import { waitForRestart } from '../../../../utils/restart';
-import {
-  createComponent,
-  addAttributeToComponent,
-  addAttributesToContentType,
-  addAttributes,
-} from '../../../../utils/content-types';
+import { createComponent, addAttributesToContentType } from '../../../../utils/content-types';
 
 test.describe('Conditional Fields - Enum-controlled conditional text fields and value are cleared when hidden', () => {
   test.beforeEach(async ({ page }) => {
