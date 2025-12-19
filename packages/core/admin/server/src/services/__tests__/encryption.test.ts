@@ -38,7 +38,9 @@ describe('Encryption Service', () => {
       (global.strapi.config.get as jest.Mock).mockReturnValue(undefined);
       const result = encryption.encrypt('test');
       expect(result).toBeNull();
-      expect(global.strapi.log.warn).toHaveBeenCalledWith('Encryption key is missing from config');
+      expect(global.strapi.log.warn).toHaveBeenCalledWith(
+        'Encryption key is missing from admin.secrets.encryptionKey configuration'
+      );
     });
   });
 
@@ -58,7 +60,9 @@ describe('Encryption Service', () => {
       (global.strapi.config.get as jest.Mock).mockReturnValue(undefined);
       const result = encryption.decrypt('v1:iv:payload:tag');
       expect(result).toBeNull();
-      expect(global.strapi.log.warn).toHaveBeenCalledWith('Encryption key is missing from config');
+      expect(global.strapi.log.warn).toHaveBeenCalledWith(
+        'Encryption key is missing from admin.secrets.encryptionKey configuration'
+      );
     });
 
     test('returns null and logs warning when decryption fails due to wrong key', () => {
