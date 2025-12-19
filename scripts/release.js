@@ -46,7 +46,7 @@ const yargs = require('yargs');
       description: 'Specify a custom tag for the release.',
       type: 'string',
     })
-    .option('otp', {
+    .option('opt', {
       description: 'npm one time password',
       type: 'string',
     })

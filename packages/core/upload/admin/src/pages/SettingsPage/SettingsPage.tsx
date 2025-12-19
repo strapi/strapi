@@ -7,7 +7,7 @@ import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/desi
 import { Check, Sparkle } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
@@ -22,12 +22,34 @@ import type { InitialState } from './reducer';
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const { put, post } = useFetchClient();
+  const { put, post, get } = useFetchClient();
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
   const { data, isLoading, refetch } = useSettings();
   const isAIAvailable = useAIAvailability();
+
+  const {
+    data: metadataCountData,
+    refetch: refetchMetadataCount,
+    isLoading: isLoadingMetadataCount,
+  } = useQuery<{ count: number }, { message: string }>(
+    ['ai-metadata-count'],
+    async () => {
+      const { data } = await get('/upload/actions/generate-ai-metadata/count');
+      return data;
+    },
+    {
+      enabled: isAIAvailable && !!data?.aiMetadata,
+      retry: false,
+      onError(err) {
+        // Silently fail - this is just for UI enhancement
+        console.error('Failed to fetch metadata count:', err);
+      },
+    }
+  );
+
+  const metadataCount = metadataCountData?.count ?? 0;
 
   React.useEffect(() => {
     if (data) {
@@ -88,6 +110,7 @@ export const SettingsPage = () => {
           type: 'success',
           message: data.message || 'AI metadata generated successfully',
         });
+        refetchMetadataCount();
       },
       onError(err) {
         toggleNotification({
@@ -214,11 +237,12 @@ export const SettingsPage = () => {
                         </Field.Root>
                       </Grid.Item>
                     </Grid.Root>
-                    <Flex paddingTop={4}>
+                    <Flex paddingTop={4} direction="column" alignItems="start" gap={2}>
                       <Button
                         variant="secondary"
                         startIcon={<Sparkle />}
                         loading={isGeneratingAI}
+                        disabled={metadataCount === 0 || isLoadingMetadataCount}
                         onClick={() => generateAIMetadata()}
                       >
                         {formatMessage({
@@ -226,6 +250,23 @@ export const SettingsPage = () => {
                           defaultMessage: 'Generate metadata for existing images',
                         })}
                       </Button>
+                      {!isLoadingMetadataCount && (
+                        <Typography variant="pi" textColor="neutral600">
+                          {metadataCount === 0
+                            ? formatMessage({
+                                id: getTrad('settings.form.aiMetadata.noImagesWithoutMetadata'),
+                                defaultMessage: 'All images have metadata',
+                              })
+                            : formatMessage(
+                                {
+                                  id: getTrad('settings.form.aiMetadata.imagesWithoutMetadata'),
+                                  defaultMessage:
+                                    '{count, plural, one {# image} other {# images}} without metadata',
+                                },
+                                { count: metadataCount }
+                              )}
+                        </Typography>
+                      )}
                     </Flex>
                   </Flex>
                 </Box>

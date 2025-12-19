@@ -316,4 +316,279 @@ describe('AI Metadata Service', () => {
       });
     });
   });
+
+  describe('updateFilesWithAIMetadata', () => {
+    const mockUpdateFileInfo = jest.fn().mockResolvedValue({});
+
+    beforeEach(() => {
+      mockUpdateFileInfo.mockClear();
+
+      // Mock the upload service with updateFileInfo method
+      mockStrapi.plugin = jest.fn().mockImplementation((pluginName) => {
+        if (pluginName === 'upload') {
+          return {
+            service: jest.fn().mockImplementation((serviceName) => {
+              if (serviceName === 'upload') {
+                return {
+                  getSettings: mockGetSettings,
+                  updateFileInfo: mockUpdateFileInfo,
+                };
+              }
+              return {};
+            }),
+          };
+        }
+        return {};
+      });
+
+      // Recreate service with updated mock
+      aiMetadataService = createAIMetadataService({ strapi: mockStrapi });
+    });
+
+    it('should only update caption when alternativeText exists', async () => {
+      const files: File[] = [
+        {
+          id: 1,
+          name: 'image.jpg',
+          url: '/tmp/image.jpg',
+          mime: 'image/jpeg',
+          size: 1024,
+          provider: 'local',
+          hash: 'hash1',
+          alternativeText: 'Existing alt text',
+          caption: '', // Empty caption
+        } as File,
+      ];
+
+      const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
+
+      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults);
+
+      expect(mockUpdateFileInfo).toHaveBeenCalledTimes(1);
+      expect(mockUpdateFileInfo).toHaveBeenCalledWith(
+        1,
+        { caption: 'AI generated caption' }, // Only caption should be updated
+        undefined
+      );
+      expect(result.processed).toBe(1);
+      expect(result.errors).toHaveLength(0);
+      expect(files[0].caption).toBe('AI generated caption');
+      expect(files[0].alternativeText).toBe('Existing alt text'); // Should remain unchanged
+    });
+
+    it('should only update alternativeText when caption exists', async () => {
+      const files: File[] = [
+        {
+          id: 2,
+          name: 'image.jpg',
+          url: '/tmp/image.jpg',
+          mime: 'image/jpeg',
+          size: 1024,
+          provider: 'local',
+          hash: 'hash2',
+          alternativeText: null, // No alt text
+          caption: 'Existing caption',
+        } as File,
+      ];
+
+      const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
+
+      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults);
+
+      expect(mockUpdateFileInfo).toHaveBeenCalledTimes(1);
+      expect(mockUpdateFileInfo).toHaveBeenCalledWith(
+        2,
+        { alternativeText: 'AI generated alt' }, // Only alternativeText should be updated
+        undefined
+      );
+      expect(result.processed).toBe(1);
+      expect(result.errors).toHaveLength(0);
+      expect(files[0].alternativeText).toBe('AI generated alt');
+      expect(files[0].caption).toBe('Existing caption'); // Should remain unchanged
+    });
+
+    it('should update both fields when neither exists', async () => {
+      const files: File[] = [
+        {
+          id: 3,
+          name: 'image.jpg',
+          url: '/tmp/image.jpg',
+          mime: 'image/jpeg',
+          size: 1024,
+          provider: 'local',
+          hash: 'hash3',
+          alternativeText: null,
+          caption: null,
+        } as File,
+      ];
+
+      const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
+
+      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults);
+
+      expect(mockUpdateFileInfo).toHaveBeenCalledTimes(1);
+      expect(mockUpdateFileInfo).toHaveBeenCalledWith(
+        3,
+        { alternativeText: 'AI generated alt', caption: 'AI generated caption' }, // Both fields
+        undefined
+      );
+      expect(result.processed).toBe(1);
+      expect(result.errors).toHaveLength(0);
+      expect(files[0].alternativeText).toBe('AI generated alt');
+      expect(files[0].caption).toBe('AI generated caption');
+    });
+
+    it('should skip update when both fields already exist', async () => {
+      const files: File[] = [
+        {
+          id: 4,
+          name: 'image.jpg',
+          url: '/tmp/image.jpg',
+          mime: 'image/jpeg',
+          size: 1024,
+          provider: 'local',
+          hash: 'hash4',
+          alternativeText: 'Existing alt text',
+          caption: 'Existing caption',
+        } as File,
+      ];
+
+      const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
+
+      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults);
+
+      expect(mockUpdateFileInfo).not.toHaveBeenCalled(); // Should not update at all
+      expect(result.processed).toBe(0); // Should not count as processed
+      expect(result.errors).toHaveLength(0);
+      expect(files[0].alternativeText).toBe('Existing alt text'); // Should remain unchanged
+      expect(files[0].caption).toBe('Existing caption'); // Should remain unchanged
+    });
+
+    it('should treat empty strings as missing fields', async () => {
+      const files: File[] = [
+        {
+          id: 5,
+          name: 'image.jpg',
+          url: '/tmp/image.jpg',
+          mime: 'image/jpeg',
+          size: 1024,
+          provider: 'local',
+          hash: 'hash5',
+          alternativeText: '',
+          caption: '',
+        } as File,
+      ];
+
+      const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
+
+      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults);
+
+      expect(mockUpdateFileInfo).toHaveBeenCalledTimes(1);
+      expect(mockUpdateFileInfo).toHaveBeenCalledWith(
+        5,
+        { alternativeText: 'AI generated alt', caption: 'AI generated caption' },
+        undefined
+      );
+      expect(result.processed).toBe(1);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should handle multiple files with different metadata states', async () => {
+      const files: File[] = [
+        {
+          id: 1,
+          name: 'image1.jpg',
+          alternativeText: 'Existing alt',
+          caption: '',
+        } as File,
+        {
+          id: 2,
+          name: 'image2.jpg',
+          alternativeText: null,
+          caption: 'Existing caption',
+        } as File,
+        {
+          id: 3,
+          name: 'image3.jpg',
+          alternativeText: 'Has both',
+          caption: 'Has both',
+        } as File,
+        {
+          id: 4,
+          name: 'image4.jpg',
+          alternativeText: null,
+          caption: null,
+        } as File,
+      ];
+
+      const metadataResults = [
+        { altText: 'Alt 1', caption: 'Caption 1' },
+        { altText: 'Alt 2', caption: 'Caption 2' },
+        { altText: 'Alt 3', caption: 'Caption 3' },
+        { altText: 'Alt 4', caption: 'Caption 4' },
+      ];
+
+      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults);
+
+      expect(mockUpdateFileInfo).toHaveBeenCalledTimes(3); // File 3 should be skipped
+      expect(mockUpdateFileInfo).toHaveBeenNthCalledWith(1, 1, { caption: 'Caption 1' }, undefined);
+      expect(mockUpdateFileInfo).toHaveBeenNthCalledWith(
+        2,
+        2,
+        { alternativeText: 'Alt 2' },
+        undefined
+      );
+      expect(mockUpdateFileInfo).toHaveBeenNthCalledWith(
+        3,
+        4,
+        { alternativeText: 'Alt 4', caption: 'Caption 4' },
+        undefined
+      );
+      expect(result.processed).toBe(3);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should handle errors and continue processing other files', async () => {
+      const files: File[] = [
+        { id: 1, name: 'image1.jpg', alternativeText: null, caption: null } as File,
+        { id: 2, name: 'image2.jpg', alternativeText: null, caption: null } as File,
+      ];
+
+      const metadataResults = [
+        { altText: 'Alt 1', caption: 'Caption 1' },
+        { altText: 'Alt 2', caption: 'Caption 2' },
+      ];
+
+      mockUpdateFileInfo
+        .mockRejectedValueOnce(new Error('Update failed'))
+        .mockResolvedValueOnce({});
+
+      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults);
+
+      expect(result.processed).toBe(1); // Only second file processed
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toEqual({
+        fileId: 1,
+        error: 'Update failed',
+      });
+    });
+
+    it('should pass user option to updateFileInfo when provided', async () => {
+      const files: File[] = [
+        { id: 1, name: 'image.jpg', alternativeText: null, caption: null } as File,
+      ];
+
+      const metadataResults = [{ altText: 'AI alt', caption: 'AI caption' }];
+
+      await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
+        user: { id: 123 },
+      });
+
+      expect(mockUpdateFileInfo).toHaveBeenCalledWith(
+        1,
+        { alternativeText: 'AI alt', caption: 'AI caption' },
+        { user: { id: 123 } }
+      );
+    });
+  });
 });

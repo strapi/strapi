@@ -65,20 +65,35 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
           const aiMetadata = metadataResults[index];
           if (aiMetadata) {
             try {
-              await uploadService.updateFileInfo(
-                file.id,
-                {
-                  alternativeText: aiMetadata.altText,
-                  caption: aiMetadata.caption,
-                },
-                options?.user ? { user: options.user } : undefined
-              );
+              // Only update fields that are missing (null or empty string)
+              const updateData: { alternativeText?: string; caption?: string } = {};
 
-              // Update in-memory file object (needed for upload flow response)
-              file.alternativeText = aiMetadata.altText;
-              file.caption = aiMetadata.caption;
+              if (!file.alternativeText || file.alternativeText === '') {
+                updateData.alternativeText = aiMetadata.altText;
+              }
 
-              processed += 1;
+              if (!file.caption || file.caption === '') {
+                updateData.caption = aiMetadata.caption;
+              }
+
+              // Only update if there are fields to update
+              if (Object.keys(updateData).length > 0) {
+                await uploadService.updateFileInfo(
+                  file.id,
+                  updateData,
+                  options?.user ? { user: options.user } : undefined
+                );
+
+                // Update in-memory file object (needed for upload flow response)
+                if (updateData.alternativeText !== undefined) {
+                  file.alternativeText = updateData.alternativeText;
+                }
+                if (updateData.caption !== undefined) {
+                  file.caption = updateData.caption;
+                }
+
+                processed += 1;
+              }
             } catch (error) {
               errors.push({
                 fileId: file.id,

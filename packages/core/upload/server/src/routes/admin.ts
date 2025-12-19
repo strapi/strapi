@@ -233,5 +233,21 @@ export const routes = {
         ],
       },
     },
+    {
+      method: 'GET',
+      path: '/actions/generate-ai-metadata/count',
+      handler: 'admin-file.getAIMetadataCount',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::upload.read'],
+            },
+          },
+        ],
+      },
+    },
   ],
 };
