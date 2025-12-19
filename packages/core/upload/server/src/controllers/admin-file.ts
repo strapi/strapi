@@ -83,6 +83,44 @@ export default {
     ctx.body = body;
   },
 
+  async getAIMetadataCount(ctx: Context) {
+    const { userAbility } = ctx.state;
+
+    const pm = strapi.service('admin::permission').createPermissionsManager({
+      ability: userAbility,
+      action: ACTIONS.read,
+      model: FILE_MODEL_UID,
+    });
+
+    if (!pm.isAllowed) {
+      return ctx.forbidden();
+    }
+
+    const aiMetadataService = getService('aiMetadata');
+
+    // Check if AI service is enabled
+    if (!(await aiMetadataService.isEnabled())) {
+      return ctx.badRequest('AI Metadata service is not enabled');
+    }
+
+    try {
+      const count = await aiMetadataService.countImagesWithoutMetadata();
+
+      ctx.body = {
+        count,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to get AI metadata count';
+
+      strapi.log.error('Failed to get AI metadata count', {
+        message,
+        error,
+      });
+
+      ctx.badRequest(message);
+    }
+  },
+
   async generateAIMetadata(ctx: Context) {
     const { userAbility } = ctx.state;
 
