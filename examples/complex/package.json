@@ -5,16 +5,14 @@
   "description": "A Strapi application with complex schemas",
   "scripts": {
     "build": "strapi build",
-    "console": "strapi console",
-    "deploy": "strapi deploy",
     "dev": "strapi develop",
     "develop": "strapi develop",
     "develop:postgres": "node scripts/develop-with-db.js postgres",
     "develop:mariadb": "node scripts/develop-with-db.js mariadb",
     "develop:sqlite": "node scripts/develop-with-db.js sqlite",
     "start": "strapi start",
-    "strapi": "strapi",
-    "test:migration": "node scripts/test-migration.js"
+    "setup:v4": "node scripts/setup-v4-project.js",
+    "test:migration": "node scripts/validate-migration-docservice.js"
   },
   "dependencies": {
     "@strapi/plugin-users-permissions": "workspace:*",

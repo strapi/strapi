@@ -6,9 +6,13 @@ const path = require('path');
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
 const MONOREPO_ROOT = path.resolve(COMPLEX_DIR, '../..');
-// Create the v4 project as a subdirectory under this example for easier local
-// work: `examples/complex/v4`.
-const V4_PROJECT_DIR = path.resolve(COMPLEX_DIR, 'v4');
+// Create the v4 project. By default this will be created just outside the
+// monorepo root (sibling to the repo) for isolated testing. You can still
+// override the location with `V4_OUTSIDE_DIR` (absolute or relative).
+const DEFAULT_OUTSIDE_DIR = path.resolve(MONOREPO_ROOT, '..', path.basename(COMPLEX_DIR) + '-v4');
+const V4_PROJECT_DIR = process.env.V4_OUTSIDE_DIR
+  ? path.resolve(process.cwd(), process.env.V4_OUTSIDE_DIR)
+  : DEFAULT_OUTSIDE_DIR;
 
 // From v4 project, find docker-compose file (could be in monorepo root, parent strapi-v5, or current dir)
 function findDockerComposeFile(v4ProjectDir) {
@@ -128,6 +132,11 @@ if (!fs.existsSync(configDir)) {
 }
 
 // Write database.js
+// Default the path the generated v4 project's sqlite file should use when the
+// user doesn't supply `DATABASE_FILENAME`. We prefer the monorepo v5 example
+// DB so v4 seeding can write directly into the v5 location when desired.
+const v5DbAbsolute = path.join(COMPLEX_DIR, '.tmp', 'data.db');
+
 const databaseConfig = `'use strict';
 const path = require('path');
 
@@ -140,8 +149,9 @@ module.exports = ({ env }) => {
         client: 'sqlite',
         connection: {
           filename: env(
-            'DATABASE_FILENAME',
-            path.join(__dirname, '..', '.tmp', 'data.db')
+              'DATABASE_FILENAME',
+              // Default to the monorepo v5 example DB absolute path
+              '${v5DbAbsolute.replace(/\\/g, '\\\\')}'
           ),
         },
         useNullAsDefault: true,

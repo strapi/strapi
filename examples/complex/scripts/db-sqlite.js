@@ -28,6 +28,36 @@ switch (command) {
   case 'start':
     console.log('SQLite database is file-based, no container to start.');
     console.log('Database file location:', DB_FILE);
+
+    // If a v5 DB already exists, move it aside to `v5-db.db` (delete previous)
+    try {
+      const dir = path.dirname(DB_FILE);
+      const v5Backup = path.join(dir, 'v5-db.db');
+
+      if (fs.existsSync(DB_FILE)) {
+        // Remove previous backup if present
+        if (fs.existsSync(v5Backup)) {
+          try {
+            fs.unlinkSync(v5Backup);
+            console.log(`Removed previous v5 backup: ${v5Backup}`);
+          } catch (e) {
+            console.warn(`Warning: failed to remove previous v5 backup: ${e.message}`);
+          }
+        }
+
+        try {
+          fs.renameSync(DB_FILE, v5Backup);
+          console.log(`Renamed existing v5 DB to: ${v5Backup}`);
+        } catch (e) {
+          console.warn(`Warning: failed to rename existing v5 DB: ${e.message}`);
+        }
+      } else {
+        console.log('No existing v5 DB to back up.');
+      }
+    } catch (e) {
+      console.warn('Warning while rotating v5 DB:', e.message || e);
+    }
+
     break;
 
   case 'stop':
