@@ -8,7 +8,7 @@
 const _ = require('lodash');
 const urlJoin = require('url-join');
 
-const { getService } = require('../utils');
+const { getService, findUniqueUsername } = require('../utils');
 
 module.exports = ({ strapi }) => {
   /**
@@ -86,23 +86,8 @@ module.exports = ({ strapi }) => {
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: advancedSettings.default_role } });
 
-    let username = email.split('@')[0];
-
-    // Get all users with the same username
-    const usersWithUsername = await strapi.db
-      .query("plugin::users-permissions.user")
-      .findMany({
-        where: { username },
-      });
-
-    // If there are users with the same username, append a number to the username
-    if (usersWithUsername.length > 0) {
-      let counter = 1;
-      while (usersWithUsername.some(user => user.username === username)) {
-        username = `${email.split('@')[0]}${counter}`;
-        counter++;
-      }
-    }
+    // Generate a unique username based on the email prefix
+    const username = await findUniqueUsername(email.split('@')[0]);
 
     // Create the new user.
     const newUser = {
