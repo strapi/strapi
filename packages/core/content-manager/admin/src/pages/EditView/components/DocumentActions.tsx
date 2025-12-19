@@ -21,6 +21,7 @@ import {
   Menu,
   ButtonProps,
   Tooltip,
+  IconButton,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
@@ -380,22 +381,16 @@ const DocumentActionsMenu = ({
     <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
       <Menu.Trigger
         disabled={isDisabled}
-        size="S"
-        endIcon={null}
-        paddingTop="4px"
-        paddingLeft="7px"
-        paddingRight="7px"
-        variant={variant}
-      >
-        <More aria-hidden focusable={false} />
-        <VisuallyHidden tag="span">
-          {label ||
-            formatMessage({
-              id: 'content-manager.containers.edit.panels.default.more-actions',
-              defaultMessage: 'More document actions',
-            })}
-        </VisuallyHidden>
-      </Menu.Trigger>
+        label={
+          label ||
+          formatMessage({
+            id: 'content-manager.containers.edit.panels.default.more-actions',
+            defaultMessage: 'More document actions',
+          })
+        }
+        tag={IconButton}
+        icon={<More />}
+      />
       <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
