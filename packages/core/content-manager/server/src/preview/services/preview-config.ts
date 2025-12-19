@@ -1,4 +1,4 @@
-import type { Core, UID } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { errors, extendMiddlewareConfiguration } from '@strapi/utils';
 
 export type HandlerParams = {
@@ -7,14 +7,11 @@ export type HandlerParams = {
   status: 'published' | 'draft';
 };
 
-export interface PreviewConfig {
-  enabled: boolean;
-  config: {
-    // List of CSP allowed origins. This is a shortcut to setting it up inside `config/middlewares.js`
-    allowedOrigins: string[];
-    handler: (uid: UID.Schema, params: HandlerParams) => string | undefined;
-  };
-}
+/**
+ * @deprecated Use Core.Config.Admin['preview'] from @strapi/types instead
+ * Keeping for backward compatibility
+ */
+export type PreviewConfig = NonNullable<Core.Config.Admin['preview']>;
 
 /**
  * Read configuration for static preview
@@ -88,7 +85,7 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Utility to get the preview handler from the configuration
      */
-    getPreviewHandler(): PreviewConfig['config']['handler'] {
+    getPreviewHandler(): NonNullable<Core.Config.Admin['preview']>['config']['handler'] {
       const emptyHandler = () => {
         return undefined;
       };
