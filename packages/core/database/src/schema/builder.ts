@@ -357,6 +357,14 @@ const createHelpers = (db: Database) => {
         dropColumn(tableBuilder, removedColumn);
       }
 
+      // Rename columns before updates (to preserve data)
+      if (table.columns.renamed) {
+        for (const { from, to } of table.columns.renamed) {
+          debug(`Renaming column ${from} to ${to} on ${table.name}`);
+          tableBuilder.renameColumn(from, to);
+        }
+      }
+
       // Update existing columns
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name} on ${table.name}`);

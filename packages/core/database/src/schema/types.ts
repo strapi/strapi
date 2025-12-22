@@ -60,6 +60,7 @@ export interface ColumnsDiff {
     removed: Column[];
     updated: ColumnDiff['diff'][];
     unchanged: Column[];
+    renamed?: Array<{ from: string; to: string }>;
   };
 }
 

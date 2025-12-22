@@ -8,6 +8,7 @@ import { typeKinds } from '../constants';
 import createSchemaHandler from './schema-handler';
 import { CreateContentTypeInput } from '../../controllers/validation/content-type';
 import type { InternalRelationAttribute, InternalAttribute } from './types';
+import { detectFieldRenames, applyRenameDetections } from './field-rename-detector';
 
 const { ApplicationError } = errors;
 
@@ -213,8 +214,31 @@ export default function createComponentBuilder() {
       const deletedKeys = _.difference(Object.keys(oldAttributes), Object.keys(newAttributes));
       const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
 
-      // remove old relations
-      deletedKeys.forEach((key) => {
+      // Detect field renames before processing deletions and additions
+      const detectedRenames = detectFieldRenames(
+        oldAttributes,
+        newAttributes,
+        deletedKeys,
+        newKeys
+      );
+
+      const { renames, actualDeletions, actualAdditions } = applyRenameDetections(
+        detectedRenames,
+        deletedKeys,
+        newKeys
+      );
+
+      // Store renames for database migration
+      if (renames.length > 0) {
+        contentType.metadata = contentType.metadata || {};
+        contentType.metadata.renamedFields = renames.map((r) => ({
+          from: r.oldName,
+          to: r.newName,
+        }));
+      }
+
+      // remove old relations (only for actual deletions, not renames)
+      actualDeletions.forEach((key) => {
         const attribute = oldAttributes[key];
 
         // if the old relation has a target attribute. we need to remove it in the target type
@@ -294,8 +318,46 @@ export default function createComponentBuilder() {
         }
       });
 
-      // add new relations
-      newKeys.forEach((key) => {
+      // Handle renamed fields - treat them like remaining fields but update the key
+      renames.forEach((rename) => {
+        const oldAttribute = oldAttributes[rename.oldName];
+        const newAttribute = newAttributes[rename.newName] as InternalAttribute;
+
+        // For renamed relations, handle them appropriately
+        if (isRelation(oldAttribute) && isRelation(newAttribute)) {
+          const relationAttribute = newAttribute as InternalRelationAttribute;
+          const oldRelationAttribute = oldAttribute as InternalRelationAttribute;
+          
+          // Keep extra options from old attribute
+          reuseUnsetPreviousProperties(relationAttribute, oldAttribute);
+          
+          // Update relation if needed
+          const oldTargetAttributeName =
+            oldRelationAttribute.inversedBy || oldRelationAttribute.mappedBy;
+          const sameRelation = oldAttribute.relation === relationAttribute.relation;
+          const targetAttributeHasChanged =
+            oldTargetAttributeName !== relationAttribute.targetAttribute;
+
+          if (!sameRelation || targetAttributeHasChanged) {
+            this.unsetRelation(oldAttribute);
+          }
+
+          if (oldRelationAttribute.inversedBy) {
+            relationAttribute.dominant = true;
+          } else if (oldRelationAttribute.mappedBy) {
+            relationAttribute.dominant = false;
+          }
+
+          this.setRelation({
+            key: rename.newName,
+            uid,
+            attribute: relationAttribute,
+          });
+        }
+      });
+
+      // add new relations (only for actual additions, not renames)
+      actualAdditions.forEach((key) => {
         const attribute = newAttributes[key] as InternalAttribute;
 
         if (isRelation(attribute)) {
