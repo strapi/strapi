@@ -78,7 +78,7 @@ const addDraftAndPublish = (schema: Schema.ContentType) => {
     type: 'datetime',
     configurable: false,
     writable: true,
-    visible: false,
+    visible: true,
     default() {
       return new Date();
     },
