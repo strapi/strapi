@@ -8,6 +8,8 @@ tags:
 
 The transfer engine manages the data transfer process by facilitating communication between a source provider and a destination provider.
 
+:::caution **Destructive Operation**: Currently, the transfer engine is designed as a synchronization tool. When using the default `local-destination` provider, the engine uses a **restore strategy** by default. This will **delete all existing data** (entities, links, assets, and configuration) in the destination database during the bootstrap phase before any new data is written. :::
+
 ## Architecture Overview
 
 ```mermaid
@@ -91,12 +93,12 @@ sequenceDiagram
     participant DH as Diff Handler
 
     rect rgb(230, 245, 230)
-        Note over Client,DP: 1️⃣ Bootstrap & Initialize Phase
+        Note over Client,DP: 1️⃣ Bootstrap & Initialize Phase (Destructive)
         Client->>+TE: Start Transfer
         TE->>SP: Bootstrap
         Note right of SP: Connect to files,<br/>databases, etc.
         TE->>DP: Bootstrap
-        Note right of DP: Setup connections,<br/>prepare storage
+        Note right of DP: Setup connections &<br/>WIPE DESTINATION DATA (Restore)
         TE->>SP: Get Metadata
         SP-->>TE: Source Metadata
         TE->>DP: Get Metadata
@@ -165,21 +167,11 @@ sequenceDiagram
     end
 ```
 
-A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
+### The Bootstrap Phase and Data Loss
 
-After that, the integrity check between the source and destination is run, which validates the requirements set by the chosen schemaStrategy and versionStrategy.
+A transfer starts by bootstrapping and initializing itself and the providers. In this stage, providers establish connections to the database and file systems.
 
-Note: Schema differences during this stage can be resolved programmatically by adding an `onSchemaDiff` handler. However, be aware that this interface is likely to change to a more generic engine handler (such as `engine.on('schemaDiff', handler)`) before this feature is stable.
-
-Once the integrity check has passed, the transfer begins by opening streams from the source to the destination one stage at a time. The following is a list of the stages in the order they are run:
-
-1. schemas - content type schemas. Note: with all built-in Strapi destination providers, only the Strapi file provider makes use of this data
-2. entities - all entities (including components, dynamic zones, and media data but not media files) _without their relations_
-3. assets - the files from the /uploads folder
-4. links - the relations between entities
-5. configuration - the Strapi project configuration data
-
-Once all stages have been completed, the transfer waits for all providers to close and then emits a finish event and the transfer completes.
+**Important:** For the `local-destination` provider, the `bootstrap` method checks the transfer strategy. Currently, `restore` is the only supported strategy for full transfers. When this is active, the provider executes a internal `#deleteAll()` method which truncates all tables and removes all assets in the destination before the transfer begins. This ensures no ID conflicts occur during the `entities` and `links` stages, but it means the operation is **non-reversible** and will result in the loss of all pre-existing data on the destination instance.
 
 ## Setting up the transfer engine
 
