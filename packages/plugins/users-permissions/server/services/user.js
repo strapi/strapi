@@ -143,7 +143,7 @@ module.exports = ({ strapi }) => ({
     const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(
       {
         schema: userSchema,
-        getModel: strapi.getModel.bind(strapi),
+        getModel: strapi.getModel.bindHere(strapi),
       },
       user
     );
