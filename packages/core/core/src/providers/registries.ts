@@ -19,6 +19,7 @@ export default defineProvider({
       .add('modules', () => registries.modules(strapi))
       .add('plugins', () => registries.plugins(strapi))
       .add('custom-fields', () => registries.customFields(strapi))
+      .add('custom-blocks', () => registries.customBlocks(strapi))
       .add('apis', () => registries.apis(strapi))
       .add('models', () => registries.models())
       .add('sanitizers', registries.sanitizers())
