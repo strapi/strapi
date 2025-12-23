@@ -8,7 +8,9 @@ tags:
 
 The transfer engine manages the data transfer process by facilitating communication between a source provider and a destination provider.
 
-:::caution **Destructive Operation**: Currently, the transfer engine is designed as a synchronization tool. When using the default `local-destination` provider, the engine uses a **restore strategy** by default. This will **delete all existing data** (entities, links, assets, and configuration) in the destination database during the bootstrap phase before any new data is written. :::
+:::caution
+**Destructive Operation**: Currently, the transfer engine is designed as a synchronization tool. When using the default `local-destination` provider, the engine uses a **restore strategy** by default. This will **delete all existing data** (entities, links, assets, and configuration) in the destination database during the bootstrap phase before any new data is written.
+:::
 
 ## Architecture Overview
 
