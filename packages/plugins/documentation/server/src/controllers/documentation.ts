@@ -111,6 +111,36 @@ export default {
     }
   },
 
+  async openapiJson(ctx: Koa.Context) {
+    try {
+      const { major, minor, patch } = ctx.params;
+      const version =
+        major && minor && patch
+          ? `${major}.${minor}.${patch}`
+          : strapi.plugin('documentation').service('documentation').getDocumentationVersion();
+
+      const openAPISpecsPath = path.join(
+        strapi.dirs.app.extensions,
+        'documentation',
+        'documentation',
+        version,
+        'full_documentation.json'
+      );
+
+      try {
+        const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
+        const response = JSON.parse(documentation);
+
+        ctx.send(response);
+      } catch (err) {
+        strapi.log.error(err);
+        ctx.badRequest();
+      }
+    } catch (e) {
+      strapi.log.error(e);
+    }
+  },
+
   async loginView(ctx: Koa.Context, next: Koa.Next) {
     // lazy require cheerio
     // eslint-disable-next-line @typescript-eslint/no-var-requires
