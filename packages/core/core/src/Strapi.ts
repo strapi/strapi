@@ -237,6 +237,10 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('validators');
   }
 
+  get mcp(): Modules.MCP.McpService {
+    return this.get('mcp');
+  }
+
   async start() {
     try {
       if (!this.isLoaded) {
