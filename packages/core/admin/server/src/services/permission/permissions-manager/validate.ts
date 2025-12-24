@@ -15,7 +15,15 @@ import {
   isObject,
 } from 'lodash/fp';
 
-import { contentTypes, traverseEntity, traverse, validate, async, errors } from '@strapi/utils';
+import {
+  contentTypes,
+  traverseEntity,
+  traverse,
+  validate,
+  async,
+  errors,
+  createModelCache,
+} from '@strapi/utils';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
 const { ValidationError } = errors;
@@ -46,9 +54,12 @@ const throwInvalidKey = ({ key, path }: { key: string; path?: string | null }) =
 export default ({ action, ability, model }: any) => {
   const schema = strapi.getModel(model);
 
+  // Create request-scoped model cache to avoid redundant getModel() calls
+  const modelCache = createModelCache(strapi.getModel.bind(strapi));
+
   const ctx = {
     schema,
-    getModel: strapi.getModel.bind(strapi),
+    getModel: modelCache.getModel,
   };
 
   const createValidateQuery = (options = {} as any) => {
@@ -129,6 +140,54 @@ export default ({ action, ability, model }: any) => {
   };
 
   const wrapValidate = (createValidateFunction: any) => {
+    /**
+     * Cache permission field calculations per action.
+     *
+     * permittedFieldsOf() is called for every entity being validated.
+     * Cache the result when rules have no entity-specific conditions.
+     */
+    const permissionCache = new Map<
+      string,
+      { permittedFields: string[]; hasAtLeastOneRegistered: boolean; shouldIncludeAll: boolean }
+    >();
+
+    const getPermissionFields = (actionOverride: string, subject: any) => {
+      const subjectType = detectSubjectType(subject);
+      const rules = ability.rulesFor(actionOverride, subjectType);
+
+      // Check if any rule has conditions that depend on entity data
+      // If so, we can't cache - must compute per entity
+      const hasEntityConditions = rules.some(
+        (rule: any) => rule.conditions && !isEmpty(rule.conditions)
+      );
+
+      // Return cached result if available and safe to use
+      const cacheKey = `${actionOverride}::${String(subjectType)}`;
+      if (!hasEntityConditions && permissionCache.has(cacheKey)) {
+        return permissionCache.get(cacheKey)!;
+      }
+
+      // Compute permission fields (expensive CASL operation)
+      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
+        fieldsFrom: (rule) => rule.fields || [],
+      });
+
+      const hasAtLeastOneRegistered = some(
+        (fields) => !isNil(fields),
+        flatMap(prop('fields'), rules)
+      );
+      const shouldIncludeAll = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
+
+      const result = { permittedFields, hasAtLeastOneRegistered, shouldIncludeAll };
+
+      // Cache for reuse if no entity-specific conditions
+      if (!hasEntityConditions) {
+        permissionCache.set(cacheKey, result);
+      }
+
+      return result;
+    };
+
     // TODO
     // @ts-expect-error define the correct return type
     const wrappedValidate = async (data, options = {}): Promise<unknown> => {
@@ -138,20 +197,15 @@ export default ({ action, ability, model }: any) => {
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
 
-      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
-        fieldsFrom: (rule) => rule.fields || [],
-      });
-
-      const hasAtLeastOneRegistered = some(
-        (fields) => !isNil(fields),
-        flatMap(prop('fields'), ability.rulesFor(actionOverride, detectSubjectType(subject)))
+      const { permittedFields, hasAtLeastOneRegistered, shouldIncludeAll } = getPermissionFields(
+        actionOverride,
+        subject
       );
-      const shouldIncludeAllFields = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
 
       const validateOptions = {
         ...options,
         fields: {
-          shouldIncludeAll: shouldIncludeAllFields,
+          shouldIncludeAll,
           permitted: permittedFields,
           hasAtLeastOneRegistered,
         },

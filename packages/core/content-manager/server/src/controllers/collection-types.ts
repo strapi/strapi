@@ -154,11 +154,21 @@ export default {
       documents
     );
 
+    // Index statuses by documentId for lookup
+    const statusByDocumentId = new Map<string, any[]>();
+    for (const status of documentsAvailableStatus) {
+      const key = status.documentId;
+      const existing = statusByDocumentId.get(key);
+      if (existing) {
+        existing.push(status);
+      } else {
+        statusByDocumentId.set(key, [status]);
+      }
+    }
+
     const setStatus = (document: any) => {
       // Available status of document
-      const availableStatuses = documentsAvailableStatus.filter(
-        (d: any) => d.documentId === document.documentId
-      );
+      const availableStatuses = statusByDocumentId.get(document.documentId) || [];
       // Compute document version status
       document.status = documentMetadata.getStatus(document, availableStatuses);
       return document;
@@ -705,13 +715,14 @@ export default {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    const populate = await getService('populate-builder')(model)
-      .populateFromQuery(permissionQuery)
-      .build();
-
     const { locale, status } = await getDocumentLocaleAndStatus(ctx.query, model);
-    const entity = await documentManager.findOne(id, model, { populate, locale, status });
+
+    // Minimal populate for permission check - countDraftRelations loads full entity
+    const entity = await documentManager.findOne(id, model, {
+      locale,
+      status,
+      populate: {},
+    });
 
     if (!entity) {
       return ctx.notFound();

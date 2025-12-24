@@ -1,4 +1,4 @@
-import { has, isNil, mapValues } from 'lodash/fp';
+import { isNil, mapValues } from 'lodash/fp';
 
 import type { UID, Struct, Core } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
@@ -55,40 +55,75 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return this.findConfiguration(component);
   },
 
+  /**
+   * Batch load component configurations.
+   *
+   * Collects all component UIDs upfront, then loads configurations in a single
+   * batch query instead of sequential queries per component.
+   */
   async findComponentsConfigurations(model: Struct.ComponentSchema) {
+    const componentUids = new Set<UID.Component>();
+
+    const collectComponentUids = (schema: Struct.ComponentSchema) => {
+      for (const key of Object.keys(schema.attributes)) {
+        const attribute = schema.attributes[key];
+
+        if (attribute.type === 'component') {
+          const uid = attribute.component;
+          if (!componentUids.has(uid)) {
+            componentUids.add(uid);
+            const nestedComponent = this.findComponent(uid);
+            if (nestedComponent) {
+              collectComponentUids(nestedComponent);
+            }
+          }
+        }
+
+        if (attribute.type === 'dynamiczone') {
+          for (const uid of attribute.components) {
+            if (!componentUids.has(uid)) {
+              componentUids.add(uid);
+              const nestedComponent = this.findComponent(uid);
+              if (nestedComponent) {
+                collectComponentUids(nestedComponent);
+              }
+            }
+          }
+        }
+      }
+    };
+
+    collectComponentUids(model);
+
+    if (componentUids.size === 0) {
+      return {};
+    }
+
+    // Key format must match configuration.ts uidToStoreKey: `${prefix}::${uid}`
+    const uidsArray = Array.from(componentUids);
+    const prefixedKeys = uidsArray.map((uid) => `components::${uid}`);
+    const configs = await storeUtils.getModelConfigurations(prefixedKeys);
+
     const componentsMap: Record<
       string,
       Configuration & { category: string; isComponent: boolean }
     > = {};
 
-    const getComponentConfigurations = async (uid: UID.Component) => {
+    for (const uid of uidsArray) {
       const component = this.findComponent(uid);
+      const configKey = `components::${uid}`;
+      // Fallback must include proper layouts structure for frontend compatibility
+      const configuration = configs[configKey] || {
+        settings: {},
+        metadatas: {},
+        layouts: { list: [], edit: [] },
+      };
 
-      if (has(uid, componentsMap)) {
-        return;
-      }
-
-      const componentConfiguration = await this.findConfiguration(component);
-      const componentsConfigurations = await this.findComponentsConfigurations(component);
-
-      Object.assign(componentsMap, {
-        [uid]: componentConfiguration,
-        ...componentsConfigurations,
-      });
-    };
-
-    for (const key of Object.keys(model.attributes)) {
-      const attribute = model.attributes[key];
-
-      if (attribute.type === 'component') {
-        await getComponentConfigurations(attribute.component);
-      }
-
-      if (attribute.type === 'dynamiczone') {
-        for (const componentUid of attribute.components) {
-          await getComponentConfigurations(componentUid);
-        }
-      }
+      componentsMap[uid] = {
+        uid: component.uid,
+        category: component.category,
+        ...configuration,
+      };
     }
 
     return componentsMap;

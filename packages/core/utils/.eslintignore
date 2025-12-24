@@ -3,3 +3,4 @@ node_modules/
 jest.config.js
 dist/
 rollup.config.mjs
+benchmark-model-cache.js
