@@ -45,7 +45,7 @@ type SqliteConnection = {
   filename: string;
 } & { [key: string]: unknown };
 
-export interface Database<TClient extends ClientKind> {
+export interface Database<TClient extends ClientKind = ClientKind> {
   connection: {
     client: TClient;
     connection: IfClientIs<TClient, 'sqlite', SqliteConnection, Connection<TClient>>;
