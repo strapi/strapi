@@ -106,7 +106,7 @@
   "list.assets.title": "Archivos",
   "list.assets.to-upload": "{number, plural, =0 {No asset} one {1 archivo} other {# archivos}} listo para subir",
   "list.folder.edit": "Editar carpeta",
-  "list.folder.subtitle": "{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} uno {# asset} otro {# assets}}",
+  "list.folder.subtitle": "{folderCount, plural, one {# carpeta} other {# carpetas}}, {filesCount, plural, one {# archivo} other {# archivos}}",
   "list.folders.title": "Carpetas",
   "modal.folder.elements.count": "{folderCount} carpetas, {assetCount} archivos",
   "modal.header.go-back": "Volver",
