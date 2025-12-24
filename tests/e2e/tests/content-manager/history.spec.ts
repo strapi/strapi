@@ -1,8 +1,13 @@
 import { test, expect, Page } from '@playwright/test';
-import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
-import { resetFiles } from '../../utils/file-reset';
-import { waitForRestart } from '../../utils/restart';
-import { sharedSetup } from '../../utils/setup';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  navToHeader,
+} from '../../../utils/shared';
+import { resetFiles } from '../../../utils/file-reset';
+import { waitForRestart } from '../../../utils/restart';
+import { sharedSetup } from '../../../utils/setup';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -251,7 +256,9 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(ARTICLE_CREATE_URL);
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas');
       await page
-        .getByRole('textbox', { name: 'slug This value is unique for the selected locale' })
+        .getByRole('textbox', {
+          name: 'slug',
+        })
         .fill('being-from-kansas');
       await page.getByRole('button', { name: 'Save' }).click();
       await page.waitForURL(ARTICLE_EDIT_URL);
