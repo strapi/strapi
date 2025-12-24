@@ -8,7 +8,7 @@
 const _ = require('lodash');
 const urlJoin = require('url-join');
 
-const { getService } = require('../utils');
+const { getService, findUniqueUsername } = require('../utils');
 
 module.exports = ({ strapi }) => {
   /**
@@ -86,9 +86,13 @@ module.exports = ({ strapi }) => {
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: advancedSettings.default_role } });
 
+    // Generate a unique username based on the email prefix
+    const username = await findUniqueUsername(email.split('@')[0]);
+
     // Create the new user.
     const newUser = {
       ...profile,
+      username, // use the generated or provided username
       email, // overwrite with lowercased email
       provider,
       role: defaultRole.id,
