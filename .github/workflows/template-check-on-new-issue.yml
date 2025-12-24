@@ -1,0 +1,21 @@
+name: Check Required Checkboxes
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-checkboxes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check issue uses template
+        uses: ./.github/actions/check-issue-template
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

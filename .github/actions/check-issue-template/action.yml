@@ -1,0 +1,5 @@
+name: 'Issue Template Checker'
+description: 'Check that new issues follow the required template'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
