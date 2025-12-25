@@ -1,4 +1,6 @@
-export default ({ env }) => ({
+import { type Env } from '@strapi/utils';
+
+export default ({ env }: { env: Env }) => ({
   host: env('HOST', '0.0.0.0'),
   port: env.int('PORT', 1337),
   app: {
