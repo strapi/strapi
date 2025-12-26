@@ -90,7 +90,7 @@ describe('metadata', () => {
 
         // Test cases: Each entry is [attributeName, attributeDetails, expectedDetails]
         const testCases = [
-          ['id', { type: 'increments' }, { type: 'increments', columnName: 'id' }], // allows id
+          ['id', { type: 'bigincrements' }, { type: 'bigincrements', columnName: 'id' }], // allows id
           ['documentId', { type: 'string' }, { type: 'string', columnName: 'document_id' }], // allows documentId
           ['document_id', { type: 'string' }, { type: 'string', columnName: 'document_id' }], // allows documentId
           [

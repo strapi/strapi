@@ -1,51 +1,55 @@
-const sqlite = {
-  client: 'sqlite',
-  connection: {
-    filename: '.tmp/data.db',
-  },
-  useNullAsDefault: true,
-};
+module.exports = ({ env }) => {
+  const client = env('DATABASE_CLIENT', 'sqlite');
 
-const postgres = {
-  client: 'postgres',
-  connection: {
-    database: 'strapi',
-    user: 'strapi',
-    password: 'strapi',
-    port: 5432,
-    host: 'localhost',
-  },
-};
+  const sqlite = {
+    client: 'sqlite',
+    connection: {
+      filename: '.tmp/data.db',
+    },
+    useNullAsDefault: true,
+  };
 
-const mysql = {
-  client: 'mysql',
-  connection: {
-    database: 'strapi',
-    user: 'strapi',
-    password: 'strapi',
-    port: 3306,
-    host: 'localhost',
-  },
-};
+  const postgres = {
+    client: 'postgres',
+    connection: {
+      database: env('DATABASE_NAME', 'strapi'),
+      user: env('DATABASE_USERNAME', 'strapi'),
+      password: env('DATABASE_PASSWORD', 'strapi'),
+      port: env('DATABASE_PORT', 5432),
+      host: env('DATABASE_HOST', 'localhost'),
+    },
+  };
 
-const mariadb = {
-  client: 'mysql',
-  connection: {
-    database: 'strapi',
-    user: 'strapi',
-    password: 'strapi',
-    port: 3307,
-    host: 'localhost',
-  },
-};
+  const mysql = {
+    client: 'mysql',
+    connection: {
+      database: env('DATABASE_NAME', 'strapi'),
+      user: env('DATABASE_USERNAME', 'strapi'),
+      password: env('DATABASE_PASSWORD', 'strapi'),
+      port: env('DATABASE_PORT', 3306),
+      host: env('DATABASE_HOST', 'localhost'),
+    },
+  };
 
-const db = {
-  mysql,
-  sqlite,
-  postgres,
-  mariadb,
-};
+  const mariadb = {
+    client: 'mysql',
+    connection: {
+      database: env('DATABASE_NAME', 'strapi'),
+      user: env('DATABASE_USERNAME', 'strapi'),
+      password: env('DATABASE_PASSWORD', 'strapi'),
+      port: env('DATABASE_PORT', 3307),
+      host: env('DATABASE_HOST', 'localhost'),
+    },
+  };
 
-module.exports = {
-  connection: process.env.DB ? db[process.env.DB] || db.sqlite : db.sqlite,
+  const db = {
+    mysql,
+    sqlite,
+    postgres,
+    mariadb,
+  };
+
+  return {
+    connection: client ? db[client] || db.sqlite : db.sqlite,
+  };
 };
