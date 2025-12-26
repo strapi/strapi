@@ -47,6 +47,8 @@ export interface Strapi extends Container {
     type: string | null | undefined;
     isEE: boolean;
     isTrial: boolean;
+    subscriptionId?: string | null | undefined;
+    planPriceId?: string | null | undefined;
     getTrialEndDate: ({
       strapi,
     }: {
