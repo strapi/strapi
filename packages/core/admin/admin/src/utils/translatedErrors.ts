@@ -65,7 +65,7 @@ const errorsTrads = {
   },
   minLength: {
     id: 'components.Input.error.validation.minLength',
-    defaultMessage: 'The value is too short (min: {min}).',
+    defaultMessage: 'The value is too short (min: 8 characters).',
   },
   regex: {
     id: 'components.Input.error.validation.regex',
