@@ -166,7 +166,7 @@ export const listHandler = (
               doc.replaceRange('', { line: i, ch: 0 }, { line: i, ch: insertion.length });
             }
           } else {
-            const lineInsertion = listType === 'BulletList' ? '- ' : `${i + 1}. `;
+            const lineInsertion = listType === 'BulletList' ? '- ' : `${i - pos[0] + 1}. `;
             doc.replaceRange(lineInsertion, { line: i, ch: 0 });
           }
         }
