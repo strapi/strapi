@@ -27,7 +27,6 @@ interface BrowserStrapi {
   };
   projectType: 'Community' | 'Enterprise';
   telemetryDisabled: boolean;
-  aiLicenseKey?: string;
   ai: {
     enabled: boolean;
   };
