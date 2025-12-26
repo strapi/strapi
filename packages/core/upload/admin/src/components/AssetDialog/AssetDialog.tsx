@@ -63,10 +63,16 @@ export interface FolderRow extends Folder {
 interface AssetContentProps {
   allowedTypes?: AllowedTypes[];
   folderId?: number | null;
+  folderPath?: string;
   onClose: () => void;
   onAddAsset: (arg?: { folderId: number | { id: number } | null | undefined }) => void;
   onAddFolder: ({ folderId }: { folderId: number | { id: number } | null | undefined }) => void;
-  onChangeFolder: (folderId: number | null) => void;
+  onChangeFolder: (
+    arg: {
+      folderId: number;
+      folderPath?: string;
+    } | null
+  ) => void;
   onValidate: (selectedAssets: Asset[]) => void;
   multiple?: boolean;
   trackedLocation?: string;
@@ -76,6 +82,7 @@ interface AssetContentProps {
 export const AssetContent = ({
   allowedTypes = [],
   folderId = null,
+  folderPath,
   onClose,
   onAddAsset,
   onAddFolder,
@@ -107,7 +114,7 @@ export const AssetContent = ({
       onChangeSearch,
       onChangeFolder: onChangeFolderParam,
     },
-  ] = useModalQueryParams({ folder: folderId });
+  ] = useModalQueryParams({ folder: folderId, folderPath });
 
   const {
     data: { pagination, results: assets } = {},
@@ -249,7 +256,7 @@ export const AssetContent = ({
   };
 
   const handleFolderChange = (folderId: number, folderPath?: string) => {
-    onChangeFolder(folderId);
+    onChangeFolder({ folderId, folderPath });
     if (onChangeFolderParam) {
       onChangeFolderParam(folderId, folderPath);
     }
