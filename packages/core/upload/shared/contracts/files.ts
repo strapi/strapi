@@ -126,8 +126,8 @@ export declare namespace GetFiles {
   }
 
   export interface Response {
-    data: {
-      results: File[];
+    data: File[];
+    meta: {
       pagination: Pagination;
     };
     error?: errors.ApplicationError | errors.NotFoundError;
