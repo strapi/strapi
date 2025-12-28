@@ -749,7 +749,12 @@ const PublishAction: DocumentActionComponent = ({
     setSubmitting(true);
 
     try {
+      const { data: filteredData } = handleInvisibleAttributes(transformData(formValues), {
+        schema,
+        components,
+      });
       const { errors } = await validate(true, {
+        ...filteredData,
         status: 'published',
       });
       if (errors) {
@@ -791,11 +796,8 @@ const PublishAction: DocumentActionComponent = ({
         }
         return;
       }
-      const { data } = handleInvisibleAttributes(transformData(formValues), {
-        schema,
-        initialValues,
-        components,
-      });
+      // filteredData is already used for validation, so use it for publishing as well
+      const data = filteredData;
       const res = await publish(
         {
           collectionType,
