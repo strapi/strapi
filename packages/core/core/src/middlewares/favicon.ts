@@ -11,18 +11,16 @@ const defaults = {
 };
 
 export const favicon: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
-  const { maxAge, path: faviconDefaultPath } = { ...defaults, ...config };
+  const { maxAge, path: faviconPathConfig } = { ...defaults, ...config };
   const { root: appRoot } = strapi.dirs.app;
-  let faviconPath = faviconDefaultPath;
+  let faviconPath = faviconPathConfig;
 
-  /** TODO (v5): Updating the favicon to use a png caused
-   *  https://github.com/strapi/strapi/issues/14693
-   *
-   *  This check ensures backwards compatibility until
-   *  the next major version
-   */
-  if (!existsSync(resolve(appRoot, faviconPath))) {
-    faviconPath = 'favicon.ico';
+  if (!existsSync(resolve(appRoot, faviconPathConfig))) {
+    if (existsSync(resolve(appRoot, defaults.path))) {
+      faviconPath = defaults.path;
+    } else if (existsSync(resolve(appRoot, 'favicon.ico'))) {
+      faviconPath = 'favicon.ico';
+    }
   }
 
   return koaFavicon(resolve(appRoot, faviconPath), { maxAge });

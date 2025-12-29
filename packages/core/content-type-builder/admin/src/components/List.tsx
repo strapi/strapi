@@ -20,7 +20,7 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { tours, useTracking } from '@strapi/admin/strapi-admin';
+import { tours } from '@strapi/admin/strapi-admin';
 import { Box, Button, EmptyStateLayout } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -31,6 +31,7 @@ import { styled } from 'styled-components';
 import { getTrad } from '../utils/getTrad';
 
 import { AttributeRow, type AttributeRowProps } from './AttributeRow';
+import { useCTBTracking } from './CTBSession/ctbSession';
 import { useDataManager } from './DataManager/useDataManager';
 import { NestedTFooter, TFooter } from './Footers';
 import { useFormModalNavigation } from './FormModalNavigation/useFormModalNavigation';
@@ -105,7 +106,7 @@ export const List = ({
   type,
 }: ListProps) => {
   const { formatMessage } = useIntl();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
   const { isInDevelopmentMode, moveAttribute } = useDataManager();
   const { onOpenModalAddField } = useFormModalNavigation();
 
