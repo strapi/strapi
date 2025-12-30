@@ -3,7 +3,6 @@ import { useState } from 'react';
 
 import {
   useStrapiApp,
-  useTracking,
   useNotification,
   ConfirmDialog,
   useGuidedTour,
@@ -33,6 +32,7 @@ import { BooleanDefaultValueSelect } from '../BooleanDefaultValueSelect';
 import { BooleanRadioGroup } from '../BooleanRadioGroup';
 import { CheckboxWithNumberField } from '../CheckboxWithNumberField';
 import { ContentTypeRadioGroup } from '../ContentTypeRadioGroup';
+import { useCTBTracking } from '../CTBSession/ctbSession';
 import { CustomRadioGroup } from '../CustomRadioGroup';
 import { useDataManager } from '../DataManager/useDataManager';
 import { DraftAndPublishToggle } from '../DraftAndPublishToggle';
@@ -101,7 +101,7 @@ export const FormModal = () => {
   const reducerState = useSelector(selectState, shallowEqual);
 
   const navigate = useNavigate();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
   const { formatMessage } = useIntl();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI: any = ctbPlugin?.apis.forms;
@@ -333,7 +333,7 @@ export const FormModal = () => {
     get(modifiedData, 'createComponent', false) || isCreatingComponentWhileAddingAField;
   const isInFirstComponentStep = step === '1';
   const isPickingAttribute = modalType === 'chooseAttribute';
-  const uid = createUid(modifiedData.displayName || '');
+  const uid = createUid(modifiedData.singularName || '');
   const attributes = get(type, ['attributes'], null) as {
     name: string;
   }[];

@@ -187,6 +187,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
             limit: MAX_DOCUMENTS,
             fields: meta.fields,
             ...additionalQueryParams,
+            locale: '*',
           });
 
           const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
@@ -281,10 +282,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
                   })
                   .first()
               : await strapiDBConnection(tableName)
-                  .select('document_id')
-                  .from(`${tableName}`)
                   .countDistinct('document_id as count')
-                  .groupBy('document_id')
+                  .from(`${tableName}`)
                   .first();
             countDocuments.published += Number(publishedDocuments?.count) || 0;
 

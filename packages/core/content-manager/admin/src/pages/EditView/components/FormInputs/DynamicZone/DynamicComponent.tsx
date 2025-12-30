@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useForm, useField, createRulesEngine } from '@strapi/admin/strapi-admin';
+import { useForm, useField, createRulesEngine, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
   Box,
@@ -59,6 +59,7 @@ const DynamicComponent = ({
   const formValues = useForm('DynamicComponent', (state) => state.values);
   const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
   const rulesEngine = createRulesEngine();
+  const isDesktop = useIsDesktop();
 
   const {
     edit: { components },
@@ -138,19 +139,21 @@ const DynamicComponent = ({
       >
         <Trash />
       </IconButton>
-      <IconButton
-        variant="ghost"
-        onClick={(e) => e.stopPropagation()}
-        data-handler-id={handlerId}
-        ref={dragRef}
-        label={formatMessage({
-          id: getTranslation('components.DragHandle-label'),
-          defaultMessage: 'Drag',
-        })}
-        onKeyDown={handleKeyDown}
-      >
-        <Drag />
-      </IconButton>
+      {isDesktop && (
+        <IconButton
+          variant="ghost"
+          onClick={(e) => e.stopPropagation()}
+          data-handler-id={handlerId}
+          ref={dragRef}
+          label={formatMessage({
+            id: getTranslation('components.DragHandle-label'),
+            defaultMessage: 'Drag',
+          })}
+          onKeyDown={handleKeyDown}
+        >
+          <Drag />
+        </IconButton>
+      )}
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={null} paddingLeft={0} paddingRight={0}>
           <IconButton
@@ -177,7 +180,7 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index)}>
+                    <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index)}>
                       {displayName}
                     </Menu.Item>
                   ))}
@@ -197,7 +200,7 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
+                    <Menu.Item key={uid} onSelect={() => onAddComponent(uid, index + 1)}>
                       {displayName}
                     </Menu.Item>
                   ))}
@@ -257,7 +260,6 @@ const DynamicComponent = ({
                           <Grid.Item
                             col={12}
                             key={rowInd}
-                            s={12}
                             xs={12}
                             direction="column"
                             alignItems="stretch"

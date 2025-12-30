@@ -36,8 +36,11 @@ describe('API Token', () => {
       },
       config: {
         get: jest.fn((key) => {
-          if (key === 'admin.secrets.encryptionKey') {
-            return ENCRYPTION_KEY;
+          if (key === 'admin.secrets') {
+            return { encryptionKey: ENCRYPTION_KEY };
+          }
+          if (key === 'admin.apiToken') {
+            return { salt: 'api-token_tests-salt' };
           }
           return '';
         }),
@@ -429,18 +432,24 @@ describe('API Token', () => {
 
       global.strapi = {
         config: {
-          get: jest.fn(() => ({
-            admin: { apiToken: { salt: 'api-token_tests-salt' } },
-          })),
+          get: jest.fn((key) => {
+            if (key === 'admin.apiToken') {
+              return { salt: 'api-token_tests-salt' };
+            }
+            return undefined;
+          }),
           set: mockedConfigSet,
         },
       } as any;
 
       setupStrapiMock({
         config: {
-          get: jest.fn(() => ({
-            admin: { apiToken: { salt: 'api-token_tests-salt' } },
-          })),
+          get: jest.fn((key) => {
+            if (key === 'admin.apiToken') {
+              return { salt: 'api-token_tests-salt' };
+            }
+            return undefined;
+          }),
           set: mockedConfigSet,
         },
       });

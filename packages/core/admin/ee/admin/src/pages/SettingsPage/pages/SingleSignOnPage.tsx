@@ -113,7 +113,7 @@ export const SingleSignOnPage = () => {
   const isLoadingData = isLoadingRoles || isLoadingPermissions || isLoadingProviderOptions;
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -251,6 +251,7 @@ export const SingleSignOnPage = () => {
                         <Grid.Item
                           key={field.name}
                           col={size}
+                          xs={12}
                           direction="column"
                           alignItems="stretch"
                         >
@@ -265,7 +266,7 @@ export const SingleSignOnPage = () => {
           )}
         </Form>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 

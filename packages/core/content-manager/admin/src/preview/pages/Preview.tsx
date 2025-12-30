@@ -6,6 +6,8 @@ import {
   useRBAC,
   createContext,
   Form as FormContext,
+  type FieldContentSourceMap,
+  useNotification,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -19,7 +21,7 @@ import {
 import { ArrowLineLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
-import { styled } from 'styled-components';
+import { styled, useTheme } from 'styled-components';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
@@ -34,11 +36,11 @@ import { createYupSchema } from '../../utils/validation';
 import { InputPopover } from '../components/InputPopover';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
-import { PUBLIC_EVENTS, INTERNAL_EVENTS } from '../utils/constants';
+import { PUBLIC_EVENTS } from '../utils/constants';
 import { getSendMessage } from '../utils/getSendMessage';
 import { previewScript } from '../utils/previewScript';
 
-import type { UID } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Constants
@@ -69,9 +71,9 @@ const DEVICES = [
  * PreviewProvider
  * -----------------------------------------------------------------------------------------------*/
 
-interface PopoverField {
-  path: string;
+interface PopoverField extends FieldContentSourceMap {
   position: DOMRect;
+  attribute: Schema.Attribute.AnyAttribute;
 }
 
 interface PreviewContextValue {
@@ -80,6 +82,7 @@ interface PreviewContextValue {
   document: NonNullable<ReturnType<UseDocument>['document']>;
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
+  components: NonNullable<ReturnType<UseDocument>['components']>;
   layout: EditLayout;
   onPreview: () => void;
   iframeRef: React.RefObject<HTMLIFrameElement>;
@@ -102,10 +105,12 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ $isSideEditorOpen: boolean }>`
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
+  const theme = useTheme();
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
   const [popoverField, setPopoverField] = React.useState<PopoverField | null>(null);
+  const { toggleNotification } = useNotification();
 
   // Read all the necessary data from the URL to find the right preview URL
   const {
@@ -129,6 +134,11 @@ const PreviewPage = () => {
   );
   const device = DEVICES.find((d) => d.name === deviceName) ?? DEVICES[0];
 
+  const previewHighlightColors = {
+    highlightHoverColor: theme.colors.primary500,
+    highlightActiveColor: theme.colors.primary600,
+  };
+
   // Listen for ready message from iframe before injecting script
   React.useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -141,13 +151,12 @@ const PreviewPage = () => {
       }
 
       if (event.data?.type === PUBLIC_EVENTS.PREVIEW_READY) {
-        const script = `(${previewScript.toString()})()`;
+        const script = `(${previewScript.toString()})(${JSON.stringify({
+          shouldRun: true,
+          colors: previewHighlightColors,
+        })})`;
         const sendMessage = getSendMessage(iframeRef);
         sendMessage(PUBLIC_EVENTS.STRAPI_SCRIPT, { script });
-      }
-
-      if (event.data?.type === INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT) {
-        setPopoverField?.(event.data.payload);
       }
     };
 
@@ -156,7 +165,7 @@ const PreviewPage = () => {
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, []);
+  }, [documentId, toggleNotification, theme]);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -265,6 +274,7 @@ const PreviewPage = () => {
         title={documentTitle}
         meta={documentResponse.meta}
         schema={documentResponse.schema}
+        components={documentResponse.components}
         layout={documentLayoutResponse.edit}
         onPreview={onPreview}
         iframeRef={iframeRef}
@@ -433,12 +443,12 @@ const ProtectedPreviewPageImpl = () => {
   if (error || !model) {
     return (
       <Box
-        height="100vh"
-        width="100vw"
+        height="100dvh"
+        width="100dvw"
         position="fixed"
         top={0}
         left={0}
-        zIndex={2}
+        zIndex={5}
         background="neutral0"
       >
         <Page.Error />
@@ -448,12 +458,12 @@ const ProtectedPreviewPageImpl = () => {
 
   return (
     <Box
-      height="100vh"
-      width="100vw"
+      height="100dvh"
+      width="100dvw"
       position="fixed"
       top={0}
       left={0}
-      zIndex={2}
+      zIndex={5}
       background="neutral0"
     >
       <Page.Protect
@@ -480,3 +490,4 @@ const ProtectedPreviewPage = () => {
 };
 
 export { ProtectedPreviewPage, usePreviewContext };
+export type { PreviewContextValue };

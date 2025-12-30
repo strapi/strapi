@@ -47,7 +47,7 @@ type GuidedTourTooltipProps = {
 const GuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
   const state = useGuidedTour('TooltipWrapper', (s) => s.state);
 
-  if (!state.enabled) {
+  if (!state.enabled || state.hidden || process.env.NODE_ENV !== 'development') {
     return children;
   }
 
@@ -72,7 +72,6 @@ const GuidedTourTooltipImpl = ({
   when,
 }: GuidedTourTooltipProps) => {
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
-
   const state = useGuidedTour('GuidedTourTooltip', (s) => s.state);
   const dispatch = useGuidedTour('GuidedTourTooltip', (s) => s.dispatch);
 

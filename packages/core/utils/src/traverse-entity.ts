@@ -21,6 +21,7 @@ export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtil
 export interface Path {
   raw: string | null;
   attribute: string | null;
+  rawWithIndices?: string | null;
 }
 
 export interface TraverseOptions {
@@ -38,7 +39,7 @@ export interface Parent {
 }
 
 const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
-  const { path = { raw: null, attribute: null }, schema, getModel } = options;
+  const { path = { raw: null, attribute: null, rawWithIndices: null }, schema, getModel } = options;
 
   let parent = options.parent;
 
@@ -98,6 +99,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     const newPath = { ...path };
 
     newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
+    newPath.rawWithIndices = isNil(path.rawWithIndices) ? key : `${path.rawWithIndices}.${key}`;
 
     if (!isNil(attribute)) {
       newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
@@ -125,10 +127,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    // The current attribute becomes the parent once visited
-    parent = { schema, key, attribute, path: newPath };
-
     if (isRelationalAttribute(attribute)) {
+      parent = { schema, key, attribute, path: newPath };
       const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
 
       const method = isMorphRelation
@@ -138,7 +138,13 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       if (isArray(value)) {
         const res = new Array(value.length);
         for (let i = 0; i < value.length; i += 1) {
-          res[i] = await method(visitor, newPath, value[i]);
+          const arrayPath = {
+            ...newPath,
+            rawWithIndices: isNil(newPath.rawWithIndices)
+              ? `${i}`
+              : `${newPath.rawWithIndices}.${i}`,
+          };
+          res[i] = await method(visitor, arrayPath, value[i]);
         }
         copy[key] = res;
       } else {
@@ -149,11 +155,19 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (isMediaAttribute(attribute)) {
+      parent = { schema, key, attribute, path: newPath };
+
       // need to update copy
       if (isArray(value)) {
         const res = new Array(value.length);
         for (let i = 0; i < value.length; i += 1) {
-          res[i] = await traverseMediaTarget(visitor, newPath, value[i]);
+          const arrayPath = {
+            ...newPath,
+            rawWithIndices: isNil(newPath.rawWithIndices)
+              ? `${i}`
+              : `${newPath.rawWithIndices}.${i}`,
+          };
+          res[i] = await traverseMediaTarget(visitor, arrayPath, value[i]);
         }
         copy[key] = res;
       } else {
@@ -164,12 +178,19 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (attribute.type === 'component') {
+      parent = { schema, key, attribute, path: newPath };
       const targetSchema = getModel(attribute.component);
 
       if (isArray(value)) {
         const res: Data[] = new Array(value.length);
         for (let i = 0; i < value.length; i += 1) {
-          res[i] = await traverseComponent(visitor, newPath, targetSchema, value[i]);
+          const arrayPath = {
+            ...newPath,
+            rawWithIndices: isNil(newPath.rawWithIndices)
+              ? `${i}`
+              : `${newPath.rawWithIndices}.${i}`,
+          };
+          res[i] = await traverseComponent(visitor, arrayPath, targetSchema, value[i]);
         }
         copy[key] = res;
       } else {
@@ -180,9 +201,15 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (attribute.type === 'dynamiczone' && isArray(value)) {
+      parent = { schema, key, attribute, path: newPath };
+
       const res = new Array(value.length);
       for (let i = 0; i < value.length; i += 1) {
-        res[i] = await visitDynamicZoneEntry(visitor, newPath, value[i]);
+        const arrayPath = {
+          ...newPath,
+          rawWithIndices: isNil(newPath.rawWithIndices) ? `${i}` : `${newPath.rawWithIndices}.${i}`,
+        };
+        res[i] = await visitDynamicZoneEntry(visitor, arrayPath, value[i]);
       }
       copy[key] = res;
 

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { findAndClose, navToHeader } from '../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { findAndClose, navToHeader } from '../../../utils/shared';
 
 const EDIT_URL_AUTHOR =
   /\/admin\/content-manager\/collection-types\/api::author.author\/[^/]+(\?.*)?/;
@@ -43,7 +43,7 @@ test.describe('Cloning', () => {
     await expect(page.getByRole('button', { name: 'Row actions' }).first()).toBeEnabled();
     await page.getByRole('button', { name: 'Row actions' }).first().click();
     await page.getByRole('menuitem', { name: 'Duplicate' }).click();
-    await findAndClose(page, 'Success:Cloned document');
+    await findAndClose(page, 'Cloned document');
 
     /**
      * Now we should be in our edit view with the new document already saved.
@@ -92,7 +92,7 @@ test.describe('Cloning', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await findAndClose(page, 'Success:Published');
+    await findAndClose(page, 'Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
@@ -117,7 +117,7 @@ test.describe('Cloning', () => {
     await expect(page.getByRole('button', { name: 'Row actions' }).first()).toBeEnabled();
     await page.getByRole('button', { name: 'Row actions' }).first().click();
     await page.getByRole('menuitem', { name: 'Duplicate' }).click();
-    await findAndClose(page, 'Success:Cloned document');
+    await findAndClose(page, 'Cloned document');
 
     /**
      * Now we should be in our edit view with the new document already saved.
@@ -168,7 +168,7 @@ test.describe('Cloning', () => {
     await page.getByRole('textbox', { name: 'slug' }).fill('');
     await page.getByRole('textbox', { name: 'slug' }).fill('hammers-post-match-analysis');
     await page.getByRole('button', { name: 'Save' }).click();
-    await findAndClose(page, 'Success:Cloned document');
+    await findAndClose(page, 'Cloned document');
     await page.waitForURL(EDIT_URL_ARTICLE);
 
     /**

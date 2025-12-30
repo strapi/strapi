@@ -64,6 +64,7 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
       <Grid.Root gap={0} shadow="filterShadow" hasRadius background="neutral0">
         <Grid.Item
           col={7}
+          xs={12}
           paddingTop={6}
           paddingBottom={6}
           paddingLeft={7}

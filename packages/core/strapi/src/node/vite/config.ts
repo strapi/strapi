@@ -23,7 +23,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     cacheDir: 'node_modules/.strapi/vite',
     configFile: false,
     define: {
-      'process.env': ctx.env,
+      process: {},
+      'process.env': JSON.stringify(ctx.env),
     },
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
@@ -94,6 +95,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'slate',
               'slate-history',
               'slate-react',
+              'motion',
             ]
           : []),
       ],
