@@ -88,6 +88,12 @@ interface AdvancedAttributeSettings {
   private?: boolean;
   default?: any;
   regexp?: string;
+  condition?: {
+    field: string;
+    operator: 'is' | 'is not';
+    value: string | boolean;
+    action: 'show' | 'hide';
+  };
 }
 
 interface AddComponentAttribute extends AddAttribute {
@@ -573,6 +579,27 @@ export const fillAttribute = async (
 
     if (isString(advanced.default)) {
       await page.getByLabel('Default').fill(advanced.default);
+    }
+
+    if (advanced.condition) {
+      const { field, operator, value, action } = advanced.condition;
+      await page.getByRole('button', { name: 'Apply condition' }).click();
+
+      await page.locator('[name="conditions.field"]').click();
+      await page.getByRole('option', { name: field }).click();
+
+      await page.locator('[name="conditions.operator"]').click();
+      await page.getByRole('option', { name: operator, exact: true }).click();
+
+      await page.locator('[name="conditions.value"]').click();
+      await page.getByRole('option', { name: value.toString() }).click();
+
+      await page.locator('[name="conditions.action"]').click();
+      await page
+        .getByRole('option')
+        .filter({ hasText: new RegExp(`${action}`, 'i') })
+        .first()
+        .click();
     }
   }
 };
