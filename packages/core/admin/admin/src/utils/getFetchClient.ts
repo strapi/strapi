@@ -30,12 +30,42 @@ const STORAGE_KEYS = {
 let refreshPromise: Promise<string | null> | null = null;
 
 /**
- * Check if the URL is an auth path that should not trigger token refresh
+ * Callback to notify the app when the token is updated (e.g., to update Redux state)
+ */
+let onTokenUpdate: ((token: string) => void) | null = null;
+
+/**
+ * Set the callback that will be called when the token is refreshed.
+ * This allows the React layer to update Redux state when a token refresh occurs.
+ *
+ * @param callback - Function to call with the new token, or null to clear
+ * @example
+ * // In a React component
+ * useEffect(() => {
+ *   setOnTokenUpdate((token) => dispatch(setToken(token)));
+ *   return () => setOnTokenUpdate(null);
+ * }, [dispatch]);
+ */
+const setOnTokenUpdate = (callback: ((token: string) => void) | null): void => {
+  onTokenUpdate = callback;
+};
+
+/**
+ * Check if the URL is an auth path that should not trigger token refresh.
+ * Note: No ^ anchor since the URL may include the baseURL prefix (e.g., "http://localhost:1337/admin/login").
+ * This differs from baseQuery.ts which uses ^/admin since it receives normalized paths.
  */
 const isAuthPath = (url: string) => /\/admin\/(login|logout|access-token)\b/.test(url);
 
 /**
  * Store the new token in the appropriate storage (localStorage or cookie)
+ * and notify the app to update its state.
+ *
+ * Uses localStorage if the user selected "remember me" during login,
+ * otherwise uses cookies for session-based storage.
+ *
+ * @param token - The JWT token to store
+ * @internal Exported for testing purposes
  */
 const storeToken = (token: string): void => {
   // Check if the original token was stored in localStorage (persist mode)
@@ -45,6 +75,11 @@ const storeToken = (token: string): void => {
     localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
   } else {
     setCookie(STORAGE_KEYS.TOKEN, token);
+  }
+
+  // Notify the app to update its state (e.g., Redux)
+  if (onTokenUpdate) {
+    onTokenUpdate(token);
   }
 };
 
@@ -67,6 +102,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     });
 
     if (!response.ok) {
+      console.warn('[Auth] Token refresh failed with status:', response.status);
       return null;
     }
 
@@ -74,19 +110,25 @@ const refreshAccessToken = async (): Promise<string | null> => {
     const token = result?.data?.token as string | undefined;
 
     if (!token) {
+      console.warn('[Auth] Token refresh response missing token');
       return null;
     }
 
     storeToken(token);
     return token;
-  } catch {
+  } catch (error) {
+    console.error('[Auth] Token refresh error:', error);
     return null;
   }
 };
 
 /**
  * Attempt to refresh the token if not already refreshing.
- * Returns the new token on success, throws an error on failure.
+ * Uses a module-level promise to prevent concurrent refresh requests.
+ *
+ * @returns The new authentication token
+ * @throws {Error} If the token refresh fails (e.g., refresh token expired)
+ * @internal Exported for testing purposes
  */
 const attemptTokenRefresh = async (): Promise<string> => {
   if (!refreshPromise) {
@@ -97,7 +139,9 @@ const attemptTokenRefresh = async (): Promise<string> => {
 
   const newToken = await refreshPromise;
   if (!newToken) {
-    throw new Error('Token refresh failed');
+    const error = new Error('Session expired. Please log in again.');
+    error.name = 'TokenRefreshError';
+    throw error;
   }
 
   return newToken;
@@ -258,23 +302,21 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   /**
    * Execute a fetch request with automatic token refresh on 401 errors.
    * @param url - The request URL (used to check if it's an auth path)
-   * @param executeFetch - Function that performs the actual fetch
-   * @param executeRetry - Function that performs the retry with fresh headers
+   * @param executeRequest - Function that performs the fetch (called again on retry with fresh headers)
    */
   const withTokenRefresh = async <TData>(
     url: string,
-    executeFetch: () => Promise<FetchResponse<TData>>,
-    executeRetry: () => Promise<FetchResponse<TData>>
+    executeRequest: () => Promise<FetchResponse<TData>>
   ): Promise<FetchResponse<TData>> => {
     try {
-      return await executeFetch();
+      return await executeRequest();
     } catch (error) {
       // Only attempt refresh for 401 errors on non-auth paths
       if (isFetchError(error) && error.status === 401 && !isAuthPath(url)) {
         try {
           await attemptTokenRefresh();
-          // Retry with fresh headers (new token)
-          return await executeRetry();
+          // Retry - executeRequest will call getDefaultHeaders() again, picking up the new token
+          return await executeRequest();
         } catch {
           // If refresh fails, throw the original error
           throw error;
@@ -333,7 +375,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest, executeRequest);
+      return withTokenRefresh(url, executeRequest);
     },
     post: async <TData, TSend = any>(
       url: string,
@@ -365,7 +407,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest, executeRequest);
+      return withTokenRefresh(url, executeRequest);
     },
     put: async <TData, TSend = any>(
       url: string,
@@ -398,7 +440,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest, executeRequest);
+      return withTokenRefresh(url, executeRequest);
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const createRequestUrl = makeCreateRequestUrl(options);
@@ -417,12 +459,19 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         return responseInterceptor<TData>(response, options?.validateStatus);
       };
 
-      return withTokenRefresh(url, executeRequest, executeRequest);
+      return withTokenRefresh(url, executeRequest);
     },
   };
 
   return fetchClient;
 };
 
-export { getFetchClient, isFetchError, FetchError, attemptTokenRefresh, storeToken };
+export {
+  getFetchClient,
+  isFetchError,
+  FetchError,
+  attemptTokenRefresh,
+  storeToken,
+  setOnTokenUpdate,
+};
 export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };

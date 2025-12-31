@@ -1,4 +1,4 @@
-import { getFetchClient } from '../getFetchClient';
+import { getFetchClient, setOnTokenUpdate } from '../getFetchClient';
 
 describe('getFetchClient', () => {
   const originalLocalStorage = window.localStorage;
@@ -236,6 +236,55 @@ describe('getFetchClient', () => {
 
       // Verify new token was stored in localStorage
       expect(window.localStorage.setItem).toHaveBeenCalledWith('jwtToken', '"new-token"');
+    });
+
+    it('should call onTokenUpdate callback when token is refreshed', async () => {
+      const onTokenUpdateMock = jest.fn();
+      setOnTokenUpdate(onTokenUpdateMock);
+
+      // Mock localStorage.getItem to return existing token (indicating persist mode)
+      (window.localStorage.getItem as jest.Mock).mockReturnValue('"old-token"');
+
+      // First call returns 401
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 401,
+            ok: false,
+            json: () =>
+              Promise.resolve({
+                error: { message: 'Unauthorized', status: 401 },
+              }),
+          })
+        )
+        // Token refresh call succeeds
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                data: { token: 'new-token' },
+              }),
+          })
+        )
+        // Retry call succeeds
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            status: 200,
+            ok: true,
+            json: () => Promise.resolve({ data: 'success' }),
+          })
+        );
+
+      const fetchClient = getFetchClient();
+      await fetchClient.get('/api/test');
+
+      // Verify onTokenUpdate callback was called with the new token
+      expect(onTokenUpdateMock).toHaveBeenCalledWith('new-token');
+
+      // Clean up
+      setOnTokenUpdate(null);
     });
 
     it('should refresh token for POST requests with FormData', async () => {
