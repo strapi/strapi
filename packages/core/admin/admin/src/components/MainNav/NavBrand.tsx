@@ -1,4 +1,4 @@
-import { Box, Flex, type FlexComponent, VisuallyHidden } from '@strapi/design-system';
+import { Flex, type FlexComponent, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -20,7 +20,7 @@ export const NavBrand = () => {
     logos: { menu },
   } = useConfiguration('LeftMenu');
   return (
-    <Box padding={3}>
+    <Flex alignItems="center" padding={3}>
       <BrandIconWrapper direction="column" justifyContent="center" width="3.2rem" height="3.2rem">
         <img
           src={menu.custom?.url || menu.default}
@@ -46,6 +46,6 @@ export const NavBrand = () => {
           </span>
         </VisuallyHidden>
       </BrandIconWrapper>
-    </Box>
+    </Flex>
   );
 };

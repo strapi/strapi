@@ -13,7 +13,7 @@ import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
+import { HEIGHT_TOP_NAVIGATION, HEIGHT_TOP_NAVIGATION_MEDIUM } from '../constants/theme';
 
 import { tours } from './GuidedTour/Tours';
 
@@ -116,8 +116,11 @@ const Link = (
 };
 
 const StyledHeader = styled(Flex)`
-  flex: 0 0 ${HEIGHT_TOP_NAVIGATION};
-  height: ${HEIGHT_TOP_NAVIGATION};
+  flex: 0 0
+    ${({ theme }) =>
+      theme.breakpoints.medium ? HEIGHT_TOP_NAVIGATION_MEDIUM : HEIGHT_TOP_NAVIGATION};
+  height: ${({ theme }) =>
+    theme.breakpoints.medium ? HEIGHT_TOP_NAVIGATION_MEDIUM : HEIGHT_TOP_NAVIGATION};
 `;
 
 const Header = ({ label }: { label: string }) => {

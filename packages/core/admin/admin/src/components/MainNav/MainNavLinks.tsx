@@ -73,7 +73,7 @@ const MainNavIcons = ({
         const linkMobile = mobileLinks.find((mobileLink) => mobileLink.to === link.to);
 
         const LinkElement = () => (
-          <NavLink.Link
+          <NavLink.NavButton
             to={link.to}
             onClick={() => handleClickOnLink(link.to)}
             aria-label={labelValue}
@@ -100,7 +100,7 @@ const MainNavIcons = ({
                 {badgeContentNumeric}
               </NavLinkBadgeCounter>
             ) : null}
-          </NavLink.Link>
+          </NavLink.NavButton>
         );
 
         return isDesktop || (!isDesktop && linkMobile) ? (
@@ -145,35 +145,37 @@ const MainNavBurgerMenuLinks = ({
         const navigationTarget = link.navigationLink || link.to;
 
         return (
-          <Flex paddingTop={3} alignItems="center" tag="li" key={navigationTarget}>
+          <Flex alignItems="center" tag="li" key={navigationTarget}>
             <NavLink.Link
               to={navigationTarget}
               onClick={() => handleClickOnLink(navigationTarget)}
               aria-label={labelValue}
             >
-              <IconContainer marginRight="0.6rem">
-                <LinkIcon width="20" height="20" fill="neutral500" />
-              </IconContainer>
-              <Typography marginLeft={3}>{labelValue}</Typography>
-              {badgeContentLock ? (
-                <NavLinkBadgeLock
-                  label="locked"
-                  textColor="neutral500"
-                  paddingLeft={0}
-                  paddingRight={0}
-                >
-                  {badgeContentLock}
-                </NavLinkBadgeLock>
-              ) : badgeContentNumeric ? (
-                <NavLinkBadgeCounter
-                  label={badgeContentNumeric}
-                  backgroundColor="primary600"
-                  width="2.3rem"
-                  color="neutral0"
-                >
-                  {badgeContentNumeric}
-                </NavLinkBadgeCounter>
-              ) : null}
+              <Flex alignItems="center" gap={3}>
+                <IconContainer>
+                  <LinkIcon width="20" height="20" fill="neutral500" />
+                </IconContainer>
+                <Typography>{labelValue}</Typography>
+                {badgeContentLock ? (
+                  <NavLinkBadgeLock
+                    label="locked"
+                    textColor="neutral500"
+                    paddingLeft={0}
+                    paddingRight={0}
+                  >
+                    {badgeContentLock}
+                  </NavLinkBadgeLock>
+                ) : badgeContentNumeric ? (
+                  <NavLinkBadgeCounter
+                    label={badgeContentNumeric}
+                    backgroundColor="primary600"
+                    width="2.3rem"
+                    color="neutral0"
+                  >
+                    {badgeContentNumeric}
+                  </NavLinkBadgeCounter>
+                ) : null}
+              </Flex>
             </NavLink.Link>
           </Flex>
         );

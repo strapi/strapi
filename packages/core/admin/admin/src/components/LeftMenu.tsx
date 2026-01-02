@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useTracking } from '../features/Tracking';
+import { useIsDesktop } from '../hooks/useMediaQuery';
 import { Menu, MenuItem, MobileMenuItem } from '../hooks/useMenu';
 
 import { MainNav } from './MainNav/MainNav';
@@ -73,6 +74,7 @@ const LeftMenu = ({
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
+  const isDesktop = useIsDesktop();
 
   const handleClickOnLink = (destination: string) => {
     trackUsage('willNavigate', { from: pathname, to: destination });
@@ -127,7 +129,7 @@ const LeftMenu = ({
       <MainNav>
         <NavBrand />
 
-        <Divider />
+        {isDesktop && <Divider />}
 
         <MenuDetails>
           <NavListWrapper
@@ -192,6 +194,7 @@ const LeftMenu = ({
             type="button"
             aria-expanded={isBurgerMenuShown}
             aria-controls="burger-menu"
+            size="L"
           >
             {!isBurgerMenuShown ? <List fill="neutral1000" /> : <Cross fill="neutral1000" />}
           </IconButton>
