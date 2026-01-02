@@ -116,11 +116,13 @@ const Link = (
 };
 
 const StyledHeader = styled(Flex)`
-  flex: 0 0
-    ${({ theme }) =>
-      theme.breakpoints.medium ? HEIGHT_TOP_NAVIGATION_MEDIUM : HEIGHT_TOP_NAVIGATION};
-  height: ${({ theme }) =>
-    theme.breakpoints.medium ? HEIGHT_TOP_NAVIGATION_MEDIUM : HEIGHT_TOP_NAVIGATION};
+  flex: 0 0 ${HEIGHT_TOP_NAVIGATION};
+  height: ${HEIGHT_TOP_NAVIGATION};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    flex: 0 0 ${HEIGHT_TOP_NAVIGATION_MEDIUM};
+    height: ${HEIGHT_TOP_NAVIGATION_MEDIUM};
+  }
 `;
 
 const Header = ({ label }: { label: string }) => {

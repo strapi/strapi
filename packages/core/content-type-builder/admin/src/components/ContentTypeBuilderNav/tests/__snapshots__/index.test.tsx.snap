@@ -431,7 +431,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c1 {
   width: 100%;
-  height: calc(100dvh - 6.3rem - 1px);
+  height: calc(100dvh - 6.4rem - 1px);
   overflow: hidden;
   background-color: #ffffff;
   display: flex;
@@ -439,7 +439,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   border-right: 0;
   box-shadow: none;
   position: fixed;
-  top: calc(6.3rem + 1px);
+  top: calc(6.4rem + 1px);
   left: 0;
   z-index: 2;
 }
