@@ -397,7 +397,20 @@ module.exports = ({ strapi }) => ({
     const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
     if (upSessions?.httpOnly || requestHttpOnly) {
       const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
-      ctx.cookies.set(cookieName, '', { expires: new Date(0) });
+      const isProduction = process.env.NODE_ENV === 'production';
+      const isSecure =
+        typeof upSessions.cookie?.secure === 'boolean' ? upSessions.cookie?.secure : isProduction;
+
+      const cookieOptions = {
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: upSessions?.cookie?.sameSite ?? 'lax',
+        path: upSessions?.cookie?.path ?? '/',
+        domain: upSessions?.cookie?.domain,
+        expires: new Date(0), // Expire immediately
+        overwrite: true,
+      };
+      ctx.cookies.set(cookieName, '', cookieOptions);
     }
     return ctx.send({ ok: true });
   },
