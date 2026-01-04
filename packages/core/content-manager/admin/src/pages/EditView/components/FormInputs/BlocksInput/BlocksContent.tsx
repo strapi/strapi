@@ -512,8 +512,13 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       return;
     }
 
-    if (selectedBlock.handleTab) {
-      event.preventDefault();
+    event.preventDefault();
+
+    if (event.shiftKey && selectedBlock.handleShiftTab) {
+      // Handle Shift+Tab (unindent)
+      selectedBlock.handleShiftTab(editor);
+    } else if (!event.shiftKey && selectedBlock.handleTab) {
+      // Handle Tab (indent)
       selectedBlock.handleTab(editor);
     }
   };
