@@ -11,7 +11,7 @@ import {
   Menu,
   BoxComponent,
 } from '@strapi/design-system';
-import { Drag, More, Trash } from '@strapi/icons';
+import { Drag, More, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -38,6 +38,7 @@ interface DynamicComponentProps
   onAddComponent: (componentUid: string, index: number) => void;
   onRemoveComponentClick: () => void;
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
+  totalLength: number;
   children?: (props: InputRendererProps) => React.ReactNode;
 }
 
@@ -53,6 +54,7 @@ const DynamicComponent = ({
   onCancel,
   dynamicComponentsByCategory = {},
   onAddComponent,
+  totalLength,
   children,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
@@ -124,6 +126,29 @@ const DynamicComponent = ({
 
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
 
+  const handleMoveUp = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index > 0) {
+        onMoveComponent(index - 1, index);
+      }
+    },
+    [index, onMoveComponent]
+  );
+
+  const handleMoveDown = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index < totalLength - 1) {
+        onMoveComponent(index + 1, index);
+      }
+    },
+    [index, totalLength, onMoveComponent]
+  );
+
+  const canMoveUp = index > 0;
+  const canMoveDown = index < totalLength - 1;
+
   const accordionActions = disabled ? null : (
     <>
       <IconButton
@@ -153,6 +178,36 @@ const DynamicComponent = ({
         >
           <Drag />
         </IconButton>
+      )}
+      {!isDesktop && (
+        <>
+          {canMoveUp && (
+            <IconButton
+              variant="ghost"
+              onClick={handleMoveUp}
+              disabled={!canMoveUp}
+              label={formatMessage({
+                id: getTranslation('components.DynamicZone.move-up'),
+                defaultMessage: 'Move up',
+              })}
+            >
+              <ArrowUp />
+            </IconButton>
+          )}
+          {canMoveDown && (
+            <IconButton
+              variant="ghost"
+              onClick={handleMoveDown}
+              disabled={!canMoveDown}
+              label={formatMessage({
+                id: getTranslation('components.DynamicZone.move-down'),
+                defaultMessage: 'Move down',
+              })}
+            >
+              <ArrowDown />
+            </IconButton>
+          )}
+        </>
       )}
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={null} paddingLeft={0} paddingRight={0}>
