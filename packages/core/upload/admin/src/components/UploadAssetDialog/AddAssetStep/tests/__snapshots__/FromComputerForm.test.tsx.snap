@@ -2,51 +2,51 @@
 
 exports[`FromComputerForm snapshots the component 1`] = `
 .c0 {
-  padding-block-start: 24px;
   padding-block-end: 24px;
   padding-inline-start: 40px;
   padding-inline-end: 40px;
+  padding-block-start: 24px;
 }
 
 .c1 {
-  padding-block-start: 64px;
-  padding-block-end: 64px;
   background: #f6f6f9;
+  border-color: #c0c0cf;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
-  border-color: #c0c0cf;
+  padding-block-end: 64px;
+  padding-block-start: 64px;
   position: relative;
 }
 
 .c7 {
-  padding-block-start: 12px;
   padding-block-end: 20px;
+  padding-block-start: 12px;
 }
 
 .c9 {
-  top: 0;
-  left: 0;
   bottom: 0;
+  left: 0;
+  position: absolute;
   right: 0;
+  top: 0;
   width: 100%;
   z-index: 1;
-  position: absolute;
 }
 
 .c11 {
+  background: #f6f6f9;
   padding-block-start: 16px;
   padding-inline-end: 20px;
   padding-block-end: 16px;
   padding-inline-start: 20px;
-  background: #f6f6f9;
 }
 
 .c14 {
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
 }
 
 .c3 {
@@ -79,8 +79,8 @@ exports[`FromComputerForm snapshots the component 1`] = `
 
 .c8 {
   font-weight: 500;
-  font-size: 1.6rem;
-  line-height: 1.25;
+  font-size: 1.8rem;
+  line-height: 1.33;
   color: #666687;
 }
 
@@ -103,7 +103,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
 }
 
 .c16 {
-  height: 3.2rem;
+  height: 4rem;
   text-decoration: none;
   border: 1px solid #dcdce4;
   background: #ffffff;
@@ -149,6 +149,24 @@ exports[`FromComputerForm snapshots the component 1`] = `
 .c10 {
   opacity: 0;
   cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .c8 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c8 {
+    line-height: 1.25;
+  }
+}
+
+@media (min-width: 520px) {
+  .c16 {
+    height: 3.2rem;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

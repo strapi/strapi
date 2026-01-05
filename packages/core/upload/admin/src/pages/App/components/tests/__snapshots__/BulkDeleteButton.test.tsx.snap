@@ -2,10 +2,10 @@
 
 exports[`BulkDeleteButton renders 1`] = `
 .c0 {
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
 }
 
 .c1 {
@@ -41,7 +41,7 @@ exports[`BulkDeleteButton renders 1`] = `
 }
 
 .c2 {
-  height: 3.2rem;
+  height: 4rem;
   text-decoration: none;
   border: 1px solid #f5c0b8;
   background: #fcecea;
@@ -63,6 +63,12 @@ exports[`BulkDeleteButton renders 1`] = `
   background: #eaeaef;
   color: #666687;
   cursor: default;
+}
+
+@media (min-width: 520px) {
+  .c2 {
+    height: 3.2rem;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
