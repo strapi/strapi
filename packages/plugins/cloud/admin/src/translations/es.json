@@ -13,7 +13,7 @@
   "Homepage.deploy.cli.ariaLabel": "Sistema de gestión de paquetes",
   "Homepage.deploy.cli.copy": "Copiar",
   "Homepage.deploy.documentation": "¿Tienes problemas? Consulta nuestra documentación",
-  "Homepage.freePlan.api": "10K peticiones API",
+  "Homepage.freePlan.api": "2.5K peticiones API",
   "Homepage.freePlan.storage": "10 GB de almacenamiento",
   "Homepage.freePlan.bandwidth": "10 GB de ancho de banda para assets",
   "Homepage.freePlan.cdn": "CDN global",

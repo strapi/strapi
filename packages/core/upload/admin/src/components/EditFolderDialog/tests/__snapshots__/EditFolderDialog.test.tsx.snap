@@ -1,18 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditFolderDialog renders and matches the snapshot 1`] = `
-.c0 {
-  margin-block-start: 16px;
-  top: 5.6rem;
-  left: 50%;
-  width: 100%;
-  max-width: 50rem;
-  z-index: 700;
-  transform: translateX(-50%);
-  position: fixed;
-}
-
-.c5 {
+.c3 {
   padding-block-start: 16px;
   padding-inline-end: 20px;
   padding-block-end: 16px;
@@ -20,58 +9,51 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: #f6f6f9;
 }
 
-.c9 {
+.c7 {
   border-radius: 4px;
   display: inline-flex;
   cursor: pointer;
 }
 
-.c24 {
+.c22 {
   padding-inline-end: 12px;
 }
 
-.c28 {
+.c26 {
   padding-inline-start: 16px;
   padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.c1 {
-  gap: 16px;
-  align-items: stretch;
-  flex-direction: column;
-  display: flex;
-}
-
-.c6 {
+.c4 {
   align-items: center;
   justify-content: space-between;
   flex-direction: row;
   display: flex;
 }
 
-.c10 {
+.c8 {
   align-items: center;
   justify-content: center;
   flex-direction: row;
   display: flex;
 }
 
-.c16 {
+.c14 {
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c18 {
+.c16 {
   gap: 4px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c21 {
+.c19 {
   gap: 8px;
   align-items: center;
   justify-content: space-between;
@@ -79,7 +61,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c29 {
+.c27 {
   gap: 8px;
   align-items: center;
   justify-content: center;
@@ -87,21 +69,21 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   display: inline-flex;
 }
 
-.c32 {
+.c30 {
   gap: 8px;
   align-items: center;
   flex-direction: row;
   display: flex;
 }
 
-.c8 {
+.c6 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: currentcolor;
   font-weight: 600;
 }
 
-.c19 {
+.c17 {
   font-size: 1.2rem;
   line-height: 1.33;
   display: block;
@@ -112,14 +94,14 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   font-weight: 600;
 }
 
-.c31 {
+.c29 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: currentcolor;
   font-weight: 600;
 }
 
-.c2 {
+.c0 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -130,7 +112,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c30 {
+.c28 {
   height: 3.2rem;
   text-decoration: none;
   border: 1px solid #dcdce4;
@@ -138,22 +120,22 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c30:hover {
+.c28:hover {
   background-color: #f6f6f9;
 }
 
-.c30:active {
+.c28:active {
   background-color: #eaeaef;
 }
 
-.c30[aria-disabled='true'] {
+.c28[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c33 {
+.c31 {
   height: 3.2rem;
   text-decoration: none;
   border: 1px solid #4945ff;
@@ -161,24 +143,24 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #ffffff;
 }
 
-.c33:hover {
+.c31:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c33:active {
+.c31:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c33[aria-disabled='true'] {
+.c31[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c11 {
+.c9 {
   text-decoration: none;
   padding-block: 0.7rem;
   padding-inline: 0.7rem;
@@ -188,27 +170,27 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #8e8ea9;
 }
 
-.c11:hover {
+.c9:hover {
   background-color: #f6f6f9;
   color: #666687;
 }
 
-.c11:active {
+.c9:active {
   background-color: #eaeaef;
 }
 
-.c11[aria-disabled='true'] {
+.c9[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c20 {
+.c18 {
   display: flex;
 }
 
-.c23 {
+.c21 {
   border: none;
   border-radius: 4px;
   color: #32324d;
@@ -223,21 +205,21 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   padding-block: 8px;
 }
 
-.c23::placeholder {
+.c21::placeholder {
   color: #666687;
   opacity: 1;
 }
 
-.c23[aria-disabled='true'] {
+.c21[aria-disabled='true'] {
   color: inherit;
 }
 
-.c23:focus {
+.c21:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c22 {
+.c20 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -249,23 +231,34 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c22:focus-within {
+.c20:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c12 {
+.c10 {
   width: 100%;
   height: 100%;
   overflow: hidden;
   display: flex;
 }
 
-.c14 {
+.c12 {
   min-width: 100%;
 }
 
-.c3 {
+.c13 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c15 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
+.c1 {
   background: #32324d33;
   position: fixed;
   inset: 0;
@@ -273,7 +266,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   will-change: opacity;
 }
 
-.c4 {
+.c2 {
   max-width: 83rem;
   max-height: 90vh;
   height: auto;
@@ -292,132 +285,121 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   z-index: 310;
 }
 
-.c4 >form {
+.c2 >form {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.c7 {
+.c5 {
   border-bottom: solid 1px #eaeaef;
 }
 
-.c13 {
+.c11 {
   padding-inline: 32px;
 }
 
-.c13>div {
+.c11>div {
   padding-block: 40px;
   margin: 0 -2px 0 -2px;
   padding-left: 2px;
   padding-right: 2px;
 }
 
-.c13>div>div {
+.c11>div>div {
   display: block!important;
 }
 
-.c27 {
+.c25 {
   border-top: solid 1px #eaeaef;
   flex: 1;
 }
 
-.c15 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-}
-
-.c17 {
-  grid-column: span 12;
-  max-width: 100%;
-}
-
-.c25 {
+.c23 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c25 svg {
+.c23 svg {
   height: 1.1rem;
   width: 1.1rem;
 }
 
-.c25 svg path {
+.c23 svg path {
   fill: #666687;
 }
 
-.c26 {
+.c24 {
   display: flex;
   background: none;
   border: none;
 }
 
-.c26 svg {
+.c24 svg {
   width: 0.9rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c30 {
+  .c28 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c33 {
+  .c31 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c11 {
+  .c9 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c3 {
-    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
-  }
-}
-
-@media (min-width: 768px) {
-  .c4 {
-    width: calc(100% - 48px);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c4[data-state='open'] {
-    animation-duration: 200ms;
-    animation-timing-function: cubic-bezier(.4,0,.2,1);
-    animation-name: iWCnzW;
-  }
-
-  .c4[data-state='closed'] {
-    animation-duration: 120ms;
-    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    animation-name: jgufbq;
   }
 }
 
 @media (min-width: 520px) {
-  .c17 {
+  .c15 {
     grid-column: span 12;
   }
 }
 
 @media (min-width: 768px) {
-  .c17 {
+  .c15 {
     grid-column: span 12;
   }
 }
 
 @media (min-width: 1080px) {
-  .c17 {
+  .c15 {
     grid-column: span 6;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c1 {
+    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+@media (min-width: 768px) {
+  .c2 {
+    width: calc(100% - 48px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c2[data-state='open'] {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(.4,0,.2,1);
+    animation-name: iWCnzW;
+  }
+
+  .c2[data-state='closed'] {
+    animation-duration: 120ms;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-name: jgufbq;
   }
 }
 
@@ -433,13 +415,15 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
     tabindex="0"
   />
   <div>
-    <div
-      aria-hidden="true"
-      class="c0 c1"
-      data-aria-hidden="true"
+    <section
+      aria-atomic="false"
+      aria-label="Notifications alt+T"
+      aria-live="polite"
+      aria-relevant="additions text"
+      tabindex="-1"
     />
     <span
-      class="c2"
+      class="c0"
     >
       <p
         aria-live="polite"
@@ -462,14 +446,14 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
     </span>
   </div>
   <div
-    class="c3"
+    class="c1"
     data-state="open"
     style="pointer-events: auto;"
   >
     <div
       aria-describedby="radix-:r2:"
       aria-labelledby="radix-:r1:"
-      class="c4"
+      class="c2"
       data-state="open"
       id="radix-:r0:"
       role="dialog"
@@ -481,17 +465,17 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
         novalidate=""
       >
         <header
-          class="c5 c6 c7"
+          class="c3 c4 c5"
         >
           <h2
-            class="c8"
+            class="c6"
             id="radix-:r1:"
           >
             Add new folder
           </h2>
           <button
             aria-disabled="false"
-            class="c9 c10 c11"
+            class="c7 c8 c9"
             type="button"
           >
             <svg
@@ -508,14 +492,14 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
               />
             </svg>
             <span
-              class="c2"
+              class="c0"
             >
               Close modal
             </span>
           </button>
         </header>
         <div
-          class="c12 c13"
+          class="c10 c11"
           dir="ltr"
           style="position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
         >
@@ -523,7 +507,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
             [data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
           </style>
           <div
-            class="c14"
+            class="c12"
             data-radix-scroll-area-viewport=""
             style="overflow-x: scroll; overflow-y: scroll;"
           >
@@ -531,27 +515,27 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
               style="min-width: 100%; display: table;"
             >
               <div
-                class="c15"
+                class="c13"
               >
                 <div
-                  class="c16 c17"
+                  class="c14 c15"
                 >
                   <div
-                    class="c18"
+                    class="c16"
                   >
                     <label
-                      class="c19 c20"
+                      class="c17 c18"
                       for=":r3:"
                       id=":r3:-label"
                     >
                       Name
                     </label>
                     <div
-                      class="c21 c22"
+                      class="c19 c20"
                     >
                       <input
                         aria-disabled="false"
-                        class="c23"
+                        class="c21"
                         id=":r3:"
                         name="name"
                         value=""
@@ -560,13 +544,13 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c16 c17"
+                  class="c14 c15"
                 >
                   <div
-                    class="c18"
+                    class="c16"
                   >
                     <label
-                      class="c19 c20"
+                      class="c17 c18"
                       for="folder-parent"
                       id="folder-parent-label"
                     >
@@ -617,7 +601,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                         >
                           <div
                             aria-hidden="true"
-                            class="c24 c25 c26"
+                            class="c22 c23 c24"
                           >
                             <svg
                               fill="currentColor"
@@ -646,30 +630,31 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
           </div>
         </div>
         <footer
-          class="c5 c6 c27"
+          class="c3 c4 c25"
         >
           <button
             aria-disabled="false"
-            class="c28 c29 c30"
+            class="c26 c27 c28"
             name="cancel"
+            type="button"
           >
             <span
-              class="c31"
+              class="c29"
             >
               Cancel
             </span>
           </button>
           <div
-            class="c32"
+            class="c30"
           >
             <button
               aria-disabled="false"
-              class="c28 c29 c33"
+              class="c26 c27 c31"
               name="submit"
               type="submit"
             >
               <span
-                class="c31"
+                class="c29"
               >
                 Create
               </span>
