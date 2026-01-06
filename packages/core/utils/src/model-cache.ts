@@ -1,3 +1,5 @@
+import type { Model } from './types';
+
 /**
  * Model cache to prevent redundant getModel() calls during populate traversal.
  *
@@ -12,16 +14,24 @@
  * @param getModelFn - The underlying getModel function to cache
  * @returns An object with cached getModel function and clear method
  */
-export const createModelCache = (getModelFn: (uid: any) => any) => {
-  const cache = new Map<string, any>();
+export const createModelCache = (
+  getModelFn: (
+    uid: // TODO should use the type from @strapi/types but this package doesn't depend on it
+    any
+  ) => Model
+) => {
+  const cache = new Map<string, Model>();
 
   return {
-    getModel(uid: any): any {
-      if (!cache.has(uid)) {
-        cache.set(uid, getModelFn(uid));
+    getModel(uid: any): Model {
+      const cached = cache.get(uid);
+      if (cached) {
+        return cached;
       }
 
-      return cache.get(uid)!;
+      const model = getModelFn(uid);
+      cache.set(uid, model);
+      return model;
     },
     clear() {
       cache.clear();

@@ -6,6 +6,7 @@ import type { Data, Modules, UID } from '@strapi/types';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
+import { indexByDocumentId } from './utils/document-status';
 
 const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 
@@ -77,24 +78,7 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
     filters,
   });
 
-  // Index statuses by documentId for lookup
-  type StatusDocument = (typeof availableStatus)[number];
-  const statusByDocumentId = new Map<string, StatusDocument[]>();
-  for (const status of availableStatus) {
-    const key = status.documentId as string;
-    if (!key) {
-      // Skip entries without a valid documentId
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-
-    const existing = statusByDocumentId.get(key);
-    if (existing) {
-      existing.push(status);
-    } else {
-      statusByDocumentId.set(key, [status]);
-    }
-  }
+  const statusByDocumentId = indexByDocumentId(availableStatus);
 
   return relations.map((relation: RelationEntity) => {
     const candidates = statusByDocumentId.get(relation.documentId as string) || [];

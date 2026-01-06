@@ -1,19 +1,10 @@
 /**
- * Performance benchmark test for model cache optimization
- *
- * This test simulates the real-world scenarios:
- * - Complex nested populate queries
- * - Multiple components and dynamic zones
- * - Deep nesting with relations
- *
- * Expected results:
- * - Without cache: 100-200+ getModel() calls
- * - With cache: 10-20 getModel() calls (only unique models)
+ * Unit tests for model cache utility.
  */
 
 import { createModelCache } from '../model-cache';
 
-describe('Model Cache Performance Benchmark', () => {
+describe('Model Cache', () => {
   const mockModels = {
     'api::page.page': {
       uid: 'api::page.page',
