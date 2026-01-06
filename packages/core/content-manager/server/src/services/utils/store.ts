@@ -43,8 +43,12 @@ const getModelConfigurations = async (keys: string[]) => {
   const configMap: Record<string, any> = {};
   for (const result of results) {
     const originalKey = result.key.replace(`${STORE_KEY_PREFIX}configuration_`, '');
-    const value = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
-    configMap[originalKey] = _.merge({}, EMPTY_CONFIG, value);
+    try {
+      const value = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
+      configMap[originalKey] = _.merge({}, EMPTY_CONFIG, value);
+    } catch {
+      // Skip malformed JSON entries - will fall back to EMPTY_CONFIG in the loop below
+    }
   }
 
   // Default missing keys to empty config
@@ -90,7 +94,15 @@ const findByKey = async (key: any) => {
     },
   });
 
-  return results.map(({ value }) => JSON.parse(value));
+  return results
+    .map(({ value }) => {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return null;
+      }
+    })
+    .filter((v) => v !== null);
 };
 
 const getAllConfigurations = () => findByKey(`${STORE_KEY_PREFIX}configuration`);

@@ -1,19 +1,5 @@
-import { subject as asSubject, detectSubjectType } from '@casl/ability';
-import { permittedFieldsOf } from '@casl/ability/extra';
-import {
-  defaults,
-  omit,
-  isArray,
-  isEmpty,
-  isNil,
-  flatMap,
-  some,
-  prop,
-  uniq,
-  intersection,
-  getOr,
-  isObject,
-} from 'lodash/fp';
+import { subject as asSubject } from '@casl/ability';
+import { defaults, omit, isArray, isEmpty, uniq, intersection, getOr, isObject } from 'lodash/fp';
 
 import {
   contentTypes,
@@ -24,6 +10,8 @@ import {
   errors,
   createModelCache,
 } from '@strapi/utils';
+import { createPermissionFieldsCache } from './permission-fields';
+
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
 const { ValidationError } = errors;
@@ -140,53 +128,7 @@ export default ({ action, ability, model }: any) => {
   };
 
   const wrapValidate = (createValidateFunction: any) => {
-    /**
-     * Cache permission field calculations per action.
-     *
-     * permittedFieldsOf() is called for every entity being validated.
-     * Cache the result when rules have no entity-specific conditions.
-     */
-    const permissionCache = new Map<
-      string,
-      { permittedFields: string[]; hasAtLeastOneRegistered: boolean; shouldIncludeAll: boolean }
-    >();
-
-    const getPermissionFields = (actionOverride: string, subject: any) => {
-      const subjectType = detectSubjectType(subject);
-      const rules = ability.rulesFor(actionOverride, subjectType);
-
-      // Check if any rule has conditions that depend on entity data
-      // If so, we can't cache - must compute per entity
-      const hasEntityConditions = rules.some(
-        (rule: any) => rule.conditions && !isEmpty(rule.conditions)
-      );
-
-      // Return cached result if available and safe to use
-      const cacheKey = `${actionOverride}::${String(subjectType)}`;
-      if (!hasEntityConditions && permissionCache.has(cacheKey)) {
-        return permissionCache.get(cacheKey)!;
-      }
-
-      // Compute permission fields (expensive CASL operation)
-      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
-        fieldsFrom: (rule) => rule.fields || [],
-      });
-
-      const hasAtLeastOneRegistered = some(
-        (fields) => !isNil(fields),
-        flatMap(prop('fields'), rules)
-      );
-      const shouldIncludeAll = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
-
-      const result = { permittedFields, hasAtLeastOneRegistered, shouldIncludeAll };
-
-      // Cache for reuse if no entity-specific conditions
-      if (!hasEntityConditions) {
-        permissionCache.set(cacheKey, result);
-      }
-
-      return result;
-    };
+    const { getPermissionFields } = createPermissionFieldsCache(ability);
 
     // TODO
     // @ts-expect-error define the correct return type

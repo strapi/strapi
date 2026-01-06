@@ -12,6 +12,28 @@ import { formatDocumentWithMetadata } from './utils/metadata';
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
 /**
+ * Get the populate depth for content manager operations.
+ *
+ * POC ONLY - NOT FOR PRODUCTION
+ *
+ * This env var can demonstrate that populateDeep(Infinity) as a performance bottleneck.
+ *
+ * However, limiting depth CAUSES DATA LOSS because the admin UI sends full form
+ * state on save - unloaded deep levels get deleted by deleteOldComponents().
+ * Proper fix requires admin UI lazy loading (separate refactor).
+ */
+const getPopulateDepth = (): number => {
+  const envDepth = process.env.STRAPI_CONTENT_MANAGER_MAX_POPULATE_DEPTH;
+  if (envDepth) {
+    const parsed = parseInt(envDepth, 10);
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return Infinity;
+};
+
+/**
  * Create a new document.
  *
  * @param ctx - Koa context
@@ -158,6 +180,12 @@ export default {
     const statusByDocumentId = new Map<string, any[]>();
     for (const status of documentsAvailableStatus) {
       const key = status.documentId;
+      if (!key) {
+        // Skip entries without a valid documentId
+
+        // eslint-disable-next-line no-continue
+        continue;
+      }
       const existing = statusByDocumentId.get(key);
       if (existing) {
         existing.push(status);
@@ -199,7 +227,7 @@ export default {
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
-      .populateDeep(Infinity)
+      .populateDeep(getPopulateDepth())
       .countRelations()
       .build();
 
@@ -401,7 +429,7 @@ export default {
       const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
-        .populateDeep(Infinity)
+        .populateDeep(getPopulateDepth())
         .countRelations()
         .build();
 
@@ -494,7 +522,7 @@ export default {
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
-      .populateDeep(Infinity)
+      .populateDeep(getPopulateDepth())
       .countRelations()
       .build();
 

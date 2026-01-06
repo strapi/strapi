@@ -136,17 +136,18 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
         : traverseRelationTarget(getModel(attribute.target!));
 
       if (isArray(value)) {
-        const res = new Array(value.length);
-        for (let i = 0; i < value.length; i += 1) {
-          const arrayPath = {
-            ...newPath,
-            rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `${i}`
-              : `${newPath.rawWithIndices}.${i}`,
-          };
-          res[i] = await method(visitor, arrayPath, value[i]);
-        }
-        copy[key] = res;
+        // Process array items in parallel for better performance with large arrays
+        copy[key] = await Promise.all(
+          value.map((item, i) => {
+            const arrayPath = {
+              ...newPath,
+              rawWithIndices: isNil(newPath.rawWithIndices)
+                ? `${i}`
+                : `${newPath.rawWithIndices}.${i}`,
+            };
+            return method(visitor, arrayPath, item);
+          })
+        );
       } else {
         copy[key] = await method(visitor, newPath, value as Data);
       }
@@ -157,19 +158,19 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     if (isMediaAttribute(attribute)) {
       parent = { schema, key, attribute, path: newPath };
 
-      // need to update copy
       if (isArray(value)) {
-        const res = new Array(value.length);
-        for (let i = 0; i < value.length; i += 1) {
-          const arrayPath = {
-            ...newPath,
-            rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `${i}`
-              : `${newPath.rawWithIndices}.${i}`,
-          };
-          res[i] = await traverseMediaTarget(visitor, arrayPath, value[i]);
-        }
-        copy[key] = res;
+        // Process media array items in parallel for better performance
+        copy[key] = await Promise.all(
+          value.map((item, i) => {
+            const arrayPath = {
+              ...newPath,
+              rawWithIndices: isNil(newPath.rawWithIndices)
+                ? `${i}`
+                : `${newPath.rawWithIndices}.${i}`,
+            };
+            return traverseMediaTarget(visitor, arrayPath, item);
+          })
+        );
       } else {
         copy[key] = await traverseMediaTarget(visitor, newPath, value as Data);
       }
@@ -182,17 +183,18 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       const targetSchema = getModel(attribute.component);
 
       if (isArray(value)) {
-        const res: Data[] = new Array(value.length);
-        for (let i = 0; i < value.length; i += 1) {
-          const arrayPath = {
-            ...newPath,
-            rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `${i}`
-              : `${newPath.rawWithIndices}.${i}`,
-          };
-          res[i] = await traverseComponent(visitor, arrayPath, targetSchema, value[i]);
-        }
-        copy[key] = res;
+        // Process component array items in parallel for better performance
+        copy[key] = await Promise.all(
+          value.map((item, i) => {
+            const arrayPath = {
+              ...newPath,
+              rawWithIndices: isNil(newPath.rawWithIndices)
+                ? `${i}`
+                : `${newPath.rawWithIndices}.${i}`,
+            };
+            return traverseComponent(visitor, arrayPath, targetSchema, item);
+          })
+        );
       } else {
         copy[key] = await traverseComponent(visitor, newPath, targetSchema, value as Data);
       }
@@ -203,15 +205,18 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     if (attribute.type === 'dynamiczone' && isArray(value)) {
       parent = { schema, key, attribute, path: newPath };
 
-      const res = new Array(value.length);
-      for (let i = 0; i < value.length; i += 1) {
-        const arrayPath = {
-          ...newPath,
-          rawWithIndices: isNil(newPath.rawWithIndices) ? `${i}` : `${newPath.rawWithIndices}.${i}`,
-        };
-        res[i] = await visitDynamicZoneEntry(visitor, arrayPath, value[i]);
-      }
-      copy[key] = res;
+      // Process dynamic zone items in parallel for better performance
+      copy[key] = await Promise.all(
+        value.map((item, i) => {
+          const arrayPath = {
+            ...newPath,
+            rawWithIndices: isNil(newPath.rawWithIndices)
+              ? `${i}`
+              : `${newPath.rawWithIndices}.${i}`,
+          };
+          return visitDynamicZoneEntry(visitor, arrayPath, item);
+        })
+      );
 
       continue;
     }

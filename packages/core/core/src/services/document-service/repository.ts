@@ -1,4 +1,4 @@
-import { omit, assoc, merge, curry } from 'lodash/fp';
+import { omit, assoc, merge, curry, isEmpty } from 'lodash/fp';
 
 import {
   async,
@@ -56,10 +56,27 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const ctx = { schema: contentType, getModel: modelCache.getModel };
 
-    await validators.validateFilters(ctx, params.filters, filtersValidations);
-    await validators.validateSort(ctx, params.sort, sortValidations);
-    await validators.validateFields(ctx, params.fields, fieldValidations);
-    await validators.validatePopulate(ctx, params.populate, populateValidations);
+    // Collect validations to run (only for non-empty params)
+    const validations: Promise<unknown>[] = [];
+
+    if (params.filters && !isEmpty(params.filters)) {
+      validations.push(validators.validateFilters(ctx, params.filters, filtersValidations));
+    }
+
+    if (params.sort && !isEmpty(params.sort)) {
+      validations.push(validators.validateSort(ctx, params.sort, sortValidations));
+    }
+
+    if (params.fields && !isEmpty(params.fields)) {
+      validations.push(validators.validateFields(ctx, params.fields, fieldValidations));
+    }
+
+    if (params.populate && !isEmpty(params.populate)) {
+      validations.push(validators.validatePopulate(ctx, params.populate, populateValidations));
+    }
+
+    // Run all collected validations in parallel
+    await Promise.all(validations);
 
     // Clean up cache after validation
     modelCache.clear();

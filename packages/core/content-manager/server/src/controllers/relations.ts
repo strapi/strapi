@@ -1,4 +1,4 @@
-import { prop, uniq, flow, isEmpty } from 'lodash/fp';
+import { prop, uniq, uniqBy, concat, flow, isEmpty } from 'lodash/fp';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -82,6 +82,11 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
   const statusByDocumentId = new Map<string, StatusDocument[]>();
   for (const status of availableStatus) {
     const key = status.documentId as string;
+    if (!key) {
+      // Skip entries without a valid documentId
+      // eslint-disable-next-line no-continue
+      continue;
+    }
 
     const existing = statusByDocumentId.get(key);
     if (existing) {
@@ -441,10 +446,9 @@ export default {
     const { uid: sourceUid } = sourceSchema;
     const { uid: targetUid } = targetSchema;
 
-    const permissionChecker = getService('permission-checker').create({
-      userAbility,
-      model: targetUid,
-    });
+    const permissionQuery = await getService('permission-checker')
+      .create({ userAbility, model: targetUid })
+      .sanitizedQuery.read({ fields: fieldsToSelect });
 
     /**
      * loadPages can not be used for single relations,
@@ -479,19 +483,43 @@ export default {
       filters.publishedAt = { $null: true };
     }
 
-    // Load all fields in single query, sanitize in memory
+    /**
+     * If user does not have access to specific relations (custom conditions),
+     * only the ids of the relations are returned.
+     *
+     * - First query loads all the ids.
+     * - Second one also loads the main field, and excludes forbidden relations.
+     *
+     * The response contains the union of the two queries.
+     */
     const res = await loadRelations({ id: entryId }, targetField, {
-      select: uniq(['id', 'documentId', 'locale', 'publishedAt', 'updatedAt', ...fieldsToSelect]),
+      select: ['id', 'documentId', 'locale', 'publishedAt', 'updatedAt'],
       ordering: 'desc',
       page: ctx.request.query.page,
       pageSize: ctx.request.query.pageSize,
       filters,
     });
 
-    // Sanitize in memory instead of second DB query - strips fields user can't access
-    const relationsUnion = await Promise.all(
-      res.results.map((item: any) => permissionChecker.sanitizeOutput(item))
-    );
+    /**
+     * Add all ids to load in permissionQuery
+     * If any of the relations are not accessible, the permissionQuery will exclude them
+     */
+    const loadedIds = res.results.map((item: any) => item.id);
+    addFiltersClause(permissionQuery, { id: { $in: loadedIds } });
+
+    /**
+     * Load the relations with the main field, the sanitized permission query
+     * will exclude the relations the user does not have access to.
+     *
+     * Pagination is not necessary as the permissionQuery contains the ids to load.
+     */
+    const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
+      ...strapi.get('query-params').transform(targetUid, permissionQuery),
+      ordering: 'desc',
+    });
+
+    // NOTE: the order is very important to make sure sanitized relations are kept in priority
+    const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
 
     ctx.body = {
       pagination: res.pagination || {
