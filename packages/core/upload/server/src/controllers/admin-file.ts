@@ -147,22 +147,26 @@ export default {
 
       if (count === 0) {
         ctx.body = {
-          processed: 0,
-          total: 0,
-          errors: [],
+          count: 0,
           message: 'No images without metadata found',
         };
         return;
       }
 
-      // Process all images without metadata
-      const result = await aiMetadataService.processExistingFiles();
+      // Create job
+      const jobService = getService('aiMetadataJobs');
+      const jobId = jobService.createJob(ctx.state.user.id, count);
 
+      // Start async processing (fire and forget)
+      aiMetadataService.processExistingFilesWithJob(jobId, ctx.state.user).catch((err: Error) => {
+        strapi.log.error('AI metadata job failed:', err);
+      });
+
+      // Return immediately with job ID
       ctx.body = {
-        processed: result.processed,
-        total: count,
-        errors: result.errors,
-        message: `Processed ${result.processed} out of ${count} images`,
+        jobId,
+        status: 'pending',
+        totalFiles: count,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate AI metadata';
@@ -176,5 +180,27 @@ export default {
 
       ctx.badRequest(cause ? `${message}: ${cause}` : message);
     }
+  },
+
+  async getAIMetadataJobStatus(ctx: Context) {
+    const { jobId } = ctx.params;
+    const jobService = getService('aiMetadataJobs');
+
+    const job = jobService.getJob(jobId, ctx.state.user.id);
+
+    if (!job) {
+      return ctx.notFound('Job not found');
+    }
+
+    ctx.body = {
+      id: job.id,
+      status: job.status,
+      totalFiles: job.totalFiles,
+      processedFiles: job.processedFiles,
+      successCount: job.successCount,
+      errorCount: job.errorCount,
+      errors: job.errors,
+      progress: job.totalFiles > 0 ? Math.round((job.processedFiles / job.totalFiles) * 100) : 0,
+    };
   },
 };

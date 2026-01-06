@@ -1,16 +1,36 @@
 // TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
-import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  useNotification,
+  useFetchClient,
+  Layouts,
+  ConfirmDialog,
+} from '@strapi/admin/strapi-admin';
 import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
-import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/design-system';
+import {
+  Box,
+  Button,
+  Dialog,
+  Flex,
+  Grid,
+  Toggle,
+  Typography,
+  Field,
+  Status,
+  Divider,
+  StatusProps,
+} from '@strapi/design-system';
 import { Check, Sparkle } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
+import { styled } from 'styled-components';
 
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
+import { useAIMetadataJob } from '../../hooks/useAIMetadataJob';
 import { useSettings } from '../../hooks/useSettings';
 import { getTrad } from '../../utils';
 
@@ -19,10 +39,132 @@ import { initialState, reducer } from './reducer';
 
 import type { InitialState } from './reducer';
 
+const MetadataButton = styled(Button)`
+  > span {
+    color: ${({ theme }) => theme.colors.primary600};
+  }
+
+  &:disabled {
+    background: transparent;
+    border: none;
+  }
+`;
+
+const BetaStatus = (props: Omit<StatusProps, 'children'>) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Status
+      size="S"
+      variant="alternative"
+      style={{ textTransform: 'uppercase', display: 'flex' }}
+      {...props}
+    >
+      <Typography tag="span" variant="pi" fontWeight="bold">
+        {formatMessage({
+          id: 'app.components.Status.beta',
+          defaultMessage: 'Beta',
+        })}
+      </Typography>
+    </Status>
+  );
+};
+
+interface MetadataActionProps {
+  currentJobId: string | null;
+  lastJobResult: { successCount: number; errorCount: number } | null;
+  metadataCount: number;
+  isConfirmDialogOpen: boolean;
+  onConfirmDialogChange: (open: boolean) => void;
+  onGenerate: () => Promise<void>;
+}
+
+const MetadataAction = ({
+  currentJobId,
+  lastJobResult,
+  metadataCount,
+  isConfirmDialogOpen,
+  onConfirmDialogChange,
+  onGenerate,
+}: MetadataActionProps) => {
+  const { formatMessage } = useIntl();
+
+  if (currentJobId) {
+    return (
+      <Flex gap={2} alignItems="center">
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: getTrad('settings.form.aiMetadata.generatingMetadata'),
+            defaultMessage: 'AI is generating your metadata',
+          })}
+        </Typography>
+      </Flex>
+    );
+  }
+
+  if (lastJobResult || metadataCount === 0) {
+    return (
+      <Typography variant="pi" textColor="primary600">
+        <Flex gap={2} alignItems="center">
+          <Check width="16px" height="16px" />
+          {formatMessage({
+            id: getTrad('settings.form.aiMetadata.metadataGenerated'),
+            defaultMessage: 'Your metadata has been generated',
+          })}
+        </Flex>
+      </Typography>
+    );
+  }
+
+  return (
+    <Dialog.Root open={isConfirmDialogOpen} onOpenChange={onConfirmDialogChange}>
+      <Dialog.Trigger>
+        <MetadataButton variant="ghost">
+          {formatMessage({
+            id: getTrad('settings.form.aiMetadata.generateButton'),
+            defaultMessage: 'Generate metadata',
+          })}
+        </MetadataButton>
+      </Dialog.Trigger>
+      <ConfirmDialog
+        variant="success-light"
+        onConfirm={onGenerate}
+        title={
+          <Flex gap={2}>
+            <BetaStatus />
+            {formatMessage({
+              id: getTrad('settings.form.aiMetadata.confirmDialog.title'),
+              defaultMessage: 'Generate AI Metadata',
+            })}
+          </Flex>
+        }
+      >
+        {formatMessage(
+          {
+            id: getTrad('settings.form.aiMetadata.confirmDialog.message'),
+            defaultMessage:
+              'This will generate captions and alternative text for {count, plural, one {# image} other {# images}}. AI can make mistakes, be sure to review the generated content. ',
+          },
+          { count: metadataCount }
+        )}
+      </ConfirmDialog>
+    </Dialog.Root>
+  );
+};
+
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { put, post, get } = useFetchClient();
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
+  const [currentJobId, setCurrentJobId] = React.useState<string | null>(() => {
+    // Restore job ID from localStorage on mount
+    return localStorage.getItem('strapi-ai-metadata-job-id');
+  });
+  const [lastJobResult, setLastJobResult] = React.useState<{
+    successCount: number;
+    errorCount: number;
+  } | null>(null);
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
@@ -42,10 +184,6 @@ export const SettingsPage = () => {
     {
       enabled: isAIAvailable && !!data?.aiMetadata,
       retry: false,
-      onError(err) {
-        // Silently fail - this is just for UI enhancement
-        console.error('Failed to fetch metadata count:', err);
-      },
     }
   );
 
@@ -90,12 +228,11 @@ export const SettingsPage = () => {
     }
   );
 
-  const { mutateAsync: generateAIMetadata, isLoading: isGeneratingAI } = useMutation<
+  const { mutateAsync: startGenerateAIMetadata } = useMutation<
     {
-      processed: number;
-      total: number;
-      errors: Array<{ fileId: number; error: string }>;
-      message: string;
+      jobId: string;
+      status: string;
+      totalFiles: number;
     },
     { message: string },
     void
@@ -106,20 +243,61 @@ export const SettingsPage = () => {
     },
     {
       onSuccess(data) {
-        toggleNotification({
-          type: 'success',
-          message: data.message || 'AI metadata generated successfully',
-        });
-        refetchMetadataCount();
+        setCurrentJobId(data.jobId);
+        setLastJobResult(null); // Clear previous result when starting new job
+        localStorage.setItem('strapi-ai-metadata-job-id', data.jobId);
+        setIsConfirmDialogOpen(false);
       },
       onError(err) {
         toggleNotification({
           type: 'danger',
           message: err.message || formatMessage({ id: 'notification.error' }),
         });
+        setIsConfirmDialogOpen(false);
       },
     }
   );
+
+  // Poll for job status
+  const { data: jobStatus } = useAIMetadataJob(currentJobId);
+
+  // Handle job completion
+  React.useEffect(() => {
+    if (jobStatus?.status === 'completed') {
+      const hasErrors = jobStatus.errorCount > 0;
+      // Store the result for inline display
+      setLastJobResult({
+        successCount: jobStatus.successCount,
+        errorCount: jobStatus.errorCount,
+      });
+      toggleNotification({
+        type: hasErrors ? 'warning' : 'success',
+        message: hasErrors
+          ? `Processed ${jobStatus.successCount} images successfully, ${jobStatus.errorCount} failed`
+          : `Successfully processed ${jobStatus.successCount} images`,
+      });
+      refetchMetadataCount();
+      setIsConfirmDialogOpen(false);
+      setCurrentJobId(null);
+      localStorage.removeItem('strapi-ai-metadata-job-id');
+    } else if (jobStatus?.status === 'failed') {
+      setLastJobResult(null);
+      toggleNotification({
+        type: 'danger',
+        message: 'Failed to generate metadata',
+      });
+      setIsConfirmDialogOpen(false);
+      setCurrentJobId(null);
+      localStorage.removeItem('strapi-ai-metadata-job-id');
+    }
+  }, [
+    jobStatus?.status,
+    jobStatus?.successCount,
+    jobStatus?.errorCount,
+    jobStatus?.totalFiles,
+    refetchMetadataCount,
+    toggleNotification,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -143,7 +321,7 @@ export const SettingsPage = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingMetadataCount) {
     return <Page.Loading />;
   }
 
@@ -183,6 +361,7 @@ export const SettingsPage = () => {
         <Layouts.Content>
           <Layouts.Root>
             <Flex direction="column" alignItems="stretch" gap={4}>
+              {/* AI features section when ai is available */}
               {isAIAvailable && (
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Flex direction="column" alignItems="stretch" gap={1}>
@@ -237,37 +416,42 @@ export const SettingsPage = () => {
                         </Field.Root>
                       </Grid.Item>
                     </Grid.Root>
-                    <Flex paddingTop={4} direction="column" alignItems="start" gap={2}>
-                      <Button
-                        variant="secondary"
-                        startIcon={<Sparkle />}
-                        loading={isGeneratingAI}
-                        disabled={metadataCount === 0 || isLoadingMetadataCount}
-                        onClick={() => generateAIMetadata()}
-                      >
-                        {formatMessage({
-                          id: getTrad('settings.form.aiMetadata.generateButton'),
-                          defaultMessage: 'Generate metadata for existing images',
-                        })}
-                      </Button>
-                      {!isLoadingMetadataCount && (
-                        <Typography variant="pi" textColor="neutral600">
-                          {metadataCount === 0
-                            ? formatMessage({
-                                id: getTrad('settings.form.aiMetadata.noImagesWithoutMetadata'),
-                                defaultMessage: 'All images have metadata',
-                              })
-                            : formatMessage(
-                                {
-                                  id: getTrad('settings.form.aiMetadata.imagesWithoutMetadata'),
-                                  defaultMessage:
-                                    '{count, plural, one {# image} other {# images}} without metadata',
-                                },
-                                { count: metadataCount }
-                              )}
-                        </Typography>
-                      )}
-                    </Flex>
+                    {/* Retroactive metadata generation when aiMetadata is enabled */}
+                    {initialData?.aiMetadata && (
+                      <>
+                        <Divider marginTop={4} marginBottom={4} />
+                        <Flex justifyContent="space-between" alignItems="center" gap={2}>
+                          <Flex gap={2}>
+                            <BetaStatus size="XS" />
+                            <Typography variant="pi" textColor="neutral500">
+                              {metadataCount === 0
+                                ? formatMessage({
+                                    id: getTrad('settings.form.aiMetadata.allAssetsHaveMetadata'),
+                                    defaultMessage: 'All assets have caption and alt text',
+                                  })
+                                : formatMessage(
+                                    {
+                                      id: getTrad('settings.form.aiMetadata.imagesWithoutMetadata'),
+                                      defaultMessage:
+                                        '{count, plural, one {# image lacks captions or alternative text} other {# images lack captions or alternative text}}',
+                                    },
+                                    { count: metadataCount }
+                                  )}
+                            </Typography>
+                          </Flex>
+                          <MetadataAction
+                            currentJobId={currentJobId}
+                            lastJobResult={lastJobResult}
+                            metadataCount={metadataCount}
+                            isConfirmDialogOpen={isConfirmDialogOpen}
+                            onConfirmDialogChange={setIsConfirmDialogOpen}
+                            onGenerate={async () => {
+                              await startGenerateAIMetadata();
+                            }}
+                          />
+                        </Flex>
+                      </>
+                    )}
                   </Flex>
                 </Box>
               )}

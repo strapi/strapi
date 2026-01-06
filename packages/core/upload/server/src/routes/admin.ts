@@ -249,5 +249,13 @@ export const routes = {
         ],
       },
     },
+    {
+      method: 'GET',
+      path: '/actions/generate-ai-metadata/status/:jobId',
+      handler: 'admin-file.getAIMetadataJobStatus',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
   ],
 };

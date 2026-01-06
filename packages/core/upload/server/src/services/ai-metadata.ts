@@ -2,6 +2,7 @@ import type { Core } from '@strapi/types';
 import { z } from 'zod';
 import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
+import { getService } from '../utils';
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
@@ -149,6 +150,94 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
+     * Process existing files with job tracking for progress updates
+     */
+    async processExistingFilesWithJob(jobId: string, user: { id: string | number }): Promise<void> {
+      const jobService = getService('aiMetadataJobs');
+
+      try {
+        // Mark as processing
+        jobService.updateJob(jobId, { status: 'processing' });
+
+        // Query all images without metadata
+        const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
+          where: {
+            mime: {
+              $startsWith: 'image/',
+            },
+            $or: [
+              { alternativeText: { $null: true } },
+              { alternativeText: '' },
+              { caption: { $null: true } },
+              { caption: '' },
+            ],
+          },
+        });
+
+        if (files.length === 0) {
+          jobService.updateJob(jobId, {
+            status: 'completed',
+            completedAt: new Date(),
+          });
+          return;
+        }
+
+        const BATCH_SIZE = 20;
+        let successCount = 0;
+        let errorCount = 0;
+        const allErrors: Array<{ fileId: number; error: string }> = [];
+
+        // Process in batches
+        for (let i = 0; i < files.length; i += BATCH_SIZE) {
+          const batch = files.slice(i, i + BATCH_SIZE);
+
+          try {
+            // Process this batch
+            const metadataResults = await this.processFiles(batch);
+            const result = await this.updateFilesWithAIMetadata(batch, metadataResults, { user });
+
+            successCount += result.processed;
+            errorCount += result.errors.length;
+            allErrors.push(...result.errors);
+          } catch (batchError) {
+            // If batch fails, count all files in batch as errors
+            errorCount += batch.length;
+            batch.forEach((file) => {
+              allErrors.push({
+                fileId: file.id,
+                error: batchError instanceof Error ? batchError.message : 'Batch processing failed',
+              });
+            });
+          }
+
+          // Update progress after each batch
+          jobService.updateJob(jobId, {
+            processedFiles: Math.min(i + batch.length, files.length),
+            successCount,
+            errorCount,
+            errors: allErrors,
+          });
+        }
+
+        // Mark as completed
+        jobService.updateJob(jobId, {
+          status: 'completed',
+          completedAt: new Date(),
+        });
+      } catch (error) {
+        strapi.log.error('AI metadata job failed', {
+          jobId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+
+        jobService.updateJob(jobId, {
+          status: 'failed',
+          completedAt: new Date(),
+        });
+      }
+    },
+
+    /**
      * Processes provided files for AI metadata generation
      */
     async processFiles(files: File[]): Promise<Array<{ altText: string; caption: string } | null>> {
@@ -240,7 +329,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       const { results } = responseSchema.parse(await res.json());
-      strapi.log.http(`Media metadata generated successfully for ${results.length} files`);
+      strapi.log.http(`AI generated metadata successfully for ${results.length} files`);
 
       // Create sparse array with results at original indices
       // Example: files=[img1, pdf, img2] -> imageFiles=[{img1, index:0}, {img2, index:2}]
