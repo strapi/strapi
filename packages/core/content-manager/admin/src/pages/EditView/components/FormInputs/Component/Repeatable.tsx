@@ -432,6 +432,7 @@ const Component = ({
       index,
       item: {
         index,
+        id: __temp_key__,
         displayedValue: displayValue,
       },
       onStart() {

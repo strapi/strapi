@@ -594,11 +594,28 @@ const reducer = <TFormValues extends FormValues = FormValues>(
           position = 0;
         }
 
-        const [key] = generateNKeysBetween(
-          position > 0 ? currentField.at(position - 1)?.__temp_key__ : null,
-          currentField.at(position)?.__temp_key__,
-          1
-        );
+        // Collect all existing keys to ensure uniqueness.
+        // Keys may be out of order after drag-and-drop moves, so we can't rely
+        // on fractional indexing alone to avoid collisions.
+        const existingKeys = new Set(currentField.map((item) => item.__temp_key__).filter(Boolean));
+
+        // Generate a unique key, retrying if there's a collision
+        let key: string;
+        let attempts = 0;
+        do {
+          // Use null as lower bound to generate keys at the "end" of the keyspace
+          // This reduces collision likelihood with existing unsorted keys
+          [key] = generateNKeysBetween(
+            existingKeys.size > 0 ? Array.from(existingKeys).sort().pop() : null,
+            null,
+            1
+          );
+          // If collision, add the key to existing set to get next one
+          if (existingKeys.has(key)) {
+            existingKeys.add(key);
+          }
+          attempts++;
+        } while (existingKeys.has(key) && attempts < 100);
 
         draft.values = setIn(
           state.values,

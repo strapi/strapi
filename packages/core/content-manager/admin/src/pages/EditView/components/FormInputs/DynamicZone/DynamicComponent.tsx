@@ -87,12 +87,15 @@ const DynamicComponent = ({
     return { icon, displayName };
   }, [componentUid, dynamicComponentsByCategory]);
 
+  const tempKey = getIn(formValues, `${name}.${index}.__temp_key__`) as string | undefined;
+
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(!disabled, {
       type: `${ItemTypes.DYNAMIC_ZONE}_${name}`,
       index,
       item: {
         index,
+        id: tempKey,
         displayedValue: `${displayName} ${title}`,
         icon,
       },
