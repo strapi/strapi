@@ -11,11 +11,21 @@ import { getTrad } from '../../../utils';
 import type { Folder } from '../../../../../shared/contracts/folders';
 import type { CrumbDefinition } from '../../../components/Breadcrumbs/Breadcrumbs';
 
-interface HeaderProps {
+interface FolderDefinition extends Omit<Folder, 'children' | 'files' | 'parent'> {
+  children: {
+    count: number;
+  };
+  files: {
+    count: number;
+  };
+  parent?: FolderDefinition;
+}
+
+export interface HeaderProps {
   breadcrumbs?: Array<CrumbDefinition> | null;
   canCreate: boolean;
-  folder?: Folder | null;
-  onToggleEditFolderDialog: ({ created }?: { created?: boolean }) => void;
+  folder?: FolderDefinition | null;
+  onToggleEditFolderDialog: (args?: { created?: boolean }) => void;
   onToggleUploadAssetDialog: () => void;
 }
 
@@ -35,6 +45,10 @@ export const Header = ({
       folder?.parent && typeof folder.parent !== 'number' && folder.parent.id
         ? folder.parent.id
         : undefined,
+    folderPath:
+      folder?.parent && typeof folder.parent !== 'number' && folder.parent.path
+        ? folder.parent.path
+        : undefined,
   };
 
   return (
@@ -45,6 +59,7 @@ export const Header = ({
       })}
       subtitle={
         breadcrumbs &&
+        typeof breadcrumbs !== 'boolean' &&
         folder && (
           <Breadcrumbs
             label={formatMessage({
