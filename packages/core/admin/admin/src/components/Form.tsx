@@ -619,18 +619,10 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         const currentField = [...(getIn(state.values, field, []) as Array<any>)];
         const currentRow = currentField[fromIndex];
 
-        const startKey =
-          fromIndex > toIndex
-            ? currentField[toIndex - 1]?.__temp_key__
-            : currentField[toIndex]?.__temp_key__;
-        const endKey =
-          fromIndex > toIndex
-            ? currentField[toIndex]?.__temp_key__
-            : currentField[toIndex + 1]?.__temp_key__;
-        const [newKey] = generateNKeysBetween(startKey, endKey, 1);
-
+        // Preserve the original __temp_key__ to maintain stable identity during drag-and-drop.
+        // The array order determines display order, so fractional key ordering isn't needed.
         currentField.splice(fromIndex, 1);
-        currentField.splice(toIndex, 0, { ...currentRow, __temp_key__: newKey });
+        currentField.splice(toIndex, 0, currentRow);
 
         draft.values = setIn(state.values, field, currentField);
 
