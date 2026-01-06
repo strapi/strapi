@@ -369,6 +369,20 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         return subPopulate === true ? { ...acc, [key]: true } : acc;
       }
 
+      // Handle bracket notation like populate[image]=* which qs parses as { image: { '*': '' } }
+      if (isPlainObject(subPopulate)) {
+        const keys = Object.keys(subPopulate);
+        if (keys.length === 1 && keys[0] === '*') {
+          const val = subPopulate['*'];
+          if (val === '' || val === 'true' || val === true) {
+            return { ...acc, [key]: true };
+          }
+          if (val === 'false' || val === false) {
+            return acc;
+          }
+        }
+      }
+
       const attribute = attributes[key];
 
       if (!attribute) {
