@@ -1195,11 +1195,9 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       {isDragging ? (
         <RelationItemPlaceholder />
       ) : (
-        <Flex
-          paddingTop={2}
-          paddingBottom={2}
-          paddingLeft={canDrag ? 2 : 4}
-          paddingRight={4}
+        <RelationRow
+          paddingLeft={canDrag && isDesktop ? 2 : 4}
+          paddingRight={2}
           hasRadius
           borderColor="neutral200"
           background={disabled ? 'neutral150' : 'neutral0'}
@@ -1246,7 +1244,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
               <Cross />
             </IconButton>
           </Box>
-        </Flex>
+        </RelationRow>
       )}
     </Box>
   );
@@ -1259,6 +1257,16 @@ const FlexWrapper = styled<FlexComponent>(Flex)`
 
   & > div[role='button'] {
     cursor: all-scroll;
+  }
+`;
+
+const RelationRow = styled<FlexComponent>(Flex)`
+  padding-top: calc(${({ theme }) => theme.spaces[1]} - 1px); // minus the border width
+  padding-bottom: calc(${({ theme }) => theme.spaces[1]} - 1px); // minus the border width
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding-top: ${({ theme }) => theme.spaces[2]};
+    padding-bottom: ${({ theme }) => theme.spaces[2]};
   }
 `;
 
