@@ -87,9 +87,9 @@ async function authenticate() {
     console.error('\nAuthentication failed!');
     console.error('Make sure you have:');
     console.error('  1. Started the Strapi server (yarn develop)');
-    console.error('  2. Created an admin user with these credentials:');
+    console.error('  2. Created an admin user with the expected credentials:');
     console.error(`     Email: ${ADMIN_EMAIL}`);
-    console.error(`     Password: ${ADMIN_PASSWORD}`);
+    console.error('     Password: (hidden; set via ADMIN_PASSWORD environment variable)');
     console.error('\nOr set ADMIN_EMAIL and ADMIN_PASSWORD environment variables.\n');
     throw error;
   }
