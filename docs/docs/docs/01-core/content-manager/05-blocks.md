@@ -11,7 +11,7 @@ The blocks editor is a modern text editor based on the [Slate.js library](https:
 
 ### Why JSON
 
-While the markdown editor stores content as a string, Blocks stores it as a JSON object. This is Strapi is headless, so we want a format that makes it easy to map on the content we want to offer a good experience for non-web use cases too.In the case of React frontends, JSON also means we don't need to rely on `dangerouslySetInnerHTML` to render the formatted content.
+While the markdown editor stores content as a string, Blocks stores it as a JSON object. Since Strapi is headless, we want a format that makes it easy to map content across different platforms and offer a good experience for non-web use cases too. In the case of React frontends, JSON also means we don't need to rely on `dangerouslySetInnerHTML` to render the formatted content.
 
 ### Slate-based schema
 
@@ -19,14 +19,14 @@ The blocks editor schema is based on Slate.js, which allows us to design our own
 
 Our Blocks schema is made of the following elements:
 
-- Block nodes: they're at the root of the document JSON: Paragraphs, images, headings, or headings...
+- Block nodes: they're at the root of the document JSON: Paragraphs, images, headings, lists, code blocks...
 - Inline nodes: they're children of block nodes, and can have children. Inline nodes include text nodes, links, and images.
 - Text leaves: they're children of inline nodes, and contain the actual text content. One specificity of our design compared to most Slate implementations is that they must have a `"type": "text"` entry in addition to the standard `text` property.
 - Modifiers: they're variations of text nodes that can be applied to text content. They include bold, italic, underline, and strikethrough. They can be combined.
 
 With these elements combined, here's what the content for a sample Blocks attribute looks like:
 
-```JSON
+```json
 [
   {
     "type":"heading",
@@ -139,11 +139,11 @@ As shown in the diagram, the Blocks input is split into several components:
 - `BlocksInput` is the input ready to be used in the content manager edit view. Besides the editor, it is responsible for rendering the label, label actions (like the i18n icon), as well as error and hint messages.
 - `BlocksEditor` is the root of the Slate editor. It provides the context for all the stateful parts of the editor.
 - `BlocksToolbar` is the toolbar that appears above the editor. It provides buttons for formatting the text, as well as a button to insert a new block.
-- `BlocksContent` is the WYSIWYG editor that allows users write and view their formatted content.
+- `BlocksContent` is the WYSIWYG editor that allows users to write and view their formatted content.
 
 ## Blocks and modifiers management
 
-A key goal of the blocks implementation is that it should be driven by a declarative list of blocks and modifiers. Each block and each modifier should manage its own rendering, logic and behavior. The editor itself (whether it's the toolbar or the content) should not contain any logic targetting specific blocks or modifiers. It should remain agnostic.
+A key goal of the blocks implementation is that it should be driven by a declarative list of blocks and modifiers. Each block and each modifier should manage its own rendering, logic and behavior. The editor itself (whether it's the toolbar or the content) should not contain any logic targeting specific blocks or modifiers. It should remain agnostic.
 
 This has several upsides. The logic for each block or modifier is self-contained within its own file, making it easier to grasp and edit. It keeps the editor's code lean and avoids spaghetti implementations. It lets us manage blocks from several entry points: the toolbar's dropdown, a Notion-style `/` to open a blocks popover...
 
@@ -161,7 +161,7 @@ A block is registered in the editor as an object of always the same shape. For a
 | **isInBlocksSelector**<br />`boolean`                                        | Whether the block should appear in the blocks selector dropdown. In almost all cases, this is `true`. The main exception is list items, as they are hidden under their list parent.                                                                                                 |
 | **dragHandleTopMargin**<br />`CSSProperties['marginTop']`                    | Adjusts the vertical alignment of the grip icon used to reorder nodes.                                                                                                                                                                                                              |
 | **matchNode**<br />`(node: BlocksNode) => boolean`                           | Returns a boolean that indicates whether a node is of the given block type.                                                                                                                                                                                                         |
-| **handleConvert**<br />`(editor: Editor) => void`                            | Customizes the logic ran when transforming the currently selected node into the given node type. It generally involves setting the `type` property and clearing unwanted properties. The `baseHandleConvert` util manages just that.                                                |
+| **handleConvert**<br />`(editor: Editor) => void`                            | Customizes the logic run when transforming the currently selected node into the given node type. It generally involves setting the `type` property and clearing unwanted properties. The `baseHandleConvert` util manages just that.                                                |
 | **handleEnterKey**<br />`(editor: Editor) => void`                           | Customizes the logic ran when the user presses enter. By default, it creates a paragraph under the current node and selects it. For blocks that may have multi-line content, such as code blocks, a common pattern is to replicate this behavior when the user presses enter twice. |
 | **handleBackspaceKey**<br />`(editor: Editor, event: KeyboardEvent) => void` | Customizes the logic ran when the user presses backspace. Useful for blocks that need special behavior when deleting content at the start of a block.                                                                                                                               |
 | **handleTab**<br />`(editor: Editor) => void`                                | Customizes the logic ran when the user presses tab. Useful for blocks like lists that support indentation.                                                                                                                                                                          |
