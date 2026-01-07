@@ -32,7 +32,13 @@ If you make contributions to our repositories on behalf of your company, we will
 
 ## Documentation
 
+### Userland Documentation
+
 Pull requests related to fixing documentation for the latest release should be directed towards the [documentation repository](https://github.com/strapi/documentation). Please follow the [documentation contributing guide](https://github.com/strapi/documentation/blob/main/CONTRIBUTING.md) for more information.
+
+### Contributor Documentation
+
+You can access the contributor documentation from (`./docs`) online at [contributor.strapi.io](https://contributor.strapi.io/).
 
 ## Bugs
 

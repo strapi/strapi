@@ -1,8 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
-import { waitForRestart } from '../../utils/restart';
-import { resetFiles } from '../../utils/file-reset';
-import { sharedSetup } from '../../utils/setup';
+import {
+  clickAndWait,
+  describeOnCondition,
+  findAndClose,
+  navToHeader,
+} from '../../../utils/shared';
+import { waitForRestart } from '../../../utils/restart';
+import { resetFiles } from '../../../utils/file-reset';
+import { sharedSetup } from '../../../utils/setup';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 

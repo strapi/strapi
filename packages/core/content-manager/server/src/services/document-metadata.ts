@@ -6,7 +6,7 @@ import type { Core, UID, Modules } from '@strapi/types';
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 import { getPopulateForValidation } from './utils/populate';
 
-const { getScalarAttributes } = contentTypes;
+const { getScalarAttributes, getMediaAttributes } = contentTypes;
 
 export interface DocumentVersion {
   id: string | number;
@@ -218,8 +218,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // i18n is disabled
     const { populate = {}, fields = [] } = getPopulateForValidation(uid);
 
-    // Include non-translatable scalar fields in availableLocales for i18n prefilling
+    // Include non-translatable scalar and media fields in availableLocales for i18n prefilling
     let nonLocalizedFields: string[] = [];
+    let nonLocalizedMediaFields: string[] = [];
     try {
       const i18nPlugin = strapi.plugin('i18n');
       if (i18nPlugin) {
@@ -228,11 +229,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           const model = strapi.getModel(uid);
           if (model?.attributes) {
             const allNonLocalized = i18nService.getNonLocalizedAttributes(model);
-            // Get only scalar attributes (components, relations, etc. can't be in fields array)
+            // Get scalar and media attributes separately
             const scalarAttrs = getScalarAttributes(model);
-            // Only include scalar, non-localized fields that actually exist in the model
+            const mediaAttrs = getMediaAttributes(model);
+
+            // Separate scalar fields (can be in fields array) from media fields (need to be populated)
             nonLocalizedFields = allNonLocalized.filter(
               (field: string) => field in model.attributes && scalarAttrs.includes(field)
+            );
+            nonLocalizedMediaFields = allNonLocalized.filter(
+              (field: string) => field in model.attributes && mediaAttrs.includes(field)
             );
           }
         }
@@ -241,9 +247,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       // i18n plugin might not be enabled or might error, ignore silently
     }
 
+    // Build populate object for non-localized media fields
+    const mediaPopulate = nonLocalizedMediaFields.reduce(
+      (acc, field) => {
+        acc[field] = {
+          populate: {
+            folder: true,
+          },
+        };
+        return acc;
+      },
+      {} as Record<string, { populate: { folder: boolean } }>
+    );
+
     const params = {
       populate: {
         ...populate,
+        ...mediaPopulate,
         // NOTE: creator fields are selected in this way to avoid exposing sensitive data
         createdBy: {
           select: ['id', 'firstname', 'lastname', 'email'],

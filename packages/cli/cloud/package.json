@@ -1,6 +1,6 @@
 {
   "name": "@strapi/cloud-cli",
-  "version": "5.31.2",
+  "version": "5.33.1",
   "description": "Commands to interact with the Strapi Cloud",
   "keywords": [
     "strapi",
@@ -47,7 +47,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.31.2",
+    "@strapi/utils": "5.33.1",
     "axios": "1.12.2",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -72,8 +72,8 @@
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
     "@types/lodash": "^4.14.191",
-    "eslint-config-custom": "5.31.2",
-    "tsconfig": "5.31.2"
+    "eslint-config-custom": "5.33.1",
+    "tsconfig": "5.33.1"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
