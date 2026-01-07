@@ -15,6 +15,7 @@
  *   ADMIN_EMAIL - Admin email (default: admin@strapi.io)
  *   ADMIN_PASSWORD - Admin password (default: Admin123!)
  *   ITERATIONS - Number of iterations per test (default: 5)
+ *   CONTENT_TYPE_UID - Content type to benchmark (default: api::benchmark-page.benchmark-page)
  */
 
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
@@ -22,7 +23,7 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@strapi.io';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin123!';
 const ITERATIONS = parseInt(process.env.ITERATIONS || '5', 10);
 
-const CONTENT_TYPE_UID = 'api::benchmark-page.benchmark-page';
+const CONTENT_TYPE_UID = process.env.CONTENT_TYPE_UID || 'api::benchmark-page.benchmark-page';
 
 // ============================================================================
 // Utility Functions
@@ -107,7 +108,7 @@ async function getFirstDocumentId(token) {
   );
 
   if (!data.results || data.results.length === 0) {
-    throw new Error('No benchmark-page entries found. Did the bootstrap create data?');
+    throw new Error(`No entries found for ${CONTENT_TYPE_UID}. Does the content type have data?`);
   }
 
   return data.results[0].documentId;
@@ -146,6 +147,7 @@ async function main() {
 
   console.log('\nConfiguration:');
   console.log(`  Server URL: ${STRAPI_URL}`);
+  console.log(`  Content Type: ${CONTENT_TYPE_UID}`);
   console.log(`  Iterations: ${ITERATIONS}`);
   console.log(
     `  STRAPI_CONTENT_MANAGER_MAX_POPULATE_DEPTH: ${process.env.STRAPI_CONTENT_MANAGER_MAX_POPULATE_DEPTH || 'unlimited (Infinity)'}`
