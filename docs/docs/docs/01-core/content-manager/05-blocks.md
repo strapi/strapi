@@ -20,7 +20,7 @@ The blocks editor schema is based on Slate.js, which allows us to design our own
 Our Blocks schema is made of the following elements:
 
 - Block nodes: they're at the root of the document JSON: Paragraphs, images, headings, lists, code blocks...
-- Inline nodes: they're children of block nodes, and can have children. Inline nodes include text nodes, links, and images.
+- Inline nodes: they're children of block nodes, and can have children. Inline nodes include text nodes, and links.
 - Text leaves: they're children of inline nodes, and contain the actual text content. One specificity of our design compared to most Slate implementations is that they must have a `"type": "text"` entry in addition to the standard `text` property.
 - Modifiers: they're variations of text nodes that can be applied to text content. They include bold, italic, underline, and strikethrough. They can be combined.
 
