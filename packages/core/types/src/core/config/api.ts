@@ -1,5 +1,5 @@
 export interface ResponsesProp {
-  privateAttributes: string[];
+  privateAttributes?: string[];
 }
 
 export interface RestProp {
@@ -12,5 +12,5 @@ export interface RestProp {
 
 export interface Api {
   responses?: ResponsesProp;
-  rest: RestProp;
+  rest?: RestProp;
 }

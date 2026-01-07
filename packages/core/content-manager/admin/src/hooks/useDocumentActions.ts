@@ -193,7 +193,6 @@ type IUseDocumentActs = ReturnType<UseDocumentActions>;
  * return <Form method="PUT" onSubmit={handleSubmit} />
  * ```
  *
- * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document-operations} for more information
  */
 const useDocumentActions: UseDocumentActions = () => {
   const { toggleNotification } = useNotification();

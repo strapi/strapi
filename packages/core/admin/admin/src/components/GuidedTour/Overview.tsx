@@ -171,7 +171,12 @@ export const GuidedTourHomepageOverview = () => {
     }
   };
 
-  if (!guidedTourMeta?.data.isFirstSuperAdminUser || !enabled || hidden) {
+  if (
+    !guidedTourMeta?.data?.isFirstSuperAdminUser ||
+    !enabled ||
+    hidden ||
+    process.env.NODE_ENV !== 'development'
+  ) {
     return null;
   }
 
