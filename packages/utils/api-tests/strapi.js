@@ -20,6 +20,7 @@ const createStrapiInstance = async ({
   logLevel = 'error',
   bypassAuth = true,
   bootstrap,
+  strapiOptions = {},
 } = {}) => {
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
@@ -29,6 +30,8 @@ const createStrapiInstance = async ({
   const options = {
     appDir: baseDir,
     distDir: baseDir,
+    autoReload: true,
+    ...strapiOptions,
   };
   const instance = strapi(options);
 

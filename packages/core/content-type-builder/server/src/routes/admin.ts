@@ -1,3 +1,5 @@
+import { middlewares } from '../middlewares';
+
 export default {
   type: 'admin',
   routes: [
@@ -45,6 +47,7 @@ export default {
       path: '/content-types',
       handler: 'content-types.createContentType',
       config: {
+        middlewares: [middlewares.isDevelopmentMode],
         policies: [
           {
             name: 'admin::hasPermissions',
@@ -58,6 +61,7 @@ export default {
       path: '/content-types/:uid',
       handler: 'content-types.updateContentType',
       config: {
+        middlewares: [middlewares.isDevelopmentMode],
         policies: [
           {
             name: 'admin::hasPermissions',
@@ -71,6 +75,7 @@ export default {
       path: '/content-types/:uid',
       handler: 'content-types.deleteContentType',
       config: {
+        middlewares: [middlewares.isDevelopmentMode],
         policies: [
           {
             name: 'admin::hasPermissions',
@@ -110,6 +115,7 @@ export default {
       path: '/components',
       handler: 'components.createComponent',
       config: {
+        middlewares: [middlewares.isDevelopmentMode],
         policies: [
           {
             name: 'admin::hasPermissions',
@@ -123,6 +129,7 @@ export default {
       path: '/components/:uid',
       handler: 'components.updateComponent',
       config: {
+        middlewares: [middlewares.isDevelopmentMode],
         policies: [
           {
             name: 'admin::hasPermissions',
@@ -136,6 +143,7 @@ export default {
       path: '/components/:uid',
       handler: 'components.deleteComponent',
       config: {
+        middlewares: [middlewares.isDevelopmentMode],
         policies: [
           {
             name: 'admin::hasPermissions',
@@ -149,6 +157,7 @@ export default {
       path: '/component-categories/:name',
       handler: 'component-categories.editCategory',
       config: {
+        middlewares: [middlewares.isDevelopmentMode],
         policies: [
           {
             name: 'admin::hasPermissions',
@@ -162,6 +171,7 @@ export default {
       path: '/component-categories/:name',
       handler: 'component-categories.deleteCategory',
       config: {
+        middlewares: [middlewares.isDevelopmentMode],
         policies: [
           {
             name: 'admin::hasPermissions',
