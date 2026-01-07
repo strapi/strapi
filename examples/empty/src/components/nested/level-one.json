@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_nested_level_ones",
+  "info": {
+    "displayName": "Level One",
+    "description": "First level of nested benchmark components"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "nested.level-two"
+    }
+  }
+}

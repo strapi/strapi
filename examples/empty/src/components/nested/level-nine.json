@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_nested_level_nines",
+  "info": {
+    "displayName": "Level Nine",
+    "description": "Ninth (leaf) level of nested benchmark components"
+  },
+  "options": {},
+  "attributes": {
+    "description": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

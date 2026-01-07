@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_nested_level_sixes",
+  "info": {
+    "displayName": "Level Six",
+    "description": "Sixth level of nested benchmark components"
+  },
+  "options": {},
+  "attributes": {
+    "content": {
+      "type": "string",
+      "required": true
+    },
+    "parts": {
+      "type": "component",
+      "repeatable": true,
+      "component": "nested.level-seven"
+    }
+  }
+}

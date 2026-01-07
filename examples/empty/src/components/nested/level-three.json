@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_nested_level_threes",
+  "info": {
+    "displayName": "Level Three",
+    "description": "Third level of nested benchmark components"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "nodes": {
+      "type": "component",
+      "repeatable": true,
+      "component": "nested.level-four"
+    }
+  }
+}
