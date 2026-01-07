@@ -47,7 +47,7 @@ const getModelConfigurations = async (keys: string[]) => {
       const value = typeof result.value === 'string' ? JSON.parse(result.value) : result.value;
       configMap[originalKey] = _.merge({}, EMPTY_CONFIG, value);
     } catch {
-      // Skip malformed JSON entries - will fall back to EMPTY_CONFIG in the loop below
+      strapi.log.warn(`Malformed JSON in core-store key "${result.key}", using default config`);
     }
   }
 
@@ -95,10 +95,11 @@ const findByKey = async (key: any) => {
   });
 
   return results
-    .map(({ value }) => {
+    .map(({ key, value }) => {
       try {
         return JSON.parse(value);
       } catch {
+        strapi.log.warn(`Malformed JSON in core-store key "${key}", skipping entry`);
         return null;
       }
     })

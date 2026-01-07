@@ -3,6 +3,23 @@ import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
 import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
+/**
+ * Execute promises in parallel but throw errors in array index order.
+ */
+const parallelWithOrderedErrors = async <T>(promises: Promise<T>[]): Promise<T[]> => {
+  const results = await Promise.allSettled(promises);
+
+  // Throw first error in array index order (matches sequential behavior)
+  for (let i = 0; i < results.length; i += 1) {
+    const result = results[i];
+    if (result.status === 'rejected') {
+      throw result.reason;
+    }
+  }
+
+  return results.map((r) => (r as PromiseFulfilledResult<T>).value);
+};
+
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
 
 export interface VisitorOptions {
@@ -136,8 +153,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
         : traverseRelationTarget(getModel(attribute.target!));
 
       if (isArray(value)) {
-        // Process array items in parallel for better performance with large arrays
-        copy[key] = await Promise.all(
+        // Process array items in parallel with ordered error handling
+        copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
@@ -159,8 +176,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       parent = { schema, key, attribute, path: newPath };
 
       if (isArray(value)) {
-        // Process media array items in parallel for better performance
-        copy[key] = await Promise.all(
+        // Process media array items in parallel with ordered error handling
+        copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
@@ -183,8 +200,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       const targetSchema = getModel(attribute.component);
 
       if (isArray(value)) {
-        // Process component array items in parallel for better performance
-        copy[key] = await Promise.all(
+        // Process component array items in parallel with ordered error handling
+        copy[key] = await parallelWithOrderedErrors(
           value.map((item, i) => {
             const arrayPath = {
               ...newPath,
@@ -205,8 +222,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     if (attribute.type === 'dynamiczone' && isArray(value)) {
       parent = { schema, key, attribute, path: newPath };
 
-      // Process dynamic zone items in parallel for better performance
-      copy[key] = await Promise.all(
+      // Process dynamic zone items in parallel with ordered error handling
+      copy[key] = await parallelWithOrderedErrors(
         value.map((item, i) => {
           const arrayPath = {
             ...newPath,
