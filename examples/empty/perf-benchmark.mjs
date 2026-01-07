@@ -217,6 +217,9 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error('\nBenchmark failed:', error.message);
+  console.error(
+    '\nBenchmark failed. Please check the Strapi server logs or rerun with additional debugging enabled.'
+  );
+
   process.exit(1);
 });
