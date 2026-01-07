@@ -89,7 +89,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
     "prismjs": "1.30.0",
-    "qs": "6.11.1",
+    "qs": "6.14.1",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
     "react-helmet": "^6.1.0",
