@@ -78,7 +78,7 @@
     "lodash": "4.17.21",
     "mime-types": "2.1.35",
     "prop-types": "^15.8.1",
-    "qs": "6.11.1",
+    "qs": "6.14.1",
     "react-dnd": "16.0.1",
     "react-intl": "6.6.2",
     "react-query": "3.39.3",

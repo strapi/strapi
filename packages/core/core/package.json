@@ -101,7 +101,7 @@
     "ora": "5.4.1",
     "package-json": "7.0.0",
     "pkg-up": "3.1.0",
-    "qs": "6.11.1",
+    "qs": "6.14.1",
     "resolve.exports": "2.0.2",
     "semver": "7.5.4",
     "statuses": "2.0.1",
