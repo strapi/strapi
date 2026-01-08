@@ -29,94 +29,94 @@ With these elements combined, here's what the content for a sample Blocks attrib
 ```json
 [
   {
-    "type":"heading",
-    "children":[
+    "type": "heading",
+    "children": [
       {
-        "type":"text",
-        "text":"I am a heading"
+        "type": "text",
+        "text": "I am a heading"
       }
     ],
-    "level":1
+    "level": 1
   },
   {
-    "type":"paragraph",
-    "children":[
+    "type": "paragraph",
+    "children": [
       {
-        "type":"text",
-        "text":"Nice content here. Isn't it? Some of it can be "
+        "type": "text",
+        "text": "Nice content here. Isn't it? Some of it can be "
       },
       {
-        "type":"text",
-        "text":"bold",
-        "bold":true
+        "type": "text",
+        "text": "bold",
+        "bold": true
       },
       {
-        "type":"text",
-        "text":", "
+        "type": "text",
+        "text": ", "
       },
       {
-        "type":"text",
-        "text":"italic",
-        "italic":true
+        "type": "text",
+        "text": "italic",
+        "italic": true
       },
       {
-        "type":"text",
-        "text":", or "
+        "type": "text",
+        "text": ", or "
       },
       {
-        "type":"text",
-        "text":"both",
-        "bold":true,
-        "italic":true
+        "type": "text",
+        "text": "both",
+        "bold": true,
+        "italic": true
       },
       {
-        "type":"text",
-        "text":"."
+        "type": "text",
+        "text": "."
       }
     ]
   },
   {
-    "type":"list",
-    "format":"unordered",
-    "children":[
+    "type": "list",
+    "format": "unordered",
+    "children": [
       {
-        "type":"list-item",
-        "children":[
+        "type": "list-item",
+        "children": [
           {
-            "type":"text",
-            "text":"first list item"
+            "type": "text",
+            "text": "first list item"
           }
         ]
       },
       {
-        "type":"list-item",
-        "children":[
+        "type": "list-item",
+        "children": [
           {
-            "type":"text",
-            "text":"sub list"
+            "type": "text",
+            "text": "sub list"
           }
         ]
       },
       {
-        "type":"list",
-        "format":"unordered",
-        "indentLevel":1,
-        "children":[
+        "type": "list",
+        "format": "unordered",
+        "indentLevel": 1,
+        "children": [
           {
-            "type":"list-item",
-            "children":[
+            "type": "list-item",
+            "children": [
               {
-                "type":"text",
-                "text":"sub 1"
+                "type": "text",
+                "text": "sub 1"
               }
             ]
           },
           {
-            "type":"list-item",
-            "children":[
+            "type": "list-item",
+            "children": [
               {
-                "type":"text",
-                "text":"sub 2"
+                "type": "text",
+                "text": "sub 2"
               }
             ]
           }
