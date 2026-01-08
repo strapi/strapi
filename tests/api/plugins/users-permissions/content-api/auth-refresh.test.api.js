@@ -16,6 +16,53 @@ const internals = {
   },
 };
 
+const parseCookies = (res) => {
+  const setCookie = res.headers['set-cookie'];
+  return Array.isArray(setCookie) ? setCookie.join('\n') : String(setCookie || '');
+};
+
+const expectHttpOnlyCookie = (res) => {
+  const cookies = parseCookies(res);
+  expect(cookies).toMatch(/strapi_up_refresh=/);
+  expect(cookies.toLowerCase()).toMatch(/httponly/);
+};
+
+const expectNoCookie = (res) => {
+  const cookies = parseCookies(res);
+  expect(cookies).not.toMatch(/strapi_up_refresh=/);
+};
+
+const loginUser = async (userInfo = internals.user, headers = {}) => {
+  const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
+  return rqAuth({
+    method: 'POST',
+    url: '/local',
+    headers,
+    body: { identifier: userInfo.email, password: userInfo.password },
+  });
+};
+
+const enableAuthRoute = async (s, routeName, roleType = 'public') => {
+  const role = await s.db
+    .query('plugin::users-permissions.role')
+    .findOne({ where: { type: roleType } });
+  const roleService = s.service('plugin::users-permissions.role');
+  const roleDetails = await roleService.findOne(role.id);
+
+  roleDetails.permissions['plugin::users-permissions'] = roleDetails.permissions[
+    'plugin::users-permissions'
+  ] || { controllers: {} };
+  const controllers = roleDetails.permissions['plugin::users-permissions'].controllers || {};
+  const authCtrl = controllers.auth || {};
+  authCtrl[routeName] = { enabled: true, policy: '' };
+  roleDetails.permissions['plugin::users-permissions'].controllers = {
+    ...controllers,
+    auth: authCtrl,
+  };
+
+  await roleService.updateRole(role.id, { permissions: roleDetails.permissions });
+};
+
 describe('Auth API (refresh mode httpOnly behaviour)', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({
@@ -35,40 +82,21 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
   });
 
   test('Default (httpOnly=false): returns jwt and refreshToken in JSON, no cookie set', async () => {
-    const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
-
-    const res = await rqAuth({
-      method: 'POST',
-      url: '/local',
-      body: { identifier: internals.user.email, password: internals.user.password },
-    });
+    const res = await loginUser();
 
     expect(res.statusCode).toBe(200);
     expect(res.body.jwt).toEqual(expect.any(String));
     expect(res.body.refreshToken).toEqual(expect.any(String));
-    const setCookie = res.headers['set-cookie'];
-    expect(Array.isArray(setCookie) ? setCookie.join('\n') : String(setCookie || '')).not.toMatch(
-      /strapi_up_refresh=/
-    );
+    expectNoCookie(res);
   });
 
   test('Per-request opt-in header sets cookie and omits refreshToken', async () => {
-    const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
-
-    const res = await rqAuth({
-      method: 'POST',
-      url: '/local',
-      headers: { 'x-strapi-refresh-cookie': 'httpOnly' },
-      body: { identifier: internals.user.email, password: internals.user.password },
-    });
+    const res = await loginUser(internals.user, { 'x-strapi-refresh-cookie': 'httpOnly' });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.jwt).toEqual(expect.any(String));
     expect(res.body.refreshToken).toBeUndefined();
-    const setCookie = res.headers['set-cookie'];
-    const cookies = Array.isArray(setCookie) ? setCookie.join('\n') : String(setCookie || '');
-    expect(cookies).toMatch(/strapi_up_refresh=/);
-    expect(cookies.toLowerCase()).toMatch(/httponly/);
+    expectHttpOnlyCookie(res);
   });
 
   test('Config httpOnly=true: always sets cookie and omits refreshToken', async () => {
@@ -81,24 +109,15 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       },
     });
 
-    const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
-
     // Ensure user exists in this new instance
     await createAuthenticatedUser({ strapi, userInfo: internals.user });
 
-    const res = await rqAuth({
-      method: 'POST',
-      url: '/local',
-      body: { identifier: internals.user.email, password: internals.user.password },
-    });
+    const res = await loginUser();
 
     expect(res.statusCode).toBe(200);
     expect(res.body.jwt).toEqual(expect.any(String));
     expect(res.body.refreshToken).toBeUndefined();
-    const setCookie = res.headers['set-cookie'];
-    const cookies = Array.isArray(setCookie) ? setCookie.join('\n') : String(setCookie || '');
-    expect(cookies).toMatch(/strapi_up_refresh=/);
-    expect(cookies.toLowerCase()).toMatch(/httponly/);
+    expectHttpOnlyCookie(res);
   });
 
   describe('Change Password (refresh mode responses)', () => {
@@ -130,8 +149,6 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
     });
 
     test('Returns jwt and refreshToken after successful password change', async () => {
-      const rqAuthLogin = createRequest({ strapi }).setURLPrefix('/api/auth');
-
       // Create an isolated user for this test to avoid impacting other tests
       const isolatedUser = {
         username: 'test-refresh-change',
@@ -143,11 +160,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       await createAuthenticatedUser({ strapi, userInfo: isolatedUser });
 
       // Login to obtain a valid jwt to perform change-password
-      const loginRes = await rqAuthLogin({
-        method: 'POST',
-        url: '/local',
-        body: { identifier: isolatedUser.email, password: isolatedUser.password },
-      });
+      const loginRes = await loginUser(isolatedUser);
 
       expect(loginRes.statusCode).toBe(200);
       const jwt = loginRes.body.jwt;
@@ -170,21 +183,12 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(res.body.refreshToken).toEqual(expect.any(String));
 
       // Can login with the new password afterwards
-      const relogin = await rqAuthLogin({
-        method: 'POST',
-        url: '/local',
-        body: { identifier: isolatedUser.email, password: newPassword },
-      });
+      const relogin = await loginUser({ ...isolatedUser, password: newPassword });
       expect(relogin.statusCode).toBe(200);
     });
 
     test('Fails on invalid confirm password', async () => {
-      const rqAuthLogin = createRequest({ strapi }).setURLPrefix('/api/auth');
-      const loginRes = await rqAuthLogin({
-        method: 'POST',
-        url: '/local',
-        body: { identifier: internals.user.email, password: internals.user.password },
-      });
+      const loginRes = await loginUser();
       const jwt = loginRes.body.jwt;
 
       const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth').setToken(jwt);
@@ -203,12 +207,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
     });
 
     test('Fails on invalid current password', async () => {
-      const rqAuthLogin = createRequest({ strapi }).setURLPrefix('/api/auth');
-      const loginRes = await rqAuthLogin({
-        method: 'POST',
-        url: '/local',
-        body: { identifier: internals.user.email, password: internals.user.password },
-      });
+      const loginRes = await loginUser();
       const jwt = loginRes.body.jwt;
 
       const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth').setToken(jwt);
@@ -227,12 +226,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
     });
 
     test('Fails when current and new password are the same', async () => {
-      const rqAuthLogin = createRequest({ strapi }).setURLPrefix('/api/auth');
-      const loginRes = await rqAuthLogin({
-        method: 'POST',
-        url: '/local',
-        body: { identifier: internals.user.email, password: internals.user.password },
-      });
+      const loginRes = await loginUser();
       const jwt = loginRes.body.jwt;
 
       const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth').setToken(jwt);
@@ -263,25 +257,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
           s.config.set('plugin::users-permissions.sessions.httpOnly', false);
           s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
 
-          // Enable public permission for refresh route
-          const publicRole = await s.db
-            .query('plugin::users-permissions.role')
-            .findOne({ where: { type: 'public' } });
-          const roleService = s.service('plugin::users-permissions.role');
-          const publicRoleDetails = await roleService.findOne(publicRole.id);
-          publicRoleDetails.permissions['plugin::users-permissions'] = publicRoleDetails
-            .permissions['plugin::users-permissions'] || { controllers: {} };
-          const controllers =
-            publicRoleDetails.permissions['plugin::users-permissions'].controllers || {};
-          const authCtrl = controllers.auth || {};
-          authCtrl.refresh = { enabled: true, policy: '' };
-          publicRoleDetails.permissions['plugin::users-permissions'].controllers = {
-            ...controllers,
-            auth: authCtrl,
-          };
-          await roleService.updateRole(publicRole.id, {
-            permissions: publicRoleDetails.permissions,
-          });
+          await enableAuthRoute(s, 'refresh', 'public');
         },
       });
       await createAuthenticatedUser({ strapi, userInfo: internals.user });
@@ -310,11 +286,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
 
       // Login to get a refresh token (default httpOnly=false)
-      const loginRes = await rqAuth({
-        method: 'POST',
-        url: '/local',
-        body: { identifier: internals.user.email, password: internals.user.password },
-      });
+      const loginRes = await loginUser();
       expect(loginRes.statusCode).toBe(200);
       const initialRefresh = loginRes.body.refreshToken;
       expect(initialRefresh).toEqual(expect.any(String));
@@ -334,11 +306,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
 
       // Login to get a refresh token first
-      const loginRes = await rqAuth({
-        method: 'POST',
-        url: '/local',
-        body: { identifier: internals.user.email, password: internals.user.password },
-      });
+      const loginRes = await loginUser();
       const initialRefresh = loginRes.body.refreshToken;
 
       const res = await rqAuth({
@@ -351,21 +319,13 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.jwt).toEqual(expect.any(String));
       expect(res.body.refreshToken).toBeUndefined();
-      const setCookie = res.headers['set-cookie'];
-      const cookies = Array.isArray(setCookie) ? setCookie.join('\n') : String(setCookie || '');
-      expect(cookies).toMatch(/strapi_up_refresh=/);
-      expect(cookies.toLowerCase()).toMatch(/httponly/);
+      expectHttpOnlyCookie(res);
     });
 
     test('Cookie-based refresh works when httpOnly is configured', async () => {
       const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
 
-      const loginRes = await rqAuth({
-        method: 'POST',
-        url: '/local',
-        headers: { 'x-strapi-refresh-cookie': 'httpOnly' },
-        body: { identifier: internals.user.email, password: internals.user.password },
-      });
+      const loginRes = await loginUser(internals.user, { 'x-strapi-refresh-cookie': 'httpOnly' });
       const setCookie = loginRes.headers['set-cookie'];
       const cookieHeader = Array.isArray(setCookie) ? setCookie : [setCookie];
 
@@ -381,12 +341,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.jwt).toEqual(expect.any(String));
       expect(res.body.refreshToken).toBeUndefined();
-      const newSetCookie = res.headers['set-cookie'];
-      const newCookies = Array.isArray(newSetCookie)
-        ? newSetCookie.join('\n')
-        : String(newSetCookie || '');
-      expect(newCookies).toMatch(/strapi_up_refresh=/);
-      expect(newCookies.toLowerCase()).toMatch(/httponly/);
+      expectHttpOnlyCookie(res);
     });
   });
 
@@ -402,44 +357,8 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
           s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
 
           // Enable authenticated permission for logout and public for refresh (used later)
-          const roleService = s.service('plugin::users-permissions.role');
-          const publicRole = await s.db
-            .query('plugin::users-permissions.role')
-            .findOne({ where: { type: 'public' } });
-          const authenticatedRole = await s.db
-            .query('plugin::users-permissions.role')
-            .findOne({ where: { type: 'authenticated' } });
-
-          const publicRoleDetails = await roleService.findOne(publicRole.id);
-          publicRoleDetails.permissions['plugin::users-permissions'] = publicRoleDetails
-            .permissions['plugin::users-permissions'] || { controllers: {} };
-          const pubControllers =
-            publicRoleDetails.permissions['plugin::users-permissions'].controllers || {};
-          const pubAuthCtrl = pubControllers.auth || {};
-          pubAuthCtrl.refresh = { enabled: true, policy: '' };
-          publicRoleDetails.permissions['plugin::users-permissions'].controllers = {
-            ...pubControllers,
-            auth: pubAuthCtrl,
-          };
-          await roleService.updateRole(publicRole.id, {
-            permissions: publicRoleDetails.permissions,
-          });
-
-          const authRoleDetails = await roleService.findOne(authenticatedRole.id);
-          authRoleDetails.permissions['plugin::users-permissions'] = authRoleDetails.permissions[
-            'plugin::users-permissions'
-          ] || { controllers: {} };
-          const authControllers =
-            authRoleDetails.permissions['plugin::users-permissions'].controllers || {};
-          const authAuthCtrl = authControllers.auth || {};
-          authAuthCtrl.logout = { enabled: true, policy: '' };
-          authRoleDetails.permissions['plugin::users-permissions'].controllers = {
-            ...authControllers,
-            auth: authAuthCtrl,
-          };
-          await roleService.updateRole(authenticatedRole.id, {
-            permissions: authRoleDetails.permissions,
-          });
+          await enableAuthRoute(s, 'refresh', 'public');
+          await enableAuthRoute(s, 'logout', 'authenticated');
         },
       });
       await createAuthenticatedUser({ strapi, userInfo: internals.user });
@@ -454,14 +373,8 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
     });
 
     test('Authenticated logout responds ok and clears cookie when requested', async () => {
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
-
       // Login to get access jwt
-      const loginRes = await rqAuth({
-        method: 'POST',
-        url: '/local',
-        body: { identifier: internals.user.email, password: internals.user.password },
-      });
+      const loginRes = await loginUser();
       expect(loginRes.statusCode).toBe(200);
       const jwt = loginRes.body.jwt;
       expect(typeof jwt).toBe('string');
@@ -476,8 +389,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       });
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({ ok: true });
-      const setCookie = res.headers['set-cookie'];
-      const cookies = Array.isArray(setCookie) ? setCookie.join('\n') : String(setCookie || '');
+      const cookies = parseCookies(res);
       expect(cookies).toMatch(/strapi_up_refresh=;/);
     });
 
@@ -485,11 +397,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
 
       // Login to get jwt and refresh token
-      const loginRes = await rqAuth({
-        method: 'POST',
-        url: '/local',
-        body: { identifier: internals.user.email, password: internals.user.password },
-      });
+      const loginRes = await loginUser();
       expect(loginRes.statusCode).toBe(200);
       const jwt = loginRes.body.jwt;
       const refreshToken = loginRes.body.refreshToken;
