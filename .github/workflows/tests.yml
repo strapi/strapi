@@ -315,7 +315,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
-        image: bitnami/mysql:latest
+        image: bitnamilegacy/mysql:latest
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
@@ -327,7 +327,6 @@ jobs:
           --health-timeout=5s
           --health-retries=3
         ports:
-          # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
       - uses: actions/checkout@v4
@@ -355,7 +354,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
-        image: bitnami/mysql:5.7
+        image: bitnamilegacy/mysql:5.7
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
@@ -367,7 +366,6 @@ jobs:
           --health-timeout=5s
           --health-retries=3
         ports:
-          # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
       - uses: actions/checkout@v4
@@ -469,7 +467,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
-        image: bitnami/mysql:latest
+        image: bitnamilegacy/mysql:latest
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
@@ -481,7 +479,6 @@ jobs:
           --health-timeout=5s
           --health-retries=3
         ports:
-          # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
       - uses: actions/checkout@v4

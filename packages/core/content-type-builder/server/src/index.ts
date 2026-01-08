@@ -6,6 +6,7 @@ import bootstrap from './bootstrap';
 import services from './services';
 import controllers from './controllers';
 import routes from './routes';
+import { middlewares } from './middlewares';
 
 export default () => ({
   config,
@@ -13,4 +14,5 @@ export default () => ({
   services,
   controllers,
   routes,
+  middlewares,
 });
