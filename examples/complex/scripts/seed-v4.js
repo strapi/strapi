@@ -1,12 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * Simplified Seed Script for Strapi v4
- *
- * A cleaner, more maintainable approach to seeding v4 migration test data.
- * Uses a data-driven configuration approach to reduce duplication and improve clarity.
- */
-
 const strapi = require('@strapi/strapi')();
 const fs = require('fs');
 const path = require('path');

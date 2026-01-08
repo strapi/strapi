@@ -25,24 +25,24 @@ This project includes tools for testing migrations between Strapi v4 and v5 by c
    yarn clone:v4
    ```
 
-   This creates a Strapi v4 project at `examples/complex/v4` (inside the monorepo) with all the same schemas.
+   This creates a Strapi v4 project outside the monorepo (default: a sibling directory named `complex-v4`). You can override the location via `V4_OUTSIDE_DIR`.
 
-2. **Navigate to the v4 project:**
+2. **Navigate to the v4 project** (use the path printed by setup):
 
    ```bash
-   cd examples/complex/v4
+   cd <path-printed-by-setup>
    ```
 
-3. **Configure the v4 project:**
+3. **Configure the v4 project** (only if you need custom DB creds):
 
    ```bash
    cp .env.example .env
-   # Edit .env to set your database configuration
+   # Edit .env as needed
    ```
 
 4. **Start the v4 project:**
    ```bash
-   npm run develop
+   yarn develop:postgres
    ```
 
 ### Database Management
@@ -143,27 +143,33 @@ This displays a table showing how many records are in each table, useful for qui
    yarn clone:v4
    ```
 
-2. **Start v4 project** (in separate terminal, use the path printed by setup):
+2. **Wipe the database** (ensures v4 format, no v5 schema):
+
+   ```bash
+   yarn db:wipe:postgres
+   ```
+
+3. **Start v4 project** (in separate terminal, use the path printed by setup):
 
    ```bash
    cd <path-printed-by-setup>
-   npm run develop
+   yarn develop:postgres
    ```
 
    (v4 will automatically start its database if needed)
 
-3. **Create test data** in the v4 admin panel (manual step)
+4. **Create test data** in the v4 admin panel (manual step)
 
-4. **Create snapshot:**
+5. **Create snapshot:**
 
    ```bash
    cd examples/complex
    yarn db:snapshot:postgres mybackup
    ```
 
-5. **Stop v4 server** (Ctrl+C in v4 terminal)
+6. **Stop v4 server** (Ctrl+C in v4 terminal)
 
-6. **Start v5 server** with the same database:
+7. **Start v5 server** with the same database:
 
    ```bash
    yarn develop:postgres
@@ -171,17 +177,23 @@ This displays a table showing how many records are in each table, useful for qui
 
    Migrations will run automatically on startup.
 
-7. **Test and fix bugs** as needed
-
-8. **Restore snapshot** to reset database:
+8. **Validate migration** (no HTTP server needed):
 
    ```bash
-   yarn db:restore:postgres mybackup
+   yarn test:migration
    ```
 
-9. **Repeat from step 6** to test fixes
+9. **Test and fix bugs** as needed
 
-**Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container.
+10. **Restore snapshot** to reset database:
+
+```bash
+yarn db:restore:postgres mybackup
+```
+
+11. **Repeat from step 7** to test fixes
+
+**Note:** The database container stays running even after stopping Strapi, so you can inspect the database or run multiple tests without restarting the container. The complex example uses its own Compose project name (`strapi_complex`) so it does not collide with other containers.
 
 ### Snapshots
 
@@ -228,27 +240,3 @@ These commands will:
 - `yarn build` - Build for production
 - `yarn start` - Start production server
 - `yarn strapi` - Run Strapi CLI commands
-
-## Use Node 20 (recommended)
-
-This repository and the `examples/complex` migration tooling are tested with Node.js 20. If you encounter native module errors, switch to Node 20 and reinstall dependencies before running the migration flow.
-
-On macOS using `nvm` (example commands):
-
-```bash
-# select Node 20
-nvm use 20
-
-# from the monorepo root: reinstall dependencies (rebuilds native modules)
-cd /Users/basselkanso/Desktop/strapi_2
-yarn install --network-timeout 600000
-
-# also rebuild/install in the generated v4 project (if present)
-cd examples/complex/v4 || true
-yarn install --network-timeout 600000
-
-# Alternatively, rebuild native modules:
-npm rebuild
-```
-
-After rebuilding native modules, rerun the migration test flow (for example `yarn test:migration`).

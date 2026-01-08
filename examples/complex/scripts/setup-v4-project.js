@@ -649,7 +649,7 @@ function startStrapi() {
   
   // Spawn strapi develop process
   const isWindows = process.platform === 'win32';
-  const strapiProcess = spawn(isWindows ? 'npm.cmd' : 'npm', ['run', 'develop'], {
+  const strapiProcess = spawn(isWindows ? 'yarn.cmd' : 'yarn', ['develop'], {
     cwd: PROJECT_DIR,
     env,
     stdio: 'inherit',
@@ -707,7 +707,7 @@ try {
 console.log('✅ Created database development scripts');
 
 // Copy seed script (always overwrite) - use the simpler seeder
-const seedScriptSource = path.join(SCRIPT_DIR, 'seed-v4-simple.js');
+const seedScriptSource = path.join(SCRIPT_DIR, 'seed-v4.js');
 const seedScriptDest = path.join(v4ScriptsDir, 'seed.js');
 fs.copyFileSync(seedScriptSource, seedScriptDest);
 try {
@@ -894,4 +894,4 @@ console.log('\nNext steps:');
 console.log(`1. cd ${V4_PROJECT_DIR}`);
 console.log('2. yarn install (install dependencies)');
 console.log('3. Edit .env file if needed (app keys will be auto-generated)');
-console.log('4. npm run develop:postgres (or develop:mysql)');
+console.log('4. yarn develop:postgres (or develop:mysql)');
