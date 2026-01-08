@@ -2061,7 +2061,7 @@ async function validateForeignKeyIntegrity(strapi) {
     return [];
   }
 
-  const client = process.env.DATABASE_CLIENT || 'sqlite';
+  const client = process.env.DATABASE_CLIENT || 'postgres';
   let dbConfig = {};
 
   switch (client) {
@@ -2081,7 +2081,6 @@ async function validateForeignKeyIntegrity(strapi) {
       break;
     case 'mysql':
     case 'mysql2':
-    case 'mariadb':
       dbConfig = {
         client: 'mysql2',
         connection: {
@@ -2095,7 +2094,7 @@ async function validateForeignKeyIntegrity(strapi) {
       };
       break;
     default:
-      console.log(`⚠️  Foreign key integrity check only supported for PostgreSQL`);
+      console.log(`⚠️  Foreign key integrity check only supported for PostgreSQL/MySQL`);
       return [];
   }
 
@@ -2238,7 +2237,7 @@ async function validateNonDPContentTypeRelations(strapi) {
       return { errors: [], warnings };
     }
 
-    const client = process.env.DATABASE_CLIENT || 'sqlite';
+    const client = process.env.DATABASE_CLIENT || 'postgres';
     let dbConfig = {};
 
     switch (client) {
@@ -2268,17 +2267,6 @@ async function validateNonDPContentTypeRelations(strapi) {
             password: process.env.DATABASE_PASSWORD || 'strapi',
             ssl: process.env.DATABASE_SSL === 'true',
           },
-        };
-        break;
-      case 'sqlite':
-      case 'better-sqlite3':
-        dbConfig = {
-          client: 'better-sqlite3',
-          connection: {
-            filename:
-              process.env.DATABASE_FILENAME || path.join(__dirname, '..', '.tmp', 'data.db'),
-          },
-          useNullAsDefault: true,
         };
         break;
       default:
@@ -2604,7 +2592,7 @@ async function validateComponentRelationFiltering(strapi) {
     return { errors: [], warnings };
   }
 
-  const client = process.env.DATABASE_CLIENT || 'sqlite';
+  const client = process.env.DATABASE_CLIENT || 'postgres';
   let dbConfig = {};
 
   switch (client) {
@@ -2624,7 +2612,6 @@ async function validateComponentRelationFiltering(strapi) {
       break;
     case 'mysql':
     case 'mysql2':
-    case 'mariadb':
       dbConfig = {
         client: 'mysql2',
         connection: {
@@ -2635,16 +2622,6 @@ async function validateComponentRelationFiltering(strapi) {
           password: process.env.DATABASE_PASSWORD || 'strapi',
           ssl: process.env.DATABASE_SSL === 'true',
         },
-      };
-      break;
-    case 'sqlite':
-    case 'better-sqlite3':
-      dbConfig = {
-        client: 'better-sqlite3',
-        connection: {
-          filename: process.env.DATABASE_FILENAME || path.join(__dirname, '..', '.tmp', 'data.db'),
-        },
-        useNullAsDefault: true,
       };
       break;
     default:
@@ -5686,7 +5663,7 @@ async function getPreMigrationCounts() {
     return null; // Can't check without knex
   }
 
-  const client = process.env.DATABASE_CLIENT || 'sqlite';
+  const client = process.env.DATABASE_CLIENT || 'postgres';
   let dbConfig = {};
 
   // Build database config from environment variables (same as checkDatabaseFormat)
@@ -5707,7 +5684,6 @@ async function getPreMigrationCounts() {
       break;
     case 'mysql':
     case 'mysql2':
-    case 'mariadb':
       dbConfig = {
         client: 'mysql2',
         connection: {
@@ -5718,16 +5694,6 @@ async function getPreMigrationCounts() {
           password: process.env.DATABASE_PASSWORD || 'strapi',
           ssl: process.env.DATABASE_SSL === 'true',
         },
-      };
-      break;
-    case 'sqlite':
-    case 'better-sqlite3':
-      dbConfig = {
-        client: 'better-sqlite3',
-        connection: {
-          filename: process.env.DATABASE_FILENAME || path.join(__dirname, '..', '.tmp', 'data.db'),
-        },
-        useNullAsDefault: true,
       };
       break;
     default:
@@ -5866,7 +5832,7 @@ async function getPreMigrationRelations() {
     return null; // Can't check without knex
   }
 
-  const client = process.env.DATABASE_CLIENT || 'sqlite';
+  const client = process.env.DATABASE_CLIENT || 'postgres';
   let dbConfig = {};
 
   // Build database config from environment variables (same as getPreMigrationCounts)
@@ -5887,7 +5853,6 @@ async function getPreMigrationRelations() {
       break;
     case 'mysql':
     case 'mysql2':
-    case 'mariadb':
       dbConfig = {
         client: 'mysql2',
         connection: {
@@ -5898,16 +5863,6 @@ async function getPreMigrationRelations() {
           password: process.env.DATABASE_PASSWORD || 'strapi',
           ssl: process.env.DATABASE_SSL === 'true',
         },
-      };
-      break;
-    case 'sqlite':
-    case 'better-sqlite3':
-      dbConfig = {
-        client: 'better-sqlite3',
-        connection: {
-          filename: process.env.DATABASE_FILENAME || path.join(__dirname, '..', '.tmp', 'data.db'),
-        },
-        useNullAsDefault: true,
       };
       break;
     default:
@@ -5925,11 +5880,9 @@ async function getPreMigrationRelations() {
   try {
     // Get all tables to find content types and relations
     const tables = await db.raw(
-      client === 'sqlite' || client === 'better-sqlite3'
-        ? "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
-        : client === 'postgres' || client === 'pg'
-          ? "SELECT tablename as name FROM pg_tables WHERE schemaname = 'public'"
-          : 'SELECT table_name as name FROM information_schema.tables WHERE table_schema = DATABASE()'
+      client === 'postgres' || client === 'pg'
+        ? "SELECT tablename as name FROM pg_tables WHERE schemaname = 'public'"
+        : 'SELECT table_name as name FROM information_schema.tables WHERE table_schema = DATABASE()'
     );
 
     const tableNames = tables.rows ? tables.rows.map((r) => r.name) : tables.map((r) => r.name);
@@ -6168,15 +6121,10 @@ async function validateAllV4RelationsMigrated(strapi, preMigrationRelations) {
   try {
     const client = strapi.db.config.connection.client;
     let tables;
-    if (client === 'sqlite' || client === 'better-sqlite3') {
-      tables = await db.raw(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
-      );
-      tables = tables.map((r) => r.name);
-    } else if (client === 'postgres' || client === 'pg') {
+    if (client === 'postgres' || client === 'pg') {
       tables = await db.raw("SELECT tablename as name FROM pg_tables WHERE schemaname = 'public'");
       tables = tables.rows ? tables.rows.map((r) => r.name) : tables.map((r) => r.name);
-    } else if (client === 'mysql' || client === 'mariadb') {
+    } else if (client === 'mysql' || client === 'mysql2') {
       tables = await db.raw(
         'SELECT table_name as name FROM information_schema.tables WHERE table_schema = DATABASE()'
       );
@@ -6598,7 +6546,7 @@ async function checkDatabaseFormat() {
     return null; // Can't check without knex
   }
 
-  const client = process.env.DATABASE_CLIENT || 'sqlite';
+  const client = process.env.DATABASE_CLIENT || 'postgres';
   let dbConfig = {};
 
   // Build database config from environment variables
@@ -6619,7 +6567,6 @@ async function checkDatabaseFormat() {
       break;
     case 'mysql':
     case 'mysql2':
-    case 'mariadb':
       dbConfig = {
         client: 'mysql2',
         connection: {
@@ -6630,16 +6577,6 @@ async function checkDatabaseFormat() {
           password: process.env.DATABASE_PASSWORD || 'strapi',
           ssl: process.env.DATABASE_SSL === 'true',
         },
-      };
-      break;
-    case 'sqlite':
-    case 'better-sqlite3':
-      dbConfig = {
-        client: 'better-sqlite3',
-        connection: {
-          filename: process.env.DATABASE_FILENAME || path.join(__dirname, '..', '.tmp', 'data.db'),
-        },
-        useNullAsDefault: true,
       };
       break;
     default:
@@ -6698,20 +6635,12 @@ async function checkDatabaseFormat() {
           const columns = await db('basic_dps').columnInfo();
           hasDocumentIdColumn = columns && (columns.document_id || columns['document_id']);
         } catch (error) {
-          // Try alternative method for column checking
-          if (client === 'sqlite' || client === 'better-sqlite3') {
-            const pragmaResult = await db.raw('PRAGMA table_info(basic_dps)');
-            hasDocumentIdColumn = pragmaResult.some(
-              (col) => col.name === 'document_id' || col.name === 'documentId'
-            );
-          } else {
-            const columnCheck = await db
-              .select('column_name')
-              .from('information_schema.columns')
-              .where({ table_name: 'basic_dps', column_name: 'document_id' })
-              .first();
-            hasDocumentIdColumn = !!columnCheck;
-          }
+          const columnCheck = await db
+            .select('column_name')
+            .from('information_schema.columns')
+            .where({ table_name: 'basic_dps', column_name: 'document_id' })
+            .first();
+          hasDocumentIdColumn = !!columnCheck;
         }
 
         // If column exists, check if entries have document_id values set
@@ -6744,19 +6673,12 @@ async function checkDatabaseFormat() {
           const columns = await db('relation_dps').columnInfo();
           hasDocumentIdColumn = columns && (columns.document_id || columns['document_id']);
         } catch (error) {
-          if (client === 'sqlite' || client === 'better-sqlite3') {
-            const pragmaResult = await db.raw('PRAGMA table_info(relation_dps)');
-            hasDocumentIdColumn = pragmaResult.some(
-              (col) => col.name === 'document_id' || col.name === 'documentId'
-            );
-          } else {
-            const columnCheck = await db
-              .select('column_name')
-              .from('information_schema.columns')
-              .where({ table_name: 'relation_dps', column_name: 'document_id' })
-              .first();
-            hasDocumentIdColumn = !!columnCheck;
-          }
+          const columnCheck = await db
+            .select('column_name')
+            .from('information_schema.columns')
+            .where({ table_name: 'relation_dps', column_name: 'document_id' })
+            .first();
+          hasDocumentIdColumn = !!columnCheck;
         }
 
         if (hasDocumentIdColumn) {

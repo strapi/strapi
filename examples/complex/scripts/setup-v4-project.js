@@ -14,35 +14,20 @@ const V4_PROJECT_DIR = process.env.V4_OUTSIDE_DIR
   ? path.resolve(process.cwd(), process.env.V4_OUTSIDE_DIR)
   : DEFAULT_OUTSIDE_DIR;
 
-// From v4 project, find docker-compose file (could be in monorepo root, parent strapi-v5, or current dir)
+// From v4 project, find docker-compose file (prefer the complex example's local compose file)
 function findDockerComposeFile(v4ProjectDir) {
-  // Try monorepo root (strapi-discard-drafts)
-  const monorepoDockerCompose = path.resolve(
-    v4ProjectDir,
-    '..',
-    'strapi-discard-drafts',
-    'docker-compose.dev.yml'
-  );
-  if (fs.existsSync(monorepoDockerCompose)) {
-    return monorepoDockerCompose;
+  // Prefer the complex example's compose file in this monorepo
+  const complexDockerCompose = path.resolve(COMPLEX_DIR, 'docker-compose.dev.yml');
+  if (fs.existsSync(complexDockerCompose)) {
+    return complexDockerCompose;
   }
-  // Try parent directory (strapi-v5)
-  const parentDockerCompose = path.resolve(
-    v4ProjectDir,
-    '..',
-    'strapi-v5',
-    'docker-compose.dev.yml'
-  );
-  if (fs.existsSync(parentDockerCompose)) {
-    return parentDockerCompose;
-  }
-  // Try current directory
+  // Fallback: try v4 project directory
   const currentDockerCompose = path.resolve(v4ProjectDir, 'docker-compose.dev.yml');
   if (fs.existsSync(currentDockerCompose)) {
     return currentDockerCompose;
   }
-  // Return monorepo location as default
-  return monorepoDockerCompose;
+  // Default to complex example location even if missing to keep paths stable
+  return complexDockerCompose;
 }
 
 const CONTENT_TYPES = [
@@ -82,20 +67,17 @@ const packageJson = {
     upgrade: 'npx @strapi/upgrade latest',
     'upgrade:dry': 'npx @strapi/upgrade latest --dry',
     'develop:postgres': 'node scripts/develop-with-db.js postgres',
-    'develop:mariadb': 'node scripts/develop-with-db.js mariadb',
-    'develop:sqlite': 'node scripts/develop-with-db.js sqlite',
+    'develop:mysql': 'node scripts/develop-with-db.js mysql',
     // Run the simple seeder directly (no DB wrapper)
     seed: 'node scripts/seed.js',
     // Wrapper commands that will start DB containers when needed
-    'seed:sqlite': 'node scripts/seed-with-db.js sqlite',
     'seed:postgres': 'node scripts/seed-with-db.js postgres',
-    'seed:mariadb': 'node scripts/seed-with-db.js mariadb',
+    'seed:mysql': 'node scripts/seed-with-db.js mysql',
   },
   dependencies: {
     '@strapi/plugin-i18n': '4.26.0',
     '@strapi/plugin-users-permissions': '4.26.0',
     '@strapi/strapi': '4.26.0',
-    'better-sqlite3': '8.6.0',
     entities: '2.2.0',
     mysql2: '^3.6.0',
     pg: '^8.11.0',
@@ -132,32 +114,10 @@ if (!fs.existsSync(configDir)) {
 }
 
 // Write database.js
-// Default the path the generated v4 project's sqlite file should use when the
-// user doesn't supply `DATABASE_FILENAME`. We prefer the monorepo v5 example
-// DB so v4 seeding can write directly into the v5 location when desired.
-const v5DbAbsolute = path.join(COMPLEX_DIR, '.tmp', 'data.db');
-
 const databaseConfig = `'use strict';
-const path = require('path');
 
 module.exports = ({ env }) => {
-  const client = env('DATABASE_CLIENT', 'sqlite');
-
-  if (client === 'sqlite') {
-    return {
-      connection: {
-        client: 'sqlite',
-        connection: {
-          filename: env(
-              'DATABASE_FILENAME',
-              // Default to the monorepo v5 example DB absolute path
-              '${v5DbAbsolute.replace(/\\/g, '\\\\')}'
-          ),
-        },
-        useNullAsDefault: true,
-      },
-    };
-  }
+  const client = env('DATABASE_CLIENT', 'postgres');
 
   if (client === 'postgres') {
     return {
@@ -526,8 +486,7 @@ TRANSFER_TOKEN_SALT=toBeModified
 JWT_SECRET=toBeModified
 
 # Database
-DATABASE_CLIENT=sqlite
-# DATABASE_CLIENT=postgres
+DATABASE_CLIENT=postgres
 # DATABASE_HOST=localhost
 # DATABASE_PORT=5432
 # DATABASE_NAME=strapi
@@ -561,12 +520,14 @@ const fs = require('fs');
 
 const PROJECT_DIR = path.resolve(__dirname, '..');
 const DOCKER_COMPOSE_FILE = '${dockerComposePath.replace(/\\/g, '/')}';
+const COMPOSE_PROJECT_NAME = 'strapi_complex';
+const COMPOSE_ENV = { ...process.env, COMPOSE_PROJECT_NAME };
 
 const dbType = process.argv[2];
 
-if (!dbType || !['postgres', 'mariadb', 'sqlite'].includes(dbType)) {
+if (!dbType || !['postgres', 'mysql'].includes(dbType)) {
   console.error('Error: Database type is required');
-  console.error('Usage: node scripts/develop-with-db.js <postgres|mariadb|sqlite>');
+  console.error('Usage: node scripts/develop-with-db.js <postgres|mysql>');
   process.exit(1);
 }
 
@@ -575,7 +536,7 @@ function isContainerRunning(serviceName) {
   try {
     const output = execSync(
       \`docker-compose -f \${DOCKER_COMPOSE_FILE} ps -q \${serviceName}\`,
-      { encoding: 'utf8', stdio: 'pipe', cwd: PROJECT_DIR }
+      { encoding: 'utf8', stdio: 'pipe', cwd: PROJECT_DIR, env: COMPOSE_ENV }
     ).trim();
     if (!output) return false;
     
@@ -626,11 +587,12 @@ function ensureContainerRunning(serviceName) {
     execSync(\`docker-compose -f \${DOCKER_COMPOSE_FILE} up -d \${serviceName}\`, {
       cwd: PROJECT_DIR,
       stdio: 'inherit',
+      env: COMPOSE_ENV,
     });
     console.log(\`✅ \${serviceName} container started\`);
     
     // Wait a bit for the database to be ready
-    if (dbType === 'postgres' || dbType === 'mariadb') {
+    if (dbType === 'postgres' || dbType === 'mysql') {
       console.log('Waiting for database to be ready...');
       const start = Date.now();
       while (Date.now() - start < 3000) {
@@ -658,7 +620,7 @@ function getEnvVars() {
       env.DATABASE_SSL = 'false';
       break;
       
-    case 'mariadb':
+    case 'mysql':
       env.DATABASE_CLIENT = 'mysql';
       env.DATABASE_HOST = 'localhost';
       env.DATABASE_PORT = '3306';
@@ -668,9 +630,6 @@ function getEnvVars() {
       env.DATABASE_SSL = 'false';
       break;
       
-    case 'sqlite':
-      env.DATABASE_CLIENT = 'sqlite';
-      break;
   }
   
   return env;
@@ -680,7 +639,7 @@ function getEnvVars() {
 function startStrapi() {
   if (dbType === 'postgres') {
     ensureContainerRunning('postgres');
-  } else if (dbType === 'mariadb') {
+  } else if (dbType === 'mysql') {
     ensureContainerRunning('mysql');
   }
   
@@ -766,6 +725,8 @@ const path = require('path');
 
 const PROJECT_DIR = path.resolve(__dirname, '..');
 const DOCKER_COMPOSE_FILE = '${dockerComposePath.replace(/\\/g, '\\\\')}';
+const COMPOSE_PROJECT_NAME = 'strapi_complex';
+const COMPOSE_ENV = { ...process.env, COMPOSE_PROJECT_NAME };
 
 const dbType = process.argv[2];
 // Skip '--' if present (yarn passes it as an argument separator)
@@ -775,9 +736,9 @@ if (process.argv[multiplierArgIndex] === '--') {
 }
 const multiplier = process.argv[multiplierArgIndex] || '1';
 
-if (!dbType || !['postgres', 'mariadb', 'sqlite'].includes(dbType)) {
+if (!dbType || !['postgres', 'mysql'].includes(dbType)) {
   console.error('Error: Database type is required');
-  console.error('Usage: node scripts/seed-with-db.js <postgres|mariadb|sqlite> [multiplier]');
+  console.error('Usage: node scripts/seed-with-db.js <postgres|mysql> [multiplier]');
   process.exit(1);
 }
 
@@ -786,7 +747,7 @@ function isContainerRunning(serviceName) {
   try {
     const output = execSync(
       \`docker-compose -f \${DOCKER_COMPOSE_FILE} ps -q \${serviceName}\`,
-      { encoding: 'utf8', stdio: 'pipe', cwd: PROJECT_DIR }
+      { encoding: 'utf8', stdio: 'pipe', cwd: PROJECT_DIR, env: COMPOSE_ENV }
     ).trim();
     if (!output) return false;
     
@@ -837,11 +798,12 @@ function ensureContainerRunning(serviceName) {
     execSync(\`docker-compose -f \${DOCKER_COMPOSE_FILE} up -d \${serviceName}\`, {
       cwd: PROJECT_DIR,
       stdio: 'inherit',
+      env: COMPOSE_ENV,
     });
     console.log(\`✅ \${serviceName} container started\`);
     
     // Wait a bit for the database to be ready
-    if (dbType === 'postgres' || dbType === 'mariadb') {
+    if (dbType === 'postgres' || dbType === 'mysql') {
       console.log('Waiting for database to be ready...');
       const start = Date.now();
       while (Date.now() - start < 3000) {
@@ -869,7 +831,7 @@ function getEnvVars() {
       env.DATABASE_SSL = 'false';
       break;
       
-    case 'mariadb':
+    case 'mysql':
       env.DATABASE_CLIENT = 'mysql';
       env.DATABASE_HOST = 'localhost';
       env.DATABASE_PORT = '3306';
@@ -879,9 +841,6 @@ function getEnvVars() {
       env.DATABASE_SSL = 'false';
       break;
       
-    case 'sqlite':
-      env.DATABASE_CLIENT = 'sqlite';
-      break;
   }
   
   return env;
@@ -891,7 +850,7 @@ function getEnvVars() {
 function runSeed() {
   if (dbType === 'postgres') {
     ensureContainerRunning('postgres');
-  } else if (dbType === 'mariadb') {
+  } else if (dbType === 'mysql') {
     ensureContainerRunning('mysql');
   }
   
@@ -932,7 +891,7 @@ console.log('✅ Created/updated seed-with-db.js wrapper script');
 console.log('\n✅ V4 project structure created successfully!');
 console.log(`\nProject location: ${V4_PROJECT_DIR}`);
 console.log('\nNext steps:');
-console.log('1. cd examples/complex/v4');
+console.log(`1. cd ${V4_PROJECT_DIR}`);
 console.log('2. yarn install (install dependencies)');
 console.log('3. Edit .env file if needed (app keys will be auto-generated)');
-console.log('4. npm run develop:postgres (or develop:mariadb, develop:sqlite)');
+console.log('4. npm run develop:postgres (or develop:mysql)');

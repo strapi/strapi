@@ -1,7 +1,5 @@
-import path from 'path';
-
 export default ({ env }) => {
-  const client = env('DATABASE_CLIENT', 'sqlite');
+  const client = env('DATABASE_CLIENT', 'postgres');
 
   const connections = {
     mysql: {
@@ -42,18 +40,11 @@ export default ({ env }) => {
       },
       pool: { min: env.int('DATABASE_POOL_MIN', 2), max: env.int('DATABASE_POOL_MAX', 10) },
     },
-    sqlite: {
-      connection: {
-        filename: (() => {
-          const dbFilename = env('DATABASE_FILENAME', '.tmp/data.db');
-          // If DATABASE_FILENAME is an absolute path, use it directly
-          // Otherwise, resolve it relative to the project root (examples/complex)
-          return path.isAbsolute(dbFilename) ? dbFilename : path.join(__dirname, '..', dbFilename);
-        })(),
-      },
-      useNullAsDefault: true,
-    },
   };
+
+  if (!connections[client]) {
+    throw new Error(`Unsupported DATABASE_CLIENT: ${client}. Use "postgres" or "mysql".`);
+  }
 
   return {
     connection: {

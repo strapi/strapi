@@ -14363,17 +14363,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:11.3.0":
-  version: 11.3.0
-  resolution: "better-sqlite3@npm:11.3.0"
-  dependencies:
-    bindings: "npm:^1.5.0"
-    node-gyp: "npm:latest"
-    prebuild-install: "npm:^7.1.1"
-  checksum: 10c0/9adc99683300699581da5d7288e4a261b7d4381fd99c762fc6a0e9b1e1e226009c1333b46b10c1c453c356b20cb8be037a4616b1e717b3d1a00bd8493bec506e
-  languageName: node
-  linkType: hard
-
 "better-sqlite3@npm:12.4.1":
   version: 12.4.1
   resolution: "better-sqlite3@npm:12.4.1"
@@ -15711,7 +15700,6 @@ __metadata:
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
-    better-sqlite3: "npm:11.3.0"
     mysql2: "npm:3.9.8"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"

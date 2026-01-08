@@ -15,7 +15,7 @@ The project includes 6 content types with different combinations of features:
 
 ## Migration Testing Workflow
 
-This project includes tools for testing migrations between Strapi v4 and v5 by creating an isolated v4 project and managing database snapshots.
+This project includes tools for testing migrations between Strapi v4 and v5 by creating an isolated v4 project and managing database snapshots. The complex example ships its own `docker-compose.dev.yml` so the database containers are independent of the monorepo root.
 
 ### Setup
 
@@ -91,88 +91,49 @@ yarn db:check:postgres
 
 This displays a table showing how many records are in each table, useful for quickly seeing if the database is empty, has data, etc.
 
-#### MariaDB
+#### MySQL
 
-**Start MariaDB container:**
+**Start MySQL container:**
 
 ```bash
-yarn db:start:mariadb
+yarn db:start:mysql
 ```
 
-**Stop MariaDB container:**
+**Stop MySQL container:**
 
 ```bash
-yarn db:stop:mariadb
+yarn db:stop:mysql
 ```
 
 **Create a snapshot:**
 
 ```bash
-yarn db:snapshot:mariadb <name>
+yarn db:snapshot:mysql <name>
 ```
 
-Example: `yarn db:snapshot:mariadb mybackup`
+Example: `yarn db:snapshot:mysql mybackup`
 
 **Restore from snapshot:**
 
 ```bash
-yarn db:restore:mariadb <name>
+yarn db:restore:mysql <name>
 ```
 
-Example: `yarn db:restore:mariadb mybackup`
+Example: `yarn db:restore:mysql mybackup`
 
 **Wipe database (drop and recreate):**
 
 ```bash
-yarn db:wipe:mariadb
+yarn db:wipe:mysql
 ```
 
 **Check database (show table row counts):**
 
 ```bash
-yarn db:check:mariadb
+yarn db:check:mysql
 ```
 
 This displays a table showing how many records are in each table, useful for quickly seeing if the database is empty, has data, etc.
-
-#### SQLite
-
-**Note:** SQLite is file-based, so there's no container to start/stop.
-
-**Create a snapshot:**
-
-```bash
-yarn db:snapshot:sqlite <name>
-```
-
-Example: `yarn db:snapshot:sqlite mybackup`
-
-**Restore from snapshot:**
-
-```bash
-yarn db:restore:sqlite <name>
-```
-
-Example: `yarn db:restore:sqlite mybackup`
-
-**Wipe database (delete file):**
-
-```bash
-yarn db:wipe:sqlite
-```
-
-**Check database (show table row counts):**
-
-```bash
-yarn db:check:sqlite
-```
-
-This displays a table showing how many records are in each table, useful for quickly seeing if the database is empty, has data, etc.
-
-**Note:** SQLite check requires the `sqlite3` command-line tool. Install with:
-
-- macOS: `brew install sqlite`
-- Linux: `sudo apt-get install sqlite3`
 
 ### Typical Migration Testing Workflow
 
@@ -182,10 +143,10 @@ This displays a table showing how many records are in each table, useful for qui
    yarn clone:v4
    ```
 
-2. **Start v4 project** (in separate terminal):
+2. **Start v4 project** (in separate terminal, use the path printed by setup):
 
    ```bash
-   cd examples/complex/v4
+   cd <path-printed-by-setup>
    npm run develop
    ```
 
@@ -227,8 +188,7 @@ This displays a table showing how many records are in each table, useful for qui
 Database snapshots are stored in the `snapshots/` directory:
 
 - PostgreSQL: `snapshots/postgres-<name>.sql`
-- MariaDB: `snapshots/mariadb-<name>.sql`
-- SQLite: `snapshots/sqlite-<name>.db`
+- MySQL: `snapshots/mysql-<name>.sql`
 
 Snapshots are gitignored and should not be committed to the repository.
 
@@ -244,16 +204,10 @@ The easiest way to start Strapi with a specific database:
 yarn develop:postgres
 ```
 
-**Start with MariaDB:**
+**Start with MySQL:**
 
 ```bash
-yarn develop:mariadb
-```
-
-**Start with SQLite:**
-
-```bash
-yarn develop:sqlite
+yarn develop:mysql
 ```
 
 These commands will:
@@ -263,21 +217,21 @@ These commands will:
 - ✅ Start the Strapi development server
 - ✅ Keep the database container running when you press Ctrl+C (only Strapi stops)
 
-**Note:** The database containers use non-standard ports to avoid conflicts:
+**Note:** The database containers use the standard ports:
 
-- PostgreSQL: port `5432` (instead of standard 5432)
-- MariaDB: port `3306` (instead of standard 3306)
+- PostgreSQL: port `5432`
+- MySQL: port `3306`
 
 ### Standard Strapi Commands
 
-- `yarn develop` - Start development server (defaults to SQLite)
+- `yarn develop` - Start development server (defaults to PostgreSQL; requires a running DB)
 - `yarn build` - Build for production
 - `yarn start` - Start production server
 - `yarn strapi` - Run Strapi CLI commands
 
 ## Use Node 20 (recommended)
 
-This repository and the `examples/complex` migration tooling are tested with Node.js 20. If you encounter native module errors (for example errors mentioning `better-sqlite3` and a `NODE_MODULE_VERSION` mismatch), switch to Node 20 and rebuild native modules before running the migration flow.
+This repository and the `examples/complex` migration tooling are tested with Node.js 20. If you encounter native module errors, switch to Node 20 and reinstall dependencies before running the migration flow.
 
 On macOS using `nvm` (example commands):
 
@@ -293,8 +247,8 @@ yarn install --network-timeout 600000
 cd examples/complex/v4 || true
 yarn install --network-timeout 600000
 
-# Alternatively, rebuild only the sqlite native binary:
-npm rebuild better-sqlite3 --update-binary
+# Alternatively, rebuild native modules:
+npm rebuild
 ```
 
 After rebuilding native modules, rerun the migration test flow (for example `yarn test:migration`).

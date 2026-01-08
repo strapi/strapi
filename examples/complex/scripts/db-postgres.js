@@ -6,20 +6,24 @@ const path = require('path');
 
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
-const MONOREPO_ROOT = path.resolve(COMPLEX_DIR, '../..');
-const DOCKER_COMPOSE_FILE = path.join(MONOREPO_ROOT, 'docker-compose.dev.yml');
+const DOCKER_COMPOSE_FILE = path.join(COMPLEX_DIR, 'docker-compose.dev.yml');
+const COMPOSE_PROJECT_NAME = 'strapi_complex';
 const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 
 const DB_NAME = 'strapi';
 const DB_USER = 'strapi';
 const DB_PASSWORD = 'strapi';
 
+function getComposeEnv() {
+  return { ...process.env, COMPOSE_PROJECT_NAME };
+}
+
 // Try to find the container name dynamically, fallback to expected name
 function getContainerName() {
-  // First, try to find any running postgres container (most reliable)
+  // First, try to find the running postgres container for this compose project
   try {
     const output = execSync(
-      `docker ps --filter "ancestor=postgres" --filter "status=running" --format "{{.Names}}"`,
+      `docker ps --filter "name=${COMPOSE_PROJECT_NAME}-postgres" --filter "status=running" --format "{{.Names}}"`,
       {
         encoding: 'utf8',
       }
@@ -37,8 +41,9 @@ function getContainerName() {
   // Second, try docker-compose method
   try {
     const output = execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} ps -q postgres`, {
-      cwd: MONOREPO_ROOT,
+      cwd: COMPLEX_DIR,
       encoding: 'utf8',
+      env: getComposeEnv(),
     }).trim();
     if (output) {
       const containerId = output.split('\n')[0];
@@ -51,10 +56,8 @@ function getContainerName() {
     // Continue to fallback
   }
 
-  // Final fallback: try to get project name from docker-compose file location
-  // Docker Compose uses the directory name as the project name by default
-  const projectName = path.basename(MONOREPO_ROOT).replace(/-/g, '_');
-  return `${projectName}_postgres_1`;
+  // Final fallback: default compose container name
+  return `${COMPOSE_PROJECT_NAME}-postgres-1`;
 }
 
 const command = process.argv[2];
@@ -68,7 +71,7 @@ function ensureSnapshotsDir() {
 
 function execDocker(command) {
   try {
-    execSync(command, { stdio: 'inherit', cwd: MONOREPO_ROOT });
+    execSync(command, { stdio: 'inherit', cwd: COMPLEX_DIR, env: getComposeEnv() });
   } catch (error) {
     console.error(`Error executing: ${command}`);
     process.exit(1);
@@ -80,7 +83,7 @@ function execDockerExec(command) {
   try {
     execSync(`docker exec ${containerName} ${command}`, {
       stdio: 'inherit',
-      cwd: MONOREPO_ROOT,
+      cwd: COMPLEX_DIR,
     });
   } catch (error) {
     console.error(`Error executing: ${command}`);
@@ -115,7 +118,7 @@ switch (command) {
       try {
         execSync(
           `docker exec ${containerName} pg_dump -U ${DB_USER} -d ${DB_NAME} > ${snapshotPath}`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         console.log(`✅ Snapshot created: ${snapshotPath}`);
       } catch (error) {
@@ -143,16 +146,16 @@ switch (command) {
         // Drop and recreate database
         execSync(
           `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         execSync(
           `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         // Restore from snapshot
         execSync(
           `docker exec -i ${containerName} psql -U ${DB_USER} -d ${DB_NAME} < ${restorePath}`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         console.log(`✅ Snapshot restored: ${snapshotName}`);
       } catch (error) {
@@ -168,7 +171,8 @@ switch (command) {
     try {
       execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} up -d postgres`, {
         stdio: 'inherit',
-        cwd: MONOREPO_ROOT,
+        cwd: COMPLEX_DIR,
+        env: getComposeEnv(),
       });
       // Wait a moment for container to be ready
       execSync('sleep 2', { stdio: 'inherit' });
@@ -183,11 +187,11 @@ switch (command) {
       try {
         execSync(
           `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         execSync(
           `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         console.log('✅ Database wiped');
       } catch (error) {
@@ -212,7 +216,7 @@ switch (command) {
 
         const output = execSync(
           `docker exec ${containerName} psql -U ${DB_USER} -d ${DB_NAME} -t -c "${query.trim()}"`,
-          { encoding: 'utf8', cwd: MONOREPO_ROOT }
+          { encoding: 'utf8', cwd: COMPLEX_DIR }
         );
 
         const lines = output

@@ -6,20 +6,25 @@ const path = require('path');
 
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
-const MONOREPO_ROOT = path.resolve(COMPLEX_DIR, '../..');
-const DOCKER_COMPOSE_FILE = path.join(MONOREPO_ROOT, 'docker-compose.dev.yml');
+const DOCKER_COMPOSE_FILE = path.join(COMPLEX_DIR, 'docker-compose.dev.yml');
+const COMPOSE_PROJECT_NAME = 'strapi_complex';
 const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 
 const DB_NAME = 'strapi';
 const DB_USER = 'strapi';
 const DB_PASSWORD = 'strapi';
 
+function getComposeEnv() {
+  return { ...process.env, COMPOSE_PROJECT_NAME };
+}
+
 // Try to find the container name dynamically, fallback to expected name
 function getContainerName() {
   try {
     const output = execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} ps -q mysql`, {
-      cwd: MONOREPO_ROOT,
+      cwd: COMPLEX_DIR,
       encoding: 'utf8',
+      env: getComposeEnv(),
     }).trim();
     if (output) {
       const containerId = output.split('\n')[0];
@@ -42,7 +47,7 @@ function getContainerName() {
   } catch (error) {
     // Continue to default
   }
-  return 'strapi-v5_mysql_1';
+  return `${COMPOSE_PROJECT_NAME}-mysql-1`;
 }
 
 const command = process.argv[2];
@@ -56,7 +61,7 @@ function ensureSnapshotsDir() {
 
 function execDocker(command) {
   try {
-    execSync(command, { stdio: 'inherit', cwd: MONOREPO_ROOT });
+    execSync(command, { stdio: 'inherit', cwd: COMPLEX_DIR, env: getComposeEnv() });
   } catch (error) {
     console.error(`Error executing: ${command}`);
     process.exit(1);
@@ -65,32 +70,32 @@ function execDocker(command) {
 
 switch (command) {
   case 'start':
-    console.log('Starting mariadb container...');
+    console.log('Starting mysql container...');
     execDocker(`docker-compose -f ${DOCKER_COMPOSE_FILE} up -d mysql`);
-    console.log('✅ MariaDB started');
+    console.log('✅ MySQL started');
     break;
 
   case 'stop':
-    console.log('Stopping mariadb container...');
+    console.log('Stopping mysql container...');
     execDocker(`docker-compose -f ${DOCKER_COMPOSE_FILE} stop mysql`);
-    console.log('✅ MariaDB stopped');
+    console.log('✅ MySQL stopped');
     break;
 
   case 'snapshot':
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-mariadb.js snapshot <name>');
+      console.error('Usage: node db-mysql.js snapshot <name>');
       process.exit(1);
     }
     ensureSnapshotsDir();
-    const snapshotPath = path.join(SNAPSHOTS_DIR, `mariadb-${snapshotName}.sql`);
+    const snapshotPath = path.join(SNAPSHOTS_DIR, `mysql-${snapshotName}.sql`);
     console.log(`Creating snapshot: ${snapshotName}...`);
     {
       const containerName = getContainerName();
       try {
         execSync(
           `docker exec ${containerName} mysqldump -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} > ${snapshotPath}`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         console.log(`✅ Snapshot created: ${snapshotPath}`);
       } catch (error) {
@@ -103,10 +108,10 @@ switch (command) {
   case 'restore':
     if (!snapshotName) {
       console.error('Error: Snapshot name is required');
-      console.error('Usage: node db-mariadb.js restore <name>');
+      console.error('Usage: node db-mysql.js restore <name>');
       process.exit(1);
     }
-    const restorePath = path.join(SNAPSHOTS_DIR, `mariadb-${snapshotName}.sql`);
+    const restorePath = path.join(SNAPSHOTS_DIR, `mysql-${snapshotName}.sql`);
     if (!fs.existsSync(restorePath)) {
       console.error(`Error: Snapshot not found: ${restorePath}`);
       process.exit(1);
@@ -118,12 +123,12 @@ switch (command) {
         // Drop and recreate database
         execSync(
           `docker exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         // Restore from snapshot
         execSync(
           `docker exec -i ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${restorePath}`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         console.log(`✅ Snapshot restored: ${snapshotName}`);
       } catch (error) {
@@ -134,13 +139,13 @@ switch (command) {
     break;
 
   case 'wipe':
-    console.log('Wiping mariadb database...');
+    console.log('Wiping mysql database...');
     {
       const containerName = getContainerName();
       try {
         execSync(
           `docker exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}; CREATE DATABASE ${DB_NAME};"`,
-          { stdio: 'inherit', cwd: MONOREPO_ROOT }
+          { stdio: 'inherit', cwd: COMPLEX_DIR }
         );
         console.log('✅ Database wiped');
       } catch (error) {
@@ -166,7 +171,7 @@ switch (command) {
 
         const output = execSync(
           `docker exec ${containerName} mysql -u${DB_USER} -p${DB_PASSWORD} -D ${DB_NAME} -e "${query.trim()}" -s -N`,
-          { encoding: 'utf8', cwd: MONOREPO_ROOT }
+          { encoding: 'utf8', cwd: COMPLEX_DIR }
         );
 
         const lines = output
@@ -197,6 +202,6 @@ switch (command) {
 
   default:
     console.error('Error: Unknown command');
-    console.error('Usage: node db-mariadb.js <start|stop|snapshot|restore|wipe|check> [name]');
+    console.error('Usage: node db-mysql.js <start|stop|snapshot|restore|wipe|check> [name]');
     process.exit(1);
 }

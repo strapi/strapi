@@ -66,7 +66,7 @@ function getExpectedCounts(multiplier = 1) {
   };
 }
 
-async function parseCountResult(countResult) {
+function parseCountResult(countResult) {
   if (!countResult) return 0;
   if (typeof countResult === 'number') return countResult;
   if (countResult.count !== undefined) return Number(countResult.count) || 0;
@@ -85,6 +85,20 @@ async function validateCounts(strapi, expected) {
     return parseCountResult(res[0] || res);
   }
 
+  async function countPublishedDrafts(uid) {
+    const publishedRes = await strapi.db.query(uid).count({
+      where: { publishedAt: { $notNull: true } },
+    });
+    const draftRes = await strapi.db.query(uid).count({
+      where: { publishedAt: { $null: true } },
+    });
+
+    return {
+      published: parseCountResult(publishedRes[0] || publishedRes),
+      drafts: parseCountResult(draftRes[0] || draftRes),
+    };
+  }
+
   // basic
   const basicCount = await countFor('api::basic.basic');
   checks.push({ type: 'basic', actual: basicCount, expected: expected.basic });
@@ -92,20 +106,58 @@ async function validateCounts(strapi, expected) {
     errors.push(`basic: expected ${expected.basic}, got ${basicCount}`);
 
   // basic-dp
-  const basicDpCount = await countFor('api::basic-dp.basic-dp');
-  checks.push({ type: 'basic-dp', actual: basicDpCount, expected: expected.basicDp.total });
-  if (basicDpCount !== expected.basicDp.total)
-    errors.push(`basic-dp: expected ${expected.basicDp.total}, got ${basicDpCount}`);
+  const basicDpCounts = await countPublishedDrafts('api::basic-dp.basic-dp');
+  const basicDpExpectedDrafts = expected.basicDp.drafts + expected.basicDp.published;
+  const basicDpExpectedTotal = expected.basicDp.published * 2 + expected.basicDp.drafts;
+  checks.push({
+    type: 'basic-dp (published)',
+    actual: basicDpCounts.published,
+    expected: expected.basicDp.published,
+  });
+  checks.push({
+    type: 'basic-dp (drafts)',
+    actual: basicDpCounts.drafts,
+    expected: basicDpExpectedDrafts,
+  });
+  checks.push({
+    type: 'basic-dp (total)',
+    actual: basicDpCounts.published + basicDpCounts.drafts,
+    expected: basicDpExpectedTotal,
+  });
+  if (basicDpCounts.published !== expected.basicDp.published)
+    errors.push(
+      `basic-dp published: expected ${expected.basicDp.published}, got ${basicDpCounts.published}`
+    );
+  if (basicDpCounts.drafts !== basicDpExpectedDrafts)
+    errors.push(`basic-dp drafts: expected ${basicDpExpectedDrafts}, got ${basicDpCounts.drafts}`);
 
   // basic-dp-i18n
-  const basicDpI18nCount = await countFor('api::basic-dp-i18n.basic-dp-i18n');
+  const basicDpI18nCounts = await countPublishedDrafts('api::basic-dp-i18n.basic-dp-i18n');
+  const basicDpI18nExpectedDrafts = expected.basicDpI18n.drafts + expected.basicDpI18n.published;
+  const basicDpI18nExpectedTotal = expected.basicDpI18n.published * 2 + expected.basicDpI18n.drafts;
   checks.push({
-    type: 'basic-dp-i18n',
-    actual: basicDpI18nCount,
-    expected: expected.basicDpI18n.total,
+    type: 'basic-dp-i18n (published)',
+    actual: basicDpI18nCounts.published,
+    expected: expected.basicDpI18n.published,
   });
-  if (basicDpI18nCount !== expected.basicDpI18n.total)
-    errors.push(`basic-dp-i18n: expected ${expected.basicDpI18n.total}, got ${basicDpI18nCount}`);
+  checks.push({
+    type: 'basic-dp-i18n (drafts)',
+    actual: basicDpI18nCounts.drafts,
+    expected: basicDpI18nExpectedDrafts,
+  });
+  checks.push({
+    type: 'basic-dp-i18n (total)',
+    actual: basicDpI18nCounts.published + basicDpI18nCounts.drafts,
+    expected: basicDpI18nExpectedTotal,
+  });
+  if (basicDpI18nCounts.published !== expected.basicDpI18n.published)
+    errors.push(
+      `basic-dp-i18n published: expected ${expected.basicDpI18n.published}, got ${basicDpI18nCounts.published}`
+    );
+  if (basicDpI18nCounts.drafts !== basicDpI18nExpectedDrafts)
+    errors.push(
+      `basic-dp-i18n drafts: expected ${basicDpI18nExpectedDrafts}, got ${basicDpI18nCounts.drafts}`
+    );
 
   // relation
   const relationCount = await countFor('api::relation.relation');
@@ -114,25 +166,61 @@ async function validateCounts(strapi, expected) {
     errors.push(`relation: expected ${expected.relation}, got ${relationCount}`);
 
   // relation-dp
-  const relationDpCount = await countFor('api::relation-dp.relation-dp');
+  const relationDpCounts = await countPublishedDrafts('api::relation-dp.relation-dp');
+  const relationDpExpectedDrafts = expected.relationDp.drafts + expected.relationDp.published;
+  const relationDpExpectedTotal = expected.relationDp.published * 2 + expected.relationDp.drafts;
   checks.push({
-    type: 'relation-dp',
-    actual: relationDpCount,
-    expected: expected.relationDp.total,
+    type: 'relation-dp (published)',
+    actual: relationDpCounts.published,
+    expected: expected.relationDp.published,
   });
-  if (relationDpCount !== expected.relationDp.total)
-    errors.push(`relation-dp: expected ${expected.relationDp.total}, got ${relationDpCount}`);
+  checks.push({
+    type: 'relation-dp (drafts)',
+    actual: relationDpCounts.drafts,
+    expected: relationDpExpectedDrafts,
+  });
+  checks.push({
+    type: 'relation-dp (total)',
+    actual: relationDpCounts.published + relationDpCounts.drafts,
+    expected: relationDpExpectedTotal,
+  });
+  if (relationDpCounts.published !== expected.relationDp.published)
+    errors.push(
+      `relation-dp published: expected ${expected.relationDp.published}, got ${relationDpCounts.published}`
+    );
+  if (relationDpCounts.drafts !== relationDpExpectedDrafts)
+    errors.push(
+      `relation-dp drafts: expected ${relationDpExpectedDrafts}, got ${relationDpCounts.drafts}`
+    );
 
   // relation-dp-i18n
-  const relationDpI18nCount = await countFor('api::relation-dp-i18n.relation-dp-i18n');
+  const relationDpI18nCounts = await countPublishedDrafts('api::relation-dp-i18n.relation-dp-i18n');
+  const relationDpI18nExpectedDrafts =
+    expected.relationDpI18n.drafts + expected.relationDpI18n.published;
+  const relationDpI18nExpectedTotal =
+    expected.relationDpI18n.published * 2 + expected.relationDpI18n.drafts;
   checks.push({
-    type: 'relation-dp-i18n',
-    actual: relationDpI18nCount,
-    expected: expected.relationDpI18n.total,
+    type: 'relation-dp-i18n (published)',
+    actual: relationDpI18nCounts.published,
+    expected: expected.relationDpI18n.published,
   });
-  if (relationDpI18nCount !== expected.relationDpI18n.total)
+  checks.push({
+    type: 'relation-dp-i18n (drafts)',
+    actual: relationDpI18nCounts.drafts,
+    expected: relationDpI18nExpectedDrafts,
+  });
+  checks.push({
+    type: 'relation-dp-i18n (total)',
+    actual: relationDpI18nCounts.published + relationDpI18nCounts.drafts,
+    expected: relationDpI18nExpectedTotal,
+  });
+  if (relationDpI18nCounts.published !== expected.relationDpI18n.published)
     errors.push(
-      `relation-dp-i18n: expected ${expected.relationDpI18n.total}, got ${relationDpI18nCount}`
+      `relation-dp-i18n published: expected ${expected.relationDpI18n.published}, got ${relationDpI18nCounts.published}`
+    );
+  if (relationDpI18nCounts.drafts !== relationDpI18nExpectedDrafts)
+    errors.push(
+      `relation-dp-i18n drafts: expected ${relationDpI18nExpectedDrafts}, got ${relationDpI18nCounts.drafts}`
     );
 
   // media files (plugin::upload.file)

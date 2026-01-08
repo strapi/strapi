@@ -6,14 +6,19 @@ const fs = require('fs');
 
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
-const MONOREPO_ROOT = path.resolve(COMPLEX_DIR, '../..');
-const DOCKER_COMPOSE_FILE = path.join(MONOREPO_ROOT, 'docker-compose.dev.yml');
+const DOCKER_COMPOSE_FILE = path.join(COMPLEX_DIR, 'docker-compose.dev.yml');
+const UPLOADS_DIR = path.join(COMPLEX_DIR, 'public', 'uploads');
+const COMPOSE_PROJECT_NAME = 'strapi_complex';
+
+function getComposeEnv() {
+  return { ...process.env, COMPOSE_PROJECT_NAME };
+}
 
 const dbType = process.argv[2];
 
-if (!dbType || !['postgres', 'mariadb', 'sqlite'].includes(dbType)) {
+if (!dbType || !['postgres', 'mysql'].includes(dbType)) {
   console.error('Error: Database type is required');
-  console.error('Usage: node develop-with-db.js <postgres|mariadb|sqlite>');
+  console.error('Usage: node develop-with-db.js <postgres|mysql>');
   process.exit(1);
 }
 
@@ -21,9 +26,10 @@ if (!dbType || !['postgres', 'mariadb', 'sqlite'].includes(dbType)) {
 function isContainerRunning(serviceName) {
   try {
     const output = execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} ps -q ${serviceName}`, {
-      cwd: MONOREPO_ROOT,
+      cwd: COMPLEX_DIR,
       encoding: 'utf8',
       stdio: 'pipe',
+      env: getComposeEnv(),
     }).trim();
     if (!output) return false;
 
@@ -38,29 +44,95 @@ function isContainerRunning(serviceName) {
   }
 }
 
+function getContainerId(serviceName) {
+  try {
+    const output = execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} ps -q ${serviceName}`, {
+      cwd: COMPLEX_DIR,
+      encoding: 'utf8',
+      stdio: 'pipe',
+      env: getComposeEnv(),
+    }).trim();
+    if (!output) return null;
+    return output.split('\n')[0];
+  } catch (error) {
+    return null;
+  }
+}
+
+function waitForPostgresReady() {
+  const containerId = getContainerId('postgres');
+  if (!containerId) return;
+
+  const start = Date.now();
+  while (Date.now() - start < 30000) {
+    try {
+      execSync(`docker exec ${containerId} pg_isready -U strapi`, {
+        stdio: 'ignore',
+      });
+      return;
+    } catch (error) {
+      // Wait and retry.
+    }
+  }
+  console.warn('⚠️  Postgres did not report ready within 30s; continuing anyway.');
+}
+
+function waitForMysqlReady() {
+  const containerId = getContainerId('mysql');
+  if (!containerId) return;
+
+  const start = Date.now();
+  while (Date.now() - start < 30000) {
+    try {
+      execSync(`docker exec ${containerId} mysqladmin ping -u strapi -pstrapi --silent`, {
+        stdio: 'ignore',
+      });
+      return;
+    } catch (error) {
+      // Wait and retry.
+    }
+  }
+  console.warn('⚠️  MySQL did not report ready within 30s; continuing anyway.');
+}
+
+function ensureUploadsDir() {
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+}
+
 // Start container if not running
 function ensureContainerRunning(serviceName) {
   if (isContainerRunning(serviceName)) {
     console.log(`✅ ${serviceName} container is already running`);
+    if (dbType === 'postgres') {
+      console.log('Waiting for database to be ready...');
+      waitForPostgresReady();
+    }
+    if (dbType === 'mysql') {
+      console.log('Waiting for database to be ready...');
+      waitForMysqlReady();
+    }
     return;
   }
 
   console.log(`Starting ${serviceName} container...`);
   try {
     execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} up -d ${serviceName}`, {
-      cwd: MONOREPO_ROOT,
+      cwd: COMPLEX_DIR,
       stdio: 'inherit',
+      env: getComposeEnv(),
     });
     console.log(`✅ ${serviceName} container started`);
 
     // Wait a bit for the database to be ready
-    if (dbType === 'postgres' || dbType === 'mariadb') {
+    if (dbType === 'postgres') {
       console.log('Waiting for database to be ready...');
-      // Use a simple blocking wait (cross-platform)
-      const start = Date.now();
-      while (Date.now() - start < 3000) {
-        // Blocking wait
-      }
+      waitForPostgresReady();
+    }
+    if (dbType === 'mysql') {
+      console.log('Waiting for database to be ready...');
+      waitForMysqlReady();
     }
   } catch (error) {
     console.error(`Error starting ${serviceName} container:`, error.message);
@@ -83,7 +155,7 @@ function getEnvVars() {
       env.DATABASE_SSL = 'false';
       break;
 
-    case 'mariadb':
+    case 'mysql':
       env.DATABASE_CLIENT = 'mysql';
       env.DATABASE_HOST = 'localhost';
       env.DATABASE_PORT = '3306';
@@ -91,10 +163,6 @@ function getEnvVars() {
       env.DATABASE_USERNAME = 'strapi';
       env.DATABASE_PASSWORD = 'strapi';
       env.DATABASE_SSL = 'false';
-      break;
-
-    case 'sqlite':
-      env.DATABASE_CLIENT = 'sqlite';
       break;
   }
 
@@ -105,12 +173,13 @@ function getEnvVars() {
 function startStrapi() {
   if (dbType === 'postgres') {
     ensureContainerRunning('postgres');
-  } else if (dbType === 'mariadb') {
+  } else if (dbType === 'mysql') {
     ensureContainerRunning('mysql');
   }
 
   const env = getEnvVars();
 
+  ensureUploadsDir();
   console.log(`\n🚀 Starting Strapi with ${dbType} database...\n`);
 
   // Spawn strapi develop process
