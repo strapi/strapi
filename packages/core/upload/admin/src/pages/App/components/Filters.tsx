@@ -43,8 +43,8 @@ export const Filters = () => {
       <FilterPopover
         displayedFilters={displayedFilters}
         filters={filters}
-        onToggle={setOpen as () => void}
         onSubmit={handleSubmit}
+        onToggle={setOpen as FilterPopoverProps['onToggle']}
       />
       <FilterList
         appliedFilters={filters as FilterListProps['appliedFilters']}
