@@ -21,6 +21,11 @@ const config: UserConfig = {
         'future',
       ],
     ],
+    'body-max-line-length': [
+      RuleConfigSeverity.Warning,
+      'always',
+      150,
+    ],
   },
   ignores: [
     (commitMessage) => {
