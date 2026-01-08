@@ -32,14 +32,22 @@ const expectNoCookie = (res) => {
   expect(cookies).not.toMatch(/strapi_up_refresh=/);
 };
 
+const createAuthRequest = () => createRequest({ strapi }).setURLPrefix('/api/auth');
+
+const createAuthRequestWithToken = (jwt) => createAuthRequest().setToken(jwt);
+
 const loginUser = async (userInfo = internals.user, headers = {}) => {
-  const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
-  return rqAuth({
+  return createAuthRequest()({
     method: 'POST',
     url: '/local',
     headers,
     body: { identifier: userInfo.email, password: userInfo.password },
   });
+};
+
+const loginAndGetAuthRequest = async (userInfo = internals.user) => {
+  const loginRes = await loginUser(userInfo);
+  return { loginRes, rqAuth: createAuthRequestWithToken(loginRes.body.jwt) };
 };
 
 const enableAuthRoute = async (s, routeName, roleType = 'public') => {
@@ -61,6 +69,26 @@ const enableAuthRoute = async (s, routeName, roleType = 'public') => {
   };
 
   await roleService.updateRole(role.id, { permissions: roleDetails.permissions });
+};
+
+const recreateStrapiInstance = async (config = {}) => {
+  await strapi.destroy();
+  strapi = await createStrapiInstance({
+    bypassAuth: false,
+    async bootstrap({ strapi: s }) {
+      s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
+      s.config.set('plugin::users-permissions.sessions.httpOnly', config.httpOnly ?? false);
+      if (config.disableRateLimit) {
+        s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
+      }
+      if (config.enableRoutes) {
+        for (const { route, role } of config.enableRoutes) {
+          await enableAuthRoute(s, route, role);
+        }
+      }
+    },
+  });
+  await createAuthenticatedUser({ strapi, userInfo: internals.user });
 };
 
 describe('Auth API (refresh mode httpOnly behaviour)', () => {
@@ -100,17 +128,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
   });
 
   test('Config httpOnly=true: always sets cookie and omits refreshToken', async () => {
-    await strapi.destroy();
-    strapi = await createStrapiInstance({
-      bypassAuth: false,
-      async bootstrap({ strapi: s }) {
-        s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
-        s.config.set('plugin::users-permissions.sessions.httpOnly', true);
-      },
-    });
-
-    // Ensure user exists in this new instance
-    await createAuthenticatedUser({ strapi, userInfo: internals.user });
+    await recreateStrapiInstance({ httpOnly: true });
 
     const res = await loginUser();
 
@@ -122,17 +140,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
 
   describe('Change Password (refresh mode responses)', () => {
     beforeAll(async () => {
-      await strapi.destroy();
-      strapi = await createStrapiInstance({
-        bypassAuth: false,
-        async bootstrap({ strapi: s }) {
-          s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
-          s.config.set('plugin::users-permissions.sessions.httpOnly', false);
-        },
-      });
-
-      // Ensure user exists
-      await createAuthenticatedUser({ strapi, userInfo: internals.user });
+      await recreateStrapiInstance();
     });
     test('Fails on unauthenticated request', async () => {
       const nonAuthRequest = createRequest({ strapi });
@@ -165,7 +173,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(loginRes.statusCode).toBe(200);
       const jwt = loginRes.body.jwt;
 
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth').setToken(jwt);
+      const rqAuth = createAuthRequestWithToken(jwt);
 
       const newPassword = 'Change12345!';
       const res = await rqAuth({
@@ -187,83 +195,52 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(relogin.statusCode).toBe(200);
     });
 
-    test('Fails on invalid confirm password', async () => {
-      const loginRes = await loginUser();
-      const jwt = loginRes.body.jwt;
-
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth').setToken(jwt);
-      const res = await rqAuth({
-        method: 'POST',
-        url: '/change-password',
+    test.each([
+      {
+        name: 'invalid confirm password',
         body: {
           password: 'newPassword',
           passwordConfirmation: 'somethingElse',
           currentPassword: 'Test12345!',
         },
-      });
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.name).toBe('ValidationError');
-      expect(res.body.error.message).toBe('Passwords do not match');
-    });
-
-    test('Fails on invalid current password', async () => {
-      const loginRes = await loginUser();
-      const jwt = loginRes.body.jwt;
-
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth').setToken(jwt);
-      const res = await rqAuth({
-        method: 'POST',
-        url: '/change-password',
+        expectedMessage: 'Passwords do not match',
+      },
+      {
+        name: 'invalid current password',
         body: {
           password: 'newPassword',
           passwordConfirmation: 'newPassword',
           currentPassword: 'badPassword',
         },
-      });
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.name).toBe('ValidationError');
-      expect(res.body.error.message).toBe('The provided current password is invalid');
-    });
-
-    test('Fails when current and new password are the same', async () => {
-      const loginRes = await loginUser();
-      const jwt = loginRes.body.jwt;
-
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth').setToken(jwt);
-      const res = await rqAuth({
-        method: 'POST',
-        url: '/change-password',
+        expectedMessage: 'The provided current password is invalid',
+      },
+      {
+        name: 'current and new password are the same',
         body: {
-          password: internals.user.password,
-          passwordConfirmation: internals.user.password,
-          currentPassword: internals.user.password,
+          password: 'Test1234',
+          passwordConfirmation: 'Test1234',
+          currentPassword: 'Test1234',
         },
-      });
+        expectedMessage: 'Your new password must be different than your current password',
+      },
+    ])('Fails on $name', async ({ body, expectedMessage }) => {
+      const { rqAuth } = await loginAndGetAuthRequest();
+      const res = await rqAuth({ method: 'POST', url: '/change-password', body });
       expect(res.statusCode).toBe(400);
       expect(res.body.error.name).toBe('ValidationError');
-      expect(res.body.error.message).toBe(
-        'Your new password must be different than your current password'
-      );
+      expect(res.body.error.message).toBe(expectedMessage);
     });
   });
 
   describe('Refresh endpoint', () => {
     beforeAll(async () => {
-      await strapi.destroy();
-      strapi = await createStrapiInstance({
-        bypassAuth: false,
-        async bootstrap({ strapi: s }) {
-          s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
-          s.config.set('plugin::users-permissions.sessions.httpOnly', false);
-          s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
-
-          await enableAuthRoute(s, 'refresh', 'public');
-        },
+      await recreateStrapiInstance({
+        disableRateLimit: true,
+        enableRoutes: [{ route: 'refresh', role: 'public' }],
       });
-      await createAuthenticatedUser({ strapi, userInfo: internals.user });
     });
     test('Missing refresh token returns 400 (public route)', async () => {
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
+      const rqAuth = createAuthRequest();
 
       const res = await rqAuth({ method: 'POST', url: '/refresh', body: {} });
       expect(res.statusCode).toBe(400);
@@ -271,7 +248,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
     });
 
     test('Invalid refresh token returns 401', async () => {
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
+      const rqAuth = createAuthRequest();
 
       const res = await rqAuth({
         method: 'POST',
@@ -283,7 +260,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
     });
 
     test('Success returns new jwt and rotated refreshToken in JSON by default', async () => {
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
+      const rqAuth = createAuthRequest();
 
       // Login to get a refresh token (default httpOnly=false)
       const loginRes = await loginUser();
@@ -303,7 +280,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
     });
 
     test('With httpOnly header, sets cookie and omits refreshToken in body', async () => {
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
+      const rqAuth = createAuthRequest();
 
       // Login to get a refresh token first
       const loginRes = await loginUser();
@@ -323,7 +300,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
     });
 
     test('Cookie-based refresh works when httpOnly is configured', async () => {
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
+      const rqAuth = createAuthRequest();
 
       const loginRes = await loginUser(internals.user, { 'x-strapi-refresh-cookie': 'httpOnly' });
       const setCookie = loginRes.headers['set-cookie'];
@@ -347,24 +324,16 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
 
   describe('Logout endpoint', () => {
     beforeAll(async () => {
-      await strapi.destroy();
-      strapi = await createStrapiInstance({
-        bypassAuth: false,
-        async bootstrap({ strapi: s }) {
-          s.config.set('plugin::users-permissions.jwtManagement', 'refresh');
-          s.config.set('plugin::users-permissions.sessions.httpOnly', false);
-          // Disable rate limiting for auth routes in this suite to avoid 429s
-          s.config.set('plugin::users-permissions.ratelimit', { enabled: false });
-
-          // Enable authenticated permission for logout and public for refresh (used later)
-          await enableAuthRoute(s, 'refresh', 'public');
-          await enableAuthRoute(s, 'logout', 'authenticated');
-        },
+      await recreateStrapiInstance({
+        disableRateLimit: true,
+        enableRoutes: [
+          { route: 'refresh', role: 'public' },
+          { route: 'logout', role: 'authenticated' },
+        ],
       });
-      await createAuthenticatedUser({ strapi, userInfo: internals.user });
     });
     test('Requires authentication', async () => {
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
+      const rqAuth = createAuthRequest();
       const res = await rqAuth({ method: 'POST', url: '/logout', body: {} });
       expect([401, 403]).toContain(res.statusCode);
       if (res.statusCode === 401) {
@@ -379,7 +348,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       const jwt = loginRes.body.jwt;
       expect(typeof jwt).toBe('string');
 
-      const rqAuthed = createRequest({ strapi }).setURLPrefix('/api/auth');
+      const rqAuthed = createAuthRequest();
 
       const res = await rqAuthed({
         method: 'POST',
@@ -394,7 +363,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
     });
 
     test('Logout invalidates refresh token', async () => {
-      const rqAuth = createRequest({ strapi }).setURLPrefix('/api/auth');
+      const rqAuth = createAuthRequest();
 
       // Login to get jwt and refresh token
       const loginRes = await loginUser();
@@ -405,7 +374,7 @@ describe('Auth API (refresh mode httpOnly behaviour)', () => {
       expect(typeof refreshToken).toBe('string');
 
       // Logout
-      const rqAuthed = createRequest({ strapi }).setURLPrefix('/api/auth');
+      const rqAuthed = createAuthRequest();
       const logoutRes = await rqAuthed({
         method: 'POST',
         url: '/logout',
