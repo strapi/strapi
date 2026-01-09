@@ -40,6 +40,15 @@ We use [stega encoding](https://github.com/vercel/stega) to identify which Strap
 
 The metadata uses URL search params format, because it makes it easy to encode and decode multiple pieces of information into a single string: `path=title&type=string&documentId=abc123&locale=en&model=api::page.page`
 
+### Stega limitations
+
+Stega can only encode strings. This means:
+
+- **Blocks fields don't support visual editing** — their content is a JSON object, not a string. Supporting them would require a custom implementation.
+- **Numbers and booleans aren't encoded** — we can't modify their type in the response.
+- **Fields inside components and dynamic zones work** — we encode individual string fields within them, not the parent object. The path includes indices (e.g., `components.2.title`) to identify the exact field.
+- **Media fields work partially** — the string properties inside media objects (like `url`, `name`, `alternativeText`) get encoded when traversed.
+
 ### Communication protocol
 
 The admin panel and preview iframe communicate via `postMessage`.
@@ -67,8 +76,8 @@ sequenceDiagram
 ```
 
 Public events (`previewReady`, `strapiScript`, `strapiUpdate`) are documented to users—changing them is a breaking change.
+
 Internal events (for field focus/blur/change synchronization) are defined in `packages/core/content-manager/admin/src/preview/utils/constants.ts` and can be changed freely since we control both ends.
-Internal events (for field focus/blur/change synchronization) are defined in `constants.ts` and can be changed freely since we control both ends.
 
 ### Frontend configuration
 
