@@ -10,9 +10,11 @@ import {
   contentTypes as contentTypesUtils,
   errors,
   file as fileUtils,
+  pagination,
 } from '@strapi/utils';
+import { omit, has, toNumber, isNil } from 'lodash/fp';
 
-import type { Core, UID } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
 
 import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
@@ -45,8 +47,106 @@ const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
 const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
 
+interface BasePaginationParams {
+  withCount?: boolean | 't' | '1' | 'true' | 'f' | '0' | 'false' | 0 | 1;
+}
+
+type PagedPagination = BasePaginationParams & {
+  page?: number;
+  pageSize?: number;
+};
+
+type OffsetPagination = BasePaginationParams & {
+  start?: number;
+  limit?: number;
+};
+
+type PaginationParams = PagedPagination | OffsetPagination;
+
+type PaginationInfo =
+  | {
+      page: number;
+      pageSize: number;
+    }
+  | {
+      start: number;
+      limit: number;
+    };
+
+const isOffsetPagination = (pagination?: PaginationParams): pagination is OffsetPagination =>
+  has('start', pagination) || has('limit', pagination);
+
+const isPagedPagination = (pagination?: PaginationParams): pagination is PagedPagination =>
+  has('page', pagination) || has('pageSize', pagination) || !isOffsetPagination(pagination);
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const fileService = getService('file');
+
+  /**
+   * Default limit values from config
+   */
+  const getLimitConfigDefaults = () => ({
+    defaultLimit: toNumber(strapi.config.get('api.rest.defaultLimit', 25)),
+    maxLimit: toNumber(strapi.config.get('api.rest.maxLimit')) || null,
+  });
+
+  const shouldCount = (params: { pagination?: PaginationParams }) => {
+    if (has('pagination.withCount', params)) {
+      const withCount = params.pagination?.withCount;
+
+      if (typeof withCount === 'boolean') {
+        return withCount;
+      }
+
+      if (typeof withCount === 'undefined') {
+        return false;
+      }
+
+      if (['true', 't', '1', 1].includes(withCount)) {
+        return true;
+      }
+
+      if (['false', 'f', '0', 0].includes(withCount)) {
+        return false;
+      }
+
+      throw new errors.ValidationError(
+        'Invalid withCount parameter. Expected "t","1","true","false","0","f"'
+      );
+    }
+
+    return Boolean(strapi.config.get('api.rest.withCount', true));
+  };
+
+  const getPaginationInfo = (params: { pagination?: PaginationParams }): PaginationInfo => {
+    const { defaultLimit, maxLimit } = getLimitConfigDefaults();
+
+    const { start, limit } = pagination.withDefaultPagination(params.pagination || {}, {
+      defaults: { offset: { limit: defaultLimit }, page: { pageSize: defaultLimit } },
+      maxLimit: maxLimit || -1,
+    });
+
+    return { start, limit };
+  };
+
+  const transformPaginationResponse = (
+    paginationInfo: PaginationInfo,
+    total: number | undefined,
+    isPaged: boolean
+  ) => {
+    const transform = isPaged
+      ? pagination.transformPagedPaginationInfo
+      : pagination.transformOffsetPaginationInfo;
+
+    const paginationResponse = transform(paginationInfo, total!);
+
+    if (isNil(total)) {
+      // Ignore total and pageCount if `total` value is not available.
+      return omit(['total', 'pageCount'], paginationResponse) as ReturnType<typeof transform>;
+    }
+
+    return paginationResponse;
+  };
 
   const sendMediaMetrics = async (data: Pick<File, 'caption' | 'alternativeText'>) => {
     if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
@@ -487,23 +587,117 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
 
     // Sign file URLs if using private provider
-    return async.map(files, (file: File) => fileService.signFileUrls(file));
+    return (await async.map(files, (file: File) => fileService.signFileUrls(file))) as File[];
   }
 
-  async function findPage(query: any = {}) {
-    const result = await strapi.db
-      .query(FILE_MODEL_UID)
-      .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, query));
+  async function findPage(
+    params: any = {}
+  ): Promise<Modules.EntityService.PaginatedResult<typeof FILE_MODEL_UID>> {
+    // Extract pagination from nested object if it exists (like content API)
+    const fetchParams = { ...params };
+
+    // Extract pagination object and flatten it to top level for query transformation
+    let paginationParams: PaginationParams | undefined;
+    if (fetchParams.pagination && typeof fetchParams.pagination === 'object') {
+      // Convert string values to numbers for pagination params
+      const paginationObj: any = { ...fetchParams.pagination };
+      if (paginationObj.page !== undefined) paginationObj.page = Number(paginationObj.page);
+      if (paginationObj.pageSize !== undefined)
+        paginationObj.pageSize = Number(paginationObj.pageSize);
+      if (paginationObj.start !== undefined) paginationObj.start = Number(paginationObj.start);
+      // Handle 'offset' as alias for 'start' in nested pagination object
+      if (paginationObj.offset !== undefined && paginationObj.start === undefined) {
+        paginationObj.start = Number(paginationObj.offset);
+        delete paginationObj.offset;
+      }
+      if (paginationObj.limit !== undefined) paginationObj.limit = Number(paginationObj.limit);
+      paginationParams = paginationObj as PaginationParams;
+      // Remove pagination from fetchParams so it doesn't interfere with query transformation
+      const { pagination: _, ...rest } = fetchParams;
+      Object.assign(fetchParams, rest);
+    } else {
+      // Check if pagination params are at top level
+      // Note: 'offset' is an alias for 'start' in query params (gets converted by transformQueryParams)
+      if (
+        fetchParams.page !== undefined ||
+        fetchParams.pageSize !== undefined ||
+        fetchParams.start !== undefined ||
+        fetchParams.offset !== undefined ||
+        fetchParams.limit !== undefined
+      ) {
+        // Build pagination params object with only defined values, converting strings to numbers
+        const paginationObj: any = {};
+        if (fetchParams.page !== undefined) paginationObj.page = Number(fetchParams.page);
+        if (fetchParams.pageSize !== undefined)
+          paginationObj.pageSize = Number(fetchParams.pageSize);
+        // Handle both 'start' and 'offset' - 'offset' is converted to 'start' for pagination logic
+        if (fetchParams.start !== undefined) {
+          paginationObj.start = Number(fetchParams.start);
+        } else if (fetchParams.offset !== undefined) {
+          paginationObj.start = Number(fetchParams.offset); // offset is an alias for start
+        }
+        if (fetchParams.limit !== undefined) paginationObj.limit = Number(fetchParams.limit);
+        paginationParams = paginationObj as PaginationParams;
+        // Remove pagination params from fetchParams so they don't interfere with query transformation
+        const { page, pageSize, start, offset, limit, ...rest } = fetchParams;
+        Object.assign(fetchParams, rest);
+      }
+    }
+
+    // Get pagination info (converts to { start, limit } for database query)
+    const paginationInfo = getPaginationInfo({ pagination: paginationParams });
+    const isPaged = isPagedPagination(paginationParams);
+
+    // Merge pagination info into fetchParams so transformQueryParams can convert start to offset
+    const paramsWithPagination = {
+      ...fetchParams,
+      ...paginationInfo, // { start, limit } - transformQueryParams will convert start to offset
+    };
+
+    // Transform query params (handles filters, sort, populate, etc.)
+    // This will convert 'start' to 'offset' and 'limit' to 'limit' for the database query
+    const query = strapi.get('query-params').transform(FILE_MODEL_UID, paramsWithPagination);
+
+    // Execute query
+    const results = await strapi.db.query(FILE_MODEL_UID).findMany(query);
 
     // Sign file URLs if using private provider
-    const signedResults = await async.map(result.results, (file: File) =>
+    const signedResults = (await async.map(results, (file: File) =>
       fileService.signFileUrls(file)
-    );
+    )) as File[];
+
+    // Get count if needed
+    let total: number | undefined;
+    const needsCount = shouldCount({ pagination: paginationParams });
+    if (needsCount) {
+      total = await strapi.db.query(FILE_MODEL_UID).count(query);
+
+      if (typeof total !== 'number') {
+        throw new Error('Count should be a number');
+      }
+    }
+
+    // Transform pagination response - need to pass original pagination params merged with converted info
+    // The transform functions check for page/pageSize first, then start/limit
+    const originalPaginationInfo = paginationParams
+      ? { ...paginationParams, ...paginationInfo }
+      : paginationInfo;
+
+    const paginationResponse = transformPaginationResponse(originalPaginationInfo, total, isPaged);
+
+    // Return pagination in the format that matches what was requested
+    // When using page-based pagination, transformPaginationResponse returns { page, pageSize, pageCount, total }
+    // When using offset-based pagination, it returns { start, limit, total }
+    // Store the original pagination response format for the controller to use
+    // We need to cast because PaginatedResult type requires page-based format, but we want to preserve the original format
 
     return {
-      ...result,
       results: signedResults,
-    };
+      pagination: paginationResponse as any, // Cast to allow returning the actual paginationResponse format
+      // Store metadata so controller can determine which format to return
+      _paginationFormat: isPaged ? 'page' : 'offset',
+      _originalPagination: paginationResponse,
+    } as any;
   }
 
   async function remove(file: File) {

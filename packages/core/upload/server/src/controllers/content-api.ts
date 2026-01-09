@@ -11,12 +11,20 @@ import { FileInfo, Config } from '../types';
 
 const { ValidationError } = utils.errors;
 
-type Pagination = {
+type PagePagination = {
   page: number;
   pageSize: number;
   pageCount: number;
   total: number;
 };
+
+type OffsetPagination = {
+  start: number;
+  limit: number;
+  total: number;
+};
+
+type Pagination = PagePagination | OffsetPagination;
 
 type PaginatedResponse<T> = {
   data: T[];
@@ -48,12 +56,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const transformPagination = (
-    files: Modules.EntityService.PaginatedResult<typeof FILE_MODEL_UID>
+    files: Modules.EntityService.PaginatedResult<typeof FILE_MODEL_UID> & {
+      _paginationFormat?: 'page' | 'offset';
+      _originalPagination?: PagePagination | OffsetPagination;
+    }
   ): PaginatedResponse<unknown> => {
+    // Use the original pagination format if available, otherwise use the default
+    const pagination = files._originalPagination || files.pagination;
+
     return {
       data: files.results,
       meta: {
-        pagination: files.pagination,
+        pagination: pagination as Pagination,
       },
     };
   };
@@ -67,9 +81,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const config = strapi.config.get<Config>('plugin::upload');
       const usePagination = config?.paginatedResponses ?? false;
 
-      const files = usePagination
-        ? await transformPagination(await getService('upload').findPage(sanitizedQuery))
-        : await getService('upload').findMany(sanitizedQuery);
+      let files;
+      if (usePagination) {
+        const pageResult = await getService('upload').findPage(sanitizedQuery);
+        files = await transformPagination(pageResult);
+      } else {
+        files = await getService('upload').findMany(sanitizedQuery);
+      }
 
       ctx.body = await sanitizeOutput(files, ctx);
     },
