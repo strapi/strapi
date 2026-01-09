@@ -96,52 +96,39 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       files: File[],
       metadataResults: Array<{ altText: string; caption: string } | null>,
       user: { id: string | number }
-    ): Promise<{ processed: number; errors: Array<{ fileId: number; error: string }> }> {
+    ) {
       const uploadService = strapi.plugin('upload').service('upload');
-      let processed = 0;
-      const errors: Array<{ fileId: number; error: string }> = [];
 
       await Promise.all(
         files.map(async (file, index) => {
           const aiMetadata = metadataResults[index];
           if (aiMetadata) {
-            try {
-              // Only update fields that are missing (null or empty string)
-              const updateData: { alternativeText?: string; caption?: string } = {};
+            // Only update fields that are missing (null or empty string)
+            const updateData: { alternativeText?: string; caption?: string } = {};
 
-              if (!file.alternativeText || file.alternativeText === '') {
-                updateData.alternativeText = aiMetadata.altText;
+            if (!file.alternativeText || file.alternativeText === '') {
+              updateData.alternativeText = aiMetadata.altText;
+            }
+
+            if (!file.caption || file.caption === '') {
+              updateData.caption = aiMetadata.caption;
+            }
+
+            // Only update if there are fields to update
+            if (Object.keys(updateData).length > 0) {
+              await uploadService.updateFileInfo(file.id, updateData, { user });
+
+              // Update in-memory file object (needed for upload flow response)
+              if (updateData.alternativeText !== undefined) {
+                file.alternativeText = updateData.alternativeText;
               }
-
-              if (!file.caption || file.caption === '') {
-                updateData.caption = aiMetadata.caption;
+              if (updateData.caption !== undefined) {
+                file.caption = updateData.caption;
               }
-
-              // Only update if there are fields to update
-              if (Object.keys(updateData).length > 0) {
-                await uploadService.updateFileInfo(file.id, updateData, { user });
-
-                // Update in-memory file object (needed for upload flow response)
-                if (updateData.alternativeText !== undefined) {
-                  file.alternativeText = updateData.alternativeText;
-                }
-                if (updateData.caption !== undefined) {
-                  file.caption = updateData.caption;
-                }
-
-                processed += 1;
-              }
-            } catch (error) {
-              errors.push({
-                fileId: file.id,
-                error: error instanceof Error ? error.message : 'Unknown error updating file',
-              });
             }
           }
         })
       );
-
-      return { processed, errors };
     },
 
     /**

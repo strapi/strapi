@@ -19,11 +19,12 @@ const fetchLatestJob = async (
   }
 };
 
-export const useAIMetadataJob = () => {
+export const useAIMetadataJob = (options?: { enabled?: boolean }) => {
   const { get } = useFetchClient();
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
+  const enabled = options?.enabled ?? true;
 
   const [previousJobStatus, setPreviousJobStatus] = React.useState<AIMetadataJob['status'] | null>(
     null
@@ -34,6 +35,7 @@ export const useAIMetadataJob = () => {
     ['ai-metadata-latest-job'],
     () => fetchLatestJob(get),
     {
+      enabled,
       // Poll every second when job is processing
       refetchInterval: (data) => {
         // If no data yet, don't poll

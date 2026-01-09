@@ -362,7 +362,7 @@ describe('AI Metadata Service', () => {
 
       const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
 
-      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
+      await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
         id: 1,
       });
 
@@ -372,8 +372,7 @@ describe('AI Metadata Service', () => {
         { caption: 'AI generated caption' }, // Only caption should be updated
         { user: { id: 1 } }
       );
-      expect(result.processed).toBe(1);
-      expect(result.errors).toHaveLength(0);
+
       expect(files[0].caption).toBe('AI generated caption');
       expect(files[0].alternativeText).toBe('Existing alt text'); // Should remain unchanged
     });
@@ -395,7 +394,7 @@ describe('AI Metadata Service', () => {
 
       const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
 
-      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
+      await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
         id: 1,
       });
 
@@ -405,8 +404,7 @@ describe('AI Metadata Service', () => {
         { alternativeText: 'AI generated alt' }, // Only alternativeText should be updated
         { user: { id: 1 } }
       );
-      expect(result.processed).toBe(1);
-      expect(result.errors).toHaveLength(0);
+
       expect(files[0].alternativeText).toBe('AI generated alt');
       expect(files[0].caption).toBe('Existing caption'); // Should remain unchanged
     });
@@ -428,7 +426,7 @@ describe('AI Metadata Service', () => {
 
       const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
 
-      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
+      await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
         id: 1,
       });
 
@@ -438,8 +436,6 @@ describe('AI Metadata Service', () => {
         { alternativeText: 'AI generated alt', caption: 'AI generated caption' }, // Both fields
         { user: { id: 1 } }
       );
-      expect(result.processed).toBe(1);
-      expect(result.errors).toHaveLength(0);
       expect(files[0].alternativeText).toBe('AI generated alt');
       expect(files[0].caption).toBe('AI generated caption');
     });
@@ -461,13 +457,11 @@ describe('AI Metadata Service', () => {
 
       const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
 
-      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
+      await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
         id: 1,
       });
 
       expect(mockUpdateFileInfo).not.toHaveBeenCalled(); // Should not update at all
-      expect(result.processed).toBe(0); // Should not count as processed
-      expect(result.errors).toHaveLength(0);
       expect(files[0].alternativeText).toBe('Existing alt text'); // Should remain unchanged
       expect(files[0].caption).toBe('Existing caption'); // Should remain unchanged
     });
@@ -489,7 +483,7 @@ describe('AI Metadata Service', () => {
 
       const metadataResults = [{ altText: 'AI generated alt', caption: 'AI generated caption' }];
 
-      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
+      await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
         id: 1,
       });
 
@@ -499,8 +493,6 @@ describe('AI Metadata Service', () => {
         { alternativeText: 'AI generated alt', caption: 'AI generated caption' },
         { user: { id: 1 } }
       );
-      expect(result.processed).toBe(1);
-      expect(result.errors).toHaveLength(0);
     });
 
     it('should handle multiple files with different metadata states', async () => {
@@ -538,7 +530,7 @@ describe('AI Metadata Service', () => {
         { altText: 'Alt 4', caption: 'Caption 4' },
       ];
 
-      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
+      await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
         id: 1,
       });
 
@@ -560,51 +552,6 @@ describe('AI Metadata Service', () => {
         4,
         { alternativeText: 'Alt 4', caption: 'Caption 4' },
         { user: { id: 1 } }
-      );
-      expect(result.processed).toBe(3);
-      expect(result.errors).toHaveLength(0);
-    });
-
-    it('should handle errors and continue processing other files', async () => {
-      const files: File[] = [
-        { id: 1, name: 'image1.jpg', alternativeText: null, caption: null } as File,
-        { id: 2, name: 'image2.jpg', alternativeText: null, caption: null } as File,
-      ];
-
-      const metadataResults = [
-        { altText: 'Alt 1', caption: 'Caption 1' },
-        { altText: 'Alt 2', caption: 'Caption 2' },
-      ];
-
-      mockUpdateFileInfo
-        .mockRejectedValueOnce(new Error('Update failed'))
-        .mockResolvedValueOnce({});
-
-      const result = await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, {
-        id: 1,
-      });
-
-      expect(result.processed).toBe(1); // Only second file processed
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]).toEqual({
-        fileId: 1,
-        error: 'Update failed',
-      });
-    });
-
-    it('should pass user to updateFileInfo', async () => {
-      const files: File[] = [
-        { id: 1, name: 'image.jpg', alternativeText: null, caption: null } as File,
-      ];
-
-      const metadataResults = [{ altText: 'AI alt', caption: 'AI caption' }];
-
-      await aiMetadataService.updateFilesWithAIMetadata(files, metadataResults, { id: 123 });
-
-      expect(mockUpdateFileInfo).toHaveBeenCalledWith(
-        1,
-        { alternativeText: 'AI alt', caption: 'AI caption' },
-        { user: { id: 123 } }
       );
     });
   });

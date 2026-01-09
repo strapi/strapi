@@ -229,7 +229,9 @@ export const SettingsPage = () => {
   );
 
   // Poll for latest active job - notifications are handled inside the hook
-  const { data: jobStatus, refetch: refetchJobStatus } = useAIMetadataJob();
+  const { data: jobStatus, refetch: refetchJobStatus } = useAIMetadataJob({
+    enabled: isAIAvailable,
+  });
 
   const { mutateAsync: startGenerateAIMetadata } = useMutation<
     {

@@ -55,38 +55,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     mockAiMetadataService = {
       isEnabled: jest.fn(),
       processFiles: jest.fn(),
-      updateFilesWithAIMetadata: jest
-        .fn()
-        .mockImplementation(async (files, metadataResults, options) => {
-          let processed = 0;
-          const errors: Array<{ fileId: number; error: string }> = [];
-
-          await Promise.all(
-            files.map(async (file: any, index: number) => {
-              const aiMetadata = metadataResults[index];
-              if (aiMetadata) {
-                try {
-                  await uploadService.updateFileInfo(
-                    file.id,
-                    {
-                      alternativeText: aiMetadata.altText,
-                      caption: aiMetadata.caption,
-                    },
-                    options?.user ? { user: options.user } : undefined
-                  );
-                  processed += 1;
-                } catch (error) {
-                  errors.push({
-                    fileId: file.id,
-                    error: error instanceof Error ? error.message : 'Unknown error updating file',
-                  });
-                }
-              }
-            })
-          );
-
-          return { processed, errors };
-        }),
+      updateFilesWithAIMetadata: jest.fn().mockResolvedValue(undefined),
     };
 
     uploadService = {
@@ -470,7 +439,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         { altText: 'AI generated alt text', caption: 'AI generated caption' },
       ]);
 
-      uploadService.upload.mockResolvedValue([
+      const uploadedFiles = [
         {
           id: 1,
           name: 'test.jpg',
@@ -478,17 +447,16 @@ describe('Admin Upload Controller - AI Service Connection', () => {
           url: '/uploads/test.jpg',
           provider: 'local',
         },
-      ]);
+      ];
+
+      uploadService.upload.mockResolvedValue(uploadedFiles);
 
       await adminUploadController.uploadFiles(mockContext as Context);
 
-      expect(uploadService.updateFileInfo).toHaveBeenCalledWith(
-        1,
-        {
-          alternativeText: 'AI generated alt text',
-          caption: 'AI generated caption',
-        },
-        { user: { id: 1 } }
+      expect(mockAiMetadataService.updateFilesWithAIMetadata).toHaveBeenCalledWith(
+        uploadedFiles,
+        [{ altText: 'AI generated alt text', caption: 'AI generated caption' }],
+        { id: 1 }
       );
     });
   });
