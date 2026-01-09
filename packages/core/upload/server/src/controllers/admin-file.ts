@@ -142,12 +142,7 @@ export default {
     }
 
     try {
-      // Get count first
-      // Note: There's a potential race condition where the count here may differ from
-      // the actual files processed by processExistingFiles, as new images could
-      // be uploaded between this count and the service's query. This is acceptable since
-      // the service processes the actual files correctly; only the initial totalFiles
-      // estimate shown to the user may differ slightly from the final processed count.
+      // Get count first to check if there are images to process
       const count = await aiMetadataService.countImagesWithoutMetadata();
 
       if (count === 0) {
@@ -158,20 +153,19 @@ export default {
         return;
       }
 
-      // Create job with initial count estimate
+      // Create job
       const jobService = getService('aiMetadataJobs');
-      const jobId = await jobService.createJob(count);
+      const jobId = await jobService.createJob();
 
       // Start async processing (fire and forget)
       aiMetadataService.processExistingFiles(jobId, ctx.state.user).catch((err: Error) => {
         strapi.log.error('AI metadata job failed:', err);
       });
 
-      // Return immediately with job ID and initial count estimate
+      // Return immediately with job ID
       ctx.body = {
         jobId,
         status: 'pending',
-        totalFiles: count,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate AI metadata';
@@ -195,12 +189,6 @@ export default {
       return ctx.notFound('No active job found');
     }
 
-    const progress =
-      job.totalFiles > 0 ? Math.round((job.processedFiles / job.totalFiles) * 100) : 0;
-
-    ctx.body = {
-      ...job,
-      progress,
-    };
+    ctx.body = job;
   },
 };

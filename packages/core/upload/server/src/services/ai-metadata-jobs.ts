@@ -4,15 +4,10 @@ import { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
 import { AI_METADATA_JOB_UID } from '../models/ai-metadata-job';
 
 export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi }) => ({
-  async createJob(totalFiles: number): Promise<number> {
+  async createJob(): Promise<number> {
     const job = await strapi.db.query(AI_METADATA_JOB_UID).create({
       data: {
         status: 'processing',
-        totalFiles,
-        processedFiles: 0,
-        successCount: 0,
-        errorCount: 0,
-        errors: [],
         createdAt: new Date(),
       },
     });

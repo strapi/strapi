@@ -179,15 +179,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         // Process all files at once
         const metadataResults = await this.processFiles(files);
-        const result = await this.updateFilesWithAIMetadata(files, metadataResults, user);
-
-        // Update job with final results
-        await jobService.updateJob(jobId, {
-          processedFiles: files.length,
-          successCount: result.processed,
-          errorCount: result.errors.length,
-          errors: result.errors,
-        });
+        await this.updateFilesWithAIMetadata(files, metadataResults, user);
 
         // Mark as completed
         await jobService.updateJob(jobId, {

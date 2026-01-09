@@ -5,14 +5,8 @@
 export interface AIMetadataJob {
   id: number;
   status: 'processing' | 'completed' | 'failed';
-  totalFiles: number;
-  processedFiles: number;
-  successCount: number;
-  errorCount: number;
-  errors: Array<{ fileId: number; error: string }>;
   createdAt: Date;
   completedAt?: Date;
-  progress?: number;
 }
 
 /**
@@ -44,7 +38,6 @@ export declare namespace StartAIMetadataJob {
     data: {
       jobId: number;
       status: string;
-      totalFiles: number;
     };
   }
 }

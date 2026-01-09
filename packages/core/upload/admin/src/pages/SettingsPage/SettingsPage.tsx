@@ -40,6 +40,10 @@ import { initialState, reducer } from './reducer';
 
 import type { InitialState } from './reducer';
 
+/* -------------------------------------------------------------------------------------------------
+ * MetadataAction
+ * -----------------------------------------------------------------------------------------------*/
+
 const GenerateMetadataButton = styled(Button)`
   > span {
     color: ${({ theme }) => theme.colors.primary600};
@@ -152,6 +156,10 @@ const MetadataAction = ({
     </Dialog.Root>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * SettingsPage
+ * -----------------------------------------------------------------------------------------------*/
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();

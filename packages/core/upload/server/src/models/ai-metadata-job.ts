@@ -15,26 +15,6 @@ const aiMetadataJob: Model = {
       enum: ['processing', 'completed', 'failed'],
       column: { notNullable: true },
     },
-    totalFiles: {
-      type: 'integer',
-      column: { notNullable: true },
-    },
-    processedFiles: {
-      type: 'integer',
-      column: { notNullable: true },
-    },
-    successCount: {
-      type: 'integer',
-      column: { notNullable: true },
-    },
-    errorCount: {
-      type: 'integer',
-      column: { notNullable: true },
-    },
-    errors: {
-      type: 'json',
-      column: { notNullable: true },
-    },
     createdAt: {
       type: 'datetime',
       default: () => new Date(),

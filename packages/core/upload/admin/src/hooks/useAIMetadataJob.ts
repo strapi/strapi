@@ -29,36 +29,29 @@ export const useAIMetadataJob = () => {
     null
   );
 
-  // Initial query to get current job state
-  const { data: initialJobData, refetch } = useQuery<AIMetadataJob | null, { message: string }>(
+  // Single query with conditional polling
+  const { data: job, refetch } = useQuery<AIMetadataJob | null, { message: string }>(
     ['ai-metadata-latest-job'],
     () => fetchLatestJob(get),
     {
-      retry: false,
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  // Polling query - starts when initial data or previous status indicates active job
-  const { data: pollingJobData } = useQuery<AIMetadataJob | null, { message: string }>(
-    ['ai-metadata-latest-job-polling'],
-    () => fetchLatestJob(get),
-    {
-      enabled: initialJobData?.status === 'processing' || previousJobStatus === 'processing',
-      // Stop polling once the polled job is completed or failed
+      // Poll every second when job is processing
       refetchInterval: (data) => {
-        if (data?.status === 'completed' || data?.status === 'failed') {
-          return false;
+        // If no data yet, don't poll
+        if (!data) return false;
+
+        // Poll while processing
+        if (data.status === 'processing') {
+          return 1000;
         }
-        return 1000;
+
+        // Stop polling when completed or failed
+        return false;
       },
       retry: false,
       refetchOnWindowFocus: false,
     }
   );
 
-  // Use polling data if available, otherwise initial data
-  const job = pollingJobData ?? initialJobData;
   const currentJobStatus = job?.status ?? null;
 
   // Detect status transitions and show notifications
@@ -67,24 +60,12 @@ export const useAIMetadataJob = () => {
 
     // Detect transition from active state to completed
     if (previousJobStatus === 'processing' && currentJobStatus === 'completed') {
-      const hasErrors = job?.errorCount && job.errorCount > 0;
       toggleNotification({
-        type: hasErrors ? 'warning' : 'success',
-        message: hasErrors
-          ? formatMessage(
-              {
-                id: getTrad('settings.form.aiMetadata.job-completed-with-errors'),
-                defaultMessage: 'Processed {successCount} images successfully, {errorCount} failed',
-              },
-              { successCount: job?.successCount ?? 0, errorCount: job?.errorCount ?? 0 }
-            )
-          : formatMessage(
-              {
-                id: getTrad('settings.form.aiMetadata.job-completed'),
-                defaultMessage: 'Successfully processed {successCount} images',
-              },
-              { successCount: job?.successCount ?? 0 }
-            ),
+        type: 'success',
+        message: formatMessage({
+          id: getTrad('settings.form.aiMetadata.job-completed'),
+          defaultMessage: 'Successfully generated metadata',
+        }),
       });
       // Invalidate metadata count query to refresh the count
       queryClient.invalidateQueries(['ai-metadata-count']);
@@ -105,15 +86,7 @@ export const useAIMetadataJob = () => {
     if (previousJobStatus !== currentJobStatus) {
       setPreviousJobStatus(currentJobStatus);
     }
-  }, [
-    currentJobStatus,
-    previousJobStatus,
-    job?.successCount,
-    job?.errorCount,
-    toggleNotification,
-    formatMessage,
-    queryClient,
-  ]);
+  }, [currentJobStatus, previousJobStatus, toggleNotification, formatMessage, queryClient]);
 
   return {
     data: job,
