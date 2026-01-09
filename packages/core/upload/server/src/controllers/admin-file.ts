@@ -155,7 +155,7 @@ export default {
 
       // Create job
       const jobService = getService('aiMetadataJobs');
-      const jobId = jobService.createJob(ctx.state.user.id, count);
+      const jobId = await jobService.createJob(count);
 
       // Start async processing (fire and forget)
       aiMetadataService.processExistingFilesWithJob(jobId, ctx.state.user).catch((err: Error) => {
@@ -182,25 +182,20 @@ export default {
     }
   },
 
-  async getAIMetadataJobStatus(ctx: Context) {
-    const { jobId } = ctx.params;
+  async getLatestAIMetadataJob(ctx: Context) {
     const jobService = getService('aiMetadataJobs');
-
-    const job = jobService.getJob(jobId, ctx.state.user.id);
+    const job = await jobService.getLatestActiveJob();
 
     if (!job) {
-      return ctx.notFound('Job not found');
+      return ctx.notFound('No active job found');
     }
 
+    const progress =
+      job.totalFiles > 0 ? Math.round((job.processedFiles / job.totalFiles) * 100) : 0;
+
     ctx.body = {
-      id: job.id,
-      status: job.status,
-      totalFiles: job.totalFiles,
-      processedFiles: job.processedFiles,
-      successCount: job.successCount,
-      errorCount: job.errorCount,
-      errors: job.errors,
-      progress: job.totalFiles > 0 ? Math.round((job.processedFiles / job.totalFiles) * 100) : 0,
+      ...job,
+      progress,
     };
   },
 };

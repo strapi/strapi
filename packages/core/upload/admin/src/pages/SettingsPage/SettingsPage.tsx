@@ -28,6 +28,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { styled } from 'styled-components';
 
+import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
 import { useAIMetadataJob } from '../../hooks/useAIMetadataJob';
@@ -71,8 +72,7 @@ const BetaStatus = (props: Omit<StatusProps, 'children'>) => {
 };
 
 interface MetadataActionProps {
-  currentJobId: string | null;
-  lastJobResult: { successCount: number; errorCount: number } | null;
+  jobStatus: AIMetadataJob | null;
   metadataCount: number;
   isConfirmDialogOpen: boolean;
   onConfirmDialogChange: (open: boolean) => void;
@@ -80,8 +80,7 @@ interface MetadataActionProps {
 }
 
 const MetadataAction = ({
-  currentJobId,
-  lastJobResult,
+  jobStatus,
   metadataCount,
   isConfirmDialogOpen,
   onConfirmDialogChange,
@@ -89,7 +88,8 @@ const MetadataAction = ({
 }: MetadataActionProps) => {
   const { formatMessage } = useIntl();
 
-  if (currentJobId) {
+  // If there's an active job processing
+  if (jobStatus?.status === 'processing') {
     return (
       <Flex gap={2} alignItems="center">
         <Typography variant="pi" textColor="neutral600">
@@ -102,7 +102,8 @@ const MetadataAction = ({
     );
   }
 
-  if (lastJobResult || metadataCount === 0) {
+  // Only show completed state when all images have metadata
+  if (metadataCount === 0) {
     return (
       <Typography variant="pi" textColor="primary600">
         <Flex gap={2} alignItems="center">
@@ -157,25 +158,16 @@ export const SettingsPage = () => {
   const { toggleNotification } = useNotification();
   const { put, post, get } = useFetchClient();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
-  const [currentJobId, setCurrentJobId] = React.useState<string | null>(() => {
-    // Restore job ID from localStorage on mount
-    return localStorage.getItem('strapi-ai-metadata-job-id');
-  });
-  const [lastJobResult, setLastJobResult] = React.useState<{
-    successCount: number;
-    errorCount: number;
-  } | null>(null);
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
   const { data, isLoading, refetch } = useSettings();
   const isAIAvailable = useAIAvailability();
 
-  const {
-    data: metadataCountData,
-    refetch: refetchMetadataCount,
-    isLoading: isLoadingMetadataCount,
-  } = useQuery<{ count: number }, { message: string }>(
+  const { data: metadataCountData, isLoading: isLoadingMetadataCount } = useQuery<
+    { count: number },
+    { message: string }
+  >(
     ['ai-metadata-count'],
     async () => {
       const { data } = await get('/upload/actions/generate-ai-metadata/count');
@@ -228,9 +220,12 @@ export const SettingsPage = () => {
     }
   );
 
+  // Poll for latest active job - notifications are handled inside the hook
+  const { data: jobStatus, refetch: refetchJobStatus } = useAIMetadataJob();
+
   const { mutateAsync: startGenerateAIMetadata } = useMutation<
     {
-      jobId: string;
+      jobId: number;
       status: string;
       totalFiles: number;
     },
@@ -242,11 +237,10 @@ export const SettingsPage = () => {
       return data;
     },
     {
-      onSuccess(data) {
-        setCurrentJobId(data.jobId);
-        setLastJobResult(null); // Clear previous result when starting new job
-        localStorage.setItem('strapi-ai-metadata-job-id', data.jobId);
+      onSuccess() {
         setIsConfirmDialogOpen(false);
+        // Refetch job status to start polling the new job
+        refetchJobStatus();
       },
       onError(err) {
         toggleNotification({
@@ -257,47 +251,6 @@ export const SettingsPage = () => {
       },
     }
   );
-
-  // Poll for job status
-  const { data: jobStatus } = useAIMetadataJob(currentJobId);
-
-  // Handle job completion
-  React.useEffect(() => {
-    if (jobStatus?.status === 'completed') {
-      const hasErrors = jobStatus.errorCount > 0;
-      // Store the result for inline display
-      setLastJobResult({
-        successCount: jobStatus.successCount,
-        errorCount: jobStatus.errorCount,
-      });
-      toggleNotification({
-        type: hasErrors ? 'warning' : 'success',
-        message: hasErrors
-          ? `Processed ${jobStatus.successCount} images successfully, ${jobStatus.errorCount} failed`
-          : `Successfully processed ${jobStatus.successCount} images`,
-      });
-      refetchMetadataCount();
-      setIsConfirmDialogOpen(false);
-      setCurrentJobId(null);
-      localStorage.removeItem('strapi-ai-metadata-job-id');
-    } else if (jobStatus?.status === 'failed') {
-      setLastJobResult(null);
-      toggleNotification({
-        type: 'danger',
-        message: 'Failed to generate metadata',
-      });
-      setIsConfirmDialogOpen(false);
-      setCurrentJobId(null);
-      localStorage.removeItem('strapi-ai-metadata-job-id');
-    }
-  }, [
-    jobStatus?.status,
-    jobStatus?.successCount,
-    jobStatus?.errorCount,
-    jobStatus?.totalFiles,
-    refetchMetadataCount,
-    toggleNotification,
-  ]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -440,8 +393,7 @@ export const SettingsPage = () => {
                             </Typography>
                           </Flex>
                           <MetadataAction
-                            currentJobId={currentJobId}
-                            lastJobResult={lastJobResult}
+                            jobStatus={jobStatus ?? null}
                             metadataCount={metadataCount}
                             isConfirmDialogOpen={isConfirmDialogOpen}
                             onConfirmDialogChange={setIsConfirmDialogOpen}

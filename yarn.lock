@@ -9563,6 +9563,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/database@npm:5.33.0":
+  version: 5.33.0
+  resolution: "@strapi/database@npm:5.33.0"
+  dependencies:
+    "@paralleldrive/cuid2": "npm:2.2.2"
+    "@strapi/utils": "npm:5.33.0"
+    ajv: "npm:8.16.0"
+    date-fns: "npm:2.30.0"
+    debug: "npm:4.3.4"
+    fs-extra: "npm:11.2.0"
+    knex: "npm:3.0.1"
+    lodash: "npm:4.17.21"
+    semver: "npm:7.5.4"
+    umzug: "npm:3.8.1"
+  checksum: 10c0/143f0c9524b4d0ded1d818eca063984fde06c1fb87e10e0cfabaf9f7d942953ebe85e2c88878dafb7d9cd259565042bfad55b2ca99a4133457b9d52ca2850732
+  languageName: node
+  linkType: hard
+
 "@strapi/database@npm:5.33.2, @strapi/database@workspace:packages/core/database":
   version: 0.0.0-use.local
   resolution: "@strapi/database@workspace:packages/core/database"
@@ -10412,6 +10430,7 @@ __metadata:
     "@mux/mux-player-react": "npm:3.1.0"
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.33.2"
+    "@strapi/database": "npm:5.33.0"
     "@strapi/design-system": "npm:2.0.1"
     "@strapi/icons": "npm:2.0.1"
     "@strapi/provider-upload-local": "npm:5.33.2"
@@ -10462,6 +10481,24 @@ __metadata:
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
+
+"@strapi/utils@npm:5.33.0":
+  version: 5.33.0
+  resolution: "@strapi/utils@npm:5.33.0"
+  dependencies:
+    "@sindresorhus/slugify": "npm:1.1.0"
+    date-fns: "npm:2.30.0"
+    execa: "npm:5.1.1"
+    http-errors: "npm:2.0.0"
+    lodash: "npm:4.17.21"
+    node-machine-id: "npm:1.1.12"
+    p-map: "npm:4.0.0"
+    preferred-pm: "npm:3.1.2"
+    yup: "npm:0.32.9"
+    zod: "npm:3.25.67"
+  checksum: 10c0/7cb493363aaf87ec1ad004362db0cfdac7290a204c8b4674cf8d49f857d98a4fdb036f7482590a3bb2eb5d11b24527792bbc03d4f6d782c3bea170458d3b91ae
+  languageName: node
+  linkType: hard
 
 "@strapi/utils@npm:5.33.2, @strapi/utils@workspace:packages/core/utils":
   version: 0.0.0-use.local

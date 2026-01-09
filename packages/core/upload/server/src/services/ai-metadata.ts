@@ -152,12 +152,12 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Process existing files with job tracking for progress updates
      */
-    async processExistingFilesWithJob(jobId: string, user: { id: string | number }): Promise<void> {
+    async processExistingFilesWithJob(jobId: number, user: { id: string | number }): Promise<void> {
       const jobService = getService('aiMetadataJobs');
 
       try {
         // Mark as processing
-        jobService.updateJob(jobId, { status: 'processing' });
+        await jobService.updateJob(jobId, { status: 'processing' });
 
         // Query all images without metadata
         const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
@@ -175,7 +175,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         if (files.length === 0) {
-          jobService.updateJob(jobId, {
+          await jobService.updateJob(jobId, {
             status: 'completed',
             completedAt: new Date(),
           });
@@ -211,7 +211,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
           }
 
           // Update progress after each batch
-          jobService.updateJob(jobId, {
+          await jobService.updateJob(jobId, {
             processedFiles: Math.min(i + batch.length, files.length),
             successCount,
             errorCount,
@@ -220,7 +220,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         }
 
         // Mark as completed
-        jobService.updateJob(jobId, {
+        await jobService.updateJob(jobId, {
           status: 'completed',
           completedAt: new Date(),
         });
@@ -230,7 +230,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
           error: error instanceof Error ? error.message : String(error),
         });
 
-        jobService.updateJob(jobId, {
+        await jobService.updateJob(jobId, {
           status: 'failed',
           completedAt: new Date(),
         });

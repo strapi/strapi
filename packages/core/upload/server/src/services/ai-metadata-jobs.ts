@@ -1,62 +1,86 @@
-import crypto from 'crypto';
+import type { Core } from '@strapi/types';
 
-interface JobStatus {
-  id: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  totalFiles: number;
-  processedFiles: number;
-  successCount: number;
-  errorCount: number;
-  errors: Array<{ fileId: number; error: string }>;
-  userId: number;
-  createdAt: Date;
-  completedAt?: Date;
-}
+import { AIMetadataJob } from '../../../shared/contracts/ai-metadata-jobs';
+import { AI_METADATA_JOB_UID } from '../models/ai-metadata-job';
 
-// In-memory store for jobs
-const jobs = new Map<string, JobStatus>();
-
-const createAIMetadataJobsService = () => {
-  return {
-    createJob(userId: number, totalFiles: number): string {
-      const jobId = crypto.randomUUID();
-      jobs.set(jobId, {
-        id: jobId,
-        status: 'pending',
+export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi }) => ({
+  async createJob(totalFiles: number): Promise<number> {
+    const job = await strapi.db.query(AI_METADATA_JOB_UID).create({
+      data: {
+        status: 'processing',
         totalFiles,
         processedFiles: 0,
         successCount: 0,
         errorCount: 0,
         errors: [],
-        userId,
         createdAt: new Date(),
-      });
-      return jobId;
-    },
+      },
+    });
 
-    getJob(jobId: string, userId: number): JobStatus | null {
-      const job = jobs.get(jobId);
-      if (!job || job.userId !== userId) {
-        return null;
-      }
-      return job;
-    },
+    return job.id;
+  },
 
-    updateJob(
-      jobId: string,
-      updates: Partial<Omit<JobStatus, 'id' | 'userId' | 'createdAt'>>
-    ): void {
-      const job = jobs.get(jobId);
-      if (job) {
-        jobs.set(jobId, { ...job, ...updates });
-      }
-    },
+  async getJob(jobId: number): Promise<AIMetadataJob | null> {
+    return strapi.db.query(AI_METADATA_JOB_UID).findOne({
+      where: { id: jobId },
+    });
+  },
 
-    deleteJob(jobId: string): void {
-      jobs.delete(jobId);
-    },
-  };
-};
+  async updateJob(
+    jobId: number,
+    updates: Partial<Omit<AIMetadataJob, 'id' | 'createdAt'>>
+  ): Promise<void> {
+    await strapi.db.query(AI_METADATA_JOB_UID).update({
+      where: { id: jobId },
+      data: updates,
+    });
+  },
 
-export { createAIMetadataJobsService };
-export type { JobStatus };
+  async deleteJob(jobId: number): Promise<void> {
+    await strapi.db.query(AI_METADATA_JOB_UID).delete({
+      where: { id: jobId },
+    });
+  },
+
+  async getLatestActiveJob(): Promise<AIMetadataJob | null> {
+    // Return the most recent job, regardless of status
+    // This allows the frontend to see completed/failed status
+    return strapi.db.query(AI_METADATA_JOB_UID).findOne({
+      orderBy: { createdAt: 'desc' },
+    });
+  },
+
+  async cleanupOldJobs(): Promise<number> {
+    const oldJobs = await strapi.db.query(AI_METADATA_JOB_UID).findMany({
+      where: {
+        status: { $ne: 'processing' },
+      },
+    });
+
+    for (const job of oldJobs) {
+      await this.deleteJob(job.id);
+    }
+
+    return oldJobs.length;
+  },
+
+  async registerCron() {
+    strapi.cron.add({
+      aiMetadataJobsCleanup: {
+        task: async () => {
+          try {
+            const deletedCount = await this.cleanupOldJobs();
+            if (deletedCount > 0) {
+              strapi.log.info(`Cleaned up ${deletedCount} old AI metadata jobs`);
+            }
+          } catch (error) {
+            strapi.log.error('Failed to cleanup AI metadata jobs:', error);
+          }
+        },
+        options: '0 0 * * *', // Run once a day at midnight
+      },
+    });
+  },
+});
+
+export type { AIMetadataJob };
