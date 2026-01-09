@@ -193,9 +193,7 @@ export default {
       try {
         const metadataResults = await aiMetadataService.processFiles(uploadedFiles);
         // Update the uploaded files with AI metadata
-        await aiMetadataService.updateFilesWithAIMetadata(uploadedFiles, metadataResults, {
-          user,
-        });
+        await aiMetadataService.updateFilesWithAIMetadata(uploadedFiles, metadataResults, user);
       } catch (error) {
         strapi.log.warn('AI metadata generation failed, proceeding without AI enhancements', {
           error: error instanceof Error ? error.message : String(error),

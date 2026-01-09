@@ -4,6 +4,48 @@ import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
 
+/**
+ * Fetches an image from a URL and returns it as a Blob
+ */
+async function fetchImageAsBlob(
+  file: InputFile,
+  serverAbsoluteUrl: string,
+  logger: Core.Strapi['log']
+): Promise<Blob> {
+  const fullUrl = file.provider === 'local' ? serverAbsoluteUrl + file.filepath : file.filepath;
+
+  const resp = await fetch(fullUrl);
+  if (!resp.ok) {
+    logger.error('Failed to fetch image', {
+      fullUrl,
+      status: resp.status,
+      statusText: resp.statusText,
+    });
+    throw new Error(`Failed to fetch image from URL: ${fullUrl} (${resp.status})`);
+  }
+
+  const arrayBuffer = await resp.arrayBuffer();
+  return new Blob([arrayBuffer], { type: file.mimetype || undefined });
+}
+
+/**
+ * Builds FormData from an array of input files by fetching each image
+ */
+async function buildFormDataFromFiles(
+  files: InputFile[],
+  serverAbsoluteUrl: string,
+  logger: Core.Strapi['log']
+): Promise<FormData> {
+  const formData = new FormData();
+
+  for (const file of files) {
+    const blob = await fetchImageAsBlob(file, serverAbsoluteUrl, logger);
+    formData.append('files', blob);
+  }
+
+  return formData;
+}
+
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
@@ -48,14 +90,12 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Update files with AI-generated metadata
-     * Shared logic used by both upload flow and batch processing
+     * Shared logic used by both upload flow and retroactive processing
      */
     async updateFilesWithAIMetadata(
       files: File[],
       metadataResults: Array<{ altText: string; caption: string } | null>,
-      options?: {
-        user?: { id: string | number };
-      }
+      user: { id: string | number }
     ): Promise<{ processed: number; errors: Array<{ fileId: number; error: string }> }> {
       const uploadService = strapi.plugin('upload').service('upload');
       let processed = 0;
@@ -79,11 +119,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
               // Only update if there are fields to update
               if (Object.keys(updateData).length > 0) {
-                await uploadService.updateFileInfo(
-                  file.id,
-                  updateData,
-                  options?.user ? { user: options.user } : undefined
-                );
+                await uploadService.updateFileInfo(file.id, updateData, { user });
 
                 // Update in-memory file object (needed for upload flow response)
                 if (updateData.alternativeText !== undefined) {
@@ -109,50 +145,9 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     /**
-     * Checks for images without metadata and generates metadata for them
-     */
-    async processExistingFiles() {
-      if (!(await this.isEnabled())) {
-        throw new Error('AI Metadata service is not enabled');
-      }
-
-      // Query all images without metadata
-      const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
-        where: {
-          mime: {
-            $startsWith: 'image/',
-          },
-          $or: [
-            { alternativeText: { $null: true } },
-            { alternativeText: '' },
-            { caption: { $null: true } },
-            { caption: '' },
-          ],
-        },
-      });
-
-      if (files.length === 0) {
-        strapi.log.info('No images without metadata found');
-        return { processed: 0, errors: [] };
-      }
-
-      try {
-        const metadataResults = await this.processFiles(files);
-        const updatedImages = await this.updateFilesWithAIMetadata(files, metadataResults);
-
-        return updatedImages;
-      } catch (error) {
-        strapi.log.error('AI metadata generation failed', {
-          error: error instanceof Error ? error.message : String(error),
-        });
-        throw error;
-      }
-    },
-
-    /**
      * Process existing files with job tracking for progress updates
      */
-    async processExistingFilesWithJob(jobId: number, user: { id: string | number }): Promise<void> {
+    async processExistingFiles(jobId: number, user: { id: string | number }): Promise<void> {
       const jobService = getService('aiMetadataJobs');
 
       try {
@@ -182,42 +177,17 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
           return;
         }
 
-        const BATCH_SIZE = 20;
-        let successCount = 0;
-        let errorCount = 0;
-        const allErrors: Array<{ fileId: number; error: string }> = [];
+        // Process all files at once
+        const metadataResults = await this.processFiles(files);
+        const result = await this.updateFilesWithAIMetadata(files, metadataResults, user);
 
-        // Process in batches
-        for (let i = 0; i < files.length; i += BATCH_SIZE) {
-          const batch = files.slice(i, i + BATCH_SIZE);
-
-          try {
-            // Process this batch
-            const metadataResults = await this.processFiles(batch);
-            const result = await this.updateFilesWithAIMetadata(batch, metadataResults, { user });
-
-            successCount += result.processed;
-            errorCount += result.errors.length;
-            allErrors.push(...result.errors);
-          } catch (batchError) {
-            // If batch fails, count all files in batch as errors
-            errorCount += batch.length;
-            batch.forEach((file) => {
-              allErrors.push({
-                fileId: file.id,
-                error: batchError instanceof Error ? batchError.message : 'Batch processing failed',
-              });
-            });
-          }
-
-          // Update progress after each batch
-          await jobService.updateJob(jobId, {
-            processedFiles: Math.min(i + batch.length, files.length),
-            successCount,
-            errorCount,
-            errors: allErrors,
-          });
-        }
+        // Update job with final results
+        await jobService.updateJob(jobId, {
+          processedFiles: files.length,
+          successCount: result.processed,
+          errorCount: result.errors.length,
+          errors: result.errors,
+        });
 
         // Mark as completed
         await jobService.updateJob(jobId, {
@@ -269,27 +239,11 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         return new Array(files.length).fill(null);
       }
 
-      const formData = new FormData();
-
-      for (const file of imageInputFiles) {
-        const fullUrl =
-          file.provider === 'local'
-            ? strapi.config.get('server.absoluteUrl') + file.filepath
-            : file.filepath;
-
-        const resp = await fetch(fullUrl);
-        if (!resp.ok) {
-          strapi.log.error('Failed to fetch image', {
-            fullUrl,
-            status: resp.status,
-            statusText: resp.statusText,
-          });
-          throw new Error(`Failed to fetch image from URL: ${fullUrl} (${resp.status})`);
-        }
-        const ab = await resp.arrayBuffer();
-        const blob: Blob = new Blob([ab], { type: file.mimetype || undefined });
-        formData.append('files', blob);
-      }
+      const formData = await buildFormDataFromFiles(
+        imageInputFiles,
+        strapi.config.get('server.absoluteUrl'),
+        strapi.log
+      );
 
       let token: string;
       try {

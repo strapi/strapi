@@ -40,7 +40,7 @@ import { initialState, reducer } from './reducer';
 
 import type { InitialState } from './reducer';
 
-const MetadataButton = styled(Button)`
+const GenerateMetadataButton = styled(Button)`
   > span {
     color: ${({ theme }) => theme.colors.primary600};
   }
@@ -120,12 +120,12 @@ const MetadataAction = ({
   return (
     <Dialog.Root open={isConfirmDialogOpen} onOpenChange={onConfirmDialogChange}>
       <Dialog.Trigger>
-        <MetadataButton variant="ghost">
+        <GenerateMetadataButton variant="ghost">
           {formatMessage({
             id: getTrad('settings.form.aiMetadata.generateButton'),
             defaultMessage: 'Generate metadata',
           })}
-        </MetadataButton>
+        </GenerateMetadataButton>
       </Dialog.Trigger>
       <ConfirmDialog
         variant="success-light"
@@ -274,7 +274,7 @@ export const SettingsPage = () => {
     });
   };
 
-  if (isLoading || isLoadingMetadataCount) {
+  if (isLoading) {
     return <Page.Loading />;
   }
 
@@ -370,7 +370,7 @@ export const SettingsPage = () => {
                       </Grid.Item>
                     </Grid.Root>
                     {/* Retroactive metadata generation when aiMetadata is enabled */}
-                    {initialData?.aiMetadata && (
+                    {initialData?.aiMetadata && !isLoadingMetadataCount && (
                       <>
                         <Divider marginTop={4} marginBottom={4} />
                         <Flex justifyContent="space-between" alignItems="center" gap={2}>
