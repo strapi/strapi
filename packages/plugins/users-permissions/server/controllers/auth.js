@@ -333,7 +333,15 @@ module.exports = ({ strapi }) => ({
       return ctx.notFound();
     }
 
-    const { refreshToken } = ctx.request.body || {};
+    const upSessions = strapi.config.get('plugin::users-permissions.sessions');
+    const cookieName = upSessions?.cookie?.name || 'strapi_up_refresh';
+
+    // Check for refresh token in cookie first (if httpOnly is configured), then in body
+    let refreshToken = ctx.cookies.get(cookieName);
+    if (!refreshToken) {
+      refreshToken = ctx.request.body?.refreshToken;
+    }
+
     if (!refreshToken || typeof refreshToken !== 'string') {
       return ctx.badRequest('Missing refresh token');
     }
@@ -352,10 +360,8 @@ module.exports = ({ strapi }) => ({
       return ctx.unauthorized('Invalid refresh token');
     }
 
-    const upSessions = strapi.config.get('plugin::users-permissions.sessions');
     const requestHttpOnly = ctx.request.header['x-strapi-refresh-cookie'] === 'httpOnly';
     if (upSessions?.httpOnly || requestHttpOnly) {
-      const cookieName = upSessions.cookie?.name || 'strapi_up_refresh';
       const isProduction = process.env.NODE_ENV === 'production';
       const isSecure =
         typeof upSessions.cookie?.secure === 'boolean' ? upSessions.cookie?.secure : isProduction;
