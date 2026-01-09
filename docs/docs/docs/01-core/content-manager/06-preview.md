@@ -19,7 +19,7 @@ Instead, the preview script is defined inside Strapi and sent to the frontend vi
 
 ### Self-contained constraint
 
-The preview script (`previewScript.ts`) is stringified before being sent to the iframe:
+The preview script (`packages/core/content-manager/admin/src/preview/utils/previewScript.ts`) is stringified before being sent to the iframe:
 
 ```ts
 const script = `(${previewScript.toString()})(${JSON.stringify(config)})`;
@@ -31,7 +31,7 @@ This is why the file has an unusual structure with many functions defined inline
 
 ### Field identification with stega
 
-We use [stega encoding](https://github.com/vercel/stega) to identify which Strapi field each piece of text comes from. Stega embeds invisible metadata into text content.
+We use [stega encoding](https://github.com/vercel/stega) to identify which Strapi field each piece of text comes from. Stega embeds invisible metadata into text content using Unicode zero-width characters that are imperceptible to users but can be decoded programmatically.
 
 1. The Document Service encodes field metadata into text values (invisible to users)
 2. The frontend renders the content normally
@@ -67,7 +67,7 @@ sequenceDiagram
 ```
 
 Public events (`previewReady`, `strapiScript`, `strapiUpdate`) are documented to users—changing them is a breaking change.
-
+Internal events (for field focus/blur/change synchronization) are defined in `packages/core/content-manager/admin/src/preview/utils/constants.ts` and can be changed freely since we control both ends.
 Internal events (for field focus/blur/change synchronization) are defined in `constants.ts` and can be changed freely since we control both ends.
 
 ### Frontend configuration
