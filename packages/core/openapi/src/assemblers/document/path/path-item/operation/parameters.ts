@@ -40,7 +40,22 @@ export class OperationParametersAssembler implements Assembler.Operation {
       const required = !zodSchema.isOptional();
       const schema = zodToOpenAPI(zodSchema) as any;
 
-      pathParams.push({ name, in: 'path', required, schema });
+      // Convert 'id' parameter to 'documentId' and remove UUID pattern
+      // This aligns with Strapi's actual documentId usage (CUID2 strings)
+      let paramName = name;
+      if (name === 'id') {
+        paramName = 'documentId';
+      }
+
+      // Remove UUID validation for documentId parameters
+      if (schema?.format === 'uuid' && (name === 'id' || name.includes('document'))) {
+        schema.type = 'string';
+        schema.description = 'The document ID, represented by a string';
+        delete schema.format;
+        delete schema.pattern;
+      }
+
+      pathParams.push({ name: paramName, in: 'path', required, schema });
     }
 
     return pathParams;
@@ -71,7 +86,7 @@ export class OperationParametersAssembler implements Assembler.Operation {
             name: `${name}[${propName}]`, // Nested format: pagination[page]
             in: 'query',
             required: isRequired,
-            schema: propSchema,
+            schema: propSchema as any,
           };
 
           Object.assign(param, { 'x-strapi-serialize': 'querystring' });
@@ -100,7 +115,7 @@ export class OperationParametersAssembler implements Assembler.Operation {
 
     // Handle allOf - merge all object properties, but preserve original anyOf/oneOf optional nature
     if (schema.allOf && Array.isArray(schema.allOf)) {
-      const mergedSchema = {
+      const mergedSchema: any = {
         type: 'object',
         properties: {},
         required: [],
@@ -115,7 +130,7 @@ export class OperationParametersAssembler implements Assembler.Operation {
           Object.assign(mergedSchema.properties, resolved.properties);
           // Only include required fields if they don't come from anyOf/oneOf schemas
           if (resolved.required && !hasAnyOfOneOf) {
-            mergedSchema.required.push(...resolved.required);
+            (mergedSchema.required as string[]).push(...(resolved.required as string[]));
           }
         }
       }

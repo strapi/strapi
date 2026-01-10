@@ -52,8 +52,8 @@ export class OperationIDAssembler implements Assembler.Operation {
         const match = REGEX_STRAPI_PATH_PARAMS.exec(part);
 
         appendix += match
-          ? // Parameter
-            formatPart(`by_${match[1]}`)
+          ? // Parameter - convert 'id' to 'document_id' for consistency
+            formatPart(`by_${match[1] === 'id' ? 'document_id' : match[1]}`)
           : // Regular path segment
             formatPart(part.replaceAll(/\W/g, '_'));
       });
