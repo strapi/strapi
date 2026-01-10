@@ -276,7 +276,16 @@ const ConditionAwareInputRenderer = ({
 }: InputRendererProps & { condition: JsonLogicCondition }) => {
   // Note: this selector causes a re-render every time any form value on the page changes
   const fieldValues = useForm('ConditionalInputRenderer', (state) => state.values);
-  const isVisible = rulesEngine.evaluate(condition, fieldValues);
+  
+  const parts = props.name.split('.');
+
+  const topLevelFieldName = parts[0];
+  const indexOfComponent = parts[1];
+
+  const isVisible = rulesEngine.evaluate(
+    condition,
+    fieldValues[topLevelFieldName][indexOfComponent] || {}
+  );
 
   if (!isVisible) {
     return null;
