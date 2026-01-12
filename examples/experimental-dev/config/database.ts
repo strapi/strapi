@@ -1,6 +1,7 @@
 import path from 'path';
+import { type Env } from '@strapi/utils';
 
-export default ({ env }) => ({
+export default ({ env }: { env: Env }) => ({
   connection: {
     client: 'sqlite',
     connection: {

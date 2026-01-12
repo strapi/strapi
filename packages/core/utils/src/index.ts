@@ -1,5 +1,5 @@
 export { default as parseType } from './parse-type';
-export { default as env } from './env-helper';
+export { default as env, type Env } from './env-helper';
 export { default as setCreatorFields } from './set-creator-fields';
 export { default as providerFactory } from './provider-factory';
 export { default as traverseEntity } from './traverse-entity';
