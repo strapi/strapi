@@ -2,9 +2,10 @@ import _ from 'lodash';
 
 export type Env = typeof envFn & typeof utils;
 
+function envFn(key: string): string | undefined;
 function envFn(key: string, defaultValue: string): string;
-function envFn(key: string, defaultValue?: string | undefined): string | undefined;
-function envFn(key: string, defaultValue?: string): string | undefined {
+function envFn<T>(key: string, defaultValue: T): string | T;
+function envFn(key: string, defaultValue?: any): any {
   return _.has(process.env, key) ? process.env[key] : defaultValue;
 }
 
@@ -115,7 +116,11 @@ function oneOf(key: string, expectedValues?: string[], defaultValue?: string) {
   }
 
   const rawValue = env(key, defaultValue);
-  return expectedValues.includes(rawValue) ? rawValue : defaultValue;
+  if (rawValue !== undefined && expectedValues.includes(rawValue)) {
+    return rawValue;
+  }
+
+  return defaultValue;
 }
 
 const utils = {
