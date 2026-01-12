@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils, { errors } from '@strapi/utils';
+import utils from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -8,7 +8,7 @@ import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
 import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
-import { enforceUploadSecurity } from '../utils/mime-validation';
+import { prepareUploadRequest } from '../utils/mime-validation';
 
 const { ValidationError } = utils.errors;
 
@@ -98,17 +98,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         query: { id },
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
-      const securityResults = await enforceUploadSecurity(filesInput, strapi);
-      if (securityResults.validFiles.length === 0) {
-        throw new errors.ValidationError(
-          securityResults.errors[0].error.message,
-          securityResults.errors[0].error.details
-        );
-      }
-      const files = securityResults.validFiles;
+
+      const { validFiles, filteredBody } = await prepareUploadRequest(filesInput, body, strapi);
 
       // cannot replace with more than one file
-      if (Array.isArray(files)) {
+      if (Array.isArray(filesInput)) {
         throw new ValidationError('Cannot replace a file with multiple ones');
       }
 
@@ -116,9 +110,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
-      const data = (await validateUploadBody(body)) as { fileInfo: FileInfo };
+      const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
 
-      const replacedFiles = await getService('upload').replace(id, { data, file: files });
+      const replacedFiles = await getService('upload').replace(id, { data, file: validFiles[0] });
 
       ctx.body = await sanitizeOutput(replacedFiles, ctx);
     },
@@ -127,31 +121,29 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
-      const securityResults = await enforceUploadSecurity(filesInput, strapi);
-      if (securityResults.validFiles.length === 0) {
-        throw new errors.ValidationError(
-          securityResults.errors[0].error.message,
-          securityResults.errors[0].error.details
-        );
-      }
-      const files = securityResults.validFiles;
 
-      const data: any = await validateUploadBody(body, Array.isArray(files));
+      const { validFiles, filteredBody } = await prepareUploadRequest(filesInput, body, strapi);
+
+      const isMultipleFiles = validFiles.length > 1;
+      const data: any = await validateUploadBody(filteredBody, isMultipleFiles);
 
       const apiUploadFolderService = getService('api-upload-folder');
 
       const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
 
-      if (Array.isArray(files)) {
+      if (isMultipleFiles) {
         data.fileInfo = data.fileInfo || [];
-        data.fileInfo = files.map((_f, i) => ({ ...data.fileInfo[i], folder: apiUploadFolder.id }));
+        data.fileInfo = validFiles.map((_f, i) => ({
+          ...data.fileInfo[i],
+          folder: apiUploadFolder.id,
+        }));
       } else {
         data.fileInfo = { ...data.fileInfo, folder: apiUploadFolder.id };
       }
 
       const uploadedFiles = await getService('upload').upload({
         data,
-        files: Array.isArray(files) ? files : [files],
+        files: validFiles,
       });
 
       ctx.body = await sanitizeOutput(uploadedFiles as any, ctx);
