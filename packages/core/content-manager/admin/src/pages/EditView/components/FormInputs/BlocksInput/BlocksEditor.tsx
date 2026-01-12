@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { createContext, type FieldValue } from '@strapi/admin/strapi-admin';
+import { createContext, type FieldValue, useStrapiApp } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -55,7 +55,7 @@ interface SelectorBlock extends BaseBlock {
 
 type NonSelectorBlockKey = 'list-item' | 'link';
 
-const selectorBlockKeys = [
+const defaultSelectorBlockKeys = [
   'paragraph',
   'heading-one',
   'heading-two',
@@ -70,16 +70,26 @@ const selectorBlockKeys = [
   'code',
 ] as const;
 
-type SelectorBlockKey = (typeof selectorBlockKeys)[number];
+type DefaultSelectorBlockKey = (typeof defaultSelectorBlockKeys)[number];
+type SelectorBlockKey = DefaultSelectorBlockKey | string;
 
-const isSelectorBlockKey = (key: unknown): key is SelectorBlockKey => {
-  return typeof key === 'string' && selectorBlockKeys.includes(key as SelectorBlockKey);
+const isSelectorBlockKey = (key: unknown, blocks: BlocksStore): key is SelectorBlockKey => {
+  if (typeof key !== 'string') return false;
+
+  // Check if it's a default selector block key
+  if (defaultSelectorBlockKeys.includes(key as DefaultSelectorBlockKey)) return true;
+
+  // Check if it's a custom block that should be in selector
+  const block = blocks[key];
+  return block?.isInBlocksSelector === true;
 };
 
 type BlocksStore = {
-  [K in SelectorBlockKey]: SelectorBlock;
+  [K in DefaultSelectorBlockKey]: SelectorBlock;
 } & {
   [K in NonSelectorBlockKey]: NonSelectorBlock;
+} & {
+  [key: string]: SelectorBlock | NonSelectorBlock;
 };
 
 interface BlocksEditorContextValue {
@@ -180,9 +190,49 @@ interface BlocksEditorProps
   name: string;
 }
 
+const getDefaultBlocks = () => ({
+  ...paragraphBlocks,
+  ...headingBlocks,
+  ...listBlocks,
+  ...linkBlocks,
+  ...imageBlocks,
+  ...quoteBlocks,
+  ...codeBlocks,
+});
+
+const useBlocks = (): BlocksStore => {
+  const getPlugin = useStrapiApp('BlocksEditor', (state) => state.getPlugin);
+
+  return React.useMemo(() => {
+    const defaultBlocks = getDefaultBlocks();
+
+    try {
+      // Since we're in the content-manager, we can access our own plugin instance
+      // by using the context directly instead of going through getPlugin
+      if (typeof getPlugin === 'function') {
+        const contentManagerPlugin = getPlugin('content-manager');
+        if (
+          contentManagerPlugin?.apis?.getBlocksRegistry &&
+          typeof contentManagerPlugin.apis.getBlocksRegistry === 'function'
+        ) {
+          const blocksRegistry = contentManagerPlugin.apis.getBlocksRegistry();
+          const customBlocks = blocksRegistry.getBlocksForEditor();
+          return { ...defaultBlocks, ...customBlocks } as BlocksStore;
+        }
+      }
+    } catch (error) {
+      // If plugin isn't available or there's an error, just use default blocks
+      console.warn('Failed to load custom blocks:', error);
+    }
+
+    return defaultBlocks as BlocksStore;
+  }, [getPlugin]);
+};
+
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
+    const blocks = useBlocks();
     const [editor] = React.useState(() =>
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
     );
@@ -263,19 +313,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       }
     }, [editor, value]);
 
-    const blocks = React.useMemo(
-      () => ({
-        ...paragraphBlocks,
-        ...headingBlocks,
-        ...listBlocks,
-        ...linkBlocks,
-        ...imageBlocks,
-        ...quoteBlocks,
-        ...codeBlocks,
-      }),
-      []
-    ) satisfies BlocksStore;
-
     return (
       <>
         <VisuallyHidden id={ariaDescriptionId}>
@@ -336,6 +373,8 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 export {
   type BlocksStore,
   type SelectorBlockKey,
+  type SelectorBlock,
+  type NonSelectorBlock,
   BlocksEditor,
   BlocksEditorProvider,
   useBlocksEditorContext,

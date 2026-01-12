@@ -27,6 +27,7 @@ import entityValidator from './services/entity-validator';
 import requestContext from './services/request-context';
 import createAuth from './services/auth';
 import createCustomFields from './services/custom-fields';
+import createCustomBlocks from './services/custom-blocks';
 import createContentAPI from './services/content-api';
 import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import getNumberOfConditionalFields from './services/utils/conditional-fields';
@@ -88,6 +89,10 @@ class Strapi extends Container implements Core.Strapi {
 
   get customFields(): Modules.CustomFields.CustomFields {
     return this.get('customFields');
+  }
+
+  get customBlocks(): Modules.CustomBlocks.CustomBlocks {
+    return this.get('customBlocks');
   }
 
   get entityValidator(): Modules.EntityValidator.EntityValidator {
@@ -275,6 +280,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('features', () => createFeaturesService(this))
       .add('requestContext', requestContext)
       .add('customFields', createCustomFields(this))
+      .add('customBlocks', createCustomBlocks(this))
       .add('entityValidator', entityValidator)
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
