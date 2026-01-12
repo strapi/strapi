@@ -173,19 +173,13 @@ const removeFieldsThatDontExistOnSchema = (schema: PartialSchema) => (data: AnyD
  * @internal
  * @description We need to remove null fields from the data-structure because it will pass it
  * to the specific inputs breaking them as most would prefer empty strings or `undefined` if
- * they're controlled / uncontrolled.
+ * they're controlled / uncontrolled. However, Boolean fields should preserve null values.
  */
-const removeNullValues = (data: AnyData) => {
-  return Object.entries(data).reduce<AnyData>((acc, [key, value]) => {
-    if (value === null) {
-      return acc;
-    }
-
-    acc[key] = value;
-
-    return acc;
-  }, {});
-};
+const removeNullValues = (schema: PartialSchema, components: ComponentsDictionary = {}) =>
+  traverseData(
+    (attribute, value) => value === null && attribute.type !== 'boolean',
+    () => undefined
+  )(schema, components);
 
 /* -------------------------------------------------------------------------------------------------
  * transformDocuments
@@ -203,7 +197,7 @@ const transformDocument =
     const transformations = pipe(
       removeFieldsThatDontExistOnSchema(schema),
       removeProhibitedFields(['password'])(schema, components),
-      removeNullValues,
+      removeNullValues(schema, components),
       prepareRelations(schema, components),
       prepareTempKeys(schema, components)
     );
@@ -239,42 +233,139 @@ const getItemInitialValue = (initialValue: AnyData, item: AnyData) => {
 };
 
 /**
- * Removes values from the data object if their corresponding attribute has a
- * visibility condition that evaluates to false.
+ * @internal
+ * @description Collects paths of attributes that should be removed based on visibility conditions.
+ * This function only evaluates conditions.visible (JSON Logic), not the visible boolean property.
  *
- * @param {object} schema - The content type schema (with attributes).
- * @param {object} data - The data object to filter based on visibility.
- * @returns {object} A new data object with only visible fields retained.
+ * @param data - The data object to evaluate
+ * @param schema - The content type schema
+ * @param components - Dictionary of component schemas
+ * @param path - Current path in the data structure (for nested components/dynamiczones)
+ * @returns Array of field paths that should be removed
  */
-const handleInvisibleAttributes = (
+const collectInvisibleAttributes = (
   data: AnyData,
-  { schema, initialValues = {}, components = {} }: HandleOptions,
-  path: string[] = [],
-  removedAttributes: RemovedFieldPath[] = []
-): {
-  data: AnyData;
-  removedAttributes: RemovedFieldPath[];
-} => {
-  if (!schema?.attributes) return { data, removedAttributes };
+  schema: Schema.ContentType | Schema.Component | undefined,
+  components: Record<string, Schema.Component>,
+  path: string[] = []
+): RemovedFieldPath[] => {
+  if (!schema?.attributes) return [];
 
   const rulesEngine = createRulesEngine();
-  const result: AnyData = {};
+  const removedPaths: RemovedFieldPath[] = [];
+  const evaluatedData: AnyData = {};
 
   for (const [attrName, attrDef] of Object.entries(schema.attributes)) {
     const fullPath = [...path, attrName].join('.');
-    const condition = attrDef?.conditions?.visible;
-    const isVisible = condition ? rulesEngine.evaluate(condition, { ...data, ...result }) : true;
 
-    if (!isVisible) {
-      removedAttributes.push(fullPath);
+    // Skip fields with visible: false - they're managed by backend
+    if ('visible' in attrDef && attrDef.visible === false) {
       continue;
     }
 
-    const userProvided = Object.prototype.hasOwnProperty.call(data, attrName);
+    const condition = attrDef?.conditions?.visible;
+    const isVisible = condition
+      ? rulesEngine.evaluate(condition, { ...data, ...evaluatedData })
+      : true;
+
+    if (!isVisible) {
+      removedPaths.push(fullPath);
+      continue;
+    }
+
+    // Track this field for future condition evaluations
+    if (attrName in data) {
+      evaluatedData[attrName] = data[attrName];
+    }
+
+    // Recursively process components
+    if (attrDef.type === 'component') {
+      const compSchema = components[attrDef.component];
+      const value = data[attrName];
+
+      if (attrDef.repeatable && Array.isArray(value)) {
+        value.forEach((item) => {
+          const nestedPaths = collectInvisibleAttributes(item, compSchema, components, [
+            ...path,
+            `${attrName}[${item.__temp_key__}]`,
+          ]);
+          removedPaths.push(...nestedPaths);
+        });
+      } else if (value && typeof value === 'object') {
+        const nestedPaths = collectInvisibleAttributes(value, compSchema, components, [
+          ...path,
+          attrName,
+        ]);
+        removedPaths.push(...nestedPaths);
+      }
+    }
+
+    // Recursively process dynamic zones
+    if (attrDef.type === 'dynamiczone' && Array.isArray(data[attrName])) {
+      data[attrName].forEach((dzItem: AnyData) => {
+        const compUID = dzItem?.__component;
+        const compSchema = components[compUID];
+        const nestedPaths = collectInvisibleAttributes(dzItem, compSchema, components, [
+          ...path,
+          `${attrName}[${dzItem.__temp_key__}]`,
+        ]);
+        removedPaths.push(...nestedPaths);
+      });
+    }
+  }
+
+  return removedPaths;
+};
+
+/**
+ * @internal
+ * @description Removes attributes from data based on the list of paths to remove.
+ * Preserves fields with visible: false from data or initialValues.
+ *
+ * @param data - The data object to filter
+ * @param initialValues - Initial values to fall back to
+ * @param schema - The content type schema
+ * @param components - Dictionary of component schemas
+ * @param removedPaths - Array of field paths to remove
+ * @param currentPath - Current path in the data structure
+ * @returns Filtered data object
+ */
+const filterDataByRemovedPaths = (
+  data: AnyData,
+  initialValues: AnyData,
+  schema: Schema.ContentType | Schema.Component | undefined,
+  components: Record<string, Schema.Component>,
+  removedPaths: RemovedFieldPath[],
+  currentPath: string[] = []
+): AnyData => {
+  if (!schema?.attributes) return data;
+
+  const result: AnyData = {};
+
+  for (const [attrName, attrDef] of Object.entries(schema.attributes)) {
+    const fullPath = [...currentPath, attrName].join('.');
+
+    // Check if this field should be removed
+    if (removedPaths.includes(fullPath)) {
+      continue;
+    }
+
+    // Handle fields with visible: false - preserve from data or initialValues
+    if ('visible' in attrDef && attrDef.visible === false) {
+      const userProvided = Object.hasOwn(data, attrName);
+      if (userProvided) {
+        result[attrName] = data[attrName];
+      } else if (attrName in initialValues) {
+        result[attrName] = initialValues[attrName];
+      }
+      continue;
+    }
+
+    const userProvided = Object.hasOwn(data, attrName);
     const currentValue = userProvided ? data[attrName] : undefined;
     const initialValue = initialValues?.[attrName];
 
-    // 🔹 Handle components
+    // Handle components
     if (attrDef.type === 'component') {
       const compSchema = components[attrDef.component];
       const value = currentValue === undefined ? initialValue : currentValue;
@@ -287,35 +378,30 @@ const handleInvisibleAttributes = (
       if (attrDef.repeatable && Array.isArray(value)) {
         result[attrName] = value.map((item) => {
           const componentInitialValue = getItemInitialValue(initialValue, item);
-
-          return handleInvisibleAttributes(
+          return filterDataByRemovedPaths(
             item,
-            {
-              schema: compSchema,
-              initialValues: componentInitialValue,
-              components,
-            },
-            [...path, `${attrName}[${item.__temp_key__}]`],
-            removedAttributes
-          ).data;
+            componentInitialValue,
+            compSchema,
+            components,
+            removedPaths,
+            [...currentPath, `${attrName}[${item.__temp_key__}]`]
+          );
         });
       } else {
-        result[attrName] = handleInvisibleAttributes(
+        result[attrName] = filterDataByRemovedPaths(
           value,
-          {
-            schema: compSchema,
-            initialValues: initialValue ?? {},
-            components,
-          },
-          [...path, attrName],
-          removedAttributes
-        ).data;
+          initialValue ?? {},
+          compSchema,
+          components,
+          removedPaths,
+          [...currentPath, attrName]
+        );
       }
 
       continue;
     }
 
-    // 🔸 Handle dynamic zones
+    // Handle dynamic zones
     if (attrDef.type === 'dynamiczone') {
       if (!Array.isArray(currentValue)) {
         result[attrName] = [];
@@ -325,21 +411,18 @@ const handleInvisibleAttributes = (
       result[attrName] = currentValue.map((dzItem) => {
         const compUID = dzItem?.__component;
         const compSchema = components[compUID];
-
         const componentInitialValue = getItemInitialValue(initialValue, dzItem);
 
-        const cleaned = handleInvisibleAttributes(
+        const cleaned = filterDataByRemovedPaths(
           dzItem,
-          {
-            schema: compSchema,
-            initialValues: componentInitialValue,
-            components,
-          },
-          [...path, `${attrName}[${dzItem.__temp_key__}]`],
-          removedAttributes
-        ).data;
+          componentInitialValue,
+          compSchema,
+          components,
+          removedPaths,
+          [...currentPath, `${attrName}[${dzItem.__temp_key__}]`]
+        );
 
-        // For newly created components, we want to be sure that the id is undefined (in case of reordering items)
+        // For newly created components, ensure id is undefined (in case of reordering)
         const processedItem =
           dzItem.id === undefined || dzItem.id === null
             ? { __component: compUID, ...cleaned, id: undefined }
@@ -351,22 +434,53 @@ const handleInvisibleAttributes = (
       continue;
     }
 
-    // 🟡 Handle scalar/primitive
+    // Regular fields - preserve from data or initialValues
     if (currentValue !== undefined) {
       result[attrName] = currentValue;
     } else if (initialValue !== undefined) {
       result[attrName] = initialValue;
-    } else {
-      if (attrName === 'id' || attrName === 'documentId') {
-        // If the attribute is 'id', we don't want to set it to null, as it should not be removed.
-        continue;
-      }
-      result[attrName] = null;
     }
   }
 
+  // Pass through any fields from data that aren't in the schema
+  for (const [key, value] of Object.entries(data)) {
+    if (!(key in result) && !(key in (schema?.attributes || {}))) {
+      result[key] = value;
+    }
+  }
+
+  return result;
+};
+
+/**
+ * Removes values from the data object if their corresponding attribute has a
+ * visibility condition that evaluates to false.
+ *
+ * @param data - The data object to filter based on visibility
+ * @param options - Schema, initialValues, and components
+ * @returns Object with filtered data and list of removed attribute paths
+ */
+const handleInvisibleAttributes = (
+  data: AnyData,
+  { schema, initialValues = {}, components = {} }: HandleOptions
+): {
+  data: AnyData;
+  removedAttributes: RemovedFieldPath[];
+} => {
+  if (!schema?.attributes) return { data, removedAttributes: [] };
+
+  const removedAttributes = collectInvisibleAttributes(data, schema, components);
+
+  const filteredData = filterDataByRemovedPaths(
+    data,
+    initialValues,
+    schema,
+    components,
+    removedAttributes
+  );
+
   return {
-    data: result,
+    data: filteredData,
     removedAttributes,
   };
 };

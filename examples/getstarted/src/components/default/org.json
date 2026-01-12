@@ -1,0 +1,27 @@
+{
+  "collectionName": "components_default_orgs",
+  "info": {
+    "displayName": "org",
+    "icon": "book"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "coverOrgImage": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images", "files", "videos", "audios"]
+    },
+    "testComponent": {
+      "type": "component",
+      "component": "default.test-component",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

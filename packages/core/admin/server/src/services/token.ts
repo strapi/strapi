@@ -1,31 +1,13 @@
 import crypto from 'crypto';
 import _ from 'lodash';
-import type { Algorithm } from 'jsonwebtoken';
-import type { AdminUser } from '../../../shared/contracts/shared';
+import type { Core } from '@strapi/types';
 
 const defaultJwtOptions = { expiresIn: '30d' };
 
-export type TokenOptions = {
-  expiresIn?: string;
-  algorithm?: Algorithm;
-  privateKey?: string;
-  publicKey?: string;
-  [key: string]: unknown;
-};
-
-export type TokenPayload = {
-  id: AdminUser['id'];
-};
-
-export type AdminAuthConfig = {
-  secret: string;
-  options: TokenOptions;
-};
-
 const getTokenOptions = () => {
-  const { options, secret } = strapi.config.get<AdminAuthConfig>(
+  const { options, secret } = strapi.config.get<Core.Config.Admin['auth']>(
     'admin.auth',
-    {} as AdminAuthConfig
+    {} as Core.Config.Admin['auth']
   );
 
   // Check for new sessions.options configuration

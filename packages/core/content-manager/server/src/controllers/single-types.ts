@@ -146,16 +146,6 @@ export default {
 
     const document = await createOrUpdateDocument(ctx);
 
-    try {
-      // Don't await since localizations should be done in the background without blocking the request
-      strapi.plugin('i18n').service('ai-localizations').generateDocumentLocalizations({
-        model,
-        document,
-      });
-    } catch (error) {
-      strapi.log.error('AI Localizations generation failed', error);
-    }
-
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
@@ -328,7 +318,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const document = await findDocument({}, model);
+    const document = await findDocument({}, model, { locale });
     if (!document) {
       return ctx.notFound();
     }
