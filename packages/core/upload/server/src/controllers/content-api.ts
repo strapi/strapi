@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils from '@strapi/utils';
+import utils, { errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -8,6 +8,7 @@ import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
 import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
+import { enforceUploadSecurity } from '../utils/mime-validation';
 
 const { ValidationError } = utils.errors;
 
@@ -95,8 +96,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async replaceFile(ctx: Context) {
       const {
         query: { id },
-        request: { body, files: { files } = {} },
+        request: { body, files: { files: filesInput } = {} },
       } = ctx;
+      const securityResults = await enforceUploadSecurity(filesInput, strapi);
+      if (securityResults.validFiles.length === 0) {
+        throw new errors.ValidationError(
+          securityResults.errors[0].error.message,
+          securityResults.errors[0].error.details
+        );
+      }
+      const files = securityResults.validFiles;
 
       // cannot replace with more than one file
       if (Array.isArray(files)) {
@@ -116,8 +125,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async uploadFiles(ctx: Context) {
       const {
-        request: { body, files: { files } = {} },
+        request: { body, files: { files: filesInput } = {} },
       } = ctx;
+      const securityResults = await enforceUploadSecurity(filesInput, strapi);
+      if (securityResults.validFiles.length === 0) {
+        throw new errors.ValidationError(
+          securityResults.errors[0].error.message,
+          securityResults.errors[0].error.details
+        );
+      }
+      const files = securityResults.validFiles;
 
       const data: any = await validateUploadBody(body, Array.isArray(files));
 
