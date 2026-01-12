@@ -22,7 +22,6 @@ import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
-import { withCode } from './plugins/withCode';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
@@ -42,6 +41,7 @@ interface BaseBlock {
   handleTab?: (editor: Editor) => void;
   snippets?: string[];
   dragHandleTopMargin?: CSSProperties['marginTop'];
+  plugin?: (editor: Editor) => Editor;
 }
 
 interface NonSelectorBlock extends BaseBlock {
@@ -160,6 +160,10 @@ const pipe =
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
+function nonNullable<T>(value: T): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}
+
 /**
  * Normalize the blocks state to null if the editor state is considered empty,
  * otherwise return the state
@@ -184,6 +188,24 @@ interface BlocksEditorProps
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
+
+    const blocks = React.useMemo(
+      () => ({
+        ...paragraphBlocks,
+        ...headingBlocks,
+        ...listBlocks,
+        ...linkBlocks,
+        ...imageBlocks,
+        ...quoteBlocks,
+        ...codeBlocks,
+      }),
+      []
+    ) satisfies BlocksStore;
+
+    const blockRegisteredPlugins = Object.values(blocks)
+      .map((block) => block.plugin)
+      .filter(nonNullable);
+
     const [editor] = React.useState(() =>
       pipe(
         withHistory,
@@ -191,7 +213,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         withStrapiSchema,
         withReact,
         withLinks,
-        withCode
+        ...blockRegisteredPlugins
       )(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
@@ -270,19 +292,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         Transforms.deselect(editor);
       }
     }, [editor, value]);
-
-    const blocks = React.useMemo(
-      () => ({
-        ...paragraphBlocks,
-        ...headingBlocks,
-        ...listBlocks,
-        ...linkBlocks,
-        ...imageBlocks,
-        ...quoteBlocks,
-        ...codeBlocks,
-      }),
-      []
-    ) satisfies BlocksStore;
 
     return (
       <>
