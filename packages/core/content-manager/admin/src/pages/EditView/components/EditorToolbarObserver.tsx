@@ -77,7 +77,7 @@ export interface ObservedComponent {
  * always appears immediately before the "More" menu button, regardless of which items
  * are visible or moved into the overflow menu.
  */
-const MenuTriggerWrapper = styled<BoxComponent>(Box)`
+const MenuTriggerWrapper = styled(Box)`
   display: flex;
   align-items: center;
 
@@ -93,6 +93,10 @@ const MenuTriggerWrapper = styled<BoxComponent>(Box)`
       margin-left: ${({ theme }) => theme.spaces[2]};
       margin-right: ${({ theme }) => theme.spaces[2]};
     }
+  }
+
+  [data-hide-toolbar-separator='true'] &::before {
+    display: none;
   }
 `;
 

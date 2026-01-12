@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { useField, useStrapiApp, type InputProps } from '@strapi/admin/strapi-admin';
-import { Field, Flex } from '@strapi/design-system';
+import { useField, useStrapiApp, useIsMobile, type InputProps } from '@strapi/admin/strapi-admin';
+import { Box, Field, Flex } from '@strapi/design-system';
 import { EditorFromTextArea } from 'codemirror5';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
@@ -10,7 +10,7 @@ import { Editor, EditorApi } from './Editor';
 import { EditorLayout } from './EditorLayout';
 import { insertFile } from './utils/utils';
 import { WysiwygFooter } from './WysiwygFooter';
-import { WysiwygNav } from './WysiwygNav';
+import { WysiwygNav, WysiwygPreviewToggleButton } from './WysiwygNav';
 
 import type { Schema } from '@strapi/types';
 
@@ -29,6 +29,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     const [isPreviewMode, setIsPreviewMode] = React.useState(false);
     const [mediaLibVisible, setMediaLibVisible] = React.useState(false);
     const [isExpandMode, setIsExpandMode] = React.useState(false);
+    const isMobile = useIsMobile();
     const components = useStrapiApp('ImageDialog', (state) => state.components);
 
     const MediaLibraryDialog = components['media-library'];
@@ -61,30 +62,73 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
             previewContent={field.value}
             onCollapse={handleToggleExpand}
           >
-            <WysiwygNav
-              isExpandMode={isExpandMode}
-              editorRef={editorRef}
-              isPreviewMode={isPreviewMode}
-              onToggleMediaLib={handleToggleMediaLib}
-              onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
-              disabled={disabled}
-            />
+            {isMobile ? (
+              <>
+                <Box paddingBottom={9}>
+                  <Editor
+                    disabled={disabled}
+                    isExpandMode={isExpandMode}
+                    editorRef={editorRef}
+                    error={field.error}
+                    isPreviewMode={isPreviewMode}
+                    name={name}
+                    onChange={field.onChange}
+                    placeholder={placeholder}
+                    textareaRef={textareaRef}
+                    value={field.value}
+                    ref={forwardedRef}
+                  />
+                </Box>
 
-            <Editor
-              disabled={disabled}
-              isExpandMode={isExpandMode}
-              editorRef={editorRef}
-              error={field.error}
-              isPreviewMode={isPreviewMode}
-              name={name}
-              onChange={field.onChange}
-              placeholder={placeholder}
-              textareaRef={textareaRef}
-              value={field.value}
-              ref={forwardedRef}
-            />
-
-            {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
+                <Box position="absolute" left={0} right={0} bottom={0} pointerEvents="none">
+                  {!isExpandMode && (
+                    <Flex justifyContent="flex-end" padding={4} pointerEvents="none">
+                      <Box pointerEvents="auto">
+                        <WysiwygPreviewToggleButton
+                          isPreviewMode={isPreviewMode}
+                          onTogglePreviewMode={handleTogglePreviewMode}
+                        />
+                      </Box>
+                    </Flex>
+                  )}
+                  <Box pointerEvents="auto">
+                    <WysiwygNav
+                      isExpandMode={isExpandMode}
+                      editorRef={editorRef}
+                      isPreviewMode={isPreviewMode}
+                      onToggleMediaLib={handleToggleMediaLib}
+                      onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
+                      disabled={disabled}
+                    />
+                  </Box>
+                </Box>
+              </>
+            ) : (
+              <>
+                <WysiwygNav
+                  isExpandMode={isExpandMode}
+                  editorRef={editorRef}
+                  isPreviewMode={isPreviewMode}
+                  onToggleMediaLib={handleToggleMediaLib}
+                  onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
+                  disabled={disabled}
+                />
+                <Editor
+                  disabled={disabled}
+                  isExpandMode={isExpandMode}
+                  editorRef={editorRef}
+                  error={field.error}
+                  isPreviewMode={isPreviewMode}
+                  name={name}
+                  onChange={field.onChange}
+                  placeholder={placeholder}
+                  textareaRef={textareaRef}
+                  value={field.value}
+                  ref={forwardedRef}
+                />
+                {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
+              </>
+            )}
           </EditorLayout>
           <Field.Hint />
           <Field.Error />

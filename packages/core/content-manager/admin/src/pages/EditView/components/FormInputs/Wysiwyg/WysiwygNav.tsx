@@ -29,6 +29,7 @@ import {
   HeadingSix,
 } from '@strapi/icons';
 import { EditorFromTextArea } from 'codemirror5';
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
 import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
@@ -44,6 +45,32 @@ interface WysiwygNavProps {
   onTogglePreviewMode?: () => void;
 }
 
+interface WysiwygPreviewToggleButtonProps {
+  isPreviewMode?: boolean;
+  onTogglePreviewMode: () => void;
+}
+
+const WysiwygPreviewToggleButton = ({
+  isPreviewMode,
+  onTogglePreviewMode,
+}: WysiwygPreviewToggleButtonProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Button onClick={onTogglePreviewMode} variant="tertiary" minWidth="132px">
+      {isPreviewMode
+        ? formatMessage({
+            id: 'components.Wysiwyg.ToggleMode.markdown-mode',
+            defaultMessage: 'Markdown mode',
+          })
+        : formatMessage({
+            id: 'components.Wysiwyg.ToggleMode.preview-mode',
+            defaultMessage: 'Preview mode',
+          })}
+    </Button>
+  );
+};
+
 /**
  * TODO: refactor this mess.
  */
@@ -55,6 +82,7 @@ const WysiwygNav = ({
   onTogglePreviewMode,
 }: WysiwygNavProps) => {
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
   const isDisabled = disabled || isPreviewMode;
 
   const handleActionClick = (
@@ -406,9 +434,9 @@ const WysiwygNav = ({
       padding={2}
       background="neutral100"
       justifyContent="space-between"
-      borderRadius="0.4rem 0.4rem 0 0"
+      borderRadius={{ initial: '0 0 0.4rem 0.4rem', medium: '0.4rem 0.4rem 0 0' }}
       width="100%"
-      gap={4}
+      gap={{ initial: 3, medium: 4 }}
     >
       <Field.Root>
         <SingleSelect
@@ -464,30 +492,28 @@ const WysiwygNav = ({
         </SingleSelect>
       </Field.Root>
       <Flex width="100%" justifyContent="space-between" overflow="hidden">
-        <Flex gap={2} overflow="hidden" width="100%">
+        <Flex
+          gap={{ initial: 3, medium: 2 }}
+          overflow="hidden"
+          width="100%"
+          data-hide-toolbar-separator="true"
+        >
           <EditorToolbarObserver
             menuTriggerVariant="tertiary"
             observedComponents={observedComponents}
           />
         </Flex>
 
-        {onTogglePreviewMode && (
-          <Button onClick={onTogglePreviewMode} variant="tertiary" minWidth="132px">
-            {isPreviewMode
-              ? formatMessage({
-                  id: 'components.Wysiwyg.ToggleMode.markdown-mode',
-                  defaultMessage: 'Markdown mode',
-                })
-              : formatMessage({
-                  id: 'components.Wysiwyg.ToggleMode.preview-mode',
-                  defaultMessage: 'Preview mode',
-                })}
-          </Button>
+        {onTogglePreviewMode && !isMobile && (
+          <WysiwygPreviewToggleButton
+            isPreviewMode={isPreviewMode}
+            onTogglePreviewMode={onTogglePreviewMode}
+          />
         )}
       </Flex>
     </Flex>
   );
 };
 
-export { WysiwygNav };
-export type { WysiwygNavProps };
+export { WysiwygNav, WysiwygPreviewToggleButton };
+export type { WysiwygNavProps, WysiwygPreviewToggleButtonProps };
