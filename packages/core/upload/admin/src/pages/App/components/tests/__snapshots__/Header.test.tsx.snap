@@ -9,12 +9,16 @@ exports[`Header renders 1`] = `
   padding-block-start: 16px;
 }
 
-.c2 {
+.c1 {
+  display: block;
+}
+
+.c3 {
   cursor: pointer;
 }
 
-.c7 {
-  min-width: 0;
+.c9 {
+  width: 100%;
 }
 
 .c11 {
@@ -22,25 +26,31 @@ exports[`Header renders 1`] = `
   cursor: pointer;
   padding-inline-start: 16px;
   padding-inline-end: 16px;
+  width: 100%;
 }
 
-.c1 {
-  gap: 8px;
+.c17 {
+  display: none;
+}
+
+.c20 {
+  min-width: 0;
+}
+
+.c21 {
+  margin-inline-start: auto;
+  padding-inline-start: 16px;
+}
+
+.c2 {
+  gap: 12px;
   align-items: initial;
   flex-direction: column;
   display: flex;
 }
 
-.c6 {
-  gap: 16px;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  flex-direction: row;
-  display: flex;
-}
-
 .c8 {
+  gap: 12px;
   align-items: center;
   flex-direction: row;
   display: flex;
@@ -61,27 +71,49 @@ exports[`Header renders 1`] = `
   display: inline-flex;
 }
 
-.c5 {
+.c14 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c18 {
+  gap: 8px;
+  align-items: initial;
+  flex-direction: column;
+  display: flex;
+}
+
+.c19 {
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  flex-direction: row;
+  display: flex;
+}
+
+.c6 {
   font-size: 1.6rem;
   line-height: 1.5;
   color: #4945ff;
 }
 
-.c9 {
+.c7 {
   font-weight: 600;
   font-size: 2.8rem;
   line-height: 1.14;
   color: currentcolor;
 }
 
-.c14 {
+.c15 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: currentcolor;
   font-weight: 600;
 }
 
-.c16 {
+.c22 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -92,11 +124,11 @@ exports[`Header renders 1`] = `
   width: 1px;
 }
 
-.c3 {
+.c4 {
   text-decoration: none;
 }
 
-.c3:visited {
+.c4:visited {
   color: inherit;
 }
 
@@ -125,7 +157,7 @@ exports[`Header renders 1`] = `
   cursor: default;
 }
 
-.c15 {
+.c16 {
   height: 4rem;
   text-decoration: none;
   border: 1px solid #4945ff;
@@ -133,24 +165,24 @@ exports[`Header renders 1`] = `
   color: #ffffff;
 }
 
-.c15:hover {
+.c16:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c15:active {
+.c16:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c15[aria-disabled='true'] {
+.c16[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c4 {
+.c5 {
   display: inline-flex;
   align-items: center;
   text-decoration: none;
@@ -159,27 +191,27 @@ exports[`Header renders 1`] = `
   outline: none;
 }
 
-.c4 svg {
+.c5 svg {
   font-size: 1rem;
 }
 
-.c4 svg path {
+.c5 svg path {
   fill: #4945ff;
 }
 
-.c4:hover>span {
+.c5:hover>span {
   color: #4945ff;
 }
 
-.c4:hover svg path {
+.c5:hover svg path {
   fill: #4945ff;
 }
 
-.c4:active {
+.c5:active {
   color: #271fe0;
 }
 
-.c4:after {
+.c5:after {
   transition-property: all;
   transition-duration: 0.2s;
   border-radius: 8px;
@@ -192,11 +224,11 @@ exports[`Header renders 1`] = `
   border: 2px solid transparent;
 }
 
-.c4:focus-visible {
+.c5:focus-visible {
   outline: none;
 }
 
-.c4:focus-visible:after {
+.c5:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -223,26 +255,38 @@ exports[`Header renders 1`] = `
   }
 }
 
+@media (min-width: 1080px) {
+  .c1 {
+    display: none;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c17 {
+    display: block;
+  }
+}
+
 @media (min-width: 768px) {
-  .c5 {
+  .c6 {
     font-size: 1.4rem;
   }
 }
 
 @media (min-width: 768px) {
-  .c5 {
+  .c6 {
     line-height: 1.43;
   }
 }
 
 @media (min-width: 768px) {
-  .c9 {
+  .c7 {
     font-size: 3.2rem;
   }
 }
 
 @media (min-width: 768px) {
-  .c9 {
+  .c7 {
     line-height: 1.25;
   }
 }
@@ -260,13 +304,13 @@ exports[`Header renders 1`] = `
 }
 
 @media (min-width: 768px) {
-  .c15 {
+  .c16 {
     height: 3.2rem;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c15 {
+  .c16 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -283,99 +327,206 @@ exports[`Header renders 1`] = `
         <div
           class="c1"
         >
-          <a
-            aria-current="page"
-            aria-disabled="false"
-            class="c2 c3 c4 active"
-            href="/?folder=2&folderPath=/1"
-          >
-            <svg
-              fill="currentColor"
-              height="16"
-              viewBox="0 0 32 32"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H8.625l6.44 6.439a1.502 1.502 0 1 1-2.125 2.125l-9-9a1.5 1.5 0 0 1 0-2.125l9-9a1.503 1.503 0 0 1 2.125 2.125L8.625 14.5H27a1.5 1.5 0 0 1 1.5 1.5"
-              />
-            </svg>
-            <span
-              class="c5"
-            >
-              Back
-            </span>
-          </a>
           <div
-            class="c6"
+            class="c2"
           >
-            <div
-              class="c7 c8"
+            <a
+              aria-current="page"
+              aria-disabled="false"
+              class="c3 c4 c5 active"
+              href="/?folder=2&folderPath=/1"
             >
-              <h1
-                class="c9"
-                style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;"
+              <svg
+                fill="currentColor"
+                height="16"
+                viewBox="0 0 32 32"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                Media Library
-              </h1>
+                <path
+                  d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H8.625l6.44 6.439a1.502 1.502 0 1 1-2.125 2.125l-9-9a1.5 1.5 0 0 1 0-2.125l9-9a1.503 1.503 0 0 1 2.125 2.125L8.625 14.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                />
+              </svg>
+              <span
+                class="c6"
+              >
+                Back
+              </span>
+            </a>
+            <h1
+              class="c7"
+              style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;"
+            >
+              Media Library
+            </h1>
+            <div
+              class="c8"
+            >
+              <div
+                class="c9 c10"
+              >
+                <button
+                  aria-disabled="false"
+                  class="c11 c12 c13"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="c14"
+                  >
+                    <svg
+                      fill="currentColor"
+                      height="16"
+                      viewBox="0 0 32 32"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                      />
+                    </svg>
+                  </span>
+                  <span
+                    class="c15"
+                  >
+                    Add new folder
+                  </span>
+                </button>
+                <button
+                  aria-disabled="false"
+                  class="c11 c12 c16"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="c14"
+                  >
+                    <svg
+                      fill="currentColor"
+                      height="16"
+                      viewBox="0 0 32 32"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                      />
+                    </svg>
+                  </span>
+                  <span
+                    class="c15"
+                  >
+                    Add new assets
+                  </span>
+                </button>
+              </div>
             </div>
-            <div
-              class="c10"
+          </div>
+        </div>
+        <div
+          class="c17"
+        >
+          <div
+            class="c18"
+          >
+            <a
+              aria-current="page"
+              aria-disabled="false"
+              class="c3 c4 c5 active"
+              href="/?folder=2&folderPath=/1"
             >
-              <button
-                aria-disabled="false"
-                class="c11 c12 c13"
-                type="button"
+              <svg
+                fill="currentColor"
+                height="16"
+                viewBox="0 0 32 32"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <span
-                  aria-hidden="true"
-                  class="c8"
-                >
-                  <svg
-                    fill="currentColor"
-                    height="16"
-                    viewBox="0 0 32 32"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                    />
-                  </svg>
-                </span>
-                <span
-                  class="c14"
-                >
-                  Add new folder
-                </span>
-              </button>
-              <button
-                aria-disabled="false"
-                class="c11 c12 c15"
-                type="button"
+                <path
+                  d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H8.625l6.44 6.439a1.502 1.502 0 1 1-2.125 2.125l-9-9a1.5 1.5 0 0 1 0-2.125l9-9a1.503 1.503 0 0 1 2.125 2.125L8.625 14.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                />
+              </svg>
+              <span
+                class="c6"
               >
-                <span
-                  aria-hidden="true"
-                  class="c8"
+                Back
+              </span>
+            </a>
+            <div
+              class="c19"
+            >
+              <div
+                class="c20 c14"
+              >
+                <h1
+                  class="c7"
+                  style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;"
                 >
-                  <svg
-                    fill="currentColor"
-                    height="16"
-                    viewBox="0 0 32 32"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
+                  Media Library
+                </h1>
+              </div>
+              <div
+                class="c21"
+              >
+                <div
+                  class="c9 c10"
+                >
+                  <button
+                    aria-disabled="false"
+                    class="c11 c12 c13"
+                    type="button"
                   >
-                    <path
-                      d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                    />
-                  </svg>
-                </span>
-                <span
-                  class="c14"
-                >
-                  Add new assets
-                </span>
-              </button>
+                    <span
+                      aria-hidden="true"
+                      class="c14"
+                    >
+                      <svg
+                        fill="currentColor"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="c15"
+                    >
+                      Add new folder
+                    </span>
+                  </button>
+                  <button
+                    aria-disabled="false"
+                    class="c11 c12 c16"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="c14"
+                    >
+                      <svg
+                        fill="currentColor"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="c15"
+                    >
+                      Add new assets
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -383,7 +534,7 @@ exports[`Header renders 1`] = `
     </div>
   </div>
   <span
-    class="c16"
+    class="c22"
   >
     <p
       aria-live="polite"

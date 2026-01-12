@@ -10,7 +10,11 @@ interface ContentLayoutProps {
 
 const ContentLayout = ({ children }: ContentLayoutProps) => {
   return (
-    <Box paddingLeft={RESPONSIVE_DEFAULT_SPACING} paddingRight={RESPONSIVE_DEFAULT_SPACING}>
+    <Box
+      paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+      paddingRight={RESPONSIVE_DEFAULT_SPACING}
+      paddingTop={{ initial: 4, large: 0 }}
+    >
       {children}
     </Box>
   );
