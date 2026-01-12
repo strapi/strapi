@@ -22,8 +22,6 @@ import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
-import { withImages } from './plugins/withImages';
-import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
 
 import type { Schema } from '@strapi/types';
@@ -207,14 +205,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       .filter(nonNullable);
 
     const [editor] = React.useState(() =>
-      pipe(
-        withHistory,
-        withImages,
-        withStrapiSchema,
-        withReact,
-        withLinks,
-        ...blockRegisteredPlugins
-      )(createEditor())
+      pipe(withHistory, withStrapiSchema, withReact, ...blockRegisteredPlugins)(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
