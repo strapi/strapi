@@ -4,7 +4,7 @@ import { createContext, type FieldValue } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor, Transforms } from 'slate';
+import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
@@ -23,6 +23,7 @@ import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
+import { isNonNullable } from './utils/types';
 
 import type { Schema } from '@strapi/types';
 
@@ -32,14 +33,21 @@ import type { Schema } from '@strapi/types';
 
 interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
+  /** Function to check if a given node is of this type of block */
   matchNode: (node: Schema.Attribute.BlocksNode) => boolean;
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
   handleTab?: (editor: Editor) => void;
   snippets?: string[];
+  /** Adjust the vertical positioning of the drag-to-reorder grip icon */
   dragHandleTopMargin?: CSSProperties['marginTop'];
+  /** A Slate plugin: function that will wrap the editor creation */
   plugin?: (editor: Editor) => Editor;
+  /**
+   * Function that checks if an element should be draggable
+   * @default () => true */
+  isDraggable?: (element: Element) => boolean;
 }
 
 interface NonSelectorBlock extends BaseBlock {
@@ -158,10 +166,6 @@ const pipe =
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
-function nonNullable<T>(value: T): value is NonNullable<T> {
-  return value !== null && value !== undefined;
-}
-
 /**
  * Normalize the blocks state to null if the editor state is considered empty,
  * otherwise return the state
@@ -202,7 +206,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     const blockRegisteredPlugins = Object.values(blocks)
       .map((block) => block.plugin)
-      .filter(nonNullable);
+      .filter(isNonNullable);
 
     const [editor] = React.useState(() =>
       pipe(withHistory, withStrapiSchema, withReact, ...blockRegisteredPlugins)(createEditor())

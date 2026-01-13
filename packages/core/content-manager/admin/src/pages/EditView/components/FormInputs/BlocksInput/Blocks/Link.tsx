@@ -2,13 +2,97 @@ import * as React from 'react';
 
 import { Box, Button, Field, Flex, Popover } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { BaseEditor, Editor, Path, Point, Range, Transforms } from 'slate';
+import {
+  BaseEditor,
+  Editor,
+  Element,
+  Path,
+  Point,
+  Range,
+  Transforms,
+  Element as SlateElement,
+  Node,
+} from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
-import { editLink, insertLink, removeLink } from '../utils/links';
-import { isLinkNode, type Block } from '../utils/types';
+import { type Block } from '../utils/types';
+
+import type { Schema } from '@strapi/types';
+
+const isLinkNode = (element: Element): element is Schema.Attribute.LinkInlineNode => {
+  return element.type === 'link';
+};
+
+const removeLink = (editor: Editor) => {
+  Transforms.unwrapNodes(editor, {
+    match: (node) => !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'link',
+  });
+};
+
+const insertLink = (editor: Editor, { url }: { url: string }) => {
+  if (editor.selection) {
+    // We want to remove all link on the selection
+    const linkNodes = Array.from(
+      Editor.nodes(editor, {
+        at: editor.selection,
+        match: (node) => !Editor.isEditor(node) && node.type === 'link',
+      })
+    );
+
+    linkNodes.forEach(([, path]) => {
+      Transforms.unwrapNodes(editor, { at: path });
+    });
+
+    if (Range.isCollapsed(editor.selection)) {
+      const link: Block<'link'> = {
+        type: 'link',
+        url: url ?? '',
+        children: [{ type: 'text', text: url }],
+        rel: '',
+        target: '',
+      };
+
+      Transforms.insertNodes(editor, link);
+    } else {
+      Transforms.wrapNodes(editor, { type: 'link', url: url ?? '' } as Block<'link'>, {
+        split: true,
+      });
+    }
+  }
+};
+
+const editLink = (
+  editor: Editor,
+  link: { url: string; text: string; rel: string; target: string }
+) => {
+  const { url, text, rel, target } = link;
+
+  if (!editor.selection) {
+    return;
+  }
+
+  const linkEntry = Editor.above(editor, {
+    match: (node) => !Editor.isEditor(node) && node.type === 'link',
+  });
+
+  if (linkEntry) {
+    const [, linkPath] = linkEntry;
+    Transforms.setNodes(editor, { url, rel, target }, { at: linkPath });
+
+    // If link text is different, we remove the old text and insert the new one
+    if (text !== '' && text !== Editor.string(editor, linkPath)) {
+      const linkNodeChildrens = Array.from(Node.children(editor, linkPath, { reverse: true }));
+
+      linkNodeChildrens.forEach(([, childPath]) => {
+        Transforms.removeNodes(editor, { at: childPath });
+      });
+
+      Transforms.insertNodes(editor, [{ type: 'text', text }], { at: linkPath.concat(0) });
+    }
+  }
+};
 
 const StyledLink = styled(Box)`
   text-decoration: none;
@@ -345,6 +429,7 @@ const linkBlocks: Pick<BlocksStore, 'link'> = {
     matchNode: (node) => node.type === 'link',
     isInBlocksSelector: false,
     plugin: withLinks,
+    isDraggable: () => false,
   },
 };
 
@@ -353,4 +438,4 @@ export interface LinkEditor extends BaseEditor {
   shouldSaveLinkPath: boolean;
 }
 
-export { linkBlocks };
+export { linkBlocks, insertLink };
