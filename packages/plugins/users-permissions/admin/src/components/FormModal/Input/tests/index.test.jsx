@@ -43,13 +43,7 @@ describe('<Input />', () => {
         display: flex;
       }
 
-      .c1 {
-        align-items: center;
-        flex-direction: row;
-        display: flex;
-      }
-
-      .c4 {
+      .c3 {
         gap: 8px;
         align-items: center;
         justify-content: space-between;
@@ -57,7 +51,7 @@ describe('<Input />', () => {
         display: flex;
       }
 
-      .c2 {
+      .c1 {
         font-size: 1.2rem;
         line-height: 1.33;
         display: block;
@@ -68,40 +62,40 @@ describe('<Input />', () => {
         font-weight: 600;
       }
 
-      .c3 {
-        display: block;
+      .c2 {
+        display: flex;
       }
 
-      .c6 {
+      .c5 {
         border: none;
         border-radius: 4px;
         color: #32324d;
         font-weight: 400;
-        font-size: 1.6rem;
-        line-height: 2.4rem;
+        font-size: 1.4rem;
+        line-height: 2.2rem;
         display: block;
         width: 100%;
         background: inherit;
         padding-inline-start: 16px;
         padding-inline-end: 16px;
-        padding-block: 12px;
+        padding-block: 8px;
       }
 
-      .c6::placeholder {
+      .c5::placeholder {
         color: #666687;
         opacity: 1;
       }
 
-      .c6[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c6:focus {
+      .c5:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c5 {
+      .c4 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -113,44 +107,27 @@ describe('<Input />', () => {
         transition-duration: 0.2s;
       }
 
-      .c5:focus-within {
+      .c4:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
-      }
-
-      @media (min-width: 768px) {
-        .c6 {
-          font-size: 1.4rem;
-          line-height: 2.2rem;
-        }
-      }
-
-      @media (min-width: 768px) {
-        .c6 {
-          padding-block: 8px;
-        }
       }
 
       <div
         class="c0"
       >
-        <div
-          class="c1"
+        <label
+          class="c1 c2"
+          for=":r0:"
+          id=":r0:-label"
         >
-          <label
-            class="c2 c3"
-            for=":r0:"
-            id=":r0:-label"
-          >
-            Enabled
-          </label>
-        </div>
+          Enabled
+        </label>
         <div
-          class="c4 c5"
+          class="c3 c4"
         >
           <input
             aria-disabled="false"
-            class="c6"
+            class="c5"
             id=":r0:"
             name="test"
             placeholder=""

@@ -2,10 +2,10 @@
 
 exports[`BulkMoveButton renders 1`] = `
 .c0 {
-  border-radius: 4px;
-  cursor: pointer;
   padding-inline-start: 16px;
   padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .c1 {
@@ -41,7 +41,7 @@ exports[`BulkMoveButton renders 1`] = `
 }
 
 .c2 {
-  height: 4rem;
+  height: 3.2rem;
   text-decoration: none;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
@@ -63,12 +63,6 @@ exports[`BulkMoveButton renders 1`] = `
   background: #eaeaef;
   color: #666687;
   cursor: default;
-}
-
-@media (min-width: 768px) {
-  .c2 {
-    height: 3.2rem;
-  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

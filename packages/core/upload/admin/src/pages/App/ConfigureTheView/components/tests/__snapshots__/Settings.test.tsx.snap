@@ -2,26 +2,25 @@
 
 exports[`Upload - Configure | Settings initial render renders and matches the snapshot 1`] = `
 .c0 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+  padding-block-start: 24px;
   padding-block-end: 24px;
   padding-inline-start: 32px;
   padding-inline-end: 32px;
-  padding-block-start: 24px;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
 }
 
-.c8 {
+.c7 {
   background: #ffffff;
   border-radius: 4px;
   cursor: default;
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
 }
 
-.c11 {
+.c10 {
   flex: 1;
-  overflow: hidden;
 }
 
 .c2 {
@@ -37,13 +36,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   display: flex;
 }
 
-.c5 {
-  align-items: center;
-  flex-direction: row;
-  display: flex;
-}
-
-.c9 {
+.c8 {
   gap: 16px;
   align-items: center;
   justify-content: space-between;
@@ -51,14 +44,14 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   display: flex;
 }
 
-.c12 {
+.c11 {
   gap: 12px;
   align-items: center;
   flex-direction: row;
   display: flex;
 }
 
-.c6 {
+.c5 {
   font-size: 1.2rem;
   line-height: 1.33;
   display: block;
@@ -69,9 +62,9 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   font-weight: 600;
 }
 
-.c13 {
-  font-size: 1.6rem;
-  line-height: 1.5;
+.c12 {
+  font-size: 1.4rem;
+  line-height: 1.43;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -96,8 +89,8 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   width: 1px;
 }
 
-.c7 {
-  display: block;
+.c6 {
+  display: flex;
 }
 
 .c1 {
@@ -111,11 +104,11 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   max-width: 100%;
 }
 
-.c10 {
+.c9 {
   border: 1px solid #dcdce4;
+  padding-block: 8px;
   padding-inline-start: 16px;
   padding-inline-end: 12px;
-  padding-block: calc(           12px - 1px         );
   cursor: pointer;
   outline: none;
   box-shadow: none;
@@ -123,15 +116,15 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   transition-duration: 0.2s;
 }
 
-.c10[aria-disabled='true'] {
+.c9[aria-disabled='true'] {
   color: #8e8ea9;
 }
 
-.c10:focus-visible {
+.c9:focus-visible {
   outline: none;
 }
 
-.c10:focus-within {
+.c9:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
@@ -144,25 +137,17 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   fill: #8e8ea9;
 }
 
-.c14 {
+.c13 {
   flex: 1;
-  min-height: 2.4rem;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
+  min-height: 2.2rem;
 }
 
-@media (min-width: 768px) {
-  .c13 {
-    font-size: 1.4rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .c13 {
-    line-height: 1.43;
-  }
-}
-
-@media (min-width: 768px) {
-
+.c14 {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 @media (min-width: 520px) {
@@ -183,18 +168,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   }
 }
 
-@media (min-width: 768px) {
-  .c10 {
-    padding-block: 8px;
-  }
-}
-
-@media (min-width: 768px) {
-  .c14 {
-    min-height: 2.2rem;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
 
 }
@@ -212,17 +185,13 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
         <div
           class="c4"
         >
-          <div
-            class="c5"
+          <label
+            class="c5 c6"
+            for=":r0:"
+            id=":r0:-label"
           >
-            <label
-              class="c6 c7"
-              for=":r0:"
-              id=":r0:-label"
-            >
-              Entries per page
-            </label>
-          </div>
+            Entries per page
+          </label>
           <div
             aria-autocomplete="none"
             aria-controls="radix-:r2:"
@@ -230,7 +199,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             aria-expanded="false"
             aria-labelledby=":r0:-label"
             aria-required="false"
-            class="c8 c9 c10"
+            class="c7 c8 c9"
             data-state="closed"
             dir="ltr"
             name="pageSize"
@@ -238,20 +207,20 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             tabindex="0"
           >
             <span
-              class="c11 c12"
+              class="c10 c11"
             >
               <span
-                class="c13 c14"
+                class="c12 c13"
               >
                 <span
-                  class=""
+                  class="c14"
                 >
                   10
                 </span>
               </span>
             </span>
             <span
-              class="c12"
+              class="c11"
             >
               <span
                 aria-hidden="true"
@@ -285,17 +254,13 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
         <div
           class="c4"
         >
-          <div
-            class="c5"
+          <label
+            class="c5 c6"
+            for=":r3:"
+            id=":r3:-label"
           >
-            <label
-              class="c6 c7"
-              for=":r3:"
-              id=":r3:-label"
-            >
-              Default sort order
-            </label>
-          </div>
+            Default sort order
+          </label>
           <div
             aria-autocomplete="none"
             aria-controls="radix-:r5:"
@@ -303,7 +268,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             aria-expanded="false"
             aria-labelledby=":r3:-label"
             aria-required="false"
-            class="c8 c9 c10"
+            class="c7 c8 c9"
             data-state="closed"
             dir="ltr"
             name="sort"
@@ -311,20 +276,20 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             tabindex="0"
           >
             <span
-              class="c11 c12"
+              class="c10 c11"
             >
               <span
-                class="c13 c14"
+                class="c12 c13"
               >
                 <span
-                  class=""
+                  class="c14"
                 >
                   createdAt:DESC
                 </span>
               </span>
             </span>
             <span
-              class="c12"
+              class="c11"
             >
               <span
                 aria-hidden="true"

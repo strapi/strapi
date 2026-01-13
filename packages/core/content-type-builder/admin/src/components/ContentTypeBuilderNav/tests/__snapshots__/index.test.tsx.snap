@@ -18,26 +18,26 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c13 {
-  border-radius: 4px;
-  cursor: pointer;
-  flex: 1;
   padding-inline-start: 16px;
   padding-inline-end: 16px;
   width: 100%;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1;
 }
 
 .c17 {
-  border-radius: 4px;
-  cursor: pointer;
+  padding-block-start: 4px;
   padding-inline-start: 7px;
   padding-inline-end: 7px;
-  padding-block-start: 4px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .c28 {
-  max-width: 100%;
-  padding-block-end: 16px;
   padding-block-start: 16px;
+  padding-block-end: 16px;
+  max-width: 100%;
 }
 
 .c31 {
@@ -50,8 +50,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c36 {
   border-radius: 4px;
-  cursor: pointer;
   display: inline-flex;
+  cursor: pointer;
 }
 
 .c39 {
@@ -60,10 +60,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c43 {
-  border-radius: 4px;
   padding-inline-start: 12px;
   padding-inline-end: 12px;
   width: 100%;
+  border-radius: 4px;
 }
 
 .c44 {
@@ -71,13 +71,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c46 {
-  overflow: hidden;
   width: 80dvw;
+  overflow: hidden;
 }
 
 .c48 {
-  text-align: center;
   width: 24px;
+  text-align: center;
 }
 
 .c50 {
@@ -179,7 +179,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c5 {
   font-weight: 600;
-  font-size: 2rem;
+  font-size: 1.8rem;
   line-height: 1.22;
   color: currentcolor;
 }
@@ -193,22 +193,22 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c34 {
   font-weight: 600;
-  text-transform: uppercase;
   font-size: 1.1rem;
   line-height: 1.45;
+  text-transform: uppercase;
   color: #666687;
 }
 
 .c47 {
-  font-size: 1.6rem;
-  line-height: 32px;
+  font-size: 1.4rem;
+  line-height: 1.43;
   color: currentcolor;
   line-height: 32px;
 }
 
 .c51 {
-  font-size: 1.6rem;
-  line-height: 1.5;
+  font-size: 1.4rem;
+  line-height: 1.43;
   color: #32324d;
   font-weight: 500;
 }
@@ -225,7 +225,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c15 {
-  height: 4rem;
+  height: 3.2rem;
   text-decoration: none;
   border: 1px solid #4945ff;
   background: #4945ff;
@@ -250,7 +250,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c18 {
-  height: 4rem;
+  height: 3.2rem;
   text-decoration: none;
   border: 1px solid #dcdce4;
   background: #ffffff;
@@ -274,8 +274,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c38 {
   text-decoration: none;
-  padding-block: 0.7rem;
-  padding-inline: 0.7rem;
+  padding-block: 0.2rem;
+  padding-inline: 0.2rem;
   border: 1px solid transparent;
   background: transparent;
   color: #32324d;
@@ -305,14 +305,14 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   border-radius: 4px;
   color: #32324d;
   font-weight: 400;
-  font-size: 1.6rem;
-  line-height: 2.4rem;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
   display: block;
   width: 100%;
   background: inherit;
   padding-inline-start: 0;
   padding-inline-end: 16px;
-  padding-block: 8px;
+  padding-block: 4px;
 }
 
 .c27::placeholder {
@@ -525,45 +525,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   }
 }
 
-@media (min-width: 768px) {
-  .c5 {
-    font-size: 1.8rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .c47 {
-    font-size: 1.4rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .c51 {
-    font-size: 1.4rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .c51 {
-    line-height: 1.43;
-  }
-}
-
-@media (min-width: 768px) {
-  .c15 {
-    height: 3.2rem;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .c15 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-}
-
-@media (min-width: 768px) {
-  .c18 {
-    height: 3.2rem;
   }
 }
 
@@ -573,29 +537,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   }
 }
 
-@media (min-width: 768px) {
-  .c38 {
-    padding-block: 0.2rem;
-    padding-inline: 0.2rem;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .c38 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-}
-
-@media (min-width: 768px) {
-  .c27 {
-    font-size: 1.4rem;
-    line-height: 2.2rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .c27 {
-    padding-block: 4px;
   }
 }
 
