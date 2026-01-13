@@ -334,17 +334,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               {isMobile ? (
                 <>
                   <BlocksContent {...contentProps} />
-                  {!isExpandedMode && (
-                    <Flex
-                      justifyContent="flex-end"
-                      width="100%"
-                      paddingTop={4}
-                      paddingRight={4}
-                      paddingBottom={4}
-                    >
-                      <ExpandButton />
-                    </Flex>
-                  )}
                   <EditorDivider width="100%" />
                   <BlocksToolbar />
                 </>
