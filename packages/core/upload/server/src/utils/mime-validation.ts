@@ -15,6 +15,7 @@ type UploadValidationError = {
 type ValidationResult = {
   isValid: boolean;
   error?: UploadValidationError;
+  detectedMime?: string;
 };
 
 type ErrorDetail = {
@@ -180,7 +181,7 @@ export async function validateFile(
     };
   }
 
-  return { isValid: true };
+  return { isValid: true, detectedMime };
 }
 
 export async function validateFiles(files: any, strapi: Core.Strapi): Promise<ValidationResult[]> {
@@ -264,6 +265,10 @@ export async function enforceUploadSecurity(
   for (const [index, result] of validationResults.entries()) {
     if (result.isValid) {
       const file = filesArray[index];
+      // Enrich file with detected MIME type for use in storage
+      if (result.detectedMime) {
+        file.detectedMimeType = result.detectedMime;
+      }
       validFiles.push(file);
       validFileNames.push(file.originalFilename || file.name);
     } else if (result.error) {

@@ -382,6 +382,32 @@ describe('mime-validation', () => {
       expect(result.errors).toHaveLength(0);
     });
 
+    it('should enrich valid files with detected MIME type', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['application/*'],
+      });
+      mockReadFile.mockResolvedValue(Buffer.from('fake docx'));
+      mockFileTypeFromBuffer.mockResolvedValue({
+        mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ext: 'docx',
+      });
+
+      const fileWithGenericMime = {
+        name: 'test.docx',
+        path: '/tmp/test.docx',
+        size: 100000,
+        type: 'application/octet-stream', // Generic MIME from client
+      };
+
+      const result = await enforceUploadSecurity([fileWithGenericMime], mockStrapi);
+
+      expect(result.validFiles).toHaveLength(1);
+      expect(result.validFiles[0].detectedMimeType).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      );
+      expect(result.errors).toHaveLength(0);
+    });
+
     it('should return errors for disallowed MIME type', async () => {
       mockStrapi.config.get.mockReturnValue({
         allowedTypes: ['application/pdf'],
