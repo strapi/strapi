@@ -8,7 +8,6 @@ import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
-import { getPopulateDepth } from './utils/populate';
 import { indexByDocumentId } from './utils/document-status';
 
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
@@ -191,7 +190,7 @@ export default {
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
-      .populateDeep(getPopulateDepth())
+      .populateDeep(Infinity)
       .countRelations()
       .build();
 
@@ -393,7 +392,7 @@ export default {
       const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
-        .populateDeep(getPopulateDepth())
+        .populateDeep(Infinity)
         .countRelations()
         .build();
 
@@ -486,7 +485,7 @@ export default {
     const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
-      .populateDeep(getPopulateDepth())
+      .populateDeep(Infinity)
       .countRelations()
       .build();
 

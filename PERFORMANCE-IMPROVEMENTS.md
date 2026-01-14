@@ -12,8 +12,6 @@ V5 introduced architectural changes that compound with deeply nested content:
 2. **Document Service Layers** - New middleware, ID translation, and transformation layers add overhead
 3. **Document ID System** - Requires extra DB lookups to translate documentId → entity id
 
-The existing `populateDeep(Infinity)` was already a bottleneck in V4, but V5's additional layers amplify it significantly.
-
 ## Changes in This PR
 
 | Change                     | File(s)                                                             | Impact                                                                   |
@@ -23,12 +21,6 @@ The existing `populateDeep(Infinity)` was already a bottleneck in V4, but V5's a
 | Lazy + parallel validation | `packages/core/core/src/services/document-service/repository.ts`    | Skips empty param validation, runs remainder in parallel                 |
 | Batch config loading       | `packages/core/content-manager/server/src/services/components.ts`   | Single DB query for all component configs instead of N queries           |
 | Map-based status indexing  | `packages/core/content-manager/server/src/controllers/relations.ts` |                                                                          |
-
-### POC Only - For discussion (Not for Production)
-
-| Change                      | File(s)                                  | Impact | Why Not Mergeable                |
-| --------------------------- | ---------------------------------------- | ------ | -------------------------------- |
-| Configurable populate depth | `collection-types.ts`, `single-types.ts` |        | **Causes data loss** - see below |
 
 #### Why Populate Depth Limiting Causes Data Loss
 

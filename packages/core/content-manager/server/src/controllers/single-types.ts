@@ -4,14 +4,13 @@ import { setCreatorFields, async, errors } from '@strapi/utils';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { getService } from '../utils';
 import { formatDocumentWithMetadata } from './utils/metadata';
-import { getPopulateDepth } from './utils/populate';
 
 type OptionsWithPopulate = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
 const buildPopulateFromQuery = async (query: any, model: any) => {
   return getService('populate-builder')(model)
     .populateFromQuery(query)
-    .populateDeep(getPopulateDepth())
+    .populateDeep(Infinity)
     .countRelations()
     .build();
 };
