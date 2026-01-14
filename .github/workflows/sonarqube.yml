@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - feature/adding-sonarqube
   pull_request:
     types: [opened, synchronize, reopened]
 
