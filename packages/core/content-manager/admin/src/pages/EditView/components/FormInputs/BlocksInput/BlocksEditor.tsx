@@ -289,17 +289,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       }
     }, [editor, value]);
 
-    const expandLabel = formatMessage({
-      id: getTranslation('components.Blocks.expand'),
-      defaultMessage: 'Expand',
-    });
-
-    const ExpandButton = (props: React.ComponentProps<typeof IconButton>) => (
-      <IconButton shadow="filterShadow" label={expandLabel} onClick={handleToggleExpand} {...props}>
-        <Expand />
-      </IconButton>
-    );
-
     return (
       <>
         <VisuallyHidden id={ariaDescriptionId}>
@@ -343,7 +332,19 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
                   <EditorDivider width="100%" />
                   <BlocksContent {...contentProps} />
                   {!isExpandedMode && (
-                    <ExpandButton position="absolute" bottom="1.2rem" right="1.2rem" />
+                    <IconButton
+                      position="absolute"
+                      bottom="1.2rem"
+                      right="1.2rem"
+                      shadow="filterShadow"
+                      label={formatMessage({
+                        id: getTranslation('components.Blocks.expand'),
+                        defaultMessage: 'Expand',
+                      })}
+                      onClick={handleToggleExpand}
+                    >
+                      <Expand />
+                    </IconButton>
                   )}
                 </>
               )}

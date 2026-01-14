@@ -81,16 +81,14 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
                 </Box>
 
                 <Box position="absolute" left={0} right={0} bottom={0} pointerEvents="none">
-                  {!isExpandMode && (
-                    <Flex justifyContent="flex-end" padding={4} pointerEvents="none">
-                      <Box pointerEvents="auto">
-                        <WysiwygPreviewToggleButton
-                          isPreviewMode={isPreviewMode}
-                          onTogglePreviewMode={handleTogglePreviewMode}
-                        />
-                      </Box>
-                    </Flex>
-                  )}
+                  <Flex justifyContent="flex-end" padding={4} pointerEvents="none">
+                    <Box pointerEvents="auto">
+                      <WysiwygPreviewToggleButton
+                        isPreviewMode={isPreviewMode}
+                        onTogglePreviewMode={handleTogglePreviewMode}
+                      />
+                    </Box>
+                  </Flex>
                   <Box pointerEvents="auto">
                     <WysiwygNav
                       isExpandMode={isExpandMode}

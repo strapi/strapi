@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -184,7 +183,6 @@ const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
   const { modalElement, handleConversionResult } = useConversionModal();
-  const isMobile = useIsMobile();
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -195,12 +193,6 @@ const BlocksDropdown = () => {
   }, []);
 
   const [blockSelected, setBlockSelected] = React.useState<SelectorBlockKey>('paragraph');
-
-  const dropdownOptions = React.useMemo(
-    () =>
-      isMobile ? blockKeysToInclude.filter((key) => key !== blockSelected) : blockKeysToInclude,
-    [blockKeysToInclude, blockSelected, isMobile]
-  );
 
   const handleSelect = (optionKey: unknown) => {
     if (!isSelectorBlockKey(optionKey)) {
@@ -331,7 +323,7 @@ const BlocksDropdown = () => {
           })}
           disabled={disabled}
         >
-          {dropdownOptions.map((key) => (
+          {blockKeysToInclude.map((key) => (
             <BlockOption
               key={key}
               value={key}
@@ -693,13 +685,7 @@ const BlocksToolbar = () => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      <ToolbarWrapper
-        paddingTop={{ initial: 1, medium: 2 }}
-        paddingBottom={{ initial: 1, medium: 2 }}
-        paddingRight={{ initial: 1, medium: 2 }}
-        paddingLeft={{ initial: 1, medium: 2 }}
-        width="100%"
-      >
+      <ToolbarWrapper padding={{ initial: 1, medium: 2 }} width="100%">
         <BlocksDropdown />
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
