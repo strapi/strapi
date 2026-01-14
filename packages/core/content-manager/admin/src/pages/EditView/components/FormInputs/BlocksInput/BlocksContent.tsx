@@ -35,7 +35,11 @@ const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   // For fullscreen align input in the center with fixed width
   width: ${(props) => (props.$isExpandedMode ? '512px' : '100%')};
   margin: auto;
+  font-size: 1.6rem;
 
+  ${({ theme }) => theme.breakpoints.medium} {
+    font-size: 1.4rem;
+  }
   > *:last-child {
     padding-bottom: ${({ theme }) => theme.spaces[3]};
   }
