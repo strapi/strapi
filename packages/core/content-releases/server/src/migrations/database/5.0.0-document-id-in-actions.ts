@@ -39,7 +39,7 @@ export const addEntryDocumentToReleaseActions: Migration = {
 
       const releaseActions = await trx.select('*').from('strapi_release_actions');
 
-      async.map(releaseActions, async (action: any) => {
+      await async.map(releaseActions, async (action: any) => {
         const { target_type, target_id } = action;
 
         const entry = await db.query(target_type).findOne({ where: { id: target_id } });
