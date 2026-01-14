@@ -370,38 +370,63 @@ describe('Content-Type', () => {
     });
 
     const tests = [
-      [undefined, ['firstname', 'car']],
-      [null, ['firstname', 'car']],
+      [undefined, []],
+      [null, []],
       [
         ['firstname', 'car'],
-        ['firstname', 'car'],
+        ['firstname', 'car.model'],
       ],
-      [['restaurant.description'], ['restaurant.description', 'firstname', 'car']],
-      [['restaurant.address'], ['firstname', 'restaurant.address.country', 'car']],
+      [['restaurant.description'], ['restaurant.description']],
       [
-        ['restaurant.address.city'],
-        ['restaurant.address.city', 'firstname', 'restaurant.address.country', 'car'],
+        ['restaurant.address'],
+        [
+          'restaurant.address.city',
+          'restaurant.address.country',
+          'restaurant.address.gpsCoordinates.lat',
+          'restaurant.address.gpsCoordinates.long',
+        ],
       ],
+      [['restaurant.address.city'], ['restaurant.address.city']],
       [
         ['firstname', 'restaurant.address.country', 'car'],
-        ['firstname', 'restaurant.address.country', 'car'],
+        ['firstname', 'restaurant.address.country', 'car.model'],
       ],
+      [
+        ['restaurant'],
+        [
+          'restaurant.name',
+          'restaurant.description',
+          'restaurant.address.city',
+          'restaurant.address.country',
+          'restaurant.address.gpsCoordinates.lat',
+          'restaurant.address.gpsCoordinates.long',
+        ],
+      ],
+      [
+        ['restaurant.name', 'restaurant.address', 'restaurant.address.country'],
+        [
+          'restaurant.name',
+          'restaurant.address.city',
+          'restaurant.address.country',
+          'restaurant.address.gpsCoordinates.lat',
+          'restaurant.address.gpsCoordinates.long',
+        ],
+      ],
+      [['nonexistent.field', 'firstname'], ['firstname']],
+      [['restaurant.address.gpsCoordinates.lat'], ['restaurant.address.gpsCoordinates.lat']],
     ];
 
     // @ts-expect-error
-    test.each(tests)('requiredOnly : %p -> %p', (fields, expectedFields) => {
-      const res = cleanPermissionFields(
-        toPermission([
-          {
-            action: 'foo',
-            subject: 'user',
-            properties: { fields },
-          },
-        ]),
+    test.each(tests)('given fields %p, it returns %p', (fields, expectedFields) => {
+      const permissions = toPermission([
         {
-          requiredOnly: true,
-        }
-      );
+          action: 'foo',
+          subject: 'user',
+          properties: { fields },
+        },
+      ]);
+
+      const res = cleanPermissionFields(permissions);
       expect(res).toEqual([
         {
           action: 'foo',
