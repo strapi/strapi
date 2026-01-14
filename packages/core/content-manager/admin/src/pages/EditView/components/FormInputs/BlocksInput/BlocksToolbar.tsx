@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -39,8 +40,13 @@ const ToolbarSeparator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
   height: 2.4rem;
-  margin-left: 0.8rem;
-  margin-right: 0.8rem;
+  margin-left: ${({ theme }) => theme.spaces[1]};
+  margin-right: ${({ theme }) => theme.spaces[1]};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    margin-left: ${({ theme }) => theme.spaces[2]};
+    margin-right: ${({ theme }) => theme.spaces[2]};
+  }
 `;
 
 const FlexButton = styled<FlexComponent<'button'>>(Flex)`
@@ -65,8 +71,17 @@ const SelectWrapper = styled<BoxComponent>(Box)`
     border: none;
     cursor: pointer;
     min-height: unset;
-    padding-top: 6px;
-    padding-bottom: 6px;
+    padding-top: ${({ theme }) => theme.spaces[2]};
+    padding-bottom: ${({ theme }) => theme.spaces[2]};
+    padding-left: ${({ theme }) => theme.spaces[4]};
+    padding-right: ${({ theme }) => theme.spaces[4]};
+    gap: ${({ theme }) => theme.spaces[2]};
+    
+    ${({ theme }) => theme.breakpoints.medium} {
+      padding-top: ${({ theme }) => theme.spaces[1]};
+      padding-bottom: ${({ theme }) => theme.spaces[1]};
+      gap: ${({ theme }) => theme.spaces[4]};
+    }
 
     &[aria-disabled='false']:hover {
       cursor: pointer;
@@ -81,6 +96,13 @@ const SelectWrapper = styled<BoxComponent>(Box)`
       span {
         color: ${({ theme }) => theme.colors.neutral600};
       }
+    }
+
+    & > span:first-child {
+     gap: ${({ theme }) => theme.spaces[0]};
+
+     ${({ theme }) => theme.breakpoints.medium} {
+      gap: ${({ theme }) => theme.spaces[3]};
     }
   }
 `;
@@ -162,6 +184,7 @@ const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
   const { modalElement, handleConversionResult } = useConversionModal();
+  const isMobile = useIsMobile();
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -172,6 +195,12 @@ const BlocksDropdown = () => {
   }, []);
 
   const [blockSelected, setBlockSelected] = React.useState<SelectorBlockKey>('paragraph');
+
+  const dropdownOptions = React.useMemo(
+    () =>
+      isMobile ? blockKeysToInclude.filter((key) => key !== blockSelected) : blockKeysToInclude,
+    [blockKeysToInclude, blockSelected, isMobile]
+  );
 
   const handleSelect = (optionKey: unknown) => {
     if (!isSelectorBlockKey(optionKey)) {
@@ -302,7 +331,7 @@ const BlocksDropdown = () => {
           })}
           disabled={disabled}
         >
-          {blockKeysToInclude.map((key) => (
+          {dropdownOptions.map((key) => (
             <BlockOption
               key={key}
               value={key}
@@ -664,7 +693,13 @@ const BlocksToolbar = () => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      <ToolbarWrapper padding={2} width="100%">
+      <ToolbarWrapper
+        paddingTop={{ initial: 1, medium: 2 }}
+        paddingBottom={{ initial: 1, medium: 2 }}
+        paddingRight={{ initial: 1, medium: 2 }}
+        paddingLeft={{ initial: 1, medium: 2 }}
+        width="100%"
+      >
         <BlocksDropdown />
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
