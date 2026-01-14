@@ -74,6 +74,18 @@ This command generates a brand new project with the default features (authentica
 
 Enjoy 🎉
 
+## Local Plugins in Strapi 5
+
+When using local plugins in Strapi 5, each plugin may include its own `node_modules` directory, which can significantly increase the project size and cause deployment issues.
+
+### Recommendation:
+- Prefer using a monorepo or workspace setup to share dependencies.
+- Avoid committing plugin `node_modules` folders.
+- Consider linking plugins using package managers instead of copying dependencies.
+
+This helps keep builds smaller and deployments more reliable.
+
+
 ### 🖐 Requirements
 
 Complete installation requirements can be found in the documentation under <a href="https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/deployment.html">Installation Requirements</a>.
