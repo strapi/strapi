@@ -3,17 +3,7 @@ import { useParams, useLoaderData, useRevalidator } from 'react-router-dom';
 import { BlocksRenderer } from '@strapi/blocks-react-renderer';
 
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
-import {
-  Grid,
-  Flex,
-  Typography,
-  JSONInput,
-  Box,
-  IconButton,
-  Link,
-  LinkButton,
-  Button,
-} from '@strapi/design-system';
+import { Grid, Flex, Typography, JSONInput, Box, Button } from '@strapi/design-system';
 import { ChevronDown, ChevronRight } from '@strapi/icons';
 
 const filterAttributes = (item) => {
@@ -55,6 +45,18 @@ const ToggleableContainer = ({ headerText, children, isEmpty = false }) => {
   );
 };
 
+const isImageMedia = (value) => {
+  return (
+    typeof value === 'object' && value !== null && value.url && value.mime?.startsWith('image/')
+  );
+};
+
+const isVideoMedia = (value) => {
+  return (
+    typeof value === 'object' && value !== null && value.url && value.mime?.startsWith('video/')
+  );
+};
+
 const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = undefined }) => {
   if (fieldName === 'blocks') {
     return (
@@ -70,6 +72,53 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
       <Button variant="tertiary" onClick={() => window.alert('Sending email!')}>
         {value}
       </Button>
+    );
+  }
+
+  // Handle image media fields
+  if (isImageMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Box
+          tag="img"
+          src={value.url}
+          alt={value.alternativeText || value.name || 'Image'}
+          maxWidth="100%"
+          maxHeight="300px"
+          borderRadius="4px"
+          style={{
+            objectFit: 'contain',
+          }}
+        />
+        {value.caption && (
+          <Typography variant="pi" textColor="neutral600">
+            {value.caption}
+          </Typography>
+        )}
+      </Flex>
+    );
+  }
+
+  // Handle video media fields
+  if (isVideoMedia(value)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={2}>
+        <Box
+          tag="video"
+          src={value.url}
+          controls
+          maxWidth="100%"
+          maxHeight="300px"
+          borderRadius="4px"
+        >
+          Your browser does not support the video tag.
+        </Box>
+        {value.caption && (
+          <Typography variant="pi" textColor="neutral600">
+            {value.caption}
+          </Typography>
+        )}
+      </Flex>
     );
   }
 
