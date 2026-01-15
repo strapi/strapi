@@ -10,9 +10,9 @@ const DOCKER_COMPOSE_FILE = path.join(COMPLEX_DIR, 'docker-compose.dev.yml');
 const COMPOSE_PROJECT_NAME = 'strapi_complex';
 const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 
-const DB_NAME = 'strapi';
-const DB_USER = 'strapi';
-const DB_PASSWORD = 'strapi';
+const DB_NAME = process.env.DATABASE_NAME || 'strapi';
+const DB_USER = process.env.DATABASE_USERNAME || 'strapi';
+const DB_PASSWORD = process.env.DATABASE_PASSWORD || 'strapi';
 
 function getComposeEnv() {
   return { ...process.env, COMPOSE_PROJECT_NAME };
@@ -36,18 +36,22 @@ function getContainerName() {
   } catch (error) {
     // Fallback to expected name pattern
   }
-  // Fallback: try to find by image name
+  // Fallback: try to find the running container by expected name
   try {
-    const output = execSync(`docker ps --filter "ancestor=mysql:8" --format "{{.Names}}"`, {
-      encoding: 'utf8',
-    }).trim();
+    const output = execSync(
+      `docker ps --filter "name=${COMPOSE_PROJECT_NAME}-mysql" --filter "status=running" --format "{{.Names}}"`,
+      { encoding: 'utf8' }
+    ).trim();
     if (output) {
       return output.split('\n')[0];
     }
   } catch (error) {
-    // Continue to default
+    // Continue to error below
   }
-  return `${COMPOSE_PROJECT_NAME}-mysql-1`;
+
+  throw new Error(
+    `MySQL container not found. Start it with "yarn db:start:mysql" (COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}).`
+  );
 }
 
 const command = process.argv[2];

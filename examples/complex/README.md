@@ -229,10 +229,10 @@ These commands will:
 - ✅ Start the Strapi development server
 - ✅ Keep the database container running when you press Ctrl+C (only Strapi stops)
 
-**Note:** The database containers use the standard ports:
+**Note:** The database containers use the standard ports by default and can be overridden:
 
-- PostgreSQL: port `5432`
-- MySQL: port `3306`
+- PostgreSQL: port `5432` (override with `POSTGRES_PORT`)
+- MySQL: port `3306` (override with `MYSQL_PORT`)
 
 ### Standard Strapi Commands
 

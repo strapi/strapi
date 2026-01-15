@@ -610,25 +610,31 @@ function getEnvVars() {
   const env = { ...process.env };
   
   switch (dbType) {
-    case 'postgres':
+    case 'postgres': {
+      const postgresPort = process.env.POSTGRES_PORT || '5432';
+      const databasePort = process.env.DATABASE_PORT || postgresPort;
       env.DATABASE_CLIENT = 'postgres';
       env.DATABASE_HOST = 'localhost';
-      env.DATABASE_PORT = '5432';
+      env.DATABASE_PORT = databasePort;
       env.DATABASE_NAME = 'strapi';
       env.DATABASE_USERNAME = 'strapi';
       env.DATABASE_PASSWORD = 'strapi';
       env.DATABASE_SSL = 'false';
       break;
+    }
       
-    case 'mysql':
+    case 'mysql': {
+      const mysqlPort = process.env.MYSQL_PORT || '3306';
+      const databasePort = process.env.DATABASE_PORT || mysqlPort;
       env.DATABASE_CLIENT = 'mysql';
       env.DATABASE_HOST = 'localhost';
-      env.DATABASE_PORT = '3306';
+      env.DATABASE_PORT = databasePort;
       env.DATABASE_NAME = 'strapi';
       env.DATABASE_USERNAME = 'strapi';
       env.DATABASE_PASSWORD = 'strapi';
       env.DATABASE_SSL = 'false';
       break;
+    }
       
   }
   
@@ -821,25 +827,31 @@ function getEnvVars() {
   const env = { ...process.env };
   
   switch (dbType) {
-    case 'postgres':
+    case 'postgres': {
+      const postgresPort = process.env.POSTGRES_PORT || '5432';
+      const databasePort = process.env.DATABASE_PORT || postgresPort;
       env.DATABASE_CLIENT = 'postgres';
       env.DATABASE_HOST = 'localhost';
-      env.DATABASE_PORT = '5432';
+      env.DATABASE_PORT = databasePort;
       env.DATABASE_NAME = 'strapi';
       env.DATABASE_USERNAME = 'strapi';
       env.DATABASE_PASSWORD = 'strapi';
       env.DATABASE_SSL = 'false';
       break;
+    }
       
-    case 'mysql':
+    case 'mysql': {
+      const mysqlPort = process.env.MYSQL_PORT || '3306';
+      const databasePort = process.env.DATABASE_PORT || mysqlPort;
       env.DATABASE_CLIENT = 'mysql';
       env.DATABASE_HOST = 'localhost';
-      env.DATABASE_PORT = '3306';
+      env.DATABASE_PORT = databasePort;
       env.DATABASE_NAME = 'strapi';
       env.DATABASE_USERNAME = 'strapi';
       env.DATABASE_PASSWORD = 'strapi';
       env.DATABASE_SSL = 'false';
       break;
+    }
       
   }
   

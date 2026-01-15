@@ -10,9 +10,9 @@ const DOCKER_COMPOSE_FILE = path.join(COMPLEX_DIR, 'docker-compose.dev.yml');
 const COMPOSE_PROJECT_NAME = 'strapi_complex';
 const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 
-const DB_NAME = 'strapi';
-const DB_USER = 'strapi';
-const DB_PASSWORD = 'strapi';
+const DB_NAME = process.env.DATABASE_NAME || 'strapi';
+const DB_USER = process.env.DATABASE_USERNAME || 'strapi';
+const DB_PASSWORD = process.env.DATABASE_PASSWORD || 'strapi';
 
 function getComposeEnv() {
   return { ...process.env, COMPOSE_PROJECT_NAME };
