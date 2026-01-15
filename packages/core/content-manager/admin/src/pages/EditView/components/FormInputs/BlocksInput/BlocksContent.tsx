@@ -23,7 +23,7 @@ import { decorateCode } from './Blocks/Code';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
-import { getEntries, isLinkNode, isListNode } from './utils/types';
+import { getEntries } from './utils/types';
 
 const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
@@ -35,7 +35,11 @@ const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   // For fullscreen align input in the center with fixed width
   width: ${(props) => (props.$isExpandedMode ? '512px' : '100%')};
   margin: auto;
+  font-size: 1.6rem;
 
+  ${({ theme }) => theme.breakpoints.medium} {
+    font-size: 1.4rem;
+  }
   > *:last-child {
     padding-bottom: ${({ theme }) => theme.spaces[3]};
   }
@@ -332,13 +336,9 @@ const baseRenderElement = ({
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, element);
 
-  // Link is inline block so it cannot be dragged
-  // List items and nested list blocks i.e. lists with indent level higher than 0 are skipped from dragged items
-  if (
-    isLinkNode(element) ||
-    (isListNode(element) && element.indentLevel && element.indentLevel > 0) ||
-    element.type === 'list-item'
-  ) {
+  const isDraggable = block.isDraggable?.(element) ?? true;
+
+  if (!isDraggable) {
     return block.renderElement(props);
   }
 
