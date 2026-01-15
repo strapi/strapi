@@ -43,6 +43,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     replace: jest.Mock;
   };
 
+  let fileService: {
+    signFileUrls: jest.Mock;
+    upload: jest.Mock;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -63,15 +68,15 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       replace: jest.fn(),
     };
 
+    fileService = {
+      upload: jest.fn().mockResolvedValue([{}]),
+      signFileUrls: jest.fn((file) => Promise.resolve({ ...file, isUrlSigned: true })),
+    };
+
     mockGetService.mockImplementation((serviceName: string) => {
       if (serviceName === 'aiMetadata') return mockAiMetadataService;
       if (serviceName === 'upload') return uploadService;
-      if (serviceName === 'file') {
-        return {
-          upload: jest.fn().mockResolvedValue([{}]),
-          signFileUrls: jest.fn((file) => Promise.resolve(file)),
-        };
-      }
+      if (serviceName === 'file') return fileService;
       if (serviceName === 'metrics') {
         return {
           trackUsage: jest.fn().mockResolvedValue(undefined),
@@ -121,6 +126,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         files: { files: { filepath: '/tmp/test.jpg', mimetype: 'image/jpeg' } },
       } as any,
       forbidden: jest.fn(),
+      query: { id: '7' },
     } as any;
 
     ctxBulk = {
@@ -506,8 +512,8 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       expect(mockFindEntityAndCheckPermissions).toHaveBeenCalledTimes(2);
 
       expect(ctxBulk.body).toEqual([
-        { id: 1, caption: 'A', cleaned: true },
-        { id: 2, alternativeText: 'B', cleaned: true },
+        { id: 1, caption: 'A', cleaned: true, isUrlSigned: true },
+        { id: 2, alternativeText: 'B', cleaned: true, isUrlSigned: true },
       ]);
     });
 
@@ -552,10 +558,10 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       await adminUploadController.bulkUpdateFileInfo(ctxBulk as Context);
 
       expect(sanitizeOutput).toHaveBeenCalledWith(
-        { id: 10, caption: 'X' },
+        { id: 10, caption: 'X', isUrlSigned: true },
         { action: ACTIONS.read }
       );
-      expect(ctxBulk.body).toEqual([{ ok: true, id: 10, caption: 'X' }]);
+      expect(ctxBulk.body).toEqual([expect.objectContaining({ ok: true, id: 10, caption: 'X' })]);
     });
 
     it('passes the authenticated user to updateFileInfo', async () => {
@@ -581,6 +587,26 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         { name: 'fileA.jpg', alternativeText: 'hello', caption: 'A' },
         { user: { id: 42 } }
       );
+    });
+  });
+
+  describe('updateFileInfo', () => {
+    it('updates a file, sanitizes outputs, and returns the signed file', async () => {
+      mockValidateUploadBody.mockResolvedValue({
+        id: 7,
+        fileInfo: {
+          name: 'fileA.jpg',
+          alternativeText: 'hello',
+          caption: 'A',
+        },
+      } as any);
+
+      uploadService.updateFileInfo.mockResolvedValue({ id: 7 });
+
+      await adminUploadController.updateFileInfo(mockContext as Context);
+
+      expect(fileService.signFileUrls).toHaveBeenCalledWith({ id: 7 });
+      expect(mockContext.body).toEqual(expect.objectContaining({ id: 7, isUrlSigned: true }));
     });
   });
 });

@@ -31,7 +31,11 @@ export default {
         );
 
         const updated = await uploadService.updateFileInfo(id, fileInfo as any, { user });
-        return pm.sanitizeOutput(updated, { action: ACTIONS.read });
+
+        // Sign file urls for private providers
+        const signedFile = await getService('file').signFileUrls(updated);
+
+        return pm.sanitizeOutput(signedFile, { action: ACTIONS.read });
       }
     );
 
@@ -61,7 +65,10 @@ export default {
 
     const file = await uploadService.updateFileInfo(id, data.fileInfo as any, { user });
 
-    ctx.body = await pm.sanitizeOutput(file, { action: ACTIONS.read });
+    // Sign file urls for private providers
+    const signedFile = await getService('file').signFileUrls(file);
+
+    ctx.body = await pm.sanitizeOutput(signedFile, { action: ACTIONS.read });
   },
 
   async replaceFile(ctx: Context) {
