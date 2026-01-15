@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -11,7 +12,6 @@ import {
   BoxComponent,
   Menu,
 } from '@strapi/design-system';
-import { useIsMobile } from '@strapi/admin/strapi-admin';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';

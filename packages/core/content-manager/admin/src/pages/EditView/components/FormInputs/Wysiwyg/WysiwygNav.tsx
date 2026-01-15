@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Flex,
@@ -29,7 +30,6 @@ import {
   HeadingSix,
 } from '@strapi/icons';
 import { EditorFromTextArea } from 'codemirror5';
-import { useIsMobile } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
 import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';

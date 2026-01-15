@@ -10,6 +10,7 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
@@ -20,6 +21,7 @@ import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop'
 import { getTranslation } from '../../../../../utils/translations';
 
 import { decorateCode } from './Blocks/Code';
+import { BlocksHoveringToolbar } from './BlocksHoveringToolbar';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
@@ -368,6 +370,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   const { formatMessage } = useIntl();
   const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
   const { modalElement, handleConversionResult } = useConversionModal();
+  const isMobile = useIsMobile();
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
@@ -588,6 +591,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       grow={1}
       width="100%"
       overflow="auto"
+      position="relative"
       fontSize={2}
       background="neutral0"
       color="neutral800"
@@ -596,6 +600,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       paddingTop={6}
       paddingBottom={3}
     >
+      {isMobile && <BlocksHoveringToolbar containerRef={blocksRef} />}
       <StyledEditable
         aria-labelledby={ariaLabelId}
         readOnly={disabled}
