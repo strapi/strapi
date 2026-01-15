@@ -708,18 +708,22 @@ export default {
 
     const { locale, status } = await getDocumentLocaleAndStatus(ctx.query, model);
 
-    // Minimal populate for permission check - countDraftRelations loads full entity
-    const entity = await documentManager.findOne(id, model, {
-      locale,
-      status,
-      populate: {},
-    });
+    if (permissionChecker.requiresEntity.read()) {
+      // Only load what we need for access checks
+      const entity = await documentManager.findOne(id, model, {
+        locale,
+        status,
+        populate: {},
+      });
 
-    if (!entity) {
-      return ctx.notFound();
-    }
+      if (!entity) {
+        return ctx.notFound();
+      }
 
-    if (permissionChecker.cannot.read(entity)) {
+      if (permissionChecker.cannot.read(entity)) {
+        return ctx.forbidden();
+      }
+    } else if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
     }
 

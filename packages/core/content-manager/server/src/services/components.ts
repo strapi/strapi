@@ -62,6 +62,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    * batch query instead of sequential queries per component.
    */
   async findComponentsConfigurations(model: Struct.ComponentSchema) {
+    // Cache on request state so the same request can reuse configs
+    const requestState = strapi.requestContext?.get?.()?.state as
+      | { __componentsConfigurationsCache?: Map<string, Record<string, Configuration>> }
+      | undefined;
+    const requestCache = requestState?.__componentsConfigurationsCache;
+
     const componentUids = new Set<UID.Component>();
 
     const collectComponentUids = (schema: Struct.ComponentSchema) => {
@@ -102,6 +108,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // Key format must match configuration.ts uidToStoreKey: `${prefix}::${uid}`
     const uidsArray = Array.from(componentUids);
     const prefixedKeys = uidsArray.map((uid) => `components::${uid}`);
+    const cacheKey = prefixedKeys.slice().sort().join('|');
+    if (requestCache?.has(cacheKey)) {
+      return requestCache.get(cacheKey)! as Record<
+        string,
+        Configuration & { category: string; isComponent: boolean }
+      >;
+    }
+
     const configs = await storeUtils.getModelConfigurations(prefixedKeys);
 
     const componentsMap: Record<
@@ -124,6 +138,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         category: component.category,
         ...configuration,
       };
+    }
+
+    if (requestState) {
+      if (!requestState.__componentsConfigurationsCache) {
+        requestState.__componentsConfigurationsCache = new Map();
+      }
+      requestState.__componentsConfigurationsCache.set(cacheKey, componentsMap);
     }
 
     return componentsMap;

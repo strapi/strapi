@@ -26,6 +26,7 @@ import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
+import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
 
 const { validators } = validate;
 
@@ -51,12 +52,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   };
 
   const validateParams = async (params: any) => {
-    // Create request-scoped model cache to avoid redundant getModel() calls
+    // Cache model lookups for this request to avoid repeating the same work
     const modelCache = createModelCache(getModel);
 
     const ctx = { schema: contentType, getModel: modelCache.getModel };
 
-    // Collect validations to run (only for non-empty params)
+    // Only validate what is actually provided
     const validations: Promise<unknown>[] = [];
 
     if (params.filters && !isEmpty(params.filters)) {
@@ -75,8 +76,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       validations.push(validators.validatePopulate(ctx, params.populate, populateValidations));
     }
 
-    // Run all collected validations in parallel
-    await Promise.all(validations);
+    // Run validations together but keep the same error order as before
+    await runParallelWithOrderedErrors(validations);
 
     // Clean up cache after validation
     modelCache.clear();
