@@ -5,6 +5,7 @@ import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/
 import { HEIGHT_TOP_NAVIGATION, RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
 import { useDeviceType } from '../../hooks/useDeviceType';
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
+import { useIsDesktop } from '../../hooks/useMediaQuery';
 
 /* -------------------------------------------------------------------------------------------------
  * BaseHeaderLayout
@@ -24,6 +25,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     { navigationAction, primaryAction, secondaryAction, subtitle, title, sticky, width, ...props },
     ref
   ) => {
+    const isDesktop = useIsDesktop();
     const isSubtitleString = typeof subtitle === 'string';
 
     if (sticky) {
@@ -82,73 +84,73 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
         background="neutral100"
         data-strapi-header
       >
-        <Box display={{ initial: 'block', large: 'none' }}>
-          <Flex direction="column" alignItems="initial" gap={3}>
-            {navigationAction}
-            <Typography
-              tag="h1"
-              variant="alpha"
-              {...props}
-              style={{
-                wordBreak: 'break-word',
-                overflowWrap: 'break-word',
-                maxWidth: '100%',
-              }}
-            >
-              {title}
-            </Typography>
-            {isSubtitleString ? (
-              <Typography variant="epsilon" textColor="neutral600" tag="p">
-                {subtitle}
-              </Typography>
-            ) : (
-              subtitle
-            )}
-            {(primaryAction || secondaryAction) && (
-              <Flex gap={3}>
-                {secondaryAction}
-                {primaryAction}
+        <Flex direction="column" alignItems="initial" gap={{ initial: 2, large: 3 }}>
+          {navigationAction}
+          {isDesktop ? (
+            <>
+              <Flex justifyContent="space-between" wrap="wrap" gap={4}>
+                <Flex minWidth={0}>
+                  <Typography
+                    tag="h1"
+                    variant="alpha"
+                    {...props}
+                    style={{
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                      maxWidth: '100%',
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                  {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
+                </Flex>
+                <Box paddingLeft={4} marginLeft="auto">
+                  {primaryAction}
+                </Box>
               </Flex>
-            )}
-          </Flex>
-        </Box>
-        <Box display={{ initial: 'none', large: 'block' }}>
-          <Flex direction="column" alignItems="initial" gap={2}>
-            {navigationAction}
-            <Flex justifyContent="space-between" wrap="wrap" gap={4}>
-              <Flex minWidth={0}>
+              {isSubtitleString ? (
                 <Typography
-                  tag="h1"
-                  variant="alpha"
-                  {...props}
-                  style={{
-                    wordBreak: 'break-word',
-                    overflowWrap: 'break-word',
-                    maxWidth: '100%',
-                  }}
+                  variant="epsilon"
+                  textColor="neutral600"
+                  tag="p"
+                  paddingTop={{ initial: 4, large: 0 }}
                 >
-                  {title}
+                  {subtitle}
                 </Typography>
-                {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
-              </Flex>
-              <Box paddingLeft={4} marginLeft="auto">
-                {primaryAction}
-              </Box>
-            </Flex>
-          </Flex>
-          {isSubtitleString ? (
-            <Typography
-              variant="epsilon"
-              textColor="neutral600"
-              tag="p"
-              paddingTop={{ initial: 4, large: 0 }}
-            >
-              {subtitle}
-            </Typography>
+              ) : (
+                subtitle
+              )}
+            </>
           ) : (
-            subtitle
+            <>
+              <Typography
+                tag="h1"
+                variant="alpha"
+                {...props}
+                style={{
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word',
+                  maxWidth: '100%',
+                }}
+              >
+                {title}
+              </Typography>
+              {isSubtitleString ? (
+                <Typography variant="epsilon" textColor="neutral600" tag="p">
+                  {subtitle}
+                </Typography>
+              ) : (
+                subtitle
+              )}
+              {(primaryAction || secondaryAction) && (
+                <Flex gap={3}>
+                  {secondaryAction}
+                  {primaryAction}
+                </Flex>
+              )}
+            </>
           )}
-        </Box>
+        </Flex>
       </Box>
     );
   }
