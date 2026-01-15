@@ -194,7 +194,6 @@ const LeftMenu = ({
             type="button"
             aria-expanded={isBurgerMenuShown}
             aria-controls="burger-menu"
-            size="L"
           >
             {!isBurgerMenuShown ? <List fill="neutral1000" /> : <Cross fill="neutral1000" />}
           </IconButton>
