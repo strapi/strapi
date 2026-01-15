@@ -11,6 +11,7 @@ import {
   BoxComponent,
   Menu,
 } from '@strapi/design-system';
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
@@ -57,9 +58,11 @@ const FlexButton = styled<FlexComponent<'button'>>(Flex)`
   &[aria-disabled='false'] {
     cursor: pointer;
 
-    // Only apply hover styles if the button is enabled
-    &:hover {
-      background: ${({ theme }) => theme.colors.primary100};
+    // Only apply hover styles if the button is enabled on desktop
+    ${({ theme }) => theme.breakpoints.medium} {
+      &:hover {
+        background: ${({ theme }) => theme.colors.primary100};
+      }
     }
   }
 `;
@@ -152,7 +155,7 @@ const ToolbarButton = ({
       <Toolbar.ToggleItem
         value={name}
         data-state={isActive ? 'on' : 'off'}
-        onMouseDown={(e) => {
+        onPointerDown={(e) => {
           e.preventDefault();
           handleClick();
           ReactEditor.focus(editor);
@@ -183,6 +186,7 @@ const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
   const { modalElement, handleConversionResult } = useConversionModal();
+  const isMobile = useIsMobile();
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -314,7 +318,7 @@ const BlocksDropdown = () => {
         <SingleSelect
           startIcon={<Icon />}
           onChange={handleSelect}
-          placeholder={formatMessage(blocks[blockSelected].label)}
+          customizeContent={() => (isMobile ? '' : formatMessage(blocks[blockSelected].label))}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
           aria-label={formatMessage({
@@ -699,3 +703,4 @@ const BlocksToolbar = () => {
 };
 
 export { BlocksToolbar, useConversionModal };
+export { ToolbarButton };
