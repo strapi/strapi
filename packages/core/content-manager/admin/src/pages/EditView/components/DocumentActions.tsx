@@ -348,6 +348,17 @@ const DocumentActionsMenu = ({
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (triggerRef.current) {
+      if (isDisabled) {
+        triggerRef.current.setAttribute('disabled', '');
+      } else {
+        triggerRef.current.removeAttribute('disabled');
+      }
+    }
+  }, [isDisabled]);
 
   const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
     const { onClick = () => false, dialog, id } = action;
@@ -377,9 +388,16 @@ const DocumentActionsMenu = ({
     setIsOpen(false);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!isDisabled) {
+      setIsOpen(open);
+    }
+  };
+
   return (
-    <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
+    <Menu.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Menu.Trigger
+        ref={triggerRef}
         disabled={isDisabled}
         label={
           label ||
