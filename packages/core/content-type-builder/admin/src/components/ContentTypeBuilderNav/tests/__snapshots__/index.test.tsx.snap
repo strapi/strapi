@@ -472,8 +472,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c4 {
-  flex: 0 0 5.6rem;
-  height: 5.6rem;
+  flex: 0 0 6.4rem;
+  height: 6.4rem;
 }
 
 .c49 {
@@ -611,6 +611,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 @media (min-width: 1080px) {
   .c1 {
     height: 100dvh;
+  }
+}
+
+@media (min-width: 768px) {
+  .c4 {
+    flex: 0 0 5.6rem;
+    height: 5.6rem;
   }
 }
 
