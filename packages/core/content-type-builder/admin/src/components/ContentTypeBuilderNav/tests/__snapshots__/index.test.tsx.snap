@@ -431,7 +431,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c1 {
   width: 100%;
-  height: calc(100dvh - 5.6rem - 1px);
+  height: calc(100dvh - 6.4rem - 1px);
   overflow: hidden;
   background-color: #ffffff;
   display: flex;
@@ -439,7 +439,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   border-right: 0;
   box-shadow: none;
   position: fixed;
-  top: calc(5.6rem + 1px);
+  top: calc(6.4rem + 1px);
   left: 0;
   z-index: 2;
 }
@@ -472,8 +472,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c4 {
-  flex: 0 0 5.6rem;
-  height: 5.6rem;
+  flex: 0 0 6.4rem;
+  height: 6.4rem;
 }
 
 .c49 {
@@ -611,6 +611,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 @media (min-width: 1080px) {
   .c1 {
     height: 100dvh;
+  }
+}
+
+@media (min-width: 768px) {
+  .c4 {
+    flex: 0 0 5.6rem;
+    height: 5.6rem;
   }
 }
 
