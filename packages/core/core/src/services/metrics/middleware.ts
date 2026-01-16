@@ -19,7 +19,7 @@ const createMiddleware = ({ sendEvent, strapi }: { sendEvent: Sender; strapi: Co
   const middleware: Core.MiddlewareHandler = async (ctx, next) => {
     const { url, method } = ctx.request;
 
-    // Only track API requests
+    // Only track API requests (skip static assets)
     const shouldTrack =
       !url.includes('.') &&
       url.includes(strapi.config.get('api.rest.prefix')) &&
@@ -42,17 +42,19 @@ const createMiddleware = ({ sendEvent, strapi }: { sendEvent: Sender; strapi: Co
           if (tracked) return;
           tracked = true;
 
-          const statusCode = ctx.response.status || 500;
+          const statusCode = typeof ctx.response?.status === 'number' ? ctx.response.status : 500;
           const success = statusCode >= 200 && statusCode < 300;
 
           // Silently handle tracking errors - telemetry failures shouldn't affect the app
-          sendEvent('didReceiveRequest', {
-            eventProperties: {
-              url: ctx.request.url,
-              success,
-              statusCode,
-            },
-          }).catch(() => {
+          Promise.resolve(
+            sendEvent('didReceiveRequest', {
+              eventProperties: {
+                url: ctx.request.url,
+                success,
+                statusCode,
+              },
+            })
+          ).catch(() => {
             // Ignore tracking errors
           });
         };
