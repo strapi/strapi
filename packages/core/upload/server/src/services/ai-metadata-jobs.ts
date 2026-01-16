@@ -45,28 +45,19 @@ export const createAIMetadataJobsService = ({ strapi }: { strapi: Core.Strapi })
     });
   },
 
-  async cleanupOldJobs(): Promise<number> {
-    const oldJobs = await strapi.db.query(AI_METADATA_JOB_UID).findMany({
-      where: {
-        status: { $ne: 'processing' },
-      },
-    });
-
-    for (const job of oldJobs) {
-      await this.deleteJob(job.id);
-    }
-
-    return oldJobs.length;
-  },
-
   async registerCron() {
     strapi.cron.add({
       aiMetadataJobsCleanup: {
-        task: async () => {
+        async task() {
           try {
-            const deletedCount = await this.cleanupOldJobs();
-            if (deletedCount > 0) {
-              strapi.log.info(`Cleaned up ${deletedCount} old AI metadata jobs`);
+            const result = await strapi.db.query(AI_METADATA_JOB_UID).deleteMany({
+              where: {
+                status: { $ne: 'processing' },
+              },
+            });
+
+            if (result.count > 0) {
+              strapi.log.info(`Cleaned up ${result.count} old AI metadata jobs`);
             }
           } catch (error) {
             strapi.log.error('Failed to cleanup AI metadata jobs:', error);

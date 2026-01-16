@@ -104,10 +104,12 @@ export default {
     }
 
     try {
-      const count = await aiMetadataService.countImagesWithoutMetadata();
+      const { imagesWithoutMetadataCount, totalImages } =
+        await aiMetadataService.countImagesWithoutMetadata();
 
       ctx.body = {
-        count,
+        imagesWithoutMetadataCount,
+        totalImages,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to get AI metadata count';
@@ -143,9 +145,9 @@ export default {
 
     try {
       // Get count first to check if there are images to process
-      const count = await aiMetadataService.countImagesWithoutMetadata();
+      const result = await aiMetadataService.countImagesWithoutMetadata();
 
-      if (count === 0) {
+      if (result.imagesWithoutMetadataCount === 0) {
         ctx.body = {
           count: 0,
           message: 'No images without metadata found',

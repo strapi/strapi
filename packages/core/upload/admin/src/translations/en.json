@@ -106,7 +106,7 @@
   "settings.form.aiMetadata.metadataGenerated": "Your metadata has been generated",
   "settings.form.aiMetadata.generateButton": "Generate metadata",
   "settings.form.aiMetadata.confirmDialog.title": "Generate AI Metadata",
-  "settings.form.aiMetadata.confirmDialog.message": "This will generate captions and alternative text for {count, plural, one {# image} other {# images}}. AI can make mistakes, be sure to review the generated content. ",
+  "settings.form.aiMetadata.confirmDialog.message": "This will start a process in the background to generate captions and alternative text for {count, plural, one {# image} other {# images}}. AI can make mistakes, be sure to review the generated content.",
   "settings.form.autoOrientation.description": "Enabling this option will automatically rotate the image according to EXIF orientation tag.",
   "settings.form.autoOrientation.label": "Auto orientation",
   "settings.form.responsiveDimensions.description": "Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.",

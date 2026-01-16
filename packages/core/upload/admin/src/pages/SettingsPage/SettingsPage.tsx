@@ -21,14 +21,15 @@ import {
   Status,
   Divider,
   StatusProps,
+  TextButton,
 } from '@strapi/design-system';
 import { Check, Sparkle } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
-import { styled } from 'styled-components';
 
 import { AIMetadataJob } from '../../../../shared/contracts/ai-metadata-jobs';
+import { GetAIMetadataCount, GenerateAIMetadata } from '../../../../shared/contracts/files';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
 import { useAIMetadataJob } from '../../hooks/useAIMetadataJob';
@@ -43,17 +44,6 @@ import type { InitialState } from './reducer';
 /* -------------------------------------------------------------------------------------------------
  * MetadataAction
  * -----------------------------------------------------------------------------------------------*/
-
-const GenerateMetadataButton = styled(Button)`
-  > span {
-    color: ${({ theme }) => theme.colors.primary600};
-  }
-
-  &:disabled {
-    background: transparent;
-    border: none;
-  }
-`;
 
 const BetaStatus = (props: Omit<StatusProps, 'children'>) => {
   const { formatMessage } = useIntl();
@@ -76,16 +66,16 @@ const BetaStatus = (props: Omit<StatusProps, 'children'>) => {
 };
 
 interface MetadataActionProps {
-  jobStatus: AIMetadataJob | null;
-  metadataCount: number;
+  job: AIMetadataJob | null;
+  imagesWithoutMetadataCount: number;
   isConfirmDialogOpen: boolean;
   onConfirmDialogChange: (open: boolean) => void;
   onGenerate: () => Promise<void>;
 }
 
 const MetadataAction = ({
-  jobStatus,
-  metadataCount,
+  job,
+  imagesWithoutMetadataCount,
   isConfirmDialogOpen,
   onConfirmDialogChange,
   onGenerate,
@@ -93,7 +83,7 @@ const MetadataAction = ({
   const { formatMessage } = useIntl();
 
   // If there's an active job processing
-  if (jobStatus?.status === 'processing') {
+  if (job?.status === 'processing') {
     return (
       <Flex gap={2} alignItems="center">
         <Typography variant="pi" textColor="neutral600">
@@ -107,7 +97,7 @@ const MetadataAction = ({
   }
 
   // Only show completed state when all images have metadata
-  if (metadataCount === 0) {
+  if (imagesWithoutMetadataCount === 0) {
     return (
       <Typography variant="pi" textColor="primary600">
         <Flex gap={2} alignItems="center">
@@ -124,12 +114,12 @@ const MetadataAction = ({
   return (
     <Dialog.Root open={isConfirmDialogOpen} onOpenChange={onConfirmDialogChange}>
       <Dialog.Trigger>
-        <GenerateMetadataButton variant="ghost">
+        <TextButton disabled={imagesWithoutMetadataCount === 0}>
           {formatMessage({
             id: getTrad('settings.form.aiMetadata.generateButton'),
             defaultMessage: 'Generate metadata',
           })}
-        </GenerateMetadataButton>
+        </TextButton>
       </Dialog.Trigger>
       <ConfirmDialog
         variant="success-light"
@@ -148,9 +138,9 @@ const MetadataAction = ({
           {
             id: getTrad('settings.form.aiMetadata.confirmDialog.message'),
             defaultMessage:
-              'This will generate captions and alternative text for {count, plural, one {# image} other {# images}}. AI can make mistakes, be sure to review the generated content. ',
+              'This will start a process in the background to generate captions and alternative text for {count, plural, one {# image} other {# images}}. AI can make mistakes, be sure to review the generated content.',
           },
-          { count: metadataCount }
+          { count: imagesWithoutMetadataCount }
         )}
       </ConfirmDialog>
     </Dialog.Root>
@@ -172,9 +162,9 @@ export const SettingsPage = () => {
   const { data, isLoading, refetch } = useSettings();
   const isAIAvailable = useAIAvailability();
 
-  const { data: metadataCountData, isLoading: isLoadingMetadataCount } = useQuery<
-    { count: number },
-    { message: string }
+  const { data: imageCountResponse, isLoading: isLoadingImagesWithoutMetadataCount } = useQuery<
+    GetAIMetadataCount.Response['data'],
+    GetAIMetadataCount.Response['error']
   >(
     ['ai-metadata-count'],
     async () => {
@@ -187,7 +177,7 @@ export const SettingsPage = () => {
     }
   );
 
-  const metadataCount = metadataCountData?.count ?? 0;
+  const imagesWithoutMetadataCount = imageCountResponse?.imagesWithoutMetadataCount ?? 0;
 
   React.useEffect(() => {
     if (data) {
@@ -229,17 +219,13 @@ export const SettingsPage = () => {
   );
 
   // Poll for latest active job - notifications are handled inside the hook
-  const { data: jobStatus, refetch: refetchJobStatus } = useAIMetadataJob({
+  const { data: aiMetadataJob, refetch: refetchAiMetadataJob } = useAIMetadataJob({
     enabled: isAIAvailable,
   });
 
   const { mutateAsync: startGenerateAIMetadata } = useMutation<
-    {
-      jobId: number;
-      status: string;
-      totalFiles: number;
-    },
-    { message: string },
+    GenerateAIMetadata.Response['data'],
+    GenerateAIMetadata.Response['error'],
     void
   >(
     async () => {
@@ -250,12 +236,12 @@ export const SettingsPage = () => {
       onSuccess() {
         setIsConfirmDialogOpen(false);
         // Refetch job status to start polling the new job
-        refetchJobStatus();
+        refetchAiMetadataJob();
       },
       onError(err) {
         toggleNotification({
           type: 'danger',
-          message: err.message || formatMessage({ id: 'notification.error' }),
+          message: (err as Error)?.message || formatMessage({ id: 'notification.error' }),
         });
         setIsConfirmDialogOpen(false);
       },
@@ -380,40 +366,44 @@ export const SettingsPage = () => {
                       </Grid.Item>
                     </Grid.Root>
                     {/* Retroactive metadata generation when aiMetadata is enabled */}
-                    {initialData?.aiMetadata && !isLoadingMetadataCount && (
-                      <>
-                        <Divider marginTop={4} marginBottom={4} />
-                        <Flex justifyContent="space-between" alignItems="center" gap={2}>
-                          <Flex gap={2}>
-                            <BetaStatus size="XS" />
-                            <Typography variant="pi" textColor="neutral500">
-                              {metadataCount === 0
-                                ? formatMessage({
-                                    id: getTrad('settings.form.aiMetadata.allAssetsHaveMetadata'),
-                                    defaultMessage: 'All assets have caption and alt text',
-                                  })
-                                : formatMessage(
-                                    {
-                                      id: getTrad('settings.form.aiMetadata.imagesWithoutMetadata'),
-                                      defaultMessage:
-                                        '{count, plural, one {# image lacks captions or alternative text} other {# images lack captions or alternative text}}',
-                                    },
-                                    { count: metadataCount }
-                                  )}
-                            </Typography>
+                    {initialData?.aiMetadata &&
+                      !isLoadingImagesWithoutMetadataCount &&
+                      Boolean(imageCountResponse?.totalImages) && (
+                        <>
+                          <Divider marginTop={4} marginBottom={4} />
+                          <Flex justifyContent="space-between" alignItems="center" gap={2}>
+                            <Flex gap={2}>
+                              <BetaStatus size="XS" />
+                              <Typography variant="pi" textColor="neutral500">
+                                {imagesWithoutMetadataCount === 0
+                                  ? formatMessage({
+                                      id: getTrad('settings.form.aiMetadata.allAssetsHaveMetadata'),
+                                      defaultMessage: 'All assets have caption and alt text',
+                                    })
+                                  : formatMessage(
+                                      {
+                                        id: getTrad(
+                                          'settings.form.aiMetadata.imagesWithoutMetadata'
+                                        ),
+                                        defaultMessage:
+                                          '{count, plural, one {# image lacks captions or alternative text} other {# images lack captions or alternative text}}',
+                                      },
+                                      { count: imagesWithoutMetadataCount }
+                                    )}
+                              </Typography>
+                            </Flex>
+                            <MetadataAction
+                              job={aiMetadataJob ?? null}
+                              imagesWithoutMetadataCount={imagesWithoutMetadataCount}
+                              isConfirmDialogOpen={isConfirmDialogOpen}
+                              onConfirmDialogChange={setIsConfirmDialogOpen}
+                              onGenerate={async () => {
+                                await startGenerateAIMetadata();
+                              }}
+                            />
                           </Flex>
-                          <MetadataAction
-                            jobStatus={jobStatus ?? null}
-                            metadataCount={metadataCount}
-                            isConfirmDialogOpen={isConfirmDialogOpen}
-                            onConfirmDialogChange={setIsConfirmDialogOpen}
-                            onGenerate={async () => {
-                              await startGenerateAIMetadata();
-                            }}
-                          />
-                        </Flex>
-                      </>
-                    )}
+                        </>
+                      )}
                   </Flex>
                 </Box>
               )}
