@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-import { login } from '../../utils/login';
-import { navToHeader } from '../../utils/shared';
-import { findAndClose } from '../../utils/shared';
-import { resetFiles } from '../../utils/file-reset';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { navToHeader } from '../../../utils/shared';
+import { findAndClose } from '../../../utils/shared';
+import { resetFiles } from '../../../utils/file-reset';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 
 test.describe('Locale Isolation', () => {
   test.describe.configure({ timeout: 500000 });

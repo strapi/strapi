@@ -1,5 +1,5 @@
 import { DesignSystemProvider } from '@strapi/design-system';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -54,10 +54,12 @@ const ComponentFixture = (props: Partial<TableListProps> = {}) => {
 const setup = (props?: TableListProps) => render(<ComponentFixture {...props} />);
 
 describe('TableList', () => {
-  it('should render a visually hidden edit table headers label', () => {
+  it('should render a visually hidden edit table headers label', async () => {
     const { getByRole } = setup();
 
-    expect(getByRole('gridcell', { name: 'actions' })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByRole('gridcell', { name: 'actions' })).toBeInTheDocument();
+    });
   });
 
   it('should call onChangeSort callback when changing sort order', async () => {
@@ -126,11 +128,11 @@ describe('TableList', () => {
     expect(getByRole('checkbox', { name: 'Select all folders & assets' })).toBeDisabled();
   });
 
-  it('should render assets', () => {
-    const { getByText } = setup();
+  it('should render assets', async () => {
+    const { findByText } = setup();
 
-    expect(getByText('michka')).toBeInTheDocument();
-    expect(getByText('JPEG')).toBeInTheDocument();
+    expect(await findByText('michka')).toBeInTheDocument();
+    expect(await findByText('JPEG')).toBeInTheDocument();
   });
 
   it('should render folders', () => {

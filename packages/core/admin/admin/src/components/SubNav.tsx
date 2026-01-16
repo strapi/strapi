@@ -1,19 +1,19 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import {
-  Box,
-  SubNav as DSSubNav,
-  Flex,
-  Typography,
-  IconButton,
   Badge,
+  Box,
+  Flex,
+  IconButton,
   ScrollArea,
+  SubNav as DSSubNav,
+  Typography,
 } from '@strapi/design-system';
 import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
+import { HEIGHT_TOP_NAVIGATION, HEIGHT_TOP_NAVIGATION_MEDIUM } from '../constants/theme';
 
 import { tours } from './GuidedTour/Tours';
 
@@ -118,6 +118,11 @@ const Link = (
 const StyledHeader = styled(Flex)`
   flex: 0 0 ${HEIGHT_TOP_NAVIGATION};
   height: ${HEIGHT_TOP_NAVIGATION};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    flex: 0 0 ${HEIGHT_TOP_NAVIGATION_MEDIUM};
+    height: ${HEIGHT_TOP_NAVIGATION_MEDIUM};
+  }
 `;
 
 const Header = ({ label }: { label: string }) => {
@@ -295,7 +300,15 @@ const SubSectionLinkWrapper = styled.li`
 
 const SubSection = ({ label, children }: { label: string; children: React.ReactNode[] }) => {
   const [isOpen, setOpenLinks] = useState(true);
+  const [contentHeight, setContentHeight] = useState(0);
   const listId = useId();
+  const contentRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight);
+    }
+  }, [children]);
 
   const handleClick = () => {
     setOpenLinks((prev) => !prev);
@@ -321,17 +334,16 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
         </SubSectionHeader>
       </Flex>
       <Flex
+        ref={contentRef}
         tag="ul"
         id={listId}
         direction="column"
         gap="2px"
         alignItems={'stretch'}
         style={{
-          maxHeight: isOpen ? '1000px' : 0,
+          maxHeight: isOpen ? `${contentHeight}px` : 0,
           overflow: 'hidden',
-          transition: isOpen
-            ? 'max-height 1s ease-in-out'
-            : 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
+          transition: 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
         }}
       >
         {children.map((child, index) => {

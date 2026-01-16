@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { resetFiles } from '../../../utils/file-reset';
-import { sharedSetup } from '../../../utils/setup';
+import { resetFiles } from '../../../../utils/file-reset';
+import { sharedSetup } from '../../../../utils/setup';
 import {
   createComponent,
   createSingleType,
@@ -9,8 +9,8 @@ import {
   removeAttributeFromComponent,
   deleteComponent,
   type AddAttribute,
-} from '../../../utils/content-types';
-import { navToHeader } from '../../../utils/shared';
+} from '../../../../utils/content-types';
+import { navToHeader } from '../../../../utils/shared';
 
 test.describe('Update a new component', () => {
   // very long timeout for these tests because they restart the server multiple times

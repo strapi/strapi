@@ -2,13 +2,14 @@ import * as React from 'react';
 
 import { Typography } from '@strapi/design-system';
 import { BulletList, NumberList } from '@strapi/icons';
-import { type Text, Editor, Node, Transforms, Path } from 'slate';
+import { Schema } from '@strapi/types';
+import { type Text, Editor, Node, Transforms, Path, Element } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled, type CSSProperties, css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
-import { isListNode, type Block } from '../utils/types';
+import { type Block } from '../utils/types';
 
 const listStyle = css`
   display: flex;
@@ -41,6 +42,10 @@ const Unorderedlist = styled.ul<{ $listStyleType: CSSProperties['listStyleType']
 
 const orderedStyles = ['decimal', 'lower-alpha', 'upper-roman'];
 const unorderedStyles = ['disc', 'circle', 'square'];
+
+const isListNode = (element: Element): element is Schema.Attribute.ListBlockNode => {
+  return element.type === 'list';
+};
 
 const List = ({ attributes, children, element }: RenderElementProps) => {
   if (!isListNode(element)) {
@@ -323,35 +328,43 @@ const handleTabOnList = (editor: Editor) => {
   }
 };
 
+// All that's in common between ordered and unordered list blocks
+const baseListBlock = {
+  renderElement: (props) => <List {...props} />,
+  isInBlocksSelector: true,
+  handleEnterKey: handleEnterKeyOnList,
+  handleBackspaceKey: handleBackspaceKeyOnList,
+  handleTab: handleTabOnList,
+  isDraggable: (element) => {
+    if (!isListNode(element)) {
+      throw Error();
+    }
+    const indentLevel = element.indentLevel ?? 0;
+    return indentLevel === 0;
+  },
+} satisfies Partial<BlocksStore['list-ordered' | 'list-unordered']>;
+
 const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-item'> = {
   'list-ordered': {
-    renderElement: (props) => <List {...props} />,
+    ...baseListBlock,
     label: {
       id: 'components.Blocks.blocks.orderedList',
       defaultMessage: 'Numbered list',
     },
     icon: NumberList,
     matchNode: (node) => node.type === 'list' && node.format === 'ordered',
-    isInBlocksSelector: true,
     handleConvert: (editor) => handleConvertToList(editor, 'ordered'),
-    handleEnterKey: handleEnterKeyOnList,
-    handleBackspaceKey: handleBackspaceKeyOnList,
-    handleTab: handleTabOnList,
     snippets: ['1.'],
   },
   'list-unordered': {
-    renderElement: (props) => <List {...props} />,
+    ...baseListBlock,
     label: {
       id: 'components.Blocks.blocks.unorderedList',
       defaultMessage: 'Bulleted list',
     },
     icon: BulletList,
     matchNode: (node) => node.type === 'list' && node.format === 'unordered',
-    isInBlocksSelector: true,
     handleConvert: (editor) => handleConvertToList(editor, 'unordered'),
-    handleEnterKey: handleEnterKeyOnList,
-    handleBackspaceKey: handleBackspaceKeyOnList,
-    handleTab: handleTabOnList,
     snippets: ['-', '*', '+'],
   },
   'list-item': {
@@ -364,6 +377,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
     matchNode: (node) => node.type === 'list-item',
     isInBlocksSelector: false,
     dragHandleTopMargin: '-2px',
+    isDraggable: () => false,
   },
 };
 
