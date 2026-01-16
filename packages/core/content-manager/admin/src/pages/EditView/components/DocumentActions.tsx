@@ -17,7 +17,6 @@ import {
   Modal,
   Radio,
   Typography,
-  VisuallyHidden,
   Menu,
   ButtonProps,
   Tooltip,
@@ -350,6 +349,9 @@ const DocumentActionsMenu = ({
   const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
+  /**
+   * TODO: remove when https://github.com/strapi/design-system/pull/1994 will be merged and released.
+   */
   React.useEffect(() => {
     if (triggerRef.current) {
       if (isDisabled) {
