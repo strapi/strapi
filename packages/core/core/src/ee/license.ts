@@ -11,6 +11,8 @@ interface LicenseInfo {
   expireAt?: string;
   seats?: number;
   features?: Array<{ name: string; options?: Record<string, unknown> }>;
+  subscriptionId?: string;
+  planPriceId?: string;
 }
 
 const DEFAULT_FEATURES = {
