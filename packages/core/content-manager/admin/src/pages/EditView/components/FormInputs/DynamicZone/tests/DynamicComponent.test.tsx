@@ -40,6 +40,7 @@ describe('DynamicComponent', () => {
         },
       ],
     },
+    totalLength: 1,
   } satisfies DynamicComponentProps;
 
   interface TestComponentProps extends Partial<DynamicComponentProps> {

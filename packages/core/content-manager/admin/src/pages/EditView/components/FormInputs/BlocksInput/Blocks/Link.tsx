@@ -1,14 +1,98 @@
 import * as React from 'react';
 
-import { Box, Button, Field, Flex, Popover, useComposedRefs } from '@strapi/design-system';
+import { Box, Button, Field, Flex, Popover } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Editor, Path, Range, Transforms } from 'slate';
+import {
+  BaseEditor,
+  Editor,
+  Element,
+  Path,
+  Point,
+  Range,
+  Transforms,
+  Element as SlateElement,
+  Node,
+} from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
-import { editLink, removeLink } from '../utils/links';
-import { isLinkNode, type Block } from '../utils/types';
+import { type Block } from '../utils/types';
+
+import type { Schema } from '@strapi/types';
+
+const isLinkNode = (element: Element): element is Schema.Attribute.LinkInlineNode => {
+  return element.type === 'link';
+};
+
+const removeLink = (editor: Editor) => {
+  Transforms.unwrapNodes(editor, {
+    match: (node) => !Editor.isEditor(node) && SlateElement.isElement(node) && node.type === 'link',
+  });
+};
+
+const insertLink = (editor: Editor, { url }: { url: string }) => {
+  if (editor.selection) {
+    // We want to remove all link on the selection
+    const linkNodes = Array.from(
+      Editor.nodes(editor, {
+        at: editor.selection,
+        match: (node) => !Editor.isEditor(node) && node.type === 'link',
+      })
+    );
+
+    linkNodes.forEach(([, path]) => {
+      Transforms.unwrapNodes(editor, { at: path });
+    });
+
+    if (Range.isCollapsed(editor.selection)) {
+      const link: Block<'link'> = {
+        type: 'link',
+        url: url ?? '',
+        children: [{ type: 'text', text: url }],
+        rel: '',
+        target: '',
+      };
+
+      Transforms.insertNodes(editor, link);
+    } else {
+      Transforms.wrapNodes(editor, { type: 'link', url: url ?? '' } as Block<'link'>, {
+        split: true,
+      });
+    }
+  }
+};
+
+const editLink = (
+  editor: Editor,
+  link: { url: string; text: string; rel: string; target: string }
+) => {
+  const { url, text, rel, target } = link;
+
+  if (!editor.selection) {
+    return;
+  }
+
+  const linkEntry = Editor.above(editor, {
+    match: (node) => !Editor.isEditor(node) && node.type === 'link',
+  });
+
+  if (linkEntry) {
+    const [, linkPath] = linkEntry;
+    Transforms.setNodes(editor, { url, rel, target }, { at: linkPath });
+
+    // If link text is different, we remove the old text and insert the new one
+    if (text !== '' && text !== Editor.string(editor, linkPath)) {
+      const linkNodeChildrens = Array.from(Node.children(editor, linkPath, { reverse: true }));
+
+      linkNodeChildrens.forEach(([, childPath]) => {
+        Transforms.removeNodes(editor, { at: childPath });
+      });
+
+      Transforms.insertNodes(editor, [{ type: 'text', text }], { at: linkPath.concat(0) });
+    }
+  }
+};
 
 const StyledLink = styled(Box)`
   text-decoration: none;
@@ -245,6 +329,95 @@ const Link = React.forwardRef<HTMLAnchorElement, RenderElementProps>((props, for
   return <LinkContent {...props} link={props.element} ref={forwardedRef} />;
 });
 
+const withLinks = (editor: Editor) => {
+  const { isInline, apply, insertText, insertData } = editor;
+
+  // Links are inline elements, so we need to override the isInline method for slate
+  editor.isInline = (element) => {
+    return element.type === 'link' ? true : isInline(element);
+  };
+
+  // We keep a track of the last inserted link path
+  // So we can show the popover on the link component if that link is the last one inserted
+  editor.lastInsertedLinkPath = null;
+
+  // We intercept the apply method, so everytime we insert a new link, we save its path
+  editor.apply = (operation) => {
+    if (operation.type === 'insert_node') {
+      if (
+        !Editor.isEditor(operation.node) &&
+        operation.node.type === 'link' &&
+        editor.shouldSaveLinkPath
+      ) {
+        editor.lastInsertedLinkPath = operation.path;
+      }
+    } else if (operation.type === 'move_node') {
+      // We need to update the last inserted link path when link is moved
+      // If link is the first word in the paragraph we dont need to update the path
+      if (
+        Path.hasPrevious(operation.path) &&
+        editor.lastInsertedLinkPath &&
+        editor.shouldSaveLinkPath
+      ) {
+        editor.lastInsertedLinkPath = Path.transform(editor.lastInsertedLinkPath, operation);
+      }
+    }
+
+    apply(operation);
+  };
+
+  editor.insertText = (text) => {
+    // When selection is at the end of a link and user types a space, we want to break the link
+    if (editor.selection && Range.isCollapsed(editor.selection) && text === ' ') {
+      const linksInSelection = Array.from(
+        Editor.nodes(editor, {
+          at: editor.selection,
+          match: (node) => !Editor.isEditor(node) && node.type === 'link',
+        })
+      );
+
+      const selectionIsInLink = editor.selection && linksInSelection.length > 0;
+      const selectionIsAtEndOfLink =
+        selectionIsInLink &&
+        Point.equals(editor.selection.anchor, Editor.end(editor, linksInSelection[0][1]));
+
+      if (selectionIsAtEndOfLink) {
+        Transforms.insertNodes(
+          editor,
+          { text: ' ', type: 'text' },
+          { at: Path.next(linksInSelection[0][1]), select: true }
+        );
+
+        return;
+      }
+    }
+
+    insertText(text);
+  };
+
+  // Add data as a clickable link if its a valid URL
+  editor.insertData = (data) => {
+    const pastedText = data.getData('text/plain');
+
+    if (pastedText) {
+      try {
+        // eslint-disable-next-line no-new
+        new URL(pastedText);
+        // Do not show link popup on copy-paste a link, so do not save its path
+        editor.shouldSaveLinkPath = false;
+        insertLink(editor, { url: pastedText });
+        return;
+      } catch (error) {
+        // continue normal data insertion
+      }
+    }
+
+    insertData(data);
+  };
+
+  return editor;
+};
+
 const linkBlocks: Pick<BlocksStore, 'link'> = {
   link: {
     renderElement: (props) => (
@@ -255,7 +428,14 @@ const linkBlocks: Pick<BlocksStore, 'link'> = {
     // No handleConvert here, links are created via the link button in the toolbar
     matchNode: (node) => node.type === 'link',
     isInBlocksSelector: false,
+    plugin: withLinks,
+    isDraggable: () => false,
   },
 };
 
-export { linkBlocks };
+export interface LinkEditor extends BaseEditor {
+  lastInsertedLinkPath: Path | null;
+  shouldSaveLinkPath: boolean;
+}
+
+export { linkBlocks, insertLink };
