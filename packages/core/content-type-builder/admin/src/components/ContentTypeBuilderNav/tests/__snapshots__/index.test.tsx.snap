@@ -2,8 +2,8 @@
 
 exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 .c2 {
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
+  padding-inline-start: 20px;
+  padding-inline-end: 20px;
 }
 
 .c6 {
@@ -36,16 +36,19 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c28 {
   max-width: 100%;
-  padding-block-end: 16px;
-  padding-block-start: 16px;
+  padding-block-end: 20px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  padding-block-start: 20px;
 }
 
 .c31 {
-  position: relative;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
 }
 
-.c33 {
-  padding-inline-end: 4px;
+.c32 {
+  position: relative;
 }
 
 .c36 {
@@ -55,8 +58,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c39 {
-  margin-inline-start: 4px;
-  margin-inline-end: 4px;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
 }
 
 .c43 {
@@ -129,7 +132,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c29 {
-  gap: 20px;
+  gap: 24px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
@@ -142,7 +145,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c32 {
+.c33 {
   align-items: center;
   flex-direction: row;
   display: flex;
@@ -170,7 +173,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c45 {
-  gap: 4px;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
   flex-direction: row;
@@ -513,15 +516,44 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 @media (min-width: 1080px) {
+  .c28 {
+    padding-block-end: 16px;
+    padding-inline-start: 0;
+    padding-inline-end: 0;
+    padding-block-start: 16px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c31 {
+    padding-inline-start: 20px;
+    padding-inline-end: 20px;
+  }
+}
+
+@media (min-width: 1080px) {
   .c39 {
     margin-inline-start: 8px;
     margin-inline-end: 8px;
   }
 }
 
+@media (min-width: 1080px) {
+  .c43 {
+    padding-inline-start: 12px;
+    padding-inline-end: 12px;
+  }
+}
+
 @media (min-width: 768px) {
   .c46 {
     width: 100%;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c45 {
+    gap: 4px;
   }
 }
 
@@ -763,16 +795,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c30"
                 >
                   <div
-                    class="c2"
+                    class="c31"
                   >
                     <div
-                      class="c31 c22"
+                      class="c32 c22"
                     >
                       <div
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class=""
                         >
                           <span
                             class="c34"
@@ -880,16 +912,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c30"
                 >
                   <div
-                    class="c2"
+                    class="c31"
                   >
                     <div
-                      class="c31 c22"
+                      class="c32 c22"
                     >
                       <div
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class=""
                         >
                           <span
                             class="c34"
@@ -969,16 +1001,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c30"
                 >
                   <div
-                    class="c2"
+                    class="c31"
                   >
                     <div
-                      class="c31 c22"
+                      class="c32 c22"
                     >
                       <div
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class=""
                         >
                           <span
                             class="c34"
