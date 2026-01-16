@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Box,
   BoxComponent,
@@ -10,7 +11,6 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
-import { useIsMobile } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
@@ -21,8 +21,8 @@ import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop'
 import { getTranslation } from '../../../../../utils/translations';
 
 import { decorateCode } from './Blocks/Code';
-import { BlocksHoveringToolbar } from './BlocksHoveringToolbar';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
+import { BlocksHoveringToolbar } from './BlocksHoveringToolbar';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getEntries } from './utils/types';
@@ -139,9 +139,11 @@ const DragAndDropElement = ({
   dragDirection,
   dragHandleTopMargin,
 }: DragAndDropElementProps) => {
+  const isMobile = useIsMobile();
   const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
   const { formatMessage } = useIntl();
   const [dragVisibility, setDragVisibility] = React.useState<CSSProperties['visibility']>('hidden');
+  const isDragAndDropEnabled = !disabled && !isMobile;
 
   const handleMoveBlock = React.useCallback(
     (newIndex: Array<number>, currentIndex: Array<number>) => {
@@ -171,7 +173,7 @@ const DragAndDropElement = ({
   );
 
   const [{ handlerId, isDragging, isOverDropTarget, direction }, blockRef, dropRef, dragRef] =
-    useDragAndDrop(!disabled, {
+    useDragAndDrop(isDragAndDropEnabled, {
       type: `${ItemTypes.BLOCKS}_${name}`,
       index,
       item: {
@@ -220,22 +222,30 @@ const DragAndDropElement = ({
           gap={2}
           paddingLeft={2}
           alignItems="start"
-          onDragStart={(event) => {
-            const target = event.target as HTMLElement;
-            const currentTarget = event.currentTarget as HTMLElement;
+          onDragStart={
+            isDragAndDropEnabled
+              ? (event) => {
+                  const target = event.target as HTMLElement;
+                  const currentTarget = event.currentTarget as HTMLElement;
 
-            // Dragging action should only trigger drag event when button is dragged, however update styles on the whole dragItem.
-            if (target.getAttribute('role') !== 'button') {
-              event.preventDefault();
-            } else {
-              // Setting styles using dragging state is not working, so set it on current target element as nodes get dragged
-              currentTarget.style.opacity = '0.5';
-            }
-          }}
-          onDragEnd={(event) => {
-            const currentTarget = event.currentTarget as HTMLElement;
-            currentTarget.style.opacity = '1';
-          }}
+                  // Dragging action should only trigger drag event when button is dragged, however update styles on the whole dragItem.
+                  if (target.getAttribute('role') !== 'button') {
+                    event.preventDefault();
+                  } else {
+                    // Setting styles using dragging state is not working, so set it on current target element as nodes get dragged
+                    currentTarget.style.opacity = '0.5';
+                  }
+                }
+              : undefined
+          }
+          onDragEnd={
+            isDragAndDropEnabled
+              ? (event) => {
+                  const currentTarget = event.currentTarget as HTMLElement;
+                  currentTarget.style.opacity = '1';
+                }
+              : undefined
+          }
           onMouseMove={() => setDragVisibility('visible')}
           onSelect={() => setDragVisibility('visible')}
           onMouseLeave={() => setDragVisibility('hidden')}
@@ -253,9 +263,9 @@ const DragAndDropElement = ({
               defaultMessage: 'Drag',
             })}
             onClick={(e) => e.stopPropagation()}
-            aria-disabled={disabled}
-            disabled={disabled}
-            draggable
+            aria-disabled={disabled || isMobile}
+            disabled={disabled || isMobile}
+            draggable={isDragAndDropEnabled}
             // For some blocks top margin added to drag handle to align at the text level
             $dragHandleTopMargin={dragHandleTopMargin}
           >
