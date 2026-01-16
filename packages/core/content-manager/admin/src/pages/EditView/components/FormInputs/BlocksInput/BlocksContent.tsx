@@ -22,7 +22,6 @@ import { getTranslation } from '../../../../../utils/translations';
 
 import { decorateCode } from './Blocks/Code';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
-import { BlocksHoveringToolbar } from './BlocksHoveringToolbar';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
 import { getEntries } from './utils/types';
@@ -610,7 +609,6 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       paddingTop={6}
       paddingBottom={3}
     >
-      {isMobile && <BlocksHoveringToolbar containerRef={blocksRef} />}
       <StyledEditable
         aria-labelledby={ariaLabelId}
         readOnly={disabled}

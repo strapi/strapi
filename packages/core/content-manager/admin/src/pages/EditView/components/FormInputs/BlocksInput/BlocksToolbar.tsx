@@ -703,4 +703,3 @@ const BlocksToolbar = () => {
 };
 
 export { BlocksToolbar, useConversionModal };
-export { ToolbarButton };
