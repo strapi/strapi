@@ -169,7 +169,7 @@
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
     "supertest": "6.3.3",
-    "tar": "6.2.1",
+    "tar": "7.5.3",
     "ts-jest": "29.1.0",
     "typescript": "5.4.4",
     "yalc": "1.0.0-pre.53",
