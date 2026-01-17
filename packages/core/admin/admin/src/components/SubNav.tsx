@@ -20,8 +20,8 @@ import { tours } from './GuidedTour/Tours';
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
   height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px);
-  overflow: hidden;
   background-color: ${({ theme }) => theme.colors.neutral0};
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   border-right: 0;
@@ -126,8 +126,23 @@ const StyledHeader = styled(Flex)`
 `;
 
 const Header = ({ label }: { label: string }) => {
+  const headerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault(); 
+    };
+    
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+    
+  }, []);
+
   return (
     <StyledHeader
+    ref={headerRef}
       justifyContent="space-between"
       paddingLeft={{
         initial: 4,
@@ -367,8 +382,14 @@ const PageWrapper = styled(Box)`
   }
 `;
 
+const StyledScrollArea = styled(ScrollArea)`
+    [data-radix-scroll-area-viewport] {
+      overscroll-behavior: contain ; 
+  }
+`;
+
 const Content = ({ children }: { children: React.ReactNode }) => {
-  return <ScrollArea>{children}</ScrollArea>;
+  return <StyledScrollArea>{children}</StyledScrollArea>;
 };
 
 export const SubNav = {
