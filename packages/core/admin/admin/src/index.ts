@@ -63,6 +63,7 @@ export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useDebounce } from './hooks/useDebounce';
 export { useMediaQuery, useIsDesktop, useIsTablet, useIsMobile } from './hooks/useMediaQuery';
 export { useDeviceType } from './hooks/useDeviceType';
+export { useContentTypes } from './hooks/useContentTypes';
 export { useAdminUsers } from './services/users';
 export { useGetCountDocumentsQuery } from './services/homepage';
 
@@ -81,6 +82,7 @@ export type {
   Entity,
   FieldContentSourceMap,
 } from '../../shared/contracts/shared';
+export type { ContentType } from '../../shared/contracts/content-types';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';
 
