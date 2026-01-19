@@ -10,10 +10,13 @@ import type { RelationResult } from '../../../shared/contracts/relations';
  * We fallback to the documentId.
  */
 const getRelationLabel = (relation: RelationResult, mainField?: MainField): string => {
-  const label = mainField && relation[mainField.name] ? relation[mainField.name] : null;
+  const label = mainField && relation[mainField.name] != null ? relation[mainField.name] : null;
 
-  if (typeof label === 'string') {
+  if (typeof label === 'string' && label !== '') {
     return label;
+  }
+  if (typeof label === 'number') {
+    return String(label);
   }
 
   return relation.documentId;
