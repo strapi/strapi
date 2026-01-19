@@ -6,14 +6,27 @@ import type { Core } from '@strapi/types';
 
 import type { IAsset, IFile } from '../../../../types';
 
+interface ErrorWithFilepath extends Error {
+  filepath?: string;
+}
+
+function createErrorWithFilepath(message: string, filepath: string): ErrorWithFilepath {
+  const error: ErrorWithFilepath = new Error(message);
+  error.filepath = filepath;
+  return error;
+}
+
 function getFileStream(
   filepath: string,
   strapi: Core.Strapi,
   isLocal = false
 ): PassThrough | ReadStream {
   if (isLocal) {
-    // Todo: handle errors
-    return createReadStream(filepath);
+    const stream = createReadStream(filepath);
+    stream.on('error', (err: ErrorWithFilepath) => {
+      err.filepath = filepath;
+    });
+    return stream;
   }
 
   const readableStream = new PassThrough();
@@ -23,7 +36,10 @@ function getFileStream(
     .fetch(filepath)
     .then((res: Response) => {
       if (res.status !== 200) {
-        readableStream.emit('error', new Error(`Request failed with status code ${res.status}`));
+        readableStream.emit(
+          'error',
+          createErrorWithFilepath(`Request failed with status code ${res.status}`, filepath)
+        );
         return;
       }
 
@@ -31,10 +47,16 @@ function getFileStream(
         // pipe the image data
         Readable.fromWeb(res.body as webStream.ReadableStream<Uint8Array>).pipe(readableStream);
       } else {
-        readableStream.emit('error', new Error('Empty data found for file'));
+        readableStream.emit(
+          'error',
+          createErrorWithFilepath('Empty data found for file', filepath)
+        );
       }
     })
     .catch((error: unknown) => {
+      if (error instanceof Error) {
+        (error as ErrorWithFilepath).filepath = filepath;
+      }
       readableStream.emit('error', error);
     });
 
@@ -47,14 +69,19 @@ function getFileStats(
   isLocal = false
 ): Promise<{ size: number }> {
   if (isLocal) {
-    return stat(filepath);
+    return stat(filepath).catch((err: ErrorWithFilepath) => {
+      err.filepath = filepath;
+      throw err;
+    });
   }
   return new Promise((resolve, reject) => {
     strapi
       .fetch(filepath)
       .then((res: Response) => {
         if (res.status !== 200) {
-          reject(new Error(`Request failed with status code ${res.status}`));
+          reject(
+            createErrorWithFilepath(`Request failed with status code ${res.status}`, filepath)
+          );
           return;
         }
 
@@ -66,6 +93,9 @@ function getFileStats(
         resolve(stats);
       })
       .catch((error: unknown) => {
+        if (error instanceof Error) {
+          (error as ErrorWithFilepath).filepath = filepath;
+        }
         reject(error);
       });
   });
