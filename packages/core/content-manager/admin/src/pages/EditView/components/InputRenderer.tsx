@@ -185,7 +185,7 @@ const BaseInputRenderer = ({
           disabled={fieldIsDisabled}
         >
           {(componentInputProps) => (
-            <BaseInputRenderer
+            <MemoizedInputRenderer
               key={`input-${componentInputProps.name}-${localeKey}`}
               {...componentInputProps}
             />
@@ -278,17 +278,37 @@ const ConditionAwareInputRenderer = ({
   const fieldValues = useForm('ConditionalInputRenderer', (state) => state.values);
   const parts = props.name.split('.');
 
-  const topLevelFieldName = parts[0];
-  const indexOfComponent = parts[1];
+  // Resolve a nested path safely from an object. Supports numeric indexes for arrays.
+  const resolvePath = (obj: unknown, pathParts: string[]) =>
+    pathParts.reduce<any>((cur, part) => {
+      if (cur == null) return undefined;
+      if (/^\d+$/.test(part)) {
+        return Array.isArray(cur) ? cur[Number(part)] : undefined;
+      }
+      return cur[part];
+    }, obj);
 
-  // If the field belongs to a dynamic zone/component (e.g. "dzName.0.field"),
-  // evaluate the rule against the specific component values when possible to
-  // avoid unnecessary broad evaluations. Fall back to the full form values
-  // if the expected structure is not present to avoid runtime errors.
+  // If the field belongs to a nested component/dynamic zone (e.g. "dz.0.nested.test"),
+  // evaluate the rule against the nearest object scope on the path (leaf -> parent -> ...).
+  // Fall back to the full form values to avoid runtime errors.
+  const nearestObjectScope = () => {
+    for (let i = parts.length; i >= 1; i -= 1) {
+      const candidate = resolvePath(fieldValues, parts.slice(0, i));
+      if (candidate && typeof candidate === 'object') return candidate;
+    }
+    return undefined;
+  };
+
+  const isComponentLike =
+    props.attribute.type === 'component' || props.attribute.type === 'dynamiczone';
+  const parentScope = parts.length > 1 ? resolvePath(fieldValues, parts.slice(0, -1)) : undefined;
+
   const targetValues =
-    parts.length >= 2 && fieldValues[topLevelFieldName]
-      ? (fieldValues[topLevelFieldName]?.[indexOfComponent] ?? {})
-      : fieldValues;
+    isComponentLike && parentScope && typeof parentScope === 'object'
+      ? parentScope
+      : parts.length > 1
+        ? (nearestObjectScope() ?? fieldValues)
+        : fieldValues;
 
   const isVisible = rulesEngine.evaluate(condition, targetValues);
 
