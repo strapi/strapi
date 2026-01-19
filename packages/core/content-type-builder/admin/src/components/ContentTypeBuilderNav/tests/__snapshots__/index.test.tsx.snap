@@ -502,13 +502,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-left: 36px;
 }
 
-@media (min-width: 1080px) {
-  .c2 {
-    padding-inline-start: 20px;
-    padding-inline-end: 20px;
-  }
-}
-
 @media (min-width: 768px) {
   .c28 {
     max-width: 23.2rem;
@@ -535,13 +528,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   .c39 {
     margin-inline-start: 8px;
     margin-inline-end: 8px;
-  }
-}
-
-@media (min-width: 1080px) {
-  .c43 {
-    padding-inline-start: 12px;
-    padding-inline-end: 12px;
   }
 }
 

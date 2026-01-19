@@ -97,12 +97,7 @@ const Link = (
 
   return (
     <StyledLink {...rest} onClick={handleClick}>
-      <Box
-        width={'100%'}
-        paddingLeft={{ initial: 3, large: 3 }}
-        paddingRight={{ initial: 3, large: 3 }}
-        borderRadius={1}
-      >
+      <Box width={'100%'} paddingLeft={3} paddingRight={3} borderRadius={1}>
         <Flex justifyContent="space-between" width="100%" gap={{ initial: 2, large: 1 }}>
           <Typography
             tag="div"
@@ -132,17 +127,7 @@ const StyledHeader = styled(Flex)`
 
 const Header = ({ label }: { label: string }) => {
   return (
-    <StyledHeader
-      justifyContent="space-between"
-      paddingLeft={{
-        initial: 5,
-        large: 5,
-      }}
-      paddingRight={{
-        initial: 5,
-        large: 5,
-      }}
-    >
+    <StyledHeader justifyContent="space-between" paddingLeft={5} paddingRight={5}>
       <Typography variant="beta" tag="h2">
         {label}
       </Typography>
@@ -165,7 +150,7 @@ const Sections = ({
       paddingRight={{ initial: 3, large: 0 }}
       maxWidth={{ initial: '100%', medium: '23.2rem' }}
     >
-      <Flex tag="ul" gap="6" direction="column" alignItems="stretch" {...props}>
+      <Flex tag="ul" gap={6} direction="column" alignItems="stretch" {...props}>
         {children.map((child, index) => {
           return <li key={index}>{child}</li>;
         })}
