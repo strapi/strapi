@@ -276,7 +276,21 @@ const ConditionAwareInputRenderer = ({
 }: InputRendererProps & { condition: JsonLogicCondition }) => {
   // Note: this selector causes a re-render every time any form value on the page changes
   const fieldValues = useForm('ConditionalInputRenderer', (state) => state.values);
-  const isVisible = rulesEngine.evaluate(condition, fieldValues);
+  const parts = props.name.split('.');
+
+  const topLevelFieldName = parts[0];
+  const indexOfComponent = parts[1];
+
+  // If the field belongs to a dynamic zone/component (e.g. "dzName.0.field"),
+  // evaluate the rule against the specific component values when possible to
+  // avoid unnecessary broad evaluations. Fall back to the full form values
+  // if the expected structure is not present to avoid runtime errors.
+  const targetValues =
+    parts.length >= 2 && fieldValues[topLevelFieldName]
+      ? (fieldValues[topLevelFieldName]?.[indexOfComponent] ?? {})
+      : fieldValues;
+
+  const isVisible = rulesEngine.evaluate(condition, targetValues);
 
   if (!isVisible) {
     return null;
