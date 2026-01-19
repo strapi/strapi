@@ -10,6 +10,7 @@ import {
   useIsDesktop,
   useDebounce,
   RESPONSIVE_DEFAULT_SPACING,
+  useIsMobile,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -59,6 +60,7 @@ interface HeaderProps {
 const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: HeaderProps) => {
   const { formatMessage } = useIntl();
   const isCloning = useMatch(CLONE_PATH) !== null;
+  const isMobile = useIsMobile();
   const params = useParams<{ collectionType: string; slug: string }>();
   const [
     {
@@ -86,7 +88,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
       paddingBottom={4}
       gap={2}
     >
-      <Box display={{ initial: 'none', medium: 'block' }}>
+      {!isMobile && (
         <BackButton
           fallback={
             params.collectionType === SINGLE_TYPES
@@ -94,7 +96,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
               : `../${COLLECTION_TYPES}/${params.slug}`
           }
         />
-      </Box>
+      )}
       <Flex
         width="100%"
         justifyContent="space-between"
@@ -117,7 +119,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
           </Box>
         </Flex>
         <Flex width={{ initial: '100%', medium: 'auto' }} gap={3} justifyContent="space-between">
-          <Box display={{ initial: 'block', medium: 'none' }}>
+          {isMobile && (
             <BackButton
               fallback={
                 params.collectionType === SINGLE_TYPES
@@ -125,7 +127,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
                   : `../${COLLECTION_TYPES}/${params.slug}`
               }
             />
-          </Box>
+          )}
           <HeaderToolbar activeTab={activeTab} isCloning={isCloning} />
         </Flex>
       </Flex>
