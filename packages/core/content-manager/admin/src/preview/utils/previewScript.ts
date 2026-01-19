@@ -72,6 +72,37 @@ const previewScript = (config: PreviewScriptConfig) => {
     return document.querySelectorAll(`[${SOURCE_ATTRIBUTE}*="path=${path}"]`);
   };
 
+  const isMediaElement = (element: Element): boolean => {
+    return element.tagName === 'IMG' || element.tagName === 'VIDEO';
+  };
+
+  /**
+   * Get the field path to use for focusing a media field.
+   * - For IMG/VIDEO elements: the path was already normalized (stripped of .url) during stega decoding
+   * - For non-media elements with model=plugin::upload.file (e.g., caption text): strip the last
+   *   segment to focus the parent media field (e.g., "hero.caption" -> "hero")
+   */
+  const getFieldPathForMedia = (sourceAttr: string, element: Element): string => {
+    // IMG/VIDEO elements already have the correct path from stega decoding
+    if (isMediaElement(element)) {
+      return sourceAttr;
+    }
+
+    // For non-media elements, check if it's a media asset field
+    const params = new URLSearchParams(sourceAttr);
+    if (params.get('model') === 'plugin::upload.file') {
+      const elementPath = params.get('path');
+      if (elementPath) {
+        // Strip the last segment (e.g., "hero.caption" -> "hero")
+        const parentPath = elementPath.split('.').slice(0, -1).join('.');
+        params.set('path', parentPath);
+        return params.toString();
+      }
+    }
+
+    return sourceAttr;
+  };
+
   /* -----------------------------------------------------------------------------------------------
    * Functionality pieces
    * ---------------------------------------------------------------------------------------------*/
@@ -88,6 +119,34 @@ const previewScript = (config: PreviewScriptConfig) => {
     );
 
     const applyStegaToElement = (element: Element) => {
+      // Handle img and video tags - check src attribute for stega encoding
+      if (isMediaElement(element)) {
+        const src = element.getAttribute('src');
+        if (src) {
+          try {
+            const result = stegaDecode(src);
+            if (result && 'strapiSource' in result) {
+              // Parse the source and remove .url suffix to point to the media field
+              const sourceValue = result.strapiSource as string;
+              const pathMatch = sourceValue.match(/path=([^&]+)/);
+              if (pathMatch) {
+                const originalPath = pathMatch[1];
+                // Remove .url to get the media field path
+                const mediaPath = originalPath.replace(/\.url$/, '');
+                const newSource = sourceValue.replace(`path=${originalPath}`, `path=${mediaPath}`);
+                element.setAttribute(SOURCE_ATTRIBUTE, newSource);
+              }
+            }
+            // Clean the src attribute so the resource can load
+            const cleanedSrc = stegaClean(src);
+            if (cleanedSrc !== src) {
+              element.setAttribute('src', cleanedSrc);
+            }
+          } catch (error) {}
+        }
+        return;
+      }
+
       const directTextNodes = Array.from(element.childNodes).filter(
         (node) => node.nodeType === Node.TEXT_NODE
       );
@@ -140,6 +199,14 @@ const previewScript = (config: PreviewScriptConfig) => {
         if (mutation.type === 'characterData' && mutation.target.parentElement) {
           applyStegaToElement(mutation.target.parentElement);
         }
+
+        // Handle src attribute changes for img/video elements
+        if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+          const target = mutation.target as Element;
+          if (isMediaElement(target)) {
+            applyStegaToElement(target);
+          }
+        }
       });
     });
 
@@ -147,6 +214,8 @@ const previewScript = (config: PreviewScriptConfig) => {
       childList: true,
       subtree: true,
       characterData: true,
+      attributes: true,
+      attributeFilter: ['src'],
     });
 
     return observer;
@@ -267,6 +336,26 @@ const previewScript = (config: PreviewScriptConfig) => {
           // Send single-click hint notification
           sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_SINGLE_CLICK_HINT, null);
 
+          // For img/video elements, find the nearest interactive parent since media
+          // elements themselves aren't interactive - their behavior comes from parents
+          let targetElement: HTMLElement = element;
+          if (isMediaElement(element)) {
+            let parent = element.parentElement;
+            while (parent) {
+              if (
+                parent.tagName === 'A' ||
+                parent.tagName === 'BUTTON' ||
+                parent.hasAttribute('onclick') ||
+                parent.getAttribute('role') === 'button' ||
+                parent.getAttribute('role') === 'link'
+              ) {
+                targetElement = parent;
+                break;
+              }
+              parent = parent.parentElement;
+            }
+          }
+
           // Re-trigger the click on the underlying element after the double-click timeout
           // Create a new event to dispatch with a marker to prevent re-handling
           const newEvent = new MouseEvent('click', {
@@ -284,7 +373,7 @@ const previewScript = (config: PreviewScriptConfig) => {
             metaKey: event.metaKey,
           });
           (newEvent as any).__strapi_redispatched = true;
-          element.dispatchEvent(newEvent);
+          targetElement.dispatchEvent(newEvent);
         }, DOUBLE_CLICK_TIMEOUT);
 
         pendingClicks.set(element, timeout);
@@ -304,9 +393,10 @@ const previewScript = (config: PreviewScriptConfig) => {
 
         const sourceAttribute = element.getAttribute(SOURCE_ATTRIBUTE);
         if (sourceAttribute) {
+          const path = getFieldPathForMedia(sourceAttribute, element);
           const rect = element.getBoundingClientRect();
           sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
-            path: sourceAttribute,
+            path,
             position: {
               top: rect.top,
               left: rect.left,
@@ -540,9 +630,45 @@ const previewScript = (config: PreviewScriptConfig) => {
 
         getElementsByPath(field).forEach((element) => {
           if (element instanceof HTMLElement) {
-            element.textContent = value || '';
+            // For img/video elements, update the src attribute instead of text content
+            if (isMediaElement(element)) {
+              // Value can be a media object with url property, or a string URL
+              const url = typeof value === 'object' && value !== null ? value.url : value;
+              element.setAttribute('src', url || '');
+            } else {
+              element.textContent = value || '';
+            }
           }
         });
+
+        // Handle nested media asset fields (caption, alt, etc.)
+        // These are identified by model=plugin::upload.file in the source attribute
+        if (typeof value === 'object' && value !== null) {
+          const allSourceElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
+
+          allSourceElements.forEach((element) => {
+            const sourceAttr = element.getAttribute(SOURCE_ATTRIBUTE);
+            if (!sourceAttr) return;
+
+            // Parse the source attribute as URL search params
+            const params = new URLSearchParams(sourceAttr);
+            const model = params.get('model');
+            const elementPath = params.get('path');
+
+            // Only process media asset fields
+            if (model !== 'plugin::upload.file' || !elementPath) return;
+
+            // Check if this element's path starts with the field path (e.g., "hero.caption" starts with "hero")
+            if (elementPath.startsWith(`${field}.`)) {
+              // Extract the property name (e.g., "caption" from "hero.caption")
+              const propertyName = elementPath.slice(field.length + 1);
+              const propertyValue = value[propertyName];
+              if (element instanceof HTMLElement && propertyValue !== undefined) {
+                element.textContent = propertyValue || '';
+              }
+            }
+          });
+        }
 
         // Update highlight dimensions since the new text content may affect them
         highlightManager.updateAllHighlights();
