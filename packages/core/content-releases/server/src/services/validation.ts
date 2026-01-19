@@ -16,10 +16,6 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
     releaseId: CreateReleaseAction.Request['params']['releaseId'],
     releaseActionArgs: CreateReleaseAction.Request['body']
   ) {
-    /**
-     * Asserting the type, otherwise TS complains: 'release.actions' is of type 'unknown', even though the types come through for non-populated fields...
-     * Possibly related to the comment on GetValues: https://github.com/strapi/strapi/blob/main/packages/core/types/src/modules/entity-service/result.ts
-     */
     const release = (await strapi.db.query(RELEASE_MODEL_UID).findOne({
       where: {
         id: releaseId,
@@ -67,7 +63,6 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
     }
   },
   async validatePendingReleasesLimit() {
-    // Use the maximum releases option if it exists, otherwise default to 3
     const featureCfg = strapi.ee.features.get('cms-content-releases');
 
     const maximumPendingReleases =
@@ -81,7 +76,6 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
       },
     });
 
-    // Unlimited is a number that will never be reached like 9999
     if (pendingReleasesCount >= maximumPendingReleases) {
       throw new errors.ValidationError('You have reached the maximum number of pending releases');
     }
@@ -109,8 +103,15 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
   async validateScheduledAtIsLaterThanNow(
     scheduledAt: CreateRelease.Request['body']['scheduledAt']
   ) {
-    if (scheduledAt && new Date(scheduledAt) <= new Date()) {
-      throw new errors.ValidationError('Scheduled at must be later than now');
+    if (scheduledAt) {
+      const scheduledMs =
+        scheduledAt instanceof Date
+          ? scheduledAt.getTime()
+          : Number(Date.parse(String(scheduledAt)));
+
+      if (Number.isNaN(scheduledMs) || scheduledMs <= Date.now()) {
+        throw new errors.ValidationError('Scheduled at must be later than now');
+      }
     }
   },
 });
