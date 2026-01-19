@@ -531,6 +531,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   }
 }
 
+@media (min-width: 1080px) {
+  .c43 {
+    padding-inline-start: 12px;
+    padding-inline-end: 12px;
+  }
+}
+
 @media (min-width: 768px) {
   .c46 {
     width: 100%;
