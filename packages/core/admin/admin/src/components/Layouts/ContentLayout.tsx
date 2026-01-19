@@ -13,7 +13,7 @@ const ContentLayout = ({ children }: ContentLayoutProps) => {
     <Box
       paddingLeft={RESPONSIVE_DEFAULT_SPACING}
       paddingRight={RESPONSIVE_DEFAULT_SPACING}
-      paddingTop={{ initial: 4, large: 0 }}
+      paddingTop={{ initial: 4, medium: 0 }}
     >
       {children}
     </Box>

@@ -158,7 +158,7 @@ export const FormHead = <TToken extends Token | null>({
       title={token?.name || formatMessage(title)}
       primaryAction={
         canEditInputs ? (
-          <Flex width="100%" gap={2} wrap={{ initial: 'wrap', large: 'nowrap' }}>
+          <Flex width="100%" gap={2} wrap={{ initial: 'wrap', medium: 'nowrap' }}>
             {canRegenerate && token?.id && (
               <Regenerate
                 onRegenerate={handleRegenerate}

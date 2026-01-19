@@ -81,7 +81,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
       paddingRight={RESPONSIVE_DEFAULT_SPACING}
       paddingTop={{
         initial: 4,
-        large: 6,
+        medium: 6,
       }}
       paddingBottom={4}
       gap={2}

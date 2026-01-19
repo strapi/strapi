@@ -289,11 +289,11 @@ const ListViewPage = () => {
             <Box background="neutral0" shadow="filterShadow" hasRadius>
               <EmptyStateLayout
                 action={
-                  canCreate ? (
+                  canCreate && (
                     <Box>
                       <CreateButton variant="secondary" />
                     </Box>
-                  ) : null
+                  )
                 }
                 content={formatMessage({
                   id: 'app.components.EmptyStateLayout.content-document',

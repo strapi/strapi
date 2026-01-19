@@ -15,7 +15,7 @@ const GradientBadge = styled(Badge)`
     padding: 1.2rem 1rem;
   }
   ${({ theme }) => theme.breakpoints.medium} {
-    padding: 0.8rem 1rem;
+    padding: 0.4rem 1rem;
   }
 `;
 
