@@ -31,7 +31,7 @@ describe('permission-checker', () => {
       model: 'api::article.article',
     });
 
-    expect(permissionChecker.requiresEntity.read()).toBe(true);
+    expect(permissionChecker.requiresEntity('read')).toBe(true);
   });
 
   test('requiresEntity is false when rules have no conditions', () => {
@@ -47,6 +47,6 @@ describe('permission-checker', () => {
       model: 'api::article.article',
     });
 
-    expect(permissionChecker.requiresEntity.read()).toBe(false);
+    expect(permissionChecker.requiresEntity('read')).toBe(false);
   });
 });
