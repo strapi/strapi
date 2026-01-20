@@ -34,6 +34,7 @@ import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
 import { useAIMetadataJob } from '../../hooks/useAIMetadataJob';
 import { useSettings } from '../../hooks/useSettings';
+import { useTracking } from '../../hooks/useTracking';
 import { getTrad } from '../../utils';
 
 import { init } from './init';
@@ -156,6 +157,7 @@ export const SettingsPage = () => {
   const { toggleNotification } = useNotification();
   const { put, post, get } = useFetchClient();
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
+  const { trackUsage } = useTracking();
 
   const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
@@ -399,6 +401,7 @@ export const SettingsPage = () => {
                               onConfirmDialogChange={setIsConfirmDialogOpen}
                               onGenerate={async () => {
                                 await startGenerateAIMetadata();
+                                trackUsage('didGenerateMetadataRetroactively');
                               }}
                             />
                           </Flex>
