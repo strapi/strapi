@@ -14,6 +14,16 @@ jest.mock('../../utils', () => ({
   })),
 }));
 
+// Mock global strapi for module-level references
+beforeEach(() => {
+  (global as any).strapi = {
+    components: {},
+    requestContext: {
+      get: () => undefined,
+    },
+  };
+});
+
 const configuration = {
   test: 'value',
   some: 'config',
@@ -40,7 +50,7 @@ describe('componentService', () => {
   });
 
   test('findComponentsConfigurations caches results per request', async () => {
-    const requestState = {};
+    const requestState: Record<string, any> = {};
     const strapiMock = {
       components: {
         'shared.block': {
@@ -54,6 +64,9 @@ describe('componentService', () => {
       },
     };
 
+    // Update global mock to use the same requestContext
+    (global as any).strapi = strapiMock;
+
     (storeUtils.getModelConfigurations as jest.Mock).mockResolvedValue({
       'components::shared.block': {
         settings: {},
@@ -62,7 +75,8 @@ describe('componentService', () => {
       },
     });
 
-    const service = componentsService(strapiMock as any);
+    const service = componentsService({ strapi: strapiMock } as any);
+
     const model = {
       attributes: {
         block: { type: 'component', component: 'shared.block' },
