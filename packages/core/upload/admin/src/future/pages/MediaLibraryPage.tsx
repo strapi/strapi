@@ -1,13 +1,17 @@
 import * as React from 'react';
 
 import { Layouts, SearchInput } from '@strapi/admin/strapi-admin';
-import { Box, Flex } from '@strapi/design-system';
+import { Box, Button, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
 
 import { getTrad } from '../../utils';
+import { openUploadProgress } from '../store/uploadProgress';
 
 export const MediaLibraryPage = () => {
   const { formatMessage } = useIntl();
+
+  const dispatch = useDispatch();
 
   return (
     /**
@@ -31,6 +35,7 @@ export const MediaLibraryPage = () => {
               trackedEvent="didSearchMediaLibraryElements"
               trackedEventDetails={{ location: 'upload' }}
             />
+            <Button onClick={() => dispatch(openUploadProgress())}>Simulate upload</Button>
             TODO: Toolbar
           </Flex>
         }

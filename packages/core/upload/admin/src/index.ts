@@ -5,6 +5,8 @@ import pluginPkg from '../../package.json';
 import { MediaLibraryDialog } from './components/MediaLibraryDialog/MediaLibraryDialog';
 import { MediaLibraryInput } from './components/MediaLibraryInput/MediaLibraryInput';
 import { PERMISSIONS } from './constants';
+import { UploadProgressDialog } from './future/components/UploadProgressDialog';
+import { uploadProgressReducer } from './future/store/uploadProgress';
 import { pluginId } from './pluginId';
 import { getTrad, prefixPluginTranslations } from './utils';
 
@@ -32,6 +34,14 @@ const admin: Plugin.Config.AdminInput = {
     });
 
     if (window.strapi.future.isEnabled('unstableMediaLibrary')) {
+      app.addReducers({ uploadProgress: uploadProgressReducer });
+      app.addComponents([
+        {
+          name: 'global::upload-progress',
+          Component: UploadProgressDialog,
+        },
+      ]);
+
       app.addMenuLink({
         to: `plugins/unstable-${pluginId}`,
         icon: WarningCircle,

@@ -30,10 +30,17 @@ const App = ({ strapi, store }: AppProps) => {
     }
   }, []);
 
+  const globalComponents = Object.entries(strapi.library.components)
+    .filter(([name]) => name.startsWith('global::'))
+    .map(([name, Component]) => ({ name, Component }));
+
   return (
     <Providers strapi={strapi} store={store}>
       <Suspense fallback={<Page.Loading />}>
         <GlobalNotifications />
+        {globalComponents.map(({ name, Component }) => (
+          <Component key={name} />
+        ))}
         <Outlet />
       </Suspense>
     </Providers>

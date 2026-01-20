@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, useStrapiApp } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
