@@ -18,6 +18,7 @@ import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
+import { getDirectParent } from '../utils/data';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
@@ -276,39 +277,9 @@ const ConditionAwareInputRenderer = ({
 }: InputRendererProps & { condition: JsonLogicCondition }) => {
   // Note: this selector causes a re-render every time any form value on the page changes
   const fieldValues = useForm('ConditionalInputRenderer', (state) => state.values);
-  const parts = props.name.split('.');
-
-  // Resolve a nested path safely from an object. Supports numeric indexes for arrays.
-  const resolvePath = (obj: unknown, pathParts: string[]) =>
-    pathParts.reduce<any>((cur, part) => {
-      if (cur == null) return undefined;
-      if (/^\d+$/.test(part)) {
-        return Array.isArray(cur) ? cur[Number(part)] : undefined;
-      }
-      return cur[part];
-    }, obj);
-
-  // If the field belongs to a nested component/dynamic zone (e.g. "dz.0.nested.test"),
-  // evaluate the rule against the nearest object scope on the path (leaf -> parent -> ...).
-  // Fall back to the full form values to avoid runtime errors.
-  const nearestObjectScope = () => {
-    for (let i = parts.length; i >= 1; i -= 1) {
-      const candidate = resolvePath(fieldValues, parts.slice(0, i));
-      if (candidate && typeof candidate === 'object') return candidate;
-    }
-    return undefined;
-  };
-
-  const isComponentLike =
-    props.attribute.type === 'component' || props.attribute.type === 'dynamiczone';
-  const parentScope = parts.length > 1 ? resolvePath(fieldValues, parts.slice(0, -1)) : undefined;
-
-  const targetValues =
-    isComponentLike && parentScope && typeof parentScope === 'object'
-      ? parentScope
-      : parts.length > 1
-        ? (nearestObjectScope() ?? fieldValues)
-        : fieldValues;
+  // For nested fields, we evaluate against the parent scope so conditions can read siblings.
+  // Top-level fields resolve to the full form values.
+  const targetValues = getDirectParent(fieldValues, props.name);
 
   const isVisible = rulesEngine.evaluate(condition, targetValues);
 
