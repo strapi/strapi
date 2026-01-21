@@ -4,7 +4,7 @@ import {
   useQueryParams,
   useStrapiApp,
   DescriptionComponentRenderer,
-  useIsMobile,
+  useIsDesktop,
 } from '@strapi/admin/strapi-admin';
 import { Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -47,7 +47,7 @@ const Panels = ({ excludeActionsPanel = false }: PanelsProps = {}) => {
   });
   const { model, id, document, meta, collectionType } = useDoc();
   const plugins = useStrapiApp('Panels', (state) => state.plugins);
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   const props = {
     activeTab: status,
     model,
@@ -66,17 +66,23 @@ const Panels = ({ excludeActionsPanel = false }: PanelsProps = {}) => {
     : allPanels;
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={isMobile ? 4 : 2}>
-      <DescriptionComponentRenderer props={props} descriptions={filteredPanels}>
-        {(panels) =>
-          panels.map(({ content, id, ...description }) => (
-            <Panel key={id} {...description}>
-              {content}
-            </Panel>
-          ))
+    <DescriptionComponentRenderer props={props} descriptions={filteredPanels}>
+      {(panels) => {
+        if (panels.length === 0) {
+          return null;
         }
-      </DescriptionComponentRenderer>
-    </Flex>
+
+        return (
+          <Flex direction="column" alignItems="stretch" gap={isDesktop ? 2 : 4}>
+            {panels.map(({ content, id, ...description }) => (
+              <Panel key={id} {...description}>
+                {content}
+              </Panel>
+            ))}
+          </Flex>
+        );
+      }}
+    </DescriptionComponentRenderer>
   );
 };
 
@@ -141,18 +147,18 @@ interface PanelProps extends Pick<PanelDescription, 'title'> {
 }
 
 const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   return (
     <Flex
       ref={ref}
       tag="aside"
       aria-labelledby="additional-information"
-      background={isMobile ? 'transparent' : 'neutral0'}
-      borderColor={isMobile ? 'transparent' : 'neutral150'}
-      hasRadius={!isMobile}
-      padding={isMobile ? 0 : 4}
-      shadow={isMobile ? 'none' : 'tableShadow'}
-      gap={isMobile ? 4 : 3}
+      background={isDesktop ? 'neutral0' : 'transparent'}
+      borderColor={isDesktop ? 'neutral150' : 'transparent'}
+      hasRadius={isDesktop}
+      padding={isDesktop ? 4 : 0}
+      shadow={isDesktop ? 'tableShadow' : 'none'}
+      gap={isDesktop ? 3 : 4}
       direction="column"
       justifyContent="stretch"
       alignItems="flex-start"

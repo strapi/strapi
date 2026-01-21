@@ -32,7 +32,12 @@ export { useGuidedTour } from './components/GuidedTour/Context';
 /** @internal */
 export { GUIDED_TOUR_REQUIRED_ACTIONS } from './components/GuidedTour/utils/constants';
 
-export { RESPONSIVE_DEFAULT_SPACING } from './constants/theme';
+export {
+  RESPONSIVE_DEFAULT_SPACING,
+  HEIGHT_TOP_NAVIGATION,
+  HEIGHT_TOP_NAVIGATION_MEDIUM,
+  WIDTH_SIDE_NAVIGATION,
+} from './constants/theme';
 
 /**
  * Features
