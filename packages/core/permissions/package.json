@@ -40,7 +40,7 @@
   "dependencies": {
     "@casl/ability": "6.5.0",
     "@strapi/utils": "5.33.4",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "qs": "6.14.1",
     "sift": "16.0.1"
   },

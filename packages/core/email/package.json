@@ -61,7 +61,7 @@
     "@strapi/provider-email-sendmail": "5.33.4",
     "@strapi/utils": "5.33.4",
     "koa2-ratelimit": "^1.1.3",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "react-intl": "6.6.2",
     "react-query": "3.39.3",
     "yup": "0.32.9",

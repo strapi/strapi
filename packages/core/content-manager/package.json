@@ -77,7 +77,7 @@
     "highlight.js": "^10.4.1",
     "immer": "9.0.21",
     "koa": "2.16.3",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "markdown-it": "^13.0.2",
     "markdown-it-abbr": "^1.0.4",
     "markdown-it-container": "^3.0.0",
