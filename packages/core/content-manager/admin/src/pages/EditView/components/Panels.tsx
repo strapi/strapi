@@ -4,6 +4,7 @@ import {
   useQueryParams,
   useStrapiApp,
   DescriptionComponentRenderer,
+  useIsMobile,
 } from '@strapi/admin/strapi-admin';
 import { Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -46,7 +47,7 @@ const Panels = ({ excludeActionsPanel = false }: PanelsProps = {}) => {
   });
   const { model, id, document, meta, collectionType } = useDoc();
   const plugins = useStrapiApp('Panels', (state) => state.plugins);
-
+  const isMobile = useIsMobile();
   const props = {
     activeTab: status,
     model,
@@ -65,7 +66,7 @@ const Panels = ({ excludeActionsPanel = false }: PanelsProps = {}) => {
     : allPanels;
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={2}>
+    <Flex direction="column" alignItems="stretch" gap={isMobile ? 4 : 2}>
       <DescriptionComponentRenderer props={props} descriptions={filteredPanels}>
         {(panels) =>
           panels.map(({ content, id, ...description }) => (
@@ -140,20 +141,18 @@ interface PanelProps extends Pick<PanelDescription, 'title'> {
 }
 
 const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
+  const isMobile = useIsMobile();
   return (
     <Flex
       ref={ref}
       tag="aside"
       aria-labelledby="additional-information"
-      background="neutral0"
-      borderColor="neutral150"
-      hasRadius
-      paddingBottom={4}
-      paddingLeft={4}
-      paddingRight={4}
-      paddingTop={4}
-      shadow="tableShadow"
-      gap={3}
+      background={isMobile ? 'transparent' : 'neutral0'}
+      borderColor={isMobile ? 'transparent' : 'neutral150'}
+      hasRadius={!isMobile}
+      padding={isMobile ? 0 : 4}
+      shadow={isMobile ? 'none' : 'tableShadow'}
+      gap={isMobile ? 4 : 3}
       direction="column"
       justifyContent="stretch"
       alignItems="flex-start"
