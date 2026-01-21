@@ -130,6 +130,12 @@ type ReorderButtonsProps = {
   onMoveDown: (e: React.MouseEvent) => void;
 };
 
+const ReorderButton = styled(IconButton)`
+  svg {
+    min-width: ${({ theme }) => theme.spaces[3]};
+  }
+`;
+
 const ReorderButtons = ({
   disabled,
   showMoveUp,
@@ -142,52 +148,58 @@ const ReorderButtons = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Flex
-      direction="column"
-      gap={1}
-      alignItems="center"
-      justifyContent="flex-start"
-      contentEditable={false}
-      minWidth="2.4rem"
-    >
-      <IconButton
-        variant="ghost"
-        onClick={onMoveUp}
-        disabled={disabled}
-        aria-hidden={!showMoveUp}
-        tabIndex={showMoveUp ? 0 : -1}
-        label={formatMessage({
-          id: getTranslation('components.DynamicZone.move-up'),
-          defaultMessage: 'Move up',
-        })}
-        size="XS"
-        style={{
-          order: upOrder,
-          visibility: showMoveUp ? 'visible' : 'hidden',
-        }}
+    <Box position="relative" minWidth="3.2rem" contentEditable={false}>
+      <Flex
+        position="absolute"
+        top="0"
+        bottom="0"
+        left="0"
+        direction="column"
+        justifyContent="flex-start"
+        alignItems="center"
+        contentEditable={false}
       >
-        <ArrowUp />
-      </IconButton>
+        <ReorderButton
+          variant="ghost"
+          onClick={onMoveUp}
+          disabled={disabled}
+          aria-hidden={!showMoveUp}
+          tabIndex={showMoveUp ? 0 : -1}
+          label={formatMessage({
+            id: getTranslation('components.DynamicZone.move-up'),
+            defaultMessage: 'Move up',
+          })}
+          size="XS"
+          style={{
+            order: upOrder,
+            visibility: showMoveUp ? 'visible' : 'hidden',
+            pointerEvents: showMoveUp ? 'auto' : 'none',
+          }}
+        >
+          <ArrowUp />
+        </ReorderButton>
 
-      <IconButton
-        variant="ghost"
-        onClick={onMoveDown}
-        disabled={disabled}
-        aria-hidden={!showMoveDown}
-        tabIndex={showMoveDown ? 0 : -1}
-        label={formatMessage({
-          id: getTranslation('components.DynamicZone.move-down'),
-          defaultMessage: 'Move down',
-        })}
-        size="XS"
-        style={{
-          order: downOrder,
-          visibility: showMoveDown ? 'visible' : 'hidden',
-        }}
-      >
-        <ArrowDown />
-      </IconButton>
-    </Flex>
+        <ReorderButton
+          variant="ghost"
+          onClick={onMoveDown}
+          disabled={disabled}
+          aria-hidden={!showMoveDown}
+          tabIndex={showMoveDown ? 0 : -1}
+          label={formatMessage({
+            id: getTranslation('components.DynamicZone.move-down'),
+            defaultMessage: 'Move down',
+          })}
+          size="XS"
+          style={{
+            order: downOrder,
+            visibility: showMoveDown ? 'visible' : 'hidden',
+            pointerEvents: showMoveDown ? 'auto' : 'none',
+          }}
+        >
+          <ArrowDown />
+        </ReorderButton>
+      </Flex>
+    </Box>
   );
 };
 
