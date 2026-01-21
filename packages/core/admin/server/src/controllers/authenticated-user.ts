@@ -4,6 +4,7 @@ import type { AdminUser } from '../../../shared/contracts/shared';
 import { getService } from '../utils';
 import { validateProfileUpdateInput } from '../validation/user';
 import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
+import { getSessionManager } from '../../../shared/utils/session-auth';
 
 export default {
   async getMe(ctx: Context) {
@@ -31,6 +32,12 @@ export default {
         return ctx.badRequest('ValidationError', {
           currentPassword: ['Invalid credentials'],
         });
+      }
+
+      // Invalidate all sessions when password changes for security
+      const sessionManager = getSessionManager();
+      if (sessionManager && sessionManager.hasOrigin('admin')) {
+        await sessionManager('admin').invalidateRefreshToken(String(ctx.state.user.id));
       }
     }
 

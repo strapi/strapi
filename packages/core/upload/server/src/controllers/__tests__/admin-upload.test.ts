@@ -6,20 +6,19 @@ import { getService } from '../../utils';
 import { validateBulkUpdateBody, validateUploadBody } from '../validation/admin/upload';
 import * as findEntityAndCheckPermissionsModule from '../utils/find-entity-and-check-permissions';
 import { ACTIONS } from '../../constants';
-import { enforceUploadSecurity } from '../../utils/mime-validation';
+import { prepareUploadRequest } from '../../utils/mime-validation';
 
 jest.mock('../../utils/mime-validation', () => ({
-  enforceUploadSecurity: jest.fn(() => ({
+  prepareUploadRequest: jest.fn(() => ({
     validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
-    validFileNames: ['test.jpg'],
-    errors: [],
+    filteredBody: {},
   })),
 }));
 
 jest.mock('../../utils');
 jest.mock('../validation/admin/upload');
 jest.mock('../utils/find-entity-and-check-permissions');
-const mockEnforceUploadSecurity = jest.mocked(enforceUploadSecurity);
+const mockPrepareUploadRequest = jest.mocked(prepareUploadRequest);
 
 const mockGetService = getService as jest.MockedFunction<typeof getService>;
 const mockValidateUploadBody = validateUploadBody as jest.MockedFunction<typeof validateUploadBody>;
@@ -46,10 +45,9 @@ describe('Admin Upload Controller - AI Service Connection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockEnforceUploadSecurity.mockResolvedValue({
+    mockPrepareUploadRequest.mockResolvedValue({
       validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
-      validFileNames: ['test.jpg'],
-      errors: [],
+      filteredBody: {},
     });
 
     mockAiMetadataService = {
@@ -182,25 +180,13 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       await adminUploadController.uploadFiles(mockContext as Context);
 
-      expect(mockEnforceUploadSecurity).toHaveBeenCalledWith(files, strapi);
+      expect(mockPrepareUploadRequest).toHaveBeenCalledWith(files, {}, strapi);
     });
 
     it('should throw ValidationError when no valid files remain after security check', async () => {
-      mockEnforceUploadSecurity.mockResolvedValue({
-        validFiles: [],
-        validFileNames: [],
-        errors: [
-          {
-            error: {
-              message: 'MIME type not allowed',
-              details: {},
-              code: 'MIME_TYPE_NOT_ALLOWED',
-            },
-            file: { originalFilename: 'test.exe' },
-            originalIndex: 0,
-          },
-        ],
-      });
+      mockPrepareUploadRequest.mockRejectedValue(
+        new errors.ValidationError('MIME type not allowed', {})
+      );
 
       await expect(adminUploadController.uploadFiles(mockContext as Context)).rejects.toThrow(
         errors.ValidationError
@@ -208,20 +194,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     });
 
     it('should filter fileInfo array when some files are rejected by security', async () => {
-      mockEnforceUploadSecurity.mockResolvedValue({
+      mockPrepareUploadRequest.mockResolvedValue({
         validFiles: [{ originalFilename: 'allowed.jpg', mimetype: 'image/jpeg' }],
-        validFileNames: ['allowed.jpg'],
-        errors: [
-          {
-            error: {
-              message: 'MIME type not allowed',
-              details: {},
-              code: 'MIME_TYPE_NOT_ALLOWED',
-            },
-            file: { originalFilename: 'blocked.pdf' },
-            originalIndex: 0,
-          },
-        ],
+        filteredBody: {
+          fileInfo: '{"name":"allowed.jpg","folder":null}',
+        },
       });
 
       mockContext.request!.body = {
@@ -243,10 +220,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     });
 
     it('should handle single file being filtered correctly', async () => {
-      mockEnforceUploadSecurity.mockResolvedValue({
+      mockPrepareUploadRequest.mockResolvedValue({
         validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
-        validFileNames: ['test.jpg'],
-        errors: [],
+        filteredBody: {
+          fileInfo: '{"name":"test.jpg","folder":null}',
+        },
       });
 
       mockContext.request!.body = {
@@ -268,13 +246,17 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     });
 
     it('should handle multiple files remaining after filtering', async () => {
-      mockEnforceUploadSecurity.mockResolvedValue({
+      mockPrepareUploadRequest.mockResolvedValue({
         validFiles: [
           { originalFilename: 'file1.jpg', mimetype: 'image/jpeg' },
           { originalFilename: 'file2.png', mimetype: 'image/png' },
         ],
-        validFileNames: ['file1.jpg', 'file2.png'],
-        errors: [],
+        filteredBody: {
+          fileInfo: [
+            { name: 'file1.jpg', folder: null, caption: '', alternativeText: '' },
+            { name: 'file2.png', folder: null, caption: '', alternativeText: '' },
+          ],
+        },
       });
 
       mockContext.request!.body = {
@@ -310,10 +292,9 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         { originalFilename: 'file2.png', mimetype: 'image/png' },
       ];
 
-      mockEnforceUploadSecurity.mockResolvedValue({
+      mockPrepareUploadRequest.mockResolvedValue({
         validFiles,
-        validFileNames: ['file1.jpg', 'file2.png'],
-        errors: [],
+        filteredBody: {},
       });
 
       mockValidateUploadBody.mockResolvedValue({
@@ -343,6 +324,13 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     });
 
     it('should handle non-array fileInfo body correctly', async () => {
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [{ originalFilename: 'single.jpg', mimetype: 'image/jpeg' }],
+        filteredBody: {
+          fileInfo: '{"name":"single.jpg","folder":null}',
+        },
+      });
+
       mockContext.request!.body = {
         fileInfo: '{"name":"single.jpg","folder":null}',
       };
@@ -362,21 +350,12 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     });
 
     it('should throw ValidationError when no valid files after filtering', async () => {
-      mockEnforceUploadSecurity.mockResolvedValue({
-        validFiles: [],
-        validFileNames: [],
-        errors: [
-          {
-            error: {
-              message: 'File size exceeds limit',
-              details: { fileSize: 10000000, maxFileSize: 1000000 },
-              code: 'MIME_TYPE_NOT_ALLOWED',
-            },
-            file: { originalFilename: 'large-file.jpg' },
-            originalIndex: 0,
-          },
-        ],
-      });
+      mockPrepareUploadRequest.mockRejectedValue(
+        new errors.ValidationError('File size exceeds limit', {
+          fileSize: 10000000,
+          maxFileSize: 1000000,
+        })
+      );
 
       await expect(adminUploadController.uploadFiles(mockContext as Context)).rejects.toThrow(
         'File size exceeds limit'

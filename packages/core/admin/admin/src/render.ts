@@ -90,7 +90,6 @@ const renderAdmin = async (
       isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
     };
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
-    window.strapi.aiLicenseKey = process.env.STRAPI_ADMIN_AI_API_KEY;
     window.strapi.ai = ai;
   } catch (err) {
     /**

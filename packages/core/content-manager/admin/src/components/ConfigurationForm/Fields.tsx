@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useDroppable, DndContext, UniqueIdentifier, DragOverlay } from '@dnd-kit/core';
-import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
+import { arraySwap, SortableContext, useSortable, rectSwappingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useField, useForm, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
@@ -54,14 +54,23 @@ const DroppableContainer = ({
 };
 
 export const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
-  const { attributes, setNodeRef, transform, transition } = useSortable({
+  const { attributes, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Transform.toString({
+      x: transform?.x ?? 0,
+      y: transform?.y ?? 0,
+      // Avoid any scaling animations which can visually "squish" or
+      // "stretch" neighbouring cards in mixed-width grids (4/8/12 cols).
+      scaleX: 1,
+      scaleY: 1,
+    }),
     transition,
     height: '100%',
+    opacity: isDragging ? 0.6 : 1,
+    outlineOffset: 2,
   };
 
   return (
@@ -282,6 +291,9 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         const overIndex = containersAsDictionary[overContainer].children.findIndex(
           (item) => item.dndId === over?.id
         );
+        const activeIndex = containersAsDictionary[activeContainer].children.findIndex(
+          (item) => item.dndId === active.id
+        );
 
         if (!draggedItem) return;
 
@@ -299,35 +311,102 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         /**
          * Handle an item being dragged from one container to another,
          * the item is removed from its current container, and then added to its new container
-         * An item can only be added in a container if there is enough space.
+         * An item can only be added in a container if there is enough space
          */
         const update = produce(containers, (draft) => {
           draft[activeContainerIndex].children = draft[activeContainerIndex].children.filter(
             (item) => item.dndId !== active.id
           );
-          const spaceTaken = draft[overContainerIndex].children.reduce((acc, curr) => {
+
+          const targetChildren = draft[overContainerIndex].children;
+          const spaceTaken = targetChildren.reduce((acc, curr) => {
             if (curr.name === TEMP_FIELD_NAME) {
               return acc;
             }
 
             return acc + curr.size;
           }, 0);
+          const isNotEnoughSpace = spaceTaken + draggedItem.size > GRID_COLUMNS;
+          const canSwapSameSizeItem =
+            overItem &&
+            overItem.name !== TEMP_FIELD_NAME &&
+            overItem.size === draggedItem.size &&
+            activeIndex !== -1 &&
+            overIndex !== -1;
+          const canCreateNewRowForItem =
+            activeContainerIndex !== overContainerIndex && GRID_COLUMNS - spaceTaken === 0;
+          const isHoveringOverSpacer = overItem?.name === TEMP_FIELD_NAME;
 
-          // Check the sizes of the children, if there is no room, exit
-          if (spaceTaken + draggedItem.size > GRID_COLUMNS) {
-            // Leave the item where it started
-            draft[activeContainerIndex].children = containers[activeContainerIndex].children;
-            return;
+          /**
+           * Not enough space in the hovered row
+           *
+           * We still want:
+           * - ability to swap items of the same size
+           * - ability to create a single extra row to host the dragged item
+           *   when surrounding rows are full
+           */
+          if (isNotEnoughSpace) {
+            // Try a simple swap when target item is of the same size
+            if (canSwapSameSizeItem) {
+              const sourceChildren = draft[activeContainerIndex].children;
+
+              // Put the hovered item back where the dragged item came from
+              sourceChildren.splice(activeIndex, 0, overItem);
+
+              // Swap the hovered item with the dragged one in the target row
+              const draftOverIndex = targetChildren.findIndex(
+                (item) => item.dndId === overItem.dndId
+              );
+
+              if (draftOverIndex !== -1) {
+                targetChildren.splice(draftOverIndex, 1, draggedItem);
+              }
+
+              return;
+            }
+
+            // If there is absolutely no space left in the target row and the
+            // dragged item comes from a different row, add it to a new row
+            if (canCreateNewRowForItem) {
+              const insertIndex = overContainerIndex + 1;
+              const existingRow = draft[insertIndex];
+
+              if (existingRow) {
+                const nonTempChildren = existingRow.children.filter(
+                  (child) => child.name !== TEMP_FIELD_NAME
+                );
+                const isNextRowEmpty = nonTempChildren.length === 0;
+
+                // If the row directly after is empty (only spacers), reuse it
+                // instead of creating yet another row.
+                if (isNextRowEmpty) {
+                  existingRow.children = [draggedItem];
+                  return;
+                }
+              }
+
+              const newContainerPrototype = draft[overContainerIndex];
+              const newContainerId = `container-${draft.length}`;
+
+              draft.splice(insertIndex, 0, {
+                ...newContainerPrototype,
+                dndId: newContainerId,
+                children: [draggedItem],
+              });
+
+              return;
+            }
           }
 
-          if (overItem?.name === TEMP_FIELD_NAME) {
+          // There is enough room in the target row
+          if (isHoveringOverSpacer) {
             // We are over an invisible spacer, replace it with the dragged item
-            draft[overContainerIndex].children.splice(overIndex, 1, draggedItem);
+            targetChildren.splice(overIndex, 1, draggedItem);
             return;
           }
 
           // There is room for the item in the container, drop it
-          draft[overContainerIndex].children.splice(overIndex, 0, draggedItem);
+          targetChildren.splice(overIndex, 0, draggedItem);
         });
 
         setContainers(update);
@@ -354,7 +433,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         const movedContainerItems = produce(containersAsDictionary, (draft) => {
           if (activeIndex !== overIndex && activeContainer === overContainer) {
             // Move items around inside their own container
-            draft[activeContainer].children = arrayMove(
+            draft[activeContainer].children = arraySwap(
               draft[activeContainer].children,
               activeIndex,
               overIndex
@@ -401,6 +480,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
                 key={container.dndId}
                 id={container.dndId}
                 items={container.children.map((child) => ({ id: child.dndId }))}
+                strategy={rectSwappingStrategy}
               >
                 <DroppableContainer id={container.dndId}>
                   {({ setNodeRef }) => (
