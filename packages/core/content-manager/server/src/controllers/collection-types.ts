@@ -723,8 +723,6 @@ export default {
       if (permissionChecker.cannot.read(entity)) {
         return ctx.forbidden();
       }
-    } else if (permissionChecker.cannot.read()) {
-      return ctx.forbidden();
     }
 
     const number = await documentManager.countDraftRelations(id, model, locale);
