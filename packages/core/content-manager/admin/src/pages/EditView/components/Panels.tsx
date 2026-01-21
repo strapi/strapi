@@ -31,7 +31,11 @@ interface PanelDescription {
  * Panels
  * -----------------------------------------------------------------------------------------------*/
 
-const Panels = () => {
+interface PanelsProps {
+  excludeActionsPanel?: boolean;
+}
+
+const Panels = ({ excludeActionsPanel = false }: PanelsProps = {}) => {
   const isCloning = useMatch(CLONE_PATH) !== null;
   const [
     {
@@ -52,14 +56,17 @@ const Panels = () => {
     collectionType,
   } satisfies PanelComponentProps;
 
+  const allPanels = (
+    plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+  ).getEditViewSidePanels();
+
+  const filteredPanels = excludeActionsPanel
+    ? allPanels.filter((panel) => (panel as PanelComponent).type !== 'actions')
+    : allPanels;
+
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
-      <DescriptionComponentRenderer
-        props={props}
-        descriptions={(
-          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-        ).getEditViewSidePanels()}
-      >
+      <DescriptionComponentRenderer props={props} descriptions={filteredPanels}>
         {(panels) =>
           panels.map(({ content, id, ...description }) => (
             <Panel key={id} {...description}>
@@ -159,5 +166,5 @@ const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
   );
 });
 
-export { Panels, ActionsPanel };
+export { Panels, ActionsPanel, ActionsPanelContent };
 export type { PanelDescription };
