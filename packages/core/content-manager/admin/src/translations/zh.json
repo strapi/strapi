@@ -67,6 +67,7 @@
   "containers.Edit.clickToJump": "跳到該筆資料",
   "containers.Edit.delete": "刪除",
   "containers.Edit.delete-entry": "刪除這個項目",
+  "containers.edit.title.new": "建立項目",
   "containers.Edit.editing": "編輯中...",
   "containers.Edit.information": "資訊",
   "containers.Edit.information.by": "操作人",

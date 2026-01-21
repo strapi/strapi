@@ -71,6 +71,7 @@
   "containers.Edit.clickToJump": "Нажмите для перехода к записи",
   "containers.Edit.delete": "Удалить",
   "containers.Edit.delete-entry": "Удалить эту запись",
+  "containers.edit.title.new": "Создать запись",
   "containers.Edit.editing": "Редактирование...",
   "containers.Edit.information": "Информация",
   "containers.Edit.information.by": "Автор",

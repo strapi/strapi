@@ -32,6 +32,7 @@
   "containers.Edit.addAnItem": "Přidat záznam...",
   "containers.Edit.clickToJump": "Klikněte pro přechod k záznamu",
   "containers.Edit.delete": "Odstranit",
+  "containers.edit.title.new": "Vytvořit záznam",
   "containers.Edit.editing": "Úpravy...",
   "containers.Edit.pluginHeader.title.new": "Vytvořit záznam",
   "containers.Edit.reset": "Resetovat",

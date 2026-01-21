@@ -38,6 +38,7 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
+import { getTranslation } from '../../../utils/translations';
 import { getDisplayName } from '../../../utils/users';
 
 import { DocumentActionsMenu } from './DocumentActions';
@@ -62,7 +63,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
 
   const title = isCreating
     ? formatMessage({
-        id: 'content-manager.containers.edit.title.new',
+        id: getTranslation('containers.edit.title.new'),
         defaultMessage: 'Create an entry',
       })
     : documentTitle;

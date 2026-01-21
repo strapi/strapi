@@ -127,6 +127,7 @@
   "components.uid.suggested": "مقترح",
   "components.uid.unavailable": "غير متوفره",
   "containers.Edit.delete-entry": "احذف هذا الإدخال",
+  "containers.edit.title.new": "إنشاء إدخال",
   "containers.Edit.information": "معلومة",
   "containers.Edit.information.by": "بواسطة",
   "containers.Edit.information.created": "أُنشء",

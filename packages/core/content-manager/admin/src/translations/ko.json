@@ -65,6 +65,7 @@
   "containers.Edit.clickToJump": "해당 항목으로 이동하려면 클릭",
   "containers.Edit.delete": "삭제",
   "containers.Edit.delete-entry": "이 항목 삭제",
+  "containers.edit.title.new": "항목 만들기",
   "containers.Edit.editing": "수정 중...",
   "containers.Edit.information": "정보",
   "containers.Edit.information.by": "편집자",

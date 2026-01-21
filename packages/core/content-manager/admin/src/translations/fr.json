@@ -68,6 +68,7 @@
   "containers.Edit.clickToJump": "Cliquer pour voir l'entrée",
   "containers.Edit.delete": "Supprimer",
   "containers.Edit.delete-entry": "Supprimer cette entrée",
+  "containers.edit.title.new": "Créer une entrée",
   "containers.Edit.editing": "Édition en cours...",
   "containers.Edit.information": "Informations",
   "containers.Edit.information.by": "Par",
