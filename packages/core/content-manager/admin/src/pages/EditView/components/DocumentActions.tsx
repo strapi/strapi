@@ -9,6 +9,7 @@ import {
   tours,
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
+  useIsMobile,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -21,6 +22,7 @@ import {
   ButtonProps,
   Tooltip,
   IconButton,
+  Box,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
@@ -166,6 +168,7 @@ const connectRelationToParent = (
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
   const [primaryAction, secondaryAction, ...restActions] = actions.filter((action) => {
     if (action.position === undefined) {
       return true;
@@ -199,53 +202,66 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
     );
   };
 
-  return (
-    <Flex direction="column" gap={2} alignItems="stretch" width="100%">
-      <tours.contentManager.Publish>
-        <Flex gap={2}>
-          {primaryAction.label === 'Publish'
-            ? addHintTooltip(
-                primaryAction,
-                <DocumentActionButton
-                  {...primaryAction}
-                  variant={primaryAction.variant || 'default'}
-                />
-              )
-            : addHintTooltip(
-                primaryAction,
-                <DocumentActionButton
-                  {...primaryAction}
-                  variant={primaryAction.variant || 'default'}
-                  buttonType="submit"
-                />
-              )}
+  const primaryActionContent = (
+    <>
+      <Flex flex={1} alignItems="stretch" direction="column">
+        {primaryAction.label === 'Publish'
+          ? addHintTooltip(
+              primaryAction,
+              <DocumentActionButton
+                {...primaryAction}
+                variant={primaryAction.variant || 'default'}
+              />
+            )
+          : addHintTooltip(
+              primaryAction,
+              <DocumentActionButton
+                {...primaryAction}
+                variant={primaryAction.variant || 'default'}
+                buttonType="submit"
+              />
+            )}
+      </Flex>
 
-          {restActions.length > 0 ? (
-            <DocumentActionsMenu
-              actions={restActions}
-              label={formatMessage({
-                id: 'content-manager.containers.edit.panels.default.more-actions',
-                defaultMessage: 'More document actions',
-              })}
-            />
-          ) : null}
-        </Flex>
+      {restActions.length > 0 ? (
+        <DocumentActionsMenu
+          actions={restActions}
+          label={formatMessage({
+            id: 'content-manager.containers.edit.panels.default.more-actions',
+            defaultMessage: 'More document actions',
+          })}
+        />
+      ) : null}
+    </>
+  );
+
+  return (
+    <Flex
+      direction={{ initial: 'row', medium: 'column' }}
+      gap={2}
+      alignItems="stretch"
+      width="100%"
+    >
+      <tours.contentManager.Publish>
+        {!isMobile ? <Flex gap={2}>{primaryActionContent}</Flex> : primaryActionContent}
       </tours.contentManager.Publish>
       {secondaryAction ? (
-        secondaryAction.label === 'Publish' ? (
-          <tours.contentManager.Publish>
+        <Flex flex={1} order={{ initial: -1, medium: 0 }} alignItems="stretch" direction="column">
+          {secondaryAction.label === 'Publish' ? (
+            <tours.contentManager.Publish>
+              <DocumentActionButton
+                {...secondaryAction}
+                variant={secondaryAction.variant || 'secondary'}
+              />
+            </tours.contentManager.Publish>
+          ) : (
             <DocumentActionButton
               {...secondaryAction}
               variant={secondaryAction.variant || 'secondary'}
+              buttonType="submit"
             />
-          </tours.contentManager.Publish>
-        ) : (
-          <DocumentActionButton
-            {...secondaryAction}
-            variant={secondaryAction.variant || 'secondary'}
-            buttonType="submit"
-          />
-        )
+          )}
+        </Flex>
       ) : null}
     </Flex>
   );
