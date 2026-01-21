@@ -332,7 +332,6 @@ type ReorderElementProps = {
   totalBlocks: number;
   selectionTopLevel: SelectionTopLevel | null;
   onMoveBlock: (newIndex: Array<number>, currentIndex: Array<number>) => void;
-  onReorder?: () => void;
   editor: Editor;
 };
 
@@ -347,7 +346,6 @@ const ReorderElement = ({
   totalBlocks,
   selectionTopLevel,
   onMoveBlock,
-  onReorder,
   editor,
 }: ReorderElementProps) => {
   const currentBlockIndex = index.length === 1 ? index[0] : null;
@@ -372,9 +370,8 @@ const ReorderElement = ({
       // Keep the moved block focused so arrows/disabled state update immediately.
       Transforms.select(editor, Editor.start(editor, newIndex));
       ReactEditor.focus(editor);
-      onReorder?.();
     },
-    [canMoveUp, currentBlockIndex, disabled, editor, onMoveBlock, onReorder]
+    [canMoveUp, currentBlockIndex, disabled, editor, onMoveBlock]
   );
 
   const handleMoveDown = React.useCallback(
@@ -389,9 +386,8 @@ const ReorderElement = ({
       // Keep the moved block focused so arrows/disabled state update immediately.
       Transforms.select(editor, Editor.start(editor, newIndex));
       ReactEditor.focus(editor);
-      onReorder?.();
     },
-    [canMoveDown, currentBlockIndex, disabled, editor, onMoveBlock, onReorder]
+    [canMoveDown, currentBlockIndex, disabled, editor, onMoveBlock]
   );
 
   const showMoveUp = isBlockInFocus && canMoveUp;
@@ -425,14 +421,12 @@ type ReorderWrapperProps = Direction & {
   children: RenderElementProps['children'];
   index: Array<number>;
   dragHandleTopMargin?: CSSProperties['marginTop'];
-  isMobile: boolean;
   disabled: boolean;
   totalBlocks: number;
   selectionTopLevel: SelectionTopLevel | null;
   name: string;
   editor: Editor;
   setLiveText: (text: string) => void;
-  onReorder?: () => void;
 };
 
 const ReorderWrapper = ({
@@ -441,16 +435,15 @@ const ReorderWrapper = ({
   setDragDirection,
   dragDirection,
   dragHandleTopMargin,
-  isMobile,
   disabled,
   totalBlocks,
   selectionTopLevel,
   name,
   editor,
   setLiveText,
-  onReorder,
 }: ReorderWrapperProps) => {
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
 
   const handleMoveBlock = React.useCallback(
     (newIndex: Array<number>, currentIndex: Array<number>) => {
@@ -486,18 +479,17 @@ const ReorderWrapper = ({
     <>
       {isMobile ? (
         <ReorderElement
-          children={children}
           index={index}
           disabled={disabled}
           totalBlocks={totalBlocks}
           selectionTopLevel={selectionTopLevel}
           onMoveBlock={handleMoveBlock}
-          onReorder={onReorder}
           editor={editor}
-        />
+        >
+          {children}
+        </ReorderElement>
       ) : (
         <DragAndDropElement
-          children={children}
           index={index}
           setDragDirection={setDragDirection}
           dragDirection={dragDirection}
@@ -505,7 +497,9 @@ const ReorderWrapper = ({
           disabled={disabled}
           name={name}
           onMoveBlock={handleMoveBlock}
-        />
+        >
+          {children}
+        </DragAndDropElement>
       )}
     </>
   );
@@ -566,8 +560,6 @@ type BaseRenderElementProps = Direction & {
   props: RenderElementProps['children'];
   blocks: BlocksStore;
   editor: Editor;
-  onReorder?: () => void;
-  isMobile: boolean;
   disabled: boolean;
   totalBlocks: number;
   selectionTopLevel: SelectionTopLevel | null;
@@ -581,8 +573,6 @@ const baseRenderElement = ({
   editor,
   setDragDirection,
   dragDirection,
-  onReorder,
-  isMobile,
   disabled,
   totalBlocks,
   selectionTopLevel,
@@ -607,8 +597,6 @@ const baseRenderElement = ({
       setDragDirection={setDragDirection}
       dragDirection={dragDirection}
       dragHandleTopMargin={block.dragHandleTopMargin}
-      onReorder={onReorder}
-      isMobile={isMobile}
       disabled={disabled}
       totalBlocks={totalBlocks}
       selectionTopLevel={selectionTopLevel}
@@ -634,9 +622,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
   const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
-  const [reorderVersion, bumpReorderVersion] = React.useReducer((v: number) => v + 1, 0);
   const { modalElement, handleConversionResult } = useConversionModal();
-  const isMobile = useIsMobile();
 
   const selectionTopLevel = React.useMemo<SelectionTopLevel | null>(() => {
     if (!editor.selection) return null;
@@ -676,8 +662,6 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         to: newIndex,
       });
 
-      bumpReorderVersion();
-
       setLiveText(
         formatMessage(
           {
@@ -704,23 +688,17 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         editor,
         dragDirection,
         setDragDirection,
-        onReorder: bumpReorderVersion,
-        isMobile,
         disabled,
         totalBlocks,
         selectionTopLevel,
         name,
         setLiveText,
       }),
-    // reorderVersion is intentionally included so renderElement identity changes after a move,
-    // forcing Slate element consumers to re-render and recompute their path/index.
     [
       blocks,
       editor,
       dragDirection,
       setDragDirection,
-      reorderVersion,
-      isMobile,
       disabled,
       totalBlocks,
       selectionTopLevel,
