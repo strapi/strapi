@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, TextInput } from '@strapi/design-system';
+import { Box, Button, Flex, Grid } from '@strapi/design-system';
 import { Check, Play as Publish } from '@strapi/icons';
 import { IntlShape, useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -89,7 +89,7 @@ const WebhookForm = ({
         <>
           <Layouts.Header
             primaryAction={
-              <Flex gap={2}>
+              <Flex width="100%" gap={2}>
                 <Button
                   onClick={() => {
                     triggerWebhook();
@@ -98,6 +98,7 @@ const WebhookForm = ({
                   variant="tertiary"
                   startIcon={<Publish />}
                   disabled={isCreating || isTriggering}
+                  fullWidth
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.trigger',
@@ -109,6 +110,7 @@ const WebhookForm = ({
                   type="submit"
                   disabled={!modified}
                   loading={isSubmitting}
+                  fullWidth
                 >
                   {formatMessage({
                     id: 'global.save',
@@ -125,7 +127,12 @@ const WebhookForm = ({
                   })
                 : data?.name
             }
-            navigationAction={<BackButton fallback="../webhooks" />}
+            navigationAction={
+              // The back link for mobile works differently; it is placed higher up in the DOM.
+              <Box display={{ initial: 'none', medium: 'block' }}>
+                <BackButton fallback="../webhooks" />
+              </Box>
+            }
           />
           <Layouts.Content>
             <Flex direction="column" alignItems="stretch" gap={4}>
@@ -164,6 +171,7 @@ const WebhookForm = ({
                       <Grid.Item
                         key={field.name}
                         col={size}
+                        xs={12}
                         direction="column"
                         alignItems="stretch"
                       >

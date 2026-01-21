@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useForm, useField, createRulesEngine, useIsDesktop } from '@strapi/admin/strapi-admin';
+import { useForm, useField, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
   Box,
@@ -11,7 +11,7 @@ import {
   Menu,
   BoxComponent,
 } from '@strapi/design-system';
-import { Drag, More, Trash } from '@strapi/icons';
+import { Drag, More, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -38,6 +38,7 @@ interface DynamicComponentProps
   onAddComponent: (componentUid: string, index: number) => void;
   onRemoveComponentClick: () => void;
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
+  totalLength: number;
   children?: (props: InputRendererProps) => React.ReactNode;
 }
 
@@ -53,12 +54,12 @@ const DynamicComponent = ({
   onCancel,
   dynamicComponentsByCategory = {},
   onAddComponent,
+  totalLength,
   children,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
   const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
-  const rulesEngine = createRulesEngine();
   const isDesktop = useIsDesktop();
 
   const {
@@ -124,6 +125,29 @@ const DynamicComponent = ({
 
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
 
+  const handleMoveUp = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index > 0) {
+        onMoveComponent(index - 1, index);
+      }
+    },
+    [index, onMoveComponent]
+  );
+
+  const handleMoveDown = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index < totalLength - 1) {
+        onMoveComponent(index + 1, index);
+      }
+    },
+    [index, totalLength, onMoveComponent]
+  );
+
+  const canMoveUp = index > 0;
+  const canMoveDown = index < totalLength - 1;
+
   const accordionActions = disabled ? null : (
     <>
       <IconButton
@@ -153,6 +177,36 @@ const DynamicComponent = ({
         >
           <Drag />
         </IconButton>
+      )}
+      {!isDesktop && (
+        <>
+          {canMoveUp && (
+            <IconButton
+              variant="ghost"
+              onClick={handleMoveUp}
+              disabled={!canMoveUp}
+              label={formatMessage({
+                id: getTranslation('components.DynamicZone.move-up'),
+                defaultMessage: 'Move up',
+              })}
+            >
+              <ArrowUp />
+            </IconButton>
+          )}
+          {canMoveDown && (
+            <IconButton
+              variant="ghost"
+              onClick={handleMoveDown}
+              disabled={!canMoveDown}
+              label={formatMessage({
+                id: getTranslation('components.DynamicZone.move-down'),
+                defaultMessage: 'Move down',
+              })}
+            >
+              <ArrowDown />
+            </IconButton>
+          )}
+        </>
       )}
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={null} paddingLeft={0} paddingRight={0}>
@@ -243,30 +297,16 @@ const DynamicComponent = ({
                   <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
                     <Grid.Root gap={4}>
                       {components[componentUid]?.layout?.map((row, rowInd) => {
-                        const visibleFields = row.filter(({ ...field }) => {
-                          const condition = field.attribute.conditions?.visible;
-
-                          if (condition) {
-                            return rulesEngine.evaluate(condition, value);
-                          }
-
-                          return true;
-                        });
-
-                        if (visibleFields.length === 0) {
-                          return null; // Skip rendering the entire grid row
-                        }
                         return (
                           <Grid.Item
                             col={12}
                             key={rowInd}
-                            s={12}
                             xs={12}
                             direction="column"
                             alignItems="stretch"
                           >
                             <ResponsiveGridRoot gap={4}>
-                              {visibleFields.map(({ size, ...field }) => {
+                              {row.map(({ size, ...field }) => {
                                 const fieldName = `${name}.${index}.${field.name}`;
 
                                 const fieldWithTranslatedLabel = {

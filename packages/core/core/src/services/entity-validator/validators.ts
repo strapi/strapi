@@ -511,7 +511,7 @@ export const Validators = {
   password: stringValidator,
   email: emailValidator,
   enumeration: enumerationValidator,
-  boolean: () => yup.boolean(),
+  boolean: () => yup.boolean().nullable(),
   uid: uidValidator,
   json: () => yup.mixed(),
   integer: integerValidator,

@@ -112,7 +112,7 @@ const SettingsPage = () => {
         })}
       />
       <Layouts.Content>
-        {isAIAvailable && window.strapi.future.isEnabled('unstableAILocalizations') && (
+        {isAIAvailable && (
           <Flex background="neutral0" padding={6} marginBottom={6} shadow="filterShadow" hasRadius>
             <Flex direction="column" alignItems="stretch" gap={1} flex={1}>
               <Flex gap={1}>

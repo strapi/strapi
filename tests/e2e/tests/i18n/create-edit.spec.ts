@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-import { login } from '../../utils/login';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
-import { waitForRestart } from '../../utils/restart';
-import { resetFiles } from '../../utils/file-reset';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import { waitForRestart } from '../../../utils/restart';
+import { resetFiles } from '../../../utils/file-reset';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 
 test.describe('Create and Edit Operations', () => {
   test.describe.configure({ timeout: 500000 });

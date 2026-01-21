@@ -11,6 +11,11 @@ export default class BooleanField extends Field {
       return value;
     }
 
+    // Handle null/undefined values explicitly
+    if (value === null || value === undefined) {
+      return null;
+    }
+
     if (isStringOrNumber(value) && ['true', 't', '1', 1].includes(value)) {
       return true;
     }

@@ -17,9 +17,10 @@ import {
   Modal,
   Radio,
   Typography,
-  VisuallyHidden,
   Menu,
   ButtonProps,
+  Tooltip,
+  IconButton,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
@@ -178,15 +179,46 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
     return null;
   }
 
+  const addHintTooltip = (action: Action, children: React.ReactNode) => {
+    return !action.disabled ? (
+      <Tooltip
+        label={formatMessage(
+          {
+            id: 'content-manager.containers.EditView.saveHint',
+            defaultMessage: 'Ctrl / Cmd + Enter to {action}',
+          },
+          {
+            action: action.label,
+          }
+        )}
+      >
+        <Flex width="100%">{children}</Flex>
+      </Tooltip>
+    ) : (
+      children
+    );
+  };
+
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
       <tours.contentManager.Publish>
         <Flex gap={2}>
-          {primaryAction.label === 'Publish' ? (
-            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-          ) : (
-            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-          )}
+          {primaryAction.label === 'Publish'
+            ? addHintTooltip(
+                primaryAction,
+                <DocumentActionButton
+                  {...primaryAction}
+                  variant={primaryAction.variant || 'default'}
+                />
+              )
+            : addHintTooltip(
+                primaryAction,
+                <DocumentActionButton
+                  {...primaryAction}
+                  variant={primaryAction.variant || 'default'}
+                  buttonType="submit"
+                />
+              )}
 
           {restActions.length > 0 ? (
             <DocumentActionsMenu
@@ -211,6 +243,7 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
           <DocumentActionButton
             {...secondaryAction}
             variant={secondaryAction.variant || 'secondary'}
+            buttonType="submit"
           />
         )
       ) : null}
@@ -222,9 +255,11 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
  * DocumentActionButton
  * -----------------------------------------------------------------------------------------------*/
 
-interface DocumentActionButtonProps extends Action {}
+interface DocumentActionButtonProps extends Action {
+  buttonType?: 'button' | 'submit' | 'reset';
+}
 
-const DocumentActionButton = (action: DocumentActionButtonProps) => {
+const DocumentActionButton = ({ buttonType = 'button', ...action }: DocumentActionButtonProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { toggleNotification } = useNotification();
 
@@ -268,6 +303,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
         paddingTop="7px"
         paddingBottom="7px"
         loading={action.loading}
+        type={buttonType}
       >
         {action.label}
       </Button>
@@ -311,6 +347,20 @@ const DocumentActionsMenu = ({
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  /**
+   * TODO: remove when https://github.com/strapi/design-system/pull/1994 will be merged and released.
+   */
+  React.useEffect(() => {
+    if (triggerRef.current) {
+      if (isDisabled) {
+        triggerRef.current.setAttribute('disabled', '');
+      } else {
+        triggerRef.current.removeAttribute('disabled');
+      }
+    }
+  }, [isDisabled]);
 
   const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
     const { onClick = () => false, dialog, id } = action;
@@ -340,26 +390,28 @@ const DocumentActionsMenu = ({
     setIsOpen(false);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!isDisabled) {
+      setIsOpen(open);
+    }
+  };
+
   return (
-    <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
+    <Menu.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Menu.Trigger
+        ref={triggerRef}
         disabled={isDisabled}
-        size="S"
-        endIcon={null}
-        paddingTop="4px"
-        paddingLeft="7px"
-        paddingRight="7px"
+        label={
+          label ||
+          formatMessage({
+            id: 'content-manager.containers.edit.panels.default.more-actions',
+            defaultMessage: 'More document actions',
+          })
+        }
+        tag={IconButton}
+        icon={<More />}
         variant={variant}
-      >
-        <More aria-hidden focusable={false} />
-        <VisuallyHidden tag="span">
-          {label ||
-            formatMessage({
-              id: 'content-manager.containers.edit.panels.default.more-actions',
-              defaultMessage: 'More document actions',
-            })}
-        </VisuallyHidden>
-      </Menu.Trigger>
+      />
       <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
@@ -573,6 +625,7 @@ const PublishAction: DocumentActionComponent = ({
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+  const initialValues = useForm('PublishAction', ({ initialValues }) => initialValues);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
   const {
     currentDocument: { components },
@@ -707,32 +760,36 @@ const PublishAction: DocumentActionComponent = ({
       meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null)) &&
     document?.status !== 'modified';
 
-  if (!schema?.options?.draftAndPublish) {
-    return null;
-  }
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const performPublish = async () => {
     setSubmitting(true);
 
     try {
+      const { data: filteredData } = handleInvisibleAttributes(transformData(formValues), {
+        schema,
+        components,
+      });
       const { errors } = await validate(true, {
+        ...filteredData,
         status: 'published',
       });
       if (errors) {
-        const hasUnreadableRequiredField = Object.keys(schema.attributes).some((fieldName) => {
-          const attribute = schema.attributes[fieldName];
+        const hasUnreadableRequiredField =
+          schema &&
+          Object.keys(schema.attributes).some((fieldName) => {
+            const attribute = schema.attributes[fieldName];
 
-          // For components, check if any of the component fields are readable
-          if (attribute.type === 'component') {
-            const componentFields = (canReadFields ?? []).filter((field) =>
-              field.startsWith(`${fieldName}.`)
-            );
-            return componentFields.length === 0;
-          }
+            // For components, check if any of the component fields are readable
+            if (attribute.type === 'component') {
+              const componentFields = (canReadFields ?? []).filter((field) =>
+                field.startsWith(`${fieldName}.`)
+              );
+              return componentFields.length === 0;
+            }
 
-          // For regular fields, check if the field itself is readable
-          return attribute?.required && !(canReadFields ?? []).includes(fieldName);
-        });
+            // For regular fields, check if the field itself is readable
+            return attribute?.required && !(canReadFields ?? []).includes(fieldName);
+          });
 
         if (hasUnreadableRequiredField) {
           toggleNotification({
@@ -755,10 +812,8 @@ const PublishAction: DocumentActionComponent = ({
         }
         return;
       }
-      const { data } = handleInvisibleAttributes(transformData(formValues), {
-        schema,
-        components,
-      });
+      // filteredData is already used for validation, so use it for publishing as well
+      const data = filteredData;
       const res = await publish(
         {
           collectionType,
@@ -769,9 +824,9 @@ const PublishAction: DocumentActionComponent = ({
         data
       );
 
-      // Reset form if successful
+      // Reset form with current values as new initial values (clears errors/submitting and sets modified to false)
       if ('data' in res) {
-        resetForm();
+        resetForm(formValues);
         dispatchGuidedTour({
           type: 'set_completed_actions',
           payload: [GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent],
@@ -873,6 +928,32 @@ const PublishAction: DocumentActionComponent = ({
   // see RFC "Count draft relations" in Notion
   const enableDraftRelationsCount = false;
   const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
+
+  // Auto-publish on CMD+Enter on macOS, and CTRL+Enter on Windows/Linux
+  React.useEffect(() => {
+    if (!schema?.options?.draftAndPublish) {
+      return;
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        if (!hasDraftRelations) {
+          performPublish();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [hasDraftRelations, performPublish, schema?.options?.draftAndPublish]);
+
+  if (!schema?.options?.draftAndPublish) {
+    return null;
+  }
 
   return {
     loading: isLoading,
@@ -1009,7 +1090,7 @@ const UpdateAction: DocumentActionComponent = ({
   );
   const { schema } = useDoc();
 
-  const handleUpdate = React.useCallback(async () => {
+  const handleUpdate = async () => {
     setSubmitting(true);
 
     try {
@@ -1077,7 +1158,7 @@ const UpdateAction: DocumentActionComponent = ({
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           setErrors(formatValidationErrors(res.error));
         } else {
-          resetForm();
+          resetForm(document);
         }
       } else {
         const { data } = handleInvisibleAttributes(transformData(document), {
@@ -1185,60 +1266,7 @@ const UpdateAction: DocumentActionComponent = ({
         onPreview();
       }
     }
-  }, [
-    setSubmitting,
-    modified,
-    validate,
-    isCloning,
-    documentId,
-    collectionType,
-    toggleNotification,
-    formatMessage,
-    clone,
-    model,
-    cloneMatch?.params.origin,
-    currentDocumentMeta.params,
-    document,
-    navigate,
-    rawQuery,
-    setErrors,
-    formatValidationErrors,
-    update,
-    resetForm,
-    create,
-    fromRelationModal,
-    fieldToConnect,
-    documentHistory,
-    parentDocumentMetaToUpdate,
-    dispatch,
-    getInitialFormValues,
-    parentDocumentData,
-    fieldToConnectUID,
-    updateDocumentMutation,
-    formatAPIError,
-    onPreview,
-    initialValues,
-    schema,
-    components,
-    relationalModalSchema,
-    dispatchGuidedTour,
-  ]);
-
-  // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        handleUpdate();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleUpdate]);
+  };
 
   return {
     loading: isLoading,

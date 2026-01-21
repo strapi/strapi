@@ -5,8 +5,8 @@ import { useIntl } from 'react-intl';
 import { Layouts } from '../../../components/Layouts/Layout';
 import { RESPONSIVE_DEFAULT_SPACING } from '../../../constants/theme';
 import { useTypedSelector } from '../../../core/store/hooks';
-import darkIllustration from '../assets/purchase-page-audit-logs-illustration-dark.svg';
-import lightIllustration from '../assets/purchase-page-audit-logs-illustration-light.svg';
+import darkIllustration from '../assets/purchase-page-audit-logs-illustration-dark.jpg';
+import lightIllustration from '../assets/purchase-page-audit-logs-illustration-light.jpg';
 
 const PurchaseAuditLogs = () => {
   const { formatMessage } = useIntl();
@@ -29,7 +29,7 @@ const PurchaseAuditLogs = () => {
           overflow={'hidden'}
         >
           <Grid.Root>
-            <Grid.Item col={6} s={12} alignItems={'flex-start'}>
+            <Grid.Item xs={12} m={6} alignItems={'flex-start'}>
               <Flex direction="column" alignItems="flex-start" padding={7} width={'100%'}>
                 <Flex>
                   <ListSearch fill="primary600" width={`24px`} height={`24px`} />
@@ -111,7 +111,7 @@ const PurchaseAuditLogs = () => {
                 </Flex>
               </Flex>
             </Grid.Item>
-            <Grid.Item col={6} s={12} background="primary100" minHeight={'280px'}>
+            <Grid.Item xs={12} m={6} background="primary100" minHeight={'280px'}>
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <img
                   src={illustration}

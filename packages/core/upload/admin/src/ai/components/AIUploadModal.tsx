@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { createContext, useTracking } from '@strapi/admin/strapi-admin';
+import { createContext, useNotification } from '@strapi/admin/strapi-admin';
 import { Alert, Button, Flex, Modal } from '@strapi/design-system';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
@@ -10,10 +10,10 @@ import {
   AddAssetStep,
   FileWithRawFile,
 } from '../../components/UploadAssetDialog/AddAssetStep/AddAssetStep';
-import { AssetType } from '../../constants';
 import { useBulkEdit } from '../../hooks/useBulkEdit';
+import { useTracking } from '../../hooks/useTracking';
 import { useUpload } from '../../hooks/useUpload';
-import { getTrad, typeFromMime } from '../../utils';
+import { getTrad } from '../../utils';
 
 import { AIAssetCard, AIAssetCardSkeletons } from './AIAssetCard';
 
@@ -44,6 +44,7 @@ const StyledAlert = styled(Alert)`
 
 const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
   const state = useAIUploadModalContext('ModalContent', (s) => s.state);
   const dispatch = useAIUploadModalContext('ModalContent', (s) => s.dispatch);
   const folderId = useAIUploadModalContext('ModalContent', (s) => s.folderId);
@@ -105,7 +106,12 @@ const ModalContent = ({ onClose }: Pick<AIUploadModalProps, 'onClose'>) => {
           await edit(updates);
           dispatch({ type: 'clear_unsaved_changes' });
         } catch (err) {
-          console.error('Failed to save asset changes:', err);
+          toggleNotification({
+            type: 'danger',
+            message:
+              (err instanceof Error ? err.message : null) ||
+              formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+          });
           return; // Don't close modal on error
         }
       }

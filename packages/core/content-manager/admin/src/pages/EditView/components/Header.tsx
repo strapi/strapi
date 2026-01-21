@@ -9,6 +9,8 @@ import {
   useQueryParams,
   useIsDesktop,
   useDebounce,
+  RESPONSIVE_DEFAULT_SPACING,
+  useIsMobile,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -58,7 +60,13 @@ interface HeaderProps {
 const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: HeaderProps) => {
   const { formatMessage } = useIntl();
   const isCloning = useMatch(CLONE_PATH) !== null;
+  const isMobile = useIsMobile();
   const params = useParams<{ collectionType: string; slug: string }>();
+  const [
+    {
+      query: { status: activeTab = 'draft' },
+    },
+  ] = useQueryParams<{ status: 'draft' | 'published' }>();
 
   const title = isCreating
     ? formatMessage({
@@ -71,23 +79,24 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
     <Flex
       direction="column"
       alignItems="flex-start"
+      paddingLeft={RESPONSIVE_DEFAULT_SPACING}
+      paddingRight={RESPONSIVE_DEFAULT_SPACING}
       paddingTop={{
         initial: 4,
-        large: 6,
+        medium: 6,
       }}
-      paddingBottom={{
-        initial: 0,
-        large: 4,
-      }}
+      paddingBottom={4}
       gap={2}
     >
-      <BackButton
-        fallback={
-          params.collectionType === SINGLE_TYPES
-            ? undefined
-            : `../${COLLECTION_TYPES}/${params.slug}`
-        }
-      />
+      {!isMobile && (
+        <BackButton
+          fallback={
+            params.collectionType === SINGLE_TYPES
+              ? undefined
+              : `../${COLLECTION_TYPES}/${params.slug}`
+          }
+        />
+      )}
       <Flex
         width="100%"
         justifyContent="space-between"
@@ -97,14 +106,30 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
         }}
         alignItems="flex-start"
         direction={{
-          initial: 'column',
+          initial: 'column-reverse',
           medium: 'row',
         }}
       >
-        <Typography variant="alpha" tag="h1">
-          {title}
-        </Typography>
-        <HeaderToolbar />
+        <Flex gap={2} justifyContent="space-between" alignItems="flex-start" width="100%">
+          <Typography variant="alpha" tag="h1">
+            {title}
+          </Typography>
+          <Box display={{ initial: 'block', medium: 'none' }}>
+            <HeaderDocumentActions activeTab={activeTab} isCloning={isCloning} />
+          </Box>
+        </Flex>
+        <Flex width={{ initial: '100%', medium: 'auto' }} gap={3} justifyContent="space-between">
+          {isMobile && (
+            <BackButton
+              fallback={
+                params.collectionType === SINGLE_TYPES
+                  ? undefined
+                  : `../${COLLECTION_TYPES}/${params.slug}`
+              }
+            />
+          )}
+          <HeaderToolbar activeTab={activeTab} isCloning={isCloning} />
+        </Flex>
       </Flex>
       {status ? (
         <Box marginTop={1}>
@@ -139,8 +164,19 @@ interface HeaderActionDescription {
     startIcon?: React.ReactNode;
     textValue?: string;
     value: string;
+    /**
+     * @internal
+     * @description
+     * Internal SelectOption renderer used to display the status of AI translation background jobs
+     */
+    _render?: () => React.ReactNode;
   }>;
-  status?: {
+  /**
+   * @internal
+   * @description
+   * Internal document header action to display the status of AI translation background jobs
+   */
+  _status?: {
     message: React.ReactNode;
     tooltip?: React.ReactNode;
   };
@@ -149,18 +185,56 @@ interface HeaderActionDescription {
   customizeContent?: (value: string) => React.ReactNode;
 }
 
+interface HeaderDocumentActionsProps {
+  activeTab: 'draft' | 'published';
+  isCloning: boolean;
+}
+
+const HeaderDocumentActions = ({ activeTab, isCloning }: HeaderDocumentActionsProps) => {
+  const { model, id, document, meta, collectionType } = useDoc();
+  const { formatMessage } = useIntl();
+  const plugins = useStrapiApp('HeaderToolbar', (state) => state.plugins);
+  return (
+    <DescriptionComponentRenderer
+      props={{
+        activeTab,
+        model,
+        documentId: id,
+        document: isCloning ? undefined : document,
+        meta: isCloning ? undefined : meta,
+        collectionType,
+      }}
+      descriptions={(
+        plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+      ).getDocumentActions('header')}
+    >
+      {(actions) => {
+        const headerActions = actions.filter((action) => {
+          const positions = Array.isArray(action.position) ? action.position : [action.position];
+          return positions.includes('header');
+        });
+
+        return (
+          <DocumentActionsMenu
+            actions={headerActions}
+            label={formatMessage({
+              id: 'content-manager.containers.edit.header.more-actions',
+              defaultMessage: 'More actions',
+            })}
+          >
+            <Information activeTab={activeTab} />
+          </DocumentActionsMenu>
+        );
+      }}
+    </DescriptionComponentRenderer>
+  );
+};
+
 /**
  * @description Contains the document actions that have `position: header`, if there are
  * none we still render the menu because we render the information about the document there.
  */
-const HeaderToolbar = () => {
-  const { formatMessage } = useIntl();
-  const isCloning = useMatch(CLONE_PATH) !== null;
-  const [
-    {
-      query: { status = 'draft' },
-    },
-  ] = useQueryParams<{ status: 'draft' | 'published' }>();
+const HeaderToolbar = ({ activeTab, isCloning }: HeaderDocumentActionsProps) => {
   const { model, id, document, meta, collectionType } = useDoc();
   const plugins = useStrapiApp('HeaderToolbar', (state) => state.plugins);
 
@@ -168,7 +242,7 @@ const HeaderToolbar = () => {
     <Flex gap={2}>
       <DescriptionComponentRenderer
         props={{
-          activeTab: status,
+          activeTab,
           model,
           documentId: id,
           document: isCloning ? undefined : document,
@@ -187,38 +261,9 @@ const HeaderToolbar = () => {
           }
         }}
       </DescriptionComponentRenderer>
-      <DescriptionComponentRenderer
-        props={{
-          activeTab: status,
-          model,
-          documentId: id,
-          document: isCloning ? undefined : document,
-          meta: isCloning ? undefined : meta,
-          collectionType,
-        }}
-        descriptions={(
-          plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-        ).getDocumentActions('header')}
-      >
-        {(actions) => {
-          const headerActions = actions.filter((action) => {
-            const positions = Array.isArray(action.position) ? action.position : [action.position];
-            return positions.includes('header');
-          });
-
-          return (
-            <DocumentActionsMenu
-              actions={headerActions}
-              label={formatMessage({
-                id: 'content-manager.containers.edit.header.more-actions',
-                defaultMessage: 'More actions',
-              })}
-            >
-              <Information activeTab={status} />
-            </DocumentActionsMenu>
-          );
-        }}
-      </DescriptionComponentRenderer>
+      <Box display={{ initial: 'none', medium: 'block' }}>
+        <HeaderDocumentActions activeTab={activeTab} isCloning={isCloning} />
+      </Box>
     </Flex>
   );
 };
@@ -408,17 +453,23 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               aria-label={action.label}
               {...action}
             >
-              {action.options.map(({ label, ...option }) => (
-                <SingleSelectOption key={option.value} {...option}>
-                  {label}
-                </SingleSelectOption>
-              ))}
+              {action.options.map(({ label, ...option }) => {
+                if (option._render) {
+                  return option._render();
+                }
+
+                return (
+                  <SingleSelectOption key={option.value} {...option}>
+                    {label}
+                  </SingleSelectOption>
+                );
+              })}
             </SingleSelect>
           );
-        } else if (action.status) {
+        } else if (action._status) {
           return (
-            <HeaderActionStatus tooltip={action.status?.tooltip} key={action.id}>
-              {action.status.message}
+            <HeaderActionStatus tooltip={action._status?.tooltip} key={action.id}>
+              {action._status.message}
             </HeaderActionStatus>
           );
         } else {

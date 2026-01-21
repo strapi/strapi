@@ -8,12 +8,12 @@ describe('Get-File-Path util', () => {
 
   test('with destination set as plugin', () => {
     const filePath = getFilePath('plugin');
-    expect(filePath).toBe(`plugins/{{ plugin }}/server`);
+    expect(filePath).toBe(`plugins/{{ plugin }}/server/src`);
   });
 
   test('with destination set as root', () => {
     const filePath = getFilePath('root');
-    expect(filePath).toBe(`./`);
+    expect(filePath).toBe(`.`);
   });
 
   test('with empty destination string', () => {

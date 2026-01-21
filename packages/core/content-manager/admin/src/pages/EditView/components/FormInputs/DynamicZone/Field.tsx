@@ -286,6 +286,7 @@ const DynamicZone = ({
                     onGrabItem={handleGrabItem}
                     onAddComponent={handleAddComponent}
                     dynamicComponentsByCategory={dynamicComponentsByCategory}
+                    totalLength={dynamicDisplayedComponentsLength}
                   >
                     {children}
                   </DynamicComponent>

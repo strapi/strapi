@@ -130,7 +130,7 @@ const EditorStylesContainer = styled.div<{ $disabled?: boolean; $isExpandMode?: 
 
   .CodeMirror {
     /* Set height, width, borders, and global font properties here */
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     height: ${({ $isExpandMode }) =>
       $isExpandMode
         ? '100%'
@@ -139,6 +139,10 @@ const EditorStylesContainer = styled.div<{ $disabled?: boolean; $isExpandMode?: 
     direction: ltr;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
       'Open Sans', 'Helvetica Neue', sans-serif;
+
+    ${({ theme }) => theme.breakpoints.medium} {
+      font-size: 1.4rem;
+    }
   }
 
   /* PADDING */

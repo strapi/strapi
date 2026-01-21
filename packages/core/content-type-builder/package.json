@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.28.0",
+  "version": "5.33.4",
   "description": "Create and manage content types",
   "repository": {
     "type": "git",
@@ -60,18 +60,18 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@ai-sdk/react": "2.0.26",
+    "@ai-sdk/react": "2.0.120",
     "@dnd-kit/core": "6.3.1",
     "@dnd-kit/modifiers": "9.0.0",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.0.0-rc.30",
-    "@strapi/generators": "5.28.0",
-    "@strapi/icons": "2.0.0-rc.30",
-    "@strapi/utils": "5.28.0",
-    "ai": "5.0.26",
+    "@strapi/design-system": "2.1.2",
+    "@strapi/generators": "5.33.4",
+    "@strapi/icons": "2.1.2",
+    "@strapi/utils": "5.33.4",
+    "ai": "5.0.52",
     "date-fns": "2.30.0",
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
@@ -79,7 +79,7 @@
     "lodash": "4.17.21",
     "micromatch": "^4.0.8",
     "pluralize": "8.0.0",
-    "qs": "6.11.1",
+    "qs": "6.14.1",
     "react-dropzone": "14.3.8",
     "react-intl": "6.6.2",
     "react-markdown": "9.1.0",
@@ -88,15 +88,15 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/admin": "5.28.0",
-    "@strapi/types": "5.28.0",
-    "@testing-library/dom": "10.1.0",
-    "@testing-library/react": "15.0.7",
-    "@testing-library/user-event": "14.5.2",
+    "@strapi/admin": "5.33.4",
+    "@strapi/types": "5.33.4",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.0",
+    "@testing-library/user-event": "14.6.1",
     "@types/fs-extra": "11.0.4",
     "@types/micromatch": "^4.0.9",
     "@types/pluralize": "0.0.30",
-    "koa": "2.16.1",
+    "koa": "2.16.3",
     "koa-body": "6.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -112,7 +112,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

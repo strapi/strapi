@@ -36,6 +36,7 @@ const PageHeader = ({ isOnline, npmPackageType = 'plugin' }: PageHeaderProps) =>
             href={`https://market.strapi.io/submit-${npmPackageType}`}
             onClick={() => trackUsage(tracking)}
             isExternal
+            fullWidth
           >
             {formatMessage({
               id: `admin.pages.MarketPlacePage.submit.${npmPackageType}.link`,

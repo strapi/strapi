@@ -61,19 +61,32 @@ export default ({ strapi }: Context) => {
 
         const isTargetDraftAndPublishContentType =
           contentTypes.hasDraftAndPublish(targetContentType);
-        const defaultFilters = isTargetDraftAndPublishContentType
-          ? {
-              where: {
-                publishedAt: {
-                  $notNull: context.rootQueryArgs?.status
-                    ? // Filter by the same status as the root query if the argument is present
-                      context.rootQueryArgs?.status === 'published'
-                    : // Otherwise fallback to the published version
-                      true,
+
+        // Helper to check if a field is from built-in queries (not custom resolvers)
+        // Use the precomputed lookup populated by the content-api service at schema build time.
+        const isBuiltInQueryField = (fieldName: string) => {
+          const graphqlService = strapi.plugin('graphql').service('content-api');
+          return graphqlService.isBuiltInQueryField(fieldName);
+        };
+
+        // Only inherit status from built-in queries to avoid conflicts with custom resolvers
+        const inheritedStatus =
+          context.rootQueryArgs?.status &&
+          context.rootQueryArgs?._originField &&
+          isBuiltInQueryField(context.rootQueryArgs._originField)
+            ? context.rootQueryArgs.status
+            : null;
+
+        const statusToApply = args.status || inheritedStatus;
+
+        const defaultFilters =
+          isTargetDraftAndPublishContentType && statusToApply
+            ? {
+                where: {
+                  publishedAt: statusToApply === 'published' ? { $notNull: true } : { $null: true },
                 },
-              },
-            }
-          : {};
+              }
+            : {};
 
         const dbQuery = merge(defaultFilters, transformedQuery);
 
@@ -97,7 +110,7 @@ export default ({ strapi }: Context) => {
           return rawData;
         })();
 
-        const info = {
+        const sanitizeInfo = {
           args: sanitizedQuery,
           resourceUID: targetUID,
         };
@@ -122,12 +135,12 @@ export default ({ strapi }: Context) => {
         // If this is a to-many relation, it returns an object that
         // matches what the entity-response-collection's resolvers expect
         if (isToMany) {
-          return toEntityResponseCollection(data, info);
+          return toEntityResponseCollection(data, sanitizeInfo);
         }
 
         // Else, it returns an object that matches
         // what the entity-response's resolvers expect
-        return toEntityResponse(data, info);
+        return toEntityResponse(data, sanitizeInfo);
       };
     },
   };

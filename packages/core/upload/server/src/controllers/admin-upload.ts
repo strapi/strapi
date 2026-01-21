@@ -8,6 +8,7 @@ import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
 import { FileInfo } from '../types';
+import { prepareUploadRequest } from '../utils/mime-validation';
 
 export default {
   async bulkUpdateFileInfo(ctx: Context) {
@@ -86,8 +87,10 @@ export default {
       throw new errors.ApplicationError('Cannot replace a file with multiple ones');
     }
 
-    const data = (await validateUploadBody(body)) as { fileInfo: FileInfo };
-    const replacedFile = await uploadService.replace(id, { data, file: files }, { user });
+    const { validFiles, filteredBody } = await prepareUploadRequest(files, body, strapi);
+
+    const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
+    const replacedFile = await uploadService.replace(id, { data, file: validFiles[0] }, { user });
 
     // Sign file urls for private providers
     const signedFile = await getService('file').signFileUrls(replacedFile);
@@ -112,9 +115,12 @@ export default {
       return ctx.forbidden();
     }
 
-    const data = await validateUploadBody(body, Array.isArray(files));
+    const { validFiles, filteredBody } = await prepareUploadRequest(files, body, strapi);
 
-    let filesArray = Array.isArray(files) ? files : [files];
+    const isMultipleFiles = validFiles.length > 1;
+    const data = await validateUploadBody(filteredBody, isMultipleFiles);
+
+    let filesArray = validFiles;
 
     if (
       data.fileInfo &&
@@ -134,7 +140,7 @@ export default {
     // Upload files first to get thumbnails
     const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
     if (uploadedFiles.some((file) => file.mime?.startsWith('image/'))) {
-      strapi.telemetry.send('didUploadImage');
+      await getService('metrics').trackUsage('didUploadImage');
     }
 
     const aiMetadataService = getService('aiMetadata');

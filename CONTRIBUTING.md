@@ -32,7 +32,13 @@ If you make contributions to our repositories on behalf of your company, we will
 
 ## Documentation
 
+### Userland Documentation
+
 Pull requests related to fixing documentation for the latest release should be directed towards the [documentation repository](https://github.com/strapi/documentation). Please follow the [documentation contributing guide](https://github.com/strapi/documentation/blob/main/CONTRIBUTING.md) for more information.
+
+### Contributor Documentation
+
+You can access the contributor documentation from (`./docs`) online at [contributor.strapi.io](https://contributor.strapi.io/).
 
 ## Bugs
 
@@ -46,7 +52,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version `>= v18 and <= v22` and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version `>= v20 and <= v24` and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -191,7 +197,7 @@ The types are based on our GitHub label, here are a subset:
 - `doc` – When writing documentation.
 - `feat` – When working on a feature.
 
-You can see the complete list [here](https://github.com/strapi/strapi/blob/1cb6f95889ccaad897759cfa14d2804adeaeb7ee/.commitlintrc.ts#L11).
+You can see the complete list [here](https://github.com/strapi/strapi/blob/develop/.commitlintrc.ts#L11).
 
 #### Subject
 

@@ -1,14 +1,24 @@
 import type { Context } from 'koa';
 
+import { errors } from '@strapi/utils';
 import adminUploadController from '../admin-upload';
 import { getService } from '../../utils';
 import { validateBulkUpdateBody, validateUploadBody } from '../validation/admin/upload';
 import * as findEntityAndCheckPermissionsModule from '../utils/find-entity-and-check-permissions';
 import { ACTIONS } from '../../constants';
+import { prepareUploadRequest } from '../../utils/mime-validation';
+
+jest.mock('../../utils/mime-validation', () => ({
+  prepareUploadRequest: jest.fn(() => ({
+    validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
+    filteredBody: {},
+  })),
+}));
 
 jest.mock('../../utils');
 jest.mock('../validation/admin/upload');
 jest.mock('../utils/find-entity-and-check-permissions');
+const mockPrepareUploadRequest = jest.mocked(prepareUploadRequest);
 
 const mockGetService = getService as jest.MockedFunction<typeof getService>;
 const mockValidateUploadBody = validateUploadBody as jest.MockedFunction<typeof validateUploadBody>;
@@ -35,6 +45,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockPrepareUploadRequest.mockResolvedValue({
+      validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
+      filteredBody: {},
+    });
+
     mockAiMetadataService = {
       isEnabled: jest.fn(),
       processFiles: jest.fn(),
@@ -53,6 +68,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         return {
           upload: jest.fn().mockResolvedValue([{}]),
           signFileUrls: jest.fn((file) => Promise.resolve(file)),
+        };
+      }
+      if (serviceName === 'metrics') {
+        return {
+          trackUsage: jest.fn().mockResolvedValue(undefined),
         };
       }
       return {};
@@ -107,12 +127,247 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     } as any;
   });
 
+  describe('uploadFiles - Security Filtering', () => {
+    it('should call enforceUploadSecurity with uploaded files', async () => {
+      const files = [
+        {
+          originalFilename: 'test1.jpg',
+          mimetype: 'image/jpeg',
+          size: 12345,
+          filepath: '/tmp/test1.jpg',
+          newFilename: 'test1.jpg',
+          hashAlgorithm: 'sha256' as const,
+          length: 12345,
+          mtime: new Date(),
+          toJSON() {
+            return {
+              originalFilename: this.originalFilename,
+              mimetype: this.mimetype,
+              size: this.size,
+              filepath: this.filepath,
+              newFilename: this.newFilename,
+              hashAlgorithm: this.hashAlgorithm,
+              length: this.length,
+              mtime: this.mtime,
+            };
+          },
+        },
+        {
+          originalFilename: 'test2.pdf',
+          mimetype: 'application/pdf',
+          size: 23456,
+          filepath: '/tmp/test2.pdf',
+          newFilename: 'test2.pdf',
+          hashAlgorithm: 'sha256' as const,
+          length: 23456,
+          mtime: new Date(),
+          toJSON() {
+            return {
+              originalFilename: this.originalFilename,
+              mimetype: this.mimetype,
+              size: this.size,
+              filepath: this.filepath,
+              newFilename: this.newFilename,
+              hashAlgorithm: this.hashAlgorithm,
+              length: this.length,
+              mtime: this.mtime,
+            };
+          },
+        },
+      ];
+
+      mockContext.request!.files = { files };
+
+      await adminUploadController.uploadFiles(mockContext as Context);
+
+      expect(mockPrepareUploadRequest).toHaveBeenCalledWith(files, {}, strapi);
+    });
+
+    it('should throw ValidationError when no valid files remain after security check', async () => {
+      mockPrepareUploadRequest.mockRejectedValue(
+        new errors.ValidationError('MIME type not allowed', {})
+      );
+
+      await expect(adminUploadController.uploadFiles(mockContext as Context)).rejects.toThrow(
+        errors.ValidationError
+      );
+    });
+
+    it('should filter fileInfo array when some files are rejected by security', async () => {
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [{ originalFilename: 'allowed.jpg', mimetype: 'image/jpeg' }],
+        filteredBody: {
+          fileInfo: '{"name":"allowed.jpg","folder":null}',
+        },
+      });
+
+      mockContext.request!.body = {
+        fileInfo: ['{"name":"blocked.pdf","folder":null}', '{"name":"allowed.jpg","folder":null}'],
+      };
+
+      mockValidateUploadBody.mockResolvedValue({
+        fileInfo: { name: 'allowed.jpg', folder: null, alternativeText: '', caption: '' },
+      });
+
+      await adminUploadController.uploadFiles(mockContext as Context);
+
+      expect(mockValidateUploadBody).toHaveBeenCalledWith(
+        {
+          fileInfo: '{"name":"allowed.jpg","folder":null}',
+        },
+        false
+      );
+    });
+
+    it('should handle single file being filtered correctly', async () => {
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [{ originalFilename: 'test.jpg', mimetype: 'image/jpeg' }],
+        filteredBody: {
+          fileInfo: '{"name":"test.jpg","folder":null}',
+        },
+      });
+
+      mockContext.request!.body = {
+        fileInfo: ['{"name":"test.jpg","folder":null}'],
+      };
+
+      mockValidateUploadBody.mockResolvedValue({
+        fileInfo: { name: 'test.jpg', folder: null, alternativeText: '', caption: '' },
+      });
+
+      await adminUploadController.uploadFiles(mockContext as Context);
+
+      expect(mockValidateUploadBody).toHaveBeenCalledWith(
+        {
+          fileInfo: '{"name":"test.jpg","folder":null}',
+        },
+        false
+      );
+    });
+
+    it('should handle multiple files remaining after filtering', async () => {
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [
+          { originalFilename: 'file1.jpg', mimetype: 'image/jpeg' },
+          { originalFilename: 'file2.png', mimetype: 'image/png' },
+        ],
+        filteredBody: {
+          fileInfo: [
+            { name: 'file1.jpg', folder: null, caption: '', alternativeText: '' },
+            { name: 'file2.png', folder: null, caption: '', alternativeText: '' },
+          ],
+        },
+      });
+
+      mockContext.request!.body = {
+        fileInfo: [
+          { name: 'file1.jpg', alternativeText: '', caption: '', folder: null },
+          { name: 'file2.png', alternativeText: '', caption: '', folder: null },
+        ],
+      };
+
+      mockValidateUploadBody.mockResolvedValue({
+        fileInfo: [
+          { name: 'file1.jpg', alternativeText: '', caption: '', folder: null },
+          { name: 'file2.png', alternativeText: '', caption: '', folder: null },
+        ],
+      });
+
+      await adminUploadController.uploadFiles(mockContext as Context);
+
+      expect(mockValidateUploadBody).toHaveBeenCalledWith(
+        {
+          fileInfo: [
+            { name: 'file1.jpg', folder: null, caption: '', alternativeText: '' },
+            { name: 'file2.png', folder: null, caption: '', alternativeText: '' },
+          ],
+        },
+        true
+      );
+    });
+
+    it('should align filesArray with filtered fileInfo data', async () => {
+      const validFiles = [
+        { originalFilename: 'file1.jpg', mimetype: 'image/jpeg' },
+        { originalFilename: 'file2.png', mimetype: 'image/png' },
+      ];
+
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles,
+        filteredBody: {},
+      });
+
+      mockValidateUploadBody.mockResolvedValue({
+        fileInfo: [
+          { name: 'file2.png', alternativeText: '', caption: '', folder: null },
+          { name: 'file1.jpg', alternativeText: '', caption: '', folder: null },
+        ],
+      });
+
+      await adminUploadController.uploadFiles(mockContext as Context);
+
+      expect(uploadService.upload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          files: expect.arrayContaining([
+            expect.objectContaining({ originalFilename: 'file2.png' }),
+            expect.objectContaining({ originalFilename: 'file1.jpg' }),
+          ]),
+          data: expect.objectContaining({
+            fileInfo: expect.arrayContaining([
+              expect.objectContaining({ name: 'file2.png' }),
+              expect.objectContaining({ name: 'file1.jpg' }),
+            ]),
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('should handle non-array fileInfo body correctly', async () => {
+      mockPrepareUploadRequest.mockResolvedValue({
+        validFiles: [{ originalFilename: 'single.jpg', mimetype: 'image/jpeg' }],
+        filteredBody: {
+          fileInfo: '{"name":"single.jpg","folder":null}',
+        },
+      });
+
+      mockContext.request!.body = {
+        fileInfo: '{"name":"single.jpg","folder":null}',
+      };
+
+      mockValidateUploadBody.mockResolvedValue({
+        fileInfo: { name: 'single.jpg', folder: null, alternativeText: '', caption: '' },
+      });
+
+      await adminUploadController.uploadFiles(mockContext as Context);
+
+      expect(mockValidateUploadBody).toHaveBeenCalledWith(
+        {
+          fileInfo: '{"name":"single.jpg","folder":null}',
+        },
+        false
+      );
+    });
+
+    it('should throw ValidationError when no valid files after filtering', async () => {
+      mockPrepareUploadRequest.mockRejectedValue(
+        new errors.ValidationError('File size exceeds limit', {
+          fileSize: 10000000,
+          maxFileSize: 1000000,
+        })
+      );
+
+      await expect(adminUploadController.uploadFiles(mockContext as Context)).rejects.toThrow(
+        'File size exceeds limit'
+      );
+    });
+  });
+
   describe('uploadFiles - AI Service Connection', () => {
     it('should call AI processFiles when service is enabled', async () => {
       mockAiMetadataService.isEnabled.mockReturnValue(true);
       mockAiMetadataService.processFiles.mockResolvedValue([{}]);
 
-      // Mock upload service to return files with proper structure
       uploadService.upload.mockResolvedValue([
         {
           id: 1,
@@ -150,6 +405,34 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       expect(strapi.log.warn).toHaveBeenCalledWith(
         'AI metadata generation failed, proceeding without AI enhancements',
         { error: 'AI service unavailable' }
+      );
+    });
+
+    it('should update files with AI metadata when available', async () => {
+      mockAiMetadataService.isEnabled.mockReturnValue(true);
+      mockAiMetadataService.processFiles.mockResolvedValue([
+        { altText: 'AI generated alt text', caption: 'AI generated caption' },
+      ]);
+
+      uploadService.upload.mockResolvedValue([
+        {
+          id: 1,
+          name: 'test.jpg',
+          mime: 'image/jpeg',
+          url: '/uploads/test.jpg',
+          provider: 'local',
+        },
+      ]);
+
+      await adminUploadController.uploadFiles(mockContext as Context);
+
+      expect(uploadService.updateFileInfo).toHaveBeenCalledWith(
+        1,
+        {
+          alternativeText: 'AI generated alt text',
+          caption: 'AI generated caption',
+        },
+        { user: { id: 1 } }
       );
     });
   });
