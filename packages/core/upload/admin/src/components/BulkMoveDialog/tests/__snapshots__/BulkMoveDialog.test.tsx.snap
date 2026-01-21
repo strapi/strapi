@@ -2,28 +2,28 @@
 
 exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 .c3 {
+  background: #f6f6f9;
   padding-block-start: 16px;
   padding-inline-end: 20px;
   padding-block-end: 16px;
   padding-inline-start: 20px;
-  background: #f6f6f9;
 }
 
 .c7 {
   border-radius: 4px;
-  display: inline-flex;
   cursor: pointer;
+  display: inline-flex;
 }
 
-.c19 {
+.c20 {
   padding-inline-end: 12px;
 }
 
-.c23 {
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
+.c24 {
   border-radius: 4px;
   cursor: pointer;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
 }
 
 .c4 {
@@ -53,7 +53,13 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c24 {
+.c17 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c25 {
   gap: 8px;
   align-items: center;
   justify-content: center;
@@ -62,13 +68,13 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 }
 
 .c6 {
-  font-size: 1.4rem;
-  line-height: 1.43;
+  font-size: 1.6rem;
+  line-height: 1.5;
   color: currentcolor;
   font-weight: 600;
 }
 
-.c17 {
+.c18 {
   font-size: 1.2rem;
   line-height: 1.33;
   display: block;
@@ -79,7 +85,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   font-weight: 600;
 }
 
-.c26 {
+.c27 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: currentcolor;
@@ -97,48 +103,48 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c25 {
-  height: 3.2rem;
+.c26 {
+  height: 4rem;
   text-decoration: none;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
 }
 
-.c25:hover {
+.c26:hover {
   background-color: #f6f6f9;
 }
 
-.c25:active {
+.c26:active {
   background-color: #eaeaef;
 }
 
-.c25[aria-disabled='true'] {
+.c26[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c27 {
-  height: 3.2rem;
+.c28 {
+  height: 4rem;
   text-decoration: none;
   border: 1px solid #4945ff;
   background: #4945ff;
   color: #ffffff;
 }
 
-.c27:hover {
+.c28:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c27:active {
+.c28:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c27[aria-disabled='true'] {
+.c28[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
@@ -147,8 +153,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 
 .c9 {
   text-decoration: none;
-  padding-block: 0.7rem;
-  padding-inline: 0.7rem;
+  padding-block: 1.1rem;
+  padding-inline: 1.1rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
@@ -171,8 +177,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   cursor: default;
 }
 
-.c18 {
-  display: flex;
+.c19 {
+  display: block;
 }
 
 .c10 {
@@ -249,46 +255,77 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   display: block!important;
 }
 
-.c22 {
+.c23 {
   border-top: solid 1px #eaeaef;
   flex: 1;
 }
 
-.c20 {
+.c21 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c20 svg {
+.c21 svg {
   height: 1.1rem;
   width: 1.1rem;
 }
 
-.c20 svg path {
+.c21 svg path {
   fill: #666687;
 }
 
-.c21 {
+.c22 {
   display: flex;
   background: none;
   border: none;
 }
 
-.c21 svg {
+.c22 svg {
   width: 0.9rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .c25 {
-    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+@media (min-width: 768px) {
+  .c6 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c6 {
+    line-height: 1.43;
+  }
+}
+
+@media (min-width: 768px) {
+  .c26 {
+    height: 3.2rem;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c27 {
+  .c26 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 768px) {
+  .c28 {
+    height: 3.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c28 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 768px) {
+  .c9 {
+    padding-block: 0.7rem;
+    padding-inline: 0.7rem;
   }
 }
 
@@ -462,13 +499,17 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                   <div
                     class="c16"
                   >
-                    <label
-                      class="c17 c18"
-                      for="folder-destination"
-                      id="folder-destination-label"
+                    <div
+                      class="c17"
                     >
-                      Location
-                    </label>
+                      <label
+                        class="c18 c19"
+                        for="folder-destination"
+                        id="folder-destination-label"
+                      >
+                        Location
+                      </label>
+                    </div>
                     <div
                       class=" css-1iyvlxg-container"
                     >
@@ -514,7 +555,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
                         >
                           <div
                             aria-hidden="true"
-                            class="c19 c20 c21"
+                            class="c20 c21 c22"
                           >
                             <svg
                               fill="currentColor"
@@ -543,27 +584,27 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
           </div>
         </div>
         <footer
-          class="c3 c4 c22"
+          class="c3 c4 c23"
         >
           <button
             aria-disabled="false"
-            class="c23 c24 c25"
+            class="c24 c25 c26"
             name="cancel"
             type="button"
           >
             <span
-              class="c26"
+              class="c27"
             >
               Cancel
             </span>
           </button>
           <button
             aria-disabled="false"
-            class="c23 c24 c27"
+            class="c24 c25 c28"
             type="submit"
           >
             <span
-              class="c26"
+              class="c27"
             >
               Move
             </span>

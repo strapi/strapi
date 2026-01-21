@@ -2,22 +2,22 @@
 
 exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 .c11 {
-  margin-block-end: 24px;
   background: #eaeaef;
+  margin-block-end: 24px;
 }
 
 .c17 {
+  border-radius: 4px;
   padding-block-start: 16px;
   padding-inline-end: 16px;
   padding-block-end: 16px;
   padding-inline-start: 16px;
-  border-radius: 4px;
 }
 
 .c20 {
-  width: 3.2rem;
-  height: 3.2rem;
   flex-shrink: 0;
+  height: 3.2rem;
+  width: 3.2rem;
 }
 
 .c22 {
@@ -53,23 +53,23 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 
 .c5 {
   font-weight: 600;
-  font-size: 1.8rem;
+  font-size: 2rem;
   line-height: 1.22;
   color: currentcolor;
 }
 
 .c8 {
   font-weight: 600;
+  text-transform: uppercase;
   font-size: 1.1rem;
   line-height: 1.45;
-  text-transform: uppercase;
   color: currentcolor;
   font-weight: 600;
 }
 
 .c23 {
-  font-size: 1.4rem;
-  line-height: 1.43;
+  font-size: 1.6rem;
+  line-height: 1.5;
   color: #32324d;
   font-weight: 600;
 }
@@ -199,6 +199,24 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   cursor: pointer;
   background: #f0f0ff;
   border: 1px solid #d9d8ff;
+}
+
+@media (min-width: 768px) {
+  .c5 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c23 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c23 {
+    line-height: 1.43;
+  }
 }
 
 @media (min-width: 520px) {
