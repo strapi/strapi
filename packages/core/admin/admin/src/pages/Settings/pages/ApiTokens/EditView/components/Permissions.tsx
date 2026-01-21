@@ -15,6 +15,7 @@ export const Permissions = ({ ...props }) => {
   return (
     <Grid.Root gap={0} shadow="filterShadow" hasRadius background="neutral0">
       <Grid.Item
+        xs={12}
         col={7}
         paddingTop={6}
         paddingBottom={6}

@@ -173,7 +173,7 @@ const PopoverImpl = ({ zIndex }: { zIndex?: number }) => {
       ],
     };
 
-    setQuery({ filters: newFilterQuery, page: 1 });
+    setQuery({ filters: newFilterQuery, page: 1 }, 'push', true);
     setOpen(false);
   };
 

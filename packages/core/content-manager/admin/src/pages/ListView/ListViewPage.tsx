@@ -270,7 +270,6 @@ const ListViewPage = () => {
               <>
                 {list.settings.searchable && (
                   <SearchInput
-                    disabled={results.length === 0}
                     label={formatMessage(
                       { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                       { target: contentTypeTitle }
@@ -282,16 +281,20 @@ const ListViewPage = () => {
                     trackedEvent="didSearch"
                   />
                 )}
-                {list.settings.filterable && schema ? (
-                  <Filters disabled={results.length === 0} schema={schema} />
-                ) : null}
+                {list.settings.filterable && schema ? <Filters schema={schema} /> : null}
               </>
             }
           />
           <Layouts.Content>
             <Box background="neutral0" shadow="filterShadow" hasRadius>
               <EmptyStateLayout
-                action={canCreate ? <CreateButton variant="secondary" /> : null}
+                action={
+                  canCreate && (
+                    <Box>
+                      <CreateButton variant="secondary" />
+                    </Box>
+                  )
+                }
                 content={formatMessage({
                   id: 'app.components.EmptyStateLayout.content-document',
                   defaultMessage: 'No content found',
@@ -508,7 +511,7 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
         search: stringify({ plugins: query.plugins }),
       }}
       minWidth="max-content"
-      marginLeft={2}
+      fullWidth
     >
       {formatMessage({
         id: getTranslation('HeaderLayout.button.label-add-entry'),

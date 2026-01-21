@@ -78,7 +78,14 @@ const SubCategory = ({ subCategory }) => {
             const name = `${action.name}.enabled`;
 
             return (
-              <Grid.Item col={6} key={action.name} direction="column" alignItems="stretch">
+              <Grid.Item
+                col={4}
+                xs={12}
+                s={6}
+                key={action.name}
+                direction="column"
+                alignItems="stretch"
+              >
                 <CheckboxWrapper isActive={isActionSelected(action.name)} padding={2} hasRadius>
                   <Checkbox
                     checked={get(modifiedData, name, false)}

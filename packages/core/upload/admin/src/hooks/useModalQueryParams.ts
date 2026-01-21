@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { stringify } from 'qs';
 
 import { useConfig } from './useConfig';
+import { useTracking } from './useTracking';
 
 import type { Query, FilterCondition } from '../../../shared/contracts/files';
 

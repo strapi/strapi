@@ -3,7 +3,9 @@ import * as React from 'react';
 import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
 
 import { HEIGHT_TOP_NAVIGATION, RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
+import { useDeviceType } from '../../hooks/useDeviceType';
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
+import { useIsMobile } from '../../hooks/useMediaQuery';
 
 /* -------------------------------------------------------------------------------------------------
  * BaseHeaderLayout
@@ -23,15 +25,13 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     { navigationAction, primaryAction, secondaryAction, subtitle, title, sticky, width, ...props },
     ref
   ) => {
+    const isMobile = useIsMobile();
     const isSubtitleString = typeof subtitle === 'string';
 
     if (sticky) {
       return (
         <Box
-          display={{
-            initial: 'none',
-            large: 'flex',
-          }}
+          display="flex"
           paddingLeft={6}
           paddingRight={6}
           paddingTop={2}
@@ -84,30 +84,68 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
         background="neutral100"
         data-strapi-header
       >
-        <Flex direction="column" alignItems="initial" gap={2}>
+        <Flex direction="column" alignItems="initial" gap={3}>
           {navigationAction}
-          <Flex justifyContent="space-between" wrap="wrap" gap={4}>
-            <Flex minWidth={0}>
-              <Typography tag="h1" variant="alpha" {...props}>
+          {!isMobile ? (
+            <>
+              <Flex justifyContent="space-between" wrap="wrap" gap={4}>
+                <Flex minWidth={0}>
+                  <Typography
+                    tag="h1"
+                    variant="alpha"
+                    {...props}
+                    style={{
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                      maxWidth: '100%',
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                  {secondaryAction && <Box paddingLeft={4}>{secondaryAction}</Box>}
+                </Flex>
+                <Box paddingLeft={4} marginLeft="auto">
+                  {primaryAction}
+                </Box>
+              </Flex>
+              {isSubtitleString ? (
+                <Typography variant="epsilon" textColor="neutral600" tag="p">
+                  {subtitle}
+                </Typography>
+              ) : (
+                subtitle
+              )}
+            </>
+          ) : (
+            <>
+              <Typography
+                tag="h1"
+                variant="alpha"
+                {...props}
+                style={{
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word',
+                  maxWidth: '100%',
+                }}
+              >
                 {title}
               </Typography>
-              {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
-            </Flex>
-            {primaryAction}
-          </Flex>
+              {isSubtitleString ? (
+                <Typography variant="epsilon" textColor="neutral600" tag="p">
+                  {subtitle}
+                </Typography>
+              ) : (
+                subtitle
+              )}
+              {(primaryAction || secondaryAction) && (
+                <Flex gap={3}>
+                  {secondaryAction}
+                  {primaryAction}
+                </Flex>
+              )}
+            </>
+          )}
         </Flex>
-        {isSubtitleString ? (
-          <Typography
-            variant="epsilon"
-            textColor="neutral600"
-            tag="p"
-            paddingTop={{ initial: 4, large: 0 }}
-          >
-            {subtitle}
-          </Typography>
-        ) : (
-          subtitle
-        )}
       </Box>
     );
   }
@@ -123,6 +161,7 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   const baseHeaderLayoutRef = React.useRef<HTMLDivElement>(null);
   const [headerSize, setHeaderSize] = React.useState<DOMRect | null>(null);
   const [isVisible, setIsVisible] = React.useState(true);
+  const deviceType = useDeviceType();
 
   const containerRef = useElementOnScreen<HTMLDivElement>(setIsVisible, {
     root: null,
@@ -130,9 +169,12 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
     threshold: 0,
   });
 
-  useResizeObserver([containerRef], () => {
-    if (containerRef.current) {
-      const newSize = containerRef.current.getBoundingClientRect();
+  useResizeObserver([containerRef, baseHeaderLayoutRef], () => {
+    const headerContainer = baseHeaderLayoutRef.current ?? containerRef.current;
+
+    if (headerContainer) {
+      const newSize = headerContainer.getBoundingClientRect();
+
       setHeaderSize((prevSize) => {
         // Only update if size actually changed
         if (!prevSize || prevSize.height !== newSize.height || prevSize.width !== newSize.width) {
@@ -144,10 +186,15 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   });
 
   React.useEffect(() => {
-    if (containerRef.current) {
-      setHeaderSize(containerRef.current.getBoundingClientRect());
+    if (baseHeaderLayoutRef.current || containerRef.current) {
+      const headerContainer = baseHeaderLayoutRef.current ?? containerRef.current;
+      setHeaderSize(headerContainer?.getBoundingClientRect() ?? null);
     }
   }, [containerRef]);
+
+  if (deviceType === 'mobile') {
+    return <BaseHeaderLayout {...props} />;
+  }
 
   return (
     <div ref={containerRef}>

@@ -1,6 +1,5 @@
-import * as React from 'react';
-
-import { Box, ScrollArea } from '@strapi/design-system';
+import { Box, FocusTrap, Portal, ScrollArea, Flex, Divider } from '@strapi/design-system';
+import { motion, AnimatePresence } from 'motion/react';
 import { styled } from 'styled-components';
 
 import { HEIGHT_TOP_NAVIGATION } from '../../constants/theme';
@@ -14,53 +13,78 @@ interface NavBurgerMenuProps {
   listLinks: MenuItem[];
   handleClickOnLink: (value: string) => void;
   mobile?: boolean;
+  onClose: () => void;
 }
 
-const NavBurgerMenuWrapper = styled(Box)<{ $isShown: boolean }>`
+const MotionLayer = styled(motion.div)`
   position: fixed;
   top: calc(${HEIGHT_TOP_NAVIGATION} + 1px);
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 3;
-  background-color: ${({ theme }) => theme.colors.neutral0};
-  transform: ${({ $isShown }) => ($isShown ? 'translateY(0)' : 'translateY(-100%)')};
-  transition: transform 0.2s ease-in-out;
 
   ${({ theme }) => theme.breakpoints.large} {
     display: none;
   }
 `;
 
-const NavBurgerMenu = ({ isShown, handleClickOnLink, listLinks }: NavBurgerMenuProps) => (
-  <NavBurgerMenuWrapper $isShown={isShown}>
-    <ScrollArea>
-      <Box
-        tag="ul"
-        paddingLeft={{
-          initial: 4,
-          medium: 6,
-        }}
-        paddingRight={{
-          initial: 4,
-          medium: 6,
-        }}
-        paddingTop={{
-          initial: 1,
-          medium: 3,
-        }}
-        paddingBottom={{
-          initial: 4,
-          medium: 6,
-        }}
-      >
-        <MainNavBurgerMenuLinks listLinks={listLinks} handleClickOnLink={handleClickOnLink} />
-        <Box paddingTop={4} tag="li">
-          <NavUser showDisplayName />
-        </Box>
-      </Box>
-    </ScrollArea>
-  </NavBurgerMenuWrapper>
-);
+const Surface = styled(Box)`
+  height: 100%;
+  background-color: ${({ theme }) => theme.colors.neutral0};
+`;
 
-export { NavBurgerMenu };
+export const NavBurgerMenu = ({
+  isShown,
+  handleClickOnLink,
+  onClose,
+  listLinks,
+}: NavBurgerMenuProps) => {
+  return (
+    <Portal>
+      <AnimatePresence>
+        {isShown && (
+          <FocusTrap onEscape={onClose}>
+            <MotionLayer
+              key="burger"
+              role="dialog"
+              aria-modal="true"
+              initial={{ y: '-100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '-100%' }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              id="burger-menu"
+            >
+              <Surface>
+                <ScrollArea>
+                  <Flex
+                    tag="ul"
+                    direction="column"
+                    alignItems="stretch"
+                    width="100%"
+                    paddingLeft={{ initial: 4, medium: 6 }}
+                    paddingRight={{ initial: 4, medium: 6 }}
+                    paddingTop={{ initial: 4, medium: 3 }}
+                    paddingBottom={{ initial: 4, medium: 6 }}
+                    gap={3}
+                  >
+                    <MainNavBurgerMenuLinks
+                      listLinks={listLinks}
+                      handleClickOnLink={handleClickOnLink}
+                    />
+                    <Box tag="li">
+                      <Divider />
+                    </Box>
+                    <Box paddingLeft={2} paddingRight={2} paddingTop={1} paddingBottom={1} tag="li">
+                      <NavUser showDisplayName />
+                    </Box>
+                  </Flex>
+                </ScrollArea>
+              </Surface>
+            </MotionLayer>
+          </FocusTrap>
+        )}
+      </AnimatePresence>
+    </Portal>
+  );
+};

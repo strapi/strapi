@@ -1,8 +1,8 @@
 import { test } from '@playwright/test';
 
-import { login } from '../../utils/login';
-import { describeOnCondition, navToHeader } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { describeOnCondition, navToHeader } from '../../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 

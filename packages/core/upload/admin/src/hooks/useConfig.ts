@@ -1,9 +1,11 @@
-import { useTracking, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, UseMutationResult, UseQueryResult } from 'react-query';
 
 import { GetConfiguration, UpdateConfiguration } from '../../../shared/contracts/configuration';
 import { pluginId } from '../pluginId';
+
+import { useTracking } from './useTracking';
 
 const endpoint = `/${pluginId}/configuration`;
 const queryKey = [pluginId, 'configuration'];

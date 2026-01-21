@@ -106,4 +106,27 @@ describe('Test type boolean', () => {
       field: false,
     });
   });
+
+  test('Clearing boolean field should set it to null', async () => {
+    const res = await rq.post('/content-manager/collection-types/api::withboolean.withboolean', {
+      body: {
+        field: true,
+      },
+    });
+
+    const updateRes = await rq.put(
+      `/content-manager/collection-types/api::withboolean.withboolean/${res.body.data.documentId}`,
+      {
+        body: {
+          field: null,
+        },
+      }
+    );
+
+    expect(updateRes.statusCode).toBe(200);
+    expect(updateRes.body.data).toMatchObject({
+      documentId: res.body.data.documentId,
+      field: null,
+    });
+  });
 });
