@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
+import { WIDTH_SIDE_NAVIGATION } from '@strapi/admin/strapi-admin';
 import { Portal, Flex, Box, ScrollArea, VisuallyHidden } from '@strapi/design-system';
 import { CaretDown, CaretUp } from '@strapi/icons';
 import { styled } from 'styled-components';
 
-const DrawerContainer = styled(Portal)<{ $isOpen: boolean }>`
+const DrawerContainer = styled(Portal)<{ $isOpen: boolean; $hasSideNav: boolean }>`
   position: fixed;
   left: 0;
   right: 0;
@@ -14,18 +15,26 @@ const DrawerContainer = styled(Portal)<{ $isOpen: boolean }>`
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-end;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    left: ${({ $hasSideNav }) => ($hasSideNav ? WIDTH_SIDE_NAVIGATION : 0)};
+  }
 `;
 
-const DrawerOverlay = styled(Box)<{ $isOpen: boolean }>`
+const DrawerOverlay = styled(Box)<{ $isOpen: boolean; $hasSideNav: boolean }>`
   position: fixed;
-  top: 0;
   left: 0;
+  top: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   transition: opacity 0.2s ease-in-out;
   opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
   pointer-events: ${({ $isOpen }) => ($isOpen ? 'auto' : 'none')};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    left: ${({ $hasSideNav }) => ($hasSideNav ? WIDTH_SIDE_NAVIGATION : 0)};
+  }
 `;
 
 const ToggleButton = styled.button`
@@ -50,17 +59,18 @@ const DrawerContent = styled(Flex)`
 
 const DrawerContentInner = styled(ScrollArea)<{ $isOpen: boolean }>`
   max-height: ${({ $isOpen }) => ($isOpen ? 'calc(100vh - 20rem)' : '0')};
-  opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
   overflow: hidden;
-  transition: all 0.2s ease-in-out;
+  transition: max-height 0.2s ease-in-out;
 `;
 
 const ActionsDrawer = ({
   children,
   headerContent,
+  hasSideNav = false,
 }: {
   children: React.ReactNode;
   headerContent: React.ReactNode;
+  hasSideNav?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -70,8 +80,8 @@ const ActionsDrawer = ({
 
   return (
     <>
-      <DrawerContainer $isOpen={isOpen}>
-        <DrawerOverlay $isOpen={isOpen} />
+      <DrawerContainer $isOpen={isOpen} $hasSideNav={hasSideNav}>
+        <DrawerOverlay $isOpen={isOpen} $hasSideNav={hasSideNav} />
         <DrawerContent background="neutral0">
           <Flex
             paddingTop={3}

@@ -8,7 +8,7 @@ import {
   useQueryParams,
   tours,
   Layouts,
-  useIsMobile,
+  useIsDesktop,
 } from '@strapi/admin/strapi-admin';
 import { Grid, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -48,7 +48,7 @@ const EditViewPage = () => {
   });
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
 
   const doc = useDoc();
   const {
@@ -206,7 +206,7 @@ const EditViewPage = () => {
                 }}
                 gap={4}
               >
-                <Grid.Item col={isMobile ? 12 : 9} xs={12} direction="column" alignItems="stretch">
+                <Grid.Item col={isDesktop ? 9 : 12} xs={12} direction="column" alignItems="stretch">
                   <Tabs.Content value="draft">
                     <tours.contentManager.Fields>
                       <Box />
@@ -217,16 +217,16 @@ const EditViewPage = () => {
                     <FormLayout layout={layout} document={doc} />
                   </Tabs.Content>
                 </Grid.Item>
-                {!isMobile && (
+                {isDesktop && (
                   <Grid.Item col={3} xs={12} direction="column" alignItems="stretch">
                     <Panels />
                   </Grid.Item>
                 )}
               </Grid.Root>
             </Tabs.Root>
-            {isMobile && (
+            {!isDesktop && (
               <>
-                <ActionsDrawer headerContent={<ActionsPanelContent />}>
+                <ActionsDrawer headerContent={<ActionsPanelContent />} hasSideNav>
                   <Panels excludeActionsPanel />
                 </ActionsDrawer>
                 {/* Adding a fixed height to the bottom of the page to prevent 

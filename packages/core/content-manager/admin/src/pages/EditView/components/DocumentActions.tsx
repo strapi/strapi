@@ -9,7 +9,7 @@ import {
   tours,
   useGuidedTour,
   GUIDED_TOUR_REQUIRED_ACTIONS,
-  useIsMobile,
+  useIsDesktop,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -168,7 +168,7 @@ const connectRelationToParent = (
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
   const { formatMessage } = useIntl();
-  const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
   const [primaryAction, secondaryAction, ...restActions] = actions.filter((action) => {
     if (action.position === undefined) {
       return true;
@@ -236,17 +236,12 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
   );
 
   return (
-    <Flex
-      direction={{ initial: 'row', medium: 'column' }}
-      gap={2}
-      alignItems="stretch"
-      width="100%"
-    >
+    <Flex direction={{ initial: 'row', large: 'column' }} gap={2} alignItems="stretch" width="100%">
       <tours.contentManager.Publish>
-        {!isMobile ? <Flex gap={2}>{primaryActionContent}</Flex> : primaryActionContent}
+        {isDesktop ? <Flex gap={2}>{primaryActionContent}</Flex> : primaryActionContent}
       </tours.contentManager.Publish>
       {secondaryAction ? (
-        <Flex flex={1} order={{ initial: -1, medium: 0 }} alignItems="stretch" direction="column">
+        <Flex flex={1} order={{ initial: -1, large: 0 }} alignItems="stretch" direction="column">
           {secondaryAction.label === 'Publish' ? (
             <tours.contentManager.Publish>
               <DocumentActionButton
