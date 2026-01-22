@@ -188,7 +188,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       draftVersion = version;
     }
 
-    const otherVersion = otherDocumentStatuses?.at(0);
+    // Prefer the counterpart from the same locale if a locale is set.
+    // This avoids cross-locale state bleed (e.g. en-GB draft affecting en status).
+    let otherVersion: DocumentVersion | undefined;
+    if (Array.isArray(otherDocumentStatuses) && otherDocumentStatuses.length > 0) {
+      if (version.locale != null) {
+        otherVersion = (otherDocumentStatuses as DocumentVersion[]).find(
+          (v) => v.locale === version.locale
+        );
+        // If a locale is defined but no counterpart exists for that locale,
+        // ignore other locales entirely.
+      } else {
+        // When no locale is defined, fall back to the first counterpart
+        otherVersion = (otherDocumentStatuses as DocumentVersion[]).at(0);
+      }
+    }
+
     if (otherVersion?.publishedAt) {
       publishedVersion = otherVersion;
     } else if (otherVersion) {
