@@ -52,7 +52,7 @@ const BetaStatus = (props: Omit<StatusProps, 'children'>) => {
   return (
     <Status
       size="S"
-      variant="alternative"
+      variant="secondary"
       style={{ textTransform: 'uppercase', display: 'flex' }}
       {...props}
     >

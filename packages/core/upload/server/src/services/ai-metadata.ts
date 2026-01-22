@@ -5,6 +5,18 @@ import { Settings } from '../controllers/validation/admin/settings';
 import { getService } from '../utils';
 import { buildFormDataFromFiles } from '../utils/images';
 
+/**
+ * Supported image types for AI metadata generation
+ * @see https://ai.google.dev/gemini-api/docs/image-understanding
+ */
+const SUPPORTED_IMAGE_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+] as const;
+
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
 
@@ -33,7 +45,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       const imagesWithoutMetadataCountPromise = strapi.db.query('plugin::upload.file').count({
         where: {
           mime: {
-            $startsWith: 'image/',
+            $in: SUPPORTED_IMAGE_TYPES,
           },
           $or: [
             { alternativeText: { $null: true } },
@@ -47,7 +59,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       const totalImagesPromise = strapi.db.query('plugin::upload.file').count({
         where: {
           mime: {
-            $startsWith: 'image/',
+            $in: SUPPORTED_IMAGE_TYPES,
           },
         },
       });
@@ -117,7 +129,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
           where: {
             mime: {
-              $startsWith: 'image/',
+              $in: SUPPORTED_IMAGE_TYPES,
             },
             $or: [
               { alternativeText: { $null: true } },
