@@ -8,6 +8,7 @@ import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
+import { indexByDocumentId } from './utils/document-status';
 
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
@@ -154,11 +155,11 @@ export default {
       documents
     );
 
+    const statusByDocumentId = indexByDocumentId(documentsAvailableStatus);
+
     const setStatus = (document: any) => {
       // Available status of document
-      const availableStatuses = documentsAvailableStatus.filter(
-        (d: any) => d.documentId === document.documentId
-      );
+      const availableStatuses = statusByDocumentId.get(document.documentId) || [];
       // Compute document version status
       document.status = documentMetadata.getStatus(document, availableStatuses);
       return document;
@@ -705,20 +706,23 @@ export default {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
-    const populate = await getService('populate-builder')(model)
-      .populateFromQuery(permissionQuery)
-      .build();
-
     const { locale, status } = await getDocumentLocaleAndStatus(ctx.query, model);
-    const entity = await documentManager.findOne(id, model, { populate, locale, status });
 
-    if (!entity) {
-      return ctx.notFound();
-    }
+    if (permissionChecker.requiresEntity.read()) {
+      // Only load what we need for access checks
+      const entity = await documentManager.findOne(id, model, {
+        locale,
+        status,
+        populate: {},
+      });
 
-    if (permissionChecker.cannot.read(entity)) {
-      return ctx.forbidden();
+      if (!entity) {
+        return ctx.notFound();
+      }
+
+      if (permissionChecker.cannot.read(entity)) {
+        return ctx.forbidden();
+      }
     }
 
     const number = await documentManager.countDraftRelations(id, model, locale);
