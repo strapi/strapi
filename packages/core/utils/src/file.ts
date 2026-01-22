@@ -15,23 +15,63 @@ const bytesToHumanReadable = (bytes: number) => {
 const streamToBuffer = (stream: NodeJS.ReadableStream): Promise<Buffer> =>
   new Promise((resolve, reject) => {
     const chunks: Uint8Array[] = [];
-    stream.on('data', (chunk) => {
+
+    // Cleanup function to remove all listeners and prevent memory leaks
+    const cleanup = () => {
+      stream.removeListener('data', onData);
+      stream.removeListener('end', onEnd);
+      stream.removeListener('error', onError);
+    };
+
+    // Named functions required for removeListener to work
+    const onData = (chunk: Uint8Array) => {
       chunks.push(chunk);
-    });
-    stream.on('end', () => {
+    };
+
+    const onEnd = () => {
+      cleanup();
       resolve(Buffer.concat(chunks));
-    });
-    stream.on('error', reject);
+    };
+
+    const onError = (err: Error) => {
+      cleanup();
+      reject(err);
+    };
+
+    stream.on('data', onData);
+    stream.on('end', onEnd);
+    stream.on('error', onError);
   });
 
 const getStreamSize = (stream: NodeJS.ReadableStream) =>
   new Promise((resolve, reject) => {
     let size = 0;
-    stream.on('data', (chunk) => {
+
+    // Cleanup function to remove all listeners and prevent memory leaks
+    const cleanup = () => {
+      stream.removeListener('data', onData);
+      stream.removeListener('close', onClose);
+      stream.removeListener('error', onError);
+    };
+
+    // Named functions required for removeListener to work
+    const onData = (chunk: Buffer | string) => {
       size += Buffer.byteLength(chunk);
-    });
-    stream.on('close', () => resolve(size));
-    stream.on('error', reject);
+    };
+
+    const onClose = () => {
+      cleanup();
+      resolve(size);
+    };
+
+    const onError = (err: Error) => {
+      cleanup();
+      reject(err);
+    };
+
+    stream.on('data', onData);
+    stream.on('close', onClose);
+    stream.on('error', onError);
     stream.resume();
   });
 

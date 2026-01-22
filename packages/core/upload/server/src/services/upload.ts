@@ -205,16 +205,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       .plugin('upload')
       .service('image-manipulation');
 
-    if (await isImage(currentFile)) {
-      if (await isFaultyImage(currentFile)) {
-        throw new ApplicationError('File is not a valid image');
+    try {
+      if (await isImage(currentFile)) {
+        if (await isFaultyImage(currentFile)) {
+          throw new ApplicationError('File is not a valid image');
+        }
+        if (await isOptimizableImage(currentFile)) {
+          return optimize(currentFile);
+        }
       }
-      if (await isOptimizableImage(currentFile)) {
-        return optimize(currentFile);
-      }
-    }
 
-    return currentFile;
+      return currentFile;
+    } catch (error) {
+      // Cleanup on validation failure
+      if (currentFile.filepath && fs.existsSync(currentFile.filepath)) {
+        await fse.remove(currentFile.filepath).catch((err) => {
+          strapi.log.warn('Failed to cleanup file after validation error:', err);
+        });
+      }
+      throw error;
+    }
   }
 
   async function upload(
@@ -275,42 +285,67 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       height,
     });
 
-    // For performance reasons, all uploads are wrapped in a single Promise.all
-    const uploadThumbnail = async (thumbnailFile: UploadableFile) => {
-      await getService('provider').upload(thumbnailFile);
-      _.set(fileData, 'formats.thumbnail', thumbnailFile);
-    };
+    // Track all generated files for cleanup on error
+    const generatedFiles: UploadableFile[] = [];
 
-    // Generate thumbnail and responsive formats
-    const uploadResponsiveFormat = async (format: { key: string; file: UploadableFile }) => {
-      const { key, file } = format;
-      await getService('provider').upload(file);
-      _.set(fileData, ['formats', key], file);
-    };
+    try {
+      // For performance reasons, all uploads are wrapped in a single Promise.all
+      const uploadThumbnail = async (thumbnailFile: UploadableFile) => {
+        generatedFiles.push(thumbnailFile);
+        await getService('provider').upload(thumbnailFile);
+        _.set(fileData, 'formats.thumbnail', thumbnailFile);
+      };
 
-    const uploadPromises: Promise<void>[] = [];
+      // Generate thumbnail and responsive formats
+      const uploadResponsiveFormat = async (format: { key: string; file: UploadableFile }) => {
+        const { key, file } = format;
+        generatedFiles.push(file);
+        await getService('provider').upload(file);
+        _.set(fileData, ['formats', key], file);
+      };
 
-    // Upload image
-    uploadPromises.push(getService('provider').upload(fileData));
+      const uploadPromises: Promise<void>[] = [];
 
-    // Generate & Upload thumbnail and responsive formats
-    if (await isResizableImage(fileData)) {
-      const thumbnailFile = await generateThumbnail(fileData);
-      if (thumbnailFile) {
-        uploadPromises.push(uploadThumbnail(thumbnailFile));
-      }
+      // Upload image
+      uploadPromises.push(getService('provider').upload(fileData));
 
-      const formats = await generateResponsiveFormats(fileData);
-      if (Array.isArray(formats) && formats.length > 0) {
-        for (const format of formats) {
-          // eslint-disable-next-line no-continue
-          if (!format) continue;
-          uploadPromises.push(uploadResponsiveFormat(format));
+      // Generate & Upload thumbnail and responsive formats
+      if (await isResizableImage(fileData)) {
+        const thumbnailFile = await generateThumbnail(fileData);
+        if (thumbnailFile) {
+          uploadPromises.push(uploadThumbnail(thumbnailFile));
+        }
+
+        const formats = await generateResponsiveFormats(fileData);
+        if (Array.isArray(formats) && formats.length > 0) {
+          for (const format of formats) {
+            // eslint-disable-next-line no-continue
+            if (!format) continue;
+            uploadPromises.push(uploadResponsiveFormat(format));
+          }
         }
       }
+      // Wait for all uploads to finish
+      await Promise.all(uploadPromises);
+    } catch (error) {
+      // Cleanup all generated files on error
+      await cleanupGeneratedFiles(generatedFiles);
+      throw error;
     }
-    // Wait for all uploads to finish
-    await Promise.all(uploadPromises);
+  }
+
+  // Helper function to cleanup generated files
+  async function cleanupGeneratedFiles(files: UploadableFile[]) {
+    for (const file of files) {
+      try {
+        if (file.filepath && fs.existsSync(file.filepath)) {
+          await fse.remove(file.filepath);
+        }
+      } catch (err) {
+        // Log but don't throw - best effort cleanup
+        strapi.log.warn('Failed to cleanup generated file:', err);
+      }
+    }
   }
 
   /**
@@ -323,18 +358,28 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const config = strapi.config.get<Config>('plugin::upload');
     const { isImage } = getService('image-manipulation');
 
-    await getService('provider').checkFileSize(fileData);
+    try {
+      await getService('provider').checkFileSize(fileData);
 
-    if (await isImage(fileData)) {
-      await uploadImage(fileData);
-    } else {
-      await getService('provider').upload(fileData);
+      if (await isImage(fileData)) {
+        await uploadImage(fileData);
+      } else {
+        await getService('provider').upload(fileData);
+      }
+
+      _.set(fileData, 'provider', config.provider);
+
+      // Persist file(s)
+      return await add(fileData, { user });
+    } catch (error) {
+      // Cleanup temporary file on error
+      if (fileData.filepath && fs.existsSync(fileData.filepath)) {
+        await fse.remove(fileData.filepath).catch((err) => {
+          strapi.log.warn('Failed to cleanup temp file:', err);
+        });
+      }
+      throw error;
     }
-
-    _.set(fileData, 'provider', config.provider);
-
-    // Persist file(s)
-    return add(fileData, { user });
   }
 
   async function updateFileInfo(

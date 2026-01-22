@@ -1,4 +1,5 @@
 import { isFunction } from 'lodash/fp';
+import { Readable } from 'stream';
 import { file as fileUtils } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
@@ -11,23 +12,45 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async upload(file: UploadableFile) {
-    if (isFunction(strapi.plugin('upload').provider.uploadStream)) {
-      file.stream = file.getStream();
-      await strapi.plugin('upload').provider.uploadStream(file);
+    const uploadProvider = strapi.plugin('upload').provider;
 
-      delete file.stream;
+    if (isFunction(uploadProvider.uploadStream)) {
+      const stream = file.getStream();
+      file.stream = stream;
 
-      if ('filepath' in file) {
-        delete file.filepath;
+      try {
+        await uploadProvider.uploadStream(file);
+      } finally {
+        delete file.stream;
+
+        // Explicitly destroy stream to prevent memory leak
+        const streamWithDestroy = stream as unknown as Readable;
+        if (stream && !streamWithDestroy.destroyed) {
+          streamWithDestroy.destroy();
+        }
+
+        if ('filepath' in file) {
+          delete file.filepath;
+        }
       }
     } else {
-      file.buffer = await fileUtils.streamToBuffer(file.getStream());
-      await strapi.plugin('upload').provider.upload(file);
+      const stream = file.getStream();
 
-      delete file.buffer;
+      try {
+        file.buffer = await fileUtils.streamToBuffer(stream);
+        await uploadProvider.upload(file);
+      } finally {
+        delete file.buffer;
 
-      if ('filepath' in file) {
-        delete file.filepath;
+        // Destroy stream even though streamToBuffer consumes it
+        const streamWithDestroy = stream as unknown as Readable;
+        if (stream && !streamWithDestroy.destroyed) {
+          streamWithDestroy.destroy();
+        }
+
+        if ('filepath' in file) {
+          delete file.filepath;
+        }
       }
     }
   },
