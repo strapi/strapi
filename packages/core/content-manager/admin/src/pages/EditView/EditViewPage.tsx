@@ -50,6 +50,8 @@ const EditViewPage = () => {
   const { toggleNotification } = useNotification();
   const isDesktop = useIsDesktop();
 
+  const [hasPanelsContent, setHasPanelsContent] = React.useState(false);
+
   const doc = useDoc();
   const {
     document,
@@ -226,8 +228,12 @@ const EditViewPage = () => {
             </Tabs.Root>
             {!isDesktop && (
               <>
-                <ActionsDrawer headerContent={<ActionsPanelContent />} hasSideNav>
-                  <Panels excludeActionsPanel />
+                <ActionsDrawer
+                  headerContent={<ActionsPanelContent />}
+                  hasContent={hasPanelsContent}
+                  hasSideNav
+                >
+                  <Panels excludeActionsPanel onContentChange={setHasPanelsContent} />
                 </ActionsDrawer>
                 {/* Adding a fixed height to the bottom of the page to prevent 
                 the actions drawer from covering the content
