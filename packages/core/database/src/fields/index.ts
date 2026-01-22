@@ -14,7 +14,8 @@ import BooleanField from './boolean';
 import type { Attribute } from '../types';
 
 const typeToFieldMap: Record<string, typeof Field> = {
-  increments: Field,
+  increments: BigIntegerField,
+  bigincrements: BigIntegerField,
   password: StringField,
   email: StringField,
   string: StringField,
@@ -39,7 +40,7 @@ export const createField = (attribute: Attribute): Field => {
   const { type } = attribute;
 
   if (_.has(type, typeToFieldMap)) {
-    return new typeToFieldMap[type]({});
+    return new typeToFieldMap[type](attribute);
   }
 
   throw new Error(`Undefined field for type ${type}`);

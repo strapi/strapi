@@ -22,6 +22,15 @@ const createCLI = async (argv: string[], command = new Command()) => {
   const hasDebug = argv.includes('--debug');
   const hasSilent = argv.includes('--silent');
 
+  // Enable debug package when --debug flag is passed
+  if (hasDebug) {
+    // Enable migration debug logs and all database-related debug logs
+    const existingDebug = process.env.DEBUG;
+    const migrationDebug = 'strapi::database::migration::*,strapi::database::*';
+    process.env.DEBUG =
+      existingDebug !== undefined ? `${existingDebug},${migrationDebug}` : migrationDebug;
+  }
+
   const logger = createLogger({ debug: hasDebug, silent: hasSilent, timestamp: false });
 
   const tsconfig = loadTsConfig({

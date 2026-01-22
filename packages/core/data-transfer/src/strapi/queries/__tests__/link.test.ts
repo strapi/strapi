@@ -3,7 +3,7 @@ import { filterValidRelationalAttributes } from '../link';
 describe('link queries realtion fitlers', () => {
   test('filter out non relation attributes', () => {
     const attributes = {
-      id: { type: 'increments', columnName: 'id' },
+      id: { type: 'bigincrements', columnName: 'id' },
       name: { type: 'string', required: true, columnName: 'name' },
       test: { type: 'string', columnName: 'test' },
       categories: {
@@ -32,7 +32,7 @@ describe('link queries realtion fitlers', () => {
 
   test('filter out cmps tables from attributes', () => {
     const attributes = {
-      id: { type: 'increments', columnName: 'id' },
+      id: { type: 'bigincrements', columnName: 'id' },
       label: { type: 'string', default: 'toto', columnName: 'label' },
       start_date: { type: 'date', required: true, columnName: 'start_date' },
       end_date: { type: 'date', required: true, columnName: 'end_date' },

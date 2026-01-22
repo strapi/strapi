@@ -55,7 +55,7 @@ const createTable = (meta: Meta): Table => {
 
         table.columns.push(
           createColumn(idColumnName, {
-            type: 'integer',
+            type: 'biginteger',
             column: {
               unsigned: true,
             },
@@ -75,7 +75,7 @@ const createTable = (meta: Meta): Table => {
           name: columnNameFull,
           referencedColumn,
           referencedTable,
-          columnType = 'integer',
+          columnType = 'biginteger',
         } = attribute.joinColumn;
 
         const columnName = identifiers.getName(columnNameFull);
@@ -142,7 +142,14 @@ const getColumnType = (attribute: Attribute) => {
     case 'increments': {
       return {
         type: 'increments',
-        args: [{ primary: true, primaryKey: true }],
+        args: [{ primaryKey: true }],
+        notNullable: true,
+      };
+    }
+    case 'bigincrements': {
+      return {
+        type: 'bigIncrements',
+        args: [{ primaryKey: true }],
         notNullable: true,
       };
     }
