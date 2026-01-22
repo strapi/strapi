@@ -1,6 +1,7 @@
 import admin from './admin';
 import coreStore from './coreStore';
 import cron from './cron';
+import mcp from './mcp';
 import registries from './registries';
 import sessionManager from './session-manager';
 import telemetry from './telemetry';
@@ -16,4 +17,5 @@ export const providers: Provider[] = [
   webhooks,
   telemetry,
   cron,
+  mcp,
 ];

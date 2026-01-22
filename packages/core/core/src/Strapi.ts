@@ -237,6 +237,39 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('validators');
   }
 
+  /**
+   * Model Context Protocol (MCP) service for AI assistant integration.
+   *
+   * The MCP service enables AI assistants to interact with Strapi through tools, prompts, and resources.
+   * It provides a standardized interface for AI applications to query and manipulate Strapi data and operations.
+   *
+   * **Availability**: Only available in development mode when:
+   * - `server.mcp.enabled` is set to `true` in configuration
+   * - running in development mode (`strapi.config.get('autoReload') === true`)
+   *
+   * @example
+   * ```typescript
+   * // Check if MCP is enabled
+   * strapi.mcp.registerTool({
+   *   name: 'my-custom-tool',
+   *   title: 'My Custom Tool',
+   *   description: 'Performs a custom operation',
+   *   inputSchema: z.object({ input: z.string() }),
+   *   outputSchema: z.object({ result: z.string() }),
+   *   devModeOnly: true,
+   *   createHandler: (strapi) => async ({ input }) => {
+   *     // Tool implementation
+   *     return { result: input };
+   *   },
+   * });
+   * ```
+   *
+   * @see {@link Modules.MCP.McpService} for the complete service interface and available methods.
+   */
+  get mcp(): Modules.MCP.McpService {
+    return this.get('mcp');
+  }
+
   async start() {
     try {
       if (!this.isLoaded) {
