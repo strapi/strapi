@@ -197,7 +197,7 @@ The types are based on our GitHub label, here are a subset:
 - `doc` – When writing documentation.
 - `feat` – When working on a feature.
 
-You can see the complete list [here](https://github.com/strapi/strapi/blob/1cb6f95889ccaad897759cfa14d2804adeaeb7ee/.commitlintrc.ts#L11).
+You can see the complete list [here](https://github.com/strapi/strapi/blob/develop/.commitlintrc.ts#L11).
 
 #### Subject
 
