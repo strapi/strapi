@@ -3,6 +3,7 @@ import * as React from 'react';
 import { WIDTH_SIDE_NAVIGATION } from '@strapi/admin/strapi-admin';
 import { Portal, Flex, Box, ScrollArea, VisuallyHidden } from '@strapi/design-system';
 import { CaretDown, CaretUp } from '@strapi/icons';
+import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 const DrawerContainer = styled(Portal)<{ $isOpen: boolean; $hasSideNav: boolean }>`
@@ -75,7 +76,7 @@ const ActionsDrawer = ({
   hasContent?: boolean;
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-
+  const { formatMessage } = useIntl();
   const toggleOpen = () => {
     setIsOpen((prev: boolean) => !prev);
   };
@@ -89,6 +90,12 @@ const ActionsDrawer = ({
   return (
     <>
       <DrawerContainer $isOpen={isOpen} $hasSideNav={hasSideNav}>
+        <DrawerOverlay
+          $isOpen={isOpen}
+          $hasSideNav={hasSideNav}
+          onClick={() => setIsOpen(false)}
+          data-testid="actions-drawer-overlay"
+        />
         <DrawerContent background="neutral0">
           <Flex
             paddingTop={3}
@@ -106,7 +113,17 @@ const ActionsDrawer = ({
             {hasContent && children && (
               <ToggleButton onClick={toggleOpen}>
                 {isOpen ? <CaretUp fill="neutral600" /> : <CaretDown fill="neutral600" />}
-                <VisuallyHidden>{isOpen ? 'Close' : 'Open'}</VisuallyHidden>
+                <VisuallyHidden>
+                  {isOpen
+                    ? formatMessage({
+                        id: 'content-manager.actions-drawer.close',
+                        defaultMessage: 'Close more actions',
+                      })
+                    : formatMessage({
+                        id: 'content-manager.actions-drawer.open',
+                        defaultMessage: 'Open more actions',
+                      })}
+                </VisuallyHidden>
               </ToggleButton>
             )}
           </Flex>
@@ -118,7 +135,6 @@ const ActionsDrawer = ({
             </DrawerContentInner>
           )}
         </DrawerContent>
-        <DrawerOverlay $isOpen={isOpen} $hasSideNav={hasSideNav} onClick={() => setIsOpen(false)} />
       </DrawerContainer>
     </>
   );

@@ -318,5 +318,7 @@
   "widget.last-edited.single-type": "Single-Type",
   "widget.last-edited.no-data": "No edited entries",
   "widget.last-published.title": "Last published entries",
-  "widget.last-published.no-data": "No published entries"
+  "widget.last-published.no-data": "No published entries",
+  "actions-drawer.open": "Open more actions",
+  "actions-drawer.close": "Close more actions"
 }
