@@ -109,6 +109,7 @@ export const EditPage = () => {
                     type="submit"
                     loading={mutation.isLoading}
                     startIcon={<Check />}
+                    fullWidth
                   >
                     {formatMessage({
                       id: 'global.save',

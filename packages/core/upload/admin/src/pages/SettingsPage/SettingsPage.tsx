@@ -297,6 +297,7 @@ export const SettingsPage = () => {
               type="submit"
               startIcon={<Check />}
               size="S"
+              fullWidth
             >
               {formatMessage({
                 id: 'global.save',
