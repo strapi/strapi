@@ -1,0 +1,209 @@
+import type { Core, Modules } from '@strapi/types';
+import { createDeleteHandler } from './handlers/handleDelete';
+import { createGetHandler } from './handlers/handleGet';
+import { createPostHandler } from './handlers/handlePost';
+import type { McpHandlerDependencies } from './handlers/types';
+import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
+import { McpConfiguration } from './internal/McpConfiguration';
+import { createMcpServerWithRegistries } from './internal/McpServerFactory';
+import { McpSessionManager } from './internal/McpSessionManager';
+import { logToolDefinition } from './tools/log';
+import { createManagedInterval } from './utils/createManagedInterval';
+
+/**
+ * Creates MCP route definitions for registration with Strapi server
+ * Extracted for testability
+ * @internal
+ */
+export const createMcpRoutes = (
+  config: McpConfiguration,
+  handlers: {
+    handlePost: Core.MiddlewareHandler;
+    handleGet: Core.MiddlewareHandler;
+    handleDelete: Core.MiddlewareHandler;
+  }
+): Omit<Core.Route, 'info'>[] => {
+  return [
+    {
+      method: 'POST',
+      path: config.path,
+      handler: handlers.handlePost,
+      config: {
+        auth: false,
+      },
+    },
+    {
+      method: 'GET',
+      path: config.path,
+      handler: handlers.handleGet,
+      config: {
+        auth: false,
+      },
+    },
+    {
+      method: 'DELETE',
+      path: config.path,
+      handler: handlers.handleDelete,
+      config: {
+        auth: false,
+      },
+    },
+  ];
+};
+
+/**
+ * Creates a MCP service instance for Strapi Core
+ */
+export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService => {
+  // Initialize configuration
+  const config = new McpConfiguration(strapi);
+
+  // Initialize session manager
+  const sessionManager = new McpSessionManager(config, strapi);
+
+  // Status tracking
+  let serverStatus: Modules.MCP.McpServiceStatus = 'idle';
+
+  // Cleanup interval management
+  const cleanupSessionsInterval = createManagedInterval();
+
+  // Definition registries
+  const toolDefinitions = new McpCapabilityDefinitionRegistry<
+    'tool',
+    Modules.MCP.McpToolDefinition
+  >('tool');
+
+  const promptDefinitions = new McpCapabilityDefinitionRegistry<
+    'prompt',
+    Modules.MCP.McpPromptDefinition
+  >('prompt');
+
+  const resourceDefinitions = new McpCapabilityDefinitionRegistry<
+    'resource',
+    Modules.MCP.McpResourceDefinition
+  >('resource');
+
+  // Prepare handler dependencies
+  const handlerDependencies: McpHandlerDependencies = {
+    strapi,
+    sessionManager,
+    config,
+    createServerWithRegistries: createMcpServerWithRegistries,
+    capabilityDefinitions: {
+      tools: toolDefinitions,
+      prompts: promptDefinitions,
+      resources: resourceDefinitions,
+    },
+  };
+
+  // Create HTTP handlers
+  const handlePost = createPostHandler(handlerDependencies);
+  const handleGet = createGetHandler(handlerDependencies);
+  const handleDelete = createDeleteHandler(handlerDependencies);
+
+  const service: Modules.MCP.McpService = {
+    isEnabled() {
+      return config.isEnabled();
+    },
+
+    isRunning() {
+      return serverStatus === 'running';
+    },
+
+    registerTool(tool) {
+      if (serverStatus !== 'idle') {
+        throw new Error(
+          '[MCP] Tools must be registered before MCP server starts. Register during plugin register().'
+        );
+      }
+      const { inputSchema, ...rest } = tool;
+      toolDefinitions.define({
+        ...rest,
+        inputSchema,
+      });
+    },
+
+    registerPrompt(prompt) {
+      if (serverStatus !== 'idle') {
+        throw new Error(
+          '[MCP] Prompts must be registered before MCP server starts. Register during plugin register().'
+        );
+      }
+      const { argsSchema, ...rest } = prompt;
+      promptDefinitions.define({
+        ...rest,
+        argsSchema,
+      });
+    },
+
+    registerResource(resource) {
+      if (serverStatus !== 'idle') {
+        throw new Error(
+          '[MCP] Resources must be registered before MCP server starts. Register during plugin register().'
+        );
+      }
+      resourceDefinitions.define(resource);
+    },
+
+    async start() {
+      if (service.isEnabled() === false) {
+        strapi.log.debug('[MCP] Server is disabled');
+        return;
+      }
+      if (serverStatus === 'error') {
+        throw new Error('[MCP] Cannot start server: previous error state');
+      }
+      if (serverStatus !== 'idle') {
+        throw new Error(`[MCP] Server already started or starting (status: ${serverStatus})`);
+      }
+      serverStatus = 'starting';
+
+      const routes = createMcpRoutes(config, { handlePost, handleGet, handleDelete });
+      strapi.server.routes(routes);
+
+      // Set status to 'running' after routes are registered
+      serverStatus = 'running';
+
+      // Start periodic cleanup of idle sessions
+      cleanupSessionsInterval.start(() => {
+        sessionManager.cleanupIdleSessions();
+      }, config.cleanupIntervalMs);
+
+      const baseUrl = strapi.config.get('server.url', 'http://localhost:1337');
+      strapi.log.info(`[MCP] Server available at ${baseUrl}${config.path}`);
+    },
+
+    async stop() {
+      serverStatus = 'stopping';
+
+      try {
+        const { erroredSessionMessages, hasErrors } = await sessionManager.closeAllSessions();
+
+        // Log any errors encountered during session closures
+        if (hasErrors === true) {
+          strapi.log.error(
+            `[MCP] Errors occurred while stopping sessions:\n${erroredSessionMessages.join('\n')}`
+          );
+          serverStatus = 'error';
+        } else {
+          serverStatus = 'idle';
+        }
+      } catch (error) {
+        strapi.log.error('[MCP] Error stopping service', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+        });
+        serverStatus = 'error';
+      } finally {
+        // Clear cleanup interval
+        cleanupSessionsInterval.clear();
+
+        strapi.log.info('[MCP] Service stopped');
+      }
+    },
+  };
+
+  service.registerTool(logToolDefinition);
+
+  return service;
+};
