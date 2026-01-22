@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import * as React from 'react';
 
 import { WIDTH_SIDE_NAVIGATION } from '@strapi/admin/strapi-admin';
 import { Portal, Flex, Box, ScrollArea, VisuallyHidden } from '@strapi/design-system';
@@ -46,7 +46,6 @@ const ToggleButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
 `;
 
 const DrawerContent = styled(Flex)`
@@ -55,6 +54,7 @@ const DrawerContent = styled(Flex)`
   max-height: calc(100vh - 16rem);
   position: relative;
   z-index: 1;
+  pointer-events: auto;
 `;
 
 const DrawerContentInner = styled(ScrollArea)<{ $isOpen: boolean }>`
@@ -67,21 +67,28 @@ const ActionsDrawer = ({
   children,
   headerContent,
   hasSideNav = false,
+  hasContent = true,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   headerContent: React.ReactNode;
   hasSideNav?: boolean;
+  hasContent?: boolean;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const toggleOpen = () => {
-    setIsOpen((prev) => !prev);
+    setIsOpen((prev: boolean) => !prev);
   };
+
+  React.useEffect(() => {
+    if (!hasContent && isOpen) {
+      setIsOpen(false);
+    }
+  }, [hasContent, isOpen]);
 
   return (
     <>
       <DrawerContainer $isOpen={isOpen} $hasSideNav={hasSideNav}>
-        <DrawerOverlay $isOpen={isOpen} $hasSideNav={hasSideNav} />
         <DrawerContent background="neutral0">
           <Flex
             paddingTop={3}
@@ -96,17 +103,22 @@ const ActionsDrawer = ({
             <Flex flex={1} gap={2} alignItems="center">
               {headerContent}
             </Flex>
-            <ToggleButton onClick={toggleOpen}>
-              {isOpen ? <CaretUp fill="neutral600" /> : <CaretDown fill="neutral600" />}
-              <VisuallyHidden>{isOpen ? 'Close' : 'Open'}</VisuallyHidden>
-            </ToggleButton>
+            {hasContent && children && (
+              <ToggleButton onClick={toggleOpen}>
+                {isOpen ? <CaretUp fill="neutral600" /> : <CaretDown fill="neutral600" />}
+                <VisuallyHidden>{isOpen ? 'Close' : 'Open'}</VisuallyHidden>
+              </ToggleButton>
+            )}
           </Flex>
-          <DrawerContentInner $isOpen={isOpen}>
-            <Flex direction="column" alignItems="stretch" justifyContent="flex-start" padding={4}>
-              {children}
-            </Flex>
-          </DrawerContentInner>
+          {children && (
+            <DrawerContentInner $isOpen={isOpen}>
+              <Flex direction="column" alignItems="stretch" justifyContent="flex-start" padding={4}>
+                {children}
+              </Flex>
+            </DrawerContentInner>
+          )}
         </DrawerContent>
+        <DrawerOverlay $isOpen={isOpen} $hasSideNav={hasSideNav} onClick={() => setIsOpen(false)} />
       </DrawerContainer>
     </>
   );

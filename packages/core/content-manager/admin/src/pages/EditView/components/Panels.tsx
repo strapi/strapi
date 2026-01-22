@@ -34,9 +34,10 @@ interface PanelDescription {
 
 interface PanelsProps {
   excludeActionsPanel?: boolean;
+  onContentChange?: (hasContent: boolean) => void;
 }
 
-const Panels = ({ excludeActionsPanel = false }: PanelsProps = {}) => {
+const Panels = ({ excludeActionsPanel = false, onContentChange }: PanelsProps = {}) => {
   const isCloning = useMatch(CLONE_PATH) !== null;
   const [
     {
@@ -47,7 +48,6 @@ const Panels = ({ excludeActionsPanel = false }: PanelsProps = {}) => {
   });
   const { model, id, document, meta, collectionType } = useDoc();
   const plugins = useStrapiApp('Panels', (state) => state.plugins);
-  const isDesktop = useIsDesktop();
   const props = {
     activeTab: status,
     model,
@@ -67,22 +67,37 @@ const Panels = ({ excludeActionsPanel = false }: PanelsProps = {}) => {
 
   return (
     <DescriptionComponentRenderer props={props} descriptions={filteredPanels}>
-      {(panels) => {
-        if (panels.length === 0) {
-          return null;
-        }
-
-        return (
-          <Flex direction="column" alignItems="stretch" gap={isDesktop ? 2 : 4}>
-            {panels.map(({ content, id, ...description }) => (
-              <Panel key={id} {...description}>
-                {content}
-              </Panel>
-            ))}
-          </Flex>
-        );
-      }}
+      {(panels) => <PanelsItems panels={panels} onHasContentChange={onContentChange} />}
     </DescriptionComponentRenderer>
+  );
+};
+
+const PanelsItems = ({
+  panels,
+  onHasContentChange,
+}: {
+  panels: (PanelDescription & { id: string })[];
+  onHasContentChange?: (hasContent: boolean) => void;
+}) => {
+  const isDesktop = useIsDesktop();
+  const hasContent = panels.length > 0;
+
+  React.useEffect(() => {
+    onHasContentChange?.(hasContent);
+  }, [hasContent, onHasContentChange]);
+
+  if (!hasContent) {
+    return null;
+  }
+
+  return (
+    <Flex direction="column" alignItems="stretch" gap={isDesktop ? 2 : 4}>
+      {panels.map(({ content, id, ...description }) => (
+        <Panel key={id} {...description}>
+          {content}
+        </Panel>
+      ))}
+    </Flex>
   );
 };
 
