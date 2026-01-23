@@ -9,6 +9,10 @@ import { createMcpServerWithRegistries } from './internal/McpServerFactory';
 import { McpSessionManager } from './internal/McpSessionManager';
 import { createAppTokenStrategy } from './strategies/app-token';
 import { logToolDefinition } from './tools/log';
+import { getProjectSettingsToolDefinition } from './tools/get-project-settings';
+import { listContentTypesToolDefinition } from './tools/list-content-types';
+import { getContentTypeSchemaToolDefinition } from './tools/get-content-type-schema';
+import { generateContentTypeTools } from './tools/content-type-tools';
 import { createManagedInterval } from './utils/createManagedInterval';
 
 /**
@@ -255,6 +259,21 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
   };
 
   service.registerTool(logToolDefinition);
+
+  service.registerTool(getProjectSettingsToolDefinition);
+
+  service.registerTool(listContentTypesToolDefinition);
+
+  service.registerTool(getContentTypeSchemaToolDefinition);
+
+  // Generate and register content type tools
+  const contentTypeTools = generateContentTypeTools({ strapi });
+  contentTypeTools.forEach((tool) => {
+    service.registerTool(
+      // @ts-expect-error - tool variance conflict
+      tool
+    );
+  });
 
   return service;
 };

@@ -6,6 +6,7 @@ import type {
   ContentBlock,
   GetPromptResult,
   ReadResourceResult,
+  ToolAnnotations,
   // eslint-disable-next-line import/extensions
 } from '@modelcontextprotocol/sdk/types.js';
 // eslint-disable-next-line import/extensions
@@ -90,6 +91,11 @@ export type McpToolDefinition<
   description: Description;
   inputSchema: InputSchema;
   outputSchema: OutputSchema;
+  /**
+   * Optional annotations providing hints about tool behavior.
+   * These are hints, not guarantees - clients should not make security decisions based on them.
+   */
+  annotations?: ToolAnnotations;
   createHandler: (strapi: Core.Strapi) => McpToolCallback<InputSchema, OutputSchema>;
 } & McpCapabilityDefinition<Name>;
 
@@ -173,6 +179,7 @@ export interface McpService {
       description: Description;
       inputSchema?: InputSchema;
       outputSchema: OutputSchema;
+      annotations?: ToolAnnotations;
       createHandler: (strapi: Core.Strapi) => McpToolCallback<InputSchema, OutputSchema>;
     } & XOR<{ devModeOnly: true }, { auth: { actions: string[]; subject?: string } }>
   ): void;
