@@ -49,13 +49,13 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       definitionRegistry.define({
         name: 'tool-2',
         title: 'Tool 2',
         description: 'Second tool',
-        devModeOnly: true,
+        auth: { actions: ['test::action'] },
       });
 
       registry.registerDefinitions();
@@ -71,7 +71,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
 
       registry.registerDefinitions();
@@ -84,7 +84,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'duplicate-tool',
         title: 'Tool',
         description: 'Tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
 
       registry.registerDefinitions();
@@ -104,7 +104,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       definitionRegistry.define({
         name: 'tool-2',
@@ -116,7 +116,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-3',
         title: 'Tool 3',
         description: 'Third tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
     });
 
@@ -127,9 +127,19 @@ describe('McpCapabilityRegistryBase', () => {
 
       expect(list).toHaveLength(3);
       expect(list).toEqual([
-        { name: 'tool-1', status: 'disabled', devModeOnly: false },
+        {
+          name: 'tool-1',
+          status: 'disabled',
+          devModeOnly: false,
+          auth: { actions: ['test::action'] },
+        },
         { name: 'tool-2', status: 'disabled', devModeOnly: true },
-        { name: 'tool-3', status: 'disabled', devModeOnly: false },
+        {
+          name: 'tool-3',
+          status: 'disabled',
+          devModeOnly: false,
+          auth: { actions: ['test::action'] },
+        },
       ]);
     });
 
@@ -142,7 +152,12 @@ describe('McpCapabilityRegistryBase', () => {
       });
 
       expect(list).toHaveLength(1);
-      expect(list[0]).toEqual({ name: 'tool-1', status: 'enabled', devModeOnly: false });
+      expect(list[0]).toEqual({
+        name: 'tool-1',
+        status: 'enabled',
+        devModeOnly: false,
+        auth: { actions: ['test::action'] },
+      });
     });
 
     test('should list capabilities filtered by disabled status', () => {
@@ -165,9 +180,23 @@ describe('McpCapabilityRegistryBase', () => {
       });
 
       expect(list).toHaveLength(3);
-      expect(list[0]).toEqual({ name: 'tool-1', status: 'defined', devModeOnly: false });
-      expect(list[1]).toEqual({ name: 'tool-2', status: 'defined', devModeOnly: true });
-      expect(list[2]).toEqual({ name: 'tool-3', status: 'defined', devModeOnly: false });
+      expect(list[0]).toEqual({
+        name: 'tool-1',
+        status: 'defined',
+        devModeOnly: false,
+        auth: { actions: ['test::action'] },
+      });
+      expect(list[1]).toEqual({
+        name: 'tool-2',
+        status: 'defined',
+        devModeOnly: true,
+      });
+      expect(list[2]).toEqual({
+        name: 'tool-3',
+        status: 'defined',
+        devModeOnly: false,
+        auth: { actions: ['test::action'] },
+      });
     });
 
     test('should list capabilities filtered by multiple statuses', () => {
@@ -208,7 +237,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
     });
 
@@ -241,7 +270,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       registry.registerDefinitions();
     });
@@ -272,7 +301,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       definitionRegistry.define({
         name: 'tool-2',
@@ -307,7 +336,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       registry.registerDefinitions();
     });
@@ -343,7 +372,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       definitionRegistry.define({
         name: 'tool-2',
@@ -382,7 +411,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       registry.registerDefinitions();
     });
@@ -424,7 +453,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       definitionRegistry.define({
         name: 'tool-2',
@@ -478,7 +507,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       registry.registerDefinitions();
 
@@ -497,7 +526,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       definitionRegistry.define({
         name: 'tool-2',
@@ -519,7 +548,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       definitionRegistry.define({
         name: 'tool-2',
@@ -543,7 +572,7 @@ describe('McpCapabilityRegistryBase', () => {
         name: 'tool-1',
         title: 'Tool 1',
         description: 'First tool',
-        devModeOnly: false,
+        auth: { actions: ['test::action'] },
       });
       definitionRegistry.define({
         name: 'tool-2',

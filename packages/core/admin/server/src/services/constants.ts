@@ -15,6 +15,10 @@ const constants = {
     FULL_ACCESS: 'full-access',
     CUSTOM: 'custom',
   },
+  APP_TOKEN_TYPE: {
+    INHERIT: 'inherit' as const,
+    CUSTOM: 'custom' as const,
+  },
   // The front-end only displays these values
   API_TOKEN_LIFESPANS: {
     UNLIMITED: null,

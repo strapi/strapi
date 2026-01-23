@@ -187,3 +187,15 @@ export type Replace<
   TObject extends object,
   TNew extends Partial<{ [key in keyof TObject]: unknown }>,
 > = Omit<TObject, keyof TNew> & TNew;
+
+/**
+ * Utility type that creates a new type by excluding properties from the left type ({@link TLeft}) that exist in the right type ({@link TRight}).
+ */
+export type Without<TLeft, TRight> = { [key in Exclude<keyof TLeft, keyof TRight>]?: never };
+
+/**
+ * Utility type that creates a new type that is mutually exclusive between two given types ({@link TLeft} and {@link TRight}).
+ */
+export type XOR<TLeft, TRight> = TLeft | TRight extends object
+  ? (Without<TLeft, TRight> & TRight) | (Without<TRight, TLeft> & TLeft)
+  : TLeft | TRight;

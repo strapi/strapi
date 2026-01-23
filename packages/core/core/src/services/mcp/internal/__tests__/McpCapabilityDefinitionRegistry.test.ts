@@ -21,6 +21,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
     const definition: Modules.MCP.McpCapabilityDefinition = {
       name: 'my-capability',
       devModeOnly: false,
+      auth: { actions: ['test::action'] },
     };
 
     registry.define(definition);
@@ -44,6 +45,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
     const definitionB: Modules.MCP.McpCapabilityDefinition = {
       name: 'duplicate',
       devModeOnly: false,
+      auth: { actions: ['test::action'] },
     };
 
     registry.define(definitionA);
@@ -65,6 +67,7 @@ describe('McpCapabilityDefinitionRegistry', () => {
     const definitionA: Modules.MCP.McpCapabilityDefinition = {
       name: 'a',
       devModeOnly: false,
+      auth: { actions: ['test::action'] },
     };
     const definitionB: Modules.MCP.McpCapabilityDefinition = {
       name: 'b',

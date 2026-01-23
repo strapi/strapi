@@ -8,6 +8,7 @@ import * as permission from '../services/permission';
 import * as contentType from '../services/content-type';
 import * as token from '../services/token';
 import * as apiToken from '../services/api-token';
+import * as appToken from '../services/app-token';
 import * as projectSettings from '../services/project-settings';
 import * as transfer from '../services/transfer';
 import { homepageService } from '../services/homepage';
@@ -22,6 +23,7 @@ type S = {
   auth: typeof auth;
   metrics: typeof metrics;
   'api-token': typeof apiToken;
+  'app-token': typeof appToken;
   'project-settings': typeof projectSettings;
   transfer: typeof transfer;
   encryption: typeof encryption;

@@ -92,6 +92,14 @@ export default {
       required: false,
       searchable: false,
     },
+    appTokens: {
+      configurable: false,
+      private: true,
+      type: 'relation',
+      relation: 'oneToMany',
+      mappedBy: 'user',
+      target: 'admin::app-token',
+    },
   },
   config: {
     attributes: {

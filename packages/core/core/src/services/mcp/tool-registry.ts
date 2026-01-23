@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/extensions
 import type { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Modules, Utils } from '@strapi/types';
 import * as z from 'zod';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import {
@@ -14,15 +14,16 @@ export const makeMcpToolDefinition = <
   Description extends string,
   OutputSchema extends z.ZodObject<z.ZodRawShape>,
   InputSchema extends z.ZodObject<z.ZodRawShape> | undefined = undefined,
->(tool: {
-  name: Name;
-  title: Title;
-  description: Description;
-  inputSchema?: InputSchema;
-  outputSchema: OutputSchema;
-  devModeOnly: boolean;
-  createHandler: (strapi: Core.Strapi) => Modules.MCP.McpToolCallback<InputSchema, OutputSchema>;
-}): Modules.MCP.McpToolDefinition<Name, InputSchema, OutputSchema, Title, Description> =>
+>(
+  tool: {
+    name: Name;
+    title: Title;
+    description: Description;
+    inputSchema?: InputSchema;
+    outputSchema: OutputSchema;
+    createHandler: (strapi: Core.Strapi) => Modules.MCP.McpToolCallback<InputSchema, OutputSchema>;
+  } & Utils.XOR<{ devModeOnly: true }, { auth: { actions: string[]; subject?: string } }>
+): Modules.MCP.McpToolDefinition<Name, InputSchema, OutputSchema, Title, Description> =>
   tool as Modules.MCP.McpToolDefinition<Name, InputSchema, OutputSchema, Title, Description>;
 
 export class McpToolRegistry

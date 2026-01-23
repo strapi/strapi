@@ -18,6 +18,9 @@ module.exports = ({ env }) => ({
   apiToken: {
     salt: env('API_TOKEN_SALT', 'example-salt'),
   },
+  appToken: {
+    salt: env('APP_TOKEN_SALT', 'example-salt'),
+  },
   auditLogs: {
     enabled: env.bool('AUDIT_LOGS_ENABLED', true),
   },
