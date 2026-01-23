@@ -19,18 +19,23 @@ export class McpSession {
 
   lastActivity: number;
 
+  tokenId: string | null;
+
   constructor(params: {
     server: McpServer;
     transport: StreamableHTTPServerTransport;
     toolRegistry: McpToolRegistry;
     promptRegistry: McpPromptRegistry;
     resourceRegistry: McpResourceRegistry;
+    tokenId: string | null;
   }) {
     this.server = params.server;
     this.transport = params.transport;
     this.toolRegistry = params.toolRegistry;
     this.promptRegistry = params.promptRegistry;
     this.resourceRegistry = params.resourceRegistry;
+    this.tokenId = params.tokenId;
+
     this.lastActivity = Date.now();
   }
 

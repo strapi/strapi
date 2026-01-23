@@ -185,10 +185,29 @@ describe('MCP Service Integration', () => {
           title: 'Test Tool',
           description: 'Test tool',
           outputSchema: {} as any,
-          devModeOnly: false,
+          devModeOnly: true,
           createHandler: jest.fn(),
         });
       }).not.toThrow();
+    });
+
+    test('should throw when registering a non-devModeOnly capability without auth', () => {
+      const service = createMcpService(mockStrapi as Core.Strapi);
+
+      expect(() => {
+        service.registerTool(
+          // @ts-expect-error - testing invalid tool registration
+          {
+            name: 'invalid-tool',
+            title: 'Invalid Tool',
+            description: 'Missing auth and not dev-only',
+            outputSchema: {} as any,
+            createHandler: jest.fn(),
+          }
+        );
+      }).toThrow(
+        '[MCP] tool "invalid-tool" must declare either devModeOnly === true or an auth requirement'
+      );
     });
 
     test('should throw error when registering tools after start', async () => {
@@ -202,7 +221,7 @@ describe('MCP Service Integration', () => {
           title: 'Test Tool',
           description: 'Test tool',
           outputSchema: {} as any,
-          devModeOnly: false,
+          devModeOnly: true,
           createHandler: jest.fn(),
         });
       }).toThrow('[MCP] Tools must be registered before MCP server starts');

@@ -5,6 +5,7 @@ import users from './users';
 import roles from './roles';
 import webhooks from './webhooks';
 import apiTokens from './api-tokens';
+import appTokens from './app-tokens';
 import contentApi from './content-api';
 import transfer from './transfer';
 import homepage from './homepage';
@@ -20,6 +21,7 @@ const routes = {
       ...roles,
       ...webhooks,
       ...apiTokens,
+      ...appTokens,
       ...contentApi,
       ...transfer,
       ...homepage,

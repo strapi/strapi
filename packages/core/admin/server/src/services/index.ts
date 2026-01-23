@@ -12,6 +12,7 @@ import * as constants from './constants';
 import * as condition from './condition';
 import * as action from './action';
 import * as apiToken from './api-token';
+import * as appToken from './app-token';
 import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
 import { homepageService } from './homepage';
@@ -30,6 +31,7 @@ export default {
   condition,
   action,
   'api-token': apiToken,
+  'app-token': appToken,
   transfer,
   'project-settings': projectSettings,
   encryption,

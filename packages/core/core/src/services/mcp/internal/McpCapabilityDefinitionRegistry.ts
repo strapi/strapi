@@ -13,6 +13,15 @@ export class McpCapabilityDefinitionRegistry<
   }
 
   define(definition: Definition) {
+    if (definition.devModeOnly !== true && definition.auth === undefined) {
+      throw new Error(
+        `[MCP] ${this.capability} "${
+          // @ts-expect-error - name is never
+          definition.name
+        }" must declare either devModeOnly === true or an auth requirement`
+      );
+    }
+
     const existing = this.#definitions.get(definition.name);
     if (existing !== undefined) {
       throw new Error(

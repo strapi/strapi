@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/extensions
 import type { McpServer, RegisteredPrompt } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Modules, Utils } from '@strapi/types';
 import * as z from 'zod';
 import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinitionRegistry';
 import {
@@ -13,14 +13,15 @@ export const makeMcpPromptDefinition = <
   Title extends string,
   Description extends string,
   ArgsSchema extends z.ZodObject<z.ZodRawShape> | undefined = undefined,
->(prompt: {
-  name: Name;
-  title: Title;
-  description: Description;
-  argsSchema?: ArgsSchema;
-  devModeOnly: boolean;
-  createHandler: (strapi: Core.Strapi) => Modules.MCP.McpPromptCallback<ArgsSchema>;
-}): Modules.MCP.McpPromptDefinition<Name, ArgsSchema, Title, Description> =>
+>(
+  prompt: {
+    name: Name;
+    title: Title;
+    description: Description;
+    argsSchema?: ArgsSchema;
+    createHandler: (strapi: Core.Strapi) => Modules.MCP.McpPromptCallback<ArgsSchema>;
+  } & Utils.XOR<{ devModeOnly: true }, { auth: { actions: string[]; subject?: string } }>
+): Modules.MCP.McpPromptDefinition<Name, ArgsSchema, Title, Description> =>
   prompt as Modules.MCP.McpPromptDefinition<Name, ArgsSchema, Title, Description>;
 
 export class McpPromptRegistry

@@ -3,6 +3,7 @@ import User from './User';
 import Role from './Role';
 import apiToken from './api-token';
 import apiTokenPermission from './api-token-permission';
+import appToken from './app-token';
 import transferToken from './transfer-token';
 import transferTokenPermission from './transfer-token-permission';
 import session from './session';
@@ -13,6 +14,7 @@ export default {
   role: { schema: Role },
   'api-token': { schema: apiToken },
   'api-token-permission': { schema: apiTokenPermission },
+  'app-token': { schema: appToken },
   'transfer-token': { schema: transferToken },
   'transfer-token-permission': { schema: transferTokenPermission },
   session: { schema: session },
