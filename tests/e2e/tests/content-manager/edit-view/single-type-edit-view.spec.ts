@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { clickAndWait, findAndClose, navToHeader } from '../../../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -234,10 +234,7 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
       await page.keyboard.press('Escape'); // close the menu since we're not actioning on it atm.
 
-      await page
-        .getByRole('textbox', { name: 'title This value is unique for the selected locale' })
-        .first()
-        .fill('International Shop');
+      await page.getByRole('textbox', { name: 'title' }).first().fill('International Shop');
       await page.getByRole('button', { name: 'Save' }).click();
 
       await findAndClose(page, 'Saved Document');

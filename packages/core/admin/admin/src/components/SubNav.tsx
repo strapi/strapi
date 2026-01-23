@@ -1,19 +1,19 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import {
-  Box,
-  SubNav as DSSubNav,
-  Flex,
-  Typography,
-  IconButton,
   Badge,
+  Box,
+  Flex,
+  IconButton,
   ScrollArea,
+  SubNav as DSSubNav,
+  Typography,
 } from '@strapi/design-system';
 import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
+import { HEIGHT_TOP_NAVIGATION, HEIGHT_TOP_NAVIGATION_MEDIUM } from '../constants/theme';
 
 import { tours } from './GuidedTour/Tours';
 
@@ -98,7 +98,7 @@ const Link = (
   return (
     <StyledLink {...rest} onClick={handleClick}>
       <Box width={'100%'} paddingLeft={3} paddingRight={3} borderRadius={1}>
-        <Flex justifyContent="space-between" width="100%" gap={1}>
+        <Flex justifyContent="space-between" width="100%" gap={{ initial: 2, large: 1 }}>
           <Typography
             tag="div"
             lineHeight="32px"
@@ -118,21 +118,16 @@ const Link = (
 const StyledHeader = styled(Flex)`
   flex: 0 0 ${HEIGHT_TOP_NAVIGATION};
   height: ${HEIGHT_TOP_NAVIGATION};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    flex: 0 0 ${HEIGHT_TOP_NAVIGATION_MEDIUM};
+    height: ${HEIGHT_TOP_NAVIGATION_MEDIUM};
+  }
 `;
 
 const Header = ({ label }: { label: string }) => {
   return (
-    <StyledHeader
-      justifyContent="space-between"
-      paddingLeft={{
-        initial: 4,
-        large: 5,
-      }}
-      paddingRight={{
-        initial: 4,
-        large: 5,
-      }}
-    >
+    <StyledHeader justifyContent="space-between" paddingLeft={5} paddingRight={5}>
       <Typography variant="beta" tag="h2">
         {label}
       </Typography>
@@ -148,8 +143,14 @@ const Sections = ({
   [key: string]: unknown;
 }) => {
   return (
-    <Box paddingTop={4} paddingBottom={4} maxWidth={{ initial: '100%', medium: '23.2rem' }}>
-      <Flex tag="ul" gap="5" direction="column" alignItems="stretch" {...props}>
+    <Box
+      paddingTop={{ initial: 5, large: 4 }}
+      paddingBottom={{ initial: 5, large: 4 }}
+      paddingLeft={{ initial: 3, large: 0 }}
+      paddingRight={{ initial: 3, large: 0 }}
+      maxWidth={{ initial: '100%', medium: '23.2rem' }}
+    >
+      <Flex tag="ul" gap={6} direction="column" alignItems="stretch" {...props}>
         {children.map((child, index) => {
           return <li key={index}>{child}</li>;
         })}
@@ -207,17 +208,17 @@ const Section = ({
     <Flex direction="column" alignItems="stretch" gap={2}>
       <Box
         paddingLeft={{
-          initial: 4,
+          initial: 3,
           large: 5,
         }}
         paddingRight={{
-          initial: 4,
+          initial: 3,
           large: 5,
         }}
       >
         <Flex position="relative" justifyContent="space-between" gap={2}>
           <Flex>
-            <Box paddingRight={1}>
+            <Box>
               <Typography variant="sigma" textColor="neutral600">
                 {label}
               </Typography>
@@ -252,11 +253,11 @@ const Section = ({
         gap="2px"
         alignItems={'stretch'}
         marginLeft={{
-          initial: 1,
+          initial: 0,
           large: 2,
         }}
         marginRight={{
-          initial: 1,
+          initial: 0,
           large: 2,
         }}
       >
@@ -295,7 +296,15 @@ const SubSectionLinkWrapper = styled.li`
 
 const SubSection = ({ label, children }: { label: string; children: React.ReactNode[] }) => {
   const [isOpen, setOpenLinks] = useState(true);
+  const [contentHeight, setContentHeight] = useState(0);
   const listId = useId();
+  const contentRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight);
+    }
+  }, [children]);
 
   const handleClick = () => {
     setOpenLinks((prev) => !prev);
@@ -321,17 +330,16 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
         </SubSectionHeader>
       </Flex>
       <Flex
+        ref={contentRef}
         tag="ul"
         id={listId}
         direction="column"
         gap="2px"
         alignItems={'stretch'}
         style={{
-          maxHeight: isOpen ? '1000px' : 0,
+          maxHeight: isOpen ? `${contentHeight}px` : 0,
           overflow: 'hidden',
-          transition: isOpen
-            ? 'max-height 1s ease-in-out'
-            : 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
+          transition: 'max-height 0.5s cubic-bezier(0, 1, 0, 1)',
         }}
       >
         {children.map((child, index) => {
