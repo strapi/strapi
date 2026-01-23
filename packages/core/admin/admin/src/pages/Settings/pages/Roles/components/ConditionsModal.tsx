@@ -41,6 +41,7 @@ interface ConditionAction extends Pick<ActionRowProps, 'label'> {
 interface ConditionsModalProps extends Pick<ActionRowProps, 'isFormDisabled'> {
   actions?: Array<ConditionAction | HiddenCheckboxAction | VisibleCheckboxAction>;
   headerBreadCrumbs?: string[];
+  isReadOnly?: boolean;
   onClose?: () => void;
 }
 
@@ -48,6 +49,7 @@ const ConditionsModal = ({
   actions = [],
   headerBreadCrumbs = [],
   isFormDisabled,
+  isReadOnly = false,
   onClose,
 }: ConditionsModalProps) => {
   const { formatMessage } = useIntl();
@@ -57,33 +59,61 @@ const ConditionsModal = ({
     return Object.entries(groupBy(availableConditions, 'category'));
   }, [availableConditions]);
 
-  const actionsToDisplay = actions.filter<VisibleCheckboxAction | ConditionAction>(
-    // @ts-expect-error – TODO: fix this type issue
-    ({ isDisplayed, hasSomeActionsSelected, hasAllActionsSelected }) =>
-      isDisplayed && Boolean(hasSomeActionsSelected || hasAllActionsSelected)
+  const actionsToDisplay = React.useMemo(
+    () =>
+      actions.filter<VisibleCheckboxAction | ConditionAction>(
+        // @ts-expect-error – TODO: fix this type issue
+        ({ isDisplayed, hasSomeActionsSelected, hasAllActionsSelected }) =>
+          isDisplayed && Boolean(hasSomeActionsSelected || hasAllActionsSelected)
+      ),
+    [actions]
   );
 
-  const [state, setState] = React.useState(
+  const [state, setState] = React.useState(() =>
     createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
   );
 
-  const handleChange = (name: string, values: ConditionForm) => {
+  // Keep local state in sync with modifiedData for read-only/inherited conditions.
+  // In editable mode, syncing on every modifiedData update would override in-progress user edits.
+  React.useEffect(() => {
+    if (isReadOnly === false) {
+      return;
+    }
+
     setState(
-      produce((draft) => {
-        if (!draft[name]) {
-          draft[name] = {};
-        }
-
-        if (!draft[name].default) {
-          draft[name].default = {};
-        }
-
-        draft[name].default = values;
-      })
+      createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
     );
-  };
+  }, [isReadOnly, actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory]);
 
-  const handleSubmit = () => {
+  const handleChange = React.useCallback(
+    (name: string, values: ConditionForm) => {
+      if (isReadOnly === true) {
+        return;
+      }
+
+      setState(
+        produce((draft) => {
+          if (draft[name] === undefined) {
+            draft[name] = {};
+          }
+
+          if (draft[name].default === undefined) {
+            draft[name].default = {};
+          }
+
+          draft[name].default = values;
+        })
+      );
+    },
+    [isReadOnly]
+  );
+
+  const handleSubmit = React.useCallback(() => {
+    if (isReadOnly === true) {
+      onClose?.();
+      return;
+    }
+
     const conditionsWithoutCategory = Object.entries(state).reduce<Record<string, ConditionForm>>(
       (acc, current) => {
         const [key, value] = current;
@@ -100,16 +130,16 @@ const ConditionsModal = ({
     );
 
     onChangeConditions(conditionsWithoutCategory);
-    onClose && onClose();
-  };
+    onClose?.();
+  }, [isReadOnly, state, onChangeConditions, onClose]);
 
-  const onCloseModal = () => {
+  const onCloseModal = React.useCallback(() => {
     setState(
       createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
     );
 
-    onClose && onClose();
-  };
+    onClose?.();
+  }, [actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory, onClose]);
 
   return (
     <Modal.Content>
@@ -128,6 +158,17 @@ const ConditionsModal = ({
         </Breadcrumbs>
       </Modal.Header>
       <Modal.Body>
+        {isReadOnly && (
+          <Box paddingBottom={4}>
+            <Typography textColor="neutral600">
+              {formatMessage({
+                id: 'Settings.permissions.conditions.inherited-readonly',
+                defaultMessage:
+                  'These conditions are inherited from your permissions and are read-only.',
+              })}
+            </Typography>
+          </Box>
+        )}
         {actionsToDisplay.length === 0 && (
           <Typography>
             {formatMessage({
@@ -146,7 +187,8 @@ const ConditionsModal = ({
                 key={actionId}
                 arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
                 label={label}
-                isFormDisabled={isFormDisabled}
+                isFormDisabled={isFormDisabled || isReadOnly}
+                isReadOnly={isReadOnly}
                 isGrey={index % 2 === 0}
                 name={name}
                 onChange={handleChange}
@@ -157,15 +199,23 @@ const ConditionsModal = ({
         </ul>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="tertiary" onClick={() => onCloseModal()}>
-          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-        </Button>
-        <Button onClick={handleSubmit}>
-          {formatMessage({
-            id: 'Settings.permissions.conditions.apply',
-            defaultMessage: 'Apply',
-          })}
-        </Button>
+        {isReadOnly ? (
+          <Button variant="tertiary" onClick={() => onCloseModal()}>
+            {formatMessage({ id: 'app.components.Button.close', defaultMessage: 'Close' })}
+          </Button>
+        ) : (
+          <>
+            <Button variant="tertiary" onClick={() => onCloseModal()}>
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+            <Button onClick={handleSubmit}>
+              {formatMessage({
+                id: 'Settings.permissions.conditions.apply',
+                defaultMessage: 'Apply',
+              })}
+            </Button>
+          </>
+        )}
       </Modal.Footer>
     </Modal.Content>
   );
@@ -215,6 +265,7 @@ interface ActionRowProps {
   >;
   isFormDisabled?: boolean;
   isGrey?: boolean;
+  isReadOnly?: boolean;
   label: string;
   name: string;
   onChange?: (name: string, values: Record<string, boolean>) => void;
@@ -225,6 +276,7 @@ const ActionRow = ({
   arrayOfOptionsGroupedByCategory,
   isFormDisabled = false,
   isGrey = false,
+  isReadOnly = false,
   label,
   name,
   onChange,
@@ -237,6 +289,8 @@ const ActionRow = ({
       onChange(name, getNewStateFromChangedValues(arrayOfOptionsGroupedByCategory, val));
     }
   };
+
+  const selectedValues = getSelectedValues(value);
 
   return (
     <Flex
@@ -269,14 +323,52 @@ const ActionRow = ({
         </Typography>
       </Flex>
       <Box style={{ maxWidth: 430, width: '100%' }}>
-        <MultiSelectNested
-          id={name}
-          customizeContent={(values = []) => `${values.length} currently selected`}
-          onChange={handleChange}
-          value={getSelectedValues(value)}
-          options={getNestedOptions(arrayOfOptionsGroupedByCategory)}
-          disabled={isFormDisabled}
-        />
+        {isReadOnly ? (
+          <Flex direction="column" alignItems="flex-start" gap={3}>
+            {selectedValues.length === 0 ? (
+              <Typography textColor="neutral600">
+                {formatMessage({
+                  id: 'Settings.permissions.conditions.none-applied',
+                  defaultMessage: 'No conditions applied.',
+                })}
+              </Typography>
+            ) : (
+              arrayOfOptionsGroupedByCategory
+                .map(([categoryName, conditions]) => {
+                  const selectedConditions = conditions.filter((c) =>
+                    selectedValues.includes(c.id)
+                  );
+
+                  if (selectedConditions.length === 0) {
+                    return null;
+                  }
+
+                  return (
+                    <Flex key={categoryName} direction="column" alignItems="flex-start" gap={2}>
+                      <Typography variant="pi" fontWeight="bold" textColor="neutral600">
+                        {categoryName}
+                      </Typography>
+                      <Box>
+                        <Typography variant="omega" textColor="neutral800">
+                          {selectedConditions.map((condition) => condition.displayName).join(', ')}
+                        </Typography>
+                      </Box>
+                    </Flex>
+                  );
+                })
+                .filter(Boolean)
+            )}
+          </Flex>
+        ) : (
+          <MultiSelectNested
+            id={name}
+            customizeContent={(values = []) => `${values.length} currently selected`}
+            onChange={handleChange}
+            value={selectedValues}
+            options={getNestedOptions(arrayOfOptionsGroupedByCategory)}
+            disabled={isFormDisabled}
+          />
+        )}
       </Box>
     </Flex>
   );
