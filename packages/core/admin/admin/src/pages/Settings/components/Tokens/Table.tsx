@@ -15,6 +15,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
+import { AppToken } from '../../../../../../shared/contracts/app-token';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { tours } from '../../../../components/GuidedTour/Tours';
@@ -37,8 +38,8 @@ interface TableProps
     canDelete: boolean;
     canUpdate: boolean;
   };
-  tokens: SanitizedTransferToken[] | ApiToken[];
-  tokenType: 'api-token' | 'transfer-token';
+  tokens: SanitizedTransferToken[] | ApiToken[] | AppToken[];
+  tokenType: 'api-token' | 'transfer-token' | 'app-token';
 }
 
 const Table = ({
@@ -74,7 +75,7 @@ const Table = ({
   };
 
   return (
-    <TableImpl.Root headers={headers} rows={sortedTokens} isLoading={isLoading}>
+    <TableImpl.Root headers={headers as any} rows={sortedTokens} isLoading={isLoading}>
       <TableImpl.Content>
         <TableImpl.Head>
           {headers.map((header) => (
@@ -101,8 +102,11 @@ const Table = ({
                 </TableImpl.Cell>
                 <TableImpl.Cell>
                   <Typography textColor="neutral800">
-                    {/* @ts-expect-error One of the tokens doesn't have createdAt */}
-                    <RelativeTime timestamp={new Date(token.createdAt)} />
+                    {'createdAt' in token && token.createdAt ? (
+                      <RelativeTime timestamp={new Date(token.createdAt)} />
+                    ) : (
+                      '-'
+                    )}
                   </Typography>
                 </TableImpl.Cell>
                 <TableImpl.Cell>
