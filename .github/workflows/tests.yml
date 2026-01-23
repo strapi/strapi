@@ -215,7 +215,7 @@ jobs:
           name: front-coverage-reports
           path: |
             coverage/
-            packages/*/coverage/
+            packages/**/coverage/
           retention-days: 1
 
   e2e_ce:
