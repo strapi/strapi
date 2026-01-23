@@ -154,6 +154,7 @@ const ReleasesSettingsPage = () => {
                         loading={isSubmitting}
                         startIcon={<Check />}
                         type="submit"
+                        fullWidth
                       >
                         {formatMessage({
                           id: 'global.save',
@@ -193,7 +194,7 @@ const ReleasesSettingsPage = () => {
                       })}
                     </Typography>
                     <Grid.Root>
-                      <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                         <TimezoneDropdown />
                       </Grid.Item>
                     </Grid.Root>

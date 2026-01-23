@@ -62,13 +62,20 @@ export default (strapi: Core.Strapi): Sender => {
     useTypescriptOnAdmin: tsUtils.isUsingTypeScriptSync(adminRootPath),
     projectId: uuid,
     isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-    aiLicenseKey: env('STRAPI_ADMIN_AI_LICENSE', null),
   };
 
   addPackageJsonStrapiMetadata(anonymousGroupProperties, strapi);
 
   return async (event: string, payload: Payload = {}, opts = {}) => {
     const userId = generateAdminUserHash(strapi);
+
+    const eeGroupProps: Record<string, unknown> = {};
+    if (strapi.ee?.subscriptionId !== undefined && strapi.ee?.subscriptionId !== null) {
+      eeGroupProps.subscriptionId = strapi.ee.subscriptionId;
+    }
+    if (strapi.ee?.planPriceId !== undefined && strapi.ee?.planPriceId !== null) {
+      eeGroupProps.planPriceId = strapi.ee.planPriceId;
+    }
 
     const reqParams = {
       method: 'POST',
@@ -81,6 +88,7 @@ export default (strapi: Core.Strapi): Sender => {
         groupProperties: {
           ...anonymousGroupProperties,
           projectType: strapi.EE ? 'Enterprise' : 'Community',
+          ...eeGroupProps,
           ...payload.groupProperties,
         },
       }),

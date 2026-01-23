@@ -1,6 +1,6 @@
 {
   "name": "@strapi/openapi",
-  "version": "5.30.0",
+  "version": "5.33.4",
   "description": "A tool set to help generate and validate API documentation for Strapi projects",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -52,7 +52,7 @@
     "test:unit:watch": "run -T jest --watch"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   },
   "dependencies": {
@@ -61,7 +61,7 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
-    "@strapi/types": "5.30.0",
+    "@strapi/types": "5.33.4",
     "@types/debug": "^4"
   }
 }

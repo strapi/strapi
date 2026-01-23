@@ -19,13 +19,13 @@ import { css, styled } from 'styled-components';
 
 import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
 
+import { insertLink } from './Blocks/Link';
 import {
   type BlocksStore,
   type SelectorBlockKey,
   isSelectorBlockKey,
   useBlocksEditorContext,
 } from './BlocksEditor';
-import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled<FlexComponent>(Flex)`
@@ -149,6 +149,7 @@ const ToolbarButton = ({
           width={7}
           height={7}
           hasRadius
+          type="button"
         >
           <Icon fill={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>

@@ -1,5 +1,5 @@
 import { testData } from '../../../../tests/data';
-import { handleInvisibleAttributes, removeProhibitedFields } from '../data';
+import { getDirectParent, handleInvisibleAttributes, removeProhibitedFields } from '../data';
 
 const defaultFieldsValues = {
   name: 'name',
@@ -7,6 +7,40 @@ const defaultFieldsValues = {
 };
 
 describe('data', () => {
+  describe('getDirectParent', () => {
+    const values = {
+      title: 'hello',
+      conditional: [
+        {
+          name: 'wow',
+          url: 'some',
+          nested: {
+            name: 'name',
+            test: '',
+          },
+        },
+      ],
+    };
+
+    it('should return the root object for a top-level path', () => {
+      expect(getDirectParent(values, 'title')).toBe(values);
+    });
+
+    it('should return the array item parent for dynamic zone fields', () => {
+      expect(getDirectParent(values, 'conditional.0.url')).toEqual(values.conditional[0]);
+    });
+
+    it('should return the nested object for deep fields', () => {
+      expect(getDirectParent(values, 'conditional.0.nested.test')).toEqual(
+        values.conditional[0].nested
+      );
+    });
+
+    it('should return undefined for invalid paths', () => {
+      expect(getDirectParent(values, 'conditional.foo.url')).toBeUndefined();
+    });
+  });
+
   describe('removeProhibitedFields', () => {
     it('should return an empty object', () => {
       const { components, contentType } = testData;
@@ -222,6 +256,273 @@ describe('data', () => {
         },
         removedAttributes: [],
       });
+    });
+
+    it('should preserve fields with visible: false when they have initialValues', () => {
+      const result = handleInvisibleAttributes(
+        {
+          documentId: 'test-doc-id',
+          title: 'My Title',
+          description: 'My Description',
+          // sitemap_exclude is not in the data because it has visible: false (not rendered in UI)
+        },
+        {
+          schema: {
+            uid: 'api::article.article',
+            kind: 'collectionType',
+            modelType: 'contentType',
+            modelName: 'article',
+            globalId: 'Article',
+            info: {
+              displayName: 'Article',
+              singularName: 'article',
+              pluralName: 'articles',
+              description: '',
+            },
+            options: {},
+            pluginOptions: {},
+            attributes: {
+              documentId: {
+                type: 'string',
+              },
+              title: {
+                type: 'string',
+              },
+              description: {
+                type: 'text',
+              },
+              sitemap_exclude: {
+                type: 'boolean',
+                visible: false,
+                private: true,
+                default: false,
+              },
+            },
+          },
+          initialValues: {
+            documentId: 'test-doc-id',
+            title: 'My Title',
+            description: 'My Description',
+            sitemap_exclude: false,
+          },
+          components: {},
+        }
+      );
+
+      // sitemap_exclude should be preserved from initialValues because visible:false fields are passed through
+      expect(result.data).toEqual({
+        documentId: 'test-doc-id',
+        title: 'My Title',
+        description: 'My Description',
+        sitemap_exclude: false, // ✅ Preserved from initialValues
+      });
+      expect(result.removedAttributes).toEqual([]);
+    });
+
+    it('should preserve fields with visible: false from data when provided', () => {
+      const result = handleInvisibleAttributes(
+        {
+          title: 'Updated Title',
+          sitemap_exclude: true, // User somehow provides this in the data
+        },
+        {
+          schema: {
+            uid: 'api::article.article',
+            kind: 'collectionType',
+            modelType: 'contentType',
+            modelName: 'article',
+            globalId: 'Article',
+            info: {
+              displayName: 'Article',
+              singularName: 'article',
+              pluralName: 'articles',
+              description: '',
+            },
+            options: {},
+            pluginOptions: {},
+            attributes: {
+              title: {
+                type: 'string',
+              },
+              sitemap_exclude: {
+                type: 'boolean',
+                visible: false,
+                private: true,
+                default: false,
+              },
+            },
+          },
+          initialValues: {
+            title: 'Original Title',
+            sitemap_exclude: false,
+          },
+          components: {},
+        }
+      );
+
+      // sitemap_exclude should be taken from data (not initialValues) because it's provided
+      expect(result.data).toEqual({
+        title: 'Updated Title',
+        sitemap_exclude: true, // ✅ From data, not initialValues
+      });
+      expect(result.removedAttributes).toEqual([]);
+    });
+
+    it('should not include visible:false fields when not in data or initialValues', () => {
+      const result = handleInvisibleAttributes(
+        {
+          title: 'New Title',
+          // sitemap_exclude not in data (not rendered in UI)
+        },
+        {
+          schema: {
+            uid: 'api::article.article',
+            kind: 'collectionType',
+            modelType: 'contentType',
+            modelName: 'article',
+            globalId: 'Article',
+            info: {
+              displayName: 'Article',
+              singularName: 'article',
+              pluralName: 'articles',
+              description: '',
+            },
+            options: {},
+            pluginOptions: {},
+            attributes: {
+              title: {
+                type: 'string',
+              },
+              sitemap_exclude: {
+                type: 'boolean',
+                visible: false,
+                private: true,
+                default: false,
+              },
+            },
+          },
+          initialValues: {
+            title: 'New Title',
+            // sitemap_exclude not in initialValues either
+          },
+          components: {},
+        }
+      );
+
+      // sitemap_exclude should NOT be in the result (not in data or initialValues)
+      expect(result.data).toEqual({
+        title: 'New Title',
+      });
+      expect(result.data).not.toHaveProperty('sitemap_exclude');
+      expect(result.removedAttributes).toEqual([]);
+    });
+
+    it('should handle fields with conditions.visible (JSON Logic) correctly', () => {
+      const result = handleInvisibleAttributes(
+        {
+          type: 'international',
+          title: 'My Title',
+          internationalCode: 'US',
+        },
+        {
+          schema: {
+            uid: 'api::article.article',
+            kind: 'collectionType',
+            modelType: 'contentType',
+            modelName: 'article',
+            globalId: 'Article',
+            info: {
+              displayName: 'Article',
+              singularName: 'article',
+              pluralName: 'articles',
+              description: '',
+            },
+            options: {},
+            pluginOptions: {},
+            attributes: {
+              type: {
+                type: 'enumeration',
+                enum: ['local', 'international'],
+              },
+              title: {
+                type: 'string',
+              },
+              internationalCode: {
+                type: 'string',
+                conditions: {
+                  visible: {
+                    '==': [{ var: 'type' }, 'international'],
+                  },
+                },
+              },
+            },
+          },
+          initialValues: {},
+          components: {},
+        }
+      );
+
+      // internationalCode should be included because condition evaluates to true
+      expect(result.data).toEqual({
+        type: 'international',
+        title: 'My Title',
+        internationalCode: 'US',
+      });
+      expect(result.removedAttributes).toEqual([]);
+    });
+
+    it('should remove fields when conditions.visible evaluates to false', () => {
+      const result = handleInvisibleAttributes(
+        {
+          type: 'local',
+          title: 'My Title',
+          internationalCode: 'US',
+        },
+        {
+          schema: {
+            uid: 'api::article.article',
+            kind: 'collectionType',
+            modelType: 'contentType',
+            modelName: 'article',
+            globalId: 'Article',
+            info: {
+              displayName: 'Article',
+              singularName: 'article',
+              pluralName: 'articles',
+              description: '',
+            },
+            options: {},
+            pluginOptions: {},
+            attributes: {
+              type: {
+                type: 'enumeration',
+                enum: ['local', 'international'],
+              },
+              title: {
+                type: 'string',
+              },
+              internationalCode: {
+                type: 'string',
+                conditions: {
+                  visible: {
+                    '==': [{ var: 'type' }, 'international'],
+                  },
+                },
+              },
+            },
+          },
+          initialValues: {},
+          components: {},
+        }
+      );
+
+      // internationalCode should be removed because condition evaluates to false
+      expect(result.data).toEqual({
+        type: 'local',
+        title: 'My Title',
+      });
+      expect(result.data).not.toHaveProperty('internationalCode');
+      expect(result.removedAttributes).toEqual(['internationalCode']);
     });
   });
 });

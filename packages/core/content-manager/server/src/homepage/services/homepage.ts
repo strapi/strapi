@@ -187,6 +187,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
             limit: MAX_DOCUMENTS,
             fields: meta.fields,
             ...additionalQueryParams,
+            locale: '*',
           });
 
           const docs = await strapi.documents(meta.uid).findMany(permissionQuery);

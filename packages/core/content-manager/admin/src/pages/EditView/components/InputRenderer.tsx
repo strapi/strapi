@@ -5,6 +5,8 @@ import {
   useForm,
   InputRenderer as FormInputRenderer,
   useField,
+  createRulesEngine,
+  type JsonLogicCondition,
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
@@ -16,6 +18,7 @@ import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
+import { getDirectParent } from '../utils/data';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
@@ -41,7 +44,7 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({
+const BaseInputRenderer = ({
   visible,
   hint: providedHint,
   document,
@@ -183,7 +186,7 @@ const InputRenderer = ({
           disabled={fieldIsDisabled}
         >
           {(componentInputProps) => (
-            <InputRenderer
+            <MemoizedInputRenderer
               key={`input-${componentInputProps.name}-${localeKey}`}
               {...componentInputProps}
             />
@@ -219,10 +222,12 @@ const InputRenderer = ({
         />
       );
     case 'uid':
+      // These props are not needed for the generic form input renderer.
+      const { unique: _uniqueUID, ...restUIDProps } = props;
       return (
         <UIDInput
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...restUIDProps}
           hint={hint}
           type={props.type}
           disabled={fieldIsDisabled}
@@ -261,6 +266,30 @@ const InputRenderer = ({
   }
 };
 
+const rulesEngine = createRulesEngine();
+
+/**
+ * A wrapper around BaseInputRenderer that conditionally renders it depending on the attribute's condition.
+ */
+const ConditionAwareInputRenderer = ({
+  condition,
+  ...props
+}: InputRendererProps & { condition: JsonLogicCondition }) => {
+  // Note: this selector causes a re-render every time any form value on the page changes
+  const fieldValues = useForm('ConditionalInputRenderer', (state) => state.values);
+  // For nested fields, we evaluate against the parent scope so conditions can read siblings.
+  // Top-level fields resolve to the full form values.
+  const targetValues = getDirectParent(fieldValues, props.name);
+
+  const isVisible = rulesEngine.evaluate(condition, targetValues);
+
+  if (!isVisible) {
+    return null;
+  }
+
+  return <BaseInputRenderer {...props} />;
+};
+
 const attributeHasCustomFieldProperty = (
   attribute: Schema.Attribute.AnyAttribute
 ): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.CustomField<string> =>
@@ -278,9 +307,7 @@ const useFieldHint = (
     return hint;
   }
 
-  const units = !['biginteger', 'integer', 'number', 'dynamiczone', 'component'].includes(
-    attribute.type
-  )
+  const units = ['string', 'uid', 'richtext', 'email', 'password', 'text'].includes(attribute.type)
     ? formatMessage(
         {
           id: 'content-manager.form.Input.hint.character.unit',
@@ -329,7 +356,22 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
   }
 };
 
-const MemoizedInputRenderer = React.memo(InputRenderer);
+/**
+ * Conditionally routes the exported InputRender component towards ConditionalInputRenderer
+ * (when there's a JSON logic condition on the attribute, or BaseInputRenderer otherwise.
+ * We do this because rendering a conditional field requires access to the values of
+ * other form fields, which causes many re-renders and performance issues on complex content
+ * types. By splitting the component into two, we isolate the performance issue to
+ * conditional fields only, not all edit view fields.
+ */
+const MemoizedInputRenderer = React.memo((props: InputRendererProps) => {
+  const condition = props.attribute.conditions?.visible;
+  if (condition) {
+    return <ConditionAwareInputRenderer {...props} condition={condition} />;
+  }
+
+  return <BaseInputRenderer {...props} />;
+});
 
 export type { InputRendererProps };
 export { MemoizedInputRenderer as InputRenderer, useFieldHint };

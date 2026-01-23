@@ -93,7 +93,12 @@ export const CreatePage = () => {
             <Layouts.Header
               primaryAction={
                 !isLoadingPlugins && (
-                  <Button type="submit" loading={mutation.isLoading} startIcon={<Check />}>
+                  <Button
+                    type="submit"
+                    loading={mutation.isLoading}
+                    startIcon={<Check />}
+                    fullWidth
+                  >
                     {formatMessage({
                       id: 'global.save',
                       defaultMessage: 'Save',
@@ -138,7 +143,7 @@ export const CreatePage = () => {
                   </Typography>
 
                   <Grid.Root gap={4}>
-                    <Grid.Item col={6} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         name="name"
                         error={
@@ -158,7 +163,7 @@ export const CreatePage = () => {
                         <Field.Error />
                       </Field.Root>
                     </Grid.Item>
-                    <Grid.Item col={6} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         name="description"
                         error={

@@ -191,6 +191,7 @@ const EditPage = () => {
                     startIcon={<Check />}
                     loading={isSubmitting}
                     type="submit"
+                    fullWidth
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>
@@ -241,7 +242,8 @@ const EditPage = () => {
                             return (
                               <Grid.Item
                                 key={field.name}
-                                col={size}
+                                m={size}
+                                xs={12}
                                 direction="column"
                                 alignItems="stretch"
                               >

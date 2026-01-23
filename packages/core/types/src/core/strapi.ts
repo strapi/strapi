@@ -38,7 +38,6 @@ export interface Strapi extends Container {
   db: Database;
   app: any;
   EE?: boolean;
-  aiLicenseKey?: string;
   ai?: {
     enabled: boolean;
   };
@@ -47,6 +46,8 @@ export interface Strapi extends Container {
     type: string | null | undefined;
     isEE: boolean;
     isTrial: boolean;
+    subscriptionId?: string | null | undefined;
+    planPriceId?: string | null | undefined;
     getTrialEndDate: ({
       strapi,
     }: {

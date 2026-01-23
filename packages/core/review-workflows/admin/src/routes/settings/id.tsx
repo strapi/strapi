@@ -362,6 +362,7 @@ const EditPage = () => {
                     // if the confirm dialog is open the loading state is on
                     // the confirm button already
                     loading={!Boolean(Object.keys(savePrompts).length > 0) && isSubmitting}
+                    fullWidth
                   >
                     {formatMessage({
                       id: 'global.save',
