@@ -195,7 +195,9 @@ export interface EventWithoutProperties {
     | 'didStartNewChat'
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
-    | 'didEditAIAlternativeText';
+    | 'didEditAIAlternativeText'
+    | 'didGenerateMetadataRetroactively';
+
   properties?: never;
 }
 
