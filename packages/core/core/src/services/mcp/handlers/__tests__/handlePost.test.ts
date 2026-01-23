@@ -43,9 +43,20 @@ describe('handlePost', () => {
       const updateActivitySpy = jest.fn();
       const handleRequestSpy = jest.fn().mockResolvedValue(undefined);
 
+      const mockAuthStrategy = {
+        name: 'app-token' as const,
+        authenticate: jest.fn().mockResolvedValue({
+          authenticated: true,
+          credentials: { token: { id: 'token-123' }, user: { id: 1 } },
+          ability: {} as any,
+        }),
+        verify: jest.fn(),
+      };
+
       const mockSession = {
         lastActivity: Date.now(),
         updateActivity: updateActivitySpy,
+        tokenId: 'token-123',
         transport: {
           handleRequest: handleRequestSpy,
         },
@@ -55,6 +66,7 @@ describe('handlePost', () => {
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthStrategy,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),
@@ -70,8 +82,12 @@ describe('handlePost', () => {
         },
       } as unknown as IncomingMessage;
 
+      const writeHeadSpy = jest.fn();
+      const endSpy = jest.fn();
       const res = {
         headersSent: false,
+        writeHead: writeHeadSpy,
+        end: endSpy,
       } as unknown as ServerResponse;
 
       const ctx = {
@@ -89,8 +105,19 @@ describe('handlePost', () => {
     });
 
     test('should return error when session is invalid', async () => {
+      const mockAuthStrategy = {
+        name: 'app-token' as const,
+        authenticate: jest.fn().mockResolvedValue({
+          authenticated: true,
+          credentials: { token: { id: 'token-123' }, user: { id: 1 } },
+          ability: {} as any,
+        }),
+        verify: jest.fn(),
+      };
+
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthStrategy,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),
@@ -161,8 +188,19 @@ describe('handlePost', () => {
         return mockTransport;
       });
 
+      const mockAuthStrategy = {
+        name: 'app-token' as const,
+        authenticate: jest.fn().mockResolvedValue({
+          authenticated: true,
+          credentials: { token: { id: 'token-123' }, user: { id: 1 } },
+          ability: {} as any,
+        }),
+        verify: jest.fn(),
+      };
+
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthStrategy,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries,
@@ -198,6 +236,7 @@ describe('handlePost', () => {
         strapi: mockStrapi,
         definitions: deps.capabilityDefinitions,
         isDevMode: mockConfig.isDevMode(),
+        authResult: { ability: {} },
       });
       expect(mockMcpServer.connect).toHaveBeenCalledWith(mockTransport);
       expect(mockTransport.handleRequest).toHaveBeenCalledWith(req, res, requestBody);
@@ -212,8 +251,19 @@ describe('handlePost', () => {
         } as any as McpSession);
       }
 
+      const mockAuthStrategy = {
+        name: 'app-token' as const,
+        authenticate: jest.fn().mockResolvedValue({
+          authenticated: true,
+          credentials: { token: { id: 'token-123' }, user: { id: 1 } },
+          ability: {} as any,
+        }),
+        verify: jest.fn(),
+      };
+
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthStrategy as any,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),
@@ -255,9 +305,20 @@ describe('handlePost', () => {
       const error = new Error('Request failed');
       const handleRequestSpy = jest.fn().mockRejectedValue(error);
 
+      const mockAuthStrategy = {
+        name: 'app-token' as const,
+        authenticate: jest.fn().mockResolvedValue({
+          authenticated: true,
+          credentials: { token: { id: 'token-123' }, user: { id: 1 } },
+          ability: {} as any,
+        }),
+        verify: jest.fn(),
+      };
+
       const mockSession = {
         lastActivity: Date.now(),
         updateActivity: jest.fn(),
+        tokenId: 'token-123',
         transport: {
           handleRequest: handleRequestSpy,
         },
@@ -267,6 +328,7 @@ describe('handlePost', () => {
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthStrategy as any,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),
@@ -310,9 +372,20 @@ describe('handlePost', () => {
       const sessionId = '12345678-1234-1234-1234-123456789abc';
       const handleRequestSpy = jest.fn().mockRejectedValue('String error');
 
+      const mockAuthStrategy = {
+        name: 'app-token' as const,
+        authenticate: jest.fn().mockResolvedValue({
+          authenticated: true,
+          credentials: { token: { id: 'token-123' }, user: { id: 1 } },
+          ability: {} as any,
+        }),
+        verify: jest.fn(),
+      };
+
       const mockSession = {
         lastActivity: Date.now(),
         updateActivity: jest.fn(),
+        tokenId: 'token-123',
         transport: {
           handleRequest: handleRequestSpy,
         },
@@ -322,6 +395,7 @@ describe('handlePost', () => {
 
       const deps: McpHandlerDependencies = {
         strapi: mockStrapi as Core.Strapi,
+        authenticationStrategy: mockAuthStrategy as any,
         sessionManager: mockSessionManager,
         config: mockConfig,
         createServerWithRegistries: jest.fn(),

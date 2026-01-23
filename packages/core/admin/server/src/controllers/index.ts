@@ -2,6 +2,7 @@ import type {} from 'koa-body';
 
 import admin from './admin';
 import apiToken from './api-token';
+import appToken from './app-token';
 import authenticatedUser from './authenticated-user';
 import authentication from './authentication';
 import permission from './permission';
@@ -15,6 +16,7 @@ import homepage from './homepage';
 export default {
   admin,
   'api-token': apiToken,
+  'app-token': appToken,
   'authenticated-user': authenticatedUser,
   authentication,
   permission,

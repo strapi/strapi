@@ -9,13 +9,33 @@ import { withTimeout } from '../utils/withTimeout';
 import type { McpHandlerDependencies } from './types';
 
 export const createPostHandler = (deps: McpHandlerDependencies): Core.MiddlewareHandler => {
-  const { strapi, sessionManager, config, createServerWithRegistries, capabilityDefinitions } =
-    deps;
+  const {
+    strapi,
+    authenticationStrategy,
+    sessionManager,
+    config,
+    createServerWithRegistries,
+    capabilityDefinitions,
+  } = deps;
 
   return async (ctx) => {
     const req = ctx.req;
     const res = ctx.res;
     const sessionId = extractSessionId(req);
+
+    // Verify the same token is being used for this session
+    const authResult = await authenticationStrategy.authenticate(ctx);
+    if (authResult.authenticated === false) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          error: { code: -32000, message: 'Unauthorized' },
+          id: null,
+        })
+      );
+      return;
+    }
 
     try {
       let transport: StreamableHTTPServerTransport;
@@ -28,6 +48,20 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
           return;
         }
         existingSession.updateActivity();
+
+        const currentTokenId = authResult.credentials?.token?.id || null;
+        if (currentTokenId !== existingSession.tokenId) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(
+            JSON.stringify({
+              jsonrpc: '2.0',
+              error: { code: -32000, message: 'Token mismatch for session' },
+              id: null,
+            })
+          );
+          return;
+        }
+
         transport = existingSession.transport;
 
         // Handle request with existing session
@@ -50,6 +84,8 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
           strapi,
           definitions: capabilityDefinitions,
           isDevMode: config.isDevMode(),
+          authResult:
+            authResult.authenticated === true ? { ability: authResult.ability } : undefined,
         });
 
         transport = new StreamableHTTPServerTransport({
@@ -63,6 +99,7 @@ export const createPostHandler = (deps: McpHandlerDependencies): Core.Middleware
                 toolRegistry: registries.toolRegistry,
                 promptRegistry: registries.promptRegistry,
                 resourceRegistry: registries.resourceRegistry,
+                tokenId: authResult.credentials.token.id,
               })
             );
             strapi.log.info('[MCP] Session initialized', { sessionId: id });

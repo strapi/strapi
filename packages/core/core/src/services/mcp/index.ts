@@ -7,6 +7,7 @@ import { McpCapabilityDefinitionRegistry } from './internal/McpCapabilityDefinit
 import { McpConfiguration } from './internal/McpConfiguration';
 import { createMcpServerWithRegistries } from './internal/McpServerFactory';
 import { McpSessionManager } from './internal/McpSessionManager';
+import { createAppTokenStrategy } from './strategies/app-token';
 import { logToolDefinition } from './tools/log';
 import { createManagedInterval } from './utils/createManagedInterval';
 
@@ -101,6 +102,9 @@ export const createMcpRoutes = (
  * Creates a MCP service instance for Strapi Core
  */
 export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService => {
+  // Create app-token strategy with injected Strapi instance
+  const appTokenStrategy = createAppTokenStrategy(strapi);
+
   // Initialize configuration
   const config = new McpConfiguration(strapi);
 
@@ -132,6 +136,7 @@ export const createMcpService = (strapi: Core.Strapi): Modules.MCP.McpService =>
   // Prepare handler dependencies
   const handlerDependencies: McpHandlerDependencies = {
     strapi,
+    authenticationStrategy: appTokenStrategy,
     sessionManager,
     config,
     createServerWithRegistries: createMcpServerWithRegistries,
