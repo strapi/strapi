@@ -52,6 +52,28 @@ const getInitialRoutes = (): RouteObject[] => [
     },
   },
   {
+    path: 'me/app-tokens',
+    lazy: async () => {
+      const { ProtectedListView } = await import('./pages/Me/pages/AppTokens/ListView');
+
+      return {
+        Component: ProtectedListView,
+      };
+    },
+  },
+  {
+    path: 'me/app-tokens/:id',
+    lazy: async () => {
+      const { ProtectedEditView } = await import(
+        './pages/Me/pages/AppTokens/EditView/EditViewPage'
+      );
+
+      return {
+        Component: ProtectedEditView,
+      };
+    },
+  },
+  {
     path: 'settings/*',
     lazy: async () => {
       const { Layout } = await import('./pages/Settings/Layout');

@@ -310,7 +310,7 @@ interface TokenEvents {
     | 'willEditToken'
     | 'willEditTokenFromList';
   properties: {
-    tokenType: 'api-token' | 'transfer-token';
+    tokenType: 'api-token' | 'transfer-token' | 'app-token';
   };
 }
 

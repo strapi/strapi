@@ -72,6 +72,11 @@ export const NavUser = ({
     navigate(redirection);
   };
 
+  const handleAppTokens = () => {
+    const redirection = '/me/app-tokens';
+    navigate(redirection);
+  };
+
   const handleLogout = () => {
     const redirection = '/auth/login';
     logout();
@@ -113,6 +118,13 @@ export const NavUser = ({
             {formatMessage({
               id: 'global.profile.settings',
               defaultMessage: 'Profile settings',
+            })}
+          </Menu.Item>
+
+          <Menu.Item onSelect={handleAppTokens}>
+            {formatMessage({
+              id: 'global.appTokens',
+              defaultMessage: 'App Tokens',
             })}
           </Menu.Item>
 

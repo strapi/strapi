@@ -15,7 +15,7 @@ import { useClipboard } from '../../../../hooks/useClipboard';
 
 interface TokenBoxProps {
   token?: string;
-  tokenType: 'transfer-token' | 'api-token';
+  tokenType: 'transfer-token' | 'api-token' | 'app-token';
 }
 
 const TypographyWordBreak = styled(Typography)`

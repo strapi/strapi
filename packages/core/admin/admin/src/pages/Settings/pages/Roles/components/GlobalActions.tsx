@@ -21,7 +21,8 @@ interface GlobalActionsProps {
 
 const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProps) => {
   const { formatMessage } = useIntl();
-  const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox } = usePermissionsDataManager();
+  const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox, checkUserHasPermission } =
+    usePermissionsDataManager();
 
   const displayedActions = actions.filter(({ subjects }) => subjects && subjects.length);
 
@@ -69,7 +70,13 @@ const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProp
   return (
     <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
       <Flex gap={0}>
-        {displayedActions.map(({ label, actionId }) => {
+        {displayedActions.map(({ label, actionId, subjects }) => {
+          // Check if user has permission for all subjects for this action
+          const allSubjects = subjects || [];
+          const userHasPermissionForAll =
+            allSubjects.length > 0 &&
+            allSubjects.every((subject) => checkUserHasPermission(actionId, subject));
+
           return (
             <Flex
               shrink={0}
@@ -87,7 +94,7 @@ const GlobalActions = ({ actions = [], isFormDisabled, kind }: GlobalActionsProp
                 })}
               </Typography>
               <Checkbox
-                disabled={isFormDisabled}
+                disabled={isFormDisabled || !userHasPermissionForAll}
                 onCheckedChange={(value) => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, !!value);
                 }}
