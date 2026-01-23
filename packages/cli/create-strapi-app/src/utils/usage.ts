@@ -38,7 +38,6 @@ const getProperties = (scope: Scope, error?: TrackError) => {
     useTypescriptOnAdmin: boolToString(scope.useTypescript),
     useTypescript: boolToString(scope.useTypescript),
     isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
-    aiLicenseKey: process.env.STRAPI_ADMIN_AI_LICENSE,
     noRun: boolToString(scope.runApp),
     projectId: scope.uuid,
     useExample: boolToString(scope.useExample),
