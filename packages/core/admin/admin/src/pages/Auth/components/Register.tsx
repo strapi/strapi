@@ -55,33 +55,45 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
         return byteSize <= 72;
       }
     )
-    .test('lowercase', {
-      message: {
-        id: 'components.Input.error.contain.lowercase',
-        defaultMessage: 'Password must contain at least 1 lowercase letter',
+    .test(
+      'lowercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.lowercase',
+          defaultMessage: 'Password must contain at least 1 lowercase letter',
+        },
       },
-    }, (value) => {
-      if (!value) return true;
-      return /[a-z]/.test(value);
-    })
-    .test('uppercase', {
-      message: {
-        id: 'components.Input.error.contain.uppercase',
-        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      (value) => {
+        if (!value) return true;
+        return /[a-z]/.test(value);
+      }
+    )
+    .test(
+      'uppercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.uppercase',
+          defaultMessage: 'Password must contain at least 1 uppercase letter',
+        },
       },
-    }, (value) => {
-      if (!value) return true;
-      return /[A-Z]/.test(value);
-    })
-    .test('number', {
-      message: {
-        id: 'components.Input.error.contain.number',
-        defaultMessage: 'Password must contain at least 1 number',
+      (value) => {
+        if (!value) return true;
+        return /[A-Z]/.test(value);
+      }
+    )
+    .test(
+      'number',
+      {
+        message: {
+          id: 'components.Input.error.contain.number',
+          defaultMessage: 'Password must contain at least 1 number',
+        },
       },
-    }, (value) => {
-      if (!value) return true;
-      return /\d/.test(value);
-    })
+      (value) => {
+        if (!value) return true;
+        return /\d/.test(value);
+      }
+    )
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
@@ -132,33 +144,45 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
         return new TextEncoder().encode(value).length <= 72;
       }
     )
-    .test('lowercase', {
-      message: {
-        id: 'components.Input.error.contain.lowercase',
-        defaultMessage: 'Password must contain at least 1 lowercase letter',
+    .test(
+      'lowercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.lowercase',
+          defaultMessage: 'Password must contain at least 1 lowercase letter',
+        },
       },
-    }, (value) => {
-      if (!value) return true;
-      return /[a-z]/.test(value);
-    })
-    .test('uppercase', {
-      message: {
-        id: 'components.Input.error.contain.uppercase',
-        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      (value) => {
+        if (!value) return true;
+        return /[a-z]/.test(value);
+      }
+    )
+    .test(
+      'uppercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.uppercase',
+          defaultMessage: 'Password must contain at least 1 uppercase letter',
+        },
       },
-    }, (value) => {
-      if (!value) return true;
-      return /[A-Z]/.test(value);
-    })
-    .test('number', {
-      message: {
-        id: 'components.Input.error.contain.number',
-        defaultMessage: 'Password must contain at least 1 number',
+      (value) => {
+        if (!value) return true;
+        return /[A-Z]/.test(value);
+      }
+    )
+    .test(
+      'number',
+      {
+        message: {
+          id: 'components.Input.error.contain.number',
+          defaultMessage: 'Password must contain at least 1 number',
+        },
       },
-    }, (value) => {
-      if (!value) return true;
-      return /\d/.test(value);
-    })
+      (value) => {
+        if (!value) return true;
+        return /\d/.test(value);
+      }
+    )
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
