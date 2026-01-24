@@ -7,7 +7,7 @@ tags:
 
 The CLI is largely contained to the `@strapi/strapi` package, however some packages are able to inject their own commands:
 
-- [`@strapi/data-transfer`](/docs/core/data-transfer/intro)
+- [`@strapi/data-transfer`](/docs/core/data-transfer/00-intro)
 
 ## Structure of command
 

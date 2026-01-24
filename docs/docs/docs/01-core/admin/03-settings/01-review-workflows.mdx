@@ -18,7 +18,7 @@ is integrated with redux, so that all input components are controlled components
 
 ### License limits
 
-Most licenses have feature-based usage limits configured through Chargebee. These limits are exposed to the frontend through [`useLicenseLimits`](/docs/core/admin/ee/hooks/use-license-limits).
+Most licenses have feature-based usage limits configured through Chargebee. These limits are exposed to the frontend through [`useLicenseLimits`](/docs/core/admin/01-ee/03-hooks/use-license-limits).
 Offline licenses do not have these limits and therefore the endpoint does not return any. For offline licenses hard-coded limits apply: max. 200 workflows, max. 200 stages per workflow.
 
 The frontend aswell as the admin API restrict actions on the settings pages in various ways (more below), if the license limits are about to exceed or already exceeded.
@@ -130,4 +130,4 @@ type Workflow {
 
 ### Endpoints
 
-For a list of all available endpoints please refer to the [detailed backend design documentation](/docs/core/admin/ee/review-workflows).
+For a list of all available endpoints please refer to the [detailed backend design documentation](/docs/core/admin/01-ee/01-review-workflows).
