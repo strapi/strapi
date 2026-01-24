@@ -57,7 +57,7 @@
     "execa": "5.1.1",
     "fs-extra": "11.2.0",
     "inquirer": "8.2.5",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "node-machine-id": "^1.1.10",
     "ora": "^5.4.1",
     "rollup": "4.19.1",

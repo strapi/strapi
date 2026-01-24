@@ -56,7 +56,7 @@
     "fs-extra": "11.2.0",
     "handlebars": "4.7.7",
     "jscodeshift": "17.3.0",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "plop": "4.0.1",
     "pluralize": "8.0.0"
   },

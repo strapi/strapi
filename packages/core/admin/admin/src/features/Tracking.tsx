@@ -130,9 +130,7 @@ export interface EventWithoutProperties {
     | 'didEditMediaLibraryConfig'
     | 'didEditNameOfContentType'
     | 'didGenerateGuidedTourApiTokens'
-    | 'didGoToMarketplace'
     | 'didLaunchGuidedtour'
-    | 'didMissMarketplacePlugin'
     | 'didNotCreateFirstAdmin'
     | 'didNotSaveComponent'
     | 'didPluginLearnMore'
@@ -197,7 +195,9 @@ export interface EventWithoutProperties {
     | 'didStartNewChat'
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
-    | 'didEditAIAlternativeText';
+    | 'didEditAIAlternativeText'
+    | 'didGenerateMetadataRetroactively';
+
   properties?: never;
 }
 
