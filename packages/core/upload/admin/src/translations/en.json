@@ -1,8 +1,10 @@
 {
   "apiError.FileTooBig": "The uploaded file exceeds the maximum allowed asset size.",
+  "assets.uploaded": "{number, plural, one {# asset} other {# assets}} uploaded successfully",
   "upload.generic-error": "An error occurred while uploading the file.",
   "bulk.select.label": "Select all assets",
   "button.next": "Next",
+  "new": "New",
   "checkControl.crop-duplicate": "Duplicate & crop the asset",
   "checkControl.crop-original": "Crop the original asset",
   "content.isLoading": "Content is loading.",
@@ -32,6 +34,7 @@
   "header.actions.upload-new-asset": "Upload new asset",
   "header.content.assets-empty": "No assets",
   "header.content.assets": "{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 asset} other {# assets}}",
+  "import-files": "Import files",
   "input.button.label": "Browse files",
   "input.label": "Drag & Drop here or",
   "input.label-bold": "Drag & drop",
