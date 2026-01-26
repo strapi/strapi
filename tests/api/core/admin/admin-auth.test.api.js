@@ -365,14 +365,14 @@ describe('Admin Auth End to End', () => {
           details: {
             errors: [
               {
-                message: 'Password must be less than 73 bytes',
+                message: 'userInfo.password must be less than 73 bytes',
                 name: 'ValidationError',
                 value: password,
                 path: ['userInfo', 'password'],
               },
             ],
           },
-          message: 'Password must be less than 73 bytes',
+          message: 'userInfo.password must be less than 73 bytes',
           name: 'ValidationError',
         },
       });
@@ -466,19 +466,19 @@ describe('Admin Auth End to End', () => {
           details: {
             errors: [
               {
-                message: 'Password must be at least 8 characters long',
+                message: 'password must be at least 8 characters',
                 name: 'ValidationError',
                 path: ['password'],
                 value: '123',
               },
               {
-                message: 'Password must contain at least one lowercase character',
+                message: 'password must contain at least one lowercase character',
                 name: 'ValidationError',
                 path: ['password'],
                 value: '123',
               },
               {
-                message: 'Password must contain at least one uppercase character',
+                message: 'password must contain at least one uppercase character',
                 name: 'ValidationError',
                 path: ['password'],
                 value: '123',
