@@ -1,6 +1,6 @@
 import type { Schema, UID } from '@strapi/types';
 
-import { mergeUnsupportedFields, buildDeepPopulate } from '../ai-localizations';
+import { mergeUnsupportedFields } from '../ai-localizations';
 
 describe('ai-localizations service', () => {
   describe('mergeUnsupportedFields', () => {
@@ -37,6 +37,20 @@ describe('ai-localizations service', () => {
       return models[uid] as Schema.Schema | undefined;
     };
 
+    // Helper to create a mock schema from attributes
+    const createMockSchema = (
+      attributes: Record<string, Schema.Attribute.AnyAttribute>
+    ): Schema.Schema => {
+      return {
+        modelType: 'contentType',
+        uid: 'api::test.test',
+        modelName: 'test',
+        globalId: 'Test',
+        info: { displayName: 'Test', singularName: 'test', pluralName: 'tests' },
+        attributes,
+      } as Schema.Schema;
+    };
+
     describe('root-level unsupported fields', () => {
       const schemaAttributes = {
         title: { type: 'string' },
@@ -47,7 +61,9 @@ describe('ai-localizations service', () => {
         author: { type: 'relation', relation: 'oneToOne' },
       } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
 
-      it('should preserve media fields from source document', () => {
+      const schema = createMockSchema(schemaAttributes);
+
+      it('should preserve media fields from source document', async () => {
         const targetData = {
           title: 'Translated Title',
           content: 'Translated content',
@@ -58,19 +74,14 @@ describe('ai-localizations service', () => {
           featuredImage: { id: 1, url: '/image.jpg' },
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaAttributes,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.title).toBe('Translated Title');
         expect(result.content).toBe('Translated content');
         expect(result.featuredImage).toEqual({ id: 1, url: '/image.jpg' });
       });
 
-      it('should preserve boolean fields from source document', () => {
+      it('should preserve boolean fields from source document', async () => {
         const targetData = {
           title: 'Translated Title',
         };
@@ -79,18 +90,13 @@ describe('ai-localizations service', () => {
           isFeatured: true,
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaAttributes,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.title).toBe('Translated Title');
         expect(result.isFeatured).toBe(true);
       });
 
-      it('should preserve enumeration fields from source document', () => {
+      it('should preserve enumeration fields from source document', async () => {
         const targetData = {
           title: 'Translated Title',
         };
@@ -99,18 +105,13 @@ describe('ai-localizations service', () => {
           backgroundColor: 'blue',
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaAttributes,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.title).toBe('Translated Title');
         expect(result.backgroundColor).toBe('blue');
       });
 
-      it('should preserve relation fields from source document', () => {
+      it('should preserve relation fields from source document', async () => {
         const targetData = {
           title: 'Translated Title',
         };
@@ -119,18 +120,13 @@ describe('ai-localizations service', () => {
           author: { id: 5, name: 'John Doe' },
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaAttributes,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.title).toBe('Translated Title');
         expect(result.author).toEqual({ id: 5, name: 'John Doe' });
       });
 
-      it('should preserve multiple unsupported fields at once', () => {
+      it('should preserve multiple unsupported fields at once', async () => {
         const targetData = {
           title: 'Translated Title',
           content: 'Translated content',
@@ -144,12 +140,7 @@ describe('ai-localizations service', () => {
           author: { id: 5 },
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaAttributes,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.title).toBe('Translated Title');
         expect(result.content).toBe('Translated content');
@@ -159,7 +150,7 @@ describe('ai-localizations service', () => {
         expect(result.author).toEqual({ id: 5 });
       });
 
-      it('should not overwrite existing unsupported fields in target', () => {
+      it('should not overwrite existing unsupported fields in target', async () => {
         const targetData = {
           title: 'Translated Title',
           isFeatured: false, // Already set in target
@@ -169,33 +160,30 @@ describe('ai-localizations service', () => {
           isFeatured: true,
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaAttributes,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.isFeatured).toBe(false); // Should keep target value
       });
 
-      it('should handle null source document', () => {
+      it('should handle null source document', async () => {
         const targetData = {
           title: 'Translated Title',
         };
 
-        const result = mergeUnsupportedFields(targetData, null, schemaAttributes, mockGetModel);
+        const result = await mergeUnsupportedFields(targetData, null, schema, mockGetModel);
 
         expect(result).toEqual({ title: 'Translated Title' });
       });
 
-      it('should ignore system fields', () => {
+      it('should ignore system fields', async () => {
         const schemaWithSystemFields = {
           ...schemaAttributes,
           id: { type: 'integer' },
           documentId: { type: 'string' },
           createdAt: { type: 'datetime' },
         } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
+
+        const schemaWithSystem = createMockSchema(schemaWithSystemFields);
 
         const targetData = {
           title: 'Translated Title',
@@ -208,10 +196,10 @@ describe('ai-localizations service', () => {
           isFeatured: true,
         };
 
-        const result = mergeUnsupportedFields(
+        const result = await mergeUnsupportedFields(
           targetData,
           sourceDoc,
-          schemaWithSystemFields,
+          schemaWithSystem,
           mockGetModel
         );
 
@@ -232,7 +220,9 @@ describe('ai-localizations service', () => {
         },
       } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
 
-      it('should preserve unsupported fields in single component', () => {
+      const schema = createMockSchema(schemaWithComponent);
+
+      it('should preserve unsupported fields in single component', async () => {
         const targetData = {
           title: 'Translated Title',
           seo: {
@@ -247,19 +237,14 @@ describe('ai-localizations service', () => {
           },
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaWithComponent,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.title).toBe('Translated Title');
         expect(result.seo.metaTitle).toBe('Translated Meta');
         expect(result.seo.ogImage).toEqual({ id: 1, url: '/og.jpg' });
       });
 
-      it('should preserve entire component if not in target', () => {
+      it('should preserve unsupported fields from component even if not in target', async () => {
         const targetData = {
           title: 'Translated Title',
         };
@@ -271,14 +256,11 @@ describe('ai-localizations service', () => {
           },
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaWithComponent,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
-        expect(result.seo).toEqual(sourceDoc.seo);
+        // Only unsupported fields (media) should be preserved, not translatable text
+        expect(result.seo.ogImage).toEqual({ id: 1, url: '/og.jpg' });
+        expect(result.seo.metaTitle).toBeUndefined();
       });
     });
 
@@ -292,7 +274,9 @@ describe('ai-localizations service', () => {
         },
       } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
 
-      it('should preserve unsupported fields in repeatable components', () => {
+      const schema = createMockSchema(schemaWithRepeatable);
+
+      it('should preserve unsupported fields in repeatable components', async () => {
         const targetData = {
           title: 'Translated Title',
           sections: [
@@ -320,12 +304,7 @@ describe('ai-localizations service', () => {
           ],
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaWithRepeatable,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.title).toBe('Translated Title');
         expect(result.sections).toHaveLength(2);
@@ -343,7 +322,7 @@ describe('ai-localizations service', () => {
         expect(result.sections[1].isFullWidth).toBe(false);
       });
 
-      it('should preserve entire repeatable component array if not in target', () => {
+      it('should preserve unsupported fields from repeatable component even if not in target', async () => {
         const targetData = {
           title: 'Translated Title',
         };
@@ -357,17 +336,15 @@ describe('ai-localizations service', () => {
           ],
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaWithRepeatable,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
-        expect(result.sections).toEqual(sourceDoc.sections);
+        // Only unsupported fields (media) should be preserved, not translatable text
+        expect(result.sections).toHaveLength(1);
+        expect(result.sections[0].sectionImage).toEqual({ id: 1, url: '/img1.jpg' });
+        expect(result.sections[0].sectionTitle).toBeUndefined();
       });
 
-      it('should handle mismatched array lengths gracefully', () => {
+      it('should handle mismatched array lengths gracefully', async () => {
         const targetData = {
           title: 'Translated Title',
           sections: [
@@ -385,18 +362,106 @@ describe('ai-localizations service', () => {
           ],
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaWithRepeatable,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.sections).toHaveLength(3);
         expect(result.sections[0].sectionImage).toEqual({ id: 1 });
         expect(result.sections[1].sectionImage).toEqual({ id: 2 });
         expect(result.sections[2].sectionTitle).toBe('Translated Section 3');
         expect(result.sections[2].sectionImage).toBeUndefined();
+      });
+    });
+
+    describe('relation and media internal fields', () => {
+      const mockGetModelWithRelationTarget = (uid: UID.Schema): Schema.Schema | undefined => {
+        const models: Record<string, unknown> = {
+          'api::author.author': {
+            modelType: 'contentType',
+            uid: 'api::author.author',
+            modelName: 'author',
+            globalId: 'Author',
+            info: { displayName: 'Author', singularName: 'author', pluralName: 'authors' },
+            attributes: {
+              name: { type: 'string' },
+              email: { type: 'string' },
+            },
+          },
+          'plugin::upload.file': {
+            modelType: 'contentType',
+            uid: 'plugin::upload.file',
+            modelName: 'file',
+            globalId: 'UploadFile',
+            info: { displayName: 'File', singularName: 'file', pluralName: 'files' },
+            attributes: {
+              name: { type: 'string' },
+              url: { type: 'string' },
+              mime: { type: 'string' },
+              width: { type: 'integer' },
+              height: { type: 'integer' },
+            },
+          },
+        };
+        return models[uid] as Schema.Schema | undefined;
+      };
+
+      it('should preserve all internal fields of relation objects (including id)', async () => {
+        const schemaAttributes = {
+          title: { type: 'string' },
+          author: { type: 'relation', relation: 'manyToOne', target: 'api::author.author' },
+        } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
+
+        const schema = createMockSchema(schemaAttributes);
+
+        const targetData = {
+          title: 'Translated Title',
+        };
+        const sourceDoc = {
+          title: 'Original Title',
+          author: { id: 5, name: 'John Doe', email: 'john@example.com' },
+        };
+
+        const result = await mergeUnsupportedFields(
+          targetData,
+          sourceDoc,
+          schema,
+          mockGetModelWithRelationTarget
+        );
+
+        expect(result.title).toBe('Translated Title');
+        // All relation fields including id must be preserved intact
+        expect(result.author).toEqual({ id: 5, name: 'John Doe', email: 'john@example.com' });
+      });
+
+      it('should preserve all internal fields of media objects (including id)', async () => {
+        const schemaAttributes = {
+          title: { type: 'string' },
+          cover: { type: 'media', multiple: false },
+        } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
+
+        const schema = createMockSchema(schemaAttributes);
+
+        const targetData = {
+          title: 'Translated Title',
+        };
+        const sourceDoc = {
+          title: 'Original Title',
+          cover: { id: 10, name: 'cover.jpg', url: '/uploads/cover.jpg', mime: 'image/jpeg' },
+        };
+
+        const result = await mergeUnsupportedFields(
+          targetData,
+          sourceDoc,
+          schema,
+          mockGetModelWithRelationTarget
+        );
+
+        expect(result.title).toBe('Translated Title');
+        expect(result.cover).toEqual({
+          id: 10,
+          name: 'cover.jpg',
+          url: '/uploads/cover.jpg',
+          mime: 'image/jpeg',
+        });
       });
     });
 
@@ -409,7 +474,9 @@ describe('ai-localizations service', () => {
         },
       } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
 
-      it('should preserve unsupported fields in dynamic zone components', () => {
+      const schema = createMockSchema(schemaWithDynamicZone);
+
+      it('should preserve unsupported fields in dynamic zone components', async () => {
         const targetData = {
           title: 'Translated Title',
           blocks: [
@@ -440,12 +507,7 @@ describe('ai-localizations service', () => {
           ],
         };
 
-        const result = mergeUnsupportedFields(
-          targetData,
-          sourceDoc,
-          schemaWithDynamicZone,
-          mockGetModel
-        );
+        const result = await mergeUnsupportedFields(targetData, sourceDoc, schema, mockGetModel);
 
         expect(result.title).toBe('Translated Title');
         expect(result.blocks[0].sectionTitle).toBe('Translated Section');
@@ -453,160 +515,6 @@ describe('ai-localizations service', () => {
         expect(result.blocks[0].sectionBackground).toBe('blue');
         expect(result.blocks[1].metaTitle).toBe('Translated Meta');
         expect(result.blocks[1].ogImage).toEqual({ id: 2, url: '/og.jpg' });
-      });
-    });
-  });
-
-  describe('buildDeepPopulate', () => {
-    const mockGetModel = (uid: UID.Schema): Schema.Schema | undefined => {
-      const models: Record<string, unknown> = {
-        'components.media-section': {
-          modelType: 'component',
-          uid: 'components.media-section',
-          modelName: 'media-section',
-          globalId: 'ComponentsMediaSection',
-          category: 'blog',
-          info: { displayName: 'Media Section' },
-          attributes: {
-            sectionTitle: { type: 'string' },
-            sectionImage: { type: 'media', multiple: false },
-            nestedRelation: { type: 'relation', relation: 'oneToOne' },
-          },
-        },
-        'components.simple': {
-          modelType: 'component',
-          uid: 'components.simple',
-          modelName: 'simple',
-          globalId: 'ComponentsSimple',
-          category: 'blog',
-          info: { displayName: 'Simple' },
-          attributes: {
-            text: { type: 'string' },
-          },
-        },
-      };
-      return models[uid] as Schema.Schema | undefined;
-    };
-
-    it('should populate media fields', () => {
-      const schemaAttributes = {
-        title: { type: 'string' },
-        image: { type: 'media', multiple: false },
-      } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
-
-      const result = buildDeepPopulate(schemaAttributes, mockGetModel);
-
-      expect(result).toEqual({ image: true });
-    });
-
-    it('should populate relation fields', () => {
-      const schemaAttributes = {
-        title: { type: 'string' },
-        author: { type: 'relation', relation: 'oneToOne' },
-      } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
-
-      const result = buildDeepPopulate(schemaAttributes, mockGetModel);
-
-      expect(result).toEqual({ author: true });
-    });
-
-    it('should build nested populate for components with media', () => {
-      const schemaAttributes = {
-        title: { type: 'string' },
-        section: {
-          type: 'component',
-          component: 'components.media-section',
-          repeatable: false,
-        },
-      } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
-
-      const result = buildDeepPopulate(schemaAttributes, mockGetModel);
-
-      expect(result).toEqual({
-        section: {
-          populate: {
-            sectionImage: true,
-            nestedRelation: true,
-          },
-        },
-      });
-    });
-
-    it('should return true for components without nested media/relations', () => {
-      const schemaAttributes = {
-        title: { type: 'string' },
-        simple: {
-          type: 'component',
-          component: 'components.simple',
-          repeatable: false,
-        },
-      } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
-
-      const result = buildDeepPopulate(schemaAttributes, mockGetModel);
-
-      expect(result).toEqual({ simple: true });
-    });
-
-    it('should handle dynamic zones with wildcard populate', () => {
-      const schemaAttributes = {
-        title: { type: 'string' },
-        blocks: {
-          type: 'dynamiczone',
-          components: ['components.media-section'],
-        },
-      } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
-
-      const result = buildDeepPopulate(schemaAttributes, mockGetModel);
-
-      expect(result).toEqual({
-        blocks: { populate: '*' },
-      });
-    });
-
-    it('should ignore system fields', () => {
-      const schemaAttributes = {
-        id: { type: 'integer' },
-        documentId: { type: 'string' },
-        createdAt: { type: 'datetime' },
-        image: { type: 'media', multiple: false },
-      } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
-
-      const result = buildDeepPopulate(schemaAttributes, mockGetModel);
-
-      expect(result).toEqual({ image: true });
-      expect(result.id).toBeUndefined();
-      expect(result.documentId).toBeUndefined();
-      expect(result.createdAt).toBeUndefined();
-    });
-
-    it('should handle complex nested structures', () => {
-      const schemaAttributes = {
-        title: { type: 'string' },
-        featuredImage: { type: 'media', multiple: false },
-        author: { type: 'relation', relation: 'oneToOne' },
-        sections: {
-          type: 'component',
-          component: 'components.media-section',
-          repeatable: true,
-        },
-        blocks: {
-          type: 'dynamiczone',
-          components: ['components.media-section'],
-        },
-      } as unknown as Record<string, Schema.Attribute.AnyAttribute>;
-
-      const result = buildDeepPopulate(schemaAttributes, mockGetModel);
-
-      expect(result).toEqual({
-        featuredImage: true,
-        author: true,
-        sections: {
-          populate: {
-            sectionImage: true,
-            nestedRelation: true,
-          },
-        },
-        blocks: { populate: '*' },
       });
     });
   });
