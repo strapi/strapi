@@ -274,6 +274,11 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     // Ensure the editor is in sync after discard
     React.useEffect(() => {
+      // Never deselect while the editor is actively focused (typing / editing),
+      if (ReactEditor.isFocused(editor)) {
+        return;
+      }
+
       // Normalize empty states for comparison to avoid losing focus on the editor when content is deleted
       const normalizedValue = value?.length ? value : null;
       const normalizedEditorState = normalizeBlocksState(editor, editor.children);

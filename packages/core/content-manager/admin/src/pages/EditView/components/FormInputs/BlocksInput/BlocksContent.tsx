@@ -146,7 +146,6 @@ const ReorderButtons = ({
   onMoveDown,
 }: ReorderButtonsProps) => {
   const { formatMessage } = useIntl();
-
   return (
     <Box position="relative" minWidth="3.2rem" contentEditable={false}>
       <Flex
@@ -321,7 +320,7 @@ const DragAndDropElement = ({
               id: getTranslation('components.DragHandle-label'),
               defaultMessage: 'Drag',
             })}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
             aria-disabled={disabled}
             disabled={disabled}
             draggable={isDragAndDropEnabled}
