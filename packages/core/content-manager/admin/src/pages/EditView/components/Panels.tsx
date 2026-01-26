@@ -32,12 +32,13 @@ interface PanelDescription {
  * Panels
  * -----------------------------------------------------------------------------------------------*/
 
-interface PanelsProps {
+const Panels = ({
+  excludeActionsPanel = false,
+  onContentChange,
+}: {
   excludeActionsPanel?: boolean;
   onContentChange?: (hasContent: boolean) => void;
-}
-
-const Panels = ({ excludeActionsPanel = false, onContentChange }: PanelsProps = {}) => {
+} = {}) => {
   const isCloning = useMatch(CLONE_PATH) !== null;
   const [
     {
@@ -79,7 +80,6 @@ const PanelsItems = ({
   panels: (PanelDescription & { id: string })[];
   onHasContentChange?: (hasContent: boolean) => void;
 }) => {
-  const isDesktop = useIsDesktop();
   const hasContent = panels.length > 0;
 
   React.useEffect(() => {
@@ -91,7 +91,7 @@ const PanelsItems = ({
   }
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={isDesktop ? 2 : 4}>
+    <Flex direction="column" alignItems="stretch" gap={{ initial: 4, large: 2 }}>
       {panels.map(({ content, id, ...description }) => (
         <Panel key={id} {...description}>
           {content}
@@ -168,12 +168,12 @@ const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
       ref={ref}
       tag="aside"
       aria-labelledby="additional-information"
-      background={isDesktop ? 'neutral0' : 'transparent'}
-      borderColor={isDesktop ? 'neutral150' : 'transparent'}
+      background={{ initial: 'transparent', large: 'neutral0' }}
+      borderColor={{ initial: 'transparent', large: 'neutral150' }}
       hasRadius={isDesktop}
-      padding={isDesktop ? 4 : 0}
-      shadow={isDesktop ? 'tableShadow' : 'none'}
-      gap={isDesktop ? 3 : 4}
+      padding={{ initial: 0, large: 4 }}
+      shadow={{ initial: 'none', large: 'tableShadow' }}
+      gap={{ initial: 4, large: 3 }}
       direction="column"
       justifyContent="stretch"
       alignItems="flex-start"

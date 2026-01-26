@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { WIDTH_SIDE_NAVIGATION } from '@strapi/admin/strapi-admin';
-import { Portal, Flex, Box, ScrollArea, VisuallyHidden } from '@strapi/design-system';
+import { Portal, Flex, Box, ScrollArea, IconButton } from '@strapi/design-system';
 import { CaretDown, CaretUp } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -38,7 +38,8 @@ const DrawerOverlay = styled(Box)<{ $isOpen: boolean; $hasSideNav: boolean }>`
   }
 `;
 
-const ToggleButton = styled.button`
+const ToggleButton = styled(IconButton)`
+  padding: 0;
   border: none;
   background: ${({ theme }) => theme.colors.neutral200};
   width: 3.2rem;
@@ -52,14 +53,16 @@ const ToggleButton = styled.button`
 const DrawerContent = styled(Flex)`
   flex-direction: column;
   align-items: stretch;
-  max-height: calc(100vh - 16rem);
   position: relative;
   z-index: 1;
   pointer-events: auto;
 `;
 
 const DrawerContentInner = styled(ScrollArea)<{ $isOpen: boolean }>`
-  max-height: ${({ $isOpen }) => ($isOpen ? 'calc(100vh - 20rem)' : '0')};
+  max-height: ${({ $isOpen }) =>
+    $isOpen
+      ? 'calc(100vh - 25rem)' // 25rem is arbitrary, to be able to see a bit of the content behind (navigation and header)
+      : '0'};
   overflow: hidden;
   transition: max-height 0.2s ease-in-out;
 `;
@@ -81,6 +84,10 @@ const ActionsDrawer = ({
     setIsOpen((prev: boolean) => !prev);
   };
 
+  /**
+   * If the content changes and becomes empty and the drawer is open,
+   * we can close it because there's nothing to display anymore.
+   */
   React.useEffect(() => {
     if (!hasContent && isOpen) {
       setIsOpen(false);
@@ -90,12 +97,14 @@ const ActionsDrawer = ({
   return (
     <>
       <DrawerContainer $isOpen={isOpen} $hasSideNav={hasSideNav}>
-        <DrawerOverlay
-          $isOpen={isOpen}
-          $hasSideNav={hasSideNav}
-          onClick={() => setIsOpen(false)}
-          data-testid="actions-drawer-overlay"
-        />
+        {hasContent && children && (
+          <DrawerOverlay
+            $isOpen={isOpen}
+            $hasSideNav={hasSideNav}
+            onClick={() => setIsOpen(false)}
+            data-testid="actions-drawer-overlay"
+          />
+        )}
         <DrawerContent background="neutral0">
           <Flex
             paddingTop={3}
@@ -111,10 +120,10 @@ const ActionsDrawer = ({
               {headerContent}
             </Flex>
             {hasContent && children && (
-              <ToggleButton onClick={toggleOpen}>
-                {isOpen ? <CaretUp fill="neutral600" /> : <CaretDown fill="neutral600" />}
-                <VisuallyHidden>
-                  {isOpen
+              <ToggleButton
+                onClick={toggleOpen}
+                label={
+                  isOpen
                     ? formatMessage({
                         id: 'content-manager.actions-drawer.close',
                         defaultMessage: 'Close more actions',
@@ -122,14 +131,21 @@ const ActionsDrawer = ({
                     : formatMessage({
                         id: 'content-manager.actions-drawer.open',
                         defaultMessage: 'Open more actions',
-                      })}
-                </VisuallyHidden>
+                      })
+                }
+              >
+                {isOpen ? <CaretUp fill="neutral600" /> : <CaretDown fill="neutral600" />}
               </ToggleButton>
             )}
           </Flex>
           {children && (
             <DrawerContentInner $isOpen={isOpen}>
-              <Flex direction="column" alignItems="stretch" justifyContent="flex-start" padding={4}>
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                justifyContent="flex-start"
+                padding={{ initial: 4, large: 0 }}
+              >
                 {children}
               </Flex>
             </DrawerContentInner>
