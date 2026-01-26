@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Typography, Link } from '@strapi/design-system';
 import omit from 'lodash/omit';
-import { useIntl } from 'react-intl';
+import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
@@ -231,6 +231,10 @@ interface RegisterFormValues {
   news: boolean;
 }
 
+interface IntlFormattedMessage extends MessageDescriptor {
+  values?: Record<string, PrimitiveType>;
+}
+
 const Register = ({ hasAdmin }: RegisterProps) => {
   const { toggleNotification } = useNotification();
   const navigate = useNavigate();
@@ -424,7 +428,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                 helpers.setErrors(
                   err.inner.reduce<Record<string, string>>((acc, { message, path }) => {
                     if (path && typeof message === 'object') {
-                      acc[path] = formatMessage(message);
+                      const typedMessage = message as IntlFormattedMessage;
+                      acc[path] = formatMessage(message, typedMessage.values);
                     }
                     return acc;
                   }, {})
