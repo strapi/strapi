@@ -208,7 +208,7 @@ const EditViewPage = () => {
                 }}
                 gap={4}
               >
-                <Grid.Item col={isDesktop ? 9 : 12} xs={12} direction="column" alignItems="stretch">
+                <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
                   <Tabs.Content value="draft">
                     <tours.contentManager.Fields>
                       <Box />
@@ -220,7 +220,7 @@ const EditViewPage = () => {
                   </Tabs.Content>
                 </Grid.Item>
                 {isDesktop && (
-                  <Grid.Item col={3} xs={12} direction="column" alignItems="stretch">
+                  <Grid.Item col={3} direction="column" alignItems="stretch">
                     <Panels />
                   </Grid.Item>
                 )}

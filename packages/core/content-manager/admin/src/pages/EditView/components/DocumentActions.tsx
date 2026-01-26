@@ -22,7 +22,6 @@ import {
   ButtonProps,
   Tooltip,
   IconButton,
-  Box,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
