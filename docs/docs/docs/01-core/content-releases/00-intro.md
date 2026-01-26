@@ -10,7 +10,7 @@ A release contains various content entries, each capable of being assigned a spe
 
 ### Architecture
 
-As opposed to other EE features built in the [EE folder](/docs/core/admin/01-ee/00-intro), Releases is built as a plugin. The plugin can be found in:
+As opposed to other EE features built in the [EE folder](docs/docs/01-core/admin/01-ee/00-intro.md), Releases is built as a plugin. The plugin can be found in:
 
 ```
 packages/core/content-releases
