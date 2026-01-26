@@ -108,12 +108,12 @@ const config = {
             sidebarId: 'api',
             label: 'API Reference',
           },
-          // {
-          //   type: 'docSidebar',
-          //   position: 'left',
-          //   sidebarId: 'exports',
-          //   label: 'Exports',
-          // },
+          {
+            type: 'docSidebar',
+            position: 'left',
+            sidebarId: 'exports',
+            label: 'Exports',
+          },
           {
             type: 'docSidebar',
             position: 'left',

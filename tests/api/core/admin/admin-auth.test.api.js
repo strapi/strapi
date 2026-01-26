@@ -317,19 +317,19 @@ describe('Admin Auth End to End', () => {
           details: {
             errors: [
               {
-                message: 'Password must be at least 8 characters long',
+                message: 'userInfo.password must be at least 8 characters',
                 name: 'ValidationError',
                 path: ['userInfo', 'password'],
                 value: '123',
               },
               {
-                message: 'Password must contain at least one lowercase character',
+                message: 'userInfo.password must contain at least one lowercase character',
                 name: 'ValidationError',
                 path: ['userInfo', 'password'],
                 value: '123',
               },
               {
-                message: 'Password must contain at least one uppercase character',
+                message: 'userInfo.password must contain at least one uppercase character',
                 name: 'ValidationError',
                 path: ['userInfo', 'password'],
                 value: '123',

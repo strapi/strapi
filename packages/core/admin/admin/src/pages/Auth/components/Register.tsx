@@ -421,15 +421,43 @@ const Register = ({ hasAdmin }: RegisterProps) => {
               }
             } catch (err) {
               if (err instanceof ValidationError) {
-                helpers.setErrors(
-                  err.inner.reduce<Record<string, string>>((acc, { message, path }) => {
-                    if (path && typeof message === 'object') {
-                      acc[path] = formatMessage(message);
+                const formatDescriptor = (msg: any) => {
+                  try {
+                    if (!msg) return '';
+                    if (typeof msg === 'string') return msg;
+                    // Direct descriptor
+                    if ('id' in msg && 'defaultMessage' in msg) return formatMessage(msg as any);
+                    // Wrapped descriptor: { message: { id, defaultMessage } }
+                    if (msg.message && typeof msg.message === 'object' && 'id' in msg.message) {
+                      return formatMessage(msg.message as any);
                     }
+                    // errors array: [{ id, defaultMessage }]
+                    if (Array.isArray(msg.errors) && msg.errors.length > 0) {
+                      const first = msg.errors[0];
+                      if (typeof first === 'string') return first;
+                      if (first && typeof first === 'object' && 'id' in first)
+                        return formatMessage(first as any);
+                    }
+                    // fallback to defaultMessage if present
+                    if ('defaultMessage' in msg) return msg.defaultMessage;
+                    return String(msg);
+                  } catch (e) {
+                    return String(msg);
+                  }
+                };
+
+                const computed = err.inner.reduce<Record<string, string>>(
+                  (acc, { message, path }) => {
+                    if (!path) return acc;
+                    acc[path] = formatDescriptor(message);
                     return acc;
-                  }, {})
+                  },
+                  {}
                 );
+
+                helpers.setErrors(computed);
               }
+
               setSubmitCount(submitCount + 1);
             }
           }}
