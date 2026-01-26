@@ -304,8 +304,9 @@ const DragAndDropElement = ({
                 }
               : undefined
           }
-          onMouseMove={() => setDragVisibility('visible')}
-          onSelect={() => setDragVisibility('visible')}
+          onMouseEnter={() => setDragVisibility('visible')}
+          onFocusCapture={() => setDragVisibility('visible')}
+          onBlurCapture={() => setDragVisibility('hidden')}
           onMouseLeave={() => setDragVisibility('hidden')}
           aria-disabled={disabled}
           $dragVisibility={dragVisibility}
