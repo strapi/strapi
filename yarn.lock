@@ -14368,17 +14368,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:11.3.0":
-  version: 11.3.0
-  resolution: "better-sqlite3@npm:11.3.0"
-  dependencies:
-    bindings: "npm:^1.5.0"
-    node-gyp: "npm:latest"
-    prebuild-install: "npm:^7.1.1"
-  checksum: 10c0/9adc99683300699581da5d7288e4a261b7d4381fd99c762fc6a0e9b1e1e226009c1333b46b10c1c453c356b20cb8be037a4616b1e717b3d1a00bd8493bec506e
-  languageName: node
-  linkType: hard
-
 "better-sqlite3@npm:12.4.1":
   version: 12.4.1
   resolution: "better-sqlite3@npm:12.4.1"
@@ -15684,25 +15673,6 @@ __metadata:
   checksum: 10c0/415205c7627f9e4f358f571266422980c9fe2d99086be0c9a48008ef7c771f32b0fbe8e97a441ffedc3910872f917a0675fe0fe3c3b6d331cda6d8690be06338
   languageName: node
   linkType: hard
-
-"complex@workspace:examples/complex":
-  version: 0.0.0-use.local
-  resolution: "complex@workspace:examples/complex"
-  dependencies:
-    "@strapi/plugin-users-permissions": "workspace:*"
-    "@strapi/strapi": "workspace:*"
-    "@types/node": "npm:^20"
-    "@types/react": "npm:^18"
-    "@types/react-dom": "npm:^18"
-    better-sqlite3: "npm:11.3.0"
-    mysql2: "npm:3.9.8"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.22.3"
-    styled-components: "npm:6.1.8"
-    typescript: "npm:^5"
-  languageName: unknown
-  linkType: soft
 
 "component-emitter@npm:^1.3.0":
   version: 1.3.0
