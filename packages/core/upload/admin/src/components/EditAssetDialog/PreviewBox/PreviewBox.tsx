@@ -92,6 +92,7 @@ export const PreviewBox = ({
   const [focalPoint, setFocalPoint] = React.useState<FocalPoint>(
     formFocalPoint ?? { x: 50, y: 50 }
   );
+  const [hoverFocalPoint, setHoverFocalPoint] = React.useState<FocalPoint | null>(null);
 
   const {
     upload,
@@ -185,18 +186,31 @@ export const PreviewBox = ({
     setHasCropIntent(true);
   };
 
-  const handleFocalPointClick = (e: React.MouseEvent<HTMLElement>) => {
-    if (!hasFocalPointIntent) return;
-
+  const calculateFocalPointFromEvent = (e: React.MouseEvent<HTMLElement>): FocalPoint => {
     const { clientX, clientY } = e;
     const rect = e.currentTarget.getBoundingClientRect();
     const posX = clientX - rect.left;
     const posY = clientY - rect.top;
 
-    setFocalPoint({
+    return {
       x: Number(((posX / rect.width) * 100).toFixed(2)),
       y: Number(((posY / rect.height) * 100).toFixed(2)),
-    });
+    };
+  };
+
+  const handleFocalPointClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (!hasFocalPointIntent) return;
+    setFocalPoint(calculateFocalPointFromEvent(e));
+    setHoverFocalPoint(null);
+  };
+
+  const handleFocalPointMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (!hasFocalPointIntent) return;
+    setHoverFocalPoint(calculateFocalPointFromEvent(e));
+  };
+
+  const handleFocalPointMouseLeave = () => {
+    setHoverFocalPoint(null);
   };
 
   const handleFocalPointCancel = () => {
@@ -213,6 +227,11 @@ export const PreviewBox = ({
   const handleFocalPointValidate = () => {
     setHasFocalPointIntent(false);
     onFocalPointFinish(focalPoint);
+  };
+
+  const handleFocalPointReset = () => {
+    setFocalPoint({ x: 50, y: 50 });
+    setHoverFocalPoint(null);
   };
 
   const isInFocalPointMode = hasFocalPointIntent === true;
@@ -233,6 +252,7 @@ export const PreviewBox = ({
           <FocalPointActions
             onValidate={handleFocalPointValidate}
             onCancel={handleFocalPointCancel}
+            onReset={handleFocalPointReset}
           />
         )}
 
@@ -306,7 +326,10 @@ export const PreviewBox = ({
             </UploadProgressWrapper>
           )}
 
-          <FocalPointImageWrapper>
+          <FocalPointImageWrapper
+            onMouseMove={handleFocalPointMouseMove}
+            onMouseLeave={handleFocalPointMouseLeave}
+          >
             <AssetPreview
               ref={previewRef}
               mime={asset.mime!}
@@ -318,11 +341,19 @@ export const PreviewBox = ({
                 }
               }}
               onClick={handleFocalPointClick}
-              style={{ cursor: isInFocalPointMode ? 'crosshair' : undefined }}
+              style={{ cursor: isInFocalPointMode && hoverFocalPoint ? 'crosshair' : undefined }}
             />
 
+            {/* Show the set focal point marker */}
             {isInFocalPointMode && (
-              <FocalPointAim $focalPoint={focalPoint}>
+              <FocalPointAim $focalPoint={focalPoint} $isPreview={false}>
+                <FocalPointHalo />
+              </FocalPointAim>
+            )}
+
+            {/* Show hover preview as additional semi-transparent marker */}
+            {isInFocalPointMode && hoverFocalPoint && (
+              <FocalPointAim $focalPoint={hoverFocalPoint} $isPreview={true}>
                 <FocalPointHalo />
               </FocalPointAim>
             )}
@@ -333,11 +364,16 @@ export const PreviewBox = ({
           paddingLeft={2}
           paddingRight={2}
           justifyContent="flex-end"
-          $blurry={isInCroppingMode}
+          $blurry={isInCroppingMode || isInFocalPointMode}
         >
           {isInCroppingMode && width && height && (
             <BadgeOverride background="neutral900" color="neutral0">
               {width && height ? `${height}✕${width}` : 'N/A'}
+            </BadgeOverride>
+          )}
+          {isInFocalPointMode && (
+            <BadgeOverride background="neutral900" color="neutral0">
+              {`x: ${focalPoint.x}% | y: ${focalPoint.y}%`}
             </BadgeOverride>
           )}
         </ActionRow>
