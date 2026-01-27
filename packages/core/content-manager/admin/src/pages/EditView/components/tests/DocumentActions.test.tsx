@@ -54,7 +54,10 @@ describe('DocumentActions', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it('should render a notification if either of the button actions has been pressed and the notification dialog props are provided', async () => {
@@ -200,7 +203,10 @@ describe('DocumentActionsMenu', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: 'More document actions' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'More document actions' })).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it("should render an actions's icon if provided", async () => {
