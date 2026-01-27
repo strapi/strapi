@@ -4,54 +4,30 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+const {
+  getContainerName: getComposeContainerName,
+  getComposeEnv,
+  COMPOSE_PROJECT_NAME,
+} = require('./db-utils');
+
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
 const DOCKER_COMPOSE_FILE = path.join(COMPLEX_DIR, 'docker-compose.dev.yml');
-const COMPOSE_PROJECT_NAME = 'strapi_complex';
 const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 
 const DB_NAME = process.env.DATABASE_NAME || 'strapi';
 const DB_USER = process.env.DATABASE_USERNAME || 'strapi';
 const DB_PASSWORD = process.env.DATABASE_PASSWORD || 'strapi';
 
-function getComposeEnv() {
-  return { ...process.env, COMPOSE_PROJECT_NAME };
-}
-
 // Try to find the container name dynamically, fallback to expected name
 function getContainerName() {
-  try {
-    const output = execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} ps -q mysql`, {
-      cwd: COMPLEX_DIR,
-      encoding: 'utf8',
-      env: getComposeEnv(),
-    }).trim();
-    if (output) {
-      const containerId = output.split('\n')[0];
-      const nameOutput = execSync(`docker inspect --format='{{.Name}}' ${containerId}`, {
-        encoding: 'utf8',
-      }).trim();
-      return nameOutput.replace(/^\//, ''); // Remove leading slash
-    }
-  } catch (error) {
-    // Fallback to expected name pattern
+  const name = getComposeContainerName(DOCKER_COMPOSE_FILE, COMPLEX_DIR, 'mysql');
+  if (!name) {
+    throw new Error(
+      `MySQL container not found. Start it with "yarn db:start:mysql" (COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}).`
+    );
   }
-  // Fallback: try to find the running container by expected name
-  try {
-    const output = execSync(
-      `docker ps --filter "name=${COMPOSE_PROJECT_NAME}-mysql" --filter "status=running" --format "{{.Names}}"`,
-      { encoding: 'utf8' }
-    ).trim();
-    if (output) {
-      return output.split('\n')[0];
-    }
-  } catch (error) {
-    // Continue to error below
-  }
-
-  throw new Error(
-    `MySQL container not found. Start it with "yarn db:start:mysql" (COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}).`
-  );
+  return name;
 }
 
 const command = process.argv[2];

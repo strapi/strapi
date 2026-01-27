@@ -4,60 +4,30 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+const {
+  getContainerName: getComposeContainerName,
+  getComposeEnv,
+  startContainer,
+  COMPOSE_PROJECT_NAME,
+} = require('./db-utils');
+
 const SCRIPT_DIR = __dirname;
 const COMPLEX_DIR = path.resolve(SCRIPT_DIR, '..');
 const DOCKER_COMPOSE_FILE = path.join(COMPLEX_DIR, 'docker-compose.dev.yml');
-const COMPOSE_PROJECT_NAME = 'strapi_complex';
 const SNAPSHOTS_DIR = path.join(COMPLEX_DIR, 'snapshots');
 
 const DB_NAME = process.env.DATABASE_NAME || 'strapi';
 const DB_USER = process.env.DATABASE_USERNAME || 'strapi';
-const DB_PASSWORD = process.env.DATABASE_PASSWORD || 'strapi';
-
-function getComposeEnv() {
-  return { ...process.env, COMPOSE_PROJECT_NAME };
-}
 
 // Try to find the container name dynamically, fallback to expected name
-function getContainerName() {
-  // First, try to find the running postgres container for this compose project
-  try {
-    const output = execSync(
-      `docker ps --filter "name=${COMPOSE_PROJECT_NAME}-postgres" --filter "status=running" --format "{{.Names}}"`,
-      {
-        encoding: 'utf8',
-      }
-    ).trim();
-    if (output) {
-      const names = output.split('\n').filter((n) => n.trim());
-      if (names.length > 0) {
-        return names[0];
-      }
-    }
-  } catch (error) {
-    // Continue to next method
+function resolveContainerName() {
+  const name = getComposeContainerName(DOCKER_COMPOSE_FILE, COMPLEX_DIR, 'postgres');
+  if (!name) {
+    throw new Error(
+      `Postgres container not found. Start it with "yarn db:start:postgres" (COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}).`
+    );
   }
-
-  // Second, try docker-compose method
-  try {
-    const output = execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} ps -q postgres`, {
-      cwd: COMPLEX_DIR,
-      encoding: 'utf8',
-      env: getComposeEnv(),
-    }).trim();
-    if (output) {
-      const containerId = output.split('\n')[0];
-      const nameOutput = execSync(`docker inspect --format='{{.Name}}' ${containerId}`, {
-        encoding: 'utf8',
-      }).trim();
-      return nameOutput.replace(/^\//, ''); // Remove leading slash
-    }
-  } catch (error) {
-    // Continue to fallback
-  }
-
-  // Final fallback: default compose container name
-  return `${COMPOSE_PROJECT_NAME}-postgres-1`;
+  return name;
 }
 
 const command = process.argv[2];
@@ -72,19 +42,6 @@ function ensureSnapshotsDir() {
 function execDocker(command) {
   try {
     execSync(command, { stdio: 'inherit', cwd: COMPLEX_DIR, env: getComposeEnv() });
-  } catch (error) {
-    console.error(`Error executing: ${command}`);
-    process.exit(1);
-  }
-}
-
-function execDockerExec(command) {
-  const containerName = getContainerName();
-  try {
-    execSync(`docker exec ${containerName} ${command}`, {
-      stdio: 'inherit',
-      cwd: COMPLEX_DIR,
-    });
   } catch (error) {
     console.error(`Error executing: ${command}`);
     process.exit(1);
@@ -114,7 +71,7 @@ switch (command) {
     const snapshotPath = path.join(SNAPSHOTS_DIR, `postgres-${snapshotName}.sql`);
     console.log(`Creating snapshot: ${snapshotName}...`);
     {
-      const containerName = getContainerName();
+      const containerName = resolveContainerName();
       try {
         execSync(
           `docker exec ${containerName} pg_dump -U ${DB_USER} -d ${DB_NAME} > ${snapshotPath}`,
@@ -141,7 +98,7 @@ switch (command) {
     }
     console.log(`Restoring snapshot: ${snapshotName}...`);
     {
-      const containerName = getContainerName();
+      const containerName = resolveContainerName();
       try {
         // Drop and recreate database
         execSync(
@@ -169,11 +126,7 @@ switch (command) {
     // Ensure container is running first
     console.log('Ensuring postgres container is running...');
     try {
-      execSync(`docker-compose -f ${DOCKER_COMPOSE_FILE} up -d postgres`, {
-        stdio: 'inherit',
-        cwd: COMPLEX_DIR,
-        env: getComposeEnv(),
-      });
+      startContainer(DOCKER_COMPOSE_FILE, COMPLEX_DIR, 'postgres');
       // Wait a moment for container to be ready
       execSync('sleep 2', { stdio: 'inherit' });
     } catch (error) {
@@ -183,7 +136,7 @@ switch (command) {
 
     console.log('Wiping postgres database...');
     {
-      const containerName = getContainerName();
+      const containerName = resolveContainerName();
       try {
         execSync(
           `docker exec ${containerName} psql -U ${DB_USER} -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"`,

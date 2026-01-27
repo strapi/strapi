@@ -22,7 +22,7 @@ This project includes tools for testing migrations between Strapi v4 and v5 by c
 1. **Create/Update the external v4 project:**
 
    ```bash
-   yarn clone:v4
+   yarn setup:v4
    ```
 
    This creates a Strapi v4 project outside the monorepo (default: a sibling directory named `complex-v4`). You can override the location via `V4_OUTSIDE_DIR`.
@@ -140,7 +140,7 @@ This displays a table showing how many records are in each table, useful for qui
 1. **Setup v4 project** (if not already done):
 
    ```bash
-   yarn clone:v4
+   yarn setup:v4
    ```
 
 2. **Wipe the database** (ensures v4 format, no v5 schema):
@@ -158,7 +158,11 @@ This displays a table showing how many records are in each table, useful for qui
 
    (v4 will automatically start its database if needed)
 
-4. **Create test data** in the v4 admin panel (manual step)
+4. **Seed test data** in the v4 project:
+
+   ```bash
+   yarn seed
+   ```
 
 5. **Create snapshot:**
 
