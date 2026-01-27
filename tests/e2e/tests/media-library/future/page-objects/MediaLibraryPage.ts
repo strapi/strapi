@@ -31,16 +31,28 @@ export class MediaLibraryPage {
   }
 
   /**
-   * Upload files using the import files menu
+   * Upload files via the file picker dialog
+   * This method opens the menu, clicks Import files, verifies the file picker opens, and uploads files
    */
-  async uploadFiles(filePaths: string | string[]) {
+  async uploadFilesWithFilePicker(filePaths: string | string[]) {
     const paths = Array.isArray(filePaths) ? filePaths : [filePaths];
 
     // Open the New menu
     await this.openNewMenu();
 
-    // Set the files to upload (this triggers the file input without clicking)
-    await this.fileInput.setInputFiles(paths);
+    // Set up a promise to wait for the file chooser
+    const fileChooserPromise = this.page.waitForEvent('filechooser');
+
+    // Click the Import files menu item
+    await this.importFilesMenuItem.click();
+
+    // Wait for and verify the file picker is present
+    const fileChooser = await fileChooserPromise;
+
+    // Upload the files
+    await fileChooser.setFiles(paths);
+
+    return fileChooser;
   }
 
   /**
@@ -74,5 +86,13 @@ export class MediaLibraryPage {
       .getByRole('alert')
       .first();
     return await notification.textContent();
+  }
+
+  /**
+   * Check if the file input value is empty (reset)
+   */
+  async isFileInputReset() {
+    const inputValue = await this.fileInput.inputValue();
+    return inputValue === '';
   }
 }

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Layouts, useNotification } from '@strapi/admin/strapi-admin';
+import { Layouts, useNotification, useAPIErrorHandler } from '@strapi/admin/strapi-admin';
 import { MenuItem, SimpleMenu, VisuallyHidden } from '@strapi/design-system';
 import { ChevronDown, Files } from '@strapi/icons';
 
@@ -10,7 +10,8 @@ import { useUploadFilesMutation } from '../services/api';
 export const MediaLibraryPage = () => {
   const { t } = useTranslation();
   const { toggleNotification } = useNotification();
-  const fileInputRef = React.useRef<HTMLInputElement>(null!);
+  const { _unstableFormatAPIError } = useAPIErrorHandler();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [uploadFiles] = useUploadFilesMutation();
 
   const handleFileSelect = () => {
@@ -47,12 +48,15 @@ export const MediaLibraryPage = () => {
             'assets.uploaded',
             '{number, plural, one {# asset} other {# assets}} uploaded successfully',
             { number: filesArray.length }
-          ),
+          ) as string,
         });
       } catch (error) {
+        // Format the error message using the API error handler to provide
+        // context-specific feedback (e.g., file size limits, format restrictions, network errors)
+        const errorMessage = _unstableFormatAPIError(error as Error);
         toggleNotification({
           type: 'danger',
-          message: t('upload.generic-error', 'An error occurred while uploading the file.'),
+          message: errorMessage,
         });
       }
     }
