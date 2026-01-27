@@ -59,6 +59,10 @@ class LocalFileSourceProvider implements ISourceProvider {
 
   #diagnostics?: IDiagnosticReporter;
 
+  #assetMetadataCache: Map<string, IFile> | null = null;
+
+  #assetMetadataCachePromise: Promise<void> | null = null;
+
   constructor(options: ILocalFileSourceProviderOptions) {
     this.options = options;
 
@@ -133,9 +137,15 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
-  async #loadAssetMetadata(path: string) {
-    const backupStream = this.#getBackupStream();
-    return this.#parseJSONFile<IFile>(backupStream, path);
+  async #loadAssetMetadata(filepath: string) {
+    if (!this.#assetMetadataCache) {
+      throw new Error('Asset metadata cache has not been preloaded');
+    }
+
+    const filename = path.basename(filepath);
+    if (this.#assetMetadataCache.has(filename)) return this.#assetMetadataCache.get(filename);
+
+    throw new Error(`Metadata not found in cache for ${filename}`);
   }
 
   async getMetadata() {
@@ -185,7 +195,90 @@ class LocalFileSourceProvider implements ISourceProvider {
     return this.#streamJsonlDirectory('configuration');
   }
 
-  createAssetsReadStream(): Readable | Promise<Readable> {
+  async preloadAssetMetadataCache(): Promise<void> {
+    if (this.#assetMetadataCache) return;
+    if (this.#assetMetadataCachePromise) return this.#assetMetadataCachePromise;
+
+    const cache = new Map<string, IFile>();
+    const inStream = this.#getBackupStream();
+
+    const load = new Promise<void>((resolve, reject) => {
+      let activeAsyncEntries = 0;
+      let pipelineDone = false;
+      let settled = false;
+
+      const maybeDone = () => {
+        if (pipelineDone && activeAsyncEntries === 0 && !settled) {
+          settled = true;
+          resolve();
+        }
+      };
+
+      const fail = (err: unknown) => {
+        if (!settled) {
+          settled = true;
+          reject(err instanceof Error ? err : new Error(String(err)));
+        }
+      };
+
+      const runReadEntry = async (fn: () => Promise<void>) => {
+        activeAsyncEntries += 1;
+        try {
+          await fn();
+        } catch (e) {
+          fail(e);
+        } finally {
+          activeAsyncEntries -= 1;
+          maybeDone();
+        }
+      };
+
+      pipeline(
+        [
+          inStream,
+          new Parser({
+            filter(filePath: string, entry: Stats | ReadEntry) {
+              if (!('type' in entry) || entry.type !== 'File') {
+                return false;
+              }
+              return isFilePathInDirname('assets/metadata', filePath);
+            },
+            async onReadEntry(entry: ReadEntry) {
+              await runReadEntry(async () => {
+                try {
+                  const body = await entry.concat();
+                  const parsedContent = JSON.parse(body.toString());
+                  cache.set(path.basename(entry.path), parsedContent);
+                } catch (error) {
+                  throw new Error(`Failed to read metadata for ${entry.path}`, { cause: error });
+                }
+              });
+            },
+          }),
+        ],
+        (err) => {
+          if (err) {
+            fail(err);
+          } else {
+            pipelineDone = true;
+            maybeDone();
+          }
+        }
+      );
+    });
+    this.#assetMetadataCachePromise = load;
+
+    try {
+      await load;
+      this.#assetMetadataCache = cache;
+    } finally {
+      this.#assetMetadataCachePromise = null;
+    }
+  }
+
+  async createAssetsReadStream(): Promise<Readable> {
+    this.#reportInfo('caching asset metadata');
+    await this.preloadAssetMetadataCache();
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
@@ -352,23 +445,15 @@ class LocalFileSourceProvider implements ISourceProvider {
             },
 
             async onReadEntry(entry: ReadEntry) {
-              // Collect all the content of the entry stream (ReadEntry has no .collect() in tar v7)
-              const chunks: Buffer[] = [];
-              for await (const chunk of entry) {
-                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-              }
+              const body = await entry.concat();
 
               try {
-                // Parse from buffer array to string to JSON
-                const parsedContent = JSON.parse(Buffer.concat(chunks).toString());
+                const parsedContent = JSON.parse(body.toString());
 
                 // Resolve the Promise with the parsed content
                 resolve(parsedContent);
               } catch (e) {
                 reject(e);
-              } finally {
-                // Cleanup (close the stream associated to the entry)
-                entry.destroy();
               }
             },
           }),
