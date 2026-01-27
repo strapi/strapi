@@ -1,5 +1,7 @@
 export interface FeaturesConfig {
-  future?: object;
+  future?: {
+    unstableMediaLibrary?: boolean;
+  };
 }
 
 export interface FeaturesService {

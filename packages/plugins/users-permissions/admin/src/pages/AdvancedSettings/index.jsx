@@ -135,6 +135,7 @@ const AdvancedSettingsPage = () => {
                     disabled={!modified || !canUpdate}
                     startIcon={<Check />}
                     size="S"
+                    fullWidth
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>

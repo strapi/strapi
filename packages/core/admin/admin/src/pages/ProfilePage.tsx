@@ -213,6 +213,7 @@ const ProfilePage = () => {
                     loading={isSubmitting}
                     type="submit"
                     disabled={!modified}
+                    fullWidth
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>

@@ -53,6 +53,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     mockAiMetadataService = {
       isEnabled: jest.fn(),
       processFiles: jest.fn(),
+      updateFilesWithAIMetadata: jest.fn().mockResolvedValue(undefined),
     };
 
     uploadService = {
@@ -382,8 +383,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       expect(mockAiMetadataService.processFiles).toHaveBeenCalledWith([
         expect.objectContaining({
-          filepath: '/uploads/test.jpg',
-          mimetype: 'image/jpeg',
+          id: 1,
+          name: 'test.jpg',
+          url: '/uploads/test.jpg',
+          mime: 'image/jpeg',
+          provider: 'local',
         }),
       ]);
     });
@@ -414,7 +418,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         { altText: 'AI generated alt text', caption: 'AI generated caption' },
       ]);
 
-      uploadService.upload.mockResolvedValue([
+      const uploadedFiles = [
         {
           id: 1,
           name: 'test.jpg',
@@ -422,17 +426,16 @@ describe('Admin Upload Controller - AI Service Connection', () => {
           url: '/uploads/test.jpg',
           provider: 'local',
         },
-      ]);
+      ];
+
+      uploadService.upload.mockResolvedValue(uploadedFiles);
 
       await adminUploadController.uploadFiles(mockContext as Context);
 
-      expect(uploadService.updateFileInfo).toHaveBeenCalledWith(
-        1,
-        {
-          alternativeText: 'AI generated alt text',
-          caption: 'AI generated caption',
-        },
-        { user: { id: 1 } }
+      expect(mockAiMetadataService.updateFilesWithAIMetadata).toHaveBeenCalledWith(
+        uploadedFiles,
+        [{ altText: 'AI generated alt text', caption: 'AI generated caption' }],
+        { id: 1 }
       );
     });
   });
