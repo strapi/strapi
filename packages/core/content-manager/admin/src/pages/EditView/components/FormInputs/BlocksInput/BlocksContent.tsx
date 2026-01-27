@@ -10,7 +10,7 @@ import {
   IconButtonComponent,
   useComposedRefs,
 } from '@strapi/design-system';
-import { Drag, ArrowUp, ArrowDown } from '@strapi/icons';
+import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
@@ -120,105 +120,15 @@ const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton)<{
   }
 `;
 
-type ReorderButtonsProps = {
-  disabled: boolean;
-  showMoveUp: boolean;
-  showMoveDown: boolean;
-  upOrder: number;
-  downOrder: number;
-  onMoveUp: (e: React.MouseEvent) => void;
-  onMoveDown: (e: React.MouseEvent) => void;
-};
-
-const ReorderButton = styled(IconButton)`
-  svg {
-    min-width: ${({ theme }) => theme.spaces[3]};
-  }
-`;
-
-const ReorderButtons = ({
-  disabled,
-  showMoveUp,
-  showMoveDown,
-  upOrder,
-  downOrder,
-  onMoveUp,
-  onMoveDown,
-}: ReorderButtonsProps) => {
-  const { formatMessage } = useIntl();
-  return (
-    <Box position="relative" minWidth="3.2rem" contentEditable={false}>
-      <Flex
-        position="absolute"
-        top="0"
-        bottom="0"
-        left="0"
-        direction="column"
-        justifyContent="flex-start"
-        alignItems="center"
-        contentEditable={false}
-      >
-        <ReorderButton
-          variant="ghost"
-          onClick={onMoveUp}
-          disabled={disabled}
-          aria-hidden={!showMoveUp}
-          tabIndex={showMoveUp ? 0 : -1}
-          label={formatMessage({
-            id: getTranslation('components.DynamicZone.move-up'),
-            defaultMessage: 'Move up',
-          })}
-          size="XS"
-          style={{
-            order: upOrder,
-            visibility: showMoveUp ? 'visible' : 'hidden',
-            pointerEvents: showMoveUp ? 'auto' : 'none',
-          }}
-        >
-          <ArrowUp />
-        </ReorderButton>
-
-        <ReorderButton
-          variant="ghost"
-          onClick={onMoveDown}
-          disabled={disabled}
-          aria-hidden={!showMoveDown}
-          tabIndex={showMoveDown ? 0 : -1}
-          label={formatMessage({
-            id: getTranslation('components.DynamicZone.move-down'),
-            defaultMessage: 'Move down',
-          })}
-          size="XS"
-          style={{
-            order: downOrder,
-            visibility: showMoveDown ? 'visible' : 'hidden',
-            pointerEvents: showMoveDown ? 'auto' : 'none',
-          }}
-        >
-          <ArrowDown />
-        </ReorderButton>
-      </Flex>
-    </Box>
-  );
-};
-
 type Direction = {
   setDragDirection: (direction: DragDirection) => void;
   dragDirection: DragDirection | null;
-};
-
-type SelectionTopLevel = {
-  anchor: number;
-  focus: number;
 };
 
 type DragAndDropElementProps = Direction & {
   children: RenderElementProps['children'];
   index: Array<number>;
   dragHandleTopMargin?: CSSProperties['marginTop'];
-  disabled: boolean;
-  name: string;
-  onMoveBlock: (newIndex: Array<number>, currentIndex: Array<number>) => void;
 };
 
 const DragAndDropElement = ({
@@ -227,13 +137,38 @@ const DragAndDropElement = ({
   setDragDirection,
   dragDirection,
   dragHandleTopMargin,
-  disabled,
-  name,
-  onMoveBlock,
 }: DragAndDropElementProps) => {
+  const { editor, disabled, name, setLiveText } = useBlocksEditorContext('DragAndDropElement');
   const { formatMessage } = useIntl();
-  const isDragAndDropEnabled = !disabled;
   const [dragVisibility, setDragVisibility] = React.useState<CSSProperties['visibility']>('hidden');
+  const isDragAndDropEnabled = !disabled;
+
+  const handleMoveBlock = React.useCallback(
+    (newIndex: Array<number>, currentIndex: Array<number>) => {
+      Transforms.moveNodes(editor, {
+        at: currentIndex,
+        to: newIndex,
+      });
+
+      // Add 1 to the index for the live text message
+      const currentIndexPosition = [currentIndex[0] + 1, ...currentIndex.slice(1)];
+      const newIndexPosition = [newIndex[0] + 1, ...newIndex.slice(1)];
+
+      setLiveText(
+        formatMessage(
+          {
+            id: getTranslation('components.Blocks.dnd.reorder'),
+            defaultMessage: '{item}, moved. New position in the editor: {position}.',
+          },
+          {
+            item: `${name}.${currentIndexPosition.join(',')}`,
+            position: `${newIndexPosition.join(',')} of ${editor.children.length}`,
+          }
+        )
+      );
+    },
+    [editor, formatMessage, name, setLiveText]
+  );
 
   const [{ handlerId, isDragging, isOverDropTarget, direction }, blockRef, dropRef, dragRef] =
     useDragAndDrop(isDragAndDropEnabled, {
@@ -244,7 +179,7 @@ const DragAndDropElement = ({
         displayedValue: children,
       },
       onDropItem(currentIndex, newIndex) {
-        if (newIndex) onMoveBlock(newIndex, currentIndex);
+        if (newIndex) handleMoveBlock(newIndex, currentIndex);
       },
     });
 
@@ -256,6 +191,11 @@ const DragAndDropElement = ({
       setDragDirection(direction);
     }
   }, [direction, setDragDirection]);
+
+  // On selection change hide drag handle
+  React.useEffect(() => {
+    setDragVisibility('hidden');
+  }, [editor.selection]);
 
   return (
     <Wrapper ref={composedBoxRefs} $isOverDropTarget={isOverDropTarget}>
@@ -337,186 +277,6 @@ const DragAndDropElement = ({
   );
 };
 
-type ReorderElementProps = {
-  children: RenderElementProps['children'];
-  index: Array<number>;
-  disabled: boolean;
-  totalBlocks: number;
-  selectionTopLevel: SelectionTopLevel | null;
-  onMoveBlock: (newIndex: Array<number>, currentIndex: Array<number>) => void;
-  editor: Editor;
-};
-
-/**
- * Mobile alternative to DnD: use up/down arrows to move a block.
- * Only supported for top-level draggable blocks (path length === 1).
- */
-const ReorderElement = ({
-  children,
-  index,
-  disabled,
-  totalBlocks,
-  selectionTopLevel,
-  onMoveBlock,
-  editor,
-}: ReorderElementProps) => {
-  const currentBlockIndex = index.length === 1 ? index[0] : null;
-  const canMoveUp = currentBlockIndex !== null && currentBlockIndex > 0;
-  const canMoveDown = currentBlockIndex !== null && currentBlockIndex < totalBlocks - 1;
-
-  const isBlockInFocus =
-    currentBlockIndex !== null &&
-    !!selectionTopLevel &&
-    selectionTopLevel.anchor === currentBlockIndex &&
-    selectionTopLevel.focus === currentBlockIndex;
-
-  const handleMoveUp = React.useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (disabled || !canMoveUp || currentBlockIndex === null) return;
-
-      const newIndex = [currentBlockIndex - 1];
-      onMoveBlock(newIndex, [currentBlockIndex]);
-      // Keep the moved block focused so arrows/disabled state update immediately.
-      Transforms.select(editor, Editor.start(editor, newIndex));
-      ReactEditor.focus(editor);
-    },
-    [canMoveUp, currentBlockIndex, disabled, editor, onMoveBlock]
-  );
-
-  const handleMoveDown = React.useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (disabled || !canMoveDown || currentBlockIndex === null) return;
-
-      const newIndex = [currentBlockIndex + 1];
-      onMoveBlock(newIndex, [currentBlockIndex]);
-      // Keep the moved block focused so arrows/disabled state update immediately.
-      Transforms.select(editor, Editor.start(editor, newIndex));
-      ReactEditor.focus(editor);
-    },
-    [canMoveDown, currentBlockIndex, disabled, editor, onMoveBlock]
-  );
-
-  const showMoveUp = isBlockInFocus && canMoveUp;
-  const showMoveDown = isBlockInFocus && canMoveDown;
-  const upOrder = canMoveUp ? 1 : 2;
-  const downOrder = canMoveUp ? 2 : 1;
-
-  return (
-    <DragItem
-      gap={2}
-      paddingLeft={2}
-      alignItems="start"
-      aria-disabled={disabled}
-      $dragVisibility="hidden"
-    >
-      <ReorderButtons
-        disabled={disabled}
-        showMoveUp={showMoveUp}
-        showMoveDown={showMoveDown}
-        upOrder={upOrder}
-        downOrder={downOrder}
-        onMoveUp={handleMoveUp}
-        onMoveDown={handleMoveDown}
-      />
-      {children}
-    </DragItem>
-  );
-};
-
-type ReorderWrapperProps = Direction & {
-  children: RenderElementProps['children'];
-  index: Array<number>;
-  dragHandleTopMargin?: CSSProperties['marginTop'];
-  disabled: boolean;
-  totalBlocks: number;
-  selectionTopLevel: SelectionTopLevel | null;
-  name: string;
-  editor: Editor;
-  setLiveText: (text: string) => void;
-};
-
-const ReorderWrapper = ({
-  children,
-  index,
-  setDragDirection,
-  dragDirection,
-  dragHandleTopMargin,
-  disabled,
-  totalBlocks,
-  selectionTopLevel,
-  name,
-  editor,
-  setLiveText,
-}: ReorderWrapperProps) => {
-  const { formatMessage } = useIntl();
-  const isMobile = useIsMobile();
-
-  const handleMoveBlock = React.useCallback(
-    (newIndex: Array<number>, currentIndex: Array<number>) => {
-      // Avoid doing a move (and forcing rerenders) if the item is dropped back to the same index.
-      if (newIndex[0] === currentIndex[0]) return;
-
-      Transforms.moveNodes(editor, {
-        at: currentIndex,
-        to: newIndex,
-      });
-
-      // Add 1 to the index for the live text message
-      const currentIndexPosition = [currentIndex[0] + 1, ...currentIndex.slice(1)];
-      const newIndexPosition = [newIndex[0] + 1, ...newIndex.slice(1)];
-
-      setLiveText(
-        formatMessage(
-          {
-            id: getTranslation('components.Blocks.dnd.reorder'),
-            defaultMessage: '{item}, moved. New position in the editor: {position}.',
-          },
-          {
-            item: `${name}.${currentIndexPosition.join(',')}`,
-            position: `${newIndexPosition.join(',')} of ${editor.children.length}`,
-          }
-        )
-      );
-    },
-    [editor, formatMessage, name, setLiveText]
-  );
-
-  return (
-    <>
-      {isMobile ? (
-        <ReorderElement
-          index={index}
-          disabled={disabled}
-          totalBlocks={totalBlocks}
-          selectionTopLevel={selectionTopLevel}
-          onMoveBlock={handleMoveBlock}
-          editor={editor}
-        >
-          {children}
-        </ReorderElement>
-      ) : (
-        <DragAndDropElement
-          index={index}
-          setDragDirection={setDragDirection}
-          dragDirection={dragDirection}
-          dragHandleTopMargin={dragHandleTopMargin}
-          disabled={disabled}
-          name={name}
-          onMoveBlock={handleMoveBlock}
-        >
-          {children}
-        </DragAndDropElement>
-      )}
-    </>
-  );
-};
-
 interface CloneDragItemProps {
   children: RenderElementProps['children'];
   dragHandleTopMargin?: CSSProperties['marginTop'];
@@ -572,24 +332,16 @@ type BaseRenderElementProps = Direction & {
   props: RenderElementProps['children'];
   blocks: BlocksStore;
   editor: Editor;
-  disabled: boolean;
-  totalBlocks: number;
-  selectionTopLevel: SelectionTopLevel | null;
-  name: string;
-  setLiveText: (text: string) => void;
+  isMobile: boolean;
 };
 
 const baseRenderElement = ({
   props,
   blocks,
   editor,
-  setDragDirection,
   dragDirection,
-  disabled,
-  totalBlocks,
-  selectionTopLevel,
-  name,
-  setLiveText,
+  setDragDirection,
+  isMobile,
 }: BaseRenderElementProps) => {
   const { element } = props;
 
@@ -599,25 +351,19 @@ const baseRenderElement = ({
 
   const isDraggable = block.isDraggable?.(element) ?? true;
 
-  if (!isDraggable) {
+  if (!isDraggable || isMobile) {
     return block.renderElement(props);
   }
 
   return (
-    <ReorderWrapper
+    <DragAndDropElement
       index={nodePath}
       setDragDirection={setDragDirection}
       dragDirection={dragDirection}
       dragHandleTopMargin={block.dragHandleTopMargin}
-      disabled={disabled}
-      totalBlocks={totalBlocks}
-      selectionTopLevel={selectionTopLevel}
-      name={name}
-      editor={editor}
-      setLiveText={setLiveText}
     >
       {block.renderElement(props)}
-    </ReorderWrapper>
+    </DragAndDropElement>
   );
 };
 
@@ -629,22 +375,13 @@ interface BlocksContentProps {
 }
 
 const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
-  const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode, name } =
+  const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
     useBlocksEditorContext('BlocksContent');
+  const isMobile = useIsMobile();
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
   const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
   const { modalElement, handleConversionResult } = useConversionModal();
-
-  const selectionTopLevel = React.useMemo<SelectionTopLevel | null>(() => {
-    if (!editor.selection) return null;
-    return {
-      anchor: editor.selection.anchor.path[0],
-      focus: editor.selection.focus.path[0],
-    };
-  }, [editor.selection]);
-
-  const totalBlocks = editor.children.length;
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
@@ -694,29 +431,8 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
     (props: RenderElementProps) =>
-      baseRenderElement({
-        props,
-        blocks,
-        editor,
-        dragDirection,
-        setDragDirection,
-        disabled,
-        totalBlocks,
-        selectionTopLevel,
-        name,
-        setLiveText,
-      }),
-    [
-      blocks,
-      editor,
-      dragDirection,
-      setDragDirection,
-      disabled,
-      totalBlocks,
-      selectionTopLevel,
-      name,
-      setLiveText,
-    ]
+      baseRenderElement({ props, blocks, editor, dragDirection, setDragDirection, isMobile }),
+    [blocks, editor, dragDirection, isMobile, setDragDirection]
   );
 
   const checkSnippet = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -891,6 +607,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       background="neutral0"
       color="neutral800"
       lineHeight={6}
+      paddingLeft={{ initial: 4, medium: 0 }}
       paddingRight={7}
       paddingTop={6}
       paddingBottom={3}

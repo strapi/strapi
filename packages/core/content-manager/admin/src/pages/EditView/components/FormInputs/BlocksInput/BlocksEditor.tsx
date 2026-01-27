@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { createContext, type FieldValue, useIsMobile } from '@strapi/admin/strapi-admin';
-import { IconButton, Divider, Flex, VisuallyHidden } from '@strapi/design-system';
+import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
@@ -325,33 +325,23 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               onToggleExpand={handleToggleExpand}
               ariaDescriptionId={ariaDescriptionId}
             >
-              {isMobile ? (
-                <>
-                  <BlocksContent {...contentProps} />
-                  <EditorDivider width="100%" />
-                  <BlocksToolbar />
-                </>
-              ) : (
-                <>
-                  <BlocksToolbar />
-                  <EditorDivider width="100%" />
-                  <BlocksContent {...contentProps} />
-                  {!isExpandedMode && (
-                    <IconButton
-                      position="absolute"
-                      bottom="1.2rem"
-                      right="1.2rem"
-                      shadow="filterShadow"
-                      label={formatMessage({
-                        id: getTranslation('components.Blocks.expand'),
-                        defaultMessage: 'Expand',
-                      })}
-                      onClick={handleToggleExpand}
-                    >
-                      <Expand />
-                    </IconButton>
-                  )}
-                </>
+              <BlocksToolbar />
+              <EditorDivider width="100%" />
+              <BlocksContent {...contentProps} />
+              {!isExpandedMode && !isMobile && (
+                <IconButton
+                  position="absolute"
+                  bottom="1.2rem"
+                  right="1.2rem"
+                  shadow="filterShadow"
+                  label={formatMessage({
+                    id: getTranslation('components.Blocks.expand'),
+                    defaultMessage: 'Expand',
+                  })}
+                  onClick={handleToggleExpand}
+                >
+                  <Expand />
+                </IconButton>
               )}
             </EditorLayout>
           </BlocksEditorProvider>

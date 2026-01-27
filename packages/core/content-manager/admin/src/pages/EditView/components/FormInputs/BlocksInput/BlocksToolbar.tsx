@@ -12,12 +12,13 @@ import {
   BoxComponent,
   Menu,
 } from '@strapi/design-system';
-import { Link } from '@strapi/icons';
+import { Link, ArrowUp, ArrowDown } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { css, styled } from 'styled-components';
 
+import { getTranslation } from '../../../../../utils/translations';
 import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
 
 import { insertLink } from './Blocks/Link';
@@ -596,9 +597,147 @@ const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
   }
 `;
 
+const ReorderToolbarButtons = () => {
+  const { editor, disabled, blocks, name, setLiveText } =
+    useBlocksEditorContext('ReorderToolbarButtons');
+  const { formatMessage } = useIntl();
+
+  const selection = editor.selection;
+  const totalBlocks = editor.children.length;
+
+  const anchorIndex = selection ? selection.anchor.path[0] : null;
+  const focusIndex = selection ? selection.focus.path[0] : null;
+  const isSingleBlockSelection =
+    anchorIndex !== null && focusIndex !== null && anchorIndex === focusIndex;
+
+  const selectedTopLevelNode =
+    isSingleBlockSelection && anchorIndex !== null ? editor.children[anchorIndex] : null;
+  const selectedBlock =
+    selectedTopLevelNode &&
+    Object.values(blocks).find((block) => block.matchNode(selectedTopLevelNode));
+
+  const isSelectedBlockDraggable =
+    selectedTopLevelNode && selectedBlock
+      ? (selectedBlock.isDraggable?.(selectedTopLevelNode) ?? true)
+      : false;
+
+  const canMoveUp =
+    !disabled &&
+    isSingleBlockSelection &&
+    isSelectedBlockDraggable &&
+    anchorIndex !== null &&
+    anchorIndex > 0;
+  const canMoveDown =
+    !disabled &&
+    isSingleBlockSelection &&
+    isSelectedBlockDraggable &&
+    anchorIndex !== null &&
+    anchorIndex < totalBlocks - 1;
+
+  const moveBlock = (direction: 'up' | 'down') => {
+    if (!selection || anchorIndex === null) return;
+
+    const currentIndex = [anchorIndex];
+    const newIndex = [direction === 'up' ? anchorIndex - 1 : anchorIndex + 1];
+
+    Transforms.moveNodes(editor, {
+      at: currentIndex,
+      to: newIndex,
+    });
+
+    // Keep the moved block focused so disabled states update immediately.
+    Transforms.select(editor, Editor.start(editor, newIndex));
+    ReactEditor.focus(editor);
+
+    setLiveText(
+      formatMessage(
+        {
+          id: getTranslation('components.Blocks.dnd.reorder'),
+          defaultMessage: '{item}, moved. New position in the editor: {position}.',
+        },
+        {
+          item: `${name}.${currentIndex[0] + 1}`,
+          position: `${newIndex[0] + 1} of ${editor.children.length}`,
+        }
+      )
+    );
+  };
+
+  return (
+    <Flex direction="row" gap={1}>
+      <Tooltip
+        label={formatMessage({
+          id: getTranslation('components.DynamicZone.move-up'),
+          defaultMessage: 'Move up',
+        })}
+      >
+        <Toolbar.Button
+          onPointerDown={(e) => {
+            e.preventDefault();
+            if (canMoveUp) moveBlock('up');
+          }}
+          aria-disabled={!canMoveUp}
+          disabled={!canMoveUp}
+          aria-label={formatMessage({
+            id: getTranslation('components.DynamicZone.move-up'),
+            defaultMessage: 'Move up',
+          })}
+          asChild
+        >
+          <FlexButton
+            tag="button"
+            alignItems="center"
+            justifyContent="center"
+            width={7}
+            height={7}
+            hasRadius
+            type="button"
+          >
+            <ArrowUp fill={!canMoveUp ? 'neutral300' : 'neutral600'} />
+          </FlexButton>
+        </Toolbar.Button>
+      </Tooltip>
+
+      <Tooltip
+        label={formatMessage({
+          id: getTranslation('components.DynamicZone.move-down'),
+          defaultMessage: 'Move down',
+        })}
+      >
+        <Toolbar.Button
+          onPointerDown={(e) => {
+            e.preventDefault();
+            if (canMoveDown) moveBlock('down');
+          }}
+          aria-disabled={!canMoveDown}
+          disabled={!canMoveDown}
+          aria-label={formatMessage({
+            id: getTranslation('components.DynamicZone.move-down'),
+            defaultMessage: 'Move down',
+          })}
+          asChild
+        >
+          <FlexButton
+            tag="button"
+            alignItems="center"
+            justifyContent="center"
+            width={7}
+            height={7}
+            hasRadius
+            type="button"
+          >
+            <ArrowDown fill={!canMoveDown ? 'neutral300' : 'neutral600'} />
+          </FlexButton>
+        </Toolbar.Button>
+      </Tooltip>
+    </Flex>
+  );
+};
+
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
 
   /**
    * The modifier buttons are disabled when an image is selected.
@@ -691,6 +830,12 @@ const BlocksToolbar = () => {
     <Toolbar.Root aria-disabled={disabled} asChild>
       <ToolbarWrapper padding={{ initial: 1, medium: 2 }} width="100%">
         <BlocksDropdown />
+        {isMobile && (
+          <>
+            <ToolbarSeparator />
+            <ReorderToolbarButtons />
+          </>
+        )}
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex direction="row" gap={1} grow={1} overflow="hidden">
