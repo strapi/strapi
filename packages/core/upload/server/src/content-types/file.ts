@@ -34,6 +34,10 @@ export default {
         type: 'text',
         configurable: false,
       },
+      focalPoint: {
+        type: 'json',
+        configurable: false,
+      },
       width: {
         type: 'integer',
         configurable: false,

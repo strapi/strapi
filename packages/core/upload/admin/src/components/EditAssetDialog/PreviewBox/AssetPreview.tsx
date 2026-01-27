@@ -25,6 +25,8 @@ interface AssetPreviewProps {
   name: string;
   url: string;
   onLoad?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  style?: React.CSSProperties;
 }
 
 export const AssetPreview = React.forwardRef<
