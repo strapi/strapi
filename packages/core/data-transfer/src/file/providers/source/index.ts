@@ -57,6 +57,8 @@ class LocalFileSourceProvider implements ISourceProvider {
 
   #diagnostics?: IDiagnosticReporter;
 
+  #assetMetadataCache?: Map<string, any> = null;
+
   constructor(options: ILocalFileSourceProviderOptions) {
     this.options = options;
 
@@ -108,9 +110,17 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#metadata = await this.#parseJSONFile<IMetadata>(backupStream, METADATA_FILE_PATH);
   }
 
-  async #loadAssetMetadata(path: string) {
+  async #loadAssetMetadata(filepath: string) {
+    if (this.#assetMetadataCache) {
+      const filename = path.basename(filepath);
+      if (this.#assetMetadataCache.has(filename)) return this.#assetMetadataCache.get(filename);
+
+      throw new Error(`Metadata not found in cache for ${filename}`);
+    }
+
+    // Fallback to uncached behaviour
     const backupStream = this.#getBackupStream();
-    return this.#parseJSONFile<IFile>(backupStream, path);
+    return this.#parseJSONFile<IFile>(backupStream, filepath);
   }
 
   async getMetadata() {
@@ -160,7 +170,50 @@ class LocalFileSourceProvider implements ISourceProvider {
     return this.#streamJsonlDirectory('configuration');
   }
 
-  createAssetsReadStream(): Readable | Promise<Readable> {
+  preloadAssetMetadataCache(): void | Promise<void> {
+    if (this.#assetMetadataCache) return;
+
+    return new Promise<void>((resolve, reject) => {
+      const cache = new Map();
+      const inStream = this.#getBackupStream();
+
+      pipeline(
+        [
+          inStream,
+          new tar.Parse({
+            filter(filePath, entry) {
+              if (entry.type !== 'File') return false;
+              return isFilePathInDirname('assets/metadata', filePath);
+            },
+            async onentry(entry) {
+              try {
+                const content = await entry.collect();
+                const parsedContent = JSON.parse(Buffer.concat(content).toString());
+                const filename = path.basename(entry.path);
+                cache.set(filename, parsedContent);
+              } catch (e) {
+                throw Error(`Failed to read metadata for ${entry.path}`);
+              } finally {
+                entry.destroy();
+              }
+            },
+          }),
+        ],
+        (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            this.#assetMetadataCache = cache;
+            resolve();
+          }
+        }
+      );
+    });
+  }
+
+  async createAssetsReadStream(): Promise<Readable> {
+    this.#reportInfo('caching asset metadata');
+    await this.preloadAssetMetadataCache();
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
