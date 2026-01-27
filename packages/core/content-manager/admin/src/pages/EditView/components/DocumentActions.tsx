@@ -17,10 +17,10 @@ import {
   Modal,
   Radio,
   Typography,
-  VisuallyHidden,
   Menu,
   ButtonProps,
   Tooltip,
+  IconButton,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
@@ -347,6 +347,20 @@ const DocumentActionsMenu = ({
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDisabled = actions.every((action) => action.disabled) || actions.length === 0;
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+
+  /**
+   * TODO: remove when https://github.com/strapi/design-system/pull/1994 will be merged and released.
+   */
+  React.useEffect(() => {
+    if (triggerRef.current) {
+      if (isDisabled) {
+        triggerRef.current.setAttribute('disabled', '');
+      } else {
+        triggerRef.current.removeAttribute('disabled');
+      }
+    }
+  }, [isDisabled]);
 
   const handleClick = (action: Action) => async (e: React.SyntheticEvent) => {
     const { onClick = () => false, dialog, id } = action;
@@ -376,26 +390,28 @@ const DocumentActionsMenu = ({
     setIsOpen(false);
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!isDisabled) {
+      setIsOpen(open);
+    }
+  };
+
   return (
-    <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
+    <Menu.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Menu.Trigger
+        ref={triggerRef}
         disabled={isDisabled}
-        size="S"
-        endIcon={null}
-        paddingTop="4px"
-        paddingLeft="7px"
-        paddingRight="7px"
+        label={
+          label ||
+          formatMessage({
+            id: 'content-manager.containers.edit.panels.default.more-actions',
+            defaultMessage: 'More document actions',
+          })
+        }
+        tag={IconButton}
+        icon={<More />}
         variant={variant}
-      >
-        <More aria-hidden focusable={false} />
-        <VisuallyHidden tag="span">
-          {label ||
-            formatMessage({
-              id: 'content-manager.containers.edit.panels.default.more-actions',
-              defaultMessage: 'More document actions',
-            })}
-        </VisuallyHidden>
-      </Menu.Trigger>
+      />
       <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
@@ -749,7 +765,12 @@ const PublishAction: DocumentActionComponent = ({
     setSubmitting(true);
 
     try {
+      const { data: filteredData } = handleInvisibleAttributes(transformData(formValues), {
+        schema,
+        components,
+      });
       const { errors } = await validate(true, {
+        ...filteredData,
         status: 'published',
       });
       if (errors) {
@@ -791,11 +812,8 @@ const PublishAction: DocumentActionComponent = ({
         }
         return;
       }
-      const { data } = handleInvisibleAttributes(transformData(formValues), {
-        schema,
-        initialValues,
-        components,
-      });
+      // filteredData is already used for validation, so use it for publishing as well
+      const data = filteredData;
       const res = await publish(
         {
           collectionType,

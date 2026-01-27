@@ -1094,6 +1094,16 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
   };
 }
 
+const RelationRow = styled<FlexComponent>(Flex)`
+  padding-top: calc(${({ theme }) => theme.spaces[1]} - 1px); // minus the border width
+  padding-bottom: calc(${({ theme }) => theme.spaces[1]} - 1px); // minus the border width
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding-top: ${({ theme }) => theme.spaces[2]};
+    padding-bottom: ${({ theme }) => theme.spaces[2]};
+  }
+`;
+
 const ListItem = ({ data, index, style }: ListItemProps) => {
   const {
     ariaDescribedBy,
@@ -1195,7 +1205,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       {isDragging ? (
         <RelationItemPlaceholder />
       ) : (
-        <Flex
+        <RelationRow
           paddingTop={2}
           paddingBottom={2}
           paddingLeft={canDrag ? 2 : 4}
@@ -1246,7 +1256,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
               <Cross />
             </IconButton>
           </Box>
-        </Flex>
+        </RelationRow>
       )}
     </Box>
   );

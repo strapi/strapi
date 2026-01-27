@@ -1,0 +1,85 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relation_dps",
+  "info": {
+    "singularName": "relation-dp",
+    "pluralName": "relation-dps",
+    "displayName": "Relation DP"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "selfOne": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-dp.relation-dp"
+    },
+    "selfMany": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation-dp.relation-dp"
+    },
+    "oneToOneBasic": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::basic-dp.basic-dp"
+    },
+    "oneToManyBasics": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::basic-dp.basic-dp"
+    },
+    "manyToOneBasic": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::basic-dp.basic-dp"
+    },
+    "manyToManyBasics": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::basic-dp.basic-dp"
+    },
+    "manyToOneBasicNoDp": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::basic.basic"
+    },
+    "manyToManyBasicsNoDp": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::basic.basic"
+    },
+    "simpleInfo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.simple-info"
+    },
+    "content": {
+      "type": "dynamiczone",
+      "components": ["shared.simple-info", "shared.image-block"]
+    },
+    "textBlocks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.text-block"
+    },
+    "mediaBlock": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.media-block"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["shared.text-block", "shared.media-block", "shared.header"]
+    },
+    "header": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.header"
+    }
+  }
+}

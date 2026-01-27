@@ -7,7 +7,7 @@ import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
 import { useQueryParams } from '../hooks/useQueryParams';
-import { login as loginAction, logout as logoutAction, setLocale } from '../reducer';
+import { login as loginAction, logout as logoutAction, setLocale, setToken } from '../reducer';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -17,6 +17,7 @@ import {
   useLogoutMutation,
 } from '../services/auth';
 import { getOrCreateDeviceId } from '../utils/deviceId';
+import { setOnTokenUpdate } from '../utils/getFetchClient';
 
 import type {
   Permission as PermissionContract,
@@ -128,6 +129,20 @@ const AuthProvider = ({
       }
     }
   }, [dispatch, user]);
+
+  /**
+   * Register a callback to update Redux state when the token is refreshed.
+   * This ensures the app state stays in sync with the token stored in localStorage/cookies.
+   */
+  React.useEffect(() => {
+    setOnTokenUpdate((newToken) => {
+      dispatch(setToken(newToken));
+    });
+
+    return () => {
+      setOnTokenUpdate(null);
+    };
+  }, [dispatch]);
 
   React.useEffect(() => {
     /**
