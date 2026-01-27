@@ -9964,7 +9964,7 @@ __metadata:
     "@aws-sdk/types": "npm:3.973.0"
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.33.4"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     tsconfig: "npm:5.33.4"
   languageName: unknown
   linkType: soft
