@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useElementOnScreen } from '@strapi/admin/strapi-admin';
-import { Box, type BoxComponent, IconButton, Menu } from '@strapi/design-system';
+import { Box, IconButton, Menu } from '@strapi/design-system';
 import { More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';

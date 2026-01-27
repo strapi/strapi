@@ -602,7 +602,6 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       grow={1}
       width="100%"
       overflow="auto"
-      position="relative"
       fontSize={2}
       background="neutral0"
       color="neutral800"

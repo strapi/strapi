@@ -62,70 +62,39 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
             previewContent={field.value}
             onCollapse={handleToggleExpand}
           >
-            {isMobile ? (
-              <>
-                <Box paddingBottom={9}>
-                  <Editor
-                    disabled={disabled}
-                    isExpandMode={isExpandMode}
-                    editorRef={editorRef}
-                    error={field.error}
-                    isPreviewMode={isPreviewMode}
-                    name={name}
-                    onChange={field.onChange}
-                    placeholder={placeholder}
-                    textareaRef={textareaRef}
-                    value={field.value}
-                    ref={forwardedRef}
-                  />
-                </Box>
-
-                <Box position="absolute" left={0} right={0} bottom={0} pointerEvents="none">
-                  <Flex justifyContent="flex-end" padding={4} pointerEvents="none">
-                    <Box pointerEvents="auto">
-                      <WysiwygPreviewToggleButton
-                        isPreviewMode={isPreviewMode}
-                        onTogglePreviewMode={handleTogglePreviewMode}
-                      />
-                    </Box>
-                  </Flex>
-                  <Box pointerEvents="auto">
-                    <WysiwygNav
-                      isExpandMode={isExpandMode}
-                      editorRef={editorRef}
+            <WysiwygNav
+              isExpandMode={isExpandMode}
+              editorRef={editorRef}
+              isPreviewMode={isPreviewMode}
+              onToggleMediaLib={handleToggleMediaLib}
+              onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
+              disabled={disabled}
+            />
+            <Editor
+              disabled={disabled}
+              isExpandMode={isExpandMode}
+              editorRef={editorRef}
+              error={field.error}
+              isPreviewMode={isPreviewMode}
+              name={name}
+              onChange={field.onChange}
+              placeholder={placeholder}
+              textareaRef={textareaRef}
+              value={field.value}
+              ref={forwardedRef}
+            />
+            {!isExpandMode && !isMobile && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
+            {isMobile && (
+              <Box position="absolute" bottom={0} right={0} left={0} pointerEvents="none">
+                <Flex justifyContent="flex-end" padding={4}>
+                  <Box pointerEvents="auto" display="inline-flex">
+                    <WysiwygPreviewToggleButton
                       isPreviewMode={isPreviewMode}
-                      onToggleMediaLib={handleToggleMediaLib}
-                      onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
-                      disabled={disabled}
+                      onTogglePreviewMode={handleTogglePreviewMode}
                     />
                   </Box>
-                </Box>
-              </>
-            ) : (
-              <>
-                <WysiwygNav
-                  isExpandMode={isExpandMode}
-                  editorRef={editorRef}
-                  isPreviewMode={isPreviewMode}
-                  onToggleMediaLib={handleToggleMediaLib}
-                  onTogglePreviewMode={isExpandMode ? undefined : handleTogglePreviewMode}
-                  disabled={disabled}
-                />
-                <Editor
-                  disabled={disabled}
-                  isExpandMode={isExpandMode}
-                  editorRef={editorRef}
-                  error={field.error}
-                  isPreviewMode={isPreviewMode}
-                  name={name}
-                  onChange={field.onChange}
-                  placeholder={placeholder}
-                  textareaRef={textareaRef}
-                  value={field.value}
-                  ref={forwardedRef}
-                />
-                {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
-              </>
+                </Flex>
+              </Box>
             )}
           </EditorLayout>
           <Field.Hint />

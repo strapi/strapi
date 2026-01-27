@@ -434,7 +434,7 @@ const WysiwygNav = ({
       padding={2}
       background="neutral100"
       justifyContent="space-between"
-      borderRadius={{ initial: '0 0 0.4rem 0.4rem', medium: '0.4rem 0.4rem 0 0' }}
+      borderRadius="0.4rem 0.4rem 0 0"
       width="100%"
       gap={{ initial: 3, medium: 4 }}
     >
