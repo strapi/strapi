@@ -49,7 +49,7 @@ const InstalledPlugins = () => {
   }
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Main>
         <Layouts.Header
           title={formatMessage({
@@ -110,7 +110,7 @@ const InstalledPlugins = () => {
           </Table>
         </Layouts.Content>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 

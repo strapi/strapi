@@ -9,6 +9,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
       sizeOptimization: true,
       responsiveDimensions: true,
       autoOrientation: false,
+      aiMetadata: true,
     },
     view_configuration: {
       pageSize: 10,
@@ -40,6 +41,8 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   await registerWebhookEvents();
 
   await getService('weeklyMetrics').registerCron();
+  await getService('aiMetadataJobs').registerCron();
+
   getService('metrics').sendUploadPluginMetrics();
 
   getService('extensions').signFileUrlsOnDocumentService();

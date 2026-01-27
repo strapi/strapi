@@ -1,4 +1,4 @@
-import { useField } from '@strapi/admin/strapi-admin';
+import { useField, createRulesEngine } from '@strapi/admin/strapi-admin';
 import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -21,6 +21,7 @@ const NonRepeatableComponent = ({
   const level = useComponent('NonRepeatableComponent', (state) => state.level);
   const isNested = level > 0;
   const { currentDocument } = useDocumentContext('NonRepeatableComponent');
+  const rulesEngine = createRulesEngine();
 
   return (
     <ComponentProvider id={value?.id} uid={attribute.component} level={level + 1} type="component">

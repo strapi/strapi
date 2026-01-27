@@ -8,6 +8,11 @@ import { getService } from '../utils';
 const { ValidationError } = errors;
 const { SUPER_ADMIN_CODE } = constants;
 
+const getSessionManager = () => {
+  const manager = strapi.sessionManager;
+  return manager ?? null;
+};
+
 /** Checks if ee disabled users list needs to be updated
  * @param {string} id
  * @param {object} input
@@ -145,6 +150,12 @@ const deleteById = async (id: unknown) => {
     .query('admin::user')
     .delete({ where: { id }, populate: ['roles'] });
 
+  // Invalidate all sessions for the deleted user
+  const sessionManager = getSessionManager();
+  if (sessionManager && sessionManager.hasOrigin('admin')) {
+    await sessionManager('admin').invalidateRefreshToken(String(id));
+  }
+
   await removeFromEEDisabledUsersList(id);
 
   strapi.eventHub.emit('user.delete', { user: sanitizeUser(deletedUser) });
@@ -176,6 +187,12 @@ const deleteByIds = async (ids: any) => {
       where: { id },
       populate: ['roles'],
     });
+
+    // Invalidate all sessions for the deleted user
+    const sessionManager = getSessionManager();
+    if (sessionManager && sessionManager.hasOrigin('admin')) {
+      await sessionManager('admin').invalidateRefreshToken(String(id));
+    }
 
     deletedUsers.push(deletedUser);
   }

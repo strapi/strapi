@@ -2,8 +2,16 @@ import { merge, map, difference, uniq } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { getService } from './utils';
+import { getTokenOptions, expiresInToSeconds } from './services/token';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
+import constants from './services/constants';
+import {
+  DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN,
+  DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN,
+  DEFAULT_MAX_SESSION_LIFESPAN,
+  DEFAULT_IDLE_SESSION_LIFESPAN,
+} from '../../shared/utils/session-auth';
 
 const defaultAdminAuthSettings = {
   providers: {
@@ -88,25 +96,63 @@ const createDefaultAPITokensIfNeeded = async () => {
   const apiTokenCount = await apiTokenService.count();
 
   if (usersCount === 0 && apiTokenCount === 0) {
-    await apiTokenService.create({
-      name: 'Read Only',
-      description:
-        'A default API token with read-only permissions, only used for accessing resources',
-      type: 'read-only',
-      lifespan: null,
-    });
-
-    await apiTokenService.create({
-      name: 'Full Access',
-      description:
-        'A default API token with full access permissions, used for accessing or modifying resources',
-      type: 'full-access',
-      lifespan: null,
-    });
+    for (const token of constants.DEFAULT_API_TOKENS) {
+      await apiTokenService.create(token);
+    }
   }
 };
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  // Get the merged token options (includes defaults merged with user config)
+  const { options } = getTokenOptions();
+  const legacyMaxRefreshFallback =
+    expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_REFRESH_TOKEN_LIFESPAN;
+  const legacyMaxSessionFallback =
+    expiresInToSeconds(options?.expiresIn) ?? DEFAULT_MAX_SESSION_LIFESPAN;
+
+  // Warn if using deprecated legacy expiresIn for new session settings
+  const hasLegacyExpires = options?.expiresIn != null;
+  const hasNewMaxRefresh = strapi.config.get('admin.auth.sessions.maxRefreshTokenLifespan') != null;
+  const hasNewMaxSession = strapi.config.get('admin.auth.sessions.maxSessionLifespan') != null;
+
+  if (hasLegacyExpires && (!hasNewMaxRefresh || !hasNewMaxSession)) {
+    strapi.log.warn(
+      'admin.auth.options.expiresIn is deprecated and will be removed in Strapi 6. Please configure admin.auth.sessions.maxRefreshTokenLifespan and admin.auth.sessions.maxSessionLifespan.'
+    );
+  }
+
+  strapi.sessionManager.defineOrigin('admin', {
+    jwtSecret: strapi.config.get('admin.auth.secret'),
+    accessTokenLifespan: strapi.config.get('admin.auth.sessions.accessTokenLifespan', 30 * 60),
+    maxRefreshTokenLifespan: strapi.config.get(
+      'admin.auth.sessions.maxRefreshTokenLifespan',
+      legacyMaxRefreshFallback
+    ),
+    idleRefreshTokenLifespan: strapi.config.get(
+      'admin.auth.sessions.idleRefreshTokenLifespan',
+      DEFAULT_IDLE_REFRESH_TOKEN_LIFESPAN
+    ),
+    maxSessionLifespan: strapi.config.get(
+      'admin.auth.sessions.maxSessionLifespan',
+      legacyMaxSessionFallback
+    ),
+    idleSessionLifespan: strapi.config.get(
+      'admin.auth.sessions.idleSessionLifespan',
+      DEFAULT_IDLE_SESSION_LIFESPAN
+    ),
+    algorithm: options?.algorithm,
+    // Pass through all JWT options (includes privateKey, publicKey, and any other options)
+    jwtOptions: options,
+  });
+
+  const isProduction = process.env.NODE_ENV === 'production';
+  const adminCookieSecure = strapi.config.get('admin.auth.cookie.secure');
+  if (isProduction && adminCookieSecure === false) {
+    strapi.log.warn(
+      'Server is in production mode, but admin.auth.cookie.secure has been set to false. This is not recommended and will allow cookies to be sent over insecure connections.'
+    );
+  }
+
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();

@@ -1,12 +1,23 @@
 # CLI Tests
 
+## Overview
+
+CLI tests use Jest to test Strapi CLI commands and functionality. They share the same infrastructure as e2e tests:
+
+- **Shared app template**: Both test types use `tests/app-template` to generate test applications
+- **Shared utilities**: Common test utilities are in `tests/utils/`
+- **Shared runners**: Test app setup and management is handled by `tests/utils/runners/shared-setup.js`
+- **Unified test runner**: Both use `tests/scripts/run-tests.js` with different execution strategies
+
+The main difference is that CLI tests use Jest for test execution, while e2e tests use Playwright for browser automation.
+
 ## Running the tests
 
-Run `yarn test:cli` to begin. The command will generate the required number of test applications based on the CLI app-template, seed them with preconfigured data [not yet implemented], then run the test suites (or "domains").
+Run `yarn test:cli` to begin. The command will generate the required number of test applications based on the shared app-template, seed them with preconfigured data [not yet implemented], then run the test suites (or "domains").
 
 The `-c X` option can be used to limit the number of concurrently running domains, where `X` is the number to be run simultaneously.
 
-If any changes are made to the template, or other issues are being encountered, try removing and regenerating the test apps by using `yarn test:cli:clean` before running the tets.
+If any changes are made to the template, or other issues are being encountered, try removing and regenerating the test apps by using `yarn test:cli:clean` before running the tests.
 
 ## Writing tests
 

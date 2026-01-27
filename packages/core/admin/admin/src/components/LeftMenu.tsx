@@ -1,20 +1,21 @@
 import * as React from 'react';
 
-import { Divider, Flex, FlexComponent, useCollator } from '@strapi/design-system';
-import { Lightning } from '@strapi/icons';
+import { Box, Divider, Flex, FlexComponent, IconButton, useCollator } from '@strapi/design-system';
+import { Cross, List } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { useAuth } from '../features/Auth';
 import { useTracking } from '../features/Tracking';
-import { Menu, MenuItem } from '../hooks/useMenu';
-import { getDisplayName } from '../utils/users';
+import { useIsDesktop } from '../hooks/useMediaQuery';
+import { Menu, MenuItem, MobileMenuItem } from '../hooks/useMenu';
 
 import { MainNav } from './MainNav/MainNav';
+import { MainNavIcons } from './MainNav/MainNavLinks';
 import { NavBrand } from './MainNav/NavBrand';
-import { NavLink } from './MainNav/NavLink';
+import { NavBurgerMenu } from './MainNav/NavBurgerMenu';
 import { NavUser } from './MainNav/NavUser';
+import { TrialCountdown } from './MainNav/TrialCountdown';
 
 const sortLinks = (links: MenuItem[]) => {
   return links.sort((a, b) => {
@@ -30,106 +31,181 @@ const sortLinks = (links: MenuItem[]) => {
   });
 };
 
-const NavLinkBadgeCounter = styled(NavLink.Badge)`
-  span {
-    color: ${({ theme }) => theme.colors.neutral0};
+const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
+  width: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 `;
 
-const NavLinkBadgeLock = styled(NavLink.Badge)`
-  background-color: transparent;
+interface LeftMenuProps
+  extends Pick<
+    Menu,
+    'generalSectionLinks' | 'pluginsSectionLinks' | 'topMobileNavigation' | 'burgerMobileNavigation'
+  > {}
+
+const MenuDetails = styled(Flex)`
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
+  overflow-x: auto;
+
+  ${({ theme }) => theme.breakpoints.large} {
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 `;
 
-const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
-  overflow-y: auto;
-`;
-
-interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
-
-const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
-  const user = useAuth('AuthenticatedApp', (state) => state.user);
+const LeftMenu = ({
+  generalSectionLinks,
+  pluginsSectionLinks,
+  topMobileNavigation,
+  burgerMobileNavigation,
+}: LeftMenuProps) => {
+  const [isBurgerMenuShown, setIsBurgerMenuShown] = React.useState(false);
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
-  const userDisplayName = getDisplayName(user);
   const { formatMessage, locale } = useIntl();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
-
-  const initials = userDisplayName
-    .split(' ')
-    .map((name) => name.substring(0, 1))
-    .join('')
-    .substring(0, 2);
+  const isDesktop = useIsDesktop();
 
   const handleClickOnLink = (destination: string) => {
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
+
+  // Close burger menu when route changes
+  React.useEffect(() => {
+    setIsBurgerMenuShown(false);
+  }, [pathname]);
 
   const listLinksAlphabeticallySorted = [...pluginsSectionLinks, ...generalSectionLinks].sort(
     (a, b) => formatter.compare(formatMessage(a.intlLabel), formatMessage(b.intlLabel))
   );
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
+  /**
+   * Return filtered mobile navigation links (used for both top and burger menu)
+   */
+  const mapMobileNavigationLinks = (mobileNavLinks: MobileMenuItem[]): MenuItem[] =>
+    mobileNavLinks.reduce<MenuItem[]>((acc, mobileLink) => {
+      const linkFound = listLinks.find((link) => link.to === mobileLink.to);
+      if (linkFound) {
+        acc.push(mobileLink.link ? { ...linkFound, navigationLink: mobileLink.link } : linkFound);
+      }
+      return acc;
+    }, []);
+
+  /**
+   * Mobile top navigation
+   */
+  const topMobileNavigationLinks = mapMobileNavigationLinks(topMobileNavigation);
+
+  /**
+   * Mobile burger menu
+   */
+  const excludedPluginsFromBurgerMenu = [
+    'content-manager',
+    'content-type-builder',
+    'upload',
+    'content-releases',
+  ];
+  const burgerMenuPluginsLinks = pluginsSectionLinks.filter(
+    (plugin) => !excludedPluginsFromBurgerMenu.some((link) => plugin.to.includes(link))
+  );
+  const burgerMobileNavigationLinks = [
+    ...burgerMenuPluginsLinks,
+    ...mapMobileNavigationLinks(burgerMobileNavigation),
+  ];
+
   return (
-    <MainNav>
-      <NavBrand />
+    <>
+      <MainNav>
+        <NavBrand />
 
-      <Divider />
+        {isDesktop && <Divider />}
 
-      <NavListWrapper tag="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3}>
-        {listLinks.length > 0
-          ? listLinks.map((link) => {
-              const LinkIcon = link.icon;
-              const badgeContentLock = link?.licenseOnly ? (
-                <Lightning fill="warning500" />
-              ) : undefined;
+        <MenuDetails>
+          <NavListWrapper
+            tag="ul"
+            gap={3}
+            direction={{
+              initial: 'row',
+              large: 'column',
+            }}
+            alignItems="center"
+            justifyContent={{
+              initial: 'center',
+              large: 'flex-start',
+            }}
+            flex={1}
+            paddingLeft={{
+              initial: 3,
+              large: 0,
+            }}
+            paddingRight={{
+              initial: 3,
+              large: 0,
+            }}
+            paddingTop={3}
+            paddingBottom={3}
+          >
+            <MainNavIcons
+              listLinks={listLinks}
+              mobileLinks={topMobileNavigationLinks}
+              handleClickOnLink={handleClickOnLink}
+            />
+          </NavListWrapper>
+          <TrialCountdown />
+          <Box
+            display={{
+              initial: 'none',
+              large: 'flex',
+            }}
+            borderStyle="solid"
+            borderWidth={{
+              initial: 0,
+              large: '1px 0 0 0',
+            }}
+            borderColor="neutral150"
+            padding={3}
+          >
+            <NavUser />
+          </Box>
+        </MenuDetails>
 
-              const badgeContentNumeric =
-                link.notificationsCount && link.notificationsCount > 0
-                  ? link.notificationsCount.toString()
-                  : undefined;
-
-              const labelValue = formatMessage(link.intlLabel);
-              return (
-                <Flex tag="li" key={link.to}>
-                  <NavLink.Tooltip label={labelValue}>
-                    <NavLink.Link
-                      to={link.to}
-                      onClick={() => handleClickOnLink(link.to)}
-                      aria-label={labelValue}
-                    >
-                      <NavLink.Icon label={labelValue}>
-                        <LinkIcon width="20" height="20" fill="neutral500" />
-                      </NavLink.Icon>
-                      {badgeContentLock ? (
-                        <NavLinkBadgeLock
-                          label="locked"
-                          textColor="neutral500"
-                          paddingLeft={0}
-                          paddingRight={0}
-                        >
-                          {badgeContentLock}
-                        </NavLinkBadgeLock>
-                      ) : badgeContentNumeric ? (
-                        <NavLinkBadgeCounter
-                          label={badgeContentNumeric}
-                          backgroundColor="primary600"
-                          width="2.3rem"
-                          color="neutral0"
-                        >
-                          {badgeContentNumeric}
-                        </NavLinkBadgeCounter>
-                      ) : null}
-                    </NavLink.Link>
-                  </NavLink.Tooltip>
-                </Flex>
-              );
-            })
-          : null}
-      </NavListWrapper>
-      <NavUser initials={initials}>{userDisplayName}</NavUser>
-    </MainNav>
+        <Box
+          padding={3}
+          display={{
+            initial: 'flex',
+            large: 'none',
+          }}
+        >
+          <IconButton
+            onClick={() => setIsBurgerMenuShown((prev) => !prev)}
+            style={{ border: 'none' }}
+            label="Menu"
+            type="button"
+            aria-expanded={isBurgerMenuShown}
+            aria-controls="burger-menu"
+          >
+            {!isBurgerMenuShown ? <List fill="neutral1000" /> : <Cross fill="neutral1000" />}
+          </IconButton>
+        </Box>
+      </MainNav>
+      <NavBurgerMenu
+        isShown={isBurgerMenuShown}
+        listLinks={burgerMobileNavigationLinks}
+        handleClickOnLink={handleClickOnLink}
+        onClose={() => setIsBurgerMenuShown(false)}
+      />
+    </>
   );
 };
 

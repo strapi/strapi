@@ -6,6 +6,7 @@ import type { Data, Modules, UID } from '@strapi/types';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
+import { indexByDocumentId } from './utils/document-status';
 
 const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 
@@ -35,8 +36,8 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   const canReadMainField = permissionChecker.can.read(null, mainField);
 
   if (!isMainFieldListable || !canReadMainField) {
-    // Default to 'id' if the actual main field shouldn't be displayed
-    return 'id';
+    // Default to 'documentId' if the actual main field shouldn't be displayed
+    return 'documentId';
   }
 
   // Edge cases
@@ -77,12 +78,13 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
     filters,
   });
 
+  const statusByDocumentId = indexByDocumentId(availableStatus);
+
   return relations.map((relation: RelationEntity) => {
-    const availableStatuses = availableStatus.filter(
-      (availableDocument: RelationEntity) =>
-        availableDocument.documentId === relation.documentId &&
-        (relation.locale ? availableDocument.locale === relation.locale : true)
-    );
+    const candidates = statusByDocumentId.get(relation.documentId as string) || [];
+    const availableStatuses = relation.locale
+      ? candidates.filter((c) => c.locale === relation.locale)
+      : candidates;
 
     return {
       ...relation,
@@ -130,7 +132,9 @@ const validateStatus = (
   const isSourceDP = isDP(sourceModel);
 
   // Default to draft if not set
-  if (!isSourceDP) return { status: undefined };
+  if (!isSourceDP && sourceModel.modelType === 'contentType') {
+    return { status: undefined };
+  }
 
   switch (status) {
     case 'published':
@@ -450,7 +454,7 @@ export default {
       publishedAt?: Record<string, any>;
     } = {};
 
-    if (sourceSchema?.options?.draftAndPublish) {
+    if (sourceSchema?.options?.draftAndPublish || sourceSchema?.modelType === 'component') {
       if (targetSchema?.options?.draftAndPublish) {
         if (status === 'published') {
           filters.publishedAt = { $notNull: true };
@@ -498,7 +502,7 @@ export default {
       ordering: 'desc',
     });
 
-    // NOTE: the order is very import to make sure sanitized relations are kept in priority
+    // NOTE: the order is very important to make sure sanitized relations are kept in priority
     const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
 
     ctx.body = {

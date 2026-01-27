@@ -8,9 +8,9 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import { Sparkle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { getTrad } from '../../utils/getTrad';
 import { AttributeIcon, IconByType } from '../AttributeIcon';
+import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
 import { OptionBoxWrapper } from './OptionBoxWrapper';
 

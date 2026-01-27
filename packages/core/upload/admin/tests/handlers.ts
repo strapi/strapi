@@ -159,9 +159,22 @@ const handlers = [
           sizeOptimization: true,
           responsiveDimensions: true,
           autoOrientation: true,
+          aiMetadata: true,
         },
       })
     );
+  }),
+
+  rest.get('/upload/actions/generate-ai-metadata/count', async (req, res, ctx) => {
+    return res(
+      ctx.json({
+        count: 0,
+      })
+    );
+  }),
+
+  rest.get('/upload/actions/generate-ai-metadata/latest', async (req, res, ctx) => {
+    return res(ctx.json(null));
   }),
 
   rest.get('/upload/folder-structure', (req, res, ctx) => {

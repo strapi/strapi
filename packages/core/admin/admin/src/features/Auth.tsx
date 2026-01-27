@@ -7,7 +7,7 @@ import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
 import { useQueryParams } from '../hooks/useQueryParams';
-import { login as loginAction, logout as logoutAction, setLocale } from '../reducer';
+import { login as loginAction, logout as logoutAction, setLocale, setToken } from '../reducer';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -15,8 +15,9 @@ import {
   useLazyCheckPermissionsQuery,
   useLoginMutation,
   useLogoutMutation,
-  useRenewTokenMutation,
 } from '../services/auth';
+import { getOrCreateDeviceId } from '../utils/deviceId';
+import { setOnTokenUpdate } from '../utils/getFetchClient';
 
 import type {
   Permission as PermissionContract,
@@ -45,7 +46,7 @@ interface AuthContextValue {
    * empty, the user does not have any of those permissions.
    */
   checkUserHasPermissions: (
-    permissions?: Permission[],
+    permissions?: Array<Pick<Permission, 'action'> & Partial<Omit<Permission, 'action'>>>,
     passedPermissions?: Permission[],
     rawQueryContext?: string
   ) => Promise<Permission[]>;
@@ -84,6 +85,13 @@ const AuthProvider = ({
   const location = useLocation();
   const [{ rawQuery }] = useQueryParams();
 
+  const locationRef = React.useRef(location);
+
+  // Update ref without causing re-render
+  React.useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
+
   const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
   const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
@@ -106,7 +114,6 @@ const AuthProvider = ({
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
-  const [renewTokenMutation] = useRenewTokenMutation();
   const [logoutMutation] = useLogoutMutation();
 
   const clearStateAndLogout = React.useCallback(() => {
@@ -115,27 +122,6 @@ const AuthProvider = ({
     navigate('/auth/login');
   }, [dispatch, navigate]);
 
-  /**
-   * Fetch data from storages on mount and store it in our state.
-   * It's not normally stored in session storage unless the user
-   * does click "remember me" when they login. We also need to renew the token.
-   */
-  React.useEffect(() => {
-    if (token && !_disableRenewToken) {
-      renewTokenMutation({ token }).then((res) => {
-        if ('data' in res) {
-          dispatch(
-            loginAction({
-              token: res.data.token,
-            })
-          );
-        } else {
-          clearStateAndLogout();
-        }
-      });
-    }
-  }, [token, dispatch, renewTokenMutation, clearStateAndLogout, _disableRenewToken]);
-
   React.useEffect(() => {
     if (user) {
       if (user.preferedLanguage) {
@@ -143,6 +129,20 @@ const AuthProvider = ({
       }
     }
   }, [dispatch, user]);
+
+  /**
+   * Register a callback to update Redux state when the token is refreshed.
+   * This ensures the app state stays in sync with the token stored in localStorage/cookies.
+   */
+  React.useEffect(() => {
+    setOnTokenUpdate((newToken) => {
+      dispatch(setToken(newToken));
+    });
+
+    return () => {
+      setOnTokenUpdate(null);
+    };
+  }, [dispatch]);
 
   React.useEffect(() => {
     /**
@@ -163,7 +163,7 @@ const AuthProvider = ({
 
   const login = React.useCallback<AuthContextValue['login']>(
     async ({ rememberMe, ...body }) => {
-      const res = await loginMutation(body);
+      const res = await loginMutation({ ...body, deviceId: getOrCreateDeviceId(), rememberMe });
 
       /**
        * There will always be a `data` key in the response
@@ -186,7 +186,7 @@ const AuthProvider = ({
   );
 
   const logout = React.useCallback(async () => {
-    await logoutMutation();
+    await logoutMutation({ deviceId: getOrCreateDeviceId() });
     clearStateAndLogout();
   }, [clearStateAndLogout, logoutMutation]);
 
@@ -242,7 +242,7 @@ const AuthProvider = ({
         {
           user,
           permissions: userPermissions,
-          pathname: location.pathname,
+          pathname: locationRef.current.pathname,
           search: (rawQueryContext || rawQuery).split('?')[1] ?? '',
         },
         matchingPermissions
@@ -269,7 +269,7 @@ const AuthProvider = ({
         return middlewaredPermissions.filter((_, index) => data?.data[index] === true);
       }
     },
-    [checkPermissions, location.pathname, rawQuery, runRbacMiddleware, user, userPermissions]
+    [checkPermissions, rawQuery, runRbacMiddleware, user, userPermissions]
   );
 
   const isLoading = isLoadingUser || isLoadingPermissions;

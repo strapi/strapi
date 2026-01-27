@@ -2,77 +2,73 @@
 
 exports[`Upload - Configure initial render renders and matches the snapshot 1`] = `
 .c1 {
-  padding-block-end: 56px;
+  padding-block-end: 16px;
 }
 
 .c4 {
-  padding-block-start: 24px;
-  padding-block-end: 40px;
-  padding-inline-start: 56px;
-  padding-inline-end: 56px;
   background: #f6f6f9;
-}
-
-.c5 {
-  padding-block-end: 8px;
+  padding-block-end: 16px;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  padding-block-start: 16px;
 }
 
 .c6 {
   cursor: pointer;
 }
 
-.c11 {
-  min-width: 0;
-}
-
-.c14 {
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
+.c13 {
   border-radius: 4px;
   cursor: pointer;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  width: 100%;
+}
+
+.c18 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  padding-block-start: 16px;
 }
 
 .c19 {
-  padding-inline-start: 56px;
-  padding-inline-end: 56px;
-}
-
-.c20 {
-  padding-block-start: 24px;
-  padding-block-end: 24px;
-  padding-inline-start: 32px;
-  padding-inline-end: 32px;
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+  padding-block-end: 24px;
+  padding-inline-start: 32px;
+  padding-inline-end: 32px;
+  padding-block-start: 24px;
 }
 
-.c27 {
+.c26 {
   background: #ffffff;
   border-radius: 4px;
   cursor: default;
+  overflow: hidden;
   position: relative;
+}
+
+.c29 {
+  flex: 1;
   overflow: hidden;
 }
 
-.c30 {
-  flex: 1;
-}
-
-.c10 {
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: row;
+.c5 {
+  gap: 12px;
+  align-items: initial;
+  flex-direction: column;
   display: flex;
 }
 
 .c12 {
+  gap: 12px;
   align-items: center;
   flex-direction: row;
   display: flex;
 }
 
-.c15 {
+.c14 {
   gap: 8px;
   align-items: center;
   justify-content: center;
@@ -80,20 +76,26 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   display: inline-flex;
 }
 
-.c22 {
+.c16 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c21 {
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c24 {
+.c23 {
   gap: 4px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
-.c28 {
+.c27 {
   gap: 16px;
   align-items: center;
   justify-content: space-between;
@@ -101,24 +103,23 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   display: flex;
 }
 
-.c31 {
-  gap: 12px;
-  align-items: center;
-  flex-direction: row;
-  display: flex;
-}
-
 .c9 {
-  font-size: 1.4rem;
-  line-height: 1.43;
+  font-size: 1.6rem;
+  line-height: 1.5;
   color: #4945ff;
 }
 
-.c13 {
+.c10 {
   font-weight: 600;
-  font-size: 3.2rem;
-  line-height: 1.25;
+  font-size: 2.8rem;
+  line-height: 1.14;
   color: currentcolor;
+}
+
+.c11 {
+  font-size: 1.8rem;
+  line-height: 1.33;
+  color: #666687;
 }
 
 .c17 {
@@ -128,13 +129,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   font-weight: 600;
 }
 
-.c18 {
-  font-size: 1.6rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c25 {
+.c24 {
   font-size: 1.2rem;
   line-height: 1.33;
   display: block;
@@ -145,9 +140,9 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   font-weight: 600;
 }
 
-.c32 {
-  font-size: 1.4rem;
-  line-height: 1.43;
+.c30 {
+  font-size: 1.6rem;
+  line-height: 1.5;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -155,13 +150,13 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   color: #32324d;
 }
 
-.c36 {
+.c33 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c37 {
+.c34 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -180,25 +175,25 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   color: inherit;
 }
 
-.c16 {
-  height: 3.2rem;
+.c15 {
+  height: 4rem;
   text-decoration: none;
   border: 1px solid #4945ff;
   background: #4945ff;
   color: #ffffff;
 }
 
-.c16:hover {
+.c15:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c15:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c16[aria-disabled='true'] {
+.c15[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
@@ -223,11 +218,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c8:hover>span {
-  color: #7b79ff;
+  color: #4945ff;
 }
 
 .c8:hover svg path {
-  fill: #7b79ff;
+  fill: #4945ff;
 }
 
 .c8:active {
@@ -262,15 +257,26 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid #4945ff;
 }
 
-.c26 {
-  display: flex;
+.c25 {
+  display: block;
 }
 
-.c29 {
+.c20 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c22 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
+.c28 {
   border: 1px solid #dcdce4;
-  padding-block: 8px;
   padding-inline-start: 16px;
   padding-inline-end: 12px;
+  padding-block: calc(           12px - 1px         );
   cursor: pointer;
   outline: none;
   box-shadow: none;
@@ -278,88 +284,198 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   transition-duration: 0.2s;
 }
 
-.c29[aria-disabled='true'] {
+.c28[aria-disabled='true'] {
   color: #8e8ea9;
 }
 
-.c29:focus-visible {
+.c28:focus-visible {
   outline: none;
 }
 
-.c29:focus-within {
+.c28:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c35 {
+.c32 {
   display: flex;
 }
 
-.c35>svg {
+.c32>svg {
   fill: #8e8ea9;
 }
 
-.c33 {
+.c31 {
   flex: 1;
-  font-size: 1.4rem;
-  line-height: 2.2rem;
-}
-
-.c34 {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+  min-height: 2.4rem;
 }
 
 .c3:focus-visible {
   outline: none;
 }
 
-.c21 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-}
-
-.c23 {
-  grid-column: span 12;
-  max-width: 100%;
-}
-
 .c0 {
+  max-width: 100%;
   display: grid;
   grid-template-columns: 1fr;
+  padding: 0;
 }
 
 .c2 {
   overflow-x: hidden;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .c16 {
-    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+@media (min-width: 768px) {
+  .c1 {
+    padding-block-end: 24px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c1 {
+    padding-block-end: 56px;
+  }
+}
+
+@media (min-width: 768px) {
+  .c4 {
+    padding-inline-start: 24px;
+    padding-inline-end: 24px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c4 {
+    padding-block-end: 40px;
+    padding-inline-start: 56px;
+    padding-inline-end: 56px;
+    padding-block-start: 24px;
+  }
+}
+
+@media (min-width: 768px) {
+  .c18 {
+    padding-inline-start: 24px;
+    padding-inline-end: 24px;
+    padding-block-start: 0;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c18 {
+    padding-inline-start: 56px;
+    padding-inline-end: 56px;
+  }
+}
+
+@media (min-width: 768px) {
+  .c9 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c9 {
+    line-height: 1.43;
+  }
+}
+
+@media (min-width: 768px) {
+  .c10 {
+    font-size: 3.2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c10 {
+    line-height: 1.25;
+  }
+}
+
+@media (min-width: 768px) {
+  .c11 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c11 {
+    line-height: 1.5;
+  }
+}
+
+@media (min-width: 768px) {
+  .c30 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c30 {
+    line-height: 1.43;
+  }
+}
+
+@media (min-width: 768px) {
+
+}
+
+@media (min-width: 768px) {
+  .c15 {
+    height: 3.2rem;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-
+  .c15 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 }
 
 @media (min-width: 520px) {
-  .c23 {
+  .c22 {
     grid-column: span 12;
   }
 }
 
 @media (min-width: 768px) {
-  .c23 {
-    grid-column: span 12;
+  .c22 {
+    grid-column: span 6;
   }
 }
 
 @media (min-width: 1080px) {
-  .c23 {
+  .c22 {
     grid-column: span 6;
+  }
+}
+
+@media (min-width: 768px) {
+  .c28 {
+    padding-block: 8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .c31 {
+    min-height: 2.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (min-width: 768px) {
+  .c0 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .c2 {
+    transform: none;
+    width: auto;
   }
 }
 
@@ -369,6 +485,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   >
     <div
       class="c1 c2"
+      data-strapi-main-content="true"
     >
       <main
         aria-labelledby="main-content-title"
@@ -377,61 +494,22 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
         tabindex="-1"
       >
         <form>
-          <div
-            style="height: 0px;"
-          >
+          <div>
             <div
-              class="c4"
-              data-strapi-header="true"
+              style="height: 0px;"
             >
               <div
-                class="c5"
-              >
-                <a
-                  aria-disabled="false"
-                  class="c6 c7 c8"
-                  href="/plugins/upload"
-                  id="go-back"
-                >
-                  <svg
-                    fill="currentColor"
-                    height="16"
-                    viewBox="0 0 32 32"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H8.625l6.44 6.439a1.502 1.502 0 1 1-2.125 2.125l-9-9a1.5 1.5 0 0 1 0-2.125l9-9a1.503 1.503 0 0 1 2.125 2.125L8.625 14.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                    />
-                  </svg>
-                  <span
-                    class="c9"
-                  >
-                    Back
-                  </span>
-                </a>
-              </div>
-              <div
-                class="c10"
+                class="c4"
+                data-strapi-header="true"
               >
                 <div
-                  class="c11 c12"
+                  class="c5"
                 >
-                  <h1
-                    class="c13"
-                  >
-                    Configure the view - Media Library
-                  </h1>
-                </div>
-                <button
-                  aria-disabled="true"
-                  class="c14 c15 c16"
-                  disabled=""
-                  type="submit"
-                >
-                  <span
-                    aria-hidden="true"
-                    class="c12"
+                  <a
+                    aria-disabled="false"
+                    class="c6 c7 c8"
+                    href="/plugins/upload"
+                    id="go-back"
                   >
                     <svg
                       fill="currentColor"
@@ -441,46 +519,88 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="m29.061 10.061-16 16a1.5 1.5 0 0 1-2.125 0l-7-7a1.504 1.504 0 0 1 2.125-2.125L12 22.875 26.939 7.939a1.502 1.502 0 1 1 2.125 2.125z"
+                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H8.625l6.44 6.439a1.502 1.502 0 1 1-2.125 2.125l-9-9a1.5 1.5 0 0 1 0-2.125l9-9a1.503 1.503 0 0 1 2.125 2.125L8.625 14.5H27a1.5 1.5 0 0 1 1.5 1.5"
                       />
                     </svg>
-                  </span>
-                  <span
-                    class="c17"
+                    <span
+                      class="c9"
+                    >
+                      Back
+                    </span>
+                  </a>
+                  <h1
+                    class="c10"
+                    style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;"
                   >
-                    Save
-                  </span>
-                </button>
+                    Configure the view - Media Library
+                  </h1>
+                  <p
+                    class="c11"
+                  >
+                    Define the view settings of the media library.
+                  </p>
+                  <div
+                    class="c12"
+                  >
+                    <button
+                      aria-disabled="true"
+                      class="c13 c14 c15"
+                      disabled=""
+                      type="submit"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="c16"
+                      >
+                        <svg
+                          fill="currentColor"
+                          height="16"
+                          viewBox="0 0 32 32"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="m29.061 10.061-16 16a1.5 1.5 0 0 1-2.125 0l-7-7a1.504 1.504 0 0 1 2.125-2.125L12 22.875 26.939 7.939a1.502 1.502 0 1 1 2.125 2.125z"
+                          />
+                        </svg>
+                      </span>
+                      <span
+                        class="c17"
+                      >
+                        Save
+                      </span>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p
-                class="c18"
-              >
-                Define the view settings of the media library.
-              </p>
             </div>
           </div>
           <div
-            class="c19"
+            class="c18"
           >
             <div
-              class="c20"
+              class="c19"
             >
               <div
-                class="c21"
+                class="c20"
               >
                 <div
-                  class="c22 c23"
+                  class="c21 c22"
                 >
                   <div
-                    class="c24"
+                    class="c23"
                   >
-                    <label
-                      class="c25 c26"
-                      for=":r0:"
-                      id=":r0:-label"
+                    <div
+                      class="c16"
                     >
-                      Entries per page
-                    </label>
+                      <label
+                        class="c24 c25"
+                        for=":r0:"
+                        id=":r0:-label"
+                      >
+                        Entries per page
+                      </label>
+                    </div>
                     <div
                       aria-autocomplete="none"
                       aria-controls="radix-:r2:"
@@ -488,7 +608,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       aria-expanded="false"
                       aria-labelledby=":r0:-label"
                       aria-required="false"
-                      class="c27 c28 c29"
+                      class="c26 c27 c28"
                       data-state="closed"
                       dir="ltr"
                       name="pageSize"
@@ -496,24 +616,24 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       tabindex="0"
                     >
                       <span
-                        class="c30 c31"
+                        class="c29 c12"
                       >
                         <span
-                          class="c32 c33"
+                          class="c30 c31"
                         >
                           <span
-                            class="c34"
+                            class=""
                           >
                             10
                           </span>
                         </span>
                       </span>
                       <span
-                        class="c31"
+                        class="c12"
                       >
                         <span
                           aria-hidden="true"
-                          class="c35"
+                          class="c32"
                         >
                           <svg
                             fill="currentColor"
@@ -530,7 +650,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       </span>
                     </div>
                     <p
-                      class="c36"
+                      class="c33"
                       id=":r0:-hint"
                     >
                       Number of assets displayed by default in the Media Library
@@ -538,18 +658,22 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                   </div>
                 </div>
                 <div
-                  class="c22 c23"
+                  class="c21 c22"
                 >
                   <div
-                    class="c24"
+                    class="c23"
                   >
-                    <label
-                      class="c25 c26"
-                      for=":r3:"
-                      id=":r3:-label"
+                    <div
+                      class="c16"
                     >
-                      Default sort order
-                    </label>
+                      <label
+                        class="c24 c25"
+                        for=":r3:"
+                        id=":r3:-label"
+                      >
+                        Default sort order
+                      </label>
+                    </div>
                     <div
                       aria-autocomplete="none"
                       aria-controls="radix-:r5:"
@@ -557,7 +681,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       aria-expanded="false"
                       aria-labelledby=":r3:-label"
                       aria-required="false"
-                      class="c27 c28 c29"
+                      class="c26 c27 c28"
                       data-state="closed"
                       dir="ltr"
                       name="sort"
@@ -565,24 +689,24 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       tabindex="0"
                     >
                       <span
-                        class="c30 c31"
+                        class="c29 c12"
                       >
                         <span
-                          class="c32 c33"
+                          class="c30 c31"
                         >
                           <span
-                            class="c34"
+                            class=""
                           >
                             createdAt:DESC
                           </span>
                         </span>
                       </span>
                       <span
-                        class="c31"
+                        class="c12"
                       >
                         <span
                           aria-hidden="true"
-                          class="c35"
+                          class="c32"
                         >
                           <svg
                             fill="currentColor"
@@ -599,7 +723,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                       </span>
                     </div>
                     <p
-                      class="c36"
+                      class="c33"
                       id=":r3:-hint"
                     >
                       Note: You can override this value in the media library.
@@ -609,13 +733,12 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
               </div>
             </div>
           </div>
-          x
         </form>
       </main>
     </div>
   </div>
   <span
-    class="c37"
+    class="c34"
   >
     <p
       aria-live="polite"

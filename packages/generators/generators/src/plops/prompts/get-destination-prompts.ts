@@ -1,13 +1,7 @@
 import { join } from 'path';
 import fs from 'fs-extra';
 
-import type { PromptQuestion } from 'node-plop';
-
-export default (
-  action: string,
-  basePath: string,
-  { rootFolder = false } = {}
-): Array<PromptQuestion> => {
+export default (action: string, basePath: string, { rootFolder = false } = {}) => {
   return [
     {
       type: 'list',
@@ -32,7 +26,7 @@ export default (
       ],
     },
     {
-      when: (answers) => answers.destination === 'api',
+      when: (answers: any) => answers.destination === 'api',
       type: 'list',
       message: 'Which API is this for?',
       name: 'api',
@@ -55,7 +49,7 @@ export default (
       },
     },
     {
-      when: (answers) => answers.destination === 'plugin',
+      when: (answers: any) => answers.destination === 'plugin',
       type: 'list',
       message: 'Which plugin is this for?',
       name: 'plugin',

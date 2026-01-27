@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, Typography, Link } from '@strapi/design-system';
 import omit from 'lodash/omit';
-import { useIntl } from 'react-intl';
+import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
@@ -14,7 +14,6 @@ import {
 } from '../../../../../shared/contracts/authentication';
 import { Form, FormHelpers } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
-import { useGuidedTour } from '../../../components/GuidedTour/Provider';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useTypedDispatch } from '../../../core/store/hooks';
@@ -29,6 +28,7 @@ import {
   useRegisterUserMutation,
 } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { getOrCreateDeviceId } from '../../../utils/deviceId';
 import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
@@ -55,24 +55,45 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
         return byteSize <= 72;
       }
     )
-    .matches(/[a-z]/, {
-      message: {
-        id: 'components.Input.error.contain.lowercase',
-        defaultMessage: 'Password must contain at least 1 lowercase letter',
+    .test(
+      'lowercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.lowercase',
+          defaultMessage: 'Password must contain at least 1 lowercase letter',
+        },
       },
-    })
-    .matches(/[A-Z]/, {
-      message: {
-        id: 'components.Input.error.contain.uppercase',
-        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      (value) => {
+        if (!value) return true;
+        return /[a-z]/.test(value);
+      }
+    )
+    .test(
+      'uppercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.uppercase',
+          defaultMessage: 'Password must contain at least 1 uppercase letter',
+        },
       },
-    })
-    .matches(/\d/, {
-      message: {
-        id: 'components.Input.error.contain.number',
-        defaultMessage: 'Password must contain at least 1 number',
+      (value) => {
+        if (!value) return true;
+        return /[A-Z]/.test(value);
+      }
+    )
+    .test(
+      'number',
+      {
+        message: {
+          id: 'components.Input.error.contain.number',
+          defaultMessage: 'Password must contain at least 1 number',
+        },
       },
-    })
+      (value) => {
+        if (!value) return true;
+        return /\d/.test(value);
+      }
+    )
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
@@ -123,24 +144,45 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
         return new TextEncoder().encode(value).length <= 72;
       }
     )
-    .matches(/[a-z]/, {
-      message: {
-        id: 'components.Input.error.contain.lowercase',
-        defaultMessage: 'Password must contain at least 1 lowercase letter',
+    .test(
+      'lowercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.lowercase',
+          defaultMessage: 'Password must contain at least 1 lowercase letter',
+        },
       },
-    })
-    .matches(/[A-Z]/, {
-      message: {
-        id: 'components.Input.error.contain.uppercase',
-        defaultMessage: 'Password must contain at least 1 uppercase letter',
+      (value) => {
+        if (!value) return true;
+        return /[a-z]/.test(value);
+      }
+    )
+    .test(
+      'uppercase',
+      {
+        message: {
+          id: 'components.Input.error.contain.uppercase',
+          defaultMessage: 'Password must contain at least 1 uppercase letter',
+        },
       },
-    })
-    .matches(/\d/, {
-      message: {
-        id: 'components.Input.error.contain.number',
-        defaultMessage: 'Password must contain at least 1 number',
+      (value) => {
+        if (!value) return true;
+        return /[A-Z]/.test(value);
+      }
+    )
+    .test(
+      'number',
+      {
+        message: {
+          id: 'components.Input.error.contain.number',
+          defaultMessage: 'Password must contain at least 1 number',
+        },
       },
-    })
+      (value) => {
+        if (!value) return true;
+        return /\d/.test(value);
+      }
+    )
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
@@ -189,6 +231,10 @@ interface RegisterFormValues {
   news: boolean;
 }
 
+interface IntlFormattedMessage extends MessageDescriptor {
+  values?: Record<string, PrimitiveType>;
+}
+
 const Register = ({ hasAdmin }: RegisterProps) => {
   const { toggleNotification } = useNotification();
   const navigate = useNavigate();
@@ -196,7 +242,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const setSkipped = useGuidedTour('Register', (state) => state.setSkipped);
   const { search: searchString } = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const match = useMatch('/auth/:authType');
@@ -235,22 +280,10 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },
     setFormErrors: FormHelpers<RegisterFormValues>['setErrors']
   ) => {
-    const res = await registerAdmin(body);
+    const res = await registerAdmin({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
       dispatch(login({ token: res.data.token }));
-
-      const { roles } = res.data.user;
-
-      if (roles) {
-        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
-
-        if (isUserSuperAdmin) {
-          localStorage.setItem('GUIDED_TOUR_SKIPPED', JSON.stringify(false));
-          setSkipped(false);
-          trackUsage('didLaunchGuidedtour');
-        }
-      }
 
       if (news) {
         // Only enable EE survey if user accepted the newsletter
@@ -281,7 +314,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     { news, ...body }: RegisterUser.Request['body'] & { news: boolean },
     setFormErrors: FormHelpers<RegisterFormValues>['setErrors']
   ) => {
-    const res = await registerUser(body);
+    const res = await registerUser({ ...body, deviceId: getOrCreateDeviceId() });
 
     if ('data' in res) {
       dispatch(login({ token: res.data.token }));
@@ -392,15 +425,43 @@ const Register = ({ hasAdmin }: RegisterProps) => {
               }
             } catch (err) {
               if (err instanceof ValidationError) {
-                helpers.setErrors(
-                  err.inner.reduce<Record<string, string>>((acc, { message, path }) => {
-                    if (path && typeof message === 'object') {
-                      acc[path] = formatMessage(message);
+                const formatDescriptor = (msg: any) => {
+                  try {
+                    if (!msg) return '';
+                    if (typeof msg === 'string') return msg;
+                    // Direct descriptor
+                    if ('id' in msg && 'defaultMessage' in msg) return formatMessage(msg as any);
+                    // Wrapped descriptor: { message: { id, defaultMessage } }
+                    if (msg.message && typeof msg.message === 'object' && 'id' in msg.message) {
+                      return formatMessage(msg.message as any);
                     }
+                    // errors array: [{ id, defaultMessage }]
+                    if (Array.isArray(msg.errors) && msg.errors.length > 0) {
+                      const first = msg.errors[0];
+                      if (typeof first === 'string') return first;
+                      if (first && typeof first === 'object' && 'id' in first)
+                        return formatMessage(first as any);
+                    }
+                    // fallback to defaultMessage if present
+                    if ('defaultMessage' in msg) return msg.defaultMessage;
+                    return String(msg);
+                  } catch (e) {
+                    return String(msg);
+                  }
+                };
+
+                const computed = err.inner.reduce<Record<string, string>>(
+                  (acc, { message, path }) => {
+                    if (!path) return acc;
+                    acc[path] = formatDescriptor(message);
                     return acc;
-                  }, {})
+                  },
+                  {}
                 );
+
+                helpers.setErrors(computed);
               }
+
               setSubmitCount(submitCount + 1);
             }
           }}
@@ -494,7 +555,13 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                   type: 'checkbox' as const,
                 },
               ].map(({ size, ...field }) => (
-                <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
+                <Grid.Item
+                  key={field.name}
+                  xs={12}
+                  m={size}
+                  direction="column"
+                  alignItems="stretch"
+                >
                   <InputRenderer {...field} />
                 </Grid.Item>
               ))}
@@ -523,16 +590,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     </UnauthenticatedLayout>
   );
 };
-
-interface RegisterFormValues {
-  firstname: string;
-  lastname: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  registrationToken: string | undefined;
-  news: boolean;
-}
 
 type StringKeys<T> = {
   [K in keyof T]: T[K] extends string | undefined ? K : never;

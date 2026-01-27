@@ -234,3 +234,66 @@ export declare namespace UpdateFile {
     error?: errors.ApplicationError | errors.ValidationError;
   }
 }
+
+/**
+ * POST /upload/actions/bulk-update - Bulk update files
+ */
+export declare namespace BulkUpdateFiles {
+  export interface Request {
+    body: {
+      updates: Array<{
+        id: number;
+        fileInfo: {
+          name?: string;
+          alternativeText?: string | null;
+          caption?: string | null;
+          folder?: number | null;
+        };
+      }>;
+    };
+  }
+
+  export interface Response {
+    data: File[];
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
+
+/**
+ * GET /upload/actions/generate-ai-metadata/count - Get count of images without metadata
+ */
+export declare namespace GetAIMetadataCount {
+  export interface Request {
+    query: {};
+  }
+
+  export interface Response {
+    data: {
+      imagesWithoutMetadataCount: number;
+      totalImages: number;
+    };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /upload/actions/generate-ai-metadata - Start AI metadata generation job
+ */
+export declare namespace GenerateAIMetadata {
+  export interface Request {
+    body: {};
+  }
+
+  export interface Response {
+    data:
+      | {
+          jobId: number;
+          status: 'pending';
+        }
+      | {
+          count: 0;
+          message: string;
+        };
+    error?: errors.ApplicationError;
+  }
+}

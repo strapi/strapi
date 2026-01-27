@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
-import { sharedSetup } from '../../../../utils/setup';
-import { navToHeader, clickAndWait } from '../../../../utils/shared';
+import { sharedSetup } from '../../../../../utils/setup';
+import { navToHeader, clickAndWait } from '../../../../../utils/shared';
 
 // Constants for the created role
 const NEW_ROLE = { name: 'Publisher', description: 'Role with publishing capabilities' };
@@ -21,7 +21,6 @@ test.describe('RBAC - Create Roles', () => {
       login: true,
       resetFiles: true,
       importData: 'with-admin.tar',
-      skipTour: true,
     });
 
     // Navigate to the Roles management page

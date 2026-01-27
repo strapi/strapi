@@ -1,11 +1,18 @@
-import { omit, assoc, merge, curry } from 'lodash/fp';
+import { omit, assoc, merge, curry, isEmpty } from 'lodash/fp';
 
-import { async, contentTypes as contentTypesUtils, validate, errors } from '@strapi/utils';
+import {
+  async,
+  contentTypes as contentTypesUtils,
+  validate,
+  errors,
+  createModelCache,
+} from '@strapi/utils';
 
 import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
+import { copyNonLocalizedFields } from './internationalization';
 import * as components from './components';
 
 import { createEntriesService } from './entries';
@@ -18,6 +25,8 @@ import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import entityValidator from '../entity-validator';
+import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
+import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
 
 const { validators } = validate;
 
@@ -43,11 +52,35 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   };
 
   const validateParams = async (params: any) => {
-    const ctx = { schema: contentType, getModel };
-    await validators.validateFilters(ctx, params.filters, filtersValidations);
-    await validators.validateSort(ctx, params.sort, sortValidations);
-    await validators.validateFields(ctx, params.fields, fieldValidations);
-    await validators.validatePopulate(ctx, params.populate, populateValidations);
+    // Cache model lookups for this request to avoid repeating the same work
+    const modelCache = createModelCache(getModel);
+
+    const ctx = { schema: contentType, getModel: modelCache.getModel };
+
+    // Only validate what is actually provided
+    const validations: Promise<unknown>[] = [];
+
+    if (params.filters && !isEmpty(params.filters)) {
+      validations.push(validators.validateFilters(ctx, params.filters, filtersValidations));
+    }
+
+    if (params.sort && !isEmpty(params.sort)) {
+      validations.push(validators.validateSort(ctx, params.sort, sortValidations));
+    }
+
+    if (params.fields && !isEmpty(params.fields)) {
+      validations.push(validators.validateFields(ctx, params.fields, fieldValidations));
+    }
+
+    if (params.populate && !isEmpty(params.populate)) {
+      validations.push(validators.validatePopulate(ctx, params.populate, populateValidations));
+    }
+
+    // Run validations together but keep the same error order as before
+    await runParallelWithOrderedErrors(validations);
+
+    // Clean up cache after validation
+    modelCache.clear();
 
     // Strip lookup from params, it's only used internally
     if (params.lookup) {
@@ -210,6 +243,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const queryParams = await async.pipe(
       validateParams,
       DP.filterDataPublishedAt,
+      filterDataFirstPublishedAt,
       DP.setStatusToDraft(contentType),
       DP.statusToLookup(contentType),
       DP.statusToData(contentType),
@@ -240,9 +274,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
+        const mergedData = await copyNonLocalizedFields(contentType, documentId, {
+          ...queryParams.data,
+          documentId,
+        });
+
         updatedDraft = await entries.create({
           ...queryParams,
-          data: { ...queryParams.data, documentId },
+          data: mergedData,
         });
         emitEvent('entry.create', updatedDraft);
       }
@@ -264,7 +303,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       DP.defaultStatus(contentType),
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
-      i18n.localeToLookup(contentType),
+      i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid)
     )(params);
 
@@ -301,10 +340,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     ]);
 
     // Load any unidirectional relation targetting the old published entries
-    const relationsToSync = await unidirectionalRelations.load(uid, {
-      newVersions: draftsToPublish,
-      oldVersions: oldPublishedVersions,
-    });
+    const relationsToSync = await unidirectionalRelations.load(
+      uid,
+      {
+        newVersions: draftsToPublish,
+        oldVersions: oldPublishedVersions,
+      },
+      {
+        shouldPropagateRelation: components.createComponentRelationFilter(),
+      }
+    );
 
     const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
       newVersions: draftsToPublish,
@@ -314,20 +359,25 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
+    // Add firstPublishedAt to draft if it doesn't exist
+    const updatedDraft = await async.map(draftsToPublish, (draft: any) =>
+      addFirstPublishedAtToDraft(draft, entries.update, contentType)
+    );
+
     // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(draftsToPublish, (draft: any) =>
+    const publishedEntries = await async.map(updatedDraft, (draft: any) =>
       entries.publish(draft, queryParams)
     );
 
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(
-      [...oldPublishedVersions, ...draftsToPublish],
+      [...oldPublishedVersions, ...updatedDraft],
       publishedEntries,
       relationsToSync
     );
 
     await bidirectionalRelations.sync(
-      [...oldPublishedVersions, ...draftsToPublish],
+      [...oldPublishedVersions, ...updatedDraft],
       publishedEntries,
       bidirectionalRelationsToSync
     );
@@ -386,10 +436,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     ]);
 
     // Load any unidirectional relation targeting the old drafts
-    const relationsToSync = await unidirectionalRelations.load(uid, {
-      newVersions: versionsToDraft,
-      oldVersions: oldDrafts,
-    });
+    const relationsToSync = await unidirectionalRelations.load(
+      uid,
+      {
+        newVersions: versionsToDraft,
+        oldVersions: oldDrafts,
+      },
+      {
+        shouldPropagateRelation: components.createComponentRelationFilter(),
+      }
+    );
 
     const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
       newVersions: versionsToDraft,

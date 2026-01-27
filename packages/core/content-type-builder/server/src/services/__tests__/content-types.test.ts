@@ -31,18 +31,5 @@ describe('Content types service', () => {
     it('Returns consistent schemas', () => {
       expect(formatContentType(contentType)).toMatchSnapshot();
     });
-
-    it('Sets default kind', () => {
-      expect(
-        formatContentType({
-          ...contentType,
-          kind: undefined,
-        })
-      ).toMatchObject({
-        schema: {
-          kind: 'collectionType',
-        },
-      });
-    });
   });
 });

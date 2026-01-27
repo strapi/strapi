@@ -1,7 +1,5 @@
-import { mergeWith } from 'lodash/fp';
-
-import type { Core, UID } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import type { Core } from '@strapi/types';
+import { errors, extendMiddlewareConfiguration } from '@strapi/utils';
 
 export type HandlerParams = {
   documentId: string;
@@ -9,48 +7,11 @@ export type HandlerParams = {
   status: 'published' | 'draft';
 };
 
-export interface PreviewConfig {
-  enabled: boolean;
-  config: {
-    // List of CSP allowed origins. This is a shortcut to setting it up inside `config/middlewares.js`
-    allowedOrigins: string[];
-    handler: (uid: UID.Schema, params: HandlerParams) => string | undefined;
-  };
-}
-
 /**
- * Utility to extend Strapi configuration middlewares. Mainly used to extend the CSP directives from the security middleware.
+ * @deprecated Use Core.Config.Admin['preview'] from @strapi/types instead
+ * Keeping for backward compatibility
  */
-const extendMiddlewareConfiguration = (middleware = { name: '', config: {} }) => {
-  const middlewares = strapi.config.get('middlewares') as (string | object)[];
-
-  const configuredMiddlewares = middlewares.map((currentMiddleware) => {
-    if (currentMiddleware === middleware.name) {
-      // Use the new config object if the middleware has no config property yet
-      return middleware;
-    }
-
-    // @ts-expect-error - currentMiddleware is not a string
-    if (currentMiddleware.name === middleware.name) {
-      // Deep merge (+ concat arrays) the new config with the current middleware config
-      return mergeWith(
-        (objValue, srcValue) => {
-          if (Array.isArray(objValue)) {
-            return objValue.concat(srcValue);
-          }
-
-          return undefined;
-        },
-        currentMiddleware,
-        middleware
-      );
-    }
-
-    return currentMiddleware;
-  });
-
-  strapi.config.set('middlewares', configuredMiddlewares);
-};
+export type PreviewConfig = NonNullable<Core.Config.Admin['preview']>;
 
 /**
  * Read configuration for static preview
@@ -68,7 +29,12 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
        * Register the allowed origins for CSP, so the preview URL can be displayed
        */
       if (config.config?.allowedOrigins) {
-        extendMiddlewareConfiguration({
+        const middlewares = strapi.config.get('middlewares') as (
+          | string
+          | { name?: string; config?: any }
+        )[];
+
+        const configuredMiddlewares = extendMiddlewareConfiguration(middlewares, {
           name: 'strapi::security',
           config: {
             contentSecurityPolicy: {
@@ -78,7 +44,14 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
             },
           },
         });
+
+        strapi.config.set('middlewares', configuredMiddlewares);
       }
+    },
+
+    isConfigured() {
+      const config = strapi.config.get('admin.preview') as PreviewConfig;
+      return config?.enabled === false || config?.config?.handler != null;
     },
 
     isEnabled() {
@@ -112,9 +85,7 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Utility to get the preview handler from the configuration
      */
-    getPreviewHandler(): PreviewConfig['config']['handler'] {
-      const config = strapi.config.get('admin.preview') as PreviewConfig;
-
+    getPreviewHandler(): NonNullable<Core.Config.Admin['preview']>['config']['handler'] {
       const emptyHandler = () => {
         return undefined;
       };
@@ -122,6 +93,8 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (!this.isEnabled()) {
         return emptyHandler;
       }
+
+      const config = strapi.config.get('admin.preview') as PreviewConfig;
 
       return config?.config?.handler || emptyHandler;
     },

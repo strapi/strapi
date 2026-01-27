@@ -25,8 +25,6 @@ const defaultQueryOpts = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-const ANALYTICS_URI = 'https://analytics.strapi.io';
-
 /**
  * Add properties from the package.json strapi key in the metadata
  */
@@ -71,6 +69,14 @@ export default (strapi: Core.Strapi): Sender => {
   return async (event: string, payload: Payload = {}, opts = {}) => {
     const userId = generateAdminUserHash(strapi);
 
+    const eeGroupProps: Record<string, unknown> = {};
+    if (strapi.ee?.subscriptionId !== undefined && strapi.ee?.subscriptionId !== null) {
+      eeGroupProps.subscriptionId = strapi.ee.subscriptionId;
+    }
+    if (strapi.ee?.planPriceId !== undefined && strapi.ee?.planPriceId !== null) {
+      eeGroupProps.planPriceId = strapi.ee.planPriceId;
+    }
+
     const reqParams = {
       method: 'POST',
       body: JSON.stringify({
@@ -82,6 +88,7 @@ export default (strapi: Core.Strapi): Sender => {
         groupProperties: {
           ...anonymousGroupProperties,
           projectType: strapi.EE ? 'Enterprise' : 'Community',
+          ...eeGroupProps,
           ...payload.groupProperties,
         },
       }),
@@ -89,7 +96,8 @@ export default (strapi: Core.Strapi): Sender => {
     };
 
     try {
-      const res = await strapi.fetch(`${ANALYTICS_URI}/api/v2/track`, reqParams);
+      const analyticsUrl = env('STRAPI_ANALYTICS_URL', 'https://analytics.strapi.io');
+      const res = await strapi.fetch(`${analyticsUrl}/api/v2/track`, reqParams);
       return res.ok;
     } catch (err) {
       return false;

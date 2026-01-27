@@ -21,6 +21,7 @@ export type WildcardNotation = '*';
  */
 export type SingleAttribute<TSchemaUID extends UID.Schema> =
   | 'id'
+  | 'documentId'
   | Guard.Never<Schema.NonPopulatableAttributeNames<TSchemaUID>, string>;
 
 /**

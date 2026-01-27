@@ -17,6 +17,7 @@ const ID_ATTRIBUTE = 'id';
 const DOC_ID_ATTRIBUTE = 'documentId';
 
 const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
+const FIRST_PUBLISHED_AT_ATTRIBUTE = 'firstPublishedAt';
 const CREATED_BY_ATTRIBUTE = 'createdBy';
 const UPDATED_BY_ATTRIBUTE = 'updatedBy';
 
@@ -27,6 +28,7 @@ const constants = {
   ID_ATTRIBUTE,
   DOC_ID_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
+  FIRST_PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
@@ -97,7 +99,13 @@ const getNonVisibleAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
+  return _.uniq([
+    ID_ATTRIBUTE,
+    DOC_ID_ATTRIBUTE,
+    PUBLISHED_AT_ATTRIBUTE,
+    ...getTimestamps(model),
+    ...nonVisibleAttributes,
+  ]);
 };
 
 const getVisibleAttributes = (model: Model) => {
@@ -113,6 +121,10 @@ const getOptions = (model: Model) =>
 
 const hasDraftAndPublish = (model: Model) =>
   _.get(model, 'options.draftAndPublish', false) === true;
+
+const hasFirstPublishedAtField = (model: Model) =>
+  strapi.config.get('features.future.experimental_firstPublishedAt', false) &&
+  hasDraftAndPublish(model);
 
 const isDraft = <T extends object>(data: T, model: Model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
@@ -205,6 +217,17 @@ const getComponentAttributes = (schema: Model) => {
   );
 };
 
+const getMediaAttributes = (schema: Model) => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isMediaAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    [] as string[]
+  );
+};
+
 const getScalarAttributes = (schema: Model) => {
   return _.reduce(
     schema.attributes,
@@ -264,6 +287,7 @@ export {
   constants,
   getNonWritableAttributes,
   getComponentAttributes,
+  getMediaAttributes,
   getScalarAttributes,
   getRelationalAttributes,
   getWritableAttributes,
@@ -276,6 +300,7 @@ export {
   getOptions,
   isDraft,
   hasDraftAndPublish,
+  hasFirstPublishedAtField,
   isSingleType,
   isCollectionType,
   isKind,

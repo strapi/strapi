@@ -9,20 +9,25 @@ import {
 } from '@strapi/design-system';
 import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
 import { styled } from 'styled-components';
-
 /* -------------------------------------------------------------------------------------------------
  * Link
  * -----------------------------------------------------------------------------------------------*/
 const MainNavLinkWrapper = styled(RouterLink)`
   text-decoration: none;
   display: flex;
+  align-items: center;
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
   color: ${({ theme }) => theme.colors.neutral500};
   position: relative;
-  width: fit-content;
-  padding-block: 0.6rem;
-  padding-inline: 0.6rem;
+  width: 100%;
+  padding-block: 0.4rem;
+  padding-inline: 1.2rem;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    padding-block: 0.6rem;
+    padding-inline: 0.6rem;
+  }
 
   &:hover {
     svg path {
@@ -39,10 +44,21 @@ const MainNavLinkWrapper = styled(RouterLink)`
   }
 `;
 
-const LinkImpl = ({ children, ...props }: LinkProps) => {
-  return <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>;
-};
+/**
+ * Padding is tuned to visually match a LinkButton size L.
+ */
+const MainNavButtonWrapper = styled(MainNavLinkWrapper)`
+  padding-block: 1rem;
+  padding-inline: 1rem;
+`;
 
+const LinkImpl = ({ children, ...props }: LinkProps) => (
+  <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>
+);
+
+const NavButtonImpl = ({ children, ...props }: LinkProps) => (
+  <MainNavButtonWrapper {...props}>{children}</MainNavButtonWrapper>
+);
 /* -------------------------------------------------------------------------------------------------
  * Tooltip
  * -----------------------------------------------------------------------------------------------*/
@@ -97,6 +113,7 @@ const BadgeImpl = ({ children, label, ...props }: NavLink.NavBadgeProps) => {
 
 const NavLink = {
   Link: LinkImpl,
+  NavButton: NavButtonImpl,
   Tooltip: TooltipImpl,
   Icon: IconImpl,
   Badge: BadgeImpl,

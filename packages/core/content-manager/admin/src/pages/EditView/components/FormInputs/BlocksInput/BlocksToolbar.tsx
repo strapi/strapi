@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { useElementOnScreen } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -11,23 +10,22 @@ import {
   FlexComponent,
   BoxComponent,
   Menu,
-  IconButton,
 } from '@strapi/design-system';
-import { Link, More } from '@strapi/icons';
+import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { css, styled } from 'styled-components';
 
-import { EditorToolbarObserver } from '../../EditorToolbarObserver';
+import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
 
+import { insertLink } from './Blocks/Link';
 import {
   type BlocksStore,
   type SelectorBlockKey,
   isSelectorBlockKey,
   useBlocksEditorContext,
 } from './BlocksEditor';
-import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled<FlexComponent>(Flex)`
@@ -151,6 +149,7 @@ const ToolbarButton = ({
           width={7}
           height={7}
           hasRadius
+          type="button"
         >
           <Icon fill={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
@@ -352,8 +351,8 @@ interface ListButtonProps {
 }
 
 const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) => {
-  const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
   const { formatMessage } = useIntl();
+  const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
 
   const isListActive = () => {
     if (!editor.selection) return false;
@@ -369,6 +368,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
       if (!Editor.isEditor(currentList) && isListNode(currentList) && currentList.format === format)
         return true;
     }
+
     return false;
   };
 
@@ -557,105 +557,6 @@ const LinkButton = ({
   );
 };
 
-interface ObservedToolbarComponentProps {
-  index: number;
-  lastVisibleIndex: number;
-  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
-  rootRef: React.RefObject<HTMLElement>;
-  children: React.ReactNode;
-}
-
-const ObservedToolbarComponent = ({
-  index,
-  lastVisibleIndex,
-  setLastVisibleIndex,
-  rootRef,
-  children,
-}: ObservedToolbarComponentProps) => {
-  const isVisible = index <= lastVisibleIndex;
-
-  const containerRef = useElementOnScreen<HTMLDivElement>(
-    (isVisible) => {
-      /**
-       * It's the MoreMenu's job to make an item not visible when there's not room for it.
-       * But we need to react here to the element becoming visible again.
-       */
-      if (isVisible) {
-        setLastVisibleIndex((prev) => Math.max(prev, index));
-      }
-    },
-    { threshold: 1, root: rootRef.current }
-  );
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        /**
-         * Use visibility so that the element occupies the space if requires even when there's not
-         * enough room for it to be visible. The empty reserved space will be clipped by the
-         * overflow:hidden rule on the parent, so it doesn't affect the UI.
-         * This way we can keep observing its visiblity and react to browser resize events.
-         */
-        visibility: isVisible ? 'visible' : 'hidden',
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
-interface ObservedComponent {
-  toolbar: React.ReactNode;
-  menu: React.ReactNode;
-  key: string;
-}
-
-interface MoreMenuProps {
-  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
-  hasHiddenItems: boolean;
-  rootRef: React.RefObject<HTMLElement>;
-  children: React.ReactNode;
-}
-
-const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
-  const { formatMessage } = useIntl();
-  const containerRef = useElementOnScreen<HTMLButtonElement>(
-    (isVisible) => {
-      // We only react to the menu becoming invisible. When that happens, we hide the last item.
-      if (!isVisible) {
-        /**
-         * If there's no room for any item, the index can be -1.
-         * This is intentional, in that case only the more menu will be visible.
-         **/
-        setLastVisibleIndex((prev) => prev - 1);
-      }
-    },
-    { threshold: 1, root: rootRef.current }
-  );
-
-  return (
-    <Menu.Root defaultOpen={false}>
-      <Menu.Trigger
-        endIcon={null}
-        paddingLeft={0}
-        paddingRight={0}
-        ref={containerRef}
-        style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
-      >
-        <IconButton
-          variant="ghost"
-          label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
-          tag="span"
-        >
-          <More aria-hidden focusable={false} />
-        </IconButton>
-      </Menu.Trigger>
-      <Menu.Content onCloseAutoFocus={(e) => e.preventDefault()}>{children}</Menu.Content>
-    </Menu.Root>
-  );
-};
-
 const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
   ${(props) =>
     props.isActive &&
@@ -688,6 +589,7 @@ const BlocksToolbar = () => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    if (!selectedNode) return true;
 
     if (['image', 'code'].includes(selectedNode.type)) {
       return true;

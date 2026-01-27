@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { useField, useNotification, useForm } from '@strapi/admin/strapi-admin';
+import {
+  useField,
+  useNotification,
+  useForm,
+  createRulesEngine,
+  useIsDesktop,
+} from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -11,7 +17,7 @@ import {
   useComposedRefs,
   BoxComponent,
 } from '@strapi/design-system';
-import { Plus, Drag, Trash } from '@strapi/icons';
+import { Plus, Drag, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -66,6 +72,8 @@ const RepeatableComponent = ({
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
+
+  const rulesEngine = createRulesEngine();
 
   React.useEffect(() => {
     const hasNestedErrors = rawError && Array.isArray(rawError) && rawError.length > 0;
@@ -244,8 +252,9 @@ const RepeatableComponent = ({
         onValueChange={handleValueChange}
         aria-describedby={ariaDescriptionId}
       >
-        {value.map(({ __temp_key__: key, id }, index) => {
+        {value.map(({ __temp_key__: key, id, ...currentComponentValues }, index) => {
           const nameWithIndex = `${name}.${index}`;
+
           return (
             <ComponentProvider
               key={key}
@@ -271,11 +280,24 @@ const RepeatableComponent = ({
                 onDropItem={handleDropItem}
                 onGrabItem={handleGrabItem}
                 __temp_key__={key}
+                totalLength={value.length}
               >
                 {layout.map((row, index) => {
+                  const visibleFields = row.filter(({ ...field }) => {
+                    const condition = field.attribute.conditions?.visible;
+                    if (condition) {
+                      return rulesEngine.evaluate(condition, currentComponentValues);
+                    }
+
+                    return true;
+                  });
+
+                  if (visibleFields.length === 0) {
+                    return null; // Skip rendering the entire grid row
+                  }
                   return (
                     <ResponsiveGridRoot gap={4} key={index}>
-                      {row.map(({ size, ...field }) => {
+                      {visibleFields.map(({ size, ...field }) => {
                         /**
                          * Layouts are built from schemas so they don't understand the complete
                          * schema tree, for components we append the parent name to the field name
@@ -372,6 +394,7 @@ interface ComponentProps
   toggleCollapses: () => void;
   children: React.ReactNode;
   __temp_key__: string;
+  totalLength: number;
 }
 
 const Component = ({
@@ -386,9 +409,12 @@ const Component = ({
   onDeleteComponent,
   toggleCollapses,
   __temp_key__,
+  totalLength,
+  onMoveItem,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
   const displayValue = useForm('RepeatableComponent', (state) => {
     return getIn(state.values, [...name.split('.'), mainField.name]);
@@ -416,6 +442,7 @@ const Component = ({
         // Close all collapses
         toggleCollapses();
       },
+      onMoveItem,
       ...dragProps,
     });
 
@@ -428,6 +455,29 @@ const Component = ({
     boxRef as React.RefObject<HTMLDivElement>,
     dropRef
   );
+
+  const handleMoveUp = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index > 0 && onMoveItem) {
+        onMoveItem(index - 1, index);
+      }
+    },
+    [index, onMoveItem]
+  );
+
+  const handleMoveDown = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index < totalLength - 1 && onMoveItem) {
+        onMoveItem(index + 1, index);
+      }
+    },
+    [index, totalLength, onMoveItem]
+  );
+
+  const canMoveUp = index > 0;
+  const canMoveDown = index < totalLength - 1;
 
   return (
     <>
@@ -449,20 +499,52 @@ const Component = ({
               >
                 <Trash />
               </IconButton>
-              <IconButton
-                disabled={disabled}
-                ref={composedAccordionRefs}
-                variant="ghost"
-                onClick={(e) => e.stopPropagation()}
-                data-handler-id={handlerId}
-                label={formatMessage({
-                  id: getTranslation('components.DragHandle-label'),
-                  defaultMessage: 'Drag',
-                })}
-                onKeyDown={handleKeyDown}
-              >
-                <Drag />
-              </IconButton>
+              {isDesktop && (
+                <IconButton
+                  disabled={disabled}
+                  ref={composedAccordionRefs}
+                  variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
+                  data-handler-id={handlerId}
+                  label={formatMessage({
+                    id: getTranslation('components.DragHandle-label'),
+                    defaultMessage: 'Drag',
+                  })}
+                  onKeyDown={handleKeyDown}
+                >
+                  <Drag />
+                </IconButton>
+              )}
+              {!isDesktop && (
+                <>
+                  {canMoveUp && (
+                    <IconButton
+                      disabled={disabled || !canMoveUp}
+                      variant="ghost"
+                      onClick={handleMoveUp}
+                      label={formatMessage({
+                        id: getTranslation('components.DynamicZone.move-up'),
+                        defaultMessage: 'Move up',
+                      })}
+                    >
+                      <ArrowUp />
+                    </IconButton>
+                  )}
+                  {canMoveDown && (
+                    <IconButton
+                      disabled={disabled || !canMoveDown}
+                      variant="ghost"
+                      onClick={handleMoveDown}
+                      label={formatMessage({
+                        id: getTranslation('components.DynamicZone.move-down'),
+                        defaultMessage: 'Move down',
+                      })}
+                    >
+                      <ArrowDown />
+                    </IconButton>
+                  )}
+                </>
+              )}
             </Accordion.Actions>
           </Accordion.Header>
           <Accordion.Content>

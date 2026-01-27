@@ -1,9 +1,19 @@
 // TODO: find a better naming convention for the file that was an index file before
+import { useAIAvailability } from '@strapi/admin/strapi-admin/ee';
 import { render, waitFor } from '@tests/utils';
+
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
+  useAIAvailability: jest.fn(),
+}));
 
 import { SettingsPage } from '../SettingsPage';
 
 describe('SettingsPage', () => {
+  beforeEach(() => {
+    (useAIAvailability as jest.Mock).mockReturnValue(false);
+  });
+
   it('renders', async () => {
     const { getByRole, queryByText } = render(<SettingsPage />);
 
@@ -29,5 +39,36 @@ describe('SettingsPage', () => {
     expect(getByRole('checkbox', { name: 'Responsive friendly upload' })).toBeChecked();
     expect(getByRole('checkbox', { name: 'Size optimization' })).toBeChecked();
     expect(getByRole('checkbox', { name: 'Auto orientation' })).toBeChecked();
+  });
+
+  it('shows AI metadata section when AI is available', async () => {
+    (useAIAvailability as jest.Mock).mockReturnValue(true);
+
+    const { getByRole, queryByText } = render(<SettingsPage />);
+
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
+
+    await waitFor(() => {
+      expect(
+        getByRole('heading', {
+          name: 'Generate AI captions and alt texts automatically on upload!',
+        })
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('hides AI metadata section when AI is not available', async () => {
+    (useAIAvailability as jest.Mock).mockReturnValue(false);
+
+    const { queryByRole, queryByText } = render(<SettingsPage />);
+
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
+
+    // Check that AI metadata section is NOT visible
+    expect(
+      queryByRole('heading', {
+        name: 'Generate AI captions and alt texts automatically on upload!',
+      })
+    ).not.toBeInTheDocument();
   });
 });

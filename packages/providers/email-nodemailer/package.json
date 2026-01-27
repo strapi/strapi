@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "5.13.1",
+  "version": "5.33.4",
   "description": "Nodemailer provider for Strapi 3",
   "keywords": [
     "strapi",
@@ -57,16 +57,16 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "lodash": "4.17.21",
-    "nodemailer": "6.9.1"
+    "lodash": "4.17.23",
+    "nodemailer": "6.10.1"
   },
   "devDependencies": {
     "@types/nodemailer": "6.4.7",
-    "eslint-config-custom": "5.13.1",
-    "tsconfig": "5.13.1"
+    "eslint-config-custom": "5.33.4",
+    "tsconfig": "5.33.4"
   },
   "engines": {
-    "node": ">=18.0.0 <=22.x.x",
+    "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"
   }
 }

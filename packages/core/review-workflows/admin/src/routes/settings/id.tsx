@@ -12,7 +12,7 @@ import {
   FormHelpers,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Button, Dialog, Flex, Typography } from '@strapi/design-system';
+import { Box, Button, Dialog, Flex, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { useIntl } from 'react-intl';
@@ -347,7 +347,12 @@ const EditPage = () => {
         {({ modified, isSubmitting, values, setErrors }) => (
           <>
             <Layout.Header
-              navigationAction={<BackButton fallback=".." />}
+              navigationAction={
+                // The back link for mobile works differently; it is placed higher up in the DOM.
+                <Box display={{ initial: 'none', medium: 'block' }}>
+                  <BackButton fallback=".." />
+                </Box>
+              }
               primaryAction={
                 canUpdate || canCreate ? (
                   <Button
@@ -357,6 +362,7 @@ const EditPage = () => {
                     // if the confirm dialog is open the loading state is on
                     // the confirm button already
                     loading={!Boolean(Object.keys(savePrompts).length > 0) && isSubmitting}
+                    fullWidth
                   >
                     {formatMessage({
                       id: 'global.save',

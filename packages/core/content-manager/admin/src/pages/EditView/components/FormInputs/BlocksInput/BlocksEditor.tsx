@@ -4,7 +4,7 @@ import { createContext, type FieldValue } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor } from 'slate';
+import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
@@ -22,9 +22,8 @@ import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
-import { withImages } from './plugins/withImages';
-import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
+import { isNonNullable } from './utils/types';
 
 import type { Schema } from '@strapi/types';
 
@@ -34,13 +33,21 @@ import type { Schema } from '@strapi/types';
 
 interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
+  /** Function to check if a given node is of this type of block */
   matchNode: (node: Schema.Attribute.BlocksNode) => boolean;
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
   handleTab?: (editor: Editor) => void;
   snippets?: string[];
+  /** Adjust the vertical positioning of the drag-to-reorder grip icon */
   dragHandleTopMargin?: CSSProperties['marginTop'];
+  /** A Slate plugin: function that will wrap the editor creation */
+  plugin?: (editor: Editor) => Editor;
+  /**
+   * Function that checks if an element should be draggable
+   * @default () => true */
+  isDraggable?: (element: Element) => boolean;
 }
 
 interface NonSelectorBlock extends BaseBlock {
@@ -147,13 +154,31 @@ function useResetKey(value?: Schema.Attribute.BlocksValue): {
     }
   }, [value]);
 
-  return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
+  const incrementSlateUpdatesCount = React.useCallback(() => {
+    slateUpdatesCount.current += 1;
+  }, []);
+
+  return { key, incrementSlateUpdatesCount };
 }
 
 const pipe =
   (...fns: ((baseEditor: Editor) => Editor)[]) =>
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
+
+/**
+ * Normalize the blocks state to null if the editor state is considered empty,
+ * otherwise return the state
+ */
+const normalizeBlocksState = (
+  editor: Editor,
+  value: Schema.Attribute.BlocksValue | Descendant[]
+): Schema.Attribute.BlocksValue | Descendant[] | null => {
+  const isEmpty =
+    value.length === 1 && Editor.isEmpty(editor, value[0] as Schema.Attribute.BlocksNode);
+
+  return isEmpty ? null : value;
+};
 
 interface BlocksEditorProps
   extends Pick<FieldValue<Schema.Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
@@ -165,8 +190,26 @@ interface BlocksEditorProps
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
+
+    const blocks = React.useMemo(
+      () => ({
+        ...paragraphBlocks,
+        ...headingBlocks,
+        ...listBlocks,
+        ...linkBlocks,
+        ...imageBlocks,
+        ...quoteBlocks,
+        ...codeBlocks,
+      }),
+      []
+    ) satisfies BlocksStore;
+
+    const blockRegisteredPlugins = Object.values(blocks)
+      .map((block) => block.plugin)
+      .filter(isNonNullable);
+
     const [editor] = React.useState(() =>
-      pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
+      pipe(withHistory, withStrapiSchema, withReact, ...blockRegisteredPlugins)(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
@@ -189,25 +232,61 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     const { key, incrementSlateUpdatesCount } = useResetKey(value);
 
-    const handleSlateChange = (state: Descendant[]) => {
-      const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
+    const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
-      if (isAstChange) {
-        incrementSlateUpdatesCount();
+    const handleSlateChange = React.useCallback(
+      (state: Descendant[]) => {
+        const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
-        onChange(name, state as Schema.Attribute.BlocksValue);
+        if (isAstChange) {
+          /**
+           * Slate handles the state of the editor internally. We just need to keep Strapi's form
+           * state in sync with it in order to make sure that things like the "modified" state
+           * isn't broken. Updating the whole state on every change is very expensive however,
+           * so we debounce calls to onChange to mitigate input lag.
+           */
+          if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+          }
+
+          // Set a new debounce timeout
+          debounceTimeout.current = setTimeout(() => {
+            incrementSlateUpdatesCount();
+
+            // Normalize the state (empty editor becomes null)
+            onChange(name, normalizeBlocksState(editor, state) as Schema.Attribute.BlocksValue);
+            debounceTimeout.current = null;
+          }, 300);
+        }
+      },
+      [editor, incrementSlateUpdatesCount, name, onChange]
+    );
+
+    // Clean up the timeout on unmount
+    React.useEffect(() => {
+      return () => {
+        if (debounceTimeout.current) {
+          clearTimeout(debounceTimeout.current);
+        }
+      };
+    }, []);
+
+    // Ensure the editor is in sync after discard
+    React.useEffect(() => {
+      // Normalize empty states for comparison to avoid losing focus on the editor when content is deleted
+      const normalizedValue = value?.length ? value : null;
+      const normalizedEditorState = normalizeBlocksState(editor, editor.children);
+
+      // Compare the field value with the editor state to check for a stale selection
+      if (
+        normalizedValue &&
+        normalizedEditorState &&
+        JSON.stringify(normalizedEditorState) !== JSON.stringify(normalizedValue)
+      ) {
+        // When there is a diff, unset selection to avoid an invalid state
+        Transforms.deselect(editor);
       }
-    };
-
-    const blocks: BlocksStore = {
-      ...paragraphBlocks,
-      ...headingBlocks,
-      ...listBlocks,
-      ...linkBlocks,
-      ...imageBlocks,
-      ...quoteBlocks,
-      ...codeBlocks,
-    };
+    }, [editor, value]);
 
     return (
       <>
@@ -220,7 +299,9 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
         <Slate
           editor={editor}
-          initialValue={value || [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]}
+          initialValue={
+            value?.length ? value : [{ type: 'paragraph', children: [{ type: 'text', text: '' }] }]
+          }
           onChange={handleSlateChange}
           key={key}
         >
@@ -271,4 +352,5 @@ export {
   BlocksEditorProvider,
   useBlocksEditorContext,
   isSelectorBlockKey,
+  normalizeBlocksState,
 };
