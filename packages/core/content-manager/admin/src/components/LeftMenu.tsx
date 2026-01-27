@@ -136,25 +136,23 @@ const LeftMenu = ({ isFullPage = false }: { isFullPage?: boolean }) => {
         </>
       )}
       <SubNav.Content>
-        {isFullPage && <SubNav.Header label={label} />}
+        {isFullPage && (
+          <>
+            <SubNav.Header label={label} />
+            <Divider />
+          </>
+        )}
         <Flex
           paddingLeft={{
-            initial: 4,
+            initial: 3,
             large: 5,
           }}
           paddingRight={{
-            initial: 4,
+            initial: 3,
             large: 5,
           }}
-          paddingTop={
-            isFullPage
-              ? 0
-              : {
-                  initial: 4,
-                  large: 5,
-                }
-          }
-          paddingBottom={0}
+          paddingTop={5}
+          paddingBottom={{ initial: 1, large: 0 }}
           gap={3}
           direction="column"
           alignItems="stretch"
