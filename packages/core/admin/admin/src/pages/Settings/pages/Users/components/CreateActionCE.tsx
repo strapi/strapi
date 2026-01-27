@@ -10,7 +10,7 @@ const CreateActionCE = React.forwardRef<HTMLButtonElement, CreateActionCEProps>(
   const { formatMessage } = useIntl();
 
   return (
-    <Button ref={ref} startIcon={<Mail />} size="S" {...props}>
+    <Button ref={ref} startIcon={<Mail />} size="S" {...props} fullWidth>
       {formatMessage({
         id: 'Settings.permissions.users.create',
         defaultMessage: 'Invite new user',

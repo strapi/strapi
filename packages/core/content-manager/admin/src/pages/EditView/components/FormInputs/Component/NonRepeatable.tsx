@@ -36,21 +36,9 @@ const NonRepeatableComponent = ({
       >
         <Flex direction="column" alignItems="stretch" gap={6}>
           {layout.map((row, index) => {
-            const visibleFields = row.filter(({ ...field }) => {
-              const condition = field.attribute.conditions?.visible;
-              if (condition) {
-                return rulesEngine.evaluate(condition, value);
-              }
-
-              return true;
-            });
-
-            if (visibleFields.length === 0) {
-              return null; // Skip rendering the entire grid row
-            }
             return (
               <ResponsiveGridRoot gap={4} key={index}>
-                {visibleFields.map(({ size, ...field }) => {
+                {row.map(({ size, ...field }) => {
                   /**
                    * Layouts are built from schemas so they don't understand the complete
                    * schema tree, for components we append the parent name to the field name
