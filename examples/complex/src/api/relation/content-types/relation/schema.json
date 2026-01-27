@@ -1,0 +1,70 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relations",
+  "info": {
+    "singularName": "relation",
+    "pluralName": "relations",
+    "displayName": "Relation"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "selfOne": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation.relation"
+    },
+    "selfMany": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation.relation"
+    },
+    "oneToOneBasic": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::basic.basic"
+    },
+    "oneToManyBasics": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::basic.basic"
+    },
+    "manyToOneBasic": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::basic.basic"
+    },
+    "manyToManyBasics": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::basic.basic"
+    },
+    "simpleInfo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.simple-info"
+    },
+    "content": {
+      "type": "dynamiczone",
+      "components": ["shared.simple-info", "shared.image-block"]
+    },
+    "textBlocks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.text-block"
+    },
+    "mediaBlock": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.media-block"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["shared.text-block", "shared.media-block"]
+    }
+  }
+}
