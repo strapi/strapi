@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const COMPOSE_PROJECT_NAME = process.env.COMPOSE_PROJECT_NAME || 'strapi_complex';
 
@@ -10,7 +10,7 @@ function getComposeEnv() {
 
 function getContainerId(composeFile, cwd, serviceName) {
   try {
-    const output = execSync(`docker-compose -f ${composeFile} ps -q ${serviceName}`, {
+    const output = execFileSync('docker-compose', ['-f', composeFile, 'ps', '-q', serviceName], {
       cwd,
       encoding: 'utf8',
       stdio: 'pipe',
@@ -27,7 +27,7 @@ function getContainerName(composeFile, cwd, serviceName) {
   const containerId = getContainerId(composeFile, cwd, serviceName);
   if (!containerId) return null;
   try {
-    const nameOutput = execSync(`docker inspect --format='{{.Name}}' ${containerId}`, {
+    const nameOutput = execFileSync('docker', ['inspect', '--format={{.Name}}', containerId], {
       encoding: 'utf8',
       stdio: 'pipe',
     }).trim();
@@ -40,7 +40,7 @@ function getContainerName(composeFile, cwd, serviceName) {
 function isContainerRunning(containerId) {
   if (!containerId) return false;
   try {
-    const status = execSync(`docker inspect --format='{{.State.Running}}' ${containerId}`, {
+    const status = execFileSync('docker', ['inspect', '--format={{.State.Running}}', containerId], {
       encoding: 'utf8',
       stdio: 'pipe',
     }).trim();
@@ -51,7 +51,7 @@ function isContainerRunning(containerId) {
 }
 
 function startContainer(composeFile, cwd, serviceName) {
-  execSync(`docker-compose -f ${composeFile} up -d ${serviceName}`, {
+  execFileSync('docker-compose', ['-f', composeFile, 'up', '-d', serviceName], {
     cwd,
     stdio: 'inherit',
     env: getComposeEnv(),
@@ -62,7 +62,9 @@ function waitForPostgresReady(containerId, timeoutMs = 30000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      execSync(`docker exec ${containerId} pg_isready -U strapi`, { stdio: 'ignore' });
+      execFileSync('docker', ['exec', containerId, 'pg_isready', '-U', 'strapi'], {
+        stdio: 'ignore',
+      });
       return true;
     } catch (error) {
       // wait and retry
@@ -75,9 +77,13 @@ function waitForMysqlReady(containerId, timeoutMs = 30000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
-      execSync(`docker exec ${containerId} mysqladmin ping -u strapi -pstrapi --silent`, {
-        stdio: 'ignore',
-      });
+      execFileSync(
+        'docker',
+        ['exec', containerId, 'mysqladmin', 'ping', '-u', 'strapi', '-pstrapi', '--silent'],
+        {
+          stdio: 'ignore',
+        }
+      );
       return true;
     } catch (error) {
       // wait and retry
@@ -91,7 +97,9 @@ function assertPostgresReady(containerId) {
     throw new Error('Postgres container not found. Start it and try again.');
   }
   try {
-    execSync(`docker exec ${containerId} pg_isready -U strapi`, { stdio: 'ignore' });
+    execFileSync('docker', ['exec', containerId, 'pg_isready', '-U', 'strapi'], {
+      stdio: 'ignore',
+    });
   } catch (error) {
     throw new Error('Postgres is not ready yet. Wait for it to be ready and retry.');
   }
@@ -102,9 +110,13 @@ function assertMysqlReady(containerId) {
     throw new Error('MySQL container not found. Start it and try again.');
   }
   try {
-    execSync(`docker exec ${containerId} mysqladmin ping -u strapi -pstrapi --silent`, {
-      stdio: 'ignore',
-    });
+    execFileSync(
+      'docker',
+      ['exec', containerId, 'mysqladmin', 'ping', '-u', 'strapi', '-pstrapi', '--silent'],
+      {
+        stdio: 'ignore',
+      }
+    );
   } catch (error) {
     throw new Error('MySQL is not ready yet. Wait for it to be ready and retry.');
   }
