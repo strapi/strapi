@@ -18,6 +18,7 @@ import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 import { useHasInputPopoverParent } from '../../../preview/components/InputPopover';
 import { usePreviewInputManager } from '../../../preview/hooks/usePreviewInputManager';
+import { getDirectParent } from '../utils/data';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
@@ -185,7 +186,7 @@ const BaseInputRenderer = ({
           disabled={fieldIsDisabled}
         >
           {(componentInputProps) => (
-            <BaseInputRenderer
+            <MemoizedInputRenderer
               key={`input-${componentInputProps.name}-${localeKey}`}
               {...componentInputProps}
             />
@@ -276,7 +277,11 @@ const ConditionAwareInputRenderer = ({
 }: InputRendererProps & { condition: JsonLogicCondition }) => {
   // Note: this selector causes a re-render every time any form value on the page changes
   const fieldValues = useForm('ConditionalInputRenderer', (state) => state.values);
-  const isVisible = rulesEngine.evaluate(condition, fieldValues);
+  // For nested fields, we evaluate against the parent scope so conditions can read siblings.
+  // Top-level fields resolve to the full form values.
+  const targetValues = getDirectParent(fieldValues, props.name);
+
+  const isVisible = rulesEngine.evaluate(condition, targetValues);
 
   if (!isVisible) {
     return null;

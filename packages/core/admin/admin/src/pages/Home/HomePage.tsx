@@ -192,6 +192,7 @@ const HomePageCE = () => {
               size="S"
               startIcon={<Plus />}
               onClick={() => setIsAddWidgetModalOpen(true)}
+              fullWidth
             >
               {formatMessage({
                 id: 'HomePage.addWidget.button',

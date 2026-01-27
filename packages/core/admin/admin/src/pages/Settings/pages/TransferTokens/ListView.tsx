@@ -173,6 +173,7 @@ const ListView = () => {
                 })
               }
               to="/settings/transfer-tokens/create"
+              fullWidth
             >
               {formatMessage({
                 id: 'Settings.transferTokens.create',

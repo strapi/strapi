@@ -388,7 +388,8 @@ const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>
   gap: ${({ theme }) => theme.spaces[1]};
   justify-content: center;
   align-items: center;
-  height: 100%;
+  height: 3.2rem;
+  width: 3.2rem;
 
   // Disabled state
   ${({ $isAISettingEnabled, theme }) =>
@@ -457,8 +458,9 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
   return {
     _status: {
       message: (
-        <Box
+        <Flex
           height="100%"
+          alignItems="center"
           aria-label={formatMessage({
             id: getTranslation('CMEditViewAITranslation.status-aria-label'),
             defaultMessage: 'AI Translation Status',
@@ -471,7 +473,7 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
           >
             {status === 'processing' ? <SpinningLoader /> : <Sparkle />}
           </AITranslationStatusIcon>
-        </Box>
+        </Flex>
       ),
       tooltip: (
         <Flex direction="column" padding={4} alignItems="flex-start" width="25rem">

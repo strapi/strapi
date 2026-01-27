@@ -97,7 +97,14 @@ const Link = (
 
   return (
     <StyledLink {...rest} onClick={handleClick}>
-      <Box width={'100%'} paddingLeft={3} paddingRight={3} borderRadius={1}>
+      <Box
+        width={'100%'}
+        paddingLeft={3}
+        paddingRight={3}
+        paddingTop={{ initial: 1, large: 0 }}
+        paddingBottom={{ initial: 1, large: 0 }}
+        borderRadius={1}
+      >
         <Flex justifyContent="space-between" width="100%" gap={{ initial: 2, large: 1 }}>
           <Typography
             tag="div"
@@ -250,7 +257,7 @@ const Section = ({
         tag="ol"
         id={listId}
         direction="column"
-        gap="2px"
+        gap={{ initial: 2, large: '2px' }}
         alignItems={'stretch'}
         marginLeft={{
           initial: 0,

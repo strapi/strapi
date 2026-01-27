@@ -258,3 +258,42 @@ export declare namespace BulkUpdateFiles {
     error?: errors.ApplicationError | errors.ValidationError;
   }
 }
+
+/**
+ * GET /upload/actions/generate-ai-metadata/count - Get count of images without metadata
+ */
+export declare namespace GetAIMetadataCount {
+  export interface Request {
+    query: {};
+  }
+
+  export interface Response {
+    data: {
+      imagesWithoutMetadataCount: number;
+      totalImages: number;
+    };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /upload/actions/generate-ai-metadata - Start AI metadata generation job
+ */
+export declare namespace GenerateAIMetadata {
+  export interface Request {
+    body: {};
+  }
+
+  export interface Response {
+    data:
+      | {
+          jobId: number;
+          status: 'pending';
+        }
+      | {
+          count: 0;
+          message: string;
+        };
+    error?: errors.ApplicationError;
+  }
+}

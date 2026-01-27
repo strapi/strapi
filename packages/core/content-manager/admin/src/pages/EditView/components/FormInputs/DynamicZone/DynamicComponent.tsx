@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useForm, useField, createRulesEngine, useIsDesktop } from '@strapi/admin/strapi-admin';
+import { useForm, useField, useIsDesktop } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
   Box,
@@ -60,7 +60,6 @@ const DynamicComponent = ({
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
   const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
-  const rulesEngine = createRulesEngine();
   const isDesktop = useIsDesktop();
 
   const {
@@ -298,19 +297,6 @@ const DynamicComponent = ({
                   <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
                     <Grid.Root gap={4}>
                       {components[componentUid]?.layout?.map((row, rowInd) => {
-                        const visibleFields = row.filter(({ ...field }) => {
-                          const condition = field.attribute.conditions?.visible;
-
-                          if (condition) {
-                            return rulesEngine.evaluate(condition, value);
-                          }
-
-                          return true;
-                        });
-
-                        if (visibleFields.length === 0) {
-                          return null; // Skip rendering the entire grid row
-                        }
                         return (
                           <Grid.Item
                             col={12}
@@ -320,7 +306,7 @@ const DynamicComponent = ({
                             alignItems="stretch"
                           >
                             <ResponsiveGridRoot gap={4}>
-                              {visibleFields.map(({ size, ...field }) => {
+                              {row.map(({ size, ...field }) => {
                                 const fieldName = `${name}.${index}.${field.name}`;
 
                                 const fieldWithTranslatedLabel = {
