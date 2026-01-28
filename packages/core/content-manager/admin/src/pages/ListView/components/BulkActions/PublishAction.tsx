@@ -23,7 +23,7 @@ import {
   Tbody,
 } from '@strapi/design-system';
 import { ArrowsCounterClockwise, CheckCircle, CrossCircle, Pencil } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import { useIntl, type IntlShape } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
@@ -66,39 +66,41 @@ const TableComponent = styled(RawTable)`
  * EntryValidationText
  * -----------------------------------------------------------------------------------------------*/
 
-const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessage: any) => {
+export const formatErrorMessages = (
+  errors: FormErrors,
+  parentKey: string,
+  formatMessage: IntlShape['formatMessage']
+) => {
+  if (!errors) return [];
+
   const messages: string[] = [];
 
   Object.entries(errors).forEach(([key, value]) => {
     const currentKey = parentKey ? `${parentKey}.${key}` : key;
 
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      if ('id' in value && 'defaultMessage' in value) {
-        messages.push(
-          formatMessage(
-            {
-              id: `${value.id}.withField`,
-              defaultMessage: value.defaultMessage,
-            },
-            { field: currentKey }
-          )
-        );
-      } else {
-        messages.push(
-          ...formatErrorMessages(
-            // @ts-expect-error TODO: check why value is not compatible with FormErrors
-            value,
-            currentKey,
-            formatMessage
-          )
-        );
-      }
+    if (Array.isArray(value)) {
+      messages.push(...formatErrorMessages(value, currentKey, formatMessage));
+    } else if (
+      value !== null &&
+      typeof value === 'object' &&
+      'id' in value &&
+      'defaultMessage' in value
+    ) {
+      messages.push(
+        formatMessage(
+          {
+            id: `${value.id}.withField`,
+            defaultMessage: value.defaultMessage as string,
+          },
+          { field: currentKey }
+        )
+      );
     } else {
       messages.push(
         formatMessage(
           {
             id: `${value}.withField`,
-            defaultMessage: value,
+            defaultMessage: value as string,
           },
           { field: currentKey }
         )
