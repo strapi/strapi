@@ -826,6 +826,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                   >
                     <img
                       alt="Screenshot 2.png"
+                      crossorigin="anonymous"
                       src="http://localhost:1337/uploads/thumbnail_Screenshot_2_5d4a574d61.png"
                     />
                   </div>
