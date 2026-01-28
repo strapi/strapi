@@ -553,8 +553,11 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     // Find the right block-specific handlers for enter and backspace key presses
     switch (event.key) {
       case 'Enter':
-        event.preventDefault();
-        return handleEnter(event);
+        if (!event.nativeEvent.isComposing) {
+          event.preventDefault();
+          return handleEnter(event);
+        }
+        break;
       case 'Backspace':
         return handleBackspaceEvent(event);
       case 'Tab':
