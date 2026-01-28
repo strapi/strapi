@@ -122,6 +122,9 @@ await strapi.plugin('email').service('email').send({
   subject: 'Hello world',
   text: 'Hello world',
   html: `<h4>Hello world</h4>`,
+  headers: {
+    'My-Custom-Header': 'header value',
+  },
 });
 ```
 
@@ -138,6 +141,7 @@ The following fields are supported:
 | text        | Plaintext version of the message                                  |
 | html        | HTML version of the message                                       |
 | attachments | Array of objects See: https://nodemailer.com/message/attachments/ |
+| headers     | Object containing additional headers                              |
 
 ## Troubleshooting
 

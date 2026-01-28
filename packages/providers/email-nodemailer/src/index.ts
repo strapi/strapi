@@ -15,6 +15,7 @@ interface SendOptions {
   subject: string;
   text: string;
   html: string;
+  headers: Record<string, string>;
   [key: string]: unknown;
 }
 
@@ -30,6 +31,7 @@ const emailFields = [
   'text',
   'html',
   'attachments',
+  'headers',
 ];
 
 export default {
