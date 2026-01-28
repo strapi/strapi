@@ -124,7 +124,7 @@ export default {
         model,
         // @ts-expect-error - fix types
         { documentId: document.documentId, locale, publishedAt: null },
-        { availableLocales: true, availableStatus: false }
+        { availableLocales: false, availableStatus: false }
       );
       ctx.body = { data: {}, meta };
       return;
@@ -135,7 +135,10 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
+      availableLocales: false,
+      availableStatus: false,
+    });
   },
 
   async createOrUpdate(ctx: any) {
