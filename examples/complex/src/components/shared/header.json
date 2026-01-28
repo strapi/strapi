@@ -1,0 +1,12 @@
+{
+  "collectionName": "components_shared_headers",
+  "info": { "displayName": "header", "description": "Header component containing logo" },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "headerlogo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.logo"
+    }
+  }
+}

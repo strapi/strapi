@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -11,12 +12,13 @@ import {
   BoxComponent,
   Menu,
 } from '@strapi/design-system';
-import { Link } from '@strapi/icons';
+import { Link, ArrowUp, ArrowDown } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { css, styled } from 'styled-components';
 
+import { getTranslation } from '../../../../../utils/translations';
 import { EditorToolbarObserver, type ObservedComponent } from '../../EditorToolbarObserver';
 
 import { insertLink } from './Blocks/Link';
@@ -39,8 +41,13 @@ const ToolbarSeparator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
   height: 2.4rem;
-  margin-left: 0.8rem;
-  margin-right: 0.8rem;
+  margin-left: ${({ theme }) => theme.spaces[1]};
+  margin-right: ${({ theme }) => theme.spaces[1]};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    margin-left: ${({ theme }) => theme.spaces[2]};
+    margin-right: ${({ theme }) => theme.spaces[2]};
+  }
 `;
 
 const FlexButton = styled<FlexComponent<'button'>>(Flex)`
@@ -52,9 +59,11 @@ const FlexButton = styled<FlexComponent<'button'>>(Flex)`
   &[aria-disabled='false'] {
     cursor: pointer;
 
-    // Only apply hover styles if the button is enabled
-    &:hover {
-      background: ${({ theme }) => theme.colors.primary100};
+    // Only apply hover styles if the button is enabled on desktop
+    ${({ theme }) => theme.breakpoints.medium} {
+      &:hover {
+        background: ${({ theme }) => theme.colors.primary100};
+      }
     }
   }
 `;
@@ -65,8 +74,17 @@ const SelectWrapper = styled<BoxComponent>(Box)`
     border: none;
     cursor: pointer;
     min-height: unset;
-    padding-top: 6px;
-    padding-bottom: 6px;
+    padding-top: ${({ theme }) => theme.spaces[2]};
+    padding-bottom: ${({ theme }) => theme.spaces[2]};
+    padding-left: ${({ theme }) => theme.spaces[4]};
+    padding-right: ${({ theme }) => theme.spaces[4]};
+    gap: ${({ theme }) => theme.spaces[2]};
+    
+    ${({ theme }) => theme.breakpoints.medium} {
+      padding-top: ${({ theme }) => theme.spaces[1]};
+      padding-bottom: ${({ theme }) => theme.spaces[1]};
+      gap: ${({ theme }) => theme.spaces[4]};
+    }
 
     &[aria-disabled='false']:hover {
       cursor: pointer;
@@ -81,6 +99,13 @@ const SelectWrapper = styled<BoxComponent>(Box)`
       span {
         color: ${({ theme }) => theme.colors.neutral600};
       }
+    }
+
+    & > span:first-child {
+     gap: ${({ theme }) => theme.spaces[0]};
+
+     ${({ theme }) => theme.breakpoints.medium} {
+      gap: ${({ theme }) => theme.spaces[3]};
     }
   }
 `;
@@ -131,7 +156,7 @@ const ToolbarButton = ({
       <Toolbar.ToggleItem
         value={name}
         data-state={isActive ? 'on' : 'off'}
-        onMouseDown={(e) => {
+        onPointerDown={(e) => {
           e.preventDefault();
           handleClick();
           ReactEditor.focus(editor);
@@ -162,6 +187,7 @@ const BlocksDropdown = () => {
   const { editor, blocks, disabled } = useBlocksEditorContext('BlocksDropdown');
   const { formatMessage } = useIntl();
   const { modalElement, handleConversionResult } = useConversionModal();
+  const isMobile = useIsMobile();
 
   const blockKeysToInclude: SelectorBlockKey[] = getEntries(blocks).reduce<
     ReturnType<typeof getEntries>
@@ -293,7 +319,7 @@ const BlocksDropdown = () => {
         <SingleSelect
           startIcon={<Icon />}
           onChange={handleSelect}
-          placeholder={formatMessage(blocks[blockSelected].label)}
+          customizeContent={() => (isMobile ? '' : formatMessage(blocks[blockSelected].label))}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
           aria-label={formatMessage({
@@ -571,9 +597,147 @@ const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
   }
 `;
 
+const ReorderToolbarButtons = () => {
+  const { editor, disabled, blocks, name, setLiveText } =
+    useBlocksEditorContext('ReorderToolbarButtons');
+  const { formatMessage } = useIntl();
+
+  const selection = editor.selection;
+  const totalBlocks = editor.children.length;
+
+  const anchorIndex = selection ? selection.anchor.path[0] : null;
+  const focusIndex = selection ? selection.focus.path[0] : null;
+  const isSingleBlockSelection =
+    anchorIndex !== null && focusIndex !== null && anchorIndex === focusIndex;
+
+  const selectedTopLevelNode =
+    isSingleBlockSelection && anchorIndex !== null ? editor.children[anchorIndex] : null;
+  const selectedBlock =
+    selectedTopLevelNode &&
+    Object.values(blocks).find((block) => block.matchNode(selectedTopLevelNode));
+
+  const isSelectedBlockDraggable =
+    selectedTopLevelNode && selectedBlock
+      ? (selectedBlock.isDraggable?.(selectedTopLevelNode) ?? true)
+      : false;
+
+  const canMoveUp =
+    !disabled &&
+    isSingleBlockSelection &&
+    isSelectedBlockDraggable &&
+    anchorIndex !== null &&
+    anchorIndex > 0;
+  const canMoveDown =
+    !disabled &&
+    isSingleBlockSelection &&
+    isSelectedBlockDraggable &&
+    anchorIndex !== null &&
+    anchorIndex < totalBlocks - 1;
+
+  const moveBlock = (direction: 'up' | 'down') => {
+    if (!selection || anchorIndex === null) return;
+
+    const currentIndex = [anchorIndex];
+    const newIndex = [direction === 'up' ? anchorIndex - 1 : anchorIndex + 1];
+
+    Transforms.moveNodes(editor, {
+      at: currentIndex,
+      to: newIndex,
+    });
+
+    // Keep the moved block focused so disabled states update immediately.
+    Transforms.select(editor, Editor.start(editor, newIndex));
+    ReactEditor.focus(editor);
+
+    setLiveText(
+      formatMessage(
+        {
+          id: getTranslation('components.Blocks.dnd.reorder'),
+          defaultMessage: '{item}, moved. New position in the editor: {position}.',
+        },
+        {
+          item: `${name}.${currentIndex[0] + 1}`,
+          position: `${newIndex[0] + 1} of ${editor.children.length}`,
+        }
+      )
+    );
+  };
+
+  return (
+    <Flex direction="row" gap={1}>
+      <Tooltip
+        label={formatMessage({
+          id: getTranslation('components.DynamicZone.move-up'),
+          defaultMessage: 'Move up',
+        })}
+      >
+        <Toolbar.Button
+          onPointerDown={(e) => {
+            e.preventDefault();
+            if (canMoveUp) moveBlock('up');
+          }}
+          aria-disabled={!canMoveUp}
+          disabled={!canMoveUp}
+          aria-label={formatMessage({
+            id: getTranslation('components.DynamicZone.move-up'),
+            defaultMessage: 'Move up',
+          })}
+          asChild
+        >
+          <FlexButton
+            tag="button"
+            alignItems="center"
+            justifyContent="center"
+            width={7}
+            height={7}
+            hasRadius
+            type="button"
+          >
+            <ArrowUp fill={!canMoveUp ? 'neutral300' : 'neutral600'} />
+          </FlexButton>
+        </Toolbar.Button>
+      </Tooltip>
+
+      <Tooltip
+        label={formatMessage({
+          id: getTranslation('components.DynamicZone.move-down'),
+          defaultMessage: 'Move down',
+        })}
+      >
+        <Toolbar.Button
+          onPointerDown={(e) => {
+            e.preventDefault();
+            if (canMoveDown) moveBlock('down');
+          }}
+          aria-disabled={!canMoveDown}
+          disabled={!canMoveDown}
+          aria-label={formatMessage({
+            id: getTranslation('components.DynamicZone.move-down'),
+            defaultMessage: 'Move down',
+          })}
+          asChild
+        >
+          <FlexButton
+            tag="button"
+            alignItems="center"
+            justifyContent="center"
+            width={7}
+            height={7}
+            hasRadius
+            type="button"
+          >
+            <ArrowDown fill={!canMoveDown ? 'neutral300' : 'neutral600'} />
+          </FlexButton>
+        </Toolbar.Button>
+      </Tooltip>
+    </Flex>
+  );
+};
+
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
 
   /**
    * The modifier buttons are disabled when an image is selected.
@@ -664,8 +828,14 @@ const BlocksToolbar = () => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      <ToolbarWrapper padding={2} width="100%">
+      <ToolbarWrapper padding={{ initial: 1, medium: 2 }} width="100%">
         <BlocksDropdown />
+        {isMobile && (
+          <>
+            <ToolbarSeparator />
+            <ReorderToolbarButtons />
+          </>
+        )}
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex direction="row" gap={1} grow={1} overflow="hidden">
