@@ -183,7 +183,7 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const matchingPermissions = userPermissions.filter(
+  const matchingPermissions = (userPermissions || []).filter(
     (permission) =>
       permissions.findIndex(
         (perm) => perm.action === permission.action && perm.subject === permission.subject
