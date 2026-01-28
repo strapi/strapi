@@ -84,7 +84,6 @@ export const FocalPointImageWrapper = styled.div`
 
 interface FocalPointAimProps {
   $focalPoint: { x: number; y: number };
-  $isPreview?: boolean;
 }
 
 export const FocalPointAim = styled.div<FocalPointAimProps>`
@@ -92,11 +91,6 @@ export const FocalPointAim = styled.div<FocalPointAimProps>`
   pointer-events: none;
   left: ${({ $focalPoint }) => $focalPoint.x}%;
   top: ${({ $focalPoint }) => $focalPoint.y}%;
-  opacity: ${({ $isPreview }) => ($isPreview ? 0.5 : 1)};
-  transition:
-    left 0.05s ease-out,
-    top 0.05s ease-out,
-    opacity 0.1s ease-out;
 
   &:before {
     content: '';

@@ -20,13 +20,10 @@ const CardAsset = styled(Flex)`
   );
 `;
 
-interface AssetPreviewProps {
+interface AssetPreviewProps extends React.HTMLAttributes<HTMLElement> {
   mime: string;
   name: string;
   url: string;
-  onLoad?: () => void;
-  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
-  style?: React.CSSProperties;
 }
 
 export const AssetPreview = React.forwardRef<
