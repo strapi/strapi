@@ -739,6 +739,13 @@ const BlocksToolbar = () => {
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
 
+  const anchorIndex = editor.selection?.anchor?.path?.at(0) ?? 0;
+  const editorLineNumber = editor.children.length;
+  if (anchorIndex >= editorLineNumber) {
+    // If the selection is outside the bounds of the editor, we move selection to the last line
+    const lastValidLineIndex = editorLineNumber - 1;
+    Transforms.select(editor, { path: [lastValidLineIndex, 0], offset: 0 });
+  }
   /**
    * The modifier buttons are disabled when an image is selected.
    */
@@ -752,9 +759,8 @@ const BlocksToolbar = () => {
       return false;
     }
 
-    const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    if (!selectedNode) return true;
-
+    const anchorIndex = editor.selection.anchor.path[0];
+    const selectedNode = editor.children[anchorIndex];
     if (['image', 'code'].includes(selectedNode.type)) {
       return true;
     }
