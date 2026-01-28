@@ -150,7 +150,7 @@ function getPopulateFor(
 const getDeepPopulate = (
   uid: UID.Schema,
   {
-    initialPopulate = {} as any,
+    initialPopulate = {},
     countMany = false,
     countOne = false,
     maxLevel = Infinity,
