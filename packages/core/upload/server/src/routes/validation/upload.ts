@@ -79,6 +79,24 @@ export class UploadRouteValidator extends AbstractRouteValidator {
   }
 
   /**
+   * Paginated files response schema
+   * Returns files with pagination metadata following Strapi's standard format
+   */
+  get paginatedFiles() {
+    return z.object({
+      data: z.array(this.file),
+      meta: z.object({
+        pagination: z.object({
+          page: z.number().int().positive(),
+          pageSize: z.number().int().positive(),
+          pageCount: z.number().int().nonnegative(),
+          total: z.number().int().nonnegative(),
+        }),
+      }),
+    });
+  }
+
+  /**
    * Upload request body schema for multiple file uploads
    */
   get multiUploadBody() {
