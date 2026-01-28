@@ -82,9 +82,9 @@ export default {
       };
 
       if (_.isEmpty(strapi.apis)) {
-        await strapi.telemetry.send('didCreateFirstContentType', metricsPayload);
+        strapi.telemetry.send('didCreateFirstContentType', metricsPayload);
       } else {
-        await strapi.telemetry.send('didCreateContentType', metricsPayload);
+        strapi.telemetry.send('didCreateContentType', metricsPayload);
       }
 
       setImmediate(() => strapi.reload());
@@ -92,7 +92,7 @@ export default {
       ctx.send({ data: { uid: contentType.uid } }, 201);
     } catch (err) {
       strapi.log.error(err);
-      await strapi.telemetry.send('didNotCreateContentType', {
+      strapi.telemetry.send('didNotCreateContentType', {
         eventProperties: { error: (err as Error).message || err },
       });
       ctx.send({ error: (err as Error).message || 'Unknown error' }, 400);
