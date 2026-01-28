@@ -1,0 +1,23 @@
+{
+  "name": "vitest-config",
+  "version": "5.33.4",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    "./presets/unit": {
+      "types": "./src/presets/unit.ts",
+      "default": "./src/presets/unit.ts"
+    }
+  },
+  "peerDependencies": {
+    "vitest": "^4.0.0"
+  },
+  "devDependencies": {
+    "vite": "6.0.7",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  }
+}

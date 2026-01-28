@@ -175,6 +175,26 @@ jobs:
       - name: Run tests
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
+  unit_back_vitest:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true'
+    name: 'unit_back_vitest (node: ${{ matrix.node }})'
+    needs: [conditions, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run Vitest unit tests
+        run: yarn test:unit:vitest
+
   unit_front:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.frontend == 'true'
     name: 'unit_front (node: ${{ matrix.node }})'

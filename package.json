@@ -81,7 +81,9 @@
     "test:unit": "jest --config jest.config.js",
     "test:unit:update": "jest --config jest.config.js -u",
     "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
-    "test:unit:watch": "run test:unit --watch"
+    "test:unit:watch": "run test:unit --watch",
+    "test:unit:vitest": "vitest run --config packages/core/core/vitest.config.ts",
+    "test:unit:vitest:watch": "vitest --config packages/core/core/vitest.config.ts"
   },
   "resolutions": {
     "@types/koa": "2.13.4",
@@ -172,6 +174,8 @@
     "tar": "6.2.1",
     "ts-jest": "29.1.0",
     "typescript": "5.4.4",
+    "vite": "6.0.7",
+    "vitest": "4.0.18",
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
