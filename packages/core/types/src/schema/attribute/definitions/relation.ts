@@ -68,6 +68,7 @@ export type RelationOptions = Intersect<
     Attribute.VisibleOption,
     Attribute.RequiredOption,
     { useJoinTable?: boolean },
+    { relationsToDisplay?: number }
   ]
 >;
 
