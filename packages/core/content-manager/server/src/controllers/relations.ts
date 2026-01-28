@@ -454,7 +454,8 @@ export default {
       publishedAt?: Record<string, any>;
     } = {};
 
-    if (sourceSchema?.options?.draftAndPublish || sourceSchema?.modelType === 'component') {
+    if (sourceSchema?.options?.draftAndPublish) {
+      // Content types with D&P: filter relations by the current document's status
       if (targetSchema?.options?.draftAndPublish) {
         if (status === 'published') {
           filters.publishedAt = { $notNull: true };
@@ -462,6 +463,10 @@ export default {
           filters.publishedAt = { $null: true };
         }
       }
+    } else if (sourceSchema?.modelType === 'component') {
+      // Components: do NOT filter by status - show relations regardless of their
+      // publication state. This ensures relations set via API are always visible.
+      // The relation's status will still be shown in the UI for transparency.
     } else if (targetSchema?.options?.draftAndPublish) {
       // NOTE: we must return the drafts as some targets might not have a published version yet
       filters.publishedAt = { $null: true };
