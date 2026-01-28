@@ -6,5 +6,6 @@ module.exports = {
     '^.+\\.ts$': ['@swc/jest'],
   },
   testMatch: ['<rootDir>/**/*.test.ts'],
+  testPathIgnorePatterns: ['.vitest.test.ts'],
   displayName: 'Core Strapi',
 };
