@@ -9,6 +9,7 @@ export const languageNativeNames = {
   es: 'Español',
   eu: 'Euskara',
   uz: 'O`zbekcha',
+  "uz-Cyrl": 'Ўзбекча',
   ro: 'Română',
   fr: 'Français',
   gu: 'Gujarati',
