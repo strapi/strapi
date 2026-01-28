@@ -108,6 +108,7 @@ export const forms = {
           data,
           type: customField.type,
           step,
+          customField,
           ...rest,
         });
 
@@ -178,6 +179,7 @@ export const forms = {
             data,
             type,
             step,
+            customField: null,
             ...rest,
           });
 
