@@ -180,22 +180,25 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
   }
 
   const addHintTooltip = (action: Action, children: React.ReactNode) => {
-    return !action.disabled ? (
-      <Tooltip
-        label={formatMessage(
-          {
+    if (action.disabled) {
+      return children;
+    }
+
+    const shortcut =
+      action.label === 'Publish'
+        ? formatMessage({
+            id: 'content-manager.containers.EditView.publishHint',
+            defaultMessage: 'Ctrl / Cmd + Shift + Enter to publish',
+          })
+        : formatMessage({
             id: 'content-manager.containers.EditView.saveHint',
-            defaultMessage: 'Ctrl / Cmd + Enter to {action}',
-          },
-          {
-            action: action.label,
-          }
-        )}
-      >
+            defaultMessage: 'Ctrl / Cmd + Enter to save',
+          });
+
+    return (
+      <Tooltip label={shortcut}>
         <Flex width="100%">{children}</Flex>
       </Tooltip>
-    ) : (
-      children
     );
   };
 
@@ -929,7 +932,7 @@ const PublishAction: DocumentActionComponent = ({
   const enableDraftRelationsCount = false;
   const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
 
-  // Auto-publish on CMD+Enter on macOS, and CTRL+Enter on Windows/Linux
+  // Keyboard shortcuts: CMD+Enter (or CTRL+Enter) = save draft, CMD+Shift+Enter (or CTRL+Shift+Enter) = publish
   React.useEffect(() => {
     if (!schema?.options?.draftAndPublish) {
       return;
@@ -937,9 +940,33 @@ const PublishAction: DocumentActionComponent = ({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        if (!hasDraftRelations) {
-          performPublish();
+        const target = e.target as HTMLElement;
+        const isInTextarea = target.tagName === 'TEXTAREA';
+        const isInInput = target.tagName === 'INPUT';
+
+        if (isInInput && !isInTextarea) {
+          const inputType = (target as HTMLInputElement).type;
+          if (
+            !inputType ||
+            inputType === 'text' ||
+            inputType === 'email' ||
+            inputType === 'password' ||
+            inputType === 'search' ||
+            inputType === 'url'
+          ) {
+            return;
+          }
+        }
+
+        if (e.shiftKey) {
+          e.preventDefault();
+          if (!hasDraftRelations) {
+            performPublish();
+          }
+        } else {
+          // Save draft - dispatch custom event
+          e.preventDefault();
+          window.dispatchEvent(new CustomEvent('content-manager:save-draft'));
         }
       }
     };
@@ -1089,6 +1116,8 @@ const UpdateAction: DocumentActionComponent = ({
     { skip: !parentDocumentMetaToUpdate }
   );
   const { schema } = useDoc();
+
+  const handleUpdateRef = React.useRef<(() => Promise<void>) | null>(null);
 
   const handleUpdate = async () => {
     setSubmitting(true);
@@ -1267,6 +1296,22 @@ const UpdateAction: DocumentActionComponent = ({
       }
     }
   };
+
+  handleUpdateRef.current = handleUpdate;
+
+  React.useEffect(() => {
+    const handleSaveDraft = () => {
+      if (handleUpdateRef.current) {
+        handleUpdateRef.current();
+      }
+    };
+
+    window.addEventListener('content-manager:save-draft', handleSaveDraft);
+
+    return () => {
+      window.removeEventListener('content-manager:save-draft', handleSaveDraft);
+    };
+  }, []);
 
   return {
     loading: isLoading,
