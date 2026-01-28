@@ -27,6 +27,7 @@ export const languageNativeNames = {
   pt: 'Português (Portugal)',
   ru: 'Русский',
   sk: 'Slovenčina',
+  sr: 'Srpski',
   sv: 'Swedish',
   th: 'ไทย',
   tr: 'Türkçe',
