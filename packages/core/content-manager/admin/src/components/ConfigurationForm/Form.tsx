@@ -26,13 +26,9 @@ import type { EditFieldLayout, EditLayout } from '../../hooks/useDocumentLayout'
  * -----------------------------------------------------------------------------------------------*/
 
 interface ConfigurationFormProps extends Pick<FieldsProps, 'attributes' | 'fieldSizes'> {
-  layout: EditLayout;
+  layout: Pick<EditLayout, 'components' | 'settings' | 'layout' | 'metadatas'>;
   onSubmit: FormProps<ConfigurationFormData>['onSubmit'];
 }
-
-/**
- * Every key in EditFieldLayout is turned to optional never and then we overwrite the ones we are using.
- */
 
 type EditFieldSpacerLayout = {
   [key in keyof Omit<EditFieldLayout, 'name' | 'size'>]?: never;
@@ -48,9 +44,9 @@ interface ConfigurationFormData extends Pick<EditLayout, 'settings'> {
   layout: Array<{
     __temp_key__: string;
     children: Array<
-      | (Pick<EditFieldLayout, 'label' | 'size' | 'name' | 'placeholder' | 'mainField'> & {
-          description: EditFieldLayout['hint'];
-          editable: EditFieldLayout['disabled'];
+      | (Pick<EditFieldLayout, 'name' | 'size' | 'label' | 'mainField' | 'placeholder'> & {
+          description: string | undefined;
+          editable: boolean;
           __temp_key__: string;
         })
       | EditFieldSpacerLayout
@@ -129,11 +125,6 @@ const ConfigurationForm = ({
                         return acc;
                       }
 
-                      /**
-                       * Create the list of attributes from the schema as to which can
-                       * be our `mainField` and dictate the display name of the schema
-                       * we're editing.
-                       */
                       if (!ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD.includes(attribute.type)) {
                         acc.push({
                           label: key,
