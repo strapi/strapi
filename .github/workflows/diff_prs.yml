@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Fetch Merged PRs Between Branches
         id: pr_diff

@@ -288,7 +288,13 @@ const ListViewPage = () => {
           <Layouts.Content>
             <Box background="neutral0" shadow="filterShadow" hasRadius>
               <EmptyStateLayout
-                action={canCreate ? <CreateButton variant="secondary" /> : null}
+                action={
+                  canCreate && (
+                    <Box>
+                      <CreateButton variant="secondary" />
+                    </Box>
+                  )
+                }
                 content={formatMessage({
                   id: 'app.components.EmptyStateLayout.content-document',
                   defaultMessage: 'No content found',
@@ -505,7 +511,7 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
         search: stringify({ plugins: query.plugins }),
       }}
       minWidth="max-content"
-      marginLeft={2}
+      fullWidth
     >
       {formatMessage({
         id: getTranslation('HeaderLayout.button.label-add-entry'),

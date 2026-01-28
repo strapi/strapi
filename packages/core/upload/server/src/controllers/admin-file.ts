@@ -82,4 +82,115 @@ export default {
 
     ctx.body = body;
   },
+
+  async getAIMetadataCount(ctx: Context) {
+    const { userAbility } = ctx.state;
+
+    const pm = strapi.service('admin::permission').createPermissionsManager({
+      ability: userAbility,
+      action: ACTIONS.read,
+      model: FILE_MODEL_UID,
+    });
+
+    if (!pm.isAllowed) {
+      return ctx.forbidden();
+    }
+
+    const aiMetadataService = getService('aiMetadata');
+
+    // Check if AI service is enabled
+    if (!(await aiMetadataService.isEnabled())) {
+      return ctx.badRequest('AI Metadata service is not enabled');
+    }
+
+    try {
+      const { imagesWithoutMetadataCount, totalImages } =
+        await aiMetadataService.countImagesWithoutMetadata();
+
+      ctx.body = {
+        imagesWithoutMetadataCount,
+        totalImages,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to get AI metadata count';
+
+      strapi.log.error('Failed to get AI metadata count', {
+        message,
+        error,
+      });
+
+      ctx.badRequest(message);
+    }
+  },
+
+  async generateAIMetadata(ctx: Context) {
+    const { userAbility } = ctx.state;
+
+    const pm = strapi.service('admin::permission').createPermissionsManager({
+      ability: userAbility,
+      action: ACTIONS.update,
+      model: FILE_MODEL_UID,
+    });
+
+    if (!pm.isAllowed) {
+      return ctx.forbidden();
+    }
+
+    const aiMetadataService = getService('aiMetadata');
+
+    // Check if AI service is enabled
+    if (!(await aiMetadataService.isEnabled())) {
+      return ctx.badRequest('AI Metadata service is not enabled');
+    }
+
+    try {
+      // Get count first to check if there are images to process
+      const result = await aiMetadataService.countImagesWithoutMetadata();
+
+      if (result.imagesWithoutMetadataCount === 0) {
+        ctx.body = {
+          count: 0,
+          message: 'No images without metadata found',
+        };
+        return;
+      }
+
+      // Create job
+      const jobService = getService('aiMetadataJobs');
+      const jobId = await jobService.createJob();
+
+      // Start async processing (fire and forget)
+      aiMetadataService.processExistingFiles(jobId, ctx.state.user).catch((err: Error) => {
+        strapi.log.error('AI metadata job failed:', err);
+      });
+
+      // Return immediately with job ID
+      ctx.body = {
+        jobId,
+        status: 'pending',
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to generate AI metadata';
+      const cause = error instanceof Error && error.cause ? String(error.cause) : undefined;
+
+      strapi.log.error('AI metadata generation failed in controller', {
+        message,
+        cause,
+        error,
+      });
+
+      ctx.badRequest(cause ? `${message}: ${cause}` : message);
+    }
+  },
+
+  async getLatestAIMetadataJob(ctx: Context) {
+    const jobService = getService('aiMetadataJobs');
+    const job = await jobService.getLatestActiveJob();
+
+    if (!job) {
+      return ctx.notFound('No active job found');
+    }
+
+    ctx.body = job;
+  },
 };

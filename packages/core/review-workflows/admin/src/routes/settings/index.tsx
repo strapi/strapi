@@ -138,6 +138,7 @@ export const ReviewWorkflowsListView = () => {
               tag={NavLink}
               to="create"
               onClick={handleCreateClick}
+              fullWidth
             >
               {formatMessage({
                 id: 'Settings.review-workflows.list.page.create',

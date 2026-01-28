@@ -1,0 +1,105 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relation_dp_i18ns",
+  "info": {
+    "singularName": "relation-dp-i18n",
+    "pluralName": "relation-dp-i18ns",
+    "displayName": "Relation DP i18n"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "selfOne": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-dp-i18n.relation-dp-i18n"
+    },
+    "selfMany": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation-dp-i18n.relation-dp-i18n"
+    },
+    "oneToOneBasic": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::basic-dp-i18n.basic-dp-i18n"
+    },
+    "oneToManyBasics": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::basic-dp-i18n.basic-dp-i18n"
+    },
+    "manyToOneBasic": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::basic-dp-i18n.basic-dp-i18n"
+    },
+    "manyToManyBasics": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::basic-dp-i18n.basic-dp-i18n"
+    },
+    "simpleInfo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.simple-info",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "content": {
+      "type": "dynamiczone",
+      "components": ["shared.simple-info", "shared.image-block"],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "textBlocks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.text-block",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "mediaBlock": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.media-block",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["shared.text-block", "shared.media-block"],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}

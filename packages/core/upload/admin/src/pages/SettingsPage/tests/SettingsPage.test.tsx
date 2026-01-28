@@ -10,6 +10,10 @@ jest.mock('@strapi/admin/strapi-admin/ee', () => ({
 import { SettingsPage } from '../SettingsPage';
 
 describe('SettingsPage', () => {
+  beforeEach(() => {
+    (useAIAvailability as jest.Mock).mockReturnValue(false);
+  });
+
   it('renders', async () => {
     const { getByRole, queryByText } = render(<SettingsPage />);
 
@@ -44,11 +48,13 @@ describe('SettingsPage', () => {
 
     await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
-    expect(
-      getByRole('heading', {
-        name: 'Generate AI captions and alt texts automatically on upload!',
-      })
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        getByRole('heading', {
+          name: 'Generate AI captions and alt texts automatically on upload!',
+        })
+      ).toBeInTheDocument();
+    });
   });
 
   it('hides AI metadata section when AI is not available', async () => {
@@ -58,6 +64,7 @@ describe('SettingsPage', () => {
 
     await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
+    // Check that AI metadata section is NOT visible
     expect(
       queryByRole('heading', {
         name: 'Generate AI captions and alt texts automatically on upload!',

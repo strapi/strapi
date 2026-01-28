@@ -1,14 +1,6 @@
-import type { Algorithm } from 'jsonwebtoken';
+import type { Core } from '@strapi/types';
 import { defineProvider } from './provider';
 import { createSessionManager } from '../services/session-manager';
-
-interface AdminAuthConfig {
-  secret?: string;
-  options?: {
-    algorithm?: Algorithm;
-    [key: string]: unknown;
-  };
-}
 
 export default defineProvider({
   init(strapi) {
@@ -21,8 +13,8 @@ export default defineProvider({
 
   async register(strapi) {
     // Get JWT secret from admin auth settings (same as admin token service)
-    const adminAuth = strapi.config.get<AdminAuthConfig>('admin.auth', {});
-    const jwtSecret = adminAuth.secret;
+    const adminAuth = strapi.config.get<Core.Config.Admin['auth']>('admin.auth');
+    const jwtSecret = adminAuth?.secret;
 
     if (!jwtSecret) {
       throw new Error(

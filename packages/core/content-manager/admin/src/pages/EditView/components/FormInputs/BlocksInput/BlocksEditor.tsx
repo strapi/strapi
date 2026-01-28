@@ -4,7 +4,7 @@ import { createContext, type FieldValue } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor, Transforms } from 'slate';
+import { Editor, type Descendant, createEditor, Transforms, Element } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
@@ -22,9 +22,8 @@ import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
-import { withImages } from './plugins/withImages';
-import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
+import { isNonNullable } from './utils/types';
 
 import type { Schema } from '@strapi/types';
 
@@ -34,13 +33,21 @@ import type { Schema } from '@strapi/types';
 
 interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
+  /** Function to check if a given node is of this type of block */
   matchNode: (node: Schema.Attribute.BlocksNode) => boolean;
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
   handleTab?: (editor: Editor) => void;
   snippets?: string[];
+  /** Adjust the vertical positioning of the drag-to-reorder grip icon */
   dragHandleTopMargin?: CSSProperties['marginTop'];
+  /** A Slate plugin: function that will wrap the editor creation */
+  plugin?: (editor: Editor) => Editor;
+  /**
+   * Function that checks if an element should be draggable
+   * @default () => true */
+  isDraggable?: (element: Element) => boolean;
 }
 
 interface NonSelectorBlock extends BaseBlock {
@@ -183,8 +190,26 @@ interface BlocksEditorProps
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
+
+    const blocks = React.useMemo(
+      () => ({
+        ...paragraphBlocks,
+        ...headingBlocks,
+        ...listBlocks,
+        ...linkBlocks,
+        ...imageBlocks,
+        ...quoteBlocks,
+        ...codeBlocks,
+      }),
+      []
+    ) satisfies BlocksStore;
+
+    const blockRegisteredPlugins = Object.values(blocks)
+      .map((block) => block.plugin)
+      .filter(isNonNullable);
+
     const [editor] = React.useState(() =>
-      pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
+      pipe(withHistory, withStrapiSchema, withReact, ...blockRegisteredPlugins)(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
@@ -262,19 +287,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         Transforms.deselect(editor);
       }
     }, [editor, value]);
-
-    const blocks = React.useMemo(
-      () => ({
-        ...paragraphBlocks,
-        ...headingBlocks,
-        ...listBlocks,
-        ...linkBlocks,
-        ...imageBlocks,
-        ...quoteBlocks,
-        ...codeBlocks,
-      }),
-      []
-    ) satisfies BlocksStore;
 
     return (
       <>
