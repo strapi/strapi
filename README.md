@@ -10,6 +10,17 @@
 <h3 align="center">Open-source headless CMS, self-hosted or Cloud you’re in control.</h3>
 <p align="center">The leading open-source headless CMS, 100% JavaScript/TypeScript, flexible and fully customizable.</p>
 <p align="center"><a href="https://cloud.strapi.io/signups?source=github1">Cloud</a> · <a href="https://strapi.io/demo?utm_campaign=Growth-Experiments&utm_source=strapi%2Fstrapi%20README.md">Try live demo</a></p>
+<p align="center">
+  <!-- Keep these links. Translations will automatically update with the README. -->
+  <a href="https://zdoc.app/de/strapi/strapi">Deutsch</a> | 
+  <a href="https://zdoc.app/es/strapi/strapi">Español</a> | 
+  <a href="https://zdoc.app/fr/strapi/strapi">français</a> | 
+  <a href="https://zdoc.app/ja/strapi/strapi">日本語</a> | 
+  <a href="https://zdoc.app/ko/strapi/strapi">한국어</a> | 
+  <a href="https://zdoc.app/pt/strapi/strapi">Português</a> | 
+  <a href="https://zdoc.app/ru/strapi/strapi">Русский</a> | 
+  <a href="https://zdoc.app/zh/strapi/strapi">中文</a>
+</p>
 <br />
 
 <p align="center">
