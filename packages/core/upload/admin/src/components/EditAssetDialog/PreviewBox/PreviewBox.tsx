@@ -88,11 +88,10 @@ export const PreviewBox = ({
   const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height } =
     useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
-  const [hasFocalPointIntent, setHasFocalPointIntent] = React.useState<boolean | null>(null);
+  const [isInFocalPointMode, setIsInFocalPointMode] = React.useState<boolean>(false);
   const [focalPoint, setFocalPoint] = React.useState<FocalPoint>(
     formFocalPoint ?? { x: 50, y: 50 }
   );
-  const [hoverFocalPoint, setHoverFocalPoint] = React.useState<FocalPoint | null>(null);
 
   const {
     upload,
@@ -199,42 +198,29 @@ export const PreviewBox = ({
   };
 
   const handleFocalPointClick = (e: React.MouseEvent<HTMLElement>) => {
-    if (!hasFocalPointIntent) return;
+    if (!isInFocalPointMode) return;
     setFocalPoint(calculateFocalPointFromEvent(e));
-    setHoverFocalPoint(null);
-  };
-
-  const handleFocalPointMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    if (!hasFocalPointIntent) return;
-    setHoverFocalPoint(calculateFocalPointFromEvent(e));
-  };
-
-  const handleFocalPointMouseLeave = () => {
-    setHoverFocalPoint(null);
   };
 
   const handleFocalPointCancel = () => {
-    setHasFocalPointIntent(false);
+    setIsInFocalPointMode(false);
     setFocalPoint(formFocalPoint ?? { x: 50, y: 50 });
     onFocalPointCancel();
   };
 
   const handleFocalPointStart = () => {
     onFocalPointStart();
-    setHasFocalPointIntent(true);
+    setIsInFocalPointMode(true);
   };
 
   const handleFocalPointValidate = () => {
-    setHasFocalPointIntent(false);
+    setIsInFocalPointMode(false);
     onFocalPointFinish(focalPoint);
   };
 
   const handleFocalPointReset = () => {
     setFocalPoint({ x: 50, y: 50 });
-    setHoverFocalPoint(null);
   };
-
-  const isInFocalPointMode = hasFocalPointIntent === true;
 
   return (
     <>
@@ -326,10 +312,7 @@ export const PreviewBox = ({
             </UploadProgressWrapper>
           )}
 
-          <FocalPointImageWrapper
-            onMouseMove={handleFocalPointMouseMove}
-            onMouseLeave={handleFocalPointMouseLeave}
-          >
+          <FocalPointImageWrapper>
             <AssetPreview
               ref={previewRef}
               mime={asset.mime!}
@@ -341,19 +324,12 @@ export const PreviewBox = ({
                 }
               }}
               onClick={handleFocalPointClick}
-              style={{ cursor: isInFocalPointMode && hoverFocalPoint ? 'crosshair' : undefined }}
+              style={{ cursor: isInFocalPointMode ? 'crosshair' : undefined }}
             />
 
             {/* Show the set focal point marker */}
             {isInFocalPointMode && (
-              <FocalPointAim $focalPoint={focalPoint} $isPreview={false}>
-                <FocalPointHalo />
-              </FocalPointAim>
-            )}
-
-            {/* Show hover preview as additional semi-transparent marker */}
-            {isInFocalPointMode && hoverFocalPoint && (
-              <FocalPointAim $focalPoint={hoverFocalPoint} $isPreview={true}>
+              <FocalPointAim $focalPoint={focalPoint}>
                 <FocalPointHalo />
               </FocalPointAim>
             )}
