@@ -1,6 +1,7 @@
 import path from 'path';
+import type { Core } from '@strapi/strapi';
 
-export default ({ env }) => ({
+const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Database<'sqlite'> => ({
   connection: {
     client: 'sqlite',
     connection: {
@@ -9,3 +10,5 @@ export default ({ env }) => ({
     useNullAsDefault: true,
   },
 });
+
+export default config;
