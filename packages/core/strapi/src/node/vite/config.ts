@@ -151,6 +151,8 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
       cors: false,
       middlewareMode: true,
       open: ctx.options.open,
+      // Allow preview deployment hosts - the leading dot allows all subdomains
+      allowedHosts: ['.previews.tools.strapi.team'],
       hmr: {
         overlay: false,
         server: ctx.options.hmrServer,

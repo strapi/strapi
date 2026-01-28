@@ -1,0 +1,177 @@
+name: Preview Deployment
+
+on:
+  pull_request:
+    types:
+      - labeled
+      - synchronize
+
+concurrency:
+  group: preview-deployment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-label:
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.has_label }}
+    steps:
+      - name: Check for hackathon-deploy-preview label
+        id: check
+        run: |
+          if [[ "${{ github.event.action }}" == "labeled" && "${{ github.event.label.name }}" == "hackathon-deploy-preview" ]]; then
+            echo "has_label=true" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.action }}" == "synchronize" ]]; then
+            labels='${{ toJSON(github.event.pull_request.labels.*.name) }}'
+            if echo "$labels" | jq -e 'index("hackathon-deploy-preview")' > /dev/null; then
+              echo "has_label=true" >> $GITHUB_OUTPUT
+            else
+              echo "has_label=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "has_label=false" >> $GITHUB_OUTPUT
+          fi
+
+  deploy-preview:
+    needs: check-label
+    if: |
+      needs.check-label.outputs.should_deploy == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      PREVIEW_API_URL: 'https://previews.tools.strapi.team'
+    steps:
+      - name: Deploy to preview
+        id: deploy
+        continue-on-error: true
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_BRANCH="${{ github.event.pull_request.head.ref }}"
+          REPO_URL="https://github.com/${{ github.repository }}.git"
+          REQUESTED_BY="${{ github.event.pull_request.user.login }}"
+
+          # Construct JSON payload
+          PAYLOAD=$(jq -n \
+            --arg repo_url "$REPO_URL" \
+            --arg branch "$PR_BRANCH" \
+            --argjson pr_number "$PR_NUMBER" \
+            --arg mode "cms-repo" \
+            --arg duration "24h" \
+            --arg env "production" \
+            --arg requested_by "$REQUESTED_BY" \
+            '{
+              repository_url: $repo_url,
+              branch: $branch,
+              pr_number: $pr_number,
+              mode: $mode,
+              duration: $duration,
+              env: $env,
+              requested_by: $requested_by
+            }')
+
+          echo "Sending deployment request..."
+
+          # Make API call with retry logic
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            --max-time 30 \
+            --retry 3 \
+            --retry-delay 5 \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.HACKATHON_DEPLOY_PREVIEW_AUTH }}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$PREVIEW_API_URL/preview-app")
+
+          # Split response body and status code
+          HTTP_BODY=$(echo "$RESPONSE" | sed '$d')
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n 1)
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response Body: $HTTP_BODY"
+
+          # Check HTTP status
+          if [[ "$HTTP_STATUS" -ne 200 && "$HTTP_STATUS" -ne 201 ]]; then
+            echo "::error::API request failed with status $HTTP_STATUS"
+            echo "::error::Response: $HTTP_BODY"
+            exit 1
+          fi
+
+          # Validate JSON response
+          if ! echo "$HTTP_BODY" | jq empty 2>/dev/null; then
+            echo "::error::Invalid JSON response from API"
+            echo "::error::Response: $HTTP_BODY"
+            exit 1
+          fi
+
+          # Parse response
+          APP_ID=$(echo "$HTTP_BODY" | jq -r '.app_id')
+          BUILD_ID=$(echo "$HTTP_BODY" | jq -r '.build_id')
+          STATUS=$(echo "$HTTP_BODY" | jq -r '.status')
+
+          # Validate response fields
+          if [[ -z "$APP_ID" || "$APP_ID" == "null" ]]; then
+            echo "::error::Missing app_id in API response"
+            echo "::error::Response: $HTTP_BODY"
+            exit 1
+          fi
+
+          if [[ -z "$BUILD_ID" || "$BUILD_ID" == "null" ]]; then
+            echo "::warning::Missing build_id in API response"
+            BUILD_ID="N/A"
+          fi
+
+          # Construct app URL
+          APP_URL="https://${APP_ID}.previews.tools.strapi.team"
+
+          # Output for next steps
+          echo "app_id=$APP_ID" >> $GITHUB_OUTPUT
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+
+          echo "✅ Deployment request successful!"
+          echo "App ID: $APP_ID"
+          echo "Build ID: $BUILD_ID"
+          echo "App URL: $APP_URL"
+
+      - name: Comment on successful deployment
+        if: steps.deploy.outcome == 'success'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            ## Preview deployment
+
+            Test the changes in this PR using a hosted Strapi app available for 24 hours
+
+            | Status | Preview URL |
+            |---|---|
+            | ⏳ Building | 🔗 [${{ steps.deploy.outputs.app_url }}](${{ steps.deploy.outputs.app_url }}) |
+          comment_tag: preview-deployment
+          mode: upsert
+
+      - name: Comment on failed deployment
+        if: steps.deploy.outcome == 'failure'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            ## Preview deployment
+
+            Failed to trigger preview deployment. This could be due to:
+            - API service is temporarily unavailable
+            - Authentication issues
+            - Invalid request parameters
+
+            Please check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
+
+            ---
+            *You can retry by pushing a new commit or removing and re-adding the `hackathon-deploy-preview` label.*
+          comment_tag: preview-deployment
+          mode: upsert
+
+      - name: Fail workflow if deployment failed
+        if: steps.deploy.outcome == 'failure'
+        run: exit 1
