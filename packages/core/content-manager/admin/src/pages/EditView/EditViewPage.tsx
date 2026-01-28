@@ -8,6 +8,7 @@ import {
   useQueryParams,
   tours,
   Layouts,
+  useIsDesktop,
 } from '@strapi/admin/strapi-admin';
 import { Grid, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -24,10 +25,11 @@ import { useOnce } from '../../hooks/useOnce';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
+import { ActionsDrawer } from './components/ActionsDrawer';
 import { Blocker } from './components/Blocker';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
-import { Panels } from './components/Panels';
+import { ActionsPanelContent, Panels, PanelsProvider, usePanelsContext } from './components/Panels';
 import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
@@ -46,6 +48,8 @@ const EditViewPage = () => {
   });
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const isDesktop = useIsDesktop();
+  const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
 
   const doc = useDoc();
   const {
@@ -214,11 +218,24 @@ const EditViewPage = () => {
                     <FormLayout layout={layout} document={doc} />
                   </Tabs.Content>
                 </Grid.Item>
-                <Grid.Item col={3} xs={12} direction="column" alignItems="stretch">
-                  <Panels />
-                </Grid.Item>
+                {isDesktop && (
+                  <Grid.Item col={3} direction="column" alignItems="stretch">
+                    <Panels />
+                  </Grid.Item>
+                )}
               </Grid.Root>
             </Tabs.Root>
+            {!isDesktop && (
+              <>
+                <ActionsDrawer hasSideNav>
+                  <Panels withActions={false} />
+                </ActionsDrawer>
+                {/* Adding a fixed height to the bottom of the page to prevent 
+                the actions drawer from covering the content
+                (40px button + 12px * 2 padding + 1px border) */}
+                <Box height="6.5rem" />
+              </>
+            )}
           </Layouts.Content>
           <Blocker />
         </>
@@ -292,7 +309,9 @@ const ProtectedEditViewPage = () => {
     <Page.Protect permissions={permissions}>
       {({ permissions }) => (
         <DocumentRBAC permissions={permissions}>
-          <EditViewPage />
+          <PanelsProvider>
+            <EditViewPage />
+          </PanelsProvider>
         </DocumentRBAC>
       )}
     </Page.Protect>

@@ -13,7 +13,11 @@ import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { HEIGHT_TOP_NAVIGATION, HEIGHT_TOP_NAVIGATION_MEDIUM } from '../constants/theme';
+import {
+  HEIGHT_TOP_NAVIGATION,
+  HEIGHT_TOP_NAVIGATION_MEDIUM,
+  WIDTH_SIDE_NAVIGATION,
+} from '../constants/theme';
 
 import { tours } from './GuidedTour/Tours';
 
@@ -32,7 +36,7 @@ const MainSubNav = styled(DSSubNav)`
   z-index: 2;
 
   ${({ theme }) => theme.breakpoints.medium} {
-    width: 23.2rem;
+    width: ${WIDTH_SIDE_NAVIGATION};
     position: sticky;
     top: 0;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
@@ -155,7 +159,7 @@ const Sections = ({
       paddingBottom={{ initial: 5, large: 4 }}
       paddingLeft={{ initial: 3, large: 0 }}
       paddingRight={{ initial: 3, large: 0 }}
-      maxWidth={{ initial: '100%', medium: '23.2rem' }}
+      maxWidth={{ initial: '100%', medium: WIDTH_SIDE_NAVIGATION }}
     >
       <Flex tag="ul" gap={6} direction="column" alignItems="stretch" {...props}>
         {children.map((child, index) => {

@@ -2,8 +2,8 @@
 
 exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 .c2 {
-  padding-inline-start: 20px;
-  padding-inline-end: 20px;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
 }
 
 .c6 {
@@ -36,19 +36,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c28 {
   max-width: 100%;
-  padding-block-end: 20px;
-  padding-inline-start: 12px;
-  padding-inline-end: 12px;
-  padding-block-start: 20px;
+  padding-block-end: 16px;
+  padding-block-start: 16px;
 }
 
 .c31 {
-  padding-inline-start: 12px;
-  padding-inline-end: 12px;
+  position: relative;
 }
 
-.c32 {
-  position: relative;
+.c33 {
+  padding-inline-end: 4px;
 }
 
 .c36 {
@@ -58,8 +55,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c39 {
-  margin-inline-start: 0;
-  margin-inline-end: 0;
+  margin-inline-start: 4px;
+  margin-inline-end: 4px;
 }
 
 .c43 {
@@ -134,7 +131,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c29 {
-  gap: 24px;
+  gap: 20px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
@@ -147,7 +144,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c33 {
+.c32 {
   align-items: center;
   flex-direction: row;
   display: flex;
@@ -175,7 +172,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c45 {
-  gap: 8px;
+  gap: 4px;
   align-items: center;
   justify-content: space-between;
   flex-direction: row;
@@ -443,7 +440,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c1 {
   width: 100%;
-  height: calc(100dvh - 6.4rem - 1px);
+  height: calc(100dvh - 5.6rem - 1px);
   overflow: hidden;
   background-color: #ffffff;
   display: flex;
@@ -451,7 +448,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   border-right: 0;
   box-shadow: none;
   position: fixed;
-  top: calc(6.4rem + 1px);
+  top: calc(5.6rem + 1px);
   left: 0;
   z-index: 2;
 }
@@ -484,8 +481,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c4 {
-  flex: 0 0 6.4rem;
-  height: 6.4rem;
+  flex: 0 0 5.6rem;
+  height: 5.6rem;
 }
 
 .c49 {
@@ -511,25 +508,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-left: 36px;
 }
 
+@media (min-width: 1080px) {
+  .c2 {
+    padding-inline-start: 20px;
+    padding-inline-end: 20px;
+  }
+}
+
 @media (min-width: 768px) {
   .c28 {
     max-width: 23.2rem;
-  }
-}
-
-@media (min-width: 1080px) {
-  .c28 {
-    padding-block-end: 16px;
-    padding-inline-start: 0;
-    padding-inline-end: 0;
-    padding-block-start: 16px;
-  }
-}
-
-@media (min-width: 1080px) {
-  .c31 {
-    padding-inline-start: 20px;
-    padding-inline-end: 20px;
   }
 }
 
@@ -553,6 +541,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   }
 }
 
+<<<<<<< HEAD
 @media (min-width: 1080px) {
   .c40 {
     gap: 2px;
@@ -565,6 +554,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   }
 }
 
+=======
+>>>>>>> 8894933c46 (fix: pr comments)
 @media (min-width: 768px) {
   .c5 {
     font-size: 1.8rem;
@@ -651,13 +642,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 @media (min-width: 1080px) {
   .c1 {
     height: 100dvh;
-  }
-}
-
-@media (min-width: 768px) {
-  .c4 {
-    flex: 0 0 5.6rem;
-    height: 5.6rem;
   }
 }
 
@@ -803,16 +787,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c30"
                 >
                   <div
-                    class="c31"
+                    class="c2"
                   >
                     <div
-                      class="c32 c22"
+                      class="c31 c22"
                     >
                       <div
-                        class="c33"
+                        class="c32"
                       >
                         <div
-                          class=""
+                          class="c33"
                         >
                           <span
                             class="c34"
@@ -920,16 +904,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c30"
                 >
                   <div
-                    class="c31"
+                    class="c2"
                   >
                     <div
-                      class="c32 c22"
+                      class="c31 c22"
                     >
                       <div
-                        class="c33"
+                        class="c32"
                       >
                         <div
-                          class=""
+                          class="c33"
                         >
                           <span
                             class="c34"
@@ -1009,16 +993,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c30"
                 >
                   <div
-                    class="c31"
+                    class="c2"
                   >
                     <div
-                      class="c32 c22"
+                      class="c31 c22"
                     >
                       <div
-                        class="c33"
+                        class="c32"
                       >
                         <div
-                          class=""
+                          class="c33"
                         >
                           <span
                             class="c34"

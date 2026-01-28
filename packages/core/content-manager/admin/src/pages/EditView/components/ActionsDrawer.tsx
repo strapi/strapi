@@ -1,0 +1,150 @@
+import * as React from 'react';
+
+import { WIDTH_SIDE_NAVIGATION } from '@strapi/admin/strapi-admin';
+import { Portal, Flex, Box, ScrollArea, IconButton } from '@strapi/design-system';
+import { CaretDown, CaretUp } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
+
+// eslint-disable-next-line import/namespace
+import { ActionsPanelContent, usePanelsContext } from './Panels';
+
+const DrawerContainer = styled(Portal)<{ $isOpen: boolean; $hasSideNav: boolean }>`
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    left: ${({ $hasSideNav }) => ($hasSideNav ? WIDTH_SIDE_NAVIGATION : 0)};
+  }
+`;
+
+const DrawerOverlay = styled(Box)<{ $isOpen: boolean; $hasSideNav: boolean }>`
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: opacity 0.2s ease-in-out;
+  opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
+  pointer-events: ${({ $isOpen }) => ($isOpen ? 'auto' : 'none')};
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    left: ${({ $hasSideNav }) => ($hasSideNav ? WIDTH_SIDE_NAVIGATION : 0)};
+  }
+`;
+
+const ToggleButton = styled(IconButton)`
+  padding: 0;
+  border: none;
+  background: ${({ theme }) => theme.colors.neutral200};
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const DrawerContent = styled(Flex)`
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+`;
+
+const DrawerContentInner = styled(ScrollArea)<{ $isOpen: boolean }>`
+  max-height: ${({ $isOpen }) =>
+    $isOpen
+      ? 'calc(100vh - 25rem)' // 25rem is arbitrary, to be able to see a bit of the content behind (navigation and header)
+      : '0'};
+  overflow: hidden;
+  transition: max-height 0.2s ease-in-out;
+`;
+
+const ActionsDrawer = ({
+  children,
+  hasSideNav = false,
+}: {
+  children?: React.ReactNode;
+  hasSideNav?: boolean;
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { formatMessage } = useIntl();
+  const toggleOpen = () => {
+    setIsOpen((prev: boolean) => !prev);
+  };
+  const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
+  const hasContent = visiblePanels.length > 0;
+
+  return (
+    <>
+      <DrawerContainer $isOpen={isOpen} $hasSideNav={hasSideNav}>
+        {hasContent && children && (
+          <DrawerOverlay
+            $isOpen={isOpen}
+            $hasSideNav={hasSideNav}
+            onClick={() => setIsOpen(false)}
+            data-testid="actions-drawer-overlay"
+          />
+        )}
+        <DrawerContent background="neutral0">
+          <Flex
+            paddingTop={3}
+            paddingBottom={3}
+            paddingLeft={4}
+            paddingRight={4}
+            gap={3}
+            borderStyle="solid"
+            borderWidth={isOpen ? '1px 0' : '1px 0 0 0'}
+            borderColor="neutral150"
+          >
+            <Flex flex={1} gap={2} alignItems="center">
+              <ActionsPanelContent />
+            </Flex>
+            {hasContent && children && (
+              <ToggleButton
+                onClick={toggleOpen}
+                label={
+                  isOpen
+                    ? formatMessage({
+                        id: 'content-manager.actions-drawer.close',
+                        defaultMessage: 'Close more actions',
+                      })
+                    : formatMessage({
+                        id: 'content-manager.actions-drawer.open',
+                        defaultMessage: 'Open more actions',
+                      })
+                }
+              >
+                {isOpen ? <CaretUp fill="neutral600" /> : <CaretDown fill="neutral600" />}
+              </ToggleButton>
+            )}
+          </Flex>
+          {children && (
+            <DrawerContentInner $isOpen={isOpen}>
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                justifyContent="flex-start"
+                padding={{ initial: 4, large: 0 }}
+              >
+                {children}
+              </Flex>
+            </DrawerContentInner>
+          )}
+        </DrawerContent>
+      </DrawerContainer>
+    </>
+  );
+};
+
+export { ActionsDrawer };
