@@ -15185,6 +15185,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"check-issue-template@workspace:.github/actions/check-issue-template":
+  version: 0.0.0-use.local
+  resolution: "check-issue-template@workspace:.github/actions/check-issue-template"
+  dependencies:
+    "@actions/core": "npm:1.11.1"
+    "@actions/github": "npm:6.0.0"
+    "@vercel/ncc": "npm:0.38.2"
+  languageName: unknown
+  linkType: soft
+
 "check-pr-status@workspace:.github/actions/check-pr-status":
   version: 0.0.0-use.local
   resolution: "check-pr-status@workspace:.github/actions/check-pr-status"
