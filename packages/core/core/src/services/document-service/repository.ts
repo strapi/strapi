@@ -1,6 +1,12 @@
-import { omit, assoc, merge, curry } from 'lodash/fp';
+import { omit, assoc, merge, curry, isEmpty } from 'lodash/fp';
 
-import { async, contentTypes as contentTypesUtils, validate, errors } from '@strapi/utils';
+import {
+  async,
+  contentTypes as contentTypesUtils,
+  validate,
+  errors,
+  createModelCache,
+} from '@strapi/utils';
 
 import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
@@ -20,6 +26,7 @@ import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
+import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
 
 const { validators } = validate;
 
@@ -45,11 +52,35 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   };
 
   const validateParams = async (params: any) => {
-    const ctx = { schema: contentType, getModel };
-    await validators.validateFilters(ctx, params.filters, filtersValidations);
-    await validators.validateSort(ctx, params.sort, sortValidations);
-    await validators.validateFields(ctx, params.fields, fieldValidations);
-    await validators.validatePopulate(ctx, params.populate, populateValidations);
+    // Cache model lookups for this request to avoid repeating the same work
+    const modelCache = createModelCache(getModel);
+
+    const ctx = { schema: contentType, getModel: modelCache.getModel };
+
+    // Only validate what is actually provided
+    const validations: Promise<unknown>[] = [];
+
+    if (params.filters && !isEmpty(params.filters)) {
+      validations.push(validators.validateFilters(ctx, params.filters, filtersValidations));
+    }
+
+    if (params.sort && !isEmpty(params.sort)) {
+      validations.push(validators.validateSort(ctx, params.sort, sortValidations));
+    }
+
+    if (params.fields && !isEmpty(params.fields)) {
+      validations.push(validators.validateFields(ctx, params.fields, fieldValidations));
+    }
+
+    if (params.populate && !isEmpty(params.populate)) {
+      validations.push(validators.validatePopulate(ctx, params.populate, populateValidations));
+    }
+
+    // Run validations together but keep the same error order as before
+    await runParallelWithOrderedErrors(validations);
+
+    // Clean up cache after validation
+    modelCache.clear();
 
     // Strip lookup from params, it's only used internally
     if (params.lookup) {

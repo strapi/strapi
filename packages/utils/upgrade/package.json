@@ -70,7 +70,7 @@
     "fast-glob": "3.3.2",
     "fs-extra": "11.2.0",
     "jscodeshift": "17.1.2",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "memfs": "4.6.0",
     "ora": "5.4.1",
     "prompts": "2.4.2",

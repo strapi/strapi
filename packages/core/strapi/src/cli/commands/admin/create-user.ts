@@ -19,9 +19,18 @@ const emailValidator = yup.string().email('Invalid email address').lowercase();
 const passwordValidator = yup
   .string()
   .min(8, 'Password must be at least 8 characters long')
-  .matches(/[a-z]/, 'Password must contain at least one lowercase character')
-  .matches(/[A-Z]/, 'Password must contain at least one uppercase character')
-  .matches(/\d/, 'Password must contain at least one number');
+  .test('lowercase', 'Password must contain at least one lowercase character', (value) => {
+    if (!value) return true;
+    return /[a-z]/.test(value);
+  })
+  .test('uppercase', 'Password must contain at least one uppercase character', (value) => {
+    if (!value) return true;
+    return /[A-Z]/.test(value);
+  })
+  .test('number', 'Password must contain at least one number', (value) => {
+    if (!value) return true;
+    return /\d/.test(value);
+  });
 
 const adminCreateSchema = yup.object().shape({
   email: emailValidator,

@@ -147,7 +147,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('checks if a mixed selected content shows only one option selected in the dropdown when you select only part of the content', async () => {
-    setup(mixedInitialValue);
+    const { user } = setup(mixedInitialValue);
 
     // Set the selection to cover the second and third row
     await select({
@@ -157,8 +157,12 @@ describe('BlocksToolbar', () => {
 
     // The dropdown should show only one option selected which is the block content in the second row
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-    expect(within(blocksDropdown).getByText(/text/i)).toBeInTheDocument();
-    expect(within(blocksDropdown).queryByText(/heading/i)).not.toBeInTheDocument();
+    await user.click(blocksDropdown);
+    expect(screen.getByRole('option', { name: /text/i })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('option', { name: /heading 1/i })).toHaveAttribute(
+      'aria-selected',
+      'false'
+    );
   });
 
   it('toggles the modifiers on a selection', async () => {
@@ -527,7 +531,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('only shows one option selected in the dropdown when mixed content is selected', async () => {
-    setup(mixedInitialValue);
+    const { user } = setup(mixedInitialValue);
 
     // Set the selection to cover the first and second
     await select({
@@ -537,7 +541,12 @@ describe('BlocksToolbar', () => {
 
     // The dropdown should show only one option selected which is the block content in the first row
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-    expect(within(blocksDropdown).getByText(/heading 1/i)).toBeInTheDocument();
+    await user.click(blocksDropdown);
+    expect(screen.getByRole('option', { name: /heading 1/i })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(screen.getByRole('option', { name: /text/i })).toHaveAttribute('aria-selected', 'false');
   });
 
   it('splits the parent list when converting a list item to another type', async () => {
@@ -830,7 +839,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('should disable the modifiers buttons when the selection is inside an image', async () => {
-    setup(imageInitialValue);
+    const { user } = setup(imageInitialValue);
 
     await select({
       anchor: { path: [0, 0], offset: 0 },
@@ -839,7 +848,8 @@ describe('BlocksToolbar', () => {
 
     // The dropdown should show only one option selected which is the image
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
-    expect(within(blocksDropdown).getByText(/image/i)).toBeInTheDocument();
+    await user.click(blocksDropdown);
+    expect(screen.getByRole('option', { name: /image/i })).toHaveAttribute('aria-selected', 'true');
 
     const linkButton = screen.getByLabelText(/link/i);
     expect(linkButton).toBeDisabled();

@@ -68,7 +68,7 @@
     "graphql-scalars": "1.22.2",
     "koa-bodyparser": "4.4.1",
     "koa-compose": "^4.1.0",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "nexus": "1.3.0",
     "pluralize": "8.0.0"
   },
