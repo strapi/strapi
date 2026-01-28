@@ -13,6 +13,8 @@ const ALLOWED_SORT_STRINGS = [
   'createdAt:ASC',
   'name:ASC',
   'name:DESC',
+  'size:DESC',
+  'size:ASC',
   'updatedAt:DESC',
   'updatedAt:ASC',
 ];

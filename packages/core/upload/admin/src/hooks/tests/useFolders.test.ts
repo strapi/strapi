@@ -3,6 +3,8 @@ import { rest } from 'msw';
 
 import { useFolders } from '../useFolders';
 
+import type { Query } from '../../../../shared/contracts/files';
+
 describe('useFolders', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -129,6 +131,63 @@ describe('useFolders', () => {
     await screen.findByText('notification.error');
 
     console.error = originalConsoleError;
+    server.restoreHandlers();
+  });
+
+  test('falls back to name:ASC when sort is size:DESC', async () => {
+    let capturedSort: string | null = null;
+
+    server.use(
+      rest.get('/upload/folders', (req, res, ctx) => {
+        capturedSort = req.url.searchParams.get('sort');
+        return res(ctx.json({ data: [] }));
+      })
+    );
+
+    const { result } = renderHook(() => useFolders({ query: { sort: 'size:DESC' } as Query }));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(capturedSort).toBe('name:ASC');
+
+    server.restoreHandlers();
+  });
+
+  test('falls back to name:ASC when sort is size:ASC', async () => {
+    let capturedSort: string | null = null;
+
+    server.use(
+      rest.get('/upload/folders', (req, res, ctx) => {
+        capturedSort = req.url.searchParams.get('sort');
+        return res(ctx.json({ data: [] }));
+      })
+    );
+
+    const { result } = renderHook(() => useFolders({ query: { sort: 'size:ASC' } as Query }));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(capturedSort).toBe('name:ASC');
+
+    server.restoreHandlers();
+  });
+
+  test('passes through other sort values unchanged', async () => {
+    let capturedSort: string | null = null;
+
+    server.use(
+      rest.get('/upload/folders', (req, res, ctx) => {
+        capturedSort = req.url.searchParams.get('sort');
+        return res(ctx.json({ data: [] }));
+      })
+    );
+
+    const { result } = renderHook(() => useFolders({ query: { sort: 'createdAt:DESC' } }));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(capturedSort).toBe('createdAt:DESC');
+
     server.restoreHandlers();
   });
 });
