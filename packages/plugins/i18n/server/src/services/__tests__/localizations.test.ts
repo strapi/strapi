@@ -115,7 +115,7 @@ describe('localizations service', () => {
       expect(update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: {},
-          where: { documentId: 'Doc1', locale: { $eq: 'fr' }, publishedAt: null },
+          where: { id: 1 },
         })
       );
     });
