@@ -401,8 +401,8 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
       return false;
     }
 
-    // Disabled if the anchor and focus are not in the same block
-    return anchorNodeEntry[0] !== focusNodeEntry[0];
+    // Allow multi-block selection for lists
+    return false;
   };
 
   const toggleList = (format: Block<'list'>['format']) => {
