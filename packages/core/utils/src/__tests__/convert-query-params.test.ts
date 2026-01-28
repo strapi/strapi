@@ -19,6 +19,7 @@ const models = {
         type: 'string',
       },
       one_to_one: { type: 'relation', relation: 'oneToOne', target: 'api::dog.dog' },
+      image: { type: 'media', multiple: false },
       cpa: { type: 'component', component: 'default.cpa' },
       cpb: { type: 'component', component: 'default.cpb' },
       dz: { type: 'dynamiczone', components: ['default.cpa', 'default.cpb'] },
@@ -201,6 +202,19 @@ describe('convert-query-params', () => {
 
         expect(newPopulate).toStrictEqual({ [key]: { count: true } });
       });
+    });
+
+    test('bracket notation populate[image]=* should work', () => {
+      const populate = {
+        image: { '*': '' },
+      };
+
+      const newPopulate = transformer.private_convertPopulateQueryParams(
+        populate,
+        models['api::dog.dog']
+      );
+
+      expect(newPopulate).toStrictEqual({ image: true });
     });
   });
 
