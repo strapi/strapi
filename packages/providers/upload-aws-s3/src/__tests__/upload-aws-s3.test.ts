@@ -39,6 +39,7 @@ describe('AWS-S3 provider', () => {
       const file: File = {
         name: 'test',
         size: 100,
+        sizeInBytes: 100 * 1024,
         url: '',
         path: 'tmp',
         hash: 'test',
@@ -66,6 +67,7 @@ describe('AWS-S3 provider', () => {
       const file: File = {
         name: 'test',
         size: 100,
+        sizeInBytes: 100 * 1024,
         url: '',
         path: 'tmp',
         hash: 'test',
@@ -95,6 +97,44 @@ describe('AWS-S3 provider', () => {
       const file: File = {
         name: 'test',
         size: 100,
+        sizeInBytes: 100 * 1024,
+        url: '',
+        path: 'tmp/test',
+        hash: 'test',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: Buffer.from(''),
+      };
+
+      await providerInstance.upload(file);
+
+      expect(uploadMock.done).toBeCalled();
+      expect(file.url).toBeDefined();
+      expect(file.url).toEqual('https://cdn.test/tmp/test/test.json');
+    });
+
+    test('Should use baseUrl even if location lacks protocol', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
+          Location: 'otherdomain.com/different/path/file.json',
+          $metadata: {},
+        })
+      );
+
+      const providerInstance = awsProvider.init({
+        baseUrl: 'https://cdn.test',
+        s3Options: {
+          region: 'test',
+          params: {
+            Bucket: 'test',
+          },
+        },
+      });
+
+      const file: File = {
+        name: 'test',
+        size: 100,
+        sizeInBytes: 100 * 1024,
         url: '',
         path: 'tmp/test',
         hash: 'test',
@@ -124,6 +164,7 @@ describe('AWS-S3 provider', () => {
       const file: File = {
         name: 'test',
         size: 100,
+        sizeInBytes: 100 * 1024,
         url: '',
         path: 'tmp/test',
         hash: 'test',
