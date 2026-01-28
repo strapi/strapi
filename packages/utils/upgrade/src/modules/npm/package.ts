@@ -64,24 +64,47 @@ export class Package implements PackageInterface {
     );
   }
 
+  private async getYarnMajorVersion(): Promise<number> {
+    try {
+      const { stdout } = await execa('yarn', ['--version'], { timeout: 5_000 });
+      const version = stdout.trim();
+      return parseInt(version.split('.')[0], 10);
+    } catch {
+      // Default to Yarn Berry (v2+) if version check fails
+      return 2;
+    }
+  }
+
   private async getRegistryFromPackageManager(): Promise<string | undefined> {
     try {
       const packageManagerName = await packageManager.getPreferred(this.cwd);
       if (!packageManagerName) return undefined;
 
-      const registryCommands = {
-        yarn: ['config', 'get', 'npmRegistryServer'],
-        npm: ['config', 'get', 'registry'],
-      } as const;
+      let command: readonly string[];
 
-      const command = registryCommands[packageManagerName as keyof typeof registryCommands];
-      if (!command) {
+      if (packageManagerName === 'yarn') {
+        const yarnMajorVersion = await this.getYarnMajorVersion();
+        // Yarn Classic (v1) uses 'registry', Yarn Berry (v2+) uses 'npmRegistryServer'
+        command =
+          yarnMajorVersion >= 2
+            ? ['config', 'get', 'npmRegistryServer']
+            : ['config', 'get', 'registry'];
+      } else if (packageManagerName === 'npm') {
+        command = ['config', 'get', 'registry'];
+      } else {
         this.logger.warn(`Unsupported package manager: ${packageManagerName}`);
         return undefined;
       }
 
-      const { stdout } = await execa(packageManagerName, command, { timeout: 10_000 });
-      return stdout.trim() || undefined;
+      const { stdout } = await execa(packageManagerName, [...command], { timeout: 10_000 });
+      const registry = stdout.trim();
+
+      // Yarn Classic (v1) may return literal "undefined" for unset config values
+      if (!registry || registry === 'undefined') {
+        return undefined;
+      }
+
+      return registry;
     } catch (error) {
       this.logger.warn('Failed to determine registry URL from package manager');
       return undefined;
