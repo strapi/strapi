@@ -109,7 +109,17 @@ export const maybeWithDefault = (defaultValue?: unknown) => {
  */
 export const maybeWithMinMax = (min?: number, max?: number) => {
   return <R extends z.ZodString | z.ZodEmail | z.ZodNumber | z.ZodArray<z.ZodAny>>(schema: R) => {
-    return min !== undefined && max !== undefined ? schema.min(min).max(max) : schema;
+    let result = schema;
+
+    if (min !== undefined) {
+      result = result.min(min) as R;
+    }
+
+    if (max !== undefined) {
+      result = result.max(max) as R;
+    }
+
+    return result;
   };
 };
 
