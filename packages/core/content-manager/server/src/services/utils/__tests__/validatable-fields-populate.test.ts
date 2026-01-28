@@ -116,6 +116,39 @@ describe('getPopulateForValidation', () => {
       expect(result).toEqual({}); // No required fields, so no populate
     });
 
+    test('with component model containing private required fields', () => {
+      fakeModels.componentWithPrivateRequiredFields = {
+        modelName: 'Fake component with private required fields',
+        attributes: {
+          componentAttrName: {
+            type: 'component',
+            component: 'componentWithPrivateFields',
+          },
+        },
+      };
+
+      fakeModels.componentWithPrivateFields = {
+        modelName: 'Fake component with private fields',
+        attributes: {
+          privateRequiredField: { type: 'string', required: true, private: true },
+          publicRequiredField: { type: 'string', required: true },
+          privateOptionalField: { type: 'string', required: false, private: true },
+        },
+      };
+
+      const uid = 'componentWithPrivateRequiredFields';
+
+      const result = getPopulateForValidation(uid as any);
+
+      expect(result).toEqual({
+        populate: {
+          componentAttrName: {
+            fields: ['publicRequiredField'],
+          },
+        },
+      });
+    });
+
     test('with nested components', () => {
       fakeModels.nestedComponent = {
         modelName: 'Fake nested component model',
