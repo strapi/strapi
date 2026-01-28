@@ -18,6 +18,7 @@ import type { Knex } from 'knex';
 import type { Migration } from '../common';
 import type { Database } from '../..';
 import type { Meta } from '../../metadata';
+import { transformLogMessage } from '../logger';
 
 interface Params {
   joinColumn: string;
@@ -26,6 +27,7 @@ interface Params {
   joinTableName: string;
 }
 
+const migrationScriptId = '5.0.0-02-created-document-id';
 const QUERIES = {
   async postgres(knex: Knex, params: Params) {
     const res = await knex.raw(
@@ -35,7 +37,7 @@ const QUERIES = {
     LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
     WHERE :tableName:.document_id IS NULL
     GROUP BY :tableName:.id, :joinTableName:.:joinColumn:
-    LIMIT 1;
+    LIMIT 100;
   `,
       params
     );
@@ -50,7 +52,7 @@ const QUERIES = {
     LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
     WHERE :tableName:.document_id IS NULL
     GROUP BY :tableName:.id, :joinTableName:.:joinColumn:
-    LIMIT 1;
+    LIMIT 100;
   `,
       params
     );
@@ -65,7 +67,7 @@ const QUERIES = {
     LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
     WHERE :tableName:.document_id IS NULL
     GROUP BY :joinTableName:.:joinColumn:
-    LIMIT 1;
+    LIMIT 100;
     `,
       params
     );
@@ -95,12 +97,18 @@ const getNextIdsToCreateDocumentId = async (
   });
 
   if (res.length > 0) {
-    const row = res[0];
-    const otherIds = row.other_ids
-      ? row.other_ids.split(',').map((v: string) => parseInt(v, 10))
-      : [];
+    const allIds: number[] = [];
+    
+    // Process all rows returned by the query
+    for (const row of res) {
+      const otherIds = row.other_ids
+        ? row.other_ids.split(',').map((v: string) => parseInt(v, 10))
+        : [];
+      
+      allIds.push(row.id, ...otherIds);
+    }
 
-    return [row.id, ...otherIds];
+    return allIds;
   }
 
   return [];
@@ -113,6 +121,8 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
   const inverseJoinColumn = snakeCase(`inv_${singularName}_id`);
   let ids: number[];
 
+  let totalCount = 0;
+
   do {
     ids = await getNextIdsToCreateDocumentId(db, knex, {
       joinColumn,
@@ -122,25 +132,51 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
     });
 
     if (ids.length > 0) {
-      await knex(meta.tableName).update({ document_id: createId() }).whereIn('id', ids);
+      totalCount += ids.length;
+      // Generate a unique document ID for all related records
+      const documentId = createId();
+
+      db.logger.info(transformLogMessage('info', `${migrationScriptId} - Updating document_id for ${ids.length} records in ${meta.tableName} (total: ${totalCount})`));
+      
+      // Apply the same document ID to all related records to maintain the localization relationship
+      await knex(meta.tableName).update({ document_id: documentId }).whereIn('id', ids);
     }
   } while (ids.length > 0);
 };
 
 // Migrate document ids for tables that don't have localizations
 const migrationDocumentIds = async (db: Database, knex: Knex, meta: Meta) => {
-  let updatedRows: number;
-
+  let idsToUpdate: { id: number }[];
+  let totalCount = 0;
   do {
-    updatedRows = await knex(meta.tableName)
-      .update({ document_id: createId() })
-      .whereIn(
-        'id',
-        knex(meta.tableName)
-          .select('id')
-          .from(knex(meta.tableName).select('id').whereNull('document_id').limit(1).as('sub_query'))
-      );
-  } while (updatedRows > 0);
+    idsToUpdate = await knex(meta.tableName)
+      .select('id')
+      .whereNull('document_id')
+      .limit(100);
+      
+    if (idsToUpdate.length > 0) {
+      totalCount += idsToUpdate.length;
+      // Process each record individually to ensure unique document IDs
+      const updates = idsToUpdate.map(({ id }) => ({
+        id,
+        document_id: createId()
+      }));
+      
+      await knex.transaction(async (trx) => {
+        const chunkedUpdates = [];
+        for (const update of updates) {
+          chunkedUpdates.push(
+            trx(meta.tableName)
+              .where('id', update.id)
+              .update({ document_id: update.document_id })
+          );
+        }
+        await Promise.all(chunkedUpdates);
+      });
+
+      db.logger.info(transformLogMessage('info', `${migrationScriptId} - Updating document_id for ${idsToUpdate.length} records in table ${meta.tableName} (total: ${totalCount})`));
+    }
+  } while (idsToUpdate.length > 0);
 };
 
 const createDocumentIdColumn = async (knex: Knex, tableName: string) => {
@@ -155,8 +191,9 @@ const hasLocalizationsJoinTable = async (knex: Knex, tableName: string) => {
 };
 
 export const createdDocumentId: Migration = {
-  name: '5.0.0-02-created-document-id',
+  name: migrationScriptId,
   async up(knex, db) {
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} running`));
     // do sth
     for (const meta of db.metadata.values()) {
       const hasTable = await knex.schema.hasTable(meta.tableName);
@@ -173,6 +210,8 @@ export const createdDocumentId: Migration = {
           continue;
         }
 
+        db.logger.info(transformLogMessage('info', `${migrationScriptId} - Adding document_id column to ${meta.tableName}`));
+
         await createDocumentIdColumn(knex, meta.tableName);
 
         if (await hasLocalizationsJoinTable(knex, meta.tableName)) {
@@ -182,6 +221,7 @@ export const createdDocumentId: Migration = {
         }
       }
     }
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} completed`));
   },
   async down() {
     throw new Error('not implemented');
