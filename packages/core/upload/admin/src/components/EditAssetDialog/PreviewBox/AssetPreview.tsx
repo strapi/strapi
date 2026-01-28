@@ -20,11 +20,10 @@ const CardAsset = styled(Flex)`
   );
 `;
 
-interface AssetPreviewProps {
+interface AssetPreviewProps extends React.HTMLAttributes<HTMLElement> {
   mime: string;
   name: string;
   url: string;
-  onLoad?: () => void;
 }
 
 export const AssetPreview = React.forwardRef<
