@@ -271,6 +271,7 @@ const useDoc = () => {
     collectionType,
     model: slug,
     id: returnId,
+    origin,
     ...document,
   };
 };
