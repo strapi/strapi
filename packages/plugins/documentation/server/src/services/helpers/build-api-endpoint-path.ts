@@ -62,7 +62,7 @@ const getPathParams = (routePath: string): OpenAPIV3.ParameterObject[] => {
       description: '',
       deprecated: false,
       required: true,
-      schema: { type: 'number' },
+      schema: { type: 'string' },
     });
 
     return acc;
