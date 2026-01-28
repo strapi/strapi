@@ -95,16 +95,16 @@ export default function createComponentBuilder() {
 
       const component = this.components.get(uid);
 
-      const [, nameUID] = uid.split('.');
-
       const newCategory = strings.nameToSlug(infos.category);
-      const newUID = `${newCategory}.${nameUID}`;
+      const newDisplayName = strings.nameToSlug(infos.displayName);
+      const newUID = `${newCategory}.${newDisplayName}`;
 
       if (newUID !== uid && this.components.has(newUID)) {
         throw new errors.ApplicationError('component.edit.alreadyExists');
       }
 
       const newDir = path.join(strapi.dirs.app.components, newCategory);
+      const newFilename = `${newDisplayName}.json`;
 
       const oldAttributes = component.schema.attributes;
 
@@ -115,6 +115,7 @@ export default function createComponentBuilder() {
       component
         .setUID(newUID)
         .setDir(newDir)
+        .setFilename(newFilename)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
