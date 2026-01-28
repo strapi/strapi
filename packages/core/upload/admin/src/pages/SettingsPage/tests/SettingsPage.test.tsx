@@ -64,6 +64,7 @@ describe('SettingsPage', () => {
 
     await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
+    // Check that AI metadata section is NOT visible
     expect(
       queryByRole('heading', {
         name: 'Generate AI captions and alt texts automatically on upload!',

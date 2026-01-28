@@ -1,0 +1,25 @@
+{
+  "collectionName": "components_shared_text_blocks",
+  "info": { "displayName": "text-block", "description": "Text content block" },
+  "attributes": {
+    "heading": { "type": "string", "required": true },
+    "body": { "type": "richtext" },
+    "author": { "type": "string" },
+    "publishedDate": { "type": "date" },
+    "relatedBasic": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::basic.basic"
+    },
+    "relatedBasicDp": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::basic-dp.basic-dp"
+    },
+    "relatedRelationDp": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-dp.relation-dp"
+    }
+  }
+}
