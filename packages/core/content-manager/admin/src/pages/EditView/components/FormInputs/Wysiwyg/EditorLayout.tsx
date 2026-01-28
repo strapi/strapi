@@ -63,6 +63,7 @@ const EditorLayout = ({
   return (
     <Flex
       borderColor={error ? 'danger600' : 'neutral200'}
+      position="relative"
       borderStyle="solid"
       borderWidth="1px"
       hasRadius
