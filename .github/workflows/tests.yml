@@ -173,7 +173,17 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run tests
-        run: yarn nx affected --target=test:unit --nx-ignore-cycles
+        run: yarn nx affected --target=test:unit --nx-ignore-cycles -- --coverage
+
+      - name: Upload coverage artifacts
+        if: matrix.node == 20 # Only upload from one node version to avoid conflicts
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-coverage-reports
+          path: |
+            coverage/
+            packages/*/coverage/
+          retention-days: 1
 
   unit_front:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.frontend == 'true'
@@ -197,7 +207,16 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run tests
-        run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
+        run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand --coverage
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: front-coverage-reports
+          path: |
+            coverage/
+            packages/**/coverage/
+          retention-days: 1
 
   e2e_ce:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
@@ -535,6 +554,48 @@ jobs:
           runEE: true
           jestOptions: '--shard=${{ matrix.shard }}'
 
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.head.repo.fork && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true') }}
+    needs: [conditions, unit_back, unit_front]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Download unit test coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-coverage-reports
+          path: ./
+        continue-on-error: true
+
+      - name: Download frontend test coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: front-coverage-reports
+          path: ./
+        continue-on-error: true
+
+      - name: List coverage files (debug)
+        run: find . -name "lcov.info" -type f
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST_URL }}
+
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: SonarSource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        continue-on-error: true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST_URL }}
+
   test_result:
     if: ${{ always() }}
     runs-on: ubuntu-latest
@@ -557,6 +618,7 @@ jobs:
         api_ee_pg,
         api_ee_mysql,
         api_ee_sqlite,
+        sonarqube,
       ]
     steps:
       - run: exit 1
