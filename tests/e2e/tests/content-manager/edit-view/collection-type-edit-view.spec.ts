@@ -265,8 +265,8 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
       await expect(page.getByText('Modified')).not.toBeVisible();
 
-      // Press Ctrl + Enter to publish the document
-      await page.keyboard.press('Control+Enter');
+      // Press Ctrl + Shift + Enter to publish the document
+      await page.keyboard.press('Control+Shift+Enter');
       await findAndClose(page, 'Published Document');
 
       /**
