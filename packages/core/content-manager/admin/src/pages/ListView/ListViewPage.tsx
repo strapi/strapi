@@ -153,7 +153,7 @@ const ListViewPage = () => {
    */
   const tableHeaders = React.useMemo(() => {
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
-      displayedHeaders,
+      displayedHeaders: list.layout,
       layout: list,
     });
 
@@ -195,14 +195,7 @@ const ListViewPage = () => {
     }
 
     return formattedHeaders;
-  }, [
-    displayedHeaders,
-    formatMessage,
-    list,
-    runHookWaterfall,
-    schema?.options?.draftAndPublish,
-    model,
-  ]);
+  }, [formatMessage, list, runHookWaterfall, schema?.options?.draftAndPublish, model]);
 
   if (isLoading) {
     return <Page.Loading />;
