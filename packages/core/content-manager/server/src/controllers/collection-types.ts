@@ -212,7 +212,7 @@ export default {
         model,
         // @ts-expect-error TODO: fix
         { documentId: id, locale, publishedAt: null },
-        { availableLocales: true, availableStatus: false }
+        { availableLocales: false, availableStatus: false }
       );
 
       ctx.body = { data: {}, meta };
@@ -227,7 +227,10 @@ export default {
 
     // TODO: Count populated relations by permissions
     const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
+      availableLocales: false,
+      availableStatus: true,
+    });
   },
 
   async create(ctx: any) {
