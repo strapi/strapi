@@ -1,3 +1,5 @@
+import { StrapiApp } from '@strapi/admin/strapi-admin';
+
 import { PERMISSIONS } from './constants';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
@@ -6,7 +8,7 @@ import type { Plugin } from '@strapi/types';
 const admin: Plugin.Config.AdminInput = {
   // TODO typing app in strapi/types as every plugin needs it
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register(app: any) {
+  register(app: StrapiApp) {
     // Create the email settings section
     app.createSettingSection(
       {

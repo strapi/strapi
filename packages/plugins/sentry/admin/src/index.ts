@@ -1,3 +1,5 @@
+import { StrapiApp } from '@strapi/strapi/admin';
+
 import pluginPkg from '../../package.json';
 
 import { pluginId } from './pluginId';
@@ -7,7 +9,7 @@ const name = pluginPkg.strapi.name;
 
 // eslint-disable-next-line import/no-default-export
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     app.registerPlugin({
       id: pluginId,
       name,

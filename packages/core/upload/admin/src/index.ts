@@ -56,9 +56,10 @@ const admin: Plugin.Config.AdminInput = {
         id: getTrad('plugin.name'),
         defaultMessage: 'Media Library',
       },
-      async Component() {
-        const { ProtectedSettingsPage } = await import('./pages/SettingsPage/SettingsPage');
-        return { default: ProtectedSettingsPage };
+      Component() {
+        return import('./pages/SettingsPage/SettingsPage').then((mod) => ({
+          default: mod.ProtectedSettingsPage,
+        }));
       },
       permissions: PERMISSIONS.settings,
     });

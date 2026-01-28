@@ -119,15 +119,16 @@ const admin: Plugin.Config.AdminInput = {
     ) {
       app.addSettingsLink('global', {
         id: pluginId,
-        to: '/plugins/purchase-content-releases',
+        to: 'purchase-content-releases',
         intlLabel: {
           id: `${pluginId}.plugin.name`,
           defaultMessage: 'Releases',
         },
         permissions: [],
-        async Component() {
-          const { PurchaseContentReleases } = await import('./pages/PurchaseContentReleases');
-          return { default: PurchaseContentReleases };
+        Component() {
+          return import('./pages/PurchaseContentReleases').then((mod) => ({
+            default: mod.PurchaseContentReleases,
+          }));
         },
         licenseOnly: true,
       });

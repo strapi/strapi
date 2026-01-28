@@ -8,7 +8,7 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
-import type { WidgetArgs } from '@strapi/admin/strapi-admin';
+import type { StrapiApp, WidgetArgs } from '@strapi/admin/strapi-admin';
 
 // NOTE: we have to preload it to ensure chunks will have it available as global
 import 'prismjs';
@@ -106,7 +106,7 @@ export default {
       return [lastEditedWidget, lastPublishedWidget, ...widgets, entriesWidget];
     });
   },
-  bootstrap(app: any) {
+  bootstrap(app: StrapiApp) {
     if (typeof historyAdmin.bootstrap === 'function') {
       historyAdmin.bootstrap(app);
     }
