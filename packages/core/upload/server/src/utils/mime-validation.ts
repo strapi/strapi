@@ -1,4 +1,6 @@
 import { readFile } from 'node:fs/promises';
+import { extname } from 'node:path';
+import { lookup } from 'mime-types';
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
@@ -15,6 +17,7 @@ type UploadValidationError = {
 type ValidationResult = {
   isValid: boolean;
   error?: UploadValidationError;
+  detectedMime?: string;
 };
 
 type ErrorDetail = {
@@ -44,6 +47,14 @@ export async function detectMimeType(file: any): Promise<string | undefined> {
   } else if (file.buffer) {
     buffer = file.buffer.length > 4100 ? file.buffer.subarray(0, 4100) : file.buffer;
   } else {
+    // No file data available - check if file has any readable properties for debugging
+    const availableProps = Object.keys(file).filter(
+      (key) => key !== 'name' && key !== 'mimetype' && key !== 'type' && key !== 'size'
+    );
+    if (availableProps.length > 0) {
+      // Log available properties for debugging (but don't throw - let validation handle it)
+      return undefined;
+    }
     // No file data available
     return undefined;
   }
@@ -135,26 +146,122 @@ export async function validateFile(
     });
   }
 
-  const mimeToValidate = detectedMime || declaredMimeType;
+  // Additional security: Validate extension matches detected/declared type
+  // This prevents spoofing even when detection succeeds with wrong type
+  const fileExt = extname(fileName).toLowerCase();
+  const expectedMimeFromExt = fileExt ? lookup(fileExt) : null;
 
-  if (
-    !detectedMime &&
-    (declaredMimeType === 'application/octet-stream' || !declaredMimeType || mimeDetectionFailed)
-  ) {
+  // Security: Validate extension matches detected type when both are available
+  // This prevents spoofing (e.g., .exe file with text content detected as text/plain)
+  if (detectedMime && fileExt && expectedMimeFromExt && detectedMime !== expectedMimeFromExt) {
+    // Detection says one thing, extension says another - potential spoofing, reject
     if (allowedTypes?.length || deniedTypes?.length) {
       return {
         isValid: false,
         error: {
           code: 'MIME_TYPE_NOT_ALLOWED',
-          message: `Cannot verify file type for security reasons`,
+          message: `File extension does not match detected MIME type`,
           details: {
             fileName,
-            reason: 'Unable to detect MIME type from file content',
-            declaredType: declaredMimeType,
-            mimeDetectionFailed,
+            detectedType: detectedMime,
+            fileExtension: fileExt,
+            expectedMimeFromExtension: expectedMimeFromExt,
+            reason:
+              'MIME type mismatch between file content and extension - possible spoofing attempt',
+            hint: 'Ensure the file extension matches the actual file type.',
           },
         },
       };
+    }
+  }
+
+  const mimeToValidate = detectedMime || declaredMimeType;
+
+  // If detection failed, apply multi-layer validation before trusting declared type
+  if (!detectedMime) {
+    const isDeclaredTypeGeneric =
+      declaredMimeType === 'application/octet-stream' || !declaredMimeType;
+
+    // Multi-layer security: Only trust declared type if ALL of these are true:
+    // 1. Declared type is specific (not generic)
+    // 2. Declared type passes security checks
+    // 3. File extension matches declared type (prevents spoofing)
+    if (!isDeclaredTypeGeneric && declaredMimeType && (allowedTypes || deniedTypes)) {
+      const declaredTypeAllowed = isMimeTypeAllowed(declaredMimeType, config);
+
+      if (declaredTypeAllowed) {
+        // Validate that file extension matches declared MIME type
+        const fileExt = extname(fileName).toLowerCase();
+        const expectedMimeFromExt = fileExt ? lookup(fileExt) : null;
+
+        // Allow ONLY if extension matches declared type
+        // If extension exists but can't be mapped, that's suspicious - reject
+        // Only allow if there's no extension at all (edge case)
+        if (!fileExt || expectedMimeFromExt === declaredMimeType) {
+          strapi.log.warn('MIME type detection failed, trusting declared type after validation', {
+            fileName,
+            declaredType: declaredMimeType,
+            fileExtension: fileExt,
+            expectedMimeFromExtension: expectedMimeFromExt,
+            reason: mimeDetectionFailed
+              ? 'Detection threw error'
+              : 'file-type library returned undefined',
+          });
+          // Return valid but without detectedMime (will use declared type for storage)
+          return { isValid: true };
+        }
+        // Extension doesn't match declared type - potential spoofing attempt, reject
+        const hasPath = !!(file.path || file.filepath || file.tempFilePath);
+        const hasBuffer = !!file.buffer;
+
+        return {
+          isValid: false,
+          error: {
+            code: 'MIME_TYPE_NOT_ALLOWED',
+            message: `Cannot verify file type for security reasons`,
+            details: {
+              fileName,
+              reason: 'File extension does not match declared MIME type',
+              declaredType: declaredMimeType,
+              fileExtension: fileExt,
+              expectedMimeFromExtension: expectedMimeFromExt,
+              fileHasPath: hasPath,
+              fileHasBuffer: hasBuffer,
+              hint: 'This may indicate a file type spoofing attempt. Ensure the file extension matches the declared Content-Type.',
+            },
+          },
+        };
+      }
+    }
+
+    // Reject if detection failed AND (declared type is generic/missing OR extension mismatch)
+    // This is "fail secure" - if we can't verify with multiple layers, we reject
+    if (isDeclaredTypeGeneric || mimeDetectionFailed) {
+      if (allowedTypes?.length || deniedTypes?.length) {
+        // Check if file has accessible data for better error message
+        const hasPath = !!(file.path || file.filepath || file.tempFilePath);
+        const hasBuffer = !!file.buffer;
+
+        return {
+          isValid: false,
+          error: {
+            code: 'MIME_TYPE_NOT_ALLOWED',
+            message: `Cannot verify file type for security reasons`,
+            details: {
+              fileName,
+              reason: 'Unable to detect MIME type from file content',
+              declaredType: declaredMimeType,
+              mimeDetectionFailed,
+              fileHasPath: hasPath,
+              fileHasBuffer: hasBuffer,
+              hint:
+                !hasPath && !hasBuffer
+                  ? 'File object missing path or buffer. Ensure multipart parser provides file.filepath or file.buffer.'
+                  : 'file-type library could not identify file format from content. This may indicate an unsupported file type or corrupted file. If this is a legitimate file, ensure it has proper file signatures/magic bytes that file-type can recognize.',
+            },
+          },
+        };
+      }
     }
   }
 
@@ -180,7 +287,7 @@ export async function validateFile(
     };
   }
 
-  return { isValid: true };
+  return { isValid: true, detectedMime };
 }
 
 export async function validateFiles(files: any, strapi: Core.Strapi): Promise<ValidationResult[]> {
@@ -264,6 +371,10 @@ export async function enforceUploadSecurity(
   for (const [index, result] of validationResults.entries()) {
     if (result.isValid) {
       const file = filesArray[index];
+      // Enrich file with detected MIME type for use in storage
+      if (result.detectedMime) {
+        file.detectedMimeType = result.detectedMime;
+      }
       validFiles.push(file);
       validFileNames.push(file.originalFilename || file.name);
     } else if (result.error) {

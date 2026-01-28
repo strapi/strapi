@@ -185,10 +185,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     fileInfo: FileInfo,
     metas?: Metas
   ): Promise<UploadableFile> {
+    // Prefer detected MIME type from security validation over declared type
+    // Falls back to declared type, then to application/octet-stream
+    const mimeType = (file as any).detectedMimeType || file.mimetype || 'application/octet-stream';
+
     const currentFile = (await formatFileInfo(
       {
         filename: file.originalFilename ?? 'unamed',
-        type: file.mimetype ?? 'application/octet-stream',
+        type: mimeType,
         size: file.size,
       },
       fileInfo,

@@ -382,6 +382,32 @@ describe('mime-validation', () => {
       expect(result.errors).toHaveLength(0);
     });
 
+    it('should enrich valid files with detected MIME type', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['application/*'],
+      });
+      mockReadFile.mockResolvedValue(Buffer.from('fake docx'));
+      mockFileTypeFromBuffer.mockResolvedValue({
+        mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ext: 'docx',
+      });
+
+      const fileWithGenericMime = {
+        name: 'test.docx',
+        path: '/tmp/test.docx',
+        size: 100000,
+        type: 'application/octet-stream', // Generic MIME from client
+      };
+
+      const result = await enforceUploadSecurity([fileWithGenericMime], mockStrapi);
+
+      expect(result.validFiles).toHaveLength(1);
+      expect(result.validFiles[0].detectedMimeType).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      );
+      expect(result.errors).toHaveLength(0);
+    });
+
     it('should return errors for disallowed MIME type', async () => {
       mockStrapi.config.get.mockReturnValue({
         allowedTypes: ['application/pdf'],
@@ -422,6 +448,131 @@ describe('mime-validation', () => {
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].originalIndex).toBe(1);
       expect(result.errors[0].error.code).toBe('MIME_TYPE_NOT_ALLOWED');
+    });
+  });
+
+  describe('multi-layer validation when detection fails', () => {
+    it('should allow file when extension matches declared type', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['text/plain'],
+      });
+      mockReadFile.mockResolvedValue(Buffer.from('plain text content'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined); // Detection fails
+
+      const textFile = {
+        name: 'document.txt',
+        path: '/tmp/document.txt',
+        size: 100,
+        type: 'text/plain', // Specific type, matches extension
+      };
+
+      const result = await validateFile(textFile, { allowedTypes: ['text/plain'] }, mockStrapi);
+
+      expect(result.isValid).toBe(true);
+      expect(mockStrapi.log.warn).toHaveBeenCalledWith(
+        'MIME type detection failed, trusting declared type after validation',
+        expect.objectContaining({
+          fileName: 'document.txt',
+          declaredType: 'text/plain',
+          fileExtension: '.txt',
+        })
+      );
+    });
+
+    it('should reject file when extension does not match declared type', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['text/plain'],
+      });
+      mockReadFile.mockResolvedValue(Buffer.from('executable content'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined); // Detection fails
+
+      const spoofedFile = {
+        name: 'malware.exe',
+        path: '/tmp/malware.exe',
+        size: 100,
+        type: 'text/plain', // Claims to be text but extension is .exe
+      };
+
+      const result = await validateFile(spoofedFile, { allowedTypes: ['text/plain'] }, mockStrapi);
+
+      expect(result.isValid).toBe(false);
+      expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
+      expect(result.error?.details.reason).toBe('File extension does not match declared MIME type');
+      expect(result.error?.details.fileExtension).toBe('.exe');
+      expect(result.error?.details.declaredType).toBe('text/plain');
+    });
+
+    it('should allow file when extension cannot be determined but declared type is valid', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['application/json'],
+      });
+      mockReadFile.mockResolvedValue(Buffer.from('{"data": "test"}'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined); // Detection fails
+
+      const fileWithoutExt = {
+        name: 'datafile', // No extension
+        path: '/tmp/datafile',
+        size: 100,
+        type: 'application/json',
+      };
+
+      const result = await validateFile(
+        fileWithoutExt,
+        { allowedTypes: ['application/json'] },
+        mockStrapi
+      );
+
+      expect(result.isValid).toBe(true);
+    });
+
+    it('should reject file with generic declared type even if extension matches', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['text/plain'],
+      });
+      mockReadFile.mockResolvedValue(Buffer.from('text content'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined); // Detection fails
+
+      const fileWithGenericType = {
+        name: 'document.txt',
+        path: '/tmp/document.txt',
+        size: 100,
+        type: 'application/octet-stream', // Generic type
+      };
+
+      const result = await validateFile(
+        fileWithGenericType,
+        { allowedTypes: ['text/plain'] },
+        mockStrapi
+      );
+
+      expect(result.isValid).toBe(false);
+      expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
+      expect(result.error?.details.reason).toBe('Unable to detect MIME type from file content');
+    });
+
+    it('should reject file when declared type does not pass security checks', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['text/plain'],
+        deniedTypes: ['text/html'],
+      });
+      mockReadFile.mockResolvedValue(Buffer.from('html content'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined); // Detection fails
+
+      const htmlFile = {
+        name: 'page.html',
+        path: '/tmp/page.html',
+        size: 100,
+        type: 'text/html', // In deniedTypes
+      };
+
+      const result = await validateFile(
+        htmlFile,
+        { allowedTypes: ['text/plain'], deniedTypes: ['text/html'] },
+        mockStrapi
+      );
+
+      expect(result.isValid).toBe(false);
+      expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
     });
   });
 });
