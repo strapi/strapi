@@ -57,7 +57,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "nodemailer": "6.10.1"
   },
   "devDependencies": {

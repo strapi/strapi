@@ -1,14 +1,9 @@
-import { subject as asSubject, detectSubjectType } from '@casl/ability';
-import { permittedFieldsOf } from '@casl/ability/extra';
+import { subject as asSubject } from '@casl/ability';
 import {
   defaults,
   omit,
   isArray,
   isEmpty,
-  isNil,
-  flatMap,
-  some,
-  prop,
   uniq,
   intersection,
   pick,
@@ -19,7 +14,15 @@ import {
 
 import type { UID } from '@strapi/types';
 
-import { contentTypes, traverseEntity, sanitize, async, traverse } from '@strapi/utils';
+import {
+  contentTypes,
+  traverseEntity,
+  sanitize,
+  async,
+  traverse,
+  createModelCache,
+} from '@strapi/utils';
+import { createPermissionFieldsCache } from './permission-fields';
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
 const {
@@ -51,9 +54,12 @@ export default ({ action, ability, model }: any) => {
 
   const { removeDisallowedFields } = sanitize.visitors;
 
+  // Create request-scoped model cache to avoid redundant getModel() calls
+  const modelCache = createModelCache(strapi.getModel.bind(strapi));
+
   const ctx = {
     schema,
-    getModel: strapi.getModel.bind(strapi),
+    getModel: modelCache.getModel,
   };
 
   const createSanitizeQuery = (options = {} as any) => {
@@ -161,6 +167,8 @@ export default ({ action, ability, model }: any) => {
   };
 
   const wrapSanitize = (createSanitizeFunction: any) => {
+    const { getPermissionFields } = createPermissionFieldsCache(ability);
+
     // TODO
     // @ts-expect-error define the correct return type
     const wrappedSanitize = async (data: unknown, options = {} as any) => {
@@ -170,20 +178,15 @@ export default ({ action, ability, model }: any) => {
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
 
-      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
-        fieldsFrom: (rule) => rule.fields || [],
-      });
-
-      const hasAtLeastOneRegistered = some(
-        (fields) => !isNil(fields),
-        flatMap(prop('fields'), ability.rulesFor(actionOverride, detectSubjectType(subject)))
+      const { permittedFields, hasAtLeastOneRegistered, shouldIncludeAll } = getPermissionFields(
+        actionOverride,
+        subject
       );
-      const shouldIncludeAllFields = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
 
       const sanitizeOptions = {
         ...options,
         fields: {
-          shouldIncludeAll: shouldIncludeAllFields,
+          shouldIncludeAll,
           permitted: permittedFields,
           hasAtLeastOneRegistered,
         },

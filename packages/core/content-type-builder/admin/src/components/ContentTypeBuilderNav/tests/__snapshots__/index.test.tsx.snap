@@ -64,8 +64,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c43 {
   border-radius: 4px;
+  padding-block-end: 4px;
   padding-inline-start: 12px;
   padding-inline-end: 12px;
+  padding-block-start: 4px;
   width: 100%;
 }
 
@@ -166,7 +168,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c40 {
-  gap: 2px;
+  gap: 8px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
@@ -177,6 +179,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   align-items: center;
   justify-content: space-between;
   flex-direction: row;
+  display: flex;
+}
+
+.c52 {
+  gap: 2px;
+  align-items: stretch;
+  flex-direction: column;
   display: flex;
 }
 
@@ -498,7 +507,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   background-color: #f6f6f9;
 }
 
-.c52 .c41>div {
+.c53 .c41>div {
   padding-left: 36px;
 }
 
@@ -531,9 +540,22 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   }
 }
 
+@media (min-width: 1080px) {
+  .c43 {
+    padding-block-end: 0;
+    padding-block-start: 0;
+  }
+}
+
 @media (min-width: 768px) {
   .c46 {
     width: 100%;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c40 {
+    gap: 2px;
   }
 }
 
@@ -1077,12 +1099,12 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           </button>
                         </div>
                         <ul
-                          class="c40"
+                          class="c52"
                           id=":r9:"
                           style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
                         >
                           <li
-                            class="c52"
+                            class="c53"
                           >
                             <a
                               class="c41 c42"
@@ -1151,12 +1173,12 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           </button>
                         </div>
                         <ul
-                          class="c40"
+                          class="c52"
                           id=":ra:"
                           style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
                         >
                           <li
-                            class="c52"
+                            class="c53"
                           >
                             <a
                               class="c41 c42"
@@ -1186,7 +1208,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                             </a>
                           </li>
                           <li
-                            class="c52"
+                            class="c53"
                           >
                             <a
                               class="c41 c42"
