@@ -5,6 +5,7 @@ import {
   useStrapiApp,
   DescriptionComponentRenderer,
   useIsDesktop,
+  createContext,
 } from '@strapi/admin/strapi-admin';
 import { Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -32,13 +33,7 @@ interface PanelDescription {
  * Panels
  * -----------------------------------------------------------------------------------------------*/
 
-const Panels = ({
-  excludeActionsPanel = false,
-  onContentChange,
-}: {
-  excludeActionsPanel?: boolean;
-  onContentChange?: (hasContent: boolean) => void;
-} = {}) => {
+const Panels = ({ withActions = true }: { withActions?: boolean }) => {
   const isCloning = useMatch(CLONE_PATH) !== null;
   const [
     {
@@ -49,6 +44,16 @@ const Panels = ({
   });
   const { model, id, document, meta, collectionType } = useDoc();
   const plugins = useStrapiApp('Panels', (state) => state.plugins);
+  // Optional context consumer
+  const setVisiblePanels = usePanelsContext('Panels', (s) => s.setVisiblePanels, false);
+  const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels, false);
+
+  const allPanels = (
+    plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+  ).getEditViewSidePanels();
+  const filteredPanels = allPanels.filter((panel) => (panel as PanelComponent).type !== 'actions');
+  const panelsToDisplay = withActions ? allPanels : filteredPanels;
+
   const props = {
     activeTab: status,
     model,
@@ -58,45 +63,28 @@ const Panels = ({
     collectionType,
   } satisfies PanelComponentProps;
 
-  const allPanels = (
-    plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-  ).getEditViewSidePanels();
-
-  const filteredPanels = excludeActionsPanel
-    ? allPanels.filter((panel) => (panel as PanelComponent).type !== 'actions')
-    : allPanels;
-
   return (
-    <DescriptionComponentRenderer props={props} descriptions={filteredPanels}>
-      {(panels) => <PanelsItems panels={panels} onHasContentChange={onContentChange} />}
-    </DescriptionComponentRenderer>
-  );
-};
+    <Flex direction="column" alignItems="stretch" gap={2}>
+      <DescriptionComponentRenderer props={props} descriptions={panelsToDisplay}>
+        {(panels) => {
+          /**
+           * Since the context is optional, we first check if it is available
+           * by confirming setVisiblePanels is not undefined.
+           * Then we check if the panels have changed by comparing the length of the visiblePanels array.
+           * If the panels have changed, we update the context. Without this comparison, the context would be updated
+           * every time the panels are rendered, which would cause (infinite) re-renders.
+           */
+          if (setVisiblePanels && visiblePanels?.length !== panels.length) {
+            setVisiblePanels(panels);
+          }
 
-const PanelsItems = ({
-  panels,
-  onHasContentChange,
-}: {
-  panels: (PanelDescription & { id: string })[];
-  onHasContentChange?: (hasContent: boolean) => void;
-}) => {
-  const hasContent = panels.length > 0;
-
-  React.useEffect(() => {
-    onHasContentChange?.(hasContent);
-  }, [hasContent, onHasContentChange]);
-
-  if (!hasContent) {
-    return null;
-  }
-
-  return (
-    <Flex direction="column" alignItems="stretch" gap={{ initial: 4, large: 2 }}>
-      {panels.map(({ content, id, ...description }) => (
-        <Panel key={id} {...description}>
-          {content}
-        </Panel>
-      ))}
+          return panels.map(({ content, id, ...description }) => (
+            <Panel key={id} {...description}>
+              {content}
+            </Panel>
+          ));
+        }}
+      </DescriptionComponentRenderer>
     </Flex>
   );
 };
@@ -163,6 +151,7 @@ interface PanelProps extends Pick<PanelDescription, 'title'> {
 
 const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
   const isDesktop = useIsDesktop();
+
   return (
     <Flex
       ref={ref}
@@ -186,5 +175,26 @@ const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
   );
 });
 
-export { Panels, ActionsPanel, ActionsPanelContent };
+/* -------------------------------------------------------------------------------------------------
+ * PanelsContext
+ * -----------------------------------------------------------------------------------------------*/
+
+const [PanelsProviderImpl, usePanelsContext] = createContext<{
+  visiblePanels: (PanelDescription & { id: string })[];
+  setVisiblePanels: React.Dispatch<React.SetStateAction<(PanelDescription & { id: string })[]>>;
+}>('PanelsContext');
+
+const PanelsProvider = ({ children }: React.PropsWithChildren) => {
+  const [visiblePanels, setVisiblePanels] = React.useState<(PanelDescription & { id: string })[]>(
+    []
+  );
+
+  return (
+    <PanelsProviderImpl visiblePanels={visiblePanels} setVisiblePanels={setVisiblePanels}>
+      {children}
+    </PanelsProviderImpl>
+  );
+};
+
+export { Panels, ActionsPanel, ActionsPanelContent, PanelsProvider, usePanelsContext };
 export type { PanelDescription };
