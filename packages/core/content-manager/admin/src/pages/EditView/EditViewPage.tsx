@@ -15,7 +15,6 @@ import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { ActionsDrawer } from '../../components/ActionsDrawer';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -26,10 +25,11 @@ import { useOnce } from '../../hooks/useOnce';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
+import { ActionsDrawer } from './components/ActionsDrawer';
 import { Blocker } from './components/Blocker';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
-import { ActionsPanelContent, Panels } from './components/Panels';
+import { ActionsPanelContent, Panels, PanelsProvider, usePanelsContext } from './components/Panels';
 import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
@@ -49,8 +49,7 @@ const EditViewPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDesktop = useIsDesktop();
-
-  const [hasPanelsContent, setHasPanelsContent] = React.useState(false);
+  const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
 
   const doc = useDoc();
   const {
@@ -228,12 +227,8 @@ const EditViewPage = () => {
             </Tabs.Root>
             {!isDesktop && (
               <>
-                <ActionsDrawer
-                  headerContent={<ActionsPanelContent />}
-                  hasContent={hasPanelsContent}
-                  hasSideNav
-                >
-                  <Panels excludeActionsPanel onContentChange={setHasPanelsContent} />
+                <ActionsDrawer hasSideNav>
+                  <Panels withActions={false} />
                 </ActionsDrawer>
                 {/* Adding a fixed height to the bottom of the page to prevent 
                 the actions drawer from covering the content
@@ -314,7 +309,9 @@ const ProtectedEditViewPage = () => {
     <Page.Protect permissions={permissions}>
       {({ permissions }) => (
         <DocumentRBAC permissions={permissions}>
-          <EditViewPage />
+          <PanelsProvider>
+            <EditViewPage />
+          </PanelsProvider>
         </DocumentRBAC>
       )}
     </Page.Protect>

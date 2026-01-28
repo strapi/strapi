@@ -6,6 +6,9 @@ import { CaretDown, CaretUp } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+// eslint-disable-next-line import/namespace
+import { ActionsPanelContent, usePanelsContext } from './Panels';
+
 const DrawerContainer = styled(Portal)<{ $isOpen: boolean; $hasSideNav: boolean }>`
   position: fixed;
   left: 0;
@@ -69,30 +72,18 @@ const DrawerContentInner = styled(ScrollArea)<{ $isOpen: boolean }>`
 
 const ActionsDrawer = ({
   children,
-  headerContent,
   hasSideNav = false,
-  hasContent = true,
 }: {
   children?: React.ReactNode;
-  headerContent: React.ReactNode;
   hasSideNav?: boolean;
-  hasContent?: boolean;
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const { formatMessage } = useIntl();
   const toggleOpen = () => {
     setIsOpen((prev: boolean) => !prev);
   };
-
-  /**
-   * If the content changes and becomes empty and the drawer is open,
-   * we can close it because there's nothing to display anymore.
-   */
-  React.useEffect(() => {
-    if (!hasContent && isOpen) {
-      setIsOpen(false);
-    }
-  }, [hasContent, isOpen]);
+  const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
+  const hasContent = visiblePanels.length > 0;
 
   return (
     <>
@@ -117,7 +108,7 @@ const ActionsDrawer = ({
             borderColor="neutral150"
           >
             <Flex flex={1} gap={2} alignItems="center">
-              {headerContent}
+              <ActionsPanelContent />
             </Flex>
             {hasContent && children && (
               <ToggleButton
