@@ -63,19 +63,21 @@ export type TransferFilters = {
 /*
  * Progress
  */
-export type TransferProgress = {
-  [key in TransferStage]?: {
-    count: number;
-    bytes: number;
-    startTime: number;
-    endTime?: number;
-    aggregates?: {
-      [key: string]: {
-        count: number;
-        bytes: number;
-      };
+export type StageProgress = {
+  count: number;
+  bytes: number;
+  startTime: number;
+  endTime?: number;
+  aggregates?: {
+    [key: string]: {
+      count: number;
+      bytes: number;
     };
   };
+};
+
+export type TransferProgress = {
+  [key in TransferStage]?: StageProgress;
 };
 
 export interface ITransferResults<S extends ISourceProvider, D extends IDestinationProvider> {
