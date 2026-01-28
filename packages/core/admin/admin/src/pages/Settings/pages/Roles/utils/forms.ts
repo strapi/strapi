@@ -140,7 +140,7 @@ const createDefaultPropertiesForm = (
 };
 
 /**
- * Creates the default for for a content type
+ * Creates the default for a content type
  */
 const createDefaultCTForm = (
   { subjects, actions = [] }: ContentPermission,
