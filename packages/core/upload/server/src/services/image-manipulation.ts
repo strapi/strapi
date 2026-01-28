@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { join } from 'path';
+import { join, parse } from 'path';
 import sharp from 'sharp';
 import crypto from 'crypto';
 import { strings, file as fileUtils } from '@strapi/utils';
@@ -7,6 +7,8 @@ import { strings, file as fileUtils } from '@strapi/utils';
 import { getService } from '../utils';
 
 import type { UploadableFile } from '../types';
+
+type Breakpoints = Record<string, { breakpoint: number; format: keyof sharp.FormatEnum } | number>;
 
 type Dimensions = {
   width: number | null;
@@ -67,10 +69,11 @@ const resizeFileTo = async (
   }: {
     name: string;
     hash: string;
-  }
+  },
+  format: keyof sharp.FormatEnum | null = null
 ) => {
   const filePath = file.tmpWorkingDirectory ? join(file.tmpWorkingDirectory, hash) : hash;
-
+  const originalFormat = (await getMetadata(file)).format;
   let newInfo;
   if (!file.filepath) {
     const transform = sharp()
@@ -79,18 +82,24 @@ const resizeFileTo = async (
         newInfo = info;
       });
 
+    if (format && format !== originalFormat) {
+      transform.toFormat(format);
+    }
     await writeStreamToFile(file.getStream().pipe(transform), filePath);
   } else {
-    newInfo = await sharp(file.filepath).resize(options).toFile(filePath);
+    newInfo =
+      format && format !== originalFormat
+        ? await sharp(file.filepath).resize(options).toFormat(format).toFile(filePath)
+        : await sharp(file.filepath).resize(options).toFile(filePath);
   }
 
   const { width, height, size } = newInfo ?? {};
 
   const newFile: UploadableFile = {
-    name,
+    name: !format ? name : `${parse(name).name}.${format}`,
     hash,
-    ext: file.ext,
-    mime: file.mime,
+    ext: format ? `.${format}` : file.ext,
+    mime: format ? `image/${format}` : file.mime,
     filepath: filePath,
     path: file.path || null,
     getStream: () => fs.createReadStream(filePath),
@@ -186,11 +195,27 @@ const optimize = async (file: UploadableFile) => {
 const DEFAULT_BREAKPOINTS = {
   large: 1000,
   medium: 750,
-  small: 500,
-};
+  small: 500
+} satisfies Breakpoints;
 
 const getBreakpoints = () =>
-  strapi.config.get<Record<string, number>>('plugin::upload.breakpoints', DEFAULT_BREAKPOINTS);
+  strapi.config.get<Breakpoints>('plugin::upload.breakpoints', DEFAULT_BREAKPOINTS);
+
+const validatedBreakpoints = (breakpoints: Breakpoints, originalFormat?: keyof sharp.FormatEnum) => {
+  return Object.entries(breakpoints).reduce((acc, [key, value]) => {
+    if (typeof value === 'number') {
+      acc[key] = value;
+      return acc;
+    }
+    const breakpointFormat = typeof value === 'object' && value !== null && 'format' in value ? value.format : null;
+    if (!breakpointFormat) return acc;
+    if (breakpointFormat === null || !sharp.format[breakpointFormat]) return acc;
+    if (breakpointFormat !== originalFormat) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as Breakpoints);
+};
 
 const generateResponsiveFormats = async (file: UploadableFile) => {
   const { responsiveDimensions = false } = (await getService('upload').getSettings()) ?? {};
@@ -198,14 +223,27 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
   if (!responsiveDimensions) return [];
 
   const originalDimensions = await getDimensions(file);
-
-  const breakpoints = getBreakpoints();
+  const { format: originalFormat } = await getMetadata(file);
+  const breakpoints = validatedBreakpoints(getBreakpoints(), originalFormat);
   return Promise.all(
-    Object.keys(breakpoints).map((key) => {
-      const breakpoint = breakpoints[key];
-
+    Object.entries(breakpoints).map(([key, value]) => {
+      let breakpoint: number;
+      let format: keyof sharp.FormatEnum | null;
+      if (typeof value === 'number') {
+        breakpoint = value;
+        format = null;
+      } else if (typeof value === 'object') {
+        breakpoint = value.breakpoint;
+        format = value.format;
+      } else {
+        return undefined;
+      }
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        return generateBreakpoint(key, { file, breakpoint });
+        return generateBreakpoint(key, {
+          file,
+          breakpoint,
+          format,
+        });
       }
 
       return undefined;
@@ -215,7 +253,11 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
 
 const generateBreakpoint = async (
   key: string,
-  { file, breakpoint }: { file: UploadableFile; breakpoint: number }
+  {
+    file,
+    breakpoint,
+    format,
+  }: { file: UploadableFile; breakpoint: number; format: keyof sharp.FormatEnum | null }
 ) => {
   const newFile = await resizeFileTo(
     file,
@@ -227,7 +269,8 @@ const generateBreakpoint = async (
     {
       name: `${key}_${file.name}`,
       hash: `${key}_${file.hash}`,
-    }
+    },
+    format
   );
   return {
     key,
