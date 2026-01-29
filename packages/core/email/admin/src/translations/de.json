@@ -1,9 +1,11 @@
 {
   "link": "Link",
   "Settings.email.plugin.button.test-email": "Test-E-Mail senden",
-  "Settings.email.plugin.label.defaultFrom": "Standard Absenderadresse ",
+  "Settings.email.plugin.label.defaultFrom": "Standard Absenderadresse",
   "Settings.email.plugin.label.defaultReplyTo": "Standard Antwortadresse",
   "Settings.email.plugin.label.provider": "E-Mail-Anbieter",
+  "Settings.email.plugin.label.replyToName": "Standard Antwort-Name",
+  "Settings.email.plugin.label.senderName": "Standard Absendername",
   "Settings.email.plugin.label.testAddress": "Empfängeradresse",
   "Settings.email.plugin.notification.config.error": "E-Mail-Einstellungen konnte nicht abgerufen werden",
   "Settings.email.plugin.notification.data.loaded": "E-Mail-Einstellungen wurden geladen",

@@ -366,6 +366,115 @@ Close all connections gracefully (recommended when using connection pooling):
 emailProvider.close();
 ```
 
+## Email Address Utilities
+
+This package includes RFC-compliant utilities for parsing and formatting email addresses.
+
+### Import
+
+```js
+import {
+  parseEmailAddress,
+  formatEmailAddress,
+  parseMultipleEmailAddresses,
+  isValidEmail,
+  decodeRfc2047,
+  encodeRfc2047Base64,
+} from '@strapi/provider-email-nodemailer/utils';
+```
+
+### Parsing Email Addresses
+
+Parse email addresses in various RFC 5322 formats:
+
+```js
+// Simple email
+parseEmailAddress('test@example.com');
+// { name: null, email: 'test@example.com', original: '...' }
+
+// Name with angle brackets
+parseEmailAddress('John Doe <john@example.com>');
+// { name: 'John Doe', email: 'john@example.com', original: '...' }
+
+// Quoted name (RFC 5322)
+parseEmailAddress('"Doe, John" <john@example.com>');
+// { name: 'Doe, John', email: 'john@example.com', original: '...' }
+
+// RFC 2047 encoded name (non-ASCII characters)
+parseEmailAddress('=?UTF-8?B?TcO8bGxlcg==?= <mueller@example.com>');
+// { name: 'Müller', email: 'mueller@example.com', original: '...' }
+
+// Comment format (RFC 5322)
+parseEmailAddress('support@example.com (Support Team)');
+// { name: 'Support Team', email: 'support@example.com', original: '...' }
+```
+
+### Formatting Email Addresses
+
+Create properly formatted email address strings:
+
+```js
+// Simple format
+formatEmailAddress('John Doe', 'john@example.com');
+// 'John Doe <john@example.com>'
+
+// Auto-quotes special characters
+formatEmailAddress('Doe, John', 'john@example.com');
+// '"Doe, John" <john@example.com>'
+
+// Auto-encodes non-ASCII characters (RFC 2047)
+formatEmailAddress('Müller', 'mueller@example.com');
+// '=?UTF-8?B?TcO8bGxlcg==?= <mueller@example.com>'
+
+// Skip encoding if needed
+formatEmailAddress('Müller', 'mueller@example.com', { encodeNonAscii: false });
+// 'Müller <mueller@example.com>'
+```
+
+### Multiple Addresses
+
+Parse comma-separated email addresses (handles quoted strings with commas):
+
+```js
+parseMultipleEmailAddresses('a@example.com, "Doe, John" <b@example.com>');
+// [
+//   { name: null, email: 'a@example.com', ... },
+//   { name: 'Doe, John', email: 'b@example.com', ... }
+// ]
+```
+
+### RFC 2047 Encoding/Decoding
+
+Handle MIME encoded-words for non-ASCII characters:
+
+```js
+// Decode Base64 or Quoted-Printable
+decodeRfc2047('=?UTF-8?B?U3RyYXBp?=');
+// 'Strapi'
+
+decodeRfc2047('=?UTF-8?Q?M=C3=BCller?=');
+// 'Müller'
+
+// Encode for MIME headers
+encodeRfc2047Base64('Müller');
+// '=?UTF-8?B?TcO8bGxlcg==?='
+```
+
+### Validation
+
+```js
+isValidEmail('user@example.com'); // true
+isValidEmail('invalid'); // false
+```
+
+### Supported RFC Standards
+
+| RFC      | Description                                                      |
+| -------- | ---------------------------------------------------------------- |
+| RFC 5322 | Internet Message Format (name <email>, quoted strings, comments) |
+| RFC 2047 | MIME encoded-words (=?charset?encoding?text?=)                   |
+| RFC 6531 | Internationalized Email (UTF-8 in addresses)                     |
+
 ## Troubleshooting
 
 Check your firewall to ensure that requests are allowed. If it doesn't work with

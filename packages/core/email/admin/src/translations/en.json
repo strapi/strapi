@@ -5,6 +5,8 @@
   "Settings.email.plugin.label.defaultFrom": "Default sender email",
   "Settings.email.plugin.label.defaultReplyTo": "Default response email",
   "Settings.email.plugin.label.provider": "Email provider",
+  "Settings.email.plugin.label.replyToName": "Default reply-to name",
+  "Settings.email.plugin.label.senderName": "Default sender name",
   "Settings.email.plugin.label.testAddress": "Recipient email",
   "Settings.email.plugin.label.verifyConnection": "Connection status",
   "Settings.email.plugin.notification.config.error": "Failed to retrieve the email config",

@@ -19,6 +19,7 @@ import { useQuery, useMutation } from 'react-query';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 
+import { parseEmailAddress } from '../../../shared/email-address-parser';
 import { PERMISSIONS } from '../constants';
 import { getYupInnerErrors } from '../utils/getYupInnerErrors';
 import { schema } from '../utils/schema';
@@ -231,47 +232,88 @@ const SettingsPage = () => {
                   </Flex>
 
                   <Grid.Root gap={5}>
-                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
-                      <Field.Root name="shipper-email">
-                        <Field.Label>
-                          {formatMessage({
-                            id: 'email.Settings.email.plugin.label.defaultFrom',
-                            defaultMessage: 'Default sender email',
-                          })}
-                        </Field.Label>
-                        <TextInput
-                          placeholder={formatMessage({
-                            id: 'email.Settings.email.plugin.placeholder.defaultFrom',
-                            defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
-                          })}
-                          disabled
-                          readOnly
-                          value={data.settings.defaultFrom}
-                          type="email"
-                        />
-                      </Field.Root>
-                    </Grid.Item>
+                    {(() => {
+                      const parsedFrom = parseEmailAddress(data.settings.defaultFrom);
+                      const parsedReplyTo = parseEmailAddress(data.settings.defaultReplyTo);
 
-                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
-                      <Field.Root name="response-email">
-                        <Field.Label>
-                          {formatMessage({
-                            id: 'email.Settings.email.plugin.label.defaultReplyTo',
-                            defaultMessage: 'Default response email',
-                          })}
-                        </Field.Label>
-                        <TextInput
-                          placeholder={formatMessage({
-                            id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
-                            defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
-                          })}
-                          disabled
-                          readOnly
-                          value={data.settings.defaultReplyTo}
-                          type="email"
-                        />
-                      </Field.Root>
-                    </Grid.Item>
+                      return (
+                        <>
+                          {/* Sender Name - only show if name is present */}
+                          {parsedFrom.name && (
+                            <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+                              <Field.Root name="sender-name">
+                                <Field.Label>
+                                  {formatMessage({
+                                    id: 'email.Settings.email.plugin.label.senderName',
+                                    defaultMessage: 'Default sender name',
+                                  })}
+                                </Field.Label>
+                                <TextInput disabled readOnly value={parsedFrom.name} />
+                              </Field.Root>
+                            </Grid.Item>
+                          )}
+
+                          {/* Sender Email */}
+                          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+                            <Field.Root name="sender-email">
+                              <Field.Label>
+                                {formatMessage({
+                                  id: 'email.Settings.email.plugin.label.defaultFrom',
+                                  defaultMessage: 'Default sender email',
+                                })}
+                              </Field.Label>
+                              <TextInput
+                                placeholder={formatMessage({
+                                  id: 'email.Settings.email.plugin.placeholder.defaultFrom',
+                                  defaultMessage: 'ex: no-reply@strapi.io',
+                                })}
+                                disabled
+                                readOnly
+                                value={parsedFrom.email}
+                                type="email"
+                              />
+                            </Field.Root>
+                          </Grid.Item>
+
+                          {/* Reply-To Name - only show if name is present */}
+                          {parsedReplyTo.name && (
+                            <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+                              <Field.Root name="reply-to-name">
+                                <Field.Label>
+                                  {formatMessage({
+                                    id: 'email.Settings.email.plugin.label.replyToName',
+                                    defaultMessage: 'Default reply-to name',
+                                  })}
+                                </Field.Label>
+                                <TextInput disabled readOnly value={parsedReplyTo.name} />
+                              </Field.Root>
+                            </Grid.Item>
+                          )}
+
+                          {/* Reply-To Email */}
+                          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+                            <Field.Root name="reply-to-email">
+                              <Field.Label>
+                                {formatMessage({
+                                  id: 'email.Settings.email.plugin.label.defaultReplyTo',
+                                  defaultMessage: 'Default response email',
+                                })}
+                              </Field.Label>
+                              <TextInput
+                                placeholder={formatMessage({
+                                  id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
+                                  defaultMessage: 'ex: support@strapi.io',
+                                })}
+                                disabled
+                                readOnly
+                                value={parsedReplyTo.email}
+                                type="email"
+                              />
+                            </Field.Root>
+                          </Grid.Item>
+                        </>
+                      );
+                    })()}
 
                     <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root name="email-provider">
