@@ -3,6 +3,9 @@ import type { EmailConfig, SendOptions } from './types';
 
 interface EmailProvider {
   send: (options: SendOptions) => Promise<any>;
+  verify?: () => Promise<boolean>;
+  isIdle?: () => boolean;
+  close?: () => void;
 }
 
 interface EmailProviderModule {

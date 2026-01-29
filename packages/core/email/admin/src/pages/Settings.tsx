@@ -11,8 +11,9 @@ import {
   TextInput,
   Typography,
   Field,
+  Badge,
 } from '@strapi/design-system';
-import { Mail } from '@strapi/icons';
+import { Mail, Check, Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import { styled } from 'styled-components';
@@ -53,10 +54,10 @@ const SettingsPage = () => {
   const { data, isLoading } = useQuery(['email', 'settings'], async () => {
     const res = await get<EmailSettings>('/email/settings');
     const {
-      data: { config },
+      data: { config, supportsVerify },
     } = res;
 
-    return config;
+    return { ...config, supportsVerify };
   });
 
   const mutation = useMutation<void, Error, MutationBody>(
@@ -86,6 +87,42 @@ const SettingsPage = () => {
             },
             { to: testAddress }
           ),
+        });
+      },
+      retry: false,
+    }
+  );
+
+  const [connectionStatus, setConnectionStatus] = React.useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle');
+
+  const verifyMutation = useMutation(
+    async () => {
+      await post('/email/verify', {});
+    },
+    {
+      onMutate() {
+        setConnectionStatus('loading');
+      },
+      onError() {
+        setConnectionStatus('error');
+        toggleNotification!({
+          type: 'danger',
+          message: formatMessage({
+            id: 'email.Settings.email.plugin.notification.verify.error',
+            defaultMessage: 'Connection verification failed',
+          }),
+        });
+      },
+      onSuccess() {
+        setConnectionStatus('success');
+        toggleNotification!({
+          type: 'success',
+          message: formatMessage({
+            id: 'email.Settings.email.plugin.notification.verify.success',
+            defaultMessage: 'Connection verified successfully',
+          }),
         });
       },
       retry: false,
@@ -244,13 +281,61 @@ const SettingsPage = () => {
                             defaultMessage: 'Email provider',
                           })}
                         </Field.Label>
-                        <SingleSelect disabled value={data.provider}>
-                          <SingleSelectOption value={data.provider}>
-                            {data.provider}
-                          </SingleSelectOption>
-                        </SingleSelect>
+                        <Flex gap={2}>
+                          <SingleSelect disabled value={data.provider}>
+                            <SingleSelectOption value={data.provider}>
+                              {data.provider}
+                            </SingleSelectOption>
+                          </SingleSelect>
+                          {connectionStatus === 'success' && (
+                            <Badge backgroundColor="success100" textColor="success700">
+                              <Flex gap={1}>
+                                <Check width="1.2rem" height="1.2rem" />
+                                {formatMessage({
+                                  id: 'email.Settings.email.plugin.status.connected',
+                                  defaultMessage: 'Connected',
+                                })}
+                              </Flex>
+                            </Badge>
+                          )}
+                          {connectionStatus === 'error' && (
+                            <Badge backgroundColor="danger100" textColor="danger700">
+                              <Flex gap={1}>
+                                <Cross width="1.2rem" height="1.2rem" />
+                                {formatMessage({
+                                  id: 'email.Settings.email.plugin.status.error',
+                                  defaultMessage: 'Error',
+                                })}
+                              </Flex>
+                            </Badge>
+                          )}
+                        </Flex>
                       </Field.Root>
                     </Grid.Item>
+
+                    {data.supportsVerify && (
+                      <Grid.Item col={6} xs={12} direction="column" alignItems="start">
+                        <Field.Root name="verify-connection">
+                          <Field.Label>
+                            {formatMessage({
+                              id: 'email.Settings.email.plugin.label.verifyConnection',
+                              defaultMessage: 'Connection status',
+                            })}
+                          </Field.Label>
+                          <Button
+                            variant="secondary"
+                            loading={verifyMutation.isLoading}
+                            onClick={() => verifyMutation.mutate()}
+                            type="button"
+                          >
+                            {formatMessage({
+                              id: 'email.Settings.email.plugin.button.verify',
+                              defaultMessage: 'Test connection',
+                            })}
+                          </Button>
+                        </Field.Root>
+                      </Grid.Item>
+                    )}
                   </Grid.Root>
                 </Flex>
               </Box>
