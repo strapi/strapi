@@ -50,7 +50,7 @@
     "date-fns": "2.30.0",
     "execa": "5.1.1",
     "http-errors": "2.0.0",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "node-machine-id": "1.1.12",
     "p-map": "4.0.0",
     "preferred-pm": "3.1.2",
