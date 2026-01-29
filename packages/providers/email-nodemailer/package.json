@@ -1,7 +1,7 @@
 {
   "name": "@strapi/provider-email-nodemailer",
   "version": "5.36.1",
-  "description": "Nodemailer provider for Strapi 3",
+  "description": "Nodemailer provider for Strapi",
   "keywords": [
     "strapi",
     "email",
@@ -57,7 +57,6 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "lodash": "4.17.23",
     "nodemailer": "6.10.1"
   },
   "devDependencies": {

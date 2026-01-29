@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import nodemailer, { SendMailOptions } from 'nodemailer';
+import nodemailer from 'nodemailer';
+import type { Transporter, SendMailOptions, SentMessageInfo } from 'nodemailer';
 
 interface Settings {
   defaultFrom: string;
@@ -9,48 +9,52 @@ interface Settings {
 interface SendOptions {
   from?: string;
   to: string;
-  cc: string;
-  bcc: string;
+  cc?: string;
+  bcc?: string;
   replyTo?: string;
   subject: string;
-  text: string;
-  html: string;
+  text?: string;
+  html?: string;
+  attachments?: SendMailOptions['attachments'];
   [key: string]: unknown;
 }
 
 type ProviderOptions = Parameters<typeof nodemailer.createTransport>[0];
 
-const emailFields = [
-  'from',
-  'replyTo',
-  'to',
-  'cc',
-  'bcc',
-  'subject',
-  'text',
-  'html',
-  'attachments',
-];
-
 export default {
-  provider: 'nodemailer',
-  name: 'Nodemailer',
-
   init(providerOptions: ProviderOptions, settings: Settings) {
-    const transporter = nodemailer.createTransport(providerOptions);
+    const transporter: Transporter = nodemailer.createTransport(providerOptions);
 
     return {
-      send(options: SendOptions) {
-        // Default values.
-        const emailOptions: SendMailOptions = {
-          ..._.pick(options, emailFields),
-          from: options.from || settings.defaultFrom,
-          replyTo: options.replyTo || settings.defaultReplyTo,
-          text: options.text || options.html,
-          html: options.html || options.text,
+      send(options: SendOptions): Promise<SentMessageInfo> {
+        const { from, to, cc, bcc, replyTo, subject, text, html, attachments, ...rest } = options;
+
+        const message: SendMailOptions = {
+          from: from || settings.defaultFrom,
+          to,
+          cc,
+          bcc,
+          replyTo: replyTo || settings.defaultReplyTo,
+          subject,
+          text: text || html,
+          html: html || text,
+          attachments,
+          ...rest,
         };
 
-        return transporter.sendMail(emailOptions);
+        return transporter.sendMail(message);
+      },
+
+      async verify(): Promise<true> {
+        return transporter.verify();
+      },
+
+      isIdle(): boolean {
+        return typeof transporter.isIdle === 'function' ? transporter.isIdle() : true;
+      },
+
+      close(): void {
+        transporter.close();
       },
     };
   },
