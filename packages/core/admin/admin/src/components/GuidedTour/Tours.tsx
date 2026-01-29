@@ -75,6 +75,11 @@ const GuidedTourTooltipImpl = ({
   const state = useGuidedTour('GuidedTourTooltip', (s) => s.state);
   const dispatch = useGuidedTour('GuidedTourTooltip', (s) => s.dispatch);
 
+  // Safety check: if tours state is corrupted or missing, render without tooltip
+  if (!state.tours || !state.tours[tourName]) {
+    return <>{children}</>;
+  }
+
   const isCurrentStep = state.tours[tourName].currentStep === step;
   const isStepConditionMet = when ? when(state.completedActions) : true;
   const isPopoverOpen =
