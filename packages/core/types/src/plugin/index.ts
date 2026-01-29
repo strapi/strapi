@@ -22,19 +22,21 @@ export type IsEnabled<
     : false
   : false;
 
+type Factory<T> = T | ((params: { strapi: Strapi }) => T)
+
 export type LoadedPlugin = {
   config: {
     default: Record<string, unknown> | ((opts: { env: typeof env }) => Record<string, unknown>);
     validator: (config: Record<string, unknown>) => void;
   };
-  bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  routes: Record<string, Router>;
-  controllers: Record<string, Controller>;
-  services: Record<string, Service>;
-  policies: Record<string, Policy>;
-  middlewares: Record<string, Middleware>;
+  bootstrap: Factory<void | Promise<void>>;
+  destroy: Factory<void | Promise<void>>;
+  register: Factory<void | Promise<void>>;
+  routes: Record<string, Factory<Router>>;
+  controllers: Record<string, Factory<Controller>>;
+  services: Record<string, Factory<Service>>;
+  policies: Record<string, Factory<Policy>>;
+  middlewares: Record<string, Factory<Middleware>>;
   contentTypes: Record<string, { schema: ContentTypeSchema }>;
 };
 
