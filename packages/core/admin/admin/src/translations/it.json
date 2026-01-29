@@ -34,6 +34,8 @@
   "Auth.form.firstname.placeholder": "Kai",
   "Auth.form.forgot-password.email.label": "Inserisci la tua email",
   "Auth.form.forgot-password.email.label.success": "Email inviata correttamente",
+  "Auth.form.welcome.title": "Benvenuto su Strapi",
+  "Auth.form.register.subtitle":"Le credenziali vengono utilizzate solo per autenticarsi in Strapi. Tutti i dati salvati saranno memorizzati nel tuo database",
   "Auth.form.lastname.label": "Cognome",
   "Auth.form.lastname.placeholder": "Doe",
   "Auth.form.password.hide-password": "Nascondi password",
