@@ -1,7 +1,7 @@
 import { assoc, curry } from 'lodash/fp';
 
-import type { Modules, Struct } from '@strapi/types';
-import { contentTypes } from '@strapi/utils';
+import type { Modules, Struct, UID } from '@strapi/types';
+import { contentTypes, errors } from '@strapi/utils';
 
 type ParamsTransform = (params: Modules.Documents.Params.All) => Modules.Documents.Params.All;
 
@@ -9,6 +9,12 @@ type TransformWithContentType = (
   contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
   params: Modules.Documents.Params.All
 ) => Modules.Documents.Params.All;
+
+type AsyncTransformWithUid = (
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
+  uid: UID.Schema,
+  params: Modules.Documents.Params.All
+) => Promise<Modules.Documents.Params.All>;
 
 /**
  * DP enabled -> set status to draft
@@ -104,12 +110,74 @@ const statusToData: TransformWithContentType = (contentType, params) => {
   return params;
 };
 
+/**
+ * Validates the hasPublishedVersion parameter.
+ * Returns normalized boolean value or undefined if not provided.
+ * Throws ValidationError for invalid input (400 response).
+ */
+const validateHasPublishedVersion = (value: unknown): boolean | undefined => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (value === true || value === 'true') {
+    return true;
+  }
+
+  if (value === false || value === 'false') {
+    return false;
+  }
+
+  throw new errors.ValidationError(
+    "Invalid value for 'hasPublishedVersion'. Expected boolean or 'true'/'false' string."
+  );
+};
+
+/**
+ * Filter documents based on whether they have a published version.
+ * Enables document-level filtering to find "never published" documents.
+ *
+ * Uses subquery approach for optimal performance - the database handles
+ * the filtering in a single query rather than materializing all IDs.
+ */
+const hasPublishedVersionToLookup: AsyncTransformWithUid = async (contentType, uid, params) => {
+  if (!contentTypes.hasDraftAndPublish(contentType)) {
+    return params;
+  }
+
+  const rawValue = (params as any)?.hasPublishedVersion;
+
+  // Validate and normalize the value (throws 400 on invalid input)
+  const hasPublishedVersion = validateHasPublishedVersion(rawValue);
+
+  // Skip if not specified (preserve existing behavior)
+  if (hasPublishedVersion === undefined) {
+    return params;
+  }
+
+  // Get table name for the content type
+  const tableName = strapi.db.metadata.get(uid).tableName;
+
+  // Create a Knex subquery that selects document IDs with published entries
+  const knex = strapi.db.connection;
+  const subquery = knex(tableName).select('document_id').whereNotNull('published_at');
+
+  if (hasPublishedVersion) {
+    // documentId IN (SELECT document_id FROM table WHERE published_at IS NOT NULL)
+    return assoc(['lookup', 'documentId'], { $in: subquery }, params);
+  }
+
+  // documentId NOT IN (SELECT document_id FROM table WHERE published_at IS NOT NULL)
+  return assoc(['lookup', 'documentId'], { $notIn: subquery }, params);
+};
+
 const setStatusToDraftCurry = curry(setStatusToDraft);
 const defaultToDraftCurry = curry(defaultToDraft);
 const defaultStatusCurry = curry(defaultStatus);
 const filterDataPublishedAtCurry = curry(filterDataPublishedAt);
 const statusToLookupCurry = curry(statusToLookup);
 const statusToDataCurry = curry(statusToData);
+const hasPublishedVersionToLookupCurry = curry(hasPublishedVersionToLookup);
 
 export {
   setStatusToDraftCurry as setStatusToDraft,
@@ -118,4 +186,5 @@ export {
   filterDataPublishedAtCurry as filterDataPublishedAt,
   statusToLookupCurry as statusToLookup,
   statusToDataCurry as statusToData,
+  hasPublishedVersionToLookupCurry as hasPublishedVersionToLookup,
 };
