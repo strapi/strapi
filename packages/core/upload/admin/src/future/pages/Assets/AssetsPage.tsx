@@ -59,6 +59,13 @@ export const AssetsPage = () => {
   const isGridView = view === viewOptions.GRID;
   const assets = data?.results ?? [];
 
+  /**
+   * NOTE:
+   *
+   * The design differs from our current Layouts component.
+   * Either we find a way to make it work with our current Layouts component
+   * or we will have to write our own custom layout.
+   */
   return (
     <Layouts.Root>
       <Layouts.Header
