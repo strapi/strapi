@@ -111,11 +111,11 @@ const statusToData: TransformWithContentType = (contentType, params) => {
 };
 
 /**
- * Validates the hasPublishedVersion parameter.
+ * Parses and sanitizes the hasPublishedVersion parameter.
  * Returns normalized boolean value or undefined if not provided.
  * Throws ValidationError for invalid input (400 response).
  */
-const validateHasPublishedVersion = (value: unknown): boolean | undefined => {
+const parseHasPublishedVersion = (value: unknown): boolean | undefined => {
   if (value === undefined || value === null) {
     return undefined;
   }
@@ -145,22 +145,29 @@ const hasPublishedVersionToLookup: AsyncTransformWithUid = async (contentType, u
     return params;
   }
 
-  const rawValue = (params as any)?.hasPublishedVersion;
+  const rawValue = params.hasPublishedVersion;
 
-  // Validate and normalize the value (throws 400 on invalid input)
-  const hasPublishedVersion = validateHasPublishedVersion(rawValue);
+  // Parse and normalize the value (throws 400 on invalid input)
+  const hasPublishedVersion = parseHasPublishedVersion(rawValue);
 
   // Skip if not specified (preserve existing behavior)
   if (hasPublishedVersion === undefined) {
     return params;
   }
 
-  // Get table name for the content type
-  const tableName = strapi.db.metadata.get(uid).tableName;
+  // Get table and column names from metadata
+  const meta = strapi.db.metadata.get(uid);
+  const tableName = meta.tableName;
+  const documentIdAttr = meta.attributes.documentId;
+  const publishedAtAttr = meta.attributes.publishedAt;
+  const documentIdColumn =
+    ('columnName' in documentIdAttr && documentIdAttr.columnName) || 'document_id';
+  const publishedAtColumn =
+    ('columnName' in publishedAtAttr && publishedAtAttr.columnName) || 'published_at';
 
   // Create a Knex subquery that selects document IDs with published entries
   const knex = strapi.db.connection;
-  const subquery = knex(tableName).select('document_id').whereNotNull('published_at');
+  const subquery = knex(tableName).distinct(documentIdColumn).whereNotNull(publishedAtColumn);
 
   if (hasPublishedVersion) {
     // documentId IN (SELECT document_id FROM table WHERE published_at IS NOT NULL)

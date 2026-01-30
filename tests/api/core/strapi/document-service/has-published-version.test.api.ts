@@ -37,6 +37,7 @@ describe('Document Service', () => {
         expect(articles.length).toBeGreaterThan(0);
 
         // All returned articles should be from documents that have never been published
+        // Fixture state defined in: tests/api/core/strapi/document-service/resources/fixtures/article.js
         // Article1 is never published, Article2 has a published version
         articles.forEach((article) => {
           expect(article.documentId).toBe('Article1');
@@ -197,6 +198,65 @@ describe('Document Service', () => {
         ).rejects.toThrow(
           "Invalid value for 'hasPublishedVersion'. Expected boolean or 'true'/'false' string."
         );
+      });
+
+      it('throws ValidationError for empty string', async () => {
+        await expect(
+          findArticles({
+            status: 'draft',
+            hasPublishedVersion: '' as any,
+          })
+        ).rejects.toThrow(
+          "Invalid value for 'hasPublishedVersion'. Expected boolean or 'true'/'false' string."
+        );
+      });
+
+      it('throws ValidationError for array values', async () => {
+        await expect(
+          findArticles({
+            status: 'draft',
+            hasPublishedVersion: [true] as any,
+          })
+        ).rejects.toThrow(
+          "Invalid value for 'hasPublishedVersion'. Expected boolean or 'true'/'false' string."
+        );
+      });
+
+      it('throws ValidationError for object values', async () => {
+        await expect(
+          findArticles({
+            status: 'draft',
+            hasPublishedVersion: { value: true } as any,
+          })
+        ).rejects.toThrow(
+          "Invalid value for 'hasPublishedVersion'. Expected boolean or 'true'/'false' string."
+        );
+      });
+    });
+
+    describe('edge cases', () => {
+      it('returns empty results for status=published with hasPublishedVersion=false', async () => {
+        // Logically contradictory: published documents always have a published version
+        const articles = await findArticles({
+          status: 'published',
+          hasPublishedVersion: false,
+        });
+
+        expect(articles.length).toBe(0);
+      });
+
+      it('works when combined with filters', async () => {
+        const articles = await findArticles({
+          status: 'draft',
+          hasPublishedVersion: false,
+          filters: { title: { $contains: 'Article1' } },
+        });
+
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+          expect(article.documentId).toBe('Article1');
+          expect(article.title).toContain('Article1');
+        });
       });
     });
   });
