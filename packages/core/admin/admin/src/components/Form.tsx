@@ -148,6 +148,40 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   validate?: (values: TFormValues, options: Record<string, string>) => Promise<any>;
 }
 
+function parseInputValueFromEventTarget(target: any, stateValues: any, field: string) {
+  const { type, value, options, multiple } = target;
+
+  /**
+   * Because we handle any field from this function, we run through a series
+   * of checks to understand how to use the value.
+   */
+  let val;
+
+  if (/number|range/.test(type)) {
+    const parsed = parseFloat(value);
+    // If the value isn't a number for whatever reason, don't let it through because that will break the API.
+    val = isNaN(parsed) ? '' : parsed;
+  } else if (/checkbox/.test(type)) {
+    // Get & invert the current value of the checkbox.
+    val = !getIn(stateValues, field);
+  } else if (options && multiple) {
+    // This will handle native select elements incl. ones with mulitple options.
+    val = Array.from<HTMLOptionElement>(options)
+      .filter((el) => el.selected)
+      .map((el) => el.value);
+  } else {
+    // NOTE: reset value to null so it failes required checks.
+    // The API only considers a required field invalid if the value is null|undefined, to differentiate from min 1
+    if (value === '') {
+      val = null;
+    } else {
+      val = value;
+    }
+  }
+
+  return val;
+}
+
 /**
  * @alpha
  * @description A form component that handles form state, validation and submission.
@@ -311,22 +345,24 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       [state.values, initialValues.current]
     );
 
-    const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
-      if (typeof eventOrPath === 'string') {
+    const setFieldValue = React.useCallback((field: string, value: any) => {
+      React.startTransition(() => {
         dispatch({
           type: 'SET_FIELD_VALUE',
-          payload: {
-            field: eventOrPath,
-            value: v,
-          },
+          payload: { field, value },
         });
+      });
+    }, []);
 
+    const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
+      if (typeof eventOrPath === 'string') {
+        setFieldValue(eventOrPath, v);
         return;
       }
 
       const target = eventOrPath.target || eventOrPath.currentTarget;
 
-      const { type, name, id, value, options, multiple } = target;
+      const { name, id } = target;
 
       const field = name || id;
 
@@ -336,42 +372,9 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         );
       }
 
-      /**
-       * Because we handle any field from this function, we run through a series
-       * of checks to understand how to use the value.
-       */
-      let val;
-
-      if (/number|range/.test(type)) {
-        const parsed = parseFloat(value);
-        // If the value isn't a number for whatever reason, don't let it through because that will break the API.
-        val = isNaN(parsed) ? '' : parsed;
-      } else if (/checkbox/.test(type)) {
-        // Get & invert the current value of the checkbox.
-        val = !getIn(state.values, field);
-      } else if (options && multiple) {
-        // This will handle native select elements incl. ones with mulitple options.
-        val = Array.from<HTMLOptionElement>(options)
-          .filter((el) => el.selected)
-          .map((el) => el.value);
-      } else {
-        // NOTE: reset value to null so it failes required checks.
-        // The API only considers a required field invalid if the value is null|undefined, to differentiate from min 1
-        if (value === '') {
-          val = null;
-        } else {
-          val = value;
-        }
-      }
-
       if (field) {
-        dispatch({
-          type: 'SET_FIELD_VALUE',
-          payload: {
-            field,
-            value: val,
-          },
-        });
+        const value = parseInputValueFromEventTarget(target, state.values, field);
+        setFieldValue(field, value);
       }
     });
 
@@ -711,6 +714,8 @@ function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
     (state) => getIn(state.values, path) as FieldValue<TValue>['value']
   );
 
+  const allValues = useForm('useField', (state) => state.values);
+
   const handleChange = useForm('useField', (state) => state.onChange);
 
   const rawError = useForm('useField', (state) => getIn(state.errors, path));
@@ -725,6 +730,29 @@ function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
 
     return error;
   });
+
+  const [localValue, setLocalValue] = React.useState<TValue | undefined>(value);
+
+  React.useEffect(() => {
+    setLocalValue((prev) => (Object.is(prev, value) ? prev : value));
+  }, [value]);
+
+  const onChange: FieldValue<TValue>['onChange'] = React.useCallback(
+    (eventOrPath, next) => {
+      if (typeof eventOrPath === 'string') {
+        setLocalValue(next);
+        handleChange(eventOrPath, next);
+        return;
+      }
+
+      const target = eventOrPath.target || eventOrPath.currentTarget;
+      const derived = parseInputValueFromEventTarget(target, allValues, path);
+
+      setLocalValue(derived);
+      handleChange(eventOrPath);
+    },
+    [allValues, handleChange, path]
+  );
 
   return {
     initialValue,
@@ -744,8 +772,8 @@ function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
       : typeof error === 'string'
         ? error
         : undefined,
-    onChange: handleChange,
-    value: value,
+    onChange,
+    value: localValue,
   };
 }
 

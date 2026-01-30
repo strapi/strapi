@@ -1,4 +1,4 @@
-import { render, server } from '@tests/utils';
+import { render, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
 
 import { ProfilePage } from '../ProfilePage';
@@ -26,14 +26,19 @@ describe('Profile page', () => {
   it('renders and shows the Interface Language section', async () => {
     const { findByText } = render(<ProfilePage />);
 
-    await findByText('Interface language');
+    await waitFor(async () => {
+      await findByText('Interface language');
+    });
   });
 
   it('should display username if it exists', async () => {
     const { getByText, findByText } = render(<ProfilePage />);
+
     await findByText('Interface language');
 
-    expect(getByText('yolo')).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(getByText('yolo')).toBeInTheDocument();
+    });
   });
 
   it('should display the change password section and all its fields', async () => {
@@ -41,11 +46,14 @@ describe('Profile page', () => {
 
     await findByText('Interface language');
 
-    expect(
-      getByRole('heading', {
-        name: 'Change password',
-      })
-    ).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(
+        getByRole('heading', {
+          name: 'Change password',
+        })
+      ).toBeInTheDocument();
+    });
+
     expect(getByLabelText(/current password/i)).toBeInTheDocument();
     expect(getByLabelText(/^password$/i)).toBeInTheDocument();
     expect(getByLabelText(/confirm password/i)).toBeInTheDocument();
@@ -72,7 +80,10 @@ describe('Profile page', () => {
 
     await findByText('Interface language');
 
-    expect(changePasswordHeading).not.toBeInTheDocument();
+    await waitFor(async () => {
+      expect(changePasswordHeading).not.toBeInTheDocument();
+    });
+
     expect(queryByLabelText(/current password/i)).not.toBeInTheDocument();
     expect(queryByLabelText(/^password$/)).not.toBeInTheDocument();
     expect(queryByLabelText(/confirm password/i)).not.toBeInTheDocument();
