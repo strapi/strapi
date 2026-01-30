@@ -4,14 +4,16 @@ import { Page } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
-import { getTrad } from '../utils';
-
 import { AIGenerationPage } from './pages/AIGenerationPage';
 import { MediaLibraryPage } from './pages/MediaLibraryPage';
+import { getTranslationKey } from './utils/translations';
 
 export const UnstableMediaLibrary = () => {
   const { formatMessage } = useIntl();
-  const title = formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });
+  const title = formatMessage({
+    id: getTranslationKey('plugin.name'),
+    defaultMessage: 'Media Library',
+  });
 
   return (
     <Page.Main>

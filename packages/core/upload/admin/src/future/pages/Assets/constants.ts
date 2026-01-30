@@ -1,4 +1,4 @@
-import { getTrad } from '../../../utils';
+import { getTranslationKey } from '../../utils/translations';
 
 export type SortOrder = 'ASC' | 'DESC';
 
@@ -22,7 +22,7 @@ interface TableHeader {
 export const TABLE_HEADERS: TableHeader[] = [
   {
     name: 'name',
-    label: { id: getTrad('list.table.header.name'), defaultMessage: 'name' },
+    label: { id: getTranslationKey('list.table.header.name'), defaultMessage: 'name' },
     isSortable: true,
   },
   // TODO translation keys
@@ -38,12 +38,12 @@ export const TABLE_HEADERS: TableHeader[] = [
   },
   {
     name: 'size',
-    label: { id: getTrad('list.table.header.size'), defaultMessage: 'size' },
+    label: { id: getTranslationKey('list.table.header.size'), defaultMessage: 'size' },
     isSortable: false,
   },
   {
     name: 'actions',
-    label: { id: getTrad('list.table.header.actions'), defaultMessage: 'actions' },
+    label: { id: getTranslationKey('list.table.header.actions'), defaultMessage: 'actions' },
     isSortable: false,
     isVisuallyHidden: true,
   },

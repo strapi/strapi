@@ -28,12 +28,8 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { AssetType } from '../../../../enums';
-import {
-  formatBytes,
-  getFileExtension,
-  getTrad,
-  prefixFileUrlWithBackendUrl,
-} from '../../../../utils';
+import { formatBytes, getFileExtension, prefixFileUrlWithBackendUrl } from '../../../../utils';
+import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS, type SortOrder, type SortState } from '../constants';
 
 import type { File } from '../../../../../../shared/contracts/files';
@@ -188,7 +184,7 @@ const AssetRow = ({ asset, onClick }: AssetRowProps) => {
         <Flex justifyContent="flex-end">
           <IconButton
             label={formatMessage({
-              id: getTrad('control-card.more-actions'),
+              id: getTranslationKey('control-card.more-actions'),
               defaultMessage: 'More actions',
             })}
             variant="ghost"
@@ -238,7 +234,7 @@ export const AssetsList = ({ assets, sort, onSortChange, onAssetClick }: AssetsL
                 <StyledTh key={header.name}>
                   <VisuallyHidden>
                     {formatMessage({
-                      id: getTrad('list.table.header.actions'),
+                      id: getTranslationKey('list.table.header.actions'),
                       defaultMessage: 'actions',
                     })}
                   </VisuallyHidden>

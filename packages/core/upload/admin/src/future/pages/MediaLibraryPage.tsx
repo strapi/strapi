@@ -22,7 +22,6 @@ import { styled } from 'styled-components';
 
 import { localStorageKeys, viewOptions } from '../../constants';
 import { usePersistentState } from '../../hooks/usePersistentState';
-import { getTrad } from '../../utils';
 import { useUploadFilesMutation } from '../services/api';
 import { useGetAssetsQuery } from '../services/assets';
 import { getTranslationKey } from '../utils/translations';
@@ -174,7 +173,7 @@ export const MediaLibraryPage = () => {
             {/* Search */}
             <SearchInput
               label={formatMessage({
-                id: getTrad('search.label'),
+                id: getTranslationKey('search.label'),
                 defaultMessage: 'Search for an asset',
               })}
               trackedEvent="didSearchMediaLibraryElements"
@@ -187,29 +186,32 @@ export const MediaLibraryPage = () => {
                 value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.LIST)
               }
               aria-label={formatMessage({
-                id: getTrad('view.switch.label'),
+                id: getTranslationKey('view.switch.label'),
                 defaultMessage: 'View options',
               })}
             >
               <StyledToggleItem
                 value="list"
                 aria-label={formatMessage({
-                  id: getTrad('view.table'),
+                  id: getTranslationKey('view.table'),
                   defaultMessage: 'Table view',
                 })}
               >
                 <List />
-                {formatMessage({ id: getTrad('view.table'), defaultMessage: 'Table view' })}
+                {formatMessage({
+                  id: getTranslationKey('view.table'),
+                  defaultMessage: 'Table view',
+                })}
               </StyledToggleItem>
               <StyledToggleItem
                 value="grid"
                 aria-label={formatMessage({
-                  id: getTrad('view.grid'),
+                  id: getTranslationKey('view.grid'),
                   defaultMessage: 'Grid view',
                 })}
               >
                 <GridIcon />
-                {formatMessage({ id: getTrad('view.grid'), defaultMessage: 'Grid view' })}
+                {formatMessage({ id: getTranslationKey('view.grid'), defaultMessage: 'Grid view' })}
               </StyledToggleItem>
             </StyledToggleGroup>
           </Flex>
@@ -225,7 +227,7 @@ export const MediaLibraryPage = () => {
           <Box padding={8}>
             <Typography textColor="danger600">
               {formatMessage({
-                id: getTrad('list.assets.error'),
+                id: getTranslationKey('list.assets.error'),
                 defaultMessage: 'An error occurred while fetching assets.',
               })}
             </Typography>
