@@ -65,15 +65,16 @@ const StyledTr = styled(RawTr)<{ $clickable?: boolean }>`
   height: 48px;
   cursor: ${({ $clickable }) => ($clickable ? 'pointer' : 'default')};
   background: ${({ theme }) => theme.colors.neutral0};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
 const StyledTd = styled(RawTd)`
   padding: 0 ${({ theme }) => theme.spaces[4]};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
 const StyledBodyTd = styled(RawTd)`
   padding: ${({ theme }) => theme.spaces[4]};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
 interface AssetPreviewCellProps {
