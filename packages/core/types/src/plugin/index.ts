@@ -29,14 +29,14 @@ export type LoadedPlugin = {
     default: Record<string, unknown> | ((opts: { env: typeof env }) => Record<string, unknown>);
     validator: (config: Record<string, unknown>) => void;
   };
-  bootstrap: Factory<void | Promise<void>>;
-  destroy: Factory<void | Promise<void>>;
-  register: Factory<void | Promise<void>>;
+  bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
+  register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   routes: Record<string, Factory<Router>>;
   controllers: Record<string, Factory<Controller>>;
   services: Record<string, Factory<Service>>;
-  policies: Record<string, Factory<Policy>>;
-  middlewares: Record<string, Factory<Middleware>>;
+  policies: Record<string, Policy>;
+  middlewares: Record<string, Middleware>;
   contentTypes: Record<string, { schema: ContentTypeSchema }>;
 };
 
