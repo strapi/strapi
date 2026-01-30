@@ -169,13 +169,13 @@ const hasPublishedVersionToLookup: AsyncTransformWithUid = async (contentType, u
   const knex = strapi.db.connection;
   const subquery = knex(tableName).distinct(documentIdColumn).whereNotNull(publishedAtColumn);
 
-  if (hasPublishedVersion) {
-    // documentId IN (SELECT document_id FROM table WHERE published_at IS NOT NULL)
-    return assoc(['lookup', 'documentId'], { $in: subquery }, params);
-  }
+  // Use $and to avoid collisions with documentId conditions from filters or findOne
+  const existingAnd = (params.lookup?.$and as unknown[]) || [];
+  const documentIdCondition = hasPublishedVersion
+    ? { documentId: { $in: subquery } }
+    : { documentId: { $notIn: subquery } };
 
-  // documentId NOT IN (SELECT document_id FROM table WHERE published_at IS NOT NULL)
-  return assoc(['lookup', 'documentId'], { $notIn: subquery }, params);
+  return assoc(['lookup', '$and'], [...existingAnd, documentIdCondition], params);
 };
 
 const setStatusToDraftCurry = curry(setStatusToDraft);

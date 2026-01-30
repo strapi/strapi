@@ -258,6 +258,78 @@ describe('Document Service', () => {
           expect(article.title).toContain('Article1');
         });
       });
+
+      it('is not overwritten by documentId filter in findMany', async () => {
+        // Article2 has a published version, so hasPublishedVersion=false should exclude it
+        // even when explicitly filtering by its documentId
+        const articles = await findArticles({
+          status: 'draft',
+          hasPublishedVersion: false,
+          filters: { documentId: { $in: ['Article2'] } },
+        });
+
+        expect(articles.length).toBe(0);
+      });
+
+      it('is not overwritten by documentId in findOne', async () => {
+        // Article2 has a published version, so hasPublishedVersion=false should return null
+        const article = await strapi.documents(ARTICLE_UID).findOne({
+          documentId: 'Article2',
+          status: 'draft',
+          hasPublishedVersion: false,
+        });
+
+        expect(article).toBeNull();
+      });
+
+      it('is not overwritten by documentId filter in findMany with hasPublishedVersion=true', async () => {
+        // Article1 has never been published, so hasPublishedVersion=true should exclude it
+        // even when explicitly filtering by its documentId
+        const articles = await findArticles({
+          status: 'draft',
+          hasPublishedVersion: true,
+          filters: { documentId: { $in: ['Article1'] } },
+        });
+
+        expect(articles.length).toBe(0);
+      });
+
+      it('is not overwritten by documentId in findOne with hasPublishedVersion=true', async () => {
+        // Article1 has never been published, so hasPublishedVersion=true should return null
+        const article = await strapi.documents(ARTICLE_UID).findOne({
+          documentId: 'Article1',
+          status: 'draft',
+          hasPublishedVersion: true,
+        });
+
+        expect(article).toBeNull();
+      });
+
+      it('returns document when documentId and hasPublishedVersion are consistent in findOne', async () => {
+        // Article2 has a published version, so hasPublishedVersion=true should still return it
+        const article = await strapi.documents(ARTICLE_UID).findOne({
+          documentId: 'Article2',
+          status: 'draft',
+          hasPublishedVersion: true,
+        });
+
+        expect(article).not.toBeNull();
+        expect(article?.documentId).toBe('Article2');
+      });
+
+      it('returns document when documentId filter and hasPublishedVersion are consistent in findMany', async () => {
+        // Article1 has never been published, so hasPublishedVersion=false should still return it
+        const articles = await findArticles({
+          status: 'draft',
+          hasPublishedVersion: false,
+          filters: { documentId: { $in: ['Article1'] } },
+        });
+
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+          expect(article.documentId).toBe('Article1');
+        });
+      });
     });
   });
 });
