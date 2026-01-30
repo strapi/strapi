@@ -53,6 +53,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     mockAiMetadataService = {
       isEnabled: jest.fn(),
       processFiles: jest.fn(),
+      updateFilesWithAIMetadata: jest.fn().mockResolvedValue(undefined),
     };
 
     uploadService = {
@@ -99,7 +100,13 @@ describe('Admin Upload Controller - AI Service Connection', () => {
     } as any;
 
     mockValidateUploadBody.mockResolvedValue({
-      fileInfo: { name: 'test.jpg', alternativeText: '', caption: '', folder: null },
+      fileInfo: {
+        name: 'test.jpg',
+        alternativeText: '',
+        caption: '',
+        focalPoint: null,
+        folder: null,
+      },
     });
 
     mockValidateBulkUpdateBody.mockResolvedValue({
@@ -206,7 +213,13 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       };
 
       mockValidateUploadBody.mockResolvedValue({
-        fileInfo: { name: 'allowed.jpg', folder: null, alternativeText: '', caption: '' },
+        fileInfo: {
+          name: 'allowed.jpg',
+          folder: null,
+          alternativeText: '',
+          caption: '',
+          focalPoint: null,
+        },
       });
 
       await adminUploadController.uploadFiles(mockContext as Context);
@@ -232,7 +245,13 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       };
 
       mockValidateUploadBody.mockResolvedValue({
-        fileInfo: { name: 'test.jpg', folder: null, alternativeText: '', caption: '' },
+        fileInfo: {
+          name: 'test.jpg',
+          folder: null,
+          alternativeText: '',
+          caption: '',
+          focalPoint: null,
+        },
       });
 
       await adminUploadController.uploadFiles(mockContext as Context);
@@ -261,15 +280,15 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       mockContext.request!.body = {
         fileInfo: [
-          { name: 'file1.jpg', alternativeText: '', caption: '', folder: null },
-          { name: 'file2.png', alternativeText: '', caption: '', folder: null },
+          { name: 'file1.jpg', alternativeText: '', caption: '', focalPoint: null, folder: null },
+          { name: 'file2.png', alternativeText: '', caption: '', focalPoint: null, folder: null },
         ],
       };
 
       mockValidateUploadBody.mockResolvedValue({
         fileInfo: [
-          { name: 'file1.jpg', alternativeText: '', caption: '', folder: null },
-          { name: 'file2.png', alternativeText: '', caption: '', folder: null },
+          { name: 'file1.jpg', alternativeText: '', caption: '', focalPoint: null, folder: null },
+          { name: 'file2.png', alternativeText: '', caption: '', focalPoint: null, folder: null },
         ],
       });
 
@@ -299,8 +318,8 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       mockValidateUploadBody.mockResolvedValue({
         fileInfo: [
-          { name: 'file2.png', alternativeText: '', caption: '', folder: null },
-          { name: 'file1.jpg', alternativeText: '', caption: '', folder: null },
+          { name: 'file2.png', alternativeText: '', caption: '', focalPoint: null, folder: null },
+          { name: 'file1.jpg', alternativeText: '', caption: '', focalPoint: null, folder: null },
         ],
       });
 
@@ -336,7 +355,13 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       };
 
       mockValidateUploadBody.mockResolvedValue({
-        fileInfo: { name: 'single.jpg', folder: null, alternativeText: '', caption: '' },
+        fileInfo: {
+          name: 'single.jpg',
+          folder: null,
+          alternativeText: '',
+          caption: '',
+          focalPoint: null,
+        },
       });
 
       await adminUploadController.uploadFiles(mockContext as Context);
@@ -382,8 +407,11 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       expect(mockAiMetadataService.processFiles).toHaveBeenCalledWith([
         expect.objectContaining({
-          filepath: '/uploads/test.jpg',
-          mimetype: 'image/jpeg',
+          id: 1,
+          name: 'test.jpg',
+          url: '/uploads/test.jpg',
+          mime: 'image/jpeg',
+          provider: 'local',
         }),
       ]);
     });
@@ -414,7 +442,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
         { altText: 'AI generated alt text', caption: 'AI generated caption' },
       ]);
 
-      uploadService.upload.mockResolvedValue([
+      const uploadedFiles = [
         {
           id: 1,
           name: 'test.jpg',
@@ -422,17 +450,16 @@ describe('Admin Upload Controller - AI Service Connection', () => {
           url: '/uploads/test.jpg',
           provider: 'local',
         },
-      ]);
+      ];
+
+      uploadService.upload.mockResolvedValue(uploadedFiles);
 
       await adminUploadController.uploadFiles(mockContext as Context);
 
-      expect(uploadService.updateFileInfo).toHaveBeenCalledWith(
-        1,
-        {
-          alternativeText: 'AI generated alt text',
-          caption: 'AI generated caption',
-        },
-        { user: { id: 1 } }
+      expect(mockAiMetadataService.updateFilesWithAIMetadata).toHaveBeenCalledWith(
+        uploadedFiles,
+        [{ altText: 'AI generated alt text', caption: 'AI generated caption' }],
+        { id: 1 }
       );
     });
   });
@@ -447,6 +474,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
               name: 'fileA.jpg',
               caption: 'A',
               alternativeText: 'alternativeA',
+              focalPoint: null,
               folder: null,
             },
           },
@@ -456,6 +484,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
               name: 'fileB.jpg',
               alternativeText: 'alternativeB',
               caption: 'B',
+              focalPoint: null,
               folder: null,
             },
           },
@@ -472,13 +501,25 @@ describe('Admin Upload Controller - AI Service Connection', () => {
       expect(uploadService.updateFileInfo).toHaveBeenNthCalledWith(
         1,
         1,
-        { name: 'fileA.jpg', alternativeText: 'alternativeA', caption: 'A', folder: null },
+        {
+          name: 'fileA.jpg',
+          alternativeText: 'alternativeA',
+          caption: 'A',
+          focalPoint: null,
+          folder: null,
+        },
         { user: { id: 42 } }
       );
       expect(uploadService.updateFileInfo).toHaveBeenNthCalledWith(
         2,
         2,
-        { name: 'fileB.jpg', alternativeText: 'alternativeB', caption: 'B', folder: null },
+        {
+          name: 'fileB.jpg',
+          alternativeText: 'alternativeB',
+          caption: 'B',
+          focalPoint: null,
+          folder: null,
+        },
         { user: { id: 42 } }
       );
 
@@ -520,6 +561,7 @@ describe('Admin Upload Controller - AI Service Connection', () => {
               name: 'fileA.jpg',
               caption: 'X',
               alternativeText: 'alternativeA',
+              focalPoint: null,
               folder: null,
             },
           },
@@ -546,10 +588,12 @@ describe('Admin Upload Controller - AI Service Connection', () => {
               name: 'fileA.jpg',
               alternativeText: 'hello',
               caption: 'A',
+              focalPoint: null,
+              folder: null,
             },
           },
         ],
-      } as any);
+      });
 
       uploadService.updateFileInfo.mockResolvedValue({ id: 7 });
 
@@ -557,7 +601,13 @@ describe('Admin Upload Controller - AI Service Connection', () => {
 
       expect(uploadService.updateFileInfo).toHaveBeenCalledWith(
         7,
-        { name: 'fileA.jpg', alternativeText: 'hello', caption: 'A' },
+        {
+          name: 'fileA.jpg',
+          alternativeText: 'hello',
+          caption: 'A',
+          focalPoint: null,
+          folder: null,
+        },
         { user: { id: 42 } }
       );
     });

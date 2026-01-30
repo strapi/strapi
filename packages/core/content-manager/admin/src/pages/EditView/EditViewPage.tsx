@@ -7,9 +7,9 @@ import {
   useNotification,
   useQueryParams,
   tours,
-  RESPONSIVE_DEFAULT_SPACING,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Main, Tabs, Box } from '@strapi/design-system';
+import { Grid, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -129,7 +129,7 @@ const EditViewPage = () => {
   };
 
   return (
-    <Main paddingLeft={RESPONSIVE_DEFAULT_SPACING} paddingRight={RESPONSIVE_DEFAULT_SPACING}>
+    <Page.Main>
       <Page.Title>{pageTitle}</Page.Title>
       {isSingleType && (
         <tours.contentManager.Introduction>
@@ -167,61 +167,63 @@ const EditViewPage = () => {
             status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
             title={pageTitle}
           />
-          <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
-            <Tabs.List
-              aria-label={formatMessage({
-                id: getTranslation('containers.edit.tabs.label'),
-                defaultMessage: 'Document status',
-              })}
-            >
-              {hasDraftAndPublished ? (
-                <>
-                  <StatusTab value="draft">
-                    {formatMessage({
-                      id: getTranslation('containers.edit.tabs.draft'),
-                      defaultMessage: 'draft',
-                    })}
-                  </StatusTab>
-                  <StatusTab
-                    disabled={!meta || meta.availableStatus.length === 0}
-                    value="published"
-                  >
-                    {formatMessage({
-                      id: getTranslation('containers.edit.tabs.published'),
-                      defaultMessage: 'published',
-                    })}
-                  </StatusTab>
-                </>
-              ) : null}
-            </Tabs.List>
-            <Grid.Root
-              paddingTop={{
-                initial: 2,
-                medium: 4,
-                large: 8,
-              }}
-              gap={4}
-            >
-              <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
-                <Tabs.Content value="draft">
-                  <tours.contentManager.Fields>
-                    <Box />
-                  </tours.contentManager.Fields>
-                  <FormLayout layout={layout} document={doc} />
-                </Tabs.Content>
-                <Tabs.Content value="published">
-                  <FormLayout layout={layout} document={doc} />
-                </Tabs.Content>
-              </Grid.Item>
-              <Grid.Item col={3} xs={12} direction="column" alignItems="stretch">
-                <Panels />
-              </Grid.Item>
-            </Grid.Root>
-          </Tabs.Root>
+          <Layouts.Content>
+            <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
+              <Tabs.List
+                aria-label={formatMessage({
+                  id: getTranslation('containers.edit.tabs.label'),
+                  defaultMessage: 'Document status',
+                })}
+              >
+                {hasDraftAndPublished ? (
+                  <>
+                    <StatusTab value="draft">
+                      {formatMessage({
+                        id: getTranslation('containers.edit.tabs.draft'),
+                        defaultMessage: 'draft',
+                      })}
+                    </StatusTab>
+                    <StatusTab
+                      disabled={!meta || meta.availableStatus.length === 0}
+                      value="published"
+                    >
+                      {formatMessage({
+                        id: getTranslation('containers.edit.tabs.published'),
+                        defaultMessage: 'published',
+                      })}
+                    </StatusTab>
+                  </>
+                ) : null}
+              </Tabs.List>
+              <Grid.Root
+                paddingTop={{
+                  initial: 2,
+                  medium: 4,
+                  large: 8,
+                }}
+                gap={4}
+              >
+                <Grid.Item col={9} xs={12} direction="column" alignItems="stretch">
+                  <Tabs.Content value="draft">
+                    <tours.contentManager.Fields>
+                      <Box />
+                    </tours.contentManager.Fields>
+                    <FormLayout layout={layout} document={doc} />
+                  </Tabs.Content>
+                  <Tabs.Content value="published">
+                    <FormLayout layout={layout} document={doc} />
+                  </Tabs.Content>
+                </Grid.Item>
+                <Grid.Item col={3} xs={12} direction="column" alignItems="stretch">
+                  <Panels />
+                </Grid.Item>
+              </Grid.Root>
+            </Tabs.Root>
+          </Layouts.Content>
           <Blocker />
         </>
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 

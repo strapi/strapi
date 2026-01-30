@@ -18,7 +18,8 @@ const ActionLayout = ({ startActions, endActions }: ActionLayoutProps) => {
     <Flex
       justifyContent="space-between"
       alignItems="flex-start"
-      paddingBottom={4}
+      paddingBottom={{ initial: 2, medium: 4 }}
+      paddingTop={{ initial: 4, medium: 0 }}
       paddingLeft={RESPONSIVE_DEFAULT_SPACING}
       paddingRight={RESPONSIVE_DEFAULT_SPACING}
     >

@@ -1,0 +1,11 @@
+{
+  "collectionName": "components_shared_image_blocks",
+  "info": { "displayName": "image-block", "description": "Image data" },
+  "attributes": {
+    "alt": { "type": "string" },
+    "url": { "type": "string" },
+    "caption": { "type": "text" },
+    "width": { "type": "integer" },
+    "height": { "type": "integer" }
+  }
+}

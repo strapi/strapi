@@ -18,7 +18,7 @@
     "@strapi/provider-upload-cloudinary": "workspace:*",
     "@strapi/strapi": "workspace:*",
     "better-sqlite3": "12.4.1",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "mysql2": "3.9.8",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.11.1",
