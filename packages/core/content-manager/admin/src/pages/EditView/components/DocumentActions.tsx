@@ -1090,6 +1090,9 @@ const UpdateAction: DocumentActionComponent = ({
   );
   const { schema } = useDoc();
 
+  const suitableSchema = fromRelationModal ? relationalModalSchema : schema
+  const hasDraftAndPublished = suitableSchema.options?.draftAndPublish ?? false;
+
   const handleUpdate = async () => {
     setSubmitting(true);
 
@@ -1099,7 +1102,8 @@ const UpdateAction: DocumentActionComponent = ({
       }
 
       const { errors } = await validate(true, {
-        status: 'draft',
+        // enforce "published" validation if not using "draft and published"
+        status: !hasDraftAndPublished ? 'published' : 'draft',
       });
 
       if (errors) {
@@ -1141,7 +1145,7 @@ const UpdateAction: DocumentActionComponent = ({
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
         const { data } = handleInvisibleAttributes(transformData(document), {
-          schema: fromRelationModal ? relationalModalSchema : schema,
+          schema: suitableSchema,
           initialValues,
           components,
         });
