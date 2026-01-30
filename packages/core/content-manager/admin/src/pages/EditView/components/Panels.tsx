@@ -28,6 +28,32 @@ interface PanelDescription {
   title: string;
   content: React.ReactNode;
 }
+interface PanelsItemsProps {
+  panels: (PanelDescription & { id: string })[];
+  setVisiblePanels:
+    | React.Dispatch<React.SetStateAction<(PanelDescription & { id: string })[]>>
+    | null
+    | undefined;
+  visiblePanelsLength: number | undefined;
+}
+
+const PanelsItems = ({ panels, setVisiblePanels, visiblePanelsLength }: PanelsItemsProps) => {
+  React.useEffect(() => {
+    if (setVisiblePanels && visiblePanelsLength !== panels.length) {
+      setVisiblePanels(panels);
+    }
+  }, [panels, panels.length, setVisiblePanels, visiblePanelsLength]);
+
+  return (
+    <>
+      {panels.map(({ content, id, ...description }) => (
+        <Panel key={id} {...description}>
+          {content}
+        </Panel>
+      ))}
+    </>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Panels
@@ -66,24 +92,13 @@ const Panels = ({ withActions = true }: { withActions?: boolean }) => {
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
       <DescriptionComponentRenderer props={props} descriptions={panelsToDisplay}>
-        {(panels) => {
-          /**
-           * Since the context is optional, we first check if it is available
-           * by confirming setVisiblePanels is not undefined.
-           * Then we check if the panels have changed by comparing the length of the visiblePanels array.
-           * If the panels have changed, we update the context. Without this comparison, the context would be updated
-           * every time the panels are rendered, which would cause (infinite) re-renders.
-           */
-          if (setVisiblePanels && visiblePanels?.length !== panels.length) {
-            setVisiblePanels(panels);
-          }
-
-          return panels.map(({ content, id, ...description }) => (
-            <Panel key={id} {...description}>
-              {content}
-            </Panel>
-          ));
-        }}
+        {(panels) => (
+          <PanelsItems
+            panels={panels}
+            setVisiblePanels={setVisiblePanels}
+            visiblePanelsLength={visiblePanels?.length}
+          />
+        )}
       </DescriptionComponentRenderer>
     </Flex>
   );
