@@ -48,4 +48,11 @@ describe('RelativeTime', () => {
 
     expect(screen.getByRole('time')).toHaveTextContent('now');
   });
+
+  it('returns a fallback for invalid dates', () => {
+    render(<RelativeTime timestamp={new Date('invalid')} />);
+
+    expect(screen.getByRole('time')).not.toBeInTheDocument();
+    expect(screen.getByText('-')).toBeInTheDocument();
+  });
 });
