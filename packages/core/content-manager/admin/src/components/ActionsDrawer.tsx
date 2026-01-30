@@ -6,6 +6,16 @@ import { CaretDown, CaretUp } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+/**
+ * ActionsDrawer is a component used in the content manager edit view page and content history page.
+ * It's a sticky banner that can expand to reveal more actions. It's used only in mobile and tablet.
+ *
+ * A similar component is currently in development in the design-system but it's not ready yet.
+ * Using the Panels for the edit view page brought some complexity and for the moment, we decided to go with this custom implementation.
+ *
+ * @TODO: Replace this component with the one in the design-system when it's ready.
+ */
+
 /* -------------------------------------------------------------------------------------------------
  * ActionsDrawer Context
  * -----------------------------------------------------------------------------------------------*/
