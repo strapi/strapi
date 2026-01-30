@@ -20,16 +20,16 @@ import { ChevronDown, Files, GridFour as GridIcon, List } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { localStorageKeys, viewOptions } from '../../../constants';
-import { usePersistentState } from '../../../hooks/usePersistentState';
-import { getTrad } from '../../../utils';
-import { useUploadFilesMutation } from '../../services/api';
-import { useGetAssetsQuery } from '../../services/assets';
-import { getTranslationKey } from '../../utils/translations';
+import { localStorageKeys, viewOptions } from '../../constants';
+import { usePersistentState } from '../../hooks/usePersistentState';
+import { getTrad } from '../../utils';
+import { useUploadFilesMutation } from '../services/api';
+import { useGetAssetsQuery } from '../services/assets';
+import { getTranslationKey } from '../utils/translations';
 
-import { AssetsGrid } from './components/AssetsGrid';
-import { AssetsList } from './components/AssetsList';
-import { DEFAULT_SORT, type SortState } from './constants';
+import { AssetsGrid } from './Assets/components/AssetsGrid';
+import { AssetsList } from './Assets/components/AssetsList';
+import { DEFAULT_SORT, type SortState } from './Assets/constants';
 
 const StyledToggleGroup = styled(ToggleGroup.Root)`
   display: flex;
@@ -64,7 +64,7 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
   }
 `;
 
-export const AssetsPage = () => {
+export const MediaLibraryPage = () => {
   const { formatMessage } = useIntl();
 
   // Upload hooks
