@@ -9,7 +9,7 @@ import { getTrad } from '../utils';
 import { AIGenerationPage } from './pages/AIGenerationPage';
 import { AssetsPage } from './pages/Assets/AssetsPage';
 
-export const UnstableMediaLibraryPage = () => {
+export const UnstableMediaLibrary = () => {
   const { formatMessage } = useIntl();
   const title = formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });
 
