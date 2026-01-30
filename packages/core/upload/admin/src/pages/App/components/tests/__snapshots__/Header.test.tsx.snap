@@ -13,15 +13,11 @@ exports[`Header renders 1`] = `
   cursor: pointer;
 }
 
-.c7 {
-  min-width: 0;
-}
-
-.c10 {
+.c8 {
   width: 100%;
 }
 
-.c12 {
+.c10 {
   border-radius: 4px;
   cursor: pointer;
   padding-inline-start: 16px;
@@ -30,22 +26,21 @@ exports[`Header renders 1`] = `
 }
 
 .c1 {
-  gap: 8px;
+  gap: 12px;
   align-items: initial;
   flex-direction: column;
   display: flex;
 }
 
-.c6 {
-  gap: 16px;
+.c7 {
+  gap: 12px;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
   flex-direction: row;
   display: flex;
 }
 
-.c8 {
+.c9 {
+  gap: 8px;
   align-items: center;
   flex-direction: row;
   display: flex;
@@ -54,16 +49,15 @@ exports[`Header renders 1`] = `
 .c11 {
   gap: 8px;
   align-items: center;
-  flex-direction: row;
-  display: flex;
-}
-
-.c13 {
-  gap: 8px;
-  align-items: center;
   justify-content: center;
   flex-direction: row;
   display: inline-flex;
+}
+
+.c13 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c5 {
@@ -72,21 +66,21 @@ exports[`Header renders 1`] = `
   color: #4945ff;
 }
 
-.c9 {
+.c6 {
   font-weight: 600;
   font-size: 2.8rem;
   line-height: 1.14;
   color: currentcolor;
 }
 
-.c15 {
+.c14 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: currentcolor;
   font-weight: 600;
 }
 
-.c17 {
+.c16 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -105,7 +99,7 @@ exports[`Header renders 1`] = `
   color: inherit;
 }
 
-.c14 {
+.c12 {
   height: 4rem;
   text-decoration: none;
   border: 1px solid #d9d8ff;
@@ -113,24 +107,24 @@ exports[`Header renders 1`] = `
   color: #271fe0;
 }
 
-.c14:hover {
+.c12:hover {
   background-color: #ffffff;
 }
 
-.c14:active {
+.c12:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
   color: #4945ff;
 }
 
-.c14[aria-disabled='true'] {
+.c12[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
   cursor: default;
 }
 
-.c16 {
+.c15 {
   height: 4rem;
   text-decoration: none;
   border: 1px solid #4945ff;
@@ -138,17 +132,17 @@ exports[`Header renders 1`] = `
   color: #ffffff;
 }
 
-.c16:hover {
+.c15:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c15:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c16[aria-disabled='true'] {
+.c15[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
@@ -241,37 +235,37 @@ exports[`Header renders 1`] = `
 }
 
 @media (min-width: 768px) {
-  .c9 {
+  .c6 {
     font-size: 3.2rem;
   }
 }
 
 @media (min-width: 768px) {
-  .c9 {
+  .c6 {
     line-height: 1.25;
   }
 }
 
 @media (min-width: 768px) {
-  .c14 {
+  .c12 {
     height: 3.2rem;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c14 {
+  .c12 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (min-width: 768px) {
-  .c16 {
+  .c15 {
     height: 3.2rem;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c16 {
+  .c15 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -311,30 +305,26 @@ exports[`Header renders 1`] = `
               Back
             </span>
           </a>
-          <div
+          <h1
             class="c6"
+            style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;"
+          >
+            Media Library
+          </h1>
+          <div
+            class="c7"
           >
             <div
-              class="c7 c8"
-            >
-              <h1
-                class="c9"
-                style="word-break: break-word; overflow-wrap: break-word; max-width: 100%;"
-              >
-                Media Library
-              </h1>
-            </div>
-            <div
-              class="c10 c11"
+              class="c8 c9"
             >
               <button
                 aria-disabled="false"
-                class="c12 c13 c14"
+                class="c10 c11 c12"
                 type="button"
               >
                 <span
                   aria-hidden="true"
-                  class="c8"
+                  class="c13"
                 >
                   <svg
                     fill="currentColor"
@@ -349,19 +339,19 @@ exports[`Header renders 1`] = `
                   </svg>
                 </span>
                 <span
-                  class="c15"
+                  class="c14"
                 >
                   Add new folder
                 </span>
               </button>
               <button
                 aria-disabled="false"
-                class="c12 c13 c16"
+                class="c10 c11 c15"
                 type="button"
               >
                 <span
                   aria-hidden="true"
-                  class="c8"
+                  class="c13"
                 >
                   <svg
                     fill="currentColor"
@@ -376,7 +366,7 @@ exports[`Header renders 1`] = `
                   </svg>
                 </span>
                 <span
-                  class="c15"
+                  class="c14"
                 >
                   Add new assets
                 </span>
@@ -388,7 +378,7 @@ exports[`Header renders 1`] = `
     </div>
   </div>
   <span
-    class="c17"
+    class="c16"
   >
     <p
       aria-live="polite"

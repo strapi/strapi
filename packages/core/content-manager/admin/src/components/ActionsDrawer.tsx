@@ -59,7 +59,8 @@ const DrawerOverlay = styled(Box)<{ $isOpen: boolean; $hasSideNav: boolean }>`
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity ${(props) => props.theme.motion.timings['200']}
+    ${(props) => props.theme.motion.easings.easeOutQuad};
   opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
   pointer-events: ${({ $isOpen }) => ($isOpen ? 'auto' : 'none')};
 
@@ -94,7 +95,8 @@ const DrawerContentInner = styled(ScrollArea)<{ $isOpen: boolean }>`
       ? 'calc(100vh - 25rem)' // 25rem is arbitrary, to be able to see a bit of the content behind (navigation and header)
       : '0'};
   overflow: hidden;
-  transition: max-height 0.2s ease-in-out;
+  transition: max-height ${(props) => props.theme.motion.timings['200']}
+    ${(props) => props.theme.motion.easings.easeOutQuad};
   z-index: 1;
   pointer-events: auto;
 `;
