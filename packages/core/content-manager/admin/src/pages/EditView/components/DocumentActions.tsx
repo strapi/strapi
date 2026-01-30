@@ -1166,7 +1166,7 @@ const UpdateAction: DocumentActionComponent = ({
         }
       } else {
         const { data } = handleInvisibleAttributes(transformData(document), {
-          schema: fromRelationModal ? relationalModalSchema : schema,
+          schema: suitableSchema,
           initialValues,
           components,
         });
