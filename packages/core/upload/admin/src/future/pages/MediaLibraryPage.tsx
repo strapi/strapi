@@ -3,12 +3,13 @@ import * as React from 'react';
 import { Layouts, useNotification, useAPIErrorHandler } from '@strapi/admin/strapi-admin';
 import { MenuItem, SimpleMenu, VisuallyHidden } from '@strapi/design-system';
 import { ChevronDown, Files } from '@strapi/icons';
+import { useIntl } from 'react-intl';
 
-import { useTranslation } from '../hooks/useTranslation';
 import { useUploadFilesMutation } from '../services/api';
+import { getTranslation } from '../utils/translations';
 
 export const MediaLibraryPage = () => {
-  const { t } = useTranslation();
+  const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError } = useAPIErrorHandler();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -44,11 +45,14 @@ export const MediaLibraryPage = () => {
         await uploadFiles(formData).unwrap();
         toggleNotification({
           type: 'success',
-          message: t(
-            'assets.uploaded',
-            '{number, plural, one {# asset} other {# assets}} uploaded successfully',
+          message: formatMessage(
+            {
+              id: getTranslation('assets.uploaded'),
+              defaultMessage:
+                '{number, plural, one {# asset} other {# assets}} uploaded successfully',
+            },
             { number: filesArray.length }
-          ) as string,
+          ),
         });
       } catch (error) {
         // Format the error message using the API error handler to provide
@@ -76,10 +80,13 @@ export const MediaLibraryPage = () => {
             popoverPlacement="bottom-end"
             variant="default"
             endIcon={<ChevronDown />}
-            label={t('new', 'New')}
+            label={formatMessage({ id: getTranslation('new'), defaultMessage: 'New' })}
           >
             <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
-              {t('import-files', 'Import files')}
+              {formatMessage({
+                id: getTranslation('import-files'),
+                defaultMessage: 'Import files',
+              })}
             </MenuItem>
           </SimpleMenu>
         }
