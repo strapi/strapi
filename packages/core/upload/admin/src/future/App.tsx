@@ -7,7 +7,7 @@ import { Route, Routes } from 'react-router-dom';
 import { getTrad } from '../utils';
 
 import { AIGenerationPage } from './pages/AIGenerationPage';
-import { MediaLibraryPage } from './pages/MediaLibraryPage';
+import { AssetsPage } from './pages/Assets/AssetsPage';
 
 export const UnstableMediaLibraryPage = () => {
   const { formatMessage } = useIntl();
@@ -18,7 +18,7 @@ export const UnstableMediaLibraryPage = () => {
       <Page.Title>{title}</Page.Title>
 
       <Routes>
-        <Route index element={<MediaLibraryPage />} />
+        <Route index element={<AssetsPage />} />
         <Route path="ai-generation" element={<AIGenerationPage />} />
       </Routes>
     </Page.Main>

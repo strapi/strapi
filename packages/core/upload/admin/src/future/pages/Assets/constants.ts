@@ -1,21 +1,39 @@
-// TODO add new translations as needed
-// TODO correct sortability implementation ??
 import { getTrad } from '../../../utils';
 
-export const TABLE_HEADERS = [
+export type SortOrder = 'ASC' | 'DESC';
+
+export interface SortState {
+  field: string;
+  order: SortOrder;
+}
+
+export const DEFAULT_SORT: SortState = {
+  field: 'updatedAt',
+  order: 'DESC',
+};
+
+interface TableHeader {
+  name: string;
+  label: { id: string; defaultMessage: string };
+  isSortable: boolean;
+  isVisuallyHidden?: boolean;
+}
+
+export const TABLE_HEADERS: TableHeader[] = [
   {
     name: 'name',
     label: { id: getTrad('list.table.header.name'), defaultMessage: 'name' },
     isSortable: true,
   },
+  // TODO translation keys
   {
     name: 'createdAt',
-    label: { id: 'TODO', defaultMessage: 'creation date' },
+    label: { id: 'TODO: creation date', defaultMessage: 'creation date' },
     isSortable: true,
   },
   {
     name: 'updatedAt',
-    label: { id: 'TODO', defaultMessage: 'last modified' },
+    label: { id: 'TODO: last modified', defaultMessage: 'last modified' },
     isSortable: false,
   },
   {
@@ -29,4 +47,4 @@ export const TABLE_HEADERS = [
     isSortable: false,
     isVisuallyHidden: true,
   },
-] as const;
+];
