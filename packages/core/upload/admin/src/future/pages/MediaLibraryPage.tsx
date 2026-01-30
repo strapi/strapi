@@ -6,7 +6,7 @@ import { ChevronDown, Files } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useUploadFilesMutation } from '../services/api';
-import { getTranslation } from '../utils/translations';
+import { getTranslationKey } from '../utils/translations';
 
 export const MediaLibraryPage = () => {
   const { formatMessage } = useIntl();
@@ -47,7 +47,7 @@ export const MediaLibraryPage = () => {
           type: 'success',
           message: formatMessage(
             {
-              id: getTranslation('assets.uploaded'),
+              id: getTranslationKey('assets.uploaded'),
               defaultMessage:
                 '{number, plural, one {# asset} other {# assets}} uploaded successfully',
             },
@@ -80,11 +80,11 @@ export const MediaLibraryPage = () => {
             popoverPlacement="bottom-end"
             variant="default"
             endIcon={<ChevronDown />}
-            label={formatMessage({ id: getTranslation('new'), defaultMessage: 'New' })}
+            label={formatMessage({ id: getTranslationKey('new'), defaultMessage: 'New' })}
           >
             <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
               {formatMessage({
-                id: getTranslation('import-files'),
+                id: getTranslationKey('import-files'),
                 defaultMessage: 'Import files',
               })}
             </MenuItem>
