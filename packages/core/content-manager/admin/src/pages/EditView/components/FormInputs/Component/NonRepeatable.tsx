@@ -1,4 +1,4 @@
-import { useField, createRulesEngine } from '@strapi/admin/strapi-admin';
+import { useField, createRulesEngine, useIsMobile } from '@strapi/admin/strapi-admin';
 import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -22,6 +22,7 @@ const NonRepeatableComponent = ({
   const isNested = level > 0;
   const { currentDocument } = useDocumentContext('NonRepeatableComponent');
   const rulesEngine = createRulesEngine();
+  const isMobile = useIsMobile();
 
   return (
     <ComponentProvider id={value?.id} uid={attribute.component} level={level + 1} type="component">
@@ -32,7 +33,7 @@ const NonRepeatableComponent = ({
         paddingTop={6}
         paddingBottom={6}
         hasRadius={isNested}
-        borderColor={isNested ? 'neutral200' : undefined}
+        borderColor={isNested || isMobile ? 'neutral200' : undefined}
       >
         <Flex direction="column" alignItems="stretch" gap={6}>
           {layout.map((row, index) => {

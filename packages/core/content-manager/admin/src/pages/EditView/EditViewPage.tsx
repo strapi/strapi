@@ -205,7 +205,7 @@ const EditViewPage = () => {
               </Tabs.List>
               <Grid.Root
                 paddingTop={{
-                  initial: 2,
+                  initial: 6,
                   medium: 4,
                   large: 8,
                 }}
@@ -216,10 +216,10 @@ const EditViewPage = () => {
                     <tours.contentManager.Fields>
                       <Box />
                     </tours.contentManager.Fields>
-                    <FormLayout layout={layout} document={doc} />
+                    <FormLayout layout={layout} document={doc} hasBackground={isDesktop} />
                   </Tabs.Content>
                   <Tabs.Content value="published">
-                    <FormLayout layout={layout} document={doc} />
+                    <FormLayout layout={layout} document={doc} hasBackground={isDesktop} />
                   </Tabs.Content>
                 </Grid.Item>
                 {isDesktop && (
