@@ -9,14 +9,13 @@ import {
   tours,
   Layouts,
   useIsDesktop,
-  useIsMobile,
-  WIDTH_SIDE_NAVIGATION,
 } from '@strapi/admin/strapi-admin';
-import { Grid, Tabs, Box, Drawer } from '@strapi/design-system';
+import { Grid, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { ActionsDrawer } from '../../components/ActionsDrawer';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -30,7 +29,7 @@ import { createYupSchema } from '../../utils/validation';
 import { Blocker } from './components/Blocker';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
-import { ActionsPanelContent, Panels, PanelsProvider, usePanelsContext } from './components/Panels';
+import { Panels, PanelsProvider, usePanelsContext, ActionsPanelContent } from './components/Panels';
 import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
@@ -50,8 +49,8 @@ const EditViewPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDesktop = useIsDesktop();
-  const isMobile = useIsMobile();
   const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
+  const drawerHasContent = visiblePanels.length > 0;
 
   const doc = useDoc();
   const {
@@ -229,26 +228,15 @@ const EditViewPage = () => {
             </Tabs.Root>
             {!isDesktop && (
               <>
-                <Drawer.Root headerVisible>
-                  <Drawer.Content
-                    side="right"
-                    width={isMobile ? '100%' : `calc(100% - ${WIDTH_SIDE_NAVIGATION})`}
-                    maxHeight="80vh"
-                    padding={0}
-                  >
-                    <Drawer.Header
-                      borderColor="neutral150"
-                      borderWidth="1px 0 0 0"
-                      borderStyle="solid"
-                      hasToggle={visiblePanels.length > 0}
-                    >
-                      <ActionsPanelContent />
-                    </Drawer.Header>
-                    <Drawer.Body>
-                      <Panels withActions={false} />
-                    </Drawer.Body>
-                  </Drawer.Content>
-                </Drawer.Root>
+                <ActionsDrawer.Root hasContent={drawerHasContent} hasSideNav>
+                  <ActionsDrawer.Overlay />
+                  <ActionsDrawer.Header>
+                    <ActionsPanelContent />
+                  </ActionsDrawer.Header>
+                  <ActionsDrawer.Content>
+                    <Panels withActions={false} />
+                  </ActionsDrawer.Content>
+                </ActionsDrawer.Root>
                 {/* Adding a fixed height to the bottom of the page to prevent 
                 the actions drawer from covering the content
                 (40px button + 12px * 2 padding + 1px border) */}
