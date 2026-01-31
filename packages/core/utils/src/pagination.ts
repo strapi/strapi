@@ -33,7 +33,7 @@ const STRAPI_DEFAULTS = {
   },
   page: {
     page: 1,
-    pageSize: 10,
+    pageSize: 100,
   },
 };
 
@@ -167,7 +167,7 @@ const transformPagedPaginationInfo = (
   return {
     ...paginationInfo,
     page: 1,
-    pageSize: 10,
+    pageSize: 100,
     pageCount: 1,
     total,
   };
