@@ -229,6 +229,7 @@
   "plugin.description.short": "查看、编辑和删除数据库中数据的快速方法。",
   "popUpWarning.bodyMessage.contentType.delete": "您确定要删除内容类型吗？",
   "popUpWarning.bodyMessage.contentType.delete.all": "您确定要删除这些条目吗？",
+  "popUpWarning.bodyMessage.contentType.delete.additionalInfos": "这将会删除可用的语言版本<em>(来自国际化)</em>",
   "popUpWarning.bodyMessage.contentType.publish.all": "您确定要发布这些条目吗？",
   "popUpWarning.bodyMessage.contentType.unpublish.all": "您确定要取消发布这些条目吗？",
   "popUpWarning.warning.has-draft-relations.title": "确认",

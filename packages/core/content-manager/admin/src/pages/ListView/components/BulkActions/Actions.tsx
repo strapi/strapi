@@ -121,7 +121,7 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
           </Flex>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
-              id: 'popUpWarning.bodyMessage.contentType.delete.all',
+              id: getTranslation('popUpWarning.bodyMessage.contentType.delete.all'),
               defaultMessage: 'Are you sure you want to delete these entries?',
             })}
           </Typography>
@@ -130,7 +130,9 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
               <Typography textColor="danger500">
                 {formatMessage(
                   {
-                    id: getTranslation('Settings.list.actions.deleteAdditionalInfos'),
+                    id: getTranslation(
+                      'popUpWarning.bodyMessage.contentType.delete.additionalInfos'
+                    ),
                     defaultMessage:
                       'This will delete the active locale versions <em>(from Internationalization)</em>',
                   },
@@ -192,7 +194,7 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
           </Flex>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
-              id: 'popUpWarning.bodyMessage.contentType.unpublish.all',
+              id: getTranslation('popUpWarning.bodyMessage.contentType.unpublish.all'),
               defaultMessage: 'Are you sure you want to unpublish these entries?',
             })}
           </Typography>
