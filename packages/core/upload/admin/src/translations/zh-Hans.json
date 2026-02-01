@@ -25,7 +25,7 @@
   "form.upload-url.error.url.invalid": "有一个链接格式不合法",
   "form.upload-url.error.url.invalids": "{number}个链接格式不合法",
   "header.actions.upload-assets": "上传素材",
-  "header.content.assets": "{numberFolders, plural, one {1 folder} other {# folders}} - {numberAssets, plural, one {1 个素材} other {# 个素材}}",
+  "header.content.assets": "{numberFolders, plural, one {1 个文件夹} other {# 个文件夹}} - {numberAssets, plural, one {1 个素材} other {# 个素材}}",
   "input.button.label": "浏览文件",
   "input.label-bold": "拖拽至此",
   "input.label-normal": "并上传",
@@ -144,5 +144,18 @@
   "config.note": "注意：您可以在媒体库中覆盖此值",
   "config.popUpWarning.warning.updateAllSettings": "这将修改您的所有设置",
   "view-switch.list": "列表视图",
-  "view-switch.grid": "网格视图"
+  "view-switch.grid": "网格视图",
+  "control-card.remove-selection": "从选择中移除",
+  "settings.form.aiMetadata.label": "上传时自动生成 AI 标题和替代文本！",
+  "settings.form.aiMetadata.description": "启用此功能可节省时间、优化 SEO 并通过让我们的 AI 为您生成标题和替代文本来提高可访问性。",
+  "settings.form.aiMetadata.allAssetsHaveMetadata": "所有资产都有标题和替代文本",
+  "settings.form.aiMetadata.imagesWithoutMetadata": "{count, plural, one {# 张图片缺少标题或替代文本} other {# 张图片缺少标题或替代文本}}",
+  "settings.form.aiMetadata.generatingMetadata": "AI 正在生成您的元数据",
+  "settings.form.aiMetadata.metadataGenerated": "您的元数据已生成",
+  "settings.form.aiMetadata.generateButton": "生成元数据",
+  "settings.form.aiMetadata.confirmDialog.title": "生成 AI 元数据",
+  "settings.form.aiMetadata.confirmDialog.message": "这将在后台启动一个流程，为 {count, plural, one {# 张图片} other {# 张图片}} 生成标题和替代文本。AI 可能会犯错，请务必检查生成的内容。",
+  "ai.modal.uploading.title": "正在上传并使用 AI 处理...",
+  "ai.modal.title": "{count, plural, one {# 个资产已上传} other {# 个资产已上传}}，查看 AI 生成的元数据",
+  "ai.modal.error": "无法为上传的文件生成 AI 元数据。"
 }

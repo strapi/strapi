@@ -1,0 +1,481 @@
+{
+  "global": {
+    "id": 1,
+    "locale": "en",
+    "metaTitleSuffix": "Strapi 企业",
+    "metadata": {
+      "id": 1,
+      "metaTitle": "Strapi 企业网站启动器",
+      "metaDescription": "使用 Strapi 构建您的企业网站",
+      "twitterCardType": "summary",
+      "twitterUsername": "strapijs",
+      "shareImage": null
+    },
+    "notificationBanner": {
+      "id": 1,
+      "text": "此页面使用 Strapi 企业网站启动器构建。\n[查看其他 Strapi 启动器](https://strapi.io/starters)",
+      "type": "info"
+    },
+    "navbar": {
+      "id": 1,
+      "links": [
+        {
+          "id": 1,
+          "url": "/pricing",
+          "newTab": false,
+          "text": "定价"
+        },
+        {
+          "id": 3,
+          "url": "/contact",
+          "newTab": false,
+          "text": "联系我们"
+        }
+      ],
+      "button": {
+        "id": 13,
+        "url": "#",
+        "newTab": false,
+        "text": "注册",
+        "type": "secondary"
+      },
+      "logo": null
+    },
+    "footer": {
+      "id": 1,
+      "smallText": "© Copyright My Company™",
+      "columns": [
+        {
+          "id": 1,
+          "title": "产品",
+          "links": [
+            {
+              "id": 11,
+              "url": "#",
+              "newTab": false,
+              "text": "功能"
+            },
+            {
+              "id": 13,
+              "url": "#",
+              "newTab": false,
+              "text": "注册"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "法律",
+          "links": [
+            {
+              "id": 15,
+              "url": "#",
+              "newTab": false,
+              "text": "隐私政策"
+            },
+            {
+              "id": 16,
+              "url": "#",
+              "newTab": false,
+              "text": "条款和条件"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "公司",
+          "links": [
+            {
+              "id": 18,
+              "url": "#",
+              "newTab": false,
+              "text": "招聘"
+            },
+            {
+              "id": 21,
+              "url": "#",
+              "newTab": false,
+              "text": "团队"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "title": "社交",
+          "links": [
+            {
+              "id": 24,
+              "url": "#",
+              "newTab": false,
+              "text": "Twitter"
+            },
+            {
+              "id": 25,
+              "url": "#",
+              "newTab": false,
+              "text": "LinkedIn"
+            }
+          ]
+        }
+      ],
+      "logo": null
+    },
+    "favicon": null,
+    "localizations": [
+      {
+        "id": 2,
+        "locale": "fr"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": 1,
+      "slug": "",
+      "locale": "en",
+      "localizations": [
+        {
+          "id": 5,
+          "locale": "fr"
+        }
+      ],
+      "shortName": "首页",
+      "publishedAt": "2021-10-22T08:11:55.490Z",
+      "metadata": {
+        "id": 2,
+        "metaTitle": "Strapi 企业网站启动器",
+        "metaDescription": "使用 Strapi 构建完全可编辑的网站",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 1,
+          "__component": "sections.hero",
+          "title": "构建企业网站的最佳方式",
+          "label": "新的 Strapi 启动器",
+          "description": "几秒钟内开始使用您的 Strapi 商业网站。",
+          "smallTextWithLink": "想从头开始构建您自己的吗？教程即将推出",
+          "buttons": [
+            {
+              "id": 2,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": false,
+              "text": "开始使用",
+              "type": "primary"
+            },
+            {
+              "id": 4,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": true,
+              "text": "查看代码",
+              "type": "secondary"
+            }
+          ],
+          "picture": null
+        },
+        {
+          "id": 1,
+          "__component": "sections.feature-rows-group",
+          "features": [
+            {
+              "id": 1,
+              "title": "让营销团队构建他们的页面",
+              "description": "得益于预构建的 UI 部分列表，营销人员可以设计他们想要的页面。",
+              "link": {
+                "id": 7,
+                "url": "#",
+                "newTab": false,
+                "text": "查看 UI 部分列表"
+              },
+              "media": null
+            },
+            {
+              "id": 2,
+              "title": "让您的开发人员独自一人",
+              "description": "您可以在没有开发人员帮助的情况下发布、编辑和删除页面。您的技术团队终于可以专注于他们的任务。",
+              "link": {
+                "id": 8,
+                "url": "#",
+                "newTab": false,
+                "text": "查看如何创建页面"
+              },
+              "media": null
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "__component": "sections.feature-columns-group",
+          "features": [
+            {
+              "id": 1,
+              "title": "预览您的更改",
+              "description": "得益于集成的预览模式，您可以在发布之前可视化您的页面。",
+              "icon": null
+            },
+            {
+              "id": 2,
+              "title": "完全响应式",
+              "description": "此启动器在所有屏幕上都能很好地工作，无论是手机、平板电脑还是台式机。",
+              "icon": null
+            },
+            {
+              "id": 3,
+              "title": "易于定制",
+              "description": "我们使用 Tailwind 进行样式设计。您无需深入代码即可更改网站主题。",
+              "icon": null
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "__component": "sections.testimonials-group",
+          "title": "您的客户推荐语在这里",
+          "description": "此部分是您展示客户的地方。插入引语，并显示喜欢您产品的公司的徽标",
+          "link": {
+            "id": 2,
+            "url": "#",
+            "newTab": false,
+            "text": "所有推荐语"
+          },
+          "logos": [
+            {
+              "id": 1,
+              "title": "Strapi",
+              "logo": null
+            },
+            {
+              "id": 2,
+              "title": "Strapi 2",
+              "logo": null
+            },
+            {
+              "id": 3,
+              "title": "Strapi 3",
+              "logo": null
+            }
+          ],
+          "testimonials": [
+            {
+              "id": 1,
+              "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+              "authorName": "您的客户姓名",
+              "authorTitle": "快乐的客户",
+              "link": "#",
+              "logo": null,
+              "picture": null
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "__component": "sections.lead-form",
+          "title": "订阅我们的通讯",
+          "emailPlaceholder": "email@company.com",
+          "submitButton": {
+            "id": 1,
+            "__component": "links.button",
+            "text": "订阅",
+            "type": "primary"
+          },
+          "location": "首页底部"
+        },
+        {
+          "id": 2,
+          "__component": "sections.bottom-actions",
+          "title": "开始构建您的网站",
+          "buttons": [
+            {
+              "id": 7,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": false,
+              "text": "开始使用",
+              "type": "primary"
+            },
+            {
+              "id": 8,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": false,
+              "text": "查看代码",
+              "type": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "slug": "pricing",
+      "locale": "en",
+      "localizations": [
+        {
+          "id": 6,
+          "locale": "fr"
+        }
+      ],
+      "shortName": "定价",
+      "publishedAt": "2021-10-22T08:11:55.490Z",
+      "metadata": {
+        "id": 3,
+        "metaTitle": "定价",
+        "metaDescription": "不同的计划",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 1,
+          "__component": "sections.pricing",
+          "title": "清晰的定价表",
+          "plans": [
+            {
+              "id": 1,
+              "name": "业余爱好",
+              "description": "非常适合副业项目",
+              "isRecommended": null,
+              "price": 0,
+              "pricePeriod": "永远",
+              "features": [
+                {
+                  "id": 1,
+                  "name": "一个很酷的功能"
+                },
+                {
+                  "id": 2,
+                  "name": "另一个很酷的功能"
+                },
+                {
+                  "id": 3,
+                  "name": "其他很酷的功能"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "name": "高级",
+              "description": "针对中小企业的更高级计划",
+              "isRecommended": true,
+              "price": 20,
+              "pricePeriod": "每月",
+              "features": [
+                {
+                  "id": 4,
+                  "name": "最酷的功能"
+                },
+                {
+                  "id": 5,
+                  "name": "不错的功能"
+                },
+                {
+                  "id": 6,
+                  "name": "有趣的功能"
+                }
+              ]
+            },
+            {
+              "id": 3,
+              "name": "企业",
+              "description": "针对大公司需求",
+              "isRecommended": null,
+              "price": 299,
+              "pricePeriod": "每月",
+              "features": [
+                {
+                  "id": 7,
+                  "name": "惊人的功能"
+                },
+                {
+                  "id": 8,
+                  "name": "哇效功能"
+                },
+                {
+                  "id": 9,
+                  "name": "迷人的功能"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "slug": "secret",
+      "locale": "en",
+      "localizations": [
+        {
+          "id": 7,
+          "locale": "fr"
+        }
+      ],
+      "shortName": "秘密",
+      "metadata": {
+        "id": 7,
+        "metaTitle": "秘密页面",
+        "metaDescription": "仅预览页面",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 2,
+          "__component": "sections.rich-text",
+          "content": "## 秘密页面\n\n您只能在预览模式下查看此页面。"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "slug": "contact",
+      "locale": "en",
+      "localizations": [
+        {
+          "id": 8,
+          "locale": "fr"
+        }
+      ],
+      "shortName": "联系我们",
+      "publishedAt": "2021-10-22T08:11:55.490Z",
+      "metadata": {
+        "id": 4,
+        "metaTitle": "联系我们",
+        "metaDescription": "与我们的团队取得联系",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 1,
+          "__component": "sections.rich-text",
+          "content": "# 取得联系\n\n> 这是一个几乎完全依赖 RichText 部分的页面示例。它对于博客文章或法律条款等内容繁重的页面很有用。\n\n我们很乐意听取您的意见。\n\n## 社交媒体\n\n* [Twitter](#)\n* [Twitter](#)\n* [Twitter](#)\n\n## 邮政地址\n\n404 Headless Street\n__92210__ **Saint Cloud**, *France*\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "id": 1,
+          "__component": "sections.bottom-actions",
+          "title": "取得联系",
+          "buttons": [
+            {
+              "id": 1,
+              "url": "#",
+              "newTab": false,
+              "text": "发送邮件",
+              "type": "primary"
+            },
+            {
+              "id": 3,
+              "url": "#",
+              "newTab": false,
+              "text": "在 Twitter 上私信我们",
+              "type": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

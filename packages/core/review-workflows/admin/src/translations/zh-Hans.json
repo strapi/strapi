@@ -1,0 +1,17 @@
+{
+  "settings.page.title": "审查工作流",
+  "settings.page.subtitle": "{count, plural, one {# 个阶段} other {# 个阶段}}",
+  "settings.page.isLoading": "工作流正在加载",
+  "settings.page.delete.confirm.body": "分配给已删除阶段的所有条目都将移动到上一阶段。您确定要保存吗？",
+  "settings.stage.name.label": "阶段名称",
+  "settings.not-available": "审查工作流仅作为企业版的一部分提供。升级以创建和管理工作流。",
+  "settings.review-workflows.workflow.stageRequiredToPublish.label": "发布所需的阶段",
+  "settings.review-workflows.workflow.stageRequiredToPublish.any": "任何阶段",
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "如果条目不处于所需阶段，则阻止发布。",
+  "settings.page.purchase.description": "管理您的内容审查流程",
+  "settings.page.purchase.perks1": "可自定义的审查阶段",
+  "settings.page.purchase.perks2": "管理用户权限",
+  "settings.page.purchase.perks3": "支持 Webhook",
+  "widget.assigned.title": "分配给我",
+  "widget.assigned.no-data": "无条目"
+}

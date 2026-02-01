@@ -1,0 +1,8 @@
+{
+  "Analytics": "分析",
+  "Auth.components.Oops.text": "您的帐户已被暂停。",
+  "Auth.components.Oops.text.admin": "如果这是个错误，请联系您的管理员。",
+  "Auth.components.Oops.title": "糟糕...",
+  "Auth.form.button.forgot-password": "发送邮件",
+  "Auth.form.button.go-home": "返回首页"
+}
