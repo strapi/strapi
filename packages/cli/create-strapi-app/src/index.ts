@@ -50,6 +50,10 @@ const command = new commander.Command('create-strapi-app')
   .option('--git-init', 'Initialize a git repository')
   .option('--no-git-init', 'Do no initialize a git repository')
 
+  // A/B testing options
+  .option('--enable-ab-tests', 'Enable anonymous A/B testing')
+  .option('--no-enable-ab-tests', 'Disable anonymous A/B testing')
+
   // Database options
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
@@ -208,7 +212,13 @@ async function run(args: string[]): Promise<void> {
     scope.gitInit = await prompts.gitInit();
   }
 
-  scope.isABTestEnabled = await prompts.enableABTests();
+  if (options.enableAbTests === true) {
+    scope.isABTestEnabled = true;
+  } else if (options.enableAbTests === false || options.quickstart) {
+    scope.isABTestEnabled = false;
+  } else {
+    scope.isABTestEnabled = await prompts.enableABTests();
+  }
 
   addDatabaseDependencies(scope);
 
