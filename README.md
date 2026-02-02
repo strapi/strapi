@@ -1,170 +1,195 @@
-<p align="center">
-  <a href="https://strapi.io/#gh-light-mode-only">
-    <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
-  </a>
-  <a href="https://strapi.io/#gh-dark-mode-only">
-    <img src="https://strapi.io/assets/strapi-logo-light.svg" width="318px" alt="Strapi logo" />
-  </a>
-</p>
+# Strapi Task-1 – Local Setup & Exploration
 
-<h3 align="center">Open-source headless CMS, self-hosted or Cloud you’re in control.</h3>
-<p align="center">The leading open-source headless CMS, 100% JavaScript/TypeScript, flexible and fully customizable.</p>
-<p align="center"><a href="https://cloud.strapi.io/signups?source=github1">Cloud</a> · <a href="https://strapi.io/demo?utm_campaign=Growth-Experiments&utm_source=strapi%2Fstrapi%20README.md">Try live demo</a></p>
-<br />
+## 📌 Project Overview
 
-<p align="center">
-  <a href="https://www.npmjs.org/package/@strapi/strapi">
-    <img src="https://img.shields.io/npm/v/@strapi/strapi/latest.svg" alt="NPM Version" />
-  </a>
-  <a href="https://github.com/strapi/strapi/actions/workflows/tests.yml">
-    <img src="https://github.com/strapi/strapi/actions/workflows/tests.yml/badge.svg?branch=main" alt="Tests" />
-  </a>
-  <a href="https://discord.strapi.io">
-    <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
-  </a>
-  <a href="https://github.com/strapi/strapi/actions/workflows/nightly.yml">
-    <img src="https://github.com/strapi/strapi/actions/workflows/nightly.yml/badge.svg" alt="Strapi Nightly Release Build Status" />
-  </a>
-</p>
+This project is part of **Task-1 for PearlThoughts**.  
+The goal of this task is to **clone the Strapi codebase**, **run Strapi locally**, **explore the project structure**, **start the Admin Panel**, **create a sample content type**, and **document the complete process**.
 
-<br>
+Strapi is an open-source headless CMS built with **Node.js and TypeScript**, allowing developers to manage and deliver content via APIs.
 
-<p align="center">
-  <a href="https://strapi.io">
-    <img src="https://raw.githubusercontent.com/strapi/strapi/main/public/assets/admin-demo.gif" alt="Administration panel" />
-  </a>
-</p>
+## 🛠️ Tech Stack
 
-<br>
+- **Strapi v5**
+- **Node.js (LTS)**
+- **SQLite** (default database)
+- **Yarn / npm**
+- **Git & GitHub**
 
-Strapi Community Edition is a free and open-source headless CMS enabling you to manage any content, anywhere.
+## 📥 Repository Setup
 
-- **Self-hosted or Cloud**: You can host and scale Strapi projects the way you want. You can save time by deploying to [Strapi Cloud](https://cloud.strapi.io/signups?source=github1) or deploy to the hosting platform you want\*\*: AWS, Azure, Google Cloud, DigitalOcean.
-- **Modern Admin Panel**: Elegant, entirely customizable and a fully extensible admin panel.
-- **Multi-database support**: You can choose the database you prefer: PostgreSQL, MySQL, MariaDB, and SQLite.
-- **Customizable**: You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
-- **Blazing Fast and Robust**: Built on top of Node.js and TypeScript, Strapi delivers reliable and solid performance.
-- **Front-end Agnostic**: Use any front-end framework (React, Next.js, Vue, Angular, etc.), mobile apps or even IoT.
-- **Secure by default**: Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
-- **Powerful CLI**: Scaffold projects and APIs on the fly.
+### Step 1: Clone the Strapi Repository
 
-## Getting Started
-
-<a href="https://docs.strapi.io/developer-docs/latest/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
-
-### ⏳ Installation
-
-Use the **Quickstart** command below to create a new Strapi project instantly:
-
-- We recommend using **yarn** to create a Strapi project.  
-  [View yarn installation docs](https://yarnpkg.com/lang/en/docs/install/).
+The official Strapi repository was forked and cloned using my GitHub account:
 
 ```bash
-yarn create strapi
+git clone https://github.com/strapi/strapi.git
 ```
 
-**or**
+Note: Strapi uses develop as its default branch. A main branch was created manually, and all task-related work was done in a personal branch.
 
-(Using npx to install the Latest Version Strapi project.)
+## Step 2: Branch Strategy
+
+The following branches are used:
+
+- **develop** → Strapi default branch (untouched)
+- **main** → Stable baseline branch
+- **avinash-karri** → Personal working branch
+
+All task-related changes are committed to the personal branch and submitted via a Pull Request.
+
+## 🚀 Creating and Running the Strapi Project Locally
+
+A new Strapi project was created using the Strapi CLI:
 
 ```bash
-npx create-strapi@latest
+npx create-strapi@latest my-strapi-app
+cd my-strapi-app
 ```
 
-This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
+Install dependencies and start the development server:
 
-Enjoy 🎉
+```bash
+yarn develop
+```
 
-### 🖐 Requirements
+Strapi runs locally at:
 
-Complete installation requirements can be found in the documentation under <a href="https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/deployment.html">Installation Requirements</a>.
+```bash
+http://localhost:1337
+```
 
-**Supported operating systems**:
+## 🔐 Admin Panel Access
 
-| OS              | Recommended | Minimum    |
-| --------------- | ----------- | ---------- |
-| Ubuntu          | 24.04       | LTS        |
-| Debian          | 11          | LTS        |
-| RHEL            | 9           | LTS        |
-| macOS           | 14          | 12         |
-| Windows Desktop | 11          | 10         |
-| Windows Server  | No Support  | No Support |
-| Docker          | N/A         | N/A        |
+The Strapi Admin Panel can be accessed at:  
+👉 [http://localhost:1337/admin](http://localhost:1337/admin)
 
-(Please note that Strapi may work on other operating systems, but these are not tested nor officially supported at this time.)
+### Steps Performed
 
-**Node:**
+- Created an admin user
+- Logged into the admin dashboard
+- Verified **Content Manager** and **Content-Type Builder** access
 
-Strapi only supports maintenance and LTS versions of Node.js. Please refer to the <a href="https://nodejs.org/en/about/releases/">Node.js release schedule</a> for more information. NPM versions installed by default with Node.js are supported. Generally it's recommended to use yarn over npm where possible.
+## 🧱 Project Folder Structure
 
-| Strapi Version  | Recommended | Minimum |
-| --------------- | ----------- | ------- |
-| 5.31.0 and up   | 24.x        | 20.x    |
-| 5.0.0 to 5.30.1 | 20.x        | 18.x    |
-| 4.14.5 and up   | 20.x        | 18.x    |
-| 4.11.0 and up   | 18.x        | 16.x    |
-| 4.3.9 to 4.10.x | 18.x        | 14.x    |
-| 4.0.x to 4.3.8  | 16.x        | 14.x    |
+Below is the main structure of the created Strapi project:
 
-**Database:**
+```
+my-strapi-app/
+├── .strapi/              # Strapi internal configuration
+├── .tmp/                 # Temporary build files
+├── config/               # Environment and server configuration
+├── database/             # SQLite database files
+├── dist/                 # Build output
+├── node_modules/         # Project dependencies
+├── public/               # Static assets
+├── src/
+│   ├── admin/            # Admin panel source (customization)
+│   ├── api/              # Core logic: Content Types, Controllers, Services, & Routes
+│   ├── extensions/       # Overrides for installed plugins
+│   └── index.ts          # Entry point for register/bootstrap functions
+├── .env                  # Environment variables (secrets/keys)
+├── package.json          # Project metadata, dependencies, & scripts
+├── tsconfig.json         # TypeScript configuration
+└── README.md             # Project documentation
+```
 
-| Database   | Recommended | Minimum |
-| ---------- | ----------- | ------- |
-| MySQL      | 8.0         | 8.0     |
-| MariaDB    | 11.2        | 10.3    |
-| PostgreSQL | 16.0        | 14.0    |
-| SQLite     | 3           | 3       |
+## 📝 Sample Content Type Creation
 
-**We recommend always using the latest version of Strapi stable to start your new projects**.
+### Content Type: Article
 
-## Features
+A sample collection type named **Article** was created using the Content-Type Builder.
 
-- **Content Types Builder**: Build the most flexible publishing experience for your content managers, by giving them the freedom to create any page on the go with [fields](https://docs.strapi.io/user-docs/content-manager/writing-content#filling-up-fields), components and [Dynamic Zones](https://docs.strapi.io/user-docs/content-manager/writing-content#dynamic-zones).
-- **Media Library**: Upload your images, videos, audio or documents to the media library. Easily find the right asset, edit and reuse it.
-- **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales"
-- **Role Based Access Control**: Create an unlimited number of custom roles and permissions for admin and end users.
-- **GraphQL or REST**: Consume the API using REST or GraphQL
+### Fields:
 
-You can unlock additional features such as SSO, Audit Logs, Review Workflows in [Strapi Cloud](https://cloud.strapi.io/login?source=github1) or [Strapi Enterprise](https://strapi.io/enterprise?source=github1).
+| Field Name     | Type      |
+| :------------- | :-------- |
+| title          | Text      |
+| description    | Rich Text |
+| published_date | Date      |
 
-**[See more on our website](https://strapi.io/overview)**.
+### API Structure:
 
-## Contributing
+This created the following directory structure in your project:
 
-Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull Request to the project.
+```text
+src/api/article/
+├── content-types/
+│   └── article/
+│       └── schema.json    # The schema definition for your fields
+├── controllers/
+│   └── article.ts        # Custom logic for Article endpoints
+├── routes/
+│   └── article.ts        # Route configurations
+└── services/
+    └── article.ts        # Reusable business logic
 
-## Community support
+```
 
-For general help using Strapi, please refer to [the official Strapi documentation](https://docs.strapi.io). For additional help, you can use one of these channels to ask a question:
+## 📄 Adding Sample Content
 
-- [Discord](https://discord.strapi.io) (For live discussion with the Community and Strapi team)
-- [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
-- [Community Forum](https://forum.strapi.io) (Questions and Discussions)
-- [Feedback section](https://feedback.strapi.io) (Roadmap, Feature requests)
-- [Twitter](https://twitter.com/strapijs) (Get the news fast)
-- [Facebook](https://www.facebook.com/Strapi-616063331867161)
-- [YouTube Channel](https://www.youtube.com/strapi) (Learn from Video Tutorials)
+**Steps followed:**
 
-## Migration
+- Opened **Content Manager**
+- Selected **Article**
+- Created a new entry with sample data
+- Saved and published the entry
 
-Follow our [migration guides](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides.html) on the documentation to keep your projects up-to-date.
+## 🔗 API Verification
 
-## Roadmap
+The Article API can be accessed at:
 
-Check out our [roadmap](https://feedback.strapi.io) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
+> [http://localhost:1337/api/articles](http://localhost:1337/api/articles)
 
-## Documentation
+**Permissions enabled from:**
+`Settings` → `Users & Permissions` → `Public` → `Article` → `find` / `findOne`
 
-See our dedicated [repository](https://github.com/strapi/documentation) for the Strapi documentation, or view our documentation live:
+## 📌 Git Workflow
 
-- [Developer docs](https://docs.strapi.io/developer-docs/latest/getting-started/introduction.html)
-- [User guide](https://docs.strapi.io/user-docs/latest/getting-started/introduction.html)
-- [Cloud guide](https://docs.strapi.io/cloud/intro)
+All changes were committed and pushed using the following commands:
 
-## Try live demo
+```bash
+git add .
+git commit -m "Task-1: Created Strapi project and Article content type"
+git push origin avinash-karri
+```
 
-See for yourself what's under the hood by getting access to a [hosted Strapi project](https://strapi.io/demo) with sample data.
+A Pull Request was raised from:
 
-## License
+```
+avinash-karri → main
+```
 
-See the [LICENSE](./LICENSE) file for licensing information.
+### 🎥 Loom Video
+
+A Loom video was recorded demonstrating the following:
+
+| Category              | Details                                |
+| :-------------------- | :------------------------------------- |
+| **Git**               | Repository & branch structure          |
+| **Project**           | Project folder structure               |
+| **Local Environment** | Running Strapi locally                 |
+| **Dashboard**         | Admin Panel access                     |
+| **Development**       | Content type creation & Sample content |
+| **Process**           | Pull Request overview                  |
+
+**📎 Loom link:** _https://www.loom.com/share/8a4bc8ebe9af458486a76cb4a09dcb25_
+
+---
+
+### ✅ Task Completion Summary
+
+- Cloned Strapi repository
+- Ran Strapi locally
+- Explored project structure
+- Started Admin Panel
+- Created sample content type
+- Added sample data
+- Documented steps in README
+- Created branch and raised PR
+- Recorded Loom video
+
+---
+
+<p align="center">
+  <b>👤 Author: Avinash Karri</b>
+</p>
