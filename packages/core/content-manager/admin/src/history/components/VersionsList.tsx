@@ -206,6 +206,7 @@ const VersionsList = () => {
         borderWidth="0 0 1px"
         borderStyle="solid"
         tag="header"
+        role="banner"
       >
         <Typography tag="h2" variant="omega" fontWeight="semiBold">
           {formatMessage({

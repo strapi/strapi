@@ -248,12 +248,12 @@ const ProtectedHistoryPageImpl = () => {
   if (error || !slug) {
     return (
       <Box
-        height="100dvh"
         width="100dvw"
         position="fixed"
         top={{ initial: HEIGHT_TOP_NAVIGATION, medium: HEIGHT_TOP_NAVIGATION_MEDIUM, large: 0 }}
+        bottom={0}
         left={0}
-        zIndex={4}
+        zIndex={{ initial: 4, large: 13 }}
         background="neutral0"
       >
         <Page.Error />
@@ -263,12 +263,12 @@ const ProtectedHistoryPageImpl = () => {
 
   return (
     <Box
-      height="100dvh"
       width="100dvw"
       position="fixed"
       top={{ initial: HEIGHT_TOP_NAVIGATION, medium: HEIGHT_TOP_NAVIGATION_MEDIUM, large: 0 }}
+      bottom={0}
       left={0}
-      zIndex={4}
+      zIndex={{ initial: 4, large: 13 }}
       background="neutral0"
     >
       <Page.Protect permissions={permissions}>
