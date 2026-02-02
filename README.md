@@ -168,3 +168,8 @@ See for yourself what's under the hood by getting access to a [hosted Strapi pro
 ## License
 
 See the [LICENSE](./LICENSE) file for licensing information.
+
+
+## Task-1
+Cloned repo, created branch task1_strapi, installed dependencies, ran Strapi, created sample content type.
+
