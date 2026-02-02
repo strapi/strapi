@@ -58,7 +58,10 @@ describe('Header', () => {
     ).toBeInTheDocument();
 
     await waitFor(async () =>
-      expect(await screen.findByRole('button', { name: 'More actions' })).toBeDisabled()
+      expect(await screen.findByRole('button', { name: 'More actions' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      )
     );
   });
 
@@ -76,7 +79,10 @@ describe('Header', () => {
     expect(await screen.findByText('Modified')).toBeInTheDocument();
 
     await waitFor(async () =>
-      expect(await screen.findByRole('button', { name: 'More actions' })).toBeDisabled()
+      expect(await screen.findByRole('button', { name: 'More actions' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      )
     );
   });
 
@@ -88,7 +94,10 @@ describe('Header', () => {
     await waitFor(() => expect(screen.queryByText('Modified')).not.toBeInTheDocument());
 
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'More actions' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'More actions' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      )
     );
   });
 
