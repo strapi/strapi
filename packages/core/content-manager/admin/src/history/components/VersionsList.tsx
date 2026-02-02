@@ -191,7 +191,8 @@ const VersionsList = () => {
       direction="column"
       alignItems="stretch"
       width={{ initial: '28rem', large: '32rem' }}
-      height="100dvh"
+      height="100%"
+      overflow="hidden"
       background="neutral0"
       borderColor="neutral200"
       borderWidth="0 0 0 1px"
@@ -251,8 +252,8 @@ const VersionsList = () => {
       </ActionsDrawer.Root>
       {/* Adding a fixed height to the bottom of the page to prevent 
       the actions drawer from covering the content
-      (40px button + 12px * 2 padding + 1px border) */}
-      <Box width="100%" height="6.5rem" />
+      (32px + 12px * 2 padding + 1px border) */}
+      <Box width="100%" height="5.7rem" />
     </>
   );
 };

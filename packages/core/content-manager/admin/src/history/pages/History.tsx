@@ -6,7 +6,6 @@ import {
   createContext,
   useRBAC,
   HEIGHT_TOP_NAVIGATION,
-  HEIGHT_TOP_NAVIGATION_MEDIUM,
 } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, Main, Portal, Link } from '@strapi/design-system';
 import { stringify } from 'qs';
@@ -208,13 +207,19 @@ const HistoryPage = () => {
         page={page}
         mainField={mainField}
       >
-        <Flex direction={{ initial: 'column', medium: 'row' }} alignItems="flex-start">
+        <Flex
+          direction={{ initial: 'column', medium: 'row' }}
+          alignItems="flex-start"
+          height="100%"
+          overflow="hidden"
+        >
           <Main
             grow={1}
-            height="100dvh"
+            width="100%"
+            height="100%"
             background="neutral100"
             paddingBottom={6}
-            overflow="auto"
+            overflow="hidden auto"
             labelledBy={headerId}
           >
             <VersionHeader headerId={headerId} />
@@ -250,10 +255,10 @@ const ProtectedHistoryPageImpl = () => {
       <Box
         width="100dvw"
         position="fixed"
-        top={{ initial: HEIGHT_TOP_NAVIGATION, medium: HEIGHT_TOP_NAVIGATION_MEDIUM, large: 0 }}
+        top={{ initial: HEIGHT_TOP_NAVIGATION, large: 0 }}
         bottom={0}
         left={0}
-        zIndex={{ initial: 4, large: 13 }}
+        zIndex={{ initial: 3, large: 13 }}
         background="neutral0"
       >
         <Page.Error />
@@ -265,10 +270,10 @@ const ProtectedHistoryPageImpl = () => {
     <Box
       width="100dvw"
       position="fixed"
-      top={{ initial: HEIGHT_TOP_NAVIGATION, medium: HEIGHT_TOP_NAVIGATION_MEDIUM, large: 0 }}
+      top={{ initial: HEIGHT_TOP_NAVIGATION, large: 0 }}
       bottom={0}
       left={0}
-      zIndex={{ initial: 4, large: 13 }}
+      zIndex={{ initial: 3, large: 13 }}
       background="neutral0"
     >
       <Page.Protect permissions={permissions}>
