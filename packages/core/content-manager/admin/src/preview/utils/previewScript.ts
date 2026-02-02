@@ -634,7 +634,61 @@ const previewScript = (config: PreviewScriptConfig) => {
             if (isMediaElement(element)) {
               // Value can be a media object with url property, or a string URL
               const url = typeof value === 'object' && value !== null ? value.url : value;
-              element.setAttribute('src', url || '');
+              const mime = typeof value === 'object' && value !== null ? value.mime : undefined;
+
+              if (url) {
+                // Check if the media type matches the element type
+                const isImage = element.tagName === 'IMG';
+                const isVideo = element.tagName === 'VIDEO';
+                const isImageMime = mime?.startsWith('image/');
+                const isVideoMime = mime?.startsWith('video/');
+
+                // Check if we need to replace the element due to media type mismatch
+                const needsReplacement =
+                  mime && ((isImage && isVideoMime) || (isVideo && isImageMime));
+
+                if (needsReplacement) {
+                  // Create a new element of the correct type
+                  const newTagName = isImageMime ? 'IMG' : 'VIDEO';
+                  const newElement = document.createElement(newTagName);
+
+                  // Copy all attributes from the old element
+                  Array.from(element.attributes).forEach((attr) => {
+                    newElement.setAttribute(attr.name, attr.value);
+                  });
+
+                  // Set the new src
+                  newElement.setAttribute('src', url);
+
+                  // Copy inline styles
+                  newElement.style.cssText = element.style.cssText;
+                  newElement.style.display = '';
+
+                  // For video elements, add common attributes
+                  if (newTagName === 'VIDEO') {
+                    newElement.setAttribute('controls', '');
+                  }
+
+                  // Replace the old element with the new one
+                  element.parentNode?.replaceChild(newElement, element);
+                } else {
+                  // Same media type, just update the src
+                  const shouldShow = !mime || (isImage && isImageMime) || (isVideo && isVideoMime);
+
+                  if (shouldShow) {
+                    element.setAttribute('src', url);
+                    element.style.display = '';
+                  } else {
+                    // Hide if no mime info and types don't match (shouldn't happen)
+                    element.style.display = 'none';
+                    element.removeAttribute('src');
+                  }
+                }
+              } else {
+                // Hide element when media is deleted/empty instead of showing broken media
+                element.style.display = 'none';
+                element.removeAttribute('src');
+              }
             } else {
               element.textContent = value || '';
             }
