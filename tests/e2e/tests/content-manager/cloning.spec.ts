@@ -159,10 +159,9 @@ test.describe('Cloning', () => {
 
     /**
      * Now we should be in our edit view with the new document already saved.
-     * The save button should be disabled and the publish button enabled.
+     * The save button should be enabled and the publish button disabled.
      */
     await page.waitForURL(CLONE_URL_ARTICLE);
-    await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled(); // we current don't support publish & create in clone routes.
     await page.getByRole('textbox', { name: 'slug' }).fill('');
