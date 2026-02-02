@@ -46,7 +46,7 @@ To run this project locally, follow these steps:
 
 ## 🎥 Video Demonstration
 
-[PASTE YOUR VIDEO LINK HERE]
+[https://www.loom.com/share/6e5266cc5068439ba547413e52d44e24]
 
 ---
 
