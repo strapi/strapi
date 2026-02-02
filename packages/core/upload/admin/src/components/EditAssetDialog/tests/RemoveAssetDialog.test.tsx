@@ -140,5 +140,6 @@ describe('RemoveAssetDialog', () => {
     await user.click(screen.getByText('Cancel'));
 
     expect(handleCloseSpy).toHaveBeenCalled();
+    expect(handleCloseSpy).not.toHaveBeenCalledWith(null);
   });
 });
