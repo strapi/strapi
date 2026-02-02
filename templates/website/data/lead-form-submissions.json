@@ -1,0 +1,19 @@
+{
+  "leadFormSubmissions": [
+    {
+      "email": "johne@thebeatles.com",
+      "status": "seen",
+      "location": "Home Page Bottom"
+    },
+    {
+      "email": "paul@thebeatles.com",
+      "status": "contacted",
+      "location": "Home Page Bottom"
+    },
+    {
+      "email": "george@thebeatles.com",
+      "status": "ignored",
+      "location": "Home Page Bottom"
+    }
+  ]
+}

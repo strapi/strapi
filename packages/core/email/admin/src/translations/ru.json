@@ -1,0 +1,23 @@
+{
+  "link": "Ссылка",
+  "Settings.email.plugin.button.test-email": "Отправить тестовое письмо",
+  "Settings.email.plugin.label.defaultFrom": "Email отправителя по умолчанию",
+  "Settings.email.plugin.label.defaultReplyTo": "Email ответа по умолчанию",
+  "Settings.email.plugin.label.provider": "Провайдер email",
+  "Settings.email.plugin.label.testAddress": "Email получателя",
+  "Settings.email.plugin.notification.config.error": "Не удалось получить конфигурацию email",
+  "Settings.email.plugin.notification.data.loaded": "Данные настроек email загружены",
+  "Settings.email.plugin.notification.test.error": "Не удалось отправить тестовое письмо на {to}",
+  "Settings.email.plugin.notification.test.success": "Тест email прошел успешно, проверьте почтовый ящик {to}",
+  "Settings.email.plugin.placeholder.defaultFrom": "напр.: Strapi No-Reply <no-reply@strapi.io>",
+  "Settings.email.plugin.placeholder.defaultReplyTo": "напр.: Strapi <example@strapi.io>",
+  "Settings.email.plugin.placeholder.testAddress": "напр.: developer@example.com",
+  "Settings.email.plugin.subTitle": "Протестируйте настройки для плагина Email",
+  "Settings.email.plugin.text.configuration": "Плагин настраивается через файл {file}, ознакомьтесь с {link} для документации.",
+  "Settings.email.plugin.title": "Конфигурация",
+  "Settings.email.plugin.title.config": "Конфигурация",
+  "Settings.email.plugin.title.test": "Тест доставки email",
+  "SettingsNav.link.settings": "Настройки",
+  "SettingsNav.section-label": "Плагин Email",
+  "components.Input.error.validation.email": "Это недействительный email"
+}

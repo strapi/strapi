@@ -1,0 +1,101 @@
+{
+  "name": "@strapi/admin-test-utils",
+  "version": "5.34.0",
+  "private": true,
+  "description": "Test utilities for the Strapi administration panel",
+  "license": "MIT",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "module": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "source": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./after-env": {
+      "types": "./dist/after-env.d.ts",
+      "module": "./dist/after-env.mjs",
+      "require": "./dist/after-env.js",
+      "source": "./src/after-env.ts",
+      "default": "./dist/after-env.js"
+    },
+    "./environment": {
+      "types": "./dist/environment.d.ts",
+      "module": "./dist/environment.mjs",
+      "require": "./dist/environment.js",
+      "source": "./src/environment.ts",
+      "default": "./dist/environment.js"
+    },
+    "./file-mock": {
+      "types": "./dist/file-mock.d.ts",
+      "module": "./dist/file-mock.mjs",
+      "require": "./dist/file-mock.js",
+      "source": "./src/file-mock.ts",
+      "default": "./dist/file-mock.js"
+    },
+    "./global-setup": {
+      "types": "./dist/global-setup.d.ts",
+      "module": "./dist/global-setup.mjs",
+      "require": "./dist/global-setup.js",
+      "source": "./src/global-setup.ts",
+      "default": "./dist/global-setup.js"
+    },
+    "./setup": {
+      "types": "./dist/setup.d.ts",
+      "module": "./dist/setup.mjs",
+      "require": "./dist/setup.js",
+      "source": "./src/setup.ts",
+      "default": "./dist/setup.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "run -T run-p build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "watch": "run -T run-p watch:code watch:types",
+    "watch:code": "run -T rollup -c -w",
+    "watch:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly -w",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:ts": "run -T tsc --noEmit"
+  },
+  "dependencies": {
+    "@juggle/resize-observer": "3.4.0",
+    "jest-styled-components": "7.1.1",
+    "whatwg-fetch": "3.6.2"
+  },
+  "devDependencies": {
+    "@reduxjs/toolkit": "1.9.7",
+    "@testing-library/jest-dom": "6.4.5",
+    "eslint-config-custom": "5.34.0",
+    "jest-environment-jsdom": "29.6.1",
+    "styled-components": "6.1.8",
+    "tsconfig": "5.34.0"
+  },
+  "peerDependencies": {
+    "@reduxjs/toolkit": "^1.9.7",
+    "@testing-library/jest-dom": "^5.16.5",
+    "jest-environment-jsdom": "^29.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x"
+  }
+}

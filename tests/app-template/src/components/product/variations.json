@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_product_variations",
+  "info": {
+    "displayName": "variations"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "price": {
+      "type": "decimal"
+    },
+    "sku": {
+      "type": "integer"
+    }
+  }
+}

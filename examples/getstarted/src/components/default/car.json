@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_default_cars",
+  "info": {
+    "displayName": "car",
+    "icon": "align-right"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}

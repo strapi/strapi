@@ -1,0 +1,574 @@
+---
+title: FE Coding Guidelines
+---
+
+## Coding Style
+
+### Application Structure
+
+The FE of Strapi aims to be a domain driven application such as we heavily utilise the concept of
+nested routes:
+
+```shell
+pages/
+├─ index.tsx
+├─ settings/
+│  ├─ pages/
+│  │  ├─ index.tsx
+│  │  ├─ users/
+│  │  ├─ roles/
+│  │  │  ├─ create.tsx
+│  │  │  ├─ :id.tsx
+│  │  │  ├─ index.tsx
+```
+
+As part of this effort, assuming a component is not used anywhere else it should live as close as
+possible to the section of the app it's used in:
+
+```shell
+pages/
+├─ index.tsx
+├─ settings/
+│  ├─ components/
+│  │  ├─ SettingsNavigation.tsx
+│  ├─ hooks/
+│  │  ├─ useSettings.ts
+│  ├─ pages/
+│  │  ├─ index.tsx
+│  │  ├─ users/
+│  │  ├─ roles/
+│  │  │  ├─ create.tsx
+│  │  │  ├─ :id.tsx
+│  │  │  ├─ index.tsx
+```
+
+When components/hooks etc. are required higher in the tree, we can subsequently move them higher up
+as necessary. But we strive for colocation.
+
+### Exports
+
+Prefer named exports over default exports. Why? Because Strapi is a _very_ large codebase. If you
+export something as `default` someone can import it with a different name:
+
+```jsx
+// button.tsx
+
+const MyButton = (props) => <button {...props} />;
+
+export default MyButton;
+
+// form.tsx
+import Button from './button';
+
+// NAMED EXPORT
+export const Form = () => <Button type="button">Submit</Button>;
+```
+
+Above is a simple component for illustration purposes, but you'd be likely to use the `MyButton`
+component in _a lot_ of places, so what happens if you want to replace all instances with a new v2
+Button? If the naming is not as consistent, it's typically a lot more frustrating & can lead to
+bugs.
+
+### Utilities / Helpers
+
+When you need a utility function ask yourself a question – do I need this _anywhere_ else? If you
+don't (which is fairly typical) include it in the file you're using it. As a guide, we expect
+anything exported to be unit-tested and if a utility or hook is unique and bespoke to the component
+you're creating then it's advised to test that code in the context of said component, this is
+covered in the Testing guides below.
+
+If you do need to use the utility elsewhere then follow the same practices shown in
+[Application Structure](#application-structure) keep it as close to where it's used as possible.
+Avoid re-exporting them from a generic `index` file. However, you might find it useful to group them
+under a generic file name such as `strings.ts` which would include all the `string` utils you have.
+
+### Components & Hooks
+
+With components and hooks, to improve code discoverability, opt for this pattern instead:
+
+```shell
+hooks/
+├─ tests/
+│  ├─ useContentManager.test.ts
+├─ useContentManager.ts
+```
+
+### Memoization
+
+Premature optimisation is the root of all evil. Performance of the application _is_ important
+however it should be measurable before we attempt to solve the issue as these
+functions _are not free._ Take this example:
+
+```jsx
+const FormButton = () => {
+  const handleSubmit = useCallback((entity) => {
+    post('/entity/create', {
+      entity,
+    });
+  }, []);
+
+  return <Button onClick={handleSubmit}>Create Entity</Button>;
+};
+
+const Button = ({ onClick, children }) => <button onClick={onClick}>{children}</button>;
+```
+
+The component we're passing to is _very_ simple & `useCallback` is unnecessary here. Because we do
+not need the function identity to be stable. If we were to use the callback in a `useEffect` hook
+then yes, we would want the function to be stable otherwise every render would cause the `useEffect`
+hook to run which could be problematic.
+
+So what about `useMemo`. Same thing, it's for heavy computational processes e.g. not this:
+
+```jsx
+const Component = ({ entities = [] }) => {
+  const entityLength = useMemo(() => entities.length, [entities]);
+  //...
+};
+```
+
+The above function isn't expensive but more importantly we don't know what impact it has without
+measuring it. Therefore, avoid using `useCallback` and `useMemo` unless you _know_ you need it.
+
+## Dependencies
+
+Generally speaking, always opt to use native-browser APIs where possible over library code, the
+platform is powerful and leveraging it correctly will handle _a lot_ of edge cases you probably
+won't have considered.
+
+One example of this would be
+[`structuredClone`](https://developer.mozilla.org/en-US/docs/Web/API/structuredClone) which is a
+completely drop-in solution for `lodash/cloneDeep`. If you're not sure whether you can use a browser
+API feel free to use [caniuse.com](https://caniuse.com/), a powerful resource that gives you a
+breakdown of the availability of an API across browsers:
+
+<img
+  src="/img/guides/fe-guidelines/caniuse-example.png"
+  alt="A screenshot of caniuse.com on the structureClone API"
+/>
+
+By default, we use `browserslist` to define the browsers we support, they're defined as:
+
+```shell
+last 3 major versions
+Firefox ESR
+last 2 Opera versions
+not dead
+```
+
+It's important to note that this informs the JS transpilation step by esbuild, so if a browser does
+not support it, it _may_ be polyfilled.
+
+### A special note on `lodash`
+
+We target modern browsers, typically speaking these browsers have all the functionality lodash
+provides natively, albeit there may be some discrepancies between the functionality or API
+signature. Because of this and our general view of shipping as little javascript to the client as
+possible we should **never be adding a `lodash` function to our code**. In addition, when working on
+the codebase everyone should strive to remove the instances we currently have.
+
+A common use case is the `get` function:
+
+```jsx
+import get from 'lodash/get';
+
+const extractDeepAttribute = (schema: object, path: string[]) => {
+  return get(schema, ['attributes', ...path], {});
+};
+```
+
+But if we zoom out we can begin to question a few things:
+
+- why are we extracting something so deep here?
+- are my data structures the issue? i.e. to complex
+- can i just use
+  [`optionalChaining`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining)?
+
+Typically, I think you'll find that rethinking how the code works will reveal an easier to manage
+data structure that from there you can probably use `optionalChaining`.
+
+If you're struggling to convert a `lodash` usage to native code, check out
+[this helpful guide](https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore).
+
+### Adding new dependencies
+
+Sometimes you require a new dependency, it happens, it's common. Third party library code is
+_fantastic_ because typically it's somewhat battle tested in production environments and in some
+circumstances where the concept is complicated e.g. `fractional-indexing` it really is easier to use
+a library than re-write and maintain in our application. It's a case by case basis therefore, when
+adding a new dependency to the codebase you should do the following:
+
+- Discuss it with at least one other developer from a different squad – most appropriately through
+  the PR
+- Add as a talking point to the next FE sync so other developers have visibility
+
+You'd be surprised how often a library can be replaced with a native API and through thinking and
+acting in this way we hope to keep our dependency surface as small as possible.
+
+## Data fetching
+
+### V4
+
+Whilst we are actively developing V4 of the CMS we should _always_ be using `react-query`'s hooks to
+manage the fetching and mutation of data in conjunction with `useFetchClient`. This is because
+`react-query` caches our data-fetching meaning multiple calls are not necessarily made unless a
+mutation occurs as well as handling various intermittent states and events during the fetching
+lifecycle.
+
+:::note
+We're using `react-query` version 3, see the specific docs – https://tanstack.com/query/v3/docs/react/overview
+:::
+
+There are a few guidelines to keep in mind when writing your query-keys
+
+- Use the URL fragments from the called URL e.g `/admin/content-manger/:id/stages -> ['content-manager', id, 'stages']` with the exception of `admin`
+- All ee calls should be prefixed with ee, to be able to invalidate it all at once
+- All dynamic variables need to be part of the dependency array
+
+You can read more on query-keys for `react-query` [here](https://tanstack.com/query/v3/docs/react/guides/query-keys).
+
+#### Example
+
+```jsx
+const useLicenseLimits = () => {
+  const { get } = useFetchClient();
+
+  const { data: license } = useQuery(['ee', 'license-limit-info'], async () => {
+    const {
+      data: { data },
+    } = await get('/admin/license-limit-information');
+
+    return data;
+  });
+
+  return { license };
+};
+```
+
+### V5
+
+In V5 we'll be looking at using `react-router-dom`'s loaders function to avoid data-waterfalls //
+render as you fetch. For mutations we'll be using `@redux/toolkit` and subsequently it's caching
+mechanisms making `react-query` redundant.
+
+:::note
+🚧 This section will be filled in further upon delivery of v5.
+:::
+
+## Managing state
+
+### Local / Global / URL state
+
+In the following paragraph we discuss three different types of state – Local which commonly is
+defined by using `React.useState`, Global which in our case involves using `redux` and URL based
+state e.g. a path parameter or search params.
+
+**Local State**
+
+This is the typical place to start when you need to make your app “react” to a change, for example,
+through event inputs e.g “A user presses a button and a modal opens”:
+
+```jsx
+import { useState } from 'react';
+
+const MyButton = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleClick = () => setIsOpen((currOpen) => !currOpen);
+
+  return (
+    <button type="button" onClick={handleClick}>
+      {isOpen ? 'Close modal' : 'Open modal'}
+    </button>
+  );
+};
+```
+
+Above is a simple example of using local state, it's isolated to the component and we're not
+typically passing this further down the tree. It's important to remember that you can very easily
+derive state from either your current state or props that are passed e.g. you render a table of
+entries and you want to know the count of entries that are “published” you could create a new state
+value, but that's not necessary, we can do a calculation because the root of the data is based off
+the props thus when the props update so will the count:
+
+```jsx
+const MyTable = ({ entries = [] }) => {
+  const publishedCount = entries.filter((e) => e.isPublished).length;
+
+  return (
+    <div>
+      <p>You have {publishedCount} published entries</p>
+      <List entries={entries} />
+    </div>
+  );
+};
+```
+
+Always aim to derive state as opposed to setting state where possible!
+
+**Global state (redux)**
+
+When's the right time to use global state? Well first if we look at how you can pass state around
+your app we first look at prop drilling. This can become verbose and inconvenient when you start to
+pass it down past the first child. Often composability can be incredibly useful for these scenarios
+where this:
+
+```jsx
+import { useState } from 'react';
+
+const App = () => {
+  const [someState, setSomeState] = useState('some state');
+  return (
+    <>
+      <Header someState={someState} onStateChange={setSomeState} />
+      <LeftNav someState={someState} onStateChange={setSomeState} />
+      <MainContent someState={someState} onStateChange={setSomeState} />
+    </>
+  );
+};
+```
+
+can easily become this:
+
+```jsx
+import { useState } from 'react';
+
+const App = () => {
+  const [someState, setSomeState] = useState('some state');
+  return (
+    <>
+      <Header>
+        <Logo someState={someState} />
+        <Settings onStateChange={setSomeState} />
+      </Header>
+      <LeftNav>
+        <SomeLink someState={someState} />
+        <SomeOtherLink someState={someState} />
+        <Etc someState={someState} />
+      </LeftNav>
+      <MainContent>
+        <SomeSensibleComponent someState={someState} />
+        <AndSoOn someState={someState} />
+      </MainContent>
+    </>
+  );
+};
+```
+
+But in the above example, we're still passing it around. Other times composability will not help you
+because it doesn't make sense or perhaps the data is fetched from one part of an application and
+another requires it later / now. For data fetching you could consider using something like
+`react-query` because it has it's own data caching system. Other times such as the Content Manager's
+edit view, it's managing complex nested browser form state and in these circumstances you'd use a
+global state management solution like redux.
+
+The other plus side to a global state manager like redux is that it's contained, it's easily
+debuggable because all the state & changes can be monitored closely and reviewed piece by piece. It
+also enforces uni-directional data flows & unlocks powerful features such as “redo/undo”.
+
+**URL state**
+
+If we have local, derived & global state then why would we want URL state? Consider this, you've
+created a very complicated view of your a table, it has the exact columns you want to show and how
+to show them and you need to show this someone page 3 – but they're not near you. This is where URL
+state comes in. If we store the pagination state in the URL we can _easily_ share the exact page of
+a table. If we store the sorting & filtering of the table then anyone can see the view you're
+directly on.
+
+The bottom line is – global & local state do not transcend the machine you're working on. In all
+reality, this is typically how web apps worked before the javascript ecosystem “got big” and most
+importantly, we're just leaning on the platform as much as possible to do all our heavy lifting
+whilst giving our users a 10x better experience.
+
+### Avoid effects
+
+Effects are tricky, when should you use them? React's documentation describes them as an escape
+hatch to step outside of the react paradigm to sync with “external” systems such as the network of
+DOM. If you're using them to make changes to your component code or respond to user-events then
+you've probably made a mistake in your code and you should review this. If you're struggling to work
+with effects and worry you're using too many of them, check out the react docs.
+
+Overall, we advise you avoid effects where you can, especially for data-fetching when you really get
+into it, it's not a trivial problem to circumvent and there's a reason why we recommend using a
+data-fetching library like `react-query` or `@redux/toolkit`.
+
+### Using context effectively
+
+`React.Context` is another powerful tool to avoid prop drilling and employ a version of global
+state, after all, `redux` is based on `React.Context`. But knowing when to use it is important. We
+advise avoiding it for complex nested data-structures like the `content-manger` edit view because
+context has no selector pattern (at time of writing) which means one change to the context will
+re-render every component connected – this could be expensive. What it's great for is complex
+components using composable design, take this simplified example:
+
+```jsx
+// Table.tsx
+import { useContext, createContext } from 'react'
+
+const TableContext = createContext()
+
+const useTableContext = () => useContext(TableContext)
+
+const Root = ({ isLoading, children }) => {
+	const contextValue = useMemo(() => ({ isLoading }), [isLoading])
+
+	return (
+		<TableContext.Provider value={contextValue}>
+			{children}
+		</TableContext.Provider>
+	)
+}
+
+const Loading = () => {
+	const { isLoading } = useTableContext()
+
+	if(!isLoading){
+		return null
+	}
+
+	return (
+		<tbody>
+			<tr>
+				<td>
+					loading...
+				</td>
+			</tr>
+		</tbody>
+	)
+}
+
+export const Table = {
+		Root,
+		Loading,
+}
+
+// something-else.tsx
+import { useQuery } from 'react-query'
+import { useFetchClient } from '@strapi/helper-plugin'
+
+import { Table } from './Table'
+
+const MyPage = () => {
+	const { get } = useFetchClient()
+
+	const { isLoading, data } = useQuery(async () => {
+		const { data } = await get(ENDPOINT)
+		return data
+	})
+
+	return (
+		<Table.Root isLoading={isLoading}>
+			<Table.Loading />
+			{data.map(datum => <MyCustomRow {...datum} />}
+		</Table.Root>
+	)
+}
+```
+
+In the above example we don't need to worry about when to render the loading state because the table
+extracts all this and we can focus on composing our views in a readable manor.
+
+### Useful articles
+
+- https://kentcdodds.com/blog/application-state-management-with-react
+- https://react.dev/learn/you-might-not-need-an-effect
+
+## Unit Testing
+
+:::note
+We'll write a section on E2E tests when we're there.
+:::
+
+### When & why should you write tests?
+
+As a rule of thumb you should add tests – whenever you add _new_ code. It's even better if you add
+them when refactoring and you notice the tests are either “light” or non-existent. They're
+incredibly valuable in stopping accidental regressions (which happen and that's okay). No test suite
+is perfect and there's always room to improve. If you're fixing a bug consider writing a test that
+addresses the issue you're trying to solve to assert it's failing & then you have an automated way
+to confirm your fix works as expected.
+
+### What makes a good test?
+
+Good FE tests avoid testing implementation details, the tests often break when refactoring code in
+an arbitrary manor whilst not actually showing issues when a user interacts with the component. This
+is why we aim to test our components as if we're a user, it supports our ethos of test writing
+should give us confidence that our application will work when a _user_ uses it. Because we're using
+the Testing Library suite of tools, they have an incredibly
+[handy document](https://testing-library.com/docs/queries/about/#priority) surrounding what order of
+queries to try and use. The main takeaway would be to try and avoid using `getByTestId` where
+possible, it should be considered a last resort because it doesn't test any of the user
+implementations and more than likely you're testing code that is not visible to the user correctly
+and in that scenario we should be asking “why is this necessary?”.
+
+Also, avoid snapshotting the DOM except for _small_ circumstances, snapshotting is great for
+data-structures where it's easy to skim and understand, it's also great for analysing a very small
+component e.g. an `svg` with a single `path`. However, often we're testing very large complicated
+compositions of components and the snapshot of said component is typically very large and hard for a
+developer to skim and understand the impact of their changes. If we're being honest with ourselves,
+no one reviews should enormous snapshot changes either.
+
+### Mocking
+
+Avoid it if you can.
+
+Although realistically, it's not always possible. Lets first look at API mocking; try to avoid
+mocking your “fetch” library whether that's `react-query` or `axios` or native fetch. It makes a
+brittle test and doesn't behave 1:1 as the library would with the network request. Instead, prefer
+using Mock Service Worker ([MSW](https://mswjs.io/)) to mock/intercept the API request calls. The
+largest benefit is because all we're doing is locating our API responses in one space that can be
+shared across tests to avoid reimplementation and therefore less work to edit them should the API
+response change.
+
+When looking at `module` mocking:
+
+```jsx
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: jest.fn(() => ({
+    toggleNotification: jest.fn(),
+  })),
+}));
+```
+
+We should continue to avoid it where possible, in the above example there's no real reason to mock
+`useNotification`, it's more than likely the wrapper just needed the correct Provider to be added to
+avoid any errors and more importantly we're now not able to test our notification is visible to the
+user – testing it's fired is an implementation detail, how can we be sure it's visible?
+
+If you do mock a module try to create a manual mock instead under the `__mocks__` folder if
+possible.
+
+### Useful Articles
+
+- https://kentcdodds.com/blog/testing-implementation-details
+- https://testing-library.com/docs/queries/about/#priority
+
+## A11y
+
+Semantics are important for users, just because the application is “not on the web” does not mean
+our users are “fully abled” (do not have any type of disability). Therefore when building UI aim to
+use the correct semantic elements in the correct places, typically we use the `design-system` to
+build UI in the CMS, so most of the accessibility work is done there. But, accessibility is not easy
+– this is why we test from a user perspective as described in the “Testing” section. If you're not
+sure about accessibility patterns check out these resources:
+
+- https://www.w3.org/WAI/ARIA/apg/
+- https://webaim.org/
+- https://www.a11yproject.com/
+
+## Conventions
+
+### Submitting a PR
+
+When submitting an FE related PR ensure you've done the following:
+
+- Follow the template, especially including a clear description, it's a history for future
+  developers understanding the context around a decision.
+- Update or add tests for your relevant code, for more help on this consult the
+  [Testing Section](#unit-testing)
+- Always consider whether adding contributor documentation is helpful for the work you've done e.g.
+  you've created a new hook that can be used across the app
+- Get the relevant reviewers – engineers in your squad is a good start, but if you're working in a
+  space of the codebase you're not as familiar with e.g. `entity-service` consider getting engineers
+  who have more experience in the space.

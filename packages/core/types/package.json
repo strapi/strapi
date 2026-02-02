@@ -1,0 +1,80 @@
+{
+  "name": "@strapi/types",
+  "version": "5.34.0",
+  "description": "Shared typescript types for Strapi internal use",
+  "keywords": [
+    "strapi"
+  ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./dist/index.js",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run -T run-s clean build:types",
+    "build:types": "run -T tsc -p tsconfig.build.json",
+    "clean": "run -T rimraf ./dist",
+    "doc:ts": "typedoc",
+    "doc:ts:watch": "typedoc --watch",
+    "lint": "run -T eslint .",
+    "test:ts": "run -T tsc --noEmit",
+    "watch": "run -T tsc -p tsconfig.build.json -w"
+  },
+  "dependencies": {
+    "@casl/ability": "6.5.0",
+    "@koa/cors": "5.0.0",
+    "@koa/router": "12.0.2",
+    "@strapi/database": "5.34.0",
+    "@strapi/logger": "5.34.0",
+    "@strapi/permissions": "5.34.0",
+    "@strapi/utils": "5.34.0",
+    "commander": "8.3.0",
+    "json-logic-js": "2.0.5",
+    "koa": "2.16.3",
+    "koa-body": "6.0.1",
+    "node-schedule": "2.1.1",
+    "typedoc": "0.25.10",
+    "typedoc-github-wiki-theme": "1.1.0",
+    "typedoc-plugin-markdown": "3.17.1",
+    "zod": "3.25.67"
+  },
+  "devDependencies": {
+    "@strapi/ts-zen": "^0.2.0",
+    "@types/jest": "29.5.2",
+    "@types/json-logic-js": "2.0.8",
+    "@types/koa": "2.13.4",
+    "@types/koa__router": "12.0.0",
+    "@types/node-schedule": "2.1.7",
+    "eslint-config-custom": "5.34.0",
+    "lodash": "4.17.21",
+    "tsconfig": "5.34.0",
+    "typescript": "5.4.4",
+    "undici": "6.23.0"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  }
+}

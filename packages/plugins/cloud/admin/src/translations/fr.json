@@ -1,0 +1,21 @@
+{
+  "Plugin.name": "Déployer",
+  "Homepage.title": "Déployez avec Strapi Cloud gratuitement !",
+  "Homepage.subTitle": "Commencez avec notre plan gratuit - aucune carte de crédit requise, sans limites de temps.",
+  "Homepage.deploy.title": "Choisissez votre méthode de déploiement",
+  "Homepage.deploy.ariaLabel": "Options de déploiement",
+  "Homepage.deploy.git.badge": "Recommandé",
+  "Homepage.deploy.git.title": "Déployer sur Strapi Cloud",
+  "Homepage.deploy.git.subTitle": "Déployez un projet GitHub ou GitLab directement dans Strapi Cloud",
+  "Homepage.deploy.git.button": "Déployer sur Strapi Cloud",
+  "Homepage.deploy.cli.title": "Déployer via CLI",
+  "Homepage.deploy.cli.subTitle": "Utilisez le CLI pour déployer votre projet Strapi",
+  "Homepage.deploy.cli.ariaLabel": "Gestionnaire de paquets",
+  "Homepage.deploy.cli.copy": "Copier",
+  "Homepage.deploy.documentation": "Des difficultés ? Consultez notre documentation",
+  "Homepage.freePlan.api": "2.5K appels API",
+  "Homepage.freePlan.storage": "10 Go de stockage",
+  "Homepage.freePlan.bandwidth": "10 Go de bande passante pour les assets",
+  "Homepage.freePlan.cdn": "CDN global",
+  "Homepage.freePlan.pushToDeploy": "Déploiements automatisés"
+}

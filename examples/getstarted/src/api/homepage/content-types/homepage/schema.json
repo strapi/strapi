@@ -1,0 +1,77 @@
+{
+  "kind": "singleType",
+  "collectionName": "homepages",
+  "info": {
+    "displayName": "Homepage",
+    "singularName": "homepage",
+    "pluralName": "homepages",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "mediaType": {
+      "type": "enumeration",
+      "enum": ["multiple", "single"],
+      "default": "multiple",
+      "required": true
+    },
+    "single": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "mediaType"
+            },
+            "single"
+          ]
+        }
+      },
+      "allowedTypes": ["images", "files", "videos"]
+    },
+    "multiple": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "mediaType"
+            },
+            "multiple"
+          ]
+        }
+      },
+      "allowedTypes": ["images", "videos"]
+    }
+  }
+}

@@ -1,0 +1,55 @@
+import { test, expect } from '@playwright/test';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { navToHeader } from '../../../utils/shared';
+
+test.describe('Blocks editor', () => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await page.goto('/admin');
+    await login({ page });
+  });
+
+  test('adds a code block and specifies the language', async ({ page, browserName }) => {
+    // Write some text into a blocks editor
+    const code = 'const problems = 99';
+    await navToHeader(page, ['Content Manager', 'Homepage'], 'Homepage');
+    await expect(page.getByRole('link', { name: 'Back' })).toBeVisible();
+    const textbox = page.getByRole('textbox').filter({ hasText: 'Drag' });
+    await expect(textbox).toBeVisible();
+    await textbox.click();
+    await textbox.fill(code);
+    await expect(page.getByText(code)).toBeVisible();
+
+    test.skip(
+      browserName === 'firefox',
+      'Firefox loses focus when clicking the toolbar in Playwright, but not in a real environment'
+    );
+
+    // Use the toolbar to convert the block to a code block and specify the language
+    const toolbar = page.getByRole('toolbar');
+    await toolbar.getByRole('combobox').click();
+    await page.getByLabel('Code block').click();
+    await textbox.getByText(code).click();
+    const languageSelect = page.getByText('Plain text');
+    await expect(languageSelect).toBeVisible();
+    await languageSelect.click();
+    await page.getByText('Fortran').click();
+    await expect(page.getByText('Fortran')).toBeVisible();
+
+    // Ensure we're not in the middle of the code block, so that double enter creates a new block
+    for (let i = 0; i < code.length; i++) {
+      await page.keyboard.press('ArrowRight');
+    }
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Enter');
+    await expect(page.getByText('Fortran')).not.toBeVisible();
+
+    // Save and reload to make sure the change is persisted
+    await page.getByRole('button', { name: 'Save' }).click();
+    await page.reload();
+    await expect(page.getByText(code)).toBeVisible();
+    await page.getByText(code).click();
+    await expect(page.getByText('Fortran')).toBeVisible();
+  });
+});

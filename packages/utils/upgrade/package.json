@@ -1,0 +1,92 @@
+{
+  "name": "@strapi/upgrade",
+  "version": "5.34.0",
+  "description": "CLI to upgrade Strapi applications effortless",
+  "keywords": [
+    "strapi",
+    "package",
+    "tool",
+    "upgrade",
+    "migrate",
+    "version"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/utils/upgrade"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "bin": "./bin/upgrade.js",
+  "files": [
+    "bin",
+    "dist",
+    "resources"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:ts": "run -T tsc --noEmit",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "@strapi/utils": "5.34.0",
+    "chalk": "4.1.2",
+    "cli-table3": "0.6.2",
+    "commander": "8.3.0",
+    "esbuild-register": "3.5.0",
+    "execa": "5.1.1",
+    "fast-glob": "3.3.2",
+    "fs-extra": "11.2.0",
+    "jscodeshift": "17.1.2",
+    "lodash": "4.17.23",
+    "memfs": "4.6.0",
+    "ora": "5.4.1",
+    "prompts": "2.4.2",
+    "semver": "7.5.4",
+    "simple-git": "3.21.0",
+    "undici": "6.23.0"
+  },
+  "devDependencies": {
+    "@strapi/types": "5.34.0",
+    "@types/fs-extra": "11.0.4",
+    "@types/jscodeshift": "0.12.0",
+    "eslint-config-custom": "5.34.0",
+    "rimraf": "5.0.5"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  }
+}

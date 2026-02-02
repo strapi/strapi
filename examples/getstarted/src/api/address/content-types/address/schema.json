@@ -1,0 +1,73 @@
+{
+  "kind": "collectionType",
+  "collectionName": "addresses",
+  "info": {
+    "displayName": "Address",
+    "singularName": "address",
+    "pluralName": "addresses",
+    "description": "",
+    "name": "Address"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "postal_code": {
+      "type": "string",
+      "maxLength": 2
+    },
+    "categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::category.category",
+      "inversedBy": "addresses"
+    },
+    "cover": {
+      "type": "media",
+      "multiple": false,
+      "required": false
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "city": {
+      "type": "string",
+      "maxLength": 200,
+      "required": true
+    },
+    "json": {
+      "type": "json"
+    },
+    "slug": {
+      "type": "uid"
+    },
+    "notrepeat_req": {
+      "type": "component",
+      "component": "blog.test-como",
+      "repeatable": false,
+      "required": true
+    },
+    "notrepeat_optional": {
+      "type": "component",
+      "component": "blog.test-como",
+      "repeatable": false
+    },
+    "repeat_req": {
+      "type": "component",
+      "component": "blog.test-como",
+      "repeatable": true,
+      "required": true
+    },
+    "repeat_req_min": {
+      "type": "component",
+      "component": "blog.test-como",
+      "repeatable": true,
+      "required": false,
+      "min": 2
+    }
+  }
+}

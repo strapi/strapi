@@ -1,0 +1,73 @@
+{
+  "name": "@strapi/utils",
+  "version": "5.34.0",
+  "description": "Shared utilities for the Strapi packages",
+  "keywords": [
+    "strapi",
+    "utils"
+  ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:ts": "run -T tsc --noEmit",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "run -T  rollup -c -w"
+  },
+  "dependencies": {
+    "@sindresorhus/slugify": "1.1.0",
+    "date-fns": "2.30.0",
+    "execa": "5.1.1",
+    "http-errors": "2.0.0",
+    "lodash": "4.17.21",
+    "node-machine-id": "1.1.12",
+    "p-map": "4.0.0",
+    "preferred-pm": "3.1.2",
+    "yup": "0.32.9",
+    "zod": "3.25.67"
+  },
+  "devDependencies": {
+    "@types/http-errors": "2.0.4",
+    "@types/koa": "2.13.4",
+    "@types/node": "24.10.0",
+    "eslint-config-custom": "5.34.0",
+    "koa": "2.16.3",
+    "koa-body": "6.0.1",
+    "tsconfig": "5.34.0"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  }
+}

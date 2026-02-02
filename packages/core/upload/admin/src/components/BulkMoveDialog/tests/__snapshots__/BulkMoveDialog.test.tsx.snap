@@ -1,0 +1,624 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
+.c3 {
+  background: #f6f6f9;
+  padding-block-start: 16px;
+  padding-inline-end: 20px;
+  padding-block-end: 16px;
+  padding-inline-start: 20px;
+}
+
+.c7 {
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+}
+
+.c20 {
+  padding-inline-end: 12px;
+}
+
+.c24 {
+  border-radius: 4px;
+  cursor: pointer;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+}
+
+.c4 {
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c8 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c14 {
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c16 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c17 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c25 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c6 {
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c18 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+  font-weight: 600;
+}
+
+.c27 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c0 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c26 {
+  height: 4rem;
+  text-decoration: none;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+}
+
+.c26:hover {
+  background-color: #f6f6f9;
+}
+
+.c26:active {
+  background-color: #eaeaef;
+}
+
+.c26[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c28 {
+  height: 4rem;
+  text-decoration: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
+  color: #ffffff;
+}
+
+.c28:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c28:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c28[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c9 {
+  text-decoration: none;
+  padding-block: 1.1rem;
+  padding-inline: 1.1rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+  color: #8e8ea9;
+}
+
+.c9:hover {
+  background-color: #f6f6f9;
+  color: #666687;
+}
+
+.c9:active {
+  background-color: #eaeaef;
+}
+
+.c9[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c19 {
+  display: block;
+}
+
+.c10 {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+}
+
+.c12 {
+  min-width: 100%;
+}
+
+.c13 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c15 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
+.c1 {
+  background: #32324d33;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  will-change: opacity;
+}
+
+.c2 {
+  max-width: 83rem;
+  max-height: 90vh;
+  height: auto;
+  width: calc(100% - 40px);
+  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 15px rgba(33, 33, 52, 0.1);
+  z-index: 310;
+}
+
+.c2 >form {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.c5 {
+  border-bottom: solid 1px #eaeaef;
+}
+
+.c11 {
+  padding-inline: 32px;
+}
+
+.c11>div {
+  padding-block: 40px;
+  margin: 0 -2px 0 -2px;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.c11>div>div {
+  display: block!important;
+}
+
+.c23 {
+  border-top: solid 1px #eaeaef;
+  flex: 1;
+}
+
+.c21 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c21 svg {
+  height: 1.1rem;
+  width: 1.1rem;
+}
+
+.c21 svg path {
+  fill: #666687;
+}
+
+.c22 {
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c22 svg {
+  width: 0.9rem;
+}
+
+@media (min-width: 768px) {
+  .c6 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c6 {
+    line-height: 1.43;
+  }
+}
+
+@media (min-width: 768px) {
+  .c26 {
+    height: 3.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c26 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 768px) {
+  .c28 {
+    height: 3.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c28 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 768px) {
+  .c9 {
+    padding-block: 0.7rem;
+    padding-inline: 0.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c9 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 520px) {
+  .c15 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 768px) {
+  .c15 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c15 {
+    grid-column: span 12;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c1 {
+    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+@media (min-width: 768px) {
+  .c2 {
+    width: calc(100% - 48px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c2[data-state='open'] {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(.4,0,.2,1);
+    animation-name: iWCnzW;
+  }
+
+  .c2[data-state='closed'] {
+    animation-duration: 120ms;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-name: jgufbq;
+  }
+}
+
+<body
+  data-scroll-locked="1"
+  style="pointer-events: none;"
+>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
+  <div>
+    <section
+      aria-atomic="false"
+      aria-label="Notifications alt+T"
+      aria-live="polite"
+      aria-relevant="additions text"
+      tabindex="-1"
+    />
+    <span
+      class="c0"
+    >
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-log"
+        role="log"
+      />
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-status"
+        role="status"
+      />
+      <p
+        aria-live="assertive"
+        aria-relevant="all"
+        id="live-region-alert"
+        role="alert"
+      />
+    </span>
+  </div>
+  <div
+    class="c1"
+    data-state="open"
+    style="pointer-events: auto;"
+  >
+    <div
+      aria-describedby="radix-:r2:"
+      aria-labelledby="radix-:r1:"
+      class="c2"
+      data-state="open"
+      id="radix-:r0:"
+      role="dialog"
+      style="pointer-events: auto;"
+      tabindex="-1"
+    >
+      <form
+        action="#"
+        novalidate=""
+      >
+        <header
+          class="c3 c4 c5"
+        >
+          <h2
+            class="c6"
+            id="radix-:r1:"
+          >
+            Move elements to
+          </h2>
+          <button
+            aria-disabled="false"
+            class="c7 c8 c9"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              fill="currentColor"
+              focusable="false"
+              height="16"
+              viewBox="0 0 32 32"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+              />
+            </svg>
+            <span
+              class="c0"
+            >
+              Close modal
+            </span>
+          </button>
+        </header>
+        <div
+          class="c10 c11"
+          dir="ltr"
+          style="position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
+        >
+          <style>
+            [data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
+          </style>
+          <div
+            class="c12"
+            data-radix-scroll-area-viewport=""
+            style="overflow-x: scroll; overflow-y: scroll;"
+          >
+            <div
+              style="min-width: 100%; display: table;"
+            >
+              <div
+                class="c13"
+              >
+                <div
+                  class="c14 c15"
+                >
+                  <div
+                    class="c16"
+                  >
+                    <div
+                      class="c17"
+                    >
+                      <label
+                        class="c18 c19"
+                        for="folder-destination"
+                        id="folder-destination-label"
+                      >
+                        Location
+                      </label>
+                    </div>
+                    <div
+                      class=" css-1iyvlxg-container"
+                    >
+                      <span
+                        class="css-1f43avz-a11yText-A11yText"
+                        id="react-select-2-live-region"
+                      />
+                      <span
+                        aria-atomic="false"
+                        aria-live="polite"
+                        aria-relevant="additions text"
+                        class="css-1f43avz-a11yText-A11yText"
+                        role="log"
+                      />
+                      <div
+                        class=" css-oe0cnm-control"
+                      >
+                        <div
+                          class=" css-onz4xi-ValueContainer"
+                        >
+                          <div
+                            class=" css-1ryi7up-singleValue"
+                          >
+                            Media Library
+                          </div>
+                          <input
+                            aria-activedescendant=""
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            aria-invalid="false"
+                            aria-readonly="true"
+                            class="css-mohuvp-dummyInput-DummyInput"
+                            id="folder-destination"
+                            inputmode="none"
+                            role="combobox"
+                            tabindex="0"
+                            value=""
+                          />
+                        </div>
+                        <div
+                          class=" css-1hm8yhz-IndicatorsContainer"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="c20 c21 c22"
+                          >
+                            <svg
+                              fill="currentColor"
+                              height="16"
+                              viewBox="0 0 32 32"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                      <input
+                        name="destination"
+                        type="hidden"
+                        value=""
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer
+          class="c3 c4 c23"
+        >
+          <button
+            aria-disabled="false"
+            class="c24 c25 c26"
+            name="cancel"
+            type="button"
+          >
+            <span
+              class="c27"
+            >
+              Cancel
+            </span>
+          </button>
+          <button
+            aria-disabled="false"
+            class="c24 c25 c28"
+            type="submit"
+          >
+            <span
+              class="c27"
+            >
+              Move
+            </span>
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
+</body>
+`;

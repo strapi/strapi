@@ -1,0 +1,10 @@
+module.exports = {
+  root: true,
+  overrides: [
+    {
+      files: ['**'],
+      excludedFiles: ['admin/**/*', 'server/**/*'],
+      extends: ['custom/back'],
+    },
+  ],
+};

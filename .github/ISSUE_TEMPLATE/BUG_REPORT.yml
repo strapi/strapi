@@ -1,0 +1,150 @@
+name: 🐛 Bug Report
+description: Help us improve this repository by filing a detailed bug report.
+body:
+  - type: input
+    id: nodeVersion
+    attributes:
+      label: Node Version
+      description: The version of Node.js you are using (only LTS versions are supported).
+      placeholder: 20.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: pmVersion
+    attributes:
+      label: NPM/Yarn/PNPM Version
+      description: The package manager and version you are using.
+      placeholder: NPM 10.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: strapiVersion
+    attributes:
+      label: Strapi Version
+      description: The version of Strapi you are using ("Latest" is not a valid response).
+      placeholder: 5.7.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: Select the operating system where you are experiencing the issue.
+      multiple: false
+      options:
+        - Strapi Cloud
+        - MacOS
+        - Linux (Debian/Ubuntu)
+        - Linux (RedHat/CentOS)
+        - Linux (Other)
+        - Windows 10
+        - Windows 11
+        - Docker/Podman/LXC
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      description: Select the database type you are using.
+      multiple: false
+      options:
+        - Strapi Cloud
+        - SQLite
+        - MySQL
+        - MariaDB
+        - PostgreSQL
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: codeType
+    attributes:
+      label: Javascript or Typescript
+      description: Select the code language your project is using.
+      multiple: false
+      options:
+        - Javascript
+        - Typescript
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: Reproduction URL
+      description: If you would like to provide a link to a repository that reproduces the issue, please provide it here.
+      placeholder: https://github.com/strapi/LaunchPad
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Bug Description
+      description: Provide a clear and concise description of the issue or unexpected behavior.
+      placeholder: When fetching data from the REST API, I see a HTTP 500 error response.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: Provide a detailed, step-by-step guide on how to reproduce the issue. Include code snippets or links to repositories if applicable.
+      placeholder: |
+        Example:
+          1. Create a content type in Strapi with fields: title, content.
+          2. Add test data to the new content type
+          3. Perform a REST API call to fetch the data
+          4. Observe the unexpected behavior or error in the response/output.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: Provide a detailed explanation of what you expected to happen instead of the observed issue. Be as specific as possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: If available, please provide the logs generated either in the Browser or Server Side console.
+      render: shell
+
+  - type: textarea
+    id: codeSnippets
+    attributes:
+      label: Code Snippets
+      description: If available, please add any code snippets (content-type schemas, custom code, ect) to illustrate the issue.
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Media
+      description: If available, please upload screenshots or videos to illustrate the issue.
+
+  - type: textarea
+    id: informationContext
+    attributes:
+      label: Additional information
+      description: If available, please add any additional information you may find useful to help us understand the issue.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Confirmation Checklist
+      options:
+        - label: I have checked the existing [issues](https://github.com/strapi/strapi/issues) for duplicates.
+          required: true
+
+        - label: I agree to follow this project's [Code of Conduct](https://github.com/strapi/strapi/blob/develop/CODE_OF_CONDUCT.md).
+          required: true

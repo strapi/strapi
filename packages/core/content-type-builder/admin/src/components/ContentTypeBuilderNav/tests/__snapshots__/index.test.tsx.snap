@@ -1,0 +1,1275 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
+.c2 {
+  padding-inline-start: 20px;
+  padding-inline-end: 20px;
+}
+
+.c6 {
+  background: #eaeaef;
+}
+
+.c10 {
+  padding-block-start: 20px;
+  padding-inline-end: 20px;
+  padding-block-end: 20px;
+  padding-inline-start: 20px;
+}
+
+.c13 {
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  width: 100%;
+}
+
+.c17 {
+  border-radius: 4px;
+  cursor: pointer;
+  padding-inline-start: 7px;
+  padding-inline-end: 7px;
+  padding-block-start: 4px;
+}
+
+.c28 {
+  max-width: 100%;
+  padding-block-end: 20px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  padding-block-start: 20px;
+}
+
+.c31 {
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+}
+
+.c32 {
+  position: relative;
+}
+
+.c36 {
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+}
+
+.c39 {
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+.c43 {
+  border-radius: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  padding-block-start: 4px;
+  width: 100%;
+}
+
+.c44 {
+  width: 100%;
+}
+
+.c46 {
+  overflow: hidden;
+  width: 80dvw;
+}
+
+.c48 {
+  text-align: center;
+  width: 24px;
+}
+
+.c50 {
+  padding-inline-start: 8px;
+}
+
+.c3 {
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c11 {
+  gap: 12px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c12 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c14 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c21 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c22 {
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c29 {
+  gap: 24px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c30 {
+  gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c33 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c35 {
+  gap: 4px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c37 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c40 {
+  gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c45 {
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c52 {
+  gap: 2px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c5 {
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.22;
+  color: currentcolor;
+}
+
+.c16 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c34 {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  color: #666687;
+}
+
+.c47 {
+  font-size: 1.6rem;
+  line-height: 32px;
+  color: currentcolor;
+  line-height: 32px;
+}
+
+.c51 {
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: #32324d;
+  font-weight: 500;
+}
+
+.c19 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c15 {
+  height: 4rem;
+  text-decoration: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
+  color: #ffffff;
+}
+
+.c15:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c15:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c15[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c18 {
+  height: 4rem;
+  text-decoration: none;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+}
+
+.c18:hover {
+  background-color: #f6f6f9;
+}
+
+.c18:active {
+  background-color: #eaeaef;
+}
+
+.c18[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c38 {
+  text-decoration: none;
+  padding-block: 0.7rem;
+  padding-inline: 0.7rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #32324d;
+}
+
+.c38 svg {
+  fill: #8e8ea9;
+}
+
+.c38:hover {
+  background-color: #f6f6f9;
+}
+
+.c38:active {
+  background-color: #eaeaef;
+}
+
+.c38[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c27 {
+  border: none;
+  border-radius: 4px;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 2.4rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+  padding-inline-start: 0;
+  padding-inline-end: 16px;
+  padding-block: 8px;
+}
+
+.c27::placeholder {
+  color: #666687;
+  opacity: 1;
+}
+
+.c27[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c27:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c23 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  padding-inline-start: 16px;
+  position: relative;
+  outline: none;
+  box-shadow: none;
+  transition-property: border-color,box-shadow,fill;
+  transition-duration: 0.2s;
+}
+
+.c23:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c8 {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+}
+
+.c9 {
+  min-width: 100%;
+}
+
+.c7 {
+  height: 1px;
+  border: none;
+  flex-shrink: 0;
+}
+
+.c26 {
+  font-size: 1rem;
+}
+
+.c26 path {
+  fill: #8e8ea9;
+}
+
+.c20 {
+  border-radius: 4px;
+  border: 1px solid #eaeaef;
+}
+
+.c20:focus-within .c25 {
+  fill: #4945ff;
+}
+
+.c24 {
+  border: 1px solid #eaeaef;
+  padding: 0 0 0 8px;
+  color: #32324d;
+  outline: none;
+  box-shadow: none;
+  transition-property: border-color,box-shadow,fill;
+  transition-duration: 0.2s;
+}
+
+.c24:hover button {
+  cursor: pointer;
+}
+
+.c24:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c24 >input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.c24 >input::-ms-reveal {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.c24 >input::-webkit-search-decoration,
+.c24 >input::-webkit-search-cancel-button,
+.c24 >input::-webkit-search-results-button,
+.c24 >input::-webkit-search-results-decoration {
+  display: none;
+}
+
+.c0 {
+  width: 23.2rem;
+  background: #f6f6f9;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid #dcdce4;
+  z-index: 1;
+}
+
+.c1 {
+  width: 100%;
+  height: calc(100dvh - 6.4rem - 1px);
+  overflow: hidden;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  border-right: 0;
+  box-shadow: none;
+  position: fixed;
+  top: calc(6.4rem + 1px);
+  left: 0;
+  z-index: 2;
+}
+
+.c42 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  height: 32px;
+  color: #32324d;
+}
+
+.c42.active>div {
+  background-color: #f0f0ff;
+  color: #271fe0;
+  font-weight: 500;
+}
+
+.c42:hover.active>div {
+  background-color: #f0f0ff;
+}
+
+.c42:hover>div {
+  background-color: #f6f6f9;
+}
+
+.c42:focus-visible {
+  outline-offset: -2px;
+}
+
+.c4 {
+  flex: 0 0 6.4rem;
+  height: 6.4rem;
+}
+
+.c49 {
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.c49:hover {
+  background-color: #f6f6f9;
+}
+
+.c53 .c41>div {
+  padding-left: 36px;
+}
+
+@media (min-width: 768px) {
+  .c28 {
+    max-width: 23.2rem;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c28 {
+    padding-block-end: 16px;
+    padding-inline-start: 0;
+    padding-inline-end: 0;
+    padding-block-start: 16px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c31 {
+    padding-inline-start: 20px;
+    padding-inline-end: 20px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c39 {
+    margin-inline-start: 8px;
+    margin-inline-end: 8px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c43 {
+    padding-block-end: 0;
+    padding-block-start: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .c46 {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c40 {
+    gap: 2px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c45 {
+    gap: 4px;
+  }
+}
+
+@media (min-width: 768px) {
+  .c5 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c47 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c51 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c51 {
+    line-height: 1.43;
+  }
+}
+
+@media (min-width: 768px) {
+  .c15 {
+    height: 3.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c15 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 768px) {
+  .c18 {
+    height: 3.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c18 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 768px) {
+  .c38 {
+    padding-block: 0.2rem;
+    padding-inline: 0.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c38 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 768px) {
+  .c27 {
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c27 {
+    padding-block: 4px;
+  }
+}
+
+@media (min-width: 768px) {
+  .c1 {
+    width: 23.2rem;
+    position: sticky;
+    top: 0;
+    border-right: 1px solid #eaeaef;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c1 {
+    height: 100dvh;
+  }
+}
+
+@media (min-width: 768px) {
+  .c4 {
+    flex: 0 0 5.6rem;
+    height: 5.6rem;
+  }
+}
+
+<div>
+  <section
+    aria-atomic="false"
+    aria-label="Notifications alt+T"
+    aria-live="polite"
+    aria-relevant="additions text"
+    tabindex="-1"
+  />
+  <nav
+    aria-label="Content-Type Builder"
+    class="c0 c1"
+  >
+    <div
+      class="c2 c3 c4"
+    >
+      <h2
+        class="c5"
+      >
+        Content-Type Builder
+      </h2>
+    </div>
+    <div
+      class="c6 c7"
+      data-orientation="horizontal"
+      role="separator"
+    />
+    <div
+      class="c8"
+      dir="ltr"
+      style="position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
+    >
+      <style>
+        [data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
+      </style>
+      <div
+        class="c9"
+        data-radix-scroll-area-viewport=""
+        style="overflow-x: scroll; overflow-y: scroll;"
+      >
+        <div
+          style="min-width: 100%; display: table;"
+        >
+          <div
+            class="c10 c11"
+          >
+            <div
+              class="c12"
+            >
+              <button
+                aria-disabled="false"
+                class="c13 c14 c15"
+                type="submit"
+              >
+                <span
+                  class="c16"
+                >
+                  Save
+                </span>
+              </button>
+              <button
+                aria-disabled="false"
+                aria-expanded="false"
+                aria-haspopup="menu"
+                class="c17 c14 c18"
+                data-state="closed"
+                id="radix-:r0:"
+                type="button"
+              >
+                <span
+                  class="c16"
+                >
+                  <svg
+                    aria-hidden="true"
+                    fill="#8e8ea9"
+                    focusable="false"
+                    height="16"
+                    viewBox="0 0 32 32"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M18 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0M7.5 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4m17 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4"
+                    />
+                  </svg>
+                  <span
+                    class="c19"
+                  >
+                    More actions
+                  </span>
+                </span>
+              </button>
+            </div>
+            <div
+              class="c20"
+            >
+              <div
+                class="c21"
+              >
+                <span
+                  class="c19"
+                />
+                <div
+                  class="c22 c23 c24"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="c25 c26"
+                    fill="currentColor"
+                    height="16"
+                    viewBox="0 0 32 32"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M29.061 26.939 23.125 21A11.515 11.515 0 1 0 21 23.125l5.941 5.942a1.503 1.503 0 0 0 2.125-2.125zM5.5 14a8.5 8.5 0 1 1 8.5 8.5A8.51 8.51 0 0 1 5.5 14"
+                    />
+                  </svg>
+                  <input
+                    aria-disabled="false"
+                    aria-label="Search"
+                    class="c27"
+                    id=":r2:"
+                    name="search_contentType"
+                    placeholder="Search"
+                    type="search"
+                    value=""
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="c28"
+          >
+            <ul
+              class="c29"
+            >
+              <li>
+                <div
+                  class="c30"
+                >
+                  <div
+                    class="c31"
+                  >
+                    <div
+                      class="c32 c22"
+                    >
+                      <div
+                        class="c33"
+                      >
+                        <div
+                          class=""
+                        >
+                          <span
+                            class="c34"
+                          >
+                            Collection Types
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="c35"
+                      >
+                        <button
+                          aria-disabled="false"
+                          class="c36 c37 c38"
+                          data-state="closed"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            fill="currentColor"
+                            focusable="false"
+                            height="16"
+                            viewBox="0 0 32 32"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                            />
+                          </svg>
+                          <span
+                            class="c19"
+                          >
+                            Create new collection type
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <ol
+                    class="c39 c40"
+                    id=":r3:"
+                  >
+                    <li>
+                      <a
+                        class="c41 c42"
+                        href="/plugins/content-type-builder/content-types/application::address.address"
+                      >
+                        <div
+                          class="c43"
+                        >
+                          <div
+                            class="c44 c45"
+                          >
+                            <div
+                              class="c46 c47"
+                              style="text-overflow: ellipsis; white-space: nowrap;"
+                            >
+                              address
+                            </div>
+                            <div
+                              class="c12"
+                            >
+                              <span
+                                class="c48"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        class="c41 c42"
+                        href="/plugins/content-type-builder/content-types/application::category.category"
+                      >
+                        <div
+                          class="c43"
+                        >
+                          <div
+                            class="c44 c45"
+                          >
+                            <div
+                              class="c46 c47"
+                              style="text-overflow: ellipsis; white-space: nowrap;"
+                            >
+                              category
+                            </div>
+                            <div
+                              class="c12"
+                            >
+                              <span
+                                class="c48"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </li>
+                  </ol>
+                </div>
+              </li>
+              <li>
+                <div
+                  class="c30"
+                >
+                  <div
+                    class="c31"
+                  >
+                    <div
+                      class="c32 c22"
+                    >
+                      <div
+                        class="c33"
+                      >
+                        <div
+                          class=""
+                        >
+                          <span
+                            class="c34"
+                          >
+                            Single Types
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="c35"
+                      >
+                        <button
+                          aria-disabled="false"
+                          class="c36 c37 c38"
+                          data-state="closed"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            fill="currentColor"
+                            focusable="false"
+                            height="16"
+                            viewBox="0 0 32 32"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                            />
+                          </svg>
+                          <span
+                            class="c19"
+                          >
+                            Create new single type
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <ol
+                    class="c39 c40"
+                    id=":r5:"
+                  >
+                    <li>
+                      <a
+                        class="c41 c42"
+                        href="/plugins/content-type-builder/content-types/application::homepage.homepage"
+                      >
+                        <div
+                          class="c43"
+                        >
+                          <div
+                            class="c44 c45"
+                          >
+                            <div
+                              class="c46 c47"
+                              style="text-overflow: ellipsis; white-space: nowrap;"
+                            >
+                              Homepage
+                            </div>
+                            <div
+                              class="c12"
+                            >
+                              <span
+                                class="c48"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </li>
+                  </ol>
+                </div>
+              </li>
+              <li>
+                <div
+                  class="c30"
+                >
+                  <div
+                    class="c31"
+                  >
+                    <div
+                      class="c32 c22"
+                    >
+                      <div
+                        class="c33"
+                      >
+                        <div
+                          class=""
+                        >
+                          <span
+                            class="c34"
+                          >
+                            Components
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="c35"
+                      >
+                        <button
+                          aria-disabled="false"
+                          class="c36 c37 c38"
+                          data-state="closed"
+                          type="button"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            fill="currentColor"
+                            focusable="false"
+                            height="16"
+                            viewBox="0 0 32 32"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                            />
+                          </svg>
+                          <span
+                            class="c19"
+                          >
+                            Create a new component
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <ol
+                    class="c39 c40"
+                    id=":r7:"
+                  >
+                    <li>
+                      <div
+                        class=""
+                      >
+                        <div
+                          class="c3"
+                        >
+                          <button
+                            aria-controls=":r9:"
+                            aria-expanded="true"
+                            class="c49"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              fill="#8e8ea9"
+                              height="16"
+                              style="transform: rotate(0deg); transition: transform 0.5s;"
+                              viewBox="0 0 32 32"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m27.061 13.061-10 10a1.503 1.503 0 0 1-2.125 0l-10-10a1.503 1.503 0 1 1 2.125-2.125L16 19.875l8.939-8.94a1.502 1.502 0 1 1 2.125 2.125z"
+                              />
+                            </svg>
+                            <div
+                              class="c50"
+                            >
+                              <span
+                                class="c51"
+                              >
+                                basic
+                              </span>
+                            </div>
+                          </button>
+                        </div>
+                        <ul
+                          class="c52"
+                          id=":r9:"
+                          style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
+                        >
+                          <li
+                            class="c53"
+                          >
+                            <a
+                              class="c41 c42"
+                              href="/plugins/content-type-builder/component-categories/basic/basic.simple"
+                            >
+                              <div
+                                class="c43"
+                              >
+                                <div
+                                  class="c44 c45"
+                                >
+                                  <div
+                                    class="c46 c47"
+                                    style="text-overflow: ellipsis; white-space: nowrap;"
+                                  >
+                                    simple
+                                  </div>
+                                  <div
+                                    class="c12"
+                                  >
+                                    <span
+                                      class="c48"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </li>
+                    <li>
+                      <div
+                        class=""
+                      >
+                        <div
+                          class="c3"
+                        >
+                          <button
+                            aria-controls=":ra:"
+                            aria-expanded="true"
+                            class="c49"
+                          >
+                            <svg
+                              aria-hidden="true"
+                              fill="#8e8ea9"
+                              height="16"
+                              style="transform: rotate(0deg); transition: transform 0.5s;"
+                              viewBox="0 0 32 32"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m27.061 13.061-10 10a1.503 1.503 0 0 1-2.125 0l-10-10a1.503 1.503 0 1 1 2.125-2.125L16 19.875l8.939-8.94a1.502 1.502 0 1 1 2.125 2.125z"
+                              />
+                            </svg>
+                            <div
+                              class="c50"
+                            >
+                              <span
+                                class="c51"
+                              >
+                                default
+                              </span>
+                            </div>
+                          </button>
+                        </div>
+                        <ul
+                          class="c52"
+                          id=":ra:"
+                          style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
+                        >
+                          <li
+                            class="c53"
+                          >
+                            <a
+                              class="c41 c42"
+                              href="/plugins/content-type-builder/component-categories/default/default.closingperiod"
+                            >
+                              <div
+                                class="c43"
+                              >
+                                <div
+                                  class="c44 c45"
+                                >
+                                  <div
+                                    class="c46 c47"
+                                    style="text-overflow: ellipsis; white-space: nowrap;"
+                                  >
+                                    closingperiod
+                                  </div>
+                                  <div
+                                    class="c12"
+                                  >
+                                    <span
+                                      class="c48"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </a>
+                          </li>
+                          <li
+                            class="c53"
+                          >
+                            <a
+                              class="c41 c42"
+                              href="/plugins/content-type-builder/component-categories/default/default.dish"
+                            >
+                              <div
+                                class="c43"
+                              >
+                                <div
+                                  class="c44 c45"
+                                >
+                                  <div
+                                    class="c46 c47"
+                                    style="text-overflow: ellipsis; white-space: nowrap;"
+                                  >
+                                    dish
+                                  </div>
+                                  <div
+                                    class="c12"
+                                  >
+                                    <span
+                                      class="c48"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </li>
+                  </ol>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <span
+    class="c19"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

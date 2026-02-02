@@ -1,0 +1,213 @@
+name: Issue Labeled
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  issues: write
+  pull-requests: write
+  actions: read
+  checks: read
+  contents: read
+  repository-projects: read
+  statuses: read
+
+jobs:
+  issue-labeled:
+    runs-on: ubuntu-latest
+    steps:
+      # Unable to Reproduce Tasks
+      - name: 'Comment: unable to reproduce'
+        if: "${{ github.event.label.name == 'status: can not reproduce' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            Thank you for reporting this bug, however we are unable to reproduce the issue you described given the information we have on hand. Can you please create a fresh project that you are able to reproduce the issue in, provide clear steps to reproduce this issue, and either upload this fresh project to a new GitHub repo or compress it into a `.zip` and upload it on this issue?
+
+            We would greatly appreciate your assistance with this, by working in a fresh project it will cut out any possible variables that might be unrelated.
+            Please note that issues labeled with `status: can not reproduce` will be closed in 14 days if there is no activity.
+
+            Thank you!
+
+      # v3 Legacy Issues
+      - name: 'Comment: unsupported v3 issues'
+        if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            Thank you for reporting this potential bug report, please keep in mind that we are no longer accepting bug reports for Strapi v3.
+            The recommended action we suggest for v3 users is to utilize the various migration resources to upgrade your package from Strapi v3 to Strapi v4:
+
+            - [Code Migration Guide](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides/v4/code-migration.html) and/or [Codemods project](https://github.com/strapi/codemods)
+            - [Data Migration Guide](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides/v4/data-migration.html) and/or [Data Migration Scripts](https://github.com/strapi/migration-scripts)
+            - [Plugin Migration Guide](https://docs.strapi.io/developer-docs/latest/update-migration-guides/migration-guides/v4/plugin-migration.html)
+
+            Please see our [Security file](https://github.com/strapi/strapi/security) for more information about supported versions.
+            For now this issue is marked as closed.
+
+            Thank You
+      - name: 'Close: unsupported v3 issues'
+        if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'not_planned'
+
+      # v4 Legacy Issues
+      - name: 'Comment: unsupported v4 issues'
+        if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            Thank you for reporting this potential bug report, please keep in mind that we are no longer accepting low/medium severity bug reports for Strapi v4.
+            We have confirmed that this issue is a low/medium severity bug and is not reproducable in Strapi 5. We advise upgrading to Strapi 5 to resolve this issue.
+
+            The recommended action we suggest for v4 users is to utilize the various migration resources to upgrade from Strapi 4 to Strapi 5:
+
+            - [Updating documentation](https://docs.strapi.io/dev-docs/migration/v4-to-v5/introduction-and-faq)
+            - [Step by Step Guide](https://docs.strapi.io/dev-docs/migration/v4-to-v5/step-by-step)
+            - [Upgrade Tool](https://docs.strapi.io/dev-docs/upgrade-tool)
+            - [Breaking Changes list](https://docs.strapi.io/dev-docs/migration/v4-to-v5/breaking-changes)
+            - [Specific Resources](https://docs.strapi.io/dev-docs/migration/v4-to-v5/additional-resources/introduction)
+
+            Please see our [Security file](https://github.com/strapi/strapi/security) for more information about supported versions.
+            For now this issue is marked as closed.
+
+            Thank You
+      - name: 'Close: unsupported v4 issues'
+        if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'not_planned'
+
+      # Feature request redirections
+      - name: 'Comment: redirect feature request to canny'
+        if: "${{ github.event.label.name == 'issue: feature request' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            First thank you for reporting this feature need.
+            To manage feature requests and the Strapi roadmap, we are using Canny.
+            You will be able to access the Public Roadmap here: https://feedback.strapi.io.
+
+            In your message, please mention the URL of this thread in case some messages are posted there. But the most important is to have your feedback posted on our feedback/roadmap site.
+            The product team is reading EVERY comment, that really helps us to develop the project in the right direction. We are keeping all feature requests and project insights in one place, our feedback website.
+
+            In order to keep our GitHub issues clean and for valid bug reports this issue will be marked as closed, but please feel free to continue the discussion with other community members here.
+
+            Thank you for your insight and have a good day.
+      - name: 'Close: redirect feature request to canny'
+        if: "${{ github.event.label.name == 'issue: feature request' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'completed'
+
+      # Invalid bug report template actions
+      - name: 'Comment: invalid bug report template'
+        if: "${{ github.event.label.name == 'flag: invalid template' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            We ask that you please follow the issue template.
+            A proper issue submission let's us better understand the origin of your bug and therefore help you. You can see the template guidelines for bug reports [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
+
+            Please create a new issue and completely fill out the issue template, you can [open a new issue here](https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.yml).
+
+            Thank you.
+      - name: 'Close: invalid bug report template'
+        if: "${{ github.event.label.name == 'flag: invalid template' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'not_planned'
+
+      # Redirect questions to community sources
+      - name: 'Comment: redirect question to community'
+        if: "${{ github.event.label.name == 'flag: question' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            I see you are wanting to ask a question that is not really a bug report,
+
+            - questions should be directed to [our forum](https://forum.strapi.io) or our [Discord](https://discord.strapi.io)
+            - feature requests should be directed to our [feedback and feature request database](https://feedback.strapi.io)
+
+            Please see the following contributing guidelines for asking a question [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
+
+            Thank you.
+      - name: 'Close: redirect question to community'
+        if: "${{ github.event.label.name == 'flag: question' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'complete'
+
+      - name: assign issues to DevExp squad project
+        uses: actions/add-to-project@v0.4.1
+        with:
+          project-url: https://github.com/orgs/strapi/projects/13
+          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
+          labeled: 'source: cli, source: core:content-type-builder, source: core:core, source: core:data-transfer, source: core:database, source: core:strapi, source: core:utils, source: dependencies, source: marketplace, source: plugin:graphql, source: plugin:users-permissions, source: tooling, source: typescript, source: utils:upgrade, source: core:permissions, source: rbac, source: providers, source: core:openapi, source: strapi-ai'
+          label-operator: OR
+      - name: assign issues to Content squad project
+        uses: actions/add-to-project@v0.4.1
+        with:
+          project-url: https://github.com/orgs/strapi/projects/48
+          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
+          labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:review-workflows, source: core:upload, source: plugin:color-picker, source: plugin:documentation, source: plugin:i18n, source: core:preview'
+          label-operator: OR

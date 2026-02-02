@@ -1,0 +1,196 @@
+{
+  "name": "@strapi/admin",
+  "version": "5.34.0",
+  "description": "Strapi Admin",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-admin/ee": {
+      "types": "./dist/admin/src/ee.d.ts",
+      "source": "./admin/src/ee.ts",
+      "import": "./dist/admin/ee.mjs",
+      "require": "./dist/admin/ee.js",
+      "default": "./dist/admin/ee.js"
+    },
+    "./strapi-admin/test": {
+      "types": "./dist/admin/tests/index.d.ts",
+      "source": "./admin/tests/index.ts",
+      "import": "./dist/admin/test.mjs",
+      "require": "./dist/admin/test.js",
+      "default": "./dist/admin/test.js"
+    },
+    "./_internal": {
+      "types": "./dist/_internal/index.d.ts",
+      "source": "./_internal/index.ts",
+      "import": "./dist/_internal.mjs",
+      "require": "./dist/_internal.js",
+      "default": "./dist/_internal.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.js",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin build:types:internals",
+    "build:types:internals": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:ts": "run -T tsc -p tsconfig.json",
+    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json && run -T tsc -p ee/admin/tsconfig.json",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "@casl/ability": "6.5.0",
+    "@internationalized/date": "3.5.4",
+    "@radix-ui/react-context": "1.0.1",
+    "@radix-ui/react-toolbar": "1.0.4",
+    "@reduxjs/toolkit": "1.9.7",
+    "@strapi/design-system": "2.1.2",
+    "@strapi/icons": "2.1.2",
+    "@strapi/permissions": "5.34.0",
+    "@strapi/types": "5.34.0",
+    "@strapi/typescript-utils": "5.34.0",
+    "@strapi/utils": "5.34.0",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.0",
+    "@testing-library/user-event": "14.6.1",
+    "axios": "1.12.2",
+    "bcryptjs": "2.4.3",
+    "boxen": "5.1.2",
+    "chalk": "^4.1.2",
+    "codemirror5": "npm:codemirror@^5.65.11",
+    "cross-env": "^7.0.3",
+    "date-fns": "2.30.0",
+    "execa": "5.1.1",
+    "fast-deep-equal": "3.1.3",
+    "formik": "2.4.5",
+    "fractional-indexing": "3.2.0",
+    "fs-extra": "11.2.0",
+    "highlight.js": "^10.4.1",
+    "immer": "9.0.21",
+    "inquirer": "8.2.5",
+    "invariant": "^2.2.4",
+    "is-localhost-ip": "2.0.0",
+    "json-logic-js": "2.0.5",
+    "jsonwebtoken": "9.0.0",
+    "koa": "2.16.3",
+    "koa-compose": "4.1.0",
+    "koa-passport": "6.0.0",
+    "koa-static": "5.0.0",
+    "koa2-ratelimit": "^1.1.3",
+    "lodash": "4.17.21",
+    "motion": "12.23.24",
+    "ora": "5.4.1",
+    "p-map": "4.0.0",
+    "passport-local": "1.0.0",
+    "pluralize": "8.0.0",
+    "punycode": "2.3.1",
+    "qs": "6.14.1",
+    "react-dnd": "16.0.1",
+    "react-dnd-html5-backend": "16.0.1",
+    "react-intl": "6.6.2",
+    "react-is": "^18.2.0",
+    "react-query": "3.39.3",
+    "react-redux": "8.1.3",
+    "react-select": "5.8.0",
+    "react-window": "1.8.10",
+    "rimraf": "5.0.5",
+    "sanitize-html": "2.13.0",
+    "scheduler": "0.23.0",
+    "semver": "7.5.4",
+    "sift": "16.0.1",
+    "sonner": "2.0.7",
+    "typescript": "5.4.4",
+    "use-context-selector": "1.4.1",
+    "yup": "0.32.9",
+    "zod": "3.25.67"
+  },
+  "devDependencies": {
+    "@strapi/admin-test-utils": "5.34.0",
+    "@strapi/data-transfer": "5.34.0",
+    "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
+    "@types/fs-extra": "11.0.4",
+    "@types/invariant": "2.2.36",
+    "@types/json-logic-js": "2.0.8",
+    "@types/jsonwebtoken": "9.0.3",
+    "@types/koa-passport": "6.0.1",
+    "@types/lodash": "^4.14.191",
+    "@types/markdown-it": "13.0.7",
+    "@types/markdown-it-container": "2.0.9",
+    "@types/markdown-it-emoji": "2.0.4",
+    "@types/markdown-it-footnote": "3.0.3",
+    "@types/passport-local": "1.0.36",
+    "@types/pluralize": "0.0.32",
+    "@types/punycode": "2.1.4",
+    "@types/react-window": "1.8.8",
+    "@types/sanitize-html": "2.13.0",
+    "@vitejs/plugin-react-swc": "3.6.0",
+    "koa-body": "6.0.1",
+    "msw": "1.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8",
+    "vite": "5.4.21",
+    "vite-plugin-dts": "^4.3.0"
+  },
+  "peerDependencies": {
+    "@strapi/data-transfer": "^5.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/build"
+        ]
+      }
+    }
+  }
+}

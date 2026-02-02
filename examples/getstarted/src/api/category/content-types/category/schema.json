@@ -1,0 +1,75 @@
+{
+  "kind": "collectionType",
+  "collectionName": "categories",
+  "info": {
+    "displayName": "Category",
+    "singularName": "category",
+    "pluralName": "categories",
+    "description": "",
+    "name": "Category"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "addresses": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::address.address",
+      "mappedBy": "categories"
+    },
+    "temps": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::temp.temp",
+      "mappedBy": "categories"
+    },
+    "datetime": {
+      "type": "datetime",
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      }
+    },
+    "date": {
+      "type": "date",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "relation_locales": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-locale.relation-locale",
+      "mappedBy": "categories"
+    },
+    "relation": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-locale.relation-locale",
+      "mappedBy": "category"
+    },
+    "articles": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::article.article",
+      "mappedBy": "categories"
+    }
+  }
+}

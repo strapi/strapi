@@ -1,0 +1,24 @@
+{
+  "name": "strapi-plugin-workspace-plugin",
+  "version": "0.0.0",
+  "private": true,
+  "description": "This is the description of my plugin.",
+  "exports": {
+    "./strapi-admin": {
+      "source": "./admin/src/index.js",
+      "require": "./admin/src/index.js",
+      "default": "./admin/src/index.js"
+    },
+    "./strapi-server": {
+      "source": "./server/index.js",
+      "require": "./server/index.js",
+      "default": "./server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "strapi": {
+    "name": "my-plugin",
+    "description": "This plugin is used as an npm module and linked that way.",
+    "kind": "plugin"
+  }
+}

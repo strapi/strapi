@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "module": "commonjs",
+    "target": "es6"
+  },
+  "exclude": [
+    "**/node_modules/*",
+    ".git",
+    ".npm",
+    "**/.cache/*",
+    "**/.tmp/*",
+    "**/dist/*",
+    "**/build/*",
+    "**/*.test.js",
+    "**/*.test.api.js",
+    "**/examples/getstarted/*",
+    "**/examples/kitchensink/*"
+  ]
+}

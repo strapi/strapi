@@ -1,0 +1,51 @@
+{
+  "name": "docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "docusaurus build",
+    "clear": "docusaurus clear",
+    "deploy": "docusaurus deploy",
+    "docusaurus": "docusaurus",
+    "serve": "docusaurus serve",
+    "start": "TYPEDOC_WATCH=true docusaurus start",
+    "swizzle": "docusaurus swizzle",
+    "write-heading-ids": "docusaurus write-heading-ids",
+    "write-translations": "docusaurus write-translations"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "resolutions": {
+    "@babel/helpers": "7.27.0",
+    "@babel/runtime": "7.26.10",
+    "@babel/runtime-corejs3": "7.26.10"
+  },
+  "dependencies": {
+    "@cmfcmf/docusaurus-search-local": "1.1.0",
+    "@docusaurus/core": "3.9.2",
+    "@docusaurus/preset-classic": "3.9.2",
+    "@docusaurus/theme-mermaid": "3.9.2",
+    "@mdx-js/react": "^3.0.0",
+    "clsx": "^1.1.1",
+    "prism-react-renderer": "^2.4.1",
+    "react": "18.3.0",
+    "react-dom": "18.3.0"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "3.9.2",
+    "docusaurus-plugin-typedoc": "0.22.0",
+    "typedoc": "0.25.9",
+    "typedoc-plugin-markdown": "3.17.1",
+    "typescript": "5.3.3"
+  }
+}
