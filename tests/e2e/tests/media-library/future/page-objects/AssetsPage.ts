@@ -1,9 +1,9 @@
 import type { Page, Locator } from '@playwright/test';
 
 /**
- * Page Object Model for the Media Library Page (Future version)
+ * Page Object Model for the Assets Page (Future version)
  */
-export class MediaLibraryPage {
+export class AssetsPage {
   readonly page: Page;
   readonly newButton: Locator;
   readonly importFilesMenuItem: Locator;
@@ -94,5 +94,12 @@ export class MediaLibraryPage {
   async isFileInputReset() {
     const inputValue = await this.fileInput.inputValue();
     return inputValue === '';
+  }
+
+  /**
+   * Get a specific asset row by name
+   */
+  getAssetRow(name: string) {
+    return this.page.getByRole('row', { name: new RegExp(name) });
   }
 }
