@@ -169,17 +169,16 @@ See for yourself what's under the hood by getting access to a [hosted Strapi pro
 
 See the [LICENSE](./LICENSE) file for licensing information.
 
-
-
 # Task 1 – Strapi Setup
 
 ## Objective
-To clone the Strapi repository, run it locally, explore the project structure, start the admin panel, create a sample content type, and raise a pull request.
 
+To clone the Strapi repository, run it locally, explore the project structure, start the admin panel, create a sample content type, and raise a pull request.
 
 ## Steps Performed
 
 ### 1. Clone the Strapi Repository
+
 Cloned the official Strapi repository from GitHub using HTTPS:
 
 ```bash
@@ -191,81 +190,57 @@ Moved into the cloned Strapi project directory:
 
 cd strapi
 
-3. Check Git Installation
+3. Steps Performed
 
-Verified Git installation:
+Include all the actions you did, like:
 
-git --version
+## Steps Performed
 
+1. **Created a new Strapi project**
+   - Ran `npx create-strapi-app@latest my-strapi-project`
+   - Chose SQLite as default database
+   - Started with example structure and data
+   - Used TypeScript
 
-4. Create a New Branch
+2. **Installed dependencies**
+   - Ran `npm install` (or Yarn if used)
 
-Created a separate branch for Task 1 work to keep changes isolated from the main code:
+3. **Initialized Git repository**
+   - Ran `git init`
+   - Linked local repo to GitHub fork
 
-git checkout -b task1_strapi
+4. **Ran Strapi locally**
+   - Ran `npm run develop` (or `yarn develop`)
+   - Admin Panel available at `http://localhost:1337/admin`
 
-Later, the branch was renamed as per instructions to include my name:
+5. **Created Admin User**
+   - Username: `<your username>`
+   - Logged in to dashboard
 
-git branch -m task1_strapi prashanth_task1
+6. **Created Sample Content Type**
+   - Name: `blog_post`
+   - Display Name: `Blog Post`
+   - Fields:
+     - `Title` → Text
+     - `Content` → Rich Text
+     - `Views` → Number (optional)
 
-5. Install Node.js
+7. **Added Sample Data (Optional)**
+   - Added some entries to test the content type
 
-Installed Node.js on the system and verified the installation:
+8. **Explored Project Folder Structure**
+   - `src/` → source code
+   - `config/` → configurations
+   - `database/` → SQLite files
+   - `public/` → static files
+   - `package.json` → scripts (`develop`, `start`, etc.)
 
-node -v
+9. **Updated README.md**
+   - Documented all steps
 
-
-Node.js version installed:
-
-v24.13.0
-
-
-6. Install Project Dependencies
-
-Installed all required dependencies for the Strapi project using npm:
-
-npm install
-
-
-(The installation took some time as the project has multiple packages.)
-
-
-7. Run Strapi Locally
-
-Started the Strapi development server:
-
-npm run develop
-
-8. Access the Admin Panel
-
-Opened the Strapi Admin Panel in the browser using:
-
-http://localhost:1337/admin
-
-9. Explore Project Folder Structure
-
-Explored the Strapi project structure, including key folders such as:
-
-packages/
-
-apps/
-
-config/
-
-database/
-
-This helped in understanding how the Strapi monorepo is organized.
-
-10. Create a Sample Content Type
-
-Using the Strapi Admin Panel:
-
-Created a sample content type
-
-Added basic fields
-
-Saved and verified the content type
-
+10. **Pushed Changes**
+    - Created branch `prashanth_task1`
+    - Pushed changes to GitHub fork
 
 11. Fork Repository and Push Changes
 
@@ -285,3 +260,4 @@ GitHub Username: prashanthbandari123
 
 Branch Name: prashanth_task1
 
+```
