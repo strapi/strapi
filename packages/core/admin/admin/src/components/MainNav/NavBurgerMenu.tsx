@@ -22,7 +22,7 @@ const MotionLayer = styled(motion.div)`
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 3;
+  z-index: 11;
 
   ${({ theme }) => theme.breakpoints.large} {
     display: none;

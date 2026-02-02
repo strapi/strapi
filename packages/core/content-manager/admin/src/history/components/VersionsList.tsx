@@ -1,11 +1,12 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams, useIsMobile } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
+import { ActionsDrawer } from '../../components/ActionsDrawer';
 import { RelativeTime } from '../../components/RelativeTime';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDisplayName } from '../../utils/users';
@@ -27,16 +28,44 @@ const BlueText = (children: React.ReactNode) => (
  * VersionCard
  * -----------------------------------------------------------------------------------------------*/
 
+const VersionAuthor = ({
+  version,
+  isCurrent,
+}: {
+  version: HistoryVersions.HistoryVersionDataResponse;
+  isCurrent: boolean;
+}) => {
+  const { formatMessage } = useIntl();
+  const author = version.createdBy && getDisplayName(version.createdBy);
+  return (
+    <>
+      {formatMessage(
+        {
+          id: 'content-manager.history.sidebar.versionDescription',
+          defaultMessage:
+            '{distanceToNow}{isAnonymous, select, true {} other { by {author}}}{isCurrent, select, true { <b>(current)</b>} other {}}',
+        },
+        {
+          distanceToNow: <RelativeTime timestamp={new Date(version.createdAt)} />,
+          author,
+          isAnonymous: !Boolean(version.createdBy),
+          isCurrent,
+          b: BlueText,
+        }
+      )}
+    </>
+  );
+};
+
 interface VersionCardProps {
   version: HistoryVersions.HistoryVersionDataResponse;
   isCurrent: boolean;
 }
 
 const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
-  const { formatDate, formatMessage } = useIntl();
+  const { formatDate } = useIntl();
   const [{ query }] = useQueryParams<{ id?: string }>();
   const isActive = query.id === version.id.toString();
-  const author = version.createdBy && getDisplayName(version.createdBy);
 
   return (
     <Flex
@@ -64,20 +93,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
           })}
         </Typography>
         <Typography tag="p" variant="pi" textColor="neutral600">
-          {formatMessage(
-            {
-              id: 'content-manager.history.sidebar.versionDescription',
-              defaultMessage:
-                '{distanceToNow}{isAnonymous, select, true {} other { by {author}}}{isCurrent, select, true { <b>(current)</b>} other {}}',
-            },
-            {
-              distanceToNow: <RelativeTime timestamp={new Date(version.createdAt)} />,
-              author,
-              isAnonymous: !Boolean(version.createdBy),
-              isCurrent,
-              b: BlueText,
-            }
-          )}
+          <VersionAuthor version={version} isCurrent={isCurrent} />
         </Typography>
       </Flex>
       {version.status && <DocumentStatus status={version.status} size="XS" />}
@@ -120,13 +136,61 @@ const VersionsList = () => {
     versions: state.versions,
     page: state.page,
   }));
+  const isMobile = useIsMobile();
 
-  return (
+  const [{ query }] = useQueryParams<{ id?: string }>();
+  const currentVersion = versions.data.find((version) => version.id.toString() === query.id);
+
+  const versionsListElements = (
+    <Box flex={1} overflow="auto">
+      {versions.meta.pagination.page > 1 && (
+        <Box paddingTop={4} textAlign="center">
+          <PaginationButton page={page - 1}>
+            {formatMessage({
+              id: 'content-manager.history.sidebar.show-newer',
+              defaultMessage: 'Show newer versions',
+            })}
+          </PaginationButton>
+        </Box>
+      )}
+      <Flex
+        direction="column"
+        gap={3}
+        padding={{ initial: 0, medium: 4 }}
+        tag="ul"
+        alignItems="stretch"
+      >
+        {versions.data.map((version, index) => (
+          <li
+            key={version.id}
+            aria-label={formatMessage({
+              id: 'content-manager.history.sidebar.title.version-card.aria-label',
+              defaultMessage: 'Version card',
+            })}
+          >
+            <VersionCard version={version} isCurrent={page === 1 && index === 0} />
+          </li>
+        ))}
+      </Flex>
+      {versions.meta.pagination.page < versions.meta.pagination.pageCount && (
+        <Box paddingBottom={4} textAlign="center">
+          <PaginationButton page={page + 1}>
+            {formatMessage({
+              id: 'content-manager.history.sidebar.show-older',
+              defaultMessage: 'Show older versions',
+            })}
+          </PaginationButton>
+        </Box>
+      )}
+    </Box>
+  );
+
+  return !isMobile ? (
     <Flex
       shrink={0}
       direction="column"
       alignItems="stretch"
-      width="320px"
+      width={{ initial: '28rem', large: '32rem' }}
       height="100dvh"
       background="neutral0"
       borderColor="neutral200"
@@ -155,42 +219,40 @@ const VersionsList = () => {
           </Typography>
         </Box>
       </Flex>
-      <Box flex={1} overflow="auto">
-        {versions.meta.pagination.page > 1 && (
-          <Box paddingTop={4} textAlign="center">
-            <PaginationButton page={page - 1}>
-              {formatMessage({
-                id: 'content-manager.history.sidebar.show-newer',
-                defaultMessage: 'Show newer versions',
-              })}
-            </PaginationButton>
-          </Box>
-        )}
-        <Flex direction="column" gap={3} padding={4} tag="ul" alignItems="stretch">
-          {versions.data.map((version, index) => (
-            <li
-              key={version.id}
-              aria-label={formatMessage({
-                id: 'content-manager.history.sidebar.title.version-card.aria-label',
-                defaultMessage: 'Version card',
-              })}
-            >
-              <VersionCard version={version} isCurrent={page === 1 && index === 0} />
-            </li>
-          ))}
-        </Flex>
-        {versions.meta.pagination.page < versions.meta.pagination.pageCount && (
-          <Box paddingBottom={4} textAlign="center">
-            <PaginationButton page={page + 1}>
-              {formatMessage({
-                id: 'content-manager.history.sidebar.show-older',
-                defaultMessage: 'Show older versions',
-              })}
-            </PaginationButton>
-          </Box>
-        )}
-      </Box>
+      {versionsListElements}
     </Flex>
+  ) : (
+    <>
+      <ActionsDrawer.Root hasContent hasSideNav>
+        <ActionsDrawer.Overlay />
+        <ActionsDrawer.Header>
+          {currentVersion && (
+            <Flex gap={2} overflow="hidden">
+              <Box flex={1} overflow="hidden">
+                <Typography
+                  display="block"
+                  variant="omega"
+                  textColor="neutral600"
+                  overflow="hidden"
+                  style={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                >
+                  <VersionAuthor
+                    version={currentVersion}
+                    isCurrent={page === 1 && versions.data.indexOf(currentVersion) === 0}
+                  />
+                </Typography>
+              </Box>
+              {currentVersion.status && <DocumentStatus status={currentVersion.status} size="XS" />}
+            </Flex>
+          )}
+        </ActionsDrawer.Header>
+        <ActionsDrawer.Content>{versionsListElements}</ActionsDrawer.Content>
+      </ActionsDrawer.Root>
+      {/* Adding a fixed height to the bottom of the page to prevent 
+      the actions drawer from covering the content
+      (40px button + 12px * 2 padding + 1px border) */}
+      <Box width="100%" height="6.5rem" />
+    </>
   );
 };
 

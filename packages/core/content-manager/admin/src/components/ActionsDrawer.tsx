@@ -189,7 +189,7 @@ const Header = ({ children }: HeaderProps) => {
         borderWidth={isOpen ? '1px 0' : '1px 0 0 0'}
         borderColor="neutral150"
       >
-        <Flex flex={1} gap={2} alignItems="center">
+        <Flex flex={1} gap={2} alignItems="center" overflow="hidden">
           {children}
         </Flex>
         {hasContent && (

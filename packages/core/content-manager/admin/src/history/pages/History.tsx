@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { useQueryParams, Page, createContext, useRBAC } from '@strapi/admin/strapi-admin';
+import {
+  useQueryParams,
+  Page,
+  createContext,
+  useRBAC,
+  HEIGHT_TOP_NAVIGATION,
+  HEIGHT_TOP_NAVIGATION_MEDIUM,
+} from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, Main, Portal, Link } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -201,7 +208,7 @@ const HistoryPage = () => {
         page={page}
         mainField={mainField}
       >
-        <Flex direction="row" alignItems="flex-start">
+        <Flex direction={{ initial: 'column', medium: 'row' }} alignItems="flex-start">
           <Main
             grow={1}
             height="100dvh"
@@ -211,7 +218,6 @@ const HistoryPage = () => {
             labelledBy={headerId}
           >
             <VersionHeader headerId={headerId} />
-
             <VersionContent />
           </Main>
           <VersionsList />
@@ -245,7 +251,7 @@ const ProtectedHistoryPageImpl = () => {
         height="100dvh"
         width="100dvw"
         position="fixed"
-        top={0}
+        top={{ initial: HEIGHT_TOP_NAVIGATION, medium: HEIGHT_TOP_NAVIGATION_MEDIUM, large: 0 }}
         left={0}
         zIndex={4}
         background="neutral0"
@@ -260,7 +266,7 @@ const ProtectedHistoryPageImpl = () => {
       height="100dvh"
       width="100dvw"
       position="fixed"
-      top={0}
+      top={{ initial: HEIGHT_TOP_NAVIGATION, medium: HEIGHT_TOP_NAVIGATION_MEDIUM, large: 0 }}
       left={0}
       zIndex={4}
       background="neutral0"
