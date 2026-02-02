@@ -172,7 +172,7 @@ A Loom video was recorded demonstrating the following:
 | **Development**       | Content type creation & Sample content |
 | **Process**           | Pull Request overview                  |
 
-**📎 Loom link:** _[Added in PR description]_
+**📎 Loom link:** _https://www.loom.com/share/8a4bc8ebe9af458486a76cb4a09dcb25_
 
 ---
 
