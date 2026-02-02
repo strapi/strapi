@@ -48,7 +48,7 @@ Strapi Community Edition is a free and open-source headless CMS enabling you to 
 - **Secure by default**: Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
 - **Powerful CLI**: Scaffold projects and APIs on the fly.
 
-## Getting Started
+## Getting Started with the DevOps Internship Task -1
 
 <a href="https://docs.strapi.io/developer-docs/latest/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
