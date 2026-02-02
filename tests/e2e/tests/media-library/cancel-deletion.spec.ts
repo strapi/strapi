@@ -4,6 +4,7 @@ import path from 'path';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { resetFiles } from '../../../utils/file-reset';
 import { login } from '../../../utils/login';
+import { navToHeader } from '../../../utils/shared';
 
 test.describe('Media Library', () => {
   test.beforeEach(async ({ page }) => {
@@ -19,8 +20,7 @@ test.describe('Media Library', () => {
     test('as a user I want to cancel the remove-asset confirmation without deleting the asset', async ({
       page,
     }) => {
-      // Go to stable Media Library (plugins/upload)
-      await page.goto('/admin/plugins/upload');
+      await navToHeader(page, ['Media Library'], 'Media Library');
 
       // Upload one asset so we have something to open and attempt to delete
       await page.getByRole('button', { name: 'Add new assets' }).first().click();
