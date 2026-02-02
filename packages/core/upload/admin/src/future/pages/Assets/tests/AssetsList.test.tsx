@@ -1,7 +1,4 @@
-import { DesignSystemProvider } from '@strapi/design-system';
-import { render, screen } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { MemoryRouter } from 'react-router-dom';
+import { render, screen } from '@tests/utils';
 
 import { AssetsList } from '../components/AssetsList';
 
@@ -30,16 +27,7 @@ interface SetupProps {
   assets?: File[];
 }
 
-const setup = ({ assets = mockAssets }: SetupProps = {}) =>
-  render(
-    <MemoryRouter>
-      <IntlProvider locale="en" messages={{}}>
-        <DesignSystemProvider>
-          <AssetsList assets={assets} />
-        </DesignSystemProvider>
-      </IntlProvider>
-    </MemoryRouter>
-  );
+const setup = ({ assets = mockAssets }: SetupProps = {}) => render(<AssetsList assets={assets} />);
 
 describe('AssetsList', () => {
   describe('Table rendering', () => {
