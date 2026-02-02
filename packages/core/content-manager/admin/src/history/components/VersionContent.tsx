@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Form, Layouts, useForm, createRulesEngine } from '@strapi/admin/strapi-admin';
+import { Form, Layouts, useForm, createRulesEngine, useIsMobile } from '@strapi/admin/strapi-admin';
 import { Box, Divider, Flex, Grid, Typography } from '@strapi/design-system';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
@@ -103,6 +103,7 @@ function getRemaingFieldsLayout({
  * -----------------------------------------------------------------------------------------------*/
 
 const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
+  const isMobile = useIsMobile();
   const fieldValues = useForm('Fields', (state) => state.values);
   const rulesEngine = createRulesEngine();
   if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
@@ -128,14 +129,11 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
 
   return (
     <Box
-      hasRadius
-      background="neutral0"
-      shadow="tableShadow"
-      paddingLeft={6}
-      paddingRight={6}
-      paddingTop={6}
-      paddingBottom={6}
-      borderColor="neutral150"
+      hasRadius={!isMobile}
+      background={{ initial: 'transparent', medium: 'neutral0' }}
+      shadow={{ initial: 'none', medium: 'tableShadow' }}
+      padding={{ initial: 0, medium: 6 }}
+      borderColor={{ initial: 'transparent', medium: 'neutral150' }}
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
         {panel.map((row, gridRowIndex) => {
@@ -154,7 +152,7 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
           }
 
           return (
-            <Grid.Root key={gridRowIndex} gap={4}>
+            <Grid.Root key={gridRowIndex} gap={{ initial: 6, medium: 4 }}>
               {visibleFields.map(({ size, ...field }) => {
                 return (
                   <Grid.Item
