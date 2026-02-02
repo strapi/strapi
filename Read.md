@@ -22,3 +22,5 @@ Output
 Strapi application is running successfully on the local system/VM.
 
 Loom Video
+https://www.loom.com/share/64eaca564dcf4b9f8623eb652b459dbe
+np
