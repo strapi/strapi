@@ -1,5 +1,5 @@
 /**
- *  article controller
+ * article controller
  */
 
 import { factories } from '@strapi/strapi';
