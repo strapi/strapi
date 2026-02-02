@@ -8,12 +8,14 @@ import {
   useQueryParams,
   tours,
   Layouts,
+  useIsDesktop,
 } from '@strapi/admin/strapi-admin';
 import { Grid, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { ActionsDrawer } from '../../components/ActionsDrawer';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -27,7 +29,7 @@ import { createYupSchema } from '../../utils/validation';
 import { Blocker } from './components/Blocker';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
-import { Panels } from './components/Panels';
+import { Panels, PanelsProvider, usePanelsContext, ActionsPanelContent } from './components/Panels';
 import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
@@ -46,6 +48,9 @@ const EditViewPage = () => {
   });
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const isDesktop = useIsDesktop();
+  const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
+  const drawerHasContent = visiblePanels.length > 0;
 
   const doc = useDoc();
   const {
@@ -214,11 +219,30 @@ const EditViewPage = () => {
                     <FormLayout layout={layout} document={doc} />
                   </Tabs.Content>
                 </Grid.Item>
-                <Grid.Item col={3} xs={12} direction="column" alignItems="stretch">
-                  <Panels />
-                </Grid.Item>
+                {isDesktop && (
+                  <Grid.Item col={3} direction="column" alignItems="stretch">
+                    <Panels />
+                  </Grid.Item>
+                )}
               </Grid.Root>
             </Tabs.Root>
+            {!isDesktop && (
+              <>
+                <ActionsDrawer.Root hasContent={drawerHasContent} hasSideNav>
+                  <ActionsDrawer.Overlay />
+                  <ActionsDrawer.Header>
+                    <ActionsPanelContent />
+                  </ActionsDrawer.Header>
+                  <ActionsDrawer.Content>
+                    <Panels withActions={false} />
+                  </ActionsDrawer.Content>
+                </ActionsDrawer.Root>
+                {/* Adding a fixed height to the bottom of the page to prevent 
+                the actions drawer from covering the content
+                (40px button + 12px * 2 padding + 1px border) */}
+                <Box height="6.5rem" />
+              </>
+            )}
           </Layouts.Content>
           <Blocker />
         </>
@@ -292,7 +316,9 @@ const ProtectedEditViewPage = () => {
     <Page.Protect permissions={permissions}>
       {({ permissions }) => (
         <DocumentRBAC permissions={permissions}>
-          <EditViewPage />
+          <PanelsProvider>
+            <EditViewPage />
+          </PanelsProvider>
         </DocumentRBAC>
       )}
     </Page.Protect>
