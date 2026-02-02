@@ -168,3 +168,12 @@ See for yourself what's under the hood by getting access to a [hosted Strapi pro
 ## License
 
 See the [LICENSE](./LICENSE) file for licensing information.
+## setup and verification
+    1. repo forked
+    2. cloned to my local
+    3. installed dependencies
+    4. build pipeline
+    5. successfully build
+
+## output
+this repo build and run successfully in my local
