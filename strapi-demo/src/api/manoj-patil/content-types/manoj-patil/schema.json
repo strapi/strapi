@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "manoj_patils",
+  "info": {
+    "singularName": "manoj-patil",
+    "pluralName": "manoj-patils",
+    "displayName": "Article"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "ManojPatil": {
+      "type": "string"
+    }
+  }
+}
