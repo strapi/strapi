@@ -41,11 +41,10 @@ const createStrapiInstance = async ({
   // Ensure Koa trusts X-Forwarded-* headers in tests so asHTTPS() can simulate HTTPS
   instance.config.set('server.proxy.koa', true);
 
-  // Opt out of deprecated expiresIn so only the new session config (and its defaults) is used
+  // Opt out of deprecated expiresIn by setting an empty session options object
+  // This prevents the default expiresIn from triggering deprecation warnings
+  // Only set if not already configured to avoid overriding user settings
   if (!skipDefaultSessionConfig) {
-    // Opt out of deprecated expiresIn by setting an empty session options object
-    // This prevents the default expiresIn from triggering deprecation warnings
-    // Only set if not already configured to avoid overriding user settings
     const existingSessionOptions = instance.config.get('admin.auth.sessions.options');
     if (!existingSessionOptions) {
       instance.config.set('admin.auth.sessions.options', {});
