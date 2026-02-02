@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useRef, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import {
@@ -20,15 +20,53 @@ import { ChevronDown, Files, GridFour as GridIcon, List } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { localStorageKeys, viewOptions } from '../../constants';
-import { usePersistentState } from '../../hooks/usePersistentState';
-import { useUploadFilesMutation } from '../services/api';
-import { useGetAssetsQuery } from '../services/assets';
-import { getTranslationKey } from '../utils/translations';
+import { usePersistentState } from '../../../hooks/usePersistentState';
+import { useUploadFilesMutation } from '../../services/api';
+import { useGetAssetsQuery } from '../../services/assets';
+import { getTranslationKey } from '../../utils/translations';
 
-import { AssetsGrid } from './Assets/components/AssetsGrid';
-import { AssetsList } from './Assets/components/AssetsList';
-import { DEFAULT_SORT, type SortState } from './Assets/constants';
+import { AssetsGrid } from './components/AssetsGrid';
+import { AssetsList } from './components/AssetsList';
+import { localStorageKeys, viewOptions } from './constants';
+
+interface AssetsViewProps {
+  view: number;
+}
+
+const AssetsView = ({ view }: AssetsViewProps) => {
+  const { formatMessage } = useIntl();
+  const { data, isLoading, error } = useGetAssetsQuery({ folder: null });
+
+  const isGridView = view === viewOptions.GRID;
+  const assets = data?.results ?? [];
+
+  if (isLoading) {
+    return (
+      <Flex justifyContent="center" padding={8}>
+        <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
+      </Flex>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box padding={8}>
+        <Typography textColor="danger600">
+          {formatMessage({
+            id: getTranslationKey('list.assets.error'),
+            defaultMessage: 'An error occurred while fetching assets.',
+          })}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (isGridView) {
+    return <AssetsGrid assets={assets} />;
+  }
+
+  return <AssetsList assets={assets} />;
+};
 
 const StyledToggleGroup = styled(ToggleGroup.Root)`
   display: flex;
@@ -63,32 +101,25 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
   }
 `;
 
-export const MediaLibraryPage = () => {
+export const AssetsPage = () => {
   const { formatMessage } = useIntl();
 
   // Upload hooks
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError } = useAPIErrorHandler();
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadFiles] = useUploadFilesMutation();
 
-  // View/sort state
-  const [sort, setSort] = React.useState<SortState>(DEFAULT_SORT);
+  // View state
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
-
-  // Query
-  const sortString = `${sort.field}:${sort.order}`;
-  const { data, isLoading, error } = useGetAssetsQuery({ folder: null, sort: sortString });
-
   const isGridView = view === viewOptions.GRID;
-  const assets = data?.results ?? [];
 
   // Upload handlers
   const handleFileSelect = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const formData = new FormData();
@@ -137,13 +168,6 @@ export const MediaLibraryPage = () => {
     e.target.value = '';
   };
 
-  /**
-   * NOTE:
-   *
-   * The design differs from our current Layouts component.
-   * Either we find a way to make it work with our current Layouts component
-   * or we will have to write our own custom layout.
-   */
   return (
     <Layouts.Root>
       <VisuallyHidden>
@@ -155,7 +179,6 @@ export const MediaLibraryPage = () => {
         title="TODO: Folder location"
         primaryAction={
           <Flex gap={2}>
-            {/* New button with upload */}
             <SimpleMenu
               popoverPlacement="bottom-end"
               variant="default"
@@ -169,8 +192,6 @@ export const MediaLibraryPage = () => {
                 })}
               </MenuItem>
             </SimpleMenu>
-
-            {/* Search */}
             <SearchInput
               label={formatMessage({
                 id: getTranslationKey('search.label'),
@@ -219,24 +240,7 @@ export const MediaLibraryPage = () => {
       />
 
       <Layouts.Content>
-        {isLoading ? (
-          <Flex justifyContent="center" padding={8}>
-            <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
-          </Flex>
-        ) : error ? (
-          <Box padding={8}>
-            <Typography textColor="danger600">
-              {formatMessage({
-                id: getTranslationKey('list.assets.error'),
-                defaultMessage: 'An error occurred while fetching assets.',
-              })}
-            </Typography>
-          </Box>
-        ) : isGridView ? (
-          <AssetsGrid assets={assets} />
-        ) : (
-          <AssetsList assets={assets} sort={sort} onSortChange={setSort} />
-        )}
+        <AssetsView view={view} />
       </Layouts.Content>
     </Layouts.Root>
   );

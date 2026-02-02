@@ -8,13 +8,10 @@ import {
   RawTh,
   RawThead,
   RawTr,
-  Tooltip,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
 import {
-  CaretDown,
-  CaretUp,
   File as FileIcon,
   FileCsv,
   FilePdf,
@@ -27,10 +24,10 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../../enums';
-import { formatBytes, getFileExtension, prefixFileUrlWithBackendUrl } from '../../../../utils';
+import { AssetType } from '../../../enums';
+import { formatBytes, getFileExtension, prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getTranslationKey } from '../../../utils/translations';
-import { TABLE_HEADERS, type SortOrder, type SortState } from '../constants';
+import { TABLE_HEADERS } from '../constants';
 
 import type { File } from '../../../../../../shared/contracts/files';
 
@@ -57,9 +54,8 @@ const StyledTh = styled(RawTh)`
   text-align: left;
 `;
 
-const StyledTr = styled(RawTr)<{ $clickable?: boolean }>`
+const StyledTr = styled(RawTr)`
   height: 48px;
-  cursor: ${({ $clickable }) => ($clickable ? 'pointer' : 'default')};
   background: ${({ theme }) => theme.colors.neutral0};
 `;
 
@@ -141,22 +137,13 @@ const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
 
 interface AssetRowProps {
   asset: File;
-  onClick?: (asset: File) => void;
 }
 
-const AssetRow = ({ asset, onClick }: AssetRowProps) => {
+const AssetRow = ({ asset }: AssetRowProps) => {
   const { formatDate, formatMessage } = useIntl();
 
-  const handleRowClick = () => {
-    if (!onClick) {
-      return;
-    }
-
-    onClick(asset);
-  };
-
   return (
-    <StyledTr onClick={handleRowClick} $clickable={!!onClick}>
+    <StyledTr>
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <AssetPreviewCell asset={asset} />
@@ -199,34 +186,17 @@ const AssetRow = ({ asset, onClick }: AssetRowProps) => {
 
 interface AssetsListProps {
   assets: File[];
-  sort?: SortState;
-  onSortChange?: (sort: SortState) => void;
-  onAssetClick?: (asset: File) => void;
 }
 
-export const AssetsList = ({ assets, sort, onSortChange, onAssetClick }: AssetsListProps) => {
+export const AssetsList = ({ assets }: AssetsListProps) => {
   const { formatMessage } = useIntl();
-
-  const handleSort = (fieldName: string) => {
-    if (!onSortChange || !sort) {
-      return;
-    }
-
-    const newOrder: SortOrder = sort.field === fieldName && sort.order === 'ASC' ? 'DESC' : 'ASC';
-    onSortChange({ field: fieldName, order: newOrder });
-  };
 
   return (
     <StyledTable colCount={TABLE_HEADERS.length} rowCount={assets.length + 1}>
       <StyledThead>
         <RawTr>
           {TABLE_HEADERS.map((header) => {
-            const isSorted = sort?.field === header.name;
             const tableHeaderLabel = formatMessage(header.label);
-            const sortLabel = formatMessage(
-              { id: 'list.table.header.sort', defaultMessage: 'Sort on {label}' },
-              { label: tableHeaderLabel }
-            );
             const isVisuallyHidden = 'isVisuallyHidden' in header && header.isVisuallyHidden;
 
             if (isVisuallyHidden) {
@@ -244,33 +214,9 @@ export const AssetsList = ({ assets, sort, onSortChange, onAssetClick }: AssetsL
 
             return (
               <StyledTh key={header.name}>
-                <Flex gap={1} alignItems="center">
-                  <Tooltip label={header.isSortable ? sortLabel : tableHeaderLabel}>
-                    {header.isSortable ? (
-                      <Typography
-                        onClick={() => handleSort(header.name)}
-                        tag={isSorted ? 'span' : 'button'}
-                        textColor="neutral600"
-                        variant="sigma"
-                      >
-                        {tableHeaderLabel}
-                      </Typography>
-                    ) : (
-                      <Typography textColor="neutral600" variant="sigma">
-                        {tableHeaderLabel}
-                      </Typography>
-                    )}
-                  </Tooltip>
-                  {isSorted && (
-                    <IconButton
-                      label={sortLabel}
-                      onClick={() => handleSort(header.name)}
-                      variant="ghost"
-                    >
-                      {sort?.order === 'ASC' ? <CaretUp /> : <CaretDown />}
-                    </IconButton>
-                  )}
-                </Flex>
+                <Typography textColor="neutral600" variant="sigma">
+                  {tableHeaderLabel}
+                </Typography>
               </StyledTh>
             );
           })}
@@ -289,7 +235,7 @@ export const AssetsList = ({ assets, sort, onSortChange, onAssetClick }: AssetsL
             </StyledBodyTd>
           </RawTr>
         ) : (
-          assets.map((asset) => <AssetRow key={asset.id} asset={asset} onClick={onAssetClick} />)
+          assets.map((asset) => <AssetRow key={asset.id} asset={asset} />)
         )}
       </RawTbody>
     </StyledTable>
