@@ -44,7 +44,7 @@
   "Auth.form.username.label": "Používateľské meno",
   "Auth.form.username.placeholder": "Janko Hraško",
   "Auth.form.welcome.subtitle": "Prihláste sa do Vášho Strapi účtu",
-  "Auth.form.welcome.title": "Welcome to Strapi!",
+  "Auth.form.welcome.title": "Vitajte v Strapi!",
   "Auth.link.forgot-password": "Zabudli ste heslo?",
   "Auth.link.ready": "Chcete sa prihlásiť?",
   "Auth.link.signin": "Prihlásiť sa",
