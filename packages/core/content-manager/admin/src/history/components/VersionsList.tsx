@@ -6,7 +6,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-import { ActionsDrawer } from '../../components/ActionsDrawer';
+import { ActionsDrawer, useActionsDrawer } from '../../components/ActionsDrawer';
 import { RelativeTime } from '../../components/RelativeTime';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDisplayName } from '../../utils/users';
@@ -65,7 +65,12 @@ interface VersionCardProps {
 const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
   const { formatDate } = useIntl();
   const [{ query }] = useQueryParams<{ id?: string }>();
+  const setIsOpen = useActionsDrawer('VersionCard', (s) => s?.setIsOpen, false);
   const isActive = query.id === version.id.toString();
+
+  const handleClick = () => {
+    setIsOpen?.(false);
+  };
 
   return (
     <Flex
@@ -81,6 +86,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
       tag={Link}
       to={`?${stringify({ ...query, id: version.id })}`}
       style={{ textDecoration: 'none' }}
+      onClick={handleClick}
     >
       <Flex direction="column" gap={1} alignItems="flex-start">
         <Typography tag="h3" fontWeight="semiBold">

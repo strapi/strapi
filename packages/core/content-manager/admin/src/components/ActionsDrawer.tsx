@@ -253,4 +253,4 @@ const ActionsDrawer = {
   Content,
 };
 
-export { ActionsDrawer };
+export { ActionsDrawer, useActionsDrawer };
