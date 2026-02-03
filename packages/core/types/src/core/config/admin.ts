@@ -44,11 +44,11 @@ export interface Auth {
 }
 
 export interface TransferToken {
-  salt: string;
+  salt?: string;
 }
 
 export interface Secrets {
-  encryptionKey: string;
+  encryptionKey?: string;
 }
 
 export interface AuditLogs {
@@ -78,7 +78,7 @@ export interface RateLimit {
 }
 
 export interface Transfer {
-  token: TransferToken;
+  token?: TransferToken;
 }
 
 export interface FirstPublisedAtField {
@@ -114,7 +114,6 @@ export interface Ai {
 export interface Admin {
   // required
   apiToken: ApiToken;
-  transfer: Transfer;
   auth: Auth;
 
   // optional - server configuration
@@ -137,4 +136,5 @@ export interface Admin {
   rateLimit?: RateLimit;
   firstPublishedAtField?: FirstPublisedAtField;
   flags?: Flags;
+  transfer?: Transfer;
 }
