@@ -10,7 +10,7 @@ import { ActionsDrawer, useActionsDrawer } from '../../components/ActionsDrawer'
 import { RelativeTime } from '../../components/RelativeTime';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDisplayName } from '../../utils/users';
-import { useHistoryContext } from '../pages/History';
+import { HistoryContextValue, useHistoryContext } from '../pages/History';
 
 import type { HistoryVersions } from '../../../../shared/contracts';
 
@@ -25,7 +25,7 @@ const BlueText = (children: React.ReactNode) => (
 );
 
 /* -------------------------------------------------------------------------------------------------
- * VersionCard
+ * VersionAuthor
  * -----------------------------------------------------------------------------------------------*/
 
 const VersionAuthor = ({
@@ -56,6 +56,10 @@ const VersionAuthor = ({
     </>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * VersionCard
+ * -----------------------------------------------------------------------------------------------*/
 
 interface VersionCardProps {
   version: HistoryVersions.HistoryVersionDataResponse;
@@ -133,21 +137,17 @@ const PaginationButton = ({ page, children }: PaginationButtonProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * VersionsList
+ * VersionsListItems
  * -----------------------------------------------------------------------------------------------*/
 
-const VersionsList = () => {
+const VersionsListItems = () => {
   const { formatMessage } = useIntl();
-  const { versions, page } = useHistoryContext('VersionsList', (state) => ({
+  const { versions, page } = useHistoryContext('VersionsListItems', (state) => ({
     versions: state.versions,
     page: state.page,
   }));
-  const isMobile = useIsMobile();
 
-  const [{ query }] = useQueryParams<{ id?: string }>();
-  const currentVersion = versions.data.find((version) => version.id.toString() === query.id);
-
-  const versionsListElements = (
+  return (
     <Box flex={1} overflow="auto">
       {versions.meta.pagination.page > 1 && (
         <Box paddingTop={4} textAlign="center">
@@ -190,6 +190,22 @@ const VersionsList = () => {
       )}
     </Box>
   );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * VersionsList
+ * -----------------------------------------------------------------------------------------------*/
+
+const VersionsList = () => {
+  const { formatMessage } = useIntl();
+  const { versions, page } = useHistoryContext('VersionsList', (state) => ({
+    versions: state.versions,
+    page: state.page,
+  }));
+  const isMobile = useIsMobile();
+
+  const [{ query }] = useQueryParams<{ id?: string }>();
+  const currentVersion = versions.data.find((version) => version.id.toString() === query.id);
 
   return !isMobile ? (
     <Flex
@@ -227,7 +243,7 @@ const VersionsList = () => {
           </Typography>
         </Box>
       </Flex>
-      {versionsListElements}
+      <VersionsListItems />
     </Flex>
   ) : (
     <>
@@ -254,7 +270,9 @@ const VersionsList = () => {
             </Flex>
           )}
         </ActionsDrawer.Header>
-        <ActionsDrawer.Content>{versionsListElements}</ActionsDrawer.Content>
+        <ActionsDrawer.Content>
+          <VersionsListItems />
+        </ActionsDrawer.Content>
       </ActionsDrawer.Root>
       {/* Adding a fixed height to the bottom of the page to prevent 
       the actions drawer from covering the content
