@@ -32,8 +32,8 @@ const setup = ({ assets = mockAssets }: SetupProps = {}) => render(<AssetsList a
 describe('AssetsList', () => {
   describe('Table rendering', () => {
     it('renders a table element', () => {
-      const { container } = setup();
-      expect(container.querySelector('table')).toBeInTheDocument();
+      setup();
+      expect(screen.getByRole('gridcell', { name: 'name' })).toBeInTheDocument();
     });
 
     it('renders asset names in the table', () => {
@@ -57,12 +57,12 @@ describe('AssetsList', () => {
         expect(screen.getByRole('img')).toBeInTheDocument();
       });
 
-      it('renders empty alt when alternativeText is not provided', () => {
+      it('renders presentational image when alternativeText is not provided', () => {
         const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
         asset.alternativeText = null;
-        const { container } = setup({ assets: [asset] });
-        const img = container.querySelector('img');
-        expect(img).toHaveAttribute('alt', '');
+        setup({ assets: [asset] });
+        expect(screen.queryByRole('img')).not.toBeInTheDocument();
+        expect(screen.getByText('test.jpg')).toBeInTheDocument();
       });
 
       it('uses thumbnail format url when available', () => {
@@ -81,78 +81,78 @@ describe('AssetsList', () => {
     });
 
     describe('Video assets', () => {
-      it('renders icon for video/mp4', () => {
-        const { container } = setup({
+      it('renders row for video/mp4', () => {
+        setup({
           assets: [createMockAsset(1, 'video.mp4', 'video/mp4', '.mp4')],
         });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        expect(screen.getByText('video.mp4')).toBeInTheDocument();
       });
 
-      it('renders icon for video/webm', () => {
-        const { container } = setup({
+      it('renders row for video/webm', () => {
+        setup({
           assets: [createMockAsset(1, 'video.webm', 'video/webm', '.webm')],
         });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        expect(screen.getByText('video.webm')).toBeInTheDocument();
       });
     });
 
     describe('Audio assets', () => {
-      it('renders icon for audio/mp3', () => {
-        const { container } = setup({
+      it('renders row for audio/mp3', () => {
+        setup({
           assets: [createMockAsset(1, 'audio.mp3', 'audio/mp3', '.mp3')],
         });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        expect(screen.getByText('audio.mp3')).toBeInTheDocument();
       });
 
-      it('renders icon for audio/wav', () => {
-        const { container } = setup({
+      it('renders row for audio/wav', () => {
+        setup({
           assets: [createMockAsset(1, 'audio.wav', 'audio/wav', '.wav')],
         });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        expect(screen.getByText('audio.wav')).toBeInTheDocument();
       });
     });
 
     describe('Document assets', () => {
-      it('renders icon for application/pdf', () => {
-        const { container } = setup({
+      it('renders row for application/pdf', () => {
+        setup({
           assets: [createMockAsset(1, 'doc.pdf', 'application/pdf', '.pdf')],
         });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        expect(screen.getByText('doc.pdf')).toBeInTheDocument();
       });
 
-      it('renders icon for text/csv', () => {
-        const { container } = setup({
+      it('renders row for text/csv', () => {
+        setup({
           assets: [createMockAsset(1, 'data.csv', 'text/csv', '.csv')],
         });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        expect(screen.getByText('data.csv')).toBeInTheDocument();
       });
 
-      it('renders icon for Excel files', () => {
-        const { container } = setup({
+      it('renders row for Excel files', () => {
+        setup({
           assets: [createMockAsset(1, 'spreadsheet.xls', 'application/vnd.ms-excel', '.xls')],
         });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        expect(screen.getByText('spreadsheet.xls')).toBeInTheDocument();
       });
 
-      it('renders icon for zip files', () => {
-        const { container } = setup({
+      it('renders row for zip files', () => {
+        setup({
           assets: [createMockAsset(1, 'archive.zip', 'application/zip', '.zip')],
         });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        expect(screen.getByText('archive.zip')).toBeInTheDocument();
       });
 
-      it('renders generic icon for unknown document types', () => {
-        const { container } = setup({
+      it('renders row for unknown document types', () => {
+        setup({
           assets: [createMockAsset(1, 'file.bin', 'application/octet-stream', '.bin')],
         });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        expect(screen.getByText('file.bin')).toBeInTheDocument();
       });
 
-      it('renders generic icon when ext is undefined', () => {
+      it('renders row when ext is undefined', () => {
         const asset = createMockAsset(1, 'file.bin', 'application/octet-stream', '.bin');
         asset.ext = undefined;
-        const { container } = setup({ assets: [asset] });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        setup({ assets: [asset] });
+        expect(screen.getByText('file.bin')).toBeInTheDocument();
       });
     });
 
@@ -160,8 +160,8 @@ describe('AssetsList', () => {
       it('handles missing mime type', () => {
         const asset = createMockAsset(1, 'file.txt', '', '.txt');
         asset.mime = undefined;
-        const { container } = setup({ assets: [asset] });
-        expect(container.querySelector('svg')).toBeInTheDocument();
+        setup({ assets: [asset] });
+        expect(screen.getByText('file.txt')).toBeInTheDocument();
       });
     });
   });
