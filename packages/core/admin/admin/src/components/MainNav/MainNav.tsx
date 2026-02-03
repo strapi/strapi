@@ -8,9 +8,6 @@ const MainNavWrapper = styled(Flex)`
   height: auto;
   z-index: 4;
 
-  ${({ theme }) => theme.breakpoints.medium} {
-    z-index: 12;
-  }
   ${({ theme }) => theme.breakpoints.large} {
     border-bottom: none;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};

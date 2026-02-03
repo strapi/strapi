@@ -258,7 +258,7 @@ const ProtectedHistoryPageImpl = () => {
         top={{ initial: HEIGHT_TOP_NAVIGATION, large: 0 }}
         bottom={0}
         left={0}
-        zIndex={{ initial: 3, large: 13 }}
+        zIndex={{ initial: 2, large: 4 }}
         background="neutral0"
       >
         <Page.Error />
@@ -273,7 +273,7 @@ const ProtectedHistoryPageImpl = () => {
       top={{ initial: HEIGHT_TOP_NAVIGATION, large: 0 }}
       bottom={0}
       left={0}
-      zIndex={{ initial: 3, large: 13 }}
+      zIndex={{ initial: 2, large: 4 }}
       background="neutral0"
     >
       <Page.Protect permissions={permissions}>

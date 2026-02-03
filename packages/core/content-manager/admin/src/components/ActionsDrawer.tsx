@@ -36,18 +36,19 @@ const [ActionsDrawerProvider, useActionsDrawer] = createContext<ActionsDrawerCon
  * Styled Components
  * -----------------------------------------------------------------------------------------------*/
 
-const DrawerContainer = styled(Portal)<{ $hasSideNav: boolean }>`
+const DrawerContainer = styled(Portal)<{ $hasSideNav: boolean; $isOpen: boolean }>`
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 10;
+  z-index: ${({ $isOpen }) => ($isOpen ? 4 : 2)};
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-end;
 
   ${({ theme }) => theme.breakpoints.medium} {
+    z-index: 2;
     left: ${({ $hasSideNav }) => ($hasSideNav ? WIDTH_SIDE_NAVIGATION : 0)};
   }
 `;
@@ -128,7 +129,9 @@ const Root = ({ children, hasContent = false, hasSideNav = false }: RootProps) =
       hasContent={hasContent}
       hasSideNav={hasSideNav}
     >
-      <DrawerContainer $hasSideNav={hasSideNav}>{children}</DrawerContainer>
+      <DrawerContainer $hasSideNav={hasSideNav} $isOpen={isOpen}>
+        {children}
+      </DrawerContainer>
     </ActionsDrawerProvider>
   );
 };
