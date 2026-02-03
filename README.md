@@ -7,7 +7,7 @@
   </a>
 </p>
 
-<h3 align="center">Open-source headless CMS, self-hosted or Cloud you’re in control.</h3>
+<h3 align="center"> Ope--source headless CMS, self-hosted or Cloud you’re in control.</h3>
 <p align="center">The leading open-source headless CMS, 100% JavaScript/TypeScript, flexible and fully customizable.</p>
 <p align="center"><a href="https://cloud.strapi.io/signups?source=github1">Cloud</a> · <a href="https://strapi.io/demo?utm_campaign=Growth-Experiments&utm_source=strapi%2Fstrapi%20README.md">Try live demo</a></p>
 <br />
@@ -56,7 +56,7 @@ Strapi Community Edition is a free and open-source headless CMS enabling you to 
 
 Use the **Quickstart** command below to create a new Strapi project instantly:
 
-- We recommend using **yarn** to create a Strapi project.  
+- We recommend using **yarn** to create a Strapi project .  
   [View yarn installation docs](https://yarnpkg.com/lang/en/docs/install/).
 
 ```bash
@@ -161,10 +161,10 @@ See our dedicated [repository](https://github.com/strapi/documentation) for the 
 - [User guide](https://docs.strapi.io/user-docs/latest/getting-started/introduction.html)
 - [Cloud guide](https://docs.strapi.io/cloud/intro)
 
-## Try live demo
+### Try live demo
 
 See for yourself what's under the hood by getting access to a [hosted Strapi project](https://strapi.io/demo) with sample data.
 
-## License
+### License
 
 See the [LICENSE](./LICENSE) file for licensing information.
