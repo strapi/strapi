@@ -303,6 +303,7 @@ const ReleasesPage = () => {
                 startIcon={<Plus />}
                 onClick={toggleAddReleaseModal}
                 disabled={hasReachedMaximumPendingReleases}
+                fullWidth
               >
                 {formatMessage({
                   id: 'content-releases.header.actions.add-release',

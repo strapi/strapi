@@ -21,6 +21,7 @@ type Reducer<Config extends object> = (prev: Config[]) => Config[];
 
 interface MenuItem {
   to: string;
+  target?: string;
   icon: React.ElementType;
   intlLabel: MessageDescriptor & { values?: Record<string, PrimitiveType> };
   permissions: Permission[];

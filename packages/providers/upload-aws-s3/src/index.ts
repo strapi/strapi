@@ -63,7 +63,7 @@ export interface DefaultOptions extends S3ClientConfig {
 export type InitOptions = (DefaultOptions | { s3Options: DefaultOptions }) & {
   baseUrl?: string;
   rootPath?: string;
-  [k: string]: any;
+  [k: string]: unknown;
 };
 
 const assertUrlProtocol = (url: string) => {
@@ -71,7 +71,13 @@ const assertUrlProtocol = (url: string) => {
   return /^\w*:\/\//.test(url);
 };
 
-const getConfig = ({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOptions) => {
+const getConfig = ({
+  s3Options,
+  legacyS3Options,
+}: {
+  s3Options: DefaultOptions;
+  legacyS3Options: Record<string, unknown>;
+}) => {
   if (Object.keys(legacyS3Options).length > 0) {
     process.emitWarning(
       "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
@@ -84,15 +90,21 @@ const getConfig = ({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOpt
     ...(credentials ? { credentials } : {}),
   };
 
-  config.params.ACL = getOr(ObjectCannedACL.public_read, ['params', 'ACL'], config);
+  if (config.params !== undefined) {
+    config.params.ACL = getOr(ObjectCannedACL.public_read, ['params', 'ACL'], config);
+  } else {
+    throw new Error('Upload AWS S3 provider: `params` are required in the config object');
+  }
 
-  return config;
+  return config as DefaultOptions & {
+    params: AWSParams;
+  };
 };
 
 export default {
   init({ baseUrl, rootPath, s3Options, ...legacyS3Options }: InitOptions) {
     // TODO V5 change config structure to avoid having to do this
-    const config = getConfig({ baseUrl, rootPath, s3Options, ...legacyS3Options });
+    const config = getConfig({ s3Options, legacyS3Options });
     const s3Client = new S3Client(config);
     const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
 
@@ -117,8 +129,11 @@ export default {
 
       const upload = (await uploadObj.done()) as UploadCommandOutput;
 
-      if (assertUrlProtocol(upload.Location)) {
-        file.url = baseUrl ? `${baseUrl}/${fileKey}` : upload.Location;
+      if (baseUrl) {
+        file.url = `${baseUrl}/${fileKey}`;
+      } else if (assertUrlProtocol(upload.Location)) {
+        // No baseUrl provided, use upload.Location
+        file.url = upload.Location;
       } else {
         // Default protocol to https protocol
         file.url = `https://${upload.Location}`;

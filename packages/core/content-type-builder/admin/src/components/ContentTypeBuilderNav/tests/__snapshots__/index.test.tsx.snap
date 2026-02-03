@@ -2,8 +2,8 @@
 
 exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 .c2 {
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
+  padding-inline-start: 20px;
+  padding-inline-end: 20px;
 }
 
 .c6 {
@@ -18,52 +18,57 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c13 {
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
-  width: 100%;
   border-radius: 4px;
   cursor: pointer;
   flex: 1;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  width: 100%;
 }
 
 .c17 {
-  padding-block-start: 4px;
-  padding-inline-start: 7px;
-  padding-inline-end: 7px;
   border-radius: 4px;
   cursor: pointer;
+  padding-inline-start: 7px;
+  padding-inline-end: 7px;
+  padding-block-start: 4px;
 }
 
 .c28 {
-  padding-block-start: 16px;
-  padding-block-end: 16px;
   max-width: 100%;
+  padding-block-end: 20px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  padding-block-start: 20px;
 }
 
 .c31 {
-  position: relative;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
 }
 
-.c33 {
-  padding-inline-end: 4px;
+.c32 {
+  position: relative;
 }
 
 .c36 {
   border-radius: 4px;
-  display: inline-flex;
   cursor: pointer;
+  display: inline-flex;
 }
 
 .c39 {
-  margin-inline-start: 4px;
-  margin-inline-end: 4px;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
 }
 
 .c43 {
+  border-radius: 4px;
+  padding-block-end: 4px;
   padding-inline-start: 12px;
   padding-inline-end: 12px;
+  padding-block-start: 4px;
   width: 100%;
-  border-radius: 4px;
 }
 
 .c44 {
@@ -71,13 +76,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c46 {
-  width: 80dvw;
   overflow: hidden;
+  width: 80dvw;
 }
 
 .c48 {
-  width: 24px;
   text-align: center;
+  width: 24px;
 }
 
 .c50 {
@@ -129,7 +134,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c29 {
-  gap: 20px;
+  gap: 24px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
@@ -142,7 +147,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c32 {
+.c33 {
   align-items: center;
   flex-direction: row;
   display: flex;
@@ -163,23 +168,30 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c40 {
-  gap: 2px;
+  gap: 8px;
   align-items: stretch;
   flex-direction: column;
   display: flex;
 }
 
 .c45 {
-  gap: 4px;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
   flex-direction: row;
   display: flex;
 }
 
+.c52 {
+  gap: 2px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
 .c5 {
   font-weight: 600;
-  font-size: 1.8rem;
+  font-size: 2rem;
   line-height: 1.22;
   color: currentcolor;
 }
@@ -193,22 +205,22 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c34 {
   font-weight: 600;
+  text-transform: uppercase;
   font-size: 1.1rem;
   line-height: 1.45;
-  text-transform: uppercase;
   color: #666687;
 }
 
 .c47 {
-  font-size: 1.4rem;
-  line-height: 1.43;
+  font-size: 1.6rem;
+  line-height: 32px;
   color: currentcolor;
   line-height: 32px;
 }
 
 .c51 {
-  font-size: 1.4rem;
-  line-height: 1.43;
+  font-size: 1.6rem;
+  line-height: 1.5;
   color: #32324d;
   font-weight: 500;
 }
@@ -225,7 +237,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c15 {
-  height: 3.2rem;
+  height: 4rem;
   text-decoration: none;
   border: 1px solid #4945ff;
   background: #4945ff;
@@ -250,7 +262,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c18 {
-  height: 3.2rem;
+  height: 4rem;
   text-decoration: none;
   border: 1px solid #dcdce4;
   background: #ffffff;
@@ -274,8 +286,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c38 {
   text-decoration: none;
-  padding-block: 0.2rem;
-  padding-inline: 0.2rem;
+  padding-block: 0.7rem;
+  padding-inline: 0.7rem;
   border: 1px solid transparent;
   background: transparent;
   color: #32324d;
@@ -305,14 +317,14 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   border-radius: 4px;
   color: #32324d;
   font-weight: 400;
-  font-size: 1.4rem;
-  line-height: 2.2rem;
+  font-size: 1.6rem;
+  line-height: 2.4rem;
   display: block;
   width: 100%;
   background: inherit;
   padding-inline-start: 0;
   padding-inline-end: 16px;
-  padding-block: 4px;
+  padding-block: 8px;
 }
 
 .c27::placeholder {
@@ -431,7 +443,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c1 {
   width: 100%;
-  height: calc(100dvh - 5.6rem - 1px);
+  height: calc(100dvh - 6.4rem - 1px);
   overflow: hidden;
   background-color: #ffffff;
   display: flex;
@@ -439,7 +451,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   border-right: 0;
   box-shadow: none;
   position: fixed;
-  top: calc(5.6rem + 1px);
+  top: calc(6.4rem + 1px);
   left: 0;
   z-index: 2;
 }
@@ -472,8 +484,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c4 {
-  flex: 0 0 5.6rem;
-  height: 5.6rem;
+  flex: 0 0 6.4rem;
+  height: 6.4rem;
 }
 
 .c49 {
@@ -495,20 +507,29 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   background-color: #f6f6f9;
 }
 
-.c52 .c41>div {
+.c53 .c41>div {
   padding-left: 36px;
-}
-
-@media (min-width: 1080px) {
-  .c2 {
-    padding-inline-start: 20px;
-    padding-inline-end: 20px;
-  }
 }
 
 @media (min-width: 768px) {
   .c28 {
     max-width: 23.2rem;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c28 {
+    padding-block-end: 16px;
+    padding-inline-start: 0;
+    padding-inline-end: 0;
+    padding-block-start: 16px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c31 {
+    padding-inline-start: 20px;
+    padding-inline-end: 20px;
   }
 }
 
@@ -519,9 +540,58 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   }
 }
 
+@media (min-width: 1080px) {
+  .c43 {
+    padding-block-end: 0;
+    padding-block-start: 0;
+  }
+}
+
 @media (min-width: 768px) {
   .c46 {
     width: 100%;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c40 {
+    gap: 2px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c45 {
+    gap: 4px;
+  }
+}
+
+@media (min-width: 768px) {
+  .c5 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c47 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c51 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c51 {
+    line-height: 1.43;
+  }
+}
+
+@media (min-width: 768px) {
+  .c15 {
+    height: 3.2rem;
   }
 }
 
@@ -531,15 +601,41 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   }
 }
 
+@media (min-width: 768px) {
+  .c18 {
+    height: 3.2rem;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .c18 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
+@media (min-width: 768px) {
+  .c38 {
+    padding-block: 0.2rem;
+    padding-inline: 0.2rem;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .c38 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (min-width: 768px) {
+  .c27 {
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .c27 {
+    padding-block: 4px;
   }
 }
 
@@ -555,6 +651,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 @media (min-width: 1080px) {
   .c1 {
     height: 100dvh;
+  }
+}
+
+@media (min-width: 768px) {
+  .c4 {
+    flex: 0 0 5.6rem;
+    height: 5.6rem;
   }
 }
 
@@ -700,16 +803,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c30"
                 >
                   <div
-                    class="c2"
+                    class="c31"
                   >
                     <div
-                      class="c31 c22"
+                      class="c32 c22"
                     >
                       <div
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class=""
                         >
                           <span
                             class="c34"
@@ -817,16 +920,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c30"
                 >
                   <div
-                    class="c2"
+                    class="c31"
                   >
                     <div
-                      class="c31 c22"
+                      class="c32 c22"
                     >
                       <div
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class=""
                         >
                           <span
                             class="c34"
@@ -906,16 +1009,16 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c30"
                 >
                   <div
-                    class="c2"
+                    class="c31"
                   >
                     <div
-                      class="c31 c22"
+                      class="c32 c22"
                     >
                       <div
-                        class="c32"
+                        class="c33"
                       >
                         <div
-                          class="c33"
+                          class=""
                         >
                           <span
                             class="c34"
@@ -996,12 +1099,12 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           </button>
                         </div>
                         <ul
-                          class="c40"
+                          class="c52"
                           id=":r9:"
                           style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
                         >
                           <li
-                            class="c52"
+                            class="c53"
                           >
                             <a
                               class="c41 c42"
@@ -1070,12 +1173,12 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           </button>
                         </div>
                         <ul
-                          class="c40"
+                          class="c52"
                           id=":ra:"
                           style="max-height: 0px; overflow: hidden; transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);"
                         >
                           <li
-                            class="c52"
+                            class="c53"
                           >
                             <a
                               class="c41 c42"
@@ -1105,7 +1208,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                             </a>
                           </li>
                           <li
-                            class="c52"
+                            class="c53"
                           >
                             <a
                               class="c41 c42"

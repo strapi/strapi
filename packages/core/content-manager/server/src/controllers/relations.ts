@@ -6,6 +6,7 @@ import type { Data, Modules, UID } from '@strapi/types';
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
 import { isListable } from '../services/utils/configuration/attributes';
+import { indexByDocumentId } from './utils/document-status';
 
 const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 
@@ -77,12 +78,13 @@ const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEn
     filters,
   });
 
+  const statusByDocumentId = indexByDocumentId(availableStatus);
+
   return relations.map((relation: RelationEntity) => {
-    const availableStatuses = availableStatus.filter(
-      (availableDocument: RelationEntity) =>
-        availableDocument.documentId === relation.documentId &&
-        (relation.locale ? availableDocument.locale === relation.locale : true)
-    );
+    const candidates = statusByDocumentId.get(relation.documentId as string) || [];
+    const availableStatuses = relation.locale
+      ? candidates.filter((c) => c.locale === relation.locale)
+      : candidates;
 
     return {
       ...relation,
@@ -500,7 +502,7 @@ export default {
       ordering: 'desc',
     });
 
-    // NOTE: the order is very import to make sure sanitized relations are kept in priority
+    // NOTE: the order is very important to make sure sanitized relations are kept in priority
     const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
 
     ctx.body = {
