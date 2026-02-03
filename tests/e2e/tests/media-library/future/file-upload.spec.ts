@@ -27,10 +27,10 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       // Verify the file chooser accepts multiple files
       expect(fileChooser.isMultiple()).toBe(true);
 
-      // Wait for and verify success notification
-      await assetsPage.waitForUploadSuccess();
-      const successMessage = await assetsPage.getSuccessMessage();
-      expect(successMessage).toContain('uploaded successfully');
+      await assetsPage.waitForUploadProgressDialogToOpen();
+      await expect(assetsPage.getUploadProgressDialog()).toBeVisible();
+
+      await assetsPage.waitForUploadProgressDialogToComplete();
     });
 
     test('should upload multiple files using the file picker', async ({ page }) => {
@@ -46,12 +46,11 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       // Upload multiple files
       await assetsPage.uploadFilesWithFilePicker(testFiles);
 
-      // Wait for and verify success notification
-      await assetsPage.waitForUploadSuccess();
-      const successMessage = await assetsPage.getSuccessMessage();
-      // Check for key parts of the message to be more resilient to translation/formatting changes
-      expect(successMessage).toContain('2');
-      expect(successMessage).toContain('uploaded successfully');
+      await assetsPage.waitForUploadProgressDialogToOpen();
+      await expect(assetsPage.getUploadProgressDialog()).toBeVisible();
+      await expect(assetsPage.getUploadProgressDialog()).toContainText('Uploading 2 files');
+
+      await assetsPage.waitForUploadProgressDialogToComplete();
     });
 
     test('should reset file input after upload', async ({ page }) => {
@@ -62,7 +61,9 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
 
       // Upload a file
       await assetsPage.uploadFilesWithFilePicker(testImagePath);
-      await assetsPage.waitForUploadSuccess();
+
+      await assetsPage.waitForUploadProgressDialogToOpen();
+      await assetsPage.waitForUploadProgressDialogToComplete();
 
       // Verify the file input is reset (value should be empty)
       const isReset = await assetsPage.isFileInputReset();
@@ -72,6 +73,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
     test('should display uploaded file in the assets table view', async ({ page }) => {
       const assetsPage = new AssetsPage(page);
       await assetsPage.goto();
+      await assetsPage.switchToTableView();
 
       await assetsPage.switchToTableView();
 
@@ -79,7 +81,9 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
 
       // Upload the file
       await assetsPage.uploadFilesWithFilePicker(testImagePath);
-      await assetsPage.waitForUploadSuccess();
+
+      await assetsPage.waitForUploadProgressDialogToOpen();
+      await assetsPage.waitForUploadProgressDialogToComplete();
 
       // Verify the uploaded file appears in the table
       const assetRow = assetsPage.getAssetRow('test-image');
