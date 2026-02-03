@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import {
@@ -16,7 +16,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ChevronDown, Files, GridFour as GridIcon, List } from '@strapi/icons';
+import { ChevronDown, Files, Folder, GridFour as GridIcon, List } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -29,16 +29,96 @@ import { AssetsGrid } from './components/AssetsGrid';
 import { AssetsList } from './components/AssetsList';
 import { localStorageKeys, viewOptions } from './constants';
 
+const setOpacity = (hex: string, alpha: number) =>
+  `${hex}${Math.floor(alpha * 255)
+    .toString(16)
+    .padStart(2, '0')}`;
+
+const DropZoneOverlay = styled(Box)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: ${({ theme }) => setOpacity(theme.colors.primary200, 0.3)};
+  border: 1px solid ${({ theme }) => theme.colors.primary700};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  z-index: 1;
+  pointer-events: none;
+`;
+
+const DropFilesMessage = styled(Box)`
+  position: fixed;
+  bottom: ${({ theme }) => theme.spaces[8]};
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: ${({ theme }) => theme.spaces[2]};
+  background: ${({ theme }) => theme.colors.primary600};
+  padding: ${({ theme }) => theme.spaces[4]} ${({ theme }) => theme.spaces[6]};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  z-index: 2;
+`;
+
 interface AssetsViewProps {
   view: number;
+  onDrop: (files: globalThis.File[]) => void;
 }
 
-const AssetsView = ({ view }: AssetsViewProps) => {
+const AssetsView = ({ view, onDrop }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetAssetsQuery({ folder: null });
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  const isGridView = view === viewOptions.GRID;
-  const assets = data?.results ?? [];
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes('Files')) {
+      setIsDraggingOver(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const relatedTarget = e.relatedTarget as Node | null;
+    const stillInside =
+      dropZoneRef.current &&
+      relatedTarget &&
+      dropZoneRef.current !== relatedTarget &&
+      dropZoneRef.current.contains(relatedTarget);
+    if (!stillInside) {
+      setIsDraggingOver(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleDragEnd = () => {
+      setIsDraggingOver(false);
+    };
+    document.addEventListener('dragend', handleDragEnd);
+    return () => document.removeEventListener('dragend', handleDragEnd);
+  }, []);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDropEvent = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    const { files } = e.dataTransfer;
+    if (files && files.length > 0) {
+      onDrop(Array.from(files));
+    }
+  };
 
   if (isLoading) {
     return (
@@ -61,11 +141,41 @@ const AssetsView = ({ view }: AssetsViewProps) => {
     );
   }
 
-  if (isGridView) {
-    return <AssetsGrid assets={assets} />;
-  }
-
-  return <AssetsList assets={assets} />;
+  return (
+    <Box
+      ref={dropZoneRef}
+      position="relative"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDropEvent}
+    >
+      {isDraggingOver && (
+        <>
+          <DropZoneOverlay />
+          <DropFilesMessage>
+            <Typography textColor="neutral0">
+              {formatMessage({
+                id: getTranslationKey('dropzone.upload.message'),
+                defaultMessage: 'Drop here to upload to',
+              })}
+            </Typography>
+            <Flex gap={2} alignItems="center">
+              <Folder width={20} height={20} fill="neutral0" />
+              <Typography textColor="neutral0" fontWeight="semiBold">
+                Current folder
+              </Typography>
+            </Flex>
+          </DropFilesMessage>
+        </>
+      )}
+      {view === viewOptions.GRID ? (
+        <AssetsGrid assets={data?.results ?? []} />
+      ) : (
+        <AssetsList assets={data?.results ?? []} />
+      )}
+    </Box>
+  );
 };
 
 const StyledToggleGroup = styled(ToggleGroup.Root)`
@@ -119,53 +229,53 @@ export const AssetsPage = () => {
     fileInputRef.current?.click();
   };
 
+  const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
+    if (files.length === 0) return;
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+      formData.append(
+        'fileInfo',
+        JSON.stringify({
+          name: file.name,
+          caption: null,
+          alternativeText: null,
+          folder: folderId,
+        })
+      );
+    });
+    try {
+      await uploadFiles(formData).unwrap();
+      toggleNotification({
+        type: 'success',
+        message: formatMessage(
+          {
+            id: getTranslationKey('assets.uploaded'),
+            defaultMessage:
+              '{number, plural, one {# asset} other {# assets}} uploaded successfully',
+          },
+          { number: files.length }
+        ),
+      });
+    } catch (error) {
+      const errorMessage = _unstableFormatAPIError(error as Error);
+      toggleNotification({
+        type: 'danger',
+        message: errorMessage,
+      });
+    }
+  };
+
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const formData = new FormData();
-      const filesArray = Array.from(files);
-
-      // Add files and fileInfo to the form data
-      filesArray.forEach((file) => {
-        formData.append('files', file);
-        formData.append(
-          'fileInfo',
-          JSON.stringify({
-            name: file.name,
-            caption: null,
-            alternativeText: null,
-            folder: null,
-          })
-        );
-      });
-
-      try {
-        // unwrap() is needed to throw errors and trigger the catch block
-        // Without it, RTK Query never rejects and catch would never execute
-        await uploadFiles(formData).unwrap();
-        toggleNotification({
-          type: 'success',
-          message: formatMessage(
-            {
-              id: getTranslationKey('assets.uploaded'),
-              defaultMessage:
-                '{number, plural, one {# asset} other {# assets}} uploaded successfully',
-            },
-            { number: filesArray.length }
-          ),
-        });
-      } catch (error) {
-        // Format the error message using the API error handler to provide
-        // context-specific feedback (e.g., file size limits, format restrictions, network errors)
-        const errorMessage = _unstableFormatAPIError(error as Error);
-        toggleNotification({
-          type: 'danger',
-          message: errorMessage,
-        });
-      }
+      await uploadFilesToFolder(Array.from(files), null);
     }
-    // Reset input so the same file can be selected again
     e.target.value = '';
+  };
+
+  const handleDrop = async (files: globalThis.File[]) => {
+    await uploadFilesToFolder(files, null);
   };
 
   return (
@@ -240,7 +350,7 @@ export const AssetsPage = () => {
       />
 
       <Layouts.Content>
-        <AssetsView view={view} />
+        <AssetsView view={view} onDrop={handleDrop} />
       </Layouts.Content>
     </Layouts.Root>
   );
