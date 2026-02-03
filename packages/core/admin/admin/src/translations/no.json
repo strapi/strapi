@@ -284,5 +284,7 @@
   "notification.success.delete": "Elementet er slettet",
   "notification.success.saved": "Lagret",
   "notification.version.update.message": "En ny versjon av Strapi er tilgjengelig!",
-  "request.error.model.unknown": "Denne modellen finnes ikke"
+  "request.error.model.unknown": "Denne modellen finnes ikke",
+  "Auth.form.welcome.title": "Welcome to Strapi!",
+  "Auth.form.register.subtitle": "Credentials are only used to authenticate in Strapi. All saved data will be stored in your database."
 }

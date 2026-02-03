@@ -298,5 +298,7 @@
   "notification.success.saved": "נשמר",
   "notification.version.update.message": "גרסה חדשה של סטראפי זמינה!",
   "or": "או",
-  "request.error.model.unknown": "המודל הזה לא קיים"
+  "request.error.model.unknown": "המודל הזה לא קיים",
+  "Auth.form.welcome.title": "Welcome to Strapi!",
+  "Auth.form.register.subtitle": "Credentials are only used to authenticate in Strapi. All saved data will be stored in your database."
 }

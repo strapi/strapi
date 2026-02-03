@@ -150,5 +150,7 @@
   "notification.error": "Došlo k chybě",
   "notification.error.layout": "Nelze načíst rozložení",
   "notification.form.error.fields": "Formulář obsahuje chyby",
-  "request.error.model.unknown": "Tento model neexistuje"
+  "request.error.model.unknown": "Tento model neexistuje",
+  "Auth.form.welcome.title": "Welcome to Strapi!",
+  "Auth.form.register.subtitle": "Credentials are only used to authenticate in Strapi. All saved data will be stored in your database."
 }

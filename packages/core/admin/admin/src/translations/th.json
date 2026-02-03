@@ -268,5 +268,7 @@
   "notification.link-copied": "คัดลอกลิงก์ไปยังคลิปบอร์ด",
   "notification.success.delete": "ไอเท็มถูกลบแล้ว",
   "notification.success.saved": "ถูกบันทึก",
-  "request.error.model.unknown": "โมเดลนี้ไม่มีอยู่"
+  "request.error.model.unknown": "โมเดลนี้ไม่มีอยู่",
+  "Auth.form.welcome.title": "Welcome to Strapi!",
+  "Auth.form.register.subtitle": "Credentials are only used to authenticate in Strapi. All saved data will be stored in your database."
 }

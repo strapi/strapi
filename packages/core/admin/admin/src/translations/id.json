@@ -274,5 +274,7 @@
   "notification.permission.not-allowed-read": "Anda tidak diizinkan untuk melihat dokumen ini",
   "notification.success.delete": "Item telah dihapus",
   "notification.success.saved": "Disimpan",
-  "request.error.model.unknown": "Model ini tidak ada"
+  "request.error.model.unknown": "Model ini tidak ada",
+  "Auth.form.welcome.title": "Welcome to Strapi!",
+  "Auth.form.register.subtitle": "Credentials are only used to authenticate in Strapi. All saved data will be stored in your database."
 }

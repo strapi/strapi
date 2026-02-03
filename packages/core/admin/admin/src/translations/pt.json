@@ -185,5 +185,7 @@
   "notification.form.error.fields": "O formulário contém erros",
   "notification.form.success.fields": "Alterações gravadas",
   "notification.success.delete": "O item foi eliminado",
-  "request.error.model.unknown": "Este modelo não existe"
+  "request.error.model.unknown": "Este modelo não existe",
+  "Auth.form.welcome.title": "Welcome to Strapi!",
+  "Auth.form.register.subtitle": "Credentials are only used to authenticate in Strapi. All saved data will be stored in your database."
 }

@@ -184,5 +184,7 @@
   "notification.form.error.fields": "Borang mengandungi beberapa kesalahan",
   "notification.form.success.fields": "Perubahan disimpan",
   "notification.success.delete": "Item telah dipadamkan",
-  "request.error.model.unknown": "model ini tidak wujud"
+  "request.error.model.unknown": "model ini tidak wujud",
+  "Auth.form.welcome.title": "Welcome to Strapi!",
+  "Auth.form.register.subtitle": "Credentials are only used to authenticate in Strapi. All saved data will be stored in your database."
 }

@@ -397,5 +397,7 @@
   "અથવા": "અથવા",
   "request.error.model.unknown": "આ મોડલ અસ્તિત્વમાં નથી",
   "skipToContent": "સામગ્રી પર જાઓ",
-  "submit": "સબમિટ કરો"
+  "submit": "સબમિટ કરો",
+  "Auth.form.welcome.title": "Welcome to Strapi!",
+  "Auth.form.register.subtitle": "Credentials are only used to authenticate in Strapi. All saved data will be stored in your database."
 }
