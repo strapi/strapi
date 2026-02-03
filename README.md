@@ -57,7 +57,7 @@ Strapi Community Edition is a free and open-source headless CMS enabling you to 
 Use the **Quickstart** command below to create a new Strapi project instantly:
 
 - We recommend using **yarn** to create a Strapi project.  
-  [View yarn installation docs](https://yarnpkg.com/lang/en/docs/install/).
+  [View yarn installation docs](https://yarnpkg.com/lang/en/docs/install/).  
 
 ```bash
 yarn create strapi
@@ -123,7 +123,7 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 - **Media Library**: Upload your images, videos, audio or documents to the media library. Easily find the right asset, edit and reuse it.
 - **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales"
 - **Role Based Access Control**: Create an unlimited number of custom roles and permissions for admin and end users.
-- **GraphQL or REST**: Consume the API using REST or GraphQL
+- **GraphQL or REST**: Consume the API using REST or GraphQL.
 
 You can unlock additional features such as SSO, Audit Logs, Review Workflows in [Strapi Cloud](https://cloud.strapi.io/login?source=github1) or [Strapi Enterprise](https://strapi.io/enterprise?source=github1).
 
@@ -151,7 +151,7 @@ Follow our [migration guides](https://docs.strapi.io/developer-docs/latest/updat
 
 ## Roadmap
 
-Check out our [roadmap](https://feedback.strapi.io) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
+check out our [roadmap](https://feedback.strapi.io) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
 
 ## Documentation
 
