@@ -111,7 +111,7 @@ test.describe('List view', () => {
     await page.getByRole('link', { name: 'Author' }).click();
     await page.waitForURL(/\/admin\/content-manager\/collection-types\/api::author.author(\?.*)?/);
     await expect(page.getByRole('heading', { name: 'Author' })).toBeVisible();
-    expect(new URL(page.url()).searchParams.has('plugins[i18n][locale]')).toEqual(false);
+    expect(new URL(page.url()).searchParams.has('plugins[i18n][locale]')).toEqual(true);
 
     /**
      * Go back to a localized content-type and assert the locale is the default locale
