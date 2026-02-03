@@ -291,3 +291,69 @@ export async function enforceUploadSecurity(
 
   return { validFiles, validFileNames, errors };
 }
+
+export type PrepareUploadResult = {
+  validFiles: any[];
+  filteredBody: any;
+};
+
+/**
+ * Prepare files and body for upload by enforcing security and parsing fileInfo
+ */
+export async function prepareUploadRequest(
+  filesInput: any,
+  body: any,
+  strapi: Core.Strapi
+): Promise<PrepareUploadResult> {
+  const securityResults = await enforceUploadSecurity(filesInput, strapi);
+
+  if (securityResults.validFiles.length === 0) {
+    throw new errors.ValidationError(
+      securityResults.errors[0].error.message,
+      securityResults.errors[0].error.details
+    );
+  }
+
+  let filteredBody = body;
+  if (body?.fileInfo) {
+    // Parse JSON strings in fileInfo
+    let parsedFileInfo = body.fileInfo;
+    if (Array.isArray(body.fileInfo)) {
+      parsedFileInfo = body.fileInfo.map((fi: any) =>
+        typeof fi === 'string' ? JSON.parse(fi) : fi
+      );
+    } else if (typeof body.fileInfo === 'string') {
+      parsedFileInfo = JSON.parse(body.fileInfo);
+    }
+
+    // Filter fileInfo by index - only keep entries for files that passed validation
+    if (Array.isArray(parsedFileInfo)) {
+      const invalidIndices = new Set(securityResults.errors.map((e) => e.originalIndex));
+      const filteredFileInfo = parsedFileInfo.filter(
+        (_: any, index: number) => !invalidIndices.has(index)
+      );
+
+      if (filteredFileInfo.length === 1) {
+        filteredBody = {
+          ...body,
+          fileInfo: filteredFileInfo[0],
+        };
+      } else {
+        filteredBody = {
+          ...body,
+          fileInfo: filteredFileInfo,
+        };
+      }
+    } else {
+      filteredBody = {
+        ...body,
+        fileInfo: parsedFileInfo,
+      };
+    }
+  }
+
+  return {
+    validFiles: securityResults.validFiles,
+    filteredBody,
+  };
+}

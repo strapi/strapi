@@ -39,7 +39,7 @@ test.describe('Edit View', () => {
       await page.getByRole('link', { name: 'Create new entry' }).click();
 
       const slug = 'product-for-required-test';
-      await page.getByLabel('slug*This value is unique for').fill(slug);
+      await page.getByLabel('slug*').fill(slug);
 
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');

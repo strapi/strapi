@@ -235,12 +235,8 @@ module.exports = ({ strapi }) => ({
     if (mode === 'refresh') {
       const deviceId = extractDeviceId(ctx.request.body);
 
-      if (deviceId) {
-        // Invalidate sessions: specific device if deviceId provided
-        await strapi
-          .sessionManager('users-permissions')
-          .invalidateRefreshToken(String(user.id), deviceId);
-      }
+      // Invalidate all sessions when password changes for security
+      await strapi.sessionManager('users-permissions').invalidateRefreshToken(String(user.id));
 
       const newDeviceId = deviceId || crypto.randomUUID();
       const refresh = await strapi
@@ -296,12 +292,8 @@ module.exports = ({ strapi }) => ({
     if (mode === 'refresh') {
       const deviceId = extractDeviceId(ctx.request.body);
 
-      if (deviceId) {
-        // Invalidate sessions: specific device if deviceId provided
-        await strapi
-          .sessionManager('users-permissions')
-          .invalidateRefreshToken(String(user.id), deviceId);
-      }
+      // Invalidate all sessions when password is reset for security
+      await strapi.sessionManager('users-permissions').invalidateRefreshToken(String(user.id));
 
       const newDeviceId = deviceId || crypto.randomUUID();
       const refresh = await strapi

@@ -5,6 +5,7 @@ export { default as providerFactory } from './provider-factory';
 export { default as traverseEntity } from './traverse-entity';
 export { default as importDefault } from './import-default';
 export { generateInstallId } from './install-id';
+export { createModelCache } from './model-cache';
 
 export { validateYupSchema, validateYupSchemaSync } from './validators';
 export { isOperator, isOperatorOfType } from './operators';
