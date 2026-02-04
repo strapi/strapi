@@ -356,10 +356,6 @@ async function validateRelationsPresence(strapi) {
       errors.push(`relation.id=${e.id} morph_to_one missing id`);
     if (Array.isArray(e.morph_to_many) && e.morph_to_many.some((x) => !x || !x.id))
       errors.push(`relation.id=${e.id} morph_to_many contains missing refs`);
-    if (e.morph_to_one.id) {
-      console.log(`relation.id=${e.id} morph_to_one id=${e.morph_to_one.id}`);
-      console.log(e);
-    }
   }
 
   // relation-dp: verify relation fields present for both published/draft (basic presence)

@@ -82,7 +82,6 @@ const { multiplier } = parseCliArgs(process.argv.slice(2));
 const CONFIG = {
   counts: applyMultiplierToCounts(BASE_COUNTS, multiplier),
   locales: ['en', 'fr'],
-  invalidFkId: 987654321,
 };
 
 // ============================================================================

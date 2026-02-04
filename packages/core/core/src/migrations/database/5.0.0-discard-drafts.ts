@@ -246,6 +246,53 @@ function chunkArray<T>(array: T[], chunkSize: number): T[][] {
 }
 
 /**
+ * Bulk-load existing relation rows for (sourceId, newTargetId) pairs so we can avoid
+ * per-row SELECTs when deciding update vs delete.
+ */
+async function buildExistingRelationMap({
+  trx,
+  tableName,
+  sourceColumnName,
+  targetColumnName,
+  updates,
+  batchSize,
+}: {
+  trx: Knex;
+  tableName: string;
+  sourceColumnName: string;
+  targetColumnName: string;
+  updates: Array<{ sourceId: number; newTargetId: number }>;
+  batchSize: number;
+}): Promise<Map<string, number>> {
+  const existingMap = new Map<string, number>();
+  if (updates.length === 0) {
+    return existingMap;
+  }
+
+  const queryChunks = chunkArray(updates, batchSize);
+  for (const chunk of queryChunks) {
+    const rows = await trx(tableName)
+      .select(['id', sourceColumnName, targetColumnName])
+      .where((qb) => {
+        for (const update of chunk) {
+          qb.orWhere((subQb) => {
+            subQb
+              .where(sourceColumnName, update.sourceId)
+              .where(targetColumnName, update.newTargetId);
+          });
+        }
+      });
+
+    for (const row of rows) {
+      const key = `${row[sourceColumnName]}_${row[targetColumnName]}`;
+      existingMap.set(key, row.id);
+    }
+  }
+
+  return existingMap;
+}
+
+/**
  * Chooses a safe batch size for bulk operations depending on the database engine,
  * falling back to smaller units on engines (notably SQLite) that have low limits.
  */
@@ -2181,16 +2228,26 @@ async function fixExistingDraftRelations({ trx, uid }: { trx: Knex; uid: string 
 
         const updateChunks = chunkArray(relationsToUpdate, getBatchSize(trx, 1000));
         for (const updateChunk of updateChunks) {
+          // Preload existing relations for this chunk to avoid N+1 lookups.
+          const existingRelationMap = await buildExistingRelationMap({
+            trx,
+            tableName: joinTable.name,
+            sourceColumnName,
+            targetColumnName,
+            updates: updateChunk.map((update) => ({
+              sourceId: update.sourceId,
+              newTargetId: update.newTargetId,
+            })),
+            batchSize: getBatchSize(trx, 100),
+          });
+
           for (const update of updateChunk) {
             try {
               // Check if relation to draft target already exists
-              const existingRelation = await trx(joinTable.name)
-                .where(sourceColumnName, update.sourceId)
-                .where(targetColumnName, update.newTargetId)
-                .where('id', '!=', update.relationId)
-                .first();
+              const key = `${update.sourceId}_${update.newTargetId}`;
+              const existingRelationId = existingRelationMap.get(key);
 
-              if (existingRelation) {
+              if (existingRelationId && existingRelationId !== update.relationId) {
                 // If relation to draft target already exists, delete the published target relation
                 await trx(joinTable.name).where('id', update.relationId).delete();
                 debug(
@@ -2364,16 +2421,26 @@ async function fixExistingDraftComponentRelations({ trx, uid }: { trx: Knex; uid
 
           const updateChunks = chunkArray(relationsToUpdate, getBatchSize(trx, 1000));
           for (const updateChunk of updateChunks) {
+            // Preload existing relations for this chunk to avoid N+1 lookups.
+            const existingRelationMap = await buildExistingRelationMap({
+              trx,
+              tableName: relationJoinTable,
+              sourceColumnName: sourceColumn,
+              targetColumnName: targetColumn,
+              updates: updateChunk.map((update) => ({
+                sourceId: update.componentId,
+                newTargetId: update.newTargetId,
+              })),
+              batchSize: getBatchSize(trx, 100),
+            });
+
             for (const update of updateChunk) {
               try {
                 // Check if relation to draft target already exists
-                const existingRelation = await trx(relationJoinTable)
-                  .where(sourceColumn, update.componentId)
-                  .where(targetColumn, update.newTargetId)
-                  .where('id', '!=', update.relationId)
-                  .first();
+                const key = `${update.componentId}_${update.newTargetId}`;
+                const existingRelationId = existingRelationMap.get(key);
 
-                if (existingRelation) {
+                if (existingRelationId && existingRelationId !== update.relationId) {
                   // If relation to draft target already exists, delete the published target relation
                   await trx(relationJoinTable).where('id', update.relationId).delete();
                   debug(
