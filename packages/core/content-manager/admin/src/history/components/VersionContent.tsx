@@ -240,53 +240,65 @@ const VersionContent = () => {
 
   return (
     <Layouts.Content>
-      <Box paddingBottom={8}>
-        <Form disabled={true} method="PUT" initialValues={transformedData}>
+      <Box paddingBottom={{ initial: 0, large: 8 }}>
+        <Form key={version.id} disabled={true} method="PUT" initialValues={transformedData}>
           <Flex direction="column" alignItems="stretch" gap={6} position="relative">
             {[...layout, ...remainingFieldsLayout].map((panel, index) => {
               return <FormPanel key={index} panel={panel} />;
             })}
           </Flex>
         </Form>
-      </Box>
-      {removedAttributesAsFields.length > 0 && (
-        <>
-          <Divider />
-          <Box paddingTop={8}>
-            <Flex direction="column" alignItems="flex-start" paddingBottom={6} gap={1}>
-              <Typography variant="delta">
-                {formatMessage({
-                  id: 'content-manager.history.content.unknown-fields.title',
-                  defaultMessage: 'Unknown fields',
-                })}
-              </Typography>
-              <Typography variant="pi">
-                {formatMessage(
-                  {
-                    id: 'content-manager.history.content.unknown-fields.message',
-                    defaultMessage:
-                      'These fields have been deleted or renamed in the Content-Type Builder. <b>These fields will not be restored.</b>',
-                  },
-                  {
-                    b: (chunks: React.ReactNode) => (
-                      <Typography variant="pi" fontWeight="bold">
-                        {chunks}
-                      </Typography>
-                    ),
-                  }
-                )}
-              </Typography>
-            </Flex>
-            <Form disabled={true} method="PUT" initialValues={version.data}>
-              <Flex direction="column" alignItems="stretch" gap={6} position="relative">
-                {unknownFieldsLayout.map((panel, index) => {
-                  return <FormPanel key={index} panel={panel} />;
-                })}
+        {removedAttributesAsFields.length > 0 && (
+          <>
+            <Box paddingTop={{ initial: 4, large: 0 }}>
+              <Divider />
+            </Box>
+            <Box paddingTop={{ initial: 4, large: 8 }}>
+              <Flex
+                direction="column"
+                alignItems="flex-start"
+                paddingBottom={{ initial: 4, large: 6 }}
+                gap={1}
+              >
+                <Typography variant="delta">
+                  {formatMessage({
+                    id: 'content-manager.history.content.unknown-fields.title',
+                    defaultMessage: 'Unknown fields',
+                  })}
+                </Typography>
+                <Typography variant="pi">
+                  {formatMessage(
+                    {
+                      id: 'content-manager.history.content.unknown-fields.message',
+                      defaultMessage:
+                        'These fields have been deleted or renamed in the Content-Type Builder. <b>These fields will not be restored.</b>',
+                    },
+                    {
+                      b: (chunks: React.ReactNode) => (
+                        <Typography variant="pi" fontWeight="bold">
+                          {chunks}
+                        </Typography>
+                      ),
+                    }
+                  )}
+                </Typography>
               </Flex>
-            </Form>
-          </Box>
-        </>
-      )}
+              <Form
+                key={`${version.id}-unknownFields`}
+                disabled={true}
+                method="PUT"
+                initialValues={version.data}
+              >
+                <Flex direction="column" alignItems="stretch" gap={6} position="relative">
+                  {unknownFieldsLayout.map((panel, index) => {
+                    return <FormPanel key={index} panel={panel} />;
+                  })}
+                </Flex>
+              </Form>
+            </Box>
+          </>
+        )}
+      </Box>
     </Layouts.Content>
   );
 };
