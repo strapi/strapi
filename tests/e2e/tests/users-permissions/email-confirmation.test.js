@@ -4,6 +4,11 @@ const request = require('supertest');
 // This prevents "Timeout" errors if your PC is slow to start Strapi
 jest.setTimeout(120000);
 
+const testPassword = process.env.E2E_TEST_PASSWORD;
+if (!testPassword) {
+  throw new Error('Missing required env var: E2E_TEST_PASSWORD');
+}
+
 describe('Email Confirmation Flow', () => {
   let strapiInstance;
 
@@ -38,7 +43,7 @@ describe('Email Confirmation Flow', () => {
     const mockUser = {
       username: `PR_Test_${Date.now()}`, // Unique name every time
       email: `pr_test_${Date.now()}@example.com`, // Unique email every time
-      password: 'Password123',
+      password: testPassword,
     };
 
     // 1. Register User
