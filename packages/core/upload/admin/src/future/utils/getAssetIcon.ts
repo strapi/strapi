@@ -8,6 +8,7 @@ import {
   FileZip,
   Monitor,
   VolumeUp,
+  Images,
 } from '@strapi/icons';
 import { DefaultTheme } from 'styled-components';
 
@@ -37,7 +38,7 @@ export const getAssetIcon = (mime: string | undefined, ext: string | undefined):
   const fileExtension = getFileExtension(ext);
 
   if (mime?.includes(AssetType.Image)) {
-    return FileIcon;
+    return Images;
   }
 
   if (mime?.includes(AssetType.Video)) {
