@@ -41,5 +41,6 @@ export const TABLE_HEADERS: TableHeader[] = [
   {
     name: 'actions',
     label: { id: getTranslationKey('list.table.header.actions'), defaultMessage: 'actions' },
+    isVisuallyHidden: true,
   },
 ];

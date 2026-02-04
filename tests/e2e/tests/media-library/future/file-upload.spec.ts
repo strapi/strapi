@@ -84,7 +84,7 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       await expect(assetRow).toBeVisible();
     });
 
-    test.only('should upload a file via drag and drop', async ({ page, browserName }) => {
+    test('should upload a file via drag and drop', async ({ page, browserName }) => {
       // DataTransfer API is not supported in WebKit
       test.skip(browserName === 'webkit', 'DataTransfer is not supported in WebKit');
 

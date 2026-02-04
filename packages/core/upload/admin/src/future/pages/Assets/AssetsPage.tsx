@@ -29,6 +29,78 @@ import { AssetsGrid } from './components/AssetsGrid';
 import { AssetsList } from './components/AssetsList';
 import { localStorageKeys, viewOptions } from './constants';
 
+interface AssetsViewProps {
+  view: number;
+}
+
+const AssetsView = ({ view }: AssetsViewProps) => {
+  const { formatMessage } = useIntl();
+  const { data, isLoading, error } = useGetAssetsQuery({ folder: null });
+
+  const isGridView = view === viewOptions.GRID;
+  const assets = data?.results ?? [];
+
+  if (isLoading) {
+    return (
+      <Flex justifyContent="center" padding={8}>
+        <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
+      </Flex>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box padding={8}>
+        <Typography textColor="danger600">
+          {formatMessage({
+            id: getTranslationKey('list.assets.error'),
+            defaultMessage: 'An error occurred while fetching assets.',
+          })}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (isGridView) {
+    return <AssetsGrid assets={assets} />;
+  }
+
+  return <AssetsList assets={assets} />;
+};
+
+const StyledToggleGroup = styled(ToggleGroup.Root)`
+  display: flex;
+  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  overflow: hidden;
+`;
+
+const StyledToggleItem = styled(ToggleGroup.Item)`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spaces[2]};
+  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
+  border: none;
+  background: ${({ theme }) => theme.colors.neutral0};
+  color: ${({ theme }) => theme.colors.neutral800};
+  cursor: pointer;
+  font-size: ${({ theme }) => theme.fontSizes[1]};
+  font-weight: ${({ theme }) => theme.fontWeights.semiBold};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.neutral100};
+  }
+
+  &[data-state='on'] {
+    background: ${({ theme }) => theme.colors.neutral150};
+  }
+
+  svg {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+`;
+
 /**
  * Dropzone items
  */
@@ -67,184 +139,6 @@ const DropFilesMessage = styled(Box)<{ $leftContentWidth: number }>`
   z-index: 2;
 `;
 
-interface AssetsViewProps {
-  view: number;
-  onDrop: (files: globalThis.File[]) => void;
-}
-
-const AssetsView = ({ view, onDrop }: AssetsViewProps) => {
-  const { formatMessage } = useIntl();
-  const { data, isLoading, error } = useGetAssetsQuery({ folder: null });
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const [leftContentWidth, setLeftContentWidth] = useState(0);
-  const dropZoneRef = useRef<HTMLDivElement>(null);
-
-  // Calculate the left content width to position the dropzone message correctly
-  useEffect(() => {
-    const mainContent = document.querySelector('[data-strapi-main-content]');
-    if (!mainContent) return;
-
-    const updateRect = () => {
-      const rect = mainContent.getBoundingClientRect();
-      setLeftContentWidth((prev) => {
-        if (prev !== rect.left) {
-          return rect.left;
-        }
-        return prev;
-      });
-    };
-
-    updateRect();
-
-    const resizeObserver = new ResizeObserver(updateRect);
-    resizeObserver.observe(mainContent);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  /**
-   * Methods to handle the upload on drag and drop
-   */
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.dataTransfer.types.includes('Files')) {
-      setIsDraggingOver(true);
-    }
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const relatedTarget = e.relatedTarget as Node | null;
-    const stillInside =
-      dropZoneRef.current &&
-      relatedTarget &&
-      dropZoneRef.current !== relatedTarget &&
-      dropZoneRef.current.contains(relatedTarget);
-    if (!stillInside) {
-      setIsDraggingOver(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleDragEnd = () => {
-      setIsDraggingOver(false);
-    };
-    document.addEventListener('dragend', handleDragEnd);
-    return () => document.removeEventListener('dragend', handleDragEnd);
-  }, []);
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = 'copy';
-  };
-
-  const handleDropEvent = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDraggingOver(false);
-    const { files } = e.dataTransfer;
-    if (files && files.length > 0) {
-      onDrop(Array.from(files));
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <Flex justifyContent="center" padding={8}>
-        <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
-      </Flex>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box padding={8}>
-        <Typography textColor="danger600">
-          {formatMessage({
-            id: getTranslationKey('list.assets.error'),
-            defaultMessage: 'An error occurred while fetching assets.',
-          })}
-        </Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <Box
-      ref={dropZoneRef}
-      position="relative"
-      data-testid="assets-dropzone"
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDragOver={handleDragOver}
-      onDrop={handleDropEvent}
-    >
-      {isDraggingOver && (
-        <>
-          <DropZoneOverlay />
-          <DropFilesMessage $leftContentWidth={leftContentWidth}>
-            <Typography textColor="neutral0">
-              {formatMessage({
-                id: getTranslationKey('dropzone.upload.message'),
-                defaultMessage: 'Drop here to upload to',
-              })}
-            </Typography>
-            <Flex gap={2} alignItems="center">
-              <Folder width={20} height={20} fill="neutral0" />
-              <Typography textColor="neutral0" fontWeight="semiBold">
-                Current folder
-              </Typography>
-            </Flex>
-          </DropFilesMessage>
-        </>
-      )}
-      {view === viewOptions.GRID ? (
-        <AssetsGrid assets={data?.results ?? []} />
-      ) : (
-        <AssetsList assets={data?.results ?? []} />
-      )}
-    </Box>
-  );
-};
-
-const StyledToggleGroup = styled(ToggleGroup.Root)`
-  display: flex;
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  overflow: hidden;
-`;
-
-const StyledToggleItem = styled(ToggleGroup.Item)`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spaces[2]};
-  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
-  border: none;
-  background: ${({ theme }) => theme.colors.neutral0};
-  color: ${({ theme }) => theme.colors.neutral800};
-  cursor: pointer;
-  font-size: ${({ theme }) => theme.fontSizes[1]};
-  font-weight: ${({ theme }) => theme.fontWeights.semiBold};
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
-  }
-
-  &[data-state='on'] {
-    background: ${({ theme }) => theme.colors.neutral150};
-  }
-
-  svg {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-`;
-
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
 
@@ -257,6 +151,67 @@ export const AssetsPage = () => {
   // View state
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
+
+  // Dropzone state (covers main content area)
+  const [leftContentWidth, setLeftContentWidth] = useState(0);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+
+  // Calculate the left content width to position the dropzone message correctly
+  useEffect(() => {
+    const mainContent = document.querySelector('[data-strapi-main-content]');
+    if (!mainContent) return;
+
+    const updateRect = () => {
+      const rect = mainContent.getBoundingClientRect();
+      setLeftContentWidth((prev) => (prev !== rect.left ? rect.left : prev));
+    };
+
+    updateRect();
+    const resizeObserver = new ResizeObserver(updateRect);
+    resizeObserver.observe(mainContent);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleDragEnd = () => setIsDraggingOver(false);
+    document.addEventListener('dragend', handleDragEnd);
+    return () => document.removeEventListener('dragend', handleDragEnd);
+  }, []);
+
+  /**
+   * Handle drag and drop events (for uploading files)
+   */
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes('Files')) {
+      setIsDraggingOver(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!e.relatedTarget || e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setIsDraggingOver(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDropEvent = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    const { files } = e.dataTransfer;
+    if (files?.length) {
+      handleDrop(Array.from(files));
+    }
+  };
 
   // Upload handlers
   const handleFileSelect = () => {
@@ -313,11 +268,35 @@ export const AssetsPage = () => {
   };
 
   return (
-    <Layouts.Root>
+    <Layouts.Root
+      minHeight="100vh"
+      ref={dropZoneRef}
+      data-testid="assets-dropzone"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDropEvent}
+    >
       <VisuallyHidden>
         <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
       </VisuallyHidden>
 
+      {isDraggingOver && (
+        <DropFilesMessage $leftContentWidth={leftContentWidth}>
+          <Typography textColor="neutral0">
+            {formatMessage({
+              id: getTranslationKey('dropzone.upload.message'),
+              defaultMessage: 'Drop here to upload to',
+            })}
+          </Typography>
+          <Flex gap={2} alignItems="center">
+            <Folder width={20} height={20} fill="neutral0" />
+            <Typography textColor="neutral0" fontWeight="semiBold">
+              Current folder
+            </Typography>
+          </Flex>
+        </DropFilesMessage>
+      )}
       <Layouts.Header
         navigationAction={<Box>TODO: Breadcrumbs</Box>}
         title="TODO: Folder location"
@@ -387,7 +366,10 @@ export const AssetsPage = () => {
       />
 
       <Layouts.Content>
-        <AssetsView view={view} onDrop={handleDrop} />
+        <Box position="relative">
+          {isDraggingOver && <DropZoneOverlay />}
+          <AssetsView view={view} />
+        </Box>
       </Layouts.Content>
     </Layouts.Root>
   );
