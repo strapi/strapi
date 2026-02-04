@@ -8,7 +8,7 @@ import {
   IconButton,
   Typography,
 } from '@strapi/design-system';
-import { Monitor, More, VolumeUp } from '@strapi/icons';
+import { More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -76,17 +76,6 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
     return (
       <PreviewContainer>
         <StyledImage src={mediaURL ?? undefined} alt={alternativeText || ''} />
-      </PreviewContainer>
-    );
-  }
-
-  if (mime?.includes(AssetType.Video) || mime?.includes(AssetType.Audio)) {
-    const Icon = mime?.includes(AssetType.Video) ? Monitor : VolumeUp;
-    return (
-      <PreviewContainer>
-        <IconPreview justifyContent="center" alignItems="center">
-          <Icon width={48} height={48} />
-        </IconPreview>
       </PreviewContainer>
     );
   }

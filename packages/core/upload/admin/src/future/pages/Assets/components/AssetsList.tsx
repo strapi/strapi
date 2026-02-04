@@ -12,12 +12,11 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Monitor, More, VolumeUp } from '@strapi/icons';
+import { More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../enums';
-import { formatBytes, prefixFileUrlWithBackendUrl } from '../../../utils/files';
+import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
@@ -67,39 +66,7 @@ interface AssetPreviewCellProps {
 }
 
 const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
-  const { alternativeText, ext, formats, mime, url } = asset;
-
-  if (mime?.includes(AssetType.Image)) {
-    const mediaURL =
-      prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
-
-    return (
-      <Box width="3.2rem" height="3.2rem" borderRadius="4px" overflow="hidden" shrink={0}>
-        <img
-          src={mediaURL ?? undefined}
-          alt={alternativeText || ''}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      </Box>
-    );
-  }
-
-  if (mime?.includes(AssetType.Video) || mime?.includes(AssetType.Audio)) {
-    const Icon = mime?.includes(AssetType.Video) ? Monitor : VolumeUp;
-    return (
-      <Flex
-        borderRadius="4px"
-        color="neutral500"
-        width="3.2rem"
-        height="3.2rem"
-        justifyContent="center"
-        alignItems="center"
-        shrink={0}
-      >
-        <Icon width={16} height={16} />
-      </Flex>
-    );
-  }
+  const { ext, mime } = asset;
 
   const DocIcon = getAssetIcon(mime, ext);
 
