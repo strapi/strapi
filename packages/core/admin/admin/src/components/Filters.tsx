@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Popover, Tag } from '@strapi/design-system';
+import { Box, Button, Flex, IconButton, Popover, Tag } from '@strapi/design-system';
 import { Plus, Filter as FilterIcon, Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -14,6 +14,7 @@ import {
   FILTERS_WITH_NO_VALUE,
 } from '../constants/filters';
 import { useControllableState } from '../hooks/useControllableState';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
@@ -88,18 +89,35 @@ const Trigger = React.forwardRef<HTMLButtonElement, Filters.TriggerProps>(
   ({ label }, forwardedRef) => {
     const { formatMessage } = useIntl();
     const disabled = useFilters('Trigger', ({ disabled }) => disabled);
+    const isMobile = useIsMobile();
+
+    const triggerLabel =
+      label || formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' });
 
     return (
       <Popover.Trigger>
-        <Button
-          variant="tertiary"
-          ref={forwardedRef}
-          startIcon={<FilterIcon />}
-          size="S"
-          disabled={disabled}
-        >
-          {label || formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
-        </Button>
+        {isMobile ? (
+          <IconButton
+            variant="tertiary"
+            ref={forwardedRef}
+            disabled={disabled}
+            label={triggerLabel}
+            size="S"
+          >
+            <FilterIcon />
+          </IconButton>
+        ) : (
+          <Button
+            variant="tertiary"
+            ref={forwardedRef}
+            startIcon={<FilterIcon />}
+            size="S"
+            disabled={disabled}
+            aria-label={triggerLabel}
+          >
+            {triggerLabel}
+          </Button>
+        )}
       </Popover.Trigger>
     );
   }
