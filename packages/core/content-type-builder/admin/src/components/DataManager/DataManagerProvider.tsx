@@ -219,11 +219,45 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await getDataRef.current();
       // Update the app's permissions
       await updatePermissions();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error({ err });
+
+      // Extract error message from the response if available
+      let errorMessage = formatMessage({
+        id: 'notification.error',
+        defaultMessage: 'An error occurred',
+      });
+
+      const axiosError = err as {
+        response?: {
+          data?: {
+            error?: {
+              message?: string;
+              details?: { errors?: Array<{ path?: string[]; message?: string }> };
+            };
+          };
+        };
+      };
+      const responseError = axiosError?.response?.data?.error;
+
+      if (responseError) {
+        if (responseError.details?.errors && responseError.details.errors.length > 0) {
+          // Format validation errors with details
+          const errorDetails = responseError.details.errors
+            .map((e) => {
+              const path = e.path?.join('.') || 'unknown field';
+              return `${path}: ${e.message}`;
+            })
+            .join('; ');
+          errorMessage = `${responseError.message}: ${errorDetails}`;
+        } else if (responseError.message) {
+          errorMessage = responseError.message;
+        }
+      }
+
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        message: errorMessage,
       });
 
       trackUsage('didUpdateCTBSchema', {

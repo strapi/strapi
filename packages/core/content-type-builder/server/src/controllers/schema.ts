@@ -43,8 +43,24 @@ export default () => {
         ctx.body = {};
       } catch (error) {
         internals.isUpdating = false;
+
+        // Handle ValidationError with detailed error information
+        if (error instanceof Error && error.name === 'ValidationError') {
+          const validationError = error as Error & { details?: { errors?: unknown[] } };
+          return ctx.send(
+            {
+              error: {
+                name: 'ValidationError',
+                message: validationError.message,
+                details: validationError.details || {},
+              },
+            },
+            400
+          );
+        }
+
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return ctx.send({ error: errorMessage }, 400);
+        return ctx.send({ error: { name: 'ApplicationError', message: errorMessage } }, 400);
       }
     },
 
