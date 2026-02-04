@@ -178,12 +178,13 @@ const AssetsView = ({ view, onDrop }: AssetsViewProps) => {
     <Box
       ref={dropZoneRef}
       position="relative"
+      data-testid="assets-dropzone"
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDropEvent}
     >
-      {!isDraggingOver && (
+      {isDraggingOver && (
         <>
           <DropZoneOverlay />
           <DropFilesMessage $leftContentWidth={leftContentWidth}>
