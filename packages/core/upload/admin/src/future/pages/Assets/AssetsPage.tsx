@@ -29,6 +29,10 @@ import { AssetsGrid } from './components/AssetsGrid';
 import { AssetsList } from './components/AssetsList';
 import { localStorageKeys, viewOptions } from './constants';
 
+/**
+ * Dropzone items
+ */
+
 const setOpacity = (hex: string, alpha: number) =>
   `${hex}${Math.floor(alpha * 255)
     .toString(16)
@@ -47,11 +51,11 @@ const DropZoneOverlay = styled(Box)`
   pointer-events: none;
 `;
 
-const DropFilesMessage = styled(Box)`
+const DropFilesMessage = styled(Box)<{ $leftContentWidth: number }>`
   position: fixed;
   bottom: ${({ theme }) => theme.spaces[8]};
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + ${({ $leftContentWidth }) => $leftContentWidth / 2}px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -72,8 +76,37 @@ const AssetsView = ({ view, onDrop }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetAssetsQuery({ folder: null });
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [leftContentWidth, setLeftContentWidth] = useState(0);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
+  // Calculate the left content width to position the dropzone message correctly
+  useEffect(() => {
+    const mainContent = document.querySelector('[data-strapi-main-content]');
+    if (!mainContent) return;
+
+    const updateRect = () => {
+      const rect = mainContent.getBoundingClientRect();
+      setLeftContentWidth((prev) => {
+        if (prev !== rect.left) {
+          return rect.left;
+        }
+        return prev;
+      });
+    };
+
+    updateRect();
+
+    const resizeObserver = new ResizeObserver(updateRect);
+    resizeObserver.observe(mainContent);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  /**
+   * Methods to handle the upload on drag and drop
+   */
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -150,10 +183,10 @@ const AssetsView = ({ view, onDrop }: AssetsViewProps) => {
       onDragOver={handleDragOver}
       onDrop={handleDropEvent}
     >
-      {isDraggingOver && (
+      {!isDraggingOver && (
         <>
           <DropZoneOverlay />
-          <DropFilesMessage>
+          <DropFilesMessage $leftContentWidth={leftContentWidth}>
             <Typography textColor="neutral0">
               {formatMessage({
                 id: getTranslationKey('dropzone.upload.message'),
@@ -342,7 +375,10 @@ export const AssetsPage = () => {
                 })}
               >
                 <GridIcon />
-                {formatMessage({ id: getTranslationKey('view.grid'), defaultMessage: 'Grid view' })}
+                {formatMessage({
+                  id: getTranslationKey('view.grid'),
+                  defaultMessage: 'Grid view',
+                })}
               </StyledToggleItem>
             </StyledToggleGroup>
           </Flex>
