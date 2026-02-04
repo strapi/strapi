@@ -23,6 +23,7 @@ import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
+import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
@@ -51,6 +52,8 @@ const EditViewPage = () => {
   const isDesktop = useIsDesktop();
   const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
   const drawerHasContent = visiblePanels.length > 0;
+
+  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
 
   const doc = useDoc();
   const {
