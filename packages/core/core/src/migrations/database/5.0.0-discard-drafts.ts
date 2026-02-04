@@ -2506,7 +2506,6 @@ async function copyComponentRelations({
   const componentIdColumn = getComponentJoinColumnInverseName(identifiers);
   const componentTypeColumn = getComponentTypeColumn(identifiers);
   const fieldColumn = identifiers.FIELD_COLUMN;
-  const orderColumn = identifiers.ORDER_COLUMN;
 
   // Check if component join table exists
   const hasTable = await trx.schema.hasTable(joinTableName);
@@ -2543,64 +2542,71 @@ async function copyComponentRelations({
     //
     // The logic: find what contains this component instance (could be a content type or another component).
     // If it's a component, recursively check its parents. If any parent in the chain has DP, filter out the relation.
-    const filteredComponentRelations = await Promise.all(
-      componentRelations.map(async (relation) => {
-        const componentId = relation[componentIdColumn];
-        const componentType = relation[componentTypeColumn];
-        const entityId = relation[entityIdColumn];
+    // Filter in batches to cap memory use and DB fan-out when relations are large.
+    const filteredComponentRelations: Array<Record<string, any> | null> = [];
+    const filterBatches = chunkArray(componentRelations, getBatchSize(trx, 100));
+    for (const batch of filterBatches) {
+      const batchResults = await Promise.all(
+        batch.map(async (relation) => {
+          const componentId = relation[componentIdColumn];
+          const componentType = relation[componentTypeColumn];
+          const entityId = relation[entityIdColumn];
 
-        const componentSchema = strapi.components[
-          componentType as keyof typeof strapi.components
-        ] as any;
+          const componentSchema = strapi.components[
+            componentType as keyof typeof strapi.components
+          ] as any;
 
-        if (!componentSchema) {
-          debug(
-            `[copyComponentRelations] ${uid}: Keeping relation - unknown component type ${componentType} (entity: ${entityId}, componentId: ${componentId})`
+          if (!componentSchema) {
+            debug(
+              `[copyComponentRelations] ${uid}: Keeping relation - unknown component type ${componentType} (entity: ${entityId}, componentId: ${componentId})`
+            );
+            return relation;
+          }
+
+          const componentParent = await findComponentParentInstance(
+            trx,
+            identifiers,
+            componentSchema.uid,
+            componentId,
+            uid,
+            componentHierarchyCaches
           );
+
+          if (!componentParent) {
+            debug(
+              `[copyComponentRelations] ${uid}: Keeping relation - component ${componentType} (id: ${componentId}) is directly on entity ${entityId} (no nested parent found)`
+            );
+            return relation;
+          }
+
+          debug(
+            `[copyComponentRelations] ${uid}: Component ${componentType} (id: ${componentId}, entity: ${entityId}) has parent in hierarchy: ${componentParent.uid} (parentId: ${componentParent.parentId})`
+          );
+
+          const hasDPParent = await hasDraftPublishAncestorForParent(
+            trx,
+            identifiers,
+            componentParent,
+            componentHierarchyCaches
+          );
+
+          if (hasDPParent) {
+            debug(
+              `[copyComponentRelations] Filtering: component ${componentType} (id: ${componentId}, entity: ${entityId}) has DP parent in hierarchy (${componentParent.uid})`
+            );
+            return null;
+          }
+
+          debug(
+            `[copyComponentRelations] ${uid}: Keeping relation - component ${componentType} (id: ${componentId}, entity: ${entityId}) has no DP parent in hierarchy`
+          );
+
           return relation;
-        }
+        })
+      );
 
-        const componentParent = await findComponentParentInstance(
-          trx,
-          identifiers,
-          componentSchema.uid,
-          componentId,
-          uid,
-          componentHierarchyCaches
-        );
-
-        if (!componentParent) {
-          debug(
-            `[copyComponentRelations] ${uid}: Keeping relation - component ${componentType} (id: ${componentId}) is directly on entity ${entityId} (no nested parent found)`
-          );
-          return relation;
-        }
-
-        debug(
-          `[copyComponentRelations] ${uid}: Component ${componentType} (id: ${componentId}, entity: ${entityId}) has parent in hierarchy: ${componentParent.uid} (parentId: ${componentParent.parentId})`
-        );
-
-        const hasDPParent = await hasDraftPublishAncestorForParent(
-          trx,
-          identifiers,
-          componentParent,
-          componentHierarchyCaches
-        );
-
-        if (hasDPParent) {
-          debug(
-            `[copyComponentRelations] Filtering: component ${componentType} (id: ${componentId}, entity: ${entityId}) has DP parent in hierarchy (${componentParent.uid})`
-          );
-          return null;
-        }
-
-        debug(
-          `[copyComponentRelations] ${uid}: Keeping relation - component ${componentType} (id: ${componentId}, entity: ${entityId}) has no DP parent in hierarchy`
-        );
-
-        return relation;
-      })
-    );
+      filteredComponentRelations.push(...batchResults);
+    }
 
     // Filter out null values (filtered relations)
     const relationsToProcess = filteredComponentRelations.filter(Boolean) as Array<
@@ -2720,45 +2726,19 @@ async function copyComponentRelations({
       const client = trx.client.config.client;
 
       if (client === 'postgres' || client === 'pg') {
-        // PostgreSQL: Insert one at a time with ON CONFLICT DO NOTHING
-        // Use raw SQL for more reliable conflict handling with specific conflict columns
+        // PostgreSQL: Batch insert with ON CONFLICT DO NOTHING for better throughput.
+        const relationChunks = chunkArray(newComponentRelations, getBatchSize(trx, 500));
         let insertedCount = 0;
-        let skippedCount = 0;
-        for (const relation of newComponentRelations) {
-          try {
-            const orderValue = relation[orderColumn] ?? null;
-            await trx.raw(
-              `INSERT INTO ?? (??, ??, ??, ??, ??) VALUES (?, ?, ?, ?, ?) 
-               ON CONFLICT (??, ??, ??, ??) DO NOTHING`,
-              [
-                joinTableName,
-                entityIdColumn,
-                componentIdColumn,
-                fieldColumn,
-                componentTypeColumn,
-                orderColumn,
-                relation[entityIdColumn],
-                relation[componentIdColumn],
-                relation[fieldColumn],
-                relation[componentTypeColumn],
-                orderValue,
-                entityIdColumn,
-                componentIdColumn,
-                fieldColumn,
-                componentTypeColumn,
-              ]
-            );
-            insertedCount += 1;
-          } catch (error: any) {
-            if (error.code !== '23505' && !error.message?.includes('duplicate key')) {
-              throw error;
-            }
-            skippedCount += 1;
-          }
+        for (const relationChunk of relationChunks) {
+          await trx(joinTableName)
+            .insert(relationChunk)
+            .onConflict([entityIdColumn, componentIdColumn, fieldColumn, componentTypeColumn])
+            .ignore();
+          insertedCount += relationChunk.length;
         }
-        if (insertedCount > 0 || skippedCount > 0) {
+        if (insertedCount > 0) {
           debug(
-            `[copyComponentRelations] ${uid}: Inserted ${insertedCount} component relations, skipped ${skippedCount} duplicates`
+            `[copyComponentRelations] ${uid}: Attempted to insert ${insertedCount} component relations (duplicates ignored)`
           );
         }
       } else {
