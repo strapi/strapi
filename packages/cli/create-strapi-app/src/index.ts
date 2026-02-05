@@ -186,13 +186,9 @@ async function run(args: string[]): Promise<void> {
     scope.useTypescript = await prompts.typescript();
   }
 
-  if (options.install === true || options.quickstart) {
-    scope.installDependencies = true;
-  } else if (options.install === false) {
-    scope.installDependencies = false;
-  } else {
-    scope.installDependencies = await prompts.installDependencies(scope.packageManager);
-  }
+  scope.installDependencies = await resolveOption(options.install, options.quickstart, true, () =>
+    prompts.installDependencies(scope.packageManager)
+  );
 
   if (scope.useTypescript) {
     scope.devDependencies = {
@@ -204,21 +200,14 @@ async function run(args: string[]): Promise<void> {
     };
   }
 
-  if (options.gitInit === true || options.quickstart) {
-    scope.gitInit = true;
-  } else if (options.gitInit === false) {
-    scope.gitInit = false;
-  } else {
-    scope.gitInit = await prompts.gitInit();
-  }
+  scope.gitInit = await resolveOption(options.gitInit, options.quickstart, true, prompts.gitInit);
 
-  if (options.enableAbTests === true) {
-    scope.isABTestEnabled = true;
-  } else if (options.enableAbTests === false || options.quickstart) {
-    scope.isABTestEnabled = false;
-  } else {
-    scope.isABTestEnabled = await prompts.enableABTests();
-  }
+  scope.isABTestEnabled = await resolveOption(
+    options.enableAbTests,
+    options.quickstart,
+    false,
+    prompts.enableABTests
+  );
 
   addDatabaseDependencies(scope);
 
@@ -233,6 +222,20 @@ async function run(args: string[]): Promise<void> {
 
     logger.fatal(error.message);
   }
+}
+
+/**
+ * Resolves a boolean CLI option: explicit flag wins, then quickstart default, then interactive prompt.
+ */
+async function resolveOption(
+  explicitValue: boolean | undefined,
+  quickstart: boolean | undefined,
+  quickstartDefault: boolean,
+  promptFn: () => Promise<boolean>
+): Promise<boolean> {
+  if (explicitValue !== undefined) return explicitValue;
+  if (quickstart) return quickstartDefault;
+  return promptFn();
 }
 
 function getPkgManager(options: Options) {
