@@ -43,5 +43,24 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
         expect(await assetsPage.isGridViewActive()).toBe(false);
       });
     });
+
+    test.describe('Grid Display', () => {
+      test('should display uploaded file as card in grid view', async ({ page }) => {
+        const assetsPage = new AssetsPage(page);
+        await assetsPage.goto();
+
+        // Ensure we're in grid view
+        await assetsPage.switchToGridView();
+        expect(await assetsPage.isGridViewActive()).toBe(true);
+
+        const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
+        await assetsPage.uploadFilesWithFilePicker(testImagePath);
+        await assetsPage.waitForUploadSuccess();
+
+        // Verify asset appears as card
+        const assetCard = assetsPage.getAssetCard('test-image');
+        await expect(assetCard).toBeVisible();
+      });
+    });
   }
 );

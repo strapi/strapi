@@ -97,4 +97,8 @@ export class AssetsPage {
   async isGridViewActive() {
     return (await this.gridViewButton.getAttribute('aria-checked')) === 'true';
   }
+
+  getAssetCard(name: string) {
+    return this.page.locator('div').filter({ hasText: name }).nth(1);
+  }
 }
