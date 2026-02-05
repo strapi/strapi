@@ -20,19 +20,14 @@ export const TABLE_HEADERS: TableHeader[] = [
     name: 'name',
     label: { id: getTranslationKey('list.table.header.name'), defaultMessage: 'name' },
   },
+  // TODO translation keys
   {
     name: 'createdAt',
-    label: {
-      id: getTranslationKey('list.table.header.creationDate'),
-      defaultMessage: 'creation date',
-    },
+    label: { id: 'TODO: creation date', defaultMessage: 'creation date' },
   },
   {
     name: 'updatedAt',
-    label: {
-      id: getTranslationKey('list.table.header.lastModified'),
-      defaultMessage: 'last modified',
-    },
+    label: { id: 'TODO: last modified', defaultMessage: 'last modified' },
   },
   {
     name: 'size',

@@ -138,8 +138,6 @@
   "sort.updated_at_asc": "Oldest updates",
   "sort.updated_at_desc": "Most recent updates",
   "list.table.header.actions": "actions",
-  "list.table.header.creationDate": "creation date",
-  "list.table.header.lastModified": "last modified",
   "list.table.header.preview": "preview",
   "list.table.header.name": "name",
   "list.table.header.ext": "extension",
