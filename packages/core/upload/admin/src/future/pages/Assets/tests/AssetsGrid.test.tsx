@@ -106,8 +106,7 @@ describe('AssetsGrid', () => {
         asset.alternativeText = null;
         setup({ assets: [asset] });
 
-        // Grid view renders empty alt for presentational images
-        const img = screen.getByRole('img');
+        const img = screen.getByRole('presentation');
         expect(img).toHaveAttribute('alt', '');
       });
 
