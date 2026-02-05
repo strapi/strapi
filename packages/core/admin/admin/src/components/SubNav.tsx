@@ -40,6 +40,7 @@ const MainSubNav = styled(DSSubNav)`
     position: sticky;
     top: 0;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+    overscroll-behavior: contain;
   }
   ${({ theme }) => theme.breakpoints.large} {
     height: 100dvh;
