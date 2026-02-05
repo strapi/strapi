@@ -103,7 +103,6 @@ const readFile = async (archive, file, options = {}) => {
       new tar.Parser({
         // Match tar entry with the given filename
         filter(filePath, entry) {
-          console.log(filePath);
           return entry.type === 'File' && file === filePath;
         },
         async onReadEntry(entry) {
