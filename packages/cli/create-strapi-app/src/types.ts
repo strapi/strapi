@@ -21,6 +21,7 @@ export interface Options {
   example?: boolean;
   gitInit?: boolean;
   enableAbTests?: boolean;
+  nonInteractive?: boolean;
   templateBranch?: string;
   templatePath?: string;
 }

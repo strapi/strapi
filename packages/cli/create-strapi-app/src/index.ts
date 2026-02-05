@@ -54,6 +54,9 @@ const command = new commander.Command('create-strapi-app')
   .option('--enable-ab-tests', 'Enable anonymous A/B testing')
   .option('--no-enable-ab-tests', 'Disable anonymous A/B testing')
 
+  // Automation
+  .option('--non-interactive', 'Skip all interactive prompts and use defaults')
+
   // Database options
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
@@ -116,6 +119,14 @@ async function run(args: string[]): Promise<void> {
     );
   }
 
+  if (options.nonInteractive && !directory) {
+    logger.fatal(
+      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold('--non-interactive')}`
+    );
+  }
+
+  const skipPrompts = options.quickstart || options.nonInteractive;
+
   checkNodeRequirements();
 
   const appDirectory = directory || (await prompts.directory());
@@ -123,7 +134,7 @@ async function run(args: string[]): Promise<void> {
   const rootPath = await checkInstallPath(appDirectory);
 
   let shouldCreateGrowthSsoTrial = false;
-  if (!options.skipCloud) {
+  if (!options.skipCloud && !options.nonInteractive) {
     shouldCreateGrowthSsoTrial = await handleCloudLogin();
   }
 
@@ -172,7 +183,7 @@ async function run(args: string[]): Promise<void> {
     scope.useExample = false;
   } else if (options.example === true) {
     scope.useExample = true;
-  } else if (options.example === false || options.quickstart === true) {
+  } else if (options.example === false || skipPrompts) {
     scope.useExample = false;
   } else {
     scope.useExample = await prompts.example();
@@ -180,13 +191,13 @@ async function run(args: string[]): Promise<void> {
 
   if (options.javascript === true) {
     scope.useTypescript = false;
-  } else if (options.typescript === true || options.quickstart) {
+  } else if (options.typescript === true || skipPrompts) {
     scope.useTypescript = true;
   } else if (!options.template) {
     scope.useTypescript = await prompts.typescript();
   }
 
-  scope.installDependencies = await resolveOption(options.install, options.quickstart, true, () =>
+  scope.installDependencies = await resolveOption(options.install, skipPrompts, true, () =>
     prompts.installDependencies(scope.packageManager)
   );
 
@@ -200,11 +211,11 @@ async function run(args: string[]): Promise<void> {
     };
   }
 
-  scope.gitInit = await resolveOption(options.gitInit, options.quickstart, true, prompts.gitInit);
+  scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
 
   scope.isABTestEnabled = await resolveOption(
     options.enableAbTests,
-    options.quickstart,
+    skipPrompts,
     false,
     prompts.enableABTests
   );
@@ -225,16 +236,16 @@ async function run(args: string[]): Promise<void> {
 }
 
 /**
- * Resolves a boolean CLI option: explicit flag wins, then quickstart default, then interactive prompt.
+ * Resolves a boolean CLI option: explicit flag wins, then non-interactive default, then interactive prompt.
  */
 async function resolveOption(
   explicitValue: boolean | undefined,
-  quickstart: boolean | undefined,
-  quickstartDefault: boolean,
+  skipPrompts: boolean | undefined,
+  defaultValue: boolean,
   promptFn: () => Promise<boolean>
 ): Promise<boolean> {
   if (explicitValue !== undefined) return explicitValue;
-  if (quickstart) return quickstartDefault;
+  if (skipPrompts) return defaultValue;
   return promptFn();
 }
 
