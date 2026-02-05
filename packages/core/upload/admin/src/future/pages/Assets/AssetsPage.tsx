@@ -21,6 +21,11 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { usePersistentState } from '../../../hooks/usePersistentState';
+import {
+  DragAndDropProvider,
+  useDragAndDrop,
+  DropZoneWithOverlay,
+} from '../../contexts/DragAndDropContext';
 import { useUploadFilesMutation } from '../../services/api';
 import { useGetAssetsQuery } from '../../services/assets';
 import { getTranslationKey } from '../../utils/translations';
@@ -105,24 +110,6 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
  * Dropzone items
  */
 
-const setOpacity = (hex: string, alpha: number) =>
-  `${hex}${Math.floor(alpha * 255)
-    .toString(16)
-    .padStart(2, '0')}`;
-
-const DropZoneOverlay = styled(Box)`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: ${({ theme }) => setOpacity(theme.colors.primary200, 0.3)};
-  border: 1px solid ${({ theme }) => theme.colors.primary700};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  z-index: 1;
-  pointer-events: none;
-`;
-
 const DropFilesMessage = styled(Box)<{ $leftContentWidth: number }>`
   position: fixed;
   bottom: ${({ theme }) => theme.spaces[8]};
@@ -145,78 +132,7 @@ export const AssetsPage = () => {
   // Upload hooks
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError } = useAPIErrorHandler();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadFiles] = useUploadFilesMutation();
-
-  // View state
-  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
-  const isGridView = view === viewOptions.GRID;
-
-  // Dropzone state (covers main content area)
-  const [leftContentWidth, setLeftContentWidth] = useState(0);
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const dropZoneRef = useRef<HTMLDivElement>(null);
-
-  // Calculate the left content width to position the dropzone message correctly
-  useEffect(() => {
-    const mainContent = document.querySelector('[data-strapi-main-content]');
-    if (!mainContent) return;
-
-    const updateRect = () => {
-      const rect = mainContent.getBoundingClientRect();
-      setLeftContentWidth((prev) => (prev !== rect.left ? rect.left : prev));
-    };
-
-    updateRect();
-    const resizeObserver = new ResizeObserver(updateRect);
-    resizeObserver.observe(mainContent);
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const handleDragEnd = () => setIsDraggingOver(false);
-    document.addEventListener('dragend', handleDragEnd);
-    return () => document.removeEventListener('dragend', handleDragEnd);
-  }, []);
-
-  /**
-   * Handle drag and drop events (for uploading files)
-   */
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.dataTransfer.types.includes('Files')) {
-      setIsDraggingOver(true);
-    }
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!e.relatedTarget || e.currentTarget.contains(e.relatedTarget as Node)) return;
-    setIsDraggingOver(false);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = 'copy';
-  };
-
-  const handleDropEvent = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDraggingOver(false);
-    const { files } = e.dataTransfer;
-    if (files?.length) {
-      handleDrop(Array.from(files));
-    }
-  };
-
-  // Upload handlers
-  const handleFileSelect = () => {
-    fileInputRef.current?.click();
-  };
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;
@@ -268,20 +184,58 @@ export const AssetsPage = () => {
   };
 
   return (
-    <Layouts.Root
-      minHeight="100vh"
-      ref={dropZoneRef}
-      data-testid="assets-dropzone"
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDragOver={handleDragOver}
-      onDrop={handleDropEvent}
-    >
+    <DragAndDropProvider>
+      <AssetsPageContent handleDrop={handleDrop} handleFileChange={handleFileChange} />
+    </DragAndDropProvider>
+  );
+};
+
+interface AssetsPageContentProps {
+  handleDrop: (files: globalThis.File[]) => Promise<void>;
+  handleFileChange: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
+}
+
+const AssetsPageContent = ({ handleDrop, handleFileChange }: AssetsPageContentProps) => {
+  const { formatMessage } = useIntl();
+  const { isDragging } = useDragAndDrop(handleDrop);
+
+  // View state
+  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
+  const isGridView = view === viewOptions.GRID;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Upload handlers
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Dropzone message position (relative to main content)
+  const [leftContentWidth, setLeftContentWidth] = useState(0);
+
+  // Calculate the left content width to position the dropzone message correctly
+  useEffect(() => {
+    const mainContent = document.querySelector('[data-strapi-main-content]');
+    if (!mainContent) return;
+
+    const updateRect = () => {
+      const rect = mainContent.getBoundingClientRect();
+      setLeftContentWidth((prev) => (prev !== rect.left ? rect.left : prev));
+    };
+
+    updateRect();
+    const resizeObserver = new ResizeObserver(updateRect);
+    resizeObserver.observe(mainContent);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  return (
+    <Layouts.Root minHeight="100vh">
       <VisuallyHidden>
         <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
       </VisuallyHidden>
 
-      {isDraggingOver && (
+      {isDragging && (
         <DropFilesMessage $leftContentWidth={leftContentWidth}>
           <Typography textColor="neutral0">
             {formatMessage({
@@ -366,10 +320,9 @@ export const AssetsPage = () => {
       />
 
       <Layouts.Content>
-        <Box position="relative">
-          {isDraggingOver && <DropZoneOverlay />}
+        <DropZoneWithOverlay>
           <AssetsView view={view} />
-        </Box>
+        </DropZoneWithOverlay>
       </Layouts.Content>
     </Layouts.Root>
   );
