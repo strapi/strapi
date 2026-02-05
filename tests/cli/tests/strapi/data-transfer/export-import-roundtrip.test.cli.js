@@ -82,4 +82,11 @@ describe('import-export', () => {
       expect(idsChanged).toBe(true);
     }
   });
+
+  test.todo('roundtrip with compressed export/import (.tar.gz)');
+  test.todo('roundtrip with encrypted export/import (.tar.gz.enc) and key');
+  test.todo('roundtrip with --only (partial content) and verify only those types restored');
+  test.todo('roundtrip with without-admin.tar fixture (different data combo)');
+  test.todo('roundtrip preserves i18n locales and localized content counts');
+  test.todo('roundtrip preserves draft vs published state where applicable');
 });
