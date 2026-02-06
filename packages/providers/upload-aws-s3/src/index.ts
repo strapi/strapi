@@ -313,7 +313,14 @@ const getConfig = ({
   };
 
   if (config.params !== undefined) {
-    config.params.ACL = getOr(ObjectCannedACL.public_read, ['params', 'ACL'], config);
+    // Only set default ACL when ACL is not explicitly present in params.
+    // Since April 2023, new AWS S3 buckets have ACLs disabled by default
+    // ("Bucket owner enforced"). Sending an ACL header to such buckets
+    // throws AccessControlListNotSupported. To disable ACLs, users should
+    // simply not include ACL in their params configuration.
+    if (!('ACL' in config.params)) {
+      config.params.ACL = ObjectCannedACL.public_read;
+    }
   } else {
     throw new Error('Upload AWS S3 provider: `params` are required in the config object');
   }
