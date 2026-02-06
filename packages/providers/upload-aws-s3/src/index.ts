@@ -405,7 +405,8 @@ export default {
     const constructFileUrl = (fileKey: string, uploadLocation: string): string => {
       // Priority 1: Use baseUrl if configured (CDN or custom domain)
       if (baseUrl) {
-        return `${baseUrl}/${fileKey}`;
+        const cleanBase = baseUrl.replace(/\/+$/, '');
+        return `${cleanBase}/${fileKey}`;
       }
 
       // Priority 2: Construct URL from endpoint if configured
