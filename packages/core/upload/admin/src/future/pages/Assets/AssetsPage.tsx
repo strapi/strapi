@@ -110,7 +110,11 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
  * Dropzone items
  */
 
-const DropFilesMessage = () => {
+interface DropFilesMessageProps {
+  uploadDropZoneRef?: React.RefObject<HTMLDivElement>;
+}
+
+const DropFilesMessage = ({ uploadDropZoneRef }: DropFilesMessageProps) => {
   const { formatMessage } = useIntl();
   const { isDragging } = useUploadDropZone();
 
@@ -119,19 +123,20 @@ const DropFilesMessage = () => {
 
   // Calculate the left content width to position the dropzone message correctly
   useEffect(() => {
-    const mainContent = document.querySelector('[data-strapi-main-content]');
-    if (!mainContent) return;
+    if (!uploadDropZoneRef?.current) return;
 
     const updateRect = () => {
-      const rect = mainContent.getBoundingClientRect();
-      setLeftContentWidth((prev) => (prev !== rect.left ? rect.left : prev));
+      const rect = uploadDropZoneRef.current?.getBoundingClientRect();
+      if (rect) {
+        setLeftContentWidth((prev) => (prev !== rect.left ? rect.left : prev));
+      }
     };
 
     updateRect();
     const resizeObserver = new ResizeObserver(updateRect);
-    resizeObserver.observe(mainContent);
+    resizeObserver.observe(uploadDropZoneRef.current);
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [uploadDropZoneRef]);
 
   if (!isDragging) return null;
 
@@ -146,7 +151,7 @@ const DropFilesMessage = () => {
       <Flex gap={2} alignItems="center">
         <Folder width={20} height={20} fill="neutral0" />
         <Typography textColor="neutral0" fontWeight="semiBold">
-          Current folder
+          Current folder{/* TODO: Replace this later with the current folder name */}
         </Typography>
       </Flex>
     </DropFilesMessageImpl>
@@ -176,7 +181,9 @@ export const AssetsPage = () => {
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
 
+  // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadDropZoneRef = useRef<HTMLDivElement>(null);
 
   // Upload handlers
   const { toggleNotification } = useNotification();
@@ -238,87 +245,89 @@ export const AssetsPage = () => {
 
   return (
     <UploadDropZoneProvider onDrop={handleDrop}>
-      <Layouts.Root minHeight="100vh">
-        <VisuallyHidden>
-          <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
-        </VisuallyHidden>
+      <Box ref={uploadDropZoneRef}>
+        <Layouts.Root minHeight="100vh">
+          <VisuallyHidden>
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
+          </VisuallyHidden>
 
-        <DropFilesMessage />
+          <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} />
 
-        <Layouts.Header
-          navigationAction={<Box>TODO: Breadcrumbs</Box>}
-          title="TODO: Folder location"
-          primaryAction={
-            <Flex gap={2}>
-              <SimpleMenu
-                popoverPlacement="bottom-end"
-                variant="default"
-                endIcon={<ChevronDown />}
-                label={formatMessage({ id: getTranslationKey('new'), defaultMessage: 'New' })}
-              >
-                <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
-                  {formatMessage({
-                    id: getTranslationKey('import-files'),
-                    defaultMessage: 'Import files',
+          <Layouts.Header
+            navigationAction={<Box>TODO: Breadcrumbs</Box>}
+            title="TODO: Folder location"
+            primaryAction={
+              <Flex gap={2}>
+                <SimpleMenu
+                  popoverPlacement="bottom-end"
+                  variant="default"
+                  endIcon={<ChevronDown />}
+                  label={formatMessage({ id: getTranslationKey('new'), defaultMessage: 'New' })}
+                >
+                  <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
+                    {formatMessage({
+                      id: getTranslationKey('import-files'),
+                      defaultMessage: 'Import files',
+                    })}
+                  </MenuItem>
+                </SimpleMenu>
+                <SearchInput
+                  label={formatMessage({
+                    id: getTranslationKey('search.label'),
+                    defaultMessage: 'Search for an asset',
                   })}
-                </MenuItem>
-              </SimpleMenu>
-              <SearchInput
-                label={formatMessage({
-                  id: getTranslationKey('search.label'),
-                  defaultMessage: 'Search for an asset',
-                })}
-                trackedEvent="didSearchMediaLibraryElements"
-                trackedEventDetails={{ location: 'upload' }}
-              />
-              <StyledToggleGroup
-                type="single"
-                value={isGridView ? 'grid' : 'list'}
-                onValueChange={(value) =>
-                  value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.LIST)
-                }
-                aria-label={formatMessage({
-                  id: getTranslationKey('view.switch.label'),
-                  defaultMessage: 'View options',
-                })}
-              >
-                <StyledToggleItem
-                  value="list"
+                  trackedEvent="didSearchMediaLibraryElements"
+                  trackedEventDetails={{ location: 'upload' }}
+                />
+                <StyledToggleGroup
+                  type="single"
+                  value={isGridView ? 'grid' : 'list'}
+                  onValueChange={(value) =>
+                    value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.LIST)
+                  }
                   aria-label={formatMessage({
-                    id: getTranslationKey('view.table'),
-                    defaultMessage: 'Table view',
+                    id: getTranslationKey('view.switch.label'),
+                    defaultMessage: 'View options',
                   })}
                 >
-                  <List />
-                  {formatMessage({
-                    id: getTranslationKey('view.table'),
-                    defaultMessage: 'Table view',
-                  })}
-                </StyledToggleItem>
-                <StyledToggleItem
-                  value="grid"
-                  aria-label={formatMessage({
-                    id: getTranslationKey('view.grid'),
-                    defaultMessage: 'Grid view',
-                  })}
-                >
-                  <GridIcon />
-                  {formatMessage({
-                    id: getTranslationKey('view.grid'),
-                    defaultMessage: 'Grid view',
-                  })}
-                </StyledToggleItem>
-              </StyledToggleGroup>
-            </Flex>
-          }
-        />
+                  <StyledToggleItem
+                    value="list"
+                    aria-label={formatMessage({
+                      id: getTranslationKey('view.table'),
+                      defaultMessage: 'Table view',
+                    })}
+                  >
+                    <List />
+                    {formatMessage({
+                      id: getTranslationKey('view.table'),
+                      defaultMessage: 'Table view',
+                    })}
+                  </StyledToggleItem>
+                  <StyledToggleItem
+                    value="grid"
+                    aria-label={formatMessage({
+                      id: getTranslationKey('view.grid'),
+                      defaultMessage: 'Grid view',
+                    })}
+                  >
+                    <GridIcon />
+                    {formatMessage({
+                      id: getTranslationKey('view.grid'),
+                      defaultMessage: 'Grid view',
+                    })}
+                  </StyledToggleItem>
+                </StyledToggleGroup>
+              </Flex>
+            }
+          />
 
-        <Layouts.Content>
-          <DropZoneWithOverlay>
-            <AssetsView view={view} />
-          </DropZoneWithOverlay>
-        </Layouts.Content>
-      </Layouts.Root>
+          <Layouts.Content>
+            <DropZoneWithOverlay>
+              <AssetsView view={view} />
+            </DropZoneWithOverlay>
+          </Layouts.Content>
+        </Layouts.Root>
+      </Box>
     </UploadDropZoneProvider>
   );
 };

@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type DragEvent,
   type ReactNode,
@@ -49,20 +50,42 @@ interface UploadDropZoneProps {
 
 export const UploadDropZoneProvider = ({ children, onDrop }: UploadDropZoneProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
 
   const contextValue: UploadDropZoneContextValue = {
     isDragging,
   };
 
   useEffect(() => {
-    const handleDragEnd = () => setIsDragging(false);
+    const handleDragEnd = () => {
+      setIsDragging(false);
+      dragCounterRef.current = 0;
+    };
+
+    // Handle drag leaving the entire document/window
+    const handleDocumentDragLeave = (e: globalThis.DragEvent) => {
+      // When relatedTarget is null, we're leaving the document entirely
+      if (!e.relatedTarget) {
+        setIsDragging(false);
+        dragCounterRef.current = 0;
+      }
+    };
+
     document.addEventListener('dragend', handleDragEnd);
-    return () => document.removeEventListener('dragend', handleDragEnd);
+    document.addEventListener('dragleave', handleDocumentDragLeave);
+
+    return () => {
+      document.removeEventListener('dragend', handleDragEnd);
+      document.removeEventListener('dragleave', handleDocumentDragLeave);
+    };
   }, []);
 
   const handleDragEnter = useCallback((e: DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
+
+    dragCounterRef.current += 1;
+
     if (e.dataTransfer.types.includes('Files')) {
       setIsDragging(true);
     }
@@ -72,12 +95,14 @@ export const UploadDropZoneProvider = ({ children, onDrop }: UploadDropZoneProps
     e.preventDefault();
     e.stopPropagation();
 
-    const related = e.relatedTarget as Node | null;
-    if (!related || e.currentTarget.contains(related)) {
-      return;
-    }
+    dragCounterRef.current -= 1;
 
-    setIsDragging(false);
+    // Only set dragging to false if we've left the dropzone completely
+    // (counter reaches 0 or negative)
+    if (dragCounterRef.current <= 0) {
+      setIsDragging(false);
+      dragCounterRef.current = 0;
+    }
   }, []);
 
   const handleDragOver = useCallback((e: DragEvent<HTMLElement>) => {
@@ -91,6 +116,7 @@ export const UploadDropZoneProvider = ({ children, onDrop }: UploadDropZoneProps
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(false);
+      dragCounterRef.current = 0;
 
       const { files } = e.dataTransfer;
       if (files?.length && onDrop) {
