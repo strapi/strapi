@@ -27,7 +27,7 @@ const FieldWrapper = styled(Field.Root)<{
   border-bottom-right-radius: ${({ $actionType, theme }) =>
     theme.spaces[getBorderRightRadiusValue($actionType)]};
 
-  > label {
+  label {
     color: inherit;
     padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`};
     text-align: center;
