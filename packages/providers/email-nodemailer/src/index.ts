@@ -16,6 +16,7 @@ interface SendOptions {
   text?: string;
   html?: string;
   attachments?: SendMailOptions['attachments'];
+  headers?: SendMailOptions['headers'];
   [key: string]: unknown;
 }
 
@@ -27,7 +28,8 @@ export default {
 
     return {
       send(options: SendOptions): Promise<SentMessageInfo> {
-        const { from, to, cc, bcc, replyTo, subject, text, html, attachments, ...rest } = options;
+        const { from, to, cc, bcc, replyTo, subject, text, html, attachments, headers, ...rest } =
+          options;
 
         const message: SendMailOptions = {
           from: from || settings.defaultFrom,
@@ -39,6 +41,7 @@ export default {
           text: text || html,
           html: html || text,
           attachments,
+          ...(headers ? { headers } : {}),
           ...rest,
         };
 
