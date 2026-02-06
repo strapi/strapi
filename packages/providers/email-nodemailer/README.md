@@ -1,5 +1,19 @@
 # @strapi/provider-email-nodemailer
 
+A feature-rich Nodemailer email provider for Strapi with support for DKIM, OAuth2, connection pooling, calendar invitations, newsletters, and more.
+
+## Features
+
+| Category           | Features                                                                       |
+| ------------------ | ------------------------------------------------------------------------------ |
+| **Sending**        | Priority, custom headers, attachments, embedded images, AMP4Email              |
+| **Security**       | DKIM signing, OAuth2, requireTLS, file/URL access restrictions                 |
+| **Performance**    | Connection pooling, rate limiting                                              |
+| **Deliverability** | List-Unsubscribe headers (Gmail/Outlook), DSN bounce tracking, custom envelope |
+| **Rich Content**   | Calendar invitations (iCalendar), AMP4Email interactive emails                 |
+| **Connectivity**   | SOCKS/HTTP proxy support, NTLM and custom auth mechanisms                      |
+| **Utilities**      | RFC 5322/2047/6531 email address parsing and formatting                        |
+
 ## Resources
 
 - [LICENSE](LICENSE)
@@ -127,20 +141,24 @@ await strapi.plugin('email').service('email').send({
 
 The following fields are supported:
 
-| Field       | Description                                                       |
-| ----------- | ----------------------------------------------------------------- |
-| from        | Email address of the sender                                       |
-| to          | Comma separated list or an array of recipients                    |
-| replyTo     | Email address to which replies are sent                           |
-| cc          | Comma separated list or an array of recipients                    |
-| bcc         | Comma separated list or an array of recipients                    |
-| subject     | Subject of the email                                              |
-| text        | Plaintext version of the message                                  |
-| html        | HTML version of the message                                       |
-| attachments | Array of objects See: https://nodemailer.com/message/attachments/ |
-| priority    | Email priority: 'high', 'normal', or 'low'                        |
-| headers     | Custom headers object                                             |
-| icalEvent   | Calendar event invitation                                         |
+| Field       | Description                                                               |
+| ----------- | ------------------------------------------------------------------------- |
+| from        | Email address of the sender                                               |
+| to          | Comma separated list or an array of recipients                            |
+| replyTo     | Email address to which replies are sent                                   |
+| cc          | Comma separated list or an array of recipients                            |
+| bcc         | Comma separated list or an array of recipients                            |
+| subject     | Subject of the email                                                      |
+| text        | Plaintext version of the message                                          |
+| html        | HTML version of the message                                               |
+| attachments | Array of objects See: https://nodemailer.com/message/attachments/         |
+| priority    | Email priority: `'high'`, `'normal'`, or `'low'` - sets X-Priority header |
+| headers     | Custom SMTP headers object (e.g. `{ 'X-Custom': 'value' }`)               |
+| icalEvent   | Calendar event invitation (iCalendar format)                              |
+| list        | RFC 2369 List-\* headers - enables one-click unsubscribe in Gmail/Outlook |
+| dsn         | Delivery Status Notification - request bounce/success reports             |
+| envelope    | Custom SMTP envelope for bounce handling (MAIL FROM / RCPT TO)            |
+| amp         | AMP4Email content for interactive emails                                  |
 
 All other [nodemailer message options](https://nodemailer.com/message/) are also supported.
 
@@ -182,6 +200,96 @@ SUMMARY:Team Meeting
 END:VEVENT
 END:VCALENDAR`,
     },
+  });
+```
+
+### Newsletter with List-Unsubscribe
+
+When sending newsletters, include List-Unsubscribe headers so Gmail and Outlook show a one-click "Unsubscribe" button:
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'subscriber@example.com',
+    subject: 'Weekly Newsletter',
+    html: '<h1>This week in tech...</h1>',
+    list: {
+      unsubscribe: {
+        url: 'https://example.com/unsubscribe?id=123',
+        comment: 'Unsubscribe',
+      },
+      help: 'support@example.com?subject=help',
+    },
+  });
+```
+
+### Delivery Status Notifications (DSN)
+
+Request bounce reports or delivery confirmations:
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'someone@example.com',
+    subject: 'Important document',
+    text: 'Please confirm receipt',
+    dsn: {
+      id: 'msg-unique-123',
+      return: 'headers',
+      notify: ['success', 'failure'],
+      recipient: 'bounce-handler@example.com',
+    },
+  });
+```
+
+### Custom SMTP Envelope (Bounce Handling)
+
+Control the MAIL FROM address independently from the visible From header, useful for tracking bounces:
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    from: 'Newsletter <newsletter@example.com>',
+    to: 'subscriber@example.com',
+    subject: 'Newsletter',
+    text: 'Hello!',
+    envelope: {
+      from: 'bounce+subscriber=example.com@example.com',
+      to: 'subscriber@example.com',
+    },
+  });
+```
+
+### AMP4Email (Interactive Emails)
+
+Send interactive AMP-powered emails (supported by Gmail):
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'someone@example.com',
+    subject: 'Interactive Email',
+    text: 'Fallback for non-AMP clients',
+    html: '<p>Fallback for non-AMP clients</p>',
+    amp: `<!doctype html>
+<html ⚡4email>
+  <head>
+    <meta charset="utf-8">
+    <style amp4email-boilerplate>body{visibility:hidden}</style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <p>This is an interactive AMP email!</p>
+  </body>
+</html>`,
   });
 ```
 
@@ -298,6 +406,81 @@ module.exports = ({ env }) => ({
     },
   },
 });
+```
+
+### Rate limiting
+
+Limit the number of emails sent per time interval to avoid being flagged as spam:
+
+```js
+module.exports = ({ env }) => ({
+  email: {
+    config: {
+      provider: 'nodemailer',
+      providerOptions: {
+        host: env('SMTP_HOST'),
+        port: 465,
+        secure: true,
+        pool: true,
+        maxConnections: 5,
+        maxMessages: 100,
+        rateDelta: 1000, // Time interval in ms (1 second)
+        rateLimit: 5, // Max messages per rateDelta interval
+        auth: {
+          user: env('SMTP_USERNAME'),
+          pass: env('SMTP_PASSWORD'),
+        },
+      },
+      settings: {
+        defaultFrom: 'hello@example.com',
+        defaultReplyTo: 'hello@example.com',
+      },
+    },
+  },
+});
+```
+
+### Proxy support
+
+Route SMTP connections through a SOCKS or HTTP proxy:
+
+```js
+module.exports = ({ env }) => ({
+  email: {
+    config: {
+      provider: 'nodemailer',
+      providerOptions: {
+        host: env('SMTP_HOST'),
+        port: 465,
+        secure: true,
+        proxy: env('SMTP_PROXY', 'socks5://127.0.0.1:1080'), // or 'http://proxy:3128'
+        auth: {
+          user: env('SMTP_USERNAME'),
+          pass: env('SMTP_PASSWORD'),
+        },
+      },
+      settings: {
+        defaultFrom: 'hello@example.com',
+        defaultReplyTo: 'hello@example.com',
+      },
+    },
+  },
+});
+```
+
+For SOCKS proxy, install the `socks` package: `yarn add socks`.
+
+### Require TLS
+
+Force TLS encryption and refuse to send if the server doesn't support it:
+
+```js
+providerOptions: {
+  host: env('SMTP_HOST'),
+  port: 587,
+  requireTLS: true, // Fail if STARTTLS is not available
+  auth: { user: env('SMTP_USERNAME'), pass: env('SMTP_PASSWORD') },
+},
 ```
 
 ### Security options
