@@ -313,6 +313,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
 
     const handleChange: FormContextValue['onChange'] = useCallbackRef((eventOrPath, v) => {
       if (typeof eventOrPath === 'string') {
+        const currentValue = getIn(state.values, eventOrPath);
+
+        // Only dispatch if the specific field value is actually different
+        if (isEqual(currentValue, v)) {
+          return;
+        }
+
         dispatch({
           type: 'SET_FIELD_VALUE',
           payload: {
