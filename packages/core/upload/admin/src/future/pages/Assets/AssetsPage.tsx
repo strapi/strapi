@@ -21,17 +21,17 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { usePersistentState } from '../../../hooks/usePersistentState';
-import {
-  DragAndDropProvider,
-  useDragAndDrop,
-  DropZoneWithOverlay,
-} from '../../contexts/DragAndDropContext';
 import { useUploadFilesMutation } from '../../services/api';
 import { useGetAssetsQuery } from '../../services/assets';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetsGrid } from './components/AssetsGrid';
 import { AssetsList } from './components/AssetsList';
+import { DropZoneWithOverlay } from './components/DropZone/DropZoneWithOverlay';
+import {
+  UploadDropZoneProvider,
+  useUploadDropZone,
+} from './components/DropZone/UploadDropZoneContext';
 import { localStorageKeys, viewOptions } from './constants';
 
 interface AssetsViewProps {
@@ -110,7 +110,50 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
  * Dropzone items
  */
 
-const DropFilesMessage = styled(Box)<{ $leftContentWidth: number }>`
+const DropFilesMessage = () => {
+  const { formatMessage } = useIntl();
+  const { isDragging } = useUploadDropZone();
+
+  // Dropzone message position (relative to main content)
+  const [leftContentWidth, setLeftContentWidth] = useState(0);
+
+  // Calculate the left content width to position the dropzone message correctly
+  useEffect(() => {
+    const mainContent = document.querySelector('[data-strapi-main-content]');
+    if (!mainContent) return;
+
+    const updateRect = () => {
+      const rect = mainContent.getBoundingClientRect();
+      setLeftContentWidth((prev) => (prev !== rect.left ? rect.left : prev));
+    };
+
+    updateRect();
+    const resizeObserver = new ResizeObserver(updateRect);
+    resizeObserver.observe(mainContent);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  if (!isDragging) return null;
+
+  return (
+    <DropFilesMessageImpl $leftContentWidth={leftContentWidth}>
+      <Typography textColor="neutral0">
+        {formatMessage({
+          id: getTranslationKey('dropzone.upload.message'),
+          defaultMessage: 'Drop here to upload to',
+        })}
+      </Typography>
+      <Flex gap={2} alignItems="center">
+        <Folder width={20} height={20} fill="neutral0" />
+        <Typography textColor="neutral0" fontWeight="semiBold">
+          Current folder
+        </Typography>
+      </Flex>
+    </DropFilesMessageImpl>
+  );
+};
+
+const DropFilesMessageImpl = styled(Box)<{ $leftContentWidth: number }>`
   position: fixed;
   bottom: ${({ theme }) => theme.spaces[8]};
   left: 50%;
@@ -129,7 +172,13 @@ const DropFilesMessage = styled(Box)<{ $leftContentWidth: number }>`
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
 
-  // Upload hooks
+  // View state
+  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
+  const isGridView = view === viewOptions.GRID;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Upload handlers
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError } = useAPIErrorHandler();
   const [uploadFiles] = useUploadFilesMutation();
@@ -171,6 +220,10 @@ export const AssetsPage = () => {
     }
   };
 
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -184,146 +237,88 @@ export const AssetsPage = () => {
   };
 
   return (
-    <DragAndDropProvider>
-      <AssetsPageContent handleDrop={handleDrop} handleFileChange={handleFileChange} />
-    </DragAndDropProvider>
-  );
-};
+    <UploadDropZoneProvider onDrop={handleDrop}>
+      <Layouts.Root minHeight="100vh">
+        <VisuallyHidden>
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
+        </VisuallyHidden>
 
-interface AssetsPageContentProps {
-  handleDrop: (files: globalThis.File[]) => Promise<void>;
-  handleFileChange: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
-}
+        <DropFilesMessage />
 
-const AssetsPageContent = ({ handleDrop, handleFileChange }: AssetsPageContentProps) => {
-  const { formatMessage } = useIntl();
-  const { isDragging } = useDragAndDrop(handleDrop);
-
-  // View state
-  const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
-  const isGridView = view === viewOptions.GRID;
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Upload handlers
-  const handleFileSelect = () => {
-    fileInputRef.current?.click();
-  };
-
-  // Dropzone message position (relative to main content)
-  const [leftContentWidth, setLeftContentWidth] = useState(0);
-
-  // Calculate the left content width to position the dropzone message correctly
-  useEffect(() => {
-    const mainContent = document.querySelector('[data-strapi-main-content]');
-    if (!mainContent) return;
-
-    const updateRect = () => {
-      const rect = mainContent.getBoundingClientRect();
-      setLeftContentWidth((prev) => (prev !== rect.left ? rect.left : prev));
-    };
-
-    updateRect();
-    const resizeObserver = new ResizeObserver(updateRect);
-    resizeObserver.observe(mainContent);
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  return (
-    <Layouts.Root minHeight="100vh">
-      <VisuallyHidden>
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
-      </VisuallyHidden>
-
-      {isDragging && (
-        <DropFilesMessage $leftContentWidth={leftContentWidth}>
-          <Typography textColor="neutral0">
-            {formatMessage({
-              id: getTranslationKey('dropzone.upload.message'),
-              defaultMessage: 'Drop here to upload to',
-            })}
-          </Typography>
-          <Flex gap={2} alignItems="center">
-            <Folder width={20} height={20} fill="neutral0" />
-            <Typography textColor="neutral0" fontWeight="semiBold">
-              Current folder
-            </Typography>
-          </Flex>
-        </DropFilesMessage>
-      )}
-      <Layouts.Header
-        navigationAction={<Box>TODO: Breadcrumbs</Box>}
-        title="TODO: Folder location"
-        primaryAction={
-          <Flex gap={2}>
-            <SimpleMenu
-              popoverPlacement="bottom-end"
-              variant="default"
-              endIcon={<ChevronDown />}
-              label={formatMessage({ id: getTranslationKey('new'), defaultMessage: 'New' })}
-            >
-              <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
-                {formatMessage({
-                  id: getTranslationKey('import-files'),
-                  defaultMessage: 'Import files',
+        <Layouts.Header
+          navigationAction={<Box>TODO: Breadcrumbs</Box>}
+          title="TODO: Folder location"
+          primaryAction={
+            <Flex gap={2}>
+              <SimpleMenu
+                popoverPlacement="bottom-end"
+                variant="default"
+                endIcon={<ChevronDown />}
+                label={formatMessage({ id: getTranslationKey('new'), defaultMessage: 'New' })}
+              >
+                <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
+                  {formatMessage({
+                    id: getTranslationKey('import-files'),
+                    defaultMessage: 'Import files',
+                  })}
+                </MenuItem>
+              </SimpleMenu>
+              <SearchInput
+                label={formatMessage({
+                  id: getTranslationKey('search.label'),
+                  defaultMessage: 'Search for an asset',
                 })}
-              </MenuItem>
-            </SimpleMenu>
-            <SearchInput
-              label={formatMessage({
-                id: getTranslationKey('search.label'),
-                defaultMessage: 'Search for an asset',
-              })}
-              trackedEvent="didSearchMediaLibraryElements"
-              trackedEventDetails={{ location: 'upload' }}
-            />
-            <StyledToggleGroup
-              type="single"
-              value={isGridView ? 'grid' : 'list'}
-              onValueChange={(value) =>
-                value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.LIST)
-              }
-              aria-label={formatMessage({
-                id: getTranslationKey('view.switch.label'),
-                defaultMessage: 'View options',
-              })}
-            >
-              <StyledToggleItem
-                value="list"
+                trackedEvent="didSearchMediaLibraryElements"
+                trackedEventDetails={{ location: 'upload' }}
+              />
+              <StyledToggleGroup
+                type="single"
+                value={isGridView ? 'grid' : 'list'}
+                onValueChange={(value) =>
+                  value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.LIST)
+                }
                 aria-label={formatMessage({
-                  id: getTranslationKey('view.table'),
-                  defaultMessage: 'Table view',
+                  id: getTranslationKey('view.switch.label'),
+                  defaultMessage: 'View options',
                 })}
               >
-                <List />
-                {formatMessage({
-                  id: getTranslationKey('view.table'),
-                  defaultMessage: 'Table view',
-                })}
-              </StyledToggleItem>
-              <StyledToggleItem
-                value="grid"
-                aria-label={formatMessage({
-                  id: getTranslationKey('view.grid'),
-                  defaultMessage: 'Grid view',
-                })}
-              >
-                <GridIcon />
-                {formatMessage({
-                  id: getTranslationKey('view.grid'),
-                  defaultMessage: 'Grid view',
-                })}
-              </StyledToggleItem>
-            </StyledToggleGroup>
-          </Flex>
-        }
-      />
+                <StyledToggleItem
+                  value="list"
+                  aria-label={formatMessage({
+                    id: getTranslationKey('view.table'),
+                    defaultMessage: 'Table view',
+                  })}
+                >
+                  <List />
+                  {formatMessage({
+                    id: getTranslationKey('view.table'),
+                    defaultMessage: 'Table view',
+                  })}
+                </StyledToggleItem>
+                <StyledToggleItem
+                  value="grid"
+                  aria-label={formatMessage({
+                    id: getTranslationKey('view.grid'),
+                    defaultMessage: 'Grid view',
+                  })}
+                >
+                  <GridIcon />
+                  {formatMessage({
+                    id: getTranslationKey('view.grid'),
+                    defaultMessage: 'Grid view',
+                  })}
+                </StyledToggleItem>
+              </StyledToggleGroup>
+            </Flex>
+          }
+        />
 
-      <Layouts.Content>
-        <DropZoneWithOverlay>
-          <AssetsView view={view} />
-        </DropZoneWithOverlay>
-      </Layouts.Content>
-    </Layouts.Root>
+        <Layouts.Content>
+          <DropZoneWithOverlay>
+            <AssetsView view={view} />
+          </DropZoneWithOverlay>
+        </Layouts.Content>
+      </Layouts.Root>
+    </UploadDropZoneProvider>
   );
 };

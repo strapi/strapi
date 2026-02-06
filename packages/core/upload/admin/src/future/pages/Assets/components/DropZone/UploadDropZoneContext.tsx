@@ -3,7 +3,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
   type DragEvent,
   type ReactNode,
@@ -18,17 +17,15 @@ import { styled } from 'styled-components';
 
 type DropHandler = (files: File[]) => void | Promise<void>;
 
-interface DragAndDropContextValue {
+interface UploadDropZoneContextValue {
   isDragging: boolean;
-  registerDropHandler: (handler: DropHandler) => void;
-  unregisterDropHandler: () => void;
 }
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-const DragAndDropContext = createContext<DragAndDropContextValue | null>(null);
+const UploadDropZoneContext = createContext<UploadDropZoneContextValue | null>(null);
 
 /* -------------------------------------------------------------------------------------------------
  * Components
@@ -41,58 +38,20 @@ const DropZoneWrapper = styled(Box)`
   min-height: 100%;
 `;
 
-const setOpacity = (hex: string, alpha: number) =>
-  `${hex}${Math.floor(alpha * 255)
-    .toString(16)
-    .padStart(2, '0')}`;
-
-const DropZoneOverlay = styled(Box)`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: ${({ theme }) => setOpacity(theme.colors.primary200, 0.3)};
-  border: 1px solid ${({ theme }) => theme.colors.primary700};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  z-index: 1;
-  pointer-events: none;
-`;
-
-export const DropZoneWithOverlay = ({ children }: { children: React.ReactNode }) => {
-  const { isDragging } = useDragAndDrop();
-  return (
-    <Box position="relative">
-      {isDragging && <DropZoneOverlay />}
-      {children}
-    </Box>
-  );
-};
-
 /* -------------------------------------------------------------------------------------------------
  * Provider
  * -----------------------------------------------------------------------------------------------*/
 
-interface DragAndDropProviderProps {
+interface UploadDropZoneProps {
   children: ReactNode;
+  onDrop?: DropHandler;
 }
 
-export const DragAndDropProvider = ({ children }: DragAndDropProviderProps) => {
+export const UploadDropZoneProvider = ({ children, onDrop }: UploadDropZoneProps) => {
   const [isDragging, setIsDragging] = useState(false);
-  const dropHandlerRef = useRef<DropHandler | null>(null);
 
-  const registerDropHandler = useCallback((handler: DropHandler) => {
-    dropHandlerRef.current = handler;
-  }, []);
-
-  const unregisterDropHandler = useCallback(() => {
-    dropHandlerRef.current = null;
-  }, []);
-
-  const contextValue: DragAndDropContextValue = {
+  const contextValue: UploadDropZoneContextValue = {
     isDragging,
-    registerDropHandler,
-    unregisterDropHandler,
   };
 
   useEffect(() => {
@@ -127,19 +86,22 @@ export const DragAndDropProvider = ({ children }: DragAndDropProviderProps) => {
     e.dataTransfer.dropEffect = 'copy';
   }, []);
 
-  const handleDrop = useCallback((e: DragEvent<HTMLElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
+  const handleDrop = useCallback(
+    (e: DragEvent<HTMLElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
 
-    const { files } = e.dataTransfer;
-    if (files?.length && dropHandlerRef.current) {
-      dropHandlerRef.current(Array.from(files));
-    }
-  }, []);
+      const { files } = e.dataTransfer;
+      if (files?.length && onDrop) {
+        onDrop(Array.from(files));
+      }
+    },
+    [onDrop]
+  );
 
   return (
-    <DragAndDropContext.Provider value={contextValue}>
+    <UploadDropZoneContext.Provider value={contextValue}>
       <DropZoneWrapper
         data-testid="assets-dropzone"
         onDragEnter={handleDragEnter}
@@ -149,7 +111,7 @@ export const DragAndDropProvider = ({ children }: DragAndDropProviderProps) => {
       >
         {children}
       </DropZoneWrapper>
-    </DragAndDropContext.Provider>
+    </UploadDropZoneContext.Provider>
   );
 };
 
@@ -157,19 +119,12 @@ export const DragAndDropProvider = ({ children }: DragAndDropProviderProps) => {
  * Hook
  * -----------------------------------------------------------------------------------------------*/
 
-export const useDragAndDrop = (onDrop?: DropHandler) => {
-  const context = useContext(DragAndDropContext);
+export const useUploadDropZone = () => {
+  const context = useContext(UploadDropZoneContext);
 
   if (!context) {
-    throw new Error('useDragAndDrop must be used within DragAndDropProvider');
+    throw new Error('useUploadDropZone must be used within UploadDropZone');
   }
-
-  useEffect(() => {
-    if (!onDrop) return;
-
-    context.registerDropHandler(onDrop);
-    return () => context.unregisterDropHandler();
-  }, [context, onDrop]);
 
   return {
     isDragging: context.isDragging,
