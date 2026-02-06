@@ -28,17 +28,14 @@ const NonRepeatableComponent = ({
     <ComponentProvider id={value?.id} uid={attribute.component} level={level + 1} type="component">
       <Box
         background={'neutral100'}
-        paddingLeft={6}
-        paddingRight={6}
-        paddingTop={6}
-        paddingBottom={6}
+        padding={{ initial: 4, medium: 6 }}
         hasRadius={isNested}
         borderColor={isNested || isMobile ? 'neutral200' : undefined}
       >
         <Flex direction="column" alignItems="stretch" gap={6}>
           {layout.map((row, index) => {
             return (
-              <ResponsiveGridRoot gap={4} key={index}>
+              <ResponsiveGridRoot gap={{ initial: 3, medium: 4 }} key={index}>
                 {row.map(({ size, ...field }) => {
                   /**
                    * Layouts are built from schemas so they don't understand the complete
