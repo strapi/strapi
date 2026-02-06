@@ -46,7 +46,7 @@ interface SendOptions {
   /**
    * Delivery Status Notification (DSN) configuration.
    * Allows requesting bounce reports, delay notices, or success confirmations.
-   * Note: Typed as unknown because @types/nodemailer does not yet include DSN types,
+   * Note: Typed locally because @types/nodemailer does not yet include DSN types,
    * but nodemailer supports it natively.
    * @example { id: 'msg-123', return: 'headers', notify: 'success', recipient: 'sender@example.com' }
    */
@@ -55,6 +55,18 @@ interface SendOptions {
     return?: 'headers' | 'full';
     notify?: string | string[];
     recipient?: string;
+  };
+  /**
+   * Per-message OAuth2 authentication. Allows sending emails on behalf of
+   * different users through a single transporter configured with OAuth2.
+   * Requires the transporter to be configured with type: 'OAuth2', clientId, and clientSecret.
+   * @example { user: 'user@gmail.com', refreshToken: '1/xxx', accessToken: 'ya29.xxx' }
+   */
+  auth?: {
+    user?: string;
+    refreshToken?: string;
+    accessToken?: string;
+    expires?: number;
   };
   [key: string]: unknown;
 }
@@ -84,6 +96,7 @@ export default {
           list,
           envelope,
           amp,
+          auth,
           ...rest
         } = options;
 
@@ -106,9 +119,13 @@ export default {
           ...rest,
         };
 
-        // DSN is supported by nodemailer but not yet typed in @types/nodemailer
+        // DSN and per-message auth are supported by nodemailer but not fully
+        // typed in @types/nodemailer, so we assign them separately
         if (dsn) {
           (message as any).dsn = dsn;
+        }
+        if (auth) {
+          (message as any).auth = auth;
         }
 
         return transporter.sendMail(message);

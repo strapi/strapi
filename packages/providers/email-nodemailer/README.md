@@ -159,6 +159,7 @@ The following fields are supported:
 | dsn         | Delivery Status Notification - request bounce/success reports             |
 | envelope    | Custom SMTP envelope for bounce handling (MAIL FROM / RCPT TO)            |
 | amp         | AMP4Email content for interactive emails                                  |
+| auth        | Per-message OAuth2 credentials for multi-user sending                     |
 
 All other [nodemailer message options](https://nodemailer.com/message/) are also supported.
 
@@ -343,6 +344,52 @@ module.exports = ({ env }) => ({
     },
   },
 });
+```
+
+#### Per-message OAuth2 (multi-user)
+
+You can send emails on behalf of different users through a single transporter. Configure the transporter with shared OAuth2 credentials, then pass user-specific tokens per message:
+
+```js
+// config/plugins.js - shared transporter with OAuth2
+module.exports = ({ env }) => ({
+  email: {
+    config: {
+      provider: 'nodemailer',
+      providerOptions: {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          type: 'OAuth2',
+          clientId: env('OAUTH_CLIENT_ID'),
+          clientSecret: env('OAUTH_CLIENT_SECRET'),
+        },
+      },
+      settings: {
+        defaultFrom: 'noreply@example.com',
+        defaultReplyTo: 'support@example.com',
+      },
+    },
+  },
+});
+```
+
+```js
+// Send as a specific user
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'recipient@example.com',
+    subject: 'Hello from user',
+    text: 'Sent on behalf of a specific user',
+    auth: {
+      user: 'specific-user@gmail.com',
+      refreshToken: userRefreshToken,
+      accessToken: userAccessToken,
+    },
+  });
 ```
 
 See [nodemailer OAuth2 documentation](https://nodemailer.com/smtp/oauth2/) for details.
