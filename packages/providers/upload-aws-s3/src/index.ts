@@ -143,14 +143,14 @@ export interface DefaultOptions extends S3ClientConfig {
   // Keep this for V5
   credentials?: AwsCredentialIdentity;
   params?: AWSParams;
-  [k: string]: any;
+  [k: string]: unknown;
 }
 
 export type InitOptions = (DefaultOptions | { s3Options: DefaultOptions }) & {
   baseUrl?: string;
   rootPath?: string;
   providerConfig?: ProviderConfig;
-  [k: string]: any;
+  [k: string]: unknown;
 };
 
 /**
@@ -294,12 +294,12 @@ const validateProviderConfig = (
 };
 
 const getConfig = ({
-  baseUrl,
-  rootPath,
   s3Options,
-  providerConfig,
-  ...legacyS3Options
-}: InitOptions) => {
+  legacyS3Options,
+}: {
+  s3Options: DefaultOptions;
+  legacyS3Options: Record<string, unknown>;
+}) => {
   if (Object.keys(legacyS3Options).length > 0) {
     process.emitWarning(
       "S3 configuration options passed at root level of the plugin's providerOptions is deprecated and will be removed in a future release. Please wrap them inside the 's3Options:{}' property."
@@ -312,17 +312,24 @@ const getConfig = ({
     ...(credentials ? { credentials } : {}),
   };
 
-  config.params.ACL = getOr(ObjectCannedACL.public_read, ['params', 'ACL'], config);
+  if (config.params !== undefined) {
+    config.params.ACL = getOr(ObjectCannedACL.public_read, ['params', 'ACL'], config);
+  } else {
+    throw new Error('Upload AWS S3 provider: `params` are required in the config object');
+  }
 
-  return config;
+  return config as DefaultOptions & {
+    params: AWSParams;
+  };
 };
 
 export default {
   init({ baseUrl, rootPath, s3Options, providerConfig, ...legacyS3Options }: InitOptions) {
     // Validate configuration and emit warnings for potential issues
-    validateProviderConfig(providerConfig, s3Options);
+    validateProviderConfig(providerConfig, s3Options as DefaultOptions);
 
-    const config = getConfig({ baseUrl, rootPath, s3Options, providerConfig, ...legacyS3Options });
+    // TODO V5 change config structure to avoid having to do this
+    const config = getConfig({ s3Options: s3Options as DefaultOptions, legacyS3Options });
     const s3Client = new S3Client(config);
     const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
 

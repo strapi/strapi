@@ -52,31 +52,56 @@ describe('AWS-S3 provider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSend.mockReset();
+    uploadMock.done.mockImplementation(() =>
+      Promise.resolve({
+        Location: 'https://validurl.test/tmp/test.json',
+        ETag: '"abc123def456"',
+        $metadata: {},
+      })
+    );
   });
 
   describe('upload', () => {
-    test('should add url to file object', async () => {
+    test('Should populate file.url with the baseUrl when provided, appending the file key to the url', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
+          Location: 'https://strapi.io/path/to/fileNameHash.json',
+          $metadata: {},
+        })
+      );
+
       const providerInstance = awsProvider.init({
+        baseUrl: 'https://assets.strapi.io',
         s3Options: {
           params: {
-            Bucket: 'test',
+            Bucket: 'bucket-name',
           },
         },
       });
 
-      const file = createTestFile();
+      const file: File = {
+        name: 'fileName',
+        size: 100,
+        sizeInBytes: 100 * 1024,
+        url: '',
+        path: 'path/to',
+        hash: 'fileNameHash',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: Buffer.from(''),
+      };
+
       await providerInstance.upload(file);
 
       expect(uploadMock.done).toHaveBeenCalled();
       expect(file.url).toBeDefined();
-      expect(file.url).toEqual('https://validurl.test/tmp/test.json');
+      expect(file.url).toEqual('https://assets.strapi.io/path/to/fileNameHash.json');
     });
 
-    test('should add https protocol when missing from upload location', async () => {
+    test('Should populate file.url with the returned Location when no baseUrl is provided', async () => {
       uploadMock.done.mockImplementationOnce(() =>
         Promise.resolve({
-          Location: 'validurl.test/tmp/test.json',
-          ETag: '"abc123"',
+          Location: 'https://strapi.io/path/from/location/fileName.json',
           $metadata: {},
         })
       );
@@ -84,18 +109,73 @@ describe('AWS-S3 provider', () => {
       const providerInstance = awsProvider.init({
         s3Options: {
           params: {
-            Bucket: 'test',
+            Bucket: 'bucket-name',
           },
         },
       });
 
-      const file = createTestFile();
+      const file: File = {
+        name: 'fileName',
+        size: 100,
+        sizeInBytes: 100 * 1024,
+        url: '',
+        path: 'path/from/location',
+        hash: 'fileNameHash',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: Buffer.from(''),
+      };
+
       await providerInstance.upload(file);
 
-      expect(file.url).toEqual('https://validurl.test/tmp/test.json');
+      expect(uploadMock.done).toBeCalled();
+      expect(file.url).toBeDefined();
+      expect(file.url).toEqual('https://strapi.io/path/from/location/fileName.json');
     });
 
-    test('should prepend baseUrl to the file url', async () => {
+    test('Should populate file.url and prepend the https protocol to the Location when missing', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
+          Location: 'strapi.io/path/to/fileNameHash.json',
+          $metadata: {},
+        })
+      );
+
+      const providerInstance = awsProvider.init({
+        s3Options: {
+          params: {
+            Bucket: 'bucket-name',
+          },
+        },
+      });
+
+      const file: File = {
+        name: 'fileName',
+        size: 100,
+        sizeInBytes: 100 * 1024,
+        url: '',
+        path: 'path/to',
+        hash: 'fileNameHash',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: Buffer.from(''),
+      };
+
+      await providerInstance.upload(file);
+
+      expect(uploadMock.done).toBeCalled();
+      expect(file.url).toBeDefined();
+      expect(file.url).toEqual('https://strapi.io/path/to/fileNameHash.json');
+    });
+
+    test('Should populate file.url with baseUrl even if location lacks protocol', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
+          Location: 'otherdomain.com/different/path/file.json',
+          $metadata: {},
+        })
+      );
+
       const providerInstance = awsProvider.init({
         baseUrl: 'https://cdn.test',
         s3Options: {
@@ -106,14 +186,32 @@ describe('AWS-S3 provider', () => {
         },
       });
 
-      const file = createTestFile({ path: 'tmp/test' });
+      const file: File = {
+        name: 'test',
+        size: 100,
+        sizeInBytes: 100 * 1024,
+        url: '',
+        path: 'tmp/test',
+        hash: 'test',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: Buffer.from(''),
+      };
+
       await providerInstance.upload(file);
 
       expect(uploadMock.done).toHaveBeenCalled();
       expect(file.url).toEqual('https://cdn.test/tmp/test/test.json');
     });
 
-    test('should prepend baseUrl and rootPath to file url', async () => {
+    test('Should populate file.url with baseUrl and rootPath', async () => {
+      uploadMock.done.mockImplementationOnce(() =>
+        Promise.resolve({
+          Location: 'https://validurl.test/tmp/test.json',
+          $metadata: {},
+        })
+      );
+
       const providerInstance = awsProvider.init({
         baseUrl: 'https://cdn.test',
         rootPath: 'dir/dir2',
@@ -124,7 +222,18 @@ describe('AWS-S3 provider', () => {
         },
       });
 
-      const file = createTestFile({ path: 'tmp/test' });
+      const file: File = {
+        name: 'test',
+        size: 100,
+        sizeInBytes: 100 * 1024,
+        url: '',
+        path: 'tmp/test',
+        hash: 'test',
+        ext: '.json',
+        mime: 'application/json',
+        buffer: Buffer.from(''),
+      };
+
       await providerInstance.upload(file);
 
       expect(file.url).toEqual('https://cdn.test/dir/dir2/tmp/test/test.json');

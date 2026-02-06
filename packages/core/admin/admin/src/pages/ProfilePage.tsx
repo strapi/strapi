@@ -232,7 +232,7 @@ const ProfilePage = () => {
           )}
         </Form>
         {isDesktop && process.env.NODE_ENV === 'development' && (
-          <Box>
+          <Box paddingBottom={6}>
             <Layouts.Content>
               <GuidedTourSection />
             </Layouts.Content>
