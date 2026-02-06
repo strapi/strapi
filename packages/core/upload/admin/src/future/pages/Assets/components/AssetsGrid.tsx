@@ -19,7 +19,9 @@ import { getTranslationKey } from '../../../utils/translations';
 
 import type { File } from '../../../../../../shared/contracts/files';
 
-const PREVIEW_HEIGHT = 208;
+/* -------------------------------------------------------------------------------------------------
+ * AssetsGrid
+ * -----------------------------------------------------------------------------------------------*/
 
 const StyledCard = styled(Card)`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
@@ -27,21 +29,79 @@ const StyledCard = styled(Card)`
   overflow: hidden;
 `;
 
-const PreviewContainer = styled(Flex)`
-  height: ${PREVIEW_HEIGHT}px;
-  background: ${({ theme }) => theme.colors.neutral100};
+/* -------------------------------------------------------------------------------------------------
+ * AssetPreview
+ * -----------------------------------------------------------------------------------------------*/
+
+const PreviewContainer = styled(Box)`
+  position: relative;
+  width: 100%;
+  padding-bottom: 62.5%;
+  height: 0;
+  overflow: hidden;
+  background: repeating-conic-gradient(
+      ${({ theme }) => theme.colors.neutral100} 0% 25%,
+      transparent 0% 50%
+    )
+    50% / 20px 20px;
 `;
 
 const StyledImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 `;
 
 const IconPreview = styled(Flex)`
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   color: ${({ theme }) => theme.colors.neutral500};
+  background: ${({ theme }) => theme.colors.neutral100};
+`;
+
+interface AssetPreviewProps {
+  asset: File;
+}
+
+const AssetPreview = ({ asset }: AssetPreviewProps) => {
+  const { alternativeText, ext, formats, mime, url } = asset;
+
+  if (mime?.includes(AssetType.Image)) {
+    const mediaURL =
+      prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
+
+    if (mediaURL) {
+      return (
+        <PreviewContainer>
+          <StyledImage src={mediaURL} alt={alternativeText || ''} />
+        </PreviewContainer>
+      );
+    }
+  }
+
+  const DocIcon = getAssetIcon(mime, ext);
+
+  return (
+    <PreviewContainer>
+      <IconPreview justifyContent="center" alignItems="center">
+        <DocIcon width={48} height={48} />
+      </IconPreview>
+    </PreviewContainer>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetCard
+ * -----------------------------------------------------------------------------------------------*/
+
+const StyledCardHeader = styled(CardHeader)`
+  border-bottom: none;
 `;
 
 const CardFooter = styled(Flex)`
@@ -62,44 +122,15 @@ interface AssetCardProps {
   asset: File;
 }
 
-interface AssetPreviewProps {
-  asset: File;
-}
-
-const AssetPreview = ({ asset }: AssetPreviewProps) => {
-  const { alternativeText, ext, formats, mime, url } = asset;
-
-  if (mime?.includes(AssetType.Image)) {
-    const mediaURL =
-      prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
-
-    return (
-      <PreviewContainer>
-        <StyledImage src={mediaURL ?? undefined} alt={alternativeText || ''} />
-      </PreviewContainer>
-    );
-  }
-
-  const DocIcon = getAssetIcon(mime, ext);
-
-  return (
-    <PreviewContainer>
-      <IconPreview justifyContent="center" alignItems="center">
-        <DocIcon width={48} height={48} />
-      </IconPreview>
-    </PreviewContainer>
-  );
-};
-
 const AssetCard = ({ asset }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
 
   return (
     <StyledCard>
-      <CardHeader>
+      <StyledCardHeader>
         <AssetPreview asset={asset} />
-      </CardHeader>
+      </StyledCardHeader>
       <CardBody>
         <CardFooter alignItems="center" gap={2} paddingTop={2}>
           <FileTypeIcon>
@@ -122,6 +153,10 @@ const AssetCard = ({ asset }: AssetCardProps) => {
     </StyledCard>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetsGrid
+ * -----------------------------------------------------------------------------------------------*/
 
 interface AssetsGridProps {
   assets: File[];

@@ -1,6 +1,5 @@
 import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
-  Box,
   Flex,
   IconButton,
   RawTable,
@@ -111,25 +110,23 @@ const AssetRow = ({ asset, isMobile }: AssetRowProps) => {
         </Flex>
       </StyledTd>
       {!isMobile && (
-        <StyledTd>
-          <Typography textColor="neutral600">
-            {asset.createdAt ? formatDate(new Date(asset.createdAt), { dateStyle: 'long' }) : '-'}
-          </Typography>
-        </StyledTd>
-      )}
-      {!isMobile && (
-        <StyledTd>
-          <Typography textColor="neutral600">
-            {asset.updatedAt ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long' }) : '-'}
-          </Typography>
-        </StyledTd>
-      )}
-      {!isMobile && (
-        <StyledTd>
-          <Typography textColor="neutral600">
-            {asset.size ? formatBytes(asset.size, 1) : '-'}
-          </Typography>
-        </StyledTd>
+        <>
+          <StyledTd>
+            <Typography textColor="neutral600">
+              {asset.createdAt ? formatDate(new Date(asset.createdAt), { dateStyle: 'long' }) : '-'}
+            </Typography>
+          </StyledTd>
+          <StyledTd>
+            <Typography textColor="neutral600">
+              {asset.updatedAt ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long' }) : '-'}
+            </Typography>
+          </StyledTd>
+          <StyledTd>
+            <Typography textColor="neutral600">
+              {asset.size ? formatBytes(asset.size, 1) : '-'}
+            </Typography>
+          </StyledTd>
+        </>
       )}
       <StyledTd>
         <Flex justifyContent="flex-end">
