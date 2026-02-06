@@ -86,7 +86,7 @@ module.exports = ({ strapi }) => {
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: advancedSettings.default_role } });
 
-    // Username: prefer profile, else email prefix; findUniqueUsername ensures valid + unique
+    // Username: prefer profile, else email prefix; findValidUsername ensures valid + unique
     const base = (profile.username && profile.username.trim()) || email.split('@')[0];
     const username = await findValidUsername(base);
 
