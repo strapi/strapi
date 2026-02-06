@@ -9,6 +9,7 @@ import {
   tours,
   Layouts,
   useIsDesktop,
+  useIsMobile,
 } from '@strapi/admin/strapi-admin';
 import { Grid, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -50,6 +51,7 @@ const EditViewPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDesktop = useIsDesktop();
+  const isMobile = useIsMobile();
   const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
   const drawerHasContent = visiblePanels.length > 0;
 
@@ -216,10 +218,10 @@ const EditViewPage = () => {
                     <tours.contentManager.Fields>
                       <Box />
                     </tours.contentManager.Fields>
-                    <FormLayout layout={layout} document={doc} hasBackground={isDesktop} />
+                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
                   </Tabs.Content>
                   <Tabs.Content value="published">
-                    <FormLayout layout={layout} document={doc} hasBackground={isDesktop} />
+                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
                   </Tabs.Content>
                 </Grid.Item>
                 {isDesktop && (
