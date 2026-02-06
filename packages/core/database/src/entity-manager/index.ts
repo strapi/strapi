@@ -373,9 +373,25 @@ export const createEntityManager = (db: Database): EntityManager => {
         throw new Error('Nothing to insert');
       }
 
-      const createdEntries = await this.createQueryBuilder(uid)
-        .insert(dataToInsert)
-        .execute<Array<ID | { id: ID }>>();
+      const batchSize = db.dialect.getBatchInsertSize();
+      const trx = await db.transaction();
+      let createdEntries: Array<ID | { id: ID }> = [];
+      try {
+        for (let i = 0; i < dataToInsert.length; i += batchSize) {
+          const chunk = dataToInsert.slice(i, i + batchSize);
+          const chunkResult = await this.createQueryBuilder(uid)
+            .insert(chunk)
+            .transacting(trx.get())
+            .execute<Array<ID | { id: ID }>>();
+          createdEntries = createdEntries.concat(
+            Array.isArray(chunkResult) ? chunkResult : [chunkResult]
+          );
+        }
+        await trx.commit();
+      } catch (e) {
+        await trx.rollback();
+        throw e;
+      }
 
       const result = {
         count: data.length,

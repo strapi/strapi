@@ -79,8 +79,7 @@ export default class Dialect {
 
   /**
    * Max rows per batch for bulk inserts.
-   * Some DBs (e.g. SQLite) limit compound SELECT terms; Knex uses UNION ALL per row for multi-row insert.
-   * Override in dialect when a lower limit is required. Used for relation join tables, createMany, etc.
+   * Some databases limit multi-row insert size; override in dialect when a lower limit is required.
    */
   getBatchInsertSize(): number {
     return 1000;

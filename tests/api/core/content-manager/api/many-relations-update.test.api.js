@@ -130,4 +130,33 @@ describe('CM API - Many relations update (GH#25198)', () => {
     },
     120000
   );
+
+  /**
+   * Update (PUT) an entry with 550 relations exercises updateRelations + batched join-table insert.
+   * On SQLite, batching keeps each batch ≤500 (GH#25198).
+   */
+  test('Update entry with 550 relations', async () => {
+    const relationCount = 550;
+    const memberDocumentIds = await createMembers(relationCount, 'member-update');
+
+    const createRes = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_OWNER}`,
+      body: { name: 'Owner to update' },
+    });
+    expect(createRes.statusCode).toBe(201);
+    const documentId = createRes.body.data.documentId;
+
+    const updateRes = await rq({
+      method: 'PUT',
+      url: `/content-manager/collection-types/${UID_OWNER}/${documentId}`,
+      body: {
+        members: { set: memberDocumentIds.map((id) => ({ documentId: id })) },
+      },
+    });
+    expect(updateRes.statusCode).toBe(200);
+    expect(updateRes.body.data).toBeDefined();
+    expect(updateRes.body.data.members).toBeDefined();
+    expect(updateRes.body.data.members).toHaveLength(relationCount);
+  }, 120000);
 });
