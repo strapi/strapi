@@ -645,6 +645,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
     position: sticky;
     top: 0;
     border-right: 1px solid #eaeaef;
+    overscroll-behavior: contain;
   }
 }
 
