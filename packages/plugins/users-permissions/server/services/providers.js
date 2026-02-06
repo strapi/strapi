@@ -8,7 +8,7 @@
 const _ = require('lodash');
 const urlJoin = require('url-join');
 
-const { getService, findUniqueUsername } = require('../utils');
+const { getService, findValidUsername } = require('../utils');
 
 module.exports = ({ strapi }) => {
   /**
@@ -88,7 +88,7 @@ module.exports = ({ strapi }) => {
 
     // Username: prefer profile, else email prefix; findUniqueUsername ensures valid + unique
     const base = (profile.username && profile.username.trim()) || email.split('@')[0];
-    const username = await findUniqueUsername(base);
+    const username = await findValidUsername(base);
 
     // Create the new user.
     const newUser = {

@@ -18,4 +18,6 @@ type S = {
 
 export function getService<T extends keyof S>(name: T): ReturnType<S[T]>;
 
-export function findUniqueUsername(basename: string): Promise<string>;
+export function isUsernameTaken(username: string): Promise<boolean>;
+
+export function findValidUsername(basename: string): Promise<string>;
