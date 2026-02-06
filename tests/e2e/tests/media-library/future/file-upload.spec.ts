@@ -69,9 +69,11 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       expect(isReset).toBe(true);
     });
 
-    test('should display uploaded file in the assets list', async ({ page }) => {
+    test.only('should display uploaded file in the assets list', async ({ page }) => {
       const assetsPage = new AssetsPage(page);
       await assetsPage.goto();
+
+      await assetsPage.switchToTableView();
 
       const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
 
