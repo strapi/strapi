@@ -159,4 +159,45 @@ describe('CM API - Many relations update (GH#25198)', () => {
     expect(updateRes.body.data.members).toBeDefined();
     expect(updateRes.body.data.members).toHaveLength(relationCount);
   }, 120000);
+
+  /**
+   * repository.attachRelations(id, data) with 550 relations exercises the transaction-wrapped
+   * path and batched join-table insert (GH#25198).
+   */
+  test('Repository.attachRelations with 550 relations succeeds', async () => {
+    const relationCount = 550;
+    const memberDocumentIds = await createMembers(relationCount, 'member-repo');
+
+    const memberEntities = await strapi.db
+      .query(UID_MEMBER)
+      .findMany({ where: { documentId: { $in: memberDocumentIds } } });
+    const memberIds = memberEntities.map((m) => m.id);
+    expect(memberIds).toHaveLength(relationCount);
+
+    const createRes = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_OWNER}`,
+      body: { name: 'Owner for repo attach' },
+    });
+    expect(createRes.statusCode).toBe(201);
+    const ownerDocumentId = createRes.body.data.documentId;
+
+    const ownerEntities = await strapi.db
+      .query(UID_OWNER)
+      .findMany({ where: { documentId: ownerDocumentId } });
+    expect(ownerEntities.length).toBeGreaterThanOrEqual(1);
+    const ownerId = ownerEntities[0].id;
+
+    await strapi.db.getRepository(UID_OWNER).attachRelations(ownerId, {
+      members: { set: memberIds },
+    });
+
+    const getRes = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${UID_OWNER}/${ownerDocumentId}`,
+      qs: { populate: ['members'] },
+    });
+    expect(getRes.statusCode).toBe(200);
+    expect(getRes.body.data.members).toHaveLength(relationCount);
+  }, 120000);
 });
