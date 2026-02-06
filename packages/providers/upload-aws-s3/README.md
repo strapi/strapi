@@ -267,7 +267,25 @@ module.exports = ({ env }) => ({
 
 #### Configuration for S3 compatible services
 
-This plugin may work with S3 compatible services by using the `endpoint`. Scaleway example:
+This plugin works with S3-compatible services by using the `endpoint` option. The provider automatically constructs correct URLs for S3-compatible services that return incorrect `Location` formats for multipart uploads (e.g. IONOS, MinIO).
+
+**Important:** Some providers require `forcePathStyle: true` in the `s3Options`. This is needed when the provider does not support virtual-hosted-style URLs (e.g. `bucket.endpoint.com`), and instead uses path-style URLs (e.g. `endpoint.com/bucket`).
+
+| Provider            | `forcePathStyle` | `ACL`             | Notes                             |
+| ------------------- | ---------------- | ----------------- | --------------------------------- |
+| IONOS               | `true`           | Supported         | Multipart Location bug auto-fixed |
+| MinIO               | `true`           | Supported         |                                   |
+| Contabo             | `true`           | Supported         |                                   |
+| Hetzner             | `true`           | Supported         |                                   |
+| DigitalOcean Spaces | Not needed       | Supported         |                                   |
+| Wasabi              | Not needed       | Supported         |                                   |
+| Scaleway            | Not needed       | Supported         |                                   |
+| Vultr               | Not needed       | Supported         |                                   |
+| Backblaze B2        | Not needed       | Supported         |                                   |
+| Cloudflare R2       | Not needed       | **Not supported** | Omit `ACL` from params            |
+
+##### Scaleway example
+
 `./config/plugins.js`
 
 ```js
@@ -277,19 +295,73 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        credentials: {
-          accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
-          secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
-        },
-        region: env('SCALEWAY_REGION'), // e.g "fr-par"
-        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "https://s3.fr-par.scw.cloud"
-        params: {
-          Bucket: env('SCALEWAY_BUCKET'),
+        s3Options: {
+          credentials: {
+            accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
+            secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
+          },
+          region: env('SCALEWAY_REGION'), // e.g "fr-par"
+          endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "https://s3.fr-par.scw.cloud"
+          params: {
+            Bucket: env('SCALEWAY_BUCKET'),
+          },
         },
       },
     },
   },
   // ...
+});
+```
+
+##### IONOS / MinIO / Contabo example (forcePathStyle required)
+
+```js
+module.exports = ({ env }) => ({
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      providerOptions: {
+        s3Options: {
+          credentials: {
+            accessKeyId: env('S3_ACCESS_KEY_ID'),
+            secretAccessKey: env('S3_ACCESS_SECRET'),
+          },
+          region: env('S3_REGION'),
+          endpoint: env('S3_ENDPOINT'),
+          forcePathStyle: true, // Required for these providers
+          params: {
+            Bucket: env('S3_BUCKET'),
+          },
+        },
+      },
+    },
+  },
+});
+```
+
+##### Cloudflare R2 example (no ACL support)
+
+```js
+module.exports = ({ env }) => ({
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      providerOptions: {
+        s3Options: {
+          credentials: {
+            accessKeyId: env('R2_ACCESS_KEY_ID'),
+            secretAccessKey: env('R2_ACCESS_SECRET'),
+          },
+          region: 'auto',
+          endpoint: env('R2_ENDPOINT'), // e.g. "https://<account-id>.r2.cloudflarestorage.com"
+          params: {
+            Bucket: env('R2_BUCKET'),
+            // Do NOT set ACL - R2 does not support ACLs
+          },
+        },
+      },
+    },
+  },
 });
 ```
 

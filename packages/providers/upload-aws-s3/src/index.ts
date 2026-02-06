@@ -353,7 +353,9 @@ export default {
         Bucket: config.params.Bucket,
         Key: fileKey,
         Body: file.stream || Buffer.from(file.buffer as any, 'binary'),
-        ACL: config.params.ACL,
+        // ACL is optional to support providers like Cloudflare R2 that don't support ACLs.
+        // Set params.ACL to undefined or omit it entirely to disable ACL headers.
+        ...(config.params.ACL ? { ACL: config.params.ACL } : {}),
         ContentType: file.mime,
       };
 
