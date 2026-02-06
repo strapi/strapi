@@ -54,14 +54,20 @@ const StyledTh = styled(RawTh)`
   text-align: left;
 `;
 
-const StyledTr = styled(RawTr)`
-  height: 48px;
-  background: ${({ theme }) => theme.colors.neutral0};
-`;
-
 const StyledTd = styled(RawTd)`
   padding: 0 ${({ theme }) => theme.spaces[4]};
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+const StyledTr = styled(RawTr)`
+  height: 48px;
+  background: ${({ theme }) => theme.colors.neutral0};
+
+  &:last-child {
+    ${StyledTd} {
+      border-bottom: 0;
+    }
+  }
 `;
 
 const StyledBodyTd = styled(RawTd)`
