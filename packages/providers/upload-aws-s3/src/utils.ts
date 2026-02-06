@@ -90,10 +90,17 @@ function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
 
 export const extractCredentials = (options: InitOptions): AwsCredentialIdentity | null => {
   if (options.s3Options?.credentials) {
-    return {
+    const creds: AwsCredentialIdentity = {
       accessKeyId: options.s3Options.credentials.accessKeyId,
       secretAccessKey: options.s3Options.credentials.secretAccessKey,
     };
+
+    // Support AWS STS session tokens for temporary credentials
+    if (options.s3Options.credentials.sessionToken) {
+      creds.sessionToken = options.s3Options.credentials.sessionToken;
+    }
+
+    return creds;
   }
   return null;
 };
