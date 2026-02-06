@@ -86,8 +86,9 @@ module.exports = ({ strapi }) => {
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: advancedSettings.default_role } });
 
-    // Generate a unique username based on the email prefix
-    const username = await findUniqueUsername(email.split('@')[0]);
+    // Username: prefer profile, else email prefix; findUniqueUsername ensures valid + unique
+    const base = (profile.username && profile.username.trim()) || email.split('@')[0];
+    const username = await findUniqueUsername(base);
 
     // Create the new user.
     const newUser = {
