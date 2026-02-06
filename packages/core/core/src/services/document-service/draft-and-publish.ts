@@ -10,12 +10,6 @@ type TransformWithContentType = (
   params: Modules.Documents.Params.All
 ) => Modules.Documents.Params.All;
 
-type AsyncTransformWithUid = (
-  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
-  uid: UID.Schema,
-  params: Modules.Documents.Params.All
-) => Promise<Modules.Documents.Params.All>;
-
 /**
  * DP enabled -> set status to draft
  * DP disabled -> Used mostly for parsing relations, so there is not a need for a default.
@@ -134,25 +128,21 @@ const parseHasPublishedVersion = (value: unknown): boolean | undefined => {
 };
 
 /**
- * Filter documents based on whether they have a published version.
- * Enables document-level filtering to find "never published" documents.
+ * Synchronous helper that returns the "has published version" condition for a given model.
+ * Returns the documentId subquery condition, or null if the model doesn't use draft & publish.
  *
- * Uses subquery approach for optimal performance - the database handles
- * the filtering in a single query rather than materializing all IDs.
+ * This is used by the filters function in transform/query.ts so that the condition
+ * is applied to both root and nested (populate) queries.
  */
-const hasPublishedVersionToLookup: AsyncTransformWithUid = async (contentType, uid, params) => {
-  if (!contentTypes.hasDraftAndPublish(contentType)) {
-    return params;
-  }
+const getHasPublishedVersionCondition = (
+  uid: UID.Schema,
+  hasPublishedVersion: boolean
+): Record<string, any> | null => {
+  const model = strapi.getModel(uid);
 
-  const rawValue = params.hasPublishedVersion;
-
-  // Parse and normalize the value (throws 400 on invalid input)
-  const hasPublishedVersion = parseHasPublishedVersion(rawValue);
-
-  // Skip if not specified (preserve existing behavior)
-  if (hasPublishedVersion === undefined) {
-    return params;
+  // Ignore if target model has disabled DP or doesn't exist (e.g., components)
+  if (!model || !contentTypes.hasDraftAndPublish(model)) {
+    return null;
   }
 
   // Get table and column names from metadata
@@ -169,13 +159,11 @@ const hasPublishedVersionToLookup: AsyncTransformWithUid = async (contentType, u
   const knex = strapi.db.connection;
   const subquery = knex(tableName).distinct(documentIdColumn).whereNotNull(publishedAtColumn);
 
-  // Use $and to avoid collisions with documentId conditions from filters or findOne
-  const existingAnd = (params.lookup?.$and as unknown[]) || [];
-  const documentIdCondition = hasPublishedVersion
-    ? { documentId: { $in: subquery } }
-    : { documentId: { $notIn: subquery } };
+  if (hasPublishedVersion) {
+    return { documentId: { $in: subquery } };
+  }
 
-  return assoc(['lookup', '$and'], [...existingAnd, documentIdCondition], params);
+  return { documentId: { $notIn: subquery } };
 };
 
 const setStatusToDraftCurry = curry(setStatusToDraft);
@@ -184,7 +172,6 @@ const defaultStatusCurry = curry(defaultStatus);
 const filterDataPublishedAtCurry = curry(filterDataPublishedAt);
 const statusToLookupCurry = curry(statusToLookup);
 const statusToDataCurry = curry(statusToData);
-const hasPublishedVersionToLookupCurry = curry(hasPublishedVersionToLookup);
 
 export {
   setStatusToDraftCurry as setStatusToDraft,
@@ -193,5 +180,6 @@ export {
   filterDataPublishedAtCurry as filterDataPublishedAt,
   statusToLookupCurry as statusToLookup,
   statusToDataCurry as statusToData,
-  hasPublishedVersionToLookupCurry as hasPublishedVersionToLookup,
+  parseHasPublishedVersion,
+  getHasPublishedVersionCondition,
 };
