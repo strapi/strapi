@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Flex } from '@strapi/design-system';
 
 import { RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
-import { useIsMobile } from '../../hooks/useMediaQuery';
 
 interface ActionLayoutProps {
   endActions?: React.ReactNode;
@@ -12,24 +11,23 @@ interface ActionLayoutProps {
 }
 
 const ActionLayout = ({ startActions, endActions, bottomActions }: ActionLayoutProps) => {
-  const isMobile = useIsMobile();
-
   if (!startActions && !endActions) {
     return null;
   }
 
-  return isMobile ? (
+  return (
     <Flex
-      gap={3}
-      direction="column"
-      paddingBottom={2}
-      paddingTop={4}
+      gap={{ initial: 2, medium: 3 }}
+      paddingBottom={{ initial: 2, medium: 4 }}
+      paddingTop={{ initial: 4, medium: 0 }}
       paddingLeft={RESPONSIVE_DEFAULT_SPACING}
       paddingRight={RESPONSIVE_DEFAULT_SPACING}
-      alignItems="center"
+      wrap="wrap"
     >
-      <Flex gap={2} wrap="wrap" width="100%">
+      <Flex gap={2} wrap="wrap" flex={1}>
         {startActions}
+      </Flex>
+      <Flex gap={2} shrink={0} wrap="wrap">
         {endActions}
       </Flex>
       {bottomActions && (
@@ -37,23 +35,6 @@ const ActionLayout = ({ startActions, endActions, bottomActions }: ActionLayoutP
           {bottomActions}
         </Flex>
       )}
-    </Flex>
-  ) : (
-    <Flex
-      justifyContent="space-between"
-      alignItems="flex-start"
-      paddingBottom={{ initial: 2, medium: 4 }}
-      paddingTop={{ initial: 4, medium: 0 }}
-      paddingLeft={RESPONSIVE_DEFAULT_SPACING}
-      paddingRight={RESPONSIVE_DEFAULT_SPACING}
-    >
-      <Flex gap={2} wrap="wrap">
-        {startActions}
-      </Flex>
-
-      <Flex gap={2} shrink={0} wrap="wrap">
-        {endActions}
-      </Flex>
     </Flex>
   );
 };

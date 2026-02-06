@@ -272,35 +272,43 @@ const ListViewPage = () => {
 
   const isEmptyState = !isFetching && results.length === 0;
 
+  const endActions = (
+    <>
+      <InjectionZone area="listView.actions" />
+      <ViewSettingsMenu
+        setHeaders={handleSetHeaders}
+        resetHeaders={handleResetHeaders}
+        headers={displayedHeaderNames ?? []}
+      />
+    </>
+  );
+
+  const startActions = (
+    <>
+      {list.settings.searchable && (
+        <SearchInput
+          label={formatMessage(
+            { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+            { target: contentTypeTitle }
+          )}
+          placeholder={formatMessage({
+            id: 'global.search',
+            defaultMessage: 'Search',
+          })}
+          trackedEvent="didSearch"
+        />
+      )}
+    </>
+  );
+
   const actions =
     list.settings.filterable && schema ? (
       <Filters.Root schema={schema}>
         <Layouts.Action
-          endActions={
-            <>
-              <InjectionZone area="listView.actions" />
-              <ViewSettingsMenu
-                setHeaders={handleSetHeaders}
-                resetHeaders={handleResetHeaders}
-                headers={displayedHeaderNames ?? []}
-              />
-            </>
-          }
+          endActions={endActions}
           startActions={
             <>
-              {list.settings.searchable && (
-                <SearchInput
-                  label={formatMessage(
-                    { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                    { target: contentTypeTitle }
-                  )}
-                  placeholder={formatMessage({
-                    id: 'global.search',
-                    defaultMessage: 'Search',
-                  })}
-                  trackedEvent="didSearch"
-                />
-              )}
+              {startActions}
               <Filters.Trigger />
               {!isMobile ? <Filters.List /> : null}
             </>
@@ -310,35 +318,7 @@ const ListViewPage = () => {
         <Filters.Popover zIndex={499} />
       </Filters.Root>
     ) : (
-      <Layouts.Action
-        endActions={
-          <>
-            <InjectionZone area="listView.actions" />
-            <ViewSettingsMenu
-              setHeaders={handleSetHeaders}
-              resetHeaders={handleResetHeaders}
-              headers={displayedHeaderNames ?? []}
-            />
-          </>
-        }
-        startActions={
-          <>
-            {list.settings.searchable && (
-              <SearchInput
-                label={formatMessage(
-                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                  { target: contentTypeTitle }
-                )}
-                placeholder={formatMessage({
-                  id: 'global.search',
-                  defaultMessage: 'Search',
-                })}
-                trackedEvent="didSearch"
-              />
-            )}
-          </>
-        }
-      />
+      <Layouts.Action endActions={endActions} startActions={startActions} />
     );
 
   return (
