@@ -87,7 +87,9 @@
     "@types/koa": "2.13.4",
     "@babel/core": "7.26.10",
     "@babel/runtime": "7.26.10",
-    "@babel/runtime-corejs3": "7.26.10"
+    "@babel/runtime-corejs3": "7.26.10",
+    "react-router-dom": "6.30.3",
+    "@remix-run/router": "1.23.2"
   },
   "devDependencies": {
     "@babel/core": "7.26.10",

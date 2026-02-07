@@ -7879,17 +7879,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.15.3":
-  version: 1.15.3
-  resolution: "@remix-run/router@npm:1.15.3"
-  checksum: 10c0/aea197447cee21e137d70f0c93e00de70c64fcfae20ae349ade9dc4202e782bd94dbc88be7302d13b6aa6cde38a701b074cd8e09a161d14cecda832a36dd2695
-  languageName: node
-  linkType: hard
-
-"@remix-run/router@npm:1.19.1":
-  version: 1.19.1
-  resolution: "@remix-run/router@npm:1.19.1"
-  checksum: 10c0/9101fc96646e5107b6b0ef248d4c93bd965590c37ac02d35bcc57d1902467db7fc6eeec0a1fb97d0ce5bc96fae58e75239555e44a983239a61badba18e82d3b8
+"@remix-run/router@npm:1.23.2":
+  version: 1.23.2
+  resolution: "@remix-run/router@npm:1.23.2"
+  checksum: 10c0/7096b7f2086b2cd80c9e06873b71a8317e04858c01edc06a6fed187b660408a90f47c8e120e8af4c369cf1fa6b6a316a66b0917f42b6eb8a566e98b277c50449
   languageName: node
   linkType: hard
 
@@ -9488,7 +9481,7 @@ __metadata:
     react-is: "npm:^18.2.0"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     react-select: "npm:5.8.0"
     react-window: "npm:1.8.10"
     rimraf: "npm:5.0.5"
@@ -9508,7 +9501,7 @@ __metadata:
     "@strapi/data-transfer": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -9606,7 +9599,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     react-window: "npm:1.8.10"
     sanitize-html: "npm:2.13.0"
     slate: "npm:0.94.1"
@@ -9618,7 +9611,7 @@ __metadata:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -9652,7 +9645,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     typescript: "npm:5.4.4"
     yup: "npm:0.32.9"
@@ -9661,7 +9654,7 @@ __metadata:
     "@strapi/content-manager": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -9707,7 +9700,7 @@ __metadata:
     react-markdown: "npm:9.1.0"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
@@ -9715,7 +9708,7 @@ __metadata:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -9944,7 +9937,7 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
@@ -9953,7 +9946,7 @@ __metadata:
     koa: ^2.15.2
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -10036,7 +10029,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
@@ -10045,7 +10038,7 @@ __metadata:
     "@strapi/content-manager": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -10141,7 +10134,7 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     tsconfig: "npm:5.35.0"
     typescript: "npm:5.4.4"
@@ -10150,7 +10143,7 @@ __metadata:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -10168,14 +10161,14 @@ __metadata:
     react-colorful: "npm:5.6.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     typescript: "npm:5.4.4"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -10215,7 +10208,7 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     swagger-ui-dist: "npm:4.19.0"
     yaml: "npm:1.10.2"
@@ -10224,7 +10217,7 @@ __metadata:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -10260,7 +10253,7 @@ __metadata:
     pluralize: "npm:8.0.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     tsconfig: "npm:5.35.0"
     typescript: "npm:5.4.4"
@@ -10268,7 +10261,7 @@ __metadata:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -10283,13 +10276,13 @@ __metadata:
     "@strapi/strapi": "npm:5.35.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -10322,7 +10315,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
@@ -10331,7 +10324,7 @@ __metadata:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -10457,7 +10450,7 @@ __metadata:
     react-helmet: "npm:^6.1.0"
     react-intl: "npm:6.6.2"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
   peerDependencies:
@@ -10465,7 +10458,7 @@ __metadata:
     "@strapi/content-manager": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -10579,7 +10572,7 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   bin:
     strapi: ./bin/strapi.js
@@ -10751,7 +10744,7 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     react-select: "npm:5.8.0"
     sharp: "npm:0.33.5"
     styled-components: "npm:6.1.8"
@@ -10761,7 +10754,7 @@ __metadata:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
+    react-router-dom: ^6.30.3
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
@@ -16045,7 +16038,7 @@ __metadata:
     mysql2: "npm:3.9.8"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     typescript: "npm:^5"
   languageName: unknown
@@ -17681,7 +17674,7 @@ __metadata:
     better-sqlite3: "npm:12.4.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     typescript: "npm:^5"
   languageName: unknown
@@ -19204,7 +19197,7 @@ __metadata:
     better-sqlite3: "npm:12.4.1"
     react: "npm:rc"
     react-dom: "npm:rc"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
     vite: "npm:5.4.21"
   languageName: unknown
@@ -20416,7 +20409,7 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     strapi-plugin-workspace-plugin: "workspace:*"
     styled-components: "npm:6.1.8"
   languageName: unknown
@@ -23780,7 +23773,7 @@ __metadata:
     better-sqlite3: "npm:12.4.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
   languageName: unknown
   linkType: soft
@@ -23800,7 +23793,7 @@ __metadata:
     pg: "npm:8.11.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
-    react-router-dom: "npm:6.22.3"
+    react-router-dom: "npm:6.30.3"
     styled-components: "npm:6.1.8"
   languageName: unknown
   linkType: soft
@@ -29099,51 +29092,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:6.22.3":
-  version: 6.22.3
-  resolution: "react-router-dom@npm:6.22.3"
+"react-router-dom@npm:6.30.3":
+  version: 6.30.3
+  resolution: "react-router-dom@npm:6.30.3"
   dependencies:
-    "@remix-run/router": "npm:1.15.3"
-    react-router: "npm:6.22.3"
+    "@remix-run/router": "npm:1.23.2"
+    react-router: "npm:6.30.3"
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: 10c0/39b0472db5d153cbbbf4f5df5c0b26f2b75ffd7b857d7b67d17e03f4618d806b957cf033fbeb265bb317ade951e6ce0d576311bdf6eb15a7013203079cfadf03
+  checksum: 10c0/e8a1e13c662ed6ee71a785bd3418ba04b700bcd8aff6ea7b32524371e8abb1c85568cd4fe9b9e9d555b8101fd415f6f1796531f593da60be179ce75b37038657
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.0.0":
-  version: 6.26.1
-  resolution: "react-router-dom@npm:6.26.1"
+"react-router@npm:6.30.3":
+  version: 6.30.3
+  resolution: "react-router@npm:6.30.3"
   dependencies:
-    "@remix-run/router": "npm:1.19.1"
-    react-router: "npm:6.26.1"
+    "@remix-run/router": "npm:1.23.2"
   peerDependencies:
     react: ">=16.8"
-    react-dom: ">=16.8"
-  checksum: 10c0/9d9d8ed54d1c95497c6fa35a6ab46992efeccf1cfc6f0f6089c6c9b040af3eae09568fbb80c690bae08051a955d92d7aa3a0e730f626eb69285114993d31d430
-  languageName: node
-  linkType: hard
-
-"react-router@npm:6.22.3":
-  version: 6.22.3
-  resolution: "react-router@npm:6.22.3"
-  dependencies:
-    "@remix-run/router": "npm:1.15.3"
-  peerDependencies:
-    react: ">=16.8"
-  checksum: 10c0/a2c85c3d1fa93585e312b1f7e6e21d1ca421875013a8d879e109d3ed41fb035bc93faef4cd42b354ea18d039bc50b679bf752679ad83ac26a986e3432fbd0462
-  languageName: node
-  linkType: hard
-
-"react-router@npm:6.26.1":
-  version: 6.26.1
-  resolution: "react-router@npm:6.26.1"
-  dependencies:
-    "@remix-run/router": "npm:1.19.1"
-  peerDependencies:
-    react: ">=16.8"
-  checksum: 10c0/463078e740462b42bb5ba8004448f33fc9e63778f432a4ed55c57b93c5b519e25fb17913ee8435b0fda33c6b9f75df8ef6fcb2c3a4f8db84fb546d202e29aa51
+  checksum: 10c0/a0a74bf5a933cf0abd47e0eac1d3a505cd66b866e3ee8f20d8016885d3b4361ba3ba72dee026248c6125e631b191ba6ad109184c892281cea6cb747c71bf5940
   languageName: node
   linkType: hard
 
@@ -31390,7 +31359,7 @@ __metadata:
     eslint: "npm:8.50.0"
     react: "npm:^18.0.0"
     react-dom: "npm:^18.0.0"
-    react-router-dom: "npm:^6.0.0"
+    react-router-dom: "npm:^6.30.3"
     styled-components: "npm:^6.0.0"
   peerDependencies:
     "@strapi/strapi": "workspace:*"
