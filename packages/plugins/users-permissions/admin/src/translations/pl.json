@@ -17,6 +17,7 @@
   "EditPage.form.roles": "Szczegóły roli",
   "Email.template.data.loaded": "Szablon email został załadowany",
   "Email.template.email_confirmation": "Potwierdzenie adresu email",
+  "Email.template.reset_password": "Zresetuj hasło",
   "Email.template.form.edit.label": "Edytuj szablon",
   "Email.template.table.action.label": "akcja",
   "Email.template.table.icon.label": "ikonka",
