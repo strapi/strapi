@@ -18,9 +18,10 @@ describe('Content API Controller - Pagination', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock upload service with findPage method
+    // Mock upload service with both findPage and findMany methods
     mockUploadService = {
       findPage: jest.fn(),
+      findMany: jest.fn(),
       findOne: jest.fn(),
       remove: jest.fn(),
     };
@@ -60,37 +61,66 @@ describe('Content API Controller - Pagination', () => {
     } as unknown as Context;
   });
 
-  describe('find - Pagination Support', () => {
-    it('should return paginated results with default pagination when no params provided', async () => {
+  describe('find - Backward Compatibility (Legacy Behavior)', () => {
+    it('should return flat array when no pagination params provided', async () => {
       const mockFiles = [
         { id: 1, name: 'file1.jpg', url: '/uploads/file1.jpg' },
         { id: 2, name: 'file2.jpg', url: '/uploads/file2.jpg' },
       ];
-      const mockPagination = {
-        page: 1,
-        pageSize: 25,
-        pageCount: 1,
-        total: 2,
-      };
 
-      mockUploadService.findPage.mockResolvedValue({
-        results: mockFiles,
-        pagination: mockPagination,
-      });
+      mockUploadService.findMany.mockResolvedValue(mockFiles);
 
       const controller = contentApiController({ strapi: globalThis.strapi as any });
       await controller.find(mockContext);
 
-      expect(mockUploadService.findPage).toHaveBeenCalledWith({});
-      expect(mockContext.body).toEqual({
-        data: mockFiles,
-        meta: {
-          pagination: mockPagination,
-        },
-      });
+      // Should call findMany (not findPage) for backward compatibility
+      expect(mockUploadService.findMany).toHaveBeenCalledWith({});
+      expect(mockUploadService.findPage).not.toHaveBeenCalled();
+
+      // Should return flat array (legacy format)
+      expect(mockContext.body).toEqual(mockFiles);
+      expect(mockContext.body).not.toHaveProperty('data');
+      expect(mockContext.body).not.toHaveProperty('meta');
     });
 
-    it('should support custom pageSize parameter', async () => {
+    it('should return flat array when pagination is not in query', async () => {
+      mockContext.query = {
+        filters: { mime: { $startsWith: 'image/' } },
+        sort: 'createdAt:desc',
+      };
+
+      const mockFiles = [{ id: 1, name: 'image.jpg', mime: 'image/jpeg' }];
+
+      mockSanitizeQuery.mockResolvedValue({
+        filters: { mime: { $startsWith: 'image/' } },
+        sort: 'createdAt:desc',
+      });
+      mockUploadService.findMany.mockResolvedValue(mockFiles);
+
+      const controller = contentApiController({ strapi: globalThis.strapi as any });
+      await controller.find(mockContext);
+
+      expect(mockUploadService.findMany).toHaveBeenCalled();
+      expect(mockContext.body).toEqual(mockFiles);
+    });
+
+    it('should properly sanitize output in legacy mode', async () => {
+      const mockFiles = [{ id: 1, name: 'file1.jpg', secretField: 'secret' }];
+      const sanitizedFiles = [{ id: 1, name: 'file1.jpg' }];
+
+      mockUploadService.findMany.mockResolvedValue(mockFiles);
+      mockSanitizeOutput.mockResolvedValue(sanitizedFiles);
+
+      const controller = contentApiController({ strapi: globalThis.strapi as any });
+      await controller.find(mockContext);
+
+      expect(mockSanitizeOutput).toHaveBeenCalled();
+      expect(mockContext.body).toEqual(sanitizedFiles);
+    });
+  });
+
+  describe('find - Paginated Response (New Behavior)', () => {
+    it('should return paginated format when pagination params provided', async () => {
       mockContext.query = {
         pagination: { pageSize: 2 },
       };
@@ -115,14 +145,22 @@ describe('Content API Controller - Pagination', () => {
       const controller = contentApiController({ strapi: globalThis.strapi as any });
       await controller.find(mockContext);
 
+      // Should call findPage (not findMany)
       expect(mockUploadService.findPage).toHaveBeenCalledWith({
         pagination: { pageSize: 2 },
       });
-      expect(mockContext.body?.meta.pagination.pageSize).toBe(2);
-      expect(mockContext.body?.data).toHaveLength(2);
+      expect(mockUploadService.findMany).not.toHaveBeenCalled();
+
+      // Should return paginated format
+      expect(mockContext.body).toEqual({
+        data: mockFiles,
+        meta: {
+          pagination: mockPagination,
+        },
+      });
     });
 
-    it('should support page navigation with page parameter', async () => {
+    it('should support page navigation with pagination[page] and pagination[pageSize]', async () => {
       mockContext.query = {
         pagination: { page: 2, pageSize: 2 },
       };
@@ -180,14 +218,19 @@ describe('Content API Controller - Pagination', () => {
       expect(mockContext.body?.meta.pagination).toHaveProperty('pageCount');
     });
 
-    it('should return empty array with pagination when no files exist', async () => {
+    it('should return empty data array with pagination when no files exist', async () => {
+      mockContext.query = {
+        pagination: { pageSize: 10 },
+      };
+
       const mockPagination = {
         page: 1,
-        pageSize: 25,
+        pageSize: 10,
         pageCount: 0,
         total: 0,
       };
 
+      mockSanitizeQuery.mockResolvedValue({ pagination: { pageSize: 10 } });
       mockUploadService.findPage.mockResolvedValue({
         results: [],
         pagination: mockPagination,
@@ -204,16 +247,21 @@ describe('Content API Controller - Pagination', () => {
       });
     });
 
-    it('should properly sanitize output before returning', async () => {
+    it('should properly sanitize output in paginated mode', async () => {
+      mockContext.query = {
+        pagination: { pageSize: 5 },
+      };
+
       const mockFiles = [{ id: 1, name: 'file1.jpg', secretField: 'secret' }];
       const sanitizedFiles = [{ id: 1, name: 'file1.jpg' }];
       const mockPagination = {
         page: 1,
-        pageSize: 25,
+        pageSize: 5,
         pageCount: 1,
         total: 1,
       };
 
+      mockSanitizeQuery.mockResolvedValue({ pagination: { pageSize: 5 } });
       mockUploadService.findPage.mockResolvedValue({
         results: mockFiles,
         pagination: mockPagination,
@@ -223,115 +271,12 @@ describe('Content API Controller - Pagination', () => {
       const controller = contentApiController({ strapi: globalThis.strapi as any });
       await controller.find(mockContext);
 
-      // Sanitize output should be called with the files array
       expect(mockSanitizeOutput).toHaveBeenCalled();
       expect(mockContext.body?.data).toEqual(sanitizedFiles);
       expect(mockContext.body?.data[0]).not.toHaveProperty('secretField');
     });
 
-    it('should validate query before processing', async () => {
-      mockContext.query = {
-        pagination: { pageSize: 100 },
-        filters: { name: { $contains: 'test' } },
-      };
-
-      mockUploadService.findPage.mockResolvedValue({
-        results: [],
-        pagination: { page: 1, pageSize: 100, pageCount: 0, total: 0 },
-      });
-
-      const controller = contentApiController({ strapi: globalThis.strapi as any });
-      await controller.find(mockContext);
-
-      // Validate should be called
-      expect(mockValidateQuery).toHaveBeenCalled();
-    });
-
-    it('should sanitize query params before calling findPage', async () => {
-      const unsanitizedQuery = {
-        pagination: { pageSize: 10 },
-        filters: { name: { $contains: 'test' } },
-        populate: '*',
-      };
-      const sanitizedQuery = {
-        pagination: { pageSize: 10 },
-        filters: { name: { $contains: 'test' } },
-      };
-
-      mockContext.query = unsanitizedQuery;
-      mockSanitizeQuery.mockResolvedValue(sanitizedQuery);
-      mockUploadService.findPage.mockResolvedValue({
-        results: [],
-        pagination: { page: 1, pageSize: 10, pageCount: 0, total: 0 },
-      });
-
-      const controller = contentApiController({ strapi: globalThis.strapi as any });
-      await controller.find(mockContext);
-
-      // Sanitize should be called
-      expect(mockSanitizeQuery).toHaveBeenCalled();
-      expect(mockUploadService.findPage).toHaveBeenCalledWith(sanitizedQuery);
-    });
-
-    it('should handle very large page numbers gracefully', async () => {
-      mockContext.query = {
-        pagination: { page: 999, pageSize: 10 },
-      };
-
-      const mockPagination = {
-        page: 999,
-        pageSize: 10,
-        pageCount: 5,
-        total: 50,
-      };
-
-      mockSanitizeQuery.mockResolvedValue({ pagination: { page: 999, pageSize: 10 } });
-      mockUploadService.findPage.mockResolvedValue({
-        results: [],
-        pagination: mockPagination,
-      });
-
-      const controller = contentApiController({ strapi: globalThis.strapi as any });
-      await controller.find(mockContext);
-
-      expect(mockContext.body).toEqual({
-        data: [],
-        meta: {
-          pagination: mockPagination,
-        },
-      });
-    });
-
-    it('should support custom page sizes up to maximum allowed', async () => {
-      mockContext.query = {
-        pagination: { pageSize: 100 },
-      };
-
-      const mockFiles = Array.from({ length: 100 }, (_, i) => ({
-        id: i + 1,
-        name: `file${i + 1}.jpg`,
-      }));
-      const mockPagination = {
-        page: 1,
-        pageSize: 100,
-        pageCount: 3,
-        total: 300,
-      };
-
-      mockSanitizeQuery.mockResolvedValue({ pagination: { pageSize: 100 } });
-      mockUploadService.findPage.mockResolvedValue({
-        results: mockFiles,
-        pagination: mockPagination,
-      });
-
-      const controller = contentApiController({ strapi: globalThis.strapi as any });
-      await controller.find(mockContext);
-
-      expect(mockContext.body?.data).toHaveLength(100);
-      expect(mockContext.body?.meta.pagination.pageSize).toBe(100);
-    });
-
-    it('should maintain backward compatibility with filters and sorting', async () => {
+    it('should maintain filters and sorting with pagination', async () => {
       mockContext.query = {
         pagination: { pageSize: 5 },
         filters: { mime: { $startsWith: 'image/' } },
@@ -355,6 +300,67 @@ describe('Content API Controller - Pagination', () => {
 
       expect(mockUploadService.findPage).toHaveBeenCalledWith(sanitizedQuery);
       expect(mockContext.body?.data).toHaveLength(1);
+    });
+  });
+
+  describe('find - Query Validation', () => {
+    it('should validate query before processing (legacy mode)', async () => {
+      mockContext.query = {
+        filters: { name: { $contains: 'test' } },
+      };
+
+      mockUploadService.findMany.mockResolvedValue([]);
+
+      const controller = contentApiController({ strapi: globalThis.strapi as any });
+      await controller.find(mockContext);
+
+      expect(mockValidateQuery).toHaveBeenCalled();
+    });
+
+    it('should validate query before processing (paginated mode)', async () => {
+      mockContext.query = {
+        pagination: { pageSize: 100 },
+        filters: { name: { $contains: 'test' } },
+      };
+
+      mockSanitizeQuery.mockResolvedValue({
+        pagination: { pageSize: 100 },
+        filters: { name: { $contains: 'test' } },
+      });
+      mockUploadService.findPage.mockResolvedValue({
+        results: [],
+        pagination: { page: 1, pageSize: 100, pageCount: 0, total: 0 },
+      });
+
+      const controller = contentApiController({ strapi: globalThis.strapi as any });
+      await controller.find(mockContext);
+
+      expect(mockValidateQuery).toHaveBeenCalled();
+    });
+
+    it('should sanitize query params before calling service', async () => {
+      const unsanitizedQuery = {
+        pagination: { pageSize: 10 },
+        filters: { name: { $contains: 'test' } },
+        populate: '*',
+      };
+      const sanitizedQuery = {
+        pagination: { pageSize: 10 },
+        filters: { name: { $contains: 'test' } },
+      };
+
+      mockContext.query = unsanitizedQuery;
+      mockSanitizeQuery.mockResolvedValue(sanitizedQuery);
+      mockUploadService.findPage.mockResolvedValue({
+        results: [],
+        pagination: { page: 1, pageSize: 10, pageCount: 0, total: 0 },
+      });
+
+      const controller = contentApiController({ strapi: globalThis.strapi as any });
+      await controller.find(mockContext);
+
+      expect(mockSanitizeQuery).toHaveBeenCalled();
+      expect(mockUploadService.findPage).toHaveBeenCalledWith(sanitizedQuery);
     });
   });
 });

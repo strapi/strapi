@@ -30,7 +30,10 @@ const createRoutes = createContentApiRoutesFactory((): Core.RouterInput['routes'
           filters: validator.filters.optional(),
         },
       },
-      response: validator.paginatedFiles,
+      // Support both response formats for backward compatibility
+      // - Paginated: {data: [...], meta: {pagination: {...}}}
+      // - Legacy: [...] (flat array)
+      response: z.union([validator.paginatedFiles, validator.files]),
     },
     {
       method: 'GET',
