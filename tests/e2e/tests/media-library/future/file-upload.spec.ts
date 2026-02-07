@@ -83,5 +83,27 @@ describeOnCondition(process.env.UNSTABLE_MEDIA_LIBRARY === 'true')(
       const assetRow = assetsPage.getAssetRow('test-image');
       await expect(assetRow).toBeVisible();
     });
+
+    test('should upload a file via drag and drop', async ({ page, browserName }) => {
+      const assetsPage = new AssetsPage(page);
+      await assetsPage.goto();
+
+      // Switch to list view (grid is default)
+      await assetsPage.switchToListView();
+
+      const testImagePath = path.join(__dirname, '../../../data/uploads/test-image.jpg');
+
+      // Upload the file via drag and drop
+      await assetsPage.uploadFilesWithDragAndDrop(testImagePath);
+
+      // Wait for and verify success notification
+      await assetsPage.waitForUploadSuccess();
+      const successMessage = await assetsPage.getSuccessMessage();
+      expect(successMessage).toContain('uploaded successfully');
+
+      // Verify the uploaded file appears in the list
+      const assetRow = assetsPage.getAssetRow('test-image');
+      await expect(assetRow).toBeVisible();
+    });
   }
 );

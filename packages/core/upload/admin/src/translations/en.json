@@ -22,6 +22,7 @@
   "control-card.replace-media": "Replace Media",
   "control-card.save": "Save",
   "control-card.stop-crop": "Stop cropping",
+  "dropzone.upload.message": "Drop here to upload to",
   "filter.add": "Add filter",
   "form.button.replace-media": "Replace media",
   "form.input.description.file-alt": "This text will be displayed if the asset can’t be shown.",
