@@ -24,7 +24,7 @@ import { PERMISSIONS } from '../constants';
 import { getYupInnerErrors } from '../utils/getYupInnerErrors';
 import { schema } from '../utils/schema';
 
-import type { EmailSettings } from '../../../shared/types';
+import type { EmailSettings, ProviderCapabilities } from '../../../shared/types';
 
 const DocumentationLink = styled.a`
   color: ${({ theme }) => theme.colors.primary600};
@@ -33,6 +33,185 @@ const DocumentationLink = styled.a`
 interface MutationBody {
   to: string;
 }
+
+const FEATURE_LABELS: Record<string, { id: string; defaultMessage: string }> = {
+  dkim: {
+    id: 'email.Settings.capabilities.feature.dkim',
+    defaultMessage: 'DKIM',
+  },
+  pool: {
+    id: 'email.Settings.capabilities.feature.pool',
+    defaultMessage: 'Connection pool',
+  },
+  rateLimiting: {
+    id: 'email.Settings.capabilities.feature.rateLimiting',
+    defaultMessage: 'Rate limiting',
+  },
+  oauth2: {
+    id: 'email.Settings.capabilities.feature.oauth2',
+    defaultMessage: 'OAuth2',
+  },
+  requireTLS: {
+    id: 'email.Settings.capabilities.feature.requireTLS',
+    defaultMessage: 'Require TLS',
+  },
+};
+
+const CapabilitiesSection = ({
+  capabilities,
+  isIdle,
+  formatMessage,
+}: {
+  capabilities: ProviderCapabilities;
+  isIdle?: boolean;
+  formatMessage: (msg: { id: string; defaultMessage: string }) => string;
+}) => {
+  const transport = capabilities.transport;
+  const auth = capabilities.auth;
+  const features = capabilities.features ?? [];
+
+  const encryptionLabel =
+    transport?.secure === true
+      ? 'TLS'
+      : transport?.port === 587
+        ? 'STARTTLS'
+        : transport?.port === 465
+          ? 'TLS'
+          : 'None';
+
+  return (
+    <Flex direction="column" alignItems="stretch" gap={4}>
+      <Flex direction="column" alignItems="stretch" gap={1}>
+        <Typography variant="delta" tag="h2">
+          {formatMessage({
+            id: 'email.Settings.capabilities.title',
+            defaultMessage: 'Provider capabilities',
+          })}
+        </Typography>
+        <Typography>
+          {formatMessage({
+            id: 'email.Settings.capabilities.subtitle',
+            defaultMessage: 'Current SMTP configuration and enabled features',
+          })}
+        </Typography>
+      </Flex>
+
+      <Grid.Root gap={5}>
+        {transport && (transport.host || transport.port) && (
+          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+            <Field.Root name="smtp-server">
+              <Field.Label>
+                {formatMessage({
+                  id: 'email.Settings.capabilities.label.smtpServer',
+                  defaultMessage: 'SMTP server',
+                })}
+              </Field.Label>
+              <TextInput
+                disabled
+                readOnly
+                value={
+                  transport.host && transport.port
+                    ? `${transport.host}:${transport.port}`
+                    : transport.host || String(transport.port)
+                }
+              />
+            </Field.Root>
+          </Grid.Item>
+        )}
+
+        {transport && (
+          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+            <Field.Root name="encryption">
+              <Field.Label>
+                {formatMessage({
+                  id: 'email.Settings.capabilities.label.encryption',
+                  defaultMessage: 'Encryption',
+                })}
+              </Field.Label>
+              <TextInput disabled readOnly value={encryptionLabel} />
+            </Field.Root>
+          </Grid.Item>
+        )}
+
+        {auth && (auth.type || auth.user) && (
+          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+            <Field.Root name="auth-type">
+              <Field.Label>
+                {formatMessage({
+                  id: 'email.Settings.capabilities.label.authType',
+                  defaultMessage: 'Authentication',
+                })}
+              </Field.Label>
+              <TextInput
+                disabled
+                readOnly
+                value={
+                  auth.type
+                    ? auth.user
+                      ? `${auth.type} (${auth.user})`
+                      : auth.type
+                    : auth.user || 'None'
+                }
+              />
+            </Field.Root>
+          </Grid.Item>
+        )}
+
+        {transport?.pool && isIdle !== undefined && (
+          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+            <Field.Root name="pool-status">
+              <Field.Label>
+                {formatMessage({
+                  id: 'email.Settings.capabilities.label.poolStatus',
+                  defaultMessage: 'Pool status',
+                })}
+              </Field.Label>
+              <Badge
+                backgroundColor={isIdle ? 'success100' : 'primary100'}
+                textColor={isIdle ? 'success700' : 'primary700'}
+              >
+                {isIdle
+                  ? formatMessage({
+                      id: 'email.Settings.capabilities.poolStatus.idle',
+                      defaultMessage: 'Idle',
+                    })
+                  : formatMessage({
+                      id: 'email.Settings.capabilities.poolStatus.active',
+                      defaultMessage: 'Active',
+                    })}
+              </Badge>
+            </Field.Root>
+          </Grid.Item>
+        )}
+
+        {features.length > 0 && (
+          <Grid.Item col={12} xs={12} direction="column" alignItems="stretch">
+            <Field.Root name="features">
+              <Field.Label>
+                {formatMessage({
+                  id: 'email.Settings.capabilities.label.features',
+                  defaultMessage: 'Enabled features',
+                })}
+              </Field.Label>
+              <Flex gap={2} wrap="wrap">
+                {features.map((f) => (
+                  <Badge key={f} backgroundColor="neutral100" textColor="neutral700">
+                    {formatMessage(
+                      FEATURE_LABELS[f] ?? {
+                        id: `email.Settings.capabilities.feature.${f}`,
+                        defaultMessage: f,
+                      }
+                    )}
+                  </Badge>
+                ))}
+              </Flex>
+            </Field.Root>
+          </Grid.Item>
+        )}
+      </Grid.Root>
+    </Flex>
+  );
+};
 
 export const ProtectedSettingsPage = () => (
   <Page.Protect permissions={PERMISSIONS.settings}>
@@ -55,10 +234,10 @@ const SettingsPage = () => {
   const { data, isLoading } = useQuery(['email', 'settings'], async () => {
     const res = await get<EmailSettings>('/email/settings');
     const {
-      data: { config, supportsVerify },
+      data: { config, supportsVerify, capabilities, isIdle },
     } = res;
 
-    return { ...config, supportsVerify };
+    return { ...config, supportsVerify, capabilities, isIdle };
   });
 
   const mutation = useMutation<void, Error, MutationBody>(
@@ -323,13 +502,13 @@ const SettingsPage = () => {
                             defaultMessage: 'Email provider',
                           })}
                         </Field.Label>
-                        <Flex gap={2}>
-                          <SingleSelect disabled value={data.provider}>
-                            <SingleSelectOption value={data.provider}>
-                              {data.provider}
-                            </SingleSelectOption>
-                          </SingleSelect>
-                          {connectionStatus === 'success' && (
+                        <SingleSelect disabled value={data.provider}>
+                          <SingleSelectOption value={data.provider}>
+                            {data.provider}
+                          </SingleSelectOption>
+                        </SingleSelect>
+                        {connectionStatus === 'success' && (
+                          <Box paddingTop={2}>
                             <Badge backgroundColor="success100" textColor="success700">
                               <Flex gap={1}>
                                 <Check width="1.2rem" height="1.2rem" />
@@ -339,8 +518,10 @@ const SettingsPage = () => {
                                 })}
                               </Flex>
                             </Badge>
-                          )}
-                          {connectionStatus === 'error' && (
+                          </Box>
+                        )}
+                        {connectionStatus === 'error' && (
+                          <Box paddingTop={2}>
                             <Badge backgroundColor="danger100" textColor="danger700">
                               <Flex gap={1}>
                                 <Cross width="1.2rem" height="1.2rem" />
@@ -350,8 +531,8 @@ const SettingsPage = () => {
                                 })}
                               </Flex>
                             </Badge>
-                          )}
-                        </Flex>
+                          </Box>
+                        )}
                       </Field.Root>
                     </Grid.Item>
 
@@ -381,6 +562,27 @@ const SettingsPage = () => {
                   </Grid.Root>
                 </Flex>
               </Box>
+
+              {data.capabilities &&
+                (data.capabilities.transport ||
+                  data.capabilities.auth ||
+                  (data.capabilities.features && data.capabilities.features.length > 0)) && (
+                  <Box
+                    background="neutral0"
+                    hasRadius
+                    shadow="filterShadow"
+                    paddingTop={6}
+                    paddingBottom={6}
+                    paddingLeft={7}
+                    paddingRight={7}
+                  >
+                    <CapabilitiesSection
+                      capabilities={data.capabilities}
+                      isIdle={data.isIdle}
+                      formatMessage={formatMessage}
+                    />
+                  </Box>
+                )}
 
               <Flex
                 alignItems="stretch"

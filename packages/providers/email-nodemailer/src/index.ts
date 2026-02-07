@@ -73,6 +73,67 @@ interface SendOptions {
 
 type ProviderOptions = Parameters<typeof nodemailer.createTransport>[0];
 
+interface ProviderCapabilities {
+  transport?: {
+    host?: string;
+    port?: number;
+    secure?: boolean;
+    pool?: boolean;
+    maxConnections?: number;
+  };
+  auth?: {
+    type?: string;
+    user?: string;
+  };
+  features?: string[];
+}
+
+function getCapabilitiesFromOptions(opts: ProviderOptions): ProviderCapabilities {
+  const capabilities: ProviderCapabilities = {};
+  const features: string[] = [];
+
+  if (opts && typeof opts === 'object') {
+    const options = opts as Record<string, unknown>;
+
+    // Transport info (no sensitive data)
+    if (options.host || options.port) {
+      capabilities.transport = {
+        host: typeof options.host === 'string' ? options.host : undefined,
+        port: typeof options.port === 'number' ? options.port : undefined,
+        secure: typeof options.secure === 'boolean' ? options.secure : undefined,
+        pool: typeof options.pool === 'boolean' ? options.pool : undefined,
+        maxConnections:
+          typeof options.maxConnections === 'number' ? options.maxConnections : undefined,
+      };
+    }
+
+    // Auth type (never expose password, tokens, etc.)
+    if (options.auth && typeof options.auth === 'object') {
+      const auth = options.auth as Record<string, unknown>;
+      const authType = auth.type as string;
+      capabilities.auth = {
+        type: authType || (auth.user ? 'Password' : undefined),
+        user: typeof auth.user === 'string' ? auth.user : undefined,
+      };
+      if (authType === 'OAuth2') {
+        features.push('oauth2');
+      }
+    }
+
+    // Feature flags
+    if (options.dkim) features.push('dkim');
+    if (options.pool) features.push('pool');
+    if (options.rateLimit) features.push('rateLimiting');
+    if (options.requireTLS) features.push('requireTLS');
+  }
+
+  if (features.length > 0) {
+    capabilities.features = features;
+  }
+
+  return capabilities;
+}
+
 export default {
   init(providerOptions: ProviderOptions, settings: Settings) {
     const transporter: Transporter = nodemailer.createTransport(providerOptions);
@@ -141,6 +202,10 @@ export default {
 
       close(): void {
         transporter.close();
+      },
+
+      getCapabilities(): ProviderCapabilities {
+        return getCapabilitiesFromOptions(providerOptions);
       },
     };
   },

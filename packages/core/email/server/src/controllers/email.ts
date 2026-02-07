@@ -70,12 +70,21 @@ const emailController = {
     // Check if provider supports verify method
     const supportsVerify = typeof provider?.verify === 'function';
 
+    // Get capabilities from provider (e.g. SMTP host, auth type, features)
+    const capabilities =
+      typeof provider?.getCapabilities === 'function' ? provider.getCapabilities() : undefined;
+
+    // Get pool idle status if provider supports it
+    const isIdle = typeof provider?.isIdle === 'function' ? provider.isIdle() : undefined;
+
     ctx.send({
       config: pick(
         ['provider', 'settings.defaultFrom', 'settings.defaultReplyTo', 'settings.testAddress'],
         config
       ),
       supportsVerify,
+      ...(capabilities ? { capabilities } : {}),
+      ...(isIdle !== undefined ? { isIdle } : {}),
     });
   },
 

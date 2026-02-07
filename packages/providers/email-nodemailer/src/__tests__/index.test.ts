@@ -229,4 +229,84 @@ describe('@strapi/provider-email-nodemailer', () => {
       expect(mockClose).toHaveBeenCalled();
     });
   });
+
+  describe('getCapabilities', () => {
+    it('returns transport and auth info without sensitive data', () => {
+      const providerOptions = {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          user: 'test@gmail.com',
+          pass: 'secret-password',
+        },
+      };
+
+      const instance = provider.init(providerOptions, {
+        defaultFrom: 'test@example.com',
+        defaultReplyTo: 'test@example.com',
+      });
+
+      const capabilities = instance.getCapabilities();
+
+      expect(capabilities.transport).toEqual({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        pool: undefined,
+        maxConnections: undefined,
+      });
+      expect(capabilities.auth).toEqual({
+        type: 'Password',
+        user: 'test@gmail.com',
+      });
+      expect(capabilities.auth).not.toHaveProperty('pass');
+      expect(capabilities).not.toHaveProperty('pass');
+    });
+
+    it('includes feature flags for dkim, pool, rateLimiting', () => {
+      const providerOptions = {
+        host: 'smtp.example.com',
+        port: 587,
+        dkim: { domainName: 'example.com' },
+        pool: true,
+        rateLimit: 5,
+      };
+
+      const instance = provider.init(providerOptions, {
+        defaultFrom: 'test@example.com',
+        defaultReplyTo: 'test@example.com',
+      });
+
+      const capabilities = instance.getCapabilities();
+
+      expect(capabilities.features).toContain('dkim');
+      expect(capabilities.features).toContain('pool');
+      expect(capabilities.features).toContain('rateLimiting');
+    });
+
+    it('includes oauth2 for OAuth2 auth type', () => {
+      const providerOptions = {
+        host: 'smtp.gmail.com',
+        port: 465,
+        auth: {
+          type: 'OAuth2',
+          user: 'oauth@gmail.com',
+          clientId: 'client',
+          clientSecret: 'secret',
+        },
+      };
+
+      const instance = provider.init(providerOptions, {
+        defaultFrom: 'test@example.com',
+        defaultReplyTo: 'test@example.com',
+      });
+
+      const capabilities = instance.getCapabilities();
+
+      expect(capabilities.auth?.type).toBe('OAuth2');
+      expect(capabilities.features).toContain('oauth2');
+      expect(capabilities.auth).not.toHaveProperty('clientSecret');
+    });
+  });
 });
