@@ -507,32 +507,6 @@ const SettingsPage = () => {
                             {data.provider}
                           </SingleSelectOption>
                         </SingleSelect>
-                        {connectionStatus === 'success' && (
-                          <Box paddingTop={2}>
-                            <Badge backgroundColor="success100" textColor="success700">
-                              <Flex gap={1}>
-                                <Check width="1.2rem" height="1.2rem" />
-                                {formatMessage({
-                                  id: 'email.Settings.email.plugin.status.connected',
-                                  defaultMessage: 'Connected',
-                                })}
-                              </Flex>
-                            </Badge>
-                          </Box>
-                        )}
-                        {connectionStatus === 'error' && (
-                          <Box paddingTop={2}>
-                            <Badge backgroundColor="danger100" textColor="danger700">
-                              <Flex gap={1}>
-                                <Cross width="1.2rem" height="1.2rem" />
-                                {formatMessage({
-                                  id: 'email.Settings.email.plugin.status.error',
-                                  defaultMessage: 'Error',
-                                })}
-                              </Flex>
-                            </Badge>
-                          </Box>
-                        )}
                       </Field.Root>
                     </Grid.Item>
 
@@ -545,17 +519,41 @@ const SettingsPage = () => {
                               defaultMessage: 'Connection status',
                             })}
                           </Field.Label>
-                          <Button
-                            variant="secondary"
-                            loading={verifyMutation.isLoading}
-                            onClick={() => verifyMutation.mutate()}
-                            type="button"
-                          >
-                            {formatMessage({
-                              id: 'email.Settings.email.plugin.button.verify',
-                              defaultMessage: 'Test connection',
-                            })}
-                          </Button>
+                          <Flex gap={2} alignItems="center">
+                            <Button
+                              variant="secondary"
+                              loading={verifyMutation.isLoading}
+                              onClick={() => verifyMutation.mutate()}
+                              type="button"
+                            >
+                              {formatMessage({
+                                id: 'email.Settings.email.plugin.button.verify',
+                                defaultMessage: 'Test connection',
+                              })}
+                            </Button>
+                            {connectionStatus === 'success' && (
+                              <Badge backgroundColor="success100" textColor="success700">
+                                <Flex gap={1}>
+                                  <Check width="1.2rem" height="1.2rem" />
+                                  {formatMessage({
+                                    id: 'email.Settings.email.plugin.status.connected',
+                                    defaultMessage: 'Connected',
+                                  })}
+                                </Flex>
+                              </Badge>
+                            )}
+                            {connectionStatus === 'error' && (
+                              <Badge backgroundColor="danger100" textColor="danger700">
+                                <Flex gap={1}>
+                                  <Cross width="1.2rem" height="1.2rem" />
+                                  {formatMessage({
+                                    id: 'email.Settings.email.plugin.status.error',
+                                    defaultMessage: 'Error',
+                                  })}
+                                </Flex>
+                              </Badge>
+                            )}
+                          </Flex>
                         </Field.Root>
                       </Grid.Item>
                     )}
