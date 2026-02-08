@@ -92,6 +92,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                   type="submit"
                   startIcon={<Check />}
                   disabled={!dirty && allowedActions.canUpdate}
+                  fullWidth
                 >
                   {formatMessage({
                     id: getTrad('pages.SettingsPage.Button.save'),

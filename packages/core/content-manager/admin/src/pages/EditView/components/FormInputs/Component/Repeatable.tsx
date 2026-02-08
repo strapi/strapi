@@ -17,7 +17,7 @@ import {
   useComposedRefs,
   BoxComponent,
 } from '@strapi/design-system';
-import { Plus, Drag, Trash } from '@strapi/icons';
+import { Plus, Drag, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -280,6 +280,7 @@ const RepeatableComponent = ({
                 onDropItem={handleDropItem}
                 onGrabItem={handleGrabItem}
                 __temp_key__={key}
+                totalLength={value.length}
               >
                 {layout.map((row, index) => {
                   const visibleFields = row.filter(({ ...field }) => {
@@ -393,6 +394,7 @@ interface ComponentProps
   toggleCollapses: () => void;
   children: React.ReactNode;
   __temp_key__: string;
+  totalLength: number;
 }
 
 const Component = ({
@@ -407,6 +409,8 @@ const Component = ({
   onDeleteComponent,
   toggleCollapses,
   __temp_key__,
+  totalLength,
+  onMoveItem,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
@@ -438,6 +442,7 @@ const Component = ({
         // Close all collapses
         toggleCollapses();
       },
+      onMoveItem,
       ...dragProps,
     });
 
@@ -450,6 +455,29 @@ const Component = ({
     boxRef as React.RefObject<HTMLDivElement>,
     dropRef
   );
+
+  const handleMoveUp = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index > 0 && onMoveItem) {
+        onMoveItem(index - 1, index);
+      }
+    },
+    [index, onMoveItem]
+  );
+
+  const handleMoveDown = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index < totalLength - 1 && onMoveItem) {
+        onMoveItem(index + 1, index);
+      }
+    },
+    [index, totalLength, onMoveItem]
+  );
+
+  const canMoveUp = index > 0;
+  const canMoveDown = index < totalLength - 1;
 
   return (
     <>
@@ -486,6 +514,36 @@ const Component = ({
                 >
                   <Drag />
                 </IconButton>
+              )}
+              {!isDesktop && (
+                <>
+                  {canMoveUp && (
+                    <IconButton
+                      disabled={disabled || !canMoveUp}
+                      variant="ghost"
+                      onClick={handleMoveUp}
+                      label={formatMessage({
+                        id: getTranslation('components.DynamicZone.move-up'),
+                        defaultMessage: 'Move up',
+                      })}
+                    >
+                      <ArrowUp />
+                    </IconButton>
+                  )}
+                  {canMoveDown && (
+                    <IconButton
+                      disabled={disabled || !canMoveDown}
+                      variant="ghost"
+                      onClick={handleMoveDown}
+                      label={formatMessage({
+                        id: getTranslation('components.DynamicZone.move-down'),
+                        defaultMessage: 'Move down',
+                      })}
+                    >
+                      <ArrowDown />
+                    </IconButton>
+                  )}
+                </>
               )}
             </Accordion.Actions>
           </Accordion.Header>

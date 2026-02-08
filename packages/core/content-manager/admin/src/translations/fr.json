@@ -215,5 +215,7 @@
   "widget.last-edited.single-type": "Types uniques",
   "widget.last-edited.no-data": "Aucune entrée éditée",
   "widget.last-published.title": "Dernières entrées publiées",
-  "widget.last-published.no-data": "Aucune entrée publiée"
+  "widget.last-published.no-data": "Aucune entrée publiée",
+  "actions-drawer.open": "Ouvrir plus d'actions",
+  "actions-drawer.close": "Fermer plus d'actions"
 }
