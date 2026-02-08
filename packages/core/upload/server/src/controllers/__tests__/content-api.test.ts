@@ -45,16 +45,30 @@ describe('Content API Controller - Pagination', () => {
     globalThis.strapi = {
       getModel: jest.fn().mockReturnValue({ uid: 'plugin::upload.file' }),
       contentAPI: {
-        validate: { query: mockValidateQuery },
+        validate: {
+          query: mockValidateQuery,
+          input: jest.fn(),
+          filters: jest.fn(),
+          sort: jest.fn(),
+          fields: jest.fn(),
+          populate: jest.fn(),
+        },
         sanitize: {
           query: mockSanitizeQuery,
           output: mockSanitizeOutput,
+          input: jest.fn(),
+          filters: jest.fn(),
+          sort: jest.fn(),
+          fields: jest.fn(),
+          populate: jest.fn(),
         },
+        permissions: {} as any,
+        getRoutesMap: jest.fn(),
       },
-    };
+    } as any;
 
     mockContext = {
-      query: {},
+      query: {} as any,
       state: { auth: {} },
       body: undefined,
       notFound: jest.fn(),
@@ -87,7 +101,7 @@ describe('Content API Controller - Pagination', () => {
       mockContext.query = {
         filters: { mime: { $startsWith: 'image/' } },
         sort: 'createdAt:desc',
-      };
+      } as any;
 
       const mockFiles = [{ id: 1, name: 'image.jpg', mime: 'image/jpeg' }];
 
@@ -120,10 +134,17 @@ describe('Content API Controller - Pagination', () => {
   });
 
   describe('find - Paginated Response (New Behavior)', () => {
+    // NOTE: Koa's qs middleware parses bracket-notation query params into nested objects.
+    // ?pagination[page]=2&pagination[pageSize]=2 → { pagination: { page: '2', pageSize: '2' } }
+    // The tests below use the parsed object form, which is what the controller receives.
+    // The upload service's findPage() is responsible for flattening the nested pagination
+    // object to top-level params before passing to transformQueryParams (see findPage.test.ts).
+
     it('should return paginated format when pagination params provided', async () => {
+      // Simulates: ?pagination[pageSize]=2
       mockContext.query = {
         pagination: { pageSize: 2 },
-      };
+      } as any;
 
       const mockFiles = [
         { id: 1, name: 'file1.jpg' },
@@ -151,7 +172,7 @@ describe('Content API Controller - Pagination', () => {
       });
       expect(mockUploadService.findMany).not.toHaveBeenCalled();
 
-      // Should return paginated format
+      // Should return paginated format matching Content API standard
       expect(mockContext.body).toEqual({
         data: mockFiles,
         meta: {
@@ -161,9 +182,10 @@ describe('Content API Controller - Pagination', () => {
     });
 
     it('should support page navigation with pagination[page] and pagination[pageSize]', async () => {
+      // Simulates: ?pagination[page]=2&pagination[pageSize]=2
       mockContext.query = {
         pagination: { page: 2, pageSize: 2 },
-      };
+      } as any;
 
       const mockFiles = [
         { id: 3, name: 'file3.jpg' },
@@ -188,14 +210,14 @@ describe('Content API Controller - Pagination', () => {
       expect(mockUploadService.findPage).toHaveBeenCalledWith({
         pagination: { page: 2, pageSize: 2 },
       });
-      expect(mockContext.body?.meta.pagination.page).toBe(2);
-      expect(mockContext.body?.data).toEqual(mockFiles);
+      expect((mockContext.body as any)?.meta.pagination.page).toBe(2);
+      expect((mockContext.body as any)?.data).toEqual(mockFiles);
     });
 
     it('should include withCount in pagination metadata when requested', async () => {
       mockContext.query = {
         pagination: { pageSize: 2, withCount: true },
-      };
+      } as any;
 
       const mockFiles = [{ id: 1, name: 'file1.jpg' }];
       const mockPagination = {
@@ -214,14 +236,14 @@ describe('Content API Controller - Pagination', () => {
       const controller = contentApiController({ strapi: globalThis.strapi as any });
       await controller.find(mockContext);
 
-      expect(mockContext.body?.meta.pagination).toHaveProperty('total');
-      expect(mockContext.body?.meta.pagination).toHaveProperty('pageCount');
+      expect((mockContext.body as any)?.meta.pagination).toHaveProperty('total');
+      expect((mockContext.body as any)?.meta.pagination).toHaveProperty('pageCount');
     });
 
     it('should return empty data array with pagination when no files exist', async () => {
       mockContext.query = {
         pagination: { pageSize: 10 },
-      };
+      } as any;
 
       const mockPagination = {
         page: 1,
@@ -250,7 +272,7 @@ describe('Content API Controller - Pagination', () => {
     it('should properly sanitize output in paginated mode', async () => {
       mockContext.query = {
         pagination: { pageSize: 5 },
-      };
+      } as any;
 
       const mockFiles = [{ id: 1, name: 'file1.jpg', secretField: 'secret' }];
       const sanitizedFiles = [{ id: 1, name: 'file1.jpg' }];
@@ -272,8 +294,8 @@ describe('Content API Controller - Pagination', () => {
       await controller.find(mockContext);
 
       expect(mockSanitizeOutput).toHaveBeenCalled();
-      expect(mockContext.body?.data).toEqual(sanitizedFiles);
-      expect(mockContext.body?.data[0]).not.toHaveProperty('secretField');
+      expect((mockContext.body as any)?.data).toEqual(sanitizedFiles);
+      expect((mockContext.body as any)?.data[0]).not.toHaveProperty('secretField');
     });
 
     it('should maintain filters and sorting with pagination', async () => {
@@ -281,7 +303,7 @@ describe('Content API Controller - Pagination', () => {
         pagination: { pageSize: 5 },
         filters: { mime: { $startsWith: 'image/' } },
         sort: 'createdAt:desc',
-      };
+      } as any;
 
       const sanitizedQuery = {
         pagination: { pageSize: 5 },
@@ -299,7 +321,7 @@ describe('Content API Controller - Pagination', () => {
       await controller.find(mockContext);
 
       expect(mockUploadService.findPage).toHaveBeenCalledWith(sanitizedQuery);
-      expect(mockContext.body?.data).toHaveLength(1);
+      expect((mockContext.body as any)?.data).toHaveLength(1);
     });
   });
 
@@ -307,7 +329,7 @@ describe('Content API Controller - Pagination', () => {
     it('should validate query before processing (legacy mode)', async () => {
       mockContext.query = {
         filters: { name: { $contains: 'test' } },
-      };
+      } as any;
 
       mockUploadService.findMany.mockResolvedValue([]);
 
@@ -321,7 +343,7 @@ describe('Content API Controller - Pagination', () => {
       mockContext.query = {
         pagination: { pageSize: 100 },
         filters: { name: { $contains: 'test' } },
-      };
+      } as any;
 
       mockSanitizeQuery.mockResolvedValue({
         pagination: { pageSize: 100 },
@@ -349,7 +371,7 @@ describe('Content API Controller - Pagination', () => {
         filters: { name: { $contains: 'test' } },
       };
 
-      mockContext.query = unsanitizedQuery;
+      mockContext.query = unsanitizedQuery as any;
       mockSanitizeQuery.mockResolvedValue(sanitizedQuery);
       mockUploadService.findPage.mockResolvedValue({
         results: [],
