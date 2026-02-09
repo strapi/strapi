@@ -443,17 +443,13 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c1 {
   width: 100%;
-  height: calc(100dvh - 6.4rem - 1px);
-  overflow: hidden;
+  height: auto;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
   border-right: 0;
   box-shadow: none;
-  position: fixed;
-  top: calc(6.4rem + 1px);
-  left: 0;
-  z-index: 2;
+  position: relative;
 }
 
 .c42 {
