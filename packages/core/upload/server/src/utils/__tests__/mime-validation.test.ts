@@ -575,4 +575,35 @@ describe('mime-validation', () => {
       expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
     });
   });
+
+  describe('extension vs detected MIME mismatch', () => {
+    it('should reject when detected MIME type does not match file extension', async () => {
+      mockStrapi.config.get.mockReturnValue({
+        allowedTypes: ['image/png', 'application/x-msdos-program'],
+      });
+
+      // Pretend the file content is a PNG but the filename is .exe
+      mockReadFile.mockResolvedValue(Buffer.from('fake png header'));
+      mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/png', ext: 'png' });
+
+      const spoofedFile = {
+        name: 'malware.exe',
+        path: '/tmp/malware.exe',
+        size: 100,
+        type: 'application/x-msdos-program',
+      };
+
+      const result = await validateFile(
+        spoofedFile,
+        { allowedTypes: ['image/png', 'application/x-msdos-program'] },
+        mockStrapi
+      );
+
+      expect(result.isValid).toBe(false);
+      expect(result.error?.code).toBe('MIME_TYPE_NOT_ALLOWED');
+      expect(result.error?.message).toMatch(/extension does not match detected/i);
+      expect(result.error?.details.detectedType).toBe('image/png');
+      expect(result.error?.details.fileExtension).toBe('.exe');
+    });
+  });
 });

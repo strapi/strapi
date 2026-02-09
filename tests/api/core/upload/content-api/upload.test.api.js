@@ -766,38 +766,6 @@ describe('Upload plugin', () => {
         }
       });
 
-      test('Rejects file when detected type does not match extension', async () => {
-        strapi.config.set('plugin::upload.security', {
-          allowedTypes: ['text/plain', 'application/x-msdos-program', 'application/octet-stream'],
-        });
-
-        // Create a plain text file with .exe extension
-        // file-type will detect it as text/plain, but extension says .exe
-        const textContent = 'This is plain text content in an .exe file';
-        const spoofedFilePath = path.join(__dirname, '../utils/test-detection-mismatch.exe');
-        fs.writeFileSync(spoofedFilePath, textContent);
-
-        const res = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: { files: fs.createReadStream(spoofedFilePath) },
-        });
-
-        // Should be rejected: detected type (text/plain) doesn't match extension (.exe -> application/x-msdos-program)
-        // This tests the extension validation when detection succeeds
-        expect(res.statusCode).toBe(400);
-        expect(res.body.error).toBeDefined();
-        const errorMessage = res.body.error.message || '';
-        expect(
-          errorMessage.includes('extension') ||
-            errorMessage.includes('MIME type mismatch') ||
-            errorMessage.includes('does not match')
-        ).toBe(true);
-
-        // Cleanup
-        fs.unlinkSync(spoofedFilePath);
-      });
-
       test('Allows file when declared type matches extension even if detection fails', async () => {
         strapi.config.set('plugin::upload.security', { allowedTypes: ['application/json'] });
 
