@@ -202,7 +202,7 @@ describe('Document Service unidirectional relations', () => {
    * Publish with 550 unidirectional relations (GH#25198): exercises document-service
    * batchInsert path so each batch stays ≤500 on SQLite.
    */
-  testIntTransaction(
+  testInTransaction(
     'Publish product with 550 tags (batched unidirectional relation sync)',
     async () => {
       const count = 550;
