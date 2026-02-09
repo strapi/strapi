@@ -92,10 +92,10 @@ const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
 
 interface AssetRowProps {
   asset: File;
-  isMobile: boolean;
 }
 
-const AssetRow = ({ asset, isMobile }: AssetRowProps) => {
+const AssetRow = ({ asset }: AssetRowProps) => {
+  const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
 
   return (
@@ -207,7 +207,7 @@ export const AssetsTable = ({ assets }: AssetsTableProps) => {
             </StyledBodyTd>
           </RawTr>
         ) : (
-          assets.map((asset) => <AssetRow key={asset.id} asset={asset} isMobile={isMobile} />)
+          assets.map((asset) => <AssetRow key={asset.id} asset={asset} />)
         )}
       </RawTbody>
     </StyledTable>
