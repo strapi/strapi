@@ -23,6 +23,19 @@ const data = {
 const UID_OWNER = 'api::owner.owner';
 const UID_MEMBER = 'api::member.member';
 
+const expectRelationCount = (value, expected) => {
+  // Content Manager can return toMany relations either as:
+  // - an array (fully populated) or
+  // - an object like { count: number } (count-only populate)
+  if (Array.isArray(value)) {
+    expect(value).toHaveLength(expected);
+    return;
+  }
+
+  expect(value).toBeDefined();
+  expect(value.count).toBe(expected);
+};
+
 // Member created first (no relation). Owner's targetAttribute: 'owners' will add the inverse on Member.
 const memberModel = {
   displayName: 'Member',
@@ -157,7 +170,7 @@ describe('CM API - Many relations update (GH#25198)', () => {
     expect(updateRes.statusCode).toBe(200);
     expect(updateRes.body.data).toBeDefined();
     expect(updateRes.body.data.members).toBeDefined();
-    expect(updateRes.body.data.members).toHaveLength(relationCount);
+    expectRelationCount(updateRes.body.data.members, relationCount);
   }, 120000);
 
   /**
@@ -188,7 +201,8 @@ describe('CM API - Many relations update (GH#25198)', () => {
     expect(ownerEntities.length).toBeGreaterThanOrEqual(1);
     const ownerId = ownerEntities[0].id;
 
-    await strapi.db.getRepository(UID_OWNER).attachRelations(ownerId, {
+    // `strapi.db.query(uid)` returns the entity repository for that model
+    await strapi.db.query(UID_OWNER).attachRelations(ownerId, {
       members: { set: memberIds },
     });
 
@@ -198,6 +212,6 @@ describe('CM API - Many relations update (GH#25198)', () => {
       qs: { populate: ['members'] },
     });
     expect(getRes.statusCode).toBe(200);
-    expect(getRes.body.data.members).toHaveLength(relationCount);
+    expectRelationCount(getRes.body.data.members, relationCount);
   }, 120000);
 });
