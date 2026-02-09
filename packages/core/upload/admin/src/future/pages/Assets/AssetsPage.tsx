@@ -26,7 +26,7 @@ import { useGetAssetsQuery } from '../../services/assets';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetsGrid } from './components/AssetsGrid';
-import { AssetsList } from './components/AssetsList';
+import { AssetsTable } from './components/AssetsTable';
 import { DropZoneWithOverlay } from './components/DropZone/DropZoneWithOverlay';
 import {
   UploadDropZoneProvider,
@@ -70,7 +70,7 @@ const AssetsView = ({ view }: AssetsViewProps) => {
     return <AssetsGrid assets={assets} />;
   }
 
-  return <AssetsList assets={assets} />;
+  return <AssetsTable assets={assets} />;
 };
 
 const StyledToggleGroup = styled(ToggleGroup.Root)`
@@ -281,9 +281,9 @@ export const AssetsPage = () => {
                 />
                 <StyledToggleGroup
                   type="single"
-                  value={isGridView ? 'grid' : 'list'}
+                  value={isGridView ? 'grid' : 'table'}
                   onValueChange={(value) =>
-                    value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.LIST)
+                    value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
                   }
                   aria-label={formatMessage({
                     id: getTranslationKey('view.switch.label'),

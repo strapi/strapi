@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { AssetsList } from '../components/AssetsList';
+import { AssetsTable } from '../components/AssetsTable';
 
 import type { File } from '../../../../../../shared/contracts/files';
 
@@ -27,9 +27,9 @@ interface SetupProps {
   assets?: File[];
 }
 
-const setup = ({ assets = mockAssets }: SetupProps = {}) => render(<AssetsList assets={assets} />);
+const setup = ({ assets = mockAssets }: SetupProps = {}) => render(<AssetsTable assets={assets} />);
 
-describe('AssetsList', () => {
+describe('AssetsTable', () => {
   describe('Table rendering', () => {
     it('renders a table element', () => {
       setup();

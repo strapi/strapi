@@ -29,10 +29,10 @@ export class AssetsPage {
   }
 
   /**
-   * Switch the assets view to list (table) view
+   * Switch the assets view to table view
    * Waits for the page to be ready (drop zone visible) before switching
    */
-  async switchToListView() {
+  async switchToTableView() {
     await this.page.getByRole('radio', { name: 'Table view' }).click();
   }
 

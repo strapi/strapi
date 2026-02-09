@@ -6,7 +6,7 @@ export const localStorageKeys = {
 
 export const viewOptions = {
   GRID: 0,
-  LIST: 1,
+  TABLE: 1,
 };
 
 interface TableHeader {

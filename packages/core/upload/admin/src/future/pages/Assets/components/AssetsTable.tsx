@@ -151,11 +151,11 @@ const AssetRow = ({ asset, isMobile }: AssetRowProps) => {
   );
 };
 
-interface AssetsListProps {
+interface AssetsTableProps {
   assets: File[];
 }
 
-export const AssetsList = ({ assets }: AssetsListProps) => {
+export const AssetsTable = ({ assets }: AssetsTableProps) => {
   const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
 
@@ -176,7 +176,7 @@ export const AssetsList = ({ assets }: AssetsListProps) => {
                 <StyledTh key={header.name}>
                   <VisuallyHidden>
                     {formatMessage({
-                      id: getTranslationKey('list.table.header.actions'),
+                      id: getTranslationKey('table.header.actions'),
                       defaultMessage: 'actions',
                     })}
                   </VisuallyHidden>
