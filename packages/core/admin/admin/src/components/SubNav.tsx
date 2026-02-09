@@ -23,17 +23,13 @@ import { tours } from './GuidedTour/Tours';
 
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
-  height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px);
-  overflow: hidden;
+  height: auto;
   background-color: ${({ theme }) => theme.colors.neutral0};
   display: flex;
   flex-direction: column;
   border-right: 0;
   box-shadow: none;
-  position: fixed;
-  top: calc(${HEIGHT_TOP_NAVIGATION} + 1px);
-  left: 0;
-  z-index: 2;
+  position: relative;
 
   ${({ theme }) => theme.breakpoints.medium} {
     width: ${WIDTH_SIDE_NAVIGATION};
