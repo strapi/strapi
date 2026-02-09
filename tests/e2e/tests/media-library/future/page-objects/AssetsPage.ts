@@ -29,14 +29,6 @@ export class AssetsPage {
   }
 
   /**
-   * Switch the assets view to table view
-   * Waits for the page to be ready (drop zone visible) before switching
-   */
-  async switchToTableView() {
-    await this.page.getByRole('radio', { name: 'Table view' }).click();
-  }
-
-  /**
    * Get the drop zone info message ("Drop here to upload to" / "Current folder")
    */
   getDropZoneMessage() {

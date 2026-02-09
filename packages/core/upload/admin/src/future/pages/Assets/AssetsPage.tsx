@@ -291,7 +291,7 @@ export const AssetsPage = () => {
                   })}
                 >
                   <StyledToggleItem
-                    value="list"
+                    value="table"
                     aria-label={formatMessage({
                       id: getTranslationKey('view.table'),
                       defaultMessage: 'Table view',
