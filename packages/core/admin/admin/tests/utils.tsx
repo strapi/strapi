@@ -29,6 +29,7 @@ import { GuidedTourContext } from '../src/components/GuidedTour/Context';
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
 import { RBAC } from '../src/core/apis/rbac';
+import { STRAPI_ROUTER_FUTURE_FLAGS } from '../src/core/apis/router';
 import { AppInfoProvider } from '../src/features/AppInfo';
 import { AuthProvider, type Permission } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
@@ -197,11 +198,13 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
     ],
     {
       initialEntries,
+      // Keep v6 defaults and avoid dev-only future-flag warnings during tests
+      future: STRAPI_ROUTER_FUTURE_FLAGS,
     }
   );
 
   // en is the default locale of the admin app.
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={router} future={STRAPI_ROUTER_FUTURE_FLAGS} />;
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment
