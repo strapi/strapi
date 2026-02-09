@@ -58,6 +58,11 @@ export const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }: Fi
           const decodedValue = decodeURIComponent(filterValue);
           return prevFilter[name]?.[filterType] !== decodedValue;
         }
+
+        // Handle object filter values (e.g., "file" type uses { $not: { $contains: [...] } })
+        if (typeof filterValue === 'object' && filterValue !== null) {
+          return JSON.stringify(prevFilter[name]?.[filterType]) !== JSON.stringify(filterValue);
+        }
       }
 
       return true;
