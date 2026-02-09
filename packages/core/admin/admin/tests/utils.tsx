@@ -29,7 +29,6 @@ import { GuidedTourContext } from '../src/components/GuidedTour/Context';
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
 import { RBAC } from '../src/core/apis/rbac';
-import { STRAPI_ROUTER_FUTURE_FLAGS } from '../src/core/apis/router';
 import { AppInfoProvider } from '../src/features/AppInfo';
 import { AuthProvider, type Permission } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
@@ -46,6 +45,22 @@ setLogger({
   warn: () => {},
   error: () => {},
 });
+
+/**
+ * React Router logs dev-only "Future Flag Warning" console.warn messages when
+ * these are left undefined. Our test setup treats `console.warn` as a failure.
+ *
+ * We explicitly set them to `false` here to keep v6 behavior unchanged while
+ * silencing warnings during tests.
+ */
+const REACT_ROUTER_FUTURE_FLAGS = {
+  v7_startTransition: false,
+  v7_relativeSplatPath: false,
+  v7_fetcherPersist: false,
+  v7_normalizeFormMethod: false,
+  v7_partialHydration: false,
+  v7_skipActionErrorRevalidation: false,
+} as const;
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -199,12 +214,12 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
     {
       initialEntries,
       // Keep v6 defaults and avoid dev-only future-flag warnings during tests
-      future: STRAPI_ROUTER_FUTURE_FLAGS,
+      future: REACT_ROUTER_FUTURE_FLAGS,
     }
   );
 
   // en is the default locale of the admin app.
-  return <RouterProvider router={router} future={STRAPI_ROUTER_FUTURE_FLAGS} />;
+  return <RouterProvider router={router} future={REACT_ROUTER_FUTURE_FLAGS} />;
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment

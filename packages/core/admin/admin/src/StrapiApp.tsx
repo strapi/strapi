@@ -15,12 +15,7 @@ import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
 import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
-import {
-  Router,
-  STRAPI_ROUTER_FUTURE_FLAGS,
-  StrapiAppSetting,
-  UnloadedSettingsLink,
-} from './core/apis/router';
+import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
 import { Widgets } from './core/apis/Widgets';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
@@ -527,10 +522,7 @@ class StrapiApp {
       basename: getBasename(),
     });
 
-    // Explicitly opt OUT of React Router v7 behavior changes.
-    // This avoids dev-only "Future Flag Warning" console noise (and test failures),
-    // while preserving existing behavior.
-    return <RouterProvider router={router} future={STRAPI_ROUTER_FUTURE_FLAGS} />;
+    return <RouterProvider router={router} />;
   }
 }
 

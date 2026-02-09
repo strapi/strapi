@@ -52,30 +52,7 @@ interface StrapiAppSetting {
 interface RouterOptions {
   basename?: string;
   memory?: boolean;
-  /**
-   * React Router "future flags".
-   *
-   * We explicitly set these to `false` to preserve current v6 behavior while
-   * avoiding dev-only "Future Flag Warning" console noise.
-   */
-  future?: Record<string, boolean>;
 }
-
-/**
- * Keep behavior identical to current React Router v6 defaults.
- *
- * React Router logs dev-only warnings when these flags are `undefined`.
- * Setting them explicitly to `false` avoids warning spam without opting into
- * any v7 behavior changes.
- */
-export const STRAPI_ROUTER_FUTURE_FLAGS = {
-  v7_startTransition: false,
-  v7_relativeSplatPath: false,
-  v7_fetcherPersist: false,
-  v7_normalizeFormMethod: false,
-  v7_partialHydration: false,
-  v7_skipActionErrorRevalidation: false,
-} as const satisfies Record<string, boolean>;
 
 class Router {
   private _routes: RouteObject[] = [];
@@ -149,16 +126,10 @@ class Router {
       },
     ];
 
-    const routerOpts = {
-      ...opts,
-      // Preserve v6 defaults: opt OUT of v7 changes explicitly
-      future: STRAPI_ROUTER_FUTURE_FLAGS,
-    };
-
     if (memory) {
-      this.router = createMemoryRouter(routes, routerOpts);
+      this.router = createMemoryRouter(routes, opts);
     } else {
-      this.router = createBrowserRouter(routes, routerOpts);
+      this.router = createBrowserRouter(routes, opts);
     }
 
     return this.router;
