@@ -42,7 +42,7 @@ const admin: Plugin.Config.AdminInput = {
         permissions: PERMISSIONS.main,
         Component: () => {
           return import('./future/App').then((mod) => ({
-            default: mod.UnstableMediaLibraryPage,
+            default: mod.UnstableMediaLibrary,
           }));
         },
         position: 5,

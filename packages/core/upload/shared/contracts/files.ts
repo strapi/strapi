@@ -56,11 +56,17 @@ type FileFormat = {
   url: string;
 };
 
+export interface FocalPoint {
+  x: number;
+  y: number;
+}
+
 export interface File {
   id: number;
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
+  focalPoint?: FocalPoint | null;
   width?: number | null;
   height?: number | null;
   formats?:
@@ -247,6 +253,7 @@ export declare namespace BulkUpdateFiles {
           name?: string;
           alternativeText?: string | null;
           caption?: string | null;
+          focalPoint?: FocalPoint | null;
           folder?: number | null;
         };
       }>;

@@ -552,8 +552,8 @@ const Component = ({
               direction="column"
               alignItems="stretch"
               background="neutral100"
-              padding={6}
-              gap={6}
+              padding={{ initial: 4, medium: 6 }}
+              gap={{ initial: 3, medium: 4 }}
             >
               {children}
             </Flex>

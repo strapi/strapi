@@ -1,0 +1,50 @@
+{
+  "name": "complex",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A Strapi application with complex schemas",
+  "scripts": {
+    "build": "strapi build",
+    "dev": "strapi develop",
+    "develop": "strapi develop",
+    "develop:postgres": "node scripts/develop-with-db.js postgres",
+    "develop:mysql": "node scripts/develop-with-db.js mysql",
+    "db:start:postgres": "node scripts/db-postgres.js start",
+    "db:stop:postgres": "node scripts/db-postgres.js stop",
+    "db:snapshot:postgres": "node scripts/db-postgres.js snapshot",
+    "db:restore:postgres": "node scripts/db-postgres.js restore",
+    "db:wipe:postgres": "node scripts/db-postgres.js wipe",
+    "db:check:postgres": "node scripts/db-postgres.js check",
+    "db:start:mysql": "node scripts/db-mysql.js start",
+    "db:stop:mysql": "node scripts/db-mysql.js stop",
+    "db:snapshot:mysql": "node scripts/db-mysql.js snapshot",
+    "db:restore:mysql": "node scripts/db-mysql.js restore",
+    "db:wipe:mysql": "node scripts/db-mysql.js wipe",
+    "db:check:mysql": "node scripts/db-mysql.js check",
+    "start": "strapi start",
+    "setup:v4": "node scripts/setup-v4-project.js",
+    "test:migration": "node scripts/validate-migration.js"
+  },
+  "dependencies": {
+    "@strapi/plugin-users-permissions": "workspace:*",
+    "@strapi/strapi": "workspace:*",
+    "mysql2": "3.9.8",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "complex"
+  }
+}

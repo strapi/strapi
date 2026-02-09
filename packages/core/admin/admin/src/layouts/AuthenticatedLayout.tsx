@@ -15,7 +15,6 @@ import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
 import { UpsellBanner } from '../components/UpsellBanner';
-import { HEIGHT_TOP_NAVIGATION } from '../constants/theme';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';

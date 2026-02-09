@@ -2,7 +2,11 @@ import * as React from 'react';
 
 import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
 
-import { HEIGHT_TOP_NAVIGATION, RESPONSIVE_DEFAULT_SPACING } from '../../constants/theme';
+import {
+  HEIGHT_TOP_NAVIGATION,
+  HEIGHT_TOP_NAVIGATION_MEDIUM,
+  RESPONSIVE_DEFAULT_SPACING,
+} from '../../constants/theme';
 import { useDeviceType } from '../../hooks/useDeviceType';
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
 import { useIsMobile } from '../../hooks/useMediaQuery';
@@ -42,7 +46,10 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           shadow="tableShadow"
           width={`${width}px`}
           zIndex={2}
-          minHeight={HEIGHT_TOP_NAVIGATION}
+          minHeight={{
+            initial: HEIGHT_TOP_NAVIGATION,
+            medium: HEIGHT_TOP_NAVIGATION_MEDIUM,
+          }}
           data-strapi-header-sticky
         >
           <Flex alignItems="center" justifyContent="space-between" wrap="wrap" width="100%">
