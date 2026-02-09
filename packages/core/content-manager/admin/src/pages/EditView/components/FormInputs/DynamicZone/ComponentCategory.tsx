@@ -79,16 +79,21 @@ const Grid =
     ? styled(Box)`
         display: grid;
         grid-template-columns: repeat(auto-fill, 100%);
-        grid-gap: 4px;
+        grid-gap: 12px;
 
         ${({ theme }) => theme.breakpoints.medium} {
           grid-template-columns: repeat(auto-fill, 14rem);
+          grid-gap: 4px;
         }
       `
     : styled(Box)`
         display: grid;
         grid-template-columns: repeat(auto-fill, 100%);
-        grid-gap: 4px;
+        grid-gap: 12px;
+
+        ${({ theme }) => theme.breakpoints.medium} {
+          grid-gap: 4px;
+        }
       `;
 
 const ComponentBox = styled<FlexComponent<'button'>>(Flex)`

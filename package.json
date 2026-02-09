@@ -155,7 +155,7 @@
     "jest-watch-typeahead": "2.2.2",
     "lerna": "8.2.0",
     "lint-staged": "15.2.10",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "npm-run-all": "4.1.5",
     "nx": "20.4.6",
     "plop": "4.0.1",
@@ -175,7 +175,7 @@
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@4.5.0",
+  "packageManager": "yarn@4.12.0",
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
     "npm": ">=6.0.0"

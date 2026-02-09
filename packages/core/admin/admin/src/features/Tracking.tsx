@@ -14,7 +14,6 @@ export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
   useTypescriptOnAdmin?: boolean;
   isHostedOnStrapiCloud?: boolean;
-  aiLicenseKey?: string;
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
@@ -131,9 +130,7 @@ export interface EventWithoutProperties {
     | 'didEditMediaLibraryConfig'
     | 'didEditNameOfContentType'
     | 'didGenerateGuidedTourApiTokens'
-    | 'didGoToMarketplace'
     | 'didLaunchGuidedtour'
-    | 'didMissMarketplacePlugin'
     | 'didNotCreateFirstAdmin'
     | 'didNotSaveComponent'
     | 'didPluginLearnMore'
@@ -198,7 +195,9 @@ export interface EventWithoutProperties {
     | 'didStartNewChat'
     | 'didLaunchGuidedtour'
     | 'didEditAICaption'
-    | 'didEditAIAlternativeText';
+    | 'didEditAIAlternativeText'
+    | 'didGenerateMetadataRetroactively';
+
   properties?: never;
 }
 
@@ -557,7 +556,6 @@ const useTracking = (): UseTrackingReturn => {
                 ...telemetryProperties,
                 projectId: uuid,
                 projectType: window.strapi.projectType,
-                aiLicenseKey: window.strapi.aiLicenseKey,
               },
             },
             {

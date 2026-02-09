@@ -148,6 +148,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       name: usedName,
       alternativeText: fileInfo.alternativeText,
       caption: fileInfo.caption,
+      focalPoint: fileInfo.focalPoint,
       folder: fileInfo.folder,
       folderPath: await fileService.getFolderPath(fileInfo.folder),
       hash: imageManipulationService.generateFileName(basename),
@@ -343,7 +344,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function updateFileInfo(
     id: ID,
-    { name, alternativeText, caption, folder }: FileInfo,
+    { name, alternativeText, caption, focalPoint, folder }: FileInfo,
     opts?: CommonOptions
   ) {
     const { user } = opts ?? {};
@@ -361,6 +362,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       name: newName,
       alternativeText: _.isNil(alternativeText) ? dbFile.alternativeText : alternativeText,
       caption: _.isNil(caption) ? dbFile.caption : caption,
+      focalPoint: _.isNil(focalPoint) ? dbFile.focalPoint : focalPoint,
       folder: _.isUndefined(folder) ? dbFile.folder : folder,
       folderPath: _.isUndefined(folder) ? dbFile.path : await fileService.getFolderPath(folder),
     };

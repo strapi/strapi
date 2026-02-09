@@ -1,7 +1,21 @@
 import type { Core } from '@strapi/types';
 import { z } from 'zod';
-import { InputFile } from '../types';
+import { InputFile, File } from '../types';
 import { Settings } from '../controllers/validation/admin/settings';
+import { getService } from '../utils';
+import { buildFormDataFromFiles } from '../utils/images';
+
+/**
+ * Supported image types for AI metadata generation
+ * @see https://ai.google.dev/gemini-api/docs/image-understanding
+ */
+const SUPPORTED_IMAGE_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+] as const;
 
 const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
   const aiServerUrl = process.env.STRAPI_AI_URL || 'https://strapi-ai.apps.strapi.io';
@@ -27,9 +41,139 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       return aiMetadata;
     },
 
-    async processFiles(
-      files: InputFile[]
-    ): Promise<Array<{ altText: string; caption: string } | null>> {
+    async countImagesWithoutMetadata() {
+      const imagesWithoutMetadataCountPromise = strapi.db.query('plugin::upload.file').count({
+        where: {
+          mime: {
+            $in: SUPPORTED_IMAGE_TYPES,
+          },
+          $or: [
+            { alternativeText: { $null: true } },
+            { alternativeText: '' },
+            { caption: { $null: true } },
+            { caption: '' },
+          ],
+        },
+      });
+
+      const totalImagesPromise = strapi.db.query('plugin::upload.file').count({
+        where: {
+          mime: {
+            $in: SUPPORTED_IMAGE_TYPES,
+          },
+        },
+      });
+
+      const [imagesWithoutMetadataCount, totalImages] = await Promise.all([
+        imagesWithoutMetadataCountPromise,
+        totalImagesPromise,
+      ]);
+
+      return { imagesWithoutMetadataCount, totalImages };
+    },
+
+    /**
+     * Update files with AI-generated metadata
+     * Shared logic used by both upload flow and retroactive processing
+     */
+    async updateFilesWithAIMetadata(
+      files: File[],
+      metadataResults: Array<{ altText: string; caption: string } | null>,
+      user: { id: string | number }
+    ) {
+      const uploadService = strapi.plugin('upload').service('upload');
+
+      await Promise.all(
+        files.map(async (file, index) => {
+          const aiMetadata = metadataResults[index];
+          if (aiMetadata) {
+            // Only update fields that are missing (null or empty string)
+            const updateData: { alternativeText?: string; caption?: string } = {};
+
+            if (!file.alternativeText || file.alternativeText === '') {
+              updateData.alternativeText = aiMetadata.altText;
+            }
+
+            if (!file.caption || file.caption === '') {
+              updateData.caption = aiMetadata.caption;
+            }
+
+            // Only update if there are fields to update
+            if (Object.keys(updateData).length > 0) {
+              await uploadService.updateFileInfo(file.id, updateData, { user });
+
+              // Update in-memory file object (needed for upload flow response)
+              if (updateData.alternativeText !== undefined) {
+                file.alternativeText = updateData.alternativeText;
+              }
+              if (updateData.caption !== undefined) {
+                file.caption = updateData.caption;
+              }
+            }
+          }
+        })
+      );
+    },
+
+    /**
+     * Process existing files with job tracking for progress updates
+     */
+    async processExistingFiles(jobId: number, user: { id: string | number }): Promise<void> {
+      const jobService = getService('aiMetadataJobs');
+
+      try {
+        // Mark as processing
+        await jobService.updateJob(jobId, { status: 'processing' });
+
+        // Query all images without metadata
+        const files: File[] = await strapi.db.query('plugin::upload.file').findMany({
+          where: {
+            mime: {
+              $in: SUPPORTED_IMAGE_TYPES,
+            },
+            $or: [
+              { alternativeText: { $null: true } },
+              { alternativeText: '' },
+              { caption: { $null: true } },
+              { caption: '' },
+            ],
+          },
+        });
+
+        if (files.length === 0) {
+          await jobService.updateJob(jobId, {
+            status: 'completed',
+            completedAt: new Date(),
+          });
+          return;
+        }
+
+        // Process all files at once
+        const metadataResults = await this.processFiles(files);
+        await this.updateFilesWithAIMetadata(files, metadataResults, user);
+
+        // Mark as completed
+        await jobService.updateJob(jobId, {
+          status: 'completed',
+          completedAt: new Date(),
+        });
+      } catch (error) {
+        strapi.log.error('AI metadata job failed', {
+          jobId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+
+        await jobService.updateJob(jobId, {
+          status: 'failed',
+          completedAt: new Date(),
+        });
+      }
+    },
+
+    /**
+     * Processes provided files for AI metadata generation
+     */
+    async processFiles(files: File[]): Promise<Array<{ altText: string; caption: string } | null>> {
       if (!(await this.isEnabled()) || !aiServerUrl) {
         throw new Error('AI Metadata service is not enabled');
       }
@@ -38,7 +182,19 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       // We need to maintain the original indices so we can map AI results back correctly
       const imageFiles = files
         .map((file, index) => ({ file, originalIndex: index }))
-        .filter(({ file }) => file.mimetype?.startsWith('image/'));
+        .filter(({ file }) => file.mime?.startsWith('image/'));
+
+      // Convert filtered image files to InputFile format (uses thumbnails when available)
+      const imageInputFiles = imageFiles.map(({ file }) => {
+        const thumbnail = (file.formats as any)?.thumbnail;
+        return {
+          filepath: thumbnail?.url || file.url || '',
+          mimetype: file.mime,
+          originalFilename: file.name,
+          size: thumbnail?.size || file.size,
+          provider: file.provider,
+        } as InputFile;
+      });
 
       // If no image files, return sparse array with all nulls to avoid calling the AI server
       // This maintains the same array length as input files for proper index alignment
@@ -46,22 +202,11 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         return new Array(files.length).fill(null);
       }
 
-      const formData = new FormData();
-
-      for (const { file } of imageFiles) {
-        const fullUrl =
-          file.provider === 'local'
-            ? strapi.config.get('server.absoluteUrl') + file.filepath
-            : file.filepath;
-
-        const resp = await fetch(fullUrl);
-        if (!resp.ok) {
-          throw new Error(`Failed to fetch image from URL: ${fullUrl} (${resp.status})`);
-        }
-        const ab = await resp.arrayBuffer();
-        const blob: Blob = new Blob([ab], { type: file.mimetype || undefined });
-        formData.append('files', blob);
-      }
+      const formData = await buildFormDataFromFiles(
+        imageInputFiles,
+        strapi.config.get('server.absoluteUrl'),
+        strapi.log
+      );
 
       let token: string;
       try {
@@ -73,7 +218,11 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
       }
 
-      strapi.log.http('Contacting AI Server for media metadata generation');
+      strapi.log.http('Contacting AI Server for media metadata generation', {
+        aiServerUrl,
+        imageCount: imageFiles.length,
+      });
+
       const res = await fetch(`${aiServerUrl}/media-library/generate-metadata`, {
         method: 'POST',
         body: formData,
@@ -83,7 +232,8 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       if (!res.ok) {
-        throw Error(`AI metadata generation failed`, { cause: await res.text() });
+        const errorText = await res.text();
+        throw Error(`AI metadata generation failed`, { cause: errorText });
       }
 
       const responseSchema = z.object({
@@ -96,7 +246,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       const { results } = responseSchema.parse(await res.json());
-      strapi.log.http(`Media metadata generated successfully for ${results.length} files`);
+      strapi.log.http(`AI generated metadata successfully for ${results.length} files`);
 
       // Create sparse array with results at original indices
       // Example: files=[img1, pdf, img2] -> imageFiles=[{img1, index:0}, {img2, index:2}]

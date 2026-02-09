@@ -38,18 +38,39 @@ const COMMON_USER_SCHEMA = {
         return new TextEncoder().encode(value).length <= 72;
       }
     )
-    .matches(/[a-z]/, {
-      id: 'components.Input.error.contain.lowercase',
-      defaultMessage: 'Password must contain at least one lowercase character',
-    })
-    .matches(/[A-Z]/, {
-      id: 'components.Input.error.contain.uppercase',
-      defaultMessage: 'Password must contain at least one uppercase character',
-    })
-    .matches(/\d/, {
-      id: 'components.Input.error.contain.number',
-      defaultMessage: 'Password must contain at least one number',
-    }),
+    .test(
+      'lowercase',
+      {
+        id: 'components.Input.error.contain.lowercase',
+        defaultMessage: 'Password must contain at least one lowercase character',
+      },
+      (value) => {
+        if (!value) return true;
+        return /[a-z]/.test(value);
+      }
+    )
+    .test(
+      'uppercase',
+      {
+        id: 'components.Input.error.contain.uppercase',
+        defaultMessage: 'Password must contain at least one uppercase character',
+      },
+      (value) => {
+        if (!value) return true;
+        return /[A-Z]/.test(value);
+      }
+    )
+    .test(
+      'number',
+      {
+        id: 'components.Input.error.contain.number',
+        defaultMessage: 'Password must contain at least one number',
+      },
+      (value) => {
+        if (!value) return true;
+        return /\d/.test(value);
+      }
+    ),
   confirmPassword: yup
     .string()
     .transform((value) => (value === '' ? null : value))
