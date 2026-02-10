@@ -120,10 +120,17 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
     });
   }
 
-  const allPermissions: Permission[] =
-    typeof permissions === 'function'
-      ? (permissions(DEFAULT_PERMISSIONS) ?? DEFAULT_PERMISSIONS)
-      : [...DEFAULT_PERMISSIONS, ...permissions];
+  let allPermissions: Permission[];
+
+  if (typeof permissions === 'function') {
+    /**
+     * The callback form can return `undefined` to mean "use defaults".
+     * Guard against passing `undefined` into AuthProvider.
+     */
+    allPermissions = permissions(DEFAULT_PERMISSIONS) ?? DEFAULT_PERMISSIONS;
+  } else {
+    allPermissions = [...DEFAULT_PERMISSIONS, ...permissions];
+  }
 
   if (routerRef.current === null) {
     routerRef.current = createMemoryRouter(
