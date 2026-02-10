@@ -198,7 +198,9 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
   };
 
   return (
-    <Th
+    <SortableTh
+      onClick={sortable ? handleClickSort : undefined}
+      $sortable={!!sortable}
       action={
         isSorted &&
         sortable && (
@@ -209,18 +211,17 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
       }
     >
       <Tooltip label={sortable ? sortLabel : label}>
-        <Typography
-          textColor="neutral600"
-          tag={!isSorted && sortable ? 'button' : 'span'}
-          onClick={handleClickSort}
-          variant="sigma"
-        >
+        <Typography textColor="neutral600" tag="span" variant="sigma">
           {label}
         </Typography>
       </Tooltip>
-    </Th>
+    </SortableTh>
   );
 };
+
+const SortableTh = styled(Th)<{ $sortable: boolean }>`
+  cursor: ${({ $sortable }) => ($sortable ? 'pointer' : 'default')};
+`;
 
 const SortIcon = styled(CaretDown)<{
   $isUp: boolean;
