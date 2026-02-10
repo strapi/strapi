@@ -30,17 +30,9 @@ describe('session-manager provider', () => {
   });
 
   describe('bootstrap', () => {
-    it('does not throw when serveAdminPanel is false and no JWT secret', async () => {
+    it('throws when JWT secret is missing', async () => {
       const strapi = createMockStrapi({
-        admin: { serveAdminPanel: false },
-      });
-
-      await expect(sessionManagerProvider.bootstrap!(strapi)).resolves.toBeUndefined();
-    });
-
-    it('throws when serveAdminPanel is true and JWT secret is missing', async () => {
-      const strapi = createMockStrapi({
-        admin: { serveAdminPanel: true, auth: {} },
+        admin: { auth: {} },
       });
 
       await expect(sessionManagerProvider.bootstrap!(strapi)).rejects.toThrow(
@@ -48,9 +40,9 @@ describe('session-manager provider', () => {
       );
     });
 
-    it('does not throw when serveAdminPanel is true and JWT secret is present', async () => {
+    it('does not throw when JWT secret is present', async () => {
       const strapi = createMockStrapi({
-        admin: { serveAdminPanel: true, auth: { secret: 'test-secret' } },
+        admin: { auth: { secret: 'test-secret' } },
       });
 
       await expect(sessionManagerProvider.bootstrap!(strapi)).resolves.toBeUndefined();
