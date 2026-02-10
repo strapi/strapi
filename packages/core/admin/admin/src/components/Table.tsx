@@ -197,9 +197,20 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (sortable && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      handleClickSort();
+    }
+  };
+
   return (
     <SortableTh
       onClick={sortable ? handleClickSort : undefined}
+      onKeyDown={sortable ? handleKeyDown : undefined}
+      tabIndex={sortable ? 0 : undefined}
+      role={sortable ? 'button' : undefined}
+      aria-label={sortable ? sortLabel : undefined}
       $sortable={!!sortable}
       action={
         isSorted &&
