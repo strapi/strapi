@@ -3,6 +3,7 @@
 import * as React from 'react';
 
 import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
+import { adminApi } from '@strapi/admin/strapi-admin';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import {
@@ -35,7 +36,6 @@ import { _internalConfigurationContextProvider as ConfigurationContextProvider }
 import { NotificationsProvider } from '../src/features/Notifications';
 import { StrapiAppProvider } from '../src/features/StrapiApp';
 import { reducer as appReducer } from '../src/reducer';
-import { adminApi } from '../src/services/api';
 
 import { server } from './server';
 import { initialState } from './store';
@@ -45,6 +45,18 @@ setLogger({
   warn: () => {},
   error: () => {},
 });
+
+/**
+ * Rendered children are provided through context so they can update across RTL `rerender()`
+ * without needing to recreate the data router (which can be unstable for React Router).
+ */
+const TestChildrenContext = React.createContext<React.ReactNode>(null);
+
+const TestChildren = () => {
+  const children = React.useContext(TestChildrenContext);
+
+  return <>{children}</>;
+};
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -108,9 +120,9 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
     });
   }
 
-  const allPermissions =
+  const allPermissions: Permission[] =
     typeof permissions === 'function'
-      ? permissions(DEFAULT_PERMISSIONS)
+      ? (permissions(DEFAULT_PERMISSIONS) ?? DEFAULT_PERMISSIONS)
       : [...DEFAULT_PERMISSIONS, ...permissions];
 
   if (routerRef.current === null) {
@@ -127,7 +139,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                   widgets: [],
                   getAll: jest.fn(),
                   register: jest.fn(),
-                } as any
+                } as unknown as React.ComponentProps<typeof StrapiAppProvider>['widgets']
               }
               customFields={{
                 customFields: {},
@@ -193,7 +205,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                                   communityEdition
                                   shouldUpdateStrapi={false}
                                 >
-                                  {children}
+                                  <TestChildren />
                                 </AppInfoProvider>
                               </ConfigurationContextProvider>
                             </GuidedTourContext>
@@ -215,7 +227,11 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
   }
 
   // en is the default locale of the admin app.
-  return <RouterProvider router={routerRef.current!} />;
+  return (
+    <TestChildrenContext.Provider value={children}>
+      <RouterProvider router={routerRef.current!} />
+    </TestChildrenContext.Provider>
+  );
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment

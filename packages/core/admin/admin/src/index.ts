@@ -1,10 +1,12 @@
-import { StrapiAppPlugin } from './StrapiApp';
-
 /**
+ * Main entrypoint for `@strapi/admin/strapi-admin`.
+ *
  * DO NOT REMOVE. This export is what's used to render the admin panel at all.
  * Without it === no admin panel.
  */
 export * from './render';
+
+import { StrapiAppPlugin } from './StrapiApp';
 
 /**
  * components
@@ -103,7 +105,6 @@ export type { CMAdminConfiguration } from './types/adminConfiguration';
 /**
  * Components
  */
-
 export { Layouts, type LayoutProps } from './components/Layouts/Layout';
 
 export type PluginDefinition = StrapiAppPlugin;
