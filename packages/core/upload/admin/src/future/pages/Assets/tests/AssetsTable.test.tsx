@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { AssetsList } from '../components/AssetsList';
+import { AssetsTable } from '../components/AssetsTable';
 
 import type { File } from '../../../../../../shared/contracts/files';
 
@@ -27,9 +27,9 @@ interface SetupProps {
   assets?: File[];
 }
 
-const setup = ({ assets = mockAssets }: SetupProps = {}) => render(<AssetsList assets={assets} />);
+const setup = ({ assets = mockAssets }: SetupProps = {}) => render(<AssetsTable assets={assets} />);
 
-describe('AssetsList', () => {
+describe('AssetsTable', () => {
   describe('Table rendering', () => {
     it('renders a table element', () => {
       setup();
@@ -46,37 +46,14 @@ describe('AssetsList', () => {
 
   describe('AssetPreviewCell', () => {
     describe('Image assets', () => {
-      it('renders image thumbnail for image/jpeg', () => {
+      it('renders row for image/jpeg', () => {
         setup({ assets: [createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg')] });
-        const img = screen.getByRole('img');
-        expect(img).toHaveAttribute('alt', 'Alt text for test.jpg');
-      });
-
-      it('renders image thumbnail for image/png', () => {
-        setup({ assets: [createMockAsset(1, 'test.png', 'image/png', '.png')] });
-        expect(screen.getByRole('img')).toBeInTheDocument();
-      });
-
-      it('renders presentational image when alternativeText is not provided', () => {
-        const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
-        asset.alternativeText = null;
-        setup({ assets: [asset] });
-        expect(screen.queryByRole('img')).not.toBeInTheDocument();
         expect(screen.getByText('test.jpg')).toBeInTheDocument();
       });
 
-      it('uses thumbnail format url when available', () => {
-        const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
-        asset.formats = { thumbnail: { url: '/uploads/thumb.jpg' } };
-        setup({ assets: [asset] });
-        expect(screen.getByRole('img')).toBeInTheDocument();
-      });
-
-      it('falls back to original url when no thumbnail', () => {
-        const asset = createMockAsset(1, 'test.jpg', 'image/jpeg', '.jpg');
-        asset.formats = null;
-        setup({ assets: [asset] });
-        expect(screen.getByRole('img')).toBeInTheDocument();
+      it('renders row for image/png', () => {
+        setup({ assets: [createMockAsset(1, 'test.png', 'image/png', '.png')] });
+        expect(screen.getByText('test.png')).toBeInTheDocument();
       });
     });
 

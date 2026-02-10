@@ -99,7 +99,10 @@ export interface PreviewHandlerParams {
 
 export interface PreviewConfig {
   allowedOrigins?: string[];
-  handler: (uid: string, params: PreviewHandlerParams) => string | null | undefined;
+  handler: (
+    uid: string,
+    params: PreviewHandlerParams
+  ) => string | null | undefined | Promise<string | null | undefined>;
 }
 
 export interface Preview {
