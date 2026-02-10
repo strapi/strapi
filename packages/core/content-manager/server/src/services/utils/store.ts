@@ -66,7 +66,7 @@ const setModelConfiguration = async (key: string, value: any) => {
   const currentConfig = { ...storedConfig };
 
   Object.keys(value).forEach((key) => {
-    if (value[key] !== null && value[key] !== undefined) {
+    if (value[key] !== undefined) {
       _.set(currentConfig, key, value[key]);
     }
   });
