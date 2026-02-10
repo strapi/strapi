@@ -1091,27 +1091,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/types@npm:3.973.0":
-  version: 3.973.0
-  resolution: "@aws-sdk/types@npm:3.973.0"
-  dependencies:
-    "@smithy/types": "npm:^4.12.0"
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/3f30b23a1f9099efab45cc217513b83dd1cf2dea5da49a7593c0b55b8184c738b95ea64aab8e8ce74ee657af9f265aa937a6c940b52a8bf4af02f12c2adbf7bf
-  languageName: node
-  linkType: hard
-
-"@aws-sdk/types@npm:^3.222.0":
-  version: 3.598.0
-  resolution: "@aws-sdk/types@npm:3.598.0"
-  dependencies:
-    "@smithy/types": "npm:^3.1.0"
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/83abd25e07ffc071e24f36b4fb4dae6e552d662ab55f832f9918ccff251ae80155e30a86d2bd0b98bb8b94adaa2a13f05e1bb071edf491e4f36755084ac63d4f
-  languageName: node
-  linkType: hard
-
-"@aws-sdk/types@npm:^3.973.0, @aws-sdk/types@npm:^3.973.1":
+"@aws-sdk/types@npm:3.973.1, @aws-sdk/types@npm:^3.222.0, @aws-sdk/types@npm:^3.973.0, @aws-sdk/types@npm:^3.973.1":
   version: 3.973.1
   resolution: "@aws-sdk/types@npm:3.973.1"
   dependencies:
@@ -8969,15 +8949,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@smithy/types@npm:^3.1.0":
-  version: 3.2.0
-  resolution: "@smithy/types@npm:3.2.0"
-  dependencies:
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/6b82a9177ae85d9c08247675831ffeed87a671c51ab35ecf64641ea0afb6036a97b3a00a83e717529a74b416b19df0c0fc2b2930a9b55bb0d34bea2390f835ad
-  languageName: node
-  linkType: hard
-
 "@smithy/types@npm:^4.12.0":
   version: 4.12.0
   resolution: "@smithy/types@npm:4.12.0"
@@ -10191,7 +10162,7 @@ __metadata:
     "@aws-sdk/client-s3": "npm:3.975.0"
     "@aws-sdk/lib-storage": "npm:3.975.0"
     "@aws-sdk/s3-request-presigner": "npm:3.975.0"
-    "@aws-sdk/types": "npm:3.973.0"
+    "@aws-sdk/types": "npm:3.973.1"
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.35.0"
     lodash: "npm:4.17.23"
