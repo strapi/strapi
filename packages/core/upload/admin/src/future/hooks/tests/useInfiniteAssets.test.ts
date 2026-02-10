@@ -1,4 +1,6 @@
-import { renderHook, act, waitFor } from '@tests/utils';
+import { useState, createElement } from 'react';
+
+import { renderHook, render, act, waitFor } from '@tests/utils';
 
 import { useInfiniteAssets, PAGE_SIZE } from '../useInfiniteAssets';
 
@@ -96,26 +98,39 @@ describe('useInfiniteAssets', () => {
   });
 
   it('accumulates results across pages', () => {
-    // Start with page 1
-    const page1 = createMockPage(1, 3, 50);
-    mockUseGetAssetsQuery.mockReturnValue(page1);
+    const page1Response = createMockPage(1, 4, 70);
+    const page2Response = createMockPage(2, 4, 70);
+    const page3Response = createMockPage(3, 4, 70);
 
-    const { result, rerender } = renderHook(() => useInfiniteAssets());
+    mockUseGetAssetsQuery.mockImplementation(({ page: p }: { page: number }) => {
+      if (p === 2) {
+        return page2Response;
+      }
+
+      if (p === 3) {
+        return page3Response;
+      }
+
+      return page1Response;
+    });
+
+    const { result } = renderHook(() => useInfiniteAssets());
 
     expect(result.current.assets).toHaveLength(PAGE_SIZE);
 
-    // Simulate fetchNextPage and page 2 response
+    // Fetch page 2
     act(() => {
       result.current.fetchNextPage();
     });
 
-    const page2 = createMockPage(2, 3, 50);
-    mockUseGetAssetsQuery.mockReturnValue(page2);
-    rerender();
+    // Fetch page 3 — pages 2 and 3 should accumulate
+    act(() => {
+      result.current.fetchNextPage();
+    });
 
     expect(result.current.assets).toHaveLength(PAGE_SIZE * 2);
-    expect(result.current.assets[0].id).toBe(1);
-    expect(result.current.assets[PAGE_SIZE].id).toBe(PAGE_SIZE + 1);
+    expect(result.current.assets[0].id).toBe(PAGE_SIZE + 1);
+    expect(result.current.assets[PAGE_SIZE].id).toBe(PAGE_SIZE * 2 + 1);
   });
 
   it('hasNextPage is false when on last page', () => {
@@ -156,20 +171,30 @@ describe('useInfiniteAssets', () => {
     const page1 = createMockPage(1, 3, 50);
     mockUseGetAssetsQuery.mockReturnValue(page1);
 
-    // eslint-disable-next-line prefer-const
-    let sort: string | undefined;
-    const { result, rerender } = renderHook(() => useInfiniteAssets({ sort }));
+    let hookResult: ReturnType<typeof useInfiniteAssets>;
+    let changeSort: () => void;
+
+    const SortTestWrapper = () => {
+      const [sort, setSort] = useState<string | undefined>(undefined);
+      hookResult = useInfiniteAssets({ sort });
+      changeSort = () => setSort('name:ASC');
+
+      return null;
+    };
+
+    render(createElement(SortTestWrapper));
 
     // Go to page 2
     act(() => {
-      result.current.fetchNextPage();
+      hookResult.fetchNextPage();
     });
 
     expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
 
-    // Change sort
-    sort = 'name:ASC';
-    rerender();
+    // Change sort — triggers useEffect that resets page to 1
+    act(() => {
+      changeSort();
+    });
 
     await waitFor(() => {
       expect(mockUseGetAssetsQuery).toHaveBeenLastCalledWith(
