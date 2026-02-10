@@ -1,6 +1,4 @@
 /**
- * Main entrypoint for `@strapi/admin/strapi-admin`.
- *
  * DO NOT REMOVE. This export is what's used to render the admin panel at all.
  * Without it === no admin panel.
  */

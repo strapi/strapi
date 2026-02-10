@@ -15,11 +15,6 @@ const moduleNameMapper = {
   '^react-dom$': path.join(__dirname, 'node_modules/react-dom'),
   '^react-router-dom$': path.join(__dirname, 'node_modules/react-router-dom'),
   '^styled-components$': path.join(__dirname, 'node_modules/styled-components'),
-  // Ensure tests use workspace source test utilities rather than stale built artifacts.
-  '^@strapi/admin/strapi-admin/test$': path.join(
-    __dirname,
-    'packages/core/admin/admin/tests/index.ts'
-  ),
 };
 
 /**
