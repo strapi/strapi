@@ -78,7 +78,9 @@
   },
   "dependencies": {
     "@juggle/resize-observer": "3.4.0",
+    "@testing-library/react": "16.3.0",
     "jest-styled-components": "7.1.1",
+    "react-query": "3.39.3",
     "whatwg-fetch": "3.6.2"
   },
   "devDependencies": {
