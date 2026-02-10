@@ -46,6 +46,18 @@ setLogger({
   error: () => {},
 });
 
+/**
+ * Rendered children are provided through context so they can update across RTL `rerender()`
+ * without needing to recreate the data router (which can be unstable for React Router).
+ */
+const TestChildrenContext = React.createContext<React.ReactNode>(null);
+
+const TestChildren = () => {
+  const children = React.useContext(TestChildrenContext);
+
+  return <>{children}</>;
+};
+
 interface ProvidersProps {
   children: React.ReactNode;
   initialEntries?: MemoryRouterProps['initialEntries'];
@@ -108,10 +120,17 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
     });
   }
 
-  const allPermissions =
-    typeof permissions === 'function'
-      ? permissions(DEFAULT_PERMISSIONS)
-      : [...DEFAULT_PERMISSIONS, ...permissions];
+  let allPermissions: Permission[];
+
+  if (typeof permissions === 'function') {
+    /**
+     * The callback form can return `undefined` to mean "use defaults".
+     * Guard against passing `undefined` into AuthProvider.
+     */
+    allPermissions = permissions(DEFAULT_PERMISSIONS) ?? DEFAULT_PERMISSIONS;
+  } else {
+    allPermissions = [...DEFAULT_PERMISSIONS, ...permissions];
+  }
 
   if (routerRef.current === null) {
     routerRef.current = createMemoryRouter(
@@ -127,7 +146,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                   widgets: [],
                   getAll: jest.fn(),
                   register: jest.fn(),
-                } as any
+                } as unknown as React.ComponentProps<typeof StrapiAppProvider>['widgets']
               }
               customFields={{
                 customFields: {},
@@ -193,7 +212,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                                   communityEdition
                                   shouldUpdateStrapi={false}
                                 >
-                                  {children}
+                                  <TestChildren />
                                 </AppInfoProvider>
                               </ConfigurationContextProvider>
                             </GuidedTourContext>
@@ -215,7 +234,11 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
   }
 
   // en is the default locale of the admin app.
-  return <RouterProvider router={routerRef.current!} />;
+  return (
+    <TestChildrenContext.Provider value={children}>
+      <RouterProvider router={routerRef.current!} />
+    </TestChildrenContext.Provider>
+  );
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment
