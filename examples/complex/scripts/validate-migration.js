@@ -17,10 +17,31 @@ const MEDIA_PER_RUN = 10;
 
 function parseCliArgs(argv) {
   const opts = { multiplier: 1, expectInvalidFk: true };
-  for (const a of argv) {
-    if (a === '--no-invalid-fk') opts.expectInvalidFk = false;
-    else if (!isNaN(Number(a))) opts.multiplier = Number(a);
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === '--multiplier' && argv[i + 1] != null) {
+      opts.multiplier = Number(argv[i + 1]);
+      i += 1;
+      continue;
+    }
+    if (arg?.startsWith('--multiplier=')) {
+      opts.multiplier = Number(arg.split('=')[1]);
+      continue;
+    }
+    if (!Number.isNaN(Number(arg))) {
+      opts.multiplier = Number(arg);
+    }
   }
+
+  const envMultiplier = process.env.MIGRATION_MULTIPLIER ?? process.env.SEED_MULTIPLIER;
+  if (!Number.isNaN(Number(envMultiplier))) {
+    opts.multiplier = Number(envMultiplier);
+  }
+
+  if (!Number.isFinite(opts.multiplier) || opts.multiplier <= 0) {
+    opts.multiplier = 1;
+  }
+
   return opts;
 }
 
@@ -331,6 +352,10 @@ async function validateRelationsPresence(strapi) {
       errors.push(`relation.id=${e.id} oneToManyBasics contains missing refs`);
     if (Array.isArray(e.manyToManyBasics) && e.manyToManyBasics.some((x) => !x || !x.id))
       errors.push(`relation.id=${e.id} manyToManyBasics contains missing refs`);
+    if (e.morph_to_one && !e.morph_to_one.id)
+      errors.push(`relation.id=${e.id} morph_to_one missing id`);
+    if (Array.isArray(e.morph_to_many) && e.morph_to_many.some((x) => !x || !x.id))
+      errors.push(`relation.id=${e.id} morph_to_many contains missing refs`);
   }
 
   // relation-dp: verify relation fields present for both published/draft (basic presence)
