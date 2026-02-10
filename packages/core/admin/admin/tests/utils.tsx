@@ -47,20 +47,19 @@ setLogger({
 });
 
 /**
- * React Router logs dev-only "Future Flag Warning" console.warn messages when
- * these are left undefined. Our test setup treats `console.warn` as a failure.
+ * RTL's `rerender()` updates the `children` passed to our test `render()` helper.
+ * However, we keep a stable `routerRef` to avoid recreating the data router (which
+ * can crash React Router). That means the route element tree would otherwise keep
+ * rendering the initial children forever.
  *
- * We explicitly set them to `false` here to keep v6 behavior unchanged while
- * silencing warnings during tests.
+ * We solve this by passing `children` via React context, so consumers inside the
+ * router element tree still update on rerenders without recreating the router.
  */
-const REACT_ROUTER_FUTURE_FLAGS = {
-  v7_startTransition: false,
-  v7_relativeSplatPath: false,
-  v7_fetcherPersist: false,
-  v7_normalizeFormMethod: false,
-  v7_partialHydration: false,
-  v7_skipActionErrorRevalidation: false,
-} as const;
+const TestChildrenContext = React.createContext<React.ReactNode>(null);
+
+const TestChildrenOutlet = () => {
+  return <>{React.useContext(TestChildrenContext)}</>;
+};
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -209,7 +208,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                                   communityEdition
                                   shouldUpdateStrapi={false}
                                 >
-                                  {children}
+                                  <TestChildrenOutlet />
                                 </AppInfoProvider>
                               </ConfigurationContextProvider>
                             </GuidedTourContext>
@@ -226,14 +225,16 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
       ],
       {
         initialEntries,
-        // Keep v6 defaults and avoid dev-only future-flag warnings during tests
-        future: REACT_ROUTER_FUTURE_FLAGS,
       }
     );
   }
 
   // en is the default locale of the admin app.
-  return <RouterProvider router={routerRef.current!} future={REACT_ROUTER_FUTURE_FLAGS} />;
+  return (
+    <TestChildrenContext.Provider value={children}>
+      <RouterProvider router={routerRef.current!} />
+    </TestChildrenContext.Provider>
+  );
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment
