@@ -42,10 +42,6 @@ describe('export', () => {
 
     expect(result.status).toBe(0);
     const stdout = String(result.stdout || '');
-    const stderr = String(result.stderr || '');
-    if (result.status !== 0) {
-      throw new Error(`Export failed: ${stderr || stdout}`);
-    }
 
     // CLI table: expect header (stdout can be truncated before Total row in some envs)
     expect(stdout).toMatch(/Type.*Count.*Size/);

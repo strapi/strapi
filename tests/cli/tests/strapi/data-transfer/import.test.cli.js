@@ -72,10 +72,6 @@ describe('import', () => {
 
     expect(result.status).toBe(0);
     const stdout = String(result.stdout || '');
-    const stderr = String(result.stderr || '');
-    if (result.status !== 0) {
-      throw new Error(`Import failed: ${stderr || stdout}`);
-    }
 
     // CLI table (stdout can be truncated before Total in some envs)
     expect(stdout).toMatch(/Import process has been completed successfully!?/);
