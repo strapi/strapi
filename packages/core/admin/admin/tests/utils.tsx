@@ -46,6 +46,18 @@ setLogger({
   error: () => {},
 });
 
+/**
+ * Rendered children are provided through context so they can update across RTL `rerender()`
+ * without needing to recreate the data router (which can be unstable for React Router).
+ */
+const TestChildrenContext = React.createContext<React.ReactNode>(null);
+
+const TestChildren = () => {
+  const children = React.useContext(TestChildrenContext);
+
+  return <>{children}</>;
+};
+
 interface ProvidersProps {
   children: React.ReactNode;
   initialEntries?: MemoryRouterProps['initialEntries'];
@@ -83,125 +95,150 @@ const DEFAULT_PERMISSIONS = [
 ];
 
 const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: ProvidersProps) => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
+  /**
+   * Keep these instances stable for the lifetime of the render.
+   * Recreating the data router on rerenders can crash React Router.
+   */
+  const queryClientRef = React.useRef<QueryClient | null>(null);
+  const storeRef = React.useRef<ReturnType<typeof configureStore> | null>(null);
+  const routerRef = React.useRef<ReturnType<typeof createMemoryRouter> | null>(null);
+
+  if (queryClientRef.current === null) {
+    queryClientRef.current = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
       },
-    },
-  });
+    });
+  }
 
-  const store = configureStore({
-    ...defaultTestStoreConfig(),
-    ...storeConfig,
-  });
+  if (storeRef.current === null) {
+    storeRef.current = configureStore({
+      ...defaultTestStoreConfig(),
+      ...storeConfig,
+    });
+  }
 
-  const allPermissions =
-    typeof permissions === 'function'
-      ? permissions(DEFAULT_PERMISSIONS)
-      : [...DEFAULT_PERMISSIONS, ...permissions];
+  let allPermissions: Permission[];
 
-  const router = createMemoryRouter(
-    [
-      {
-        path: '/*',
-        element: (
-          <StrapiAppProvider
-            components={{}}
-            rbac={new RBAC()}
-            widgets={
-              {
-                widgets: [],
+  if (typeof permissions === 'function') {
+    /**
+     * The callback form can return `undefined` to mean "use defaults".
+     * Guard against passing `undefined` into AuthProvider.
+     */
+    allPermissions = permissions(DEFAULT_PERMISSIONS) ?? DEFAULT_PERMISSIONS;
+  } else {
+    allPermissions = [...DEFAULT_PERMISSIONS, ...permissions];
+  }
+
+  if (routerRef.current === null) {
+    routerRef.current = createMemoryRouter(
+      [
+        {
+          path: '/*',
+          element: (
+            <StrapiAppProvider
+              components={{}}
+              rbac={new RBAC()}
+              widgets={
+                {
+                  widgets: [],
+                  getAll: jest.fn(),
+                  register: jest.fn(),
+                } as unknown as React.ComponentProps<typeof StrapiAppProvider>['widgets']
+              }
+              customFields={{
+                customFields: {},
+                get: jest.fn().mockReturnValue({
+                  name: 'color',
+                  pluginId: 'mycustomfields',
+                  type: 'text',
+                  icon: jest.fn(),
+                  intlLabel: {
+                    id: 'mycustomfields.color.label',
+                    defaultMessage: 'Color',
+                  },
+                  intlDescription: {
+                    id: 'mycustomfields.color.description',
+                    defaultMessage: 'Select any color',
+                  },
+                  components: {
+                    Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
+                  },
+                }),
                 getAll: jest.fn(),
                 register: jest.fn(),
-              } as any
-            }
-            customFields={{
-              customFields: {},
-              get: jest.fn().mockReturnValue({
-                name: 'color',
-                pluginId: 'mycustomfields',
-                type: 'text',
-                icon: jest.fn(),
-                intlLabel: {
-                  id: 'mycustomfields.color.label',
-                  defaultMessage: 'Color',
-                },
-                intlDescription: {
-                  id: 'mycustomfields.color.description',
-                  defaultMessage: 'Select any color',
-                },
-                components: {
-                  Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
-                },
-              }),
-              getAll: jest.fn(),
-              register: jest.fn(),
-            }}
-            fields={{}}
-            menu={[]}
-            getAdminInjectedComponents={jest.fn()}
-            getPlugin={jest.fn()}
-            plugins={{}}
-            runHookParallel={jest.fn()}
-            runHookWaterfall={jest.fn().mockImplementation((_name, initialValue) => initialValue)}
-            runHookSeries={jest.fn()}
-            settings={{}}
-          >
-            <Provider store={store}>
-              <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
-                <QueryClientProvider client={queryClient}>
-                  <DndProvider backend={HTML5Backend}>
-                    <LanguageProvider messages={{}}>
-                      <Theme
-                        themes={{
-                          dark: darkTheme,
-                          light: lightTheme,
-                        }}
-                      >
-                        <NotificationsProvider>
-                          <GuidedTourContext enabled={false}>
-                            <ConfigurationContextProvider
-                              showReleaseNotification={false}
-                              logos={{
-                                auth: { default: 'default' },
-                                menu: { default: 'default' },
-                              }}
-                              updateProjectSettings={jest.fn()}
-                            >
-                              <AppInfoProvider
-                                autoReload
-                                useYarn
-                                dependencies={{
-                                  '@strapi/plugin-documentation': '4.2.0',
-                                  '@strapi/provider-upload-cloudinary': '4.2.0',
+              }}
+              fields={{}}
+              menu={[]}
+              getAdminInjectedComponents={jest.fn()}
+              getPlugin={jest.fn()}
+              plugins={{}}
+              runHookParallel={jest.fn()}
+              runHookWaterfall={jest.fn().mockImplementation((_name, initialValue) => initialValue)}
+              runHookSeries={jest.fn()}
+              settings={{}}
+            >
+              <Provider store={storeRef.current!}>
+                <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
+                  <QueryClientProvider client={queryClientRef.current!}>
+                    <DndProvider backend={HTML5Backend}>
+                      <LanguageProvider messages={{}}>
+                        <Theme
+                          themes={{
+                            dark: darkTheme,
+                            light: lightTheme,
+                          }}
+                        >
+                          <NotificationsProvider>
+                            <GuidedTourContext enabled={false}>
+                              <ConfigurationContextProvider
+                                showReleaseNotification={false}
+                                logos={{
+                                  auth: { default: 'default' },
+                                  menu: { default: 'default' },
                                 }}
-                                strapiVersion="4.1.0"
-                                communityEdition
-                                shouldUpdateStrapi={false}
+                                updateProjectSettings={jest.fn()}
                               >
-                                {children}
-                              </AppInfoProvider>
-                            </ConfigurationContextProvider>
-                          </GuidedTourContext>
-                        </NotificationsProvider>
-                      </Theme>
-                    </LanguageProvider>
-                  </DndProvider>
-                </QueryClientProvider>
-              </AuthProvider>
-            </Provider>
-          </StrapiAppProvider>
-        ),
-      },
-    ],
-    {
-      initialEntries,
-    }
-  );
+                                <AppInfoProvider
+                                  autoReload
+                                  useYarn
+                                  dependencies={{
+                                    '@strapi/plugin-documentation': '4.2.0',
+                                    '@strapi/provider-upload-cloudinary': '4.2.0',
+                                  }}
+                                  strapiVersion="4.1.0"
+                                  communityEdition
+                                  shouldUpdateStrapi={false}
+                                >
+                                  <TestChildren />
+                                </AppInfoProvider>
+                              </ConfigurationContextProvider>
+                            </GuidedTourContext>
+                          </NotificationsProvider>
+                        </Theme>
+                      </LanguageProvider>
+                    </DndProvider>
+                  </QueryClientProvider>
+                </AuthProvider>
+              </Provider>
+            </StrapiAppProvider>
+          ),
+        },
+      ],
+      {
+        initialEntries,
+      }
+    );
+  }
 
   // en is the default locale of the admin app.
-  return <RouterProvider router={router} />;
+  return (
+    <TestChildrenContext.Provider value={children}>
+      <RouterProvider router={routerRef.current!} />
+    </TestChildrenContext.Provider>
+  );
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment
