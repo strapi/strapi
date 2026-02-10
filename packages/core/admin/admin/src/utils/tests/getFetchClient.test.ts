@@ -91,6 +91,56 @@ describe('getFetchClient', () => {
     );
   });
 
+  describe('204 no-content response', () => {
+    it('should return empty data for 204 responses without calling response.json()', async () => {
+      const jsonMock = jest.fn();
+      (window.fetch as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          status: 204,
+          ok: true,
+          json: jsonMock,
+        })
+      );
+
+      const fetchClient = getFetchClient();
+      const result = await fetchClient.post('/admin/forgot-password', {
+        email: 'test@example.com',
+      });
+
+      expect(result).toEqual({ data: {}, status: 204 });
+      expect(jsonMock).not.toHaveBeenCalled();
+    });
+
+    it('should handle 204 responses for all HTTP methods', async () => {
+      const mock204 = () =>
+        Promise.resolve({
+          status: 204,
+          ok: true,
+          json: jest.fn(),
+        });
+
+      (window.fetch as jest.Mock)
+        .mockImplementationOnce(mock204)
+        .mockImplementationOnce(mock204)
+        .mockImplementationOnce(mock204)
+        .mockImplementationOnce(mock204);
+
+      const fetchClient = getFetchClient();
+
+      const getResult = await fetchClient.get('/test');
+      expect(getResult).toEqual({ data: {}, status: 204 });
+
+      const postResult = await fetchClient.post('/test', {});
+      expect(postResult).toEqual({ data: {}, status: 204 });
+
+      const putResult = await fetchClient.put('/test', {});
+      expect(putResult).toEqual({ data: {}, status: 204 });
+
+      const delResult = await fetchClient.del('/test');
+      expect(delResult).toEqual({ data: {}, status: 204 });
+    });
+  });
+
   describe('token refresh on 401', () => {
     it('should refresh token and retry on 401 error', async () => {
       // First call returns 401
