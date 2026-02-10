@@ -47,10 +47,10 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.600.0",
-    "@aws-sdk/lib-storage": "3.433.0",
-    "@aws-sdk/s3-request-presigner": "3.433.0",
-    "@aws-sdk/types": "3.433.0",
+    "@aws-sdk/client-s3": "3.975.0",
+    "@aws-sdk/lib-storage": "3.975.0",
+    "@aws-sdk/s3-request-presigner": "3.975.0",
+    "@aws-sdk/types": "3.973.0",
     "lodash": "4.17.23"
   },
   "devDependencies": {

@@ -1,4 +1,6 @@
-import type { Page, Locator } from '@playwright/test';
+import { expect, type Page, type Locator } from '@playwright/test';
+import { readFileSync } from 'fs';
+import path from 'path';
 
 /**
  * Page Object Model for the Assets Page (Future version)
@@ -8,19 +10,29 @@ export class AssetsPage {
   readonly newButton: Locator;
   readonly importFilesMenuItem: Locator;
   readonly fileInput: Locator;
+  readonly gridViewButton: Locator;
+  readonly tableViewButton: Locator;
+  readonly dropZone: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.newButton = page.getByRole('button', { name: 'New' });
     this.importFilesMenuItem = page.getByRole('menuitem', { name: 'Import files' });
     this.fileInput = page.locator('input[type="file"]');
+    this.gridViewButton = page.getByRole('radio', { name: 'Grid view' });
+    this.tableViewButton = page.getByRole('radio', { name: 'Table view' });
+    this.dropZone = page.getByTestId('assets-dropzone');
+  }
+
+  async goto() {
+    await this.page.goto('/admin/plugins/unstable-upload');
   }
 
   /**
-   * Navigate to the Media Library page
+   * Get the drop zone info message ("Drop here to upload to" / "Current folder")
    */
-  async goto() {
-    await this.page.goto('/admin/plugins/unstable-upload');
+  getDropZoneMessage() {
+    return this.page.getByText('Drop here to upload to');
   }
 
   /**
@@ -28,6 +40,47 @@ export class AssetsPage {
    */
   async openNewMenu() {
     await this.newButton.click();
+  }
+
+  /**
+   * Upload files via drag and drop onto the assets drop zone.
+   * Uses DataTransfer and dispatchEvent - works in Chromium and Firefox (DataTransfer is not supported in WebKit).
+   *
+   * @param filePaths - Absolute path(s) to file(s) to upload
+   */
+  async uploadFilesWithDragAndDrop(filePaths: string | string[]) {
+    const paths = Array.isArray(filePaths) ? filePaths : [filePaths];
+    const files = paths.map((filePath) => {
+      const buffer = readFileSync(filePath);
+      const filename = path.basename(filePath);
+      const ext = path.extname(filename).toLowerCase();
+      const mimeTypes: Record<string, string> = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+      };
+      const mimeType = mimeTypes[ext] ?? 'application/octet-stream';
+      // Pass as plain array - Buffer doesn't serialize correctly with evaluateHandle
+      return { data: Array.from(new Uint8Array(buffer)), filename, mimeType };
+    });
+
+    const dataTransfer = await this.page.evaluateHandle((filesData) => {
+      const dt = new DataTransfer();
+      for (const { data, filename, mimeType } of filesData) {
+        const file = new File([new Uint8Array(data)], filename, { type: mimeType });
+        dt.items.add(file);
+      }
+      return dt;
+    }, files);
+
+    // dispatchEvent must fire dragenter first - that's what sets isDraggingOver and shows the overlay
+    await this.dropZone.dispatchEvent('dragenter', { dataTransfer });
+    await this.dropZone.dispatchEvent('dragover', { dataTransfer });
+    await expect(this.getDropZoneMessage()).toBeVisible();
+
+    await this.dropZone.dispatchEvent('drop', { dataTransfer });
   }
 
   /**
@@ -55,9 +108,6 @@ export class AssetsPage {
     return fileChooser;
   }
 
-  /**
-   * Wait for upload success notification
-   */
   async waitForUploadSuccess() {
     // Wait for the success notification inside the Notifications region
     const notification = this.page
@@ -66,9 +116,6 @@ export class AssetsPage {
     await notification.waitFor({ state: 'visible' });
   }
 
-  /**
-   * Get the success notification message
-   */
   async getSuccessMessage() {
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
@@ -77,9 +124,6 @@ export class AssetsPage {
     return await notification.textContent();
   }
 
-  /**
-   * Get the error notification message
-   */
   async getErrorMessage() {
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
@@ -88,18 +132,28 @@ export class AssetsPage {
     return await notification.textContent();
   }
 
-  /**
-   * Check if the file input value is empty (reset)
-   */
   async isFileInputReset() {
     const inputValue = await this.fileInput.inputValue();
     return inputValue === '';
   }
 
-  /**
-   * Get a specific asset row by name
-   */
   getAssetRow(name: string) {
     return this.page.getByRole('row', { name: new RegExp(name) });
+  }
+
+  async switchToGridView() {
+    await this.gridViewButton.click();
+  }
+
+  async switchToTableView() {
+    await this.tableViewButton.click();
+  }
+
+  async isGridViewActive() {
+    return (await this.gridViewButton.getAttribute('aria-checked')) === 'true';
+  }
+
+  getAssetCard(name: string) {
+    return this.page.locator('div').filter({ hasText: name }).nth(1);
   }
 }
