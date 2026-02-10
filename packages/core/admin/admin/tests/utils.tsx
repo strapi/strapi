@@ -3,7 +3,6 @@
 import * as React from 'react';
 
 import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
-import { adminApi } from '@strapi/admin/strapi-admin';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
 import {
@@ -36,6 +35,7 @@ import { _internalConfigurationContextProvider as ConfigurationContextProvider }
 import { NotificationsProvider } from '../src/features/Notifications';
 import { StrapiAppProvider } from '../src/features/StrapiApp';
 import { reducer as appReducer } from '../src/reducer';
+import { adminApi } from '../src/services/api';
 
 import { server } from './server';
 import { initialState } from './store';
