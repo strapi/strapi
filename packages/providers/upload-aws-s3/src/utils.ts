@@ -1,5 +1,5 @@
 import type { AwsCredentialIdentity } from '@aws-sdk/types';
-import type { InitOptions } from '.';
+import type { DefaultOptions, InitOptions } from '.';
 
 const ENDPOINT_PATTERN = /^(.+\.)?s3[.-]([a-z0-9-]+)\./;
 
@@ -89,10 +89,16 @@ function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
 }
 
 export const extractCredentials = (options: InitOptions): AwsCredentialIdentity | null => {
-  if (options.s3Options?.credentials) {
+  const s3Options = (options as { s3Options?: DefaultOptions }).s3Options;
+
+  if (s3Options?.credentials) {
+    // Support AWS STS session tokens for temporary credentials
     return {
-      accessKeyId: options.s3Options.credentials.accessKeyId,
-      secretAccessKey: options.s3Options.credentials.secretAccessKey,
+      accessKeyId: s3Options.credentials.accessKeyId,
+      secretAccessKey: s3Options.credentials.secretAccessKey,
+      ...(s3Options.credentials.sessionToken
+        ? { sessionToken: s3Options.credentials.sessionToken }
+        : {}),
     };
   }
   return null;

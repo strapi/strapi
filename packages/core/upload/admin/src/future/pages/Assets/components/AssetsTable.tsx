@@ -1,5 +1,5 @@
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
-  Box,
   Flex,
   IconButton,
   RawTable,
@@ -11,21 +11,12 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import {
-  File as FileIcon,
-  FileCsv,
-  FilePdf,
-  FileXls,
-  FileZip,
-  Monitor,
-  More,
-  VolumeUp,
-} from '@strapi/icons';
+import { More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../enums';
-import { formatBytes, getFileExtension, prefixFileUrlWithBackendUrl } from '../../../utils/files';
+import { formatBytes } from '../../../utils/files';
+import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
 
@@ -80,51 +71,9 @@ interface AssetPreviewCellProps {
 }
 
 const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
-  const { alternativeText, ext, formats, mime, url } = asset;
+  const { ext, mime } = asset;
 
-  const fileExtension = getFileExtension(ext);
-
-  if (mime?.includes(AssetType.Image)) {
-    const mediaURL =
-      prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
-
-    return (
-      <Box width="3.2rem" height="3.2rem" borderRadius="4px" overflow="hidden" shrink={0}>
-        <img
-          src={mediaURL ?? undefined}
-          alt={alternativeText || ''}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      </Box>
-    );
-  }
-
-  if (mime?.includes(AssetType.Video) || mime?.includes(AssetType.Audio)) {
-    const Icon = mime?.includes(AssetType.Video) ? Monitor : VolumeUp;
-    return (
-      <Flex
-        borderRadius="4px"
-        color="neutral500"
-        width="3.2rem"
-        height="3.2rem"
-        justifyContent="center"
-        alignItems="center"
-        shrink={0}
-      >
-        <Icon width={16} height={16} />
-      </Flex>
-    );
-  }
-
-  type IconComponent = typeof FileIcon;
-  const DOC_ICON_MAP: Record<string, IconComponent> = {
-    pdf: FilePdf,
-    csv: FileCsv,
-    xls: FileXls,
-    zip: FileZip,
-  };
-
-  const DocIcon = fileExtension ? DOC_ICON_MAP[fileExtension] || FileIcon : FileIcon;
+  const DocIcon = getAssetIcon(mime, ext);
 
   return (
     <Flex
@@ -146,6 +95,7 @@ interface AssetRowProps {
 }
 
 const AssetRow = ({ asset }: AssetRowProps) => {
+  const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
 
   return (
@@ -153,26 +103,37 @@ const AssetRow = ({ asset }: AssetRowProps) => {
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <AssetPreviewCell asset={asset} />
-          <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
-            {asset.name}
-          </Typography>
+          <Flex direction="column" alignItems="flex-start">
+            <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
+              {asset.name}
+            </Typography>
+            {isMobile && (
+              <Typography textColor="neutral600" variant="pi">
+                {asset.size ? formatBytes(asset.size, 1) : '-'}
+              </Typography>
+            )}
+          </Flex>
         </Flex>
       </StyledTd>
-      <StyledTd>
-        <Typography textColor="neutral600">
-          {asset.createdAt ? formatDate(new Date(asset.createdAt), { dateStyle: 'long' }) : '-'}
-        </Typography>
-      </StyledTd>
-      <StyledTd>
-        <Typography textColor="neutral600">
-          {asset.updatedAt ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long' }) : '-'}
-        </Typography>
-      </StyledTd>
-      <StyledTd>
-        <Typography textColor="neutral600">
-          {asset.size ? formatBytes(asset.size, 1) : '-'}
-        </Typography>
-      </StyledTd>
+      {!isMobile && (
+        <>
+          <StyledTd>
+            <Typography textColor="neutral600">
+              {asset.createdAt ? formatDate(new Date(asset.createdAt), { dateStyle: 'long' }) : '-'}
+            </Typography>
+          </StyledTd>
+          <StyledTd>
+            <Typography textColor="neutral600">
+              {asset.updatedAt ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long' }) : '-'}
+            </Typography>
+          </StyledTd>
+          <StyledTd>
+            <Typography textColor="neutral600">
+              {asset.size ? formatBytes(asset.size, 1) : '-'}
+            </Typography>
+          </StyledTd>
+        </>
+      )}
       <StyledTd>
         <Flex justifyContent="flex-end">
           <IconButton
@@ -190,18 +151,23 @@ const AssetRow = ({ asset }: AssetRowProps) => {
   );
 };
 
-interface AssetsListProps {
+interface AssetsTableProps {
   assets: File[];
 }
 
-export const AssetsList = ({ assets }: AssetsListProps) => {
+export const AssetsTable = ({ assets }: AssetsTableProps) => {
+  const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
 
+  const visibleHeaders = isMobile
+    ? TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions')
+    : TABLE_HEADERS;
+
   return (
-    <StyledTable colCount={TABLE_HEADERS.length} rowCount={assets.length + 1}>
+    <StyledTable colCount={visibleHeaders.length} rowCount={assets.length + 1}>
       <StyledThead>
         <RawTr>
-          {TABLE_HEADERS.map((header) => {
+          {visibleHeaders.map((header) => {
             const tableHeaderLabel = formatMessage(header.label);
             const isVisuallyHidden = 'isVisuallyHidden' in header && header.isVisuallyHidden;
 
@@ -210,7 +176,7 @@ export const AssetsList = ({ assets }: AssetsListProps) => {
                 <StyledTh key={header.name}>
                   <VisuallyHidden>
                     {formatMessage({
-                      id: getTranslationKey('list.table.header.actions'),
+                      id: getTranslationKey('table.header.actions'),
                       defaultMessage: 'actions',
                     })}
                   </VisuallyHidden>
@@ -231,7 +197,7 @@ export const AssetsList = ({ assets }: AssetsListProps) => {
       <RawTbody>
         {assets.length === 0 ? (
           <RawTr>
-            <StyledBodyTd colSpan={TABLE_HEADERS.length}>
+            <StyledBodyTd colSpan={visibleHeaders.length}>
               <Typography textColor="neutral600">
                 {formatMessage({
                   id: 'app.components.EmptyStateLayout.content-document',

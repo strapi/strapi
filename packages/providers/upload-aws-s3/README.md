@@ -29,6 +29,7 @@ npm install @strapi/provider-upload-aws-s3 --save
   - `ACL` is the access control list for the object. Defaults to `public-read`.
   - `signedUrlExpires` is the number of seconds before a signed URL expires. (See [how signed URLs work](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-signed-urls.html)). Defaults to 15 minutes and URLs are only signed when ACL is set to `private`.
   - `Bucket` is the name of the bucket to upload to.
+- `providerOptions.providerConfig` contains extended configuration options (see below).
 - `actionOptions` is passed directly to the parameters to each method respectively. You can find the complete list of [upload/ uploadStream options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property) and [delete options](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObject-property)
 
 See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
@@ -69,6 +70,159 @@ module.exports = ({ env }) => ({
     },
   },
   // ...
+});
+```
+
+## Extended Provider Configuration
+
+The `providerConfig` option provides additional features for data integrity, security, and cost optimization.
+
+### Checksum Validation
+
+Enable automatic checksum calculation to ensure data integrity during uploads. The SDK calculates a checksum on the client side, and S3 validates it server-side.
+
+```js
+providerOptions: {
+  s3Options: { /* ... */ },
+  providerConfig: {
+    checksumAlgorithm: 'CRC64NVME', // Options: 'CRC32', 'CRC32C', 'SHA1', 'SHA256', 'CRC64NVME'
+  },
+},
+```
+
+`CRC64NVME` is recommended for best performance on modern hardware.
+
+### Conditional Writes (Prevent Overwrites)
+
+Prevent accidental file overwrites due to race conditions by enabling conditional writes. When enabled, uploads will fail if an object with the same key already exists.
+
+```js
+providerConfig: {
+  preventOverwrite: true,
+},
+```
+
+### Storage Class Configuration (AWS S3 only)
+
+Optimize storage costs by specifying a storage class for uploaded objects. Use lower-cost classes for infrequently accessed data.
+
+**Note:** Storage classes are AWS S3-specific. Other S3-compatible providers (MinIO, DigitalOcean Spaces, IONOS, Wasabi) will ignore this setting.
+
+```js
+providerConfig: {
+  storageClass: 'INTELLIGENT_TIERING', // Auto-optimizes costs
+},
+```
+
+Available storage classes (AWS S3):
+
+- `STANDARD` - Frequently accessed data (default)
+- `INTELLIGENT_TIERING` - Automatic cost optimization
+- `STANDARD_IA` - Infrequently accessed data
+- `ONEZONE_IA` - Infrequently accessed, single AZ
+- `GLACIER` - Archive storage
+- `DEEP_ARCHIVE` - Long-term archive
+- `GLACIER_IR` - Glacier Instant Retrieval
+
+### Server-Side Encryption
+
+Configure server-side encryption for compliance requirements (GDPR, HIPAA, etc.).
+
+```js
+providerConfig: {
+  encryption: {
+    type: 'AES256', // S3-managed encryption
+  },
+},
+```
+
+For KMS-managed encryption (AWS S3 only):
+
+```js
+providerConfig: {
+  encryption: {
+    type: 'aws:kms',
+    kmsKeyId: env('AWS_KMS_KEY_ID'),
+  },
+},
+```
+
+Available encryption types:
+
+- `AES256` - S3-managed keys (SSE-S3) - supported by most S3-compatible providers
+- `aws:kms` - AWS KMS-managed keys (SSE-KMS) - AWS S3 only
+- `aws:kms:dsse` - Dual-layer SSE with KMS - AWS S3 only
+
+### Object Tagging
+
+Apply tags to uploaded objects for cost allocation, lifecycle policies, and organization.
+
+```js
+providerConfig: {
+  tags: {
+    project: 'website',
+    environment: 'production',
+    team: 'backend',
+  },
+},
+```
+
+### Multipart Upload Configuration
+
+Configure multipart upload behavior for large files.
+
+```js
+providerConfig: {
+  multipart: {
+    partSize: 10 * 1024 * 1024, // 10MB per part
+    queueSize: 4,               // Number of parallel uploads
+    leavePartsOnError: false,   // Clean up on failure
+  },
+},
+```
+
+### Complete Configuration Example
+
+```js
+module.exports = ({ env }) => ({
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      providerOptions: {
+        baseUrl: env('CDN_URL'),
+        rootPath: env('CDN_ROOT_PATH'),
+        s3Options: {
+          credentials: {
+            accessKeyId: env('AWS_ACCESS_KEY_ID'),
+            secretAccessKey: env('AWS_ACCESS_SECRET'),
+          },
+          region: env('AWS_REGION'),
+          params: {
+            ACL: 'private',
+            signedUrlExpires: 15 * 60,
+            Bucket: env('AWS_BUCKET'),
+          },
+        },
+        providerConfig: {
+          checksumAlgorithm: 'CRC64NVME',
+          preventOverwrite: true,
+          storageClass: 'INTELLIGENT_TIERING',
+          encryption: {
+            type: 'aws:kms',
+            kmsKeyId: env('AWS_KMS_KEY_ID'),
+          },
+          tags: {
+            application: 'strapi',
+            environment: env('NODE_ENV'),
+          },
+          multipart: {
+            partSize: 10 * 1024 * 1024,
+            queueSize: 4,
+          },
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -113,7 +267,25 @@ module.exports = ({ env }) => ({
 
 #### Configuration for S3 compatible services
 
-This plugin may work with S3 compatible services by using the `endpoint`. Scaleway example:
+This plugin works with S3-compatible services by using the `endpoint` option. The provider automatically constructs correct URLs for S3-compatible services that return incorrect `Location` formats for multipart uploads (e.g. IONOS, MinIO).
+
+**Important:** Some providers require `forcePathStyle: true` in the `s3Options`. This is needed when the provider does not support virtual-hosted-style URLs (e.g. `bucket.endpoint.com`), and instead uses path-style URLs (e.g. `endpoint.com/bucket`).
+
+| Provider            | `forcePathStyle` | `ACL`             | Notes                             |
+| ------------------- | ---------------- | ----------------- | --------------------------------- |
+| IONOS               | `true`           | Supported         | Multipart Location bug auto-fixed |
+| MinIO               | `true`           | Supported         |                                   |
+| Contabo             | `true`           | Supported         |                                   |
+| Hetzner             | `true`           | Supported         |                                   |
+| DigitalOcean Spaces | Not needed       | Supported         |                                   |
+| Wasabi              | Not needed       | Supported         |                                   |
+| Scaleway            | Not needed       | Supported         |                                   |
+| Vultr               | Not needed       | Supported         |                                   |
+| Backblaze B2        | Not needed       | Supported         |                                   |
+| Cloudflare R2       | Not needed       | **Not supported** | Omit `ACL` from params            |
+
+##### Scaleway example
+
 `./config/plugins.js`
 
 ```js
@@ -123,19 +295,73 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        credentials: {
-          accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
-          secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
-        },
-        region: env('SCALEWAY_REGION'), // e.g "fr-par"
-        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "https://s3.fr-par.scw.cloud"
-        params: {
-          Bucket: env('SCALEWAY_BUCKET'),
+        s3Options: {
+          credentials: {
+            accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
+            secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
+          },
+          region: env('SCALEWAY_REGION'), // e.g "fr-par"
+          endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "https://s3.fr-par.scw.cloud"
+          params: {
+            Bucket: env('SCALEWAY_BUCKET'),
+          },
         },
       },
     },
   },
   // ...
+});
+```
+
+##### IONOS / MinIO / Contabo example (forcePathStyle required)
+
+```js
+module.exports = ({ env }) => ({
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      providerOptions: {
+        s3Options: {
+          credentials: {
+            accessKeyId: env('S3_ACCESS_KEY_ID'),
+            secretAccessKey: env('S3_ACCESS_SECRET'),
+          },
+          region: env('S3_REGION'),
+          endpoint: env('S3_ENDPOINT'),
+          forcePathStyle: true, // Required for these providers
+          params: {
+            Bucket: env('S3_BUCKET'),
+          },
+        },
+      },
+    },
+  },
+});
+```
+
+##### Cloudflare R2 example (no ACL support)
+
+```js
+module.exports = ({ env }) => ({
+  upload: {
+    config: {
+      provider: 'aws-s3',
+      providerOptions: {
+        s3Options: {
+          credentials: {
+            accessKeyId: env('R2_ACCESS_KEY_ID'),
+            secretAccessKey: env('R2_ACCESS_SECRET'),
+          },
+          region: 'auto',
+          endpoint: env('R2_ENDPOINT'), // e.g. "https://<account-id>.r2.cloudflarestorage.com"
+          params: {
+            Bucket: env('R2_BUCKET'),
+            // Do NOT set ACL - R2 does not support ACLs
+          },
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -253,3 +479,28 @@ upload: {
 ```
 
 This configuration ensures compatibility with the updated AWS SDK while providing flexibility in URL format selection, catering to various user needs.
+
+## Security Considerations
+
+This provider includes several security measures to protect against common attack vectors.
+
+### Path Traversal Prevention
+
+File paths, hashes, and extensions are sanitized to prevent directory traversal attacks. Sequences like `../` are removed, and special characters in file extensions are filtered.
+
+### Parameter Injection Protection
+
+The `customParams` option allows passing additional parameters to S3 operations. However, critical security parameters (`Bucket`, `Key`, `Body`) cannot be overridden via `customParams` to prevent unauthorized access to other buckets or objects.
+
+### URL Protocol Validation
+
+Only `http://` and `https://` protocols are accepted for S3 response URLs. This prevents potential injection of dangerous protocols like `file://`, `javascript:`, or `data:`.
+
+### Recommendations
+
+1. **Use Private ACL**: Set `ACL: 'private'` for sensitive content and use signed URLs for access.
+2. **Enable Encryption**: Configure server-side encryption for data at rest.
+3. **Enable Checksums**: Use `checksumAlgorithm` to ensure data integrity during uploads.
+4. **Use Conditional Writes**: Enable `preventOverwrite: true` to prevent accidental overwrites.
+5. **Apply Least Privilege**: Use the minimum required IAM permissions listed above.
+6. **Enable Bucket Versioning**: Consider enabling S3 versioning for recovery from accidental deletions.

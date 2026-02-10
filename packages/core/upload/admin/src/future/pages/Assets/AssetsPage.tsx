@@ -27,7 +27,7 @@ import { useUploadFilesMutation } from '../../services/api';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetsGrid } from './components/AssetsGrid';
-import { AssetsList } from './components/AssetsList';
+import { AssetsTable } from './components/AssetsTable';
 import { DropZoneWithOverlay } from './components/DropZone/DropZoneWithOverlay';
 import {
   UploadDropZoneProvider,
@@ -83,7 +83,7 @@ const AssetsView = ({ view }: AssetsViewProps) => {
 
   return (
     <>
-      {isGridView ? <AssetsGrid assets={assets} /> : <AssetsList assets={assets} />}
+      {isGridView ? <AssetsGrid assets={assets} /> : <AssetsTable assets={assets} />}
       <div ref={loadMoreRef} style={{ height: 1 }} />
       {isFetchingMore && (
         <Flex justifyContent="center" padding={4}>
@@ -307,9 +307,9 @@ export const AssetsPage = () => {
                 />
                 <StyledToggleGroup
                   type="single"
-                  value={isGridView ? 'grid' : 'list'}
+                  value={isGridView ? 'grid' : 'table'}
                   onValueChange={(value) =>
-                    value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.LIST)
+                    value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
                   }
                   aria-label={formatMessage({
                     id: getTranslationKey('view.switch.label'),
@@ -317,7 +317,7 @@ export const AssetsPage = () => {
                   })}
                 >
                   <StyledToggleItem
-                    value="list"
+                    value="table"
                     aria-label={formatMessage({
                       id: getTranslationKey('view.table'),
                       defaultMessage: 'Table view',
