@@ -32,6 +32,8 @@ const MainSubNav = styled(DSSubNav)`
   position: relative;
 
   ${({ theme }) => theme.breakpoints.medium} {
+    height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px);
+    overflow: hidden;
     width: ${WIDTH_SIDE_NAVIGATION};
     position: sticky;
     top: 0;
