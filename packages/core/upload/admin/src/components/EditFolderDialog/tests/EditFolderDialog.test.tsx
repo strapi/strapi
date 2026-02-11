@@ -120,6 +120,9 @@ describe('EditFolderDialog', () => {
     await waitFor(() => expect(spy).toBeCalledTimes(1));
 
     expect(spy).toBeCalledWith({ created: true });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Folder successfully created');
   });
 
   test('set default form values', async () => {

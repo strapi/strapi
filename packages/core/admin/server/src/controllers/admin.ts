@@ -38,7 +38,7 @@ export default {
   // This returns an empty feature list for CE
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
-    return { data: { isEE: false, features: [], flags } };
+    return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
   },
 
   async init() {
@@ -187,15 +187,12 @@ export default {
   },
 
   async getGuidedTourMeta(ctx: Context) {
-    const [isFirstSuperAdminUser, completedActions] = await Promise.all([
-      getService('user').isFirstSuperAdminUser(ctx.state.user.id),
-      getService('guided-tour').getCompletedActions(),
-    ]);
+    const isFirstSuperAdminUser = await getService('user').isFirstSuperAdminUser(ctx.state.user.id);
 
     return {
       data: {
         isFirstSuperAdminUser,
-        completedActions,
+        schemas: strapi.contentTypes,
       },
     } satisfies GetGuidedTourMeta.Response;
   },

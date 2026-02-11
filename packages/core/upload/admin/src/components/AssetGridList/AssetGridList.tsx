@@ -68,7 +68,16 @@ export const AssetGridList = ({
           }
 
           return (
-            <Grid.Item col={3} key={asset.id} height="100%" direction="column" alignItems="stretch">
+            <Grid.Item
+              col={3}
+              m={4}
+              s={6}
+              xs={12}
+              key={asset.id}
+              height="100%"
+              direction="column"
+              alignItems="stretch"
+            >
               <AssetCard
                 key={asset.id}
                 allowedTypes={allowedTypes}

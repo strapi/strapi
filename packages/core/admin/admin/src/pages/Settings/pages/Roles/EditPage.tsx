@@ -189,19 +189,18 @@ const EditPage = () => {
           <form onSubmit={handleSubmit}>
             <Layouts.Header
               primaryAction={
-                <Flex gap={2}>
-                  <Button
-                    type="submit"
-                    startIcon={<Check />}
-                    disabled={role.code === 'strapi-super-admin'}
-                    loading={isSubmitting}
-                  >
-                    {formatMessage({
-                      id: 'global.save',
-                      defaultMessage: 'Save',
-                    })}
-                  </Button>
-                </Flex>
+                <Button
+                  type="submit"
+                  startIcon={<Check />}
+                  disabled={role.code === 'strapi-super-admin'}
+                  loading={isSubmitting}
+                  fullWidth
+                >
+                  {formatMessage({
+                    id: 'global.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
               }
               title={formatMessage({
                 id: 'Settings.roles.edit.title',
@@ -211,7 +210,12 @@ const EditPage = () => {
                 id: 'Settings.roles.create.description',
                 defaultMessage: 'Define the rights given to the role',
               })}
-              navigationAction={<BackButton fallback="../roles" />}
+              navigationAction={
+                // The back link for mobile works differently; it is placed higher up in the DOM.
+                <Box display={{ initial: 'none', medium: 'block' }}>
+                  <BackButton fallback="../roles" />
+                </Box>
+              }
             />
             <Layouts.Content>
               <Flex direction="column" alignItems="stretch" gap={6}>

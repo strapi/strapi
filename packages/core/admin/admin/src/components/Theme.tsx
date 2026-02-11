@@ -3,7 +3,7 @@ import * as React from 'react';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
-import { DefaultTheme, createGlobalStyle } from 'styled-components';
+import { type DefaultTheme, createGlobalStyle } from 'styled-components';
 
 import { useTypedSelector } from '../core/store/hooks';
 import { setAvailableThemes } from '../reducer';
@@ -21,6 +21,11 @@ const Theme = ({ children, themes }: ThemeProps) => {
   const [systemTheme, setSystemTheme] = React.useState<'light' | 'dark'>();
   const { locale } = useIntl();
   const dispatch = useDispatch();
+  const isIos =
+    ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'].includes(
+      navigator.platform
+    ) ||
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
 
   // Listen to changes in the system theme
   React.useEffect(() => {
@@ -55,15 +60,41 @@ const Theme = ({ children, themes }: ThemeProps) => {
       theme={themes?.[computedThemeName || 'light']}
     >
       {children}
-      <GlobalStyle />
+      <GlobalStyle $shouldOverrideInputFontSize={isIos} />
     </DesignSystemProvider>
   );
 };
 
-const GlobalStyle = createGlobalStyle`
+const GlobalStyle = createGlobalStyle<{ $shouldOverrideInputFontSize: boolean }>`
   body {
     background: ${({ theme }) => theme.colors.neutral100};
   }
+
+  // Temporary fix override to fix iOS zoom due to the 14px input font size
+  ${({ $shouldOverrideInputFontSize }) =>
+    $shouldOverrideInputFontSize
+      ? `
+    input[type="color"],
+    input[type="date"],
+    input[type="datetime"],
+    input[type="datetime-local"],
+    input[type="email"],
+    input[type="month"],
+    input[type="number"],
+    input[type="password"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="text"],
+    input[type="time"],
+    input[type="url"],
+    input[type="week"],
+    select:focus,
+    textarea {
+      font-size: 16px !important;
+      line-height: 2.4rem !important;
+    }
+  `
+      : undefined}
 `;
 
 export { Theme };

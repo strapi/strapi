@@ -25,7 +25,7 @@ describe('SearchInput', () => {
 
     await user.click(getByRole('button', { name: 'Search' }));
 
-    expect(getByRole('textbox', { name: 'Search label' })).toBeInTheDocument();
+    expect(getByRole('searchbox', { name: 'Search label' })).toBeInTheDocument();
   });
 
   it('should push value to query params', async () => {
@@ -44,7 +44,7 @@ describe('SearchInput', () => {
 
     await user.click(getByRole('button', { name: 'Search' }));
 
-    await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
+    await user.type(getByRole('searchbox', { name: 'Search label' }), 'michka');
 
     await user.keyboard('[Enter]');
 
@@ -71,7 +71,7 @@ describe('SearchInput', () => {
 
     await user.click(getByRole('button', { name: 'Search' }));
 
-    await user.type(getByRole('textbox', { name: 'Search label' }), 'michka');
+    await user.type(getByRole('searchbox', { name: 'Search label' }), 'michka');
 
     await user.keyboard('[Enter]');
 
@@ -79,7 +79,7 @@ describe('SearchInput', () => {
 
     await user.click(getByRole('button', { name: 'Clear' }));
 
-    expect(getByRole('textbox', { name: 'Search label' })).toHaveValue('');
+    expect(getByRole('searchbox', { name: 'Search label' })).toHaveValue('');
 
     expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
   });
@@ -102,7 +102,7 @@ describe('SearchInput', () => {
       // Open the search input
       await user.click(getByRole('button', { name: 'Search' }));
 
-      const textbox = getByRole('textbox', { name: 'Search label' });
+      const textbox = getByRole('searchbox', { name: 'Search label' });
       expect(textbox).toBeInTheDocument();
 
       // Type the value if any
@@ -117,9 +117,9 @@ describe('SearchInput', () => {
       // Check visibility
       await waitFor(() => {
         if (expectedToBeInDocument) {
-          expect(getByRole('textbox', { name: 'Search label' })).toBeInTheDocument();
+          expect(getByRole('searchbox', { name: 'Search label' })).toBeInTheDocument();
         } else {
-          expect(queryByRole('textbox', { name: 'Search label' })).not.toBeInTheDocument();
+          expect(queryByRole('searchbox', { name: 'Search label' })).not.toBeInTheDocument();
         }
       });
     });

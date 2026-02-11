@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { sanitize, validate } from '@strapi/utils';
+import { sanitize, validate, sanitizeRoutesMapForSerialization } from '@strapi/utils';
 
 import type { Core, UID } from '@strapi/types';
 
@@ -66,7 +66,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
       }));
     });
 
-    return routesMap;
+    return sanitizeRoutesMapForSerialization(routesMap);
   };
 
   const sanitizer = sanitize.createAPISanitizers({

@@ -52,7 +52,7 @@ const CellContent = ({ content, mainField, attribute, rowId, name }: CellContent
 
     case 'string':
       return (
-        <Tooltip description={content}>
+        <Tooltip label={content}>
           <Typography maxWidth="30rem" ellipsis textColor="neutral800">
             <CellValue type={attribute.type} value={content} />
           </Typography>

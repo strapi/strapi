@@ -1,10 +1,10 @@
-import { StrapiAppPlugin } from './StrapiApp';
-
 /**
  * DO NOT REMOVE. This export is what's used to render the admin panel at all.
  * Without it === no admin panel.
  */
 export * from './render';
+
+import { StrapiAppPlugin } from './StrapiApp';
 
 /**
  * components
@@ -25,7 +25,19 @@ export * from './components/ContentBox';
 export * from './components/SubNav';
 export * from './components/GradientBadge';
 
+/** @internal */
 export { tours } from './components/GuidedTour/Tours';
+/** @internal */
+export { useGuidedTour } from './components/GuidedTour/Context';
+/** @internal */
+export { GUIDED_TOUR_REQUIRED_ACTIONS } from './components/GuidedTour/utils/constants';
+
+export {
+  RESPONSIVE_DEFAULT_SPACING,
+  HEIGHT_TOP_NAVIGATION,
+  HEIGHT_TOP_NAVIGATION_MEDIUM,
+  WIDTH_SIDE_NAVIGATION,
+} from './constants/theme';
 
 /**
  * Features
@@ -53,6 +65,10 @@ export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
 export { useElementOnScreen } from './hooks/useElementOnScreen';
+export { useDebounce } from './hooks/useDebounce';
+export { useMediaQuery, useIsDesktop, useIsTablet, useIsMobile } from './hooks/useMediaQuery';
+export { useDeviceType } from './hooks/useDeviceType';
+export { usePersistentState, useScopedPersistentState } from './hooks/usePersistentState';
 export { useAdminUsers } from './services/users';
 export { useGetCountDocumentsQuery } from './services/homepage';
 
@@ -69,6 +85,7 @@ export type {
   SanitizedAdminRole,
   AdminRole,
   Entity,
+  FieldContentSourceMap,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 export type { WidgetWithUID as WidgetType, WidgetArgs } from './core/apis/Widgets';
@@ -86,7 +103,6 @@ export type { CMAdminConfiguration } from './types/adminConfiguration';
 /**
  * Components
  */
-
 export { Layouts, type LayoutProps } from './components/Layouts/Layout';
 
 export type PluginDefinition = StrapiAppPlugin;

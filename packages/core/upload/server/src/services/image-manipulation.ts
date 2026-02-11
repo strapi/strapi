@@ -25,12 +25,12 @@ const isOptimizableFormat = (
   format !== undefined && FORMATS_TO_OPTIMIZE.includes(format);
 
 const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
-  new Promise((resolve, reject) => {
+  new Promise<void>((resolve, reject) => {
     const writeStream = fs.createWriteStream(path);
     // Reject promise if there is an error with the provided stream
     stream.on('error', reject);
     stream.pipe(writeStream);
-    writeStream.on('close', resolve);
+    writeStream.on('close', () => resolve());
     writeStream.on('error', reject);
   });
 

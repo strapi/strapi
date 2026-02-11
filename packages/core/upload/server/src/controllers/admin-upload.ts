@@ -5,11 +5,39 @@ import type { Context } from 'koa';
 
 import { getService } from '../utils';
 import { ACTIONS, FILE_MODEL_UID } from '../constants';
-import { validateUploadBody } from './validation/admin/upload';
+import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
 import { FileInfo } from '../types';
+import { prepareUploadRequest } from '../utils/mime-validation';
 
 export default {
+  async bulkUpdateFileInfo(ctx: Context) {
+    const {
+      state: { userAbility, user },
+      request: { body },
+    } = ctx;
+
+    const { updates } = await validateBulkUpdateBody(body);
+    const uploadService = getService('upload');
+
+    const results = await async.map(
+      updates,
+      async ({ id, fileInfo }: { id: number; fileInfo: FileInfo }) => {
+        const { pm } = await findEntityAndCheckPermissions(
+          userAbility,
+          ACTIONS.update,
+          FILE_MODEL_UID,
+          id
+        );
+
+        const updated = await uploadService.updateFileInfo(id, fileInfo as any, { user });
+        return pm.sanitizeOutput(updated, { action: ACTIONS.read });
+      }
+    );
+
+    ctx.body = results;
+  },
+
   async updateFileInfo(ctx: Context) {
     const {
       state: { userAbility, user },
@@ -59,8 +87,10 @@ export default {
       throw new errors.ApplicationError('Cannot replace a file with multiple ones');
     }
 
-    const data = (await validateUploadBody(body)) as { fileInfo: FileInfo };
-    const replacedFile = await uploadService.replace(id, { data, file: files }, { user });
+    const { validFiles, filteredBody } = await prepareUploadRequest(files, body, strapi);
+
+    const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
+    const replacedFile = await uploadService.replace(id, { data, file: validFiles[0] }, { user });
 
     // Sign file urls for private providers
     const signedFile = await getService('file').signFileUrls(replacedFile);
@@ -85,8 +115,48 @@ export default {
       return ctx.forbidden();
     }
 
-    const data = await validateUploadBody(body);
-    const uploadedFiles = await uploadService.upload({ data, files }, { user });
+    const { validFiles, filteredBody } = await prepareUploadRequest(files, body, strapi);
+
+    const isMultipleFiles = validFiles.length > 1;
+    const data = await validateUploadBody(filteredBody, isMultipleFiles);
+
+    let filesArray = validFiles;
+
+    if (
+      data.fileInfo &&
+      Array.isArray(data.fileInfo) &&
+      filesArray.length === data.fileInfo.length
+    ) {
+      // Reorder filesArray to match data.fileInfo order
+      const alignedFilesArray = data.fileInfo
+        .map((info) => {
+          return filesArray.find((file) => file.originalFilename === info.name);
+        })
+        .filter(Boolean) as any[];
+
+      filesArray = alignedFilesArray;
+    }
+
+    // Upload files first to get thumbnails
+    const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
+    if (uploadedFiles.some((file) => file.mime?.startsWith('image/'))) {
+      await getService('metrics').trackUsage('didUploadImage');
+    }
+
+    const aiMetadataService = getService('aiMetadata');
+
+    // AFTER upload - generate AI metadata for images
+    if (await aiMetadataService.isEnabled()) {
+      try {
+        const metadataResults = await aiMetadataService.processFiles(uploadedFiles);
+        // Update the uploaded files with AI metadata
+        await aiMetadataService.updateFilesWithAIMetadata(uploadedFiles, metadataResults, user);
+      } catch (error) {
+        strapi.log.warn('AI metadata generation failed, proceeding without AI enhancements', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
 
     // Sign file urls for private providers
     const signedFiles = await async.map(uploadedFiles, getService('file').signFileUrls);

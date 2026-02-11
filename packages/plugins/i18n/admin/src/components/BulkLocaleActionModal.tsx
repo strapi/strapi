@@ -254,7 +254,7 @@ const BulkLocaleActionModal = ({
               const statusVariant =
                 status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
 
-              return (
+              return status && locale ? (
                 <Table.Row key={index}>
                   <Table.CheckboxCell id={locale} aria-label={`Select ${locale}`} />
                   <Table.Cell>
@@ -305,7 +305,7 @@ const BulkLocaleActionModal = ({
                     </IconButton>
                   </Table.Cell>
                 </Table.Row>
-              );
+              ) : null;
             })}
           </Table.Body>
         </Table.Content>

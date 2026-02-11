@@ -99,7 +99,13 @@ const getNonVisibleAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
+  return _.uniq([
+    ID_ATTRIBUTE,
+    DOC_ID_ATTRIBUTE,
+    PUBLISHED_AT_ATTRIBUTE,
+    ...getTimestamps(model),
+    ...nonVisibleAttributes,
+  ]);
 };
 
 const getVisibleAttributes = (model: Model) => {
@@ -211,6 +217,17 @@ const getComponentAttributes = (schema: Model) => {
   );
 };
 
+const getMediaAttributes = (schema: Model) => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isMediaAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    [] as string[]
+  );
+};
+
 const getScalarAttributes = (schema: Model) => {
   return _.reduce(
     schema.attributes,
@@ -270,6 +287,7 @@ export {
   constants,
   getNonWritableAttributes,
   getComponentAttributes,
+  getMediaAttributes,
   getScalarAttributes,
   getRelationalAttributes,
   getWritableAttributes,

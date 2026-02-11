@@ -29,7 +29,7 @@ export const TokenName = ({ error, value, onChange, canEditInputs }: TokenNamePr
           defaultMessage: 'Name',
         })}
       </Field.Label>
-      <TextInput onChange={onChange} value={value} disabled={!canEditInputs} />
+      <TextInput type="text" onChange={onChange} value={value} disabled={!canEditInputs} />
       <Field.Error />
     </Field.Root>
   );

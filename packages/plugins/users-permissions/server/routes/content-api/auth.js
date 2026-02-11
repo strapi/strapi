@@ -114,5 +114,17 @@ module.exports = (strapi) => {
       },
       response: validator.authResponseSchema,
     },
+    {
+      method: 'POST',
+      path: '/auth/refresh',
+      handler: 'auth.refresh',
+      config: { prefix: '' },
+    },
+    {
+      method: 'POST',
+      path: '/auth/logout',
+      handler: 'auth.logout',
+      config: { prefix: '' },
+    },
   ];
 };

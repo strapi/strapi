@@ -282,7 +282,7 @@ const URLForm = () => {
               defaultMessage: 'URL',
             })}
           </Field.Label>
-          <TextInput onChange={handleChange} value={logoUrl} />
+          <TextInput type="url" onChange={handleChange} value={logoUrl} />
           <Field.Error />
         </Field.Root>
       </Box>
