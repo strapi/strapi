@@ -556,7 +556,7 @@ const FillFromAnotherLocaleAction = ({
       collectionType,
       model,
       documentId,
-      params: { locale: localeSelected },
+      params: { locale: localeSelected, status: 'published' },
     });
     if (!response || !schema) {
       return;
