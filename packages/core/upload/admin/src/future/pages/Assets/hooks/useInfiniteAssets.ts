@@ -1,8 +1,8 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 
-import { useGetAssetsQuery } from '../services/assets';
+import { useGetAssetsQuery } from '../../../services/assets';
 
-import type { File } from '../../../../shared/contracts/files';
+import type { File } from '../../../../../../shared/contracts/files';
 
 const PAGE_SIZE = 20;
 

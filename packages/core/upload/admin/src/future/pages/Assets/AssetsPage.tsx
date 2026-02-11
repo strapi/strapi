@@ -22,7 +22,6 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { usePersistentState } from '../../../hooks/usePersistentState';
-import { useInfiniteAssets } from '../../hooks/useInfiniteAssets';
 import { useUploadFilesMutation } from '../../services/api';
 import { getTranslationKey } from '../../utils/translations';
 
@@ -34,6 +33,7 @@ import {
   useUploadDropZone,
 } from './components/DropZone/UploadDropZoneContext';
 import { localStorageKeys, viewOptions } from './constants';
+import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 
 const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 

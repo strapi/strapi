@@ -4,7 +4,7 @@ import { renderHook, render, act, waitFor } from '@tests/utils';
 
 import { useInfiniteAssets, PAGE_SIZE } from '../useInfiniteAssets';
 
-import type { File, Pagination } from '../../../../../shared/contracts/files';
+import type { File, Pagination } from '../../../../../../../shared/contracts/files';
 
 const mockUseGetAssetsQuery = jest.fn();
 
