@@ -6,6 +6,7 @@ import {
   setFileComplete,
   setFileError,
   updateProgress,
+  setUploadFailed,
 } from '../store/uploadProgress';
 
 import type {
@@ -148,10 +149,28 @@ const uploadApi = adminApi
 
             if (!response.ok || !response.body) {
               unregisterAbortController(uploadId);
+
+              // Try to parse error message from response
+              let errorMessage = 'Upload request failed';
+              try {
+                const errorData = await response.json();
+                if (errorData.error?.message) {
+                  errorMessage = errorData.error.message;
+                } else if (errorData.message) {
+                  errorMessage = errorData.message;
+                }
+              } catch {
+                // If we can't parse the error, use a generic message with status code
+                errorMessage = `Upload failed with status ${response.status}`;
+              }
+
+              // Mark all files as failed in the UI
+              dispatch(setUploadFailed({ message: errorMessage }));
+
               return {
                 error: {
                   name: 'UnknownError',
-                  message: 'Upload request failed',
+                  message: errorMessage,
                   status: response.status,
                 },
               };
@@ -242,25 +261,34 @@ const uploadApi = adminApi
               return { data: streamResult };
             }
 
+            // If stream ended without completing any files, mark all as failed
+            const errorMessage = 'No files were uploaded successfully';
+            dispatch(setUploadFailed({ message: errorMessage }));
+
             return {
               error: {
                 name: 'UnknownError',
-                message: 'No files were uploaded successfully',
+                message: errorMessage,
               },
             };
           } catch (err) {
             unregisterAbortController(uploadId);
 
             if (err instanceof DOMException && err.name === 'AbortError') {
+              // Don't mark as failed for user-initiated cancellations
               return {
                 error: { name: 'UnknownError', message: 'Upload cancelled' },
               };
             }
 
+            // For network errors or other exceptions, mark all files as failed
+            const errorMessage = err instanceof Error ? err.message : 'Network error occurred';
+            dispatch(setUploadFailed({ message: errorMessage }));
+
             return {
               error: {
                 name: 'UnknownError',
-                message: err instanceof Error ? err.message : 'Network error occurred',
+                message: errorMessage,
               },
             };
           }

@@ -132,6 +132,21 @@ const uploadProgressSlice = createSlice({
       });
       state.progress = computeProgress(state.files);
     },
+    setUploadFailed(state, action: PayloadAction<{ message: string }>) {
+      // Mark all pending and uploading files as errored when a catastrophic failure occurs
+      state.files = state.files.map((file) => {
+        if (file.status === 'pending' || file.status === 'uploading') {
+          return {
+            ...file,
+            status: 'error' as FileProgressStatus,
+            error: action.payload.message,
+          };
+        }
+        return file;
+      });
+      state.progress = 100;
+      state.errors = [...state.errors, { name: 'Upload Error', message: action.payload.message }];
+    },
   },
 });
 
@@ -145,6 +160,7 @@ export const {
   closeUploadProgress,
   toggleMinimize,
   cancelUpload,
+  setUploadFailed,
 } = uploadProgressSlice.actions;
 
 export const uploadProgressReducer = uploadProgressSlice.reducer;
