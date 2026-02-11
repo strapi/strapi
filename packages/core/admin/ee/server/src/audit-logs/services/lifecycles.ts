@@ -159,8 +159,12 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
       strapi.cron.add({
         deleteExpiredAuditLogs: {
           task: async () => {
-            const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-            auditLogsService.deleteExpiredEvents(expirationDate);
+            try {
+              const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+              await auditLogsService.deleteExpiredEvents(expirationDate);
+            } catch (error) {
+              strapi.log.error('Error deleting expired audit logs', error);
+            }
           },
           options: '0 0 * * *',
         },
