@@ -42,6 +42,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           return {
             documentId: nonNull(idArg()),
             status: args.PublicationStatusArg,
+            hasPublishedVersion: args.HasPublishedVersionArg,
           };
         }
 
@@ -52,7 +53,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         };
 
         if (!isNested) {
-          Object.assign(params, { status: args.PublicationStatusArg });
+          Object.assign(params, {
+            status: args.PublicationStatusArg,
+            hasPublishedVersion: args.HasPublishedVersionArg,
+          });
         }
 
         return params;
@@ -63,7 +67,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const params = {};
 
         if (!isNested) {
-          Object.assign(params, { status: args.PublicationStatusArg });
+          Object.assign(params, {
+            status: args.PublicationStatusArg,
+            hasPublishedVersion: args.HasPublishedVersionArg,
+          });
         }
 
         return params;
