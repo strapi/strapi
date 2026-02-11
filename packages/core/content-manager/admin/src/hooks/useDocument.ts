@@ -265,7 +265,7 @@ const useDoc = () => {
     }
   );
 
-  const returnId = origin || id === 'create' ? undefined : id;
+  const returnId = origin || (id === 'create' ? undefined : id);
 
   return {
     collectionType,

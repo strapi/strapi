@@ -10,6 +10,11 @@ import { blocksData } from './mock-schema';
 
 type BlocksEditorProps = React.ComponentProps<typeof BlocksInput>;
 
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useIsMobile: jest.fn().mockReturnValue(false),
+}));
+
 const setup = ({
   initialValues = {
     'blocks-editor': blocksData,

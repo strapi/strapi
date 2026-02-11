@@ -22,6 +22,8 @@ const createStrapiInstance = async ({
   bypassAuth = true,
   bootstrap,
   strapiOptions = {},
+  /** When false (default), opts out of deprecated expiresIn so tests use new session config defaults. Set true to test legacy/deprecation behavior. */
+  skipDefaultSessionConfig = false,
 } = {}) => {
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
@@ -38,6 +40,16 @@ const createStrapiInstance = async ({
 
   // Ensure Koa trusts X-Forwarded-* headers in tests so asHTTPS() can simulate HTTPS
   instance.config.set('server.proxy.koa', true);
+
+  // Opt out of deprecated expiresIn by setting an empty session options object
+  // This prevents the default expiresIn from triggering deprecation warnings
+  // Only set if not already configured to avoid overriding user settings
+  if (!skipDefaultSessionConfig) {
+    const existingSessionOptions = instance.config.get('admin.auth.sessions.options');
+    if (!existingSessionOptions) {
+      instance.config.set('admin.auth.sessions.options', {});
+    }
+  }
 
   if (bypassAuth) {
     instance.get('auth').register('content-api', {
