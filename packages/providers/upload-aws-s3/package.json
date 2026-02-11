@@ -50,7 +50,7 @@
     "@aws-sdk/client-s3": "3.975.0",
     "@aws-sdk/lib-storage": "3.975.0",
     "@aws-sdk/s3-request-presigner": "3.975.0",
-    "@aws-sdk/types": "3.973.0",
+    "@aws-sdk/types": "3.973.1",
     "lodash": "4.17.23"
   },
   "devDependencies": {

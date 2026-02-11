@@ -1091,27 +1091,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/types@npm:3.973.0":
-  version: 3.973.0
-  resolution: "@aws-sdk/types@npm:3.973.0"
-  dependencies:
-    "@smithy/types": "npm:^4.12.0"
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/3f30b23a1f9099efab45cc217513b83dd1cf2dea5da49a7593c0b55b8184c738b95ea64aab8e8ce74ee657af9f265aa937a6c940b52a8bf4af02f12c2adbf7bf
-  languageName: node
-  linkType: hard
-
-"@aws-sdk/types@npm:^3.222.0":
-  version: 3.598.0
-  resolution: "@aws-sdk/types@npm:3.598.0"
-  dependencies:
-    "@smithy/types": "npm:^3.1.0"
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/83abd25e07ffc071e24f36b4fb4dae6e552d662ab55f832f9918ccff251ae80155e30a86d2bd0b98bb8b94adaa2a13f05e1bb071edf491e4f36755084ac63d4f
-  languageName: node
-  linkType: hard
-
-"@aws-sdk/types@npm:^3.973.0, @aws-sdk/types@npm:^3.973.1":
+"@aws-sdk/types@npm:3.973.1, @aws-sdk/types@npm:^3.222.0, @aws-sdk/types@npm:^3.973.0, @aws-sdk/types@npm:^3.973.1":
   version: 3.973.1
   resolution: "@aws-sdk/types@npm:3.973.1"
   dependencies:
@@ -8969,15 +8949,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@smithy/types@npm:^3.1.0":
-  version: 3.2.0
-  resolution: "@smithy/types@npm:3.2.0"
-  dependencies:
-    tslib: "npm:^2.6.2"
-  checksum: 10c0/6b82a9177ae85d9c08247675831ffeed87a671c51ab35ecf64641ea0afb6036a97b3a00a83e717529a74b416b19df0c0fc2b2930a9b55bb0d34bea2390f835ad
-  languageName: node
-  linkType: hard
-
 "@smithy/types@npm:^4.12.0":
   version: 4.12.0
   resolution: "@smithy/types@npm:4.12.0"
@@ -9358,7 +9329,7 @@ __metadata:
     open: "npm:8.4.0"
     ora: "npm:5.4.1"
     pkg-up: "npm:3.1.0"
-    tar: "npm:6.2.1"
+    tar: "npm:7.5.7"
     tsconfig: "npm:5.35.0"
     xdg-app-paths: "npm:8.3.0"
     yup: "npm:0.32.9"
@@ -9649,7 +9620,7 @@ __metadata:
     semver: "npm:7.5.4"
     stream-chain: "npm:2.2.5"
     stream-json: "npm:1.8.0"
-    tar: "npm:6.2.1"
+    tar: "npm:7.5.7"
     tar-stream: "npm:2.2.0"
     typescript: "npm:5.4.4"
     ws: "npm:8.17.1"
@@ -10193,7 +10164,7 @@ __metadata:
     "@aws-sdk/client-s3": "npm:3.975.0"
     "@aws-sdk/lib-storage": "npm:3.975.0"
     "@aws-sdk/s3-request-presigner": "npm:3.975.0"
-    "@aws-sdk/types": "npm:3.973.0"
+    "@aws-sdk/types": "npm:3.973.1"
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.35.0"
     lodash: "npm:4.17.23"
@@ -10575,7 +10546,7 @@ __metadata:
     lodash: "npm:4.17.21"
     node-machine-id: "npm:1.1.12"
     p-map: "npm:4.0.0"
-    preferred-pm: "npm:3.1.2"
+    preferred-pm: "npm:3.1.3"
     tsconfig: "npm:5.35.0"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
@@ -16310,7 +16281,7 @@ __metadata:
     rollup: "npm:4.19.1"
     semver: "npm:7.5.4"
     sort-package-json: "npm:2.10.0"
-    tar: "npm:7.4.3"
+    tar: "npm:7.5.7"
     tsconfig: "npm:5.35.0"
   bin:
     create-strapi-app: ./bin/index.js
@@ -25661,13 +25632,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minizlib@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "minizlib@npm:3.0.1"
+"minizlib@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "minizlib@npm:3.1.0"
   dependencies:
-    minipass: "npm:^7.0.4"
-    rimraf: "npm:^5.0.5"
-  checksum: 10c0/82f8bf70da8af656909a8ee299d7ed3b3372636749d29e105f97f20e88971be31f5ed7642f2e898f00283b68b701cc01307401cdc209b0efc5dd3818220e5093
+    minipass: "npm:^7.1.2"
+  checksum: 10c0/5aad75ab0090b8266069c9aabe582c021ae53eb33c6c691054a13a45db3b4f91a7fb1bd79151e6b4e9e9a86727b522527c0a06ec7d45206b745d54cd3097bcec
   languageName: node
   linkType: hard
 
@@ -28150,15 +28120,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"preferred-pm@npm:3.1.2":
-  version: 3.1.2
-  resolution: "preferred-pm@npm:3.1.2"
+"preferred-pm@npm:3.1.3":
+  version: 3.1.3
+  resolution: "preferred-pm@npm:3.1.3"
   dependencies:
     find-up: "npm:^5.0.0"
     find-yarn-workspace-root2: "npm:1.2.16"
     path-exists: "npm:^4.0.0"
     which-pm: "npm:2.0.0"
-  checksum: 10c0/0c1a876461d41ddd8c5ecdcb4be2b8c93b408857c8b7ff7a14312920301b7458061d620b476da90e16b27a2d7d19688a51bdeddf200557ad1d925658f05796f8
+  checksum: 10c0/8eb9c35e4818d8e20b5b61a2117f5c77678649e1d20492fe4fdae054a9c4b930d04582b17e8a59b2dc923f2f788c7ded7fc99fd22c04631d836f7f52aeb79bde
   languageName: node
   linkType: hard
 
@@ -29713,17 +29683,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rimraf@npm:^5.0.5":
-  version: 5.0.10
-  resolution: "rimraf@npm:5.0.10"
-  dependencies:
-    glob: "npm:^10.3.7"
-  bin:
-    rimraf: dist/esm/bin.mjs
-  checksum: 10c0/7da4fd0e15118ee05b918359462cfa1e7fe4b1228c7765195a45b55576e8c15b95db513b8466ec89129666f4af45ad978a3057a02139afba1a63512a2d9644cc
-  languageName: node
-  linkType: hard
-
 "roarr@npm:^2.15.3":
   version: 2.15.4
   resolution: "roarr@npm:2.15.4"
@@ -31260,7 +31219,7 @@ __metadata:
     stream-chain: "npm:2.2.5"
     stream-json: "npm:1.8.0"
     supertest: "npm:6.3.3"
-    tar: "npm:6.2.1"
+    tar: "npm:7.5.7"
     ts-jest: "npm:29.1.0"
     typescript: "npm:5.4.4"
     yalc: "npm:1.0.0-pre.53"
@@ -31892,17 +31851,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:7.4.3":
-  version: 7.4.3
-  resolution: "tar@npm:7.4.3"
+"tar@npm:7.5.7":
+  version: 7.5.7
+  resolution: "tar@npm:7.5.7"
   dependencies:
     "@isaacs/fs-minipass": "npm:^4.0.0"
     chownr: "npm:^3.0.0"
     minipass: "npm:^7.1.2"
-    minizlib: "npm:^3.0.1"
-    mkdirp: "npm:^3.0.1"
+    minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
-  checksum: 10c0/d4679609bb2a9b48eeaf84632b6d844128d2412b95b6de07d53d8ee8baf4ca0857c9331dfa510390a0727b550fd543d4d1a10995ad86cdf078423fbb8d99831d
+  checksum: 10c0/51f261afc437e1112c3e7919478d6176ea83f7f7727864d8c2cce10f0b03a631d1911644a567348c3063c45abdae39718ba97abb073d22aa3538b9a53ae1e31c
   languageName: node
   linkType: hard
 
