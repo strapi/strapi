@@ -175,7 +175,7 @@ export default {
         packageName: plugin.info.packageName,
       }));
 
-    ctx.send({ plugins }) satisfies Plugins.Response;
+    ctx.send({ plugins } satisfies Plugins.Response);
   },
 
   async licenseTrialTimeLeft() {
