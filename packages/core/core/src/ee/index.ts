@@ -22,6 +22,8 @@ interface EE {
     seats?: number;
     type?: string;
     isTrial: boolean;
+    subscriptionId?: string;
+    planPriceId?: string;
   };
   logger?: Logger;
 }
@@ -288,6 +290,14 @@ export default Object.freeze({
 
   get isTrial() {
     return ee.licenseInfo.isTrial;
+  },
+
+  get planPriceId() {
+    return ee.licenseInfo.planPriceId;
+  },
+
+  get subscriptionId() {
+    return ee.licenseInfo.subscriptionId;
   },
 
   features: Object.freeze({

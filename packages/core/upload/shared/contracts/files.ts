@@ -56,11 +56,17 @@ type FileFormat = {
   url: string;
 };
 
+export interface FocalPoint {
+  x: number;
+  y: number;
+}
+
 export interface File {
   id: number;
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
+  focalPoint?: FocalPoint | null;
   width?: number | null;
   height?: number | null;
   formats?:
@@ -247,6 +253,7 @@ export declare namespace BulkUpdateFiles {
           name?: string;
           alternativeText?: string | null;
           caption?: string | null;
+          focalPoint?: FocalPoint | null;
           folder?: number | null;
         };
       }>;
@@ -256,5 +263,44 @@ export declare namespace BulkUpdateFiles {
   export interface Response {
     data: File[];
     error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
+
+/**
+ * GET /upload/actions/generate-ai-metadata/count - Get count of images without metadata
+ */
+export declare namespace GetAIMetadataCount {
+  export interface Request {
+    query: {};
+  }
+
+  export interface Response {
+    data: {
+      imagesWithoutMetadataCount: number;
+      totalImages: number;
+    };
+    error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * POST /upload/actions/generate-ai-metadata - Start AI metadata generation job
+ */
+export declare namespace GenerateAIMetadata {
+  export interface Request {
+    body: {};
+  }
+
+  export interface Response {
+    data:
+      | {
+          jobId: number;
+          status: 'pending';
+        }
+      | {
+          count: 0;
+          message: string;
+        };
+    error?: errors.ApplicationError;
   }
 }

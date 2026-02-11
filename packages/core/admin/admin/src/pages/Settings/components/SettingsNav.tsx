@@ -79,7 +79,12 @@ const SettingsNav = ({ isFullPage = false }: { isFullPage?: boolean }) => {
         </>
       )}
       <SubNav.Content>
-        {isFullPage && <SubNav.Header label={label} />}
+        {isFullPage && (
+          <>
+            <SubNav.Header label={label} />
+            <Divider />
+          </>
+        )}
         <SubNav.Sections>
           {sections.map((section) => (
             <SubNav.Section key={section.id} label={formatMessage(section.intlLabel)}>

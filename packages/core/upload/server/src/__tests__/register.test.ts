@@ -43,6 +43,7 @@ describe('Upload plugin register function', () => {
         get: jest.fn().mockReturnValueOnce({ provider: 'local' }),
         set: jest.fn(),
       },
+      get: jest.fn().mockReturnValue({ add: jest.fn() }),
     } as any;
 
     await register({ strapi });
@@ -62,6 +63,7 @@ describe('Upload plugin register function', () => {
         get: jest.fn().mockReturnValueOnce({ provider: 'local' }),
         set: setConfig,
       },
+      get: jest.fn().mockReturnValue({ add: jest.fn() }),
     } as any;
 
     await register({ strapi });

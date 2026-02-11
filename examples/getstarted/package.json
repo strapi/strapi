@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@strapi/blocks-react-renderer": "1.0.2",
-    "@strapi/icons": "2.0.1",
+    "@strapi/icons": "2.1.2",
     "@strapi/plugin-color-picker": "workspace:*",
     "@strapi/plugin-documentation": "workspace:*",
     "@strapi/plugin-graphql": "workspace:*",
@@ -25,7 +25,7 @@
     "@strapi/provider-upload-cloudinary": "workspace:*",
     "@strapi/strapi": "workspace:*",
     "better-sqlite3": "12.4.1",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "mysql2": "3.9.8",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.11.1",
