@@ -43,6 +43,14 @@
       "relation": "manyToMany",
       "target": "api::basic.basic"
     },
+    "morph_to_one": {
+      "type": "relation",
+      "relation": "morphToOne"
+    },
+    "morph_to_many": {
+      "type": "relation",
+      "relation": "morphToMany"
+    },
     "simpleInfo": {
       "type": "component",
       "repeatable": false,
