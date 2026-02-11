@@ -33,7 +33,9 @@ const createMockPage = (
   const results = Array.from({ length: resultsCount }, (_, i) => createMockAsset(startId + i));
   const pagination: Pagination = { page, pageSize: PAGE_SIZE, pageCount, total };
 
-  return { data: { results, pagination }, isLoading: false, isFetching: false, error: undefined };
+  const data = { results, pagination };
+
+  return { data, currentData: data, isLoading: false, isFetching: false, error: undefined };
 };
 
 describe('useInfiniteAssets', () => {
@@ -56,6 +58,7 @@ describe('useInfiniteAssets', () => {
   it('returns loading state when query is loading', () => {
     mockUseGetAssetsQuery.mockReturnValue({
       data: undefined,
+      currentData: undefined,
       isLoading: true,
       isFetching: true,
       error: undefined,
@@ -70,6 +73,7 @@ describe('useInfiniteAssets', () => {
   it('fetches with page 1 and correct pageSize', () => {
     mockUseGetAssetsQuery.mockReturnValue({
       data: undefined,
+      currentData: undefined,
       isLoading: true,
       isFetching: true,
       error: undefined,
@@ -128,9 +132,10 @@ describe('useInfiniteAssets', () => {
       result.current.fetchNextPage();
     });
 
-    expect(result.current.assets).toHaveLength(PAGE_SIZE * 2);
-    expect(result.current.assets[0].id).toBe(PAGE_SIZE + 1);
-    expect(result.current.assets[PAGE_SIZE].id).toBe(PAGE_SIZE * 2 + 1);
+    expect(result.current.assets).toHaveLength(PAGE_SIZE * 3);
+    expect(result.current.assets[0].id).toBe(1);
+    expect(result.current.assets[PAGE_SIZE].id).toBe(PAGE_SIZE + 1);
+    expect(result.current.assets[PAGE_SIZE * 2].id).toBe(PAGE_SIZE * 2 + 1);
   });
 
   it('hasNextPage is false when on last page', () => {
@@ -155,6 +160,7 @@ describe('useInfiniteAssets', () => {
   it('passes sort parameter to query', () => {
     mockUseGetAssetsQuery.mockReturnValue({
       data: undefined,
+      currentData: undefined,
       isLoading: true,
       isFetching: true,
       error: undefined,
@@ -207,6 +213,7 @@ describe('useInfiniteAssets', () => {
     // Page 1 fetching — not "fetchingMore"
     mockUseGetAssetsQuery.mockReturnValue({
       data: undefined,
+      currentData: undefined,
       isLoading: true,
       isFetching: true,
       error: undefined,
@@ -221,6 +228,7 @@ describe('useInfiniteAssets', () => {
     const mockError = { status: 500, data: 'Server error' };
     mockUseGetAssetsQuery.mockReturnValue({
       data: undefined,
+      currentData: undefined,
       isLoading: false,
       isFetching: false,
       error: mockError,

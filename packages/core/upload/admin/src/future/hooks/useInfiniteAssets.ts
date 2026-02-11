@@ -14,8 +14,14 @@ interface UseInfiniteAssetsOptions {
 const useInfiniteAssets = ({ folder = null, sort }: UseInfiniteAssetsOptions = {}) => {
   const [page, setPage] = useState(1);
   const lastResultsRef = useRef<File[]>([]);
+  const isMountRef = useRef(true);
 
-  const { data, isLoading, isFetching, error } = useGetAssetsQuery({
+  const {
+    currentData: data,
+    isLoading,
+    isFetching,
+    error,
+  } = useGetAssetsQuery({
     folder,
     page,
     pageSize: PAGE_SIZE,
@@ -51,8 +57,14 @@ const useInfiniteAssets = ({ folder = null, sort }: UseInfiniteAssetsOptions = {
     return lastResultsRef.current;
   }, [data, page]);
 
-  // Reset on filter/sort change or detected cache invalidation
+  // Reset on filter/sort change — skip the initial mount since the memo
+  // already handles page 1 correctly
   useEffect(() => {
+    if (isMountRef.current) {
+      isMountRef.current = false;
+
+      return;
+    }
     setPage(1);
     lastResultsRef.current = [];
   }, [folder, sort]);
