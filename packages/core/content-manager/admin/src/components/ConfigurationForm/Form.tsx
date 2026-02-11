@@ -145,6 +145,43 @@ const ConfigurationForm = ({
                     }, [])}
                   />
                 </Grid.Item>
+                <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+                  <InputRenderer
+                    type="enumeration"
+                    label={formatMessage({
+                      id: getTranslation('containers.SettingPage.relationOpenMode'),
+                      defaultMessage: 'Relation open behavior',
+                    })}
+                    hint={formatMessage({
+                      id: getTranslation('containers.SettingPage.relationOpenMode.description'),
+                      defaultMessage: 'Choose how relation entries open when clicked',
+                    })}
+                    name="settings.relationOpenMode"
+                    options={[
+                      {
+                        label: formatMessage({
+                          id: getTranslation('containers.SettingPage.relationOpenMode.modal'),
+                          defaultMessage: 'Modal (default)',
+                        }),
+                        value: 'modal',
+                      },
+                      {
+                        label: formatMessage({
+                          id: getTranslation('containers.SettingPage.relationOpenMode.page'),
+                          defaultMessage: 'Navigate to page',
+                        }),
+                        value: 'page',
+                      },
+                      {
+                        label: formatMessage({
+                          id: getTranslation('containers.SettingPage.relationOpenMode.newTab'),
+                          defaultMessage: 'Open in new tab',
+                        }),
+                        value: 'newTab',
+                      },
+                    ]}
+                  />
+                </Grid.Item>
                 <Grid.Item
                   paddingTop={6}
                   paddingBottom={6}

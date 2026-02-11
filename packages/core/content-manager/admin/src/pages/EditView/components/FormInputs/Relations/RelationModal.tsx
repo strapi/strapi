@@ -207,6 +207,8 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+type RelationOpenMode = 'modal' | 'page' | 'newTab';
+
 interface RelationModalContextValue {
   state: State;
   dispatch: React.Dispatch<Action>;
@@ -215,6 +217,7 @@ interface RelationModalContextValue {
   currentDocument: ReturnType<UseDocument>;
   onPreview?: () => void;
   isCreating: boolean;
+  relationOpenMode: RelationOpenMode;
 }
 
 const [RelationModalProvider, useRelationModal] =
@@ -222,7 +225,10 @@ const [RelationModalProvider, useRelationModal] =
 
 function isRenderProp(
   children: RelationModalRendererProps['children']
-): children is (props: { dispatch: (action: Action) => void }) => React.ReactNode {
+): children is (props: {
+  dispatch: (action: Action) => void;
+  relationOpenMode: RelationOpenMode;
+}) => React.ReactNode {
   return typeof children === 'function';
 }
 
@@ -235,7 +241,10 @@ type RelationModalRendererProps =
   // Is creating
   | {
       relation?: never;
-      children: (props: { dispatch: (action: Action) => void }) => React.ReactNode;
+      children: (props: {
+        dispatch: (action: Action) => void;
+        relationOpenMode: RelationOpenMode;
+      }) => React.ReactNode;
     };
 
 const RootRelationRenderer = (props: RelationModalRendererProps) => {
@@ -260,6 +269,11 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
     params,
   };
 
+  // Get the relationOpenMode setting from the current document's layout configuration
+  const documentLayoutResponse = useDocumentLayout(rootDocument.model);
+  const relationOpenMode: RelationOpenMode =
+    documentLayoutResponse.edit?.settings?.relationOpenMode ?? 'modal';
+
   const currentDocumentMeta = state.documentHistory.at(-1) ?? rootDocumentMeta;
   const currentDocument = useDocument(currentDocumentMeta);
   // TODO: check if we can remove the single type check
@@ -277,10 +291,11 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
       currentDocumentMeta={currentDocumentMeta}
       currentDocument={currentDocument}
       isCreating={isCreating}
+      relationOpenMode={relationOpenMode}
     >
       <RelationModal>
         {isRenderProp(children)
-          ? children({ dispatch })
+          ? children({ dispatch, relationOpenMode })
           : props.relation && (
               <RelationModalTrigger relation={props.relation}>{children}</RelationModalTrigger>
             )}
@@ -292,9 +307,13 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
 const NestedRelationRenderer = (props: RelationModalRendererProps) => {
   const { children } = props;
   const dispatch = useRelationModal('NestedRelation', (state) => state.dispatch);
+  const relationOpenMode = useRelationModal(
+    'NestedRelation',
+    (state) => state.relationOpenMode
+  );
 
   return isRenderProp(children)
-    ? children({ dispatch })
+    ? children({ dispatch, relationOpenMode })
     : props.relation && (
         <RelationModalTrigger relation={props.relation}>{children}</RelationModalTrigger>
       ); /* This is the trigger that will be rendered in the parent relation */
@@ -542,19 +561,33 @@ const RelationModalTrigger = ({
   relation: DocumentMeta;
 }) => {
   const dispatch = useRelationModal('ModalTrigger', (state) => state.dispatch);
+  const relationOpenMode = useRelationModal(
+    'ModalTrigger',
+    (state) => state.relationOpenMode
+  );
+  const navigate = useNavigate();
 
-  return (
-    <StyledTextButton
-      onClick={() => {
+  const handleClick = () => {
+    const fullPageUrl = getFullPageUrl(relation);
+
+    switch (relationOpenMode) {
+      case 'page':
+        navigate(fullPageUrl);
+        break;
+      case 'newTab':
+        window.open(fullPageUrl, '_blank');
+        break;
+      case 'modal':
+      default:
         dispatch({
           type: 'GO_TO_RELATION',
           payload: { document: relation, shouldBypassConfirmation: false },
         });
-      }}
-    >
-      {children}
-    </StyledTextButton>
-  );
+        break;
+    }
+  };
+
+  return <StyledTextButton onClick={handleClick}>{children}</StyledTextButton>;
 };
 
 const StyledTextButton = styled(TextButton)`
@@ -718,5 +751,5 @@ const RelationModalForm = () => {
   );
 };
 
-export { reducer, RelationModalRenderer, useRelationModal };
-export type { State, Action };
+export { reducer, RelationModalRenderer, useRelationModal, getFullPageUrl, generateCreateUrl };
+export type { State, Action, RelationOpenMode };
