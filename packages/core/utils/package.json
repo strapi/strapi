@@ -53,7 +53,7 @@
     "lodash": "4.17.21",
     "node-machine-id": "1.1.12",
     "p-map": "4.0.0",
-    "preferred-pm": "3.1.2",
+    "preferred-pm": "3.1.3",
     "yup": "0.32.9",
     "zod": "3.25.67"
   },

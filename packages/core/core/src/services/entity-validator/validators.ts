@@ -37,6 +37,12 @@ interface ValidatorOptions {
 
 /* Validator utils */
 
+const toNumberSafe = (value: unknown): number | undefined => {
+  if (value === undefined || value === null) return undefined;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : undefined;
+};
+
 /**
  * Adds minLength validator
  */
@@ -93,7 +99,10 @@ const addMinIntegerValidator = (
     attr: Schema.Attribute.Integer | Schema.Attribute.BigInteger;
   },
   { isDraft }: ValidatorOptions
-) => (_.isNumber(attr.min) && !isDraft ? validator.min(_.toInteger(attr.min)) : validator);
+) => {
+  const min = toNumberSafe(attr.min);
+  return min !== undefined && !isDraft ? validator.min(_.toInteger(min)) : validator;
+};
 
 /**
  * Adds max integer validator
@@ -105,7 +114,10 @@ const addMaxIntegerValidator = (
   }: {
     attr: Schema.Attribute.Integer | Schema.Attribute.BigInteger;
   }
-) => (_.isNumber(attr.max) ? validator.max(_.toInteger(attr.max)) : validator);
+) => {
+  const max = toNumberSafe(attr.max);
+  return max !== undefined ? validator.max(_.toInteger(max)) : validator;
+};
 
 /**
  * Adds min float/decimal validator
@@ -118,7 +130,10 @@ const addMinFloatValidator = (
     attr: Schema.Attribute.Decimal | Schema.Attribute.Float;
   },
   { isDraft }: ValidatorOptions
-) => (_.isNumber(attr.min) && !isDraft ? validator.min(attr.min) : validator);
+) => {
+  const min = toNumberSafe(attr.min);
+  return min !== undefined && !isDraft ? validator.min(min) : validator;
+};
 
 /**
  * Adds max float/decimal validator
@@ -130,7 +145,10 @@ const addMaxFloatValidator = (
   }: {
     attr: Schema.Attribute.Decimal | Schema.Attribute.Float;
   }
-) => (_.isNumber(attr.max) ? validator.max(attr.max) : validator);
+) => {
+  const max = toNumberSafe(attr.max);
+  return max !== undefined ? validator.max(max) : validator;
+};
 
 /**
  * Adds regex validator
