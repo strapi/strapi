@@ -62,6 +62,7 @@ import {
   RelationModalRenderer,
   getCollectionType,
   generateCreateUrl,
+  getAdminBasePath,
 } from '../Relations/RelationModal';
 
 import type { FindAvailable } from '../../../../../../../shared/contracts/relations';
@@ -726,7 +727,7 @@ const RelationModalWithContext = ({
                   navigate(createUrl);
                   break;
                 case 'newTab':
-                  window.open(createUrl, '_blank');
+                  window.open(`${getAdminBasePath()}${createUrl}`, '_blank');
                   break;
                 case 'modal':
                 default:

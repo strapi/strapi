@@ -553,6 +553,17 @@ const RelationModalBody = () => {
   );
 };
 
+/**
+ * Get the admin base path (e.g. "/admin") to construct full URLs for window.open().
+ * React Router's navigate() only needs the relative SPA path, but window.open()
+ * needs the full path including the admin prefix.
+ *
+ * Mirrors the logic from @strapi/admin's internal getBasename() utility.
+ */
+const getAdminBasePath = () => {
+  return (process.env.ADMIN_PATH ?? '').replace(window.location.origin, '');
+};
+
 const RelationModalTrigger = ({
   children,
   relation,
@@ -575,7 +586,7 @@ const RelationModalTrigger = ({
         navigate(fullPageUrl);
         break;
       case 'newTab':
-        window.open(fullPageUrl, '_blank');
+        window.open(`${getAdminBasePath()}${fullPageUrl}`, '_blank');
         break;
       case 'modal':
       default:
@@ -751,5 +762,12 @@ const RelationModalForm = () => {
   );
 };
 
-export { reducer, RelationModalRenderer, useRelationModal, getFullPageUrl, generateCreateUrl };
+export {
+  reducer,
+  RelationModalRenderer,
+  useRelationModal,
+  getFullPageUrl,
+  generateCreateUrl,
+  getAdminBasePath,
+};
 export type { State, Action, RelationOpenMode };

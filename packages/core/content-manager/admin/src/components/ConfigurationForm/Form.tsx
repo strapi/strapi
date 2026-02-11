@@ -107,7 +107,7 @@ const ConfigurationForm = ({
                   defaultMessage: 'Settings',
                 })}
               </Typography>
-              <Grid.Root>
+              <Grid.Root gap={5}>
                 <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                   <InputRenderer
                     type="enumeration"
@@ -149,32 +149,40 @@ const ConfigurationForm = ({
                   <InputRenderer
                     type="enumeration"
                     label={formatMessage({
-                      id: getTranslation('containers.SettingPage.relationOpenMode'),
+                      id: getTranslation('containers.SettingPage.editSettings.relationOpenMode'),
                       defaultMessage: 'Relation open behavior',
                     })}
                     hint={formatMessage({
-                      id: getTranslation('containers.SettingPage.relationOpenMode.description'),
+                      id: getTranslation(
+                        'containers.SettingPage.editSettings.relationOpenMode.description'
+                      ),
                       defaultMessage: 'Choose how relation entries open when clicked',
                     })}
                     name="settings.relationOpenMode"
                     options={[
                       {
                         label: formatMessage({
-                          id: getTranslation('containers.SettingPage.relationOpenMode.modal'),
+                          id: getTranslation(
+                            'containers.SettingPage.editSettings.relationOpenMode.modal'
+                          ),
                           defaultMessage: 'Modal (default)',
                         }),
                         value: 'modal',
                       },
                       {
                         label: formatMessage({
-                          id: getTranslation('containers.SettingPage.relationOpenMode.page'),
+                          id: getTranslation(
+                            'containers.SettingPage.editSettings.relationOpenMode.page'
+                          ),
                           defaultMessage: 'Navigate to page',
                         }),
                         value: 'page',
                       },
                       {
                         label: formatMessage({
-                          id: getTranslation('containers.SettingPage.relationOpenMode.newTab'),
+                          id: getTranslation(
+                            'containers.SettingPage.editSettings.relationOpenMode.newTab'
+                          ),
                           defaultMessage: 'Open in new tab',
                         }),
                         value: 'newTab',
