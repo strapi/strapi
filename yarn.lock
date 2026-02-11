@@ -9043,7 +9043,7 @@ __metadata:
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.2"
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.1"
     formik: "npm:2.4.5"
@@ -9151,7 +9151,7 @@ __metadata:
     "@types/http-errors": "npm:2.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.2"
     "@types/koa-compress": "npm:4.0.3"
     "@types/koa-static": "npm:4.0.2"
     "@types/koa__router": "npm:12.0.0"
@@ -9159,7 +9159,6 @@ __metadata:
     "@types/mime-types": "npm:2.1.1"
     "@types/node": "npm:24.10.0"
     "@types/node-schedule": "npm:2.1.7"
-    "@types/statuses": "npm:2.0.1"
     "@vercel/stega": "npm:0.1.2"
     bcryptjs: "npm:2.4.3"
     boxen: "npm:5.1.2"
@@ -9200,7 +9199,6 @@ __metadata:
     qs: "npm:6.15.2"
     resolve.exports: "npm:2.0.2"
     semver: "npm:7.7.4"
-    statuses: "npm:2.0.1"
     supertest: "npm:7.2.2"
     tsconfig: "npm:5.47.1"
     typescript: "npm:5.4.5"
@@ -9222,7 +9220,7 @@ __metadata:
     "@strapi/utils": "npm:5.47.1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:24.10.0"
     "@types/semver": "npm:7.5.0"
@@ -9551,7 +9549,7 @@ __metadata:
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/fs-extra": "npm:11.0.4"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.2"
     "@types/swagger-ui-dist": "npm:3.30.4"
     bcryptjs: "npm:2.4.3"
     cheerio: "npm:^1.0.0"
@@ -9939,7 +9937,7 @@ __metadata:
     "@strapi/utils": "npm:5.47.1"
     "@types/jest": "npm:29.5.2"
     "@types/json-logic-js": "npm:2.0.8"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.2"
     "@types/koa__router": "npm:12.0.0"
     "@types/node-schedule": "npm:2.1.7"
     commander: "npm:8.3.0"
@@ -10055,7 +10053,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/byte-size": "npm:8.1.2"
     "@types/fs-extra": "npm:11.0.4"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.2"
     "@types/koa-range": "npm:0.3.5"
     "@types/koa-static": "npm:4.0.2"
     byte-size: "npm:8.1.1"
@@ -10102,7 +10100,7 @@ __metadata:
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@types/http-errors": "npm:2.0.4"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.2"
     "@types/node": "npm:24.10.0"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:5.47.1"
@@ -11293,9 +11291,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/koa@npm:2.13.4":
-  version: 2.13.4
-  resolution: "@types/koa@npm:2.13.4"
+"@types/koa@npm:2.15.2":
+  version: 2.15.2
+  resolution: "@types/koa@npm:2.15.2"
   dependencies:
     "@types/accepts": "npm:*"
     "@types/content-disposition": "npm:*"
@@ -11305,7 +11303,7 @@ __metadata:
     "@types/keygrip": "npm:*"
     "@types/koa-compose": "npm:*"
     "@types/node": "npm:*"
-  checksum: 10c0/040954632e40ebb6b881fae9da2d3e0c421bc61c05302b34d525cb5c512a75589c229853d59ded45445c327aaa6df47d1bbfecdcf054e31c0bc0305070751553
+  checksum: 10c0/912bb5135d8d72353617826790aa8ac085d92c629893c9780bc933affc2286cd9869fd4881e601278774df41ee95071adfcd86ee29c8b1e84561ce6ebedbc7b6
   languageName: node
   linkType: hard
 
@@ -11751,13 +11749,6 @@ __metadata:
   version: 2.0.1
   resolution: "@types/stack-utils@npm:2.0.1"
   checksum: 10c0/3327ee919a840ffe907bbd5c1d07dfd79137dd9732d2d466cf717ceec5bb21f66296173c53bb56cff95fae4185b9cd6770df3e9745fe4ba528bbc4975f54d13f
-  languageName: node
-  linkType: hard
-
-"@types/statuses@npm:2.0.1":
-  version: 2.0.1
-  resolution: "@types/statuses@npm:2.0.1"
-  checksum: 10c0/e77169158ff979d755bf6d291ed74d9ace4434b9036e3892d895a23195886d23da04c96d066de47787e1ca77af09a4d9fd2a041d2a3f933a5731278af8212b02
   languageName: node
   linkType: hard
 

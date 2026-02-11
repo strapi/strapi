@@ -73,7 +73,7 @@
     "@strapi/database": "5.47.1",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
-    "@types/koa": "2.13.4",
+    "@types/koa": "2.15.2",
     "@types/lodash": "^4.14.191",
     "@types/node": "24.10.0",
     "@types/semver": "7.5.0",

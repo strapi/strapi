@@ -102,7 +102,7 @@
     "ajv@~8.13.0": "8.20.0",
     "ajv@~8.18.0": "8.20.0",
     "webpack": "5.106.2",
-    "@types/koa": "2.13.4",
+    "@types/koa": "2.15.2",
     "@babel/core": "7.29.0",
     "@babel/runtime": "7.29.2",
     "@babel/runtime-corejs3": "7.29.2",
