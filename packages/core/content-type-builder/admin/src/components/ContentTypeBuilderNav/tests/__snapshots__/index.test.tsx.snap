@@ -637,6 +637,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 @media (min-width: 768px) {
   .c1 {
+    height: calc(100dvh - 6.4rem - 1px);
+    overflow: hidden;
     width: 23.2rem;
     position: sticky;
     top: 0;
