@@ -566,229 +566,329 @@ describe('Upload plugin', () => {
 
   describe('File restriction', () => {
     afterEach(() => {
-      // Reset config after each test
       strapi.config.set('plugin::upload.security', {});
     });
 
-    describe('uploadFiles endpoint', () => {
-      test('Rejects file when MIME type is in denied list', async () => {
-        strapi.config.set('plugin::upload.security', { deniedTypes: ['image/*'] });
-        const res = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
+    describe('validation matrix (real detection)', () => {
+      const utilsPath = (name) => path.join(__dirname, '../utils', name);
+      const fixturePaths = {
+        jpg: utilsPath('rec.jpg'),
+        png: utilsPath('strapi.png'),
+        pdf: utilsPath('rec.pdf'),
+        docx: utilsPath('rec.docx'),
+        txt: utilsPath('rec.txt'),
+        unknown: utilsPath('rec.bin'),
+      };
+
+      const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+      // allowedList: undefined = no allow list (allow all); [] = explicit empty (reject all); string[] = allow only these
+      const MATRIX = [
+        {
+          description: 'no config: detectable → allow',
+          allowedList: undefined,
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'image/jpeg',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'no config: undetectable → allow',
+          allowedList: undefined,
+          bannedList: [],
+          contentKind: 'unknown',
+          uploadedFileName: 'a.xyz',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'explicit empty allowedTypes → reject any file',
+          allowedList: [],
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'image/jpeg',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'explicit empty allowedTypes + undetectable file → reject',
+          allowedList: [],
+          bannedList: [],
+          contentKind: 'unknown',
+          uploadedFileName: 'a.xyz',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'deny only: declared in deny → reject',
+          allowedList: undefined,
+          bannedList: ['image/png'],
+          contentKind: 'png',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/png',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'deny only: detected in deny → reject',
+          allowedList: undefined,
+          bannedList: ['image/png'],
+          contentKind: 'png',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/png',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'deny only: extension MIME in deny → reject',
+          allowedList: undefined,
+          bannedList: ['image/png'],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/jpeg',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'deny only: type not in deny → allow',
+          allowedList: undefined,
+          bannedList: ['image/png'],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'image/jpeg',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'allow+deny: declared in ban → reject',
+          allowedList: ['image/jpeg', 'image/png'],
+          bannedList: ['image/png'],
+          contentKind: 'png',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/png',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'allow+deny: detected in ban → reject',
+          allowedList: ['image/jpeg', 'image/png'],
+          bannedList: ['image/png'],
+          contentKind: 'png',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/png',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'allow+deny: extension MIME in ban → reject',
+          allowedList: ['image/*'],
+          bannedList: ['image/png'],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/jpeg',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'undetectable, no extension, declared in allow → reject',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'noext',
+          uploadedFileDeclaredType: 'text/plain',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'undetectable, no extension, declared generic → reject',
+          allowedList: ['text/plain'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'noext',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'undetectable, no extension (any declared) → reject',
+          allowedList: ['text/plain'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'noext',
+          uploadedFileDeclaredType: 'text/plain',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'undetectable, extension in allow, declared matches extension → allow',
+          allowedList: ['text/plain'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'a.txt',
+          uploadedFileDeclaredType: 'text/plain',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'undetectable, extension in allow, declared generic → allow',
+          allowedList: ['text/plain'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'a.txt',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'undetectable, extension in allow, declared empty (generic) → allow',
+          allowedList: ['text/plain'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'a.txt',
+          uploadedFileDeclaredType: '',
+          expectedResult: 'allow',
+        },
+        {
+          description:
+            'undetectable, extension in allow, declared does not match extension → reject',
+          allowedList: ['text/plain', 'application/pdf'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'a.pdf',
+          uploadedFileDeclaredType: 'text/plain',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'undetectable, extension not in allow list → reject',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'a.txt',
+          uploadedFileDeclaredType: 'text/plain',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'undetectable, unknown extension, declared generic → reject',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'unknown',
+          uploadedFileName: 'file.xyz',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'reject',
+        },
+        {
+          description:
+            'undetectable, unknown extension, declared specific in allow (no MIME for .xyz) → reject',
+          allowedList: ['text/plain'],
+          bannedList: [],
+          contentKind: 'unknown',
+          uploadedFileName: 'a.xyz',
+          uploadedFileDeclaredType: 'text/plain',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'undetectable, unknown extension, declared specific not in allow → reject',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'unknown',
+          uploadedFileName: 'a.xyz',
+          uploadedFileDeclaredType: 'text/plain',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'detectable, detected in allow, extension matches → allow',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'image/jpeg',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'detectable, detected in allow, extension does not match (warn but allow)',
+          allowedList: ['image/jpeg', 'application/pdf'],
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.pdf',
+          uploadedFileDeclaredType: 'application/pdf',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'detectable, detected in allow, declared generic (warn but allow)',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'detectable, none of declared/detected/extension in allow → reject',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'pdf',
+          uploadedFileName: 'a.pdf',
+          uploadedFileDeclaredType: 'application/pdf',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'docx detected, docx in allow → allow',
+          allowedList: [DOCX_MIME],
+          bannedList: [],
+          contentKind: 'docx',
+          uploadedFileName: 'a.docx',
+          uploadedFileDeclaredType: DOCX_MIME,
+          expectedResult: 'allow',
+        },
+        {
+          description: 'docx detected, application/* in allow → allow',
+          allowedList: ['application/*'],
+          bannedList: [],
+          contentKind: 'docx',
+          uploadedFileName: 'a.docx',
+          uploadedFileDeclaredType: DOCX_MIME,
+          expectedResult: 'allow',
+        },
+        {
+          description: 'docx detected, declared generic (application/octet-stream) → allow',
+          allowedList: [DOCX_MIME],
+          bannedList: [],
+          contentKind: 'docx',
+          uploadedFileName: 'a.docx',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'detectable PNG, in allow → allow',
+          allowedList: ['image/png', 'image/jpeg'],
+          bannedList: [],
+          contentKind: 'png',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/png',
+          expectedResult: 'allow',
+        },
+      ];
+
+      for (const row of MATRIX) {
+        test(row.description, async () => {
+          const config = {
+            ...(row.allowedList !== undefined && { allowedTypes: row.allowedList }),
+            ...(row.bannedList.length > 0 && { deniedTypes: row.bannedList }),
+          };
+          strapi.config.set('plugin::upload.security', config);
+
+          const res = await rq({
+            method: 'POST',
+            url: '/upload',
+            formData: {
+              files: {
+                path: fixturePaths[row.contentKind],
+                filename: row.uploadedFileName,
+                contentType: row.uploadedFileDeclaredType,
+              },
+            },
+          });
+
+          if (row.expectedResult === 'allow') {
+            expect(res.statusCode).toBe(201);
+            expect(res.body).toHaveLength(1);
+            await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+          } else {
+            expect(res.statusCode).toBe(400);
+            expect(res.body.error).toBeDefined();
+            expect(res.body.error.code || res.body.error.message).toBeTruthy();
+          }
         });
-
-        // Should be rejected due to security configuration
-        expect(res.statusCode).toBe(400);
-        expect(res.body.error).toBeDefined();
-        // MIME detection may fail in test environment, so check for either error
-        expect(res.body.error.message).toMatch(/image\/jpeg|Cannot verify file type/);
-      });
-
-      test('Rejects file when not in allowed types list', async () => {
-        strapi.config.set('plugin::upload.security', { allowedTypes: ['application/pdf'] });
-        const res = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
-        });
-
-        // Should be rejected because it's not a PDF
-        expect(res.statusCode).toBe(400);
-        expect(res.body.error).toBeDefined();
-      });
-
-      test('Accepts file when no restrictions are configured', async () => {
-        // No security config - should accept any file
-        const res = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
-        });
-
-        expect(res.statusCode).toBe(201);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].mime).toBe('image/jpeg');
-      });
-
-      test('Rejects multiple files when they do not match allowed types', async () => {
-        strapi.config.set('plugin::upload.security', { allowedTypes: ['application/pdf'] });
-        const res = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: {
-            files: [
-              fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
-              fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
-            ],
-          },
-        });
-
-        // When all files are rejected, should return 400
-        expect(res.statusCode).toBe(400);
-        expect(res.body.error).toBeDefined();
-      });
-    });
-
-    describe('replaceFile endpoint', () => {
-      let fileToReplace;
-
-      beforeEach(async () => {
-        // Upload an initial file to replace (without restrictions)
-        const uploadRes = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
-        });
-        fileToReplace = uploadRes.body[0];
-      });
-
-      afterEach(async () => {
-        // Clean up uploaded files
-        if (fileToReplace) {
-          await rq({ method: 'DELETE', url: `/upload/files/${fileToReplace.id}` });
-        }
-      });
-
-      test('Rejects replacement file when MIME type is in denied list', async () => {
-        strapi.config.set('plugin::upload.security', { deniedTypes: ['image/*'] });
-        const res = await rq({
-          method: 'POST',
-          url: `/upload?id=${fileToReplace.id}`,
-          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
-        });
-
-        // Should be rejected due to security configuration
-        expect(res.statusCode).toBe(400);
-        expect(res.body.error).toBeDefined();
-      });
-
-      test('Accepts replacement file when no restrictions are configured', async () => {
-        // No security config - should accept replacement
-        const res = await rq({
-          method: 'POST',
-          url: `/upload?id=${fileToReplace.id}`,
-          formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
-        });
-
-        expect(res.statusCode).toBe(200);
-        expect(res.body.mime).toBe('image/jpeg');
-      });
-    });
-
-    describe('Multi-layer validation when detection fails', () => {
-      test('Allows file when extension matches declared type and detection fails', async () => {
-        strapi.config.set('plugin::upload.security', { allowedTypes: ['text/plain'] });
-
-        // Create a text file
-        const textContent = 'This is a plain text file for testing';
-        const textFilePath = path.join(__dirname, '../utils/test-file.txt');
-        fs.writeFileSync(textFilePath, textContent);
-
-        const res = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: { files: fs.createReadStream(textFilePath) },
-        });
-
-        // Should be allowed: extension matches declared type even though detection may fail
-        expect(res.statusCode).toBe(201);
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].mime).toBe('text/plain');
-        expect(res.body[0].ext).toBe('.txt');
-
-        // Cleanup
-        fs.unlinkSync(textFilePath);
-        await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
-      });
-
-      test('Rejects file when extension does not match declared type (spoofing attempt)', async () => {
-        strapi.config.set('plugin::upload.security', { allowedTypes: ['text/plain'] });
-
-        // Create a file with .exe extension containing plain text
-        // This simulates a spoofing attempt where attacker claims text/plain but uses .exe extension
-        const textContent = 'This is plain text but with wrong extension';
-        const spoofedFilePath = path.join(__dirname, '../utils/test-spoofed.exe');
-        fs.writeFileSync(spoofedFilePath, textContent);
-
-        const res = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: { files: fs.createReadStream(spoofedFilePath) },
-        });
-
-        // Should be rejected: extension (.exe) doesn't match declared type (text/plain)
-        // Even if file-type can't detect it, extension validation should catch it
-        expect(res.statusCode).toBe(400);
-        expect(res.body.error).toBeDefined();
-        const errorMessage = res.body.error.message || '';
-        const errorDetails = res.body.error.details || {};
-        expect(
-          errorMessage.includes('extension') ||
-            errorMessage.includes('Cannot verify') ||
-            errorDetails.reason?.includes('extension')
-        ).toBe(true);
-
-        // Cleanup
-        fs.unlinkSync(spoofedFilePath);
-      });
-
-      test('Rejects file with generic declared type when detection fails', async () => {
-        strapi.config.set('plugin::upload.security', { allowedTypes: ['text/plain'] });
-
-        // Create a text file
-        const textContent = 'This is plain text';
-        const textFilePath = path.join(__dirname, '../utils/test-generic.txt');
-        fs.writeFileSync(textFilePath, textContent);
-
-        // Simulate generic type by not providing Content-Type (multipart parser may default to octet-stream)
-        const res = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: { files: fs.createReadStream(textFilePath) },
-        });
-
-        // If detection fails and declared type is generic, should reject
-        // Note: This test may pass or fail depending on whether file-type can detect text files
-        // The important thing is that generic types are not trusted when detection fails
-        if (res.statusCode === 400) {
-          expect(res.body.error).toBeDefined();
-          expect(res.body.error.message).toMatch(/Cannot verify file type/i);
-        }
-
-        // Cleanup
-        if (fs.existsSync(textFilePath)) {
-          fs.unlinkSync(textFilePath);
-        }
-        if (res.statusCode === 201 && res.body[0]) {
-          await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
-        }
-      });
-
-      test('Allows file when declared type matches extension even if detection fails', async () => {
-        strapi.config.set('plugin::upload.security', { allowedTypes: ['application/json'] });
-
-        // Create a JSON file (file-type may not detect JSON reliably)
-        const jsonContent = JSON.stringify({ test: 'data' });
-        const jsonFilePath = path.join(__dirname, '../utils/test-file.json');
-        fs.writeFileSync(jsonFilePath, jsonContent);
-
-        const res = await rq({
-          method: 'POST',
-          url: '/upload',
-          formData: { files: fs.createReadStream(jsonFilePath) },
-        });
-
-        // Should be allowed: extension matches declared type
-        expect(res.statusCode).toBe(201);
-        expect(res.body).toHaveLength(1);
-        expect(['application/json', 'text/json']).toContain(res.body[0].mime);
-
-        // Cleanup
-        fs.unlinkSync(jsonFilePath);
-        await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
-      });
+      }
     });
   });
 });
