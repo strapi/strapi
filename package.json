@@ -82,8 +82,8 @@
     "test:unit:update": "jest --config jest.config.js -u",
     "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
     "test:unit:watch": "run test:unit --watch",
-    "test:unit:vitest": "vitest run --config packages/core/core/vitest.config.ts",
-    "test:unit:vitest:watch": "vitest --watch --config packages/core/core/vitest.config.ts"
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch"
   },
   "resolutions": {
     "@types/koa": "2.13.4",
