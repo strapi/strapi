@@ -67,6 +67,9 @@ const controller = {
     const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
     const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);
 
+    // TODO (Mehak): Issue #25178 - Investigate why 'nonLocalizedFields' are returning null here for REST API.
+    // It seems the Document Service might be bypassing this step or the entity data is incomplete.
+
     const availableLocalesResult = await strapi.plugins['content-manager']
       .service('document-metadata')
       .getMetadata(model, entity, {
