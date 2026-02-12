@@ -217,8 +217,19 @@ jobs:
           node-version: 22
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: playwright-browsers-${{ runner.os }}-
       - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
+      - name: Install Playwright system deps only (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
@@ -268,8 +279,19 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: playwright-browsers-${{ runner.os }}-
       - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
+      - name: Install Playwright system deps only (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
 
       - name: Monorepo build
         uses: ./.github/actions/run-build

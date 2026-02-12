@@ -103,20 +103,27 @@ yargs
 
         const { concurrency, domains: selectedDomains, setup } = testYargs;
 
+        /** For e2e: one entry per template; used to run one Playwright (one server) per template */
+        let e2eTemplates = null;
+
         /**
          * Publishing all packages to the yalc store
          */
         await publishYalc(cwd);
 
-        // Load domain configs for CLI tests
+        // Load domain configs for CLI tests; determine how many test apps we need
         let domainConfigs = null;
         let testAppsRequired;
         if (type === 'cli') {
           domainConfigs = await loadDomainConfigs(testDomainRoot, selectedDomains, testYargs);
+          // CLI needs multiple apps in parallel (concurrency); each domain can require its own app(s)
           testAppsRequired = calculateTestAppsRequired(domainConfigs, concurrency);
         } else {
-          // For e2e: we don't need more apps than domains, but respect concurrency
-          testAppsRequired = Math.min(selectedDomains.length, concurrency);
+          // E2E: one app per template; one Playwright run per template (all domains in that run).
+          // We ignore -c/--concurrency here: it does not control app count or parallel runs for e2e.
+          // Parallelism for e2e is via CI matrix jobs; each job gets --shard=X/Y (Playwright) and runs 1/Y of the tests.
+          e2eTemplates = [{ name: 'default', dir: templateDir, domains: selectedDomains }];
+          testAppsRequired = e2eTemplates.length;
         }
 
         if (testAppsRequired === 0) {
@@ -157,8 +164,7 @@ yargs
          * Run the appropriate test runner
          */
         if (type === 'e2e') {
-          // Playwright orchestration: init git and start Strapi once per test app, then run tests for each domain
-          const testAppsToSpawn = testAppPaths.length;
+          // Playwright orchestration: init git and start Strapi once per template (one app per template), then one run per template
           const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
 
           // Initialize git and start Strapi once per test app (not per domain)
@@ -319,76 +325,67 @@ yargs
             })();
           }
 
-          // Now chunk domains and run tests
-          const chunkedDomains = selectedDomains.reduce((acc, _, i) => {
-            if (i % testAppsToSpawn === 0) acc.push(selectedDomains.slice(i, i + testAppsToSpawn));
-            return acc;
-          }, []);
-
+          // One Playwright run per template: one server reused for all domains using that template
           // eslint-disable-next-line no-plusplus
-          for (let i = 0; i < chunkedDomains.length; i++) {
-            const domainBatch = chunkedDomains[i];
+          for (let j = 0; j < e2eTemplates.length; j++) {
+            const template = e2eTemplates[j];
+            const testAppPath = testAppPaths[j];
+            const port = 8000 + j;
+            const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
 
-            await Promise.all(
-              domainBatch.map(async (domain, j) => {
-                const testAppPath = testAppPaths[j];
-                const port = 8000 + j;
-                const pathToPlaywrightConfig = path.resolve(testAppPath, 'playwright.config.js');
+            console.log(
+              `Creating playwright config for template: ${template.name}, at path: ${testAppPath} (all domains)`
+            );
 
-                console.log(
-                  `Creating playwright config for domain: ${domain}, at path: ${testAppPath}`
-                );
+            const config = createConfig({
+              testDir: testDomainRoot,
+              port,
+              appDir: testAppPath,
+              reportFileName: `playwright-${template.name}-${port}.xml`,
+            });
 
-                const config = createConfig({
-                  testDir: path.join(testDomainRoot, domain),
-                  port,
-                  appDir: testAppPath,
-                  reportFileName: `playwright-${domain}-${port}.xml`,
-                });
-
-                const configFileTemplate = `
+            const configFileTemplate = `
 const config = ${JSON.stringify(config)}
 
 module.exports = config
-                `;
+            `;
 
-                await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
+            await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
 
-                // Add the config file to git so it persists through git clean
-                await execa('git', [...gitUser, 'add', pathToPlaywrightConfig], {
-                  stdio: 'inherit',
-                  cwd: testAppPath,
-                });
-                await execa(
-                  'git',
-                  [
-                    ...gitUser,
-                    '-c',
-                    'commit.gpgsign=false',
-                    'commit',
-                    '-m',
-                    'Add playwright config',
-                  ],
-                  {
-                    stdio: 'inherit',
-                    cwd: testAppPath,
-                  }
-                ).catch(() => {
-                  // Ignore error if there's nothing to commit (file already tracked)
-                });
+            // Add the config file to git so it persists through git clean
+            await execa('git', [...gitUser, 'add', pathToPlaywrightConfig], {
+              stdio: 'inherit',
+              cwd: testAppPath,
+            });
+            await execa(
+              'git',
+              [...gitUser, '-c', 'commit.gpgsign=false', 'commit', '-m', 'Add playwright config'],
+              {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              }
+            ).catch(() => {
+              // Ignore error if there's nothing to commit (file already tracked)
+            });
 
-                console.log(`Running ${domain} e2e tests`);
-
-                // Run Playwright - this is the only line that differs!
-                await runPlaywright({
-                  configPath: pathToPlaywrightConfig,
-                  cwd,
-                  port,
-                  testAppPath,
-                  testArgs: testYargs._,
-                });
-              })
+            console.log(
+              `Running e2e tests for template: ${template.name} (one server, all domains)`
             );
+
+            // When user passed --domains, restrict to those domain paths
+            const domainFilterPaths =
+              template.domains.length < domains.length
+                ? template.domains.map((d) => path.join(testDomainRoot, d))
+                : [];
+            const testArgs = [...testYargs._, ...domainFilterPaths];
+
+            await runPlaywright({
+              configPath: pathToPlaywrightConfig,
+              cwd,
+              port,
+              testAppPath,
+              testArgs,
+            });
           }
         } else {
           // CLI orchestration: batch domains, assign test apps, then run tests
