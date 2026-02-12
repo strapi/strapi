@@ -55,7 +55,11 @@ const EditViewPage = () => {
   const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
   const drawerHasContent = visiblePanels.length > 0;
 
-  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
+  usePersistentPartialQueryParams({
+    keyPrefix: 'STRAPI_LOCALE',
+    keysToPersist: ['plugins.i18n.locale'],
+    pathnameInKey: false,
+  });
 
   const doc = useDoc();
   const {

@@ -21,38 +21,63 @@ const filterObjectKeys = (obj: object, keys: PropertyPath[]) => {
   return result;
 };
 
+type PersistentQueryConfig = {
+  keyPrefix: string;
+  keysToPersist: PropertyPath[];
+  pathnameInKey?: boolean;
+};
+
+const normalizeConfigs = (
+  configs: PersistentQueryConfig | PersistentQueryConfig[]
+): PersistentQueryConfig[] => {
+  return (Array.isArray(configs) ? configs : [configs]).map((config) => ({
+    ...config,
+    pathnameInKey: config.pathnameInKey ?? true,
+  }));
+};
+
 export const usePersistentPartialQueryParams = (
-  keyPrefix: string,
-  keysToPersist: PropertyPath[],
-  pathnameInKey = true
+  config: PersistentQueryConfig | PersistentQueryConfig[]
 ) => {
   const { pathname } = useLocation();
   const [{ query }, setQuery] = useQueryParams();
-  const localStorageKey = `${keyPrefix}${pathnameInKey ? pathname : ''}`;
+  const configs = normalizeConfigs(config);
 
   // load query params from local storge
   useEffect(() => {
-    const savedQueryParams = window.localStorage.getItem(localStorageKey);
-    if (!savedQueryParams) return;
+    const mergedFilteredQuery: Record<string, unknown> = {};
 
-    let parsedSavedParams: Record<string, unknown>;
-    try {
-      parsedSavedParams = JSON.parse(savedQueryParams);
-    } catch {
-      return;
+    for (const config of configs) {
+      const localStorageKey = `${config.keyPrefix}${config.pathnameInKey ? pathname : ''}`;
+      const savedQueryParams = window.localStorage.getItem(localStorageKey);
+      if (!savedQueryParams) continue;
+
+      let parsedSavedParams: Record<string, unknown>;
+      try {
+        parsedSavedParams = JSON.parse(savedQueryParams);
+      } catch {
+        continue;
+      }
+      if (Object.keys(parsedSavedParams).length === 0) continue;
+
+      const filteredQuery = filterObjectKeys(parsedSavedParams, config.keysToPersist);
+      Object.assign(mergedFilteredQuery, filteredQuery);
     }
-    if (Object.keys(parsedSavedParams).length === 0) return;
 
-    const filteredQuery = filterObjectKeys(parsedSavedParams, keysToPersist);
-    setQuery({ ...filteredQuery, ...query }, 'push', true);
+    if (Object.keys(mergedFilteredQuery).length === 0) return;
+
+    setQuery({ ...mergedFilteredQuery, ...query }, 'push', true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localStorageKey]);
+  }, [pathname, config]);
 
   // update local storage
   useEffect(() => {
-    const paramsToPersist = filterObjectKeys(query, keysToPersist);
-    if (Object.keys(paramsToPersist).length === 0) return;
-    window.localStorage.setItem(localStorageKey, JSON.stringify(paramsToPersist));
+    for (const config of configs) {
+      const paramsToPersist = filterObjectKeys(query, config.keysToPersist);
+      if (Object.keys(paramsToPersist).length === 0) continue;
+      const localStorageKey = `${config.keyPrefix}${config.pathnameInKey ? pathname : ''}`;
+      window.localStorage.setItem(localStorageKey, JSON.stringify(paramsToPersist));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, keysToPersist]);
+  }, [query, pathname, config]);
 };

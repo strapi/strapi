@@ -75,8 +75,23 @@ const ListViewPage = () => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
-  usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
-  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
+  const persistentQueryConfigs = React.useMemo(
+    () => [
+      {
+        keyPrefix: 'STRAPI_LIST_VIEW_SETTINGS:',
+        keysToPersist: ['sort', 'filters', 'pageSize'],
+        pathnameInKey: true,
+      },
+      {
+        keyPrefix: 'STRAPI_LOCALE',
+        keysToPersist: ['plugins.i18n.locale'],
+        pathnameInKey: false,
+      },
+    ],
+    []
+  );
+
+  usePersistentPartialQueryParams(persistentQueryConfigs);
 
   const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);
