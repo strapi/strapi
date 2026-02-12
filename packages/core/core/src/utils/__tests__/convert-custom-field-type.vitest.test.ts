@@ -1,12 +1,13 @@
+import { describe, it, expect, vi } from 'vitest';
 import { convertCustomFieldType } from '../convert-custom-field-type';
 
 describe('format attributes', () => {
   it('replaces type customField with the underlying data type', () => {
     global.strapi = {
       // mock container.get('custom-fields')
-      get: jest.fn(() => ({
+      get: vi.fn(() => ({
         // mock container.get('custom-fields').get(uid)
-        get: jest.fn(() => ({
+        get: vi.fn(() => ({
           name: 'color',
           plugin: 'mycustomfields',
           type: 'text',

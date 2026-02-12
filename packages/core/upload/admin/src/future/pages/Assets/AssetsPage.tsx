@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useCallback, useState, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import {
   Layouts,
   SearchInput,
+  useElementOnScreen,
   useNotification,
   useAPIErrorHandler,
 } from '@strapi/admin/strapi-admin';
@@ -22,7 +23,6 @@ import { styled } from 'styled-components';
 
 import { usePersistentState } from '../../../hooks/usePersistentState';
 import { useUploadFilesMutation } from '../../services/api';
-import { useGetAssetsQuery } from '../../services/assets';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetsGrid } from './components/AssetsGrid';
@@ -33,6 +33,9 @@ import {
   useUploadDropZone,
 } from './components/DropZone/UploadDropZoneContext';
 import { localStorageKeys, viewOptions } from './constants';
+import { useInfiniteAssets } from './hooks/useInfiniteAssets';
+
+const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 
 interface AssetsViewProps {
   view: number;
@@ -40,10 +43,22 @@ interface AssetsViewProps {
 
 const AssetsView = ({ view }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
-  const { data, isLoading, error } = useGetAssetsQuery({ folder: null });
+  const { assets, isLoading, isFetchingMore, hasNextPage, fetchNextPage, error } =
+    useInfiniteAssets();
 
   const isGridView = view === viewOptions.GRID;
-  const assets = data?.results ?? [];
+
+  const loadMoreRef = useElementOnScreen<HTMLDivElement>(
+    useCallback(
+      (isVisible) => {
+        if (isVisible && hasNextPage && !isFetchingMore) {
+          fetchNextPage();
+        }
+      },
+      [hasNextPage, isFetchingMore, fetchNextPage]
+    ),
+    INTERSECTION_OPTIONS
+  );
 
   if (isLoading) {
     return (
@@ -66,11 +81,22 @@ const AssetsView = ({ view }: AssetsViewProps) => {
     );
   }
 
-  if (isGridView) {
-    return <AssetsGrid assets={assets} />;
-  }
-
-  return <AssetsTable assets={assets} />;
+  return (
+    <>
+      {isGridView ? <AssetsGrid assets={assets} /> : <AssetsTable assets={assets} />}
+      <div ref={loadMoreRef} style={{ height: 1 }} />
+      {isFetchingMore && (
+        <Flex justifyContent="center" padding={4}>
+          <Loader>
+            {formatMessage({
+              id: getTranslationKey('list.assets.loading-more'),
+              defaultMessage: 'Loading more assets...',
+            })}
+          </Loader>
+        </Flex>
+      )}
+    </>
+  );
 };
 
 const StyledToggleGroup = styled(ToggleGroup.Root)`

@@ -355,7 +355,6 @@ const addMaxLengthValidation: ValidationFn =
 const addMinValidation: ValidationFn =
   (attribute, options) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
-    // do not validate min for draft
     if (options.status === 'draft') {
       return schema;
     }
@@ -363,7 +362,7 @@ const addMinValidation: ValidationFn =
     if ('min' in attribute && 'min' in schema) {
       const min = toInteger(attribute.min);
 
-      if (min) {
+      if (min !== undefined) {
         return schema.min(min, {
           ...translatedErrors.min,
           values: {
@@ -382,7 +381,7 @@ const addMaxValidation: ValidationFn =
     if ('max' in attribute) {
       const max = toInteger(attribute.max);
 
-      if ('max' in schema && max) {
+      if ('max' in schema && max !== undefined) {
         return schema.max(max, {
           ...translatedErrors.max,
           values: {
