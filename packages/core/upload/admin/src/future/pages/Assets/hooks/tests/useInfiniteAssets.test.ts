@@ -8,7 +8,7 @@ import type { File, Pagination } from '../../../../../../../shared/contracts/fil
 
 const mockUseGetAssetsQuery = jest.fn();
 
-jest.mock('../../services/assets', () => ({
+jest.mock('../../../../services/assets', () => ({
   useGetAssetsQuery: (...args: unknown[]) => mockUseGetAssetsQuery(...args),
 }));
 
