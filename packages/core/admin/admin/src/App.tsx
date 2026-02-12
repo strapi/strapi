@@ -32,7 +32,7 @@ const App = ({ strapi, store }: AppProps) => {
 
   /**
    * @internal
-   * @experimnental
+   * @experimental
    *
    * The `future-global::` namespace is intended for internal use.
    * It is experimental and could change or be removed in the future.

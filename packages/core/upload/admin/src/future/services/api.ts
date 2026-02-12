@@ -37,20 +37,6 @@ interface RootState {
 }
 
 /**
- * Manages abort controllers for in-flight uploads.
- *
- * Design decision: Uses a Map to track uploads by their unique uploadId.
- * This approach is necessary because:
- * 1. Redux state cannot store function references (abort controllers)
- * 2. RTK Query's signal is only accessible within the queryFn
- * 3. The upload is triggered in AssetsPage but cancelled from UploadProgressDialog
- *
- * The uploadId ensures we abort the correct upload even if multiple uploads
- * are queued, though the current UI prevents simultaneous uploads.
- */
-const abortControllers = new Map<number, AbortController>();
-
-/**
  * Stores original File objects for retry functionality.
  *
  * Similar to abortControllers, File objects cannot be stored in Redux state
@@ -69,16 +55,23 @@ const registerUploadedFiles = (uploadId: number, files: File[]) => {
 /**
  * Retrieves stored files for an upload.
  */
-export const getUploadedFiles = (uploadId: number): File[] | undefined => {
+const getUploadedFiles = (uploadId: number): File[] | undefined => {
   return uploadedFiles.get(uploadId);
 };
 
 /**
- * Removes stored files when an upload completes or dialog closes.
+ * Manages abort controllers for in-flight uploads.
+ *
+ * Design decision: Uses a Map to track uploads by their unique uploadId.
+ * This approach is necessary because:
+ * 1. Redux state cannot store function references (abort controllers)
+ * 2. RTK Query's signal is only accessible within the queryFn
+ * 3. The upload is triggered in AssetsPage but cancelled from UploadProgressDialog
+ *
+ * The uploadId ensures we abort the correct upload even if multiple uploads
+ * are queued, though the current UI prevents simultaneous uploads.
  */
-export const clearUploadedFiles = (uploadId: number) => {
-  uploadedFiles.delete(uploadId);
-};
+const abortControllers = new Map<number, AbortController>();
 
 /**
  * Registers an abort controller for a specific upload.
@@ -137,6 +130,39 @@ const parseSSEEvents = (chunk: string): Array<{ event: string; data: string }> =
   }
 
   return events;
+};
+
+/**
+ * Makes a streaming upload request to the server.
+ *
+ * We use fetch directly instead of RTK Query's fetchBaseQuery because:
+ * 1. We need access to the raw Response to read the body as a stream
+ * 2. RTK Query's baseQuery awaits the full response and parses it as JSON,
+ *    which doesn't work for Server-Sent Events (SSE) streaming
+ * 3. The stream must be read incrementally via response.body.getReader()
+ *    to dispatch progress updates as files upload
+ */
+const fetchUploadStream = async ({
+  token,
+  formData,
+  signal,
+}: {
+  token: string | null | undefined;
+  formData: FormData;
+  signal: AbortSignal;
+}): Promise<Response> => {
+  const backendURL = window.strapi.backendURL;
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return fetch(`${backendURL}/upload/unstable/stream`, {
+    method: 'POST',
+    headers,
+    body: formData,
+    signal,
+  });
 };
 
 /**
@@ -281,16 +307,9 @@ const uploadApi = adminApi
           registerAbortController(uploadId, abortController);
 
           try {
-            const backendURL = window.strapi.backendURL;
-            const headers: Record<string, string> = {};
-            if (token) {
-              headers.Authorization = `Bearer ${token}`;
-            }
-
-            const response = await fetch(`${backendURL}/upload/unstable/stream`, {
-              method: 'POST',
-              headers,
-              body: formData,
+            const response = await fetchUploadStream({
+              token,
+              formData,
               signal: abortController.signal,
             });
 
@@ -416,16 +435,9 @@ const uploadApi = adminApi
           registerAbortController(uploadId, abortController);
 
           try {
-            const backendURL = window.strapi.backendURL;
-            const headers: Record<string, string> = {};
-            if (token) {
-              headers.Authorization = `Bearer ${token}`;
-            }
-
-            const response = await fetch(`${backendURL}/upload/unstable/stream`, {
-              method: 'POST',
-              headers,
-              body: formData,
+            const response = await fetchUploadStream({
+              token,
+              formData,
               signal: abortController.signal,
             });
 

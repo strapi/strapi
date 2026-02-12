@@ -1,14 +1,7 @@
 import * as React from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import {
-  Box,
-  Flex,
-  IconButton,
-  TextButton,
-  Typography,
-  VisuallyHidden,
-} from '@strapi/design-system';
+import { Box, Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
 import {
   ArrowsCounterClockwise,
   Check,
@@ -48,7 +41,7 @@ const HeaderStatusMessage = ({ title, subtitle }: { title: string; subtitle?: st
   );
 };
 
-const HeaderStatusIcon = styled(Box)`
+const HeaderStatusIcon = styled(Flex)`
   padding: ${({ theme }) => theme.spaces[3]};
   border-radius: ${({ theme }) => `${theme.borderRadius} 0 0 ${theme.borderRadius}`};
 
@@ -429,7 +422,7 @@ const AnimatedContent = styled.div<{ $isVisible: boolean }>`
 
 export const UploadProgressDialog = () => {
   const dispatch = useTypedDispatch();
-  const { isOpen, isMinimized, files } = useTypedSelector((state) => state.uploadProgress);
+  const { isVisible, isMinimized, files } = useTypedSelector((state) => state.uploadProgress);
 
   const currentFile = files.find((f) => f.status === 'uploading');
   const completedFiles = files
@@ -451,24 +444,28 @@ export const UploadProgressDialog = () => {
   };
 
   return (
-    <Dialog.Root open={isOpen} modal={false}>
+    <Dialog.Root open={isVisible} modal={false}>
       <Dialog.Portal>
         <DialogContent
           // The accessible name is set by Dialog.Title and is dynamic,
           // use a data-testid to ensure a stable target for e2e tests
           data-testid="upload-progress-dialog"
         >
-          {/* Header */}
           <DialogHeader handleClose={handleClose} />
 
-          {/* Content */}
           <AnimatedContent $isVisible={!isMinimized}>
-            <Box paddingTop={4} paddingBottom={4} paddingLeft={4} paddingRight={4}>
-              <Flex direction="column" alignItems="stretch" gap={4}>
-                {/* Current file being uploaded */}
+            <Box>
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                gap={4}
+                paddingTop={4}
+                paddingBottom={4}
+                paddingLeft={4}
+                paddingRight={4}
+              >
                 {currentFile && <FileRowRenderer file={currentFile} />}
 
-                {/* Completed files list */}
                 {completedFiles.length > 0 && (
                   <CompletedFilesList>
                     {completedFiles.map((file) => (

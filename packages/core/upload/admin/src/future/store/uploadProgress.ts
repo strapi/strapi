@@ -19,7 +19,7 @@ export interface FileProgress {
 }
 
 export interface UploadProgressState {
-  isOpen: boolean;
+  isVisible: boolean;
   isMinimized: boolean;
   progress: number;
   totalFiles: number;
@@ -33,7 +33,7 @@ export interface RootState {
 }
 
 const initialState: UploadProgressState = {
-  isOpen: false,
+  isVisible: false,
   isMinimized: false,
   progress: 0,
   totalFiles: 0,
@@ -66,7 +66,7 @@ const uploadProgressSlice = createSlice({
       state,
       action: PayloadAction<{ totalFiles: number; fileNames: string[]; fileSizes: number[] }>
     ) {
-      state.isOpen = true;
+      state.isVisible = true;
       state.isMinimized = false;
       state.progress = 0;
       state.totalFiles = action.payload.totalFiles;
@@ -112,7 +112,7 @@ const uploadProgressSlice = createSlice({
       state.errors = [...state.errors, ...action.payload];
     },
     closeUploadProgress(state) {
-      state.isOpen = false;
+      state.isVisible = false;
       state.isMinimized = false;
       state.progress = 0;
       state.totalFiles = 0;

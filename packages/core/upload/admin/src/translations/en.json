@@ -6,7 +6,7 @@
   "upload.progress.failed": "Upload failed",
   "upload.progress.failed.subtitle": "Please try to upload files again",
   "upload.progress.success": "Upload successful!",
-  "upload.progress.success.subtitle": "{count} files uploaded successfully",
+  "upload.progress.success.subtitle": "{count, plural, one {# file uploaded successfully} other {# files uploaded successfully}}",
   "upload.progress.uploading.withCount": "Uploading {total} items ({percentage}%)",
   "upload.progress.uploading-files": "Uploading {count, plural, one {# file} other {# files}}",
   "upload.progress.indicator.in-progress": "Upload in progress indicator",

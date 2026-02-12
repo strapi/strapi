@@ -269,7 +269,6 @@ export const AssetsPage = () => {
           <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} />
 
           <Layouts.Header
-            navigationAction={<Box>TODO: Breadcrumbs</Box>}
             title="TODO: Folder location"
             primaryAction={
               <Flex gap={2}>

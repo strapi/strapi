@@ -34,7 +34,7 @@ const createMockFile = (
 });
 
 const createMockState = (overrides: Partial<UploadProgressState> = {}): UploadProgressState => ({
-  isOpen: true,
+  isVisible: true,
   isMinimized: false,
   progress: 0,
   totalFiles: 3,
@@ -58,13 +58,13 @@ describe('UploadProgressDialog', () => {
   });
 
   describe('Dialog visibility', () => {
-    it('renders the dialog when isOpen is true', () => {
-      setup(createMockState({ isOpen: true }));
+    it('renders the dialog when isVisible is true', () => {
+      setup(createMockState({ isVisible: true }));
       expect(screen.getByTestId('upload-progress-dialog')).toBeInTheDocument();
     });
 
-    it('does not render the dialog when isOpen is false', () => {
-      setup(createMockState({ isOpen: false }));
+    it('does not render the dialog when isVisible is false', () => {
+      setup(createMockState({ isVisible: false }));
       expect(screen.queryByTestId('upload-progress-dialog')).not.toBeInTheDocument();
     });
   });
