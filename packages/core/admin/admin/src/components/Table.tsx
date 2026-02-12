@@ -209,8 +209,7 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
       onClick={sortable ? handleClickSort : undefined}
       onKeyDown={sortable ? handleKeyDown : undefined}
       tabIndex={sortable ? 0 : undefined}
-      role={sortable ? 'button' : undefined}
-      aria-label={sortable ? sortLabel : undefined}
+      aria-sort={isSorted ? (sortOrder === 'ASC' ? 'ascending' : 'descending') : undefined}
       $sortable={!!sortable}
       action={
         isSorted &&
