@@ -15,7 +15,7 @@ import {
 import { useIntl } from 'react-intl';
 import { styled, keyframes } from 'styled-components';
 
-import { abortUpload } from '../services/api';
+import { abortUpload, useRetryCancelledFilesStreamMutation } from '../services/api';
 import { useTypedDispatch, useTypedSelector } from '../store/hooks';
 import { closeUploadProgress, toggleMinimize, cancelUpload } from '../store/uploadProgress';
 import { getTranslationKey } from '../utils/translations';
@@ -179,6 +179,7 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
     (state) => state.uploadProgress
   );
   const dispatch = useTypedDispatch();
+  const [retryCancelledFiles] = useRetryCancelledFilesStreamMutation();
 
   const isComplete = progress === 100;
   const isAllUploaded = isComplete && files.every((f) => f.status !== 'uploading');
@@ -196,6 +197,14 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   const handleCancel = () => {
     abortUpload(uploadId);
     dispatch(cancelUpload());
+  };
+
+  const handleRetry = async () => {
+    try {
+      await retryCancelledFiles().unwrap();
+    } catch {
+      // Error is already dispatched to store from the API queryFn
+    }
   };
 
   const handleToggleMinimize = () => {
@@ -216,6 +225,14 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
             {formatMessage({
               id: getTranslationKey('upload.progress.cancel'),
               defaultMessage: 'Cancel',
+            })}
+          </TextButton>
+        )}
+        {hasCancelledFiles && (
+          <TextButton onClick={handleRetry} fontWeight="bold">
+            {formatMessage({
+              id: getTranslationKey('upload.progress.retry'),
+              defaultMessage: 'Retry',
             })}
           </TextButton>
         )}

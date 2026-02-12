@@ -1,3 +1,4 @@
+import { Dispatch } from '@reduxjs/toolkit';
 import { adminApi } from '@strapi/admin/strapi-admin';
 
 import {
@@ -7,6 +8,7 @@ import {
   setFileError,
   updateProgress,
   setUploadFailed,
+  retryCancelledFiles,
 } from '../store/uploadProgress';
 
 import type {
@@ -25,6 +27,12 @@ interface RootState {
   };
   uploadProgress: {
     uploadId: number;
+    files: Array<{
+      index: number;
+      name: string;
+      size: number;
+      status: 'pending' | 'uploading' | 'complete' | 'error' | 'cancelled';
+    }>;
   };
 }
 
@@ -41,6 +49,36 @@ interface RootState {
  * are queued, though the current UI prevents simultaneous uploads.
  */
 const abortControllers = new Map<number, AbortController>();
+
+/**
+ * Stores original File objects for retry functionality.
+ *
+ * Similar to abortControllers, File objects cannot be stored in Redux state
+ * (they are not serializable). This Map allows us to retry cancelled uploads
+ * by retrieving the original files using the uploadId.
+ */
+const uploadedFiles = new Map<number, File[]>();
+
+/**
+ * Registers files for a specific upload to enable retry.
+ */
+const registerUploadedFiles = (uploadId: number, files: File[]) => {
+  uploadedFiles.set(uploadId, files);
+};
+
+/**
+ * Retrieves stored files for an upload.
+ */
+export const getUploadedFiles = (uploadId: number): File[] | undefined => {
+  return uploadedFiles.get(uploadId);
+};
+
+/**
+ * Removes stored files when an upload completes or dialog closes.
+ */
+export const clearUploadedFiles = (uploadId: number) => {
+  uploadedFiles.delete(uploadId);
+};
 
 /**
  * Registers an abort controller for a specific upload.
@@ -101,6 +139,112 @@ const parseSSEEvents = (chunk: string): Array<{ event: string; data: string }> =
   return events;
 };
 
+/**
+ * Options for processing an SSE upload stream.
+ */
+interface ProcessSSEStreamOptions {
+  response: Response;
+  dispatch: Dispatch;
+  indexMapper?: (serverIndex: number) => number;
+}
+
+/**
+ * Processes an SSE stream from the upload endpoint.
+ * Dispatches Redux actions for each file event and returns the final result.
+ *
+ * @param options.response - The fetch Response object with SSE body
+ * @param options.dispatch - Redux dispatch function
+ * @param options.indexMapper - Optional function to map server indices to state indices (for retry)
+ * @param options.logPrefix - Optional prefix for console logs
+ * @returns The stream result or null if no files completed
+ */
+const processSSEStream = async ({
+  response,
+  dispatch,
+  indexMapper = (i) => i,
+}: ProcessSSEStreamOptions): Promise<CreateFilesStream.Response | null> => {
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let streamResult: CreateFilesStream.Response | null = null;
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) {
+      break;
+    }
+
+    buffer += decoder.decode(value, { stream: true });
+
+    // Process complete SSE events from the buffer
+    const lastDoubleNewline = buffer.lastIndexOf('\n\n');
+    if (lastDoubleNewline === -1) {
+      // No complete events yet, keep buffering
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    const completePart = buffer.slice(0, lastDoubleNewline + 2);
+    buffer = buffer.slice(lastDoubleNewline + 2);
+
+    const events = parseSSEEvents(completePart);
+
+    for (const { event, data } of events) {
+      const parsed = JSON.parse(data);
+      const mappedIndex = indexMapper(parsed.index as number);
+
+      switch (event) {
+        case 'file:uploading': {
+          const payload = parsed as CreateFilesStreamEvents.FileUploadingEvent;
+          dispatch(
+            setFileUploading({
+              name: payload.name,
+              index: mappedIndex,
+              total: payload.total,
+              size: payload.size,
+            })
+          );
+          break;
+        }
+        case 'file:complete': {
+          const payload = parsed as CreateFilesStreamEvents.FileCompleteEvent;
+          dispatch(
+            setFileComplete({
+              index: mappedIndex,
+              file: payload.file,
+            })
+          );
+          break;
+        }
+        case 'file:error': {
+          const payload = parsed as CreateFilesStreamEvents.FileErrorEvent;
+          dispatch(
+            setFileError({
+              index: mappedIndex,
+              name: payload.name,
+              message: payload.message,
+            })
+          );
+          break;
+        }
+        case 'stream:complete': {
+          const payload = parsed as CreateFilesStreamEvents.StreamCompleteEvent;
+          streamResult = {
+            data: payload.data,
+            errors: payload.errors,
+          };
+          break;
+        }
+        default:
+          console.error(`[SSE Upload] unknown event: ${event}`, parsed);
+      }
+    }
+  }
+
+  return streamResult;
+};
+
 const uploadApi = adminApi
   .enhanceEndpoints({
     addTagTypes: ['Asset', 'Folder'],
@@ -128,6 +272,9 @@ const uploadApi = adminApi
 
           // Get the uploadId from state after dispatching
           const uploadId = (getState() as RootState).uploadProgress.uploadId;
+
+          // Store original files for retry functionality
+          registerUploadedFiles(uploadId, files);
 
           // Create abort controller for this upload
           const abortController = new AbortController();
@@ -176,84 +323,11 @@ const uploadApi = adminApi
               };
             }
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let streamResult: CreateFilesStream.Response | null = null;
-            let buffer = '';
-
-            while (true) {
-              const { done, value } = await reader.read();
-
-              if (done) {
-                break;
-              }
-
-              buffer += decoder.decode(value, { stream: true });
-
-              // Process complete SSE events from the buffer
-              const lastDoubleNewline = buffer.lastIndexOf('\n\n');
-              if (lastDoubleNewline === -1) {
-                // No complete events yet, keep buffering
-                // eslint-disable-next-line no-continue
-                continue;
-              }
-
-              const completePart = buffer.slice(0, lastDoubleNewline + 2);
-              buffer = buffer.slice(lastDoubleNewline + 2);
-
-              const events = parseSSEEvents(completePart);
-
-              for (const { event, data } of events) {
-                const parsed = JSON.parse(data);
-
-                switch (event) {
-                  case 'file:uploading': {
-                    const payload = parsed as CreateFilesStreamEvents.FileUploadingEvent;
-                    dispatch(
-                      setFileUploading({
-                        name: payload.name,
-                        index: payload.index,
-                        total: payload.total,
-                        size: payload.size,
-                      })
-                    );
-                    break;
-                  }
-                  case 'file:complete': {
-                    const payload = parsed as CreateFilesStreamEvents.FileCompleteEvent;
-                    dispatch(
-                      setFileComplete({
-                        index: payload.index,
-                        file: payload.file,
-                      })
-                    );
-                    break;
-                  }
-                  case 'file:error': {
-                    const payload = parsed as CreateFilesStreamEvents.FileErrorEvent;
-                    dispatch(
-                      setFileError({
-                        index: payload.index,
-                        name: payload.name,
-                        message: payload.message,
-                      })
-                    );
-                    break;
-                  }
-                  case 'stream:complete': {
-                    const payload = parsed as CreateFilesStreamEvents.StreamCompleteEvent;
-                    streamResult = {
-                      data: payload.data,
-                      errors: payload.errors,
-                    };
-                    break;
-                  }
-                  default:
-                    // eslint-disable-next-line no-console
-                    console.log(`[Upload SSE] unknown event: ${event}`, parsed);
-                }
-              }
-            }
+            const streamResult = await processSSEStream({
+              response,
+              dispatch,
+              logPrefix: 'Upload SSE',
+            });
 
             unregisterAbortController(uploadId);
 
@@ -295,8 +369,143 @@ const uploadApi = adminApi
         },
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
       }),
+
+      /**
+       * Retry uploading cancelled files.
+       * Retrieves original File objects and re-uploads only the cancelled ones.
+       */
+      retryCancelledFilesStream: builder.mutation<CreateFilesStream.Response, void>({
+        queryFn: async (_, { dispatch, getState }) => {
+          const token = (getState() as RootState).admin_app?.token;
+          const { uploadId, files: stateFiles } = (getState() as RootState).uploadProgress;
+
+          // Get cancelled files with their original indices
+          const cancelledFiles = stateFiles.filter((f) => f.status === 'cancelled');
+          if (cancelledFiles.length === 0) {
+            return { error: { name: 'UnknownError', message: 'No cancelled files to retry' } };
+          }
+
+          // Get the original File objects
+          const originalFiles = getUploadedFiles(uploadId);
+          if (!originalFiles) {
+            return { error: { name: 'UnknownError', message: 'Original files not found' } };
+          }
+
+          // Build mapping from new index to original index
+          const indexMapping = cancelledFiles.map((f) => f.index);
+          const filesToRetry = cancelledFiles.map((f) => originalFiles[f.index]);
+
+          // Reset cancelled files to pending
+          dispatch(retryCancelledFiles());
+
+          // Build FormData for retry
+          const formData = new FormData();
+          const fileInfoArray = filesToRetry.map((file) => ({
+            name: file.name,
+            caption: null,
+            alternativeText: null,
+            folder: null, // TODO: preserve folder from original upload if needed
+          }));
+
+          filesToRetry.forEach((file) => {
+            formData.append('files', file);
+          });
+          formData.append('fileInfo', JSON.stringify(fileInfoArray));
+
+          // Create abort controller for this retry
+          const abortController = new AbortController();
+          registerAbortController(uploadId, abortController);
+
+          try {
+            const backendURL = window.strapi.backendURL;
+            const headers: Record<string, string> = {};
+            if (token) {
+              headers.Authorization = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`${backendURL}/upload/unstable/stream`, {
+              method: 'POST',
+              headers,
+              body: formData,
+              signal: abortController.signal,
+            });
+
+            if (!response.ok || !response.body) {
+              unregisterAbortController(uploadId);
+
+              let errorMessage = 'Retry request failed';
+              try {
+                const errorData = await response.json();
+                if (errorData.error?.message) {
+                  errorMessage = errorData.error.message;
+                } else if (errorData.message) {
+                  errorMessage = errorData.message;
+                }
+              } catch {
+                errorMessage = `Retry failed with status ${response.status}`;
+              }
+
+              // Mark retried files as failed
+              for (const originalIndex of indexMapping) {
+                dispatch(
+                  setFileError({
+                    index: originalIndex,
+                    name: stateFiles[originalIndex].name,
+                    message: errorMessage,
+                  })
+                );
+              }
+
+              return {
+                error: {
+                  name: 'UnknownError',
+                  message: errorMessage,
+                  status: response.status,
+                },
+              };
+            }
+
+            const streamResult = await processSSEStream({
+              response,
+              dispatch,
+              indexMapper: (serverIndex) => indexMapping[serverIndex],
+              logPrefix: 'Upload Retry SSE',
+            });
+
+            unregisterAbortController(uploadId);
+
+            if (streamResult && streamResult.data.length > 0) {
+              return { data: streamResult };
+            }
+
+            return {
+              error: {
+                name: 'UnknownError',
+                message: 'No files were uploaded successfully',
+              },
+            };
+          } catch (err) {
+            unregisterAbortController(uploadId);
+
+            if (err instanceof DOMException && err.name === 'AbortError') {
+              return {
+                error: { name: 'UnknownError', message: 'Retry cancelled' },
+              };
+            }
+
+            const errorMessage = err instanceof Error ? err.message : 'Network error occurred';
+            return {
+              error: {
+                name: 'UnknownError',
+                message: errorMessage,
+              },
+            };
+          }
+        },
+        invalidatesTags: [{ type: 'Asset', id: 'LIST' }],
+      }),
     }),
   });
 
-export const { useUploadFilesStreamMutation } = uploadApi;
+export const { useUploadFilesStreamMutation, useRetryCancelledFilesStreamMutation } = uploadApi;
 export { uploadApi };

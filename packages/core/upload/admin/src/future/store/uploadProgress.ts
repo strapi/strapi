@@ -147,6 +147,19 @@ const uploadProgressSlice = createSlice({
       state.progress = 100;
       state.errors = [...state.errors, { name: 'Upload Error', message: action.payload.message }];
     },
+    retryCancelledFiles(state) {
+      // Reset all cancelled files back to pending for retry
+      state.files = state.files.map((file) => {
+        if (file.status === 'cancelled') {
+          return {
+            ...file,
+            status: 'pending' as FileProgressStatus,
+          };
+        }
+        return file;
+      });
+      state.progress = computeProgress(state.files);
+    },
   },
 });
 
@@ -161,6 +174,7 @@ export const {
   toggleMinimize,
   cancelUpload,
   setUploadFailed,
+  retryCancelledFiles,
 } = uploadProgressSlice.actions;
 
 export const uploadProgressReducer = uploadProgressSlice.reducer;
