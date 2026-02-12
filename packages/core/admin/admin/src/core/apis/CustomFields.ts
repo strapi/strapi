@@ -25,7 +25,8 @@ type CustomFieldOptionInput =
   | 'select-date'
   | 'text-area-enum'
   | 'select-number'
-  | 'radio-group';
+  | 'radio-group'
+  | (string & {});
 
 type CustomFieldOptionName =
   | 'min'
