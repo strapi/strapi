@@ -38,7 +38,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@casl/ability": "6.5.0",
+    "@casl/ability": "6.7.5",
     "@strapi/utils": "5.36.0",
     "lodash": "4.17.21",
     "qs": "6.14.1",
