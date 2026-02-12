@@ -35,11 +35,4 @@ module.exports = () => ({
     enabled: false,
     resolve: `../plugins/todo-example`, // From the /examples/plugins folder
   },
-  upload: {
-    config: {
-      security: {
-        allowedTypes: ['image/*'],
-      },
-    },
-  },
 });

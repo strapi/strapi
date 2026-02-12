@@ -1,7 +1,14 @@
 import * as React from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { Box, Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  IconButton,
+  TextButton,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import {
   ArrowsCounterClockwise,
   Check,
@@ -29,12 +36,14 @@ import type { FileProgress, FileProgressStatus } from '../store/uploadProgress';
 const HeaderStatusMessage = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   return (
     <Flex direction="column" alignItems="flex-start" paddingLeft={2}>
-      <Typography variant="omega">{title}</Typography>
-      {subtitle && (
+      <Dialog.Title>
+        <Typography variant="omega">{title}</Typography>
+      </Dialog.Title>
+      <Dialog.Description>
         <Typography variant="pi" textColor="neutral600">
           {subtitle}
         </Typography>
-      )}
+      </Dialog.Description>
     </Flex>
   );
 };
@@ -49,8 +58,8 @@ const HeaderStatusIcon = styled(Box)`
   }
 `;
 
-const HeaderStatusWrapper = styled(Flex)`
-  gap: ${({ theme }) => theme.spaces[1]};
+const HeaderStatusWrapper = styled(Dialog.Title)`
+  display: flex;
   align-items: center;
 `;
 
@@ -447,10 +456,9 @@ export const UploadProgressDialog = () => {
     <Dialog.Root open={isOpen} modal={false}>
       <Dialog.Portal>
         <DialogContent
-          aria-label={formatMessage({
-            id: getTranslationKey('upload.progress'),
-            defaultMessage: 'Upload progress',
-          })}
+          // The accessible name is set by Dialog.Title and is dynamic,
+          // use a data-testid to ensure a stable target for e2e tests
+          data-testid="upload-progress-dialog"
         >
           {/* Header */}
           <DialogHeader handleClose={handleClose} />

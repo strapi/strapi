@@ -326,7 +326,6 @@ const uploadApi = adminApi
             const streamResult = await processSSEStream({
               response,
               dispatch,
-              logPrefix: 'Upload SSE',
             });
 
             unregisterAbortController(uploadId);
@@ -469,7 +468,6 @@ const uploadApi = adminApi
               response,
               dispatch,
               indexMapper: (serverIndex) => indexMapping[serverIndex],
-              logPrefix: 'Upload Retry SSE',
             });
 
             unregisterAbortController(uploadId);
