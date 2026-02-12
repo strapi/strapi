@@ -5,6 +5,12 @@ import resources from './resources/index';
 import { ARTICLE_UID } from './utils';
 
 let strapi: Core.Strapi;
+let rqContent: (options: {
+  method: string;
+  url: string;
+  qs?: Record<string, string>;
+  body?: unknown;
+}) => Promise<{ statusCode: number; body: { data?: unknown; errors?: unknown } }>;
 
 const findArticles = async (params: Modules.Documents.ServiceParams['findMany']) => {
   return strapi.documents(ARTICLE_UID).findMany({ ...params });
@@ -20,6 +26,8 @@ describe('Document Service', () => {
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
     strapi = testUtils.strapi;
+    const { createContentAPIRequest } = require('api-tests/request');
+    rqContent = await createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -122,6 +130,30 @@ describe('Document Service', () => {
         expect(locales).toContain('en');
         expect(locales).toContain('nl');
         expect(locales).toContain('it');
+      });
+    });
+
+    describe('findFirst', () => {
+      it('returns a never-published document when hasPublishedVersion=false', async () => {
+        const article = await strapi.documents(ARTICLE_UID).findFirst({
+          status: 'draft',
+          hasPublishedVersion: false,
+        });
+
+        expect(article).not.toBeNull();
+        expect(article?.documentId).toBe('Article1');
+        expect(article?.publishedAt).toBe(null);
+      });
+
+      it('returns a draft of a published document when hasPublishedVersion=true', async () => {
+        const article = await strapi.documents(ARTICLE_UID).findFirst({
+          status: 'draft',
+          hasPublishedVersion: true,
+        });
+
+        expect(article).not.toBeNull();
+        expect(article?.documentId).toBe('Article2');
+        expect(article?.publishedAt).toBe(null);
       });
     });
 
@@ -329,6 +361,103 @@ describe('Document Service', () => {
         articles.forEach((article) => {
           expect(article.documentId).toBe('Article1');
         });
+      });
+    });
+
+    describe('REST API', () => {
+      it('GET /api/articles with status=draft&hasPublishedVersion=false returns only never-published documents', async () => {
+        const res = await rqContent({
+          method: 'GET',
+          url: '/articles',
+          qs: { status: 'draft', hasPublishedVersion: 'false' },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBeGreaterThan(0);
+        res.body.data.forEach((article: { documentId: string; publishedAt: unknown }) => {
+          expect(article.documentId).toBe('Article1');
+          expect(article.publishedAt).toBeNull();
+        });
+      });
+
+      it('GET /api/articles with status=draft&hasPublishedVersion=true returns only drafts of published documents', async () => {
+        const res = await rqContent({
+          method: 'GET',
+          url: '/articles',
+          qs: { status: 'draft', hasPublishedVersion: 'true' },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBeGreaterThan(0);
+        res.body.data.forEach((article: { documentId: string; publishedAt: unknown }) => {
+          expect(article.documentId).toBe('Article2');
+          expect(article.publishedAt).toBeNull();
+        });
+      });
+
+      it('GET /api/articles with invalid hasPublishedVersion returns 400', async () => {
+        const res = await rqContent({
+          method: 'GET',
+          url: '/articles',
+          qs: { status: 'draft', hasPublishedVersion: 'invalid' },
+        });
+
+        expect(res.statusCode).toBe(400);
+      });
+    });
+
+    describe('GraphQL', () => {
+      it('query with status DRAFT and hasPublishedVersion false returns only never-published documents', async () => {
+        const res = await testUtils.rq.admin({
+          method: 'POST',
+          url: '/graphql',
+          body: {
+            query: /* GraphQL */ `
+              query {
+                articles_connection(status: DRAFT, hasPublishedVersion: false) {
+                  data {
+                    documentId
+                    attributes {
+                      publishedAt
+                    }
+                  }
+                }
+              }
+            `,
+          },
+        });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.errors).toBeUndefined();
+        const data = res.body.data?.articles_connection?.data ?? [];
+        expect(data.length).toBeGreaterThan(0);
+        data.forEach((article: { documentId: string; attributes: { publishedAt: unknown } }) => {
+          expect(article.documentId).toBe('Article1');
+          expect(article.attributes.publishedAt).toBeNull();
+        });
+      });
+    });
+
+    describe('populate', () => {
+      it('works with populate when hasPublishedVersion is set', async () => {
+        const articles = await findArticles({
+          status: 'draft',
+          hasPublishedVersion: false,
+          populate: ['categories'],
+        });
+
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+          expect(article.documentId).toBe('Article1');
+          expect(article).toHaveProperty('categories');
+        });
+        // Article1 (en) has categories [Cat1-EN]
+        const withCategories = articles.filter(
+          (a) => Array.isArray(a.categories) && a.categories.length > 0
+        );
+        expect(withCategories.length).toBeGreaterThan(0);
       });
     });
   });
