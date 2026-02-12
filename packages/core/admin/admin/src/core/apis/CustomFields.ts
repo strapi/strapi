@@ -37,7 +37,8 @@ type CustomFieldOptionName =
   | 'enum'
   | 'unique'
   | 'private'
-  | 'default';
+  | 'default'
+  | `options.${string}`;
 
 interface CustomFieldOption {
   intlLabel: MessageDescriptor & {
