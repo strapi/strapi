@@ -428,8 +428,6 @@ const AnimatedContent = styled.div<{ $isVisible: boolean }>`
 `;
 
 export const UploadProgressDialog = () => {
-  const { formatMessage } = useIntl();
-
   const dispatch = useTypedDispatch();
   const { isOpen, isMinimized, files } = useTypedSelector((state) => state.uploadProgress);
 
