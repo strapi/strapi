@@ -69,7 +69,106 @@ const previewScript = (config: PreviewScriptConfig) => {
   };
 
   const getElementsByPath = (path: string) => {
-    return document.querySelectorAll(`[${SOURCE_ATTRIBUTE}*="path=${path}"]`);
+    const nodes = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}*="path=${path}"]`);
+    return Array.from(nodes).filter((node) => {
+      const attr = node.getAttribute(SOURCE_ATTRIBUTE);
+      const params = new URLSearchParams(attr ?? '');
+      return params.get('path') === path;
+    });
+  };
+
+  const isMediaElement = (element: Element): boolean => {
+    return element.tagName === 'IMG' || element.tagName === 'VIDEO';
+  };
+
+  /**
+   * Get the field path to use for focusing a media field.
+   * - For IMG/VIDEO elements: the path was already normalized (stripped of .url) during stega decoding
+   * - For non-media elements with model=plugin::upload.file (e.g., caption text): strip the last
+   *   segment to focus the parent media field (e.g., "hero.caption" -> "hero")
+   */
+  const getFieldPathForMedia = (sourceAttr: string, element: Element): string => {
+    // IMG/VIDEO elements already have the correct path from stega decoding
+    if (isMediaElement(element)) {
+      return sourceAttr;
+    }
+
+    // For non-media elements, check if it's a media asset field
+    const params = new URLSearchParams(sourceAttr);
+    if (params.get('model') === 'plugin::upload.file') {
+      const elementPath = params.get('path');
+      if (elementPath) {
+        // Strip the last segment (e.g., "hero.caption" -> "hero")
+        const parentPath = elementPath.split('.').slice(0, -1).join('.');
+        params.set('path', parentPath);
+        return params.toString();
+      }
+    }
+
+    return sourceAttr;
+  };
+
+  const renderBlocks = (blocks: any[]): string => {
+    if (!Array.isArray(blocks)) {
+      return '';
+    }
+
+    const renderChildren = (children: any[]): string => {
+      if (!Array.isArray(children)) return '';
+
+      return children
+        .map((child) => {
+          if (!child) return '';
+          let text = child.text || '';
+
+          if (child.bold) text = `<strong>${text}</strong>`;
+          if (child.italic) text = `<em>${text}</em>`;
+          if (child.underline) text = `<u>${text}</u>`;
+          if (child.strikethrough) text = `<del>${text}</del>`;
+          if (child.code) text = `<code>${text}</code>`;
+
+          if (child.type === 'link') {
+            return `<a href="${child.url}">${renderChildren(child.children)}</a>`;
+          }
+
+          return text;
+        })
+        .join('');
+    };
+
+    return blocks
+      .map((block) => {
+        if (!block) return '';
+
+        switch (block.type) {
+          case 'paragraph':
+            return `<p>${renderChildren(block.children)}</p>`;
+          case 'heading':
+            return `<h${block.level}>${renderChildren(block.children)}</h${block.level}>`;
+          case 'list':
+            const tag = block.format === 'ordered' ? 'ol' : 'ul';
+            const listItems = Array.isArray(block.children)
+              ? block.children
+                  .map((item: any) => `<li>${renderChildren(item.children)}</li>`)
+                  .join('')
+              : '';
+            return `<${tag}>${listItems}</${tag}>`;
+          case 'quote':
+            return `<blockquote>${renderChildren(block.children)}</blockquote>`;
+          case 'code':
+            return `<pre><code>${renderChildren(block.children)}</code></pre>`;
+          case 'image':
+            if (block.image && block.image.url) {
+              return `<img src="${block.image.url}" alt="${block.image.alternativeText || ''}" />`;
+            }
+            return '';
+          case 'link':
+            return `<a href="${block.url}">${renderChildren(block.children)}</a>`;
+          default:
+            return '';
+        }
+      })
+      .join('');
   };
 
   /* -----------------------------------------------------------------------------------------------
@@ -88,6 +187,34 @@ const previewScript = (config: PreviewScriptConfig) => {
     );
 
     const applyStegaToElement = (element: Element) => {
+      // Handle img and video tags - check src attribute for stega encoding
+      if (isMediaElement(element)) {
+        const src = element.getAttribute('src');
+        if (src) {
+          try {
+            const result = stegaDecode(src);
+            if (result && 'strapiSource' in result) {
+              // Parse the source and remove .url suffix to point to the media field
+              const sourceValue = result.strapiSource as string;
+              const pathMatch = sourceValue.match(/path=([^&]+)/);
+              if (pathMatch) {
+                const originalPath = pathMatch[1];
+                // Remove .url to get the media field path
+                const mediaPath = originalPath.replace(/\.url$/, '');
+                const newSource = sourceValue.replace(`path=${originalPath}`, `path=${mediaPath}`);
+                element.setAttribute(SOURCE_ATTRIBUTE, newSource);
+              }
+            }
+            // Clean the src attribute so the resource can load
+            const cleanedSrc = stegaClean(src);
+            if (cleanedSrc !== src) {
+              element.setAttribute('src', cleanedSrc);
+            }
+          } catch (error) {}
+        }
+        return;
+      }
+
       const directTextNodes = Array.from(element.childNodes).filter(
         (node) => node.nodeType === Node.TEXT_NODE
       );
@@ -140,6 +267,13 @@ const previewScript = (config: PreviewScriptConfig) => {
         if (mutation.type === 'characterData' && mutation.target.parentElement) {
           applyStegaToElement(mutation.target.parentElement);
         }
+        // Handle src attribute changes for img/video elements
+        if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+          const target = mutation.target as Element;
+          if (isMediaElement(target)) {
+            applyStegaToElement(target);
+          }
+        }
       });
     });
 
@@ -147,6 +281,8 @@ const previewScript = (config: PreviewScriptConfig) => {
       childList: true,
       subtree: true,
       characterData: true,
+      attributes: true,
+      attributeFilter: ['src'],
     });
 
     return observer;
@@ -304,9 +440,10 @@ const previewScript = (config: PreviewScriptConfig) => {
 
         const sourceAttribute = element.getAttribute(SOURCE_ATTRIBUTE);
         if (sourceAttribute) {
+          const path = getFieldPathForMedia(sourceAttribute, element);
           const rect = element.getBoundingClientRect();
           sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_FOCUS_INTENT, {
-            path: sourceAttribute,
+            path,
             position: {
               top: rect.top,
               left: rect.left,
@@ -540,11 +677,103 @@ const previewScript = (config: PreviewScriptConfig) => {
 
         getElementsByPath(field).forEach((element) => {
           if (element instanceof HTMLElement) {
-            element.textContent = value || '';
+            // For img/video elements, update the src attribute instead of text content
+            if (isMediaElement(element)) {
+              // Value can be a media object with url property, or a string URL
+              const url = typeof value === 'object' && value !== null ? value.url : value;
+              const mime = typeof value === 'object' && value !== null ? value.mime : undefined;
+
+              if (url) {
+                // Check if the media type matches the element type
+                const isImage = element.tagName === 'IMG';
+                const isVideo = element.tagName === 'VIDEO';
+                const isImageMime = mime?.startsWith('image/');
+                const isVideoMime = mime?.startsWith('video/');
+
+                // Check if we need to replace the element due to media type mismatch
+                const needsReplacement =
+                  mime && ((isImage && isVideoMime) || (isVideo && isImageMime));
+
+                if (needsReplacement) {
+                  // Create a new element of the correct type
+                  const newTagName = isImageMime ? 'IMG' : 'VIDEO';
+                  const newElement = document.createElement(newTagName);
+
+                  // Copy all attributes from the old element
+                  Array.from(element.attributes).forEach((attr) => {
+                    newElement.setAttribute(attr.name, attr.value);
+                  });
+
+                  // Set the new src
+                  newElement.setAttribute('src', url);
+
+                  // Copy inline styles
+                  newElement.style.cssText = element.style.cssText;
+                  newElement.style.display = '';
+
+                  // For video elements, add common attributes
+                  if (newTagName === 'VIDEO') {
+                    newElement.setAttribute('controls', '');
+                  }
+
+                  // Replace the old element with the new one
+                  element.parentNode?.replaceChild(newElement, element);
+                } else {
+                  // Same media type, just update the src
+                  const shouldShow = !mime || (isImage && isImageMime) || (isVideo && isVideoMime);
+
+                  if (shouldShow) {
+                    element.setAttribute('src', url);
+                    element.style.display = '';
+                  } else {
+                    element.style.display = 'none';
+                    element.removeAttribute('src');
+                  }
+                }
+              } else {
+                // Hide element when media is deleted/empty
+                element.style.display = 'none';
+                element.removeAttribute('src');
+              }
+            } else if (
+              Array.isArray(value) &&
+              value.length > 0 &&
+              typeof value[0] === 'object' &&
+              'type' in value[0]
+            ) {
+              element.innerHTML = renderBlocks(value);
+            } else {
+              const text = value !== null && value !== undefined ? String(value) : '';
+              element.textContent = text === '' ? '\u00A0' : text;
+            }
           }
         });
 
-        // Update highlight dimensions since the new text content may affect them
+        // Handle nested media asset fields (caption, alt, etc.)
+        if (typeof value === 'object' && value !== null) {
+          const allSourceElements = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
+
+          allSourceElements.forEach((element) => {
+            const sourceAttr = element.getAttribute(SOURCE_ATTRIBUTE);
+            if (!sourceAttr) return;
+
+            const params = new URLSearchParams(sourceAttr);
+            const model = params.get('model');
+            const elementPath = params.get('path');
+
+            if (model !== 'plugin::upload.file' || !elementPath) return;
+
+            if (elementPath.startsWith(`${field}.`)) {
+              const propertyName = elementPath.slice(field.length + 1);
+              const propertyValue = value[propertyName];
+              if (element instanceof HTMLElement && propertyValue !== undefined) {
+                element.textContent = propertyValue || '';
+              }
+            }
+          });
+        }
+
+        // Update highlight dimensions since the new content may affect them
         highlightManager.updateAllHighlights();
         return;
       }
@@ -564,7 +793,15 @@ const previewScript = (config: PreviewScriptConfig) => {
         highlightManager.setFocusedField(field);
         getElementsByPath(field).forEach((element, index) => {
           if (index === 0) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Check if scrollIntoViewIfNeeded is available (e.g. Chrome)
+            if (
+              'scrollIntoViewIfNeeded' in element &&
+              typeof (element as any).scrollIntoViewIfNeeded === 'function'
+            ) {
+              (element as any).scrollIntoViewIfNeeded({ behavior: 'smooth', block: 'center' });
+            } else {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
           }
           const highlight =
             highlightManager.highlights[Array.from(highlightManager.elements).indexOf(element)];

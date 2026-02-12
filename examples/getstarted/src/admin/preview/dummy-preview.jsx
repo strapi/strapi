@@ -3,18 +3,12 @@ import { useParams, useLoaderData, useRevalidator } from 'react-router-dom';
 import { BlocksRenderer } from '@strapi/blocks-react-renderer';
 
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
-import {
-  Grid,
-  Flex,
-  Typography,
-  JSONInput,
-  Box,
-  IconButton,
-  Link,
-  LinkButton,
-  Button,
-} from '@strapi/design-system';
+import { Grid, Flex, Typography, JSONInput, Box, Button } from '@strapi/design-system';
 import { ChevronDown, ChevronRight } from '@strapi/icons';
+
+const isMedia = (value) => {
+  return typeof value === 'object' && value !== null && 'url' in value;
+};
 
 const filterAttributes = (item) => {
   const excludedKeys = ['documentId', 'id', 'createdAt', 'updatedAt', 'publishedAt'];
@@ -55,10 +49,25 @@ const ToggleableContainer = ({ headerText, children, isEmpty = false }) => {
   );
 };
 
-const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = undefined }) => {
+const NestedValue = ({
+  value,
+  level = 0,
+  arrayIndex = undefined,
+  fieldName = undefined,
+  path,
+  model,
+  documentId,
+}) => {
   if (fieldName === 'blocks') {
     return (
-      <Flex direction="column" alignItems="flex-start" fontSize="1.4rem" gap={2}>
+      <Flex
+        direction="column"
+        alignItems="flex-start"
+        fontSize="1.4rem"
+        gap={2}
+        data-strapi-source={`path=${path}&type=blocks&model=${model}&documentId=${documentId}`}
+        width="100%"
+      >
         {value ? <BlocksRenderer content={value} /> : 'null'}
       </Flex>
     );
@@ -67,9 +76,56 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
   // Use the email type to test clickable preview elements
   if (fieldName === 'email') {
     return (
-      <Button variant="tertiary" onClick={() => window.alert('Sending email!')}>
+      <Button
+        variant="tertiary"
+        onClick={() => window.alert('Sending email!')}
+        data-strapi-source={`path=${path}&type=email&model=${model}&documentId=${documentId}`}
+      >
         {value}
       </Button>
+    );
+  }
+
+  if (typeof value === 'boolean') {
+    return (
+      <Box
+        data-strapi-source={`path=${path}&type=boolean&model=${model}&documentId=${documentId}`}
+        padding={1}
+        background={value ? 'success100' : 'danger100'}
+        borderColor={value ? 'success200' : 'danger200'}
+        borderWidth="1px"
+        hasRadius
+      >
+        <Typography variant="sigma" textColor={value ? 'success600' : 'danger600'}>
+          {String(value).toUpperCase()}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (isMedia(value)) {
+    // Check for video mime type if available, otherwise assume image for preview if url exists
+    const isVideo = value.mime?.startsWith('video/');
+    const sourceString = `path=${path}&type=media&model=${model}&documentId=${documentId}`;
+
+    return (
+      <Box style={{ maxWidth: '300px' }}>
+        {isVideo ? (
+          <video
+            src={value.url}
+            controls
+            style={{ maxWidth: '100%' }}
+            data-strapi-source={sourceString}
+          />
+        ) : (
+          <img
+            src={value.url}
+            alt={value.alternativeText || ''}
+            style={{ maxWidth: '100%' }}
+            data-strapi-source={sourceString}
+          />
+        )}
+      </Box>
     );
   }
 
@@ -88,6 +144,9 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
                   level={level + 1}
                   arrayIndex={index}
                   fieldName={fieldName}
+                  path={`${path}.${index}`}
+                  model={model}
+                  documentId={documentId}
                 />
               ) : (
                 <Flex direction="column" gap={1}>
@@ -99,6 +158,9 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
                     level={level + 1}
                     arrayIndex={index}
                     fieldName={fieldName}
+                    path={`${path}.${index}`}
+                    model={model}
+                    documentId={documentId}
                   />
                 </Flex>
               )}
@@ -123,7 +185,14 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
               <Typography variant="sigma" textColor="neutral600">
                 {key}
               </Typography>
-              <NestedValue value={val} level={level + 1} fieldName={key} />
+              <NestedValue
+                value={val}
+                level={level + 1}
+                fieldName={key}
+                path={`${path}.${key}`}
+                model={model}
+                documentId={documentId}
+              />
             </Flex>
           ))}
         </Flex>
@@ -133,12 +202,16 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
 
   return (
     <Box>
-      <Typography>{String(value)}</Typography>
+      <Typography
+        data-strapi-source={`path=${path}&type=text&model=${model}&documentId=${documentId}`}
+      >
+        {value === null || value === undefined || String(value) === '' ? '\u00A0' : String(value)}
+      </Typography>
     </Box>
   );
 };
 
-const Entry = ({ data }) => {
+const Entry = ({ data, model, documentId }) => {
   return (
     <Grid.Root gap={5} tag="dl">
       {filterAttributes(data).map(([key, value]) => (
@@ -147,7 +220,13 @@ const Entry = ({ data }) => {
             {key}
           </Typography>
           <Flex gap={3} direction="column" alignItems="start" tag="dd">
-            <NestedValue value={value} fieldName={key} />
+            <NestedValue
+              value={value}
+              fieldName={key}
+              path={key}
+              model={model}
+              documentId={documentId}
+            />
           </Flex>
         </Grid.Item>
       ))}
@@ -193,16 +272,7 @@ const PreviewComponent = () => {
   }, []);
 
   return (
-    <Box
-      position="fixed"
-      top={0}
-      left={0}
-      right={0}
-      bottom={0}
-      zIndex={100}
-      background="neutral100"
-      overflow="auto"
-    >
+    <Box height="100vh" background="neutral100" overflow="auto">
       <Layouts.Root>
         <Page.Main>
           <Page.Title>{`Previewing ${apiName}`}</Page.Title>
@@ -264,7 +334,7 @@ const PreviewComponent = () => {
               {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
               {main ? (
                 <>
-                  <Entry data={main} />
+                  <Entry data={main} model={apiName} documentId={documentId} />
                   <JSONInput value={JSON.stringify(main, null, 2)} disabled />
                 </>
               ) : (
@@ -275,7 +345,7 @@ const PreviewComponent = () => {
                   <Typography variant="delta" tag="h3">
                     Unrelated API data
                   </Typography>
-                  <Entry data={unrelated} />
+                  <Entry data={unrelated} model={apiName} documentId={documentId} />
                 </>
               )}
             </Flex>
