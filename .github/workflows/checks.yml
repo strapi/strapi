@@ -13,6 +13,9 @@ on:
       - develop
       - v4
 
+permissions:
+  contents: read
+
 jobs:
   check-pr-status:
     runs-on: ubuntu-latest
