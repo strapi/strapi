@@ -8,6 +8,7 @@ import { ACTIONS, FILE_MODEL_UID } from '../constants';
 import { validateBulkUpdateBody, validateUploadBody } from './validation/admin/upload';
 import { findEntityAndCheckPermissions } from './utils/find-entity-and-check-permissions';
 import { FileInfo } from '../types';
+import { prepareUploadRequest } from '../utils/mime-validation';
 
 export default {
   async bulkUpdateFileInfo(ctx: Context) {
@@ -86,8 +87,10 @@ export default {
       throw new errors.ApplicationError('Cannot replace a file with multiple ones');
     }
 
-    const data = (await validateUploadBody(body)) as { fileInfo: FileInfo };
-    const replacedFile = await uploadService.replace(id, { data, file: files }, { user });
+    const { validFiles, filteredBody } = await prepareUploadRequest(files, body, strapi);
+
+    const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
+    const replacedFile = await uploadService.replace(id, { data, file: validFiles[0] }, { user });
 
     // Sign file urls for private providers
     const signedFile = await getService('file').signFileUrls(replacedFile);
@@ -112,49 +115,42 @@ export default {
       return ctx.forbidden();
     }
 
-    const data = await validateUploadBody(body, Array.isArray(files));
-    const filesArray = Array.isArray(files) ? files : [files];
+    const { validFiles, filteredBody } = await prepareUploadRequest(files, body, strapi);
+
+    const isMultipleFiles = validFiles.length > 1;
+    const data = await validateUploadBody(filteredBody, isMultipleFiles);
+
+    let filesArray = validFiles;
+
+    if (
+      data.fileInfo &&
+      Array.isArray(data.fileInfo) &&
+      filesArray.length === data.fileInfo.length
+    ) {
+      // Reorder filesArray to match data.fileInfo order
+      const alignedFilesArray = data.fileInfo
+        .map((info) => {
+          return filesArray.find((file) => file.originalFilename === info.name);
+        })
+        .filter(Boolean) as any[];
+
+      filesArray = alignedFilesArray;
+    }
+
     // Upload files first to get thumbnails
     const uploadedFiles = await uploadService.upload({ data, files: filesArray }, { user });
+    if (uploadedFiles.some((file) => file.mime?.startsWith('image/'))) {
+      await getService('metrics').trackUsage('didUploadImage');
+    }
 
     const aiMetadataService = getService('aiMetadata');
 
-    // AFTER upload - use thumbnail versions for AI processing
+    // AFTER upload - generate AI metadata for images
     if (await aiMetadataService.isEnabled()) {
       try {
-        // Use thumbnail URLs instead of original files
-        const thumbnailFiles = uploadedFiles.map(
-          (file) =>
-            ({
-              filepath: file.formats?.thumbnail?.url || file.url, // Use thumbnail if available
-              mimetype: file.mime,
-              originalFilename: file.name,
-              size: file.formats?.thumbnail?.size || file.size,
-              provider: file.provider,
-            }) as unknown as any
-        );
-
-        const metadataResults = await aiMetadataService.processFiles(thumbnailFiles);
-
+        const metadataResults = await aiMetadataService.processFiles(uploadedFiles);
         // Update the uploaded files with AI metadata
-        await Promise.all(
-          uploadedFiles.map(async (uploadedFile, index) => {
-            const aiMetadata = metadataResults[index];
-            if (aiMetadata) {
-              await uploadService.updateFileInfo(
-                uploadedFile.id,
-                {
-                  alternativeText: aiMetadata.altText,
-                  caption: aiMetadata.caption,
-                },
-                { user }
-              );
-
-              uploadedFiles[index].alternativeText = aiMetadata.altText;
-              uploadedFiles[index].caption = aiMetadata.caption;
-            }
-          })
-        );
+        await aiMetadataService.updateFilesWithAIMetadata(uploadedFiles, metadataResults, user);
       } catch (error) {
         strapi.log.warn('AI metadata generation failed, proceeding without AI enhancements', {
           error: error instanceof Error ? error.message : String(error),

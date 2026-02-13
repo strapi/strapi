@@ -13,6 +13,7 @@ import { auditLog } from './audit-logs/content-types/audit-log';
 import aiRoutes from './ai/routes/ai';
 import aiController from './ai/controllers/ai';
 import type { Core } from '@strapi/types';
+import { createAIContainer } from './ai/containers/ai';
 
 const getAdminEE = () => {
   const eeAdmin = {
@@ -31,6 +32,7 @@ const getAdminEE = () => {
 
   const isAIEnabled =
     strapi.config.get('admin.ai.enabled', true) && strapi.ee.features.isEnabled('cms-ai');
+
   const isAuditLogsEnabled =
     strapi.config.get('admin.auditLogs.enabled', true) &&
     strapi.ee.features.isEnabled('audit-logs');
@@ -49,6 +51,12 @@ const getAdminEE = () => {
     async register({ strapi }: { strapi: Core.Strapi }) {
       // Run the the default registration
       await eeAdmin.register({ strapi });
+
+      // Register internal ai service
+      if (isAIEnabled) {
+        strapi.add('ai', createAIContainer({ strapi }));
+      }
+
       if (isAuditLogsEnabled) {
         // Register an internal audit logs service
         strapi.add('audit-logs', createAuditLogsService(strapi));

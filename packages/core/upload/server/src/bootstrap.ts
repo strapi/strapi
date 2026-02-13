@@ -41,6 +41,8 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   await registerWebhookEvents();
 
   await getService('weeklyMetrics').registerCron();
+  await getService('aiMetadataJobs').registerCron();
+
   getService('metrics').sendUploadPluginMetrics();
 
   getService('extensions').signFileUrlsOnDocumentService();

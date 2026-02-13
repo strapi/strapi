@@ -3,6 +3,23 @@ import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
 import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
+/**
+ * Execute promises in parallel but throw errors in array index order.
+ */
+const parallelWithOrderedErrors = async <T>(promises: Promise<T>[]): Promise<T[]> => {
+  const results = await Promise.allSettled(promises);
+
+  // Throw first error in array index order (matches sequential behavior)
+  for (let i = 0; i < results.length; i += 1) {
+    const result = results[i];
+    if (result.status === 'rejected') {
+      throw result.reason;
+    }
+  }
+
+  return results.map((r) => (r as PromiseFulfilledResult<T>).value);
+};
+
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
 
 export interface VisitorOptions {
@@ -127,10 +144,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    // The current attribute becomes the parent once visited
-    parent = { schema, key, attribute, path: newPath };
-
     if (isRelationalAttribute(attribute)) {
+      parent = { schema, key, attribute, path: newPath };
       const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
 
       const method = isMorphRelation
@@ -138,17 +153,18 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
         : traverseRelationTarget(getModel(attribute.target!));
 
       if (isArray(value)) {
-        const res = new Array(value.length);
-        for (let i = 0; i < value.length; i += 1) {
-          const arrayPath = {
-            ...newPath,
-            rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `${i}`
-              : `${newPath.rawWithIndices}.${i}`,
-          };
-          res[i] = await method(visitor, arrayPath, value[i]);
-        }
-        copy[key] = res;
+        // Process array items in parallel with ordered error handling
+        copy[key] = await parallelWithOrderedErrors(
+          value.map((item, i) => {
+            const arrayPath = {
+              ...newPath,
+              rawWithIndices: isNil(newPath.rawWithIndices)
+                ? `${i}`
+                : `${newPath.rawWithIndices}.${i}`,
+            };
+            return method(visitor, arrayPath, item);
+          })
+        );
       } else {
         copy[key] = await method(visitor, newPath, value as Data);
       }
@@ -157,19 +173,21 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (isMediaAttribute(attribute)) {
-      // need to update copy
+      parent = { schema, key, attribute, path: newPath };
+
       if (isArray(value)) {
-        const res = new Array(value.length);
-        for (let i = 0; i < value.length; i += 1) {
-          const arrayPath = {
-            ...newPath,
-            rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `${i}`
-              : `${newPath.rawWithIndices}.${i}`,
-          };
-          res[i] = await traverseMediaTarget(visitor, arrayPath, value[i]);
-        }
-        copy[key] = res;
+        // Process media array items in parallel with ordered error handling
+        copy[key] = await parallelWithOrderedErrors(
+          value.map((item, i) => {
+            const arrayPath = {
+              ...newPath,
+              rawWithIndices: isNil(newPath.rawWithIndices)
+                ? `${i}`
+                : `${newPath.rawWithIndices}.${i}`,
+            };
+            return traverseMediaTarget(visitor, arrayPath, item);
+          })
+        );
       } else {
         copy[key] = await traverseMediaTarget(visitor, newPath, value as Data);
       }
@@ -178,20 +196,22 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (attribute.type === 'component') {
+      parent = { schema, key, attribute, path: newPath };
       const targetSchema = getModel(attribute.component);
 
       if (isArray(value)) {
-        const res: Data[] = new Array(value.length);
-        for (let i = 0; i < value.length; i += 1) {
-          const arrayPath = {
-            ...newPath,
-            rawWithIndices: isNil(newPath.rawWithIndices)
-              ? `${i}`
-              : `${newPath.rawWithIndices}.${i}`,
-          };
-          res[i] = await traverseComponent(visitor, arrayPath, targetSchema, value[i]);
-        }
-        copy[key] = res;
+        // Process component array items in parallel with ordered error handling
+        copy[key] = await parallelWithOrderedErrors(
+          value.map((item, i) => {
+            const arrayPath = {
+              ...newPath,
+              rawWithIndices: isNil(newPath.rawWithIndices)
+                ? `${i}`
+                : `${newPath.rawWithIndices}.${i}`,
+            };
+            return traverseComponent(visitor, arrayPath, targetSchema, item);
+          })
+        );
       } else {
         copy[key] = await traverseComponent(visitor, newPath, targetSchema, value as Data);
       }
@@ -200,15 +220,20 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (attribute.type === 'dynamiczone' && isArray(value)) {
-      const res = new Array(value.length);
-      for (let i = 0; i < value.length; i += 1) {
-        const arrayPath = {
-          ...newPath,
-          rawWithIndices: isNil(newPath.rawWithIndices) ? `${i}` : `${newPath.rawWithIndices}.${i}`,
-        };
-        res[i] = await visitDynamicZoneEntry(visitor, arrayPath, value[i]);
-      }
-      copy[key] = res;
+      parent = { schema, key, attribute, path: newPath };
+
+      // Process dynamic zone items in parallel with ordered error handling
+      copy[key] = await parallelWithOrderedErrors(
+        value.map((item, i) => {
+          const arrayPath = {
+            ...newPath,
+            rawWithIndices: isNil(newPath.rawWithIndices)
+              ? `${i}`
+              : `${newPath.rawWithIndices}.${i}`,
+          };
+          return visitDynamicZoneEntry(visitor, arrayPath, item);
+        })
+      );
 
       continue;
     }

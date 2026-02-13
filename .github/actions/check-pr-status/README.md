@@ -19,7 +19,7 @@ This action checks a PR labels, milestone and status to validate it is ready for
 
 ### Requirements
 
-- The code is compatible with Node 18, 20, and 22
+- The code is compatible with Node 20, 22, and 24
 
 ### Dependencies
 

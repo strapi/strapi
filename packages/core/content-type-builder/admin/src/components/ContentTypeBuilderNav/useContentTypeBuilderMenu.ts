@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { useCollator, useFilter } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
+import { useCTBTracking } from '../CTBSession/ctbSession';
 import { useDataManager } from '../DataManager/useDataManager';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
@@ -45,12 +45,12 @@ type Menu = MenuSection[];
 export const useContentTypeBuilderMenu = () => {
   const { componentsGroupedByCategory, isInDevelopmentMode, sortedContentTypesList } =
     useDataManager();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
   const [searchValue, setSearchValue] = useState('');
   const { onOpenModalCreateSchema } = useFormModalNavigation();
   const { locale } = useIntl();
 
-  const { startsWith } = useFilter(locale, {
+  const { contains } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -178,7 +178,7 @@ export const useContentTypeBuilderMenu = () => {
         ...section,
         links: section.links.reduce((acc, link) => {
           const filteredLinks =
-            'links' in link ? link.links.filter((link) => startsWith(link.title, searchValue)) : [];
+            'links' in link ? link.links.filter((link) => contains(link.title, searchValue)) : [];
 
           if (filteredLinks.length === 0) {
             return acc;
@@ -198,7 +198,7 @@ export const useContentTypeBuilderMenu = () => {
     }
 
     const filteredLinks = section.links
-      .filter((link) => startsWith(link.title, searchValue))
+      .filter((link) => contains(link.title, searchValue))
       .sort((a, b) => formatter.compare(a.title, b.title));
 
     return {

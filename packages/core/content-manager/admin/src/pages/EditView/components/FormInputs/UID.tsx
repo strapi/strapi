@@ -271,6 +271,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
           onChange={field.onChange}
           value={field.value ?? ''}
           {...props}
+          type="text"
         />
         <Field.Error />
         <Field.Hint />

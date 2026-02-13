@@ -95,6 +95,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'slate',
               'slate-history',
               'slate-react',
+              'motion',
             ]
           : []),
       ],

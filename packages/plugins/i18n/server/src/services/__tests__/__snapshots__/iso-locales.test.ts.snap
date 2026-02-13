@@ -267,6 +267,22 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Bosnian (Bosnia and Herzegovina) (bs-BA)",
   },
   {
+    "code": "bs-Cyrl",
+    "name": "Bosnian (Cyrillic)",
+  },
+  {
+    "code": "bs-Cyrl-BA",
+    "name": "Bosnian (Cyrillic, Bosnia and Herzegovina)",
+  },
+  {
+    "code": "bs-Latn",
+    "name": "Bosnian (Latin)",
+  },
+  {
+    "code": "bs-Latn-BA",
+    "name": "Bosnian (Latin, Bosnia and Herzegovina)",
+  },
+  {
     "code": "br",
     "name": "Breton (br)",
   },
@@ -329,6 +345,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "chr-US",
     "name": "Cherokee (United States) (chr-US)",
+  },
+  {
+    "code": "ny",
+    "name": "Chichewa",
   },
   {
     "code": "cgg",
@@ -421,6 +441,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "da-DK",
     "name": "Danish (Denmark) (da-DK)",
+  },
+  {
+    "code": "dwr",
+    "name": "Dawro",
   },
   {
     "code": "dua",
@@ -635,6 +659,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "English (Jamaica) (en-JM)",
   },
   {
+    "code": "en-JP",
+    "name": "English (Japan) (en-JP)",
+  },
+  {
     "code": "en-JE",
     "name": "English (Jersey) (en-JE)",
   },
@@ -661,6 +689,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "en-MG",
     "name": "English (Madagascar) (en-MG)",
+  },
+  {
+    "code": "en-MM",
+    "name": "English (Myanmar) (en-MM)",
   },
   {
     "code": "en-MW",
@@ -1107,6 +1139,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Galician (Spain) (gl-ES)",
   },
   {
+    "code": "gmv",
+    "name": "Gamo",
+  },
+  {
     "code": "lao",
     "name": "Laotian (Laos) (lao)",
   },
@@ -1155,6 +1191,10 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "German (Switzerland) (de-CH)",
   },
   {
+    "code": "gof",
+    "name": "Gofa",
+  },
+  {
     "code": "el",
     "name": "Greek (el)",
   },
@@ -1201,6 +1241,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "ha-Latn-NG",
     "name": "Hausa (Latin, Nigeria) (ha-Latn-NG)",
+  },
+  {
+    "code": "ht",
+    "name": "Haitian",
   },
   {
     "code": "haw",
@@ -1475,6 +1519,14 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Lithuanian (Lithuania) (lt-LT)",
   },
   {
+    "code": "lb",
+    "name": "Luxembourgish (lb)",
+  },
+  {
+    "code": "lb-LU",
+    "name": "Luxembourgish (Luxembourg) (lb-LU)",
+  },
+  {
     "code": "lu",
     "name": "Luba-Katanga (lu)",
   },
@@ -1605,6 +1657,10 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "mn",
     "name": "Mongolian (mn)",
+  },
+  {
+    "code": "mn-Cyrl",
+    "name": "Mongolian (Cyrillic)",
   },
   {
     "code": "mfe",
@@ -1793,6 +1849,22 @@ exports[`ISO locales getIsoLocales 1`] = `
   {
     "code": "pa-Guru-IN",
     "name": "Punjabi (Gurmukhi, India) (pa-Guru-IN)",
+  },
+  {
+    "code": "pap",
+    "name": "Papiamento (pap)",
+  },
+  {
+    "code": "pap-AW",
+    "name": "Papiamento (Aruba) (pap-AW)",
+  },
+  {
+    "code": "pap-CW",
+    "name": "Papiamentu (Curaçao) (pap-CW)",
+  },
+  {
+    "code": "pap-BQ",
+    "name": "Papiamentu (Bonaire) (pap-BQ)",
   },
   {
     "code": "ro",

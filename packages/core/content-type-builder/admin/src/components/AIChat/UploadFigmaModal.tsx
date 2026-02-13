@@ -165,6 +165,7 @@ const FigmaUrlInputStep = ({ figmaUrl, setFigmaUrl }: FigmaUrlInputStepProps) =>
           onChange={(e) => setFigmaUrl(e.target.value)}
           width="100%"
           disabled={isLoading}
+          type="url"
         />
       </Box>
 
@@ -249,7 +250,7 @@ const FigmaImageDisplayStep = ({
           {images.map((frame, index) => {
             const isSelected = selectedImages.includes(frame.id);
             return (
-              <Grid.Item key={frame.id} col={6} padding={'1px'}>
+              <Grid.Item key={frame.id} col={6} xs={12} padding={'1px'}>
                 <ImagePreview
                   imageUrl={frame.url}
                   imageName={frame.filename || `Frame ${index + 1}`}

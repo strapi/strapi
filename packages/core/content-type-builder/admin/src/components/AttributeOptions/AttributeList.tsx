@@ -16,7 +16,7 @@ export const AttributeList = ({ attributes }: AttributeListProps) => (
           // eslint-disable-next-line react/no-array-index-key
           <Grid.Root key={index} gap={3}>
             {attributeRow.map((attribute) => (
-              <Grid.Item key={attribute} col={6} direction="column" alignItems="stretch">
+              <Grid.Item key={attribute} col={6} xs={12} direction="column" alignItems="stretch">
                 <AttributeOption type={attribute} />
               </Grid.Item>
             ))}

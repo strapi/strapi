@@ -1,6 +1,15 @@
 import * as React from 'react';
 
-import { Button, Flex, TextInput, Textarea, Typography, Grid, Field } from '@strapi/design-system';
+import {
+  Button,
+  Flex,
+  TextInput,
+  Textarea,
+  Typography,
+  Grid,
+  Field,
+  Box,
+} from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import {
   Page,
@@ -100,6 +109,7 @@ export const EditPage = () => {
                     type="submit"
                     loading={mutation.isLoading}
                     startIcon={<Check />}
+                    fullWidth
                   >
                     {formatMessage({
                       id: 'global.save',
@@ -110,7 +120,12 @@ export const EditPage = () => {
               }
               title={role.name}
               subtitle={role.description}
-              navigationAction={<BackButton fallback=".." />}
+              navigationAction={
+                // The back link for mobile works differently; it is placed higher up in the DOM.
+                <Box display={{ initial: 'none', medium: 'block' }}>
+                  <BackButton fallback=".." />
+                </Box>
+              }
             />
             <Layouts.Content>
               <Flex
@@ -134,7 +149,7 @@ export const EditPage = () => {
                   </Typography>
 
                   <Grid.Root gap={4}>
-                    <Grid.Item col={6} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         name="name"
                         error={
@@ -153,11 +168,11 @@ export const EditPage = () => {
                             defaultMessage: 'Name',
                           })}
                         </Field.Label>
-                        <TextInput value={values.name || ''} onChange={handleChange} />
+                        <TextInput type="text" value={values.name || ''} onChange={handleChange} />
                         <Field.Error />
                       </Field.Root>
                     </Grid.Item>
-                    <Grid.Item col={6} direction="column" alignItems="stretch">
+                    <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                       <Field.Root
                         name="description"
                         error={
