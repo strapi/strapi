@@ -109,6 +109,98 @@ const processRelationWhere = (where: unknown, ctx: WhereCtx) => {
 };
 
 /**
+ * Check if a relation filter is a simple ID filter that can be optimized to use FK column
+ * Returns true for: { id: 6 }, { id: { $in: [6, 7] } }, { id: null }
+ * Returns false for: { name: "Acme" }, { id: 6, country: "USA" }
+ */
+const isSimpleIdFilter = (value: unknown): boolean => {
+  if (!isRecord(value)) {
+    // Direct value like: advertiser: 6 or advertiser: null
+    return true;
+  }
+
+  const keys = Object.keys(value);
+
+  // Empty object
+  if (keys.length === 0) {
+    return false;
+  }
+
+  // Check if it's ONLY filtering by 'id'
+  const hasOnlyId = keys.length === 1 && keys[0] === 'id';
+  if (!hasOnlyId) {
+    return false;
+  }
+
+  const idValue = value.id;
+
+  // Simple value: { id: 6 } or { id: null }
+  if (!isRecord(idValue)) {
+    return true;
+  }
+
+  // Check if it uses only optimizable operators
+  const idKeys = Object.keys(idValue);
+  const optimizableOperators = ['$eq', '$ne', '$in', '$notIn', '$null', '$notNull'];
+
+  return idKeys.every((key) => optimizableOperators.includes(key));
+};
+
+/**
+ * Optimize relation filter to use FK column directly instead of JOIN
+ * Returns { optimized: true, filter } if optimization is possible
+ * Returns { optimized: false } if JOIN is needed
+ */
+const optimizeRelationFilter = (
+  attribute: Attribute,
+  value: unknown,
+  ctx: WhereCtx
+): { optimized: boolean; filter?: Record<string, unknown> } => {
+  const { qb, alias } = ctx;
+
+  // Only optimize manyToOne and oneToOne relations with joinColumn
+  if (attribute.type !== 'relation') {
+    return { optimized: false };
+  }
+
+  const relation = attribute.relation;
+  if (relation !== 'manyToOne' && relation !== 'oneToOne') {
+    return { optimized: false };
+  }
+
+  // Check if the relation has a joinColumn (FK on source table)
+  if (!('joinColumn' in attribute) || !attribute.joinColumn) {
+    return { optimized: false };
+  }
+
+  // Check if it's a simple ID filter
+  if (!isSimpleIdFilter(value)) {
+    return { optimized: false };
+  }
+
+  // Build FK column filter
+  const fkColumnName = attribute.joinColumn.name;
+  const aliasedFkColumn = qb.aliasColumn(fkColumnName, alias);
+
+  // Handle different value formats
+  if (!isRecord(value)) {
+    // Direct value: advertiser: 6 or advertiser: null
+    return {
+      optimized: true,
+      filter: { [aliasedFkColumn]: value },
+    };
+  }
+
+  // Extract ID value: { id: 6 } or { id: { $in: [6, 7] } }
+  const idValue = value.id;
+
+  return {
+    optimized: true,
+    filter: { [aliasedFkColumn]: idValue },
+  };
+};
+
+/**
  * Process where parameter
  */
 function processWhere(where: Record<string, unknown>, ctx: WhereCtx): Record<string, unknown>;
@@ -163,7 +255,16 @@ function processWhere(
     }
 
     if (types.isRelation(attribute.type) && 'target' in attribute) {
-      // attribute
+      // Try FK filter optimization first
+      const optimization = optimizeRelationFilter(attribute, value, ctx);
+
+      if (optimization.optimized && optimization.filter) {
+        // Use FK column filter directly (no JOIN needed)
+        Object.assign(filters, optimization.filter);
+        continue;
+      }
+
+      // Fall back to JOIN-based approach for complex filters
       const subAlias = createJoin(ctx, {
         alias: alias || qb.alias,
         attributeName: key,
