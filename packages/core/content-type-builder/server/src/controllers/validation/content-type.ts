@@ -30,6 +30,7 @@ export type CreateContentTypeInput = {
   draftAndPublish?: Struct.SchemaOptions['draftAndPublish'];
   pluginOptions?: Struct.ContentTypeSchema['pluginOptions'];
   config?: object;
+  plugin?: string;
 };
 
 /**
