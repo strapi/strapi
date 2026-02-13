@@ -358,7 +358,6 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
 
 const PageWrapper = styled(Box)`
   width: 100%;
-  overflow: hidden;
 
   ${MainSubNav} {
     background-color: transparent;
@@ -366,6 +365,8 @@ const PageWrapper = styled(Box)`
   }
 
   ${({ theme }) => theme.breakpoints.medium} {
+    overflow: hidden;
+
     ${MainSubNav} {
       top: 0;
     }

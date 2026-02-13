@@ -21,9 +21,9 @@ const GridContainer = styled(Box)<{ $hasSideNav: boolean }>`
   display: grid;
   grid-template-columns: 1fr;
   padding: 0;
-  overflow: hidden;
 
   ${({ theme }) => theme.breakpoints.medium} {
+    overflow: hidden;
     grid-template-columns: ${({ $hasSideNav }) => ($hasSideNav ? `auto 1fr` : '1fr')};
   }
 `;

@@ -443,7 +443,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c1 {
   width: 100%;
-  height: auto;
+  height: 100%;
+  overflow: hidden;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -637,19 +638,11 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 @media (min-width: 768px) {
   .c1 {
-    height: calc(100dvh - 6.4rem - 1px);
-    overflow: hidden;
     width: 23.2rem;
     position: sticky;
     top: 0;
     border-right: 1px solid #eaeaef;
     overscroll-behavior: contain;
-  }
-}
-
-@media (min-width: 1080px) {
-  .c1 {
-    height: 100dvh;
   }
 }
 
