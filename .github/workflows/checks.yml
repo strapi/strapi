@@ -29,7 +29,6 @@ jobs:
         with:
           allowedHosts: 'yarn'
 
-  # Fails only on version errors (exit 1); range-vs-exact and major version warnings do not fail the job
   check-package-versions:
     name: Package version alignment
     runs-on: ubuntu-latest
@@ -41,4 +40,4 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/yarn-nm-install
       - name: Check package versions
-        run: node scripts/check-package-versions.js
+        run: yarn version:check
