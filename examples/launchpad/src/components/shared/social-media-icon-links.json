@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_shared_social_media_icon_links",
+  "info": {
+    "displayName": "Social_Media_Icon_Links",
+    "icon": "expand",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images", "files", "videos", "audios"]
+    },
+    "link": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.link"
+    }
+  }
+}

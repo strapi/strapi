@@ -1,0 +1,34 @@
+{
+  "collectionName": "components_dynamic_zone_form_next_to_sections",
+  "info": {
+    "displayName": "Form_Next_To_Section",
+    "icon": "book",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "heading": {
+      "type": "string"
+    },
+    "sub_heading": {
+      "type": "string"
+    },
+    "form": {
+      "displayName": "Form",
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.form"
+    },
+    "section": {
+      "type": "component",
+      "repeatable": false,
+      "component": "shared.section"
+    },
+    "social_media_icon_links": {
+      "displayName": "Social_Media_Icon_Links",
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.social-media-icon-links"
+    }
+  }
+}

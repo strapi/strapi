@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_items_ray_items",
+  "info": {
+    "displayName": "Ray_Card_Items",
+    "icon": "bulletList",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "item_1": {
+      "type": "string"
+    },
+    "item_2": {
+      "type": "string"
+    },
+    "item_3": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_shared_links",
+  "info": {
+    "displayName": "Link",
+    "icon": "link"
+  },
+  "options": {},
+  "attributes": {
+    "text": {
+      "type": "string"
+    },
+    "URL": {
+      "type": "string"
+    },
+    "target": {
+      "type": "enumeration",
+      "enum": ["_blank", "_self", "_parent", "_top"]
+    }
+  }
+}

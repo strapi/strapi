@@ -1,0 +1,31 @@
+{
+  "collectionName": "components_cards_ray_cards",
+  "info": {
+    "displayName": "Ray_Card",
+    "icon": "dashboard",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "before_ray_items": {
+      "type": "component",
+      "repeatable": false,
+      "component": "items.ray-items"
+    },
+    "after_ray_items": {
+      "type": "component",
+      "repeatable": false,
+      "component": "items.ray-items"
+    },
+    "span": {
+      "type": "enumeration",
+      "enum": ["one", "two", "three"]
+    }
+  }
+}

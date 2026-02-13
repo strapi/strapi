@@ -1,0 +1,17 @@
+{
+  "collectionName": "components_shared_steps",
+  "info": {
+    "displayName": "Steps",
+    "icon": "bulletList",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}

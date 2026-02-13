@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_items_left_navbar_items",
+  "info": {
+    "displayName": "Left_Navbar_Items",
+    "icon": "bulletList"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "URL": {
+      "type": "string"
+    }
+  }
+}

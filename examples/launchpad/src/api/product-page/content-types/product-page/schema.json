@@ -1,0 +1,67 @@
+{
+  "kind": "singleType",
+  "collectionName": "product_pages",
+  "info": {
+    "singularName": "product-page",
+    "pluralName": "product-pages",
+    "displayName": "/products"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "seo": {
+      "type": "component",
+      "repeatable": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "shared.seo"
+    },
+    "heading": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "string"
+    },
+    "sub_heading": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "string"
+    },
+    "dynamic_zone": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "dynamiczone",
+      "components": [
+        "dynamic-zone.testimonials",
+        "dynamic-zone.related-products",
+        "dynamic-zone.related-articles",
+        "dynamic-zone.pricing",
+        "dynamic-zone.launches",
+        "dynamic-zone.how-it-works",
+        "dynamic-zone.hero",
+        "dynamic-zone.form-next-to-section",
+        "dynamic-zone.features",
+        "dynamic-zone.faq",
+        "dynamic-zone.cta",
+        "dynamic-zone.brands"
+      ]
+    }
+  }
+}

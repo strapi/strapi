@@ -1,0 +1,46 @@
+{
+  "collectionName": "components_items_inputs",
+  "info": {
+    "displayName": "Input",
+    "icon": "apps",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "text",
+        "email",
+        "password",
+        "submit",
+        "textarea",
+        "button",
+        "checkbox",
+        "color",
+        "date",
+        "datetime-local",
+        "file",
+        "hidden",
+        "image",
+        "month",
+        "number",
+        "radio",
+        "range",
+        "reset",
+        "search",
+        "tel",
+        "time",
+        "url",
+        "week"
+      ],
+      "default": "text"
+    },
+    "name": {
+      "type": "string"
+    },
+    "placeholder": {
+      "type": "string"
+    }
+  }
+}

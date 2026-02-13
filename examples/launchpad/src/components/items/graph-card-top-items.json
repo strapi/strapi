@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_items_graph_card_top_items",
+  "info": {
+    "displayName": "Graph_Card_Top_Items",
+    "icon": "bulletList"
+  },
+  "options": {},
+  "attributes": {
+    "number": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    }
+  }
+}

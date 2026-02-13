@@ -1,0 +1,17 @@
+{
+  "collectionName": "components_shared_forms",
+  "info": {
+    "displayName": "Form",
+    "icon": "paperPlane",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "inputs": {
+      "displayName": "Input",
+      "type": "component",
+      "repeatable": true,
+      "component": "items.input"
+    }
+  }
+}

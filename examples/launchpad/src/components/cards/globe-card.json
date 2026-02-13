@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_cards_globe_cards",
+  "info": {
+    "displayName": "Globe_Card",
+    "icon": "dashboard",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "span": {
+      "type": "enumeration",
+      "enum": ["one", "two", "three"]
+    }
+  }
+}

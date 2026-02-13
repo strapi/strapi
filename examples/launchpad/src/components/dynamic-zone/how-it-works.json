@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_dynamic_zone_how_it_works",
+  "info": {
+    "displayName": "How_It_Works",
+    "icon": "question",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "heading": {
+      "type": "string"
+    },
+    "sub_heading": {
+      "type": "string"
+    },
+    "steps": {
+      "displayName": "Steps",
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.steps"
+    }
+  }
+}

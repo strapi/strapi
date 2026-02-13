@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_shared_launches",
+  "info": {
+    "displayName": "Launches",
+    "icon": "rocket",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "mission_number": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}
