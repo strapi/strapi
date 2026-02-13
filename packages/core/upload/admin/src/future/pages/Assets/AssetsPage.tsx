@@ -1,13 +1,7 @@
 import { useEffect, useRef, useCallback, useState, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import {
-  Layouts,
-  SearchInput,
-  useElementOnScreen,
-  useNotification,
-  useAPIErrorHandler,
-} from '@strapi/admin/strapi-admin';
+import { Layouts, SearchInput, useElementOnScreen } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -22,7 +16,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { usePersistentState } from '../../../hooks/usePersistentState';
-import { useUploadFilesMutation } from '../../services/api';
+import { useUploadFilesStreamMutation } from '../../services/api';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetsGrid } from './components/AssetsGrid';
@@ -36,6 +30,12 @@ import { localStorageKeys, viewOptions } from './constants';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 
 const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
+
+import type { UploadFileInfo } from '../../../../../shared/contracts/files';
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetsView
+ * -----------------------------------------------------------------------------------------------*/
 
 interface AssetsViewProps {
   view: number;
@@ -98,6 +98,10 @@ const AssetsView = ({ view }: AssetsViewProps) => {
     </>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetsPage
+ * -----------------------------------------------------------------------------------------------*/
 
 const StyledToggleGroup = styled(ToggleGroup.Root)`
   display: flex;
@@ -212,44 +216,29 @@ export const AssetsPage = () => {
   const uploadDropZoneRef = useRef<HTMLDivElement>(null);
 
   // Upload handlers
-  const { toggleNotification } = useNotification();
-  const { _unstableFormatAPIError } = useAPIErrorHandler();
-  const [uploadFiles] = useUploadFilesMutation();
+  const [uploadFilesStream] = useUploadFilesStreamMutation();
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;
+
     const formData = new FormData();
+    const fileInfoArray: UploadFileInfo[] = [];
+
     files.forEach((file) => {
       formData.append('files', file);
-      formData.append(
-        'fileInfo',
-        JSON.stringify({
-          name: file.name,
-          caption: null,
-          alternativeText: null,
-          folder: folderId,
-        })
-      );
+      fileInfoArray.push({
+        name: file.name,
+        caption: null,
+        alternativeText: null,
+        folder: folderId,
+      });
     });
+
+    formData.append('fileInfo', JSON.stringify(fileInfoArray));
     try {
-      await uploadFiles(formData).unwrap();
-      toggleNotification({
-        type: 'success',
-        message: formatMessage(
-          {
-            id: getTranslationKey('assets.uploaded'),
-            defaultMessage:
-              '{number, plural, one {# asset} other {# assets}} uploaded successfully',
-          },
-          { number: files.length }
-        ),
-      });
+      await uploadFilesStream({ formData, totalFiles: files.length }).unwrap();
     } catch (error) {
-      const errorMessage = _unstableFormatAPIError(error as Error);
-      toggleNotification({
-        type: 'danger',
-        message: errorMessage,
-      });
+      // Error is already dispatched to store from the API queryFn
     }
   };
 
@@ -280,7 +269,6 @@ export const AssetsPage = () => {
           <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} />
 
           <Layouts.Header
-            navigationAction={<Box>TODO: Breadcrumbs</Box>}
             title="TODO: Folder location"
             primaryAction={
               <Flex gap={2}>
