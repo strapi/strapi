@@ -23,7 +23,8 @@ import { tours } from './GuidedTour/Tours';
 
 const MainSubNav = styled(DSSubNav)`
   width: 100%;
-  height: auto;
+  height: 100%;
+  overflow: hidden;
   background-color: ${({ theme }) => theme.colors.neutral0};
   display: flex;
   flex-direction: column;
@@ -32,16 +33,11 @@ const MainSubNav = styled(DSSubNav)`
   position: relative;
 
   ${({ theme }) => theme.breakpoints.medium} {
-    height: calc(100dvh - ${HEIGHT_TOP_NAVIGATION} - 1px);
-    overflow: hidden;
     width: ${WIDTH_SIDE_NAVIGATION};
     position: sticky;
     top: 0;
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
     overscroll-behavior: contain;
-  }
-  ${({ theme }) => theme.breakpoints.large} {
-    height: 100dvh;
   }
 `;
 
@@ -361,6 +357,9 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
 };
 
 const PageWrapper = styled(Box)`
+  width: 100%;
+  overflow: hidden;
+
   ${MainSubNav} {
     background-color: transparent;
     border-right: none;
