@@ -28,3 +28,17 @@ jobs:
       - uses: ./.github/actions/security/lockfile
         with:
           allowedHosts: 'yarn'
+
+  # Fails only on version errors (exit 1); range-vs-exact and major version warnings do not fail the job
+  check-package-versions:
+    name: Package version alignment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+      - name: Install dependencies
+        uses: ./.github/actions/yarn-nm-install
+      - name: Check package versions
+        run: node scripts/check-package-versions.js

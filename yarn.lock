@@ -9628,7 +9628,7 @@ __metadata:
     koa-passport: "npm:6.0.0"
     koa-static: "npm:5.0.0"
     koa2-ratelimit: "npm:^1.1.3"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     motion: "npm:12.23.24"
     msw: "npm:1.3.0"
     ora: "npm:5.4.1"
@@ -9741,7 +9741,7 @@ __metadata:
     immer: "npm:9.0.21"
     koa: "npm:2.16.3"
     koa-body: "npm:6.0.1"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     markdown-it: "npm:^13.0.2"
     markdown-it-abbr: "npm:^1.0.4"
     markdown-it-container: "npm:^3.0.0"
@@ -9801,7 +9801,7 @@ __metadata:
     date-fns-tz: "npm:2.0.1"
     formik: "npm:2.4.5"
     koa: "npm:2.16.3"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     msw: "npm:1.3.0"
     qs: "npm:6.14.2"
     react: "npm:18.3.1"
@@ -9845,7 +9845,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.6.1"
     "@types/fs-extra": "npm:11.0.4"
     "@types/micromatch": "npm:^4.0.9"
-    "@types/pluralize": "npm:0.0.30"
+    "@types/pluralize": "npm:0.0.32"
     ai: "npm:5.0.52"
     date-fns: "npm:2.30.0"
     fs-extra: "npm:11.2.0"
@@ -9917,7 +9917,7 @@ __metadata:
     boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
     ci-info: "npm:4.0.0"
-    cli-table3: "npm:0.6.2"
+    cli-table3: "npm:0.6.5"
     commander: "npm:8.3.0"
     configstore: "npm:5.0.1"
     copyfiles: "npm:2.4.1"
@@ -9943,7 +9943,7 @@ __metadata:
     koa-ip: "npm:^2.1.3"
     koa-session: "npm:6.4.0"
     koa-static: "npm:5.0.0"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     mime-types: "npm:2.1.35"
     node-schedule: "npm:2.1.1"
     open: "npm:8.4.0"
@@ -9959,7 +9959,7 @@ __metadata:
     typescript: "npm:5.4.4"
     undici: "npm:6.23.0"
     vitest: "npm:4.0.18"
-    vitest-config: "npm:5.34.0"
+    vitest-config: "npm:5.36.0"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
   languageName: unknown
@@ -9991,7 +9991,7 @@ __metadata:
     inquirer: "npm:8.2.5"
     knex: "npm:3.0.1"
     koa: "npm:2.16.3"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     ora: "npm:5.4.1"
     resolve-cwd: "npm:3.0.0"
     rimraf: "npm:5.0.5"
@@ -10018,7 +10018,7 @@ __metadata:
     eslint-config-custom: "npm:5.36.0"
     fs-extra: "npm:11.2.0"
     knex: "npm:3.0.1"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     semver: "npm:7.5.4"
     tsconfig: "npm:5.36.0"
     umzug: "npm:3.8.1"
@@ -10079,7 +10079,7 @@ __metadata:
     koa: "npm:2.16.3"
     koa-body: "npm:6.0.1"
     koa2-ratelimit: "npm:^1.1.3"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     msw: "npm:1.3.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
@@ -10263,7 +10263,7 @@ __metadata:
     "@casl/ability": "npm:6.7.5"
     "@strapi/utils": "npm:5.36.0"
     eslint-config-custom: "npm:5.36.0"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     qs: "npm:6.14.2"
     sift: "npm:16.0.1"
     tsconfig: "npm:5.36.0"
@@ -10694,7 +10694,7 @@ __metadata:
     html-webpack-plugin: "npm:5.6.0"
     inquirer: "npm:8.2.5"
     jest: "npm:29.6.0"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     mini-css-extract-plugin: "npm:2.7.7"
     nodemon: "npm:3.0.2"
     ora: "npm:5.4.1"
@@ -10759,7 +10759,7 @@ __metadata:
     json-logic-js: "npm:2.0.5"
     koa: "npm:2.16.3"
     koa-body: "npm:6.0.1"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     node-schedule: "npm:2.1.1"
     tsconfig: "npm:5.36.0"
     typedoc: "npm:0.25.10"
@@ -10826,14 +10826,14 @@ __metadata:
     "@types/fs-extra": "npm:11.0.4"
     "@types/jscodeshift": "npm:0.12.0"
     chalk: "npm:4.1.2"
-    cli-table3: "npm:0.6.2"
+    cli-table3: "npm:0.6.5"
     commander: "npm:8.3.0"
     esbuild-register: "npm:3.5.0"
     eslint-config-custom: "npm:5.36.0"
     execa: "npm:5.1.1"
     fast-glob: "npm:3.3.2"
     fs-extra: "npm:11.2.0"
-    jscodeshift: "npm:17.1.2"
+    jscodeshift: "npm:17.3.0"
     lodash: "npm:4.17.23"
     memfs: "npm:4.6.0"
     ora: "npm:5.4.1"
@@ -10881,7 +10881,7 @@ __metadata:
     koa-body: "npm:6.0.1"
     koa-range: "npm:0.3.0"
     koa-static: "npm:5.0.0"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     mime-types: "npm:2.1.35"
     msw: "npm:1.3.0"
     prop-types: "npm:^15.8.1"
@@ -10921,7 +10921,7 @@ __metadata:
     http-errors: "npm:2.0.0"
     koa: "npm:2.16.3"
     koa-body: "npm:6.0.1"
-    lodash: "npm:4.17.21"
+    lodash: "npm:4.17.23"
     node-machine-id: "npm:1.1.12"
     p-map: "npm:4.0.0"
     preferred-pm: "npm:3.1.3"
@@ -12483,13 +12483,6 @@ __metadata:
   dependencies:
     "@types/express": "npm:*"
   checksum: 10c0/119d5c3530b05b566e03341e06775919985065d75c9872c174e284896b92c208ea7a617823477c8c672bf04311b184eb107eeefe0c5d290bc569378274482d19
-  languageName: node
-  linkType: hard
-
-"@types/pluralize@npm:0.0.30":
-  version: 0.0.30
-  resolution: "@types/pluralize@npm:0.0.30"
-  checksum: 10c0/6d01d329240005a3958e7c57d17495e4816cb89ae80d3c1f4e41d8a97bd1c846a47fe06c3e5d361ddcc4992a18c005ab8acd1598096b7a7cabde704489da908d
   languageName: node
   linkType: hard
 
@@ -15881,19 +15874,6 @@ __metadata:
   version: 2.9.2
   resolution: "cli-spinners@npm:2.9.2"
   checksum: 10c0/907a1c227ddf0d7a101e7ab8b300affc742ead4b4ebe920a5bf1bc6d45dce2958fcd195eb28fa25275062fe6fa9b109b93b63bc8033396ed3bcb50297008b3a3
-  languageName: node
-  linkType: hard
-
-"cli-table3@npm:0.6.2":
-  version: 0.6.2
-  resolution: "cli-table3@npm:0.6.2"
-  dependencies:
-    "@colors/colors": "npm:1.5.0"
-    string-width: "npm:^4.2.0"
-  dependenciesMeta:
-    "@colors/colors":
-      optional: true
-  checksum: 10c0/aaa87929d86ba36e651e0280ab34cc28660e13da9dd2b6f8aa36e800c40e331c32bff53597cb9126e8a2e88e7a9025aff9c240350fe69876207d51ba452ef5e0
   languageName: node
   linkType: hard
 
@@ -23654,39 +23634,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jscodeshift@npm:17.1.2":
-  version: 17.1.2
-  resolution: "jscodeshift@npm:17.1.2"
-  dependencies:
-    "@babel/core": "npm:^7.24.7"
-    "@babel/parser": "npm:^7.24.7"
-    "@babel/plugin-transform-class-properties": "npm:^7.24.7"
-    "@babel/plugin-transform-modules-commonjs": "npm:^7.24.7"
-    "@babel/plugin-transform-nullish-coalescing-operator": "npm:^7.24.7"
-    "@babel/plugin-transform-optional-chaining": "npm:^7.24.7"
-    "@babel/plugin-transform-private-methods": "npm:^7.24.7"
-    "@babel/preset-flow": "npm:^7.24.7"
-    "@babel/preset-typescript": "npm:^7.24.7"
-    "@babel/register": "npm:^7.24.6"
-    flow-parser: "npm:0.*"
-    graceful-fs: "npm:^4.2.4"
-    micromatch: "npm:^4.0.7"
-    neo-async: "npm:^2.5.0"
-    picocolors: "npm:^1.0.1"
-    recast: "npm:^0.23.9"
-    tmp: "npm:^0.2.3"
-    write-file-atomic: "npm:^5.0.1"
-  peerDependencies:
-    "@babel/preset-env": ^7.1.6
-  peerDependenciesMeta:
-    "@babel/preset-env":
-      optional: true
-  bin:
-    jscodeshift: bin/jscodeshift.js
-  checksum: 10c0/1212b9fc24bbd0ca5df531ec9a2e389e09c977dbba9a91ac9ce87a947056d957bf66149e0633f1298b7baeb9a98b406028f610f92d4370f7c0d9b0a739eab2fe
-  languageName: node
-  linkType: hard
-
 "jscodeshift@npm:17.3.0":
   version: 17.3.0
   resolution: "jscodeshift@npm:17.3.0"
@@ -29741,19 +29688,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recast@npm:^0.23.9":
-  version: 0.23.9
-  resolution: "recast@npm:0.23.9"
-  dependencies:
-    ast-types: "npm:^0.16.1"
-    esprima: "npm:~4.0.0"
-    source-map: "npm:~0.6.1"
-    tiny-invariant: "npm:^1.3.3"
-    tslib: "npm:^2.0.1"
-  checksum: 10c0/65d6e780351f0180ea4fe5c9593ac18805bf2b79977f5bedbbbf26f6d9b619ed0f6992c1bf9e06dd40fca1aea727ad6d62463cfb5d3a33342ee5a6e486305fe5
-  languageName: node
-  linkType: hard
-
 "rechoir@npm:^0.8.0":
   version: 0.8.0
   resolution: "rechoir@npm:0.8.0"
@@ -31893,6 +31827,7 @@ __metadata:
     chalk: "npm:4.1.2"
     chokidar: "npm:3.6.0"
     coffee: "npm:5.5.1"
+    commander: "npm:8.3.0"
     core-js: "npm:3.36.0"
     create-strapi-app: "workspace:*"
     cross-env: "npm:7.0.3"
@@ -31928,6 +31863,7 @@ __metadata:
     lerna: "npm:8.2.0"
     lint-staged: "npm:15.2.10"
     lodash: "npm:4.17.23"
+    minimatch: "npm:9.0.3"
     npm-run-all: "npm:4.1.5"
     nx: "npm:20.4.6"
     plop: "npm:4.0.1"
@@ -34317,7 +34253,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest-config@npm:5.34.0, vitest-config@workspace:packages/utils/vitest-config":
+"vitest-config@npm:5.36.0, vitest-config@workspace:packages/utils/vitest-config":
   version: 0.0.0-use.local
   resolution: "vitest-config@workspace:packages/utils/vitest-config"
   dependencies:

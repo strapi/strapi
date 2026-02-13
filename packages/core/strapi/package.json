@@ -153,7 +153,7 @@
     "git-url-parse": "14.0.0",
     "html-webpack-plugin": "5.6.0",
     "inquirer": "8.2.5",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "mini-css-extract-plugin": "2.7.7",
     "nodemon": "3.0.2",
     "ora": "5.4.1",
