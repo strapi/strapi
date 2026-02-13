@@ -91,8 +91,7 @@ const SearchInput = ({
 
   if (isMobile) {
     // Add wrapper so that the Searchbar takes up the rest of the available space.
-    // But also prevent the Searchbar from shrinking so much that its icon is clipped.
-    return <Box style={{ flex: '1 1 4rem', minWidth: '4rem' }}>{renderSearchForm()}</Box>;
+    return <Box width="100%">{renderSearchForm()}</Box>;
   }
 
   if (isOpen) {

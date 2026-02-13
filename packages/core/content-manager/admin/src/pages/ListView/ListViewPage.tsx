@@ -16,6 +16,7 @@ import {
   Layouts,
   useTable,
   useIsMobile,
+  useIsDesktop,
   tours,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -75,6 +76,7 @@ const ListViewPage = () => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
   const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
 
   usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
   usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
@@ -274,6 +276,7 @@ const ListViewPage = () => {
 
   const endActions = (
     <>
+      {isMobile && list.settings.filterable && schema && <Filters.Trigger />}
       <InjectionZone area="listView.actions" />
       <ViewSettingsMenu
         setHeaders={handleSetHeaders}
@@ -283,7 +286,7 @@ const ListViewPage = () => {
     </>
   );
 
-  const startActions = (
+  const searchInput = (
     <>
       {list.settings.searchable && (
         <SearchInput
@@ -301,21 +304,27 @@ const ListViewPage = () => {
     </>
   );
 
+  const startActions = (
+    <>
+      {searchInput}
+      {!isMobile && list.settings.filterable && schema && (
+        <>
+          <Filters.Trigger />
+          <Filters.List />
+        </>
+      )}
+    </>
+  );
+
   const actions =
     list.settings.filterable && schema ? (
       <Filters.Root schema={schema}>
         <Layouts.Action
           endActions={endActions}
-          startActions={
-            <>
-              {startActions}
-              <Filters.Trigger />
-              {!isMobile ? <Filters.List /> : null}
-            </>
-          }
+          startActions={startActions}
           bottomActions={isMobile && hasAppliedFilters ? <Filters.List /> : null}
         />
-        <Filters.Popover zIndex={499} />
+        <Filters.Popover />
       </Filters.Root>
     ) : (
       <Layouts.Action endActions={endActions} startActions={startActions} />
