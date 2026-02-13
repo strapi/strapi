@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils from '@strapi/utils';
+import utils, { errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -99,7 +99,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
-      const { validFiles, filteredBody } = await prepareUploadRequest(filesInput, body, strapi);
+      const {
+        validFiles,
+        filteredBody,
+        errors: validationErrors,
+      } = await prepareUploadRequest(filesInput, body, strapi);
+      if (validFiles.length === 0) {
+        throw new errors.ValidationError(validationErrors[0].message);
+      }
 
       // cannot replace with more than one file
       if (Array.isArray(filesInput)) {
@@ -122,7 +129,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
-      const { validFiles, filteredBody } = await prepareUploadRequest(filesInput, body, strapi);
+      const {
+        validFiles,
+        filteredBody,
+        errors: validationErrors,
+      } = await prepareUploadRequest(filesInput, body, strapi);
+      if (validFiles.length === 0) {
+        throw new errors.ValidationError(validationErrors[0].message);
+      }
 
       const isMultipleFiles = validFiles.length > 1;
       const data: any = await validateUploadBody(filteredBody, isMultipleFiles);
