@@ -13,6 +13,7 @@ export class AssetsPage {
   readonly gridViewButton: Locator;
   readonly tableViewButton: Locator;
   readonly dropZone: Locator;
+  readonly uploadProgressDialog: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -22,6 +23,7 @@ export class AssetsPage {
     this.gridViewButton = page.getByRole('radio', { name: 'Grid view' });
     this.tableViewButton = page.getByRole('radio', { name: 'Table view' });
     this.dropZone = page.getByTestId('assets-dropzone');
+    this.uploadProgressDialog = page.getByTestId('upload-progress-dialog');
   }
 
   async goto() {
@@ -155,5 +157,19 @@ export class AssetsPage {
 
   getAssetCard(name: string) {
     return this.page.locator('div').filter({ hasText: name }).nth(1);
+  }
+
+  /**
+   * Wait for the upload progress dialog to show success state
+   */
+  async waitForUploadProgressSuccess() {
+    await this.uploadProgressDialog.getByText('Upload successful!').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Close the upload progress dialog
+   */
+  async closeUploadProgressDialog() {
+    await this.uploadProgressDialog.getByRole('button', { name: 'Close' }).click();
   }
 }
