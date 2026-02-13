@@ -50,7 +50,9 @@
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch"
+    "test:unit:watch": "run -T jest --watch",
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch"
   },
   "dependencies": {
     "@koa/cors": "5.0.0",
@@ -101,7 +103,7 @@
     "ora": "5.4.1",
     "package-json": "7.0.0",
     "pkg-up": "3.1.0",
-    "qs": "6.14.1",
+    "qs": "6.14.2",
     "resolve.exports": "2.0.2",
     "semver": "7.5.4",
     "statuses": "2.0.1",
@@ -133,7 +135,9 @@
     "@types/statuses": "2.0.1",
     "eslint-config-custom": "5.36.0",
     "supertest": "6.3.3",
-    "tsconfig": "5.36.0"
+    "tsconfig": "5.36.0",
+    "vitest": "4.0.18",
+    "vitest-config": "5.34.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

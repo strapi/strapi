@@ -24,6 +24,16 @@ const generateRSAKeyPair = () => {
 
 const { publicKey: testPublicKey, privateKey: testPrivateKey } = generateRSAKeyPair();
 
+/** Set legacy admin.auth.options.expiresIn and clear new session lifespans so admin bootstrap sees legacy-only config. */
+const setLegacyExpiresIn = (strapi: any, expiresIn: string) => {
+  const existing = strapi.config.get('admin.auth.options') || {};
+  strapi.config.set('admin.auth.options', { ...existing, expiresIn });
+  const sessions = { ...(strapi.config.get('admin.auth.sessions') || {}) };
+  delete sessions.maxRefreshTokenLifespan;
+  delete sessions.maxSessionLifespan;
+  strapi.config.set('admin.auth.sessions', sessions);
+};
+
 describe('Admin JWT Configuration API Tests', () => {
   let rq: any;
   let strapi: any;
@@ -265,14 +275,13 @@ describe('Admin JWT Configuration API Tests', () => {
       strapi = await createStrapiInstance({
         skipDefaultSessionConfig: true,
         async bootstrap({ strapi: s }) {
+          setLegacyExpiresIn(s, '7d');
           s.config.set('admin.rateLimit.enabled', false);
-          s.config.set('admin.auth.options', { expiresIn: '7d' });
           const originalWarn = s.log.warn.bind(s.log);
           s.log.warn = (...args: unknown[]) => {
             warnSpy(...args);
             originalWarn(...args);
           };
-          (s as any).__expiresInDeprecationWarnSpy = warnSpy;
         },
       });
       rq = await createAuthRequest({ strapi });
@@ -288,8 +297,8 @@ describe('Admin JWT Configuration API Tests', () => {
       strapi = await createStrapiInstance({
         skipDefaultSessionConfig: true,
         async bootstrap({ strapi: s }) {
+          setLegacyExpiresIn(s, '2m');
           s.config.set('admin.rateLimit.enabled', false);
-          s.config.set('admin.auth.options', { expiresIn: '2m' });
         },
       });
       rq = await createAuthRequest({ strapi });
