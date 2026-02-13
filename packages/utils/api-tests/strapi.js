@@ -22,6 +22,8 @@ const createStrapiInstance = async ({
   bypassAuth = true,
   bootstrap,
   strapiOptions = {},
+  /** When false (default), opts out of deprecated expiresIn so tests use new session config defaults. Set true to test legacy/deprecation behavior. */
+  skipDefaultSessionConfig = false,
 } = {}) => {
   // read .env file as it could have been updated
   dotenv.config({ path: process.env.ENV_PATH });
@@ -39,6 +41,25 @@ const createStrapiInstance = async ({
   // Ensure Koa trusts X-Forwarded-* headers in tests so asHTTPS() can simulate HTTPS
   instance.config.set('server.proxy.koa', true);
 
+  // Use the new session config so tests do not trigger the expiresIn deprecation warning.
+  // Set maxRefreshTokenLifespan and maxSessionLifespan (same defaults as session-auth) so
+  // bootstrap sees the new API and does not warn. We do not set expiresIn.
+  if (!skipDefaultSessionConfig) {
+    const hasNewMaxRefresh =
+      instance.config.get('admin.auth.sessions.maxRefreshTokenLifespan') != null;
+    const hasNewMaxSession = instance.config.get('admin.auth.sessions.maxSessionLifespan') != null;
+    if (!hasNewMaxRefresh || !hasNewMaxSession) {
+      const THIRTY_DAYS_SEC = 30 * 24 * 60 * 60;
+      const ONE_DAY_SEC = 24 * 60 * 60;
+      if (!hasNewMaxRefresh) {
+        instance.config.set('admin.auth.sessions.maxRefreshTokenLifespan', THIRTY_DAYS_SEC);
+      }
+      if (!hasNewMaxSession) {
+        instance.config.set('admin.auth.sessions.maxSessionLifespan', ONE_DAY_SEC);
+      }
+    }
+  }
+
   if (bypassAuth) {
     instance.get('auth').register('content-api', {
       name: 'test-auth',
@@ -52,10 +73,8 @@ const createStrapiInstance = async ({
   if (bootstrap) {
     const modules = instance.get('modules');
     const originalBootstrap = modules.bootstrap;
-    // decorate modules bootstrap
     modules.bootstrap = async () => {
       await bootstrap({ strapi: instance });
-
       await originalBootstrap();
     };
   }

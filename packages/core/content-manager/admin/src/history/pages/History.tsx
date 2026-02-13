@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { useQueryParams, Page, createContext, useRBAC } from '@strapi/admin/strapi-admin';
+import {
+  useQueryParams,
+  Page,
+  createContext,
+  useRBAC,
+  HEIGHT_TOP_NAVIGATION,
+} from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, Main, Portal, Link } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -201,17 +207,22 @@ const HistoryPage = () => {
         page={page}
         mainField={mainField}
       >
-        <Flex direction="row" alignItems="flex-start">
+        <Flex
+          direction={{ initial: 'column', medium: 'row' }}
+          alignItems="flex-start"
+          height="100%"
+          overflow="hidden"
+        >
           <Main
             grow={1}
-            height="100dvh"
+            width="100%"
+            height="100%"
             background="neutral100"
             paddingBottom={6}
-            overflow="auto"
+            overflow="hidden auto"
             labelledBy={headerId}
           >
             <VersionHeader headerId={headerId} />
-
             <VersionContent />
           </Main>
           <VersionsList />
@@ -242,12 +253,12 @@ const ProtectedHistoryPageImpl = () => {
   if (error || !slug) {
     return (
       <Box
-        height="100dvh"
         width="100dvw"
         position="fixed"
-        top={0}
+        top={{ initial: HEIGHT_TOP_NAVIGATION, large: 0 }}
+        bottom={0}
         left={0}
-        zIndex={4}
+        zIndex={{ initial: 2, large: 4 }}
         background="neutral0"
       >
         <Page.Error />
@@ -257,12 +268,12 @@ const ProtectedHistoryPageImpl = () => {
 
   return (
     <Box
-      height="100dvh"
       width="100dvw"
       position="fixed"
-      top={0}
+      top={{ initial: HEIGHT_TOP_NAVIGATION, large: 0 }}
+      bottom={0}
       left={0}
-      zIndex={4}
+      zIndex={{ initial: 2, large: 4 }}
       background="neutral0"
     >
       <Page.Protect permissions={permissions}>

@@ -4,6 +4,11 @@ import { within } from '@testing-library/react';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useIsMobile: jest.fn().mockReturnValue(false),
+}));
+
 import { HistoryProvider } from '../../pages/History';
 import { mockHistoryVersionsData } from '../../tests/mockData';
 import { VersionsList } from '../VersionsList';
@@ -41,11 +46,8 @@ describe('VersionsList', () => {
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
 
-    // Shows sidebar header and total count
-    const header = screen.getByRole('banner');
-    expect(within(header).getByText('Versions')).toBeInTheDocument();
-    expect(screen.getByText('14')).toBeInTheDocument();
     expect(screen.getByText('Versions')).toBeInTheDocument();
+    expect(screen.getByText('14')).toBeInTheDocument();
 
     // Displays the right info for each version
     const versions = screen.getAllByRole('link');

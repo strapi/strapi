@@ -50,6 +50,13 @@ const command = new commander.Command('create-strapi-app')
   .option('--git-init', 'Initialize a git repository')
   .option('--no-git-init', 'Do no initialize a git repository')
 
+  // A/B testing options
+  .option('--enable-ab-tests', 'Enable anonymous A/B testing')
+  .option('--no-enable-ab-tests', 'Disable anonymous A/B testing')
+
+  // Automation
+  .option('--non-interactive', 'Skip all interactive prompts and use defaults')
+
   // Database options
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
@@ -112,6 +119,14 @@ async function run(args: string[]): Promise<void> {
     );
   }
 
+  if (options.nonInteractive && !directory) {
+    logger.fatal(
+      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold('--non-interactive')}`
+    );
+  }
+
+  const skipPrompts = options.quickstart || options.nonInteractive;
+
   checkNodeRequirements();
 
   const appDirectory = directory || (await prompts.directory());
@@ -119,7 +134,7 @@ async function run(args: string[]): Promise<void> {
   const rootPath = await checkInstallPath(appDirectory);
 
   let shouldCreateGrowthSsoTrial = false;
-  if (!options.skipCloud) {
+  if (!options.skipCloud && !options.nonInteractive) {
     shouldCreateGrowthSsoTrial = await handleCloudLogin();
   }
 
@@ -168,7 +183,7 @@ async function run(args: string[]): Promise<void> {
     scope.useExample = false;
   } else if (options.example === true) {
     scope.useExample = true;
-  } else if (options.example === false || options.quickstart === true) {
+  } else if (options.example === false || skipPrompts) {
     scope.useExample = false;
   } else {
     scope.useExample = await prompts.example();
@@ -176,19 +191,15 @@ async function run(args: string[]): Promise<void> {
 
   if (options.javascript === true) {
     scope.useTypescript = false;
-  } else if (options.typescript === true || options.quickstart) {
+  } else if (options.typescript === true || skipPrompts) {
     scope.useTypescript = true;
   } else if (!options.template) {
     scope.useTypescript = await prompts.typescript();
   }
 
-  if (options.install === true || options.quickstart) {
-    scope.installDependencies = true;
-  } else if (options.install === false) {
-    scope.installDependencies = false;
-  } else {
-    scope.installDependencies = await prompts.installDependencies(scope.packageManager);
-  }
+  scope.installDependencies = await resolveOption(options.install, skipPrompts, true, () =>
+    prompts.installDependencies(scope.packageManager)
+  );
 
   if (scope.useTypescript) {
     scope.devDependencies = {
@@ -200,15 +211,14 @@ async function run(args: string[]): Promise<void> {
     };
   }
 
-  if (options.gitInit === true || options.quickstart) {
-    scope.gitInit = true;
-  } else if (options.gitInit === false) {
-    scope.gitInit = false;
-  } else {
-    scope.gitInit = await prompts.gitInit();
-  }
+  scope.gitInit = await resolveOption(options.gitInit, skipPrompts, true, prompts.gitInit);
 
-  scope.isABTestEnabled = await prompts.enableABTests();
+  scope.isABTestEnabled = await resolveOption(
+    options.enableAbTests,
+    skipPrompts,
+    false,
+    prompts.enableABTests
+  );
 
   addDatabaseDependencies(scope);
 
@@ -223,6 +233,20 @@ async function run(args: string[]): Promise<void> {
 
     logger.fatal(error.message);
   }
+}
+
+/**
+ * Resolves a boolean CLI option: explicit flag wins, then non-interactive default, then interactive prompt.
+ */
+async function resolveOption(
+  explicitValue: boolean | undefined,
+  skipPrompts: boolean | undefined,
+  defaultValue: boolean,
+  promptFn: () => Promise<boolean>
+): Promise<boolean> {
+  if (explicitValue !== undefined) return explicitValue;
+  if (skipPrompts) return defaultValue;
+  return promptFn();
 }
 
 function getPkgManager(options: Options) {
