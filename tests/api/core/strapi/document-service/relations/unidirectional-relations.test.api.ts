@@ -201,6 +201,8 @@ describe('Document Service unidirectional relations', () => {
   /**
    * Publish with 550 unidirectional relations (GH#25198): exercises document-service
    * batchInsert path so each batch stays ≤500 on SQLite.
+   * Tags are published first so that when we publish the product, relation id resolution
+   * finds published tag ids (same-status rule for DP); the 550 join rows are then inserted in batches.
    */
   testInTransaction(
     'Publish product with 550 tags (batched unidirectional relation sync)',
@@ -213,6 +215,10 @@ describe('Document Service unidirectional relations', () => {
           publishedAt: null,
         })),
       });
+
+      for (let i = 0; i < count; i++) {
+        await strapi.documents(TAG_UID).publish({ documentId: `TagBatch${i}` });
+      }
 
       const product = await strapi.documents(PRODUCT_UID).create({
         data: {
