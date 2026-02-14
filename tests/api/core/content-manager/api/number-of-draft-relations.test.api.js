@@ -14,6 +14,7 @@ const categories = {
 
 const UID_PRODUCT = 'api::product.product';
 const UID_CATEGORY = 'api::category.category';
+const UID_TAG = 'api::tag.tag';
 
 const productModel = {
   displayName: 'Product',
@@ -53,6 +54,16 @@ const productModel = {
       relation: 'oneToOne',
       target: UID_CATEGORY,
       targetAttribute: 'oneproduct',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    tag: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: UID_TAG,
       pluginOptions: {
         i18n: {
           localized: true,
@@ -107,6 +118,18 @@ const categoryModel = {
   },
 };
 
+const tagModel = {
+  displayName: 'Tag',
+  singularName: 'tag',
+  pluralName: 'tags',
+  draftAndPublish: false,
+  attributes: {
+    name: {
+      type: 'string',
+    },
+  },
+};
+
 const compoModel = {
   displayName: 'compo',
   attributes: {
@@ -131,7 +154,7 @@ describe('CM API - Number of draft relations', () => {
 
   beforeAll(async () => {
     await builder
-      .addContentTypes([categoryModel])
+      .addContentTypes([categoryModel, tagModel])
       .addComponent(compoModel)
       .addContentTypes([productModel])
       .build();
@@ -440,6 +463,36 @@ describe('CM API - Number of draft relations', () => {
     });
 
     expect(body.data).toBe(8);
+  });
+
+  test('Return 0 and not crash when product has a relation to a non-draftAndPublish type', async () => {
+    // Create a tag (non-D&P content type)
+    const {
+      body: { data: tag },
+    } = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_TAG}`,
+      body: { name: 'Important' },
+    });
+
+    // Create a product with a relation to the non-D&P tag
+    const {
+      body: { data: product },
+    } = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
+      body: { name: 'TaggedProduct', tag: tag.id },
+    });
+
+    // countDraftRelations should not crash and should return 0
+    // because the tag content type has no draft/publish concept
+    const { body, statusCode } = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
+    });
+
+    expect(statusCode).toBe(200);
+    expect(body.data).toBe(0);
   });
 
   test('Correctly count the number of draft relations across multiple locales and document IDs', async () => {

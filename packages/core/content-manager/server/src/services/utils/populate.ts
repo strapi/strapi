@@ -3,8 +3,12 @@ import strapiUtils from '@strapi/utils';
 import type { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 
-const { isVisibleAttribute, isScalarAttribute, getDoesAttributeRequireValidation } =
-  strapiUtils.contentTypes;
+const {
+  isVisibleAttribute,
+  isScalarAttribute,
+  getDoesAttributeRequireValidation,
+  hasDraftAndPublish,
+} = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
@@ -287,6 +291,13 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
         // TODO: Support polymorphic relations
         const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
         if (isMorphRelation) {
+          break;
+        }
+
+        // Skip relations to content types without draft & publish,
+        // as they don't have a publishedAt attribute and can't have drafts
+        const targetModel = strapi.getModel(attribute.target);
+        if (targetModel && !hasDraftAndPublish(targetModel)) {
           break;
         }
 
