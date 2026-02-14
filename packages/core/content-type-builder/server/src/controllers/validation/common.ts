@@ -39,7 +39,7 @@ export const isValidUID: CommonTestConfig = {
 
 export const isValidCategoryName: CommonTestConfig = {
   name: 'isValidCategoryName',
-  message: `\${path} must match the following regex: ${CATEGORY_NAME_REGEX}`,
+  message: `\${path} must start with a letter and only contain letters, numbers, dashes and underscores`,
   test: (val) => val === '' || CATEGORY_NAME_REGEX.test(val as string),
 };
 
