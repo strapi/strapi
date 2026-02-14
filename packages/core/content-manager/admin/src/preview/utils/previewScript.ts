@@ -68,12 +68,31 @@ const previewScript = (config: PreviewScriptConfig) => {
     window.parent.postMessage({ type, payload }, '*');
   };
 
-  const getElementsByPath = (path: string) => {
-    const nodes = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}*="path=${path}"]`);
+  const getElementsByPath = (
+    path: string,
+    options: {
+      includeDescendants?: boolean;
+      includeFieldPath?: boolean;
+    } = {}
+  ) => {
+    const { includeDescendants = false, includeFieldPath = false } = options;
+    const nodes = document.querySelectorAll(`[${SOURCE_ATTRIBUTE}]`);
+
     return Array.from(nodes).filter((node) => {
       const attr = node.getAttribute(SOURCE_ATTRIBUTE);
       const params = new URLSearchParams(attr ?? '');
-      return params.get('path') === path;
+      const sourcePath = params.get('path');
+      const fieldPath = params.get('fieldPath');
+
+      if (sourcePath === path) {
+        return true;
+      }
+
+      if (includeFieldPath && fieldPath === path) {
+        return true;
+      }
+
+      return includeDescendants && !!sourcePath && sourcePath.startsWith(`${path}.`);
     });
   };
 
@@ -81,94 +100,255 @@ const previewScript = (config: PreviewScriptConfig) => {
     return element.tagName === 'IMG' || element.tagName === 'VIDEO';
   };
 
-  /**
-   * Get the field path to use for focusing a media field.
-   * - For IMG/VIDEO elements: the path was already normalized (stripped of .url) during stega decoding
-   * - For non-media elements with model=plugin::upload.file (e.g., caption text): strip the last
-   *   segment to focus the parent media field (e.g., "hero.caption" -> "hero")
-   */
-  const getFieldPathForMedia = (sourceAttr: string, element: Element): string => {
-    // IMG/VIDEO elements already have the correct path from stega decoding
-    if (isMediaElement(element)) {
-      return sourceAttr;
+  const normalizeMediaFieldPath = (
+    sourcePath: string,
+    options: { stripLeafProperty?: boolean } = {}
+  ) => {
+    const { stripLeafProperty = false } = options;
+    const pathSegments = sourcePath.split('.').filter(Boolean);
+
+    if (pathSegments.length === 0) {
+      return sourcePath;
     }
 
-    // For non-media elements, check if it's a media asset field
+    // For non-media text nodes from upload files (e.g. alt/caption), drop the property segment first.
+    if (stripLeafProperty) {
+      pathSegments.pop();
+    }
+
+    // Stega on media URLs may still point to "...url". Always normalize to the media field path.
+    if (pathSegments[pathSegments.length - 1] === 'url') {
+      pathSegments.pop();
+    }
+
+    // Repeatable media fields resolve to "<field>.<index>": normalize to "<field>" for InputRenderer.
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    if (lastSegment && /^\d+$/.test(lastSegment)) {
+      pathSegments.pop();
+    }
+
+    return pathSegments.join('.');
+  };
+
+  /**
+   * Get the field path to use for focusing a field from a stega source.
+   * - Prefer explicit fieldPath when available (e.g. blocks nested text nodes)
+   * - For blocks without fieldPath, derive the root blocks field from "X.<index>.children..."
+   * - For media-derived upload fields (url, caption, alt), normalize to the parent media field path.
+   */
+  const getFieldPathForMedia = (sourceAttr: string, element: Element): string => {
     const params = new URLSearchParams(sourceAttr);
-    if (params.get('model') === 'plugin::upload.file') {
-      const elementPath = params.get('path');
-      if (elementPath) {
-        // Strip the last segment (e.g., "hero.caption" -> "hero")
-        const parentPath = elementPath.split('.').slice(0, -1).join('.');
-        params.set('path', parentPath);
+    const fieldPath = params.get('fieldPath');
+
+    // For nested stega paths (e.g. blocks text nodes), focus the parent field.
+    if (fieldPath) {
+      params.set('path', fieldPath);
+      params.delete('fieldPath');
+      return params.toString();
+    }
+
+    const type = params.get('type');
+    const sourcePath = params.get('path');
+
+    if (type === 'blocks' && sourcePath) {
+      const blocksPathMatch = sourcePath.match(/^(.*?)\.\d+\.children\./);
+      if (blocksPathMatch?.[1]) {
+        params.set('path', blocksPathMatch[1]);
         return params.toString();
       }
+    }
+
+    if (params.get('model') === 'plugin::upload.file' && sourcePath) {
+      const normalizedPath = normalizeMediaFieldPath(sourcePath, {
+        stripLeafProperty: !isMediaElement(element),
+      });
+
+      if (normalizedPath) {
+        params.set('path', normalizedPath);
+      }
+
+      return params.toString();
     }
 
     return sourceAttr;
   };
 
-  const renderBlocks = (blocks: any[]): string => {
-    if (!Array.isArray(blocks)) {
-      return '';
+  const getInteractiveClickTarget = (element: HTMLElement): HTMLElement => {
+    if (!isMediaElement(element)) {
+      return element;
     }
 
-    const renderChildren = (children: any[]): string => {
-      if (!Array.isArray(children)) return '';
+    let parent = element.parentElement;
+    while (parent) {
+      if (
+        parent.tagName === 'A' ||
+        parent.tagName === 'BUTTON' ||
+        parent.hasAttribute('onclick') ||
+        parent.getAttribute('role') === 'button' ||
+        parent.getAttribute('role') === 'link'
+      ) {
+        return parent;
+      }
 
-      return children
-        .map((child) => {
-          if (!child) return '';
-          let text = child.text || '';
+      parent = parent.parentElement;
+    }
 
-          if (child.bold) text = `<strong>${text}</strong>`;
-          if (child.italic) text = `<em>${text}</em>`;
-          if (child.underline) text = `<u>${text}</u>`;
-          if (child.strikethrough) text = `<del>${text}</del>`;
-          if (child.code) text = `<code>${text}</code>`;
+    return element;
+  };
 
-          if (child.type === 'link') {
-            return `<a href="${child.url}">${renderChildren(child.children)}</a>`;
-          }
+  const getRenderableTextValue = (value: unknown): string | null => {
+    if (value === null || value === undefined) {
+      return 'null';
+    }
 
-          return text;
-        })
-        .join('');
+    if (typeof value === 'string') {
+      return value === '' ? 'null' : value;
+    }
+
+    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+      return String(value);
+    }
+
+    // Complex values should be rendered by the frontend app itself.
+    return null;
+  };
+
+  const isBlocksValue = (value: unknown): boolean => {
+    if (!Array.isArray(value)) {
+      return false;
+    }
+
+    return value.every(
+      (item) =>
+        item !== null &&
+        typeof item === 'object' &&
+        'type' in item &&
+        'children' in item &&
+        Array.isArray((item as { children?: unknown[] }).children)
+    );
+  };
+
+  const getBlocksTextUpdates = (
+    blocks: unknown,
+    rootPath: string
+  ): Array<{ path: string; text: string }> => {
+    const updates: Array<{ path: string; text: string }> = [];
+
+    const visitNode = (node: unknown, currentPath: string) => {
+      if (Array.isArray(node)) {
+        node.forEach((child, index) => {
+          visitNode(child, `${currentPath}.${index}`);
+        });
+        return;
+      }
+
+      if (!node || typeof node !== 'object') {
+        return;
+      }
+
+      if ('text' in node && typeof node.text === 'string') {
+        updates.push({ path: `${currentPath}.text`, text: node.text });
+      }
+
+      if ('children' in node && Array.isArray(node.children)) {
+        node.children.forEach((child, index) => {
+          visitNode(child, `${currentPath}.children.${index}`);
+        });
+      }
     };
 
-    return blocks
-      .map((block) => {
-        if (!block) return '';
+    visitNode(blocks, rootPath);
+    return updates;
+  };
 
-        switch (block.type) {
-          case 'paragraph':
-            return `<p>${renderChildren(block.children)}</p>`;
-          case 'heading':
-            return `<h${block.level}>${renderChildren(block.children)}</h${block.level}>`;
-          case 'list':
-            const tag = block.format === 'ordered' ? 'ol' : 'ul';
-            const listItems = Array.isArray(block.children)
-              ? block.children
-                  .map((item: any) => `<li>${renderChildren(item.children)}</li>`)
-                  .join('')
-              : '';
-            return `<${tag}>${listItems}</${tag}>`;
-          case 'quote':
-            return `<blockquote>${renderChildren(block.children)}</blockquote>`;
-          case 'code':
-            return `<pre><code>${renderChildren(block.children)}</code></pre>`;
-          case 'image':
-            if (block.image && block.image.url) {
-              return `<img src="${block.image.url}" alt="${block.image.alternativeText || ''}" />`;
-            }
-            return '';
-          case 'link':
-            return `<a href="${block.url}">${renderChildren(block.children)}</a>`;
-          default:
-            return '';
-        }
-      })
-      .join('');
+  const isMediaLikeValue = (value: unknown): value is { url?: unknown; mime?: unknown } => {
+    return value !== null && typeof value === 'object' && 'url' in value;
+  };
+
+  const getSourcePathFromElement = (element: Element): string | null => {
+    const sourceAttr = element.getAttribute(SOURCE_ATTRIBUTE);
+    if (!sourceAttr) {
+      return null;
+    }
+
+    return new URLSearchParams(sourceAttr).get('path');
+  };
+
+  const getMediaValueForSourcePath = (
+    field: string,
+    value: unknown,
+    sourcePath: string | null
+  ): unknown => {
+    if (!sourcePath) {
+      return null;
+    }
+
+    if (Array.isArray(value)) {
+      if (!sourcePath.startsWith(`${field}.`)) {
+        return null;
+      }
+
+      const relativePath = sourcePath.slice(field.length + 1);
+      const mediaIndex = Number(relativePath.split('.')[0]);
+      if (Number.isNaN(mediaIndex)) {
+        return null;
+      }
+
+      return value[mediaIndex] ?? null;
+    }
+
+    if (isMediaLikeValue(value) && sourcePath === field) {
+      return value;
+    }
+
+    return null;
+  };
+
+  const updateMediaElement = (
+    element: HTMLElement,
+    value: unknown,
+    siblingElements: HTMLElement[]
+  ) => {
+    const url = typeof value === 'string' ? value : isMediaLikeValue(value) ? value.url : undefined;
+    const mime = isMediaLikeValue(value) ? value.mime : undefined;
+    const normalizedUrl = typeof url === 'string' ? url : '';
+    const normalizedMime = typeof mime === 'string' ? mime : undefined;
+
+    if (!normalizedUrl) {
+      element.style.display = 'none';
+      element.removeAttribute('src');
+      return;
+    }
+
+    const isImageElement = element.tagName === 'IMG';
+    const isVideoElement = element.tagName === 'VIDEO';
+    const isImageMime = normalizedMime?.startsWith('image/');
+    const isVideoMime = normalizedMime?.startsWith('video/');
+    const isCompatible =
+      !normalizedMime ||
+      (isImageElement && !!isImageMime) ||
+      (isVideoElement && !!isVideoMime) ||
+      (!isImageMime && !isVideoMime);
+
+    const hasCompatibleSibling =
+      (isImageMime &&
+        siblingElements.some((sibling) => sibling !== element && sibling.tagName === 'IMG')) ||
+      (isVideoMime &&
+        siblingElements.some((sibling) => sibling !== element && sibling.tagName === 'VIDEO'));
+
+    if (!isCompatible && hasCompatibleSibling) {
+      element.style.display = 'none';
+      element.removeAttribute('src');
+      return;
+    }
+
+    // Avoid replacing nodes in-place (React-managed trees may crash on save after external replaceChild).
+    element.setAttribute('src', normalizedUrl);
+    element.style.display = '';
+
+    if (isVideoElement) {
+      element.setAttribute('controls', '');
+    }
   };
 
   /* -----------------------------------------------------------------------------------------------
@@ -180,7 +360,11 @@ const previewScript = (config: PreviewScriptConfig) => {
       return;
     }
 
-    const { vercelStegaDecode: stegaDecode, vercelStegaClean: stegaClean } = await import(
+    const {
+      vercelStegaDecode: stegaDecode,
+      vercelStegaDecodeAll: stegaDecodeAll,
+      vercelStegaClean: stegaClean,
+    } = await import(
       // @ts-expect-error it's not a local dependency
       // eslint-disable-next-line import/no-unresolved
       'https://cdn.jsdelivr.net/npm/@vercel/stega@0.1.2/+esm'
@@ -216,30 +400,58 @@ const previewScript = (config: PreviewScriptConfig) => {
       }
 
       const directTextNodes = Array.from(element.childNodes).filter(
-        (node) => node.nodeType === Node.TEXT_NODE
+        (node): node is Text => node.nodeType === Node.TEXT_NODE
       );
 
-      const directTextContent = directTextNodes.map((node) => node.textContent || '').join('');
+      if (directTextNodes.length === 0) {
+        return;
+      }
 
-      if (directTextContent) {
+      let decodedSource: string | null = null;
+
+      // Decode each direct text node independently so split rich text leaves are handled.
+      directTextNodes.forEach((node) => {
+        if (!node.textContent) {
+          return;
+        }
+
         try {
-          // TODO: check if we can call split instead of decode+clean
-          const result = stegaDecode(directTextContent);
-          if (result && 'strapiSource' in result) {
-            element.setAttribute(SOURCE_ATTRIBUTE, result.strapiSource);
+          const decodedSources = stegaDecodeAll(node.textContent) as Array<{
+            strapiSource?: string;
+          }>;
+          const firstSource = decodedSources.find((decoded) => decoded?.strapiSource)?.strapiSource;
+          if (!decodedSource && firstSource) {
+            decodedSource = firstSource;
+          }
 
-            // Remove encoded part from DOM text content (to avoid breaking links for example)
-            directTextNodes.forEach((node) => {
-              if (node.textContent) {
-                const cleanedText = stegaClean(node.textContent);
-                if (cleanedText !== node.textContent) {
-                  node.textContent = cleanedText;
-                }
-              }
-            });
+          const cleanedText = stegaClean(node.textContent);
+          if (cleanedText !== node.textContent) {
+            node.textContent = cleanedText;
           }
         } catch (error) {}
+      });
+
+      if (decodedSource) {
+        element.setAttribute(SOURCE_ATTRIBUTE, decodedSource);
+        return;
       }
+
+      // Fallback to merged direct text content for edge cases where encoded chars are split across nodes.
+      const directTextContent = directTextNodes.map((node) => node.textContent || '').join('');
+
+      if (!directTextContent) {
+        return;
+      }
+
+      try {
+        const decodedSources = stegaDecodeAll(directTextContent) as Array<{
+          strapiSource?: string;
+        }>;
+        const firstSource = decodedSources.find((decoded) => decoded?.strapiSource)?.strapiSource;
+        if (firstSource) {
+          element.setAttribute(SOURCE_ATTRIBUTE, firstSource);
+        }
+      } catch (error) {}
     };
 
     // Process all existing elements
@@ -403,6 +615,8 @@ const previewScript = (config: PreviewScriptConfig) => {
           // Send single-click hint notification
           sendMessage(INTERNAL_EVENTS.STRAPI_FIELD_SINGLE_CLICK_HINT, null);
 
+          const targetElement = getInteractiveClickTarget(element);
+
           // Re-trigger the click on the underlying element after the double-click timeout
           // Create a new event to dispatch with a marker to prevent re-handling
           const newEvent = new MouseEvent('click', {
@@ -420,7 +634,7 @@ const previewScript = (config: PreviewScriptConfig) => {
             metaKey: event.metaKey,
           });
           (newEvent as any).__strapi_redispatched = true;
-          element.dispatchEvent(newEvent);
+          targetElement.dispatchEvent(newEvent);
         }, DOUBLE_CLICK_TIMEOUT);
 
         pendingClicks.set(element, timeout);
@@ -675,78 +889,106 @@ const previewScript = (config: PreviewScriptConfig) => {
         const { field, value } = event.data.payload;
         if (!field) return;
 
+        if (isBlocksValue(value)) {
+          getBlocksTextUpdates(value, field).forEach(({ path, text }) => {
+            const elements = getElementsByPath(path);
+
+            if (elements.length > 0) {
+              elements.forEach((element) => {
+                if (element instanceof HTMLElement && !isMediaElement(element)) {
+                  element.innerText = text;
+                }
+              });
+              return;
+            }
+
+            // If the element doesn't exist (e.g. new block added), try to find a preceding sibling to clone
+            // We assume paths like "field.0.children.0.text" and try to find "field.0.children.-1.text" (conceptually)
+            // We look for all numeric segments in the path and try decrementing them from right to left.
+            const segments = path.split('.');
+            const numericIndices = segments
+              .map((s, i) => (/^\d+$/.test(s) ? i : -1))
+              .filter((i) => i !== -1);
+
+            // Iterate from right to left (deepest to shallowest)
+            for (let i = numericIndices.length - 1; i >= 0; i--) {
+              const segmentIndex = numericIndices[i];
+              const currentIndex = parseInt(segments[segmentIndex], 10);
+
+              if (currentIndex > 0) {
+                const previousIndex = currentIndex - 1;
+                const candidateSegments = [...segments];
+                candidateSegments[segmentIndex] = previousIndex.toString();
+                const candidatePath = candidateSegments.join('.');
+
+                const previousElements = getElementsByPath(candidatePath);
+
+                if (previousElements.length > 0) {
+                  previousElements.forEach((prevEl) => {
+                    if (prevEl instanceof HTMLElement && prevEl.parentElement) {
+                      // Clone strategy
+                      const clone = prevEl.cloneNode(true) as HTMLElement;
+
+                      // Update source attribute
+                      const oldSource = prevEl.getAttribute(SOURCE_ATTRIBUTE);
+                      if (oldSource) {
+                        const newSource = oldSource.replace(
+                          `path=${candidatePath}`,
+                          `path=${path}`
+                        );
+                        clone.setAttribute(SOURCE_ATTRIBUTE, newSource);
+                      }
+
+                      clone.innerText = text;
+                      prevEl.parentElement.insertBefore(clone, prevEl.nextSibling);
+                    }
+                  });
+                  // If we found a match at this level, we stop searching.
+                  return;
+                }
+              }
+            }
+          });
+
+          highlightManager.updateAllHighlights();
+          return;
+        }
+
         getElementsByPath(field).forEach((element) => {
           if (element instanceof HTMLElement) {
-            // For img/video elements, update the src attribute instead of text content
-            if (isMediaElement(element)) {
-              // Value can be a media object with url property, or a string URL
-              const url = typeof value === 'object' && value !== null ? value.url : value;
-              const mime = typeof value === 'object' && value !== null ? value.mime : undefined;
-
-              if (url) {
-                // Check if the media type matches the element type
-                const isImage = element.tagName === 'IMG';
-                const isVideo = element.tagName === 'VIDEO';
-                const isImageMime = mime?.startsWith('image/');
-                const isVideoMime = mime?.startsWith('video/');
-
-                // Check if we need to replace the element due to media type mismatch
-                const needsReplacement =
-                  mime && ((isImage && isVideoMime) || (isVideo && isImageMime));
-
-                if (needsReplacement) {
-                  // Create a new element of the correct type
-                  const newTagName = isImageMime ? 'IMG' : 'VIDEO';
-                  const newElement = document.createElement(newTagName);
-
-                  // Copy all attributes from the old element
-                  Array.from(element.attributes).forEach((attr) => {
-                    newElement.setAttribute(attr.name, attr.value);
-                  });
-
-                  // Set the new src
-                  newElement.setAttribute('src', url);
-
-                  // Copy inline styles
-                  newElement.style.cssText = element.style.cssText;
-                  newElement.style.display = '';
-
-                  // For video elements, add common attributes
-                  if (newTagName === 'VIDEO') {
-                    newElement.setAttribute('controls', '');
-                  }
-
-                  // Replace the old element with the new one
-                  element.parentNode?.replaceChild(newElement, element);
-                } else {
-                  // Same media type, just update the src
-                  const shouldShow = !mime || (isImage && isImageMime) || (isVideo && isVideoMime);
-
-                  if (shouldShow) {
-                    element.setAttribute('src', url);
-                    element.style.display = '';
-                  } else {
-                    element.style.display = 'none';
-                    element.removeAttribute('src');
-                  }
-                }
-              } else {
-                // Hide element when media is deleted/empty
-                element.style.display = 'none';
-                element.removeAttribute('src');
+            if (!isMediaElement(element)) {
+              const nextText = getRenderableTextValue(value);
+              if (nextText !== null) {
+                element.textContent = nextText;
               }
-            } else if (
-              Array.isArray(value) &&
-              value.length > 0 &&
-              typeof value[0] === 'object' &&
-              'type' in value[0]
-            ) {
-              element.innerHTML = renderBlocks(value);
-            } else {
-              const text = value !== null && value !== undefined ? String(value) : '';
-              element.textContent = text === '' ? '\u00A0' : text;
             }
           }
+        });
+
+        const mediaElements = getElementsByPath(field, { includeDescendants: true }).filter(
+          (element): element is HTMLElement =>
+            element instanceof HTMLElement && isMediaElement(element)
+        );
+
+        const mediaElementsByPath = new Map<string, HTMLElement[]>();
+        mediaElements.forEach((element) => {
+          const sourcePath = getSourcePathFromElement(element);
+          if (!sourcePath) {
+            return;
+          }
+
+          const currentElements = mediaElementsByPath.get(sourcePath) ?? [];
+          currentElements.push(element);
+          mediaElementsByPath.set(sourcePath, currentElements);
+        });
+
+        mediaElements.forEach((element) => {
+          const sourcePath = getSourcePathFromElement(element);
+          const mediaValue = getMediaValueForSourcePath(field, value, sourcePath);
+          const siblingElements = sourcePath
+            ? (mediaElementsByPath.get(sourcePath) ?? [element])
+            : [element];
+          updateMediaElement(element, mediaValue, siblingElements);
         });
 
         // Handle nested media asset fields (caption, alt, etc.)
@@ -761,13 +1003,39 @@ const previewScript = (config: PreviewScriptConfig) => {
             const model = params.get('model');
             const elementPath = params.get('path');
 
-            if (model !== 'plugin::upload.file' || !elementPath) return;
+            if (
+              model !== 'plugin::upload.file' ||
+              !elementPath ||
+              !(element instanceof HTMLElement)
+            ) {
+              return;
+            }
+
+            if (Array.isArray(value)) {
+              if (!elementPath.startsWith(`${field}.`) || isMediaElement(element)) return;
+
+              const relativePath = elementPath.slice(field.length + 1);
+              const [indexPart, ...propertyPath] = relativePath.split('.');
+              const mediaIndex = Number(indexPart);
+
+              if (Number.isNaN(mediaIndex) || propertyPath.length === 0) return;
+
+              const mediaItem = value[mediaIndex];
+              if (!mediaItem || typeof mediaItem !== 'object') return;
+
+              const propertyName = propertyPath.join('.');
+              const propertyValue = (mediaItem as Record<string, unknown>)[propertyName];
+              if (propertyValue !== undefined) {
+                element.textContent = propertyValue ? String(propertyValue) : '';
+              }
+              return;
+            }
 
             if (elementPath.startsWith(`${field}.`)) {
               const propertyName = elementPath.slice(field.length + 1);
-              const propertyValue = value[propertyName];
-              if (element instanceof HTMLElement && propertyValue !== undefined) {
-                element.textContent = propertyValue || '';
+              const propertyValue = (value as Record<string, unknown>)[propertyName];
+              if (!isMediaElement(element) && propertyValue !== undefined) {
+                element.textContent = propertyValue ? String(propertyValue) : '';
               }
             }
           });
@@ -791,13 +1059,21 @@ const previewScript = (config: PreviewScriptConfig) => {
 
         // Set new focused field and highlight matching elements
         highlightManager.setFocusedField(field);
-        getElementsByPath(field).forEach((element, index) => {
+        const exactMatches = getElementsByPath(field);
+        const matchingElements =
+          exactMatches.length > 0
+            ? exactMatches
+            : getElementsByPath(field, { includeDescendants: true, includeFieldPath: true });
+
+        matchingElements.forEach((element, index) => {
           if (index === 0) {
             // Check if scrollIntoViewIfNeeded is available (e.g. Chrome)
             if (
               'scrollIntoViewIfNeeded' in element &&
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               typeof (element as any).scrollIntoViewIfNeeded === 'function'
             ) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (element as any).scrollIntoViewIfNeeded({ behavior: 'smooth', block: 'center' });
             } else {
               element.scrollIntoView({ behavior: 'smooth', block: 'center' });

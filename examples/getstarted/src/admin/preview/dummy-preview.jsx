@@ -6,10 +6,6 @@ import { Page, Layouts } from '@strapi/admin/strapi-admin';
 import { Grid, Flex, Typography, JSONInput, Box, Button } from '@strapi/design-system';
 import { ChevronDown, ChevronRight } from '@strapi/icons';
 
-const isMedia = (value) => {
-  return typeof value === 'object' && value !== null && 'url' in value;
-};
-
 const filterAttributes = (item) => {
   const excludedKeys = ['documentId', 'id', 'createdAt', 'updatedAt', 'publishedAt'];
   return Object.entries(item).filter(([key]) => !excludedKeys.includes(key));
@@ -49,6 +45,10 @@ const ToggleableContainer = ({ headerText, children, isEmpty = false }) => {
   );
 };
 
+const isMedia = (value) => {
+  return typeof value === 'object' && value !== null && 'url' in value;
+};
+
 const NestedValue = ({
   value,
   level = 0,
@@ -60,14 +60,7 @@ const NestedValue = ({
 }) => {
   if (fieldName === 'blocks') {
     return (
-      <Flex
-        direction="column"
-        alignItems="flex-start"
-        fontSize="1.4rem"
-        gap={2}
-        data-strapi-source={`path=${path}&type=blocks&model=${model}&documentId=${documentId}`}
-        width="100%"
-      >
+      <Flex direction="column" alignItems="flex-start" fontSize="1.4rem" gap={2}>
         {value ? <BlocksRenderer content={value} /> : 'null'}
       </Flex>
     );
@@ -76,55 +69,40 @@ const NestedValue = ({
   // Use the email type to test clickable preview elements
   if (fieldName === 'email') {
     return (
-      <Button
-        variant="tertiary"
-        onClick={() => window.alert('Sending email!')}
-        data-strapi-source={`path=${path}&type=email&model=${model}&documentId=${documentId}`}
-      >
+      <Button variant="tertiary" onClick={() => window.alert('Sending email!')}>
         {value}
       </Button>
     );
   }
 
-  if (typeof value === 'boolean') {
-    return (
-      <Box
-        data-strapi-source={`path=${path}&type=boolean&model=${model}&documentId=${documentId}`}
-        padding={1}
-        background={value ? 'success100' : 'danger100'}
-        borderColor={value ? 'success200' : 'danger200'}
-        borderWidth="1px"
-        hasRadius
-      >
-        <Typography variant="sigma" textColor={value ? 'success600' : 'danger600'}>
-          {String(value).toUpperCase()}
-        </Typography>
-      </Box>
-    );
-  }
-
   if (isMedia(value)) {
-    // Check for video mime type if available, otherwise assume image for preview if url exists
-    const isVideo = value.mime?.startsWith('video/');
-    const sourceString = `path=${path}&type=media&model=${model}&documentId=${documentId}`;
+    const url = value.url;
+    const mime = value.mime;
+    const isVideo = mime?.startsWith('video/');
+    const isImage = mime?.startsWith('image/') || (!mime && !!url);
+    const fileName = value.name || 'file';
 
     return (
       <Box style={{ maxWidth: '300px' }}>
-        {isVideo ? (
-          <video
-            src={value.url}
-            controls
-            style={{ maxWidth: '100%' }}
-            data-strapi-source={sourceString}
-          />
-        ) : (
-          <img
-            src={value.url}
-            alt={value.alternativeText || ''}
-            style={{ maxWidth: '100%' }}
-            data-strapi-source={sourceString}
-          />
+        {isImage && (
+          <>
+            <img
+              src={isImage ? url : undefined}
+              alt={value.alternativeText || ''}
+              style={{ maxWidth: '100%', display: isImage ? 'block' : 'none' }}
+            />
+          </>
         )}
+        {isVideo && (
+          <>
+            <video
+              src={isVideo ? url : undefined}
+              controls
+              style={{ maxWidth: '100%', display: isVideo ? 'block' : 'none' }}
+            />
+          </>
+        )}
+        {!isImage && !isVideo && <Typography>{fileName}</Typography>}
       </Box>
     );
   }
@@ -202,11 +180,7 @@ const NestedValue = ({
 
   return (
     <Box>
-      <Typography
-        data-strapi-source={`path=${path}&type=text&model=${model}&documentId=${documentId}`}
-      >
-        {value === null || value === undefined || String(value) === '' ? '\u00A0' : String(value)}
-      </Typography>
+      <Typography>{String(value)}</Typography>
     </Box>
   );
 };
@@ -272,7 +246,16 @@ const PreviewComponent = () => {
   }, []);
 
   return (
-    <Box height="100vh" background="neutral100" overflow="auto">
+    <Box
+      position="fixed"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
+      zIndex={100}
+      background="neutral100"
+      overflow="auto"
+    >
       <Layouts.Root>
         <Page.Main>
           <Page.Title>{`Previewing ${apiName}`}</Page.Title>

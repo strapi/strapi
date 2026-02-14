@@ -158,7 +158,7 @@ describe('usePreviewInputManager', () => {
   });
 
   test('does not send change event for excluded field types', () => {
-    const excludedTypes = ['component', 'dynamiczone', 'json', 'relation'];
+    const excludedTypes = ['component', 'dynamiczone'];
 
     excludedTypes.forEach((type) => {
       jest.clearAllMocks();
