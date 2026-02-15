@@ -106,21 +106,21 @@ test.describe('List view', () => {
     expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
 
     /**
-     * Go to another non-localized content-type and assert i18n is not in the search params
+     * Go to another non-localized content-type and assert i18n is still in the search params
      */
     await page.getByRole('link', { name: 'Author' }).click();
     await page.waitForURL(/\/admin\/content-manager\/collection-types\/api::author.author(\?.*)?/);
     await expect(page.getByRole('heading', { name: 'Author' })).toBeVisible();
-    expect(new URL(page.url()).searchParams.has('plugins[i18n][locale]')).toEqual(false);
+    expect(new URL(page.url()).searchParams.has('plugins[i18n][locale]')).toEqual(true);
 
     /**
-     * Go back to a localized content-type and assert the locale is the default locale
+     * Go back to a localized content-type and assert that the locale persists
      */
     await page.getByRole('link', { name: 'Products' }).click();
     await page.waitForURL(
       /\/admin\/content-manager\/collection-types\/api::product.product(\?.*)?/
     );
     await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
-    expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('en');
+    expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
   });
 });

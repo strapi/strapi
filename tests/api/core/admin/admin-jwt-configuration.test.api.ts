@@ -84,7 +84,7 @@ describe('Admin JWT Configuration API Tests', () => {
       utils = createUtils(strapi);
     });
 
-    test('Uses legacy admin.auth.options configuration with deprecation warning', async () => {
+    test('Uses legacy admin.auth.options configuration', async () => {
       const res = await rq({
         url: '/admin/login',
         method: 'POST',
@@ -256,6 +256,68 @@ describe('Admin JWT Configuration API Tests', () => {
 
       expect(authRes.statusCode).toBe(200);
       expect(authRes.body.data).toBeDefined();
+    });
+  });
+
+  describe('Legacy expiresIn deprecation warning', () => {
+    test('Logs deprecation warning when legacy admin.auth.options.expiresIn is used without new session config', async () => {
+      const warnSpy = jest.fn();
+      strapi = await createStrapiInstance({
+        skipDefaultSessionConfig: true,
+        async bootstrap({ strapi: s }) {
+          s.config.set('admin.rateLimit.enabled', false);
+          s.config.set('admin.auth.options', { expiresIn: '7d' });
+          const originalWarn = s.log.warn.bind(s.log);
+          s.log.warn = (...args: unknown[]) => {
+            warnSpy(...args);
+            originalWarn(...args);
+          };
+          (s as any).__expiresInDeprecationWarnSpy = warnSpy;
+        },
+      });
+      rq = await createAuthRequest({ strapi });
+      const deprecationMessage =
+        'admin.auth.options.expiresIn is deprecated and will be removed in Strapi 6. Please configure admin.auth.sessions.maxRefreshTokenLifespan and admin.auth.sessions.maxSessionLifespan.';
+      expect(warnSpy).toHaveBeenCalledWith(deprecationMessage);
+    });
+  });
+
+  describe('Legacy expiresIn still applies to session lifespans', () => {
+    test('Refresh token and cookie expiry use legacy admin.auth.options.expiresIn when new session config is not set', async () => {
+      const cookieName = 'strapi_admin_refresh';
+      strapi = await createStrapiInstance({
+        skipDefaultSessionConfig: true,
+        async bootstrap({ strapi: s }) {
+          s.config.set('admin.rateLimit.enabled', false);
+          s.config.set('admin.auth.options', { expiresIn: '2m' });
+        },
+      });
+      rq = await createAuthRequest({ strapi });
+
+      const beforeLogin = Date.now();
+      const res = await rq({
+        url: '/admin/login',
+        method: 'POST',
+        body: { ...superAdmin.loginInfo, rememberMe: true },
+      });
+      const afterLogin = Date.now();
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.token).toBeDefined();
+
+      const setCookies = (res.headers['set-cookie'] || []) as string[];
+      const refreshCookie = setCookies.find((c) => c.startsWith(`${cookieName}=`));
+      expect(refreshCookie).toBeDefined();
+
+      const expiresMatch = refreshCookie!.match(/expires=([^;]+)/i);
+      expect(expiresMatch).toBeDefined();
+      const cookieExpiresAt = new Date(expiresMatch![1].trim()).getTime();
+      const expectedLifespanMs = 2 * 60 * 1000;
+      const toleranceMs = 10 * 1000;
+      expect(cookieExpiresAt).toBeGreaterThanOrEqual(
+        beforeLogin + expectedLifespanMs - toleranceMs
+      );
+      expect(cookieExpiresAt).toBeLessThanOrEqual(afterLogin + expectedLifespanMs + toleranceMs);
     });
   });
 
