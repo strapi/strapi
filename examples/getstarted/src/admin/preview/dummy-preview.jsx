@@ -68,11 +68,7 @@ const NestedValue = ({
 
   // Use the email type to test clickable preview elements
   if (fieldName === 'email') {
-    return (
-      <Button variant="tertiary" onClick={() => window.alert('Sending email!')}>
-        {value}
-      </Button>
-    );
+    return <Typography>{value}</Typography>;
   }
 
   if (isMedia(value)) {
