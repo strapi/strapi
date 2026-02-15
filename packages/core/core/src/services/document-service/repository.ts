@@ -24,6 +24,7 @@ import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
+import * as selfReferentialRelations from './utils/self-referential-relations';
 import entityValidator from '../entity-validator';
 import { addFirstPublishedAtToDraft, filterDataFirstPublishedAt } from './first-published-at';
 import { runParallelWithOrderedErrors } from './utils/ordered-parallel';
@@ -356,6 +357,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldPublishedVersions,
     });
 
+    // Load self-referential relations from draft entries before publishing
+    const selfRelationsToSync = await selfReferentialRelations.load(uid, draftsToPublish);
+
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
@@ -381,6 +385,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       publishedEntries,
       bidirectionalRelationsToSync
     );
+
+    // Sync self-referential relations with the new published entries
+    await selfReferentialRelations.sync(draftsToPublish, publishedEntries, selfRelationsToSync);
 
     publishedEntries.forEach(emitEvent('entry.publish'));
 
@@ -452,6 +459,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldDrafts,
     });
 
+    // Load self-referential relations from published entries before discarding
+    const selfRelationsToSync = await selfReferentialRelations.load(uid, versionsToDraft);
+
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
 
@@ -472,6 +482,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       draftEntries,
       bidirectionalRelationsToSync
     );
+
+    // Sync self-referential relations with the new draft entries
+    await selfReferentialRelations.sync(versionsToDraft, draftEntries, selfRelationsToSync);
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
     return { documentId, entries: draftEntries };
