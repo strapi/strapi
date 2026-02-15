@@ -75,11 +75,12 @@ const GuidedTourTooltipImpl = ({
   const state = useGuidedTour('GuidedTourTooltip', (s) => s.state);
   const dispatch = useGuidedTour('GuidedTourTooltip', (s) => s.dispatch);
 
-  const isCurrentStep = state.tours[tourName].currentStep === step;
+  const tourState = state.tours?.[tourName];
+  const isCurrentStep = tourState?.currentStep === step;
   const isStepConditionMet = when ? when(state.completedActions) : true;
   const isPopoverOpen =
     guidedTourMeta?.data?.isFirstSuperAdminUser &&
-    !state.tours[tourName].isCompleted &&
+    !tourState?.isCompleted &&
     isCurrentStep &&
     isStepConditionMet;
 
@@ -117,6 +118,11 @@ const GuidedTourTooltipImpl = ({
       });
     }
   }, [dispatch, hasApiSchema, step, tourName]);
+
+  // Safety check: if tours state is corrupted or missing, render without tooltip (after all hooks)
+  if (!state.tours || !state.tours[tourName]) {
+    return <>{children}</>;
+  }
 
   return (
     <>

@@ -79,7 +79,7 @@
     "lodash": "4.17.23",
     "micromatch": "^4.0.8",
     "pluralize": "8.0.0",
-    "qs": "6.14.1",
+    "qs": "6.14.2",
     "react-dropzone": "14.3.8",
     "react-intl": "6.6.2",
     "react-markdown": "9.1.0",
@@ -101,14 +101,14 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-query": "3.39.3",
-    "react-router-dom": "6.22.3",
+    "react-router-dom": "6.30.3",
     "styled-components": "6.1.8"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "^6.0.0",
+    "react-router-dom": "^6.30.3",
     "styled-components": "^6.0.0"
   },
   "engines": {

@@ -85,6 +85,8 @@
     "test:unit:coverage": "jest --config jest.config.js --coverage",
     "test:front:coverage": "cross-env IS_EE=true jest --config jest.config.front.js --runInBand --coverage",
     "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage"
+    "test:unit:vitest": "vitest run",
+    "test:unit:vitest:watch": "vitest --watch"
   },
   "resolutions": {
     "@types/koa": "2.13.4",
@@ -164,7 +166,7 @@
     "plop": "4.0.1",
     "prettier": "3.3.3",
     "prettier-2": "npm:prettier@^2",
-    "qs": "6.14.1",
+    "qs": "6.14.2",
     "rimraf": "5.0.5",
     "rollup": "4.27.4",
     "rollup-plugin-html": "0.2.1",
@@ -172,9 +174,10 @@
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
     "supertest": "6.3.3",
-    "tar": "6.2.1",
+    "tar": "7.5.7",
     "ts-jest": "29.1.0",
     "typescript": "5.4.4",
+    "vitest": "4.0.18",
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
