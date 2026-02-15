@@ -10,29 +10,24 @@ export class AssetsPage {
   readonly newButton: Locator;
   readonly importFilesMenuItem: Locator;
   readonly fileInput: Locator;
+  readonly gridViewButton: Locator;
+  readonly tableViewButton: Locator;
   readonly dropZone: Locator;
+  readonly uploadProgressDialog: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.newButton = page.getByRole('button', { name: 'New' });
     this.importFilesMenuItem = page.getByRole('menuitem', { name: 'Import files' });
     this.fileInput = page.locator('input[type="file"]');
+    this.gridViewButton = page.getByRole('radio', { name: 'Grid view' });
+    this.tableViewButton = page.getByRole('radio', { name: 'Table view' });
     this.dropZone = page.getByTestId('assets-dropzone');
+    this.uploadProgressDialog = page.getByTestId('upload-progress-dialog');
   }
 
-  /**
-   * Navigate to the Media Library page
-   */
   async goto() {
     await this.page.goto('/admin/plugins/unstable-upload');
-  }
-
-  /**
-   * Switch the assets view to list (table) view
-   * Waits for the page to be ready (drop zone visible) before switching
-   */
-  async switchToListView() {
-    await this.page.getByRole('radio', { name: 'Table view' }).click();
   }
 
   /**
@@ -115,9 +110,6 @@ export class AssetsPage {
     return fileChooser;
   }
 
-  /**
-   * Wait for upload success notification
-   */
   async waitForUploadSuccess() {
     // Wait for the success notification inside the Notifications region
     const notification = this.page
@@ -126,9 +118,6 @@ export class AssetsPage {
     await notification.waitFor({ state: 'visible' });
   }
 
-  /**
-   * Get the success notification message
-   */
   async getSuccessMessage() {
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
@@ -137,9 +126,6 @@ export class AssetsPage {
     return await notification.textContent();
   }
 
-  /**
-   * Get the error notification message
-   */
   async getErrorMessage() {
     const notification = this.page
       .getByRole('region', { name: 'Notifications' })
@@ -148,18 +134,42 @@ export class AssetsPage {
     return await notification.textContent();
   }
 
-  /**
-   * Check if the file input value is empty (reset)
-   */
   async isFileInputReset() {
     const inputValue = await this.fileInput.inputValue();
     return inputValue === '';
   }
 
-  /**
-   * Get a specific asset row by name
-   */
   getAssetRow(name: string) {
     return this.page.getByRole('row', { name: new RegExp(name) });
+  }
+
+  async switchToGridView() {
+    await this.gridViewButton.click();
+  }
+
+  async switchToTableView() {
+    await this.tableViewButton.click();
+  }
+
+  async isGridViewActive() {
+    return (await this.gridViewButton.getAttribute('aria-checked')) === 'true';
+  }
+
+  getAssetCard(name: string) {
+    return this.page.locator('div').filter({ hasText: name }).nth(1);
+  }
+
+  /**
+   * Wait for the upload progress dialog to show success state
+   */
+  async waitForUploadProgressSuccess() {
+    await this.uploadProgressDialog.getByText('Upload successful!').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Close the upload progress dialog
+   */
+  async closeUploadProgressDialog() {
+    await this.uploadProgressDialog.getByRole('button', { name: 'Close' }).click();
   }
 }

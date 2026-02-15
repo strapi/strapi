@@ -1,12 +1,7 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useCallback, useState, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import {
-  Layouts,
-  SearchInput,
-  useNotification,
-  useAPIErrorHandler,
-} from '@strapi/admin/strapi-admin';
+import { Layouts, SearchInput, useElementOnScreen } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -21,18 +16,26 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { usePersistentState } from '../../../hooks/usePersistentState';
-import { useUploadFilesMutation } from '../../services/api';
-import { useGetAssetsQuery } from '../../services/assets';
+import { useUploadFilesStreamMutation } from '../../services/api';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetsGrid } from './components/AssetsGrid';
-import { AssetsList } from './components/AssetsList';
+import { AssetsTable } from './components/AssetsTable';
 import { DropZoneWithOverlay } from './components/DropZone/DropZoneWithOverlay';
 import {
   UploadDropZoneProvider,
   useUploadDropZone,
 } from './components/DropZone/UploadDropZoneContext';
 import { localStorageKeys, viewOptions } from './constants';
+import { useInfiniteAssets } from './hooks/useInfiniteAssets';
+
+const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
+
+import type { UploadFileInfo } from '../../../../../shared/contracts/files';
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetsView
+ * -----------------------------------------------------------------------------------------------*/
 
 interface AssetsViewProps {
   view: number;
@@ -40,10 +43,22 @@ interface AssetsViewProps {
 
 const AssetsView = ({ view }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
-  const { data, isLoading, error } = useGetAssetsQuery({ folder: null });
+  const { assets, isLoading, isFetchingMore, hasNextPage, fetchNextPage, error } =
+    useInfiniteAssets();
 
   const isGridView = view === viewOptions.GRID;
-  const assets = data?.results ?? [];
+
+  const loadMoreRef = useElementOnScreen<HTMLDivElement>(
+    useCallback(
+      (isVisible) => {
+        if (isVisible && hasNextPage && !isFetchingMore) {
+          fetchNextPage();
+        }
+      },
+      [hasNextPage, isFetchingMore, fetchNextPage]
+    ),
+    INTERSECTION_OPTIONS
+  );
 
   if (isLoading) {
     return (
@@ -66,12 +81,27 @@ const AssetsView = ({ view }: AssetsViewProps) => {
     );
   }
 
-  if (isGridView) {
-    return <AssetsGrid assets={assets} />;
-  }
-
-  return <AssetsList assets={assets} />;
+  return (
+    <>
+      {isGridView ? <AssetsGrid assets={assets} /> : <AssetsTable assets={assets} />}
+      <div ref={loadMoreRef} style={{ height: 1 }} />
+      {isFetchingMore && (
+        <Flex justifyContent="center" padding={4}>
+          <Loader>
+            {formatMessage({
+              id: getTranslationKey('list.assets.loading-more'),
+              defaultMessage: 'Loading more assets...',
+            })}
+          </Loader>
+        </Flex>
+      )}
+    </>
+  );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetsPage
+ * -----------------------------------------------------------------------------------------------*/
 
 const StyledToggleGroup = styled(ToggleGroup.Root)`
   display: flex;
@@ -186,44 +216,29 @@ export const AssetsPage = () => {
   const uploadDropZoneRef = useRef<HTMLDivElement>(null);
 
   // Upload handlers
-  const { toggleNotification } = useNotification();
-  const { _unstableFormatAPIError } = useAPIErrorHandler();
-  const [uploadFiles] = useUploadFilesMutation();
+  const [uploadFilesStream] = useUploadFilesStreamMutation();
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;
+
     const formData = new FormData();
+    const fileInfoArray: UploadFileInfo[] = [];
+
     files.forEach((file) => {
       formData.append('files', file);
-      formData.append(
-        'fileInfo',
-        JSON.stringify({
-          name: file.name,
-          caption: null,
-          alternativeText: null,
-          folder: folderId,
-        })
-      );
+      fileInfoArray.push({
+        name: file.name,
+        caption: null,
+        alternativeText: null,
+        folder: folderId,
+      });
     });
+
+    formData.append('fileInfo', JSON.stringify(fileInfoArray));
     try {
-      await uploadFiles(formData).unwrap();
-      toggleNotification({
-        type: 'success',
-        message: formatMessage(
-          {
-            id: getTranslationKey('assets.uploaded'),
-            defaultMessage:
-              '{number, plural, one {# asset} other {# assets}} uploaded successfully',
-          },
-          { number: files.length }
-        ),
-      });
+      await uploadFilesStream({ formData, totalFiles: files.length }).unwrap();
     } catch (error) {
-      const errorMessage = _unstableFormatAPIError(error as Error);
-      toggleNotification({
-        type: 'danger',
-        message: errorMessage,
-      });
+      // Error is already dispatched to store from the API queryFn
     }
   };
 
@@ -254,7 +269,6 @@ export const AssetsPage = () => {
           <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} />
 
           <Layouts.Header
-            navigationAction={<Box>TODO: Breadcrumbs</Box>}
             title="TODO: Folder location"
             primaryAction={
               <Flex gap={2}>
@@ -281,9 +295,9 @@ export const AssetsPage = () => {
                 />
                 <StyledToggleGroup
                   type="single"
-                  value={isGridView ? 'grid' : 'list'}
+                  value={isGridView ? 'grid' : 'table'}
                   onValueChange={(value) =>
-                    value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.LIST)
+                    value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
                   }
                   aria-label={formatMessage({
                     id: getTranslationKey('view.switch.label'),
@@ -291,7 +305,7 @@ export const AssetsPage = () => {
                   })}
                 >
                   <StyledToggleItem
-                    value="list"
+                    value="table"
                     aria-label={formatMessage({
                       id: getTranslationKey('view.table'),
                       defaultMessage: 'Table view',
