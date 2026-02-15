@@ -9,6 +9,7 @@ import {
 } from '@reduxjs/toolkit';
 
 import { reducer as appReducer, AppState, logout } from '../../reducer';
+import { getBasename } from '../utils/basename';
 import { adminApi } from '../../services/api';
 
 /**
@@ -92,7 +93,8 @@ const rtkQueryUnauthorizedMiddleware: Middleware =
     // isRejectedWithValue Or isRejected
     if (isRejected(action) && action.payload?.status === 401) {
       dispatch(logout());
-      window.location.href = '/admin/auth/login';
+      const basename = getBasename();
+      window.location.href = `${basename}/auth/login`;
       return;
     }
 
