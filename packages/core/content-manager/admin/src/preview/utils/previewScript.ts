@@ -65,6 +65,10 @@ const previewScript = (config: PreviewScriptConfig) => {
     type: (typeof INTERNAL_EVENTS)[keyof typeof INTERNAL_EVENTS],
     payload: unknown
   ) => {
+    /**
+     * We intentionally use "*" here because the preview iframe (user site) and Strapi admin (parent)
+     * are frequently on different origins. Target origin validation should happen on the receiver side.
+     */
     window.parent.postMessage({ type, payload }, '*');
   };
 
@@ -315,8 +319,21 @@ const previewScript = (config: PreviewScriptConfig) => {
     const normalizedMime = typeof mime === 'string' ? mime : undefined;
 
     if (!normalizedUrl) {
-      element.style.display = 'none';
-      element.removeAttribute('src');
+      if (normalizedMime === 'application/x-strapi-empty-media') {
+        // Render a 1x1 transparent GIF as placeholder so it remains selectable
+        element.setAttribute(
+          'src',
+          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+        );
+        element.style.display = '';
+        element.style.minWidth = '24px'; // Ensure it has some dimensions
+        element.style.minHeight = '24px';
+        element.style.backgroundColor = '#f0f0f0'; // Slight background to be visible
+        element.style.border = '1px dashed #ccc';
+      } else {
+        element.style.display = 'none';
+        element.removeAttribute('src');
+      }
       return;
     }
 
@@ -345,6 +362,12 @@ const previewScript = (config: PreviewScriptConfig) => {
     // Avoid replacing nodes in-place (React-managed trees may crash on save after external replaceChild).
     element.setAttribute('src', normalizedUrl);
     element.style.display = '';
+
+    // Reset placeholder styles if present
+    element.style.minWidth = '';
+    element.style.minHeight = '';
+    element.style.backgroundColor = '';
+    element.style.border = '';
 
     if (isVideoElement) {
       element.setAttribute('controls', '');
@@ -394,7 +417,9 @@ const previewScript = (config: PreviewScriptConfig) => {
             if (cleanedSrc !== src) {
               element.setAttribute('src', cleanedSrc);
             }
-          } catch (error) {}
+          } catch {
+            // noop – invalid stega payload / decode failure
+          }
         }
         return;
       }
@@ -428,7 +453,9 @@ const previewScript = (config: PreviewScriptConfig) => {
           if (cleanedText !== node.textContent) {
             node.textContent = cleanedText;
           }
-        } catch (error) {}
+        } catch {
+          // noop – invalid stega payload / decode failure
+        }
       });
 
       if (decodedSource) {
@@ -451,7 +478,9 @@ const previewScript = (config: PreviewScriptConfig) => {
         if (firstSource) {
           element.setAttribute(SOURCE_ATTRIBUTE, firstSource);
         }
-      } catch (error) {}
+      } catch {
+        // noop – invalid stega payload / decode failure
+      }
     };
 
     // Process all existing elements
@@ -557,7 +586,7 @@ const previewScript = (config: PreviewScriptConfig) => {
 
   type EventListenersList = Array<{
     element: HTMLElement | Window;
-    type: keyof HTMLElementEventMap | 'message';
+    type: keyof HTMLElementEventMap | keyof WindowEventMap | 'message';
     handler: EventListener;
   }>;
 
@@ -566,6 +595,7 @@ const previewScript = (config: PreviewScriptConfig) => {
     const eventListeners: EventListenersList = [];
     const focusedHighlights: HTMLElement[] = [];
     const pendingClicks = new Map<Element, number>(); // number is timeout id
+    const clonedElements: HTMLElement[] = []; // Track cloned elements to remove on cleanup
     let focusedField: string | null = null;
 
     const drawHighlight = (target: Element, highlight: HTMLElement) => {
@@ -593,6 +623,7 @@ const previewScript = (config: PreviewScriptConfig) => {
       highlight.className = 'strapi-highlight';
       const clickHandler = (event: MouseEvent) => {
         // Skip if this is a re-dispatched event from our delayed handler to avoid infinite loops
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((event as any).__strapi_redispatched) {
           return;
         }
@@ -633,6 +664,7 @@ const previewScript = (config: PreviewScriptConfig) => {
             shiftKey: event.shiftKey,
             metaKey: event.metaKey,
           });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (newEvent as any).__strapi_redispatched = true;
           targetElement.dispatchEvent(newEvent);
         }, DOUBLE_CLICK_TIMEOUT);
@@ -711,7 +743,8 @@ const previewScript = (config: PreviewScriptConfig) => {
       // Remove event listeners for this highlight
       const listenersToRemove = eventListeners.filter((listener) => listener.element === highlight);
       listenersToRemove.forEach(({ element, type, handler }) => {
-        element.removeEventListener(type, handler);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        element.removeEventListener(type as any, handler);
       });
 
       // Mutate eventListeners to remove listeners for this highlight
@@ -750,6 +783,10 @@ const previewScript = (config: PreviewScriptConfig) => {
         pendingClicks.forEach((timeout) => clearTimeout(timeout));
         pendingClicks.clear();
       },
+      registerClonedElement: (element: HTMLElement) => {
+        clonedElements.push(element);
+      },
+      clonedElements,
     };
   };
 
@@ -941,6 +978,9 @@ const previewScript = (config: PreviewScriptConfig) => {
 
                       clone.innerText = text;
                       prevEl.parentElement.insertBefore(clone, prevEl.nextSibling);
+
+                      // Track the cloned element for cleanup
+                      highlightManager.registerClonedElement(clone);
                     }
                   });
                   // If we found a match at this level, we stop searching.
@@ -1107,7 +1147,7 @@ const previewScript = (config: PreviewScriptConfig) => {
     // Add the message handler to the cleanup list
     const messageEventListener = {
       element: window,
-      type: 'message' as keyof HTMLElementEventMap,
+      type: 'message' as const,
       handler: handleMessage as EventListener,
     };
 
@@ -1134,7 +1174,13 @@ const previewScript = (config: PreviewScriptConfig) => {
 
       // Remove highlight event listeners
       eventHandlers.forEach(({ element, type, handler }) => {
-        element.removeEventListener(type, handler);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (element as any).removeEventListener(type, handler);
+      });
+
+      // Tracked cloned elements removal to prevent React reconciliation errors
+      highlightManager.clonedElements.forEach((element) => {
+        element.remove();
       });
 
       // Clean up CSS styles
