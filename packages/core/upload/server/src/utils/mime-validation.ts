@@ -292,9 +292,15 @@ export async function enforceUploadSecurity(
   return { validFiles, validFileNames, errors };
 }
 
+export type FileUploadError = {
+  name: string;
+  message: string;
+};
+
 export type PrepareUploadResult = {
   validFiles: any[];
   filteredBody: any;
+  errors: FileUploadError[];
 };
 
 /**
@@ -306,13 +312,6 @@ export async function prepareUploadRequest(
   strapi: Core.Strapi
 ): Promise<PrepareUploadResult> {
   const securityResults = await enforceUploadSecurity(filesInput, strapi);
-
-  if (securityResults.validFiles.length === 0) {
-    throw new errors.ValidationError(
-      securityResults.errors[0].error.message,
-      securityResults.errors[0].error.details
-    );
-  }
 
   let filteredBody = body;
   if (body?.fileInfo) {
@@ -352,8 +351,15 @@ export async function prepareUploadRequest(
     }
   }
 
+  // Map errors to simplified format
+  const uploadErrors: FileUploadError[] = securityResults.errors.map((e) => ({
+    name: e.file?.originalFilename || e.file?.name || 'unknown',
+    message: e.error.message,
+  }));
+
   return {
     validFiles: securityResults.validFiles,
     filteredBody,
+    errors: uploadErrors,
   };
 }
