@@ -1,7 +1,12 @@
 import { useEffect, useRef, useCallback, useState, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { Layouts, SearchInput, useElementOnScreen } from '@strapi/admin/strapi-admin';
+import {
+  Layouts,
+  SearchInput,
+  useElementOnScreen,
+  useQueryParams,
+} from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -11,12 +16,19 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ChevronDown, Files, Folder, GridFour as GridIcon, List } from '@strapi/icons';
+import {
+  ChevronDown,
+  Files,
+  Folder as FolderIcon,
+  GridFour as GridIcon,
+  List,
+} from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { usePersistentState } from '../../../hooks/usePersistentState';
 import { useUploadFilesStreamMutation } from '../../services/api';
+import { useGetFoldersQuery } from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetsGrid } from './components/AssetsGrid';
@@ -27,11 +39,13 @@ import {
   useUploadDropZone,
 } from './components/DropZone/UploadDropZoneContext';
 import { localStorageKeys, viewOptions } from './constants';
+import { useFolderTitle } from './hooks/useFolderTitle';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 
-const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
-
 import type { UploadFileInfo } from '../../../../../shared/contracts/files';
+import type { Folder } from '../../../../../shared/contracts/folders';
+
+const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 
 /* -------------------------------------------------------------------------------------------------
  * AssetsView
@@ -39,14 +53,26 @@ import type { UploadFileInfo } from '../../../../../shared/contracts/files';
 
 interface AssetsViewProps {
   view: number;
+  folderId: number | null;
+  onNavigateFolder: (folder: Folder) => void;
 }
 
-const AssetsView = ({ view }: AssetsViewProps) => {
+const AssetsView = ({ view, folderId, onNavigateFolder }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
-  const { assets, isLoading, isFetchingMore, hasNextPage, fetchNextPage, error } =
-    useInfiniteAssets();
+  const {
+    assets,
+    isLoading: isLoadingAssets,
+    isFetchingMore,
+    hasNextPage,
+    fetchNextPage,
+    error,
+  } = useInfiniteAssets({ folder: folderId });
+  const { data: folders = [], isLoading: isLoadingFolders } = useGetFoldersQuery({
+    parentId: folderId,
+  });
 
   const isGridView = view === viewOptions.GRID;
+  const isLoading = isLoadingAssets || isLoadingFolders;
 
   const loadMoreRef = useElementOnScreen<HTMLDivElement>(
     useCallback(
@@ -81,9 +107,25 @@ const AssetsView = ({ view }: AssetsViewProps) => {
     );
   }
 
+  if (folders.length === 0 && assets.length === 0) {
+    return (
+      <Box padding={8}>
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: 'app.components.EmptyStateLayout.content-document',
+            defaultMessage: 'No content found',
+          })}
+        </Typography>
+      </Box>
+    );
+  }
   return (
     <>
-      {isGridView ? <AssetsGrid assets={assets} /> : <AssetsTable assets={assets} />}
+      {isGridView ? (
+        <AssetsGrid folders={folders} assets={assets} onNavigateFolder={onNavigateFolder} />
+      ) : (
+        <AssetsTable assets={assets} folders={folders} onNavigateFolder={onNavigateFolder} />
+      )}
       <div ref={loadMoreRef} style={{ height: 1 }} />
       {isFetchingMore && (
         <Flex justifyContent="center" padding={4}>
@@ -142,9 +184,10 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
 
 interface DropFilesMessageProps {
   uploadDropZoneRef?: React.RefObject<HTMLDivElement>;
+  folderName?: string;
 }
 
-const DropFilesMessage = ({ uploadDropZoneRef }: DropFilesMessageProps) => {
+const DropFilesMessage = ({ uploadDropZoneRef, folderName }: DropFilesMessageProps) => {
   const { formatMessage } = useIntl();
   const { isDragging } = useUploadDropZone();
 
@@ -179,9 +222,13 @@ const DropFilesMessage = ({ uploadDropZoneRef }: DropFilesMessageProps) => {
         })}
       </Typography>
       <Flex gap={2} alignItems="center">
-        <Folder width={20} height={20} fill="neutral0" />
+        <FolderIcon width={20} height={20} fill="neutral0" />
         <Typography textColor="neutral0" fontWeight="semiBold">
-          Current folder{/* TODO: Replace this later with the current folder name */}
+          {folderName ??
+            formatMessage({
+              id: getTranslationKey('plugin.name'),
+              defaultMessage: 'Media Library',
+            })}
         </Typography>
       </Flex>
     </DropFilesMessageImpl>
@@ -206,6 +253,14 @@ const DropFilesMessageImpl = styled(Box)<{ $leftContentWidth: number }>`
 
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
+
+  const [{ query }, setQuery] = useQueryParams<{ folder?: string }>();
+  const currentFolderId = query?.folder ? Number(query.folder) : null;
+  const title = useFolderTitle(currentFolderId);
+
+  const handleNavigateFolder = (folder: Folder) => {
+    setQuery({ folder: String(folder.id) });
+  };
 
   // View state
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
@@ -249,13 +304,13 @@ export const AssetsPage = () => {
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      await uploadFilesToFolder(Array.from(files), null);
+      await uploadFilesToFolder(Array.from(files), currentFolderId);
     }
     e.target.value = '';
   };
 
   const handleDrop = async (files: globalThis.File[]) => {
-    await uploadFilesToFolder(files, null);
+    await uploadFilesToFolder(files, currentFolderId);
   };
 
   return (
@@ -269,7 +324,7 @@ export const AssetsPage = () => {
           <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} />
 
           <Layouts.Header
-            title="TODO: Folder location"
+            title={title}
             primaryAction={
               <Flex gap={2}>
                 <SimpleMenu
@@ -337,7 +392,11 @@ export const AssetsPage = () => {
 
           <Layouts.Content>
             <DropZoneWithOverlay>
-              <AssetsView view={view} />
+              <AssetsView
+                view={view}
+                folderId={currentFolderId}
+                onNavigateFolder={handleNavigateFolder}
+              />
             </DropZoneWithOverlay>
           </Layouts.Content>
         </Layouts.Root>

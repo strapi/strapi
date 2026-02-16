@@ -8,7 +8,7 @@ import {
   IconButton,
   Typography,
 } from '@strapi/design-system';
-import { More } from '@strapi/icons';
+import { Folder as FolderIcon, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -18,6 +18,7 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 
 import type { File } from '../../../../../../shared/contracts/files';
+import type { Folder } from '../../../../../../shared/contracts/folders';
 
 /* -------------------------------------------------------------------------------------------------
  * AssetsGrid
@@ -28,6 +29,79 @@ const StyledCard = styled(Card)`
   border-radius: 8px;
   overflow: hidden;
 `;
+
+/* -------------------------------------------------------------------------------------------------
+ * FolderItem
+ * -----------------------------------------------------------------------------------------------*/
+
+const FoldersContainer = styled.div`
+  grid-column: 1 / -1; // Span full width to force new row for assets
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spaces[4]}; // 16px gap between folder items
+`;
+
+const FolderItem = styled.div`
+  display: flex;
+  width: 256px;
+  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`}; // 8px 12px
+  align-items: center;
+  gap: ${({ theme }) => theme.spaces[2]}; // 8px
+  border: 1px solid ${({ theme }) => theme.colors.neutral200};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  background: ${({ theme }) => theme.colors.neutral0};
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.neutral100};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: 2px;
+  }
+`;
+
+const FolderIconContainer = styled(Flex)`
+  flex-shrink: 0;
+  color: ${({ theme }) => theme.colors.neutral600};
+`;
+
+const FolderName = styled(Typography)`
+  flex: 1;
+  min-width: 0;
+`;
+
+interface FolderItemProps {
+  folder: Folder;
+  onNavigateFolder: (folder: Folder) => void;
+}
+
+const FolderItemComponent = ({ folder, onNavigateFolder }: FolderItemProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <FolderItem onClick={() => onNavigateFolder(folder)} role="button" tabIndex={0}>
+      <FolderIconContainer>
+        <FolderIcon width={16} height={16} />
+      </FolderIconContainer>
+      <FolderName textColor="neutral800" ellipsis>
+        {folder.name}
+      </FolderName>
+      <IconButton
+        label={formatMessage({
+          id: getTranslationKey('control-card.more-actions'),
+          defaultMessage: 'More actions',
+        })}
+        variant="ghost"
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+      >
+        <More />
+      </IconButton>
+    </FolderItem>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * AssetPreview
@@ -160,12 +234,16 @@ const AssetCard = ({ asset }: AssetCardProps) => {
 
 interface AssetsGridProps {
   assets: File[];
+  folders?: Folder[];
+  onNavigateFolder?: (folder: Folder) => void;
 }
 
-export const AssetsGrid = ({ assets }: AssetsGridProps) => {
+export const AssetsGrid = ({ assets, folders = [], onNavigateFolder }: AssetsGridProps) => {
   const { formatMessage } = useIntl();
 
-  if (assets.length === 0) {
+  const totalItems = folders.length + assets.length;
+
+  if (totalItems === 0) {
     return (
       <Box padding={8}>
         <Typography textColor="neutral600">
@@ -180,6 +258,17 @@ export const AssetsGrid = ({ assets }: AssetsGridProps) => {
 
   return (
     <Grid.Root gap={4}>
+      {folders.length > 0 && (
+        <FoldersContainer>
+          {folders.map((folder) => (
+            <FolderItemComponent
+              key={`folder-${folder.id}`}
+              folder={folder}
+              onNavigateFolder={onNavigateFolder ?? (() => {})}
+            />
+          ))}
+        </FoldersContainer>
+      )}
       {assets.map((asset) => (
         <Grid.Item
           col={3}
