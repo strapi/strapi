@@ -59,7 +59,7 @@ const foldersApi = uploadApi.injectEndpoints({
           },
         },
       }),
-      transformResponse: (response: GetFolder.Response['data']) => response,
+      transformResponse: (response: GetFolder.Response) => response.data,
       providesTags: (_result, _error, { id }) => [{ type: 'Folder', id }],
     }),
   }),

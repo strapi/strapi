@@ -5,17 +5,23 @@ import { getTranslationKey } from '../../../utils/translations';
 
 export const useFolderTitle = (currentFolderId: number | null): string => {
   const { formatMessage } = useIntl();
-  const { data: currentFolder } = useGetFolderQuery(
+  const { data: currentFolder, isLoading } = useGetFolderQuery(
     { id: currentFolderId! },
     { skip: currentFolderId === null }
   );
 
+  const mediaLibraryLabel = formatMessage({
+    id: getTranslationKey('plugin.name'),
+    defaultMessage: 'Media Library',
+  });
+
   if (currentFolderId === null) {
-    return formatMessage({
-      id: getTranslationKey('plugin.name'),
-      defaultMessage: 'Media Library',
-    });
+    return mediaLibraryLabel;
   }
 
-  return currentFolder?.name ?? '...';
+  if (isLoading) {
+    return mediaLibraryLabel;
+  }
+
+  return currentFolder?.name ?? mediaLibraryLabel;
 };

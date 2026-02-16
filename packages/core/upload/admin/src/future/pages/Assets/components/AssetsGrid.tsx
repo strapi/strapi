@@ -16,6 +16,7 @@ import { AssetType } from '../../../enums';
 import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
+import { useFolderNavigation } from '../hooks/useFolderNavigation';
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
@@ -41,8 +42,7 @@ const FoldersContainer = styled.div`
   gap: ${({ theme }) => theme.spaces[4]}; // 16px gap between folder items
 `;
 
-const FolderItem = styled.div`
-  display: flex;
+const FolderItem = styled(Flex)`
   width: 256px;
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`}; // 8px 12px
   align-items: center;
@@ -75,14 +75,14 @@ const FolderName = styled(Typography)`
 
 interface FolderItemProps {
   folder: Folder;
-  onNavigateFolder: (folder: Folder) => void;
 }
 
-const FolderItemComponent = ({ folder, onNavigateFolder }: FolderItemProps) => {
+const FolderItemComponent = ({ folder }: FolderItemProps) => {
   const { formatMessage } = useIntl();
+  const { navigateToFolder } = useFolderNavigation();
 
   return (
-    <FolderItem onClick={() => onNavigateFolder(folder)} role="button" tabIndex={0}>
+    <FolderItem onClick={() => navigateToFolder(folder)} role="button" tabIndex={0}>
       <FolderIconContainer>
         <FolderIcon width={16} height={16} />
       </FolderIconContainer>
@@ -235,10 +235,9 @@ const AssetCard = ({ asset }: AssetCardProps) => {
 interface AssetsGridProps {
   assets: File[];
   folders?: Folder[];
-  onNavigateFolder?: (folder: Folder) => void;
 }
 
-export const AssetsGrid = ({ assets, folders = [], onNavigateFolder }: AssetsGridProps) => {
+export const AssetsGrid = ({ assets, folders = [] }: AssetsGridProps) => {
   const { formatMessage } = useIntl();
 
   const totalItems = folders.length + assets.length;
@@ -261,11 +260,7 @@ export const AssetsGrid = ({ assets, folders = [], onNavigateFolder }: AssetsGri
       {folders.length > 0 && (
         <FoldersContainer>
           {folders.map((folder) => (
-            <FolderItemComponent
-              key={`folder-${folder.id}`}
-              folder={folder}
-              onNavigateFolder={onNavigateFolder ?? (() => {})}
-            />
+            <FolderItemComponent key={`folder-${folder.id}`} folder={folder} />
           ))}
         </FoldersContainer>
       )}

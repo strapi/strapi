@@ -1,12 +1,7 @@
 import { useEffect, useRef, useCallback, useState, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import {
-  Layouts,
-  SearchInput,
-  useElementOnScreen,
-  useQueryParams,
-} from '@strapi/admin/strapi-admin';
+import { Layouts, SearchInput, useElementOnScreen } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -39,11 +34,11 @@ import {
   useUploadDropZone,
 } from './components/DropZone/UploadDropZoneContext';
 import { localStorageKeys, viewOptions } from './constants';
+import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useFolderTitle } from './hooks/useFolderTitle';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 
 import type { UploadFileInfo } from '../../../../../shared/contracts/files';
-import type { Folder } from '../../../../../shared/contracts/folders';
 
 const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 
@@ -54,10 +49,9 @@ const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 interface AssetsViewProps {
   view: number;
   folderId: number | null;
-  onNavigateFolder: (folder: Folder) => void;
 }
 
-const AssetsView = ({ view, folderId, onNavigateFolder }: AssetsViewProps) => {
+const AssetsView = ({ view, folderId }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
   const {
     assets,
@@ -122,9 +116,9 @@ const AssetsView = ({ view, folderId, onNavigateFolder }: AssetsViewProps) => {
   return (
     <>
       {isGridView ? (
-        <AssetsGrid folders={folders} assets={assets} onNavigateFolder={onNavigateFolder} />
+        <AssetsGrid folders={folders} assets={assets} />
       ) : (
-        <AssetsTable assets={assets} folders={folders} onNavigateFolder={onNavigateFolder} />
+        <AssetsTable assets={assets} folders={folders} />
       )}
       <div ref={loadMoreRef} style={{ height: 1 }} />
       {isFetchingMore && (
@@ -254,13 +248,8 @@ const DropFilesMessageImpl = styled(Box)<{ $leftContentWidth: number }>`
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
 
-  const [{ query }, setQuery] = useQueryParams<{ folder?: string }>();
-  const currentFolderId = query?.folder ? Number(query.folder) : null;
+  const { currentFolderId } = useFolderNavigation();
   const title = useFolderTitle(currentFolderId);
-
-  const handleNavigateFolder = (folder: Folder) => {
-    setQuery({ folder: String(folder.id) });
-  };
 
   // View state
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
@@ -392,11 +381,7 @@ export const AssetsPage = () => {
 
           <Layouts.Content>
             <DropZoneWithOverlay>
-              <AssetsView
-                view={view}
-                folderId={currentFolderId}
-                onNavigateFolder={handleNavigateFolder}
-              />
+              <AssetsView view={view} folderId={currentFolderId} />
             </DropZoneWithOverlay>
           </Layouts.Content>
         </Layouts.Root>

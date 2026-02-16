@@ -19,6 +19,7 @@ import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
+import { useFolderNavigation } from '../hooks/useFolderNavigation';
 
 import type { File } from '../../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../../shared/contracts/folders';
@@ -162,15 +163,15 @@ const FolderTr = styled(StyledTr)`
 
 interface FolderRowProps {
   folder: Folder;
-  onNavigateFolder: (folder: Folder) => void;
 }
 
-const FolderRow = ({ folder, onNavigateFolder }: FolderRowProps) => {
+const FolderRow = ({ folder }: FolderRowProps) => {
   const isMobile = useIsMobile();
-  const { formatMessage } = useIntl();
+  const { formatDate, formatMessage } = useIntl();
+  const { navigateToFolder } = useFolderNavigation();
 
   return (
-    <FolderTr onClick={() => onNavigateFolder(folder)}>
+    <FolderTr onClick={() => navigateToFolder(folder)}>
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <Flex
@@ -192,10 +193,18 @@ const FolderRow = ({ folder, onNavigateFolder }: FolderRowProps) => {
       {!isMobile && (
         <>
           <StyledTd>
-            <Typography textColor="neutral600">-</Typography>
+            <Typography textColor="neutral600">
+              {folder.createdAt
+                ? formatDate(new Date(folder.createdAt), { dateStyle: 'long' })
+                : '-'}
+            </Typography>
           </StyledTd>
           <StyledTd>
-            <Typography textColor="neutral600">-</Typography>
+            <Typography textColor="neutral600">
+              {folder.updatedAt
+                ? formatDate(new Date(folder.updatedAt), { dateStyle: 'long' })
+                : '-'}
+            </Typography>
           </StyledTd>
           <StyledTd>
             <Typography textColor="neutral600">-</Typography>
@@ -223,10 +232,9 @@ const FolderRow = ({ folder, onNavigateFolder }: FolderRowProps) => {
 interface AssetsTableProps {
   assets: File[];
   folders?: Folder[];
-  onNavigateFolder?: (folder: Folder) => void;
 }
 
-export const AssetsTable = ({ assets, folders = [], onNavigateFolder }: AssetsTableProps) => {
+export const AssetsTable = ({ assets, folders = [] }: AssetsTableProps) => {
   const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
 
@@ -282,11 +290,7 @@ export const AssetsTable = ({ assets, folders = [], onNavigateFolder }: AssetsTa
         ) : (
           <>
             {folders.map((folder) => (
-              <FolderRow
-                key={`folder-${folder.id}`}
-                folder={folder}
-                onNavigateFolder={onNavigateFolder ?? (() => {})}
-              />
+              <FolderRow key={`folder-${folder.id}`} folder={folder} />
             ))}
             {assets.map((asset) => (
               <AssetRow key={asset.id} asset={asset} />
