@@ -2,7 +2,7 @@ import type { Core, Modules } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import resources from './resources/index';
-import { ARTICLE_UID } from './utils';
+import { ARTICLE_UID, CATEGORY_UID } from './utils';
 
 let strapi: Core.Strapi;
 let rqContent: (options: {
@@ -21,7 +21,7 @@ const countArticles = async (params: Modules.Documents.ServiceParams['count']) =
 };
 
 describe('Document Service', () => {
-  let testUtils;
+  let testUtils: any;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
@@ -43,10 +43,6 @@ describe('Document Service', () => {
         });
 
         expect(articles.length).toBeGreaterThan(0);
-
-        // All returned articles should be from documents that have never been published
-        // Fixture state defined in: tests/api/core/strapi/document-service/resources/fixtures/article.js
-        // Article1 is never published, Article2 has a published version
         articles.forEach((article) => {
           expect(article.documentId).toBe('Article1');
           expect(article.publishedAt).toBe(null);
@@ -60,9 +56,6 @@ describe('Document Service', () => {
         });
 
         expect(articles.length).toBeGreaterThan(0);
-
-        // All returned articles should be drafts of documents that have been published
-        // Article2 has a published version
         articles.forEach((article) => {
           expect(article.documentId).toBe('Article2');
           expect(article.publishedAt).toBe(null);
@@ -72,12 +65,12 @@ describe('Document Service', () => {
       it('works with string values "true" and "false"', async () => {
         const neverPublished = await findArticles({
           status: 'draft',
-          hasPublishedVersion: 'false',
+          hasPublishedVersion: 'false' as any,
         });
 
         const hasPublished = await findArticles({
           status: 'draft',
-          hasPublishedVersion: 'true',
+          hasPublishedVersion: 'true' as any,
         });
 
         expect(neverPublished.length).toBeGreaterThan(0);
@@ -97,9 +90,8 @@ describe('Document Service', () => {
           status: 'draft',
         });
 
-        const documentIds = [...new Set(allDrafts.map((a) => a.documentId))];
+        const documentIds = Array.from(new Set(allDrafts.map((a) => a.documentId)));
 
-        // Should include both Article1 and Article2
         expect(documentIds).toContain('Article1');
         expect(documentIds).toContain('Article2');
       });
@@ -268,7 +260,6 @@ describe('Document Service', () => {
 
     describe('edge cases', () => {
       it('returns empty results for status=published with hasPublishedVersion=false', async () => {
-        // Logically contradictory: published documents always have a published version
         const articles = await findArticles({
           status: 'published',
           hasPublishedVersion: false,
@@ -292,8 +283,6 @@ describe('Document Service', () => {
       });
 
       it('is not overwritten by documentId filter in findMany', async () => {
-        // Article2 has a published version, so hasPublishedVersion=false should exclude it
-        // even when explicitly filtering by its documentId
         const articles = await findArticles({
           status: 'draft',
           hasPublishedVersion: false,
@@ -304,7 +293,6 @@ describe('Document Service', () => {
       });
 
       it('is not overwritten by documentId in findOne', async () => {
-        // Article2 has a published version, so hasPublishedVersion=false should return null
         const article = await strapi.documents(ARTICLE_UID).findOne({
           documentId: 'Article2',
           status: 'draft',
@@ -315,8 +303,6 @@ describe('Document Service', () => {
       });
 
       it('is not overwritten by documentId filter in findMany with hasPublishedVersion=true', async () => {
-        // Article1 has never been published, so hasPublishedVersion=true should exclude it
-        // even when explicitly filtering by its documentId
         const articles = await findArticles({
           status: 'draft',
           hasPublishedVersion: true,
@@ -327,7 +313,6 @@ describe('Document Service', () => {
       });
 
       it('is not overwritten by documentId in findOne with hasPublishedVersion=true', async () => {
-        // Article1 has never been published, so hasPublishedVersion=true should return null
         const article = await strapi.documents(ARTICLE_UID).findOne({
           documentId: 'Article1',
           status: 'draft',
@@ -338,7 +323,6 @@ describe('Document Service', () => {
       });
 
       it('returns document when documentId and hasPublishedVersion are consistent in findOne', async () => {
-        // Article2 has a published version, so hasPublishedVersion=true should still return it
         const article = await strapi.documents(ARTICLE_UID).findOne({
           documentId: 'Article2',
           status: 'draft',
@@ -350,7 +334,6 @@ describe('Document Service', () => {
       });
 
       it('returns document when documentId filter and hasPublishedVersion are consistent in findMany', async () => {
-        // Article1 has never been published, so hasPublishedVersion=false should still return it
         const articles = await findArticles({
           status: 'draft',
           hasPublishedVersion: false,
@@ -440,24 +423,87 @@ describe('Document Service', () => {
       });
     });
 
+    // Fixture state: Article1 (never published) → [Cat1], Article2 (published) → []
+    // Cat1 & Cat2: both draft-only (never published)
+    // Tests are sequential — each mutates state for the next
     describe('populate', () => {
-      it('works with populate when hasPublishedVersion is set', async () => {
+      it('hasPublishedVersion=false cascades into populated relations', async () => {
         const articles = await findArticles({
           status: 'draft',
           hasPublishedVersion: false,
-          populate: ['categories'],
+          populate: { categories: true },
         });
 
-        expect(articles.length).toBeGreaterThan(0);
-        articles.forEach((article) => {
-          expect(article.documentId).toBe('Article1');
-          expect(article).toHaveProperty('categories');
+        const enArticle = articles.find((a) => a.locale === 'en');
+        expect(enArticle).toBeDefined();
+        expect(enArticle!.documentId).toBe('Article1');
+        expect(enArticle!.categories).toHaveLength(1);
+        expect(enArticle!.categories[0].name).toBe('Cat1-EN');
+      });
+
+      it('hasPublishedVersion=true cascades — only includes relations with published versions', async () => {
+        await strapi.documents(CATEGORY_UID).publish({ documentId: 'Cat1', locale: 'en' });
+        await strapi.documents(ARTICLE_UID).update({
+          documentId: 'Article2',
+          locale: 'en',
+          status: 'draft',
+          data: { categories: ['Cat1'] } as any,
         });
-        // Article1 (en) has categories [Cat1-EN]
-        const withCategories = articles.filter(
-          (a) => Array.isArray(a.categories) && a.categories.length > 0
-        );
-        expect(withCategories.length).toBeGreaterThan(0);
+
+        const articles = await findArticles({
+          status: 'draft',
+          hasPublishedVersion: true,
+          populate: { categories: true },
+        });
+
+        const article2 = articles.find((a) => a.documentId === 'Article2');
+        expect(article2).toBeDefined();
+        expect(article2!.categories).toHaveLength(1);
+        expect(article2!.categories[0].documentId).toBe('Cat1');
+      });
+
+      it('filters out populated relations not matching hasPublishedVersion', async () => {
+        await strapi.documents(ARTICLE_UID).update({
+          documentId: 'Article2',
+          locale: 'en',
+          status: 'draft',
+          data: { categories: ['Cat1', 'Cat2'] } as any,
+        });
+
+        const articles = await findArticles({
+          status: 'draft',
+          hasPublishedVersion: true,
+          populate: { categories: true },
+        });
+
+        const categoryDocIds = articles
+          .find((a) => a.documentId === 'Article2')!
+          .categories.map((c: any) => c.documentId);
+        expect(categoryDocIds).toContain('Cat1');
+        expect(categoryDocIds).not.toContain('Cat2');
+      });
+
+      it('returns all populated relations when hasPublishedVersion is omitted', async () => {
+        const articles = await findArticles({
+          status: 'draft',
+          populate: { categories: true },
+        });
+
+        const categoryDocIds = articles
+          .find((a) => a.documentId === 'Article2' && a.locale === 'en')!
+          .categories.map((c: any) => c.documentId);
+        expect(categoryDocIds).toContain('Cat1');
+        expect(categoryDocIds).toContain('Cat2');
+      });
+
+      afterAll(async () => {
+        await strapi.documents(CATEGORY_UID).unpublish({ documentId: 'Cat1', locale: 'en' });
+        await strapi.documents(ARTICLE_UID).update({
+          documentId: 'Article2',
+          locale: 'en',
+          status: 'draft',
+          data: { categories: [] } as any,
+        });
       });
     });
   });
