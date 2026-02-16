@@ -9,6 +9,7 @@ import {
   tours,
   Layouts,
   useIsDesktop,
+  useIsMobile,
 } from '@strapi/admin/strapi-admin';
 import { Grid, Tabs, Box } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -23,6 +24,7 @@ import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
+import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
@@ -49,8 +51,11 @@ const EditViewPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const isDesktop = useIsDesktop();
+  const isMobile = useIsMobile();
   const visiblePanels = usePanelsContext('Panels', (s) => s.visiblePanels);
   const drawerHasContent = visiblePanels.length > 0;
+
+  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
 
   const doc = useDoc();
   const {
@@ -202,7 +207,7 @@ const EditViewPage = () => {
               </Tabs.List>
               <Grid.Root
                 paddingTop={{
-                  initial: 2,
+                  initial: 6,
                   medium: 4,
                   large: 8,
                 }}
@@ -213,10 +218,10 @@ const EditViewPage = () => {
                     <tours.contentManager.Fields>
                       <Box />
                     </tours.contentManager.Fields>
-                    <FormLayout layout={layout} document={doc} />
+                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
                   </Tabs.Content>
                   <Tabs.Content value="published">
-                    <FormLayout layout={layout} document={doc} />
+                    <FormLayout layout={layout} document={doc} hasBackground={!isMobile} />
                   </Tabs.Content>
                 </Grid.Item>
                 {isDesktop && (

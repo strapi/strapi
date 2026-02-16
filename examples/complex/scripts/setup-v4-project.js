@@ -346,18 +346,11 @@ CONTENT_TYPES.forEach((contentType) => {
       fs.mkdirSync(schemaDir, { recursive: true });
     }
 
-    // Read and modify schema to remove problematic polymorphic relations
+    // Read and modify schema for v4 compatibility
     const schema = JSON.parse(fs.readFileSync(schemaSource, 'utf8'));
-    if (schema.attributes) {
-      // Remove polymorphic relations that cause issues in v4
-      delete schema.attributes.morphToOne;
-      delete schema.attributes.morphOne;
-      delete schema.attributes.morphMany;
-    }
 
     fs.writeFileSync(schemaDest, JSON.stringify(schema, null, 2) + '\n');
-    // TODO: stop removing polymorphic relations
-    console.log(`Copied schema for ${contentType} (removed polymorphic relations)`);
+    console.log(`Copied schema for ${contentType}`);
   }
 
   // Create controller

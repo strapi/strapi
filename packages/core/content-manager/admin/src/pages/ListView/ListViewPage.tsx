@@ -11,6 +11,7 @@ import {
   useTracking,
   useAPIErrorHandler,
   useQueryParams,
+  useScopedPersistentState,
   useRBAC,
   Layouts,
   useTable,
@@ -42,6 +43,7 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
+import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
@@ -73,27 +75,66 @@ const ListViewPage = () => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
+  usePersistentPartialQueryParams('STRAPI_LIST_VIEW_SETTINGS:', ['sort', 'filters', 'pageSize']);
+  usePersistentPartialQueryParams('STRAPI_LOCALE', ['plugins.i18n.locale'], false);
+
   const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);
 
-  const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
+  const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
+    `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
+    null
+  );
 
-  const listLayout = usePrev(list.layout);
-  React.useEffect(() => {
-    /**
-     * ONLY update the displayedHeaders if the document
-     * layout has actually changed in value.
-     */
-    if (!isEqual(listLayout, list.layout)) {
-      setDisplayedHeaders(list.layout);
-    }
-  }, [list.layout, listLayout]);
+  const mapDisplayedHeaders = (headers: ListFieldLayout[]) => headers.map((header) => header.name);
+
+  const displayedHeaders: ListFieldLayout[] = React.useMemo(() => {
+    if (
+      !displayedHeaderNames ||
+      !list.metadatas ||
+      Object.keys(list.metadatas).length <= 0 ||
+      !schema?.attributes
+    )
+      return [];
+
+    return convertListLayoutToFieldLayouts(displayedHeaderNames, schema.attributes, list.metadatas);
+  }, [displayedHeaderNames, schema, list]);
 
   const handleSetHeaders = (headers: string[]) => {
-    setDisplayedHeaders(
-      convertListLayoutToFieldLayouts(headers, schema!.attributes, list.metadatas)
-    );
+    setDisplayedHeaderNames(headers);
   };
+
+  const handleResetHeaders = () => {
+    setDisplayedHeaderNames(mapDisplayedHeaders(list.layout));
+  };
+
+  /**
+   * If the persistent displayedHeaders are not yet initialized, set them to list.layout
+   */
+  React.useEffect(() => {
+    // wait for list.layout to be loaded
+    if (list.layout.length === 0) {
+      return;
+    }
+
+    if (!displayedHeaderNames) {
+      handleResetHeaders();
+    }
+  }, [list.layout]);
+
+  React.useEffect(() => {
+    if (!schema?.attributes) return;
+    if (!displayedHeaderNames || displayedHeaderNames.length === 0) return;
+    if (schema.uid !== model) return;
+
+    const allowedDisplayHeaders = displayedHeaderNames.filter((header) =>
+      Object.keys(schema?.attributes).includes(header)
+    );
+
+    if (allowedDisplayHeaders.length !== displayedHeaderNames.length) {
+      handleSetHeaders(allowedDisplayHeaders);
+    }
+  }, [displayedHeaderNames]);
 
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
@@ -261,8 +302,8 @@ const ListViewPage = () => {
                 <InjectionZone area="listView.actions" />
                 <ViewSettingsMenu
                   setHeaders={handleSetHeaders}
-                  resetHeaders={() => setDisplayedHeaders(list.layout)}
-                  headers={displayedHeaders.map((header) => header.name)}
+                  resetHeaders={handleResetHeaders}
+                  headers={displayedHeaderNames ?? []}
                 />
               </>
             }
@@ -342,8 +383,8 @@ const ListViewPage = () => {
               <InjectionZone area="listView.actions" />
               <ViewSettingsMenu
                 setHeaders={handleSetHeaders}
-                resetHeaders={() => setDisplayedHeaders(list.layout)}
-                headers={displayedHeaders.map((header) => header.name)}
+                resetHeaders={handleResetHeaders}
+                headers={displayedHeaderNames ?? []}
               />
             </>
           }
@@ -552,7 +593,7 @@ const ProtectedListViewPage = () => {
     <Page.Protect permissions={permissions}>
       {({ permissions }) => (
         <DocumentRBAC permissions={permissions}>
-          <ListViewPage />
+          <ListViewPage key={slug} />
         </DocumentRBAC>
       )}
     </Page.Protect>
