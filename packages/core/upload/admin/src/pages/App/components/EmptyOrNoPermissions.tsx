@@ -6,16 +6,18 @@ import { useIntl } from 'react-intl';
 import { EmptyAssets } from '../../../components/EmptyAssets/EmptyAssets';
 import { getTrad } from '../../../utils';
 
-interface EmptyOrNoPermissionsProps {
+export interface EmptyOrNoPermissionsProps {
   canCreate: boolean;
   canRead: boolean;
   isFiltering: boolean;
   onActionClick: () => void;
 }
 
-type GetContentIntlMessageProps = Omit<EmptyOrNoPermissionsProps, 'onActionClick'>;
-
-const getContentIntlMessage = ({ isFiltering, canCreate, canRead }: GetContentIntlMessageProps) => {
+const getContentIntlMessage = ({
+  isFiltering,
+  canCreate,
+  canRead,
+}: Omit<EmptyOrNoPermissionsProps, 'onActionClick'>) => {
   if (isFiltering) {
     return {
       id: 'list.assets-empty.title-withSearch',
