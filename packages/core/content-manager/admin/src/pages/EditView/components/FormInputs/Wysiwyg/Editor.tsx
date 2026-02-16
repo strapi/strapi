@@ -117,7 +117,11 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
 
 const EditorAndPreviewWrapper = styled.div`
   position: relative;
-  height: calc(100% - 48px);
+  height: calc(100%);
+
+  ${({ theme }) => theme.breakpoints.medium} {
+    height: calc(100% - 48px);
+  }
 `;
 
 const EditorStylesContainer = styled.div<{ $disabled?: boolean; $isExpandMode?: boolean }>`
@@ -284,6 +288,7 @@ const EditorStylesContainer = styled.div<{ $disabled?: boolean; $isExpandMode?: 
   .CodeMirror {
     position: relative;
     overflow: hidden;
+    border-radius: ${({ theme }) => theme.borderRadius};
     background: ${({ theme }) => `${theme.colors.neutral0}`};
   }
 

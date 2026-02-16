@@ -48,40 +48,61 @@ window.cancelIdleCallback = clearImmediate;
  * This is to stop pollution, you shouldn't need to log _anything_ to the console
  * for tests.
  */
-window.console = {
+const patchedConsole = {
   ...window.console,
   warn(...args: any[]) {
+    const msg = args
+      .map((arg) => {
+        if (arg && typeof arg === 'object' && 'message' in arg) {
+          return String((arg as any).message);
+        }
+
+        return String(arg);
+      })
+      .join(' ');
+
+    /**
+     * React Router emits dev-only warnings about upcoming v7 behavior when `future`
+     * flags are left undefined. We don't want test log pollution or flaky failures
+     * from these informational warnings, so we drop them entirely.
+     *
+     * Everything else remains strict: any other warn fails the test.
+     */
+    if (/Future Flag Warning/i.test(msg)) {
+      return;
+    }
+
     throw new Error(format(...args));
   },
   error(...args: any[]) {
     const message = format(...args);
 
-    if (/(Invalid prop|Failed prop type)/gi.test(message)) {
-      throw new Error(message);
-
-      // Ignore errors thrown by styled-components. This can be removed once we upgrade
-      // to styled-components@6 and have separate props that are rendered in the DOM by
-      // the ones that aren't using the $ prefix.
-      // https://styled-components.com/docs/faqs#transient-as-and-forwardedas-props-have-been-dropped
-    } else if (
+    if (
       /React does not recognize the .* prop on a DOM element/.test(message) ||
       /Unknown event handler property/.test(message)
     ) {
-      // do nothing
-    } else if (/Support for defaultProps will be removed/gi.test(message)) {
-      // do nothing
-      // Ignore act() warnings from sonner components which update state asynchronously
-    } else if (
+      return;
+    }
+    // Ignore act() warnings from sonner components which update state asynchronously
+    if (/Support for defaultProps will be removed/gi.test(message)) {
+      return;
+    }
+
+    if (
       /An update to (ForwardRef\(Toaster\)|Toast) inside a test was not wrapped in act/i.test(
         message
       )
     ) {
-      // do nothing
-    } else {
-      throw new Error(message);
+      return;
     }
+
+    throw new Error(message);
   },
 };
+
+window.console = patchedConsole;
+// Ensure `console.warn` (global) is patched too
+globalThis.console = patchedConsole as any;
 
 /* -------------------------------------------------------------------------------------------------
  * Strapi

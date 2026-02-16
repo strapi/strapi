@@ -1,10 +1,11 @@
+import type { Stats } from 'node:fs';
 import type { Readable } from 'stream';
 
 import zip from 'zlib';
 import path from 'path';
 import { pipeline, PassThrough } from 'stream';
 import fs from 'fs-extra';
-import tar from 'tar';
+import { Parser, type ReadEntry } from 'tar';
 import { isEmpty, keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
@@ -169,15 +170,15 @@ class LocalFileSourceProvider implements ISourceProvider {
     pipeline(
       [
         inStream,
-        new tar.Parse({
+        new Parser({
           // find only files in the assets/uploads folder
-          filter(filePath, entry) {
-            if (entry.type !== 'File') {
+          filter(filePath: string, entry: Stats | ReadEntry) {
+            if (!('type' in entry) || entry.type !== 'File') {
               return false;
             }
             return isFilePathInDirname('assets/uploads', filePath);
           },
-          async onentry(entry) {
+          async onReadEntry(entry: ReadEntry) {
             const { path: filePath, size = 0 } = entry;
             const normalizedPath = unknownPathToPosix(filePath);
             const file = path.basename(normalizedPath);
@@ -235,16 +236,16 @@ class LocalFileSourceProvider implements ISourceProvider {
     pipeline(
       [
         inStream,
-        new tar.Parse({
-          filter(filePath, entry) {
-            if (entry.type !== 'File') {
+        new Parser({
+          filter(filePath: string, entry: Stats | ReadEntry) {
+            if (!('type' in entry) || entry.type !== 'File') {
               return false;
             }
 
             return isFilePathInDirname(directory, filePath);
           },
 
-          async onentry(entry) {
+          async onReadEntry(entry: ReadEntry) {
             const transforms = [
               // JSONL parser to read the data chunks one by one (line by line)
               parser({
@@ -294,19 +295,19 @@ class LocalFileSourceProvider implements ISourceProvider {
         [
           fileStream,
           // Custom backup archive parsing
-          new tar.Parse({
+          new Parser({
             /**
              * Filter the parsed entries to only keep the one that matches the given filepath
              */
-            filter(entryPath, entry) {
-              if (entry.type !== 'File') {
+            filter(entryPath: string, entry: Stats | ReadEntry) {
+              if (!('type' in entry) || entry.type !== 'File') {
                 return false;
               }
 
               return isPathEquivalent(entryPath, filePath);
             },
 
-            async onentry(entry) {
+            async onReadEntry(entry: ReadEntry) {
               // Collect all the content of the entry file
               const content = await entry.collect();
 

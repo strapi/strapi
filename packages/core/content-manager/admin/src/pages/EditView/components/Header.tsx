@@ -110,8 +110,14 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
           medium: 'row',
         }}
       >
-        <Flex gap={2} justifyContent="space-between" alignItems="flex-start" width="100%">
-          <Typography variant="alpha" tag="h1">
+        <Flex
+          gap={2}
+          justifyContent="space-between"
+          alignItems="flex-start"
+          width="100%"
+          overflow="hidden"
+        >
+          <Typography variant="alpha" tag="h1" overflow="hidden">
             {title}
           </Typography>
           <Box display={{ initial: 'block', medium: 'none' }}>

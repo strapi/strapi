@@ -56,11 +56,17 @@ type FileFormat = {
   url: string;
 };
 
+export interface FocalPoint {
+  x: number;
+  y: number;
+}
+
 export interface File {
   id: number;
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
+  focalPoint?: FocalPoint | null;
   width?: number | null;
   height?: number | null;
   formats?:
@@ -96,6 +102,11 @@ export interface File {
   updatedBy?: number;
   isLocal?: boolean;
 }
+
+export type UploadFileInfo = Pick<
+  File,
+  'name' | 'alternativeText' | 'caption' | 'focalPoint' | 'folder'
+>;
 
 export interface RawFile extends Blob {
   size: number;
@@ -209,6 +220,7 @@ export declare namespace DeleteFile {
 
 /**
  * POST /upload - Create a file
+ * @deprecated Use CreateFilesStream instead
  */
 export declare namespace CreateFile {
   export interface Request {
@@ -219,6 +231,62 @@ export declare namespace CreateFile {
     data: File[];
     error?: errors.ApplicationError | errors.ValidationError;
   }
+}
+
+/**
+ * POST /upload/unstable/stream - Stream upload files with partial success support
+ */
+export declare namespace CreateFilesStream {
+  export interface FileUploadError {
+    name: string;
+    message: string;
+  }
+  export interface Request {
+    body: FormData;
+  }
+  export interface Response {
+    data: File[];
+    errors?: FileUploadError[];
+  }
+}
+
+/**
+ * POST /upload/unstable/stream - SSE streaming event types
+ *
+ * The endpoint streams Server-Sent Events as each file is processed.
+ * The final `stream:complete` event carries the same shape as CreateFilesStream.Response.
+ */
+export declare namespace CreateFilesStreamEvents {
+  export interface FileUploadingEvent {
+    name: string;
+    index: number;
+    total: number;
+    size: number;
+  }
+
+  export interface FileCompleteEvent {
+    name: string;
+    index: number;
+    file: File;
+  }
+
+  export interface FileErrorEvent {
+    name: string;
+    index: number;
+    message: string;
+  }
+
+  export interface StreamCompleteEvent {
+    data: File[];
+    errors: CreateFilesStream.FileUploadError[];
+  }
+
+  export type SSEEventMap = {
+    'file:uploading': FileUploadingEvent;
+    'file:complete': FileCompleteEvent;
+    'file:error': FileErrorEvent;
+    'stream:complete': StreamCompleteEvent;
+  };
 }
 
 /**
@@ -247,6 +315,7 @@ export declare namespace BulkUpdateFiles {
           name?: string;
           alternativeText?: string | null;
           caption?: string | null;
+          focalPoint?: FocalPoint | null;
           folder?: number | null;
         };
       }>;

@@ -9,10 +9,10 @@ interface PreviewWysiwygProps {
   data?: string;
 }
 
-const PreviewWysiwyg = ({ data = '' }: PreviewWysiwygProps) => {
+const PreviewWysiwyg = ({ data }: PreviewWysiwygProps) => {
   const html = React.useMemo(
     () =>
-      sanitizeHtml(md.render(data.replaceAll('\\n', '\n') || ''), {
+      sanitizeHtml(md.render((data ?? '').replaceAll('\\n', '\n')), {
         ...sanitizeHtml.defaults,
         allowedTags: false,
         allowedAttributes: {

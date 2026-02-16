@@ -25,6 +25,7 @@ interface DevelopOptions extends CLIContext {
   polling?: boolean;
   open?: boolean;
   watchAdmin?: boolean;
+  buildAdmin?: boolean;
 }
 
 // This method removes all non-admin build files from the dist directory
@@ -75,6 +76,7 @@ const develop = async ({
   logger,
   tsconfig,
   watchAdmin,
+  buildAdmin,
   ...options
 }: DevelopOptions) => {
   const timer = getTimer();
@@ -100,7 +102,7 @@ const develop = async ({
      * sure that at least the admin is built for users & they can interact
      * with the application.
      */
-    if (!watchAdmin) {
+    if (!watchAdmin && buildAdmin) {
       timer.start('createBuildContext');
       const contextSpinner = logger.spinner(`Building build context`).start();
       console.log('');
