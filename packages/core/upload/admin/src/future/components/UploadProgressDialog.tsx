@@ -1,7 +1,14 @@
 import * as React from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { Box, Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  IconButton,
+  TextButton,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import {
   ArrowsCounterClockwise,
   Check,
@@ -29,14 +36,10 @@ import type { FileProgress, FileProgressStatus } from '../store/uploadProgress';
 const HeaderStatusMessage = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   return (
     <Flex direction="column" alignItems="flex-start" paddingLeft={2}>
-      <Dialog.Title>
-        <Typography variant="omega">{title}</Typography>
-      </Dialog.Title>
-      <Dialog.Description>
-        <Typography variant="pi" textColor="neutral600">
-          {subtitle}
-        </Typography>
-      </Dialog.Description>
+      <Typography variant="omega">{title}</Typography>
+      <Typography variant="pi" textColor="neutral600">
+        {subtitle}
+      </Typography>
     </Flex>
   );
 };
@@ -51,8 +54,7 @@ const HeaderStatusIcon = styled(Flex)`
   }
 `;
 
-const HeaderStatusWrapper = styled(Dialog.Title)`
-  display: flex;
+const HeaderStatusWrapper = styled(Flex)`
   align-items: center;
 `;
 
@@ -69,7 +71,7 @@ const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
     return (
       <HeaderStatusWrapper>
         <HeaderStatusIcon background="danger200">
-          <Cross fill="danger700" />
+          <Cross aria-hidden={true} focusable={false} fill="danger700" />
         </HeaderStatusIcon>
         <HeaderStatusMessage
           title={formatMessage({
@@ -89,7 +91,7 @@ const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
     return (
       <HeaderStatusWrapper>
         <HeaderStatusIcon background="success200">
-          <Check fill="success700" />
+          <Check aria-hidden={true} focusable={false} fill="success700" />
         </HeaderStatusIcon>
         <HeaderStatusMessage
           title={formatMessage({
@@ -112,7 +114,7 @@ const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
     return (
       <HeaderStatusWrapper>
         <HeaderStatusIcon background="neutral200">
-          <MinusCircle fill="neutral700" />
+          <MinusCircle aria-hidden={true} focusable={false} fill="neutral700" />
         </HeaderStatusIcon>
         <HeaderStatusMessage
           title={formatMessage({
@@ -134,7 +136,7 @@ const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
     return (
       <HeaderStatusWrapper>
         <HeaderStatusIcon background="primary200">
-          <Upload fill="primary700" />
+          <Upload aria-hidden={true} focusable={false} fill="primary700" />
         </HeaderStatusIcon>
         <HeaderStatusMessage
           title={formatMessage(
@@ -220,6 +222,16 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
       margin={1}
       hasRadius
     >
+      {/* Accessible name for the dialog */}
+      <VisuallyHidden>
+        <Dialog.Title>
+          {formatMessage({
+            id: getTranslationKey('upload.progress.title'),
+            defaultMessage: 'Upload progress',
+          })}
+        </Dialog.Title>
+      </VisuallyHidden>
+
       <HeaderStatus status={status} progress={progress} totalFiles={totalFiles} />
       <Flex gap={1}>
         {!isAllUploaded && (
@@ -341,7 +353,16 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
             defaultMessage: 'Uploading...',
           })}
         </Typography>
-        <IndeterminateBar />
+        <IndeterminateBar
+          role="progressbar"
+          aria-label={formatMessage(
+            {
+              id: getTranslationKey('upload.progress.file.uploading.label'),
+              defaultMessage: 'Uploading {fileName}',
+            },
+            { fileName: file.name }
+          )}
+        />
       </FileRow>
     );
   }
@@ -446,11 +467,7 @@ export const UploadProgressDialog = () => {
   return (
     <Dialog.Root open={isVisible} modal={false}>
       <Dialog.Portal>
-        <DialogContent
-          // The accessible name is set by Dialog.Title and is dynamic,
-          // use a data-testid to ensure a stable target for e2e tests
-          data-testid="upload-progress-dialog"
-        >
+        <DialogContent>
           <DialogHeader handleClose={handleClose} />
 
           <AnimatedContent $isVisible={!isMinimized}>

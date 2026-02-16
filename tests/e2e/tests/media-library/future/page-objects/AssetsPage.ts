@@ -23,7 +23,7 @@ export class AssetsPage {
     this.gridViewButton = page.getByRole('radio', { name: 'Grid view' });
     this.tableViewButton = page.getByRole('radio', { name: 'Table view' });
     this.dropZone = page.getByTestId('assets-dropzone');
-    this.uploadProgressDialog = page.getByTestId('upload-progress-dialog');
+    this.uploadProgressDialog = page.getByRole('dialog', { name: 'Upload progress' });
   }
 
   async goto() {
