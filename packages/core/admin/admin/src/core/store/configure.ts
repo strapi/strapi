@@ -9,8 +9,8 @@ import {
 } from '@reduxjs/toolkit';
 
 import { reducer as appReducer, AppState, logout } from '../../reducer';
-import { getBasename } from '../utils/basename';
 import { adminApi } from '../../services/api';
+import { getBasename } from '../utils/basename';
 
 /**
  * @description Static reducers are ones we know, they live in the admin package.
