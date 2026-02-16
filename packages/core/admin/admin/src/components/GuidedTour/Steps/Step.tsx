@@ -72,6 +72,12 @@ const DefaultActions = ({
   const { trackUsage } = useTracking();
   const dispatch = useGuidedTour('GuidedTourPopover', (s) => s.dispatch);
   const state = useGuidedTour('GuidedTourPopover', (s) => s.state);
+
+  // Safety check: if tours state is missing, return null
+  if (!state.tours || !state.tours[tourName]) {
+    return null;
+  }
+
   const currentStep = state.tours[tourName].currentStep + 1;
   const actualTourLength = tours[tourName]._meta.totalStepCount;
 

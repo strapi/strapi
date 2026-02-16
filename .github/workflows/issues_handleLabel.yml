@@ -167,8 +167,8 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'not_planned'
 
-      # Redirect questions to community sources
-      - name: 'Comment: redirect question to community'
+      # Redirect questions to GitHub Discussions
+      - name: 'Comment: redirect question to discussions'
         if: "${{ github.event.label.name == 'flag: question' }}"
         uses: actions-cool/issues-helper@v3
         with:
@@ -180,22 +180,29 @@ jobs:
 
             Hello @${{ github.event.issue.user.login }},
 
-            I see you are wanting to ask a question that is not really a bug report,
+            Thank you for your interest in Strapi! However, this issue appears to be a question rather than a bug report. GitHub Issues are reserved for reproducible bug reports.
 
-            - questions should be directed to [our forum](https://forum.strapi.io) or our [Discord](https://discord.strapi.io)
-            - feature requests should be directed to our [feedback and feature request database](https://feedback.strapi.io)
+            Please ask your question in our [GitHub Discussions](https://github.com/strapi/strapi/discussions) where the community and team can help you out.
 
-            Please see the following contributing guidelines for asking a question [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
+            You can also check out our [Discord](https://discord.strapi.io) for real-time help.
 
-            Thank you.
-      - name: 'Close: redirect question to community'
+            Thank you!
+      - name: 'Close: redirect question to discussions'
         if: "${{ github.event.label.name == 'flag: question' }}"
         uses: actions-cool/issues-helper@v3
         with:
           actions: 'close-issue'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
-          close-reason: 'complete'
+          close-reason: 'not_planned'
+      - name: 'Lock: redirect question to discussions'
+        if: "${{ github.event.label.name == 'flag: question' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'lock-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          lock-reason: 'off-topic'
 
       - name: assign issues to DevExp squad project
         uses: actions/add-to-project@v0.4.1
