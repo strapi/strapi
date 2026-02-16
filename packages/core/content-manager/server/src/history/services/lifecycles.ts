@@ -177,44 +177,40 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           async task() {
             const BATCH_SIZE = 1000;
 
-            try {
-              const retentionDaysInMilliseconds =
-                serviceUtils.getRetentionDays() * 24 * 60 * 60 * 1000;
-              const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
+            const retentionDaysInMilliseconds =
+              serviceUtils.getRetentionDays() * 24 * 60 * 60 * 1000;
+            const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
 
-              // Delete in batches of 1000 to avoid a single query that
-              // exhausts the DB connection pool and blocks other operations.
-              let deleted: number;
-              do {
-                // Fetch up to BATCH_SIZE expired IDs
-                const expiredVersions = await strapi.db.query(HISTORY_VERSION_UID).findMany({
-                  select: ['id'],
-                  where: {
-                    created_at: {
-                      $lt: expirationDate,
-                    },
+            // Delete in batches of 1000 to avoid a single query that
+            // exhausts the DB connection pool and blocks other operations.
+            let deleted: number;
+            do {
+              // Fetch up to BATCH_SIZE expired IDs
+              const expiredVersions = await strapi.db.query(HISTORY_VERSION_UID).findMany({
+                select: ['id'],
+                where: {
+                  created_at: {
+                    $lt: expirationDate,
                   },
-                  limit: BATCH_SIZE,
+                },
+                limit: BATCH_SIZE,
+              });
+
+              const ids = expiredVersions.map((v: { id: number | string }) => v.id);
+              deleted = ids.length;
+
+              // Delete this batch by ID
+              if (deleted > 0) {
+                await strapi.db.query(HISTORY_VERSION_UID).deleteMany({
+                  where: {
+                    id: { $in: ids },
+                  },
                 });
+              }
 
-                const ids = expiredVersions.map((v: { id: number | string }) => v.id);
-                deleted = ids.length;
-
-                // Delete this batch by ID
-                if (deleted > 0) {
-                  await strapi.db.query(HISTORY_VERSION_UID).deleteMany({
-                    where: {
-                      id: { $in: ids },
-                    },
-                  });
-                }
-
-                // If we got a full batch, there are likely more rows to delete — loop again.
-                // If we got fewer, we've handled everything and can stop.
-              } while (deleted >= BATCH_SIZE);
-            } catch (error) {
-              strapi.log.error('Error deleting expired history versions', error);
-            }
+              // If we got a full batch, there are likely more rows to delete — loop again.
+              // If we got fewer, we've handled everything and can stop.
+            } while (deleted >= BATCH_SIZE);
           },
           options: '0 0 * * *',
         },
