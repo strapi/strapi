@@ -46,8 +46,6 @@ interface SendOptions {
   /**
    * Delivery Status Notification (DSN) configuration.
    * Allows requesting bounce reports, delay notices, or success confirmations.
-   * Note: Typed locally because @types/nodemailer does not yet include DSN types,
-   * but nodemailer supports it natively.
    * @example { id: 'msg-123', return: 'headers', notify: 'success', recipient: 'sender@example.com' }
    */
   dsn?: {
@@ -68,7 +66,6 @@ interface SendOptions {
     accessToken?: string;
     expires?: number;
   };
-  [key: string]: unknown;
 }
 
 type ProviderOptions = Parameters<typeof nodemailer.createTransport>[0];
@@ -83,7 +80,6 @@ interface ProviderCapabilities {
   };
   auth?: {
     type?: string;
-    user?: string;
   };
   features?: string[];
 }
@@ -95,7 +91,6 @@ function getCapabilitiesFromOptions(opts: ProviderOptions): ProviderCapabilities
   if (opts && typeof opts === 'object') {
     const options = opts as Record<string, unknown>;
 
-    // Transport info (no sensitive data)
     if (options.host || options.port) {
       capabilities.transport = {
         host: typeof options.host === 'string' ? options.host : undefined,
@@ -107,20 +102,17 @@ function getCapabilitiesFromOptions(opts: ProviderOptions): ProviderCapabilities
       };
     }
 
-    // Auth type (never expose password, tokens, etc.)
     if (options.auth && typeof options.auth === 'object') {
       const auth = options.auth as Record<string, unknown>;
-      const authType = auth.type as string;
+      const authType = typeof auth.type === 'string' ? auth.type : undefined;
       capabilities.auth = {
-        type: authType || (auth.user ? 'Password' : undefined),
-        user: typeof auth.user === 'string' ? auth.user : undefined,
+        type: authType || (auth.user ? 'login' : undefined),
       };
       if (authType === 'OAuth2') {
         features.push('oauth2');
       }
     }
 
-    // Feature flags
     if (options.dkim) features.push('dkim');
     if (options.pool) features.push('pool');
     if (options.rateLimit) features.push('rateLimiting');
@@ -140,53 +132,48 @@ export default {
 
     return {
       send(options: SendOptions): Promise<SentMessageInfo> {
-        const {
-          from,
-          to,
-          cc,
-          bcc,
-          replyTo,
-          subject,
-          text,
-          html,
-          attachments,
-          headers,
-          priority,
-          dsn,
-          icalEvent,
-          list,
-          envelope,
-          amp,
-          auth,
-          ...rest
-        } = options;
-
         const message: SendMailOptions = {
-          from: from || settings.defaultFrom,
-          to,
-          cc,
-          bcc,
-          replyTo: replyTo || settings.defaultReplyTo,
-          subject,
-          text: text || html,
-          html: html || text,
-          attachments,
-          ...(headers ? { headers } : {}),
-          ...(priority ? { priority } : {}),
-          ...(icalEvent ? { icalEvent } : {}),
-          ...(list ? { list } : {}),
-          ...(envelope ? { envelope } : {}),
-          ...(amp ? { amp } : {}),
-          ...rest,
+          from: options.from || settings.defaultFrom,
+          to: options.to,
+          cc: options.cc,
+          bcc: options.bcc,
+          replyTo: options.replyTo || settings.defaultReplyTo,
+          subject: options.subject,
+          text: options.text || options.html,
+          html: options.html || options.text,
         };
 
-        // DSN and per-message auth are supported by nodemailer but not fully
-        // typed in @types/nodemailer, so we assign them separately
-        if (dsn) {
-          (message as any).dsn = dsn;
+        if (options.attachments) {
+          message.attachments = options.attachments;
         }
-        if (auth) {
-          (message as any).auth = auth;
+        if (options.headers) {
+          message.headers = options.headers;
+        }
+        if (options.priority) {
+          message.priority = options.priority;
+        }
+        if (options.icalEvent) {
+          message.icalEvent = options.icalEvent;
+        }
+        if (options.list) {
+          message.list = options.list;
+        }
+        if (options.envelope) {
+          message.envelope = options.envelope;
+        }
+        if (options.amp) {
+          message.amp = options.amp;
+        }
+        if (options.dsn) {
+          (message as Record<string, unknown>).dsn = options.dsn;
+        }
+        if (options.auth) {
+          (message as Record<string, unknown>).auth = {
+            user: options.auth.user,
+            refreshToken: options.auth.refreshToken,
+            accessToken: options.auth.accessToken,
+            ...(options.auth.expires != null ? { expires: options.auth.expires } : {}),
+          };
         }
 
         return transporter.sendMail(message);

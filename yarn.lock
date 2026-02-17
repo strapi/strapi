@@ -10661,9 +10661,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-nodemailer@workspace:packages/providers/email-nodemailer"
   dependencies:
-    "@types/nodemailer": "npm:7.0.9"
+    "@types/nodemailer": "npm:7.0.10"
     eslint-config-custom: "npm:5.36.0"
-    nodemailer: "npm:7.0.13"
+    nodemailer: "npm:8.0.1"
     tsconfig: "npm:5.36.0"
   languageName: unknown
   linkType: soft
@@ -12581,12 +12581,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/nodemailer@npm:7.0.9":
-  version: 7.0.9
-  resolution: "@types/nodemailer@npm:7.0.9"
+"@types/nodemailer@npm:7.0.10":
+  version: 7.0.10
+  resolution: "@types/nodemailer@npm:7.0.10"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10c0/8751a0fbad2fd3e5c7c8ae66b13c2581c71a272c6e8da81c2f50e1d55bd49093033b3507750b1a7b2ee9fedae69cbb533f8924d366e3deaa9f7556d2adcc2b6b
+  checksum: 10c0/14e4389a71a154cad898c6ad21fbf12309f86fa504c6d11bf0911190697164f1c3b0c0d9f6cb425c189af73137cc49eb10dbb41574174bf822cfe37755b87c03
   languageName: node
   linkType: hard
 
@@ -26971,10 +26971,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:7.0.13":
-  version: 7.0.13
-  resolution: "nodemailer@npm:7.0.13"
-  checksum: 10c0/b26aa5b9fa4a033bbc1e1c16ef75ee2a9c8641fd290c00a8361d6a251b3c1b8bad545a23efa627f59cb266340a448891ea8aa49d8a9307c767b8505219d95079
+"nodemailer@npm:8.0.1":
+  version: 8.0.1
+  resolution: "nodemailer@npm:8.0.1"
+  checksum: 10c0/c63aa734e41b8a920964f79ade0bd6dd7e6f960bdb4d5ed00712cf1fd52a2facf69d09773b3a8494c844383743f2b7ae832914dead5dcfd1b876b1a9b807b3b0
   languageName: node
   linkType: hard
 

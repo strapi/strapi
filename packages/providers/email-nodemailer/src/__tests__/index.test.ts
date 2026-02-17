@@ -69,13 +69,12 @@ describe('@strapi/provider-email-nodemailer', () => {
       expect(mockSendMail).toHaveBeenCalledWith({
         from: 'noreply@example.com',
         to: 'recipient@example.com',
+        cc: undefined,
+        bcc: undefined,
         replyTo: 'support@example.com',
         subject: 'Test Subject',
         text: 'Test content',
         html: '<p>Test content</p>',
-        cc: undefined,
-        bcc: undefined,
-        attachments: undefined,
       });
     });
 
@@ -138,7 +137,7 @@ describe('@strapi/provider-email-nodemailer', () => {
       );
     });
 
-    it('passes additional options to sendMail', async () => {
+    it('passes priority and headers to sendMail', async () => {
       mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
 
       const instance = provider.init(providerOptions, settings);
@@ -156,6 +155,111 @@ describe('@strapi/provider-email-nodemailer', () => {
           priority: 'high',
           headers: { 'X-Custom-Header': 'value' },
         })
+      );
+    });
+
+    it('passes DSN configuration to sendMail', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+      const dsn = { id: 'msg-123', return: 'headers' as const, notify: 'success' };
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        dsn,
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(expect.objectContaining({ dsn }));
+    });
+
+    it('passes per-message OAuth2 auth with only allowed fields', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        auth: {
+          user: 'user@gmail.com',
+          refreshToken: '1/xxx',
+          accessToken: 'ya29.xxx',
+          expires: 1234567890,
+        },
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          auth: {
+            user: 'user@gmail.com',
+            refreshToken: '1/xxx',
+            accessToken: 'ya29.xxx',
+            expires: 1234567890,
+          },
+        })
+      );
+    });
+
+    it('does not pass unknown properties to sendMail (no rest-spread injection)', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+      } as any);
+
+      const calledWith = mockSendMail.mock.calls[0][0];
+      const allowedKeys = [
+        'from',
+        'to',
+        'cc',
+        'bcc',
+        'replyTo',
+        'subject',
+        'text',
+        'html',
+        'attachments',
+        'headers',
+        'priority',
+        'icalEvent',
+        'list',
+        'envelope',
+        'amp',
+        'dsn',
+        'auth',
+      ];
+      const actualKeys = Object.keys(calledWith);
+
+      for (const key of actualKeys) {
+        expect(allowedKeys).toContain(key);
+      }
+    });
+
+    it('passes icalEvent and list options to sendMail', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+      const icalEvent = { method: 'REQUEST', content: 'BEGIN:VCALENDAR...' };
+      const list = {
+        unsubscribe: { url: 'https://example.com/unsubscribe', comment: 'Unsubscribe' },
+      };
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        icalEvent,
+        list,
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({ icalEvent, list })
       );
     });
   });
@@ -231,7 +335,7 @@ describe('@strapi/provider-email-nodemailer', () => {
   });
 
   describe('getCapabilities', () => {
-    it('returns transport and auth info without sensitive data', () => {
+    it('returns transport info and auth type without sensitive data', () => {
       const providerOptions = {
         host: 'smtp.gmail.com',
         port: 465,
@@ -257,11 +361,40 @@ describe('@strapi/provider-email-nodemailer', () => {
         maxConnections: undefined,
       });
       expect(capabilities.auth).toEqual({
-        type: 'Password',
-        user: 'test@gmail.com',
+        type: 'login',
       });
       expect(capabilities.auth).not.toHaveProperty('pass');
+      expect(capabilities.auth).not.toHaveProperty('user');
       expect(capabilities).not.toHaveProperty('pass');
+    });
+
+    it('never exposes passwords, tokens, or secrets', () => {
+      const providerOptions = {
+        host: 'smtp.gmail.com',
+        port: 465,
+        auth: {
+          type: 'OAuth2',
+          user: 'oauth@gmail.com',
+          clientId: 'client-id-value',
+          clientSecret: 'super-secret-value',
+          refreshToken: 'refresh-token-value',
+          accessToken: 'access-token-value',
+        },
+      };
+
+      const instance = provider.init(providerOptions, {
+        defaultFrom: 'test@example.com',
+        defaultReplyTo: 'test@example.com',
+      });
+
+      const capabilities = instance.getCapabilities();
+      const capStr = JSON.stringify(capabilities);
+
+      expect(capStr).not.toContain('super-secret-value');
+      expect(capStr).not.toContain('refresh-token-value');
+      expect(capStr).not.toContain('access-token-value');
+      expect(capStr).not.toContain('client-id-value');
+      expect(capStr).not.toContain('oauth@gmail.com');
     });
 
     it('includes feature flags for dkim, pool, rateLimiting', () => {
@@ -307,6 +440,7 @@ describe('@strapi/provider-email-nodemailer', () => {
       expect(capabilities.auth?.type).toBe('OAuth2');
       expect(capabilities.features).toContain('oauth2');
       expect(capabilities.auth).not.toHaveProperty('clientSecret');
+      expect(capabilities.auth).not.toHaveProperty('user');
     });
   });
 });

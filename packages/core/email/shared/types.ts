@@ -8,7 +8,6 @@ export interface ProviderCapabilities {
   };
   auth?: {
     type?: string;
-    user?: string;
   };
   features?: string[];
 }

@@ -71,10 +71,10 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "nodemailer": "7.0.13"
+    "nodemailer": "8.0.1"
   },
   "devDependencies": {
-    "@types/nodemailer": "7.0.9",
+    "@types/nodemailer": "7.0.10",
     "eslint-config-custom": "5.36.1",
     "tsconfig": "5.36.1"
   },

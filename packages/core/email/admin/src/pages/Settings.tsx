@@ -133,7 +133,7 @@ const CapabilitiesSection = ({
           </Grid.Item>
         )}
 
-        {auth && (auth.type || auth.user) && (
+        {auth?.type && (
           <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
             <Field.Root name="auth-type">
               <Field.Label>
@@ -142,17 +142,7 @@ const CapabilitiesSection = ({
                   defaultMessage: 'Authentication',
                 })}
               </Field.Label>
-              <TextInput
-                disabled
-                readOnly
-                value={
-                  auth.type
-                    ? auth.user
-                      ? `${auth.type} (${auth.user})`
-                      : auth.type
-                    : auth.user || 'None'
-                }
-              />
+              <TextInput disabled readOnly value={auth.type} />
             </Field.Root>
           </Grid.Item>
         )}
