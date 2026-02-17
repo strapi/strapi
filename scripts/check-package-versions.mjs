@@ -1,20 +1,22 @@
 #!/usr/bin/env node
-'use strict';
 
 /**
  * Ensures all workspace package.json files that have a "version" field use the
  * same version as the canonical source (@strapi/strapi). Run from repo root.
  *
  * Usage:
- *   node scripts/check-package-versions.js              # check only, exit 1 if mismatch
- *   node scripts/check-package-versions.js --fix        # write canonical version to mismatched packages
- *   node scripts/check-package-versions.js --fix --prompt # prompt for each package before fixing
+ *   node scripts/check-package-versions.mjs              # check only, exit 1 if mismatch
+ *   node scripts/check-package-versions.mjs --fix        # write canonical version to mismatched packages
+ *   node scripts/check-package-versions.mjs --fix --prompt # prompt for each package before fixing
  */
 
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
-const { globSync } = require('glob');
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+import { globSync } from 'glob';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function ask(question) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -114,7 +116,7 @@ async function main() {
   for (const { rel, current } of mismatches) {
     console.error(`  ${rel}: ${current} → ${canonicalVersion}`);
   }
-  console.error(`Run: node scripts/check-package-versions.js --fix [--prompt]`);
+  console.error(`Run: node scripts/check-package-versions.mjs --fix [--prompt]`);
   process.exit(1);
 }
 
