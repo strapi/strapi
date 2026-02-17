@@ -149,7 +149,7 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
   font-weight: ${({ theme }) => theme.fontWeights.semiBold};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
+    background: ${({ theme }) => theme.colors.primary100};
   }
 
   &[data-state='on'] {

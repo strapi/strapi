@@ -54,7 +54,7 @@ const FolderItem = styled(Flex)`
   transition: background 0.2s;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
+    background: ${({ theme }) => theme.colors.primary100};
   }
 
   &:focus-visible {

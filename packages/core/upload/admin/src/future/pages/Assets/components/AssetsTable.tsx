@@ -157,7 +157,7 @@ const FolderTr = styled(StyledTr)`
   cursor: pointer;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
+    background: ${({ theme }) => theme.colors.primary100};
   }
 `;
 
