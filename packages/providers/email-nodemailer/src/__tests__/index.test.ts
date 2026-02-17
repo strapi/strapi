@@ -221,16 +221,32 @@ describe('@strapi/provider-email-nodemailer', () => {
         'cc',
         'bcc',
         'replyTo',
+        'sender',
         'subject',
         'text',
         'html',
+        'watchHtml',
+        'amp',
         'attachments',
+        'alternatives',
         'headers',
         'priority',
+        'messageId',
+        'date',
+        'xMailer',
+        'inReplyTo',
+        'references',
+        'textEncoding',
+        'encoding',
+        'normalizeHeaderKey',
         'icalEvent',
         'list',
         'envelope',
-        'amp',
+        'dkim',
+        'attachDataUrls',
+        'disableUrlAccess',
+        'disableFileAccess',
+        'raw',
         'dsn',
         'auth',
       ];
@@ -260,6 +276,148 @@ describe('@strapi/provider-email-nodemailer', () => {
 
       expect(mockSendMail).toHaveBeenCalledWith(
         expect.objectContaining({ icalEvent, list })
+      );
+    });
+
+    it('passes threading options (inReplyTo, references)', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Re: Test Subject',
+        text: 'Reply content',
+        inReplyTo: '<original-msg-id@example.com>',
+        references: ['<original-msg-id@example.com>', '<prev-msg-id@example.com>'],
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inReplyTo: '<original-msg-id@example.com>',
+          references: ['<original-msg-id@example.com>', '<prev-msg-id@example.com>'],
+        })
+      );
+    });
+
+    it('passes sender for "on behalf of" emails', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        sender: 'actual-sender@example.com',
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({ sender: 'actual-sender@example.com' })
+      );
+    });
+
+    it('passes per-message DKIM options', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+      const dkim = {
+        domainName: 'example.com',
+        keySelector: 'default',
+        privateKey: '-----BEGIN RSA PRIVATE KEY-----\n...',
+      };
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        dkim,
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(expect.objectContaining({ dkim }));
+    });
+
+    it('passes security flags (disableUrlAccess, disableFileAccess)', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        disableUrlAccess: true,
+        disableFileAccess: true,
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          disableUrlAccess: true,
+          disableFileAccess: true,
+        })
+      );
+    });
+
+    it('passes encoding and metadata options', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        messageId: '<custom-id@example.com>',
+        date: new Date('2026-01-01T00:00:00Z'),
+        textEncoding: 'base64',
+        xMailer: false,
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messageId: '<custom-id@example.com>',
+          date: new Date('2026-01-01T00:00:00Z'),
+          textEncoding: 'base64',
+          xMailer: false,
+        })
+      );
+    });
+
+    it('passes raw MIME content', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+      const rawMime =
+        'From: sender@example.com\r\nTo: recipient@example.com\r\nSubject: Raw\r\n\r\nBody';
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        raw: rawMime,
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({ raw: rawMime })
+      );
+    });
+
+    it('passes alternatives and attachDataUrls', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+      const alternatives = [{ contentType: 'text/x-web-markdown', content: '**Bold**' }];
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Test content',
+        alternatives,
+        attachDataUrls: true,
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({ alternatives, attachDataUrls: true })
       );
     });
   });
@@ -397,13 +555,14 @@ describe('@strapi/provider-email-nodemailer', () => {
       expect(capabilities.auth?.user).toBe('oauth@gmail.com');
     });
 
-    it('includes feature flags for dkim, pool, rateLimiting', () => {
+    it('includes feature flags for dkim, pool, rateLimiting, proxy', () => {
       const providerOptions = {
         host: 'smtp.example.com',
         port: 587,
         dkim: { domainName: 'example.com' },
         pool: true,
         rateLimit: 5,
+        proxy: 'socks5://proxy.example.com:1080',
       };
 
       const instance = provider.init(providerOptions, {
@@ -416,6 +575,7 @@ describe('@strapi/provider-email-nodemailer', () => {
       expect(capabilities.features).toContain('dkim');
       expect(capabilities.features).toContain('pool');
       expect(capabilities.features).toContain('rateLimiting');
+      expect(capabilities.features).toContain('proxy');
     });
 
     it('includes oauth2 for OAuth2 auth type', () => {
