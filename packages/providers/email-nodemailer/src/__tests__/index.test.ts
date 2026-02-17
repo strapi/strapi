@@ -362,9 +362,9 @@ describe('@strapi/provider-email-nodemailer', () => {
       });
       expect(capabilities.auth).toEqual({
         type: 'login',
+        user: 'test@gmail.com',
       });
       expect(capabilities.auth).not.toHaveProperty('pass');
-      expect(capabilities.auth).not.toHaveProperty('user');
       expect(capabilities).not.toHaveProperty('pass');
     });
 
@@ -394,7 +394,7 @@ describe('@strapi/provider-email-nodemailer', () => {
       expect(capStr).not.toContain('refresh-token-value');
       expect(capStr).not.toContain('access-token-value');
       expect(capStr).not.toContain('client-id-value');
-      expect(capStr).not.toContain('oauth@gmail.com');
+      expect(capabilities.auth?.user).toBe('oauth@gmail.com');
     });
 
     it('includes feature flags for dkim, pool, rateLimiting', () => {
@@ -438,9 +438,9 @@ describe('@strapi/provider-email-nodemailer', () => {
       const capabilities = instance.getCapabilities();
 
       expect(capabilities.auth?.type).toBe('OAuth2');
+      expect(capabilities.auth?.user).toBe('oauth@gmail.com');
       expect(capabilities.features).toContain('oauth2');
       expect(capabilities.auth).not.toHaveProperty('clientSecret');
-      expect(capabilities.auth).not.toHaveProperty('user');
     });
   });
 });

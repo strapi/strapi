@@ -80,6 +80,7 @@ interface ProviderCapabilities {
   };
   auth?: {
     type?: string;
+    user?: string;
   };
   features?: string[];
 }
@@ -107,6 +108,7 @@ function getCapabilitiesFromOptions(opts: ProviderOptions): ProviderCapabilities
       const authType = typeof auth.type === 'string' ? auth.type : undefined;
       capabilities.auth = {
         type: authType || (auth.user ? 'login' : undefined),
+        user: typeof auth.user === 'string' ? auth.user : undefined,
       };
       if (authType === 'OAuth2') {
         features.push('oauth2');
