@@ -1,0 +1,36 @@
+name: Community PR Label
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check org membership and label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const org = 'strapi';
+            const username = context.payload.pull_request.user.login;
+
+            try {
+              await github.rest.orgs.checkMembershipForUser({ org, username });
+            } catch (error) {
+              if (error.status === 404 || error.status === 302) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  labels: ['source: community']
+                });
+                core.info(`Added "source: community" label — ${username} is not a member of ${org}`);
+              } else {
+                core.setFailed(`Failed to check membership: ${error.message}`);
+              }
+            }
