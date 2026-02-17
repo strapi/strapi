@@ -15,7 +15,7 @@ export const UnstableMediaLibrary = () => {
   });
 
   return (
-    <Page.Main>
+    <Page.Main width="100%">
       <Page.Title>{title}</Page.Title>
 
       <Routes>
