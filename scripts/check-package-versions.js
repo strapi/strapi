@@ -59,8 +59,8 @@ function shouldEnforceVersion(currentVersion, canonicalVersion) {
 }
 
 async function main() {
-  const fix = process.argv.includes('--fix');
-  const promptEach = process.argv.includes('--prompt');
+  const hasFixArg = process.argv.includes('--fix');
+  const hasPromptArg = process.argv.includes('--prompt');
   const canonicalVersion = getCanonicalVersion();
   const files = findPackageJsonFiles();
   const mismatches = [];
