@@ -191,14 +191,18 @@ const FileName = styled(Typography)`
 
 interface AssetCardProps {
   asset: File;
+  onAssetItemClick?: (assetId: number) => void;
 }
 
-const AssetCard = ({ asset }: AssetCardProps) => {
+const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
 
   return (
-    <StyledCard>
+    <StyledCard
+      onClick={() => onAssetItemClick?.(asset.id)}
+      style={{ cursor: onAssetItemClick ? 'pointer' : undefined }}
+    >
       <StyledCardHeader>
         <AssetPreview asset={asset} />
       </StyledCardHeader>
@@ -232,9 +236,10 @@ const AssetCard = ({ asset }: AssetCardProps) => {
 interface AssetsGridProps {
   assets: File[];
   folders?: Folder[];
+  onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsGrid = ({ assets, folders = [] }: AssetsGridProps) => {
+export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
   const { formatMessage } = useIntl();
 
   const totalItems = folders.length + assets.length;
@@ -275,7 +280,7 @@ export const AssetsGrid = ({ assets, folders = [] }: AssetsGridProps) => {
           direction="column"
           alignItems="stretch"
         >
-          <AssetCard asset={asset} />
+          <AssetCard asset={asset} onAssetItemClick={onAssetItemClick} />
         </Grid.Item>
       ))}
     </Grid.Root>

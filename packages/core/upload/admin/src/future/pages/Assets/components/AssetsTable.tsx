@@ -94,14 +94,18 @@ const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
 
 interface AssetRowProps {
   asset: File;
+  onAssetItemClick?: (assetId: number) => void;
 }
 
-const AssetRow = ({ asset }: AssetRowProps) => {
+const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
 
   return (
-    <StyledTr>
+    <StyledTr
+      onClick={() => onAssetItemClick?.(asset.id)}
+      style={{ cursor: onAssetItemClick ? 'pointer' : undefined }}
+    >
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <AssetPreviewCell asset={asset} />
@@ -232,9 +236,10 @@ const FolderRow = ({ folder }: FolderRowProps) => {
 interface AssetsTableProps {
   assets: File[];
   folders?: Folder[];
+  onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsTable = ({ assets, folders = [] }: AssetsTableProps) => {
+export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTableProps) => {
   const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
 
@@ -293,7 +298,7 @@ export const AssetsTable = ({ assets, folders = [] }: AssetsTableProps) => {
               <FolderRow key={`folder-${folder.id}`} folder={folder} />
             ))}
             {assets.map((asset) => (
-              <AssetRow key={asset.id} asset={asset} />
+              <AssetRow key={asset.id} asset={asset} onAssetItemClick={onAssetItemClick} />
             ))}
           </>
         )}

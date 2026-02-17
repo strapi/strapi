@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { Box, Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
+import { Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
 import {
   ArrowsCounterClockwise,
   Check,
@@ -19,6 +19,8 @@ import { abortUpload, useRetryCancelledFilesStreamMutation } from '../services/a
 import { useTypedDispatch, useTypedSelector } from '../store/hooks';
 import { closeUploadProgress, toggleMinimize, cancelUpload } from '../store/uploadProgress';
 import { getTranslationKey } from '../utils/translations';
+
+import { Drawer } from './Drawer';
 
 import type { FileProgress, FileProgressStatus } from '../store/uploadProgress';
 
@@ -253,16 +255,13 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
           </ChevronWrapper>
         </HeaderIconButton>
         {isComplete && (
-          <HeaderIconButton
-            onClick={handleClose}
+          <Drawer.CloseButton
+            onClose={handleClose}
             label={formatMessage({
               id: getTranslationKey('upload.progress.close'),
               defaultMessage: 'Close',
             })}
-            variant="ghost"
-          >
-            <Cross />
-          </HeaderIconButton>
+          />
         )}
       </Flex>
     </Flex>
@@ -385,39 +384,10 @@ const FileRowRenderer = ({ file }: { file: FileProgress }) => {
   return null;
 };
 
-const DialogContent = styled(Dialog.Content)`
-  position: fixed;
-  bottom: ${({ theme }) => theme.spaces[4]};
-  right: ${({ theme }) => theme.spaces[4]};
-  width: 400px;
-  background-color: ${({ theme }) => theme.colors.neutral0};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  box-shadow: ${({ theme }) => theme.shadows.popupShadow};
-  z-index: 1000;
-  overflow: hidden;
-  border: 1px solid ${({ theme }) => theme.colors.neutral150};
-
-  &:focus {
-    outline: none;
-  }
-`;
-
 const CompletedFilesList = styled(Flex)`
-  max-height: 200px;
-  overflow-y: auto;
   flex-direction: column;
   gap: ${({ theme }) => theme.spaces[2]};
   width: 100%;
-`;
-
-const AnimatedContent = styled.div<{ $isVisible: boolean }>`
-  display: grid;
-  grid-template-rows: ${({ $isVisible }) => ($isVisible ? '1fr' : '0fr')};
-  transition: grid-template-rows 0.3s ease-in-out;
-
-  > div {
-    overflow: hidden;
-  }
 `;
 
 export const UploadProgressDialog = () => {
@@ -444,40 +414,38 @@ export const UploadProgressDialog = () => {
   };
 
   return (
-    <Dialog.Root open={isVisible} modal={false}>
-      <Dialog.Portal>
-        <DialogContent
-          // The accessible name is set by Dialog.Title and is dynamic,
-          // use a data-testid to ensure a stable target for e2e tests
-          data-testid="upload-progress-dialog"
+    <Drawer.Root
+      isVisible={isVisible}
+      onClose={handleClose}
+      isContentExpanded={!isMinimized}
+      dataTestId="upload-progress-dialog"
+      maxHeight="34.2rem"
+    >
+      <Drawer.Header>
+        <DialogHeader handleClose={handleClose} />
+      </Drawer.Header>
+      <Drawer.Content>
+        <Flex
+          direction="column"
+          alignItems="stretch"
+          gap={4}
+          paddingTop={4}
+          paddingBottom={4}
+          paddingLeft={4}
+          paddingRight={4}
         >
-          <DialogHeader handleClose={handleClose} />
+          {currentFile && <FileRowRenderer file={currentFile} />}
 
-          <AnimatedContent $isVisible={!isMinimized}>
-            <Box>
-              <Flex
-                direction="column"
-                alignItems="stretch"
-                gap={4}
-                paddingTop={4}
-                paddingBottom={4}
-                paddingLeft={4}
-                paddingRight={4}
-              >
-                {currentFile && <FileRowRenderer file={currentFile} />}
-
-                {completedFiles.length > 0 && (
-                  <CompletedFilesList>
-                    {completedFiles.map((file) => (
-                      <FileRowRenderer key={file.index} file={file} />
-                    ))}
-                  </CompletedFilesList>
-                )}
-              </Flex>
-            </Box>
-          </AnimatedContent>
-        </DialogContent>
-      </Dialog.Portal>
-    </Dialog.Root>
+          {completedFiles.length > 0 && (
+            <CompletedFilesList>
+              {completedFiles.map((file) => (
+                <FileRowRenderer key={file.index} file={file} />
+              ))}
+            </CompletedFilesList>
+          )}
+        </Flex>
+      </Drawer.Content>
+      <Drawer.Footer />
+    </Drawer.Root>
   );
 };
