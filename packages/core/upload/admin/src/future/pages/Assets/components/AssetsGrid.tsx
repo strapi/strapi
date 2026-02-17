@@ -35,15 +35,12 @@ const StyledCard = styled(Card)`
  * FolderItem
  * -----------------------------------------------------------------------------------------------*/
 
-const FoldersContainer = styled.div`
-  grid-column: 1 / -1; // Span full width to force new row for assets
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${({ theme }) => theme.spaces[4]}; // 16px gap between folder items
+const FoldersRow = styled.div`
+  grid-column: 1 / -1;
 `;
 
 const FolderItem = styled(Flex)`
-  width: 256px;
+  width: 100%;
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`}; // 8px 12px
   align-items: center;
   gap: ${({ theme }) => theme.spaces[2]}; // 8px
@@ -258,11 +255,15 @@ export const AssetsGrid = ({ assets, folders = [] }: AssetsGridProps) => {
   return (
     <Grid.Root gap={4}>
       {folders.length > 0 && (
-        <FoldersContainer>
-          {folders.map((folder) => (
-            <FolderItemComponent key={`folder-${folder.id}`} folder={folder} />
-          ))}
-        </FoldersContainer>
+        <FoldersRow>
+          <Grid.Root gap={4}>
+            {folders.map((folder) => (
+              <Grid.Item col={3} m={4} s={6} xs={12} key={`folder-${folder.id}`}>
+                <FolderItemComponent folder={folder} />
+              </Grid.Item>
+            ))}
+          </Grid.Root>
+        </FoldersRow>
       )}
       {assets.map((asset) => (
         <Grid.Item
