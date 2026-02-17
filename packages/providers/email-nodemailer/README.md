@@ -830,13 +830,33 @@ isValidEmail('user@example.com'); // true
 isValidEmail('invalid'); // false
 ```
 
+### Normalization
+
+All email addresses are automatically normalized to lowercase when parsed or formatted (per RFC 5321 section 2.4):
+
+```js
+parseEmailAddress('User@Example.COM');
+// { name: null, email: 'user@example.com', original: 'User@Example.COM' }
+
+formatEmailAddress('Admin', 'Admin@EXAMPLE.ORG');
+// 'Admin <admin@example.org>'
+
+normalizeEmail('Mixed.Case@Example.COM');
+// 'mixed.case@example.com'
+```
+
 ### Supported RFC Standards
 
-| RFC      | Description                                                      |
-| -------- | ---------------------------------------------------------------- |
-| RFC 5322 | Internet Message Format (name <email>, quoted strings, comments) |
-| RFC 2047 | MIME encoded-words (=?charset?encoding?text?=)                   |
-| RFC 6531 | Internationalized Email (UTF-8 in addresses)                     |
+| RFC      | Description                                                            |
+| -------- | ---------------------------------------------------------------------- |
+| RFC 5321 | SMTP protocol - email address case-insensitive normalization           |
+| RFC 5322 | Internet Message Format (name <email>, quoted strings, comments)       |
+| RFC 2047 | MIME encoded-words (=?charset?encoding?text?=)                         |
+| RFC 2369 | List-\* headers (List-Unsubscribe, List-Help, etc.)                    |
+| RFC 3461 | Delivery Status Notifications (DSN)                                    |
+| RFC 6376 | DomainKeys Identified Mail (DKIM) signatures                           |
+| RFC 6531 | Internationalized Email (UTF-8 in local parts)                         |
+| RFC 6532 | Internationalized Email Headers (UTF-8 in header fields)               |
 
 ## Troubleshooting
 

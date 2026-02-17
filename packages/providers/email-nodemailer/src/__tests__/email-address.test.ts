@@ -2,6 +2,7 @@ import {
   parseEmailAddress,
   parseMultipleEmailAddresses,
   formatEmailAddress,
+  normalizeEmail,
   decodeRfc2047,
   encodeRfc2047Base64,
   encodeRfc2047QuotedPrintable,
@@ -146,6 +147,52 @@ describe('Email Address Parser', () => {
         expect(result.email).toBe('test@example.com');
       });
     });
+
+    describe('email normalization (RFC 5321)', () => {
+      it('should lowercase the entire email address', () => {
+        const result = parseEmailAddress('User@Example.COM');
+        expect(result.email).toBe('user@example.com');
+      });
+
+      it('should lowercase email in angle bracket format', () => {
+        const result = parseEmailAddress('John Doe <John.Doe@Example.COM>');
+        expect(result.email).toBe('john.doe@example.com');
+        expect(result.name).toBe('John Doe');
+      });
+
+      it('should lowercase email with comment format', () => {
+        const result = parseEmailAddress('Admin@EXAMPLE.ORG (Administrator)');
+        expect(result.email).toBe('admin@example.org');
+        expect(result.name).toBe('Administrator');
+      });
+
+      it('should preserve original casing in original field', () => {
+        const original = 'User@Example.COM';
+        const result = parseEmailAddress(original);
+        expect(result.email).toBe('user@example.com');
+        expect(result.original).toBe(original);
+      });
+
+      it('should handle mixed case with RFC 2047 encoding', () => {
+        const result = parseEmailAddress('=?UTF-8?B?U3RyYXBp?= <No-Reply@Strapi.IO>');
+        expect(result.email).toBe('no-reply@strapi.io');
+        expect(result.name).toBe('Strapi');
+      });
+    });
+  });
+
+  describe('normalizeEmail', () => {
+    it('should lowercase the email', () => {
+      expect(normalizeEmail('User@Example.COM')).toBe('user@example.com');
+    });
+
+    it('should handle already lowercase emails', () => {
+      expect(normalizeEmail('user@example.com')).toBe('user@example.com');
+    });
+
+    it('should handle empty string', () => {
+      expect(normalizeEmail('')).toBe('');
+    });
   });
 
   describe('parseMultipleEmailAddresses', () => {
@@ -204,6 +251,16 @@ describe('Email Address Parser', () => {
     it('should skip encoding when disabled', () => {
       const result = formatEmailAddress('Müller', 'mueller@example.com', { encodeNonAscii: false });
       expect(result).toBe('Müller <mueller@example.com>');
+    });
+
+    it('should normalize email to lowercase', () => {
+      const result = formatEmailAddress('John Doe', 'John.Doe@Example.COM');
+      expect(result).toBe('John Doe <john.doe@example.com>');
+    });
+
+    it('should normalize email without name to lowercase', () => {
+      const result = formatEmailAddress(null, 'Admin@EXAMPLE.ORG');
+      expect(result).toBe('admin@example.org');
     });
   });
 

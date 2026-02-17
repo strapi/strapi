@@ -21,6 +21,8 @@ export {
   parseMultipleEmailAddresses,
   // Formatting
   formatEmailAddress,
+  // Normalization (RFC 5321)
+  normalizeEmail,
   // RFC 2047 Encoding/Decoding
   decodeRfc2047,
   encodeRfc2047Base64,

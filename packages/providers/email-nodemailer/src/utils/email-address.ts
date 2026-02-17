@@ -10,11 +10,26 @@
 export interface ParsedEmailAddress {
   /** Display name (decoded if RFC 2047 encoded) */
   name: string | null;
-  /** Email address */
+  /** Email address (normalized to lowercase per RFC 5321) */
   email: string;
   /** Original unparsed string */
   original: string;
 }
+
+/**
+ * Normalizes an email address to lowercase.
+ *
+ * Per RFC 5321 section 2.4, the domain part of an email address is
+ * case-insensitive. While the local part is technically case-sensitive,
+ * in practice virtually all mail systems treat it as case-insensitive.
+ * Major providers (Gmail, Outlook, Yahoo, etc.) all normalize to lowercase.
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc5321#section-2.4
+ */
+export const normalizeEmail = (email: string): string => {
+  if (!email) return email;
+  return email.toLowerCase();
+};
 
 /**
  * Decodes RFC 2047 encoded-words
@@ -235,7 +250,7 @@ export const parseEmailAddress = (emailString: string | undefined | null): Parse
 
   if (angleMatch) {
     let name = angleMatch[1].trim();
-    const email = angleMatch[2].trim();
+    const email = normalizeEmail(angleMatch[2].trim());
 
     if (name) {
       name = unquoteString(name);
@@ -259,7 +274,7 @@ export const parseEmailAddress = (emailString: string | undefined | null): Parse
   if (trimmedDecoded.includes('@')) {
     return {
       name: comments.length > 0 ? comments[0] : null,
-      email: trimmedDecoded,
+      email: normalizeEmail(trimmedDecoded),
       original,
     };
   }
@@ -295,9 +310,10 @@ export const formatEmailAddress = (
   options: { encodeNonAscii?: boolean } = {}
 ): string => {
   const { encodeNonAscii = true } = options;
+  const normalizedEmail = normalizeEmail(email);
 
   if (!name) {
-    return email;
+    return normalizedEmail;
   }
 
   let formattedName = name;
@@ -306,7 +322,7 @@ export const formatEmailAddress = (
   // eslint-disable-next-line no-control-regex
   if (encodeNonAscii && /[^\x00-\x7F]/.test(name)) {
     formattedName = encodeRfc2047Base64(name);
-    return `${formattedName} <${email}>`;
+    return `${formattedName} <${normalizedEmail}>`;
   }
 
   // Check if name needs quoting (special characters)
@@ -314,10 +330,10 @@ export const formatEmailAddress = (
 
   if (needsQuoting && !formattedName.startsWith('"')) {
     const escaped = formattedName.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    return `"${escaped}" <${email}>`;
+    return `"${escaped}" <${normalizedEmail}>`;
   }
 
-  return `${formattedName} <${email}>`;
+  return `${formattedName} <${normalizedEmail}>`;
 };
 
 /**
@@ -336,7 +352,6 @@ export const isValidEmail = (email: string): boolean => {
     return false;
   }
 
-  // RFC 5322 compliant pattern (simplified)
   const emailPattern =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~\u0080-\uFFFF-]+@[a-zA-Z0-9\u0080-\uFFFF](?:[a-zA-Z0-9\u0080-\uFFFF-]{0,61}[a-zA-Z0-9\u0080-\uFFFF])?(?:\.[a-zA-Z0-9\u0080-\uFFFF](?:[a-zA-Z0-9\u0080-\uFFFF-]{0,61}[a-zA-Z0-9\u0080-\uFFFF])?)*$/;
 
