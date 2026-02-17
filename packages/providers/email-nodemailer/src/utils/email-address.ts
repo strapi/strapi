@@ -83,14 +83,39 @@ export const decodeRfc2047 = (encoded: string): string => {
  * @see https://datatracker.ietf.org/doc/html/rfc2047
  */
 export const encodeRfc2047Base64 = (str: string): string => {
-  // Check if encoding is needed (non-ASCII characters)
   // eslint-disable-next-line no-control-regex
   if (!/[^\x00-\x7F]/.test(str)) {
     return str;
   }
 
-  const encoded = Buffer.from(str, 'utf-8').toString('base64');
-  return `=?UTF-8?B?${encoded}?=`;
+  const bytes = Buffer.from(str, 'utf-8');
+  // RFC 2047 Section 2: encoded-word max 75 chars total
+  // =?UTF-8?B?...?= overhead is 12 chars, leaving 63 for base64 payload
+  // 63 base64 chars encode 47 bytes (floor(63 * 3 / 4) = 47)
+  const maxBytesPerChunk = 45; // conservative (produces 60 base64 chars = 72 total)
+
+  if (bytes.length <= maxBytesPerChunk) {
+    return `=?UTF-8?B?${bytes.toString('base64')}?=`;
+  }
+
+  const parts: string[] = [];
+  let offset = 0;
+
+  while (offset < bytes.length) {
+    let chunkEnd = Math.min(offset + maxBytesPerChunk, bytes.length);
+
+    // Avoid splitting in the middle of a multi-byte UTF-8 character
+    // UTF-8 continuation bytes start with 10xxxxxx (0x80-0xBF)
+    while (chunkEnd < bytes.length && bytes[chunkEnd] >= 0x80 && bytes[chunkEnd] < 0xc0) {
+      chunkEnd -= 1;
+    }
+
+    const chunk = bytes.subarray(offset, chunkEnd);
+    parts.push(`=?UTF-8?B?${chunk.toString('base64')}?=`);
+    offset = chunkEnd;
+  }
+
+  return parts.join(' ');
 };
 
 /**
@@ -164,12 +189,16 @@ export const extractComments = (str: string): { text: string; comments: string[]
       }
       depth += 1;
     } else if (!inQuotes && char === ')') {
-      depth -= 1;
-      if (depth === 0) {
-        comments.push(currentComment.trim());
-        currentComment = '';
-      } else if (depth > 0) {
-        currentComment += char;
+      if (depth <= 0) {
+        result += char;
+      } else {
+        depth -= 1;
+        if (depth === 0) {
+          comments.push(currentComment.trim());
+          currentComment = '';
+        } else {
+          currentComment += char;
+        }
       }
     } else if (depth > 0) {
       currentComment += char;
@@ -352,6 +381,18 @@ export const isValidEmail = (email: string): boolean => {
     return false;
   }
 
+  // RFC 5321 length limits: local max 64, domain max 255, total max 320
+  const atIndex = email.indexOf('@');
+  if (atIndex < 1 || atIndex > 64) return false;
+
+  const domain = email.slice(atIndex + 1);
+  if (domain.length === 0 || domain.length > 255) return false;
+  if (email.length > 320) return false;
+
+  // No leading/trailing/consecutive dots in the local part (RFC 5321)
+  const local = email.slice(0, atIndex);
+  if (local.startsWith('.') || local.endsWith('.') || local.includes('..')) return false;
+
   const emailPattern =
     /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~\u0080-\uFFFF-]+@[a-zA-Z0-9\u0080-\uFFFF](?:[a-zA-Z0-9\u0080-\uFFFF-]{0,61}[a-zA-Z0-9\u0080-\uFFFF])?(?:\.[a-zA-Z0-9\u0080-\uFFFF](?:[a-zA-Z0-9\u0080-\uFFFF-]{0,61}[a-zA-Z0-9\u0080-\uFFFF])?)*$/;
 
@@ -376,35 +417,32 @@ export const parseMultipleEmailAddresses = (
   let current = '';
   let inQuotes = false;
   let depth = 0;
-  let prevChar = '';
+  let escaped = false;
 
   for (const char of emailsString) {
-    // Handle escape sequences
-    if (prevChar === '\\') {
+    if (escaped) {
       current += char;
-      prevChar = char;
+      escaped = false;
+    } else if (char === '\\') {
+      escaped = true;
+      current += char;
     } else if (char === '"') {
       inQuotes = !inQuotes;
       current += char;
-      prevChar = char;
     } else if (!inQuotes && (char === '<' || char === '(')) {
       depth += 1;
       current += char;
-      prevChar = char;
     } else if (!inQuotes && (char === '>' || char === ')')) {
       depth -= 1;
       current += char;
-      prevChar = char;
     } else if (!inQuotes && char === ',' && depth === 0) {
       const trimmed = current.trim();
       if (trimmed) {
         addresses.push(trimmed);
       }
       current = '';
-      prevChar = char;
     } else {
       current += char;
-      prevChar = char;
     }
   }
 

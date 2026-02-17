@@ -221,6 +221,16 @@ describe('Email Address Parser', () => {
       expect(parseMultipleEmailAddresses('')).toEqual([]);
       expect(parseMultipleEmailAddresses(null)).toEqual([]);
     });
+
+    it('should handle escaped backslash before quote correctly', () => {
+      // \\" = escaped backslash + real quote -> should toggle inQuotes
+      const result = parseMultipleEmailAddresses(
+        '"Back\\\\" <a@example.com>, b@example.com'
+      );
+      expect(result).toHaveLength(2);
+      expect(result[0].email).toBe('a@example.com');
+      expect(result[1].email).toBe('b@example.com');
+    });
   });
 
   describe('formatEmailAddress', () => {
@@ -296,6 +306,46 @@ describe('Email Address Parser', () => {
       const result = encodeRfc2047Base64('Hello');
       expect(result).toBe('Hello');
     });
+
+    it('should split long non-ASCII names into multiple encoded words (RFC 2047 75-char limit)', () => {
+      // 100 copies of a 2-byte Unicode char = 200 bytes, way over the 45-byte chunk limit
+      const longName = '\u00fc'.repeat(100);
+      const result = encodeRfc2047Base64(longName);
+
+      // Must produce multiple encoded words separated by space
+      const parts = result.split(' ');
+      expect(parts.length).toBeGreaterThan(1);
+
+      // Each part must be a valid encoded word and <= 75 chars
+      for (const part of parts) {
+        expect(part).toMatch(/^=\?UTF-8\?B\?[A-Za-z0-9+/=]+\?=$/);
+        expect(part.length).toBeLessThanOrEqual(75);
+      }
+
+      // Must decode back to the original
+      const decoded = parts
+        .map((p) => {
+          const b64 = p.replace(/^=\?UTF-8\?B\?/, '').replace(/\?=$/, '');
+          return Buffer.from(b64, 'base64').toString('utf-8');
+        })
+        .join('');
+      expect(decoded).toBe(longName);
+    });
+
+    it('should not split mid-character for multi-byte UTF-8', () => {
+      // Emoji is 4 bytes in UTF-8
+      const emojiName = '\u{1F600}'.repeat(20);
+      const result = encodeRfc2047Base64(emojiName);
+      const parts = result.split(' ');
+
+      const decoded = parts
+        .map((p) => {
+          const b64 = p.replace(/^=\?UTF-8\?B\?/, '').replace(/\?=$/, '');
+          return Buffer.from(b64, 'base64').toString('utf-8');
+        })
+        .join('');
+      expect(decoded).toBe(emojiName);
+    });
   });
 
   describe('encodeRfc2047QuotedPrintable', () => {
@@ -336,6 +386,18 @@ describe('Email Address Parser', () => {
       expect(result.text).toBe('"(not a comment)" text');
       expect(result.comments).toEqual([]);
     });
+
+    it('should handle unmatched closing parenthesis without crashing', () => {
+      const result = extractComments('text ) more text');
+      expect(result.text).toBe('text ) more text');
+      expect(result.comments).toEqual([]);
+    });
+
+    it('should handle unmatched closing paren followed by valid comment', () => {
+      const result = extractComments('a ) b (valid)');
+      expect(result.text).toBe('a ) b');
+      expect(result.comments).toEqual(['valid']);
+    });
   });
 
   describe('unquoteString', () => {
@@ -367,8 +429,43 @@ describe('Email Address Parser', () => {
     });
 
     it('should handle internationalized emails (RFC 6531)', () => {
-      // Note: This depends on the email pattern supporting Unicode
       expect(isValidEmail('user@example.com')).toBe(true);
+    });
+
+    it('should reject consecutive dots in local part', () => {
+      expect(isValidEmail('user..name@example.com')).toBe(false);
+    });
+
+    it('should reject leading dot in local part', () => {
+      expect(isValidEmail('.user@example.com')).toBe(false);
+    });
+
+    it('should reject trailing dot in local part', () => {
+      expect(isValidEmail('user.@example.com')).toBe(false);
+    });
+
+    it('should reject local part exceeding 64 characters', () => {
+      const longLocal = 'a'.repeat(65);
+      expect(isValidEmail(`${longLocal}@example.com`)).toBe(false);
+    });
+
+    it('should accept local part at exactly 64 characters', () => {
+      const maxLocal = 'a'.repeat(64);
+      expect(isValidEmail(`${maxLocal}@example.com`)).toBe(true);
+    });
+
+    it('should reject domain exceeding 255 characters', () => {
+      const longDomain = `${'a'.repeat(63)}.${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(63)}.com`;
+      expect(isValidEmail(`user@${longDomain}`)).toBe(false);
+    });
+
+    it('should reject email exceeding 320 characters total', () => {
+      const local = 'a'.repeat(64);
+      // Build a domain that pushes total over 320: 64 + 1(@) + 256 = 321
+      const domain = `${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(63)}.${'e'.repeat(62)}.com`;
+      const email = `${local}@${domain}`;
+      expect(email.length).toBeGreaterThan(320);
+      expect(isValidEmail(email)).toBe(false);
     });
   });
 });

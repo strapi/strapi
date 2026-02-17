@@ -184,14 +184,14 @@ export default {
     return {
       send(options: SendOptions): Promise<SentMessageInfo> {
         const message: SendMailOptions = {
-          from: options.from || settings.defaultFrom,
+          from: options.from ?? settings.defaultFrom,
           to: options.to,
           cc: options.cc,
           bcc: options.bcc,
-          replyTo: options.replyTo || settings.defaultReplyTo,
+          replyTo: options.replyTo ?? settings.defaultReplyTo,
           subject: options.subject,
-          text: options.text || options.html,
-          html: options.html || options.text,
+          text: options.text ?? options.html,
+          html: options.html ?? options.text,
         };
 
         // Addressing

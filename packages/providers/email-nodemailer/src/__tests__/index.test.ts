@@ -137,6 +137,46 @@ describe('@strapi/provider-email-nodemailer', () => {
       );
     });
 
+    it('respects empty string for text without falling back to html', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: '',
+        html: '<p>HTML only</p>',
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: '',
+          html: '<p>HTML only</p>',
+        })
+      );
+    });
+
+    it('respects empty string for html without falling back to text', async () => {
+      mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
+
+      const instance = provider.init(providerOptions, settings);
+
+      await instance.send({
+        to: 'recipient@example.com',
+        subject: 'Test Subject',
+        text: 'Plain text',
+        html: '',
+      });
+
+      expect(mockSendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'Plain text',
+          html: '',
+        })
+      );
+    });
+
     it('passes priority and headers to sendMail', async () => {
       mockSendMail.mockResolvedValueOnce({ messageId: '<test@example.com>' });
 
