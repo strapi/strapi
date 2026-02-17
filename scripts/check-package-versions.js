@@ -86,10 +86,10 @@ async function main() {
     return;
   }
 
-  if (fix) {
+  if (hasFixArg) {
     let fixed = 0;
     for (const { file, rel, current } of mismatches) {
-      if (promptEach) {
+      if (hasPromptArg) {
         const answer = await ask(`${rel}: ${current} → ${canonicalVersion}? (y/n) `);
         if (answer !== 'y' && answer !== 'yes') continue;
       }
