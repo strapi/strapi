@@ -141,27 +141,51 @@ await strapi.plugin('email').service('email').send({
 
 The following fields are supported:
 
-| Field       | Description                                                               |
-| ----------- | ------------------------------------------------------------------------- |
-| from        | Email address of the sender                                               |
-| to          | Comma separated list or an array of recipients                            |
-| replyTo     | Email address to which replies are sent                                   |
-| cc          | Comma separated list or an array of recipients                            |
-| bcc         | Comma separated list or an array of recipients                            |
-| subject     | Subject of the email                                                      |
-| text        | Plaintext version of the message                                          |
-| html        | HTML version of the message                                               |
-| attachments | Array of objects See: https://nodemailer.com/message/attachments/         |
-| priority    | Email priority: `'high'`, `'normal'`, or `'low'` - sets X-Priority header |
-| headers     | Custom SMTP headers object (e.g. `{ 'X-Custom': 'value' }`)               |
-| icalEvent   | Calendar event invitation (iCalendar format)                              |
-| list        | RFC 2369 List-\* headers - enables one-click unsubscribe in Gmail/Outlook |
-| dsn         | Delivery Status Notification - request bounce/success reports             |
-| envelope    | Custom SMTP envelope for bounce handling (MAIL FROM / RCPT TO)            |
-| amp         | AMP4Email content for interactive emails                                  |
-| auth        | Per-message OAuth2 credentials for multi-user sending                     |
+| Field                | Description                                                                    |
+| -------------------- | ------------------------------------------------------------------------------ |
+| **Core**             |                                                                                |
+| from                 | Email address of the sender                                                    |
+| to                   | Comma separated list or an array of recipients                                 |
+| cc                   | Comma separated list or an array of recipients                                 |
+| bcc                  | Comma separated list or an array of recipients                                 |
+| replyTo              | Email address to which replies are sent                                        |
+| sender               | Address for the Sender: field (for "on behalf of" emails)                      |
+| subject              | Subject of the email                                                           |
+| **Content**          |                                                                                |
+| text                 | Plaintext version of the message                                               |
+| html                 | HTML version of the message                                                    |
+| watchHtml            | Apple Watch specific HTML version                                              |
+| amp                  | AMP4Email content for interactive emails                                       |
+| attachments          | Array of attachment objects. See: https://nodemailer.com/message/attachments/  |
+| alternatives         | Array of alternative content (e.g. Markdown alongside HTML)                    |
+| **Headers & Meta**   |                                                                                |
+| headers              | Custom SMTP headers object (e.g. `{ 'X-Custom': 'value' }`)                   |
+| priority             | Email priority: `'high'`, `'normal'`, or `'low'`                               |
+| messageId            | Custom Message-ID (random generated if not set)                                |
+| date                 | Custom Date value (current UTC if not set)                                     |
+| xMailer              | Control X-Mailer header (`false` to remove, string to override)                |
+| **Threading**        |                                                                                |
+| inReplyTo            | Message-ID of the email being replied to                                       |
+| references           | Message-ID list this email references (array or space-separated string)        |
+| **Encoding**         |                                                                                |
+| textEncoding         | Force content-transfer-encoding: `'quoted-printable'` or `'base64'`            |
+| encoding             | Encoding for the message content                                               |
+| normalizeHeaderKey   | Function to normalize header key casing                                        |
+| **Advanced**         |                                                                                |
+| icalEvent            | Calendar event invitation (iCalendar format)                                   |
+| list                 | RFC 2369 List-\* headers - enables one-click unsubscribe in Gmail/Outlook      |
+| envelope             | Custom SMTP envelope for bounce handling (MAIL FROM / RCPT TO)                 |
+| dkim                 | Per-message DKIM signing options (overrides transport-level DKIM)               |
+| attachDataUrls       | Convert `data:` URIs in HTML to embedded CID attachments (`true`/`false`)      |
+| dsn                  | Delivery Status Notification - request bounce/success reports                  |
+| auth                 | Per-message OAuth2 credentials for multi-user sending                          |
+| **Security**         |                                                                                |
+| disableUrlAccess     | Fail if content tries to load from a URL (`true`/`false`)                      |
+| disableFileAccess    | Fail if content tries to load from a file path (`true`/`false`)                |
+| **Raw MIME**         |                                                                                |
+| raw                  | Pre-built MIME message (skips message generation, envelope must be set)         |
 
-All other [nodemailer message options](https://nodemailer.com/message/) are also supported.
+Every field listed above is explicitly allowlisted. Unknown properties are silently dropped to prevent injection.
 
 ### Sending with priority and custom headers
 
@@ -291,6 +315,98 @@ await strapi
     <p>This is an interactive AMP email!</p>
   </body>
 </html>`,
+  });
+```
+
+### Email threading (replies & conversations)
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'someone@example.com',
+    subject: 'Re: Project Update',
+    text: 'Thanks for the update!',
+    inReplyTo: '<original-msg-id@example.com>',
+    references: ['<original-msg-id@example.com>', '<prev-msg-id@example.com>'],
+  });
+```
+
+### Sending on behalf of (Sender field)
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    from: 'CEO <ceo@example.com>',
+    sender: 'assistant@example.com',
+    to: 'board@example.com',
+    subject: 'Quarterly Report',
+    text: 'Please find the report attached',
+  });
+```
+
+### Per-message DKIM signing
+
+Override transport-level DKIM settings for a specific message:
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'someone@example.com',
+    subject: 'Signed Email',
+    text: 'This email has a specific DKIM signature',
+    dkim: {
+      domainName: 'special.example.com',
+      keySelector: 'mail2026',
+      privateKey: process.env.DKIM_PRIVATE_KEY_SPECIAL,
+    },
+  });
+```
+
+### Alternative content formats
+
+Provide multiple representations of the same content (email clients pick the best match):
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'someone@example.com',
+    subject: 'Multi-format Email',
+    text: 'Plain text version',
+    html: '<p>HTML version</p>',
+    alternatives: [
+      {
+        contentType: 'text/x-web-markdown',
+        content: '**Markdown** version',
+      },
+    ],
+  });
+```
+
+### Raw MIME passthrough
+
+Send a pre-built MIME message directly (skips all message generation):
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'someone@example.com',
+    subject: 'ignored',
+    text: 'ignored',
+    envelope: {
+      from: 'sender@example.com',
+      to: 'someone@example.com',
+    },
+    raw: 'From: sender@example.com\r\nTo: someone@example.com\r\nSubject: Raw\r\n\r\nPre-built body',
   });
 ```
 
@@ -532,7 +648,7 @@ providerOptions: {
 
 ### Security options
 
-When processing emails from untrusted sources, you can restrict file and URL access:
+Restrict file and URL access at the transport level (applies to all messages):
 
 ```js
 module.exports = ({ env }) => ({
@@ -557,6 +673,23 @@ module.exports = ({ env }) => ({
   },
 });
 ```
+
+You can also set these per message when processing content from untrusted sources:
+
+```js
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'someone@example.com',
+    subject: 'User-generated content',
+    html: userProvidedHtml,
+    disableUrlAccess: true,
+    disableFileAccess: true,
+  });
+```
+
+**Security note:** This provider uses an explicit allowlist for all message fields. Unknown or unsupported properties are silently dropped, preventing property injection attacks.
 
 ## Provider methods
 
