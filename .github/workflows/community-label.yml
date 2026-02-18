@@ -27,9 +27,9 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: context.payload.pull_request.number,
-                  labels: ['source: community']
+                  labels: ['community']
                 });
-                core.info(`Added "source: community" label — ${username} is not a member of ${org}`);
+                core.info(`Added "community" label — ${username} is not a member of ${org}`);
               } else {
                 core.setFailed(`Failed to check membership: ${error.message}`);
               }
