@@ -54,13 +54,19 @@ const GuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
   return <GuidedTourTooltipImpl {...props}>{children}</GuidedTourTooltipImpl>;
 };
 
+// TODO: This should be exported from the design system
+const setOpacity = (hex: string, alpha: number) =>
+  `${hex}${Math.floor(alpha * 255)
+    .toString(16)
+    .padStart(2, '0')}`;
+
 const GuidedTourOverlay = styled(Box)`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(50, 50, 77, 0.2);
+  background-color: ${({ theme }) => setOpacity(theme.colors.neutral800, 0.2)};
   z-index: 10;
 `;
 
