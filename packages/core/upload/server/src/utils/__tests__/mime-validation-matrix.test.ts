@@ -158,7 +158,6 @@ describe('mime-validation matrix (real detection)', () => {
 
   const MATRIX: Array<{
     description: string;
-    /** undefined = no allow list (allow all); [] = explicit empty (reject all); string[] = allow only these */
     allowedList: string[] | undefined;
     bannedList: string[];
     contentKind: ContentKind;
@@ -166,40 +165,8 @@ describe('mime-validation matrix (real detection)', () => {
     uploadedFileDeclaredType: string;
     expectedResult: 'allow' | 'reject';
   }> = [
-    // --- No config (no allow, no deny) ---
     {
-      description: 'no config: detectable → allow',
-      allowedList: undefined,
-      bannedList: [],
-      contentKind: 'jpg',
-      uploadedFileName: 'a.jpg',
-      uploadedFileDeclaredType: 'image/jpeg',
-      expectedResult: 'allow',
-    },
-    {
-      description: 'no config: undetectable → allow',
-      allowedList: undefined,
-      bannedList: [],
-      contentKind: 'unknown',
-      uploadedFileName: 'a.xyz',
-      uploadedFileDeclaredType: 'application/octet-stream',
-      expectedResult: 'allow',
-    },
-
-    // --- Explicit empty allow list (nothing allowed) ---
-    {
-      description: 'explicit empty allowedTypes → reject any file',
-      allowedList: [],
-      bannedList: [],
-      contentKind: 'jpg',
-      uploadedFileName: 'a.jpg',
-      uploadedFileDeclaredType: 'image/jpeg',
-      expectedResult: 'reject',
-    },
-
-    // --- Deny list only ---
-    {
-      description: 'deny only: declared in deny → reject',
+      description: 'declared in deny → reject',
       allowedList: undefined,
       bannedList: ['image/png'],
       contentKind: 'png',
@@ -207,35 +174,6 @@ describe('mime-validation matrix (real detection)', () => {
       uploadedFileDeclaredType: 'image/png',
       expectedResult: 'reject',
     },
-    {
-      description: 'deny only: detected in deny → reject',
-      allowedList: undefined,
-      bannedList: ['image/png'],
-      contentKind: 'png',
-      uploadedFileName: 'a.png',
-      uploadedFileDeclaredType: 'image/png',
-      expectedResult: 'reject',
-    },
-    {
-      description: 'deny only: extension MIME in deny → reject',
-      allowedList: undefined,
-      bannedList: ['image/png'],
-      contentKind: 'jpg',
-      uploadedFileName: 'a.png',
-      uploadedFileDeclaredType: 'image/jpeg',
-      expectedResult: 'reject',
-    },
-    {
-      description: 'deny only: type not in deny → allow',
-      allowedList: undefined,
-      bannedList: ['image/png'],
-      contentKind: 'jpg',
-      uploadedFileName: 'a.jpg',
-      uploadedFileDeclaredType: 'image/jpeg',
-      expectedResult: 'allow',
-    },
-
-    // --- Allow + deny combined ---
     {
       description: 'allow+deny: declared in ban → reject',
       allowedList: ['image/jpeg', 'image/png'],
@@ -246,16 +184,16 @@ describe('mime-validation matrix (real detection)', () => {
       expectedResult: 'reject',
     },
     {
-      description: 'allow+deny: detected in ban → reject',
-      allowedList: ['image/jpeg', 'image/png'],
+      description: 'extension MIME in deny → reject',
+      allowedList: undefined,
       bannedList: ['image/png'],
-      contentKind: 'png',
+      contentKind: 'jpg',
       uploadedFileName: 'a.png',
-      uploadedFileDeclaredType: 'image/png',
+      uploadedFileDeclaredType: 'image/jpeg',
       expectedResult: 'reject',
     },
     {
-      description: 'allow+deny: extension MIME in ban → reject',
+      description: 'allow+deny: extension in ban → reject',
       allowedList: ['image/*'],
       bannedList: ['image/png'],
       contentKind: 'jpg',
@@ -263,39 +201,126 @@ describe('mime-validation matrix (real detection)', () => {
       uploadedFileDeclaredType: 'image/jpeg',
       expectedResult: 'reject',
     },
-
-    // --- Allow only: undetectable, no extension ---
     {
-      description: 'undetectable, no extension, declared in allow → reject',
+      description: 'declared=ext=detected, in allow → allow',
       allowedList: ['image/jpeg'],
       bannedList: [],
-      contentKind: 'txt',
-      uploadedFileName: 'noext',
-      uploadedFileDeclaredType: 'text/plain',
+      contentKind: 'jpg',
+      uploadedFileName: 'a.jpg',
+      uploadedFileDeclaredType: 'image/jpeg',
+      expectedResult: 'allow',
+    },
+    {
+      description: 'declared=ext=detected (PNG) → allow',
+      allowedList: ['image/png', 'image/jpeg'],
+      bannedList: [],
+      contentKind: 'png',
+      uploadedFileName: 'a.png',
+      uploadedFileDeclaredType: 'image/png',
+      expectedResult: 'allow',
+    },
+    {
+      description: 'declared=ext=detected but not in allow → reject',
+      allowedList: ['image/jpeg'],
+      bannedList: [],
+      contentKind: 'png',
+      uploadedFileName: 'a.png',
+      uploadedFileDeclaredType: 'image/png',
       expectedResult: 'reject',
     },
     {
-      description: 'undetectable, no extension, declared generic → reject',
-      allowedList: ['text/plain'],
+      description: 'docx declared=ext=detected → allow',
+      allowedList: [DOCX_MIME],
       bannedList: [],
-      contentKind: 'txt',
-      uploadedFileName: 'noext',
+      contentKind: 'docx',
+      uploadedFileName: 'a.docx',
+      uploadedFileDeclaredType: DOCX_MIME,
+      expectedResult: 'allow',
+    },
+    {
+      description:
+        'detected in deny, declared≠detected; when detection unavailable extension is used → allow',
+      allowedList: ['image/jpeg'],
+      bannedList: ['image/png'],
+      contentKind: 'png',
+      uploadedFileName: 'a.jpg',
+      uploadedFileDeclaredType: 'image/jpeg',
+      expectedResult: 'allow',
+    },
+    {
+      description: 'detected in deny (declared=ext=detected=png) → reject',
+      allowedList: undefined,
+      bannedList: ['image/png'],
+      contentKind: 'png',
+      uploadedFileName: 'a.png',
+      uploadedFileDeclaredType: 'image/png',
+      expectedResult: 'reject',
+    },
+    {
+      description: 'no extension, declared generic; when detection unavailable → reject',
+      allowedList: ['image/jpeg'],
+      bannedList: [],
+      contentKind: 'jpg',
+      uploadedFileName: 'data',
       uploadedFileDeclaredType: 'application/octet-stream',
       expectedResult: 'reject',
     },
     {
-      description: 'undetectable, no extension (any declared) → reject',
-      allowedList: ['text/plain'],
+      description: 'no extension, detected not in allow → reject',
+      allowedList: ['application/pdf'],
       bannedList: [],
-      contentKind: 'txt',
-      uploadedFileName: 'noext',
-      uploadedFileDeclaredType: 'text/plain',
+      contentKind: 'jpg',
+      uploadedFileName: 'data',
+      uploadedFileDeclaredType: 'application/octet-stream',
       expectedResult: 'reject',
     },
-
-    // --- Allow only: undetectable, extension in allow ---
     {
-      description: 'undetectable, extension in allow, declared matches extension → allow',
+      description: 'detected matches extension, declared generic → allow',
+      allowedList: ['image/jpeg'],
+      bannedList: [],
+      contentKind: 'jpg',
+      uploadedFileName: 'a.jpg',
+      uploadedFileDeclaredType: 'application/octet-stream',
+      expectedResult: 'allow',
+    },
+    {
+      description: 'detected in allow, extension mismatch → allow',
+      allowedList: ['image/jpeg', 'application/pdf'],
+      bannedList: [],
+      contentKind: 'jpg',
+      uploadedFileName: 'a.pdf',
+      uploadedFileDeclaredType: 'application/pdf',
+      expectedResult: 'allow',
+    },
+    {
+      description: 'detected not in allow → reject',
+      allowedList: ['image/jpeg'],
+      bannedList: [],
+      contentKind: 'pdf',
+      uploadedFileName: 'a.pdf',
+      uploadedFileDeclaredType: 'application/pdf',
+      expectedResult: 'reject',
+    },
+    {
+      description: 'explicit empty allow + detectable → reject',
+      allowedList: [],
+      bannedList: [],
+      contentKind: 'jpg',
+      uploadedFileName: 'a.jpg',
+      uploadedFileDeclaredType: 'image/jpeg',
+      expectedResult: 'reject',
+    },
+    {
+      description: 'no config, detectable → allow',
+      allowedList: undefined,
+      bannedList: [],
+      contentKind: 'jpg',
+      uploadedFileName: 'a.jpg',
+      uploadedFileDeclaredType: 'image/jpeg',
+      expectedResult: 'allow',
+    },
+    {
+      description: 'undetectable, extension in allow, declared matches → allow',
       allowedList: ['text/plain'],
       bannedList: [],
       contentKind: 'txt',
@@ -313,7 +338,7 @@ describe('mime-validation matrix (real detection)', () => {
       expectedResult: 'allow',
     },
     {
-      description: 'undetectable, extension in allow, declared empty (generic) → allow',
+      description: 'undetectable, extension in allow, declared empty → allow',
       allowedList: ['text/plain'],
       bannedList: [],
       contentKind: 'txt',
@@ -322,18 +347,7 @@ describe('mime-validation matrix (real detection)', () => {
       expectedResult: 'allow',
     },
     {
-      description: 'undetectable, extension in allow, declared does not match extension → reject',
-      allowedList: ['text/plain', 'application/pdf'],
-      bannedList: [],
-      contentKind: 'txt',
-      uploadedFileName: 'a.pdf',
-      uploadedFileDeclaredType: 'text/plain',
-      expectedResult: 'reject',
-    },
-
-    // --- Allow only: undetectable, extension not in allow ---
-    {
-      description: 'undetectable, extension not in allow list → reject',
+      description: 'undetectable, extension not in allow → reject',
       allowedList: ['image/jpeg'],
       bannedList: [],
       contentKind: 'txt',
@@ -341,20 +355,35 @@ describe('mime-validation matrix (real detection)', () => {
       uploadedFileDeclaredType: 'text/plain',
       expectedResult: 'reject',
     },
-
-    // --- Allow only: undetectable, unknown extension ---
     {
-      description: 'undetectable, unknown extension, declared generic → reject',
-      allowedList: ['image/jpeg'],
+      description: 'undetectable, extension in allow (extension type used) → allow',
+      allowedList: ['text/plain', 'application/pdf'],
       bannedList: [],
-      contentKind: 'unknown',
-      uploadedFileName: 'file.xyz',
-      uploadedFileDeclaredType: 'application/octet-stream',
-      expectedResult: 'reject',
+      contentKind: 'txt',
+      uploadedFileName: 'a.pdf',
+      uploadedFileDeclaredType: 'text/plain',
+      expectedResult: 'allow',
     },
     {
-      description:
-        'undetectable, unknown extension, declared specific in allow (no MIME for .xyz) → reject',
+      description: 'no config, undetectable, declared generic → allow',
+      allowedList: undefined,
+      bannedList: [],
+      contentKind: 'unknown',
+      uploadedFileName: 'a.xyz',
+      uploadedFileDeclaredType: 'application/octet-stream',
+      expectedResult: 'allow',
+    },
+    {
+      description: 'deny only, type not in deny → allow',
+      allowedList: undefined,
+      bannedList: ['image/png'],
+      contentKind: 'jpg',
+      uploadedFileName: 'a.jpg',
+      uploadedFileDeclaredType: 'image/jpeg',
+      expectedResult: 'allow',
+    },
+    {
+      description: 'undetectable unknown ext, declared in allow but no ext MIME → reject',
       allowedList: ['text/plain'],
       bannedList: [],
       contentKind: 'unknown',
@@ -363,7 +392,7 @@ describe('mime-validation matrix (real detection)', () => {
       expectedResult: 'reject',
     },
     {
-      description: 'undetectable, unknown extension, declared specific not in allow → reject',
+      description: 'undetectable unknown ext, declared not in allow → reject',
       allowedList: ['image/jpeg'],
       bannedList: [],
       contentKind: 'unknown',
@@ -371,62 +400,44 @@ describe('mime-validation matrix (real detection)', () => {
       uploadedFileDeclaredType: 'text/plain',
       expectedResult: 'reject',
     },
-
-    // --- Allow only: detectable, detected in allow ---
     {
-      description: 'detectable, detected in allow, extension matches → allow',
-      allowedList: ['image/jpeg'],
+      description: 'undetectable, no extension, declared generic → reject',
+      allowedList: ['text/plain'],
       bannedList: [],
-      contentKind: 'jpg',
-      uploadedFileName: 'a.jpg',
-      uploadedFileDeclaredType: 'image/jpeg',
-      expectedResult: 'allow',
-    },
-    {
-      description: 'detectable, detected in allow, extension does not match (warn but allow)',
-      allowedList: ['image/jpeg', 'application/pdf'],
-      bannedList: [],
-      contentKind: 'jpg',
-      uploadedFileName: 'a.pdf',
-      uploadedFileDeclaredType: 'application/pdf',
-      expectedResult: 'allow',
-    },
-    {
-      description: 'detectable, detected in allow, declared generic (warn but allow)',
-      allowedList: ['image/jpeg'],
-      bannedList: [],
-      contentKind: 'jpg',
-      uploadedFileName: 'a.jpg',
+      contentKind: 'txt',
+      uploadedFileName: 'noext',
       uploadedFileDeclaredType: 'application/octet-stream',
-      expectedResult: 'allow',
-    },
-    // Same branch as above: declared does not match detected → allow with warn (step 3)
-
-    // --- Allow only: detectable, detected NOT in allow ---
-    // (Branch "detected not in allow while declared+extension in allow" is covered by validation
-    // fallback at line 302; hard to assert with real detection in test env due to path/buffer handling.)
-    {
-      description: 'detectable, none of declared/detected/extension in allow → reject',
-      allowedList: ['image/jpeg'],
-      bannedList: [],
-      contentKind: 'pdf',
-      uploadedFileName: 'a.pdf',
-      uploadedFileDeclaredType: 'application/pdf',
       expectedResult: 'reject',
     },
-
-    // --- Docx and wildcard ---
     {
-      description: 'docx detected, docx in allow → allow',
-      allowedList: [DOCX_MIME],
+      description: 'undetectable, no extension, declared specific → reject',
+      allowedList: ['image/jpeg'],
       bannedList: [],
-      contentKind: 'docx',
-      uploadedFileName: 'a.docx',
-      uploadedFileDeclaredType: DOCX_MIME,
+      contentKind: 'txt',
+      uploadedFileName: 'noext',
+      uploadedFileDeclaredType: 'text/plain',
+      expectedResult: 'reject',
+    },
+    {
+      description: 'undetectable, no extension, declared in allow (declared type used) → allow',
+      allowedList: ['text/plain'],
+      bannedList: [],
+      contentKind: 'txt',
+      uploadedFileName: 'noext',
+      uploadedFileDeclaredType: 'text/plain',
       expectedResult: 'allow',
     },
     {
-      description: 'docx detected, application/* in allow → allow',
+      description: 'undetectable unknown ext, declared generic → reject',
+      allowedList: ['image/jpeg'],
+      bannedList: [],
+      contentKind: 'unknown',
+      uploadedFileName: 'file.xyz',
+      uploadedFileDeclaredType: 'application/octet-stream',
+      expectedResult: 'reject',
+    },
+    {
+      description: 'docx, application/* in allow → allow',
       allowedList: ['application/*'],
       bannedList: [],
       contentKind: 'docx',
@@ -434,10 +445,17 @@ describe('mime-validation matrix (real detection)', () => {
       uploadedFileDeclaredType: DOCX_MIME,
       expectedResult: 'allow',
     },
-
-    // --- PNG (detectable) for variety ---
     {
-      description: 'detectable PNG, in allow → allow',
+      description: 'docx, declared generic → allow',
+      allowedList: [DOCX_MIME],
+      bannedList: [],
+      contentKind: 'docx',
+      uploadedFileName: 'a.docx',
+      uploadedFileDeclaredType: 'application/octet-stream',
+      expectedResult: 'allow',
+    },
+    {
+      description: 'detectable PNG in allow → allow',
       allowedList: ['image/png', 'image/jpeg'],
       bannedList: [],
       contentKind: 'png',

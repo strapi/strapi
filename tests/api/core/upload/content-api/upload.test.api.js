@@ -569,8 +569,77 @@ describe('Upload plugin', () => {
       strapi.config.set('plugin::upload.security', {});
     });
 
+    /**
+     * These tests prove that MIME type is detected from file content and used for
+     * allow/deny and for the stored file.mime. "rejects when content is detectable
+     * but not in allow list" would pass without detection (declared/extension would
+     * allow); it only rejects because detection runs and finds image/jpeg. "stored
+     * mime is detected type for PDF" proves the saved file gets the detected MIME.
+     */
+    describe('MIME type detection (content-based)', () => {
+      const utilsPath = (name) => path.join(__dirname, '../utils', name);
+
+      test('stored mime is detected type for PDF when declared type is generic', async () => {
+        strapi.config.set('plugin::upload.security', { allowedTypes: ['application/pdf'] });
+        const res = await rq({
+          method: 'POST',
+          url: '/upload',
+          formData: {
+            files: {
+              path: utilsPath('rec.pdf'),
+              filename: 'document.pdf',
+              contentType: 'application/octet-stream',
+            },
+          },
+        });
+        expect(res.statusCode).toBe(201);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].mime).toBe('application/pdf');
+        await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+      });
+
+      test('stored mime is detected type for JPEG when filename has no extension and Content-Type is generic', async () => {
+        strapi.config.set('plugin::upload.security', { allowedTypes: ['image/jpeg'] });
+        const res = await rq({
+          method: 'POST',
+          url: '/upload',
+          formData: {
+            files: {
+              path: utilsPath('rec.jpg'),
+              filename: 'data',
+              contentType: 'application/octet-stream',
+            },
+          },
+        });
+        expect(res.statusCode).toBe(201);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].mime).toBe('image/jpeg');
+        await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+      });
+
+      test('rejects when content is detectable but not in allow list (extension/declared would allow)', async () => {
+        strapi.config.set('plugin::upload.security', { allowedTypes: ['application/pdf'] });
+        // Real JPEG content sent as fake.pdf – only content detection reveals image/jpeg, so we reject.
+        const res = await rq({
+          method: 'POST',
+          url: '/upload',
+          formData: {
+            files: {
+              path: utilsPath('rec.jpg'),
+              filename: 'fake.pdf',
+              contentType: 'application/pdf',
+            },
+          },
+        });
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toBeDefined();
+        expect(res.body.error.code || res.body.error.message).toBeTruthy();
+      });
+    });
+
     describe('validation matrix (real detection)', () => {
       const utilsPath = (name) => path.join(__dirname, '../utils', name);
+
       const fixturePaths = {
         jpg: utilsPath('rec.jpg'),
         png: utilsPath('strapi.png'),
@@ -582,79 +651,16 @@ describe('Upload plugin', () => {
 
       const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
-      // allowedList: undefined = no allow list (allow all); [] = explicit empty (reject all); string[] = allow only these
+      // allowedList: undefined = allow all; [] = allow none; string[] = allow only these.
       const MATRIX = [
         {
-          description: 'no config: detectable → allow',
-          allowedList: undefined,
-          bannedList: [],
-          contentKind: 'jpg',
-          uploadedFileName: 'a.jpg',
-          uploadedFileDeclaredType: 'image/jpeg',
-          expectedResult: 'allow',
-        },
-        {
-          description: 'no config: undetectable → allow',
-          allowedList: undefined,
-          bannedList: [],
-          contentKind: 'unknown',
-          uploadedFileName: 'a.xyz',
-          uploadedFileDeclaredType: 'application/octet-stream',
-          expectedResult: 'allow',
-        },
-        {
-          description: 'explicit empty allowedTypes → reject any file',
-          allowedList: [],
-          bannedList: [],
-          contentKind: 'jpg',
-          uploadedFileName: 'a.jpg',
-          uploadedFileDeclaredType: 'image/jpeg',
-          expectedResult: 'reject',
-        },
-        {
-          description: 'explicit empty allowedTypes + undetectable file → reject',
-          allowedList: [],
-          bannedList: [],
-          contentKind: 'unknown',
-          uploadedFileName: 'a.xyz',
-          uploadedFileDeclaredType: 'application/octet-stream',
-          expectedResult: 'reject',
-        },
-        {
-          description: 'deny only: declared in deny → reject',
+          description: 'declared in deny → reject',
           allowedList: undefined,
           bannedList: ['image/png'],
           contentKind: 'png',
           uploadedFileName: 'a.png',
           uploadedFileDeclaredType: 'image/png',
           expectedResult: 'reject',
-        },
-        {
-          description: 'deny only: detected in deny → reject',
-          allowedList: undefined,
-          bannedList: ['image/png'],
-          contentKind: 'png',
-          uploadedFileName: 'a.png',
-          uploadedFileDeclaredType: 'image/png',
-          expectedResult: 'reject',
-        },
-        {
-          description: 'deny only: extension MIME in deny → reject',
-          allowedList: undefined,
-          bannedList: ['image/png'],
-          contentKind: 'jpg',
-          uploadedFileName: 'a.png',
-          uploadedFileDeclaredType: 'image/jpeg',
-          expectedResult: 'reject',
-        },
-        {
-          description: 'deny only: type not in deny → allow',
-          allowedList: undefined,
-          bannedList: ['image/png'],
-          contentKind: 'jpg',
-          uploadedFileName: 'a.jpg',
-          uploadedFileDeclaredType: 'image/jpeg',
-          expectedResult: 'allow',
         },
         {
           description: 'allow+deny: declared in ban → reject',
@@ -666,16 +672,16 @@ describe('Upload plugin', () => {
           expectedResult: 'reject',
         },
         {
-          description: 'allow+deny: detected in ban → reject',
-          allowedList: ['image/jpeg', 'image/png'],
+          description: 'extension MIME in deny → reject',
+          allowedList: undefined,
           bannedList: ['image/png'],
-          contentKind: 'png',
+          contentKind: 'jpg',
           uploadedFileName: 'a.png',
-          uploadedFileDeclaredType: 'image/png',
+          uploadedFileDeclaredType: 'image/jpeg',
           expectedResult: 'reject',
         },
         {
-          description: 'allow+deny: extension MIME in ban → reject',
+          description: 'allow+deny: extension in ban → reject',
           allowedList: ['image/*'],
           bannedList: ['image/png'],
           contentKind: 'jpg',
@@ -684,30 +690,120 @@ describe('Upload plugin', () => {
           expectedResult: 'reject',
         },
         {
-          description: 'undetectable, no extension, declared in allow → reject',
+          description: 'declared=ext=detected, in allow → allow',
           allowedList: ['image/jpeg'],
           bannedList: [],
-          contentKind: 'txt',
-          uploadedFileName: 'noext',
-          uploadedFileDeclaredType: 'text/plain',
+          contentKind: 'jpg',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'image/jpeg',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'declared=ext=detected (PNG), in allow → allow',
+          allowedList: ['image/png', 'image/jpeg'],
+          bannedList: [],
+          contentKind: 'png',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/png',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'declared=ext=detected but not in allow → reject',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'png',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/png',
           expectedResult: 'reject',
         },
         {
-          description: 'undetectable, no extension, declared generic → reject',
-          allowedList: ['text/plain'],
+          description: 'docx declared=ext=detected, in allow → allow',
+          allowedList: [DOCX_MIME],
           bannedList: [],
-          contentKind: 'txt',
-          uploadedFileName: 'noext',
+          contentKind: 'docx',
+          uploadedFileName: 'a.docx',
+          uploadedFileDeclaredType: DOCX_MIME,
+          expectedResult: 'allow',
+        },
+        {
+          description: 'detected in deny, declared≠detected (.jpg name, PNG content) → reject',
+          allowedList: ['image/jpeg'],
+          bannedList: ['image/png'],
+          contentKind: 'png',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'image/jpeg',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'detected in deny (declared=ext=detected=png, deny png) → reject',
+          allowedList: undefined,
+          bannedList: ['image/png'],
+          contentKind: 'png',
+          uploadedFileName: 'a.png',
+          uploadedFileDeclaredType: 'image/png',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'no extension, detected in allow, declared generic → allow',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'data',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'no extension, detected in allow (allow all) → allow',
+          allowedList: undefined,
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'data',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'no extension, detected not in allow → reject',
+          allowedList: ['application/pdf'],
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'data',
           uploadedFileDeclaredType: 'application/octet-stream',
           expectedResult: 'reject',
         },
         {
-          description: 'undetectable, no extension (any declared) → reject',
-          allowedList: ['text/plain'],
+          description: 'detected matches extension, declared generic → allow',
+          allowedList: ['image/jpeg'],
           bannedList: [],
-          contentKind: 'txt',
-          uploadedFileName: 'noext',
-          uploadedFileDeclaredType: 'text/plain',
+          contentKind: 'jpg',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'detected in allow, extension mismatch (warn but allow)',
+          allowedList: ['image/jpeg', 'application/pdf'],
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.pdf',
+          uploadedFileDeclaredType: 'application/pdf',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'detected not in allow → reject',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'pdf',
+          uploadedFileName: 'a.pdf',
+          uploadedFileDeclaredType: 'application/pdf',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'explicit empty allow list + detectable → reject',
+          allowedList: [],
+          bannedList: [],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'image/jpeg',
           expectedResult: 'reject',
         },
         {
@@ -729,7 +825,7 @@ describe('Upload plugin', () => {
           expectedResult: 'allow',
         },
         {
-          description: 'undetectable, extension in allow, declared empty (generic) → allow',
+          description: 'undetectable, extension in allow, declared empty → allow',
           allowedList: ['text/plain'],
           bannedList: [],
           contentKind: 'txt',
@@ -738,17 +834,7 @@ describe('Upload plugin', () => {
           expectedResult: 'allow',
         },
         {
-          description:
-            'undetectable, extension in allow, declared does not match extension → reject',
-          allowedList: ['text/plain', 'application/pdf'],
-          bannedList: [],
-          contentKind: 'txt',
-          uploadedFileName: 'a.pdf',
-          uploadedFileDeclaredType: 'text/plain',
-          expectedResult: 'reject',
-        },
-        {
-          description: 'undetectable, extension not in allow list → reject',
+          description: 'undetectable, extension not in allow → reject',
           allowedList: ['image/jpeg'],
           bannedList: [],
           contentKind: 'txt',
@@ -757,17 +843,43 @@ describe('Upload plugin', () => {
           expectedResult: 'reject',
         },
         {
-          description: 'undetectable, unknown extension, declared generic → reject',
-          allowedList: ['image/jpeg'],
+          description: 'undetectable, extension in allow (extension type used) → allow',
+          allowedList: ['text/plain', 'application/pdf'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'a.pdf',
+          uploadedFileDeclaredType: 'text/plain',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'explicit empty allow + undetectable with extension → reject',
+          allowedList: [],
           bannedList: [],
           contentKind: 'unknown',
-          uploadedFileName: 'file.xyz',
+          uploadedFileName: 'a.xyz',
           uploadedFileDeclaredType: 'application/octet-stream',
           expectedResult: 'reject',
         },
         {
-          description:
-            'undetectable, unknown extension, declared specific in allow (no MIME for .xyz) → reject',
+          description: 'no config (allow all), undetectable, declared generic → allow',
+          allowedList: undefined,
+          bannedList: [],
+          contentKind: 'unknown',
+          uploadedFileName: 'a.xyz',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'deny only, type not in deny → allow',
+          allowedList: undefined,
+          bannedList: ['image/png'],
+          contentKind: 'jpg',
+          uploadedFileName: 'a.jpg',
+          uploadedFileDeclaredType: 'image/jpeg',
+          expectedResult: 'allow',
+        },
+        {
+          description: 'undetectable unknown ext, declared in allow but no ext MIME → reject',
           allowedList: ['text/plain'],
           bannedList: [],
           contentKind: 'unknown',
@@ -776,7 +888,7 @@ describe('Upload plugin', () => {
           expectedResult: 'reject',
         },
         {
-          description: 'undetectable, unknown extension, declared specific not in allow → reject',
+          description: 'undetectable unknown ext, declared not in allow → reject',
           allowedList: ['image/jpeg'],
           bannedList: [],
           contentKind: 'unknown',
@@ -785,49 +897,40 @@ describe('Upload plugin', () => {
           expectedResult: 'reject',
         },
         {
-          description: 'detectable, detected in allow, extension matches → allow',
-          allowedList: ['image/jpeg'],
+          description: 'undetectable, no extension, declared generic → reject',
+          allowedList: ['text/plain'],
           bannedList: [],
-          contentKind: 'jpg',
-          uploadedFileName: 'a.jpg',
-          uploadedFileDeclaredType: 'image/jpeg',
-          expectedResult: 'allow',
-        },
-        {
-          description: 'detectable, detected in allow, extension does not match (warn but allow)',
-          allowedList: ['image/jpeg', 'application/pdf'],
-          bannedList: [],
-          contentKind: 'jpg',
-          uploadedFileName: 'a.pdf',
-          uploadedFileDeclaredType: 'application/pdf',
-          expectedResult: 'allow',
-        },
-        {
-          description: 'detectable, detected in allow, declared generic (warn but allow)',
-          allowedList: ['image/jpeg'],
-          bannedList: [],
-          contentKind: 'jpg',
-          uploadedFileName: 'a.jpg',
+          contentKind: 'txt',
+          uploadedFileName: 'noext',
           uploadedFileDeclaredType: 'application/octet-stream',
-          expectedResult: 'allow',
-        },
-        {
-          description: 'detectable, none of declared/detected/extension in allow → reject',
-          allowedList: ['image/jpeg'],
-          bannedList: [],
-          contentKind: 'pdf',
-          uploadedFileName: 'a.pdf',
-          uploadedFileDeclaredType: 'application/pdf',
           expectedResult: 'reject',
         },
         {
-          description: 'docx detected, docx in allow → allow',
-          allowedList: [DOCX_MIME],
+          description: 'undetectable, no extension, declared specific → reject',
+          allowedList: ['image/jpeg'],
           bannedList: [],
-          contentKind: 'docx',
-          uploadedFileName: 'a.docx',
-          uploadedFileDeclaredType: DOCX_MIME,
+          contentKind: 'txt',
+          uploadedFileName: 'noext',
+          uploadedFileDeclaredType: 'text/plain',
+          expectedResult: 'reject',
+        },
+        {
+          description: 'undetectable, no extension, declared in allow (declared type used) → allow',
+          allowedList: ['text/plain'],
+          bannedList: [],
+          contentKind: 'txt',
+          uploadedFileName: 'noext',
+          uploadedFileDeclaredType: 'text/plain',
           expectedResult: 'allow',
+        },
+        {
+          description: 'undetectable unknown ext, declared generic → reject',
+          allowedList: ['image/jpeg'],
+          bannedList: [],
+          contentKind: 'unknown',
+          uploadedFileName: 'file.xyz',
+          uploadedFileDeclaredType: 'application/octet-stream',
+          expectedResult: 'reject',
         },
         {
           description: 'docx detected, application/* in allow → allow',
@@ -839,21 +942,12 @@ describe('Upload plugin', () => {
           expectedResult: 'allow',
         },
         {
-          description: 'docx detected, declared generic (application/octet-stream) → allow',
+          description: 'docx detected, declared generic → allow',
           allowedList: [DOCX_MIME],
           bannedList: [],
           contentKind: 'docx',
           uploadedFileName: 'a.docx',
           uploadedFileDeclaredType: 'application/octet-stream',
-          expectedResult: 'allow',
-        },
-        {
-          description: 'detectable PNG, in allow → allow',
-          allowedList: ['image/png', 'image/jpeg'],
-          bannedList: [],
-          contentKind: 'png',
-          uploadedFileName: 'a.png',
-          uploadedFileDeclaredType: 'image/png',
           expectedResult: 'allow',
         },
       ];
