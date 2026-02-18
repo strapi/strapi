@@ -95,7 +95,7 @@
     "@testing-library/user-event": "14.6.1",
     "@types/fs-extra": "11.0.4",
     "@types/micromatch": "^4.0.9",
-    "@types/pluralize": "0.0.30",
+    "@types/pluralize": "0.0.32",
     "koa": "2.16.3",
     "koa-body": "6.0.1",
     "react": "18.3.1",
