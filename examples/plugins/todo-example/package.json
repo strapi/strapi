@@ -24,12 +24,9 @@
     "lint": "eslint ."
   },
   "peerDependencies": {
-    "@strapi/strapi": "workspace:*"
-  },
-  "dependencies": {
     "@strapi/design-system": "2.1.2",
     "@strapi/icons": "2.1.2",
-    "eslint": "8.50.0",
+    "@strapi/strapi": "workspace:*",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
@@ -37,7 +34,8 @@
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.2.0",
-    "@strapi/strapi": "workspace:*"
+    "@strapi/strapi": "workspace:*",
+    "eslint": "8.50.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

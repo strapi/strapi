@@ -1,5 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import type { InlineConfig, UserConfig } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
+import resolveFrom from 'resolve-from';
 import react from '@vitejs/plugin-react-swc';
 
 import { getUserConfig } from '../core/config';
@@ -7,6 +10,70 @@ import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
 import type { BuildContext } from '../create-build-context';
 import { buildFilesPlugin } from './plugins';
+
+/**
+ * Core packages required by the Strapi admin panel that should always
+ * be deduplicated to avoid multiple instances in the bundle.
+ * https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
+ */
+const CORE_ADMIN_DEPS = ['react', 'react-dom', 'react-router-dom', 'styled-components'];
+
+/**
+ * Collects dependency names from local plugins that are also resolvable from
+ * the project root. These are added to Vite's `resolve.dedupe` to prevent
+ * bundling duplicate copies when local plugins have their own node_modules
+ * with overlapping dependencies.
+ *
+ * Without this, each local plugin can cause Vite to bundle a separate copy
+ * of large packages like `@strapi/design-system` or `@strapi/icons`, leading
+ * to excessive memory usage and OOM errors during the admin panel build.
+ *
+ * @see {@link https://github.com/strapi/strapi/issues/22946}
+ */
+const getLocalPluginDedupe = (ctx: BuildContext): string[] => {
+  const pluginDeps = new Set<string>(CORE_ADMIN_DEPS);
+
+  for (const plugin of ctx.plugins) {
+    /**
+     * Module plugins are resolved from the project's node_modules, so Vite
+     * handles their deduplication natively. Only local plugins (resolved via
+     * a filesystem path) can introduce duplicate dependency trees.
+     */
+    const localPluginPath = plugin.path;
+
+    if (localPluginPath) {
+      const packageJsonPath = path.join(localPluginPath, 'package.json');
+
+      if (fs.existsSync(packageJsonPath)) {
+        try {
+          const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+
+          for (const dep of Object.keys(pkg.dependencies ?? {})) {
+            pluginDeps.add(dep);
+          }
+
+          for (const dep of Object.keys(pkg.peerDependencies ?? {})) {
+            pluginDeps.add(dep);
+          }
+        } catch {
+          /**
+           * Silently ignore plugins with a malformed package.json –
+           * they will still work, just without dedupe optimisation.
+           */
+        }
+      }
+    }
+  }
+
+  /**
+   * Only deduplicate packages that are actually resolvable from the project
+   * root to avoid breaking resolution for plugin-specific dependencies that
+   * are not available at the top level.
+   */
+  return Array.from(pluginDeps).filter(
+    (dep) => !!resolveFrom.silent(ctx.cwd, path.join(dep, 'package.json'))
+  );
+};
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
@@ -101,8 +168,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       ],
     },
     resolve: {
-      // https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
-      dedupe: ['react', 'react-dom', 'react-router-dom', 'styled-components'],
+      dedupe: getLocalPluginDedupe(ctx),
     },
     plugins: [react(), buildFilesPlugin(ctx)],
   };
@@ -175,4 +241,9 @@ const mergeConfigWithUserConfig = async (config: InlineConfig, ctx: BuildContext
   return config;
 };
 
-export { mergeConfigWithUserConfig, resolveProductionConfig, resolveDevelopmentConfig };
+export {
+  mergeConfigWithUserConfig,
+  resolveProductionConfig,
+  resolveDevelopmentConfig,
+  getLocalPluginDedupe,
+};
