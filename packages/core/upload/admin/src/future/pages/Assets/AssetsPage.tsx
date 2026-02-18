@@ -176,7 +176,7 @@ export const AssetsPage = () => {
   const { formatMessage } = useIntl();
 
   const { currentFolderId } = useFolderNavigation();
-  const title = useFolderTitle(currentFolderId);
+  const { title } = useFolderTitle(currentFolderId);
 
   // View state
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);

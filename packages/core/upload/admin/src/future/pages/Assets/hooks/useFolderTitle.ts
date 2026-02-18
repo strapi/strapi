@@ -1,27 +1,59 @@
 import { useIntl } from 'react-intl';
 
+import { useGetAssetsQuery } from '../../../services/assets';
 import { useGetFolderQuery } from '../../../services/folders';
 import { getTranslationKey } from '../../../utils/translations';
 
-export const useFolderTitle = (currentFolderId: number | null): string => {
+export interface FolderTitle {
+  title: string;
+}
+
+export const useFolderTitle = (currentFolderId: number | null): FolderTitle => {
   const { formatMessage } = useIntl();
   const { data: currentFolder, isLoading } = useGetFolderQuery(
     { id: currentFolderId! },
     { skip: currentFolderId === null }
   );
+  const { data: rootAssetsData, isLoading: isRootAssetsLoading } = useGetAssetsQuery(
+    { folder: null, pageSize: 1 },
+    { skip: currentFolderId !== null }
+  );
 
-  const mediaLibraryLabel = formatMessage({
-    id: getTranslationKey('plugin.name'),
-    defaultMessage: 'Media Library',
+  const homeLabel = formatMessage({
+    id: getTranslationKey('plugin.home'),
+    defaultMessage: 'Home',
   });
 
   if (currentFolderId === null) {
-    return mediaLibraryLabel;
+    if (isRootAssetsLoading) {
+      return { title: homeLabel };
+    }
+
+    const fileCount = rootAssetsData?.pagination?.total ?? 0;
+    const itemCountLabel = formatMessage(
+      {
+        id: getTranslationKey('header.content.item-count'),
+        defaultMessage: '{count, plural, =1 {# item} other {# items}}',
+      },
+      { count: fileCount }
+    );
+
+    return { title: `${homeLabel} (${itemCountLabel})` };
   }
 
   if (isLoading) {
-    return mediaLibraryLabel;
+    return { title: homeLabel };
   }
 
-  return currentFolder?.name ?? mediaLibraryLabel;
+  const folderName = currentFolder?.name ?? homeLabel;
+  const fileCount = currentFolder?.files?.count ?? 0;
+  const itemCountLabel = formatMessage(
+    {
+      id: getTranslationKey('header.content.item-count'),
+      defaultMessage: '{count, plural, =1 {# item} other {# items}}',
+    },
+    { count: fileCount }
+  );
+
+  return { title: `${folderName} (${itemCountLabel})` };
 };

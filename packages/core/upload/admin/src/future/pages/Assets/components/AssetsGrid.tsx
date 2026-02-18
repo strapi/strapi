@@ -35,7 +35,7 @@ const StyledCard = styled(Card)`
  * FolderItem
  * -----------------------------------------------------------------------------------------------*/
 
-const FoldersRow = styled.div`
+const FoldersRow = styled(Box)`
   grid-column: 1 / -1;
 `;
 
