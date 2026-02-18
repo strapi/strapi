@@ -16,21 +16,17 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const org = 'strapi';
-            const username = context.payload.pull_request.user.login;
+            const { login } = context.payload.pull_request.user;
+            const association = context.payload.pull_request.author_association;
 
-            try {
-              await github.rest.orgs.checkMembershipForUser({ org, username });
-            } catch (error) {
-              if (error.status === 404 || error.status === 302) {
-                await github.rest.issues.addLabels({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  labels: ['community']
-                });
-                core.info(`Added "community" label — ${username} is not a member of ${org}`);
-              } else {
-                core.setFailed(`Failed to check membership: ${error.message}`);
-              }
+            if (!['MEMBER', 'OWNER'].includes(association)) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: ['community']
+              });
+              core.info(`Added "community" label — ${login} has association "${association}"`);
+            } else {
+              core.info(`Skipped — ${login} is a ${association.toLowerCase()}`);
             }
