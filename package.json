@@ -161,7 +161,7 @@
     "lerna": "8.2.0",
     "lint-staged": "15.2.10",
     "lodash": "4.17.23",
-    "minimatch": "9.0.3",
+    "minimatch": "10.2.1",
     "npm-run-all": "4.1.5",
     "nx": "20.4.6",
     "plop": "4.0.1",
