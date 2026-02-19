@@ -1,4 +1,5 @@
 import { enableFeatureMiddleware } from '../../routes/utils';
+import type { Core } from '@strapi/types';
 
 export default {
   type: 'admin',
@@ -38,4 +39,4 @@ export default {
       },
     },
   ],
-};
+} satisfies Core.RouterInput;
