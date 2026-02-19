@@ -11,6 +11,7 @@
   "asset-details.duration": "Duration",
   "asset-details.creationDate": "Creation date",
   "asset-details.lastUpdated": "Last updated",
+  "asset-details.createdBy": "Created by",
   "asset-details.extension": "Extension",
   "asset-details.assetId": "Asset ID",
   "asset-details.fileName": "File name",

@@ -1,9 +1,7 @@
+import * as Dialog from '@radix-ui/react-dialog';
 import { render, screen, fireEvent } from '@tests/utils';
 
 import { Drawer } from '../Drawer';
-
-const defaultTitle = { id: 'test.title', defaultMessage: 'Test title' };
-const defaultDescription = { id: 'test.description', defaultMessage: 'Test description' };
 
 const renderDrawer = (
   props: {
@@ -11,8 +9,8 @@ const renderDrawer = (
     onClose?: () => void;
     dataTestId?: string;
     isContentExpanded?: boolean;
-    title?: { id: string; defaultMessage: string };
-    description?: { id: string; defaultMessage: string };
+    title?: string;
+    description?: string;
   } = {}
 ) => {
   const onClose = props.onClose ?? jest.fn();
@@ -22,18 +20,14 @@ const renderDrawer = (
       onClose={onClose}
       dataTestId={props.dataTestId ?? 'test-drawer'}
       isContentExpanded={props.isContentExpanded}
-      title={props.title ?? defaultTitle}
-      description={props.description ?? defaultDescription}
     >
-      <Drawer.Header>
-        <span data-testid="drawer-header">Header content</span>
-      </Drawer.Header>
+      <Dialog.Title>{props.title ?? 'Test title'}</Dialog.Title>
+      {props.description && <Dialog.Description>{props.description}</Dialog.Description>}
+      <span data-testid="drawer-header">Header content</span>
       <Drawer.Content>
         <span data-testid="drawer-content">Body content</span>
       </Drawer.Content>
-      <Drawer.Footer>
-        <span data-testid="drawer-footer">Footer content</span>
-      </Drawer.Footer>
+      <span data-testid="drawer-footer">Footer content</span>
     </Drawer.Root>
   );
 };
@@ -56,22 +50,14 @@ describe('Drawer', () => {
       expect(screen.getByTestId('test-drawer')).toHaveAttribute('data-state', 'open');
 
       rerender(
-        <Drawer.Root
-          isVisible={false}
-          onClose={jest.fn()}
-          dataTestId="test-drawer"
-          title={defaultTitle}
-          description={defaultDescription}
-        >
-          <Drawer.Header>
-            <span data-testid="drawer-header">Header content</span>
-          </Drawer.Header>
+        <Drawer.Root isVisible={false} onClose={jest.fn()} dataTestId="test-drawer">
+          <Dialog.Title>Test title</Dialog.Title>
+          <Dialog.Description>Test description</Dialog.Description>
+          <span data-testid="drawer-header">Header content</span>
           <Drawer.Content>
             <span data-testid="drawer-content">Body content</span>
           </Drawer.Content>
-          <Drawer.Footer>
-            <span data-testid="drawer-footer">Footer content</span>
-          </Drawer.Footer>
+          <span data-testid="drawer-footer">Footer content</span>
         </Drawer.Root>
       );
       expect(screen.queryByTestId('test-drawer')).not.toBeInTheDocument();
@@ -82,15 +68,13 @@ describe('Drawer', () => {
       expect(screen.getByTestId('custom-drawer-id')).toBeInTheDocument();
     });
 
-    it('renders accessible title for screen readers', () => {
-      renderDrawer({ title: { id: 'custom.title', defaultMessage: 'Custom title' } });
+    it('renders accessible title from content', () => {
+      renderDrawer({ title: 'Custom title' });
       expect(screen.getByText('Custom title')).toBeInTheDocument();
     });
 
-    it('renders accessible description when provided', () => {
-      renderDrawer({
-        description: { id: 'custom.description', defaultMessage: 'Custom description' },
-      });
+    it('renders accessible description from content when provided', () => {
+      renderDrawer({ description: 'Custom description' });
       expect(screen.getByText('Custom description')).toBeInTheDocument();
     });
   });
@@ -99,16 +83,10 @@ describe('Drawer', () => {
     it('renders and calls onClose when clicked', () => {
       const onClose = jest.fn();
       render(
-        <Drawer.Root
-          isVisible
-          onClose={onClose}
-          dataTestId="test-drawer"
-          title={defaultTitle}
-          description={defaultDescription}
-        >
-          <Drawer.Header>
-            <Drawer.CloseButton onClose={onClose} />
-          </Drawer.Header>
+        <Drawer.Root isVisible onClose={onClose} dataTestId="test-drawer">
+          <Dialog.Title>Test title</Dialog.Title>
+          <Dialog.Description>Test description</Dialog.Description>
+          <Drawer.CloseButton onClose={onClose} />
           <Drawer.Content>Content</Drawer.Content>
         </Drawer.Root>
       );
@@ -148,18 +126,14 @@ describe('Drawer', () => {
           onClose={jest.fn()}
           dataTestId="test-drawer"
           isContentExpanded={false}
-          title={defaultTitle}
-          description={defaultDescription}
         >
-          <Drawer.Header>
-            <span data-testid="drawer-header">Header content</span>
-          </Drawer.Header>
+          <Dialog.Title>Test title</Dialog.Title>
+          <Dialog.Description>Test description</Dialog.Description>
+          <span data-testid="drawer-header">Header content</span>
           <Drawer.Content>
             <span data-testid="drawer-content">Body content</span>
           </Drawer.Content>
-          <Drawer.Footer>
-            <span data-testid="drawer-footer">Footer content</span>
-          </Drawer.Footer>
+          <span data-testid="drawer-footer">Footer content</span>
         </Drawer.Root>
       );
       expect(

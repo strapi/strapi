@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { ScrollArea, IconButton, VisuallyHidden } from '@strapi/design-system';
+import { Box, ScrollArea, IconButton } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
-import { useIntl, type MessageDescriptor } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { keyframes, styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
@@ -11,10 +11,6 @@ import { keyframes, styled } from 'styled-components';
  * -----------------------------------------------------------------------------------------------*/
 
 interface DrawerContextValue {
-  /** Accessible title for screen readers (required for accessibility) */
-  title: MessageDescriptor;
-  /** Accessible description for screen readers. Omit to use aria-describedby={undefined} */
-  description: MessageDescriptor;
   animationDirection?: 'up' | 'left';
   isVisible?: boolean;
   onClose?: () => void;
@@ -94,7 +90,6 @@ interface DrawerContainerProps {
   $height?: number | string;
   $maxHeight?: number | string;
   $animationDirection?: 'up' | 'left';
-  $zIndex?: number;
 }
 
 const DrawerContainer = styled(Dialog.Content)<DrawerContainerProps>`
@@ -132,7 +127,7 @@ const DrawerContainer = styled(Dialog.Content)<DrawerContainerProps>`
   }
 `;
 
-const DrawerContent = styled.div`
+const DrawerContent = styled(Box)`
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -149,7 +144,7 @@ interface AnimatedBodyProps {
   $isVisible: boolean;
 }
 
-const AnimatedBody = styled.div<AnimatedBodyProps>`
+const AnimatedBody = styled(Box)<AnimatedBodyProps>`
   display: grid;
   flex: 1;
   min-height: 0;
@@ -175,11 +170,8 @@ const DrawerRoot = ({
   height,
   maxHeight,
   dataTestId,
-  title,
-  description,
   children,
 }: DrawerContextValue & React.PropsWithChildren) => {
-  const { formatMessage } = useIntl();
   const contextValue: DrawerContextValue = {
     animationDirection,
     isVisible,
@@ -189,8 +181,6 @@ const DrawerRoot = ({
     width,
     height,
     maxHeight,
-    title,
-    description,
   };
 
   return (
@@ -207,32 +197,15 @@ const DrawerRoot = ({
             $height={height}
             $maxHeight={maxHeight}
             data-testid={dataTestId}
-            {...(!description ? { 'aria-describedby': undefined } : {})}
-            forceMount
             onPointerDownOutside={(e) => e.preventDefault()}
             onInteractOutside={(e) => e.preventDefault()}
           >
-            <VisuallyHidden>
-              <Dialog.Title>{formatMessage(title)}</Dialog.Title>
-              {description ? (
-                <Dialog.Description>{formatMessage(description)}</Dialog.Description>
-              ) : null}
-            </VisuallyHidden>
             <DrawerContent>{children}</DrawerContent>
           </DrawerContainer>
         </Dialog.Portal>
       </Dialog.Root>
     </DrawerContext.Provider>
   );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * Drawer.Header - composable header slot
- * -----------------------------------------------------------------------------------------------*/
-
-const DrawerHeaderSlot = ({ children }: React.PropsWithChildren) => {
-  if (!children) return null;
-  return <>{children}</>;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -250,15 +223,6 @@ const DrawerContentSlot = ({ children }: React.PropsWithChildren) => {
       <ScrollArea>{children}</ScrollArea>
     </AnimatedBody>
   );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * Drawer.Footer - composable footer slot
- * -----------------------------------------------------------------------------------------------*/
-
-const DrawerFooterSlot = ({ children }: React.PropsWithChildren) => {
-  if (!children) return null;
-  return <>{children}</>;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -288,9 +252,7 @@ const DrawerCloseButton = ({ onClose, label, children }: DrawerCloseButtonProps)
 
 const Drawer = {
   Root: DrawerRoot,
-  Header: DrawerHeaderSlot,
   Content: DrawerContentSlot,
-  Footer: DrawerFooterSlot,
   CloseButton: DrawerCloseButton,
 };
 

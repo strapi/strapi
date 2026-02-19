@@ -29,6 +29,11 @@ const StyledCard = styled(Card)`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-radius: 8px;
   overflow: hidden;
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary100};
+  }
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -172,11 +177,12 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const StyledCardHeader = styled(CardHeader)`
-  border-bottom: none;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
 const CardFooter = styled(Flex)`
   min-width: 0;
+  width: 100%;
 `;
 
 const FileTypeIcon = styled(Flex)`
@@ -191,7 +197,7 @@ const FileName = styled(Typography)`
 
 interface AssetCardProps {
   asset: File;
-  onAssetItemClick?: (assetId: number) => void;
+  onAssetItemClick: (assetId: number) => void;
 }
 
 const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
@@ -199,17 +205,14 @@ const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
 
   return (
-    <StyledCard
-      onClick={() => onAssetItemClick?.(asset.id)}
-      style={{ cursor: onAssetItemClick ? 'pointer' : undefined }}
-    >
+    <StyledCard tabIndex={0} role="button" onClick={() => onAssetItemClick(asset.id)}>
       <StyledCardHeader>
         <AssetPreview asset={asset} />
       </StyledCardHeader>
       <CardBody>
-        <CardFooter alignItems="center" gap={2} paddingTop={2}>
+        <CardFooter alignItems="center" gap={2}>
           <FileTypeIcon>
-            <TypeIcon width={16} height={16} />
+            <TypeIcon width={20} height={20} />
           </FileTypeIcon>
           <FileName textColor="primary800" ellipsis>
             {asset.name}

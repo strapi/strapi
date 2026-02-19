@@ -1,7 +1,16 @@
 import * as React from 'react';
 
+import * as Dialog from '@radix-ui/react-dialog';
 import { useNotification, useQueryParams, getDisplayName } from '@strapi/admin/strapi-admin';
-import { Box, Field, Flex, Loader, TextInput, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Field,
+  Flex,
+  Loader,
+  TextInput,
+  Typography,
+  VisuallyHidden,
+} from '@strapi/design-system';
 import { ArrowLineRight, FileError, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -9,15 +18,14 @@ import { styled } from 'styled-components';
 import { Drawer } from '../../../components/Drawer';
 import { AssetType } from '../../../enums';
 import { useGetAssetQuery, type AssetWithPopulatedCreatedBy } from '../../../services/assets';
-import { formatBytes, getFileExtension, prefixFileUrlWithBackendUrl } from '../../../utils/files';
+import { formatBytes, getFileExtension } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
-import { formatDuration, useMediaDuration } from '../hooks/useMediaDuration';
 
 import { AssetPreview } from './AssetPreview';
 
 // Name of the parameter to look for in the URL to open the drawer
-const URL_PARAM = 'details';
+const URL_PARAM = 'assetId';
 // Closing animation duration to wait until the drawer is closed before removing the URL parameter
 const CLOSE_ANIMATION_MS = 300;
 
@@ -149,19 +157,6 @@ interface AssetDetailsProps {
 const AssetDetails = ({ asset, error }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
 
-  const isVideo = asset?.mime?.includes(AssetType.Video) ?? false;
-  const isAudio = asset?.mime?.includes(AssetType.Audio) ?? false;
-  const mediaUrl = asset?.url ? prefixFileUrlWithBackendUrl(asset.url) : undefined;
-
-  const { duration: videoDuration, isLoading: isVideoDurationLoading } = useMediaDuration(
-    isVideo ? mediaUrl : undefined,
-    'video'
-  );
-  const { duration: audioDuration, isLoading: isAudioDurationLoading } = useMediaDuration(
-    isAudio ? mediaUrl : undefined,
-    'audio'
-  );
-
   if (error || !asset) {
     return (
       <Flex
@@ -183,11 +178,6 @@ const AssetDetails = ({ asset, error }: AssetDetailsProps) => {
   }
 
   const isImage = asset.mime?.includes(AssetType.Image);
-  const metadataDuration = (asset.provider_metadata as { duration?: number } | undefined)?.duration;
-  const duration =
-    metadataDuration ?? (isVideo ? videoDuration : null) ?? (isAudio ? audioDuration : null);
-  const isDurationPending =
-    (isVideo && isVideoDurationLoading) || (isAudio && isAudioDurationLoading);
 
   return (
     <Flex
@@ -239,7 +229,7 @@ const AssetDetails = ({ asset, error }: AssetDetailsProps) => {
         />
         <DetailItem
           label={formatMessage({
-            id: getTranslationKey('asset-details.provider'),
+            id: getTranslationKey('asset-details.createdBy'),
             defaultMessage: 'Created by',
           })}
           value={
@@ -270,21 +260,6 @@ const AssetDetails = ({ asset, error }: AssetDetailsProps) => {
               asset.width != null && asset.height != null
                 ? `${asset.width} × ${asset.height}`
                 : null
-            }
-          />
-        )}
-        {(isVideo || isAudio) && (
-          <DetailItem
-            label={formatMessage({
-              id: getTranslationKey('asset-details.duration'),
-              defaultMessage: 'Duration',
-            })}
-            value={
-              isDurationPending
-                ? formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })
-                : duration != null
-                  ? formatDuration(duration)
-                  : null
             }
           />
         )}
@@ -373,11 +348,27 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 
   if (isLoading) {
     return (
-      <Drawer.Content>
-        <Flex justifyContent="center" padding={8}>
-          <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
-        </Flex>
-      </Drawer.Content>
+      <>
+        <VisuallyHidden>
+          <Dialog.Title>
+            {formatMessage({
+              id: getTranslationKey('asset-details.title'),
+              defaultMessage: 'File details',
+            })}
+          </Dialog.Title>
+          <Dialog.Description>
+            {formatMessage({
+              id: getTranslationKey('asset-details.description'),
+              defaultMessage: 'Displays file information and metadata',
+            })}
+          </Dialog.Description>
+        </VisuallyHidden>
+        <Drawer.Content>
+          <Flex justifyContent="center" padding={8}>
+            <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
+          </Flex>
+        </Drawer.Content>
+      </>
     );
   }
 
@@ -385,19 +376,27 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 
   return !error && asset ? (
     <>
-      <Drawer.Header>
-        <Flex gap={2} paddingLeft={5} paddingTop={3} paddingBottom={3} paddingRight={3}>
-          <DocIcon width={20} height={20} />
-          <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis>
+      <Flex gap={2} paddingLeft={5} paddingTop={3} paddingBottom={3} paddingRight={3}>
+        <DocIcon width={20} height={20} />
+        <Dialog.Title asChild>
+          <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
             {asset.name}
           </Typography>
-          <Box marginLeft="auto">
-            <Drawer.CloseButton onClose={closeDetails}>
-              <ArrowLineRight />
-            </Drawer.CloseButton>
-          </Box>
-        </Flex>
-      </Drawer.Header>
+        </Dialog.Title>
+        <Box marginLeft="auto">
+          <Drawer.CloseButton onClose={closeDetails}>
+            <ArrowLineRight />
+          </Drawer.CloseButton>
+        </Box>
+      </Flex>
+      <VisuallyHidden>
+        <Dialog.Description>
+          {formatMessage({
+            id: getTranslationKey('asset-details.description'),
+            defaultMessage: 'Displays file information and metadata',
+          })}
+        </Dialog.Description>
+      </VisuallyHidden>
       <Drawer.Content>
         <AssetPreview asset={asset} error={error} />
         <AssetDetails asset={asset} error={error} />
@@ -425,14 +424,6 @@ export const AssetDetailsDrawer = () => {
       width="41.6rem"
       height="100vh"
       animationDirection="left"
-      title={{
-        id: getTranslationKey('asset-details.title'),
-        defaultMessage: 'File details',
-      }}
-      description={{
-        id: getTranslationKey('asset-details.description'),
-        defaultMessage: 'Displays file information and metadata',
-      }}
     >
       <DrawerContent assetId={assetId} closeDetails={closeDetails} />
     </Drawer.Root>

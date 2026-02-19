@@ -420,18 +420,8 @@ export const UploadProgressDialog = () => {
       isContentExpanded={!isMinimized}
       dataTestId="upload-progress-dialog"
       maxHeight="34.2rem"
-      title={{
-        id: getTranslationKey('upload.progress'),
-        defaultMessage: 'Upload progress',
-      }}
-      description={{
-        id: getTranslationKey('upload.progress.description'),
-        defaultMessage: 'Shows upload progress and status',
-      }}
     >
-      <Drawer.Header>
-        <DialogHeader handleClose={handleClose} />
-      </Drawer.Header>
+      <DialogHeader handleClose={handleClose} />
       <Drawer.Content>
         <Flex
           direction="column"
@@ -453,7 +443,6 @@ export const UploadProgressDialog = () => {
           )}
         </Flex>
       </Drawer.Content>
-      <Drawer.Footer />
     </Drawer.Root>
   );
 };

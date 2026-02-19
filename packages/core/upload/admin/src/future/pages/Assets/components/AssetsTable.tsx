@@ -55,6 +55,11 @@ const StyledTd = styled(RawTd)`
 const StyledTr = styled(RawTr)`
   height: 48px;
   background: ${({ theme }) => theme.colors.neutral0};
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary100};
+  }
 
   &:last-child {
     ${StyledTd} {
@@ -94,7 +99,7 @@ const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
 
 interface AssetRowProps {
   asset: File;
-  onAssetItemClick?: (assetId: number) => void;
+  onAssetItemClick: (assetId: number) => void;
 }
 
 const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
@@ -102,10 +107,7 @@ const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
   const { formatDate, formatMessage } = useIntl();
 
   return (
-    <StyledTr
-      onClick={() => onAssetItemClick?.(asset.id)}
-      style={{ cursor: onAssetItemClick ? 'pointer' : undefined }}
-    >
+    <StyledTr tabIndex={0} role="button" onClick={() => onAssetItemClick(asset.id)}>
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <AssetPreviewCell asset={asset} />
