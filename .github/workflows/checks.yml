@@ -13,6 +13,10 @@ on:
       - develop
       - v4
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   check-pr-status:
     runs-on: ubuntu-latest
@@ -28,3 +32,14 @@ jobs:
       - uses: ./.github/actions/security/lockfile
         with:
           allowedHosts: 'yarn'
+
+  check-package-versions:
+    name: Package version alignment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+      - name: Install dependencies
+        uses: ./.github/actions/yarn-nm-install
+      - name: Check package versions
+        run: yarn version:check
