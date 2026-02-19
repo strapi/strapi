@@ -1,0 +1,32 @@
+name: Community PR Label
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check org membership and label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { login } = context.payload.pull_request.user;
+            const association = context.payload.pull_request.author_association;
+
+            if (!['MEMBER', 'OWNER'].includes(association)) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: ['community']
+              });
+              core.info(`Added "community" label — ${login} has association "${association}"`);
+            } else {
+              core.info(`Skipped — ${login} is a ${association.toLowerCase()}`);
+            }
