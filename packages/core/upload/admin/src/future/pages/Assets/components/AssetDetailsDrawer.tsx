@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
+import { useNotification, useQueryParams, getDisplayName } from '@strapi/admin/strapi-admin';
 import { Box, Field, Flex, Loader, TextInput, Typography } from '@strapi/design-system';
 import { ArrowLineRight, FileError, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -8,15 +8,13 @@ import { styled } from 'styled-components';
 
 import { Drawer } from '../../../components/Drawer';
 import { AssetType } from '../../../enums';
-import { useGetAssetQuery } from '../../../services/assets';
+import { useGetAssetQuery, type AssetWithPopulatedCreatedBy } from '../../../services/assets';
 import { formatBytes, getFileExtension, prefixFileUrlWithBackendUrl } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { formatDuration, useMediaDuration } from '../hooks/useMediaDuration';
 
 import { AssetPreview } from './AssetPreview';
-
-import type { File } from '../../../../../../shared/contracts/files';
 
 // Name of the parameter to look for in the URL to open the drawer
 const URL_PARAM = 'details';
@@ -144,7 +142,7 @@ const DetailField = ({ name, label, value, required }: DetailFieldProps) => (
 );
 
 interface AssetDetailsProps {
-  asset: File | undefined;
+  asset: AssetWithPopulatedCreatedBy | undefined;
   error: unknown;
 }
 
@@ -215,7 +213,46 @@ const AssetDetails = ({ asset, error }: AssetDetailsProps) => {
         paddingBottom={4}
         paddingLeft={6}
         paddingRight={6}
+        alignItems="flex-start"
       >
+        <DetailItem
+          label={formatMessage({
+            id: getTranslationKey('asset-details.creationDate'),
+            defaultMessage: 'Creation date',
+          })}
+          value={
+            asset.createdAt
+              ? formatDate(new Date(asset.createdAt), { dateStyle: 'long', timeStyle: 'short' })
+              : null
+          }
+        />
+        <DetailItem
+          label={formatMessage({
+            id: getTranslationKey('asset-details.lastUpdated'),
+            defaultMessage: 'Last updated',
+          })}
+          value={
+            asset.updatedAt
+              ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long', timeStyle: 'short' })
+              : null
+          }
+        />
+        <DetailItem
+          label={formatMessage({
+            id: getTranslationKey('asset-details.provider'),
+            defaultMessage: 'Created by',
+          })}
+          value={
+            asset.createdBy
+              ? (getDisplayName({
+                  firstname: asset.createdBy.firstname ?? undefined,
+                  lastname: asset.createdBy.lastname ?? undefined,
+                  username: asset.createdBy.username ?? undefined,
+                  email: asset.createdBy.email ?? undefined,
+                }) ?? '-')
+              : null
+          }
+        />
         <DetailItem
           label={formatMessage({
             id: getTranslationKey('asset-details.size'),
@@ -251,28 +288,6 @@ const AssetDetails = ({ asset, error }: AssetDetailsProps) => {
             }
           />
         )}
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.creationDate'),
-            defaultMessage: 'Creation date',
-          })}
-          value={
-            asset.createdAt
-              ? formatDate(new Date(asset.createdAt), { dateStyle: 'long', timeStyle: 'short' })
-              : null
-          }
-        />
-        <DetailItem
-          label={formatMessage({
-            id: getTranslationKey('asset-details.lastUpdated'),
-            defaultMessage: 'Last updated',
-          })}
-          value={
-            asset.updatedAt
-              ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long', timeStyle: 'short' })
-              : null
-          }
-        />
         <DetailItem
           label={formatMessage({
             id: getTranslationKey('asset-details.extension'),

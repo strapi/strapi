@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Loader } from '@strapi/design-system';
+import { Box, Flex, Loader, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -10,6 +10,7 @@ import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 
 import type { File } from '../../../../../../shared/contracts/files';
+import type { AssetWithPopulatedCreatedBy } from '../../../services/assets';
 
 /* -------------------------------------------------------------------------------------------------
  * Styled components
@@ -19,9 +20,10 @@ const PreviewContainer = styled(Box)`
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: 200px;
+  max-height: 24rem;
   overflow: hidden;
   border-radius: ${({ theme }) => theme.borderRadius};
+  padding: ${({ theme }) => theme.spaces[3]};
   background: repeating-conic-gradient(
       ${({ theme }) => theme.colors.neutral100} 0% 25%,
       transparent 0% 50%
@@ -30,6 +32,7 @@ const PreviewContainer = styled(Box)`
 `;
 
 const AssetContainer = styled(Flex)`
+  justify-content: center;
   position: relative;
   z-index: 2;
   width: 100%;
@@ -37,20 +40,19 @@ const AssetContainer = styled(Flex)`
 `;
 
 const StyledImage = styled.img`
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
 `;
 
 const StyledVideo = styled.video`
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
 `;
 
 const StyledAudio = styled.audio`
   width: 100%;
-  max-width: 100%;
 `;
 
 const StyledPdfIframe = styled.iframe`
@@ -61,10 +63,13 @@ const StyledPdfIframe = styled.iframe`
 `;
 
 const IconFallback = styled(Flex)`
-  width: 100%;
   height: 100%;
+  aspect-ratio: 1;
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto;
   color: ${({ theme }) => theme.colors.neutral500};
-  background: ${({ theme }) => theme.colors.neutral100};
+  background: ${({ theme }) => theme.colors.neutral150};
 `;
 
 const LoaderOverlay = styled(Flex)`
@@ -91,7 +96,7 @@ const AssetLoader = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface AssetPreviewContentProps {
-  asset: File;
+  asset: File | AssetWithPopulatedCreatedBy;
 }
 
 export const AssetPreviewContent = ({ asset }: AssetPreviewContentProps) => {
@@ -115,6 +120,7 @@ export const AssetPreviewContent = ({ asset }: AssetPreviewContentProps) => {
             <StyledImage
               src={imageUrl}
               alt={alternativeText || asset.name || ''}
+              onLoad={() => setIsMediaLoaded(true)}
               onError={() => setIsMediaLoaded(true)}
             />
           </AssetContainer>
@@ -190,8 +196,20 @@ export const AssetPreviewContent = ({ asset }: AssetPreviewContentProps) => {
   const DocIcon = getAssetIcon(mime, ext);
   return (
     <PreviewContainer>
-      <IconFallback justifyContent="center" alignItems="center">
-        <DocIcon width={48} height={48} />
+      <IconFallback
+        justifyContent="center"
+        alignItems="center"
+        gap={1}
+        direction="column"
+        hasRadius
+      >
+        <DocIcon width={24} height={24} />
+        <Typography variant="pi">
+          {formatMessage({
+            id: getTranslationKey('asset-details.noPreview'),
+            defaultMessage: 'No preview available',
+          })}
+        </Typography>
       </IconFallback>
     </PreviewContainer>
   );
@@ -202,7 +220,7 @@ export const AssetPreviewContent = ({ asset }: AssetPreviewContentProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface AssetPreviewProps {
-  asset: File | undefined;
+  asset: (File | AssetWithPopulatedCreatedBy) | undefined;
   error: unknown;
 }
 

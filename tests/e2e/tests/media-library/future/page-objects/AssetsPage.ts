@@ -14,6 +14,7 @@ export class AssetsPage {
   readonly tableViewButton: Locator;
   readonly dropZone: Locator;
   readonly uploadProgressDialog: Locator;
+  readonly assetDetailsDrawer: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -24,6 +25,7 @@ export class AssetsPage {
     this.tableViewButton = page.getByRole('radio', { name: 'Table view' });
     this.dropZone = page.getByTestId('assets-dropzone');
     this.uploadProgressDialog = page.getByTestId('upload-progress-dialog');
+    this.assetDetailsDrawer = page.getByTestId('asset-details-drawer');
   }
 
   async goto() {
@@ -155,8 +157,12 @@ export class AssetsPage {
     return (await this.gridViewButton.getAttribute('aria-checked')) === 'true';
   }
 
+  /**
+   * Get an asset card in grid view by (partial) filename.
+   * Targets the clickable card (has cursor: pointer in upload drop zone).
+   */
   getAssetCard(name: string) {
-    return this.page.locator('div').filter({ hasText: name }).nth(1);
+    return this.dropZone.locator('[style*="cursor: pointer"]').filter({ hasText: name }).first();
   }
 
   /**
@@ -171,5 +177,37 @@ export class AssetsPage {
    */
   async closeUploadProgressDialog() {
     await this.uploadProgressDialog.getByRole('button', { name: 'Close' }).click();
+  }
+
+  /**
+   * Click an asset row in table view to open the details drawer
+   */
+  async clickAssetInTable(name: string) {
+    const row = this.getAssetRow(name);
+    await row.click();
+  }
+
+  /**
+   * Click an asset card in grid view to open the details drawer
+   */
+  async clickAssetInGrid(name: string) {
+    const card = this.getAssetCard(name);
+    await card.click();
+  }
+
+  /**
+   * Get the value of a detail field in the asset details drawer by its label
+   * The DetailItem structure has label and value as siblings, so we find the label and get its following sibling
+   */
+  getDrawerDetailValue(label: string) {
+    const labelEl = this.assetDetailsDrawer.getByText(label);
+    return labelEl.locator('xpath=following-sibling::*[1]');
+  }
+
+  /**
+   * Close the asset details drawer
+   */
+  async closeAssetDetailsDrawer() {
+    await this.assetDetailsDrawer.getByRole('button', { name: 'Close' }).click();
   }
 }

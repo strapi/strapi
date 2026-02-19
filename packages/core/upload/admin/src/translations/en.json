@@ -16,6 +16,7 @@
   "asset-details.fileName": "File name",
   "asset-details.caption": "Caption",
   "asset-details.alternativeText": "Alternative text",
+  "asset-details.noPreview": "No preview available",
   "upload.generic-error": "An error occurred while uploading the file.",
   "upload.progress": "Upload progress",
   "upload.progress.description": "Shows upload progress and status",

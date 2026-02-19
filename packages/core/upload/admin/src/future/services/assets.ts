@@ -2,6 +2,19 @@ import { uploadApi } from './api';
 
 import type { GetFiles, File, Pagination } from '../../../../shared/contracts/files';
 
+/** User object returned when createdBy is populated (GET /upload/files/:id) */
+export interface PopulatedCreatedBy {
+  id: number;
+  firstname?: string;
+  lastname?: string;
+  username?: string | null;
+  email?: string;
+}
+
+export type AssetWithPopulatedCreatedBy = Omit<File, 'createdBy'> & {
+  createdBy?: PopulatedCreatedBy | null;
+};
+
 interface GetAssetsParams {
   page?: number;
   pageSize?: number;
@@ -47,7 +60,7 @@ const assetsApi = uploadApi.injectEndpoints({
             ]
           : [{ type: 'Asset', id: 'LIST' }],
     }),
-    getAsset: builder.query<File, number>({
+    getAsset: builder.query<AssetWithPopulatedCreatedBy, number>({
       query: (id) => ({
         url: `/upload/files/${id}`,
         method: 'GET',
