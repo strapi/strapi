@@ -44,19 +44,12 @@ const previewLoader = async ({ params }) => {
       throw new Error(`HTTP error! status: ${mainResponse.status}`);
     }
 
-    if (!unrelatedResponse.ok) {
-      throw new Error(`HTTP error! status: ${unrelatedResponse.status}`);
-    }
-
-    // Process both responses in parallel
-    const [mainResult, unrelatedResult] = await Promise.all([
-      mainResponse.json(),
-      unrelatedResponse.json(),
-    ]);
+    const mainResult = await mainResponse.json();
+    const unrelatedResult = unrelatedResponse.ok ? await unrelatedResponse.json() : null;
 
     return {
       main: mainResult.data,
-      unrelated: unrelatedResult.data,
+      unrelated: unrelatedResult?.data ?? null,
     };
   } catch (error) {
     console.error('Error fetching preview data:', error);

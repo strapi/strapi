@@ -10,6 +10,7 @@ import type { Schema } from '@strapi/types';
 interface BlocksInputProps extends Omit<InputProps, 'type'> {
   labelAction?: React.ReactNode;
   type: Schema.Attribute.Blocks['type'];
+  autoFocus?: boolean;
 }
 
 const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(

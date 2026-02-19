@@ -3,17 +3,7 @@ import { useParams, useLoaderData, useRevalidator } from 'react-router-dom';
 import { BlocksRenderer } from '@strapi/blocks-react-renderer';
 
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
-import {
-  Grid,
-  Flex,
-  Typography,
-  JSONInput,
-  Box,
-  IconButton,
-  Link,
-  LinkButton,
-  Button,
-} from '@strapi/design-system';
+import { Grid, Flex, Typography, JSONInput, Box, Button } from '@strapi/design-system';
 import { ChevronDown, ChevronRight } from '@strapi/icons';
 
 const filterAttributes = (item) => {
@@ -55,7 +45,19 @@ const ToggleableContainer = ({ headerText, children, isEmpty = false }) => {
   );
 };
 
-const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = undefined }) => {
+const isMedia = (value) => {
+  return typeof value === 'object' && value !== null && 'url' in value;
+};
+
+const NestedValue = ({
+  value,
+  level = 0,
+  arrayIndex = undefined,
+  fieldName = undefined,
+  path,
+  model,
+  documentId,
+}) => {
   if (fieldName === 'blocks') {
     return (
       <Flex direction="column" alignItems="flex-start" fontSize="1.4rem" gap={2}>
@@ -66,10 +68,38 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
 
   // Use the email type to test clickable preview elements
   if (fieldName === 'email') {
+    return <Typography>{value}</Typography>;
+  }
+
+  if (isMedia(value)) {
+    const url = value.url;
+    const mime = value.mime;
+    const isVideo = mime?.startsWith('video/');
+    const isImage = mime?.startsWith('image/') || (!mime && !!url);
+    const fileName = value.name || 'file';
+
     return (
-      <Button variant="tertiary" onClick={() => window.alert('Sending email!')}>
-        {value}
-      </Button>
+      <Box style={{ maxWidth: '300px' }}>
+        {isImage && (
+          <>
+            <img
+              src={isImage ? url : undefined}
+              alt={value.alternativeText || ''}
+              style={{ maxWidth: '100%', display: isImage ? 'block' : 'none' }}
+            />
+          </>
+        )}
+        {isVideo && (
+          <>
+            <video
+              src={isVideo ? url : undefined}
+              controls
+              style={{ maxWidth: '100%', display: isVideo ? 'block' : 'none' }}
+            />
+          </>
+        )}
+        {!isImage && !isVideo && <Typography>{fileName}</Typography>}
+      </Box>
     );
   }
 
@@ -88,6 +118,9 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
                   level={level + 1}
                   arrayIndex={index}
                   fieldName={fieldName}
+                  path={`${path}.${index}`}
+                  model={model}
+                  documentId={documentId}
                 />
               ) : (
                 <Flex direction="column" gap={1}>
@@ -99,6 +132,9 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
                     level={level + 1}
                     arrayIndex={index}
                     fieldName={fieldName}
+                    path={`${path}.${index}`}
+                    model={model}
+                    documentId={documentId}
                   />
                 </Flex>
               )}
@@ -123,7 +159,14 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
               <Typography variant="sigma" textColor="neutral600">
                 {key}
               </Typography>
-              <NestedValue value={val} level={level + 1} fieldName={key} />
+              <NestedValue
+                value={val}
+                level={level + 1}
+                fieldName={key}
+                path={`${path}.${key}`}
+                model={model}
+                documentId={documentId}
+              />
             </Flex>
           ))}
         </Flex>
@@ -138,7 +181,7 @@ const NestedValue = ({ value, level = 0, arrayIndex = undefined, fieldName = und
   );
 };
 
-const Entry = ({ data }) => {
+const Entry = ({ data, model, documentId }) => {
   return (
     <Grid.Root gap={5} tag="dl">
       {filterAttributes(data).map(([key, value]) => (
@@ -147,7 +190,13 @@ const Entry = ({ data }) => {
             {key}
           </Typography>
           <Flex gap={3} direction="column" alignItems="start" tag="dd">
-            <NestedValue value={value} fieldName={key} />
+            <NestedValue
+              value={value}
+              fieldName={key}
+              path={key}
+              model={model}
+              documentId={documentId}
+            />
           </Flex>
         </Grid.Item>
       ))}
@@ -264,7 +313,7 @@ const PreviewComponent = () => {
               {revalidator.state === 'loading' && <Typography>Refreshing data...</Typography>}
               {main ? (
                 <>
-                  <Entry data={main} />
+                  <Entry data={main} model={apiName} documentId={documentId} />
                   <JSONInput value={JSON.stringify(main, null, 2)} disabled />
                 </>
               ) : (
@@ -275,7 +324,7 @@ const PreviewComponent = () => {
                   <Typography variant="delta" tag="h3">
                     Unrelated API data
                   </Typography>
-                  <Entry data={unrelated} />
+                  <Entry data={unrelated} model={apiName} documentId={documentId} />
                 </>
               )}
             </Flex>

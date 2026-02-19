@@ -372,9 +372,18 @@ const dragNoop = () => true;
 interface BlocksContentProps {
   placeholder?: string;
   ariaLabelId: string;
+  autoFocus?: boolean;
+  onFocus?: React.FocusEventHandler<HTMLElement>;
+  onBlur?: React.FocusEventHandler<HTMLElement>;
 }
 
-const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
+const BlocksContent = ({
+  placeholder,
+  ariaLabelId,
+  autoFocus,
+  onFocus,
+  onBlur,
+}: BlocksContentProps) => {
   const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
     useBlocksEditorContext('BlocksContent');
   const isMobile = useIsMobile();
@@ -624,6 +633,9 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         // As we have our own handler to drag and drop the elements returing true will skip slate's own event handler
         onDrop={dragNoop}
         onDragStart={dragNoop}
+        autoFocus={autoFocus}
+        onFocus={onFocus}
+        onBlur={onBlur}
       />
       {modalElement}
     </Box>

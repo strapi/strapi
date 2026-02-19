@@ -77,7 +77,9 @@ const InputPopover = ({ documentResponse }: { documentResponse: ReturnType<UseDo
          * current document. This doesn't do anything about fields that may come from relations to
          * the current document however.
          */
-        if (fieldMetaData.documentId !== document.documentId) {
+        const isUploadAssetSource = fieldMetaData.model === 'plugin::upload.file';
+
+        if (!isUploadAssetSource && fieldMetaData.documentId !== document.documentId) {
           const { type, message } = PREVIEW_ERROR_MESSAGES.DIFFERENT_DOCUMENT;
           toggleNotification({ type, message: formatMessage(message) });
           return;
