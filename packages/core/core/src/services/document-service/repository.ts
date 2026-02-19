@@ -103,6 +103,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       validateParams,
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
+
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
       transformParamsDocumentId(uid),
@@ -117,6 +118,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       validateParams,
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
+
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       transformParamsDocumentId(uid),
@@ -134,6 +136,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       validateParams,
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
+
       i18n.defaultLocale(contentType),
       i18n.localeToLookup(contentType),
       transformParamsDocumentId(uid),
@@ -303,6 +306,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       validateParams,
       DP.defaultStatus(contentType),
       DP.statusToLookup(contentType),
+
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid)

@@ -1,0 +1,13 @@
+{
+  "source": ["package.json", "**/package.json"],
+  "dependencyTypes": ["prod", "dev"],
+  "lintFormatting": false,
+  "lintSemverRanges": false,
+  "versionGroups": [
+    {
+      "label": "Ignore non-exact (workspace, ranges, etc.)",
+      "specifierTypes": ["!exact"],
+      "isIgnored": true
+    }
+  ]
+}

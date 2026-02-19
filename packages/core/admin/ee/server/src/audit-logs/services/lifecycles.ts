@@ -160,7 +160,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
         deleteExpiredAuditLogs: {
           task: async () => {
             const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-            auditLogsService.deleteExpiredEvents(expirationDate);
+            await auditLogsService.deleteExpiredEvents(expirationDate);
           },
           options: '0 0 * * *',
         },
