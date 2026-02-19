@@ -32,14 +32,14 @@ const StyledCard = styled(Card)`
 `;
 
 /* -------------------------------------------------------------------------------------------------
- * FolderItem
+ * FolderCard
  * -----------------------------------------------------------------------------------------------*/
 
 const FoldersRow = styled(Box)`
   grid-column: 1 / -1;
 `;
 
-const FolderItem = styled(Flex)`
+const StyledFolderCard = styled(Flex)`
   width: 100%;
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[3]}`}; // 8px 12px
   align-items: center;
@@ -70,16 +70,16 @@ const FolderName = styled(Typography)`
   min-width: 0;
 `;
 
-interface FolderItemProps {
+interface FolderCardProps {
   folder: Folder;
 }
 
-const FolderItemComponent = ({ folder }: FolderItemProps) => {
+const FolderCard = ({ folder }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
 
   return (
-    <FolderItem onClick={() => navigateToFolder(folder)} role="button" tabIndex={0}>
+    <StyledFolderCard onClick={() => navigateToFolder(folder)} role="button" tabIndex={0}>
       <FolderIconContainer>
         <FolderIcon width={16} height={16} />
       </FolderIconContainer>
@@ -96,7 +96,7 @@ const FolderItemComponent = ({ folder }: FolderItemProps) => {
       >
         <More />
       </IconButton>
-    </FolderItem>
+    </StyledFolderCard>
   );
 };
 
@@ -259,7 +259,7 @@ export const AssetsGrid = ({ assets, folders = [] }: AssetsGridProps) => {
           <Grid.Root gap={4}>
             {folders.map((folder) => (
               <Grid.Item col={3} m={4} s={6} xs={12} key={`folder-${folder.id}`}>
-                <FolderItemComponent folder={folder} />
+                <FolderCard folder={folder} />
               </Grid.Item>
             ))}
           </Grid.Root>
