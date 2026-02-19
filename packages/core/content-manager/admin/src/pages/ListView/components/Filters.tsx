@@ -17,6 +17,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { Schema } from '../../../hooks/useDocument';
 import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { getMainField } from '../../../utils/attributes';
+import { getTranslation } from '../../../utils/translations';
 import { getDisplayName } from '../../../utils/users';
 
 /**
@@ -118,8 +119,45 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
         ...allowedFields,
         ...DEFAULT_ALLOWED_FILTERS,
         ...(canReadAdminUsers ? CREATOR_FIELDS : []),
+        ...(options?.draftAndPublish === true ? ['status'] : []),
       ]
         .map((name) => {
+          if (name === 'status') {
+            return {
+              name: 'status',
+              type: 'enumeration',
+              label: formatMessage({
+                id: getTranslation('containers.list.table-headers.status'),
+                defaultMessage: 'status',
+              }),
+              operators: [
+                {
+                  label: formatMessage({
+                    id: 'components.FilterOptions.FILTER_TYPES.$eq',
+                    defaultMessage: 'is',
+                  }),
+                  value: '$eq',
+                },
+              ],
+              options: [
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.draft'),
+                    defaultMessage: 'Draft',
+                  }),
+                  value: 'draft',
+                },
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.published'),
+                    defaultMessage: 'Published',
+                  }),
+                  value: 'published',
+                },
+              ],
+            } satisfies Filters.Filter;
+          }
+
           const attribute = attributes[name];
 
           if (NOT_ALLOWED_FILTERS.includes(attribute.type)) {
