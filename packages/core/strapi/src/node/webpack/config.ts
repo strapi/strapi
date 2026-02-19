@@ -1,5 +1,4 @@
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import browserslistToEsbuild from 'browserslist-to-esbuild';
 import { EsbuildPlugin } from 'esbuild-loader';
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -22,6 +21,7 @@ import { getMonorepoAliases } from '../core/aliases';
 import { getModulePath } from '../core/resolve-module';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
+  const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
 
   return {
@@ -181,6 +181,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuratio
 };
 
 const resolveProductionConfig = async (ctx: BuildContext): Promise<Configuration> => {
+  const { default: browserslistToEsbuild } = await import('browserslist-to-esbuild');
   const target = browserslistToEsbuild(ctx.target);
 
   const baseConfig = await resolveBaseConfig(ctx);

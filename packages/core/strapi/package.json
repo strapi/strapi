@@ -132,7 +132,7 @@
     "@vitejs/plugin-react-swc": "3.6.0",
     "boxen": "5.1.2",
     "browserslist": "^4.23.0",
-    "browserslist-to-esbuild": "1.2.0",
+    "browserslist-to-esbuild": "2.1.1",
     "chalk": "4.1.2",
     "chokidar": "3.6.0",
     "ci-info": "4.0.0",
