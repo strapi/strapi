@@ -15,7 +15,7 @@ import { ArrowLineRight, FileError, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { Drawer } from '../../../components/Drawer';
+import { Drawer, DRAWER_CLOSE_ANIMATION_MS } from '../../../components/Drawer';
 import { AssetType } from '../../../enums';
 import { useGetAssetQuery, type AssetWithPopulatedCreatedBy } from '../../../services/assets';
 import { formatBytes, getFileExtension } from '../../../utils/files';
@@ -26,8 +26,6 @@ import { AssetPreview } from './AssetPreview';
 
 // Name of the parameter to look for in the URL to open the drawer
 const URL_PARAM = 'assetId';
-// Closing animation duration to wait until the drawer is closed before removing the URL parameter
-const CLOSE_ANIMATION_MS = 300;
 
 /* -------------------------------------------------------------------------------------------------
  * useAssetDetailsParam - sync drawer visibility with URL ?{URL_PARAM}={id}
@@ -70,7 +68,7 @@ export const useAssetDetailsParam = () => {
       setQuery({ [URL_PARAM]: undefined }, 'remove');
       setIsClosing(false);
       displayAssetId.current = null;
-    }, CLOSE_ANIMATION_MS);
+    }, DRAWER_CLOSE_ANIMATION_MS);
     return () => window.clearTimeout(timer);
   }, [isClosing, setQuery]);
 

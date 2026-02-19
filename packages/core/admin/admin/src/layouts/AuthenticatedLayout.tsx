@@ -123,7 +123,6 @@ const AdminLayout = () => {
                 burgerMobileNavigation={burgerMobileNavigation}
               />
               <Flex
-                alignItems="stretch"
                 direction="column"
                 alignItems="stretch"
                 flex={1}

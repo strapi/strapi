@@ -21,6 +21,9 @@ interface DrawerContextValue {
   maxHeight?: number | string;
 }
 
+/** Duration of the close animation in ms. Use for timing cleanup (e.g. removing URL params). */
+export const DRAWER_CLOSE_ANIMATION_MS = 300;
+
 const DrawerContext = React.createContext<DrawerContextValue | null>(null);
 
 const useDrawerContext = () => {
@@ -115,13 +118,13 @@ const DrawerContainer = styled(Dialog.Content)<DrawerContainerProps>`
     &[data-state='open'] {
       animation: ${({ $animationDirection }) =>
           $animationDirection === 'up' ? slideUpFromBottomIn : slideLeftFromRightIn}
-        300ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+        ${DRAWER_CLOSE_ANIMATION_MS}ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
     }
 
     &[data-state='closed'] {
       animation: ${({ $animationDirection }) =>
           $animationDirection === 'up' ? slideUpFromBottomOut : slideLeftFromRightOut}
-        300ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+        ${DRAWER_CLOSE_ANIMATION_MS}ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
       pointer-events: none;
     }
   }
@@ -197,6 +200,7 @@ const DrawerRoot = ({
             $height={height}
             $maxHeight={maxHeight}
             data-testid={dataTestId}
+            forceMount
             onPointerDownOutside={(e) => e.preventDefault()}
             onInteractOutside={(e) => e.preventDefault()}
           >
