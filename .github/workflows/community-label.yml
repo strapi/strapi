@@ -25,7 +25,7 @@ jobs:
               return;
             }
 
-            if (!['MEMBER', 'OWNER'].includes(association)) {
+            if (!['MEMBER', 'OWNER', 'FIRST_TIME_CONTRIBUTOR', 'CONTRIBUTOR'].includes(association)) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
