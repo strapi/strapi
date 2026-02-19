@@ -7,7 +7,6 @@ const renderDrawer = (
   props: {
     isVisible?: boolean;
     onClose?: () => void;
-    dataTestId?: string;
     isContentExpanded?: boolean;
     title?: string;
     description?: string;
@@ -18,11 +17,10 @@ const renderDrawer = (
     <Drawer.Root
       isVisible={props.isVisible ?? true}
       onClose={onClose}
-      dataTestId={props.dataTestId ?? 'test-drawer'}
       isContentExpanded={props.isContentExpanded}
     >
       <Dialog.Title>{props.title ?? 'Test title'}</Dialog.Title>
-      {props.description && <Dialog.Description>{props.description}</Dialog.Description>}
+      <Dialog.Description>{props.description ?? 'Test description'}</Dialog.Description>
       <span data-testid="drawer-header">Header content</span>
       <Drawer.Content>
         <span data-testid="drawer-content">Body content</span>
@@ -36,21 +34,25 @@ describe('Drawer', () => {
   describe('Drawer.Root', () => {
     it('renders the drawer when isVisible is true', () => {
       renderDrawer({ isVisible: true });
-      expect(screen.getByTestId('test-drawer')).toBeInTheDocument();
-      expect(screen.getByTestId('test-drawer')).toHaveAttribute('data-state', 'open');
+      const dialog = screen.getByRole('dialog', { name: 'Test title' });
+      expect(dialog).toBeInTheDocument();
+      expect(dialog).toHaveAttribute('data-state', 'open');
     });
 
     it('does not render the drawer in the DOM when isVisible is false', () => {
       renderDrawer({ isVisible: false });
-      expect(screen.queryByTestId('test-drawer')).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('updates visibility when isVisible changes', () => {
       const { rerender } = renderDrawer({ isVisible: true });
-      expect(screen.getByTestId('test-drawer')).toHaveAttribute('data-state', 'open');
+      expect(screen.getByRole('dialog', { name: 'Test title' })).toHaveAttribute(
+        'data-state',
+        'open'
+      );
 
       rerender(
-        <Drawer.Root isVisible={false} onClose={jest.fn()} dataTestId="test-drawer">
+        <Drawer.Root isVisible={false} onClose={jest.fn()}>
           <Dialog.Title>Test title</Dialog.Title>
           <Dialog.Description>Test description</Dialog.Description>
           <span data-testid="drawer-header">Header content</span>
@@ -60,12 +62,7 @@ describe('Drawer', () => {
           <span data-testid="drawer-footer">Footer content</span>
         </Drawer.Root>
       );
-      expect(screen.queryByTestId('test-drawer')).not.toBeInTheDocument();
-    });
-
-    it('applies dataTestId to the container', () => {
-      renderDrawer({ dataTestId: 'custom-drawer-id' });
-      expect(screen.getByTestId('custom-drawer-id')).toBeInTheDocument();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('renders accessible title from content', () => {
@@ -83,7 +80,7 @@ describe('Drawer', () => {
     it('renders and calls onClose when clicked', () => {
       const onClose = jest.fn();
       render(
-        <Drawer.Root isVisible onClose={onClose} dataTestId="test-drawer">
+        <Drawer.Root isVisible onClose={onClose}>
           <Dialog.Title>Test title</Dialog.Title>
           <Dialog.Description>Test description</Dialog.Description>
           <Drawer.CloseButton onClose={onClose} />
@@ -121,12 +118,7 @@ describe('Drawer', () => {
       ).not.toBeInTheDocument();
 
       rerender(
-        <Drawer.Root
-          isVisible
-          onClose={jest.fn()}
-          dataTestId="test-drawer"
-          isContentExpanded={false}
-        >
+        <Drawer.Root isVisible onClose={jest.fn()} isContentExpanded={false}>
           <Dialog.Title>Test title</Dialog.Title>
           <Dialog.Description>Test description</Dialog.Description>
           <span data-testid="drawer-header">Header content</span>

@@ -418,7 +418,6 @@ export const UploadProgressDialog = () => {
       isVisible={isVisible}
       onClose={handleClose}
       isContentExpanded={!isMinimized}
-      dataTestId="upload-progress-dialog"
       maxHeight="34.2rem"
     >
       <DialogHeader handleClose={handleClose} />

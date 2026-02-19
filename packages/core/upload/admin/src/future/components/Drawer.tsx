@@ -15,7 +15,6 @@ interface DrawerContextValue {
   isVisible?: boolean;
   onClose?: () => void;
   isContentExpanded?: boolean | undefined;
-  dataTestId?: string;
   width?: number | string;
   height?: number | string;
   maxHeight?: number | string;
@@ -172,7 +171,6 @@ const DrawerRoot = ({
   width,
   height,
   maxHeight,
-  dataTestId,
   children,
 }: DrawerContextValue & React.PropsWithChildren) => {
   const contextValue: DrawerContextValue = {
@@ -180,7 +178,6 @@ const DrawerRoot = ({
     isVisible,
     onClose,
     isContentExpanded,
-    dataTestId,
     width,
     height,
     maxHeight,
@@ -199,7 +196,6 @@ const DrawerRoot = ({
             $width={width}
             $height={height}
             $maxHeight={maxHeight}
-            data-testid={dataTestId}
             forceMount
             onPointerDownOutside={(e) => e.preventDefault()}
             onInteractOutside={(e) => e.preventDefault()}

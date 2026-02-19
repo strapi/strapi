@@ -24,8 +24,8 @@ export class AssetsPage {
     this.gridViewButton = page.getByRole('radio', { name: 'Grid view' });
     this.tableViewButton = page.getByRole('radio', { name: 'Table view' });
     this.dropZone = page.getByTestId('assets-dropzone');
-    this.uploadProgressDialog = page.getByTestId('upload-progress-dialog');
-    this.assetDetailsDrawer = page.getByTestId('asset-details-drawer');
+    this.uploadProgressDialog = page.getByRole('dialog', { name: /upload/i });
+    this.assetDetailsDrawer = page.getByRole('dialog').filter({ has: page.getByText('File info') });
   }
 
   async goto() {

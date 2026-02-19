@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { useNotification, useQueryParams, getDisplayName } from '@strapi/admin/strapi-admin';
+import { useQueryParams, getDisplayName } from '@strapi/admin/strapi-admin';
 import {
+  Alert,
   Box,
   Field,
   Flex,
@@ -15,12 +16,12 @@ import { ArrowLineRight, FileError, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { Drawer, DRAWER_CLOSE_ANIMATION_MS } from '../../../components/Drawer';
-import { AssetType } from '../../../enums';
-import { useGetAssetQuery, type AssetWithPopulatedCreatedBy } from '../../../services/assets';
-import { formatBytes, getFileExtension } from '../../../utils/files';
-import { getAssetIcon } from '../../../utils/getAssetIcon';
-import { getTranslationKey } from '../../../utils/translations';
+import { Drawer, DRAWER_CLOSE_ANIMATION_MS } from '../../../../components/Drawer';
+import { AssetType } from '../../../../enums';
+import { useGetAssetQuery, type AssetWithPopulatedCreatedBy } from '../../../../services/assets';
+import { formatBytes, getFileExtension } from '../../../../utils/files';
+import { getAssetIcon } from '../../../../utils/getAssetIcon';
+import { getTranslationKey } from '../../../../utils/translations';
 
 import { AssetPreview } from './AssetPreview';
 
@@ -148,32 +149,11 @@ const DetailField = ({ name, label, value, required }: DetailFieldProps) => (
 );
 
 interface AssetDetailsProps {
-  asset: AssetWithPopulatedCreatedBy | undefined;
-  error: unknown;
+  asset: AssetWithPopulatedCreatedBy;
 }
 
-const AssetDetails = ({ asset, error }: AssetDetailsProps) => {
+const AssetDetails = ({ asset }: AssetDetailsProps) => {
   const { formatMessage, formatDate } = useIntl();
-
-  if (error || !asset) {
-    return (
-      <Flex
-        direction="column"
-        alignItems="stretch"
-        gap={4}
-        paddingBottom={4}
-        paddingLeft={5}
-        paddingRight={5}
-      >
-        <Typography textColor="danger600">
-          {formatMessage({
-            id: getTranslationKey('asset-details.error'),
-            defaultMessage: 'Failed to load file details.',
-          })}
-        </Typography>
-      </Flex>
-    );
-  }
 
   const isImage = asset.mime?.includes(AssetType.Image);
 
@@ -320,7 +300,6 @@ interface DrawerContentProps {
 
 const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
   const { formatMessage } = useIntl();
-  const { toggleNotification } = useNotification();
   const {
     data: asset,
     isLoading,
@@ -330,19 +309,6 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
     refetchOnReconnect: false,
     refetchOnFocus: false,
   });
-
-  React.useEffect(() => {
-    if (error) {
-      toggleNotification({
-        type: 'danger',
-        message: formatMessage({
-          id: getTranslationKey('asset-details.error'),
-          defaultMessage: 'Failed to load file details.',
-        }),
-      });
-      closeDetails();
-    }
-  }, [error, closeDetails, toggleNotification, formatMessage]);
 
   if (isLoading) {
     return (
@@ -372,7 +338,24 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 
   const DocIcon = asset ? getAssetIcon(asset.mime, asset.ext) : FileError;
 
-  return !error && asset ? (
+  if (error || !asset) {
+    return (
+      <Flex direction="column" alignItems="stretch" gap={4} padding={4}>
+        <Alert
+          variant="danger"
+          closeLabel={formatMessage({ id: 'global.close', defaultMessage: 'Close' })}
+          onClose={closeDetails}
+        >
+          {formatMessage({
+            id: getTranslationKey('asset-details.error'),
+            defaultMessage: 'Failed to load file details.',
+          })}
+        </Alert>
+      </Flex>
+    );
+  }
+
+  return (
     <>
       <Flex gap={2} paddingLeft={5} paddingTop={3} paddingBottom={3} paddingRight={3}>
         <DocIcon width={20} height={20} />
@@ -396,11 +379,11 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
         </Dialog.Description>
       </VisuallyHidden>
       <Drawer.Content>
-        <AssetPreview asset={asset} error={error} />
-        <AssetDetails asset={asset} error={error} />
+        <AssetPreview asset={asset} />
+        <AssetDetails asset={asset} />
       </Drawer.Content>
     </>
-  ) : null;
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -418,7 +401,6 @@ export const AssetDetailsDrawer = () => {
     <Drawer.Root
       isVisible={isVisible}
       onClose={closeDetails}
-      dataTestId="asset-details-drawer"
       width="41.6rem"
       height="100vh"
       animationDirection="left"

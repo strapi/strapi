@@ -4,13 +4,13 @@ import { Box, Flex, Loader, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../enums';
-import { prefixFileUrlWithBackendUrl } from '../../../utils/files';
-import { getAssetIcon } from '../../../utils/getAssetIcon';
-import { getTranslationKey } from '../../../utils/translations';
+import { AssetType } from '../../../../enums';
+import { prefixFileUrlWithBackendUrl } from '../../../../utils/files';
+import { getAssetIcon } from '../../../../utils/getAssetIcon';
+import { getTranslationKey } from '../../../../utils/translations';
 
-import type { File } from '../../../../../../shared/contracts/files';
-import type { AssetWithPopulatedCreatedBy } from '../../../services/assets';
+import type { File } from '../../../../../../../shared/contracts/files';
+import type { AssetWithPopulatedCreatedBy } from '../../../../services/assets';
 
 /* -------------------------------------------------------------------------------------------------
  * Styled components
@@ -95,11 +95,11 @@ const AssetLoader = () => {
  * AssetPreviewContent
  * -----------------------------------------------------------------------------------------------*/
 
-interface AssetPreviewContentProps {
+interface AssetPreviewProps {
   asset: File | AssetWithPopulatedCreatedBy;
 }
 
-export const AssetPreviewContent = ({ asset }: AssetPreviewContentProps) => {
+export const AssetPreview = ({ asset }: AssetPreviewProps) => {
   const { formatMessage } = useIntl();
   const { alternativeText, ext, mime, url } = asset;
   const mediaUrl = prefixFileUrlWithBackendUrl(url);
@@ -213,21 +213,4 @@ export const AssetPreviewContent = ({ asset }: AssetPreviewContentProps) => {
       </IconFallback>
     </PreviewContainer>
   );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * AssetPreview
- * -----------------------------------------------------------------------------------------------*/
-
-interface AssetPreviewProps {
-  asset: (File | AssetWithPopulatedCreatedBy) | undefined;
-  error: unknown;
-}
-
-export const AssetPreview = ({ asset, error }: AssetPreviewProps) => {
-  if (error || !asset) {
-    return null;
-  }
-
-  return <AssetPreviewContent asset={asset} />;
 };
