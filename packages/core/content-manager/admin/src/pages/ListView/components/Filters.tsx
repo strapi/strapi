@@ -119,16 +119,16 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
         ...allowedFields,
         ...DEFAULT_ALLOWED_FILTERS,
         ...(canReadAdminUsers ? CREATOR_FIELDS : []),
-        ...(options?.draftAndPublish === true ? ['status'] : []),
+        ...(options?.draftAndPublish === true ? ['__status'] : []),
       ]
         .map((name) => {
-          if (name === 'status') {
+          if (name === '__status') {
             return {
-              name: 'status',
+              name: '__status',
               type: 'enumeration',
               label: formatMessage({
-                id: getTranslation('containers.list.table-headers.status'),
-                defaultMessage: 'status',
+                id: getTranslation('containers.list.table-headers.publishedAt'),
+                defaultMessage: 'State',
               }),
               operators: [
                 {

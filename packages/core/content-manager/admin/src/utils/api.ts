@@ -28,7 +28,7 @@ const extractStatusFilter = <T extends Record<string, any>>(params: T): T => {
   const statusFilters = [];
 
   for (const filter of filters.$and) {
-    if (!filter || typeof filter !== 'object' || !('status' in filter) || !filter.status?.$eq) {
+    if (!filter || typeof filter !== 'object' || !('__status' in filter) || !filter.__status?.$eq) {
       remainingFilters.push(filter);
     } else {
       statusFilters.push(filter);
@@ -46,7 +46,7 @@ const extractStatusFilter = <T extends Record<string, any>>(params: T): T => {
   // Technically, multiple filters on an enum field should produce no result, which is why
   // this has the ability to apply mutually exclusive filters.
   for (const statusFilter of statusFilters) {
-    const value = statusFilter.status.$eq;
+    const value = statusFilter.__status.$eq;
 
     if (value === 'published') {
       modifiedQuery.status = 'published';
