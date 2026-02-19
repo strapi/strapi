@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { ScrollArea, Flex, IconButton, Typography } from '@strapi/design-system';
+import { ScrollArea, IconButton, VisuallyHidden } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 import { keyframes, styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
@@ -10,9 +11,14 @@ import { keyframes, styled } from 'styled-components';
  * -----------------------------------------------------------------------------------------------*/
 
 interface DrawerContextValue {
-  isVisible: boolean;
-  onClose: () => void;
-  isContentExpanded: boolean | undefined;
+  /** Accessible title for screen readers (required for accessibility) */
+  title: MessageDescriptor;
+  /** Accessible description for screen readers. Omit to use aria-describedby={undefined} */
+  description: MessageDescriptor;
+  animationDirection?: 'up' | 'left';
+  isVisible?: boolean;
+  onClose?: () => void;
+  isContentExpanded?: boolean | undefined;
   dataTestId?: string;
   width?: number | string;
   height?: number | string;
@@ -30,9 +36,10 @@ const useDrawerContext = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * Animations - slide up from bottom (outside viewport)
+ * Animations
  * -----------------------------------------------------------------------------------------------*/
 
+// Direction: up
 const slideUpFromBottomIn = keyframes`
   from {
     opacity: 0;
@@ -55,15 +62,42 @@ const slideUpFromBottomOut = keyframes`
   }
 `;
 
+// Direction: left
+const slideLeftFromRightIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`;
+
+const slideLeftFromRightOut = keyframes`
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+`;
+
 /* -------------------------------------------------------------------------------------------------
  * Styled components
  * -----------------------------------------------------------------------------------------------*/
 
-const DrawerContainer = styled(Dialog.Content)<{
+interface DrawerContainerProps {
   $width?: number | string;
   $height?: number | string;
   $maxHeight?: number | string;
-}>`
+  $animationDirection?: 'up' | 'left';
+  $zIndex?: number;
+}
+
+const DrawerContainer = styled(Dialog.Content)<DrawerContainerProps>`
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -72,6 +106,7 @@ const DrawerContainer = styled(Dialog.Content)<{
   padding: ${({ theme }) => theme.spaces[2]};
   width: ${({ $width }) => (typeof $width === 'number' ? `${$width}px` : ($width ?? '400px'))};
   height: ${({ $height }) => (typeof $height === 'number' ? `${$height}px` : ($height ?? 'auto'))};
+  max-width: 100%;
   max-height: ${({ $maxHeight }) =>
     typeof $maxHeight === 'number' ? `${$maxHeight}px` : ($maxHeight ?? '100vh')};
   z-index: 1000;
@@ -83,11 +118,15 @@ const DrawerContainer = styled(Dialog.Content)<{
 
   @media (prefers-reduced-motion: no-preference) {
     &[data-state='open'] {
-      animation: ${slideUpFromBottomIn} 300ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+      animation: ${({ $animationDirection }) =>
+          $animationDirection === 'up' ? slideUpFromBottomIn : slideLeftFromRightIn}
+        300ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
     }
 
     &[data-state='closed'] {
-      animation: ${slideUpFromBottomOut} 300ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+      animation: ${({ $animationDirection }) =>
+          $animationDirection === 'up' ? slideUpFromBottomOut : slideLeftFromRightOut}
+        300ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
       pointer-events: none;
     }
   }
@@ -106,7 +145,11 @@ const DrawerContent = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const AnimatedBody = styled.div<{ $isVisible: boolean }>`
+interface AnimatedBodyProps {
+  $isVisible: boolean;
+}
+
+const AnimatedBody = styled.div<AnimatedBodyProps>`
   display: grid;
   flex: 1;
   min-height: 0;
@@ -123,18 +166,8 @@ const AnimatedBody = styled.div<{ $isVisible: boolean }>`
  * Drawer.Root
  * -----------------------------------------------------------------------------------------------*/
 
-export interface DrawerRootProps {
-  isVisible: boolean;
-  onClose: () => void;
-  isContentExpanded?: boolean;
-  width?: number | string;
-  height?: number | string;
-  maxHeight?: number | string;
-  dataTestId?: string;
-  children: React.ReactNode;
-}
-
 const DrawerRoot = ({
+  animationDirection = 'up',
   isVisible,
   onClose,
   isContentExpanded,
@@ -142,9 +175,13 @@ const DrawerRoot = ({
   height,
   maxHeight,
   dataTestId,
+  title,
+  description,
   children,
-}: DrawerRootProps) => {
+}: DrawerContextValue & React.PropsWithChildren) => {
+  const { formatMessage } = useIntl();
   const contextValue: DrawerContextValue = {
+    animationDirection,
     isVisible,
     onClose,
     isContentExpanded,
@@ -152,26 +189,35 @@ const DrawerRoot = ({
     width,
     height,
     maxHeight,
+    title,
+    description,
   };
 
   return (
     <DrawerContext.Provider value={contextValue}>
       <Dialog.Root
         open={isVisible}
-        onOpenChange={(nextVisible) => !nextVisible && onClose()}
+        onOpenChange={(nextVisible) => !nextVisible && onClose?.()}
         modal={false}
       >
         <Dialog.Portal>
           <DrawerContainer
+            $animationDirection={animationDirection}
             $width={width}
             $height={height}
             $maxHeight={maxHeight}
             data-testid={dataTestId}
-            aria-describedby={undefined}
+            {...(!description ? { 'aria-describedby': undefined } : {})}
             forceMount
             onPointerDownOutside={(e) => e.preventDefault()}
             onInteractOutside={(e) => e.preventDefault()}
           >
+            <VisuallyHidden>
+              <Dialog.Title>{formatMessage(title)}</Dialog.Title>
+              {description ? (
+                <Dialog.Description>{formatMessage(description)}</Dialog.Description>
+              ) : null}
+            </VisuallyHidden>
             <DrawerContent>{children}</DrawerContent>
           </DrawerContainer>
         </Dialog.Portal>
@@ -184,27 +230,24 @@ const DrawerRoot = ({
  * Drawer.Header - composable header slot
  * -----------------------------------------------------------------------------------------------*/
 
-const DrawerHeaderSlot = ({ children }: { children?: React.ReactNode }) => {
+const DrawerHeaderSlot = ({ children }: React.PropsWithChildren) => {
   if (!children) return null;
   return <>{children}</>;
 };
 
 /* -------------------------------------------------------------------------------------------------
  * Drawer.Content - composable content slot (collapsible when isContentExpanded is used)
+ * Contains a scrollable area
  * -----------------------------------------------------------------------------------------------*/
 
-const DrawerContentSlot = ({ children }: { children?: React.ReactNode }) => {
+const DrawerContentSlot = ({ children }: React.PropsWithChildren) => {
   const { isContentExpanded } = useDrawerContext();
   const isCollapsible = typeof isContentExpanded === 'boolean';
   const isContentVisible = isCollapsible ? isContentExpanded : true;
 
   return (
-    <AnimatedBody $isVisible={isContentVisible}>
-      <ScrollArea>
-        <Flex direction="column" alignItems="stretch" gap={4}>
-          {children}
-        </Flex>
-      </ScrollArea>
+    <AnimatedBody $isVisible={isContentVisible} data-collapsed={!isContentVisible}>
+      <ScrollArea>{children}</ScrollArea>
     </AnimatedBody>
   );
 };
@@ -213,13 +256,13 @@ const DrawerContentSlot = ({ children }: { children?: React.ReactNode }) => {
  * Drawer.Footer - composable footer slot
  * -----------------------------------------------------------------------------------------------*/
 
-const DrawerFooterSlot = ({ children }: { children?: React.ReactNode }) => {
+const DrawerFooterSlot = ({ children }: React.PropsWithChildren) => {
   if (!children) return null;
   return <>{children}</>;
 };
 
 /* -------------------------------------------------------------------------------------------------
- * Drawer.CloseButton - composable close icon button
+ * Drawer.CloseButton - composable close icon button (Cross icon by default)
  * -----------------------------------------------------------------------------------------------*/
 
 const CloseIconButton = styled(IconButton)`
@@ -228,96 +271,27 @@ const CloseIconButton = styled(IconButton)`
   }
 `;
 
-export interface DrawerCloseButtonProps {
+export interface DrawerCloseButtonProps extends React.PropsWithChildren {
   onClose: () => void;
   label?: string;
-  children?: React.ReactNode;
 }
 
-const DrawerCloseButton = ({ onClose, label = 'Close', children }: DrawerCloseButtonProps) => (
-  <CloseIconButton onClick={onClose} label={label} variant="ghost">
-    {children ?? <Cross />}
-  </CloseIconButton>
-);
+const DrawerCloseButton = ({ onClose, label, children }: DrawerCloseButtonProps) => {
+  const { formatMessage } = useIntl();
+  const labelMessage = label ?? formatMessage({ id: 'global.close', defaultMessage: 'Close' });
+  return (
+    <CloseIconButton onClick={onClose} label={labelMessage} variant="ghost">
+      {children ?? <Cross />}
+    </CloseIconButton>
+  );
+};
 
-/* -------------------------------------------------------------------------------------------------
- * Drawer.Header - preset with title, subtitle, actions (for asset details, etc.)
- * -----------------------------------------------------------------------------------------------*/
-
-export interface DrawerHeaderProps {
-  title: React.ReactNode;
-  subtitle?: React.ReactNode;
-  actions?: React.ReactNode;
-  background?: 'primary100' | 'success100' | 'danger100' | 'neutral100';
-}
-
-const DrawerHeaderPreset = ({
-  title,
-  subtitle,
-  actions,
-  background = 'neutral100',
-}: DrawerHeaderProps) => (
-  <Flex
-    background={background}
-    justifyContent="space-between"
-    margin={1}
-    hasRadius
-    alignItems="center"
-  >
-    <Flex direction="column" alignItems="flex-start" paddingLeft={2} minWidth={0}>
-      <Dialog.Title>
-        <Typography variant="omega">{title}</Typography>
-      </Dialog.Title>
-      <Dialog.Description>
-        {subtitle ? (
-          <Typography variant="pi" textColor="neutral600">
-            {subtitle}
-          </Typography>
-        ) : (
-          <span />
-        )}
-      </Dialog.Description>
-    </Flex>
-    {actions && (
-      <Flex gap={1} shrink={0} alignItems="center">
-        {actions}
-      </Flex>
-    )}
-  </Flex>
-);
-
-/* -------------------------------------------------------------------------------------------------
- * Drawer - compound component
- * -----------------------------------------------------------------------------------------------*/
-
-/**
- * Composable drawer with Root, Header, Content, Footer slots.
- *
- * @example
- * // Upload progress
- * <Drawer.Root isVisible={isVisible} onClose={handleClose} isContentExpanded={!isMinimized}>
- *   <Drawer.Header><DialogHeader /></Drawer.Header>
- *   <Drawer.Content>{fileList}</Drawer.Content>
- *   <Drawer.Footer />
- * </Drawer.Root>
- *
- * @example
- * // Asset details
- * <Drawer.Root isVisible={isOpen} onClose={() => setIsOpen(false)}>
- *   <Drawer.Header>
- *     <Drawer.HeaderPreset title="Asset details" subtitle="image.png" actions={<Drawer.CloseButton onClose={() => setIsOpen(false)} />} />
- *   </Drawer.Header>
- *   <Drawer.Content><AssetDetailsContent /></Drawer.Content>
- * </Drawer.Root>
- */
 const Drawer = {
   Root: DrawerRoot,
   Header: DrawerHeaderSlot,
   Content: DrawerContentSlot,
   Footer: DrawerFooterSlot,
   CloseButton: DrawerCloseButton,
-  /** Preset header with title, subtitle, actions - use when you need a simple header layout */
-  HeaderPreset: DrawerHeaderPreset,
 };
 
 export { Drawer };

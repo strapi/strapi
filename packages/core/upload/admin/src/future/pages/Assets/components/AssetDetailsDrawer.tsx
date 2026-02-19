@@ -1,23 +1,31 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { Flex, Loader, Typography } from '@strapi/design-system';
+import { useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
+import { Box, Field, Flex, Loader, TextInput, Typography } from '@strapi/design-system';
+import { ArrowLineRight, FileError, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { Drawer } from '../../../components/Drawer';
 import { AssetType } from '../../../enums';
 import { useGetAssetQuery } from '../../../services/assets';
-import { formatBytes, getFileExtension } from '../../../utils/files';
+import { formatBytes, getFileExtension, prefixFileUrlWithBackendUrl } from '../../../utils/files';
+import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
+import { formatDuration, useMediaDuration } from '../hooks/useMediaDuration';
+
+import { AssetPreview } from './AssetPreview';
+
+import type { File } from '../../../../../../shared/contracts/files';
 
 // Name of the parameter to look for in the URL to open the drawer
 const URL_PARAM = 'details';
+// Closing animation duration to wait until the drawer is closed before removing the URL parameter
+const CLOSE_ANIMATION_MS = 300;
 
 /* -------------------------------------------------------------------------------------------------
  * useAssetDetailsParam - sync drawer visibility with URL ?{URL_PARAM}={id}
  * -----------------------------------------------------------------------------------------------*/
-
-const CLOSE_ANIMATION_MS = 300;
 
 export const useAssetDetailsParam = () => {
   const [{ query }, setQuery] = useQueryParams<{ [URL_PARAM]?: string }>();
@@ -76,139 +84,233 @@ export const useAssetDetailsParam = () => {
  * AssetDetailsContent
  * -----------------------------------------------------------------------------------------------*/
 
-interface DetailRowProps {
+interface DetailItemProps {
   label: string;
   value: React.ReactNode;
 }
 
-const DetailRow = ({ label, value }: DetailRowProps) => (
-  <Flex direction="column" gap={1} paddingBottom={3}>
-    <Typography variant="pi" textColor="neutral600" fontWeight="semiBold">
+const DetailItemContainer = styled(Flex)`
+  flex: 0 0 calc(50% - ${({ theme }) => theme.spaces[2]});
+`;
+
+const DetailItem = ({ label, value }: DetailItemProps) => (
+  <DetailItemContainer
+    direction="column"
+    justifyContent="flex-start"
+    alignItems="flex-start"
+    gap={1}
+  >
+    <Typography
+      variant="sigma"
+      textColor="neutral600"
+      fontWeight="semiBold"
+      textTransform="uppercase"
+    >
       {label}
     </Typography>
-    <Typography variant="pi" textColor="neutral800">
+    <Typography variant="pi" textColor="neutral700">
       {value ?? '-'}
     </Typography>
-  </Flex>
+  </DetailItemContainer>
 );
 
-interface AssetDetailsContentProps {
-  assetId: number;
+const StyledWarning = styled(WarningCircle)`
+  width: 1.6rem;
+  height: 1.6rem;
+
+  path {
+    fill: ${({ theme }) => theme.colors.warning500};
+  }
+`;
+
+interface DetailFieldProps {
+  name: string;
+  label: string;
+  value: string | null | undefined;
+  required?: boolean;
 }
 
-const AssetDetailsContent = ({ assetId }: AssetDetailsContentProps) => {
-  const { formatMessage, formatDate } = useIntl();
-  const { data: asset, isLoading, error } = useGetAssetQuery(assetId);
+const DetailField = ({ name, label, value, required }: DetailFieldProps) => (
+  <Field.Root name={name} required={required}>
+    <Field.Label>{label}</Field.Label>
+    <TextInput
+      value={value ?? ''}
+      // TODO: handle onChange
+      onChange={() => {}}
+      endAction={!value ? <StyledWarning /> : undefined}
+      type="text"
+    />
+  </Field.Root>
+);
 
-  if (isLoading) {
+interface AssetDetailsProps {
+  asset: File | undefined;
+  error: unknown;
+}
+
+const AssetDetails = ({ asset, error }: AssetDetailsProps) => {
+  const { formatMessage, formatDate } = useIntl();
+
+  const isVideo = asset?.mime?.includes(AssetType.Video) ?? false;
+  const isAudio = asset?.mime?.includes(AssetType.Audio) ?? false;
+  const mediaUrl = asset?.url ? prefixFileUrlWithBackendUrl(asset.url) : undefined;
+
+  const { duration: videoDuration, isLoading: isVideoDurationLoading } = useMediaDuration(
+    isVideo ? mediaUrl : undefined,
+    'video'
+  );
+  const { duration: audioDuration, isLoading: isAudioDurationLoading } = useMediaDuration(
+    isAudio ? mediaUrl : undefined,
+    'audio'
+  );
+
+  if (error || !asset) {
     return (
-      <Flex justifyContent="center" padding={8}>
-        <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
+      <Flex
+        direction="column"
+        alignItems="stretch"
+        gap={4}
+        paddingBottom={4}
+        paddingLeft={5}
+        paddingRight={5}
+      >
+        <Typography textColor="danger600">
+          {formatMessage({
+            id: getTranslationKey('asset-details.error'),
+            defaultMessage: 'Failed to load file details.',
+          })}
+        </Typography>
       </Flex>
     );
   }
 
-  if (error || !asset) {
-    return (
-      <Typography textColor="danger600">
-        {formatMessage({
-          id: getTranslationKey('details.error'),
-          defaultMessage: 'Failed to load asset details.',
-        })}
-      </Typography>
-    );
-  }
-
   const isImage = asset.mime?.includes(AssetType.Image);
-  const isVideo = asset.mime?.includes(AssetType.Video);
-  const isAudio = asset.mime?.includes(AssetType.Audio);
-
-  const duration = (asset.provider_metadata as { duration?: number } | undefined)?.duration;
+  const metadataDuration = (asset.provider_metadata as { duration?: number } | undefined)?.duration;
+  const duration =
+    metadataDuration ?? (isVideo ? videoDuration : null) ?? (isAudio ? audioDuration : null);
+  const isDurationPending =
+    (isVideo && isVideoDurationLoading) || (isAudio && isAudioDurationLoading);
 
   return (
-    <Flex direction="column" gap={0}>
-      <DetailRow
-        label={formatMessage({
-          id: getTranslationKey('details.name'),
-          defaultMessage: 'Name',
+    <Flex
+      direction="column"
+      alignItems="stretch"
+      gap={4}
+      paddingTop={4}
+      paddingBottom={4}
+      paddingLeft={5}
+      paddingRight={5}
+    >
+      <Typography variant="beta" fontWeight="semiBold" tag="h3">
+        {formatMessage({
+          id: getTranslationKey('asset-details.fileInfo'),
+          defaultMessage: 'File info',
         })}
-        value={asset.name}
-      />
-      <DetailRow
-        label={formatMessage({
-          id: getTranslationKey('details.size'),
-          defaultMessage: 'Size',
-        })}
-        value={asset.size ? formatBytes(asset.size, 1) : null}
-      />
-      {isImage && (asset.width != null || asset.height != null) && (
-        <DetailRow
+      </Typography>
+      <Flex
+        wrap="wrap"
+        gap={4}
+        background="neutral100"
+        paddingTop={4}
+        paddingBottom={4}
+        paddingLeft={6}
+        paddingRight={6}
+      >
+        <DetailItem
           label={formatMessage({
-            id: getTranslationKey('details.dimensions'),
-            defaultMessage: 'Dimensions',
+            id: getTranslationKey('asset-details.size'),
+            defaultMessage: 'Size',
+          })}
+          value={asset.size ? formatBytes(asset.size, 1) : null}
+        />
+        {isImage && (asset.width != null || asset.height != null) && (
+          <DetailItem
+            label={formatMessage({
+              id: getTranslationKey('asset-details.dimensions'),
+              defaultMessage: 'Dimensions',
+            })}
+            value={
+              asset.width != null && asset.height != null
+                ? `${asset.width} × ${asset.height}`
+                : null
+            }
+          />
+        )}
+        {(isVideo || isAudio) && (
+          <DetailItem
+            label={formatMessage({
+              id: getTranslationKey('asset-details.duration'),
+              defaultMessage: 'Duration',
+            })}
+            value={
+              isDurationPending
+                ? formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })
+                : duration != null
+                  ? formatDuration(duration)
+                  : null
+            }
+          />
+        )}
+        <DetailItem
+          label={formatMessage({
+            id: getTranslationKey('asset-details.creationDate'),
+            defaultMessage: 'Creation date',
           })}
           value={
-            asset.width != null && asset.height != null ? `${asset.width} × ${asset.height}` : null
+            asset.createdAt
+              ? formatDate(new Date(asset.createdAt), { dateStyle: 'long', timeStyle: 'short' })
+              : null
           }
         />
-      )}
-      {(isVideo || isAudio) && duration != null && (
-        <DetailRow
+        <DetailItem
           label={formatMessage({
-            id: getTranslationKey('details.duration'),
-            defaultMessage: 'Duration',
+            id: getTranslationKey('asset-details.lastUpdated'),
+            defaultMessage: 'Last updated',
           })}
-          value={`${Math.floor(duration / 60)}:${String(duration % 60).padStart(2, '0')}`}
+          value={
+            asset.updatedAt
+              ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long', timeStyle: 'short' })
+              : null
+          }
         />
-      )}
-      <DetailRow
+        <DetailItem
+          label={formatMessage({
+            id: getTranslationKey('asset-details.extension'),
+            defaultMessage: 'Extension',
+          })}
+          value={getFileExtension(asset.ext)}
+        />
+        <DetailItem
+          label={formatMessage({
+            id: getTranslationKey('asset-details.assetId'),
+            defaultMessage: 'Asset ID',
+          })}
+          value={String(asset.id)}
+        />
+      </Flex>
+      <DetailField
+        name="fileName"
         label={formatMessage({
-          id: getTranslationKey('details.createdAt'),
-          defaultMessage: 'Date of creation',
+          id: getTranslationKey('asset-details.fileName'),
+          defaultMessage: 'File name',
         })}
-        value={
-          asset.createdAt
-            ? formatDate(new Date(asset.createdAt), { dateStyle: 'long', timeStyle: 'short' })
-            : null
-        }
-      />
-      <DetailRow
-        label={formatMessage({
-          id: getTranslationKey('details.updatedAt'),
-          defaultMessage: 'Date of modification',
-        })}
-        value={
-          asset.updatedAt
-            ? formatDate(new Date(asset.updatedAt), { dateStyle: 'long', timeStyle: 'short' })
-            : null
-        }
-      />
-      <DetailRow
-        label={formatMessage({
-          id: getTranslationKey('details.extension'),
-          defaultMessage: 'Extension',
-        })}
-        value={getFileExtension(asset.ext)}
-      />
-      <DetailRow
-        label={formatMessage({
-          id: getTranslationKey('details.id'),
-          defaultMessage: 'ID',
-        })}
-        value={String(asset.id)}
+        value={asset.name}
+        required
       />
       {isImage && (
         <>
-          <DetailRow
+          <DetailField
+            name="caption"
             label={formatMessage({
-              id: getTranslationKey('details.caption'),
+              id: getTranslationKey('asset-details.caption'),
               defaultMessage: 'Caption',
             })}
             value={asset.caption}
           />
-          <DetailRow
+          <DetailField
+            name="alternativeText"
             label={formatMessage({
-              id: getTranslationKey('details.alternativeText'),
+              id: getTranslationKey('asset-details.alternativeText'),
               defaultMessage: 'Alternative text',
             })}
             value={asset.alternativeText}
@@ -220,11 +322,80 @@ const AssetDetailsContent = ({ assetId }: AssetDetailsContentProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * DrawerContent (Drawer.Header and Drawer.Content)
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DrawerContentProps {
+  assetId: number;
+  closeDetails: () => void;
+}
+
+const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const {
+    data: asset,
+    isLoading,
+    error,
+  } = useGetAssetQuery(assetId, {
+    refetchOnMountOrArgChange: false,
+    refetchOnReconnect: false,
+    refetchOnFocus: false,
+  });
+
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslationKey('asset-details.error'),
+          defaultMessage: 'Failed to load file details.',
+        }),
+      });
+      closeDetails();
+    }
+  }, [error, closeDetails, toggleNotification, formatMessage]);
+
+  if (isLoading) {
+    return (
+      <Drawer.Content>
+        <Flex justifyContent="center" padding={8}>
+          <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
+        </Flex>
+      </Drawer.Content>
+    );
+  }
+
+  const DocIcon = asset ? getAssetIcon(asset.mime, asset.ext) : FileError;
+
+  return !error && asset ? (
+    <>
+      <Drawer.Header>
+        <Flex gap={2} paddingLeft={5} paddingTop={3} paddingBottom={3} paddingRight={3}>
+          <DocIcon width={20} height={20} />
+          <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis>
+            {asset.name}
+          </Typography>
+          <Box marginLeft="auto">
+            <Drawer.CloseButton onClose={closeDetails}>
+              <ArrowLineRight />
+            </Drawer.CloseButton>
+          </Box>
+        </Flex>
+      </Drawer.Header>
+      <Drawer.Content>
+        <AssetPreview asset={asset} error={error} />
+        <AssetDetails asset={asset} error={error} />
+      </Drawer.Content>
+    </>
+  ) : null;
+};
+
+/* -------------------------------------------------------------------------------------------------
  * AssetDetailsDrawer
  * -----------------------------------------------------------------------------------------------*/
 
 export const AssetDetailsDrawer = () => {
-  const { formatMessage } = useIntl();
   const { assetId, isVisible, shouldRenderDrawer, closeDetails } = useAssetDetailsParam();
 
   if (!shouldRenderDrawer || assetId === null) {
@@ -238,19 +409,17 @@ export const AssetDetailsDrawer = () => {
       dataTestId="asset-details-drawer"
       width="41.6rem"
       height="100vh"
+      animationDirection="left"
+      title={{
+        id: getTranslationKey('asset-details.title'),
+        defaultMessage: 'File details',
+      }}
+      description={{
+        id: getTranslationKey('asset-details.description'),
+        defaultMessage: 'Displays file information and metadata',
+      }}
     >
-      <Drawer.Header>
-        <Drawer.HeaderPreset
-          title={formatMessage({
-            id: getTranslationKey('details.title'),
-            defaultMessage: 'Asset details',
-          })}
-          actions={<Drawer.CloseButton onClose={closeDetails} />}
-        />
-      </Drawer.Header>
-      <Drawer.Content>
-        <AssetDetailsContent assetId={assetId} />
-      </Drawer.Content>
+      <DrawerContent assetId={assetId} closeDetails={closeDetails} />
     </Drawer.Root>
   );
 };

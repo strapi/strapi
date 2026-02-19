@@ -87,7 +87,7 @@ const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
       height="3.2rem"
       shrink={0}
     >
-      <DocIcon width={16} height={16} />
+      <DocIcon width={20} height={20} />
     </Flex>
   );
 };
