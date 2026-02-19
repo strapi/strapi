@@ -1,6 +1,6 @@
 import { renderHook } from '@tests/utils';
 
-import { useFolderTitle } from '../useFolderTitle';
+import { useFolderInfo } from '../useFolderInfo';
 
 const mockUseGetAssetsQuery = jest.fn();
 const mockUseGetFolderQuery = jest.fn();
@@ -13,7 +13,7 @@ jest.mock('../../../../services/folders', () => ({
   useGetFolderQuery: (...args: unknown[]) => mockUseGetFolderQuery(...args),
 }));
 
-describe('useFolderTitle', () => {
+describe('useFolderInfo', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -23,45 +23,49 @@ describe('useFolderTitle', () => {
       mockUseGetFolderQuery.mockReturnValue({ data: undefined, isLoading: false });
     });
 
-    it('returns "Home" when root assets are loading', () => {
+    it('returns title "Home" and itemCount 0 when root assets are loading', () => {
       mockUseGetAssetsQuery.mockReturnValue({ data: undefined, isLoading: true });
 
-      const { result } = renderHook(() => useFolderTitle(null));
+      const { result } = renderHook(() => useFolderInfo(null));
 
       expect(result.current.title).toBe('Home');
+      expect(result.current.itemCount).toBe(0);
     });
 
-    it('returns "Home (0 items)" when there are 0 files', () => {
+    it('returns itemCount 0 when there are 0 files', () => {
       mockUseGetAssetsQuery.mockReturnValue({
         data: { results: [], pagination: { total: 0 } },
         isLoading: false,
       });
 
-      const { result } = renderHook(() => useFolderTitle(null));
+      const { result } = renderHook(() => useFolderInfo(null));
 
-      expect(result.current.title).toBe('Home (0 items)');
+      expect(result.current.title).toBe('Home');
+      expect(result.current.itemCount).toBe(0);
     });
 
-    it('returns singular "Home (1 item)" when there is 1 file', () => {
+    it('returns itemCount 1 when there is 1 file', () => {
       mockUseGetAssetsQuery.mockReturnValue({
         data: { results: [], pagination: { total: 1 } },
         isLoading: false,
       });
 
-      const { result } = renderHook(() => useFolderTitle(null));
+      const { result } = renderHook(() => useFolderInfo(null));
 
-      expect(result.current.title).toBe('Home (1 item)');
+      expect(result.current.title).toBe('Home');
+      expect(result.current.itemCount).toBe(1);
     });
 
-    it('returns "Home (5 items)" when there are 5 files', () => {
+    it('returns itemCount 5 when there are 5 files', () => {
       mockUseGetAssetsQuery.mockReturnValue({
         data: { results: [], pagination: { total: 5 } },
         isLoading: false,
       });
 
-      const { result } = renderHook(() => useFolderTitle(null));
+      const { result } = renderHook(() => useFolderInfo(null));
 
-      expect(result.current.title).toBe('Home (5 items)');
+      expect(result.current.title).toBe('Home');
+      expect(result.current.itemCount).toBe(5);
     });
   });
 
@@ -70,34 +74,37 @@ describe('useFolderTitle', () => {
       mockUseGetAssetsQuery.mockReturnValue({ data: undefined, isLoading: false });
     });
 
-    it('returns "Docs (3 items)" for a loaded subfolder with 3 files', () => {
+    it('returns folder name and itemCount 3 for a loaded subfolder with 3 files', () => {
       mockUseGetFolderQuery.mockReturnValue({
         data: { id: 5, name: 'Docs', files: { count: 3 } },
         isLoading: false,
       });
 
-      const { result } = renderHook(() => useFolderTitle(5));
+      const { result } = renderHook(() => useFolderInfo(5));
 
-      expect(result.current.title).toBe('Docs (3 items)');
+      expect(result.current.title).toBe('Docs');
+      expect(result.current.itemCount).toBe(3);
     });
 
-    it('returns singular "Docs (1 item)" when the folder has 1 file', () => {
+    it('returns folder name and itemCount 1 when the folder has 1 file', () => {
       mockUseGetFolderQuery.mockReturnValue({
         data: { id: 5, name: 'Docs', files: { count: 1 } },
         isLoading: false,
       });
 
-      const { result } = renderHook(() => useFolderTitle(5));
+      const { result } = renderHook(() => useFolderInfo(5));
 
-      expect(result.current.title).toBe('Docs (1 item)');
+      expect(result.current.title).toBe('Docs');
+      expect(result.current.itemCount).toBe(1);
     });
 
-    it('falls back to "Home (0 items)" when folder data is not found', () => {
+    it('falls back to "Home" with itemCount 0 when folder data is not found', () => {
       mockUseGetFolderQuery.mockReturnValue({ data: undefined, isLoading: false });
 
-      const { result } = renderHook(() => useFolderTitle(5));
+      const { result } = renderHook(() => useFolderInfo(5));
 
-      expect(result.current.title).toBe('Home (0 items)');
+      expect(result.current.title).toBe('Home');
+      expect(result.current.itemCount).toBe(0);
     });
   });
 });

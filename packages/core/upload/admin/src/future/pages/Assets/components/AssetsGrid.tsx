@@ -81,7 +81,7 @@ const FolderCard = ({ folder }: FolderCardProps) => {
   return (
     <StyledFolderCard onClick={() => navigateToFolder(folder)} role="button" tabIndex={0}>
       <FolderIconContainer>
-        <FolderIcon width={16} height={16} />
+        <FolderIcon width={20} height={20} />
       </FolderIconContainer>
       <FolderName textColor="neutral800" ellipsis>
         {folder.name}

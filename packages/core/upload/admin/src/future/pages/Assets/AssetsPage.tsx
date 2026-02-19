@@ -24,8 +24,8 @@ import { AssetsTable } from './components/AssetsTable';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
 import { localStorageKeys, viewOptions } from './constants';
+import { useFolderInfo } from './hooks/useFolderInfo';
 import { useFolderNavigation } from './hooks/useFolderNavigation';
-import { useFolderTitle } from './hooks/useFolderTitle';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 
 import type { UploadFileInfo } from '../../../../../shared/contracts/files';
@@ -176,7 +176,14 @@ export const AssetsPage = () => {
   const { formatMessage } = useIntl();
 
   const { currentFolderId } = useFolderNavigation();
-  const { title } = useFolderTitle(currentFolderId);
+  const { title, itemCount } = useFolderInfo(currentFolderId);
+  const itemCountLabel = formatMessage(
+    {
+      id: getTranslationKey('header.content.item-count'),
+      defaultMessage: '{count, plural, =1 {# item} other {# items}}',
+    },
+    { count: itemCount }
+  );
 
   // View state
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
@@ -239,7 +246,7 @@ export const AssetsPage = () => {
 
           <HeaderWrapper>
             <Layouts.Header
-              title={title}
+              title={`${title} (${itemCountLabel})`}
               primaryAction={
                 <SimpleMenu
                   popoverPlacement="bottom-end"
@@ -309,7 +316,7 @@ export const AssetsPage = () => {
 
           <Layouts.Content>
             <DropZoneWithOverlay>
-              <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} />
+              <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
               <AssetsView view={view} folderId={currentFolderId} />
             </DropZoneWithOverlay>
           </Layouts.Content>

@@ -183,7 +183,7 @@ const FolderRow = ({ folder }: FolderRowProps) => {
             height="3.2rem"
             shrink={0}
           >
-            <FolderIcon width={16} height={16} />
+            <FolderIcon width={20} height={20} />
           </Flex>
           <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
             {folder.name}
