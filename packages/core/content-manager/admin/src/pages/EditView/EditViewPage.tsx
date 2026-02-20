@@ -56,13 +56,9 @@ const EditViewPage = () => {
   const drawerHasContent = visiblePanels.length > 0;
 
   const persistentQueryConfigs = React.useMemo(
-    () => [
-      {
-        keyPrefix: 'STRAPI_LOCALE',
-        keysToPersist: ['plugins.i18n.locale'],
-        pathnameInKey: false,
-      },
-    ],
+    () => ({
+      STRAPI_LOCALE: ['plugins.i18n.locale'],
+    }),
     []
   );
 

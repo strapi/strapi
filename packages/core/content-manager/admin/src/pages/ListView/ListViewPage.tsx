@@ -31,7 +31,7 @@ import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
@@ -72,6 +72,7 @@ const LayoutsHeaderCustom = styled(Layouts.Header)`
 const ListViewPage = () => {
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
@@ -79,19 +80,11 @@ const ListViewPage = () => {
   const isDesktop = useIsDesktop();
 
   const persistentQueryConfigs = React.useMemo(
-    () => [
-      {
-        keyPrefix: 'STRAPI_LIST_VIEW_SETTINGS:',
-        keysToPersist: ['sort', 'filters', 'pageSize'],
-        pathnameInKey: true,
-      },
-      {
-        keyPrefix: 'STRAPI_LOCALE',
-        keysToPersist: ['plugins.i18n.locale'],
-        pathnameInKey: false,
-      },
-    ],
-    []
+    () => ({
+      [`STRAPI_LIST_VIEW_SETTINGS:${pathname}`]: ['sort', 'filters', 'pageSize'],
+      STRAPI_LOCALE: ['plugins.i18n.locale'],
+    }),
+    [pathname]
   );
 
   usePersistentPartialQueryParams(persistentQueryConfigs);
