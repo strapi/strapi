@@ -61,6 +61,11 @@ const StyledTr = styled(RawTr)`
     background: ${({ theme }) => theme.colors.primary100};
   }
 
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: -2px;
+  }
+
   &:last-child {
     ${StyledTd} {
       border-bottom: 0;
@@ -177,7 +182,7 @@ const FolderRow = ({ folder }: FolderRowProps) => {
   const { navigateToFolder } = useFolderNavigation();
 
   return (
-    <FolderTr onClick={() => navigateToFolder(folder)}>
+    <FolderTr tabIndex={0} role="button" onClick={() => navigateToFolder(folder)}>
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <Flex

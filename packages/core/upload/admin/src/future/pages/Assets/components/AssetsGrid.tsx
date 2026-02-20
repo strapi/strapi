@@ -34,6 +34,11 @@ const StyledCard = styled(Card)`
   &:hover {
     background: ${({ theme }) => theme.colors.primary100};
   }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: 2px;
+  }
 `;
 
 /* -------------------------------------------------------------------------------------------------
