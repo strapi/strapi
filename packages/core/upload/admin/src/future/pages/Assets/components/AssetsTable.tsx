@@ -11,7 +11,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { More } from '@strapi/icons';
+import { Folder as FolderIcon, More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -19,8 +19,10 @@ import { formatBytes } from '../../../utils/files';
 import { getAssetIcon } from '../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../utils/translations';
 import { TABLE_HEADERS } from '../constants';
+import { useFolderNavigation } from '../hooks/useFolderNavigation';
 
 import type { File } from '../../../../../../shared/contracts/files';
+import type { Folder } from '../../../../../../shared/contracts/folders';
 
 const StyledTable = styled(RawTable)`
   width: 100%;
@@ -151,11 +153,88 @@ const AssetRow = ({ asset }: AssetRowProps) => {
   );
 };
 
-interface AssetsTableProps {
-  assets: File[];
+const FolderTr = styled(StyledTr)`
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary100};
+  }
+`;
+
+interface FolderRowProps {
+  folder: Folder;
 }
 
-export const AssetsTable = ({ assets }: AssetsTableProps) => {
+const FolderRow = ({ folder }: FolderRowProps) => {
+  const isMobile = useIsMobile();
+  const { formatDate, formatMessage } = useIntl();
+  const { navigateToFolder } = useFolderNavigation();
+
+  return (
+    <FolderTr onClick={() => navigateToFolder(folder)}>
+      <StyledTd>
+        <Flex gap={3} alignItems="center">
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            borderRadius="4px"
+            color="neutral600"
+            width="3.2rem"
+            height="3.2rem"
+            shrink={0}
+          >
+            <FolderIcon width={20} height={20} />
+          </Flex>
+          <Typography textColor="neutral800" fontWeight="semiBold" ellipsis>
+            {folder.name}
+          </Typography>
+        </Flex>
+      </StyledTd>
+      {!isMobile && (
+        <>
+          <StyledTd>
+            <Typography textColor="neutral600">
+              {folder.createdAt
+                ? formatDate(new Date(folder.createdAt), { dateStyle: 'long' })
+                : '-'}
+            </Typography>
+          </StyledTd>
+          <StyledTd>
+            <Typography textColor="neutral600">
+              {folder.updatedAt
+                ? formatDate(new Date(folder.updatedAt), { dateStyle: 'long' })
+                : '-'}
+            </Typography>
+          </StyledTd>
+          <StyledTd>
+            <Typography textColor="neutral600">-</Typography>
+          </StyledTd>
+        </>
+      )}
+      <StyledTd>
+        <Flex justifyContent="flex-end">
+          <IconButton
+            label={formatMessage({
+              id: getTranslationKey('control-card.more-actions'),
+              defaultMessage: 'More actions',
+            })}
+            variant="ghost"
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          >
+            <More />
+          </IconButton>
+        </Flex>
+      </StyledTd>
+    </FolderTr>
+  );
+};
+
+interface AssetsTableProps {
+  assets: File[];
+  folders?: Folder[];
+}
+
+export const AssetsTable = ({ assets, folders = [] }: AssetsTableProps) => {
   const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
 
@@ -163,8 +242,10 @@ export const AssetsTable = ({ assets }: AssetsTableProps) => {
     ? TABLE_HEADERS.filter((h) => h.name === 'name' || h.name === 'actions')
     : TABLE_HEADERS;
 
+  const totalRows = folders.length + assets.length;
+
   return (
-    <StyledTable colCount={visibleHeaders.length} rowCount={assets.length + 1}>
+    <StyledTable colCount={visibleHeaders.length} rowCount={totalRows + 1}>
       <StyledThead>
         <RawTr>
           {visibleHeaders.map((header) => {
@@ -195,7 +276,7 @@ export const AssetsTable = ({ assets }: AssetsTableProps) => {
         </RawTr>
       </StyledThead>
       <RawTbody>
-        {assets.length === 0 ? (
+        {totalRows === 0 ? (
           <RawTr>
             <StyledBodyTd colSpan={visibleHeaders.length}>
               <Typography textColor="neutral600">
@@ -207,7 +288,14 @@ export const AssetsTable = ({ assets }: AssetsTableProps) => {
             </StyledBodyTd>
           </RawTr>
         ) : (
-          assets.map((asset) => <AssetRow key={asset.id} asset={asset} />)
+          <>
+            {folders.map((folder) => (
+              <FolderRow key={`folder-${folder.id}`} folder={folder} />
+            ))}
+            {assets.map((asset) => (
+              <AssetRow key={asset.id} asset={asset} />
+            ))}
+          </>
         )}
       </RawTbody>
     </StyledTable>

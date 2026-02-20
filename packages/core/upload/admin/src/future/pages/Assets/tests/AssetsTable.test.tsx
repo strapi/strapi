@@ -1,8 +1,19 @@
+import { userEvent } from '@testing-library/user-event';
 import { render, screen } from '@tests/utils';
 
 import { AssetsTable } from '../components/AssetsTable';
 
 import type { File } from '../../../../../../shared/contracts/files';
+import type { Folder } from '../../../../../../shared/contracts/folders';
+
+const mockNavigateToFolder = jest.fn();
+
+jest.mock('../hooks/useFolderNavigation', () => ({
+  useFolderNavigation: () => ({
+    currentFolderId: null,
+    navigateToFolder: mockNavigateToFolder,
+  }),
+}));
 
 const createMockAsset = (id: number, name: string, mime = 'image/png', ext = '.png'): File => ({
   id,
@@ -17,6 +28,14 @@ const createMockAsset = (id: number, name: string, mime = 'image/png', ext = '.p
   updatedAt: '2024-01-01T00:00:00.000Z',
 });
 
+const createMockFolder = (id: number, name: string): Folder => ({
+  id,
+  name,
+  pathId: id,
+  path: `/${id}`,
+  parent: null,
+});
+
 const mockAssets: File[] = [
   createMockAsset(1, 'image1.png'),
   createMockAsset(2, 'image2.png'),
@@ -25,11 +44,17 @@ const mockAssets: File[] = [
 
 interface SetupProps {
   assets?: File[];
+  folders?: Folder[];
 }
 
-const setup = ({ assets = mockAssets }: SetupProps = {}) => render(<AssetsTable assets={assets} />);
+const setup = ({ assets = mockAssets, folders }: SetupProps = {}) =>
+  render(<AssetsTable assets={assets} folders={folders} />);
 
 describe('AssetsTable', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('Table rendering', () => {
     it('renders a table element', () => {
       setup();
@@ -140,6 +165,41 @@ describe('AssetsTable', () => {
         setup({ assets: [asset] });
         expect(screen.getByText('file.txt')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Folder rows', () => {
+    it('renders folder rows above asset rows', () => {
+      const folders = [createMockFolder(1, 'Photos'), createMockFolder(2, 'Documents')];
+      setup({ folders, assets: mockAssets });
+
+      expect(screen.getByText('Photos')).toBeInTheDocument();
+      expect(screen.getByText('Documents')).toBeInTheDocument();
+      expect(screen.getByText('image1.png')).toBeInTheDocument();
+    });
+
+    it('calls navigateToFolder when a folder row is clicked', async () => {
+      const user = userEvent.setup();
+      const folders = [createMockFolder(1, 'Photos')];
+      setup({ folders, assets: [] });
+
+      await user.click(screen.getByText('Photos'));
+
+      expect(mockNavigateToFolder).toHaveBeenCalledTimes(1);
+      expect(mockNavigateToFolder).toHaveBeenCalledWith(folders[0]);
+    });
+
+    it('shows empty state when no folders and no assets', () => {
+      setup({ folders: [], assets: [] });
+      expect(screen.getByText('No content found')).toBeInTheDocument();
+    });
+
+    it('renders only folder rows when there are no assets', () => {
+      const folders = [createMockFolder(1, 'Photos')];
+      setup({ folders, assets: [] });
+
+      expect(screen.getByText('Photos')).toBeInTheDocument();
+      expect(screen.queryByText('No content found')).not.toBeInTheDocument();
     });
   });
 });
