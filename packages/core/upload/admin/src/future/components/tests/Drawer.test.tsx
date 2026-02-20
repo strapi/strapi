@@ -14,18 +14,16 @@ const renderDrawer = (
 ) => {
   const onClose = props.onClose ?? jest.fn();
   return render(
-    <Drawer.Root
-      isVisible={props.isVisible ?? true}
-      onClose={onClose}
-      isContentExpanded={props.isContentExpanded}
-    >
-      <Dialog.Title>{props.title ?? 'Test title'}</Dialog.Title>
-      <Dialog.Description>{props.description ?? 'Test description'}</Dialog.Description>
-      <span data-testid="drawer-header">Header content</span>
-      <Drawer.Content>
-        <span data-testid="drawer-content">Body content</span>
-      </Drawer.Content>
-      <span data-testid="drawer-footer">Footer content</span>
+    <Drawer.Root isVisible={props.isVisible ?? true} onClose={onClose}>
+      <Drawer.Body>
+        <Dialog.Title>{props.title ?? 'Test title'}</Dialog.Title>
+        <Dialog.Description>{props.description ?? 'Test description'}</Dialog.Description>
+        <span data-testid="drawer-header">Header content</span>
+        <Drawer.ScrollableContent isContentExpanded={props.isContentExpanded}>
+          <span data-testid="drawer-content">Body content</span>
+        </Drawer.ScrollableContent>
+        <span data-testid="drawer-footer">Footer content</span>
+      </Drawer.Body>
     </Drawer.Root>
   );
 };
@@ -53,13 +51,15 @@ describe('Drawer', () => {
 
       rerender(
         <Drawer.Root isVisible={false} onClose={jest.fn()}>
-          <Dialog.Title>Test title</Dialog.Title>
-          <Dialog.Description>Test description</Dialog.Description>
-          <span data-testid="drawer-header">Header content</span>
-          <Drawer.Content>
-            <span data-testid="drawer-content">Body content</span>
-          </Drawer.Content>
-          <span data-testid="drawer-footer">Footer content</span>
+          <Drawer.Body>
+            <Dialog.Title>Test title</Dialog.Title>
+            <Dialog.Description>Test description</Dialog.Description>
+            <span data-testid="drawer-header">Header content</span>
+            <Drawer.ScrollableContent>
+              <span data-testid="drawer-content">Body content</span>
+            </Drawer.ScrollableContent>
+            <span data-testid="drawer-footer">Footer content</span>
+          </Drawer.Body>
         </Drawer.Root>
       );
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -76,15 +76,83 @@ describe('Drawer', () => {
     });
   });
 
+  describe('Drawer.Body', () => {
+    it('applies width, height, and maxHeight parameters', () => {
+      render(
+        <Drawer.Root isVisible onClose={jest.fn()}>
+          <Drawer.Body width={500} height={300} maxHeight={400}>
+            <Dialog.Title>Test title</Dialog.Title>
+            <Dialog.Description>Test description</Dialog.Description>
+            <Drawer.ScrollableContent>Content</Drawer.ScrollableContent>
+          </Drawer.Body>
+        </Drawer.Root>
+      );
+
+      const dialog = screen.getByRole('dialog', { name: 'Test title' });
+      const styles = window.getComputedStyle(dialog);
+
+      expect(styles.width).toBe('500px');
+      expect(styles.height).toBe('300px');
+      expect(styles.maxHeight).toBe('400px');
+    });
+
+    it('applies string values for width and maxHeight', () => {
+      render(
+        <Drawer.Root isVisible onClose={jest.fn()}>
+          <Drawer.Body width="41.6rem" maxHeight="34.2rem">
+            <Dialog.Title>Test title</Dialog.Title>
+            <Dialog.Description>Test description</Dialog.Description>
+            <Drawer.ScrollableContent>Content</Drawer.ScrollableContent>
+          </Drawer.Body>
+        </Drawer.Root>
+      );
+
+      const dialog = screen.getByRole('dialog', { name: 'Test title' });
+      const styles = window.getComputedStyle(dialog);
+
+      expect(styles.width).toBe('41.6rem');
+      expect(styles.maxHeight).toBe('34.2rem');
+    });
+
+    it('applies animationDirection parameter', () => {
+      const { rerender } = render(
+        <Drawer.Root isVisible onClose={jest.fn()}>
+          <Drawer.Body animationDirection="up">
+            <Dialog.Title>Test title</Dialog.Title>
+            <Dialog.Description>Test description</Dialog.Description>
+            <Drawer.ScrollableContent>Content</Drawer.ScrollableContent>
+          </Drawer.Body>
+        </Drawer.Root>
+      );
+
+      const dialog = screen.getByRole('dialog', { name: 'Test title' });
+      expect(dialog).toHaveAttribute('data-animation-direction', 'up');
+
+      rerender(
+        <Drawer.Root isVisible onClose={jest.fn()}>
+          <Drawer.Body animationDirection="left">
+            <Dialog.Title>Test title</Dialog.Title>
+            <Dialog.Description>Test description</Dialog.Description>
+            <Drawer.ScrollableContent>Content</Drawer.ScrollableContent>
+          </Drawer.Body>
+        </Drawer.Root>
+      );
+
+      expect(dialog).toHaveAttribute('data-animation-direction', 'left');
+    });
+  });
+
   describe('Drawer.CloseButton', () => {
     it('renders and calls onClose when clicked', () => {
       const onClose = jest.fn();
       render(
         <Drawer.Root isVisible onClose={onClose}>
-          <Dialog.Title>Test title</Dialog.Title>
-          <Dialog.Description>Test description</Dialog.Description>
-          <Drawer.CloseButton onClose={onClose} />
-          <Drawer.Content>Content</Drawer.Content>
+          <Drawer.Body>
+            <Dialog.Title>Test title</Dialog.Title>
+            <Dialog.Description>Test description</Dialog.Description>
+            <Drawer.CloseButton onClose={onClose} />
+            <Drawer.ScrollableContent>Content</Drawer.ScrollableContent>
+          </Drawer.Body>
         </Drawer.Root>
       );
 
@@ -118,14 +186,16 @@ describe('Drawer', () => {
       ).not.toBeInTheDocument();
 
       rerender(
-        <Drawer.Root isVisible onClose={jest.fn()} isContentExpanded={false}>
-          <Dialog.Title>Test title</Dialog.Title>
-          <Dialog.Description>Test description</Dialog.Description>
-          <span data-testid="drawer-header">Header content</span>
-          <Drawer.Content>
-            <span data-testid="drawer-content">Body content</span>
-          </Drawer.Content>
-          <span data-testid="drawer-footer">Footer content</span>
+        <Drawer.Root isVisible onClose={jest.fn()}>
+          <Drawer.Body>
+            <Dialog.Title>Test title</Dialog.Title>
+            <Dialog.Description>Test description</Dialog.Description>
+            <span data-testid="drawer-header">Header content</span>
+            <Drawer.ScrollableContent isContentExpanded={false}>
+              <span data-testid="drawer-content">Body content</span>
+            </Drawer.ScrollableContent>
+            <span data-testid="drawer-footer">Footer content</span>
+          </Drawer.Body>
         </Drawer.Root>
       );
       expect(

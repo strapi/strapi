@@ -1,37 +1,13 @@
 import * as React from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { Box, ScrollArea, IconButton } from '@strapi/design-system';
+import { Box, ScrollArea, IconButton, Flex, FlexProps } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { keyframes, styled } from 'styled-components';
 
-/* -------------------------------------------------------------------------------------------------
- * Context
- * -----------------------------------------------------------------------------------------------*/
-
-interface DrawerContextValue {
-  animationDirection?: 'up' | 'left';
-  isVisible?: boolean;
-  onClose?: () => void;
-  isContentExpanded?: boolean | undefined;
-  width?: number | string;
-  height?: number | string;
-  maxHeight?: number | string;
-}
-
 /** Duration of the close animation in ms. Use for timing cleanup (e.g. removing URL params). */
 export const DRAWER_CLOSE_ANIMATION_MS = 300;
-
-const DrawerContext = React.createContext<DrawerContextValue | null>(null);
-
-const useDrawerContext = () => {
-  const context = React.useContext(DrawerContext);
-  if (!context) {
-    throw new Error('Drawer compound components must be used within Drawer.Root');
-  }
-  return context;
-};
 
 /* -------------------------------------------------------------------------------------------------
  * Animations
@@ -88,26 +64,20 @@ const slideLeftFromRightOut = keyframes`
  * -----------------------------------------------------------------------------------------------*/
 
 interface DrawerContainerProps {
-  $width?: number | string;
-  $height?: number | string;
-  $maxHeight?: number | string;
-  $animationDirection?: 'up' | 'left';
+  $animationDirection?: DrawerBodyProps['animationDirection'];
 }
 
-const DrawerContainer = styled(Dialog.Content)<DrawerContainerProps>`
-  display: flex;
+const DrawerContainer = styled(Flex)<DrawerContainerProps>`
   flex-direction: column;
   position: fixed;
   bottom: 0;
   right: 0;
   padding: ${({ theme }) => theme.spaces[2]};
-  width: ${({ $width }) => (typeof $width === 'number' ? `${$width}px` : ($width ?? '400px'))};
-  height: ${({ $height }) => (typeof $height === 'number' ? `${$height}px` : ($height ?? 'auto'))};
   max-width: 100%;
-  max-height: ${({ $maxHeight }) =>
-    typeof $maxHeight === 'number' ? `${$maxHeight}px` : ($maxHeight ?? '100vh')};
   z-index: 1000;
   overflow: hidden;
+  width: ${({ width }) => width ?? '400px'};
+  max-height: ${({ maxHeight }) => maxHeight ?? '100vh'};
 
   &:focus {
     outline: none;
@@ -142,11 +112,11 @@ const DrawerContent = styled(Box)`
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-interface AnimatedBodyProps {
+interface CollapsibleContentProps {
   $isVisible: boolean;
 }
 
-const AnimatedBody = styled(Box)<AnimatedBodyProps>`
+const CollapsibleContent = styled(Box)<CollapsibleContentProps>`
   display: grid;
   flex: 1;
   min-height: 0;
@@ -159,83 +129,88 @@ const AnimatedBody = styled(Box)<AnimatedBodyProps>`
   }
 `;
 
-/* -------------------------------------------------------------------------------------------------
- * Drawer.Root
- * -----------------------------------------------------------------------------------------------*/
-
-const DrawerRoot = ({
-  animationDirection = 'up',
-  isVisible,
-  onClose,
-  isContentExpanded,
-  width,
-  height,
-  maxHeight,
-  children,
-}: DrawerContextValue & React.PropsWithChildren) => {
-  const contextValue: DrawerContextValue = {
-    animationDirection,
-    isVisible,
-    onClose,
-    isContentExpanded,
-    width,
-    height,
-    maxHeight,
-  };
-
-  return (
-    <DrawerContext.Provider value={contextValue}>
-      <Dialog.Root
-        open={isVisible}
-        onOpenChange={(nextVisible) => !nextVisible && onClose?.()}
-        modal={false}
-      >
-        <Dialog.Portal>
-          <DrawerContainer
-            $animationDirection={animationDirection}
-            $width={width}
-            $height={height}
-            $maxHeight={maxHeight}
-            forceMount
-            onPointerDownOutside={(e) => e.preventDefault()}
-            onInteractOutside={(e) => e.preventDefault()}
-          >
-            <DrawerContent>{children}</DrawerContent>
-          </DrawerContainer>
-        </Dialog.Portal>
-      </Dialog.Root>
-    </DrawerContext.Provider>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * Drawer.Content - composable content slot (collapsible when isContentExpanded is used)
- * Contains a scrollable area
- * -----------------------------------------------------------------------------------------------*/
-
-const DrawerContentSlot = ({ children }: React.PropsWithChildren) => {
-  const { isContentExpanded } = useDrawerContext();
-  const isCollapsible = typeof isContentExpanded === 'boolean';
-  const isContentVisible = isCollapsible ? isContentExpanded : true;
-
-  return (
-    <AnimatedBody $isVisible={isContentVisible} data-collapsed={!isContentVisible}>
-      <ScrollArea>{children}</ScrollArea>
-    </AnimatedBody>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * Drawer.CloseButton - composable close icon button (Cross icon by default)
- * -----------------------------------------------------------------------------------------------*/
-
 const CloseIconButton = styled(IconButton)`
   &:hover {
     background: transparent;
   }
 `;
 
-export interface DrawerCloseButtonProps extends React.PropsWithChildren {
+/* -------------------------------------------------------------------------------------------------
+ * Drawer.Body
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DrawerBodyProps extends FlexProps {
+  animationDirection?: 'up' | 'left';
+  children: React.ReactNode;
+}
+
+const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
+  ({ animationDirection, children, ...props }, ref) => (
+    <Dialog.Content
+      ref={ref}
+      forceMount
+      onPointerDownOutside={(e) => e.preventDefault()}
+      onInteractOutside={(e) => e.preventDefault()}
+      asChild
+    >
+      <DrawerContainer
+        $animationDirection={animationDirection}
+        data-animation-direction={animationDirection}
+        forceMount
+        {...props}
+      >
+        <DrawerContent>{children}</DrawerContent>
+      </DrawerContainer>
+    </Dialog.Content>
+  )
+);
+DrawerBody.displayName = 'DrawerBody';
+
+/* -------------------------------------------------------------------------------------------------
+ * Drawer.Root
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DrawerRootProps {
+  isVisible?: boolean;
+  onClose?: () => void;
+  children: React.ReactNode;
+}
+
+const DrawerRoot = ({ isVisible, onClose, children }: DrawerRootProps): React.ReactElement => (
+  <Dialog.Root
+    open={isVisible}
+    onOpenChange={(nextVisible) => !nextVisible && onClose?.()}
+    modal={false}
+  >
+    <Dialog.Portal>{children}</Dialog.Portal>
+  </Dialog.Root>
+);
+
+/* -------------------------------------------------------------------------------------------------
+ * Drawer.Content - composable content slot (collapsible when isContentExpanded is used)
+ * Contains a scrollable area
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DrawerScrollableContentProps {
+  children: React.ReactNode;
+  /** When provided, content can collapse/expand (e.g. for minimize). Omit to always show. */
+  isContentExpanded?: boolean;
+}
+
+const DrawerScrollableContent = ({
+  children,
+  isContentExpanded = true,
+}: DrawerScrollableContentProps) => (
+  <CollapsibleContent $isVisible={isContentExpanded} data-collapsed={!isContentExpanded}>
+    <ScrollArea>{children}</ScrollArea>
+  </CollapsibleContent>
+);
+
+/* -------------------------------------------------------------------------------------------------
+ * Drawer.CloseButton - composable close icon button (Cross icon by default)
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DrawerCloseButtonProps extends React.PropsWithChildren {
   onClose: () => void;
   label?: string;
 }
@@ -252,8 +227,11 @@ const DrawerCloseButton = ({ onClose, label, children }: DrawerCloseButtonProps)
 
 const Drawer = {
   Root: DrawerRoot,
-  Content: DrawerContentSlot,
+  Body: DrawerBody,
+  ScrollableContent: DrawerScrollableContent,
   CloseButton: DrawerCloseButton,
+  Title: Dialog.Title,
+  Description: Dialog.Description,
 };
 
 export { Drawer };

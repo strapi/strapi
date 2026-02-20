@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import * as Dialog from '@radix-ui/react-dialog';
 import { Flex, IconButton, TextButton, Typography } from '@strapi/design-system';
 import {
   ArrowsCounterClockwise,
@@ -31,14 +30,14 @@ import type { FileProgress, FileProgressStatus } from '../store/uploadProgress';
 const HeaderStatusMessage = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   return (
     <Flex direction="column" alignItems="flex-start" paddingLeft={2}>
-      <Dialog.Title>
+      <Drawer.Title>
         <Typography variant="omega">{title}</Typography>
-      </Dialog.Title>
-      <Dialog.Description>
+      </Drawer.Title>
+      <Drawer.Description>
         <Typography variant="pi" textColor="neutral600">
           {subtitle}
         </Typography>
-      </Dialog.Description>
+      </Drawer.Description>
     </Flex>
   );
 };
@@ -53,7 +52,7 @@ const HeaderStatusIcon = styled(Flex)`
   }
 `;
 
-const HeaderStatusWrapper = styled(Dialog.Title)`
+const HeaderStatusWrapper = styled(Drawer.Title)`
   display: flex;
   align-items: center;
 `;
@@ -414,34 +413,31 @@ export const UploadProgressDialog = () => {
   };
 
   return (
-    <Drawer.Root
-      isVisible={isVisible}
-      onClose={handleClose}
-      isContentExpanded={!isMinimized}
-      maxHeight="34.2rem"
-    >
-      <DialogHeader handleClose={handleClose} />
-      <Drawer.Content>
-        <Flex
-          direction="column"
-          alignItems="stretch"
-          gap={4}
-          paddingTop={4}
-          paddingBottom={4}
-          paddingLeft={4}
-          paddingRight={4}
-        >
-          {currentFile && <FileRowRenderer file={currentFile} />}
+    <Drawer.Root isVisible={isVisible} onClose={handleClose}>
+      <Drawer.Body animationDirection="up" width="41.6rem" maxHeight="34.2rem">
+        <DialogHeader handleClose={handleClose} />
+        <Drawer.ScrollableContent isContentExpanded={!isMinimized}>
+          <Flex
+            direction="column"
+            alignItems="stretch"
+            gap={4}
+            paddingTop={4}
+            paddingBottom={4}
+            paddingLeft={4}
+            paddingRight={4}
+          >
+            {currentFile && <FileRowRenderer file={currentFile} />}
 
-          {completedFiles.length > 0 && (
-            <CompletedFilesList>
-              {completedFiles.map((file) => (
-                <FileRowRenderer key={file.index} file={file} />
-              ))}
-            </CompletedFilesList>
-          )}
-        </Flex>
-      </Drawer.Content>
+            {completedFiles.length > 0 && (
+              <CompletedFilesList>
+                {completedFiles.map((file) => (
+                  <FileRowRenderer key={file.index} file={file} />
+                ))}
+              </CompletedFilesList>
+            )}
+          </Flex>
+        </Drawer.ScrollableContent>
+      </Drawer.Body>
     </Drawer.Root>
   );
 };

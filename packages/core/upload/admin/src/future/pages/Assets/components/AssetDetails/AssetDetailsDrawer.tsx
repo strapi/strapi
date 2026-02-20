@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import * as Dialog from '@radix-ui/react-dialog';
 import { useQueryParams, getDisplayName } from '@strapi/admin/strapi-admin';
 import {
   Alert,
@@ -86,7 +85,7 @@ export const useAssetDetailsParam = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * AssetDetailsContent
+ * DetailItem
  * -----------------------------------------------------------------------------------------------*/
 
 interface DetailItemProps {
@@ -119,6 +118,10 @@ const DetailItem = ({ label, value }: DetailItemProps) => (
   </DetailItemContainer>
 );
 
+/* -------------------------------------------------------------------------------------------------
+ * DetailField
+ * -----------------------------------------------------------------------------------------------*/
+
 const StyledWarning = styled(WarningCircle)`
   width: 1.6rem;
   height: 1.6rem;
@@ -147,6 +150,10 @@ const DetailField = ({ name, label, value, required }: DetailFieldProps) => (
     />
   </Field.Root>
 );
+
+/* -------------------------------------------------------------------------------------------------
+ * AssetDetails
+ * -----------------------------------------------------------------------------------------------*/
 
 interface AssetDetailsProps {
   asset: AssetWithPopulatedCreatedBy;
@@ -290,7 +297,35 @@ const AssetDetails = ({ asset }: AssetDetailsProps) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * DrawerContent (Drawer.Header and Drawer.Content)
+ * DrawerHeader
+ * -----------------------------------------------------------------------------------------------*/
+
+interface DrawerHeaderProps {
+  asset: AssetWithPopulatedCreatedBy;
+  closeDetails: () => void;
+}
+
+const DrawerHeader = ({ asset, closeDetails }: DrawerHeaderProps) => {
+  const DocIcon = asset ? getAssetIcon(asset.mime, asset.ext) : FileError;
+  return (
+    <Flex gap={2} paddingLeft={5} paddingTop={3} paddingBottom={3} paddingRight={3}>
+      <DocIcon width={20} height={20} />
+      <Drawer.Title asChild>
+        <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
+          {asset.name}
+        </Typography>
+      </Drawer.Title>
+      <Box marginLeft="auto">
+        <Drawer.CloseButton onClose={closeDetails}>
+          <ArrowLineRight />
+        </Drawer.CloseButton>
+      </Box>
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * DrawerContent
  * -----------------------------------------------------------------------------------------------*/
 
 interface DrawerContentProps {
@@ -312,31 +347,11 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 
   if (isLoading) {
     return (
-      <>
-        <VisuallyHidden>
-          <Dialog.Title>
-            {formatMessage({
-              id: getTranslationKey('asset-details.title'),
-              defaultMessage: 'File details',
-            })}
-          </Dialog.Title>
-          <Dialog.Description>
-            {formatMessage({
-              id: getTranslationKey('asset-details.description'),
-              defaultMessage: 'Displays file information and metadata',
-            })}
-          </Dialog.Description>
-        </VisuallyHidden>
-        <Drawer.Content>
-          <Flex justifyContent="center" padding={8}>
-            <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
-          </Flex>
-        </Drawer.Content>
-      </>
+      <Flex justifyContent="center" padding={8}>
+        <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
+      </Flex>
     );
   }
-
-  const DocIcon = asset ? getAssetIcon(asset.mime, asset.ext) : FileError;
 
   if (error || !asset) {
     return (
@@ -357,31 +372,11 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 
   return (
     <>
-      <Flex gap={2} paddingLeft={5} paddingTop={3} paddingBottom={3} paddingRight={3}>
-        <DocIcon width={20} height={20} />
-        <Dialog.Title asChild>
-          <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
-            {asset.name}
-          </Typography>
-        </Dialog.Title>
-        <Box marginLeft="auto">
-          <Drawer.CloseButton onClose={closeDetails}>
-            <ArrowLineRight />
-          </Drawer.CloseButton>
-        </Box>
-      </Flex>
-      <VisuallyHidden>
-        <Dialog.Description>
-          {formatMessage({
-            id: getTranslationKey('asset-details.description'),
-            defaultMessage: 'Displays file information and metadata',
-          })}
-        </Dialog.Description>
-      </VisuallyHidden>
-      <Drawer.Content>
+      <DrawerHeader asset={asset} closeDetails={closeDetails} />
+      <Drawer.ScrollableContent>
         <AssetPreview asset={asset} />
         <AssetDetails asset={asset} />
-      </Drawer.Content>
+      </Drawer.ScrollableContent>
     </>
   );
 };
@@ -391,6 +386,7 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 export const AssetDetailsDrawer = () => {
+  const { formatMessage } = useIntl();
   const { assetId, isVisible, shouldRenderDrawer, closeDetails } = useAssetDetailsParam();
 
   if (!shouldRenderDrawer || assetId === null) {
@@ -398,14 +394,24 @@ export const AssetDetailsDrawer = () => {
   }
 
   return (
-    <Drawer.Root
-      isVisible={isVisible}
-      onClose={closeDetails}
-      width="41.6rem"
-      height="100vh"
-      animationDirection="left"
-    >
-      <DrawerContent assetId={assetId} closeDetails={closeDetails} />
+    <Drawer.Root isVisible={isVisible} onClose={closeDetails}>
+      <VisuallyHidden>
+        <Drawer.Title>
+          {formatMessage({
+            id: getTranslationKey('asset-details.title'),
+            defaultMessage: 'File details',
+          })}
+        </Drawer.Title>
+        <Drawer.Description>
+          {formatMessage({
+            id: getTranslationKey('asset-details.description'),
+            defaultMessage: 'Displays file information and metadata',
+          })}
+        </Drawer.Description>
+      </VisuallyHidden>
+      <Drawer.Body animationDirection="left" width="41.6rem" height="100vh">
+        <DrawerContent assetId={assetId} closeDetails={closeDetails} />
+      </Drawer.Body>
     </Drawer.Root>
   );
 };
