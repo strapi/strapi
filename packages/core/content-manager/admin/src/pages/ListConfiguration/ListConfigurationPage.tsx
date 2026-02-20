@@ -4,6 +4,8 @@ import {
   Form,
   type FormProps,
   useNotification,
+  useScopedPersistentState,
+  usePersistentState,
   useTracking,
   useAPIErrorHandler,
   Page,
@@ -39,6 +41,14 @@ const ListConfiguration = () => {
   const { model, collectionType } = useDoc();
 
   const { isLoading: isLoadingLayout, list, edit } = useDocLayout();
+  const [, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
+    `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
+    null
+  );
+  const [, setListViewSettings] = usePersistentState<Record<string, unknown>>(
+    `STRAPI_LIST_VIEW_SETTINGS:${model}`,
+    {}
+  );
 
   const [updateContentTypeConfiguration] = useUpdateContentTypeConfigurationMutation();
   const handleSubmit: FormProps<FormData>['onSubmit'] = async (data) => {
@@ -80,6 +90,8 @@ const ListConfiguration = () => {
       });
 
       if ('data' in res) {
+        setDisplayedHeaderNames(layoutData.map((field) => field.name));
+        setListViewSettings({});
         trackUsage('didEditListSettings');
         toggleNotification({
           type: 'success',
