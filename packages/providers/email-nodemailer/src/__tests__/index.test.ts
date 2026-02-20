@@ -314,9 +314,7 @@ describe('@strapi/provider-email-nodemailer', () => {
         list,
       });
 
-      expect(mockSendMail).toHaveBeenCalledWith(
-        expect.objectContaining({ icalEvent, list })
-      );
+      expect(mockSendMail).toHaveBeenCalledWith(expect.objectContaining({ icalEvent, list }));
     });
 
     it('passes threading options (inReplyTo, references)', async () => {
@@ -437,9 +435,7 @@ describe('@strapi/provider-email-nodemailer', () => {
         raw: rawMime,
       });
 
-      expect(mockSendMail).toHaveBeenCalledWith(
-        expect.objectContaining({ raw: rawMime })
-      );
+      expect(mockSendMail).toHaveBeenCalledWith(expect.objectContaining({ raw: rawMime }));
     });
 
     it('passes alternatives and attachDataUrls', async () => {

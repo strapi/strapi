@@ -224,9 +224,7 @@ describe('Email Address Parser', () => {
 
     it('should handle escaped backslash before quote correctly', () => {
       // \\" = escaped backslash + real quote -> should toggle inQuotes
-      const result = parseMultipleEmailAddresses(
-        '"Back\\\\" <a@example.com>, b@example.com'
-      );
+      const result = parseMultipleEmailAddresses('"Back\\\\" <a@example.com>, b@example.com');
       expect(result).toHaveLength(2);
       expect(result[0].email).toBe('a@example.com');
       expect(result[1].email).toBe('b@example.com');

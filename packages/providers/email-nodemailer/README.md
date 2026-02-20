@@ -141,49 +141,49 @@ await strapi.plugin('email').service('email').send({
 
 The following fields are supported:
 
-| Field                | Description                                                                    |
-| -------------------- | ------------------------------------------------------------------------------ |
-| **Core**             |                                                                                |
-| from                 | Email address of the sender                                                    |
-| to                   | Comma separated list or an array of recipients                                 |
-| cc                   | Comma separated list or an array of recipients                                 |
-| bcc                  | Comma separated list or an array of recipients                                 |
-| replyTo              | Email address to which replies are sent                                        |
-| sender               | Address for the Sender: field (for "on behalf of" emails)                      |
-| subject              | Subject of the email                                                           |
-| **Content**          |                                                                                |
-| text                 | Plaintext version of the message                                               |
-| html                 | HTML version of the message                                                    |
-| watchHtml            | Apple Watch specific HTML version                                              |
-| amp                  | AMP4Email content for interactive emails                                       |
-| attachments          | Array of attachment objects. See: https://nodemailer.com/message/attachments/  |
-| alternatives         | Array of alternative content (e.g. Markdown alongside HTML)                    |
-| **Headers & Meta**   |                                                                                |
-| headers              | Custom SMTP headers object (e.g. `{ 'X-Custom': 'value' }`)                   |
-| priority             | Email priority: `'high'`, `'normal'`, or `'low'`                               |
-| messageId            | Custom Message-ID (random generated if not set)                                |
-| date                 | Custom Date value (current UTC if not set)                                     |
-| xMailer              | Control X-Mailer header (`false` to remove, string to override)                |
-| **Threading**        |                                                                                |
-| inReplyTo            | Message-ID of the email being replied to                                       |
-| references           | Message-ID list this email references (array or space-separated string)        |
-| **Encoding**         |                                                                                |
-| textEncoding         | Force content-transfer-encoding: `'quoted-printable'` or `'base64'`            |
-| encoding             | Encoding for the message content                                               |
-| normalizeHeaderKey   | Function to normalize header key casing                                        |
-| **Advanced**         |                                                                                |
-| icalEvent            | Calendar event invitation (iCalendar format)                                   |
-| list                 | RFC 2369 List-\* headers - enables one-click unsubscribe in Gmail/Outlook      |
-| envelope             | Custom SMTP envelope for bounce handling (MAIL FROM / RCPT TO)                 |
-| dkim                 | Per-message DKIM signing options (overrides transport-level DKIM)               |
-| attachDataUrls       | Convert `data:` URIs in HTML to embedded CID attachments (`true`/`false`)      |
-| dsn                  | Delivery Status Notification - request bounce/success reports                  |
-| auth                 | Per-message OAuth2 credentials for multi-user sending                          |
-| **Security**         |                                                                                |
-| disableUrlAccess     | Fail if content tries to load from a URL (`true`/`false`)                      |
-| disableFileAccess    | Fail if content tries to load from a file path (`true`/`false`)                |
-| **Raw MIME**         |                                                                                |
-| raw                  | Pre-built MIME message (skips message generation, envelope must be set)         |
+| Field              | Description                                                                   |
+| ------------------ | ----------------------------------------------------------------------------- |
+| **Core**           |                                                                               |
+| from               | Email address of the sender                                                   |
+| to                 | Comma separated list or an array of recipients                                |
+| cc                 | Comma separated list or an array of recipients                                |
+| bcc                | Comma separated list or an array of recipients                                |
+| replyTo            | Email address to which replies are sent                                       |
+| sender             | Address for the Sender: field (for "on behalf of" emails)                     |
+| subject            | Subject of the email                                                          |
+| **Content**        |                                                                               |
+| text               | Plaintext version of the message                                              |
+| html               | HTML version of the message                                                   |
+| watchHtml          | Apple Watch specific HTML version                                             |
+| amp                | AMP4Email content for interactive emails                                      |
+| attachments        | Array of attachment objects. See: https://nodemailer.com/message/attachments/ |
+| alternatives       | Array of alternative content (e.g. Markdown alongside HTML)                   |
+| **Headers & Meta** |                                                                               |
+| headers            | Custom SMTP headers object (e.g. `{ 'X-Custom': 'value' }`)                   |
+| priority           | Email priority: `'high'`, `'normal'`, or `'low'`                              |
+| messageId          | Custom Message-ID (random generated if not set)                               |
+| date               | Custom Date value (current UTC if not set)                                    |
+| xMailer            | Control X-Mailer header (`false` to remove, string to override)               |
+| **Threading**      |                                                                               |
+| inReplyTo          | Message-ID of the email being replied to                                      |
+| references         | Message-ID list this email references (array or space-separated string)       |
+| **Encoding**       |                                                                               |
+| textEncoding       | Force content-transfer-encoding: `'quoted-printable'` or `'base64'`           |
+| encoding           | Encoding for the message content                                              |
+| normalizeHeaderKey | Function to normalize header key casing                                       |
+| **Advanced**       |                                                                               |
+| icalEvent          | Calendar event invitation (iCalendar format)                                  |
+| list               | RFC 2369 List-\* headers - enables one-click unsubscribe in Gmail/Outlook     |
+| envelope           | Custom SMTP envelope for bounce handling (MAIL FROM / RCPT TO)                |
+| dkim               | Per-message DKIM signing options (overrides transport-level DKIM)             |
+| attachDataUrls     | Convert `data:` URIs in HTML to embedded CID attachments (`true`/`false`)     |
+| dsn                | Delivery Status Notification - request bounce/success reports                 |
+| auth               | Per-message OAuth2 credentials for multi-user sending                         |
+| **Security**       |                                                                               |
+| disableUrlAccess   | Fail if content tries to load from a URL (`true`/`false`)                     |
+| disableFileAccess  | Fail if content tries to load from a file path (`true`/`false`)               |
+| **Raw MIME**       |                                                                               |
+| raw                | Pre-built MIME message (skips message generation, envelope must be set)       |
 
 Every field listed above is explicitly allowlisted. Unknown properties are silently dropped to prevent injection.
 
@@ -336,16 +336,13 @@ await strapi
 ### Sending on behalf of (Sender field)
 
 ```js
-await strapi
-  .plugin('email')
-  .service('email')
-  .send({
-    from: 'CEO <ceo@example.com>',
-    sender: 'assistant@example.com',
-    to: 'board@example.com',
-    subject: 'Quarterly Report',
-    text: 'Please find the report attached',
-  });
+await strapi.plugin('email').service('email').send({
+  from: 'CEO <ceo@example.com>',
+  sender: 'assistant@example.com',
+  to: 'board@example.com',
+  subject: 'Quarterly Report',
+  text: 'Please find the report attached',
+});
 ```
 
 ### Per-message DKIM signing
@@ -677,16 +674,13 @@ module.exports = ({ env }) => ({
 You can also set these per message when processing content from untrusted sources:
 
 ```js
-await strapi
-  .plugin('email')
-  .service('email')
-  .send({
-    to: 'someone@example.com',
-    subject: 'User-generated content',
-    html: userProvidedHtml,
-    disableUrlAccess: true,
-    disableFileAccess: true,
-  });
+await strapi.plugin('email').service('email').send({
+  to: 'someone@example.com',
+  subject: 'User-generated content',
+  html: userProvidedHtml,
+  disableUrlAccess: true,
+  disableFileAccess: true,
+});
 ```
 
 **Security note:** This provider uses an explicit allowlist for all message fields. Unknown or unsupported properties are silently dropped, preventing property injection attacks.
@@ -847,16 +841,16 @@ normalizeEmail('Mixed.Case@Example.COM');
 
 ### Supported RFC Standards
 
-| RFC      | Description                                                            |
-| -------- | ---------------------------------------------------------------------- |
-| RFC 5321 | SMTP protocol - email address case-insensitive normalization           |
-| RFC 5322 | Internet Message Format (name <email>, quoted strings, comments)       |
-| RFC 2047 | MIME encoded-words (=?charset?encoding?text?=)                         |
-| RFC 2369 | List-\* headers (List-Unsubscribe, List-Help, etc.)                    |
-| RFC 3461 | Delivery Status Notifications (DSN)                                    |
-| RFC 6376 | DomainKeys Identified Mail (DKIM) signatures                           |
-| RFC 6531 | Internationalized Email (UTF-8 in local parts)                         |
-| RFC 6532 | Internationalized Email Headers (UTF-8 in header fields)               |
+| RFC      | Description                                                      |
+| -------- | ---------------------------------------------------------------- |
+| RFC 5321 | SMTP protocol - email address case-insensitive normalization     |
+| RFC 5322 | Internet Message Format (name <email>, quoted strings, comments) |
+| RFC 2047 | MIME encoded-words (=?charset?encoding?text?=)                   |
+| RFC 2369 | List-\* headers (List-Unsubscribe, List-Help, etc.)              |
+| RFC 3461 | Delivery Status Notifications (DSN)                              |
+| RFC 6376 | DomainKeys Identified Mail (DKIM) signatures                     |
+| RFC 6531 | Internationalized Email (UTF-8 in local parts)                   |
+| RFC 6532 | Internationalized Email Headers (UTF-8 in header fields)         |
 
 ## Troubleshooting
 
