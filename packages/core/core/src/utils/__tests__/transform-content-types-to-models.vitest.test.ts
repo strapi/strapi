@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from 'vitest';
 import { cloneDeep, merge } from 'lodash';
 import { Database } from '@strapi/database';
 import {
@@ -301,16 +302,16 @@ describe('transformContentTypesToModels', () => {
   describe('full length identifiers', () => {
     // mock the options so that the 'global' identifiers created for use by createMetadata uses 0 for maxLength
     Object.defineProperty(identifiers, 'options', {
-      get: jest.fn(() => ({ maxLength: 0 })),
+      get: vi.fn(() => ({ maxLength: 0 })),
     });
 
-    test('converts valid content types to models', () => {
+    it('converts valid content types to models', () => {
       const models = transformContentTypesToModels(contentTypes, identifiers);
 
       expect(models).toMatchModels(expectedModels);
     });
 
-    test.each(['id', 'document_id', 'ID', 'documentId'])(
+    it.each(['id', 'document_id', 'ID', 'documentId'])(
       'throws on restricted attribute name: %s',
       (restrictedName) => {
         const changes = {
@@ -328,7 +329,7 @@ describe('transformContentTypesToModels', () => {
       }
     );
 
-    test.each(['collectionName', 'uid', 'modelName'])(
+    it.each(['collectionName', 'uid', 'modelName'])(
       'throws on missing name: %s',
       (restrictedName) => {
         const changes = {

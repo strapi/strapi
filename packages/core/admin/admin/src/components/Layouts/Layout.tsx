@@ -16,17 +16,20 @@ interface LayoutProps extends BoxProps {
 }
 
 const GridContainer = styled(Box)<{ $hasSideNav: boolean }>`
-  max-width: 100%;
+  width: 100%;
+  flex: 1;
   display: grid;
   grid-template-columns: 1fr;
   padding: 0;
 
   ${({ theme }) => theme.breakpoints.medium} {
+    overflow: hidden;
     grid-template-columns: ${({ $hasSideNav }) => ($hasSideNav ? `auto 1fr` : '1fr')};
   }
 `;
 
 const SideNavContainer = styled(Flex)`
+  overflow: hidden;
   display: none;
   background: ${({ theme }) => theme.colors.neutral0};
 
