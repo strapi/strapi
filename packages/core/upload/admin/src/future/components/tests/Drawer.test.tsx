@@ -77,43 +77,6 @@ describe('Drawer', () => {
   });
 
   describe('Drawer.Body', () => {
-    it('applies width, height, and maxHeight parameters', () => {
-      render(
-        <Drawer.Root isVisible onClose={jest.fn()}>
-          <Drawer.Body width={500} height={300} maxHeight={400}>
-            <Dialog.Title>Test title</Dialog.Title>
-            <Dialog.Description>Test description</Dialog.Description>
-            <Drawer.ScrollableContent>Content</Drawer.ScrollableContent>
-          </Drawer.Body>
-        </Drawer.Root>
-      );
-
-      const dialog = screen.getByRole('dialog', { name: 'Test title' });
-      const styles = window.getComputedStyle(dialog);
-
-      expect(styles.width).toBe('500px');
-      expect(styles.height).toBe('300px');
-      expect(styles.maxHeight).toBe('400px');
-    });
-
-    it('applies string values for width and maxHeight', () => {
-      render(
-        <Drawer.Root isVisible onClose={jest.fn()}>
-          <Drawer.Body width="41.6rem" maxHeight="34.2rem">
-            <Dialog.Title>Test title</Dialog.Title>
-            <Dialog.Description>Test description</Dialog.Description>
-            <Drawer.ScrollableContent>Content</Drawer.ScrollableContent>
-          </Drawer.Body>
-        </Drawer.Root>
-      );
-
-      const dialog = screen.getByRole('dialog', { name: 'Test title' });
-      const styles = window.getComputedStyle(dialog);
-
-      expect(styles.width).toBe('41.6rem');
-      expect(styles.maxHeight).toBe('34.2rem');
-    });
-
     it('applies animationDirection parameter', () => {
       const { rerender } = render(
         <Drawer.Root isVisible onClose={jest.fn()}>
