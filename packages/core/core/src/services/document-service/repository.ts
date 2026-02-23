@@ -68,12 +68,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
+    // When D&P is disabled, accept status but it is ignored downstream
+    // In the future, this may throw an error, but for now it would break too much internal code
     if (!hasDraftAndPublish) {
-      if (params.status !== undefined) {
-        throw new errors.ValidationError(
-          `Invalid parameter at 'status'. Content type does not support draft and publish.`
-        );
-      }
       return params;
     }
 
@@ -359,7 +356,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
 
-    if (params.status === 'draft') {
+    if (hasDraftAndPublish && params.status === 'draft') {
       throw new Error('Cannot delete a draft document');
     }
 
