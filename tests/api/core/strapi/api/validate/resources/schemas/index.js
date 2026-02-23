@@ -6,6 +6,7 @@ module.exports = {
     'api::document.document': require('./document'),
   },
   components: {
+    'default.component-nested': require('./component-nested'),
     'default.component-a': require('./component-a'),
     'default.component-b': require('./component-b'),
   },

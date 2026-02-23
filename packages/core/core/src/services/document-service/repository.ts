@@ -8,7 +8,7 @@ import {
   createModelCache,
 } from '@strapi/utils';
 
-import type { UID } from '@strapi/types';
+import type { UID, Modules } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
@@ -16,7 +16,7 @@ import { copyNonLocalizedFields } from './internationalization';
 import * as components from './components';
 
 import { createEntriesService } from './entries';
-import { pickSelectionParams } from './params';
+import { ALLOWED_DOCUMENT_PARAM_KEYS, pickSelectionParams } from './params';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
 import { getDeepPopulate } from './utils/populate';
 import { transformParamsToQuery } from './transform/query';
@@ -32,6 +32,12 @@ const { validators } = validate;
 
 // we have to typecast to reconcile the differences between validator and database getModel
 const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: string) => any;
+
+// config.documents.strictParams: false/undefined (pass through), true (throw on invalid)
+
+// BCP 47–style locale format: 2–3 letter language code (any case), optional subtags (-XX or -XXX...), max 35 chars
+const LOCALE_FORMAT = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
+const MAX_LOCALE_LENGTH = 35;
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (
   uid,
@@ -51,7 +57,182 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     populate: ['nonAttributesOperators'],
   };
 
-  const validateParams = async (params: any) => {
+  /**
+   * Checks status parameter. When strict is true, throws on invalid status.
+   */
+  const checkStatus = (
+    params: Record<string, unknown>,
+    strict: boolean
+  ): Record<string, unknown> => {
+    if (!strict) {
+      return params;
+    }
+
+    if (!hasDraftAndPublish) {
+      if (params.status !== undefined) {
+        throw new errors.ValidationError(
+          `Invalid parameter at 'status'. Content type does not support draft and publish.`
+        );
+      }
+      return params;
+    }
+
+    if (params.status !== undefined && params.status !== 'published' && params.status !== 'draft') {
+      throw new errors.ValidationError(
+        `Invalid parameter at 'status'. Expected 'published' or 'draft', received: ${params.status}`
+      );
+    }
+
+    return params;
+  };
+
+  /**
+   * Checks locale parameter. When strict is true, throws on invalid locale.
+   */
+  const checkLocale = (
+    params: Record<string, unknown>,
+    strict: boolean
+  ): Record<string, unknown> => {
+    if (!strict) {
+      return params;
+    }
+
+    const i18nPlugin = strapi.plugin('i18n');
+    const isLocalized =
+      i18nPlugin?.service('content-types')?.isLocalizedContentType(contentType) ?? false;
+
+    if (!isLocalized) {
+      if (params.locale !== undefined) {
+        throw new errors.ValidationError(
+          `Invalid parameter at 'locale'. Content type is not localized.`
+        );
+      }
+      return params;
+    }
+
+    if (params.locale !== undefined && typeof params.locale !== 'string') {
+      throw new errors.ValidationError(
+        `Invalid parameter at 'locale'. Expected a string, received: ${typeof params.locale}`
+      );
+    }
+
+    if (params.locale !== undefined && params.locale !== '*') {
+      const localeStr = params.locale as string;
+      const isEmpty = localeStr.length === 0;
+      const tooLong = localeStr.length > MAX_LOCALE_LENGTH;
+      const invalidFormat = !LOCALE_FORMAT.test(localeStr);
+      if (isEmpty || tooLong || invalidFormat) {
+        let reason: string;
+        if (isEmpty) {
+          reason = 'Locale cannot be empty';
+        } else if (tooLong) {
+          reason = `Locale exceeds maximum length of ${MAX_LOCALE_LENGTH} characters`;
+        } else {
+          reason = 'Locale must be a valid BCP 47 format (e.g. en, en-US, zh-Hans)';
+        }
+        throw new errors.ValidationError(`Invalid parameter at 'locale'. ${reason}.`);
+      }
+    }
+
+    return params;
+  };
+
+  /**
+   * Parses an integer param; throws when strict and invalid.
+   */
+  const parsePaginationInt = (
+    name: string,
+    value: unknown,
+    strict: boolean,
+    spec: { min: number; allowMinusOne?: boolean }
+  ): number | undefined => {
+    if (value === undefined) return undefined;
+    const num = Number(value);
+    const valid =
+      Number.isInteger(num) && (num >= spec.min || (spec.allowMinusOne === true && num === -1));
+    if (!valid && strict) {
+      const expected = spec.allowMinusOne
+        ? `integer >= ${spec.min} or -1`
+        : `integer >= ${spec.min}`;
+      throw new errors.ValidationError(
+        `Invalid parameter at '${name}'. Expected ${expected}, received: ${value}`
+      );
+    }
+    return valid ? num : undefined;
+  };
+
+  /**
+   * Checks pagination parameters. When strict is true, throws on invalid pagination
+   * and returns params with validated pagination values (e.g. normalized to numbers).
+   */
+  const checkPagination = (
+    params: Record<string, unknown>,
+    strict: boolean
+  ): Record<string, unknown> => {
+    if (!strict) {
+      return params;
+    }
+
+    const hasPagePagination = params.page !== undefined || params.pageSize !== undefined;
+    const hasOffsetPagination = params.start !== undefined || params.limit !== undefined;
+
+    if (hasPagePagination && hasOffsetPagination) {
+      throw new errors.ValidationError(
+        'Invalid pagination parameters. Cannot use both page-based (page, pageSize) and offset-based (start, limit) pagination in the same query.'
+      );
+    }
+
+    const validPage = parsePaginationInt('page', params.page, strict, { min: 1 });
+    const validPageSize = parsePaginationInt('pageSize', params.pageSize, strict, { min: 1 });
+    const validStart = parsePaginationInt('start', params.start, strict, { min: 0 });
+    const validLimit = parsePaginationInt('limit', params.limit, strict, {
+      min: 1,
+      allowMinusOne: true,
+    });
+
+    const withCount = params.withCount;
+    if (withCount !== undefined && typeof withCount !== 'boolean') {
+      throw new errors.ValidationError(
+        `Invalid parameter at 'withCount'. Expected a boolean, received: ${typeof withCount}`
+      );
+    }
+
+    const result = { ...params };
+    if (validPage !== undefined) result.page = validPage;
+    if (validPageSize !== undefined) result.pageSize = validPageSize;
+    if (validStart !== undefined) result.start = validStart;
+    if (validLimit !== undefined) result.limit = validLimit;
+    return result;
+  };
+
+  /**
+   * When strict is true, throws on unrecognized root-level keys.
+   */
+  const checkUnrecognizedRootParams = (
+    params: Record<string, unknown>,
+    strict: boolean
+  ): Record<string, unknown> => {
+    if (!strict) {
+      return params;
+    }
+
+    const unrecognized = Object.keys(params).filter(
+      (key) => !(ALLOWED_DOCUMENT_PARAM_KEYS as readonly string[]).includes(key)
+    );
+
+    if (unrecognized.length > 0) {
+      throw new errors.ValidationError(
+        `Unrecognized parameter(s) at root level: ${unrecognized.map((k) => `'${k}'`).join(', ')}. ` +
+          `Allowed: ${ALLOWED_DOCUMENT_PARAM_KEYS.join(', ')}.`
+      );
+    }
+
+    return params;
+  };
+
+  const validateParams = async (
+    params: Modules.Documents.Params.All
+  ): Promise<Modules.Documents.Params.All> => {
     // Cache model lookups for this request to avoid repeating the same work
     const modelCache = createModelCache(getModel);
 
@@ -87,9 +268,29 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       throw new errors.ValidationError("Invalid params: 'lookup'");
     }
 
-    // TODO: add validate status, locale, pagination
+    // Validate status, locale, and pagination based on config
+    // config.documents.strictParams: false/undefined (pass through), true (throw on invalid)
+    const rawStrictParams: unknown = strapi.config.get('documents.strictParams', undefined);
 
-    return params;
+    if (rawStrictParams !== undefined && rawStrictParams !== false && rawStrictParams !== true) {
+      throw new errors.ValidationError(
+        `Invalid config.documents.strictParams value: "${rawStrictParams}". Expected boolean (true or false).`
+      );
+    }
+
+    const strict = rawStrictParams === true;
+
+    let processedParams: Record<string, unknown>;
+    if (strict) {
+      processedParams = checkUnrecognizedRootParams(params as Record<string, unknown>, strict);
+      processedParams = checkStatus(processedParams, strict);
+      processedParams = checkLocale(processedParams, strict);
+      processedParams = checkPagination(processedParams, strict);
+    } else {
+      processedParams = params as Record<string, unknown>;
+    }
+
+    return processedParams as Modules.Documents.Params.All;
   };
 
   const entries = createEntriesService(uid, validator);
