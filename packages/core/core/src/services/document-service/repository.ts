@@ -79,7 +79,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   };
 
   /**
-   * Checks locale parameter. When strict is true, throws on invalid locale.
+   * Checks locale parameter. When strict is true, throws on invalid locale value.
+   * Valid locale is allowed for both localized and non-localized types (non-localized will ignore it downstream).
    */
   const checkLocale = (
     params: Record<string, unknown>,
@@ -89,27 +90,18 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
-    const i18nPlugin = strapi.plugin('i18n');
-    const isLocalized =
-      i18nPlugin?.service('content-types')?.isLocalizedContentType(contentType) ?? false;
-
-    if (!isLocalized) {
-      if (params.locale !== undefined) {
-        throw new errors.ValidationError(
-          `Invalid parameter at 'locale'. Content type is not localized.`
-        );
-      }
+    if (params.locale === undefined) {
       return params;
     }
 
-    if (params.locale !== undefined && typeof params.locale !== 'string') {
+    if (typeof params.locale !== 'string') {
       throw new errors.ValidationError(
         `Invalid parameter at 'locale'. Expected a string, received: ${typeof params.locale}`
       );
     }
 
-    if (params.locale !== undefined && params.locale !== '*') {
-      const localeStr = params.locale as string;
+    if (params.locale !== '*') {
+      const localeStr = params.locale;
       const isEmpty = localeStr.length === 0;
       const tooLong = localeStr.length > MAX_LOCALE_LENGTH;
       const invalidFormat = !LOCALE_FORMAT.test(localeStr);

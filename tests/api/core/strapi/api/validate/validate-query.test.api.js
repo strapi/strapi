@@ -273,14 +273,22 @@ describe('Core API - Validate', () => {
       ).rejects.toThrow(/status|published|draft/i);
     });
 
-    it('returns 400 when api.documents.strictParams is true and request has invalid locale', async () => {
+    it('returns 400 when strictParams is true and request has invalid locale (non-string)', async () => {
       strapi.config.set('api.documents.strictParams', true);
 
-      // URL sends locale as string "123"; document service rejects invalid format or non-localized type
       const res = await publicRq.get('/documents', { qs: { locale: 123 } });
 
       expect(res.status).toEqual(400);
-      expect(res.body?.error?.message).toBeDefined();
+      expect(res.body?.error?.message).toMatch(/locale|string/i);
+    });
+
+    it('allows valid locale string on non-localized type when strictParams is true (ignored downstream)', async () => {
+      strapi.config.set('api.documents.strictParams', true);
+
+      const res = await publicRq.get('/documents', { qs: { locale: 'en' } });
+
+      expect(res.status).toEqual(200);
+      expect(res.body?.data).toBeDefined();
     });
   });
 
