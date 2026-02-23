@@ -16,6 +16,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useUploadFilesStreamMutation } from '../../services/api';
+import { useGetFoldersQuery } from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
 
 import { AssetsGrid } from './components/AssetsGrid';
@@ -23,11 +24,13 @@ import { AssetsTable } from './components/AssetsTable';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
 import { localStorageKeys, viewOptions } from './constants';
+import { useFolderInfo } from './hooks/useFolderInfo';
+import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 
-const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
-
 import type { UploadFileInfo } from '../../../../../shared/contracts/files';
+
+const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 
 /* -------------------------------------------------------------------------------------------------
  * AssetsView
@@ -35,14 +38,25 @@ import type { UploadFileInfo } from '../../../../../shared/contracts/files';
 
 interface AssetsViewProps {
   view: number;
+  folderId: number | null;
 }
 
-const AssetsView = ({ view }: AssetsViewProps) => {
+const AssetsView = ({ view, folderId }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
-  const { assets, isLoading, isFetchingMore, hasNextPage, fetchNextPage, error } =
-    useInfiniteAssets();
+  const {
+    assets,
+    isLoading: isLoadingAssets,
+    isFetchingMore,
+    hasNextPage,
+    fetchNextPage,
+    error,
+  } = useInfiniteAssets({ folder: folderId });
+  const { data: folders = [], isLoading: isLoadingFolders } = useGetFoldersQuery({
+    parentId: folderId,
+  });
 
   const isGridView = view === viewOptions.GRID;
+  const isLoading = isLoadingAssets || isLoadingFolders;
 
   const loadMoreRef = useElementOnScreen<HTMLDivElement>(
     useCallback(
@@ -77,9 +91,25 @@ const AssetsView = ({ view }: AssetsViewProps) => {
     );
   }
 
+  if (folders.length === 0 && assets.length === 0) {
+    return (
+      <Box padding={8}>
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: 'app.components.EmptyStateLayout.content-document',
+            defaultMessage: 'No content found',
+          })}
+        </Typography>
+      </Box>
+    );
+  }
   return (
     <>
-      {isGridView ? <AssetsGrid assets={assets} /> : <AssetsTable assets={assets} />}
+      {isGridView ? (
+        <AssetsGrid folders={folders} assets={assets} />
+      ) : (
+        <AssetsTable assets={assets} folders={folders} />
+      )}
       <div ref={loadMoreRef} style={{ height: 1 }} />
       {isFetchingMore && (
         <Flex justifyContent="center" padding={4}>
@@ -119,7 +149,7 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
   font-weight: ${({ theme }) => theme.fontWeights.semiBold};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
+    background: ${({ theme }) => theme.colors.primary100};
   }
 
   &[data-state='on'] {
@@ -144,6 +174,16 @@ const HeaderWrapper = styled.div`
 
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
+
+  const { currentFolderId } = useFolderNavigation();
+  const { title, itemCount } = useFolderInfo(currentFolderId);
+  const itemCountLabel = formatMessage(
+    {
+      id: getTranslationKey('header.content.item-count'),
+      defaultMessage: '{count, plural, =1 {# item} other {# items}}',
+    },
+    { count: itemCount }
+  );
 
   // View state
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
@@ -187,13 +227,13 @@ export const AssetsPage = () => {
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      await uploadFilesToFolder(Array.from(files), null);
+      await uploadFilesToFolder(Array.from(files), currentFolderId);
     }
     e.target.value = '';
   };
 
   const handleDrop = async (files: globalThis.File[]) => {
-    await uploadFilesToFolder(files, null);
+    await uploadFilesToFolder(files, currentFolderId);
   };
 
   return (
@@ -206,7 +246,7 @@ export const AssetsPage = () => {
 
           <HeaderWrapper>
             <Layouts.Header
-              title="TODO: Folder name"
+              title={`${title} (${itemCountLabel})`}
               primaryAction={
                 <SimpleMenu
                   popoverPlacement="bottom-end"
@@ -276,8 +316,8 @@ export const AssetsPage = () => {
 
           <Layouts.Content>
             <DropZoneWithOverlay>
-              <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} />
-              <AssetsView view={view} />
+              <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
+              <AssetsView view={view} folderId={currentFolderId} />
             </DropZoneWithOverlay>
           </Layouts.Content>
         </Layouts.Root>

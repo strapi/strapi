@@ -124,6 +124,7 @@ const AdminLayout = () => {
               />
               <Flex
                 direction="column"
+                alignItems="stretch"
                 flex={1}
                 overflow="auto"
                 width="100%"
