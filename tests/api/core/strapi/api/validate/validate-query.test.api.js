@@ -201,19 +201,19 @@ describe('Core API - Validate', () => {
   });
 
   /**
-   * documents.strictParams (document service validation)
+   * api.documents.strictParams (document service validation)
    *
-   * When documents.strictParams is true, invalid root-level param types (e.g. invalid status,
+   * When api.documents.strictParams is true, invalid root-level param types (e.g. invalid status,
    * non-string locale) are rejected by the document service. These E2E tests assert the full
    * path from HTTP query params down to the document service.
    */
-  describe('documents.strictParams (document service)', () => {
+  describe('api.documents.strictParams (document service)', () => {
     afterEach(() => {
-      strapi.config.set('documents.strictParams', undefined);
+      strapi.config.set('api.documents.strictParams', undefined);
     });
 
-    it('returns 400 when documents.strictParams is true and request has invalid status', async () => {
-      strapi.config.set('documents.strictParams', true);
+    it('returns 400 when api.documents.strictParams is true and request has invalid status', async () => {
+      strapi.config.set('api.documents.strictParams', true);
 
       const res = await publicRq.get('/documents', { qs: { status: 'invalid' } });
 
@@ -221,8 +221,8 @@ describe('Core API - Validate', () => {
       expect(res.body?.error?.message).toMatch(/status|published|draft/i);
     });
 
-    it('returns 400 when documents.strictParams is true and request has invalid locale', async () => {
-      strapi.config.set('documents.strictParams', true);
+    it('returns 400 when api.documents.strictParams is true and request has invalid locale', async () => {
+      strapi.config.set('api.documents.strictParams', true);
 
       // URL sends locale as string "123"; document service rejects invalid format or non-localized type
       const res = await publicRq.get('/documents', { qs: { locale: 123 } });

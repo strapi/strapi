@@ -536,11 +536,11 @@ describe('Document Service Validations', () => {
 
   describe('strictParams: true (validate)', () => {
     beforeEach(() => {
-      strapi.config.set('documents.strictParams', true);
+      strapi.config.set('api.documents.strictParams', true);
     });
 
     afterAll(() => {
-      strapi.config.set('documents.strictParams', undefined);
+      strapi.config.set('api.documents.strictParams', undefined);
     });
 
     describe('Status', () => {
@@ -557,11 +557,11 @@ describe('Document Service Validations', () => {
       });
 
       it('should accept false to explicitly disable validation', async () => {
-        strapi.config.set('documents.strictParams', false);
+        strapi.config.set('api.documents.strictParams', false);
         const result = await strapi.documents(ARTICLE_UID).findMany({ status: 'invalid' } as any);
         expect(result).toBeDefined();
         expect(Array.isArray(result)).toBe(true);
-        strapi.config.set('documents.strictParams', undefined);
+        strapi.config.set('api.documents.strictParams', undefined);
       });
     });
 
@@ -679,14 +679,14 @@ describe('Document Service Validations', () => {
     });
   });
 
-  describe('Unrecognized root-level params (documents.strictParams)', () => {
+  describe('Unrecognized root-level params (api.documents.strictParams)', () => {
     describe('strictParams: true', () => {
       afterEach(() => {
-        strapi.config.set('documents.strictParams', undefined);
+        strapi.config.set('api.documents.strictParams', undefined);
       });
 
       it('should throw ValidationError when unrecognized root-level key is passed', async () => {
-        strapi.config.set('documents.strictParams', true);
+        strapi.config.set('api.documents.strictParams', true);
 
         await expect(
           strapi.documents(ARTICLE_UID).findMany({ where: { id: 1 } } as any)
@@ -698,7 +698,7 @@ describe('Document Service Validations', () => {
       });
 
       it('should throw ValidationError for multiple unrecognized root-level keys', async () => {
-        strapi.config.set('documents.strictParams', true);
+        strapi.config.set('api.documents.strictParams', true);
 
         await expect(
           strapi.documents(ARTICLE_UID).findMany({ foo: 'bar', baz: 123 } as any)
@@ -710,7 +710,7 @@ describe('Document Service Validations', () => {
       });
 
       it('should accept only allowed root-level params', async () => {
-        strapi.config.set('documents.strictParams', true);
+        strapi.config.set('api.documents.strictParams', true);
 
         const result = await strapi.documents(ARTICLE_UID).findMany({
           status: 'published',
@@ -722,7 +722,7 @@ describe('Document Service Validations', () => {
       });
 
       it('should accept allowed params including hasPublishedVersion and reject extra unrecognized keys', async () => {
-        strapi.config.set('documents.strictParams', true);
+        strapi.config.set('api.documents.strictParams', true);
 
         const result = await strapi.documents(ARTICLE_UID).findMany({
           status: 'draft',
@@ -743,18 +743,18 @@ describe('Document Service Validations', () => {
 
     describe('strictParams: false / undefined (default)', () => {
       it('should pass through unrecognized root-level keys without throwing', async () => {
-        strapi.config.set('documents.strictParams', false);
+        strapi.config.set('api.documents.strictParams', false);
         const result = await strapi.documents(ARTICLE_UID).findMany({
           status: 'published',
           unknownParam: { nested: 1 },
         } as any);
         expect(result).toBeDefined();
         expect(Array.isArray(result)).toBe(true);
-        strapi.config.set('documents.strictParams', undefined);
+        strapi.config.set('api.documents.strictParams', undefined);
       });
 
       it('should not apply unrecognized root-level keys to the query', async () => {
-        strapi.config.set('documents.strictParams', false);
+        strapi.config.set('api.documents.strictParams', false);
 
         const withKnownParamsOnly = await strapi.documents(ARTICLE_UID).findMany({
           status: 'published',
@@ -768,36 +768,36 @@ describe('Document Service Validations', () => {
         const idsOnly = (arr: any[]) => arr.map((d) => d.documentId).sort();
         expect(idsOnly(withUnknownKey)).toEqual(idsOnly(withKnownParamsOnly));
 
-        strapi.config.set('documents.strictParams', undefined);
+        strapi.config.set('api.documents.strictParams', undefined);
       });
     });
   });
 
   describe('strictParams config validation', () => {
     it('should throw ValidationError for non-boolean strictParams value', async () => {
-      strapi.config.set('documents.strictParams', 'invalid' as any);
+      strapi.config.set('api.documents.strictParams', 'invalid' as any);
 
       await expect(strapi.documents(ARTICLE_UID).findMany({})).rejects.toThrow(
         errors.ValidationError
       );
       await expect(strapi.documents(ARTICLE_UID).findMany({})).rejects.toThrow(
-        /Invalid config\.documents\.strictParams value/
+        /Invalid config\.api\.documents\.strictParams value/
       );
 
-      strapi.config.set('documents.strictParams', undefined);
+      strapi.config.set('api.documents.strictParams', undefined);
     });
 
     it('should accept valid strictParams values (boolean or undefined)', async () => {
       const validValues = [undefined, false, true];
 
       for (const value of validValues) {
-        strapi.config.set('documents.strictParams', value as any);
+        strapi.config.set('api.documents.strictParams', value as any);
 
         // Should not throw when using a valid value
         await expect(strapi.documents(ARTICLE_UID).findMany({})).resolves.not.toThrow();
       }
 
-      strapi.config.set('documents.strictParams', undefined);
+      strapi.config.set('api.documents.strictParams', undefined);
     });
   });
 });

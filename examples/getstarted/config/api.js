@@ -5,4 +5,7 @@ module.exports = {
     withCount: true,
     strictParams: true,
   },
+  documents: {
+    strictParams: true,
+  },
 };

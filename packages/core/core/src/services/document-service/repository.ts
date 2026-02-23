@@ -33,7 +33,7 @@ const { validators } = validate;
 // we have to typecast to reconcile the differences between validator and database getModel
 const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: string) => any;
 
-// config.documents.strictParams: false/undefined (pass through), true (throw on invalid)
+// config.api.documents.strictParams: false/undefined (pass through), true (throw on invalid)
 
 // BCP 47–style locale format: 2–3 letter language code (any case), optional subtags (-XX or -XXX...), max 35 chars
 const LOCALE_FORMAT = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
@@ -269,12 +269,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     }
 
     // Validate status, locale, and pagination based on config
-    // config.documents.strictParams: false/undefined (pass through), true (throw on invalid)
-    const rawStrictParams: unknown = strapi.config.get('documents.strictParams', undefined);
+    // config.api.documents.strictParams: false/undefined (pass through), true (throw on invalid)
+    const rawStrictParams: unknown = strapi.config.get('api.documents.strictParams', undefined);
 
     if (rawStrictParams !== undefined && rawStrictParams !== false && rawStrictParams !== true) {
       throw new errors.ValidationError(
-        `Invalid config.documents.strictParams value: "${rawStrictParams}". Expected boolean (true or false).`
+        `Invalid config.api.documents.strictParams value: "${rawStrictParams}". Expected boolean (true or false).`
       );
     }
 
