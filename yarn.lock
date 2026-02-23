@@ -10051,7 +10051,7 @@ __metadata:
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/utils": "npm:5.36.1"
     "@types/fs-extra": "npm:11.0.4"
-    ajv: "npm:8.16.0"
+    ajv: "npm:8.18.0"
     date-fns: "npm:2.30.0"
     debug: "npm:4.3.4"
     eslint-config-custom: "npm:5.36.1"
@@ -14075,15 +14075,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:8.16.0":
-  version: 8.16.0
-  resolution: "ajv@npm:8.16.0"
+"ajv@npm:8.18.0":
+  version: 8.18.0
+  resolution: "ajv@npm:8.18.0"
   dependencies:
     fast-deep-equal: "npm:^3.1.3"
+    fast-uri: "npm:^3.0.1"
     json-schema-traverse: "npm:^1.0.0"
     require-from-string: "npm:^2.0.2"
-    uri-js: "npm:^4.4.1"
-  checksum: 10c0/6fc38aa8fd4fbfaa7096ac049e48c0cb440db36b76fef2d7d5b7d92b102735670d055d412d19176c08c9d48eaa9d06661b67e59f04943dc71ab1551e0484f88c
+  checksum: 10c0/e7517c426173513a07391be951879932bdf3348feaebd2199f5b901c20f99d60db8cd1591502d4d551dc82f594e82a05c4fe1c70139b15b8937f7afeaed9532f
   languageName: node
   linkType: hard
 
