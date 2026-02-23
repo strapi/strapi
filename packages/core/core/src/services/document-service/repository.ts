@@ -16,7 +16,7 @@ import { copyNonLocalizedFields } from './internationalization';
 import * as components from './components';
 
 import { createEntriesService } from './entries';
-import { ALLOWED_DOCUMENT_PARAM_KEYS, pickSelectionParams } from './params';
+import { ALLOWED_DOCUMENT_ROOT_PARAM_KEYS, pickSelectionParams } from './params';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
 import { getDeepPopulate } from './utils/populate';
 import { transformParamsToQuery } from './transform/query';
@@ -217,13 +217,13 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     }
 
     const unrecognized = Object.keys(params).filter(
-      (key) => !(ALLOWED_DOCUMENT_PARAM_KEYS as readonly string[]).includes(key)
+      (key) => !(ALLOWED_DOCUMENT_ROOT_PARAM_KEYS as readonly string[]).includes(key)
     );
 
     if (unrecognized.length > 0) {
       throw new errors.ValidationError(
         `Unrecognized parameter(s) at root level: ${unrecognized.map((k) => `'${k}'`).join(', ')}. ` +
-          `Allowed: ${ALLOWED_DOCUMENT_PARAM_KEYS.join(', ')}.`
+          `Allowed: ${ALLOWED_DOCUMENT_ROOT_PARAM_KEYS.join(', ')}.`
       );
     }
 

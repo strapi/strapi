@@ -739,6 +739,31 @@ describe('Document Service Validations', () => {
           } as any)
         ).rejects.toThrow(errors.ValidationError);
       });
+
+      it('should accept create with data param when strictParams is true', async () => {
+        strapi.config.set('api.documents.strictParams', true);
+
+        const doc = await strapi.documents(ARTICLE_UID).create({
+          data: { title: 'StrictParams create test' },
+        });
+        expect(doc).toBeDefined();
+        expect(doc).toHaveProperty('documentId');
+        expect(doc).toMatchObject({ title: 'StrictParams create test' });
+      });
+
+      it('should accept update with data param when strictParams is true', async () => {
+        strapi.config.set('api.documents.strictParams', true);
+
+        const created = await strapi.documents(ARTICLE_UID).create({
+          data: { title: 'Original' },
+        });
+        const updated = await strapi.documents(ARTICLE_UID).update({
+          documentId: created.documentId,
+          data: { title: 'Updated under strictParams' },
+        });
+        expect(updated).toBeDefined();
+        expect(updated).toMatchObject({ title: 'Updated under strictParams' });
+      });
     });
 
     describe('strictParams: false / undefined (default)', () => {

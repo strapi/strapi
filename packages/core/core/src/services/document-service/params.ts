@@ -8,6 +8,13 @@ import { SHARED_QUERY_PARAM_KEYS } from '@strapi/utils';
  */
 export const ALLOWED_DOCUMENT_PARAM_KEYS = [...SHARED_QUERY_PARAM_KEYS, 'withCount'] as const;
 
+/**
+ * Root-level param keys allowed when api.documents.strictParams is true.
+ * Includes ALLOWED_DOCUMENT_PARAM_KEYS plus 'data' (create/update payload).
+ * Used only for validation; query building still uses ALLOWED_DOCUMENT_PARAM_KEYS.
+ */
+export const ALLOWED_DOCUMENT_ROOT_PARAM_KEYS = [...ALLOWED_DOCUMENT_PARAM_KEYS, 'data'] as const;
+
 /** Restrict to allowed query keys so only these reach the query-params transformer (security). */
 export const pickAllowedQueryParams = (
   params: Record<string, unknown>
