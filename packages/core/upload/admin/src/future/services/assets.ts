@@ -17,11 +17,27 @@ interface GetAssetsResponse {
 const assetsApi = uploadApi.injectEndpoints({
   endpoints: (builder) => ({
     getAssets: builder.query<GetAssetsResponse, GetAssetsParams | void>({
-      query: (params = {}) => ({
-        url: '/upload/files',
-        method: 'GET',
-        config: { params },
-      }),
+      query: (params = {}) => {
+        const { folder, ...rest } = params as GetAssetsParams;
+
+        const queryParams: Record<string, unknown> = { ...rest };
+
+        if (folder != null) {
+          queryParams['filters'] = {
+            $and: [{ folder: { id: folder } }],
+          };
+        } else {
+          queryParams['filters'] = {
+            $and: [{ folder: { id: { $null: true } } }],
+          };
+        }
+
+        return {
+          url: '/upload/files',
+          method: 'GET',
+          config: { params: queryParams },
+        };
+      },
       transformResponse: (response: GetFiles.Response['data']) => response,
       providesTags: (result) =>
         result

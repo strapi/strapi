@@ -19,7 +19,13 @@ jobs:
             const { login } = context.payload.pull_request.user;
             const association = context.payload.pull_request.author_association;
 
-            if (!['MEMBER', 'OWNER'].includes(association)) {
+            // Skip bot users
+            if (login && login.includes('[bot]')) {
+              core.info(`Skipped — ${login} is a bot`);
+              return;
+            }
+
+            if (!['MEMBER', 'OWNER', 'FIRST_TIME_CONTRIBUTOR', 'CONTRIBUTOR'].includes(association)) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
