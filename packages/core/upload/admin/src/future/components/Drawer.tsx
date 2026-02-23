@@ -156,7 +156,6 @@ const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
       <DrawerContainer
         $animationDirection={animationDirection}
         data-animation-direction={animationDirection}
-        forceMount
         {...props}
       >
         <DrawerContent>{children}</DrawerContent>

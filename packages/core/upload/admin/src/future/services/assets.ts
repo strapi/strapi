@@ -1,19 +1,11 @@
 import { uploadApi } from './api';
 
-import type { GetFiles, File, Pagination } from '../../../../shared/contracts/files';
-
-/** User object returned when createdBy is populated (GET /upload/files/:id) */
-export interface PopulatedCreatedBy {
-  id: number;
-  firstname?: string;
-  lastname?: string;
-  username?: string | null;
-  email?: string;
-}
-
-export type AssetWithPopulatedCreatedBy = Omit<File, 'createdBy'> & {
-  createdBy?: PopulatedCreatedBy | null;
-};
+import type {
+  GetFiles,
+  File,
+  Pagination,
+  AssetWithPopulatedCreatedBy,
+} from '../../../../shared/contracts/files';
 
 interface GetAssetsParams {
   page?: number;
