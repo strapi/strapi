@@ -59,18 +59,13 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   /**
    * Checks status parameter. When strict is true, throws on invalid status.
+   * Valid values are 'published' and 'draft'; for types without D&P they are currently ignored but may throw in the future
    */
   const checkStatus = (
     params: Record<string, unknown>,
     strict: boolean
   ): Record<string, unknown> => {
     if (!strict) {
-      return params;
-    }
-
-    // When D&P is disabled, accept status but it is ignored downstream
-    // In the future, this may throw an error, but for now it would break too much internal code
-    if (!hasDraftAndPublish) {
       return params;
     }
 

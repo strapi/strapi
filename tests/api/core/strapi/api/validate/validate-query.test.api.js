@@ -25,7 +25,11 @@ const addSchemas = () => {
 };
 
 const addFixtures = () => {
-  const creationOrder = ['api::relation.relation', 'api::document.document'];
+  const creationOrder = [
+    'api::relation.relation',
+    'api::document.document',
+    'api::article.article',
+  ];
 
   creationOrder.forEach((uid) => {
     const fixture = fixtures['content-types'][uid];
@@ -200,25 +204,73 @@ describe('Core API - Validate', () => {
     });
   });
 
+  describe('contentAPI.addQueryParams (strictParams + real request)', () => {
+    const z = require('zod/v4');
+
+    beforeAll(() => {
+      strapi.contentAPI.addQueryParams({
+        search: {
+          schema: (zInstance) => zInstance.string().max(200).optional(),
+          matchRoute: (route) => route.method === 'GET' && route.path === '/documents',
+        },
+      });
+      // Routes were already registered at load(); re-apply so they get the new param.
+      // Ignore "param already exists" when the same route object appears in multiple routers.
+      for (const apiName of Object.keys(strapi.apis)) {
+        const api = strapi.api(apiName);
+        const routers = api.routes ?? {};
+        for (const router of Object.values(routers)) {
+          if (router.routes && Array.isArray(router.routes)) {
+            try {
+              strapi.contentAPI.applyExtraParamsToRoutes(router.routes);
+            } catch (err) {
+              if (!/param "search" already exists on route/.test(err.message)) {
+                throw err;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    afterEach(() => {
+      strapi.config.set('api.rest.strictParams', undefined);
+    });
+
+    it('returns 200 when strictParams is true and request includes custom query param registered via addQueryParams', async () => {
+      strapi.config.set('api.rest.strictParams', true);
+
+      const res = await rq.get('/api/documents', { qs: { search: 'hello' } });
+
+      expect(res.status).toEqual(200);
+      expect(res.body.data).toBeDefined();
+    });
+  });
+
   /**
    * api.documents.strictParams (document service validation)
    *
-   * When api.documents.strictParams is true, invalid root-level param types (e.g. invalid status,
-   * non-string locale) are rejected by the document service. These E2E tests assert the full
-   * path from HTTP query params down to the document service.
+   * When api.documents.strictParams is true, the document service rejects invalid root-level
+   * params (e.g. invalid status, non-string locale). We test the document service directly
+   * for status; invalid locale is covered by an E2E request.
    */
   describe('api.documents.strictParams (document service)', () => {
     afterEach(() => {
       strapi.config.set('api.documents.strictParams', undefined);
     });
 
-    it('returns 400 when api.documents.strictParams is true and request has invalid status', async () => {
+    it('document service throws when strictParams is true and params have invalid status (non-D&P type)', async () => {
       strapi.config.set('api.documents.strictParams', true);
+      await expect(
+        strapi.documents('api::document.document').findMany({ status: 'invalid' })
+      ).rejects.toThrow(/status|published|draft/i);
+    });
 
-      const res = await publicRq.get('/documents', { qs: { status: 'invalid' } });
-
-      expect(res.status).toEqual(400);
-      expect(res.body?.error?.message).toMatch(/status|published|draft/i);
+    it('document service throws when strictParams is true and params have invalid status (D&P type)', async () => {
+      strapi.config.set('api.documents.strictParams', true);
+      await expect(
+        strapi.documents('api::article.article').findMany({ status: 'invalid' })
+      ).rejects.toThrow(/status|published|draft/i);
     });
 
     it('returns 400 when api.documents.strictParams is true and request has invalid locale', async () => {
