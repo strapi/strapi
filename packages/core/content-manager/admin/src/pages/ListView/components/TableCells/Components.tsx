@@ -16,7 +16,17 @@ interface SingleComponentProps extends Pick<CellContentProps, 'mainField'> {
 }
 
 const SingleComponent = ({ content, mainField }: SingleComponentProps) => {
+  // If no mainField configured, try to render title as fallback
   if (!mainField) {
+    if (content?.title) {
+      return (
+        <Tooltip label={content.title}>
+          <Typography maxWidth="25rem" textColor="neutral800" ellipsis>
+            {content.title}
+          </Typography>
+        </Tooltip>
+      );
+    }
     return null;
   }
 
