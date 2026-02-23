@@ -88,8 +88,20 @@ const FolderCard = ({ folder }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigateToFolder(folder);
+    }
+  };
+
   return (
-    <StyledFolderCard onClick={() => navigateToFolder(folder)} role="button" tabIndex={0}>
+    <StyledFolderCard
+      onClick={() => navigateToFolder(folder)}
+      onKeyDown={handleKeyDown}
+      role="listitem"
+      tabIndex={0}
+    >
       <FolderIconContainer>
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
@@ -209,8 +221,20 @@ const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onAssetItemClick(asset.id);
+    }
+  };
+
   return (
-    <StyledCard tabIndex={0} role="button" onClick={() => onAssetItemClick(asset.id)}>
+    <StyledCard
+      tabIndex={0}
+      role="listitem"
+      onClick={() => onAssetItemClick(asset.id)}
+      onKeyDown={handleKeyDown}
+    >
       <StyledCardHeader>
         <AssetPreview asset={asset} />
       </StyledCardHeader>
@@ -266,7 +290,7 @@ export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGri
   }
 
   return (
-    <Grid.Root gap={4}>
+    <Grid.Root gap={4} role="list">
       {folders.length > 0 && (
         <FoldersRow>
           <Grid.Root gap={4}>

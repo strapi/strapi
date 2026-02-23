@@ -9,8 +9,10 @@ import { prefixFileUrlWithBackendUrl } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 
-import type { File } from '../../../../../../../shared/contracts/files';
-import type { AssetWithPopulatedCreatedBy } from '../../../../services/assets';
+import type {
+  File,
+  AssetWithPopulatedCreatedBy,
+} from '../../../../../../../shared/contracts/files';
 
 /* -------------------------------------------------------------------------------------------------
  * Styled components

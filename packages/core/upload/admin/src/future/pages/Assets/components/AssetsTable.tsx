@@ -111,8 +111,20 @@ const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onAssetItemClick(asset.id);
+    }
+  };
+
   return (
-    <StyledTr tabIndex={0} role="button" onClick={() => onAssetItemClick(asset.id)}>
+    <StyledTr
+      tabIndex={0}
+      role="row"
+      onClick={() => onAssetItemClick(asset.id)}
+      onKeyDown={handleKeyDown}
+    >
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <AssetPreviewCell asset={asset} />
@@ -181,8 +193,20 @@ const FolderRow = ({ folder }: FolderRowProps) => {
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigateToFolder(folder);
+    }
+  };
+
   return (
-    <FolderTr tabIndex={0} role="button" onClick={() => navigateToFolder(folder)}>
+    <FolderTr
+      tabIndex={0}
+      role="row"
+      onClick={() => navigateToFolder(folder)}
+      onKeyDown={handleKeyDown}
+    >
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <Flex

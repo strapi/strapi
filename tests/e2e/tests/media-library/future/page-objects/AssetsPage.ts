@@ -142,11 +142,10 @@ export class AssetsPage {
   }
 
   /**
-   * Get an asset row in table view. Rows use role="button" for clickability, not role="row".
+   * Get an asset row in table view. Rows use role="row" in the grid.
    */
   getAssetRow(name: string) {
-    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return this.page.getByRole('grid').getByRole('button', { name: new RegExp(escapedName) });
+    return this.page.getByRole('grid').getByRole('row').filter({ hasText: name }).first();
   }
 
   async switchToGridView() {
@@ -163,11 +162,10 @@ export class AssetsPage {
 
   /**
    * Get an asset card in grid view by (partial) filename.
-   * Asset cards use role="button" for clickability (styled-components sets cursor via CSS, not inline).
+   * Asset cards use role="listitem" in the list.
    */
   getAssetCard(name: string) {
-    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return this.dropZone.getByRole('button', { name: new RegExp(escapedName) });
+    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**

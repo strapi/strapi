@@ -17,12 +17,14 @@ import { styled } from 'styled-components';
 
 import { Drawer, DRAWER_CLOSE_ANIMATION_MS } from '../../../../components/Drawer';
 import { AssetType } from '../../../../enums';
-import { useGetAssetQuery, type AssetWithPopulatedCreatedBy } from '../../../../services/assets';
+import { useGetAssetQuery } from '../../../../services/assets';
 import { formatBytes, getFileExtension } from '../../../../utils/files';
 import { getAssetIcon } from '../../../../utils/getAssetIcon';
 import { getTranslationKey } from '../../../../utils/translations';
 
 import { AssetPreview } from './AssetPreview';
+
+import type { AssetWithPopulatedCreatedBy } from '../../../../../../../shared/contracts/files';
 
 // Name of the parameter to look for in the URL to open the drawer
 const URL_PARAM = 'assetId';
