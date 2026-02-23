@@ -18,6 +18,7 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import type { BuildContext } from '../create-build-context';
 import { getUserConfig } from '../core/config';
+import { getLinkedDesignSystemPath } from '../core/linked-packages';
 import { getMonorepoAliases } from '../core/aliases';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
@@ -127,6 +128,7 @@ const resolveBaseConfig = async (ctx: BuildContext) => {
 const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuration> => {
   const baseConfig = await resolveBaseConfig(ctx);
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
+  const linkedDesignSystemPath = getLinkedDesignSystemPath(ctx.cwd);
 
   return {
     ...baseConfig,
@@ -135,6 +137,10 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuratio
       // version cache when there are changes to aliases
       buildDependencies: {
         config: [__filename],
+        // When design-system is linked, invalidate cache when it changes
+        ...(linkedDesignSystemPath && {
+          designSystem: [path.join(linkedDesignSystemPath, 'dist')],
+        }),
       },
       version: crypto
         .createHash('md5')

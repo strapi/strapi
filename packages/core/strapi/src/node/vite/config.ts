@@ -3,6 +3,7 @@ import browserslistToEsbuild from 'browserslist-to-esbuild';
 import react from '@vitejs/plugin-react-swc';
 
 import { getUserConfig } from '../core/config';
+import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
 import type { BuildContext } from '../create-build-context';
@@ -11,6 +12,7 @@ import { buildFilesPlugin } from './plugins';
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
+  const designSystemLinked = isDesignSystemLinked(ctx.cwd);
 
   return {
     root: ctx.cwd,
@@ -28,6 +30,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     },
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
+      // When design-system is linked (portal:, file:, yarn link), exclude from pre-bundling
+      // so changes are reflected without clearing node_modules/.strapi/vite cache
+      ...(designSystemLinked && { exclude: ['@strapi/design-system'] }),
       include: [
         // pre-bundle React dependencies to avoid React duplicates,
         // even if React dependencies are not direct dependencies
@@ -40,7 +45,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Pre-bundle design-system so plugin custom field chunks (dynamic imports) resolve
         // to the same instance as the main app. Otherwise TooltipProvider/DesignSystemProvider
         // context from the root is not seen by components in plugin chunks.
-        '@strapi/design-system',
+        // Omit when linked so local changes are picked up (see exclude above)
+        ...(!designSystemLinked ? ['@strapi/design-system'] : []),
         '@radix-ui/react-tooltip',
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
