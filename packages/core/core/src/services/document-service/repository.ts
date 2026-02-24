@@ -180,11 +180,17 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       allowMinusOne: true,
     });
 
-    const withCount = params.withCount;
-    if (withCount !== undefined && typeof withCount !== 'boolean') {
-      throw new errors.ValidationError(
-        `Invalid parameter at 'withCount'. Expected a boolean, received: ${typeof withCount}`
-      );
+    let withCount = params.withCount;
+    if (withCount !== undefined) {
+      if (typeof withCount === 'boolean') {
+        // already valid
+      } else if (typeof withCount === 'string' && (withCount === 'true' || withCount === 'false')) {
+        withCount = withCount === 'true';
+      } else {
+        throw new errors.ValidationError(
+          `Invalid parameter at 'withCount'. Expected a boolean, received: ${typeof withCount}`
+        );
+      }
     }
 
     const result = { ...params };
@@ -192,6 +198,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     if (validPageSize !== undefined) result.pageSize = validPageSize;
     if (validStart !== undefined) result.start = validStart;
     if (validLimit !== undefined) result.limit = validLimit;
+    if (withCount !== undefined) result.withCount = withCount;
     return result;
   };
 
@@ -416,7 +423,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     const clonedEntries = await async.map(
       entriesToClone,
       async.pipe(
-        validateParams,
         omit(['id', 'createdAt', 'updatedAt']),
         // assign new documentId
         assoc('documentId', createDocumentId()),
