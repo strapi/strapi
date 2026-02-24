@@ -89,5 +89,5 @@ const isBaseQueryError = (error: BaseQueryError | SerializedError): error is Bas
   return error.name !== undefined;
 };
 
-export { isBaseQueryError, buildValidParams };
+export { isBaseQueryError, buildValidParams, extractStatusFilter };
 export type { BaseQueryError, UnknownApiError };
