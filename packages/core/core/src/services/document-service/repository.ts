@@ -80,6 +80,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   /**
    * Checks locale parameter. When strict is true, throws on invalid locale value.
+   * Accepts string (single locale or '*') or array of locale strings (e.g. bulk publish).
    * Valid locale is allowed for both localized and non-localized types (non-localized will ignore it downstream).
    */
   const checkLocale = (
@@ -94,17 +95,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
-    if (typeof params.locale !== 'string') {
-      throw new errors.ValidationError(
-        `Invalid parameter at 'locale'. Expected a string, received: ${typeof params.locale}`
-      );
-    }
-
-    if (params.locale !== '*') {
-      const localeStr = params.locale;
-      const isEmpty = localeStr.length === 0;
-      const tooLong = localeStr.length > MAX_LOCALE_LENGTH;
-      const invalidFormat = !LOCALE_FORMAT.test(localeStr);
+    const validateOneLocale = (value: unknown, path: string): void => {
+      if (typeof value !== 'string') {
+        throw new errors.ValidationError(
+          `Invalid parameter at '${path}'. Expected a string, received: ${typeof value}`
+        );
+      }
+      if (value === '*') return;
+      const isEmpty = value.length === 0;
+      const tooLong = value.length > MAX_LOCALE_LENGTH;
+      const invalidFormat = !LOCALE_FORMAT.test(value);
       if (isEmpty || tooLong || invalidFormat) {
         let reason: string;
         if (isEmpty) {
@@ -114,10 +114,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         } else {
           reason = 'Locale must be a valid BCP 47 format (e.g. en, en-US, zh-Hans)';
         }
-        throw new errors.ValidationError(`Invalid parameter at 'locale'. ${reason}.`);
+        throw new errors.ValidationError(`Invalid parameter at '${path}'. ${reason}.`);
       }
+    };
+
+    if (Array.isArray(params.locale)) {
+      params.locale.forEach((item, i) => validateOneLocale(item, `locale[${i}]`));
+      return params;
     }
 
+    validateOneLocale(params.locale, 'locale');
     return params;
   };
 
