@@ -186,9 +186,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     fileInfo: FileInfo,
     metas?: Metas
   ): Promise<UploadableFile> {
-    // Prefer detected MIME type from security validation over declared type
-    // Falls back to declared type, then to application/octet-stream
-    const mimeType = (file as any).detectedMimeType || file.mimetype || 'application/octet-stream';
+    // Prefer detected MIME type from security validation. Treat application/octet-stream as
+    // undeclared so we use detected type when the client sends no real Content-Type.
+    const detected = (file as any).detectedMimeType;
+    const declared = file.mimetype || '';
+    const mimeType =
+      detected ||
+      (declared && declared !== 'application/octet-stream' ? declared : undefined) ||
+      'application/octet-stream';
 
     const currentFile = (await formatFileInfo(
       {

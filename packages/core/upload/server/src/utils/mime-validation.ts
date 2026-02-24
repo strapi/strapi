@@ -200,8 +200,30 @@ export async function validateFile(
 ): Promise<ValidationResult> {
   const { allowedTypes, deniedTypes } = config;
 
+  // When no allow/deny config, still run detection so stored file gets detected MIME when declared is generic (e.g. octet-stream)
   if (!allowedTypes && !deniedTypes) {
-    return { isValid: true };
+    let detectedMime: string | undefined;
+    try {
+      detectedMime = await detectMimeType(file);
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      strapi.log.warn(`Failed to detect MIME type from file: ${errMsg}`, {
+        fileName: extractFileInfo(file).fileName,
+        error: errMsg,
+      });
+    }
+    // file-type returns application/zip for Office formats (docx, xlsx); use extension-based MIME for stored type
+    const { fileName } = extractFileInfo(file);
+    const fileExt = extname(fileName).toLowerCase();
+    const expectedMimeFromExt = fileExt ? lookup(fileExt) || null : null;
+    if (
+      detectedMime === 'application/zip' &&
+      expectedMimeFromExt &&
+      expectedMimeFromExt !== 'application/zip'
+    ) {
+      detectedMime = expectedMimeFromExt;
+    }
+    return { isValid: true, detectedMime };
   }
 
   const { fileName, declaredMimeType } = extractFileInfo(file);

@@ -617,6 +617,27 @@ describe('Upload plugin', () => {
         await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
       });
 
+      test('stored mime is detected type for docx when no config and Content-Type is application/octet-stream', async () => {
+        strapi.config.set('plugin::upload.security', {});
+        const res = await rq({
+          method: 'POST',
+          url: '/upload',
+          formData: {
+            files: {
+              path: utilsPath('rec.docx'),
+              filename: 'document.docx',
+              contentType: 'application/octet-stream',
+            },
+          },
+        });
+        expect(res.statusCode).toBe(201);
+        expect(res.body).toHaveLength(1);
+        expect(res.body[0].mime).toBe(
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        );
+        await rq({ method: 'DELETE', url: `/upload/files/${res.body[0].id}` });
+      });
+
       test('rejects when content is detectable but not in allow list (extension/declared would allow)', async () => {
         strapi.config.set('plugin::upload.security', { allowedTypes: ['application/pdf'] });
         // Real JPEG content sent as fake.pdf – only content detection reveals image/jpeg, so we reject.
