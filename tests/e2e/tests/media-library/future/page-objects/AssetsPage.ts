@@ -14,6 +14,7 @@ export class AssetsPage {
   readonly tableViewButton: Locator;
   readonly dropZone: Locator;
   readonly uploadProgressDialog: Locator;
+  readonly assetDetailsDrawer: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -23,7 +24,8 @@ export class AssetsPage {
     this.gridViewButton = page.getByRole('radio', { name: 'Grid view' });
     this.tableViewButton = page.getByRole('radio', { name: 'Table view' });
     this.dropZone = page.getByTestId('assets-dropzone');
-    this.uploadProgressDialog = page.getByTestId('upload-progress-dialog');
+    this.uploadProgressDialog = page.getByRole('dialog', { name: /upload/i });
+    this.assetDetailsDrawer = page.getByRole('dialog').filter({ has: page.getByText('File info') });
   }
 
   async goto() {
@@ -139,8 +141,11 @@ export class AssetsPage {
     return inputValue === '';
   }
 
+  /**
+   * Get an asset row in table view. Rows use role="row" in the grid.
+   */
   getAssetRow(name: string) {
-    return this.page.getByRole('row', { name: new RegExp(name) });
+    return this.page.getByRole('grid').getByRole('row').filter({ hasText: name }).first();
   }
 
   async switchToGridView() {
@@ -155,8 +160,12 @@ export class AssetsPage {
     return (await this.gridViewButton.getAttribute('aria-checked')) === 'true';
   }
 
+  /**
+   * Get an asset card in grid view by (partial) filename.
+   * Asset cards use role="listitem" in the list.
+   */
   getAssetCard(name: string) {
-    return this.page.locator('div').filter({ hasText: name }).nth(1);
+    return this.dropZone.getByRole('listitem').filter({ hasText: name }).first();
   }
 
   /**
@@ -171,5 +180,37 @@ export class AssetsPage {
    */
   async closeUploadProgressDialog() {
     await this.uploadProgressDialog.getByRole('button', { name: 'Close' }).click();
+  }
+
+  /**
+   * Click an asset row in table view to open the details drawer
+   */
+  async clickAssetInTable(name: string) {
+    const row = this.getAssetRow(name);
+    await row.click();
+  }
+
+  /**
+   * Click an asset card in grid view to open the details drawer
+   */
+  async clickAssetInGrid(name: string) {
+    const card = this.getAssetCard(name);
+    await card.click();
+  }
+
+  /**
+   * Get the value of a detail field in the asset details drawer by its label
+   * The DetailItem structure has label and value as siblings, so we find the label and get its following sibling
+   */
+  getDrawerDetailValue(label: string) {
+    const labelEl = this.assetDetailsDrawer.getByText(label);
+    return labelEl.locator('xpath=following-sibling::*[1]');
+  }
+
+  /**
+   * Close the asset details drawer
+   */
+  async closeAssetDetailsDrawer() {
+    await this.assetDetailsDrawer.getByRole('button', { name: 'Close' }).click();
   }
 }

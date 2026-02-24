@@ -29,6 +29,16 @@ const StyledCard = styled(Card)`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-radius: 8px;
   overflow: hidden;
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary100};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: 2px;
+  }
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -78,8 +88,20 @@ const FolderCard = ({ folder }: FolderCardProps) => {
   const { formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigateToFolder(folder);
+    }
+  };
+
   return (
-    <StyledFolderCard onClick={() => navigateToFolder(folder)} role="button" tabIndex={0}>
+    <StyledFolderCard
+      onClick={() => navigateToFolder(folder)}
+      onKeyDown={handleKeyDown}
+      role="listitem"
+      tabIndex={0}
+    >
       <FolderIconContainer>
         <FolderIcon width={20} height={20} />
       </FolderIconContainer>
@@ -172,11 +194,12 @@ const AssetPreview = ({ asset }: AssetPreviewProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const StyledCardHeader = styled(CardHeader)`
-  border-bottom: none;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
 const CardFooter = styled(Flex)`
   min-width: 0;
+  width: 100%;
 `;
 
 const FileTypeIcon = styled(Flex)`
@@ -191,21 +214,34 @@ const FileName = styled(Typography)`
 
 interface AssetCardProps {
   asset: File;
+  onAssetItemClick: (assetId: number) => void;
 }
 
-const AssetCard = ({ asset }: AssetCardProps) => {
+const AssetCard = ({ asset, onAssetItemClick }: AssetCardProps) => {
   const { formatMessage } = useIntl();
   const TypeIcon = getAssetIcon(asset.mime, asset.ext);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onAssetItemClick(asset.id);
+    }
+  };
+
   return (
-    <StyledCard>
+    <StyledCard
+      tabIndex={0}
+      role="listitem"
+      onClick={() => onAssetItemClick(asset.id)}
+      onKeyDown={handleKeyDown}
+    >
       <StyledCardHeader>
         <AssetPreview asset={asset} />
       </StyledCardHeader>
       <CardBody>
-        <CardFooter alignItems="center" gap={2} paddingTop={2}>
+        <CardFooter alignItems="center" gap={2}>
           <FileTypeIcon>
-            <TypeIcon width={16} height={16} />
+            <TypeIcon width={20} height={20} />
           </FileTypeIcon>
           <FileName textColor="primary800" ellipsis>
             {asset.name}
@@ -232,9 +268,10 @@ const AssetCard = ({ asset }: AssetCardProps) => {
 interface AssetsGridProps {
   assets: File[];
   folders?: Folder[];
+  onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsGrid = ({ assets, folders = [] }: AssetsGridProps) => {
+export const AssetsGrid = ({ assets, folders = [], onAssetItemClick }: AssetsGridProps) => {
   const { formatMessage } = useIntl();
 
   const totalItems = folders.length + assets.length;
@@ -253,7 +290,7 @@ export const AssetsGrid = ({ assets, folders = [] }: AssetsGridProps) => {
   }
 
   return (
-    <Grid.Root gap={4}>
+    <Grid.Root gap={4} role="list">
       {folders.length > 0 && (
         <FoldersRow>
           <Grid.Root gap={4}>
@@ -275,7 +312,7 @@ export const AssetsGrid = ({ assets, folders = [] }: AssetsGridProps) => {
           direction="column"
           alignItems="stretch"
         >
-          <AssetCard asset={asset} />
+          <AssetCard asset={asset} onAssetItemClick={onAssetItemClick} />
         </Grid.Item>
       ))}
     </Grid.Root>
