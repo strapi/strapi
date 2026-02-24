@@ -1,6 +1,16 @@
+import { userEvent } from '@testing-library/user-event';
 import { render, screen } from '@tests/utils';
 
 import { AssetsGrid } from '../components/AssetsGrid';
+
+const mockNavigateToFolder = jest.fn();
+
+jest.mock('../hooks/useFolderNavigation', () => ({
+  useFolderNavigation: () => ({
+    currentFolderId: null,
+    navigateToFolder: mockNavigateToFolder,
+  }),
+}));
 
 jest.mock('@strapi/icons', () => ({
   ...jest.requireActual('@strapi/icons'),
@@ -29,9 +39,24 @@ jest.mock('@strapi/icons', () => ({
       <title>FileZip</title>
     </svg>
   ),
+  Image: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} data-testid="icon-image">
+      <title>Image</title>
+    </svg>
+  ),
   Images: (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} data-testid="icon-images">
       <title>Images</title>
+    </svg>
+  ),
+  Play: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} data-testid="icon-play">
+      <title>Play</title>
+    </svg>
+  ),
+  Headphones: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} data-testid="icon-headphones">
+      <title>Headphones</title>
     </svg>
   ),
   Monitor: (props: React.SVGProps<SVGSVGElement>) => (
@@ -52,6 +77,7 @@ jest.mock('@strapi/icons', () => ({
 }));
 
 import type { File } from '../../../../../../shared/contracts/files';
+import type { Folder } from '../../../../../../shared/contracts/folders';
 
 const createMockAsset = (id: number, name: string, mime = 'image/png', ext = '.png'): File => ({
   id,
@@ -72,13 +98,27 @@ const mockAssets: File[] = [
   createMockAsset(3, 'image3.png'),
 ];
 
+const createMockFolder = (id: number, name: string): Folder => ({
+  id,
+  name,
+  pathId: id,
+  path: `/${id}`,
+  parent: null,
+});
+
 interface SetupProps {
   assets?: File[];
+  folders?: Folder[];
 }
 
-const setup = ({ assets = mockAssets }: SetupProps = {}) => render(<AssetsGrid assets={assets} />);
+const setup = ({ assets = mockAssets, folders }: SetupProps = {}) =>
+  render(<AssetsGrid assets={assets} folders={folders} onAssetItemClick={jest.fn()} />);
 
 describe('AssetsGrid', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('Grid rendering', () => {
     it('renders asset cards in a grid', () => {
       setup();
@@ -87,8 +127,8 @@ describe('AssetsGrid', () => {
       expect(screen.getByText('image3.png')).toBeInTheDocument();
     });
 
-    it('renders empty state when no assets', () => {
-      setup({ assets: [] });
+    it('renders empty state when no assets and no folders', () => {
+      setup({ assets: [], folders: [] });
       expect(screen.getByText('No content found')).toBeInTheDocument();
     });
   });
@@ -148,20 +188,20 @@ describe('AssetsGrid', () => {
     });
 
     describe('Media type icons', () => {
-      it('renders Images icon for image assets', () => {
+      it('renders Image icon for image assets', () => {
         setup({ assets: [createMockAsset(1, 'photo.jpg', 'image/jpeg', '.jpg')] });
-        expect(screen.getByTestId('icon-images')).toBeInTheDocument();
+        expect(screen.getByTestId('icon-image')).toBeInTheDocument();
         expect(screen.getByRole('img')).toBeInTheDocument(); // actual thumbnail
       });
 
-      it('renders Monitor icon for video assets', () => {
+      it('renders Play icon for video assets', () => {
         setup({ assets: [createMockAsset(1, 'video.mp4', 'video/mp4', '.mp4')] });
-        expect(screen.getAllByTestId('icon-monitor')).toHaveLength(2); // preview + footer
+        expect(screen.getAllByTestId('icon-play')).toHaveLength(2); // preview + footer
       });
 
-      it('renders VolumeUp icon for audio assets', () => {
+      it('renders Headphones icon for audio assets', () => {
         setup({ assets: [createMockAsset(1, 'audio.mp3', 'audio/mp3', '.mp3')] });
-        expect(screen.getAllByTestId('icon-volume-up')).toHaveLength(2);
+        expect(screen.getAllByTestId('icon-headphones')).toHaveLength(2);
       });
 
       it('renders FilePdf icon for PDF documents', () => {
@@ -211,6 +251,41 @@ describe('AssetsGrid', () => {
         setup({ assets: [asset] });
         expect(screen.getByText('file')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Folder items', () => {
+    it('renders folder items above asset cards', () => {
+      const folders = [createMockFolder(1, 'Photos'), createMockFolder(2, 'Documents')];
+      setup({ folders, assets: mockAssets });
+
+      expect(screen.getByText('Photos')).toBeInTheDocument();
+      expect(screen.getByText('Documents')).toBeInTheDocument();
+      expect(screen.getByText('image1.png')).toBeInTheDocument();
+    });
+
+    it('calls navigateToFolder when a folder item is clicked', async () => {
+      const user = userEvent.setup();
+      const folders = [createMockFolder(1, 'Photos')];
+      setup({ folders, assets: [] });
+
+      await user.click(screen.getByText('Photos'));
+
+      expect(mockNavigateToFolder).toHaveBeenCalledTimes(1);
+      expect(mockNavigateToFolder).toHaveBeenCalledWith(folders[0]);
+    });
+
+    it('shows empty state when there are no folders and no assets', () => {
+      setup({ folders: [], assets: [] });
+      expect(screen.getByText('No content found')).toBeInTheDocument();
+    });
+
+    it('renders only folder items when there are no assets', () => {
+      const folders = [createMockFolder(1, 'Photos')];
+      setup({ folders, assets: [] });
+
+      expect(screen.getByText('Photos')).toBeInTheDocument();
+      expect(screen.queryByText('No content found')).not.toBeInTheDocument();
     });
   });
 });
