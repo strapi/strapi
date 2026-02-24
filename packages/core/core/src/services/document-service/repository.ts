@@ -154,8 +154,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   };
 
   /**
-   * Parses an integer param; throws when strict and invalid.
-   * Treats empty (null, undefined, '') as absent and returns undefined.
+   * Pagination param parsing (used only when strict).
+   * Contract: empty (null/undefined/'') → undefined (omit from result).
+   *           present but invalid → throw ValidationError.
+   *           present and valid → return normalized value.
    */
   const parsePaginationInt = (
     name: string,
@@ -178,55 +180,50 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     return valid ? num : undefined;
   };
 
+  const parseWithCount = (value: unknown): boolean | undefined => {
+    if (isParamEmpty(value)) return undefined;
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'string' && (value === 'true' || value === 'false'))
+      return value === 'true';
+    throw new errors.ValidationError(
+      `Invalid parameter at 'withCount'. Expected a boolean, received: ${typeof value}`
+    );
+  };
+
+  const PAGINATION_KEYS = ['page', 'pageSize', 'start', 'limit', 'withCount'] as const;
+
   /**
-   * Checks pagination parameters. When strict is true, throws on invalid pagination
-   * and returns params with validated pagination values (e.g. normalized to numbers).
+   * When strict: empty → omit, invalid → throw, valid → include.
+   * When not strict: return params unchanged.
    */
   const checkPagination = (
     params: Record<string, unknown>,
     strict: boolean
   ): Record<string, unknown> => {
-    if (!strict) {
-      return params;
-    }
+    if (!strict) return params;
 
-    const hasPagePagination = !isParamEmpty(params.page) || !isParamEmpty(params.pageSize);
-    const hasOffsetPagination = !isParamEmpty(params.start) || !isParamEmpty(params.limit);
-
-    if (hasPagePagination && hasOffsetPagination) {
+    const hasPage = !isParamEmpty(params.page) || !isParamEmpty(params.pageSize);
+    const hasOffset = !isParamEmpty(params.start) || !isParamEmpty(params.limit);
+    if (hasPage && hasOffset) {
       throw new errors.ValidationError(
         'Invalid pagination parameters. Cannot use both page-based (page, pageSize) and offset-based (start, limit) pagination in the same query.'
       );
     }
 
-    const validPage = parsePaginationInt('page', params.page, strict, { min: 1 });
-    const validPageSize = parsePaginationInt('pageSize', params.pageSize, strict, { min: 1 });
-    const validStart = parsePaginationInt('start', params.start, strict, { min: 0 });
-    const validLimit = parsePaginationInt('limit', params.limit, strict, {
+    const page = parsePaginationInt('page', params.page, strict, { min: 1 });
+    const pageSize = parsePaginationInt('pageSize', params.pageSize, strict, { min: 1 });
+    const start = parsePaginationInt('start', params.start, strict, { min: 0 });
+    const limit = parsePaginationInt('limit', params.limit, strict, {
       min: 1,
       allowMinusOne: true,
     });
+    const withCount = parseWithCount(params.withCount);
 
-    let withCount = params.withCount;
-    if (!isParamEmpty(withCount)) {
-      if (typeof withCount === 'boolean') {
-        // already valid
-      } else if (typeof withCount === 'string' && (withCount === 'true' || withCount === 'false')) {
-        withCount = withCount === 'true';
-      } else {
-        throw new errors.ValidationError(
-          `Invalid parameter at 'withCount'. Expected a boolean, received: ${typeof withCount}`
-        );
-      }
-    } else {
-      withCount = undefined;
-    }
-
-    const result = { ...params };
-    if (validPage !== undefined) result.page = validPage;
-    if (validPageSize !== undefined) result.pageSize = validPageSize;
-    if (validStart !== undefined) result.start = validStart;
-    if (validLimit !== undefined) result.limit = validLimit;
+    const result = { ...omit(PAGINATION_KEYS, params) };
+    if (page !== undefined) result.page = page;
+    if (pageSize !== undefined) result.pageSize = pageSize;
+    if (start !== undefined) result.start = start;
+    if (limit !== undefined) result.limit = limit;
     if (withCount !== undefined) result.withCount = withCount;
     return result;
   };
