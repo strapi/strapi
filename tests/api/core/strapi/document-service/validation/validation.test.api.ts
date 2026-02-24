@@ -667,12 +667,37 @@ describe('Document Service Validations', () => {
         ).rejects.toThrow(errors.ValidationError);
       });
 
-      it('should throw ValidationError for non-boolean withCount', async () => {
+      it('should accept withCount string "true" and "false" when strict (coerced from query params)', async () => {
+        const resultTrue = await strapi.documents(ARTICLE_UID).findMany({
+          page: 1,
+          pageSize: 10,
+          withCount: 'true',
+        } as any);
+        expect(resultTrue).toBeDefined();
+        expect(Array.isArray(resultTrue)).toBe(true);
+
+        const resultFalse = await strapi.documents(ARTICLE_UID).findMany({
+          page: 1,
+          pageSize: 10,
+          withCount: 'false',
+        } as any);
+        expect(resultFalse).toBeDefined();
+        expect(Array.isArray(resultFalse)).toBe(true);
+      });
+
+      it('should throw ValidationError for invalid withCount (e.g. number or non-boolean string)', async () => {
         await expect(
           strapi.documents(ARTICLE_UID).findMany({
             page: 1,
             pageSize: 10,
-            withCount: 'true',
+            withCount: 123,
+          } as any)
+        ).rejects.toThrow(errors.ValidationError);
+        await expect(
+          strapi.documents(ARTICLE_UID).findMany({
+            page: 1,
+            pageSize: 10,
+            withCount: 'yes',
           } as any)
         ).rejects.toThrow(errors.ValidationError);
       });
