@@ -11,12 +11,10 @@ import {
   RELATION_OPERATION_KEYS,
 } from '../../content-types';
 import type { Visitor } from '../../traverse-entity';
-import { throwInvalidKey } from '../utils';
 
-const throwUnrecognizedFields: Visitor = (
+const removeUnrecognizedFields: Visitor = (
   { key, attribute, path, schema, parent, allowedExtraRootKeys },
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Visitor type requires second param
-  _visitorUtils
+  { remove }
 ) => {
   // We only look at properties that are not attributes
   if (attribute) {
@@ -32,7 +30,8 @@ const throwUnrecognizedFields: Visitor = (
       return;
     }
 
-    return throwInvalidKey({ key, path: path.attribute });
+    remove(key);
+    return;
   }
 
   // allow special morphTo keys
@@ -66,8 +65,8 @@ const throwUnrecognizedFields: Visitor = (
     return;
   }
 
-  // if we couldn't find any reason for it to be here, throw
-  throwInvalidKey({ key, path: path.attribute });
+  // if we couldn't find any reason for it to be here, remove it
+  remove(key);
 };
 
-export default throwUnrecognizedFields;
+export default removeUnrecognizedFields;
