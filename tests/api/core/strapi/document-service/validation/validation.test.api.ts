@@ -556,6 +556,20 @@ describe('Document Service Validations', () => {
         ).rejects.toThrow(errors.ValidationError);
       });
 
+      it('should treat null and empty string status as undefined (no status)', async () => {
+        const resultNull = await strapi.documents(ARTICLE_UID).findMany({ status: null } as any);
+        expect(resultNull).toBeDefined();
+        expect(Array.isArray(resultNull)).toBe(true);
+
+        const resultEmpty = await strapi.documents(ARTICLE_UID).findMany({ status: '' } as any);
+        expect(resultEmpty).toBeDefined();
+        expect(Array.isArray(resultEmpty)).toBe(true);
+
+        const resultNoStatus = await strapi.documents(ARTICLE_UID).findMany({});
+        expect(resultNull).toEqual(resultNoStatus);
+        expect(resultEmpty).toEqual(resultNoStatus);
+      });
+
       it('should accept false to explicitly disable validation', async () => {
         strapi.config.set('api.documents.strictParams', false);
         const result = await strapi.documents(ARTICLE_UID).findMany({ status: 'invalid' } as any);
@@ -665,6 +679,47 @@ describe('Document Service Validations', () => {
             limit: 20,
           } as any)
         ).rejects.toThrow(errors.ValidationError);
+      });
+
+      it('should treat null and empty string pagination params as absent', async () => {
+        const resultPageNull = await strapi.documents(ARTICLE_UID).findMany({
+          page: null,
+          pageSize: 10,
+        } as any);
+        expect(resultPageNull).toBeDefined();
+        expect(Array.isArray(resultPageNull)).toBe(true);
+
+        const resultPageEmpty = await strapi.documents(ARTICLE_UID).findMany({
+          page: 1,
+          pageSize: '',
+        } as any);
+        expect(resultPageEmpty).toBeDefined();
+        expect(Array.isArray(resultPageEmpty)).toBe(true);
+
+        const resultStartNull = await strapi.documents(ARTICLE_UID).findMany({
+          start: null,
+          limit: 10,
+        } as any);
+        expect(resultStartNull).toBeDefined();
+        expect(Array.isArray(resultStartNull)).toBe(true);
+      });
+
+      it('should treat null and empty string withCount as absent', async () => {
+        const resultNull = await strapi.documents(ARTICLE_UID).findMany({
+          page: 1,
+          pageSize: 10,
+          withCount: null,
+        } as any);
+        expect(resultNull).toBeDefined();
+        expect(Array.isArray(resultNull)).toBe(true);
+
+        const resultEmpty = await strapi.documents(ARTICLE_UID).findMany({
+          page: 1,
+          pageSize: 10,
+          withCount: '',
+        } as any);
+        expect(resultEmpty).toBeDefined();
+        expect(Array.isArray(resultEmpty)).toBe(true);
       });
 
       it('should accept withCount string "true" and "false" when strict (coerced from query params)', async () => {

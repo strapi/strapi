@@ -39,6 +39,9 @@ const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: s
 const LOCALE_FORMAT = /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$/;
 const MAX_LOCALE_LENGTH = 35;
 
+/** Treat as "param not provided": null, undefined, or empty string (e.g. from query/JSON). */
+const isParamEmpty = (v: unknown): boolean => v === undefined || v === null || v === '';
+
 export const createContentTypeRepository: RepositoryFactoryMethod = (
   uid,
   validator = entityValidator
@@ -69,13 +72,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
-    // Treat empty string as undefined (e.g. from query params or forms)
-    if (params.status === '' || params.status === undefined) {
+    if (isParamEmpty(params.status)) {
       delete params.status;
       return params;
     }
 
-    if (params.status !== undefined && params.status !== 'published' && params.status !== 'draft') {
+    if (params.status !== 'published' && params.status !== 'draft') {
       throw new errors.ValidationError(
         `Invalid parameter at 'status'. Expected 'published' or 'draft', received: ${params.status}`
       );
@@ -97,7 +99,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
-    if (params.locale === null || params.locale === undefined || params.locale === '') {
+    if (isParamEmpty(params.locale)) {
       delete params.locale;
       return params;
     }
@@ -137,7 +139,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     if (Array.isArray(params.locale)) {
       const filtered = (params.locale as unknown[]).filter(
-        (item): item is string => typeof item === 'string' && item !== ''
+        (item): item is string => typeof item === 'string' && !isParamEmpty(item)
       );
       if (filtered.length === 0) {
         delete params.locale;
@@ -153,6 +155,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   /**
    * Parses an integer param; throws when strict and invalid.
+   * Treats empty (null, undefined, '') as absent and returns undefined.
    */
   const parsePaginationInt = (
     name: string,
@@ -160,7 +163,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     strict: boolean,
     spec: { min: number; allowMinusOne?: boolean }
   ): number | undefined => {
-    if (value === undefined) return undefined;
+    if (isParamEmpty(value)) return undefined;
     const num = Number(value);
     const valid =
       Number.isInteger(num) && (num >= spec.min || (spec.allowMinusOne === true && num === -1));
@@ -187,8 +190,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
-    const hasPagePagination = params.page !== undefined || params.pageSize !== undefined;
-    const hasOffsetPagination = params.start !== undefined || params.limit !== undefined;
+    const hasPagePagination = !isParamEmpty(params.page) || !isParamEmpty(params.pageSize);
+    const hasOffsetPagination = !isParamEmpty(params.start) || !isParamEmpty(params.limit);
 
     if (hasPagePagination && hasOffsetPagination) {
       throw new errors.ValidationError(
@@ -205,7 +208,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     });
 
     let withCount = params.withCount;
-    if (withCount !== undefined) {
+    if (!isParamEmpty(withCount)) {
       if (typeof withCount === 'boolean') {
         // already valid
       } else if (typeof withCount === 'string' && (withCount === 'true' || withCount === 'false')) {
@@ -215,6 +218,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           `Invalid parameter at 'withCount'. Expected a boolean, received: ${typeof withCount}`
         );
       }
+    } else {
+      withCount = undefined;
     }
 
     const result = { ...params };
