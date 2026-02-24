@@ -151,7 +151,6 @@ const DrawerBody = React.forwardRef<HTMLDivElement, DrawerBodyProps>(
       forceMount
       onPointerDownOutside={(e) => e.preventDefault()}
       onInteractOutside={(e) => e.preventDefault()}
-      asChild
     >
       <DrawerContainer
         $animationDirection={animationDirection}

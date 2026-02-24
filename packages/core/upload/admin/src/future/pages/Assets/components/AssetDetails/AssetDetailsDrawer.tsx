@@ -397,20 +397,24 @@ export const AssetDetailsDrawer = () => {
 
   return (
     <Drawer.Root isVisible={isVisible} onClose={closeDetails}>
-      <VisuallyHidden>
-        <Drawer.Title>
-          {formatMessage({
-            id: getTranslationKey('asset-details.title'),
-            defaultMessage: 'File details',
-          })}
-        </Drawer.Title>
-        <Drawer.Description>
-          {formatMessage({
-            id: getTranslationKey('asset-details.description'),
-            defaultMessage: 'Displays file information and metadata',
-          })}
-        </Drawer.Description>
-      </VisuallyHidden>
+      {/* Wrapper div required: Dialog.Portal uses asChild and merges ref onto each child.
+          VisuallyHidden does not forward refs, so we wrap it in a div that can receive the ref. */}
+      <div>
+        <VisuallyHidden>
+          <Drawer.Title>
+            {formatMessage({
+              id: getTranslationKey('asset-details.title'),
+              defaultMessage: 'File details',
+            })}
+          </Drawer.Title>
+          <Drawer.Description>
+            {formatMessage({
+              id: getTranslationKey('asset-details.description'),
+              defaultMessage: 'Displays file information and metadata',
+            })}
+          </Drawer.Description>
+        </VisuallyHidden>
+      </div>
       <Drawer.Body animationDirection="left" width="41.6rem" height="100vh">
         <DrawerContent assetId={assetId} closeDetails={closeDetails} />
       </Drawer.Body>

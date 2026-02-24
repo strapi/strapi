@@ -61,7 +61,7 @@
   },
   "dependencies": {
     "@mux/mux-player-react": "3.1.0",
-    "@radix-ui/react-dialog": "1.1.15",
+    "@radix-ui/react-dialog": "1.0.5",
     "@radix-ui/react-toggle-group": "1.1.11",
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/database": "5.36.1",
