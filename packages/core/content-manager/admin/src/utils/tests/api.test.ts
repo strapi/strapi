@@ -89,6 +89,51 @@ describe('api', () => {
       });
     });
 
+    it('should preserve all other top-level params when extracting status', () => {
+      const queryParams = {
+        filters: { $and: [{ __status: { $eq: 'published' } }] },
+        sort: 'name:ASC',
+        page: '1',
+      };
+      const params = extractStatusFilter(queryParams);
+
+      expect(params).toEqual({
+        status: 'published',
+        filters: undefined,
+        sort: 'name:ASC',
+        page: '1',
+      });
+    });
+
+    it('should preserve non-$and filter properties when remaining $and filters exist', () => {
+      const queryParams = {
+        filters: {
+          $and: [{ name: { $eq: 'test' } }, { __status: { $eq: 'draft' } }],
+          $or: [{ age: { $gt: 18 } }],
+        },
+      };
+      const params = extractStatusFilter(queryParams);
+
+      expect(params).toEqual({
+        filters: { $or: [{ age: { $gt: 18 } }], $and: [{ name: { $eq: 'test' } }] },
+        hasPublishedVersion: 'false',
+      });
+    });
+
+    it('should not extract malformed __status entries', () => {
+      const queryParams = {
+        filters: {
+          $and: [{ __status: {} }, { __status: null }, { __status: { $eq: 'published' } }],
+        },
+      };
+      const params = extractStatusFilter(queryParams);
+
+      expect(params).toEqual({
+        filters: { $and: [{ __status: {} }, { __status: null }] },
+        status: 'published',
+      });
+    });
+
     it('should handle multiple status filters', () => {
       const queryParams = {
         filters: {
