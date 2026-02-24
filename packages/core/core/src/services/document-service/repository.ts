@@ -69,6 +69,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
+    // Treat empty string as undefined (e.g. from query params or forms)
+    if (params.status === '' || params.status === undefined) {
+      delete params.status;
+      return params;
+    }
+
     if (params.status !== undefined && params.status !== 'published' && params.status !== 'draft') {
       throw new errors.ValidationError(
         `Invalid parameter at 'status'. Expected 'published' or 'draft', received: ${params.status}`
@@ -80,8 +86,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
   /**
    * Checks locale parameter. When strict is true, throws on invalid locale value.
-   * Accepts string (single locale or '*') or array of locale strings (e.g. bulk publish).
-   * Valid locale is allowed for both localized and non-localized types (non-localized will ignore it downstream).
+   * Accepts string (single locale or '*'), array of locale strings (e.g. bulk publish),
+   * or object with `code` (i18n shape: { code: 'en', name?: string } from URL plugins[i18n][locale]).
+   * Validates format then normalizes to string(s) so the rest of the pipeline is unchanged.
    */
   const checkLocale = (
     params: Record<string, unknown>,
@@ -101,25 +108,42 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
-    if (Array.isArray(params.locale)) {
-      const filtered = (params.locale as unknown[]).filter((item) => item !== '');
-      if (filtered.length === 0) {
-        delete params.locale;
-        return params;
-      }
-      params.locale = filtered;
+    // Treat empty object as undefined (e.g. from query params when locale is {})
+    if (
+      params.locale !== null &&
+      typeof params.locale === 'object' &&
+      !Array.isArray(params.locale) &&
+      typeof (params.locale as Record<string, unknown>).code !== 'string'
+    ) {
+      delete params.locale;
+      return params;
     }
 
-    const validateOneLocale = (value: unknown, path: string): void => {
-      if (typeof value !== 'string') {
+    /**
+     * Extract locale string from value. The release details page sends params from the URL
+     * (useQueryParams → qs.parse). When the URL has plugins[i18n][locale][code]=en the server
+     * receives locale as object; i18n uses { code: string, name?: string }.
+     */
+    const extractLocaleString = (value: unknown): string | null => {
+      if (typeof value === 'string') return value;
+      if (value === null || typeof value !== 'object' || Array.isArray(value)) return null;
+      const obj = value as Record<string, unknown>;
+      if (typeof obj.code === 'string') return obj.code;
+      return null;
+    };
+
+    const validateAndNormalizeOne = (value: unknown, path: string): string => {
+      const code = extractLocaleString(value);
+      if (code === null) {
         throw new errors.ValidationError(
-          `Invalid parameter at '${path}'. Expected a string, received: ${typeof value}`
+          `Invalid parameter at '${path}'. Expected a string or object with 'code' (e.g. { code: 'en' } from i18n), received: ${typeof value}`,
+          { received: value }
         );
       }
-      if (value === '*') return;
-      const isEmpty = value.length === 0;
-      const tooLong = value.length > MAX_LOCALE_LENGTH;
-      const invalidFormat = !LOCALE_FORMAT.test(value);
+      if (code === '*') return code;
+      const isEmpty = code.length === 0;
+      const tooLong = code.length > MAX_LOCALE_LENGTH;
+      const invalidFormat = !LOCALE_FORMAT.test(code);
       if (isEmpty || tooLong || invalidFormat) {
         let reason: string;
         if (isEmpty) {
@@ -131,14 +155,28 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         }
         throw new errors.ValidationError(`Invalid parameter at '${path}'. ${reason}.`);
       }
+      return code;
     };
 
     if (Array.isArray(params.locale)) {
-      params.locale.forEach((item, i) => validateOneLocale(item, `locale[${i}]`));
+      const hasValidCode = (item: unknown) =>
+        item !== '' &&
+        !(
+          item !== null &&
+          typeof item === 'object' &&
+          !Array.isArray(item) &&
+          typeof (item as Record<string, unknown>).code !== 'string'
+        );
+      const filtered = (params.locale as unknown[]).filter(hasValidCode);
+      if (filtered.length === 0) {
+        delete params.locale;
+        return params;
+      }
+      params.locale = filtered.map((item, i) => validateAndNormalizeOne(item, `locale[${i}]`));
       return params;
     }
 
-    validateOneLocale(params.locale, 'locale');
+    params.locale = validateAndNormalizeOne(params.locale, 'locale');
     return params;
   };
 
