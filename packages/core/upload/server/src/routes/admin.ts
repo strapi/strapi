@@ -42,6 +42,14 @@ export const routes = {
       },
     },
     {
+      method: 'POST',
+      path: '/unstable/stream',
+      handler: 'admin-upload.unstable_uploadFilesStream',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
+    {
       method: 'GET',
       path: '/files',
       handler: 'admin-file.find',

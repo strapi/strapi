@@ -1,6 +1,6 @@
 import { entries, mapValues, omit } from 'lodash/fp';
 import { idArg, nonNull } from 'nexus';
-import { pagination } from '@strapi/utils';
+import { contentTypes, pagination } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 
 const { withDefaultPagination } = pagination;
@@ -36,13 +36,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const { kind } = contentType;
 
+      const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
+
       // Collection Types
       if (kind === 'collectionType') {
         if (!multiple) {
-          return {
+          const params: Record<string, unknown> = {
             documentId: nonNull(idArg()),
-            status: args.PublicationStatusArg,
           };
+
+          if (hasDraftAndPublish) {
+            Object.assign(params, {
+              status: args.PublicationStatusArg,
+              hasPublishedVersion: args.HasPublishedVersionArg,
+            });
+          }
+
+          return params;
         }
 
         const params = {
@@ -51,8 +61,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           sort: args.SortArg,
         };
 
-        if (!isNested) {
-          Object.assign(params, { status: args.PublicationStatusArg });
+        if (!isNested && hasDraftAndPublish) {
+          Object.assign(params, {
+            status: args.PublicationStatusArg,
+            hasPublishedVersion: args.HasPublishedVersionArg,
+          });
         }
 
         return params;
@@ -62,8 +75,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (kind === 'singleType') {
         const params = {};
 
-        if (!isNested) {
-          Object.assign(params, { status: args.PublicationStatusArg });
+        if (!isNested && hasDraftAndPublish) {
+          Object.assign(params, {
+            status: args.PublicationStatusArg,
+            hasPublishedVersion: args.HasPublishedVersionArg,
+          });
         }
 
         return params;

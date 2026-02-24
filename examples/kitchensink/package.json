@@ -24,7 +24,7 @@
     "pg": "8.11.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router-dom": "6.22.3",
+    "react-router-dom": "6.30.3",
     "styled-components": "6.1.8"
   },
   "engines": {
