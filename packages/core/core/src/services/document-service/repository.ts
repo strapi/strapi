@@ -95,6 +95,21 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
+    // Treat empty string as undefined (e.g. from query params or forms when locale is cleared)
+    if (params.locale === '') {
+      delete params.locale;
+      return params;
+    }
+
+    if (Array.isArray(params.locale)) {
+      const filtered = (params.locale as unknown[]).filter((item) => item !== '');
+      if (filtered.length === 0) {
+        delete params.locale;
+        return params;
+      }
+      params.locale = filtered;
+    }
+
     const validateOneLocale = (value: unknown, path: string): void => {
       if (typeof value !== 'string') {
         throw new errors.ValidationError(

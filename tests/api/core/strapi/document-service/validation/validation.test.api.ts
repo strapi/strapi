@@ -590,13 +590,13 @@ describe('Document Service Validations', () => {
         expect(Array.isArray(resultEnUppercase)).toBe(true);
       });
 
-      it('should throw ValidationError for empty locale', async () => {
-        await expect(strapi.documents(ARTICLE_UID).findMany({ locale: '' })).rejects.toThrow(
-          errors.ValidationError
-        );
-        await expect(strapi.documents(ARTICLE_UID).findMany({ locale: '' })).rejects.toThrow(
-          /Locale cannot be empty/
-        );
+      it('should treat empty locale as undefined', async () => {
+        const result = await strapi.documents(ARTICLE_UID).findMany({ locale: '' });
+        expect(result).toBeDefined();
+        expect(Array.isArray(result)).toBe(true);
+        // Empty locale is normalized to undefined, so result should match findMany without locale
+        const resultNoLocale = await strapi.documents(ARTICLE_UID).findMany({});
+        expect(result).toEqual(resultNoLocale);
       });
 
       it('should throw ValidationError for invalid locale format (underscore)', async () => {
