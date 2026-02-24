@@ -31,7 +31,6 @@ import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
@@ -58,12 +57,7 @@ import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
-import {
-  RelationModalRenderer,
-  getCollectionType,
-  generateCreateUrl,
-  getAdminBasePath,
-} from '../Relations/RelationModal';
+import { RelationModalRenderer, getCollectionType } from '../Relations/RelationModal';
 
 import type { FindAvailable } from '../../../../../../../shared/contracts/relations';
 import type { Schema } from '@strapi/types';
@@ -700,14 +694,12 @@ const RelationModalWithContext = ({
     setTextValue('');
   }, [fieldValue]);
 
-  const navigate = useNavigate();
-
   const handleSearch = async (search: string) => {
     setSearchParams((s) => ({ ...s, _q: search, page: 1 }));
   };
   return (
     <RelationModalRenderer>
-      {({ dispatch, relationOpenMode }) => (
+      {({ dispatch }) => (
         <Combobox
           ref={fieldRef}
           creatable="visible"
@@ -720,28 +712,15 @@ const RelationModalWithContext = ({
           }
           onCreateOption={() => {
             if (canCreate) {
-              const createUrl = generateCreateUrl(relation);
-
-              switch (relationOpenMode) {
-                case 'page':
-                  navigate(createUrl);
-                  break;
-                case 'newTab':
-                  window.open(`${getAdminBasePath()}${createUrl}`, '_blank');
-                  break;
-                case 'modal':
-                default:
-                  dispatch({
-                    type: 'GO_TO_RELATION',
-                    payload: {
-                      document: relation,
-                      shouldBypassConfirmation: false,
-                      fieldToConnect: name,
-                      fieldToConnectUID: componentUID,
-                    },
-                  });
-                  break;
-              }
+              dispatch({
+                type: 'GO_TO_RELATION',
+                payload: {
+                  document: relation,
+                  shouldBypassConfirmation: false,
+                  fieldToConnect: name,
+                  fieldToConnectUID: componentUID,
+                },
+              });
             }
           }}
           creatableStartIcon={<Plus fill="neutral500" />}

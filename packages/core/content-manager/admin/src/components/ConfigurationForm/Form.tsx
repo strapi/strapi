@@ -79,7 +79,10 @@ const ConfigurationForm = ({
 
     return {
       layout: transformations(layout),
-      settings,
+      settings: {
+        ...settings,
+        relationOpenMode: settings.relationOpenMode ?? 'modal',
+      },
     };
   }, [layout, settings]);
 
@@ -107,7 +110,7 @@ const ConfigurationForm = ({
                   defaultMessage: 'Settings',
                 })}
               </Typography>
-              <Grid.Root gap={5}>
+              <Grid.Root gap={4}>
                 <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                   <InputRenderer
                     type="enumeration"
@@ -190,33 +193,22 @@ const ConfigurationForm = ({
                     ]}
                   />
                 </Grid.Item>
-                <Grid.Item
-                  paddingTop={6}
-                  paddingBottom={6}
-                  col={12}
-                  s={12}
-                  direction="column"
-                  alignItems="stretch"
-                >
-                  <Divider />
-                </Grid.Item>
-                <Grid.Item col={12} s={12} direction="column" alignItems="stretch">
-                  <Typography variant="delta" tag="h3">
-                    {formatMessage({
-                      id: getTranslation('containers.SettingPage.view'),
-                      defaultMessage: 'View',
-                    })}
-                  </Typography>
-                </Grid.Item>
-                <Grid.Item col={12} s={12} direction="column" alignItems="stretch">
-                  <Fields
-                    attributes={attributes}
-                    components={components}
-                    fieldSizes={fieldSizes}
-                    metadatas={metadatas}
-                  />
-                </Grid.Item>
               </Grid.Root>
+              <Divider />
+              <Flex direction="column" alignItems="stretch" gap={2}>
+                <Typography variant="delta" tag="h3">
+                  {formatMessage({
+                    id: getTranslation('containers.SettingPage.view'),
+                    defaultMessage: 'View',
+                  })}
+                </Typography>
+                <Fields
+                  attributes={attributes}
+                  components={components}
+                  fieldSizes={fieldSizes}
+                  metadatas={metadatas}
+                />
+              </Flex>
             </Flex>
           </Layouts.Content>
         </Form>

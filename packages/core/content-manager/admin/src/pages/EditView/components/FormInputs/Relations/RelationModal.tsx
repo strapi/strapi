@@ -23,7 +23,7 @@ import {
 } from '@strapi/design-system';
 import { ArrowLeft, ArrowsOut, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
@@ -40,6 +40,7 @@ import { DocumentStatus } from '../../DocumentStatus';
 import { FormLayout } from '../../FormLayout';
 import { ComponentProvider } from '../ComponentContext';
 
+import type { RelationOpenMode } from '../../../../../../../shared/contracts/content-types';
 import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
 
 export function getCollectionType(url: string) {
@@ -207,8 +208,6 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-type RelationOpenMode = 'modal' | 'page' | 'newTab';
-
 interface RelationModalContextValue {
   state: State;
   dispatch: React.Dispatch<Action>;
@@ -307,10 +306,7 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
 const NestedRelationRenderer = (props: RelationModalRendererProps) => {
   const { children } = props;
   const dispatch = useRelationModal('NestedRelation', (state) => state.dispatch);
-  const relationOpenMode = useRelationModal(
-    'NestedRelation',
-    (state) => state.relationOpenMode
-  );
+  const relationOpenMode = useRelationModal('NestedRelation', (state) => state.relationOpenMode);
 
   return isRenderProp(children)
     ? children({ dispatch, relationOpenMode })
@@ -553,17 +549,6 @@ const RelationModalBody = () => {
   );
 };
 
-/**
- * Get the admin base path (e.g. "/admin") to construct full URLs for window.open().
- * React Router's navigate() only needs the relative SPA path, but window.open()
- * needs the full path including the admin prefix.
- *
- * Mirrors the logic from @strapi/admin's internal getBasename() utility.
- */
-const getAdminBasePath = () => {
-  return (process.env.ADMIN_PATH ?? '').replace(window.location.origin, '');
-};
-
 const RelationModalTrigger = ({
   children,
   relation,
@@ -572,33 +557,34 @@ const RelationModalTrigger = ({
   relation: DocumentMeta;
 }) => {
   const dispatch = useRelationModal('ModalTrigger', (state) => state.dispatch);
-  const relationOpenMode = useRelationModal(
-    'ModalTrigger',
-    (state) => state.relationOpenMode
-  );
-  const navigate = useNavigate();
+  const relationOpenMode = useRelationModal('ModalTrigger', (state) => state.relationOpenMode);
 
-  const handleClick = () => {
-    const fullPageUrl = getFullPageUrl(relation);
+  const fullPageUrl = getFullPageUrl(relation);
 
-    switch (relationOpenMode) {
-      case 'page':
-        navigate(fullPageUrl);
-        break;
-      case 'newTab':
-        window.open(`${getAdminBasePath()}${fullPageUrl}`, '_blank');
-        break;
-      case 'modal':
-      default:
+  if (relationOpenMode === 'newTab') {
+    return (
+      <StyledRelationLink to={fullPageUrl} target="_blank" rel="noopener noreferrer">
+        {children}
+      </StyledRelationLink>
+    );
+  }
+
+  if (relationOpenMode === 'page') {
+    return <StyledRelationLink to={fullPageUrl}>{children}</StyledRelationLink>;
+  }
+
+  return (
+    <StyledTextButton
+      onClick={() =>
         dispatch({
           type: 'GO_TO_RELATION',
           payload: { document: relation, shouldBypassConfirmation: false },
-        });
-        break;
-    }
-  };
-
-  return <StyledTextButton onClick={handleClick}>{children}</StyledTextButton>;
+        })
+      }
+    >
+      {children}
+    </StyledTextButton>
+  );
 };
 
 const StyledTextButton = styled(TextButton)`
@@ -609,6 +595,23 @@ const StyledTextButton = styled(TextButton)`
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+`;
+
+const StyledRelationLink = styled(RouterLink)`
+  max-width: 100%;
+  font-size: ${({ theme }) => theme.fontSizes[2]};
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+  color: ${({ theme }) => theme.colors.primary600};
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: ${({ theme }) => theme.colors.primary700};
+    text-decoration: underline;
   }
 `;
 
@@ -762,12 +765,5 @@ const RelationModalForm = () => {
   );
 };
 
-export {
-  reducer,
-  RelationModalRenderer,
-  useRelationModal,
-  getFullPageUrl,
-  generateCreateUrl,
-  getAdminBasePath,
-};
+export { reducer, RelationModalRenderer, useRelationModal, getFullPageUrl, generateCreateUrl };
 export type { State, Action, RelationOpenMode };
