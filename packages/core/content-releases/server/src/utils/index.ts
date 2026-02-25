@@ -1,3 +1,5 @@
+import { contentTypes as contentTypesUtils } from '@strapi/utils';
+
 import type { UID, Data, Core } from '@strapi/types';
 
 import type { SettingsService } from '../services/settings';
@@ -123,4 +125,74 @@ export const getEntryStatus = async (contentType: UID.ContentType, entry: Data.C
   }
 
   return 'published';
+};
+
+/**
+ * Returns content type UIDs sorted by relation dependency order for publishing.
+ * When content type A has a relation to content type B (both with draft & publish),
+ * B will appear before A in the result. This ensures that when publishing a release,
+ * related entities are published first, so that relation IDs can be correctly
+ * resolved (published target must exist when publishing source).
+ *
+ * @param contentTypeUids - Content type UIDs that will be published in the release
+ * @param strapi - Strapi instance
+ * @returns Content type UIDs in publish order (dependencies first)
+ */
+export const getPublishOrderForContentTypes = (
+  contentTypeUids: UID.ContentType[],
+  { strapi }: { strapi: Core.Strapi }
+): UID.ContentType[] => {
+  const uidSet = new Set(contentTypeUids);
+
+  // Build dependency graph: source depends on target (source must be published after target)
+  const dependencies = new Map<UID.ContentType, Set<UID.ContentType>>();
+
+  for (const uid of contentTypeUids) {
+    const model = strapi.getModel(uid);
+    if (model && contentTypesUtils.hasDraftAndPublish(model)) {
+      for (const attribute of Object.values(model.attributes) as Array<{
+        type?: string;
+        target?: string;
+      }>) {
+        const isRelation = attribute?.type === 'relation' && attribute.target;
+        const targetUid = attribute?.target as UID.ContentType;
+        const isTargetInRelease =
+          targetUid && uidSet.has(targetUid) && strapi.contentTypes[targetUid];
+        const targetModel = targetUid ? strapi.getModel(targetUid) : null;
+        const targetHasDraftAndPublish =
+          targetModel && contentTypesUtils.hasDraftAndPublish(targetModel);
+
+        if (isRelation && isTargetInRelease && targetHasDraftAndPublish) {
+          if (!dependencies.has(uid)) {
+            dependencies.set(uid, new Set());
+          }
+          dependencies.get(uid)!.add(targetUid);
+        }
+      }
+    }
+  }
+
+  // Topological sort: dependencies first
+  const sorted: UID.ContentType[] = [];
+  const visited = new Set<UID.ContentType>();
+  const visiting = new Set<UID.ContentType>();
+
+  const visit = (uid: UID.ContentType) => {
+    if (visited.has(uid)) return;
+    if (visiting.has(uid)) return; // No cycle in valid schemas
+
+    visiting.add(uid);
+    for (const dep of dependencies.get(uid) ?? []) {
+      visit(dep);
+    }
+    visiting.delete(uid);
+    visited.add(uid);
+    sorted.push(uid);
+  };
+
+  for (const uid of contentTypeUids) {
+    visit(uid);
+  }
+
+  return sorted;
 };
