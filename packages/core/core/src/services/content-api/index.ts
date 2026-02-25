@@ -24,56 +24,6 @@ const transformRoutePrefixFor = (pluginName: string) => (route: Core.Route) => {
 
 const filterContentAPI = (route: Core.Route) => route.info.type === 'content-api';
 
-function isRoute(obj: unknown): obj is Core.Route {
-  return (
-    typeof obj === 'object' && obj !== null && 'path' in obj && 'method' in obj && 'info' in obj
-  );
-}
-
-/** Collect all content-api route objects that currently exist on strapi.apis and strapi.plugins. */
-const getCurrentContentAPIRoutes = (strapi: Core.Strapi): Core.Route[] => {
-  const routes: Core.Route[] = [];
-  _.forEach(strapi.apis, (api) => {
-    const routerList = Object.values(api.routes ?? {});
-    for (const router of routerList) {
-      if (
-        router &&
-        typeof router === 'object' &&
-        'routes' in router &&
-        Array.isArray(router.routes)
-      ) {
-        router.routes
-          .filter(isRoute)
-          .filter(filterContentAPI)
-          .forEach((r) => routes.push(r));
-      }
-    }
-  });
-  _.forEach(strapi.plugins, (plugin) => {
-    if (Array.isArray(plugin.routes)) {
-      plugin.routes
-        .filter(isRoute)
-        .filter(filterContentAPI)
-        .forEach((r) => routes.push(r));
-    } else if (plugin.routes && typeof plugin.routes === 'object') {
-      for (const router of Object.values(plugin.routes)) {
-        if (
-          router &&
-          typeof router === 'object' &&
-          'routes' in router &&
-          Array.isArray(router.routes)
-        ) {
-          router.routes
-            .filter(isRoute)
-            .filter(filterContentAPI)
-            .forEach((r) => routes.push(r));
-        }
-      }
-    }
-  });
-  return routes;
-};
-
 /**
  * Runtime check for addQueryParams: we only allow scalar or array-of-scalar schemas (no nested objects).
  * We keep this in addition to the ZodQueryParamSchema type because: (1) TypeScript can be bypassed (JS,
@@ -125,7 +75,6 @@ const mergeOneQueryParamIntoRoute = (
   schema: z.ZodType,
   matchRoute?: (route: Core.Route) => boolean
 ): void => {
-  if (route.info?.type !== 'content-api') return;
   if (matchRoute && !matchRoute(route)) return;
   const query = { ...(route.request?.query ?? {}) };
   if (param in query) {
@@ -142,7 +91,6 @@ const mergeOneBodyParamIntoRoute = (
   schema: z.ZodType,
   matchRoute?: (route: Core.Route) => boolean
 ): void => {
-  if (route.info?.type !== 'content-api') return;
   if (matchRoute && !matchRoute(route)) return;
   const jsonKey = 'application/json';
   type RouteBody = NonNullable<NonNullable<Core.Route['request']>['body']>;
@@ -193,8 +141,10 @@ const createContentAPI = (strapi: Core.Strapi) => {
       throw new Error(`contentAPI.addQueryParams: param "${param}" has already been added`);
     }
     extraQueryParams.push({ param, schema, matchRoute });
-    const routes = getCurrentContentAPIRoutes(strapi);
-    routes.forEach((route) => mergeOneQueryParamIntoRoute(route, param, schema, matchRoute));
+    // Params are merged into routes when initRouting() runs (applyExtraParamsToRoutes).
+    // We do not merge here: at register() time routes may not exist yet (lazy creation), and
+    // merging here would cause double-merge when initRouting runs and 400 "invalid param" or
+    // "param already exists" errors.
   };
 
   const addBodyParam = (options: Modules.ContentAPI.BodyParamEntry & { param: string }) => {
@@ -209,8 +159,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
       throw new Error(`contentAPI.addBodyParams: param "${param}" has already been added`);
     }
     extraBodyParams.push({ param, schema, matchRoute });
-    const routes = getCurrentContentAPIRoutes(strapi);
-    routes.forEach((route) => mergeOneBodyParamIntoRoute(route, param, schema, matchRoute));
+    // Params are merged into routes when initRouting() runs (applyExtraParamsToRoutes).
   };
 
   /**

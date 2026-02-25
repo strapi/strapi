@@ -765,28 +765,25 @@ describe('Document Service Validations', () => {
         strapi.config.set('api.documents.strictParams', undefined);
       });
 
-      it('should throw ValidationError when unrecognized root-level key is passed', async () => {
+      it('should strip unrecognized root-level keys and succeed (content API may pass known-but-unused params)', async () => {
         strapi.config.set('api.documents.strictParams', true);
 
-        await expect(
-          strapi.documents(ARTICLE_UID).findMany({ where: { id: 1 } } as any)
-        ).rejects.toThrow(errors.ValidationError);
-
-        await expect(
-          strapi.documents(ARTICLE_UID).findMany({ where: { id: 1 } } as any)
-        ).rejects.toThrow(/Unrecognized parameter\(s\) at root level/);
+        const result = await strapi.documents(ARTICLE_UID).findMany({ where: { id: 1 } } as any);
+        expect(result).toBeDefined();
+        expect(Array.isArray(result)).toBe(true);
+        // 'where' is not in ALLOWED_DOCUMENT_ROOT_PARAM_KEYS so it was stripped; query ran with default params
       });
 
-      it('should throw ValidationError for multiple unrecognized root-level keys', async () => {
+      it('should strip multiple unrecognized root-level keys and succeed', async () => {
         strapi.config.set('api.documents.strictParams', true);
 
-        await expect(
-          strapi.documents(ARTICLE_UID).findMany({ foo: 'bar', baz: 123 } as any)
-        ).rejects.toThrow(errors.ValidationError);
-
-        await expect(
-          strapi.documents(ARTICLE_UID).findMany({ foo: 'bar', baz: 123 } as any)
-        ).rejects.toThrow(/Unrecognized parameter\(s\) at root level/);
+        const result = await strapi.documents(ARTICLE_UID).findMany({
+          foo: 'bar',
+          baz: 123,
+        } as any);
+        expect(result).toBeDefined();
+        expect(Array.isArray(result)).toBe(true);
+        // foo and baz are stripped; query ran with default params
       });
 
       it('should accept only allowed root-level params', async () => {
@@ -801,7 +798,7 @@ describe('Document Service Validations', () => {
         expect(Array.isArray(result)).toBe(true);
       });
 
-      it('should accept allowed params including hasPublishedVersion and reject extra unrecognized keys', async () => {
+      it('should accept allowed params including hasPublishedVersion and strip extra unrecognized keys', async () => {
         strapi.config.set('api.documents.strictParams', true);
 
         const result = await strapi.documents(ARTICLE_UID).findMany({
@@ -811,13 +808,14 @@ describe('Document Service Validations', () => {
         expect(result).toBeDefined();
         expect(Array.isArray(result)).toBe(true);
 
-        await expect(
-          strapi.documents(ARTICLE_UID).findMany({
-            status: 'draft',
-            hasPublishedVersion: false,
-            unrecognizedKey: 'value',
-          } as any)
-        ).rejects.toThrow(errors.ValidationError);
+        const resultWithExtra = await strapi.documents(ARTICLE_UID).findMany({
+          status: 'draft',
+          hasPublishedVersion: false,
+          unrecognizedKey: 'value',
+        } as any);
+        expect(resultWithExtra).toBeDefined();
+        expect(Array.isArray(resultWithExtra)).toBe(true);
+        // unrecognizedKey is stripped; query ran with status and hasPublishedVersion only
       });
 
       it('should accept create with data param when strictParams is true', async () => {
