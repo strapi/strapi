@@ -78,10 +78,7 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
         router.prefix = router.prefix ?? `/${pluginName}`;
         router.routes.forEach((route) => {
           generateRouteScope(route);
-          route.info = {
-            pluginName,
-            ...(router.type === 'content-api' ? { type: 'content-api' as const } : {}),
-          };
+          route.info = { pluginName };
         });
         strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
 
