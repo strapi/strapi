@@ -7,11 +7,25 @@ const { createAuthRequest } = require('api-tests/request');
 let strapi;
 let rq;
 
+const nestedComponent = {
+  displayName: 'nestedcomponent',
+  attributes: {
+    value: {
+      type: 'string',
+    },
+  },
+};
+
 const component = {
   displayName: 'somecomponent',
   attributes: {
     name: {
       type: 'string',
+    },
+    nested: {
+      type: 'component',
+      component: 'default.nestedcomponent',
+      repeatable: false,
     },
   },
 };
@@ -34,7 +48,7 @@ describe('Non repeatable and required component', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
-    await builder.addComponent(component).addContentType(ct).build();
+    await builder.addComponent(nestedComponent).addComponent(component).addContentType(ct).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -386,6 +400,125 @@ describe('Non repeatable and required component', () => {
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body.data).toMatchObject(expectedResult);
+    });
+
+    test('Updates nested component if nested component id is sent', async () => {
+      const res = await rq.post('/', {
+        body: {
+          field: {
+            name: 'parentName',
+            nested: {
+              value: 'initialNestedValue',
+            },
+          },
+        },
+        qs: {
+          populate: ['field.nested'],
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      const initialNestedId = res.body.data.field.nested.id;
+      const initialParentId = res.body.data.field.id;
+
+      const updateRes = await rq.put(`/${res.body.data.documentId}`, {
+        body: {
+          field: {
+            id: res.body.data.field.id,
+            name: 'updatedParentName',
+            nested: {
+              id: initialNestedId, // nested component ID - should update, not replace
+              value: 'updatedNestedValue',
+            },
+          },
+        },
+        qs: {
+          populate: ['field.nested'],
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body.data).toMatchObject({
+        documentId: res.body.data.documentId,
+        field: {
+          id: initialParentId,
+          name: 'updatedParentName',
+          nested: {
+            id: initialNestedId, // Same ID - component was updated, not replaced
+            value: 'updatedNestedValue',
+          },
+        },
+      });
+
+      const getRes = await rq.get(`/${res.body.data.documentId}`, {
+        qs: {
+          populate: ['field.nested'],
+        },
+      });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body.data).toMatchObject({
+        documentId: res.body.data.documentId,
+        field: {
+          id: initialParentId,
+          name: 'updatedParentName',
+          nested: {
+            id: initialNestedId, // Same ID confirms update, not replacement
+            value: 'updatedNestedValue',
+          },
+        },
+      });
+    });
+
+    test('Replaces nested component if nested component id is not sent', async () => {
+      const res = await rq.post('/', {
+        body: {
+          field: {
+            name: 'parentName2',
+            nested: {
+              value: 'initialNestedValue2',
+            },
+          },
+        },
+        qs: {
+          populate: ['field.nested'],
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      const initialNestedId = res.body.data.field.nested.id;
+      const initialParentId = res.body.data.field.id;
+
+      const updateRes = await rq.put(`/${res.body.data.documentId}`, {
+        body: {
+          field: {
+            id: res.body.data.field.id,
+            name: 'updatedParentName2',
+            nested: {
+              // No ID provided - should create new nested component
+              value: 'newNestedValue',
+            },
+          },
+        },
+        qs: {
+          populate: ['field.nested'],
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body.data).toMatchObject({
+        documentId: res.body.data.documentId,
+        field: {
+          id: initialParentId,
+          name: 'updatedParentName2',
+          nested: {
+            id: expect.anything(), // Different ID - component was replaced
+            value: 'newNestedValue',
+          },
+        },
+      });
+      // Verify the nested component ID is different (component was replaced, not updated)
+      expect(updateRes.body.data.field.nested.id).not.toBe(initialNestedId);
     });
   });
 

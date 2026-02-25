@@ -39,9 +39,24 @@ jest.mock('@strapi/icons', () => ({
       <title>FileZip</title>
     </svg>
   ),
+  Image: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} data-testid="icon-image">
+      <title>Image</title>
+    </svg>
+  ),
   Images: (props: React.SVGProps<SVGSVGElement>) => (
     <svg {...props} data-testid="icon-images">
       <title>Images</title>
+    </svg>
+  ),
+  Play: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} data-testid="icon-play">
+      <title>Play</title>
+    </svg>
+  ),
+  Headphones: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg {...props} data-testid="icon-headphones">
+      <title>Headphones</title>
     </svg>
   ),
   Monitor: (props: React.SVGProps<SVGSVGElement>) => (
@@ -97,7 +112,7 @@ interface SetupProps {
 }
 
 const setup = ({ assets = mockAssets, folders }: SetupProps = {}) =>
-  render(<AssetsGrid assets={assets} folders={folders} />);
+  render(<AssetsGrid assets={assets} folders={folders} onAssetItemClick={jest.fn()} />);
 
 describe('AssetsGrid', () => {
   beforeEach(() => {
@@ -173,20 +188,20 @@ describe('AssetsGrid', () => {
     });
 
     describe('Media type icons', () => {
-      it('renders Images icon for image assets', () => {
+      it('renders Image icon for image assets', () => {
         setup({ assets: [createMockAsset(1, 'photo.jpg', 'image/jpeg', '.jpg')] });
-        expect(screen.getByTestId('icon-images')).toBeInTheDocument();
+        expect(screen.getByTestId('icon-image')).toBeInTheDocument();
         expect(screen.getByRole('img')).toBeInTheDocument(); // actual thumbnail
       });
 
-      it('renders Monitor icon for video assets', () => {
+      it('renders Play icon for video assets', () => {
         setup({ assets: [createMockAsset(1, 'video.mp4', 'video/mp4', '.mp4')] });
-        expect(screen.getAllByTestId('icon-monitor')).toHaveLength(2); // preview + footer
+        expect(screen.getAllByTestId('icon-play')).toHaveLength(2); // preview + footer
       });
 
-      it('renders VolumeUp icon for audio assets', () => {
+      it('renders Headphones icon for audio assets', () => {
         setup({ assets: [createMockAsset(1, 'audio.mp3', 'audio/mp3', '.mp3')] });
-        expect(screen.getAllByTestId('icon-volume-up')).toHaveLength(2);
+        expect(screen.getAllByTestId('icon-headphones')).toHaveLength(2);
       });
 
       it('renders FilePdf icon for PDF documents', () => {

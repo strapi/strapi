@@ -19,6 +19,10 @@ import { useUploadFilesStreamMutation } from '../../services/api';
 import { useGetFoldersQuery } from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
 
+import {
+  AssetDetailsDrawer,
+  useAssetDetailsParam,
+} from './components/AssetDetails/AssetDetailsDrawer';
 import { AssetsGrid } from './components/AssetsGrid';
 import { AssetsTable } from './components/AssetsTable';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
@@ -39,9 +43,10 @@ const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 interface AssetsViewProps {
   view: number;
   folderId: number | null;
+  onAssetItemClick: (assetId: number) => void;
 }
 
-const AssetsView = ({ view, folderId }: AssetsViewProps) => {
+const AssetsView = ({ view, folderId, onAssetItemClick }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
   const {
     assets,
@@ -106,9 +111,9 @@ const AssetsView = ({ view, folderId }: AssetsViewProps) => {
   return (
     <>
       {isGridView ? (
-        <AssetsGrid folders={folders} assets={assets} />
+        <AssetsGrid folders={folders} assets={assets} onAssetItemClick={onAssetItemClick} />
       ) : (
-        <AssetsTable assets={assets} folders={folders} />
+        <AssetsTable assets={assets} folders={folders} onAssetItemClick={onAssetItemClick} />
       )}
       <div ref={loadMoreRef} style={{ height: 1 }} />
       {isFetchingMore && (
@@ -162,7 +167,7 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
   }
 `;
 
-const HeaderWrapper = styled.div`
+const HeaderWrapper = styled(Box)`
   [data-strapi-header] {
     background: ${({ theme }) => theme.colors.neutral0};
 
@@ -174,6 +179,7 @@ const HeaderWrapper = styled.div`
 
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
+  const { openDetails } = useAssetDetailsParam();
 
   const { currentFolderId } = useFolderNavigation();
   const { title, itemCount } = useFolderInfo(currentFolderId);
@@ -317,11 +323,12 @@ export const AssetsPage = () => {
           <Layouts.Content>
             <DropZoneWithOverlay>
               <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
-              <AssetsView view={view} folderId={currentFolderId} />
+              <AssetsView view={view} folderId={currentFolderId} onAssetItemClick={openDetails} />
             </DropZoneWithOverlay>
           </Layouts.Content>
         </Layouts.Root>
       </Box>
+      <AssetDetailsDrawer />
     </UploadDropZoneProvider>
   );
 };
