@@ -106,7 +106,7 @@ const registerAPIRoutes = (strapi: Core.Strapi) => {
       router.type = 'content-api';
       router.routes?.forEach((route) => {
         generateRouteScope(route);
-        route.info = { apiName, type: 'content-api' };
+        route.info = { apiName };
       });
       strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
 
