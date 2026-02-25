@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useNotification } from '@strapi/admin/strapi-admin';
 import { Button, Field, Flex, Modal, TextInput } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { useCreateFolderMutation } from '../../../services/folders';
 import { getTranslationKey } from '../../../utils/translations';
@@ -10,16 +11,34 @@ import { getTranslationKey } from '../../../utils/translations';
 import type { FetchError } from '@strapi/admin/strapi-admin';
 
 interface CreateFolderDialogProps {
+  open: boolean;
+  folderName: string;
   parentFolderId: number | null;
   onClose: () => void;
 }
 
-export const CreateFolderDialog = ({ parentFolderId, onClose }: CreateFolderDialogProps) => {
+const StyledModalContent = styled(Modal.Content)`
+  max-width: 51.6rem;
+`;
+
+export const CreateFolderDialog = ({
+  open,
+  folderName,
+  parentFolderId,
+  onClose,
+}: CreateFolderDialogProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const [name, setName] = useState('');
   const [fieldError, setFieldError] = useState<string | undefined>();
   const [createFolder, { isLoading }] = useCreateFolderMutation();
+
+  useEffect(() => {
+    if (open) {
+      setName('');
+      setFieldError(undefined);
+    }
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,14 +86,17 @@ export const CreateFolderDialog = ({ parentFolderId, onClose }: CreateFolderDial
   };
 
   return (
-    <Modal.Root open onOpenChange={onClose}>
-      <Modal.Content>
+    <Modal.Root open={open} onOpenChange={onClose}>
+      <StyledModalContent>
         <Modal.Header>
           <Modal.Title>
-            {formatMessage({
-              id: getTranslationKey('folder.create.title'),
-              defaultMessage: 'New folder',
-            })}
+            {formatMessage(
+              {
+                id: getTranslationKey('folder.create.title-in'),
+                defaultMessage: 'New folder in {folderName}',
+              },
+              { folderName }
+            )}
           </Modal.Title>
         </Modal.Header>
         <form onSubmit={handleSubmit}>
@@ -98,7 +120,7 @@ export const CreateFolderDialog = ({ parentFolderId, onClose }: CreateFolderDial
             </Field.Root>
           </Modal.Body>
           <Modal.Footer>
-            <Flex gap={2} justifyContent="flex-end" width="100%">
+            <Flex gap={2} justifyContent="space-between" width="100%">
               <Button variant="tertiary" onClick={onClose} type="button">
                 {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
               </Button>
@@ -111,7 +133,7 @@ export const CreateFolderDialog = ({ parentFolderId, onClose }: CreateFolderDial
             </Flex>
           </Modal.Footer>
         </form>
-      </Modal.Content>
+      </StyledModalContent>
     </Modal.Root>
   );
 };

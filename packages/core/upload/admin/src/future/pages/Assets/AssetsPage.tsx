@@ -192,7 +192,7 @@ export const AssetsPage = () => {
     { count: itemCount }
   );
 
-  const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false);
+  const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
 
   // View state
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
@@ -265,7 +265,7 @@ export const AssetsPage = () => {
                     label={formatMessage({ id: getTranslationKey('new'), defaultMessage: 'New' })}
                   >
                     <MenuItem
-                      onSelect={() => setShowCreateFolderDialog(true)}
+                      onSelect={() => setIsCreateFolderDialogOpen(true)}
                       startIcon={<Folder />}
                     >
                       {formatMessage({
@@ -342,12 +342,12 @@ export const AssetsPage = () => {
           </Layouts.Root>
         </Box>
       </UploadDropZoneProvider>
-      {showCreateFolderDialog && (
-        <CreateFolderDialog
-          parentFolderId={currentFolderId}
-          onClose={() => setShowCreateFolderDialog(false)}
-        />
-      )}
+      <CreateFolderDialog
+        open={isCreateFolderDialogOpen}
+        folderName={title}
+        parentFolderId={currentFolderId}
+        onClose={() => setIsCreateFolderDialogOpen(false)}
+      />
       <AssetDetailsDrawer />
     </>
   );
