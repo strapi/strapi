@@ -7,11 +7,25 @@ const { createAuthRequest } = require('api-tests/request');
 let strapi;
 let rq;
 
+const nestedComponent = {
+  displayName: 'nestedcomponent',
+  attributes: {
+    value: {
+      type: 'string',
+    },
+  },
+};
+
 const component = {
   displayName: 'somecomponent',
   attributes: {
     name: {
       type: 'string',
+    },
+    nested: {
+      type: 'component',
+      component: 'default.nestedcomponent',
+      repeatable: true,
     },
   },
 };
@@ -34,7 +48,7 @@ describe('Non repeatable and Not required component', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
-    await builder.addComponent(component).addContentType(ct).build();
+    await builder.addComponent(nestedComponent).addComponent(component).addContentType(ct).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -553,6 +567,105 @@ describe('Non repeatable and Not required component', () => {
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body.data).toMatchObject(expectedResult);
+    });
+
+    test('Updates nested components by id, creates new ones, and removes old ones', async () => {
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              name: 'parent1',
+              nested: [{ value: 'nested1' }, { value: 'nested2' }, { value: 'nested3' }],
+            },
+          ],
+        },
+        qs: {
+          populate: ['field.nested'],
+        },
+      });
+
+      expect(res.statusCode).toBe(201);
+      const nestedIds = res.body.data.field[0].nested.map((n) => n.id);
+
+      const updateRes = await rq.put(`/${res.body.data.documentId}`, {
+        body: {
+          field: [
+            {
+              id: res.body.data.field[0].id,
+              name: 'updatedParent1',
+              nested: [
+                {
+                  id: nestedIds[0], // Update first nested component
+                  value: 'updatedNested1',
+                },
+                {
+                  // No ID - should create new nested component
+                  value: 'newNested2',
+                },
+                {
+                  id: nestedIds[2], // Update third nested component
+                  value: 'updatedNested3',
+                },
+                {
+                  // No ID - should create new nested component
+                  value: 'newNested4',
+                },
+              ],
+            },
+          ],
+        },
+        qs: {
+          populate: ['field.nested'],
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body.data.field[0].nested).toHaveLength(4);
+
+      // First nested component: updated by ID (same ID)
+      expect(updateRes.body.data.field[0].nested[0]).toMatchObject({
+        id: nestedIds[0],
+        value: 'updatedNested1',
+      });
+
+      // Second nested component: new one created (no ID provided, and nestedIds[1] was removed)
+      expect(updateRes.body.data.field[0].nested[1]).toMatchObject({
+        id: expect.anything(),
+        value: 'newNested2',
+      });
+      expect(updateRes.body.data.field[0].nested[1].id).not.toBe(nestedIds[1]); // Original second was removed
+
+      // Third nested component: updated by ID (same ID)
+      expect(updateRes.body.data.field[0].nested[2]).toMatchObject({
+        id: nestedIds[2],
+        value: 'updatedNested3',
+      });
+
+      // Fourth nested component: new one created
+      expect(updateRes.body.data.field[0].nested[3]).toMatchObject({
+        id: expect.anything(),
+        value: 'newNested4',
+      });
+
+      // Verify that nestedIds[1] was removed (not present in the array)
+      const allNestedIds = updateRes.body.data.field[0].nested.map((n) => n.id);
+      expect(allNestedIds).not.toContain(nestedIds[1]);
+
+      const getRes = await rq.get(`/${res.body.data.documentId}`, {
+        qs: {
+          populate: ['field.nested'],
+        },
+      });
+
+      expect(getRes.statusCode).toBe(200);
+      expect(getRes.body.data.field[0].nested).toHaveLength(4);
+      expect(getRes.body.data.field[0].nested[0].id).toBe(nestedIds[0]);
+      expect(getRes.body.data.field[0].nested[0].value).toBe('updatedNested1');
+      expect(getRes.body.data.field[0].nested[2].id).toBe(nestedIds[2]);
+      expect(getRes.body.data.field[0].nested[2].value).toBe('updatedNested3');
+      // Verify nestedIds[1] is still not present
+      const allNestedIdsAfterGet = getRes.body.data.field[0].nested.map((n) => n.id);
+      expect(allNestedIdsAfterGet).not.toContain(nestedIds[1]);
     });
   });
 

@@ -82,6 +82,7 @@ export interface Strapi extends Container {
   apis: Record<string, Core.Module>;
   api(name: string): Core.Module;
   auth: Modules.Auth.AuthenticationService;
+  /** Content API: permissions, route map, sanitize/validate, and registration of extra query/body params (see addQueryParams, addBodyParams). */
   contentAPI: Modules.ContentAPI.ContentApi;
   sanitizers: Modules.Sanitizers.SanitizersRegistry;
   validators: Modules.Validators.ValidatorsRegistry;
