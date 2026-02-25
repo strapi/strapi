@@ -221,6 +221,24 @@ describe('mime-validation', () => {
       expect(mockFileTypeFromBuffer).toHaveBeenCalled();
     });
 
+    it('when no config and detection returns nothing, uses extension so stored mime is not octet-stream', async () => {
+      mockReadFile.mockResolvedValue(Buffer.from('unknown binary'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined);
+
+      const fileWithOctetStream = {
+        name: 'document.pdf',
+        path: '/tmp/document.pdf',
+        size: 100000,
+        mimetype: 'application/octet-stream',
+      };
+      const config: SecurityConfig = {};
+
+      const result = await validateFile(fileWithOctetStream, config, mockStrapi);
+
+      expect(result.isValid).toBe(true);
+      expect(result.detectedMime).toBe('application/pdf');
+    });
+
     it('should validate MIME type successfully', async () => {
       mockReadFile.mockResolvedValue(Buffer.from('fake image'));
       mockFileTypeFromBuffer.mockResolvedValue({ mime: 'image/jpeg', ext: 'jpg' });

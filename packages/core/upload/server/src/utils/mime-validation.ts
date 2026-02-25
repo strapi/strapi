@@ -212,15 +212,20 @@ export async function validateFile(
         error: errMsg,
       });
     }
-    // file-type returns application/zip for Office formats (docx, xlsx); use extension-based MIME for stored type
+    // When declared is generic (e.g. octet-stream): use detection first, then fallback to extension so we don't store octet-stream when we can determine a type.
     const { fileName } = extractFileInfo(file);
     const fileExt = extname(fileName).toLowerCase();
     const expectedMimeFromExt = fileExt ? lookup(fileExt) || null : null;
+    // file-type returns application/zip for Office formats (docx, xlsx); use extension-based MIME for stored type
     if (
       detectedMime === 'application/zip' &&
       expectedMimeFromExt &&
       expectedMimeFromExt !== 'application/zip'
     ) {
+      detectedMime = expectedMimeFromExt;
+    }
+    // When detection failed or returned nothing, use extension so we still store a meaningful type instead of octet-stream
+    if (!detectedMime && expectedMimeFromExt) {
       detectedMime = expectedMimeFromExt;
     }
     return { isValid: true, detectedMime };
