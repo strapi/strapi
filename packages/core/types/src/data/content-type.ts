@@ -2,7 +2,7 @@ import type { ID } from './constants';
 
 import type { Intersect } from '../utils';
 import type * as UID from '../uid';
-import type { AttributeNames, AttributeValueByName } from '../schema';
+import type { AttributeNames, AttributeValueByName, RequiredAttributeNames } from '../schema';
 
 /**
  * A type used as the identifier for a document.
@@ -19,12 +19,24 @@ export type ContentType<
   TContentTypeUID extends UID.ContentType = UID.ContentType,
   TContentTypeKeys extends AttributeNames<TContentTypeUID> = AttributeNames<TContentTypeUID>,
 > = Intersect<
-  [{ id: ID; documentId: DocumentID }, Pick<AttributeValues<TContentTypeUID>, TContentTypeKeys>]
+  [
+    { id: ID; documentId: DocumentID },
+    Pick<
+      AttributeValues<TContentTypeUID>,
+      Extract<TContentTypeKeys, keyof AttributeValues<TContentTypeUID>>
+    >,
+  ]
 >;
 
+/**
+ * @internal
+ */
 type AttributeValues<TContentTypeUID extends UID.ContentType = UID.ContentType> = {
-  [TAttributeName in AttributeNames<TContentTypeUID>]?: AttributeValueByName<
-    TContentTypeUID,
-    TAttributeName
-  > | null;
+  [TAttributeName in Exclude<
+    AttributeNames<TContentTypeUID>,
+    RequiredAttributeNames<TContentTypeUID>
+  >]?: AttributeValueByName<TContentTypeUID, TAttributeName> | null;
+} & {
+  [TAttributeName in AttributeNames<TContentTypeUID> &
+    RequiredAttributeNames<TContentTypeUID>]: AttributeValueByName<TContentTypeUID, TAttributeName>;
 };
