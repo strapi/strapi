@@ -62,6 +62,7 @@ const GuidedTourOverlay = styled(Box)`
   bottom: 0;
   background-color: rgba(50, 50, 77, 0.2);
   z-index: 10;
+  pointer-events: none;
 `;
 
 const GuidedTourTooltipImpl = ({
@@ -84,17 +85,21 @@ const GuidedTourTooltipImpl = ({
     isCurrentStep &&
     isStepConditionMet;
 
-  // Lock the scroll
+  // Scroll sidebar for specific steps in Content-Type Builder
   React.useEffect(() => {
     if (!isPopoverOpen) return;
 
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
+    if (tourName !== 'contentTypeBuilder') return;
+    if (step !== 2 && step !== 3 && step !== 4 && step !== 5) return;
 
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
-  }, [isPopoverOpen]);
+    // Find CTB sidebar scroll container
+    const sidebarScroll = document.querySelector('[data-radix-scroll-area-viewport]');
+
+    if (sidebarScroll) {
+      const scrollAmount = step === 2 ? 0 : step === 3 ? 100 : step === 4 ? 260 : 250;
+      (sidebarScroll as HTMLElement).scrollTop = scrollAmount;
+    }
+  }, [isPopoverOpen, tourName, step]);
 
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
