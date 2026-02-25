@@ -205,18 +205,8 @@ describe('Core API - Validate', () => {
   });
 
   describe('contentAPI.addQueryParams and addInputParams (strictParams + real request)', () => {
-    const z = require('zod/v4');
     let bodyParamTestDocumentId;
 
-    // Why tests previously didn't catch the real-world failures:
-    // 1) route.info.type: register-routes set route.info = { apiName } but not type.
-    //    Fixed in production by setting route.info = { apiName, type: 'content-api' } in register-routes.
-    // 2) api.documents.strictParams: getstarted has api.documents.strictParams: true.
-    //    Fixed in production by stripping params in document service when strictParams is true.
-    //    We set api.documents.strictParams below so the test exercises the same path as production.
-    //
-    // We register both query and body params in beforeAll; apply runs once before the "after apply" tests
-    // (in the third test), so we use the same applyExtraParamsToRoutes the framework uses.
     beforeAll(() => {
       strapi.contentAPI.addQueryParams({
         extraParam: {
