@@ -1,4 +1,5 @@
 import { createTransformer } from '../convert-query-params';
+import { ValidationError } from '../errors';
 import { Model } from '../types';
 
 const models = {
@@ -86,7 +87,35 @@ describe('convert-query-params', () => {
     test.todo('partial filtering works');
   });
 
-  test.todo('convertSortQueryParams');
+  describe('convertSortQueryParams', () => {
+    it('throws a ValidationError for an invalid sort order', () => {
+      expect(() => transformer.private_convertSortQueryParams("title:asc'")).toThrow(
+        ValidationError
+      );
+      expect(() => transformer.private_convertSortQueryParams("title:asc'")).toThrow(
+        'Invalid order. order can only be one of asc|desc|ASC|DESC'
+      );
+    });
+
+    it('throws a ValidationError for an invalid sort type', () => {
+      expect(() => transformer.private_convertSortQueryParams(123 as any)).toThrow(ValidationError);
+    });
+
+    it('throws a ValidationError for an empty field name', () => {
+      expect(() => transformer.private_convertSortQueryParams(':asc')).toThrow(ValidationError);
+      expect(() => transformer.private_convertSortQueryParams(':asc')).toThrow(
+        'Field cannot be empty'
+      );
+    });
+
+    it('accepts valid sort parameters', () => {
+      expect(transformer.private_convertSortQueryParams('title:asc')).toEqual([{ title: 'asc' }]);
+      expect(transformer.private_convertSortQueryParams('title:desc')).toEqual([{ title: 'desc' }]);
+      expect(transformer.private_convertSortQueryParams('title:ASC')).toEqual([{ title: 'ASC' }]);
+      expect(transformer.private_convertSortQueryParams('title:DESC')).toEqual([{ title: 'DESC' }]);
+      expect(transformer.private_convertSortQueryParams('title')).toEqual([{ title: 'asc' }]);
+    });
+  });
 
   describe('convertStartQueryParams', () => {
     it('accepts valid non-negative integers', () => {

@@ -23,7 +23,7 @@ import {
   isDynamicZoneAttribute,
   isMorphToRelationalAttribute,
 } from './content-types';
-import { PaginationError } from './errors';
+import { PaginationError, ValidationError } from './errors';
 import { isOperator } from './operators';
 
 import parseType from './parse-type';
@@ -118,18 +118,17 @@ export interface Query {
   pageSize?: number;
 }
 
-class InvalidOrderError extends Error {
+class InvalidOrderError extends ValidationError {
   constructor() {
-    super();
-    this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
+    super('Invalid order. order can only be one of asc|desc|ASC|DESC');
   }
 }
 
-class InvalidSortError extends Error {
+class InvalidSortError extends ValidationError {
   constructor() {
-    super();
-    this.message =
-      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects';
+    super(
+      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects'
+    );
   }
 }
 
@@ -189,14 +188,14 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (!isString(sortQuery)) {
-      throw new Error('Invalid sort query');
+      throw new ValidationError('Invalid sort query');
     }
 
     // split field and order param with default order to ascending
     const [field, order = 'asc'] = sortQuery.split(':');
 
     if (field.length === 0) {
-      throw new Error('Field cannot be empty');
+      throw new ValidationError('Field cannot be empty');
     }
 
     validateOrder(order);
@@ -218,7 +217,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         validateOrder(order);
         transformedSort[field] = order;
       } else {
-        throw Error(`Invalid sort type expected object or string got ${typeof order}`);
+        throw new ValidationError(
+          `Invalid sort type expected object or string got ${typeof order}`
+        );
       }
     }
 
@@ -232,7 +233,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const startAsANumber = toNumber(startQuery);
 
     if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
-      throw new Error(`convertStartQueryParams expected a positive integer got ${startAsANumber}`);
+      throw new ValidationError(
+        `convertStartQueryParams expected a positive integer got ${startAsANumber}`
+      );
     }
 
     return startAsANumber;
@@ -245,7 +248,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const limitAsANumber = toNumber(limitQuery);
 
     if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
-      throw new Error(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
+      throw new ValidationError(
+        `convertLimitQueryParams expected a positive integer got ${limitAsANumber}`
+      );
     }
 
     if (limitAsANumber === -1) {
@@ -296,11 +301,11 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
   };
 
-  class InvalidPopulateError extends Error {
+  class InvalidPopulateError extends ValidationError {
     constructor() {
-      super();
-      this.message =
-        'Invalid populate parameter. Expected a string, an array of strings, a populate object';
+      super(
+        'Invalid populate parameter. Expected a string, an array of strings, a populate object'
+      );
     }
   }
 
@@ -391,7 +396,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         );
 
         if (hasInvalidProperties) {
-          throw new Error(
+          throw new ValidationError(
             `Invalid nested populate for ${schema.info?.singularName}.${key} (${schema.uid}). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
           );
         }
@@ -402,7 +407,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          * If 'populate' exists in subPopulate, its value should be constrained to a wildcard ('*').
          */
         if ('populate' in subPopulate && subPopulate.populate !== '*') {
-          throw new Error(
+          throw new ValidationError(
             `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
               `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
               `Consider using the fragment API for more granular population control.`
@@ -442,7 +447,9 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       // Edge case when trying to use the fragment ('on') on a non-morph like attribute
       if (!isMorphLikeRelationalAttribute && hasPopulateFragmentDefined(subPopulate)) {
-        throw new Error(`Using fragments is not permitted to populate "${key}" in "${schema.uid}"`);
+        throw new ValidationError(
+          `Using fragments is not permitted to populate "${key}" in "${schema.uid}"`
+        );
       }
 
       // NOTE: Retrieve the target schema UID.
@@ -490,7 +497,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     if (!isPlainObject(subPopulate)) {
-      throw new Error(`Invalid nested populate. Expected '*' or an object`);
+      throw new ValidationError(`Invalid nested populate. Expected '*' or an object`);
     }
 
     const { sort, filters, fields, populate, count, ordering, page, pageSize, start, limit } =
@@ -576,7 +583,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       return _.uniq([ID_ATTRIBUTE, ...fieldsValues]);
     }
 
-    throw new Error('Invalid fields parameter. Expected a string or an array of strings');
+    throw new ValidationError('Invalid fields parameter. Expected a string or an array of strings');
   };
 
   const isValidSchemaAttribute = (key: string, schema?: Model) => {
@@ -595,7 +602,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     // Filters need to be either an array or an object
     // Here we're only checking for 'object' type since typeof [] => object and typeof {} => object
     if (!isObject(filters)) {
-      throw new Error('The filters parameter must be an object or an array');
+      throw new ValidationError('The filters parameter must be an object or an array');
     }
 
     // Don't mutate the original object
