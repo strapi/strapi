@@ -8,8 +8,6 @@ import { styled } from 'styled-components';
 import { useCreateFolderMutation } from '../../../services/folders';
 import { getTranslationKey } from '../../../utils/translations';
 
-import type { FetchError } from '@strapi/admin/strapi-admin';
-
 interface CreateFolderDialogProps {
   open: boolean;
   folderName: string;
@@ -68,8 +66,7 @@ export const CreateFolderDialog = ({
 
       onClose();
     } catch (err) {
-      const fetchError = err as FetchError;
-      const apiError = fetchError?.response?.data?.error;
+      const apiError = err as { message?: string };
 
       if (apiError?.message) {
         setFieldError(apiError.message);

@@ -16,6 +16,8 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 }));
 
 const defaultProps = {
+  open: true,
+  folderName: 'Home',
   parentFolderId: null,
   onClose: jest.fn(),
 };
@@ -26,10 +28,10 @@ describe('CreateFolderDialog', () => {
     mockUnwrap.mockResolvedValue({});
   });
 
-  it('renders modal with title "New folder" and a "Folder name" input', () => {
+  it('renders modal with title "New folder in Home" and a "Folder name" input', () => {
     render(<CreateFolderDialog {...defaultProps} />);
 
-    expect(screen.getByText('New folder')).toBeInTheDocument();
+    expect(screen.getByText('New folder in Home')).toBeInTheDocument();
     expect(screen.getByRole('textbox')).toBeInTheDocument();
     // Field label
     expect(screen.getByText('Folder name')).toBeInTheDocument();
@@ -105,9 +107,7 @@ describe('CreateFolderDialog', () => {
   });
 
   it('shows inline API validation error (e.g. duplicate name) below the input', async () => {
-    mockUnwrap.mockRejectedValue({
-      response: { data: { error: { message: 'A folder with that name already exists' } } },
-    });
+    mockUnwrap.mockRejectedValue({ message: 'A folder with that name already exists' });
     render(<CreateFolderDialog {...defaultProps} />);
 
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Existing Folder' } });
@@ -120,7 +120,7 @@ describe('CreateFolderDialog', () => {
   });
 
   it('calls toggleNotification with type "danger" on unknown API error', async () => {
-    mockUnwrap.mockRejectedValue({ response: { data: { error: {} } } });
+    mockUnwrap.mockRejectedValue({});
     render(<CreateFolderDialog {...defaultProps} />);
 
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Some Folder' } });
@@ -131,5 +131,33 @@ describe('CreateFolderDialog', () => {
         expect.objectContaining({ type: 'danger' })
       );
     });
+  });
+
+  it('renders the folderName in the dialog title', () => {
+    render(<CreateFolderDialog {...defaultProps} folderName="Documents" />);
+
+    expect(screen.getByText('New folder in Documents')).toBeInTheDocument();
+  });
+
+  it('does not render when open is false', () => {
+    render(<CreateFolderDialog {...defaultProps} open={false} />);
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('clears name and error when reopened', async () => {
+    const { rerender } = render(<CreateFolderDialog {...defaultProps} open={true} />);
+
+    // Type a name and trigger an error
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: '  ' } });
+    fireEvent.click(screen.getByRole('button', { name: /create folder/i }));
+    expect(await screen.findByText('Name is required')).toBeInTheDocument();
+
+    // Close and reopen
+    rerender(<CreateFolderDialog {...defaultProps} open={false} />);
+    rerender(<CreateFolderDialog {...defaultProps} open={true} />);
+
+    expect(screen.getByRole('textbox')).toHaveValue('');
+    expect(screen.queryByText('Name is required')).not.toBeInTheDocument();
   });
 });
