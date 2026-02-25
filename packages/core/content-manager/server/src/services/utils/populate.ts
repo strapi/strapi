@@ -24,6 +24,13 @@ type PopulateOptions = {
   countMany?: boolean;
   countOne?: boolean;
   maxLevel?: number;
+  /**
+   * Controls how the `localizations` relation is populated.
+   * - 'none': Do not populate localizations
+   * - 'minimal': Only populate locale, documentId, publishedAt fields
+   * - 'validation': Full validation populate (default, current behavior)
+   */
+  populateLocalizationsMode?: 'none' | 'minimal' | 'validation';
 };
 
 /**
@@ -38,7 +45,7 @@ function getPopulateForRelation(
   attribute: Schema.Attribute.AnyAttribute,
   model: Model,
   attributeName: string,
-  { countMany, countOne, initialPopulate }: PopulateOptions
+  { countMany, countOne, initialPopulate, populateLocalizationsMode }: PopulateOptions
 ) {
   const isManyRelation = isAnyToMany(attribute);
 
@@ -46,9 +53,20 @@ function getPopulateForRelation(
     return initialPopulate;
   }
 
-  // If populating localizations attribute, also include validatable fields
-  // Mainly needed for bulk locale publishing, so the Client has all the information necessary to perform validations
   if (attributeName === 'localizations') {
+    const mode = populateLocalizationsMode ?? 'validation';
+
+    if (mode === 'none') {
+      return false;
+    }
+
+    if (mode === 'minimal') {
+      return {
+        fields: ['locale', 'documentId', 'publishedAt'],
+      };
+    }
+
+    // 'validation' mode — full validation populate (needed for bulk locale publishing)
     const validationPopulate = getPopulateForValidation(model.uid as UID.Schema);
 
     return {
@@ -154,6 +172,7 @@ const getDeepPopulate = (
     countMany = false,
     countOne = false,
     maxLevel = Infinity,
+    populateLocalizationsMode,
   }: PopulateOptions = {},
   level = 1
 ) => {
@@ -180,6 +199,7 @@ const getDeepPopulate = (
             countMany,
             countOne,
             maxLevel,
+            populateLocalizationsMode,
           },
           level
         )

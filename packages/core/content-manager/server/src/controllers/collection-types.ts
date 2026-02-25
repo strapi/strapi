@@ -140,6 +140,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
       .countRelations({ toOne: false, toMany: true })
+      .populateLocalizationsMode('minimal')
       .build();
 
     const { locale, status } = await getDocumentLocaleAndStatus(query, model);
@@ -192,6 +193,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
       .countRelations()
+      .populateLocalizationsMode('minimal')
       .build();
 
     const { locale, status } = await getDocumentLocaleAndStatus(ctx.query, model);
@@ -394,6 +396,7 @@ export default {
         .populateFromQuery(permissionQuery)
         .populateDeep(Infinity)
         .countRelations()
+        .populateLocalizationsMode('minimal')
         .build();
 
       let document: any;

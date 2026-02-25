@@ -50,6 +50,21 @@ describe('Populate', () => {
         },
       },
     },
+    withLocalizations: {
+      uid: 'api::article.article',
+      modelName: 'Fake model with localizations',
+      attributes: {
+        title: {
+          type: 'string',
+        },
+        localizations: {
+          type: 'relation',
+          relation: 'oneToMany',
+          target: 'api::article.article',
+          visible: false,
+        },
+      },
+    },
   } as any;
 
   describe('getDeepPopulate', () => {
@@ -151,6 +166,49 @@ describe('Populate', () => {
 
       expect(result).toEqual({
         mediaAttrName: { populate: { folder: true } },
+      });
+    });
+
+    describe('populateLocalizationsMode option', () => {
+      test('defaults to validation populate for localizations', () => {
+        const uid = 'withLocalizations';
+
+        const result = getDeepPopulate(uid as any);
+
+        // Default behavior: localizations gets validation populate (populated via getPopulateForValidation)
+        expect(result).toHaveProperty('localizations');
+        expect(result.localizations).toHaveProperty('populate');
+      });
+
+      test('populateLocalizationsMode: minimal returns only locale, documentId, publishedAt fields', () => {
+        const uid = 'withLocalizations';
+
+        const result = getDeepPopulate(uid as any, { populateLocalizationsMode: 'minimal' });
+
+        expect(result).toEqual({
+          localizations: {
+            fields: ['locale', 'documentId', 'publishedAt'],
+          },
+        });
+      });
+
+      test('populateLocalizationsMode: none excludes localizations from populate', () => {
+        const uid = 'withLocalizations';
+
+        const result = getDeepPopulate(uid as any, { populateLocalizationsMode: 'none' });
+
+        expect(result).toEqual({
+          localizations: false,
+        });
+      });
+
+      test('populateLocalizationsMode: validation returns full validation populate', () => {
+        const uid = 'withLocalizations';
+
+        const result = getDeepPopulate(uid as any, { populateLocalizationsMode: 'validation' });
+
+        expect(result).toHaveProperty('localizations');
+        expect(result.localizations).toHaveProperty('populate');
       });
     });
   });

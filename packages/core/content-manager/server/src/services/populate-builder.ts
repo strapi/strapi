@@ -16,7 +16,12 @@ const populateBuilder = (uid: UID.Schema) => {
   let getInitialPopulate = async (): Promise<undefined | Populate> => {
     return undefined;
   };
-  const deepPopulateOptions = {
+  const deepPopulateOptions: {
+    countMany: boolean;
+    countOne: boolean;
+    maxLevel: number;
+    populateLocalizationsMode?: 'none' | 'minimal' | 'validation';
+  } = {
     countMany: false,
     countOne: false,
     maxLevel: -1,
@@ -54,6 +59,15 @@ const populateBuilder = (uid: UID.Schema) => {
      */
     populateDeep(level = Infinity) {
       deepPopulateOptions.maxLevel = level;
+      return builder;
+    },
+
+    /**
+     * Controls how the localizations relation is populated.
+     * @param [mode='validation'] - 'none' | 'minimal' | 'validation'
+     */
+    populateLocalizationsMode(mode: 'none' | 'minimal' | 'validation') {
+      deepPopulateOptions.populateLocalizationsMode = mode;
       return builder;
     },
 

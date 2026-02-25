@@ -12,6 +12,7 @@ const buildPopulateFromQuery = async (query: any, model: any) => {
     .populateFromQuery(query)
     .populateDeep(Infinity)
     .countRelations()
+    .populateLocalizationsMode('minimal')
     .build();
 };
 
