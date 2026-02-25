@@ -1,3 +1,6 @@
+# SECURITY (read before editing):
+# Do NOT add actions/checkout of the PR head or it could expose repo secrets.
+
 name: Community PR Label
 
 on:
@@ -9,9 +12,23 @@ permissions: {}
 jobs:
   label:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.base.ref == github.event.repository.default_branch
     permissions:
       pull-requests: write
     steps:
+      - name: Verify run context
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request_target" ]; then
+            echo "::error::Expected pull_request_target, got ${{ github.event_name }}"
+            exit 1
+          fi
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          DEFAULT_REF="${{ github.event.repository.default_branch }}"
+          if [ "$BASE_REF" != "$DEFAULT_REF" ]; then
+            echo "::error::Refusing to run when PR targets branch '$BASE_REF' (only default '$DEFAULT_REF' is allowed)."
+            exit 1
+          fi
+          echo "Running from default branch; PR head code is never executed."
       - name: Check org membership and label
         uses: actions/github-script@v7
         with:
