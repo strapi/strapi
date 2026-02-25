@@ -10,7 +10,7 @@ describe('sanitizeInput', () => {
    * Extra params are sanitized via Zod safeParse; invalid values are removed.
    */
   describe('strictParams with route.request.body', () => {
-    it('keeps extra body param from route when strictParams: true and Zod parses', async () => {
+    it('keeps extra input param from route when strictParams: true and Zod parses', async () => {
       const route = {
         request: {
           body: {
@@ -32,7 +32,7 @@ describe('sanitizeInput', () => {
       expect(result).toHaveProperty('clientMutationId', 'foo');
     });
 
-    it('removes extra body param when Zod safeParse fails', async () => {
+    it('removes extra input param when Zod safeParse fails', async () => {
       const route = {
         request: {
           body: {
@@ -76,7 +76,7 @@ describe('sanitizeInput', () => {
       expect(result).not.toHaveProperty('otherExtraKey');
     });
 
-    it('sanitizes extra body param that is a nested object (non-scalar)', async () => {
+    it('sanitizes extra input param that is a nested object (non-scalar)', async () => {
       const route = {
         request: {
           body: {

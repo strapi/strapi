@@ -308,7 +308,7 @@ describe('Content API - Permissions', () => {
     });
   });
 
-  describe('addQueryParams / addBodyParams / applyExtraParamsToRoutes', () => {
+  describe('addQueryParams / addInputParams / applyExtraParamsToRoutes', () => {
     const minimalStrapi = { ...strapiMock, apis: {}, plugins: {} } as any;
 
     /** Minimal content-api route; pass request (and optionally method/path) to override. */
@@ -338,8 +338,8 @@ describe('Content API - Permissions', () => {
       );
     });
 
-    it('applyExtraParamsToRoutes throws when a route already has the body param', () => {
-      contentAPI.addBodyParams({ clientMutationId: { schema: z.string() } });
+    it('applyExtraParamsToRoutes throws when a route already has the input param', () => {
+      contentAPI.addInputParams({ clientMutationId: { schema: z.string() } });
       const route = contentAPIRoute({
         method: 'POST',
         request: { body: { 'application/json': z.object({ clientMutationId: z.string() }) } },
@@ -356,10 +356,10 @@ describe('Content API - Permissions', () => {
       );
     });
 
-    it('addBodyParams throws when the same param name is added twice', () => {
-      contentAPI.addBodyParams({ clientMutationId: { schema: z.string() } });
-      expect(() => contentAPI.addBodyParams({ clientMutationId: { schema: z.number() } })).toThrow(
-        /contentAPI\.addBodyParams: param "clientMutationId" has already been added/
+    it('addInputParams throws when the same param name is added twice', () => {
+      contentAPI.addInputParams({ clientMutationId: { schema: z.string() } });
+      expect(() => contentAPI.addInputParams({ clientMutationId: { schema: z.number() } })).toThrow(
+        /contentAPI\.addInputParams: param "clientMutationId" has already been added/
       );
     });
 
@@ -369,8 +369,8 @@ describe('Content API - Permissions', () => {
       );
     });
 
-    it.each(['id', 'documentId'])('addBodyParams throws when param "%s" is reserved', (param) => {
-      expect(() => contentAPI.addBodyParams({ [param]: { schema: z.string() } })).toThrow(
+    it.each(['id', 'documentId'])('addInputParams throws when param "%s" is reserved', (param) => {
+      expect(() => contentAPI.addInputParams({ [param]: { schema: z.string() } })).toThrow(
         new RegExp(`param "${param}" is reserved by Strapi; use a different name`)
       );
     });
@@ -404,8 +404,8 @@ describe('Content API - Permissions', () => {
       expect(searchSchema.safeParse('foo').success).toBe(true);
     });
 
-    it('addBodyParams accepts schema as function that receives z and returns schema', () => {
-      contentAPI.addBodyParams({
+    it('addInputParams accepts schema as function that receives z and returns schema', () => {
+      contentAPI.addInputParams({
         clientMutationId: { schema: (zInstance) => zInstance.string().max(100).optional() },
       });
       const route = contentAPIRoute({

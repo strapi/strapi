@@ -204,7 +204,7 @@ describe('Core API - Validate', () => {
     });
   });
 
-  describe('contentAPI.addQueryParams and addBodyParams (strictParams + real request)', () => {
+  describe('contentAPI.addQueryParams and addInputParams (strictParams + real request)', () => {
     const z = require('zod/v4');
     let bodyParamTestDocumentId;
 
@@ -224,7 +224,7 @@ describe('Core API - Validate', () => {
           matchRoute: (route) => route.method === 'GET' && route.path === '/documents',
         },
       });
-      strapi.contentAPI.addBodyParams({
+      strapi.contentAPI.addInputParams({
         clientMutationId: {
           schema: (zInstance) => zInstance.string().max(100).optional(),
           matchRoute: (route) => route.method === 'POST' && route.path === '/documents',
