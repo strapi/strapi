@@ -79,6 +79,9 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
           generateRouteScope(route);
           route.info = { pluginName };
         });
+        if (router.type === 'content-api') {
+          strapi.contentAPI.applyExtraParamsToRoutes(router.routes);
+        }
 
         strapi.server.routes(router);
       });
@@ -106,6 +109,7 @@ const registerAPIRoutes = (strapi: Core.Strapi) => {
         generateRouteScope(route);
         route.info = { apiName };
       });
+      strapi.contentAPI.applyExtraParamsToRoutes(router.routes ?? []);
 
       return strapi.server.routes(router);
     });

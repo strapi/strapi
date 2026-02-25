@@ -55,6 +55,16 @@ const StyledTd = styled(RawTd)`
 const StyledTr = styled(RawTr)`
   height: 48px;
   background: ${({ theme }) => theme.colors.neutral0};
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primary100};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary600};
+    outline-offset: -2px;
+  }
 
   &:last-child {
     ${StyledTd} {
@@ -87,21 +97,34 @@ const AssetPreviewCell = ({ asset }: AssetPreviewCellProps) => {
       height="3.2rem"
       shrink={0}
     >
-      <DocIcon width={16} height={16} />
+      <DocIcon width={20} height={20} />
     </Flex>
   );
 };
 
 interface AssetRowProps {
   asset: File;
+  onAssetItemClick: (assetId: number) => void;
 }
 
-const AssetRow = ({ asset }: AssetRowProps) => {
+const AssetRow = ({ asset, onAssetItemClick }: AssetRowProps) => {
   const isMobile = useIsMobile();
   const { formatDate, formatMessage } = useIntl();
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onAssetItemClick(asset.id);
+    }
+  };
+
   return (
-    <StyledTr>
+    <StyledTr
+      tabIndex={0}
+      role="row"
+      onClick={() => onAssetItemClick(asset.id)}
+      onKeyDown={handleKeyDown}
+    >
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <AssetPreviewCell asset={asset} />
@@ -170,8 +193,20 @@ const FolderRow = ({ folder }: FolderRowProps) => {
   const { formatDate, formatMessage } = useIntl();
   const { navigateToFolder } = useFolderNavigation();
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigateToFolder(folder);
+    }
+  };
+
   return (
-    <FolderTr onClick={() => navigateToFolder(folder)}>
+    <FolderTr
+      tabIndex={0}
+      role="row"
+      onClick={() => navigateToFolder(folder)}
+      onKeyDown={handleKeyDown}
+    >
       <StyledTd>
         <Flex gap={3} alignItems="center">
           <Flex
@@ -232,9 +267,10 @@ const FolderRow = ({ folder }: FolderRowProps) => {
 interface AssetsTableProps {
   assets: File[];
   folders?: Folder[];
+  onAssetItemClick: (assetId: number) => void;
 }
 
-export const AssetsTable = ({ assets, folders = [] }: AssetsTableProps) => {
+export const AssetsTable = ({ assets, folders = [], onAssetItemClick }: AssetsTableProps) => {
   const isMobile = useIsMobile();
   const { formatMessage } = useIntl();
 
@@ -293,7 +329,7 @@ export const AssetsTable = ({ assets, folders = [] }: AssetsTableProps) => {
               <FolderRow key={`folder-${folder.id}`} folder={folder} />
             ))}
             {assets.map((asset) => (
-              <AssetRow key={asset.id} asset={asset} />
+              <AssetRow key={asset.id} asset={asset} onAssetItemClick={onAssetItemClick} />
             ))}
           </>
         )}
