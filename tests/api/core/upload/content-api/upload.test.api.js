@@ -656,6 +656,85 @@ describe('Upload plugin', () => {
         expect(res.body.error).toBeDefined();
         expect(res.body.error.code || res.body.error.message).toBeTruthy();
       });
+
+      describe('no-config vs with-config: same validation path, same stored mime', () => {
+        test('stored mime for docx (Content-Type octet-stream) is the same with empty config and with allowedTypes', async () => {
+          const formData = {
+            files: {
+              path: utilsPath('rec.docx'),
+              filename: 'document.docx',
+              contentType: 'application/octet-stream',
+            },
+          };
+          const docxMime =
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+          strapi.config.set('plugin::upload.security', {});
+          const resNoConfig = await rq({
+            method: 'POST',
+            url: '/upload',
+            formData: { ...formData },
+          });
+          expect(resNoConfig.statusCode).toBe(201);
+          expect(resNoConfig.body).toHaveLength(1);
+          const mimeNoConfig = resNoConfig.body[0].mime;
+          expect(mimeNoConfig).toBe(docxMime);
+          await rq({ method: 'DELETE', url: `/upload/files/${resNoConfig.body[0].id}` });
+
+          strapi.config.set('plugin::upload.security', {
+            allowedTypes: ['application/*'],
+          });
+          const resWithConfig = await rq({
+            method: 'POST',
+            url: '/upload',
+            formData: { ...formData },
+          });
+          expect(resWithConfig.statusCode).toBe(201);
+          expect(resWithConfig.body).toHaveLength(1);
+          const mimeWithConfig = resWithConfig.body[0].mime;
+          expect(mimeWithConfig).toBe(docxMime);
+          expect(mimeWithConfig).toBe(mimeNoConfig);
+          await rq({ method: 'DELETE', url: `/upload/files/${resWithConfig.body[0].id}` });
+        });
+
+        test('stored mime for PDF (Content-Type octet-stream) is the same with empty config and with allowedTypes', async () => {
+          const formData = {
+            files: {
+              path: utilsPath('rec.pdf'),
+              filename: 'document.pdf',
+              contentType: 'application/octet-stream',
+            },
+          };
+          const pdfMime = 'application/pdf';
+
+          strapi.config.set('plugin::upload.security', {});
+          const resNoConfig = await rq({
+            method: 'POST',
+            url: '/upload',
+            formData: { ...formData },
+          });
+          expect(resNoConfig.statusCode).toBe(201);
+          expect(resNoConfig.body).toHaveLength(1);
+          const mimeNoConfig = resNoConfig.body[0].mime;
+          expect(mimeNoConfig).toBe(pdfMime);
+          await rq({ method: 'DELETE', url: `/upload/files/${resNoConfig.body[0].id}` });
+
+          strapi.config.set('plugin::upload.security', {
+            allowedTypes: ['application/pdf'],
+          });
+          const resWithConfig = await rq({
+            method: 'POST',
+            url: '/upload',
+            formData: { ...formData },
+          });
+          expect(resWithConfig.statusCode).toBe(201);
+          expect(resWithConfig.body).toHaveLength(1);
+          const mimeWithConfig = resWithConfig.body[0].mime;
+          expect(mimeWithConfig).toBe(pdfMime);
+          expect(mimeWithConfig).toBe(mimeNoConfig);
+          await rq({ method: 'DELETE', url: `/upload/files/${resWithConfig.body[0].id}` });
+        });
+      });
     });
 
     describe('validation matrix (real detection)', () => {

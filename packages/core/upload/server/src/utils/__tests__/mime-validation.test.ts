@@ -544,6 +544,27 @@ describe('mime-validation', () => {
       expect(result.errors).toHaveLength(0);
     });
 
+    it('when no config and detection fails (undefined), uses extension so stored mime is not octet-stream', async () => {
+      mockStrapi.config.get.mockReturnValue({});
+      mockReadFile.mockResolvedValue(Buffer.from('content'));
+      mockFileTypeFromBuffer.mockResolvedValue(undefined);
+
+      const fileWithExtOnly = {
+        name: 'document.docx',
+        path: '/tmp/document.docx',
+        size: 100,
+        mimetype: 'application/octet-stream',
+      };
+
+      const result = await enforceUploadSecurity([fileWithExtOnly], mockStrapi);
+
+      expect(result.validFiles).toHaveLength(1);
+      expect(result.validFiles[0].detectedMimeType).toBe(
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      );
+      expect(result.errors).toHaveLength(0);
+    });
+
     it('should return errors for disallowed MIME type', async () => {
       mockStrapi.config.get.mockReturnValue({
         allowedTypes: ['application/pdf'],
