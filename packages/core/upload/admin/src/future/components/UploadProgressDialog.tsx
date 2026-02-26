@@ -52,8 +52,7 @@ const HeaderStatusIcon = styled(Flex)`
   }
 `;
 
-const HeaderStatusWrapper = styled(Drawer.Title)`
-  display: flex;
+const HeaderStatusWrapper = styled(Flex)`
   align-items: center;
 `;
 
