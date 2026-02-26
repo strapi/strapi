@@ -9371,8 +9371,8 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin-test-utils": "npm:5.36.1"
     "@strapi/data-transfer": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/permissions": "npm:5.36.1"
     "@strapi/types": "npm:5.36.1"
     "@strapi/typescript-utils": "npm:5.36.1"
@@ -9520,8 +9520,8 @@ __metadata:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@strapi/admin": "npm:5.36.1"
     "@strapi/database": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/types": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
     "@testing-library/react": "npm:16.3.0"
@@ -9583,8 +9583,8 @@ __metadata:
     "@strapi/admin-test-utils": "npm:5.36.1"
     "@strapi/content-manager": "npm:5.36.1"
     "@strapi/database": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/types": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
     "@testing-library/dom": "npm:10.4.1"
@@ -9629,9 +9629,9 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@sindresorhus/slugify": "npm:1.1.0"
     "@strapi/admin": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
     "@strapi/generators": "npm:5.36.1"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/types": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
     "@testing-library/dom": "npm:10.4.1"
@@ -9857,13 +9857,51 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@strapi/design-system@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@strapi/design-system@npm:2.2.0"
+  dependencies:
+    "@codemirror/lang-json": "npm:6.0.1"
+    "@floating-ui/react-dom": "npm:2.1.0"
+    "@internationalized/date": "npm:3.5.4"
+    "@internationalized/number": "npm:3.5.3"
+    "@radix-ui/react-accordion": "npm:1.1.2"
+    "@radix-ui/react-alert-dialog": "npm:1.0.5"
+    "@radix-ui/react-avatar": "npm:1.0.4"
+    "@radix-ui/react-checkbox": "npm:1.0.4"
+    "@radix-ui/react-dialog": "npm:1.0.5"
+    "@radix-ui/react-dismissable-layer": "npm:1.0.5"
+    "@radix-ui/react-dropdown-menu": "npm:2.0.6"
+    "@radix-ui/react-focus-guards": "npm:1.0.1"
+    "@radix-ui/react-focus-scope": "npm:1.0.4"
+    "@radix-ui/react-popover": "npm:1.0.7"
+    "@radix-ui/react-progress": "npm:1.0.3"
+    "@radix-ui/react-radio-group": "npm:1.1.3"
+    "@radix-ui/react-scroll-area": "npm:1.0.5"
+    "@radix-ui/react-switch": "npm:1.0.3"
+    "@radix-ui/react-tabs": "npm:1.0.4"
+    "@radix-ui/react-tooltip": "npm:1.0.7"
+    "@radix-ui/react-use-callback-ref": "npm:1.0.1"
+    "@strapi/ui-primitives": "npm:2.2.0"
+    "@uiw/react-codemirror": "npm:4.22.2"
+    lodash: "npm:4.17.23"
+    react-remove-scroll: "npm:2.5.10"
+  peerDependencies:
+    "@strapi/icons": ^2.0.0 || ^2.0.0-beta || ^2.0.0-alpha
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    styled-components: ^6.0.0
+  checksum: 10c0/10c8b505373bd64e0db81d7f7a6bd2794c511cf1cc5739a3ee5289728c6e7b6f3f6f5f0e66f4d80e3f8cbe11a1e5e3511ac8aff94e52ae260b2e2bb9834080b9
+  languageName: node
+  linkType: hard
+
 "@strapi/email@npm:5.36.1, @strapi/email@workspace:packages/core/email":
   version: 0.0.0-use.local
   resolution: "@strapi/email@workspace:packages/core/email"
   dependencies:
     "@strapi/admin": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/provider-email-sendmail": "npm:5.36.1"
     "@strapi/types": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
@@ -9956,8 +9994,8 @@ __metadata:
     "@strapi/admin-test-utils": "npm:5.36.1"
     "@strapi/content-manager": "npm:5.36.1"
     "@strapi/database": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/types": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
     "@testing-library/react": "npm:16.3.0"
@@ -9993,6 +10031,17 @@ __metadata:
     react-dom: ^17.0.0 || ^18.0.0
     styled-components: ^6.0.0
   checksum: 10c0/6f3edfbd7ffa72ff22463abf9d1df09561eeeffe43dfec7e2f8c1d37b67d53a0f709af3e00690a6d9dc033a4b4ab45a8b73ac7bd6d0b0f1950a4ffc2a0ccb159
+  languageName: node
+  linkType: hard
+
+"@strapi/icons@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@strapi/icons@npm:2.2.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    styled-components: ^6.0.0
+  checksum: 10c0/62d74b0d97fbd16cf67904dcbf1cfb786d8850f3e88a119df478555cfdd02f71b71fa8d4f201760ca3ead50de32e8e2a6818a8f6aade40a222aceb11564ad14e
   languageName: node
   linkType: hard
 
@@ -10069,8 +10118,8 @@ __metadata:
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
   dependencies:
     "@strapi/admin": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/strapi": "npm:5.36.1"
     eslint-config-custom: "npm:5.36.1"
     react: "npm:18.3.1"
@@ -10094,8 +10143,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-color-picker@workspace:packages/plugins/color-picker"
   dependencies:
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/strapi": "npm:5.36.1"
     "@testing-library/react": "npm:16.3.0"
     "@testing-library/user-event": "npm:14.6.1"
@@ -10123,8 +10172,8 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.36.1"
     "@strapi/admin-test-utils": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/strapi": "npm:5.36.1"
     "@strapi/types": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
@@ -10173,8 +10222,8 @@ __metadata:
     "@graphql-tools/schema": "npm:10.0.3"
     "@graphql-tools/utils": "npm:^10.1.3"
     "@koa/cors": "npm:5.0.0"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/strapi": "npm:5.36.1"
     "@strapi/types": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
@@ -10213,8 +10262,8 @@ __metadata:
   resolution: "@strapi/plugin-sentry@workspace:packages/plugins/sentry"
   dependencies:
     "@sentry/node": "npm:7.112.2"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/strapi": "npm:5.36.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
@@ -10233,8 +10282,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/strapi": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
     "@testing-library/dom": "npm:10.4.1"
@@ -10377,8 +10426,8 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.36.1"
     "@strapi/content-manager": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/types": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
     "@testing-library/react": "npm:16.3.0"
@@ -10610,6 +10659,38 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@strapi/ui-primitives@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@strapi/ui-primitives@npm:2.2.0"
+  dependencies:
+    "@radix-ui/number": "npm:1.0.1"
+    "@radix-ui/primitive": "npm:1.0.1"
+    "@radix-ui/react-collection": "npm:1.0.3"
+    "@radix-ui/react-compose-refs": "npm:1.0.1"
+    "@radix-ui/react-context": "npm:1.0.1"
+    "@radix-ui/react-direction": "npm:1.0.1"
+    "@radix-ui/react-dismissable-layer": "npm:1.0.5"
+    "@radix-ui/react-focus-guards": "npm:1.0.1"
+    "@radix-ui/react-focus-scope": "npm:1.0.4"
+    "@radix-ui/react-id": "npm:1.0.1"
+    "@radix-ui/react-popper": "npm:1.1.3"
+    "@radix-ui/react-portal": "npm:1.0.4"
+    "@radix-ui/react-primitive": "npm:1.0.3"
+    "@radix-ui/react-slot": "npm:1.0.2"
+    "@radix-ui/react-use-controllable-state": "npm:1.0.1"
+    "@radix-ui/react-use-layout-effect": "npm:1.0.1"
+    "@radix-ui/react-use-previous": "npm:1.0.1"
+    "@radix-ui/react-visually-hidden": "npm:1.0.3"
+    "@tanstack/react-virtual": "npm:^3.10.8"
+    aria-hidden: "npm:1.2.4"
+    react-remove-scroll: "npm:2.5.10"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+  checksum: 10c0/b28378fefe624af35aa6bb2eef7a00661f2698c6bb744aaee573c111b0adb4e8941cd8ef53f9dcd7e519f444e51900383ec103d83a5e11c53eb94eebd535c650
+  languageName: node
+  linkType: hard
+
 "@strapi/upgrade@workspace:packages/utils/upgrade":
   version: 0.0.0-use.local
   resolution: "@strapi/upgrade@workspace:packages/utils/upgrade"
@@ -10650,8 +10731,8 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.36.1"
     "@strapi/database": "npm:5.36.1"
-    "@strapi/design-system": "npm:2.1.2"
-    "@strapi/icons": "npm:2.1.2"
+    "@strapi/design-system": "npm:2.2.0"
+    "@strapi/icons": "npm:2.2.0"
     "@strapi/provider-upload-local": "npm:5.36.1"
     "@strapi/types": "npm:5.36.1"
     "@strapi/utils": "npm:5.36.1"
