@@ -42,16 +42,12 @@ const CellValue = ({ type, value }: CellValueProps) => {
   }
 
   if (type === 'boolean') {
-    formattedValue = value ? 'true' : 'false';  // Default values
-    try {
-      formattedValue = formatMessage({
-        id: value ? 'app.components.ToggleCheckbox.on-label' : 'app.components.ToggleCheckbox.off-label',
-        defaultMessage: value ? 'true' : 'false'
-      });
-    } catch (error) {
-      // Fallback to default if translation is missing
-      console.warn('Missing translation for boolean value');
-    }
+    formattedValue = formatMessage({
+      id: value
+        ? 'app.components.ToggleCheckbox.on-label'
+        : 'app.components.ToggleCheckbox.off-label',
+      defaultMessage: value ? 'true' : 'false',
+    });
   }
 
   if (['integer', 'biginteger'].includes(type)) {
