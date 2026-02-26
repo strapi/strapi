@@ -149,10 +149,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         data.fileInfo = data.fileInfo || [];
         data.fileInfo = validFiles.map((_f, i) => ({
           ...data.fileInfo[i],
-          folder: apiUploadFolder.id,
+          folder: data.fileInfo[i]?.folder ?? apiUploadFolder.id,
         }));
       } else {
-        data.fileInfo = { ...data.fileInfo, folder: apiUploadFolder.id };
+        data.fileInfo = { ...data.fileInfo, folder: data.fileInfo?.folder ?? apiUploadFolder.id };
       }
 
       const uploadedFiles = await getService('upload').upload({
