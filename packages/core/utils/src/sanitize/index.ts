@@ -27,7 +27,7 @@ export interface Options {
    */
   strictParams?: boolean;
   /**
-   * When set, extra query/body params are derived from the route's request schema (and validated/sanitized with Zod).
+   * When set, extra query/input params are derived from the route's request schema (and validated/sanitized with Zod).
    * When absent, no extra params are allowed in strict mode.
    */
   route?: RouteLike;
@@ -92,7 +92,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     ];
 
     if (strictParams) {
-      // Remove unrecognized fields (allowedExtraRootKeys = registered body param keys)
+      // Remove unrecognized fields (allowedExtraRootKeys = registered input param keys)
       transforms.push(
         traverseEntity(visitors.removeUnrecognizedFields, {
           schema,
@@ -121,7 +121,7 @@ const createAPISanitizers = (opts: APIOptions) => {
      * The route's body schema is z.object({ data: ... }), so its shape includes "data". We skip "data" because
      * the main document payload is already sanitized above by traverseEntity (removeUnrecognizedFields, etc.);
      * relation ops (connect/disconnect/set) are handled there, not by the route's Zod schema. We only run
-     * Zod here for truly extra root keys added via addBodyParams (e.g. clientMutationId).
+     * Zod here for truly extra root keys added via addInputParams (e.g. clientMutationId).
      */
     const routeBodySanitizeTransform = async (data: Data): Promise<Data> => {
       if (!data || typeof data !== 'object' || Array.isArray(data)) return data;

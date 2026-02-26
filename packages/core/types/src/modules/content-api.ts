@@ -28,8 +28,8 @@ export type QueryParamEntry = {
   matchRoute?: (route: Route) => boolean;
 };
 
-/** Schema + optional matchRoute for one body param. Keys in addBodyParams are the param names. */
-export type BodyParamEntry = {
+/** Schema + optional matchRoute for one input param (root-level body.data). Keys in addInputParams are the param names. */
+export type InputParamEntry = {
   /** Zod schema or factory. Any Zod type allowed (scalars, objects, arrays). */
   schema: z.ZodType | ((z: ZodSchemaFactory) => z.ZodType);
   /** If provided, the param is only merged into routes for which this returns true. */
@@ -39,8 +39,8 @@ export type BodyParamEntry = {
 /** Options for addQueryParams: keys are param names, values are schema + optional matchRoute. */
 export type AddQueryParamsOptions = Record<string, QueryParamEntry>;
 
-/** Options for addBodyParams: keys are param names, values are schema + optional matchRoute. */
-export type AddBodyParamsOptions = Record<string, BodyParamEntry>;
+/** Options for addInputParams: keys are param names, values are schema + optional matchRoute. */
+export type AddInputParamsOptions = Record<string, InputParamEntry>;
 
 export interface Condition {
   name: string;
@@ -81,7 +81,7 @@ export interface ContentApi {
   validate: validate.APIValidators;
   /**
    * Register extra query params to be merged into content-api route schemas.
-   * Query params accept only Zod scalar or array-of-scalar schemas (no nested objects); enforced at runtime. Use {@link ContentApi.addBodyParams} for nested structures.
+   * Query params accept only Zod scalar or array-of-scalar schemas (no nested objects); enforced at runtime. Use {@link ContentApi.addInputParams} for nested structures.
    * Use `z` from `@strapi/utils` or `zod/v4` for compatibility.
    *
    * @param options - {@link AddQueryParamsOptions}: record of param name → {@link QueryParamEntry}. Each entry has:
@@ -91,20 +91,20 @@ export interface ContentApi {
    */
   addQueryParams: (options: AddQueryParamsOptions) => void;
   /**
-   * Register extra body params to be merged into content-api route schemas (JSON body).
+   * Register extra input params (root-level body.data) to be merged into content-api route schemas.
    * Any Zod type is allowed (scalars, objects, arrays). Enforced at runtime.
    *
-   * @param options - {@link AddBodyParamsOptions}: record of param name → {@link BodyParamEntry}. Each entry has:
-   * @param options.[paramName] - {@link BodyParamEntry} (key is the root-level JSON key, e.g. `"metadata"`).
+   * @param options - {@link AddInputParamsOptions}: record of param name → {@link InputParamEntry}. Each entry has:
+   * @param options.[paramName] - {@link InputParamEntry} (key is the root-level key in body.data, e.g. `"metadata"`).
    * @param options.[paramName].schema - `z.ZodType` or `(z: {@link ZodSchemaFactory}) => z.ZodType`. Any Zod type (e.g. z.object(), z.array(), scalars).
    * @param options.[paramName].matchRoute - Optional. `(route: {@link Route}) => boolean`; if provided, this param is only added to routes for which it returns true.
    */
-  addBodyParams: (options: AddBodyParamsOptions) => void;
+  addInputParams: (options: AddInputParamsOptions) => void;
   /**
    * Merge all registered extra params into the given routes (mutates in place). Used at route registration.
    *
    * @internal Used by the framework during route registration. Not intended for app or plugin code.
-   * @param routes - Array of {@link Route} objects to mutate with registered query/body params.
+   * @param routes - Array of {@link Route} objects to mutate with registered query/input params.
    */
   applyExtraParamsToRoutes: (routes: Route[]) => void;
 }

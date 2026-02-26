@@ -9,10 +9,10 @@ import {
 import { OperationContextFactory } from '../src/context';
 
 /**
- * Params registered via strapi.contentAPI.addQueryParams / addBodyParams are
+ * Params registered via strapi.contentAPI.addQueryParams / addInputParams are
  * merged into each route's request.query and request.body (by the content-api
  * service). The OpenAPI spec generator reads route.request when assembling
- * parameters and body. These tests (1) call addQueryParams/addBodyParams,
+ * parameters and body. These tests (1) call addQueryParams/addInputParams,
  * (2) simulate merging those params into routes, (3) run the assemblers and
  * assert the generated spec includes the params.
  */
@@ -24,7 +24,7 @@ type ResolvedQueryParamEntry = {
   matchRoute?: (r: Core.Route) => boolean;
 };
 /** Resolved entry shape (param + schema + matchRoute) mirroring the real content-api service storage. */
-type ResolvedBodyParamEntry = {
+type ResolvedInputParamEntry = {
   param: string;
   schema: z.ZodType;
   matchRoute?: (r: Core.Route) => boolean;
@@ -42,13 +42,13 @@ const contentAPIRoute = (overrides: Partial<Core.Route> = {}): Core.Route =>
 
 function createMockContentAPI() {
   const extraQueryParams: ResolvedQueryParamEntry[] = [];
-  const extraBodyParams: ResolvedBodyParamEntry[] = [];
+  const extraInputParams: ResolvedInputParamEntry[] = [];
   return {
     addQueryParams(options: Modules.ContentAPI.AddQueryParamsOptions) {
       Object.entries(options).forEach(([param, rest]) => extraQueryParams.push({ param, ...rest }));
     },
-    addBodyParams(options: Modules.ContentAPI.AddBodyParamsOptions) {
-      Object.entries(options).forEach(([param, rest]) => extraBodyParams.push({ param, ...rest }));
+    addInputParams(options: Modules.ContentAPI.AddInputParamsOptions) {
+      Object.entries(options).forEach(([param, rest]) => extraInputParams.push({ param, ...rest }));
     },
     mergeQueryParamsIntoRoute(route: Core.Route): Core.Route {
       const query = { ...route.request?.query } as Record<string, z.ZodType>;
@@ -59,10 +59,10 @@ function createMockContentAPI() {
       }
       return { ...route, request: { ...route.request, query } };
     },
-    mergeBodyParamsIntoRoute(route: Core.Route): Core.Route {
+    mergeInputParamsIntoRoute(route: Core.Route): Core.Route {
       const jsonKey = 'application/json';
       const extra: Record<string, z.ZodType> = {};
-      for (const { param, schema, matchRoute } of extraBodyParams) {
+      for (const { param, schema, matchRoute } of extraInputParams) {
         if (!matchRoute || matchRoute(route)) {
           extra[param] = schema;
         }
@@ -73,7 +73,7 @@ function createMockContentAPI() {
   };
 }
 
-describe('OpenAPI operation assemblers – params added via addQueryParams / addBodyParams', () => {
+describe('OpenAPI operation assemblers – params added via addQueryParams / addInputParams', () => {
   const createOperationContext = () => {
     const factory = new OperationContextFactory();
     return factory.create({ strapi: {} as Core.Strapi, routes: [] }, {});
@@ -139,13 +139,13 @@ describe('OpenAPI operation assemblers – params added via addQueryParams / add
   });
 
   describe('BodyAssembler', () => {
-    it('includes in the spec body params registered with addBodyParams', () => {
+    it('includes in the spec input params registered with addInputParams', () => {
       const contentAPI = createMockContentAPI();
-      contentAPI.addBodyParams({
+      contentAPI.addInputParams({
         clientMutationId: { schema: z.string().max(100).optional() },
       });
 
-      const route = contentAPI.mergeBodyParamsIntoRoute(
+      const route = contentAPI.mergeInputParamsIntoRoute(
         contentAPIRoute({ method: 'POST', handler: 'api::article.article.create' })
       );
 

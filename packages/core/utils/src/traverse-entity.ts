@@ -31,7 +31,7 @@ export interface VisitorOptions {
   path: Path;
   getModel(uid: string): Model;
   parent?: Parent;
-  /** Extra root-level keys allowed (e.g. registered body params). Only used when path.attribute === null. */
+  /** Extra root-level keys allowed (e.g. registered input params). Only used when path.attribute === null. */
   allowedExtraRootKeys?: string[];
 }
 
@@ -48,7 +48,7 @@ export interface TraverseOptions {
   path?: Path;
   parent?: Parent;
   getModel(uid: string): Model;
-  /** Extra root-level keys allowed (e.g. registered body params). Only used when path.attribute === null. */
+  /** Extra root-level keys allowed (e.g. registered input params). Only used when path.attribute === null. */
   allowedExtraRootKeys?: string[];
 }
 

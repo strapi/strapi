@@ -1,4 +1,4 @@
-import { omit, assoc, merge, curry, isEmpty } from 'lodash/fp';
+import { omit, assoc, merge, curry, isEmpty, pick } from 'lodash/fp';
 
 import {
   async,
@@ -229,7 +229,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   };
 
   /**
-   * When strict is true, throws on unrecognized root-level keys.
+   * When strict is true, strip to allowed root-level keys so only those reach the query.
+   * Extra params (e.g. from content API addQueryParams) are allowed in so middlewares see them,
+   * but are stripped here before the query pipeline; they never affect the document query.
    */
   const checkUnrecognizedRootParams = (
     params: Record<string, unknown>,
@@ -239,18 +241,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       return params;
     }
 
-    const unrecognized = Object.keys(params).filter(
-      (key) => !(ALLOWED_DOCUMENT_ROOT_PARAM_KEYS as readonly string[]).includes(key)
-    );
-
-    if (unrecognized.length > 0) {
-      throw new errors.ValidationError(
-        `Unrecognized parameter(s) at root level: ${unrecognized.map((k) => `'${k}'`).join(', ')}. ` +
-          `Allowed: ${ALLOWED_DOCUMENT_ROOT_PARAM_KEYS.join(', ')}.`
-      );
-    }
-
-    return params;
+    return pick(ALLOWED_DOCUMENT_ROOT_PARAM_KEYS as unknown as string[], params) as Record<
+      string,
+      unknown
+    >;
   };
 
   const validateParams = async (

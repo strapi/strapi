@@ -62,7 +62,7 @@ describe('Content API – schemas from exported @strapi/utils z (Zod v4)', () =>
     await builder.cleanup();
   });
 
-  describe('addQueryParams / addBodyParams accept schemas from @strapi/utils', () => {
+  describe('addQueryParams / addInputParams accept schemas from @strapi/utils', () => {
     it('addQueryParams accepts schema built with exported z and applyExtraParamsToRoutes succeeds', () => {
       strapi.contentAPI.addQueryParams({
         exportedZodSearch: { schema: z.string().max(200).optional() },
@@ -79,8 +79,8 @@ describe('Content API – schemas from exported @strapi/utils z (Zod v4)', () =>
       expect(route.request?.query).toHaveProperty('exportedZodSearch');
     });
 
-    it('addBodyParams accepts schema built with exported z and applyExtraParamsToRoutes succeeds', () => {
-      strapi.contentAPI.addBodyParams({
+    it('addInputParams accepts schema built with exported z and applyExtraParamsToRoutes succeeds', () => {
+      strapi.contentAPI.addInputParams({
         exportedZodClientId: { schema: z.string().max(100).optional() },
       });
 

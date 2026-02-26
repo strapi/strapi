@@ -16,17 +16,17 @@ module.exports = {
     // Use a function (z) => schema so you don't need to import z; Strapi passes its z.
     // -------------------------------------------------------------------------
 
-    // Custom query param: e.g. GET /api/articles?search=coffee
+    // Custom query param: e.g. GET /api/articles?extraParam=coffee
     // matchRoute: only add this param to routes whose path includes "articles"
     strapi.contentAPI.addQueryParams({
-      search: {
+      extraParam: {
         schema: (z) => z.string().max(200).optional(),
         matchRoute: (route) => route.path.includes('articles'),
       },
     });
 
     // Custom body param: e.g. POST /api/articles with body { title: '...', clientMutationId: 'abc-123' }
-    strapi.contentAPI.addBodyParams({
+    strapi.contentAPI.addInputParams({
       clientMutationId: {
         schema: (z) => z.string().max(100).optional(),
       },

@@ -4,7 +4,7 @@ import {
   validate,
   sanitizeRoutesMapForSerialization,
   ALLOWED_QUERY_PARAM_KEYS,
-  RESERVED_BODY_PARAM_KEYS,
+  RESERVED_INPUT_PARAM_KEYS,
 } from '@strapi/utils';
 import * as z from 'zod/v4';
 
@@ -23,56 +23,6 @@ const transformRoutePrefixFor = (pluginName: string) => (route: Core.Route) => {
 };
 
 const filterContentAPI = (route: Core.Route) => route.info.type === 'content-api';
-
-function isRoute(obj: unknown): obj is Core.Route {
-  return (
-    typeof obj === 'object' && obj !== null && 'path' in obj && 'method' in obj && 'info' in obj
-  );
-}
-
-/** Collect all content-api route objects that currently exist on strapi.apis and strapi.plugins. */
-const getCurrentContentAPIRoutes = (strapi: Core.Strapi): Core.Route[] => {
-  const routes: Core.Route[] = [];
-  _.forEach(strapi.apis, (api) => {
-    const routerList = Object.values(api.routes ?? {});
-    for (const router of routerList) {
-      if (
-        router &&
-        typeof router === 'object' &&
-        'routes' in router &&
-        Array.isArray(router.routes)
-      ) {
-        router.routes
-          .filter(isRoute)
-          .filter(filterContentAPI)
-          .forEach((r) => routes.push(r));
-      }
-    }
-  });
-  _.forEach(strapi.plugins, (plugin) => {
-    if (Array.isArray(plugin.routes)) {
-      plugin.routes
-        .filter(isRoute)
-        .filter(filterContentAPI)
-        .forEach((r) => routes.push(r));
-    } else if (plugin.routes && typeof plugin.routes === 'object') {
-      for (const router of Object.values(plugin.routes)) {
-        if (
-          router &&
-          typeof router === 'object' &&
-          'routes' in router &&
-          Array.isArray(router.routes)
-        ) {
-          router.routes
-            .filter(isRoute)
-            .filter(filterContentAPI)
-            .forEach((r) => routes.push(r));
-        }
-      }
-    }
-  });
-  return routes;
-};
 
 /**
  * Runtime check for addQueryParams: we only allow scalar or array-of-scalar schemas (no nested objects).
@@ -98,7 +48,7 @@ function assertQueryParamSchema(schema: unknown, param: string): void {
   const name = (schema as { constructor?: { name?: string } })?.constructor?.name ?? '';
   if (!ALLOWED_QUERY_SCHEMA_NAMES.has(name)) {
     throw new Error(
-      `contentAPI.addQueryParams: param "${param}" schema must be a scalar (string, number, boolean, enum) or array of scalars; got ${name}. Use addBodyParams for nested objects.`
+      `contentAPI.addQueryParams: param "${param}" schema must be a scalar (string, number, boolean, enum) or array of scalars; got ${name}. Use addInputParams for nested objects.`
     );
   }
   if (name === 'ZodOptional' || name === 'ZodDefault') {
@@ -125,7 +75,6 @@ const mergeOneQueryParamIntoRoute = (
   schema: z.ZodType,
   matchRoute?: (route: Core.Route) => boolean
 ): void => {
-  if (route.info?.type !== 'content-api') return;
   if (matchRoute && !matchRoute(route)) return;
   const query = { ...(route.request?.query ?? {}) };
   if (param in query) {
@@ -136,13 +85,12 @@ const mergeOneQueryParamIntoRoute = (
   route.request = { ...route.request, query: { ...query, [param]: schema } };
 };
 
-const mergeOneBodyParamIntoRoute = (
+const mergeOneInputParamIntoRoute = (
   route: Core.Route,
   param: string,
   schema: z.ZodType,
   matchRoute?: (route: Core.Route) => boolean
 ): void => {
-  if (route.info?.type !== 'content-api') return;
   if (matchRoute && !matchRoute(route)) return;
   const jsonKey = 'application/json';
   type RouteBody = NonNullable<NonNullable<Core.Route['request']>['body']>;
@@ -154,7 +102,7 @@ const mergeOneBodyParamIntoRoute = (
       : {};
   if (param in base) {
     throw new Error(
-      `contentAPI.addBodyParams: param "${param}" already exists on route ${route.method} ${route.path}`
+      `contentAPI.addInputParams: param "${param}" already exists on route ${route.method} ${route.path}`
     );
   }
   body[jsonKey] = z.object({ ...base, [param]: schema }) as RouteBody[keyof RouteBody];
@@ -167,7 +115,7 @@ type ResolvedQueryParamEntry = {
   schema: z.ZodType;
   matchRoute?: (route: Core.Route) => boolean;
 };
-type ResolvedBodyParamEntry = {
+type ResolvedInputParamEntry = {
   param: string;
   schema: z.ZodType;
   matchRoute?: (route: Core.Route) => boolean;
@@ -178,7 +126,7 @@ type ResolvedBodyParamEntry = {
  */
 const createContentAPI = (strapi: Core.Strapi) => {
   const extraQueryParams: ResolvedQueryParamEntry[] = [];
-  const extraBodyParams: ResolvedBodyParamEntry[] = [];
+  const extraInputParams: ResolvedInputParamEntry[] = [];
 
   const addQueryParam = (options: Modules.ContentAPI.QueryParamEntry & { param: string }) => {
     const { param, schema: schemaOrFactory, matchRoute } = options;
@@ -193,24 +141,25 @@ const createContentAPI = (strapi: Core.Strapi) => {
       throw new Error(`contentAPI.addQueryParams: param "${param}" has already been added`);
     }
     extraQueryParams.push({ param, schema, matchRoute });
-    const routes = getCurrentContentAPIRoutes(strapi);
-    routes.forEach((route) => mergeOneQueryParamIntoRoute(route, param, schema, matchRoute));
+    // Params are merged into routes when initRouting() runs (applyExtraParamsToRoutes).
+    // We do not merge here: at register() time routes may not exist yet (lazy creation), and
+    // merging here would cause double-merge when initRouting runs and 400 "invalid param" or
+    // "param already exists" errors.
   };
 
-  const addBodyParam = (options: Modules.ContentAPI.BodyParamEntry & { param: string }) => {
+  const addInputParam = (options: Modules.ContentAPI.InputParamEntry & { param: string }) => {
     const { param, schema: schemaOrFactory, matchRoute } = options;
     const schema = resolveSchema(schemaOrFactory);
-    if ((RESERVED_BODY_PARAM_KEYS as readonly string[]).includes(param)) {
+    if ((RESERVED_INPUT_PARAM_KEYS as readonly string[]).includes(param)) {
       throw new Error(
-        `contentAPI.addBodyParams: param "${param}" is reserved by Strapi; use a different name`
+        `contentAPI.addInputParams: param "${param}" is reserved by Strapi; use a different name`
       );
     }
-    if (extraBodyParams.some((o) => o.param === param)) {
-      throw new Error(`contentAPI.addBodyParams: param "${param}" has already been added`);
+    if (extraInputParams.some((o) => o.param === param)) {
+      throw new Error(`contentAPI.addInputParams: param "${param}" has already been added`);
     }
-    extraBodyParams.push({ param, schema, matchRoute });
-    const routes = getCurrentContentAPIRoutes(strapi);
-    routes.forEach((route) => mergeOneBodyParamIntoRoute(route, param, schema, matchRoute));
+    extraInputParams.push({ param, schema, matchRoute });
+    // Params are merged into routes when initRouting() runs (applyExtraParamsToRoutes).
   };
 
   /**
@@ -222,11 +171,11 @@ const createContentAPI = (strapi: Core.Strapi) => {
   };
 
   /**
-   * Register extra body params. Keys = param names; values = { schema, matchRoute? }.
+   * Register extra input params (root-level body.data). Keys = param names; values = { schema, matchRoute? }.
    * Any Zod type allowed; enforced at registration time.
    */
-  const addBodyParams = (options: Modules.ContentAPI.AddBodyParamsOptions) => {
-    Object.entries(options).forEach(([param, rest]) => addBodyParam({ param, ...rest }));
+  const addInputParams = (options: Modules.ContentAPI.AddInputParamsOptions) => {
+    Object.entries(options).forEach(([param, rest]) => addInputParam({ param, ...rest }));
   };
 
   /** Merge all registered extra params into the given routes (mutates in place). Called at route registration. Throws if a param key already exists. */
@@ -235,8 +184,8 @@ const createContentAPI = (strapi: Core.Strapi) => {
       for (const { param, schema, matchRoute } of extraQueryParams) {
         mergeOneQueryParamIntoRoute(route, param, schema, matchRoute);
       }
-      for (const { param, schema, matchRoute } of extraBodyParams) {
-        mergeOneBodyParamIntoRoute(route, param, schema, matchRoute);
+      for (const { param, schema, matchRoute } of extraInputParams) {
+        mergeOneInputParamIntoRoute(route, param, schema, matchRoute);
       }
     });
   };
@@ -318,7 +267,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
     sanitize: sanitizer,
     validate: validator,
     addQueryParams,
-    addBodyParams,
+    addInputParams,
     applyExtraParamsToRoutes,
   };
 };
