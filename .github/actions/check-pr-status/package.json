@@ -1,6 +1,6 @@
 {
   "name": "check-pr-status",
-  "version": "5.36.1",
+  "version": "5.37.0",
   "private": true,
   "license": "MIT",
   "main": "dist/index.js",

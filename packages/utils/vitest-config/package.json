@@ -1,6 +1,6 @@
 {
   "name": "vitest-config",
-  "version": "5.36.1",
+  "version": "5.37.0",
   "private": true,
   "license": "SEE LICENSE IN LICENSE",
   "exports": {
