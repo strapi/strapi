@@ -12,7 +12,7 @@ export type Settings = {
   mainField: string;
   defaultSortBy: string;
   defaultSortOrder: string;
-  relationOpenMode: RelationOpenMode;
+  relationOpenMode?: RelationOpenMode;
 };
 
 export type Metadatas = {
