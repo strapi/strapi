@@ -12,6 +12,7 @@ import { styled, type CSSProperties } from 'styled-components';
 import { getTranslation } from '../../../../../utils/translations';
 
 import { codeBlocks } from './Blocks/Code';
+import { embeddedSocialMediaBlocks } from './Blocks/EmbeddedSocialMedia';
 import { headingBlocks } from './Blocks/Heading';
 import { imageBlocks } from './Blocks/Image';
 import { linkBlocks } from './Blocks/Link';
@@ -75,6 +76,7 @@ const selectorBlockKeys = [
   'image',
   'quote',
   'code',
+  'embedded-social-media',
 ] as const;
 
 type SelectorBlockKey = (typeof selectorBlockKeys)[number];
@@ -201,6 +203,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         ...imageBlocks,
         ...quoteBlocks,
         ...codeBlocks,
+        ...embeddedSocialMediaBlocks,
       }),
       []
     ) satisfies BlocksStore;

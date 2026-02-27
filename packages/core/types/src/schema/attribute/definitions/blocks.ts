@@ -27,7 +27,8 @@ type RootNode =
   | CodeBlockNode
   | HeadingBlockNode
   | ListBlockNode
-  | ImageBlockNode;
+  | ImageBlockNode
+  | EmbeddedSocialMediaNode;
 
 // Type utils needed for the blocks renderer and the blocks editor
 export type BlocksNode = RootNode | NonTextInlineNode;
@@ -100,4 +101,9 @@ interface ImageBlockNode extends BaseNode {
   type: 'image';
   image: Attribute.MediaValue<false>;
   children: [{ type: 'text'; text: '' }];
+}
+
+export interface EmbeddedSocialMediaNode extends BaseNode {
+  type: 'embedded-social-media';
+  children: TextInlineNode[];
 }
