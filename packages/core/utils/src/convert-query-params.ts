@@ -267,12 +267,13 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     return pageVal;
   };
 
-  const convertPageSizeQueryParams = (pageSize: unknown, page: unknown): number => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const convertPageSizeQueryParams = (pageSize: unknown, _page: unknown): number => {
     const pageSizeVal = toNumber(pageSize);
 
     if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
       throw new PaginationError(
-        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
+        `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${pageSize}`
       );
     }
 
