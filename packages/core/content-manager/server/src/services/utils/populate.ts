@@ -70,8 +70,13 @@ function getPopulateForRelation(
       }
 
       if (mode === 'minimal') {
+        // Minimal fields required for CM localization features:
+        // - locale: identifies which locale this localization represents
+        // - documentId: links all localizations of the same document together
+        // - publishedAt: determines draft/published status
+        // - updatedAt: needed to compute "modified" status (draft updated after publish)
         return {
-          fields: ['locale', 'documentId', 'publishedAt'],
+          fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'],
         };
       }
 
