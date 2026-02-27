@@ -53,6 +53,7 @@ describe('Populate', () => {
     withLocalizations: {
       uid: 'api::article.article',
       modelName: 'Fake model with localizations',
+      pluginOptions: { i18n: { localized: true } },
       attributes: {
         title: {
           type: 'string',
@@ -62,6 +63,23 @@ describe('Populate', () => {
           relation: 'oneToMany',
           target: 'api::article.article',
           visible: false,
+        },
+      },
+    },
+    withLocalizationsNotLocalized: {
+      uid: 'api::product.product',
+      modelName: 'Fake non-localized model with localizations attribute',
+      pluginOptions: {},
+      attributes: {
+        name: {
+          type: 'string',
+        },
+        localizations: {
+          type: 'relation',
+          relation: 'oneToMany',
+          target: 'api::product.product',
+          visible: false,
+          private: true,
         },
       },
     },
@@ -173,7 +191,7 @@ describe('Populate', () => {
       test('defaults to validation populate for localizations', () => {
         const uid = 'withLocalizations';
 
-        const result = getDeepPopulate(uid as any);
+        const result = getDeepPopulate(uid as any) as Record<string, any>;
 
         // Default behavior: localizations gets validation populate (populated via getPopulateForValidation)
         expect(result).toHaveProperty('localizations');
@@ -183,7 +201,9 @@ describe('Populate', () => {
       test('populateLocalizationsMode: minimal returns only locale, documentId, publishedAt fields', () => {
         const uid = 'withLocalizations';
 
-        const result = getDeepPopulate(uid as any, { populateLocalizationsMode: 'minimal' });
+        const result = getDeepPopulate(uid as any, {
+          populateLocalizationsMode: 'minimal',
+        }) as Record<string, any>;
 
         expect(result).toEqual({
           localizations: {
@@ -195,7 +215,9 @@ describe('Populate', () => {
       test('populateLocalizationsMode: none excludes localizations from populate', () => {
         const uid = 'withLocalizations';
 
-        const result = getDeepPopulate(uid as any, { populateLocalizationsMode: 'none' });
+        const result = getDeepPopulate(uid as any, {
+          populateLocalizationsMode: 'none',
+        }) as Record<string, any>;
 
         expect(result).toEqual({
           localizations: false,
@@ -205,10 +227,39 @@ describe('Populate', () => {
       test('populateLocalizationsMode: validation returns full validation populate', () => {
         const uid = 'withLocalizations';
 
-        const result = getDeepPopulate(uid as any, { populateLocalizationsMode: 'validation' });
+        const result = getDeepPopulate(uid as any, {
+          populateLocalizationsMode: 'validation',
+        }) as Record<string, any>;
 
         expect(result).toHaveProperty('localizations');
         expect(result.localizations).toHaveProperty('populate');
+      });
+
+      test('non-localized content type falls through to default handling regardless of mode', () => {
+        const uid = 'withLocalizationsNotLocalized';
+
+        // With minimal mode, non-localized types should NOT use fields-based populate
+        // (locale is private on non-localized types, which would fail validation)
+        const minimalResult = getDeepPopulate(uid as any, {
+          populateLocalizationsMode: 'minimal',
+        }) as Record<string, any>;
+
+        // Should fall through to default invisible attribute handling (return true)
+        expect(minimalResult.localizations).toBe(true);
+
+        // With none mode, non-localized types should also fall through
+        const noneResult = getDeepPopulate(uid as any, {
+          populateLocalizationsMode: 'none',
+        }) as Record<string, any>;
+
+        expect(noneResult.localizations).toBe(true);
+
+        // With validation mode, non-localized types should also fall through
+        const validationResult = getDeepPopulate(uid as any, {
+          populateLocalizationsMode: 'validation',
+        }) as Record<string, any>;
+
+        expect(validationResult.localizations).toBe(true);
       });
     });
   });

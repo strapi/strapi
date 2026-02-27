@@ -54,24 +54,35 @@ function getPopulateForRelation(
   }
 
   if (attributeName === 'localizations') {
-    const mode = populateLocalizationsMode ?? 'validation';
+    // Only apply special localizations handling for localized content types.
+    // The i18n plugin adds locale/localizations to ALL content types, but marks
+    // them as private for non-localized types. Using fields-based populate on
+    // non-localized types would fail validation (locale is a private field).
+    const isLocalized =
+      (model as { pluginOptions?: { i18n?: { localized?: boolean } } }).pluginOptions?.i18n
+        ?.localized === true;
 
-    if (mode === 'none') {
-      return false;
-    }
+    if (isLocalized) {
+      const mode = populateLocalizationsMode ?? 'validation';
 
-    if (mode === 'minimal') {
+      if (mode === 'none') {
+        return false;
+      }
+
+      if (mode === 'minimal') {
+        return {
+          fields: ['locale', 'documentId', 'publishedAt'],
+        };
+      }
+
+      // 'validation' mode — full validation populate (needed for bulk locale publishing)
+      const validationPopulate = getPopulateForValidation(model.uid as UID.Schema);
+
       return {
-        fields: ['locale', 'documentId', 'publishedAt'],
+        populate: validationPopulate.populate,
       };
     }
-
-    // 'validation' mode — full validation populate (needed for bulk locale publishing)
-    const validationPopulate = getPopulateForValidation(model.uid as UID.Schema);
-
-    return {
-      populate: validationPopulate.populate,
-    };
+    // Non-localized types: fall through to default handling (return true for invisible attributes)
   }
 
   // always populate createdBy, updatedBy, localizations etc.
