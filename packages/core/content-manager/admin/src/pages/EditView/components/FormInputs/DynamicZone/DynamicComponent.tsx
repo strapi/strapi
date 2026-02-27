@@ -294,7 +294,7 @@ const DynamicComponent = ({
               </Accordion.Header>
               <Accordion.Content>
                 <AccordionContentRadius background="neutral0">
-                  <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
+                  <Box padding={{ initial: 4, medium: 6 }}>
                     <Grid.Root gap={4}>
                       {components[componentUid]?.layout?.map((row, rowInd) => {
                         return (

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { createContext, type FieldValue } from '@strapi/admin/strapi-admin';
+import { createContext, type FieldValue, useIsMobile } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -190,6 +190,7 @@ interface BlocksEditorProps
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
+    const isMobile = useIsMobile();
 
     const blocks = React.useMemo(
       () => ({
@@ -273,6 +274,11 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     // Ensure the editor is in sync after discard
     React.useEffect(() => {
+      // Never deselect while the editor is actively focused (typing / editing),
+      if (ReactEditor.isFocused(editor)) {
+        return;
+      }
+
       // Normalize empty states for comparison to avoid losing focus on the editor when content is deleted
       const normalizedValue = value?.length ? value : null;
       const normalizedEditorState = normalizeBlocksState(editor, editor.children);
@@ -322,7 +328,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               <BlocksToolbar />
               <EditorDivider width="100%" />
               <BlocksContent {...contentProps} />
-              {!isExpandedMode && (
+              {!isExpandedMode && !isMobile && (
                 <IconButton
                   position="absolute"
                   bottom="1.2rem"
