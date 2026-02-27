@@ -17,9 +17,17 @@ import { Navigate } from 'react-router-dom';
 
 import { SINGLE_TYPES } from '../../constants/collections';
 import { useDoc } from '../../hooks/useDocument';
-import { ListFieldLayout, ListLayout, useDocLayout } from '../../hooks/useDocumentLayout';
+import {
+  convertListLayoutToFieldLayouts,
+  type ListFieldLayout,
+  type ListLayout,
+  useDocLayout,
+} from '../../hooks/useDocumentLayout';
 import { useTypedSelector } from '../../modules/hooks';
-import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
+import {
+  useGetContentTypeConfigurationQuery,
+  useUpdateContentTypeConfigurationMutation,
+} from '../../services/contentTypes';
 import { setIn } from '../../utils/objects';
 
 import { Header } from './components/Header';
@@ -38,10 +46,10 @@ const ListConfiguration = () => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { model, collectionType } = useDoc();
+  const { model, collectionType, schema } = useDoc();
 
   const { isLoading: isLoadingLayout, list, edit } = useDocLayout();
-  const [, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
+  const [displayedHeaderNames, setDisplayedHeaderNames] = useScopedPersistentState<string[] | null>(
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
     null
   );
@@ -49,6 +57,12 @@ const ListConfiguration = () => {
     `STRAPI_LIST_VIEW_SETTINGS:${model}`,
     {}
   );
+
+  const { metadata } = useGetContentTypeConfigurationQuery(model, {
+    selectFromResult: ({ data }) => ({
+      metadata: data?.contentType.metadatas ?? {},
+    }),
+  });
 
   const [updateContentTypeConfiguration] = useUpdateContentTypeConfigurationMutation();
   const handleSubmit: FormProps<FormData>['onSubmit'] = async (data) => {
@@ -113,15 +127,27 @@ const ListConfiguration = () => {
   };
 
   const initialValues = React.useMemo(() => {
+    const headerNames =
+      displayedHeaderNames && displayedHeaderNames.length > 0
+        ? displayedHeaderNames
+        : list.layout.map((field) => field.name);
+
+    const headerMetadatas = headerNames.reduce<ListLayout['metadatas']>((acc, name) => {
+      acc[name] = metadata[name]?.list ?? list.metadatas[name] ?? { label: name };
+      return acc;
+    }, {});
+
     return {
-      layout: list.layout.map(({ label, sortable, name }) => ({
-        label: typeof label === 'string' ? label : formatMessage(label),
-        sortable,
-        name,
-      })),
+      layout: convertListLayoutToFieldLayouts(headerNames, schema?.attributes, headerMetadatas).map(
+        ({ label, sortable, name }) => ({
+          label: typeof label === 'string' ? label : formatMessage(label),
+          sortable,
+          name,
+        })
+      ),
       settings: list.settings,
     } satisfies FormData;
-  }, [formatMessage, list.layout, list.settings]);
+  }, [formatMessage, list, displayedHeaderNames, schema, metadata]);
 
   if (collectionType === SINGLE_TYPES) {
     return <Navigate to={`/single-types/${model}`} />;
