@@ -71,6 +71,7 @@ const yargs = require('yargs');
       verbose: options.verbose,
       gitCommit: options.gitCommit,
       preid: options.preid,
+      gitCommitArgs: '--no-verify',
     });
     workspaceVersion = versionResult.workspaceVersion;
     projectsVersionData = versionResult.projectsVersionData;

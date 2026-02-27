@@ -187,9 +187,13 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
 
   const handleClickSort = () => {
     if (sortable) {
-      setQuery({
-        sort: `${name}:${isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC'}`,
-      });
+      setQuery(
+        {
+          sort: `${name}:${isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC'}`,
+        },
+        'push',
+        true
+      );
     }
   };
 

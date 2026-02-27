@@ -246,7 +246,7 @@ const DynamicZone = ({
 
   return (
     <DynamicZoneProvider isInDynamicZone>
-      <Flex direction="column" alignItems="stretch" gap={6}>
+      <Flex direction="column" alignItems="stretch" gap={{ initial: 4, medium: 6 }}>
         {dynamicDisplayedComponentsLength > 0 && (
           <Box>
             <DynamicZoneLabel
@@ -286,6 +286,7 @@ const DynamicZone = ({
                     onGrabItem={handleGrabItem}
                     onAddComponent={handleAddComponent}
                     dynamicComponentsByCategory={dynamicComponentsByCategory}
+                    totalLength={dynamicDisplayedComponentsLength}
                   >
                     {children}
                   </DynamicComponent>

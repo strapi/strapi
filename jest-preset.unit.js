@@ -9,6 +9,8 @@ module.exports = {
     '.d.ts',
     '__tests__/resources',
     'tests/resources',
+    // Prevent Jest from running Vitest test files
+    '.vitest.test.ts',
   ],
   prettierPath: require.resolve('prettier-2'),
   testMatch: ['**/__tests__/**/*.{js,ts,jsx,tsx}'],

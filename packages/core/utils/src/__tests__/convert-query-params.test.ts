@@ -87,8 +87,92 @@ describe('convert-query-params', () => {
   });
 
   test.todo('convertSortQueryParams');
-  test.todo('convertStartQueryParams');
-  test.todo('convertLimitQueryParams');
+
+  describe('convertStartQueryParams', () => {
+    it('accepts valid non-negative integers', () => {
+      expect(transformer.private_convertStartQueryParams(0)).toBe(0);
+      expect(transformer.private_convertStartQueryParams(1)).toBe(1);
+      expect(transformer.private_convertStartQueryParams(100)).toBe(100);
+    });
+
+    it('coerces string numbers to integer', () => {
+      expect(transformer.private_convertStartQueryParams('0')).toBe(0);
+      expect(transformer.private_convertStartQueryParams('5')).toBe(5);
+      expect(transformer.private_convertStartQueryParams('  10  ')).toBe(10);
+    });
+
+    it('throws for negative values', () => {
+      expect(() => transformer.private_convertStartQueryParams(-1)).toThrow(
+        'convertStartQueryParams expected a positive integer got -1'
+      );
+      expect(() => transformer.private_convertStartQueryParams('-1')).toThrow(
+        'convertStartQueryParams expected a positive integer'
+      );
+    });
+
+    it('throws for non-integer numbers', () => {
+      expect(() => transformer.private_convertStartQueryParams(1.5)).toThrow(
+        'convertStartQueryParams expected a positive integer got 1.5'
+      );
+      expect(() => transformer.private_convertStartQueryParams('1.5')).toThrow(
+        'convertStartQueryParams expected a positive integer'
+      );
+    });
+
+    it('throws for invalid or NaN values', () => {
+      expect(() => transformer.private_convertStartQueryParams('invalid')).toThrow(
+        'convertStartQueryParams expected a positive integer'
+      );
+      expect(() => transformer.private_convertStartQueryParams(NaN)).toThrow(
+        'convertStartQueryParams expected a positive integer'
+      );
+      expect(() => transformer.private_convertStartQueryParams(undefined)).toThrow(
+        'convertStartQueryParams expected a positive integer'
+      );
+    });
+  });
+
+  describe('convertLimitQueryParams', () => {
+    it('accepts valid positive integers', () => {
+      expect(transformer.private_convertLimitQueryParams(1)).toBe(1);
+      expect(transformer.private_convertLimitQueryParams(10)).toBe(10);
+      expect(transformer.private_convertLimitQueryParams(100)).toBe(100);
+    });
+
+    it('returns undefined for -1 (unlimited)', () => {
+      expect(transformer.private_convertLimitQueryParams(-1)).toBeUndefined();
+      expect(transformer.private_convertLimitQueryParams('-1')).toBeUndefined();
+    });
+
+    it('coerces string numbers to integer', () => {
+      expect(transformer.private_convertLimitQueryParams('10')).toBe(10);
+      expect(transformer.private_convertLimitQueryParams('  25  ')).toBe(25);
+    });
+
+    it('throws for negative (except -1)', () => {
+      expect(() => transformer.private_convertLimitQueryParams(-2)).toThrow(
+        'convertLimitQueryParams expected a positive integer got -2'
+      );
+      expect(() => transformer.private_convertLimitQueryParams('-2')).toThrow(
+        'convertLimitQueryParams expected a positive integer'
+      );
+    });
+
+    it('throws for non-integer numbers', () => {
+      expect(() => transformer.private_convertLimitQueryParams(1.5)).toThrow(
+        'convertLimitQueryParams expected a positive integer'
+      );
+    });
+
+    it('throws for invalid or NaN values', () => {
+      expect(() => transformer.private_convertLimitQueryParams('invalid')).toThrow(
+        'convertLimitQueryParams expected a positive integer'
+      );
+      expect(() => transformer.private_convertLimitQueryParams(NaN)).toThrow(
+        'convertLimitQueryParams expected a positive integer'
+      );
+    });
+  });
 
   describe('convertPopulateQueryParams', () => {
     describe('Fields selection', () => {
@@ -205,5 +289,94 @@ describe('convert-query-params', () => {
   });
 
   test.todo('convertFieldsQueryParams');
+
+  describe('transformQueryParams', () => {
+    it('includes all supported params in the result (page-based pagination)', () => {
+      const params = {
+        filters: { title: 'Hello' },
+        sort: { title: 'asc' },
+        fields: ['title', 'createdAt'],
+        populate: { one_to_one: true },
+        page: 1,
+        pageSize: 10,
+        status: 'published' as const,
+        _q: 'search',
+        count: true,
+        ordering: { title: 'asc' },
+        unknownParam: 'ignored',
+      };
+
+      const result = transformer.transformQueryParams('api::dog.dog', params);
+
+      expect(result.where).toEqual({ title: 'Hello' });
+      expect(result.orderBy).toEqual({ title: 'asc' });
+      expect(result.select).toBeDefined();
+      expect(result.populate).toBeDefined();
+      expect(result.page).toBe(1);
+      expect(result.pageSize).toBe(10);
+      expect(result.filters).toBeDefined();
+      expect(typeof result.filters).toBe('function');
+      expect(result._q).toBe('search');
+      expect(result.count).toBe(true);
+      expect(result.ordering).toEqual({ title: 'asc' });
+      expect(result).toHaveProperty('unknownParam', 'ignored');
+    });
+
+    it('includes offset and limit when using start/limit pagination', () => {
+      const params = {
+        filters: { id: { $gt: 0 } },
+        start: 5,
+        limit: 20,
+      };
+
+      const result = transformer.transformQueryParams('api::dog.dog', params);
+
+      expect(result.where).toEqual({ id: { $gt: 0 } });
+      expect(result.offset).toBe(5);
+      expect(result.limit).toBe(20);
+    });
+
+    describe('page and pageSize (string→number coercion)', () => {
+      it('accepts numeric page and pageSize', () => {
+        const result = transformer.transformQueryParams('api::dog.dog', {
+          page: 2,
+          pageSize: 20,
+        });
+        expect(result.page).toBe(2);
+        expect(result.pageSize).toBe(20);
+      });
+
+      it('coerces string page and pageSize to numbers', () => {
+        const result = transformer.transformQueryParams('api::dog.dog', {
+          page: '2',
+          pageSize: '20',
+        });
+        expect(result.page).toBe(2);
+        expect(result.pageSize).toBe(20);
+      });
+
+      it('throws PaginationError for invalid page (non-integer or <= 0)', () => {
+        expect(() =>
+          transformer.transformQueryParams('api::dog.dog', { page: 0, pageSize: 10 })
+        ).toThrow(/Invalid 'page' parameter/);
+        expect(() =>
+          transformer.transformQueryParams('api::dog.dog', { page: 'invalid', pageSize: 10 })
+        ).toThrow(/Invalid 'page' parameter/);
+        expect(() =>
+          transformer.transformQueryParams('api::dog.dog', { page: -1, pageSize: 10 })
+        ).toThrow(/Invalid 'page' parameter/);
+      });
+
+      it('throws PaginationError for invalid pageSize (non-integer or <= 0)', () => {
+        expect(() =>
+          transformer.transformQueryParams('api::dog.dog', { page: 1, pageSize: 0 })
+        ).toThrow(/Invalid 'pageSize' parameter/);
+        expect(() =>
+          transformer.transformQueryParams('api::dog.dog', { page: 1, pageSize: 'invalid' })
+        ).toThrow(/Invalid 'pageSize' parameter/);
+      });
+    });
+  });
+
   test.todo('transformParamsToQuery');
 });

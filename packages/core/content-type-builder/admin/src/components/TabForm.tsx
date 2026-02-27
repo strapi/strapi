@@ -87,6 +87,7 @@ export const TabForm = ({
                   return (
                     <Grid.Item
                       col={input.size || 6}
+                      xs={12}
                       key={input.name || key}
                       direction="column"
                       alignItems="stretch"
@@ -124,6 +125,7 @@ export const TabForm = ({
                   return (
                     <Grid.Item
                       col={input.size || 12}
+                      xs={12}
                       key={input.name || key}
                       direction="column"
                       alignItems="stretch"
@@ -191,6 +193,7 @@ export const TabForm = ({
                 return (
                   <Grid.Item
                     col={input.size || 6}
+                    xs={12}
                     key={input.name || key}
                     direction="column"
                     alignItems="stretch"

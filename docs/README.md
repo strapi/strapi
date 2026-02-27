@@ -1,15 +1,20 @@
 # Strapi contributor documentation
 
+> [!NOTE]
 > If you are looking for the official Strapi documentation, it is available [here](https://docs.strapi.io)
 
 This documentation is a contributor documentation made for anyone that wants to contribute to the project.
 
 To run the documentation website, follow the instructions below.
 
+Otherwise, you can also access the documentation online at [contributor.strapi.io](https://contributor.strapi.io/).
+
+## Getting Started
+
 ### Installation
 
 ```
-$ yarn
+$ yarn install
 ```
 
 ### Local Development

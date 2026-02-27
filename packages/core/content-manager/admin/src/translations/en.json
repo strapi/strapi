@@ -38,6 +38,8 @@
   "components.DynamicZone.move-up-label": "Move component up",
   "components.DynamicZone.pick-compo": "Pick one component",
   "components.DynamicZone.required": "Component is required",
+  "components.DynamicZone.move-up": "Move up",
+  "components.DynamicZone.move-down": "Move down",
   "components.EmptyAttributesBlock.button": "Go to settings page",
   "components.EmptyAttributesBlock.description": "You can change your settings",
   "components.FieldItem.linkToComponentLayout": "Set the component's layout",
@@ -102,6 +104,7 @@
   "containers.EditSettingsView.modal-form.edit-field": "Edit the field",
   "containers.EditView.add.new-entry": "Add an entry",
   "containers.EditView.notification.errors": "The form contains some errors",
+  "containers.EditView.saveHint": "Ctrl / Cmd + Enter to {action}",
   "containers.Home.introduction": "To edit your entries go to the specific link in the left menu. This plugin doesn't have a proper way to edit settings and it's still under active development.",
   "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",
   "containers.Home.pluginHeaderTitle": "Content Manager",
@@ -317,5 +320,7 @@
   "widget.last-edited.single-type": "Single-Type",
   "widget.last-edited.no-data": "No edited entries",
   "widget.last-published.title": "Last published entries",
-  "widget.last-published.no-data": "No published entries"
+  "widget.last-published.no-data": "No published entries",
+  "actions-drawer.open": "Open more actions",
+  "actions-drawer.close": "Close more actions"
 }

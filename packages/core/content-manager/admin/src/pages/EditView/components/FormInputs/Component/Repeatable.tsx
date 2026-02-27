@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { useField, useNotification, useForm, createRulesEngine } from '@strapi/admin/strapi-admin';
+import {
+  useField,
+  useNotification,
+  useForm,
+  createRulesEngine,
+  useIsDesktop,
+} from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -11,7 +17,7 @@ import {
   useComposedRefs,
   BoxComponent,
 } from '@strapi/design-system';
-import { Plus, Drag, Trash } from '@strapi/icons';
+import { Plus, Drag, Trash, ArrowUp, ArrowDown } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -274,6 +280,7 @@ const RepeatableComponent = ({
                 onDropItem={handleDropItem}
                 onGrabItem={handleGrabItem}
                 __temp_key__={key}
+                totalLength={value.length}
               >
                 {layout.map((row, index) => {
                   const visibleFields = row.filter(({ ...field }) => {
@@ -387,6 +394,7 @@ interface ComponentProps
   toggleCollapses: () => void;
   children: React.ReactNode;
   __temp_key__: string;
+  totalLength: number;
 }
 
 const Component = ({
@@ -401,9 +409,12 @@ const Component = ({
   onDeleteComponent,
   toggleCollapses,
   __temp_key__,
+  totalLength,
+  onMoveItem,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
+  const isDesktop = useIsDesktop();
 
   const displayValue = useForm('RepeatableComponent', (state) => {
     return getIn(state.values, [...name.split('.'), mainField.name]);
@@ -431,6 +442,7 @@ const Component = ({
         // Close all collapses
         toggleCollapses();
       },
+      onMoveItem,
       ...dragProps,
     });
 
@@ -443,6 +455,29 @@ const Component = ({
     boxRef as React.RefObject<HTMLDivElement>,
     dropRef
   );
+
+  const handleMoveUp = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index > 0 && onMoveItem) {
+        onMoveItem(index - 1, index);
+      }
+    },
+    [index, onMoveItem]
+  );
+
+  const handleMoveDown = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (index < totalLength - 1 && onMoveItem) {
+        onMoveItem(index + 1, index);
+      }
+    },
+    [index, totalLength, onMoveItem]
+  );
+
+  const canMoveUp = index > 0;
+  const canMoveDown = index < totalLength - 1;
 
   return (
     <>
@@ -464,20 +499,52 @@ const Component = ({
               >
                 <Trash />
               </IconButton>
-              <IconButton
-                disabled={disabled}
-                ref={composedAccordionRefs}
-                variant="ghost"
-                onClick={(e) => e.stopPropagation()}
-                data-handler-id={handlerId}
-                label={formatMessage({
-                  id: getTranslation('components.DragHandle-label'),
-                  defaultMessage: 'Drag',
-                })}
-                onKeyDown={handleKeyDown}
-              >
-                <Drag />
-              </IconButton>
+              {isDesktop && (
+                <IconButton
+                  disabled={disabled}
+                  ref={composedAccordionRefs}
+                  variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
+                  data-handler-id={handlerId}
+                  label={formatMessage({
+                    id: getTranslation('components.DragHandle-label'),
+                    defaultMessage: 'Drag',
+                  })}
+                  onKeyDown={handleKeyDown}
+                >
+                  <Drag />
+                </IconButton>
+              )}
+              {!isDesktop && (
+                <>
+                  {canMoveUp && (
+                    <IconButton
+                      disabled={disabled || !canMoveUp}
+                      variant="ghost"
+                      onClick={handleMoveUp}
+                      label={formatMessage({
+                        id: getTranslation('components.DynamicZone.move-up'),
+                        defaultMessage: 'Move up',
+                      })}
+                    >
+                      <ArrowUp />
+                    </IconButton>
+                  )}
+                  {canMoveDown && (
+                    <IconButton
+                      disabled={disabled || !canMoveDown}
+                      variant="ghost"
+                      onClick={handleMoveDown}
+                      label={formatMessage({
+                        id: getTranslation('components.DynamicZone.move-down'),
+                        defaultMessage: 'Move down',
+                      })}
+                    >
+                      <ArrowDown />
+                    </IconButton>
+                  )}
+                </>
+              )}
             </Accordion.Actions>
           </Accordion.Header>
           <Accordion.Content>
@@ -485,8 +552,8 @@ const Component = ({
               direction="column"
               alignItems="stretch"
               background="neutral100"
-              padding={6}
-              gap={6}
+              padding={{ initial: 4, medium: 6 }}
+              gap={{ initial: 3, medium: 4 }}
             >
               {children}
             </Flex>

@@ -148,6 +148,7 @@ export const GuidedTourHomepageOverview = () => {
   const tourState = useGuidedTour('Overview', (s) => s.state.tours);
   const dispatch = useGuidedTour('Overview', (s) => s.dispatch);
   const enabled = useGuidedTour('Overview', (s) => s.state.enabled);
+  const hidden = useGuidedTour('Overview', (s) => s.state.hidden);
   const completedActions = useGuidedTour('Overview', (s) => s.state.completedActions);
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
 
@@ -170,7 +171,12 @@ export const GuidedTourHomepageOverview = () => {
     }
   };
 
-  if (!guidedTourMeta?.data.isFirstSuperAdminUser || !enabled) {
+  if (
+    !guidedTourMeta?.data?.isFirstSuperAdminUser ||
+    !enabled ||
+    hidden ||
+    process.env.NODE_ENV !== 'development'
+  ) {
     return null;
   }
 

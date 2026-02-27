@@ -23,7 +23,8 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     cacheDir: 'node_modules/.strapi/vite',
     configFile: false,
     define: {
-      'process.env': ctx.env,
+      process: {},
+      'process.env': JSON.stringify(ctx.env),
     },
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
@@ -36,6 +37,11 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'react-dom/client',
         'styled-components',
         'react-router-dom',
+        // Pre-bundle design-system so plugin custom field chunks (dynamic imports) resolve
+        // to the same instance as the main app. Otherwise TooltipProvider/DesignSystemProvider
+        // context from the root is not seen by components in plugin chunks.
+        '@strapi/design-system',
+        '@radix-ui/react-tooltip',
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why
@@ -94,13 +100,22 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
               'slate',
               'slate-history',
               'slate-react',
+              'motion',
             ]
           : []),
       ],
     },
     resolve: {
       // https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
-      dedupe: ['react', 'react-dom', 'react-router-dom', 'styled-components'],
+      // Include design-system so plugin chunks use the same instance and inherit root context
+      dedupe: [
+        'react',
+        'react-dom',
+        'react-router-dom',
+        'styled-components',
+        '@strapi/design-system',
+        '@radix-ui/react-tooltip',
+      ],
     },
     plugins: [react(), buildFilesPlugin(ctx)],
   };

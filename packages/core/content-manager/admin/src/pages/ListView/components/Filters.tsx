@@ -40,9 +40,10 @@ const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
 interface FiltersProps {
   disabled?: boolean;
   schema: Schema;
+  children: React.ReactNode;
 }
 
-const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
+const Root = ({ disabled, schema, children }: FiltersProps) => {
   const { attributes, uid: model, options } = schema;
   const { formatMessage, locale } = useIntl();
   const { trackUsage } = useTracking();
@@ -66,7 +67,12 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
 
     const id = value.id.$eq || value.id.$ne;
 
-    if (id && USER_FILTER_ATTRIBUTES.includes(key) && !acc.includes(id)) {
+    // Check if the attribute is a relation to admin::user
+    const attribute = attributes[key];
+    const isAdminUserRelation =
+      attribute?.type === 'relation' && 'target' in attribute && attribute.target === 'admin::user';
+
+    if (id && (isAdminUserRelation || USER_FILTER_ATTRIBUTES.includes(key)) && !acc.includes(id)) {
       acc.push(id);
     }
 
@@ -126,8 +132,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
             name,
             label: label ?? '',
             mainField: getMainField(attribute, mainFieldName, { schemas, components: {} }),
-            // @ts-expect-error – TODO: this is filtered out above in the `allowedFields` call but TS complains, is there a better way to solve this?
-            type: attribute.type,
+            type: attribute.type as Filters.Filter['type'],
           };
 
           if (
@@ -214,9 +219,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
       onOpenChange={onOpenChange}
       onChange={handleFilterChange}
     >
-      <Filters.Trigger />
-      <Filters.Popover zIndex={499} />
-      <Filters.List />
+      {children}
     </Filters.Root>
   );
 };
@@ -274,5 +277,12 @@ const AdminUsersFilter = ({ name }: Filters.ValueInputProps) => {
   );
 };
 
-export { FiltersImpl as Filters };
+const listViewFilters = {
+  Root,
+  Trigger: Filters.Trigger,
+  Popover: Filters.Popover,
+  List: Filters.List,
+};
+
+export { listViewFilters };
 export type { FiltersProps };
