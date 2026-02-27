@@ -99,6 +99,7 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run lint
+        # To reproduce locally: yarn prettier:check
         run: yarn prettier:check
 
   lint:
@@ -121,6 +122,7 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run lint
+        # To reproduce locally: NX_BASE=origin/develop NX_HEAD=HEAD yarn nx affected --target=lint --parallel --nx-ignore-cycles
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
   typescript:
@@ -144,6 +146,7 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: TSC for packages
+        # To reproduce locally: NX_BASE=origin/develop NX_HEAD=HEAD yarn nx affected --target=test:ts --nx-ignore-cycles
         run: yarn nx affected --target=test:ts --nx-ignore-cycles
       - name: TSC for back
         run: yarn nx affected --target=test:ts:back --nx-ignore-cycles
