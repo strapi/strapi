@@ -45,7 +45,7 @@ export const useCropImg = () => {
         zoomable: false,
         cropBoxResizable: true,
         background: false,
-        checkCrossOrigin: false,
+        checkCrossOrigin: true,
         crop: handleResize,
       });
 
