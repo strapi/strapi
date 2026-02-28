@@ -1,4 +1,4 @@
-import { useRef, useCallback, type ChangeEvent } from 'react';
+import { useRef, useCallback, useState, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Layouts, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
@@ -11,23 +11,32 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ChevronDown, Files, GridFour as GridIcon, List } from '@strapi/icons';
+import { ChevronDown, Files, Folder, GridFour as GridIcon, Link, List } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useUploadFilesStreamMutation } from '../../services/api';
+import { useUploadFilesStreamMutation, useUploadFromUrlsMutation } from '../../services/api';
+import { useGetFoldersQuery } from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
 
+import {
+  AssetDetailsDrawer,
+  useAssetDetailsParam,
+} from './components/AssetDetails/AssetDetailsDrawer';
 import { AssetsGrid } from './components/AssetsGrid';
 import { AssetsTable } from './components/AssetsTable';
+import { CreateFolderDialog } from './components/CreateFolderDialog';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
+import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { localStorageKeys, viewOptions } from './constants';
+import { useFolderInfo } from './hooks/useFolderInfo';
+import { useFolderNavigation } from './hooks/useFolderNavigation';
 import { useInfiniteAssets } from './hooks/useInfiniteAssets';
 
-const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
-
 import type { UploadFileInfo } from '../../../../../shared/contracts/files';
+
+const INTERSECTION_OPTIONS: IntersectionObserverInit = { threshold: 0.1 };
 
 /* -------------------------------------------------------------------------------------------------
  * AssetsView
@@ -35,14 +44,26 @@ import type { UploadFileInfo } from '../../../../../shared/contracts/files';
 
 interface AssetsViewProps {
   view: number;
+  folderId: number | null;
+  onAssetItemClick: (assetId: number) => void;
 }
 
-const AssetsView = ({ view }: AssetsViewProps) => {
+const AssetsView = ({ view, folderId, onAssetItemClick }: AssetsViewProps) => {
   const { formatMessage } = useIntl();
-  const { assets, isLoading, isFetchingMore, hasNextPage, fetchNextPage, error } =
-    useInfiniteAssets();
+  const {
+    assets,
+    isLoading: isLoadingAssets,
+    isFetchingMore,
+    hasNextPage,
+    fetchNextPage,
+    error,
+  } = useInfiniteAssets({ folder: folderId });
+  const { data: folders = [], isLoading: isLoadingFolders } = useGetFoldersQuery({
+    parentId: folderId,
+  });
 
   const isGridView = view === viewOptions.GRID;
+  const isLoading = isLoadingAssets || isLoadingFolders;
 
   const loadMoreRef = useElementOnScreen<HTMLDivElement>(
     useCallback(
@@ -77,9 +98,25 @@ const AssetsView = ({ view }: AssetsViewProps) => {
     );
   }
 
+  if (folders.length === 0 && assets.length === 0) {
+    return (
+      <Box padding={8}>
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: 'app.components.EmptyStateLayout.content-document',
+            defaultMessage: 'No content found',
+          })}
+        </Typography>
+      </Box>
+    );
+  }
   return (
     <>
-      {isGridView ? <AssetsGrid assets={assets} /> : <AssetsTable assets={assets} />}
+      {isGridView ? (
+        <AssetsGrid folders={folders} assets={assets} onAssetItemClick={onAssetItemClick} />
+      ) : (
+        <AssetsTable assets={assets} folders={folders} onAssetItemClick={onAssetItemClick} />
+      )}
       <div ref={loadMoreRef} style={{ height: 1 }} />
       {isFetchingMore && (
         <Flex justifyContent="center" padding={4}>
@@ -119,7 +156,7 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
   font-weight: ${({ theme }) => theme.fontWeights.semiBold};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral100};
+    background: ${({ theme }) => theme.colors.primary100};
   }
 
   &[data-state='on'] {
@@ -132,7 +169,7 @@ const StyledToggleItem = styled(ToggleGroup.Item)`
   }
 `;
 
-const HeaderWrapper = styled.div`
+const HeaderWrapper = styled(Box)`
   [data-strapi-header] {
     background: ${({ theme }) => theme.colors.neutral0};
 
@@ -144,10 +181,26 @@ const HeaderWrapper = styled.div`
 
 export const AssetsPage = () => {
   const { formatMessage } = useIntl();
+  const { openDetails } = useAssetDetailsParam();
+
+  const { currentFolderId } = useFolderNavigation();
+  const { title, itemCount } = useFolderInfo(currentFolderId);
+  const itemCountLabel = formatMessage(
+    {
+      id: getTranslationKey('header.content.item-count'),
+      defaultMessage: '{count, plural, =1 {# item} other {# items}}',
+    },
+    { count: itemCount }
+  );
+
+  const [isCreateFolderDialogOpen, setIsCreateFolderDialogOpen] = useState(false);
 
   // View state
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
+
+  // Dialog state
+  const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -155,6 +208,7 @@ export const AssetsPage = () => {
 
   // Upload handlers
   const [uploadFilesStream] = useUploadFilesStreamMutation();
+  const [uploadFromUrls] = useUploadFromUrlsMutation();
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;
@@ -187,101 +241,138 @@ export const AssetsPage = () => {
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      await uploadFilesToFolder(Array.from(files), null);
+      await uploadFilesToFolder(Array.from(files), currentFolderId);
     }
     e.target.value = '';
   };
 
   const handleDrop = async (files: globalThis.File[]) => {
-    await uploadFilesToFolder(files, null);
+    await uploadFilesToFolder(files, currentFolderId);
+  };
+
+  const handleUrlUpload = async (urls: string[]) => {
+    try {
+      await uploadFromUrls({ urls, folderId: currentFolderId }).unwrap();
+    } catch (error) {
+      // Error is already dispatched to store from the API queryFn
+    }
   };
 
   return (
-    <UploadDropZoneProvider onDrop={handleDrop}>
-      <Box ref={uploadDropZoneRef}>
-        <Layouts.Root minHeight="100vh" background="neutral0">
-          <VisuallyHidden>
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
-          </VisuallyHidden>
+    <>
+      <UploadDropZoneProvider onDrop={handleDrop}>
+        <Box ref={uploadDropZoneRef}>
+          <Layouts.Root minHeight="100vh" background="neutral0">
+            <VisuallyHidden>
+              <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple />
+            </VisuallyHidden>
 
-          <HeaderWrapper>
-            <Layouts.Header
-              title="TODO: Folder name"
-              primaryAction={
-                <SimpleMenu
-                  popoverPlacement="bottom-end"
-                  variant="default"
-                  endIcon={<ChevronDown />}
-                  label={formatMessage({ id: getTranslationKey('new'), defaultMessage: 'New' })}
-                >
-                  <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
-                    {formatMessage({
-                      id: getTranslationKey('import-files'),
-                      defaultMessage: 'Import files',
-                    })}
-                  </MenuItem>
-                </SimpleMenu>
-              }
-              subtitle={
-                <Flex justifyContent="space-between" alignItems="center" gap={4} width="100%">
-                  <Flex gap={4} alignItems="center">
-                    TODO: Filters and search
-                  </Flex>
-
-                  <Flex gap={4} alignItems="center">
-                    <Box>TODO: Sort</Box>
-                    <StyledToggleGroup
-                      type="single"
-                      value={isGridView ? 'grid' : 'table'}
-                      onValueChange={(value) =>
-                        value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
-                      }
-                      aria-label={formatMessage({
-                        id: getTranslationKey('view.switch.label'),
-                        defaultMessage: 'View options',
-                      })}
+            <HeaderWrapper>
+              <Layouts.Header
+                title={`${title} (${itemCountLabel})`}
+                primaryAction={
+                  <SimpleMenu
+                    popoverPlacement="bottom-end"
+                    variant="default"
+                    endIcon={<ChevronDown />}
+                    label={formatMessage({ id: getTranslationKey('new'), defaultMessage: 'New' })}
+                  >
+                    <MenuItem
+                      onSelect={() => setIsCreateFolderDialogOpen(true)}
+                      startIcon={<Folder />}
                     >
-                      <StyledToggleItem
-                        value="table"
-                        aria-label={formatMessage({
-                          id: getTranslationKey('view.table'),
-                          defaultMessage: 'Table view',
-                        })}
-                      >
-                        <List />
-                        {formatMessage({
-                          id: getTranslationKey('view.table'),
-                          defaultMessage: 'Table view',
-                        })}
-                      </StyledToggleItem>
-                      <StyledToggleItem
-                        value="grid"
-                        aria-label={formatMessage({
-                          id: getTranslationKey('view.grid'),
-                          defaultMessage: 'Grid view',
-                        })}
-                      >
-                        <GridIcon />
-                        {formatMessage({
-                          id: getTranslationKey('view.grid'),
-                          defaultMessage: 'Grid view',
-                        })}
-                      </StyledToggleItem>
-                    </StyledToggleGroup>
-                  </Flex>
-                </Flex>
-              }
-            />
-          </HeaderWrapper>
+                      {formatMessage({
+                        id: getTranslationKey('folder.create.title'),
+                        defaultMessage: 'New folder',
+                      })}
+                    </MenuItem>
+                    <MenuItem onSelect={handleFileSelect} startIcon={<Files />}>
+                      {formatMessage({
+                        id: getTranslationKey('import-files'),
+                        defaultMessage: 'Import files',
+                      })}
+                    </MenuItem>
+                    <MenuItem onSelect={() => setIsUrlDialogOpen(true)} startIcon={<Link />}>
+                      {formatMessage({
+                        id: getTranslationKey('import-from-url'),
+                        defaultMessage: 'Import from URL',
+                      })}
+                    </MenuItem>
+                  </SimpleMenu>
+                }
+                subtitle={
+                  <Flex justifyContent="space-between" alignItems="center" gap={4} width="100%">
+                    <Flex gap={4} alignItems="center">
+                      TODO: Filters and search
+                    </Flex>
 
-          <Layouts.Content>
-            <DropZoneWithOverlay>
-              <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} />
-              <AssetsView view={view} />
-            </DropZoneWithOverlay>
-          </Layouts.Content>
-        </Layouts.Root>
-      </Box>
-    </UploadDropZoneProvider>
+                    <Flex gap={4} alignItems="center">
+                      <Box>TODO: Sort</Box>
+                      <StyledToggleGroup
+                        type="single"
+                        value={isGridView ? 'grid' : 'table'}
+                        onValueChange={(value) =>
+                          value && setView(value === 'grid' ? viewOptions.GRID : viewOptions.TABLE)
+                        }
+                        aria-label={formatMessage({
+                          id: getTranslationKey('view.switch.label'),
+                          defaultMessage: 'View options',
+                        })}
+                      >
+                        <StyledToggleItem
+                          value="table"
+                          aria-label={formatMessage({
+                            id: getTranslationKey('view.table'),
+                            defaultMessage: 'Table view',
+                          })}
+                        >
+                          <List />
+                          {formatMessage({
+                            id: getTranslationKey('view.table'),
+                            defaultMessage: 'Table view',
+                          })}
+                        </StyledToggleItem>
+                        <StyledToggleItem
+                          value="grid"
+                          aria-label={formatMessage({
+                            id: getTranslationKey('view.grid'),
+                            defaultMessage: 'Grid view',
+                          })}
+                        >
+                          <GridIcon />
+                          {formatMessage({
+                            id: getTranslationKey('view.grid'),
+                            defaultMessage: 'Grid view',
+                          })}
+                        </StyledToggleItem>
+                      </StyledToggleGroup>
+                    </Flex>
+                  </Flex>
+                }
+              />
+            </HeaderWrapper>
+
+            <Layouts.Content>
+              <DropZoneWithOverlay>
+                <DropFilesMessage uploadDropZoneRef={uploadDropZoneRef} folderName={title} />
+                <AssetsView view={view} folderId={currentFolderId} onAssetItemClick={openDetails} />
+              </DropZoneWithOverlay>
+            </Layouts.Content>
+          </Layouts.Root>
+        </Box>
+      </UploadDropZoneProvider>
+      <CreateFolderDialog
+        open={isCreateFolderDialogOpen}
+        folderName={title}
+        parentFolderId={currentFolderId}
+        onClose={() => setIsCreateFolderDialogOpen(false)}
+      />
+      <ImportFromUrlDialog
+        open={isUrlDialogOpen}
+        onClose={() => setIsUrlDialogOpen(false)}
+        onUpload={handleUrlUpload}
+      />
+      <AssetDetailsDrawer />
+    </>
   );
 };
