@@ -482,7 +482,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const { where } = params;
 
       const deletedRows = await this.createQueryBuilder(uid)
-        .where(where)
+        .init({ where })
         .delete()
         .execute<number>({ mapResults: false });
 
