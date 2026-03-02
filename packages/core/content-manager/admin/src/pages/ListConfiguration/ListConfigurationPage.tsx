@@ -12,7 +12,7 @@ import {
 } from '@strapi/admin/strapi-admin';
 import { Divider, Flex, Main } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 import { SINGLE_TYPES } from '../../constants/collections';
 import { useDoc } from '../../hooks/useDocument';
@@ -239,13 +239,16 @@ const ListConfiguration = () => {
 };
 
 const ProtectedListConfiguration = () => {
+  const { slug = '' } = useParams<{
+    slug: string;
+  }>();
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.contentManager?.collectionTypesConfigurations
   );
 
   return (
     <Page.Protect permissions={permissions}>
-      <ListConfiguration />
+      <ListConfiguration key={slug} />
     </Page.Protect>
   );
 };

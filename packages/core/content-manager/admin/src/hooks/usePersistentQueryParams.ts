@@ -33,10 +33,10 @@ const normalizeConfigEntry = (
   scope: string | undefined
 ) => {
   const { paths } = entry;
-  const isScoped = entry.scoped === true;
+  const isScoped = entry.scoped === true && scope !== undefined;
 
   return {
-    key: isScoped && scope ? `${key}:${scope}` : key,
+    key: isScoped ? `${key}:${scope}` : key,
     paths,
   };
 };
