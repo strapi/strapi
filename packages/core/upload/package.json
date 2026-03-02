@@ -2,6 +2,15 @@
   "name": "@strapi/upload",
   "version": "5.37.1",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/core/upload"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
     "name": "Strapi Solutions SAS",

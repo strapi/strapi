@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/utils/logger"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {

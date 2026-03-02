@@ -2,9 +2,14 @@
   "name": "@strapi/review-workflows",
   "version": "5.37.1",
   "description": "Review workflows for your content",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/core/review-workflows"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {

@@ -2,9 +2,14 @@
   "name": "@strapi/email",
   "version": "5.37.1",
   "description": "Easily configure your Strapi application to send emails.",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/core/email"
   },
   "license": "SEE LICENSE IN LICENSE",
   "author": {

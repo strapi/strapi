@@ -11,6 +11,15 @@
     "backup",
     "restore"
   ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/core/data-transfer"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "author": {
     "name": "Strapi Solutions SAS",

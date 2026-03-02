@@ -2,9 +2,13 @@
   "name": "@strapi/plugin-graphql",
   "version": "5.37.1",
   "description": "Adds GraphQL endpoint with default API methods.",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/strapi/strapi.git",
+    "url": "git://github.com/strapi/strapi.git",
     "directory": "packages/plugins/graphql"
   },
   "license": "SEE LICENSE IN LICENSE",
