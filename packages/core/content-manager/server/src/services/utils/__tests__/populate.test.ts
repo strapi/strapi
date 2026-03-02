@@ -207,7 +207,7 @@ describe('Populate', () => {
 
         expect(result).toEqual({
           localizations: {
-            fields: ['locale', 'documentId', 'publishedAt'],
+            fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'],
           },
         });
       });
