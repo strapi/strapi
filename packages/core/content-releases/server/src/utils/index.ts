@@ -128,11 +128,58 @@ export const getEntryStatus = async (contentType: UID.ContentType, entry: Data.C
 };
 
 /**
+ * Recursively collects content type UIDs that a model (content type or component) has relations to.
+ * Go through component and dynamic zone attributes to find nested relations.
+ */
+const collectRelationTargets = (
+  modelUid: string,
+  strapi: Core.Strapi,
+  visited = new Set<string>()
+): Set<string> => {
+  const targets = new Set<string>();
+  if (visited.has(modelUid)) {
+    return targets;
+  }
+  visited.add(modelUid);
+
+  const model = strapi.getModel(modelUid as UID.Schema);
+  if (!model?.attributes) {
+    return targets;
+  }
+
+  for (const attribute of Object.values(model.attributes) as Array<{
+    type?: string;
+    target?: string;
+    component?: string;
+    components?: string[];
+  }>) {
+    if (attribute?.type === 'relation' && attribute.target) {
+      targets.add(attribute.target);
+    }
+    if (attribute?.type === 'component' && attribute.component) {
+      for (const t of collectRelationTargets(attribute.component, strapi, visited)) {
+        targets.add(t);
+      }
+    }
+    if (attribute?.type === 'dynamiczone' && attribute.components) {
+      for (const compUid of attribute.components) {
+        for (const t of collectRelationTargets(compUid, strapi, visited)) {
+          targets.add(t);
+        }
+      }
+    }
+  }
+  return targets;
+};
+
+/**
  * Returns content type UIDs sorted by relation dependency order for publishing.
  * When content type A has a relation to content type B (both with draft & publish),
  * B will appear before A in the result. This ensures that when publishing a release,
  * related entities are published first, so that relation IDs can be correctly
  * resolved (published target must exist when publishing source).
+ *
+ * Relations in components (nested or not) and dynamic zones are also considered.
  *
  * @param contentTypeUids - Content type UIDs that will be published in the release
  * @param strapi - Strapi instance
@@ -150,23 +197,21 @@ export const getPublishOrderForContentTypes = (
   for (const uid of contentTypeUids) {
     const model = strapi.getModel(uid);
     if (model && contentTypesUtils.hasDraftAndPublish(model)) {
-      for (const attribute of Object.values(model.attributes) as Array<{
-        type?: string;
-        target?: string;
-      }>) {
-        const isRelation = attribute?.type === 'relation' && attribute.target;
-        const targetUid = attribute?.target as UID.ContentType;
+      const relationTargets = collectRelationTargets(uid, strapi);
+
+      for (const targetUid of relationTargets) {
+        const targetContentTypeUid = targetUid as UID.ContentType;
         const isTargetInRelease =
-          targetUid && uidSet.has(targetUid) && strapi.contentTypes[targetUid];
-        const targetModel = targetUid ? strapi.getModel(targetUid) : null;
+          uidSet.has(targetContentTypeUid) && targetContentTypeUid in strapi.contentTypes;
+        const targetModel = strapi.getModel(targetContentTypeUid);
         const targetHasDraftAndPublish =
           targetModel && contentTypesUtils.hasDraftAndPublish(targetModel);
 
-        if (isRelation && isTargetInRelease && targetHasDraftAndPublish) {
+        if (isTargetInRelease && targetHasDraftAndPublish) {
           if (!dependencies.has(uid)) {
             dependencies.set(uid, new Set());
           }
-          dependencies.get(uid)!.add(targetUid);
+          dependencies.get(uid)!.add(targetContentTypeUid);
         }
       }
     }
