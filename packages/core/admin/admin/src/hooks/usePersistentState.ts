@@ -37,14 +37,19 @@ const usePersistentState = <T>(key: string, defaultValue: T) => {
   return [value, setValue] as const;
 };
 
+const usePersistentStateScope = () => {
+  const { data: initData } = useInitQuery();
+
+  return initData?.uuid;
+};
+
 // Same as usePersistentState, but scoped to the current instance of Strapi
 // useful for storing state that should not be shared across different instances of Strapi running on localhost
 const useScopedPersistentState = <T>(key: string, defaultValue: T) => {
-  const { data: initData } = useInitQuery();
-  const { uuid } = initData ?? {};
+  const uuid = usePersistentStateScope();
 
   const namespacedKey = `${key}:${uuid}`;
   return usePersistentState<T>(namespacedKey, defaultValue);
 };
 
-export { usePersistentState, useScopedPersistentState };
+export { usePersistentState, useScopedPersistentState, usePersistentStateScope };

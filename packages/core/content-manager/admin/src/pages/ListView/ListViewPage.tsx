@@ -44,7 +44,10 @@ import {
   convertListLayoutToFieldLayouts,
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
-import { usePersistentPartialQueryParams } from '../../hooks/usePersistentQueryParams';
+import {
+  type PersistentQueryConfig,
+  usePersistentPartialQueryParams,
+} from '../../hooks/usePersistentQueryParams';
 import { usePrev } from '../../hooks/usePrev';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
@@ -81,10 +84,16 @@ const ListViewPage = () => {
   const { collectionType, model, schema } = useDoc();
   const { list } = useDocumentLayout(model);
 
-  const persistentQueryConfigs = React.useMemo(
+  const persistentQueryConfigs: PersistentQueryConfig = React.useMemo(
     () => ({
-      [`STRAPI_LIST_VIEW_SETTINGS:${model}`]: ['sort', 'filters', 'pageSize'],
-      STRAPI_LOCALE: ['plugins.i18n.locale'],
+      [`STRAPI_LIST_VIEW_SETTINGS:${model}`]: {
+        paths: ['sort', 'filters', 'pageSize'],
+        scoped: true,
+      },
+      STRAPI_LOCALE: {
+        paths: ['plugins.i18n.locale'],
+        scoped: false,
+      },
     }),
     [model]
   );

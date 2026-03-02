@@ -1,4 +1,4 @@
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams, usePersistentStateScope } from '@strapi/admin/strapi-admin';
 import { renderHook, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
@@ -11,6 +11,7 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   useQueryParams: jest.fn(),
+  usePersistentStateScope: jest.fn(),
 }));
 
 const mockSetQuery = jest.fn();
@@ -26,12 +27,13 @@ describe('usePersistentPartialQueryParams', () => {
     window.localStorage.clear();
     (useLocation as jest.Mock).mockReturnValue({ pathname });
     (useQueryParams as jest.Mock).mockReturnValue([{ query: {} }, mockSetQuery]);
+    (usePersistentStateScope as jest.Mock).mockReturnValue('test-uuid');
   });
 
   it('should not load query params if localStorage is empty', () => {
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [key]: keysToPersist,
+        [key]: { paths: keysToPersist },
       })
     );
 
@@ -44,7 +46,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [key]: keysToPersist,
+        [key]: { paths: keysToPersist },
       })
     );
 
@@ -59,7 +61,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [key]: keysToPersist,
+        [key]: { paths: keysToPersist },
       })
     );
 
@@ -82,7 +84,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [key]: keysToPersist,
+        [key]: { paths: keysToPersist },
       })
     );
 
@@ -98,7 +100,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [key]: keysToPersist,
+        [key]: { paths: keysToPersist },
       })
     );
 
@@ -115,7 +117,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [key]: keysToPersist,
+        [key]: { paths: keysToPersist },
       })
     );
 
@@ -132,7 +134,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [key]: keysToPersist,
+        [key]: { paths: keysToPersist },
       })
     );
 
@@ -145,7 +147,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [key]: keysToPersist,
+        [key]: { paths: keysToPersist },
       })
     );
 
@@ -157,7 +159,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [key]: keysToPersist,
+        [key]: { paths: keysToPersist },
       })
     );
 
@@ -175,7 +177,7 @@ describe('usePersistentPartialQueryParams', () => {
 
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [`${keyPrefix}${pathname1}`]: keysToPersist,
+        [`${keyPrefix}${pathname1}`]: { paths: keysToPersist },
       })
     );
 
@@ -186,7 +188,7 @@ describe('usePersistentPartialQueryParams', () => {
     mockSetQuery.mockClear();
     renderHook(() =>
       usePersistentPartialQueryParams({
-        [`${keyPrefix}${pathname2}`]: keysToPersist,
+        [`${keyPrefix}${pathname2}`]: { paths: keysToPersist },
       })
     );
 
@@ -197,8 +199,8 @@ describe('usePersistentPartialQueryParams', () => {
 
   it('should load and merge params from multiple configs', async () => {
     const config = {
-      [`LIST_SETTINGS:${pathname}`]: ['page', 'pageSize', 'sort'],
-      LOCALE: ['plugins.i18n.locale'],
+      [`LIST_SETTINGS:${pathname}`]: { paths: ['page', 'pageSize', 'sort'] },
+      LOCALE: { paths: ['plugins.i18n.locale'] },
     };
 
     window.localStorage.setItem(
@@ -221,5 +223,43 @@ describe('usePersistentPartialQueryParams', () => {
         true
       );
     });
+  });
+
+  it('should load scoped config values from scoped localStorage key', async () => {
+    const config = {
+      'STRAPI_LIST_VIEW_SETTINGS:api::article.article': {
+        paths: ['pageSize', 'sort'],
+        scoped: true,
+      },
+    };
+
+    window.localStorage.setItem(
+      'STRAPI_LIST_VIEW_SETTINGS:api::article.article:test-uuid',
+      JSON.stringify({ pageSize: 20, sort: 'name:asc' })
+    );
+
+    renderHook(() => usePersistentPartialQueryParams(config));
+
+    await waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalledWith({ pageSize: 20, sort: 'name:asc' }, 'push', true);
+    });
+  });
+
+  it('should not load scoped values from unscoped key', () => {
+    const config = {
+      'STRAPI_LIST_VIEW_SETTINGS:api::article.article': {
+        paths: ['pageSize', 'sort'],
+        scoped: true,
+      },
+    };
+
+    window.localStorage.setItem(
+      'STRAPI_LIST_VIEW_SETTINGS:api::article.article',
+      JSON.stringify({ pageSize: 20, sort: 'name:asc' })
+    );
+
+    renderHook(() => usePersistentPartialQueryParams(config));
+
+    expect(mockSetQuery).not.toHaveBeenCalled();
   });
 });

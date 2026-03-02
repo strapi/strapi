@@ -5,7 +5,6 @@ import {
   type FormProps,
   useNotification,
   useScopedPersistentState,
-  usePersistentState,
   useTracking,
   useAPIErrorHandler,
   Page,
@@ -79,10 +78,8 @@ const ListConfiguration = () => {
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
     null
   );
-  const [listViewSettings, setListViewSettings] = usePersistentState<PersistentListViewSettings>(
-    `STRAPI_LIST_VIEW_SETTINGS:${model}`,
-    {}
-  );
+  const [listViewSettings, setListViewSettings] =
+    useScopedPersistentState<PersistentListViewSettings>(`STRAPI_LIST_VIEW_SETTINGS:${model}`, {});
 
   const { metadata } = useGetContentTypeConfigurationQuery(model, {
     selectFromResult: ({ data }) => ({
