@@ -10,6 +10,7 @@ export class AssetsPage {
   readonly newButton: Locator;
   readonly importFilesMenuItem: Locator;
   readonly newFolderMenuItem: Locator;
+  readonly importFromUrlMenuItem: Locator;
   readonly fileInput: Locator;
   readonly gridViewButton: Locator;
   readonly tableViewButton: Locator;
@@ -17,12 +18,16 @@ export class AssetsPage {
   readonly uploadProgressDialog: Locator;
   readonly assetDetailsDrawer: Locator;
   readonly createFolderDialog: Locator;
+  readonly importFromUrlDialog: Locator;
+  readonly urlTextarea: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.newButton = page.getByRole('button', { name: 'New' });
-    this.importFilesMenuItem = page.getByRole('menuitem', { name: 'Import files' });
     this.newFolderMenuItem = page.getByRole('menuitem', { name: 'New folder' });
+    this.importFilesMenuItem = page.getByRole('menuitem', { name: 'File upload', exact: true });
+    this.importFromUrlMenuItem = page.getByRole('menuitem', { name: 'File upload from URL' });
+
     this.fileInput = page.locator('input[type="file"]');
     this.gridViewButton = page.getByRole('radio', { name: 'Grid view' });
     this.tableViewButton = page.getByRole('radio', { name: 'Table view' });
@@ -30,6 +35,8 @@ export class AssetsPage {
     this.uploadProgressDialog = page.getByRole('dialog', { name: /upload/i });
     this.assetDetailsDrawer = page.getByRole('dialog').filter({ has: page.getByText('File info') });
     this.createFolderDialog = page.getByRole('dialog', { name: /new folder in/i });
+    this.importFromUrlDialog = page.getByRole('dialog', { name: 'Import from URL' });
+    this.urlTextarea = page.getByRole('textbox', { name: 'URL' });
   }
 
   async goto() {
@@ -254,5 +261,24 @@ export class AssetsPage {
    */
   async navigateIntoFolder(name: string) {
     await this.page.getByText(name).first().click();
+  }
+
+  /**
+   * Open the import from URL dialog
+   */
+  async openImportFromUrlDialog() {
+    await this.openNewMenu();
+    await this.importFromUrlMenuItem.click();
+    await expect(this.importFromUrlDialog).toBeVisible();
+  }
+
+  /**
+   * Upload files from URLs using the import from URL dialog
+   */
+  async uploadFilesFromUrl(urls: string | string[]) {
+    await this.openImportFromUrlDialog();
+    const urlsArray = Array.isArray(urls) ? urls : [urls];
+    await this.urlTextarea.fill(urlsArray.join('\n'));
+    await this.importFromUrlDialog.getByRole('button', { name: 'Upload' }).click();
   }
 }

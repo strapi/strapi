@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, type ChangeEvent } from 'react';
+import { useRef, useCallback, useState, type ChangeEvent } from 'react';
 
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Layouts, useElementOnScreen, usePersistentState } from '@strapi/admin/strapi-admin';
@@ -11,11 +11,11 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { ChevronDown, Files, Folder, GridFour as GridIcon, List } from '@strapi/icons';
+import { ChevronDown, Files, Folder, GridFour as GridIcon, Link, List } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useUploadFilesStreamMutation } from '../../services/api';
+import { useUploadFilesStreamMutation, useUploadFromUrlsMutation } from '../../services/api';
 import { useGetFoldersQuery } from '../../services/folders';
 import { getTranslationKey } from '../../utils/translations';
 
@@ -28,6 +28,7 @@ import { AssetsTable } from './components/AssetsTable';
 import { CreateFolderDialog } from './components/CreateFolderDialog';
 import { DropFilesMessage, DropZoneWithOverlay } from './components/DropZone/UploadDropZone';
 import { UploadDropZoneProvider } from './components/DropZone/UploadDropZoneContext';
+import { ImportFromUrlDialog } from './components/ImportFromUrlDialog';
 import { localStorageKeys, viewOptions } from './constants';
 import { useFolderInfo } from './hooks/useFolderInfo';
 import { useFolderNavigation } from './hooks/useFolderNavigation';
@@ -198,12 +199,16 @@ export const AssetsPage = () => {
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
 
+  // Dialog state
+  const [isUrlDialogOpen, setIsUrlDialogOpen] = useState(false);
+
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadDropZoneRef = useRef<HTMLDivElement>(null);
 
   // Upload handlers
   const [uploadFilesStream] = useUploadFilesStreamMutation();
+  const [uploadFromUrls] = useUploadFromUrlsMutation();
 
   const uploadFilesToFolder = async (files: globalThis.File[], folderId: number | null) => {
     if (files.length === 0) return;
@@ -245,6 +250,14 @@ export const AssetsPage = () => {
     await uploadFilesToFolder(files, currentFolderId);
   };
 
+  const handleUrlUpload = async (urls: string[]) => {
+    try {
+      await uploadFromUrls({ urls, folderId: currentFolderId }).unwrap();
+    } catch (error) {
+      // Error is already dispatched to store from the API queryFn
+    }
+  };
+
   return (
     <>
       <UploadDropZoneProvider onDrop={handleDrop}>
@@ -277,6 +290,12 @@ export const AssetsPage = () => {
                       {formatMessage({
                         id: getTranslationKey('import-files'),
                         defaultMessage: 'Import files',
+                      })}
+                    </MenuItem>
+                    <MenuItem onSelect={() => setIsUrlDialogOpen(true)} startIcon={<Link />}>
+                      {formatMessage({
+                        id: getTranslationKey('import-from-url'),
+                        defaultMessage: 'Import from URL',
                       })}
                     </MenuItem>
                   </SimpleMenu>
@@ -347,6 +366,11 @@ export const AssetsPage = () => {
         folderName={title}
         parentFolderId={currentFolderId}
         onClose={() => setIsCreateFolderDialogOpen(false)}
+      />
+      <ImportFromUrlDialog
+        open={isUrlDialogOpen}
+        onClose={() => setIsUrlDialogOpen(false)}
+        onUpload={handleUrlUpload}
       />
       <AssetDetailsDrawer />
     </>

@@ -52,8 +52,7 @@ const HeaderStatusIcon = styled(Flex)`
   }
 `;
 
-const HeaderStatusWrapper = styled(Drawer.Title)`
-  display: flex;
+const HeaderStatusWrapper = styled(Flex)`
   align-items: center;
 `;
 
@@ -61,9 +60,17 @@ type HeaderStatusProps = {
   status: 'uploading' | 'success' | 'error' | 'canceled';
   progress?: number;
   totalFiles: number;
+  successfulCount: number;
+  errorCount: number;
 };
 
-const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
+const HeaderStatus = ({
+  status,
+  progress,
+  totalFiles,
+  successfulCount,
+  errorCount,
+}: HeaderStatusProps) => {
   const { formatMessage } = useIntl();
 
   if (status === 'error') {
@@ -87,6 +94,23 @@ const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
   }
 
   if (status === 'success') {
+    const subtitle =
+      errorCount > 0
+        ? formatMessage(
+            {
+              id: getTranslationKey('upload.progress.success.subtitle.withErrors'),
+              defaultMessage: '{successCount} uploaded, {errorCount} failed',
+            },
+            { successCount: successfulCount, errorCount }
+          )
+        : formatMessage(
+            {
+              id: getTranslationKey('upload.progress.success.subtitle'),
+              defaultMessage: '{count} files uploaded successfully',
+            },
+            { count: successfulCount }
+          );
+
     return (
       <HeaderStatusWrapper>
         <HeaderStatusIcon background="success200">
@@ -97,13 +121,7 @@ const HeaderStatus = ({ status, progress, totalFiles }: HeaderStatusProps) => {
             id: getTranslationKey('upload.progress.success'),
             defaultMessage: 'Upload successful!',
           })}
-          subtitle={formatMessage(
-            {
-              id: getTranslationKey('upload.progress.success.subtitle'),
-              defaultMessage: '{count} files uploaded successfully',
-            },
-            { count: totalFiles }
-          )}
+          subtitle={subtitle}
         />
       </HeaderStatusWrapper>
     );
@@ -188,7 +206,10 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
   const isAllUploaded = isComplete && files.every((f) => f.status !== 'uploading');
   const isAllErrored = isComplete && files.length > 0 && files.every((f) => f.status === 'error');
   const hasCancelledFiles = files.some((f) => f.status === 'cancelled');
-  const isSuccess = isComplete && isAllUploaded && !isAllErrored && !hasCancelledFiles;
+  const successfulCount = files.filter((f) => f.status === 'complete').length;
+  const errorCount = files.filter((f) => f.status === 'error').length;
+  // Success includes partial success (some files succeeded, even if some failed)
+  const isSuccess = isComplete && isAllUploaded && successfulCount > 0 && !hasCancelledFiles;
   const status = ((): HeaderStatusProps['status'] => {
     if (isAllErrored) return 'error';
     if (isSuccess) return 'success';
@@ -221,7 +242,13 @@ const DialogHeader = ({ handleClose }: { handleClose: () => void }) => {
       margin={1}
       hasRadius
     >
-      <HeaderStatus status={status} progress={progress} totalFiles={totalFiles} />
+      <HeaderStatus
+        status={status}
+        progress={progress}
+        totalFiles={totalFiles}
+        successfulCount={successfulCount}
+        errorCount={errorCount}
+      />
       <Flex gap={1}>
         {!isAllUploaded && (
           <TextButton onClick={handleCancel} fontWeight="bold">
