@@ -17,13 +17,23 @@ export interface DocumentVersion {
   publishedAt?: string | null | Date;
 }
 
-const AVAILABLE_STATUS_FIELDS = [
+// Scalar fields that can be used in a DB `select`
+const AVAILABLE_STATUS_SCALAR_FIELDS = [
   'id',
   'documentId',
   'locale',
   'updatedAt',
   'createdAt',
   'publishedAt',
+];
+// Relation populate shared by both the fast path and the full path
+const AVAILABLE_STATUS_POPULATE = {
+  createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+  updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+};
+// All fields to pick from a hydrated result (scalars + populated relations + virtual)
+const AVAILABLE_STATUS_FIELDS = [
+  ...AVAILABLE_STATUS_SCALAR_FIELDS,
   'createdBy',
   'updatedBy',
   'status',
@@ -35,7 +45,6 @@ const AVAILABLE_LOCALES_FIELDS = [
   'updatedAt',
   'createdAt',
   'publishedAt',
-  'documentId',
 ];
 
 const CONTENT_MANAGER_STATUS = {
@@ -174,7 +183,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     return strapi.query(uid).findMany({
       where,
-      select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
+      select: AVAILABLE_STATUS_SCALAR_FIELDS,
     });
   },
 
@@ -218,27 +227,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const hasDnP = contentTypes.hasDraftAndPublish(model);
     const isLocalized = (model.pluginOptions?.i18n as any)?.localized === true;
 
-    // Fast path: nothing to compute
     if (!availableLocales && !availableStatus) {
+      // Nothing to compute.
       return { availableLocales: [], availableStatus: [] };
     }
     if (!isLocalized && !hasDnP) {
+      // If there are no locales and no draft/publish, there's only ever 1 version of any document.
       return { availableLocales: [], availableStatus: [] };
     }
 
-    // Non-localized D&P: just find the opposite status version directly
-    if (!isLocalized && hasDnP) {
+    const onlyStatusIsRelevant = hasDnP && (!isLocalized || !availableLocales);
+    if (onlyStatusIsRelevant) {
       const otherVersion = availableStatus
         ? await strapi.db.query(uid).findOne({
             where: {
               documentId: version.documentId,
+              ...(version.locale ? { locale: version.locale } : {}),
               publishedAt: version.publishedAt !== null ? { $null: true } : { $notNull: true },
             },
-            select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
-            populate: {
-              createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
-              updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
-            },
+            select: AVAILABLE_STATUS_SCALAR_FIELDS,
+            populate: AVAILABLE_STATUS_POPULATE,
           })
         : null;
       return {
@@ -297,13 +305,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       populate: {
         ...populate,
         ...mediaPopulate,
-        // NOTE: creator fields are selected in this way to avoid exposing sensitive data
-        createdBy: {
-          select: ['id', 'firstname', 'lastname', 'email'],
-        },
-        updatedBy: {
-          select: ['id', 'firstname', 'lastname', 'email'],
-        },
+        ...AVAILABLE_STATUS_POPULATE,
       },
       fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...fields, ...nonLocalizedFields]),
       filters: {
