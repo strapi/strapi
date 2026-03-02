@@ -40,6 +40,32 @@ interface FormData extends Pick<ListLayout, 'settings'> {
   layout: Array<Pick<ListFieldLayout, 'sortable' | 'name'> & { label: string }>;
 }
 
+interface PersistentListViewSettings {
+  sort?: string;
+  filters?: unknown;
+  pageSize?: number | string;
+}
+
+const parseSortParam = (value: unknown) => {
+  if (typeof value !== 'string' || value.length === 0) {
+    return null;
+  }
+
+  const [defaultSortBy, rawOrder] = value.split(':');
+
+  if (!defaultSortBy) {
+    return null;
+  }
+
+  const normalizedOrder = rawOrder?.toUpperCase();
+  const defaultSortOrder = normalizedOrder === 'DESC' ? 'DESC' : 'ASC';
+
+  return {
+    defaultSortBy,
+    defaultSortOrder,
+  };
+};
+
 const ListConfiguration = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -53,7 +79,7 @@ const ListConfiguration = () => {
     `STRAPI_LIST_VIEW_DISPLAYED_HEADERS:${model}`,
     null
   );
-  const [, setListViewSettings] = usePersistentState<Record<string, unknown>>(
+  const [listViewSettings, setListViewSettings] = usePersistentState<PersistentListViewSettings>(
     `STRAPI_LIST_VIEW_SETTINGS:${model}`,
     {}
   );
@@ -104,8 +130,17 @@ const ListConfiguration = () => {
       });
 
       if ('data' in res) {
+        const sortOrder = data.settings.defaultSortOrder?.toLowerCase() ?? 'asc';
+        const sort = data.settings.defaultSortBy
+          ? `${data.settings.defaultSortBy}:${sortOrder}`
+          : undefined;
+
         setDisplayedHeaderNames(layoutData.map((field) => field.name));
-        setListViewSettings({});
+        setListViewSettings((prev) => ({
+          ...prev,
+          pageSize: data.settings.pageSize,
+          ...(sort ? { sort } : {}),
+        }));
         trackUsage('didEditListSettings');
         toggleNotification({
           type: 'success',
@@ -137,6 +172,20 @@ const ListConfiguration = () => {
       return acc;
     }, {});
 
+    const parsedSort = parseSortParam(listViewSettings.sort);
+    const persistedPageSize =
+      typeof listViewSettings.pageSize === 'string'
+        ? Number.parseInt(listViewSettings.pageSize, 10)
+        : listViewSettings.pageSize;
+
+    const settings: FormData['settings'] = {
+      ...list.settings,
+      ...(typeof persistedPageSize === 'number' && !Number.isNaN(persistedPageSize)
+        ? { pageSize: persistedPageSize }
+        : {}),
+      ...parsedSort,
+    };
+
     return {
       layout: convertListLayoutToFieldLayouts(headerNames, schema?.attributes, headerMetadatas).map(
         ({ label, sortable, name }) => ({
@@ -145,9 +194,9 @@ const ListConfiguration = () => {
           name,
         })
       ),
-      settings: list.settings,
+      settings,
     } satisfies FormData;
-  }, [formatMessage, list, displayedHeaderNames, schema, metadata]);
+  }, [formatMessage, list, displayedHeaderNames, schema, metadata, listViewSettings]);
 
   if (collectionType === SINGLE_TYPES) {
     return <Navigate to={`/single-types/${model}`} />;
