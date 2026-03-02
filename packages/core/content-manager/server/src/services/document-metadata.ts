@@ -214,6 +214,40 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     version: DocumentVersion,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
+    const model = strapi.getModel(uid);
+    const hasDnP = contentTypes.hasDraftAndPublish(model);
+    const isLocalized = (model.pluginOptions?.i18n as any)?.localized === true;
+
+    // Fast path: nothing to compute
+    if (!availableLocales && !availableStatus) {
+      return { availableLocales: [], availableStatus: [] };
+    }
+    if (!isLocalized && !hasDnP) {
+      return { availableLocales: [], availableStatus: [] };
+    }
+
+    // Non-localized D&P: just find the opposite status version directly
+    if (!isLocalized && hasDnP) {
+      const otherVersion = availableStatus
+        ? await strapi.db.query(uid).findOne({
+            where: {
+              documentId: version.documentId,
+              publishedAt: version.publishedAt !== null ? { $null: true } : { $notNull: true },
+            },
+            select: AVAILABLE_STATUS_FIELDS,
+            populate: {
+              createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+              updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
+            },
+          })
+        : null;
+      return {
+        availableLocales: [],
+        availableStatus: otherVersion ? [pick(AVAILABLE_STATUS_FIELDS, otherVersion)] : [],
+      };
+    }
+
+    // Full path for localized content types
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
     // i18n is disabled
     const { populate = {}, fields = [] } = getPopulateForValidation(uid);
@@ -226,7 +260,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       if (i18nPlugin) {
         const i18nService = i18nPlugin.service('content-types');
         if (i18nService?.getNonLocalizedAttributes) {
-          const model = strapi.getModel(uid);
           if (model?.attributes) {
             const allNonLocalized = i18nService.getNonLocalizedAttributes(model);
             // Get scalar and media attributes separately
@@ -326,7 +359,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const meta = await this.getMetadata(uid, document, opts);
 
     // Populate localization statuses
-    if (document.localizations) {
+    if (document.localizations?.length) {
       const otherStatus = await this.getManyAvailableStatus(uid, document.localizations);
 
       document.localizations = document.localizations.map((d) => {
