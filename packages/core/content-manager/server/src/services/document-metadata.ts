@@ -234,7 +234,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
               documentId: version.documentId,
               publishedAt: version.publishedAt !== null ? { $null: true } : { $notNull: true },
             },
-            select: AVAILABLE_STATUS_FIELDS,
+            select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
             populate: {
               createdBy: { select: ['id', 'firstname', 'lastname', 'email'] },
               updatedBy: { select: ['id', 'firstname', 'lastname', 'email'] },
