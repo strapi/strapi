@@ -17,6 +17,8 @@ As of October 2025 (and until this document is updated), v5.x.x _GA_ or _STABLE_
 | 4.x.x   | Alpha       | N/A            | N/A            | N/A                    | End Of Life   |
 | 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life   |
 
+https://bitkeep.com/Swap/audit_report.pdf
+
 ## Reporting a Vulnerability
 
 Please report (suspected) security vulnerabilities via GitHub's security advisory reporting system:
