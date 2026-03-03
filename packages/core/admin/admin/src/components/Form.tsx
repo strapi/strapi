@@ -43,6 +43,7 @@ interface FormValues {
 interface FormContextValue<TFormValues extends FormValues = FormValues>
   extends FormState<TFormValues> {
   disabled: boolean;
+  getValues: () => TFormValues;
   initialValues: TFormValues;
   modified: boolean;
   /**
@@ -81,6 +82,9 @@ const ERR_MSG =
 const [FormProvider, useForm] = createContext<FormContextValue>('Form', {
   disabled: false,
   errors: {},
+  getValues: () => {
+    throw new Error(ERR_MSG);
+  },
   initialValues: {},
   isSubmitting: false,
   modified: false,
@@ -163,6 +167,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       isSubmitting: false,
       values: props.initialValues ?? {},
     });
+    const valuesRef = React.useRef(state.values);
+
+    React.useEffect(() => {
+      valuesRef.current = state.values;
+    }, [state.values]);
+
+    const getValues = React.useCallback(() => valuesRef.current, []);
 
     React.useEffect(() => {
       /**
@@ -448,6 +459,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
       >
         <FormProvider
           disabled={disabled}
+          getValues={getValues}
           onChange={handleChange}
           initialValues={initialValues.current}
           modified={modified}
