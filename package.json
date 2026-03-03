@@ -169,7 +169,7 @@
     "prettier-2": "npm:prettier@^2",
     "qs": "6.14.2",
     "rimraf": "5.0.5",
-    "rollup": "4.27.4",
+    "rollup": "4.59.0",
     "rollup-plugin-html": "0.2.1",
     "semver": "7.5.4",
     "stream-chain": "2.2.5",
@@ -179,7 +179,7 @@
     "tar": "7.5.9",
     "ts-jest": "29.1.0",
     "typescript": "5.4.4",
-    "vitest": "4.0.18",
+    "vitest": "catalog:",
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
