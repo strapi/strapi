@@ -9543,8 +9543,10 @@ __metadata:
     jest-environment-jsdom: "npm:29.6.1"
     jest-styled-components: "npm:7.1.1"
     react-query: "npm:3.39.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
     whatwg-fetch: "npm:3.6.2"
   peerDependencies:
     "@reduxjs/toolkit": ^1.9.7
@@ -9636,14 +9638,14 @@ __metadata:
     react-router-dom: "npm:6.30.3"
     react-select: "npm:5.8.0"
     react-window: "npm:1.8.10"
-    rimraf: "npm:5.0.5"
+    rimraf: "catalog:"
     sanitize-html: "npm:2.13.0"
     scheduler: "npm:0.23.0"
     semver: "npm:7.5.4"
     sift: "npm:16.0.1"
     sonner: "npm:2.0.7"
     styled-components: "npm:6.1.8"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
     use-context-selector: "npm:1.4.1"
     vite: "npm:5.4.21"
     vite-plugin-dts: "npm:^4.3.0"
@@ -9693,8 +9695,10 @@ __metadata:
     open: "npm:8.4.0"
     ora: "npm:5.4.1"
     pkg-up: "npm:3.1.0"
+    rimraf: "catalog:"
     tar: "npm:7.5.9"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
     xdg-app-paths: "npm:8.3.0"
     yup: "npm:0.32.9"
   bin:
@@ -9753,11 +9757,13 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
     react-window: "npm:1.8.10"
+    rimraf: "catalog:"
     sanitize-html: "npm:2.13.0"
     slate: "npm:0.94.1"
     slate-history: "npm:0.93.0"
     slate-react: "npm:0.98.3"
     styled-components: "npm:6.1.8"
+    typescript: "catalog:"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
@@ -9798,8 +9804,9 @@ __metadata:
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
@@ -9853,7 +9860,9 @@ __metadata:
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
+    typescript: "catalog:"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
   peerDependencies:
@@ -9940,11 +9949,12 @@ __metadata:
     pkg-up: "npm:3.1.0"
     qs: "npm:6.14.2"
     resolve.exports: "npm:2.0.2"
+    rimraf: "catalog:"
     semver: "npm:7.5.4"
     statuses: "npm:2.0.1"
     supertest: "npm:6.3.3"
     tsconfig: "npm:5.37.1"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
     undici: "npm:6.23.0"
     vitest: "catalog:"
     vitest-config: "npm:5.37.1"
@@ -9982,13 +9992,13 @@ __metadata:
     lodash: "npm:4.17.23"
     ora: "npm:5.4.1"
     resolve-cwd: "npm:3.0.0"
-    rimraf: "npm:5.0.5"
+    rimraf: "catalog:"
     semver: "npm:7.5.4"
     stream-chain: "npm:2.2.5"
     stream-json: "npm:1.8.0"
     tar: "npm:7.5.9"
     tar-stream: "npm:2.2.0"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
     ws: "npm:8.17.1"
   languageName: unknown
   linkType: soft
@@ -10007,8 +10017,10 @@ __metadata:
     fs-extra: "npm:11.2.0"
     knex: "npm:3.0.1"
     lodash: "npm:4.17.23"
+    rimraf: "catalog:"
     semver: "npm:7.5.4"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
     umzug: "npm:3.8.1"
   languageName: unknown
   linkType: soft
@@ -10074,7 +10086,9 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-query: "npm:3.39.3"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
+    typescript: "catalog:"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
   peerDependencies:
@@ -10137,7 +10151,9 @@ __metadata:
     outdent: "npm:^0.8.0"
     plop: "npm:4.0.1"
     pluralize: "npm:8.0.0"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10166,7 +10182,9 @@ __metadata:
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
+    typescript: "catalog:"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
   peerDependencies:
@@ -10196,7 +10214,9 @@ __metadata:
   dependencies:
     eslint-config-custom: "npm:5.37.1"
     lodash: "npm:4.17.23"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
     winston: "npm:3.10.0"
   languageName: unknown
   linkType: soft
@@ -10209,6 +10229,8 @@ __metadata:
     "@types/debug": "npm:^4"
     debug: "npm:4.3.4"
     openapi-types: "npm:12.1.3"
+    rimraf: "catalog:"
+    typescript: "catalog:"
     zod: "npm:3.25.67"
   languageName: unknown
   linkType: soft
@@ -10253,8 +10275,10 @@ __metadata:
     eslint-config-custom: "npm:5.37.1"
     lodash: "npm:4.17.23"
     qs: "npm:6.14.2"
+    rimraf: "catalog:"
     sift: "npm:16.0.1"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10271,9 +10295,10 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
     tsconfig: "npm:5.37.1"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     "@strapi/strapi": ^5.0.0
@@ -10298,8 +10323,9 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -10345,8 +10371,10 @@ __metadata:
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
     swagger-ui-dist: "npm:4.19.0"
+    typescript: "catalog:"
     yaml: "npm:1.10.2"
     yup: "npm:0.32.9"
   peerDependencies:
@@ -10390,9 +10418,10 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
     tsconfig: "npm:5.37.1"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -10413,7 +10442,9 @@ __metadata:
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
+    typescript: "catalog:"
   peerDependencies:
     "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -10452,6 +10483,7 @@ __metadata:
     react-query: "npm:3.39.3"
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
@@ -10472,7 +10504,9 @@ __metadata:
     "@strapi/utils": "npm:5.37.1"
     eslint-config-custom: "npm:5.37.1"
     node-ses: "npm:^3.0.3"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10484,7 +10518,9 @@ __metadata:
     eslint-config-custom: "npm:5.37.1"
     form-data: "npm:4.0.4"
     mailgun.js: "npm:10.2.1"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10495,7 +10531,9 @@ __metadata:
     "@types/nodemailer": "npm:7.0.10"
     eslint-config-custom: "npm:5.37.1"
     nodemailer: "npm:8.0.1"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10506,7 +10544,9 @@ __metadata:
     "@sendgrid/mail": "npm:8.1.3"
     "@strapi/utils": "npm:5.37.1"
     eslint-config-custom: "npm:5.37.1"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10517,8 +10557,10 @@ __metadata:
     "@strapi/utils": "npm:5.37.1"
     "@types/sendmail": "npm:1.4.4"
     eslint-config-custom: "npm:5.37.1"
+    rimraf: "catalog:"
     sendmail: "npm:^1.6.1"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10533,7 +10575,9 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.37.1"
     lodash: "npm:4.17.23"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10545,7 +10589,9 @@ __metadata:
     cloudinary: "npm:^2.7.0"
     eslint-config-custom: "npm:5.37.1"
     into-stream: "npm:^5.1.0"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10560,7 +10606,9 @@ __metadata:
     eslint-config-custom: "npm:5.37.1"
     fs-extra: "npm:11.2.0"
     memfs: "npm:4.6.0"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   languageName: unknown
   linkType: soft
 
@@ -10586,7 +10634,9 @@ __metadata:
     react-intl: "npm:6.6.2"
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
+    rimraf: "catalog:"
     styled-components: "npm:6.1.8"
+    typescript: "catalog:"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0
@@ -10693,10 +10743,11 @@ __metadata:
     react-refresh: "npm:0.14.0"
     read-pkg-up: "npm:7.0.1"
     resolve-from: "npm:5.0.0"
+    rimraf: "catalog:"
     semver: "npm:7.5.4"
     style-loader: "npm:3.3.4"
     tsconfig: "npm:5.37.1"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
     vite: "npm:5.4.21"
     webpack: "npm:^5.90.3"
     webpack-bundle-analyzer: "npm:^4.10.1"
@@ -10748,11 +10799,12 @@ __metadata:
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.23"
     node-schedule: "npm:2.1.1"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
     typedoc: "npm:0.25.10"
     typedoc-github-wiki-theme: "npm:1.1.0"
     typedoc-plugin-markdown: "npm:3.17.1"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
     undici: "npm:6.23.0"
     zod: "npm:3.25.67"
   languageName: unknown
@@ -10825,9 +10877,10 @@ __metadata:
     memfs: "npm:4.6.0"
     ora: "npm:5.4.1"
     prompts: "npm:2.4.2"
-    rimraf: "npm:5.0.5"
+    rimraf: "catalog:"
     semver: "npm:7.5.4"
     simple-git: "npm:3.21.0"
+    typescript: "catalog:"
     undici: "npm:6.23.0"
   bin:
     upgrade: ./bin/upgrade.js
@@ -10882,8 +10935,10 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.30.3"
     react-select: "npm:5.8.0"
+    rimraf: "catalog:"
     sharp: "npm:0.33.5"
     styled-components: "npm:6.1.8"
+    typescript: "catalog:"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
   peerDependencies:
@@ -10913,7 +10968,9 @@ __metadata:
     node-machine-id: "npm:1.1.12"
     p-map: "npm:4.0.0"
     preferred-pm: "npm:3.1.3"
+    rimraf: "catalog:"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
     yup: "npm:0.32.9"
     zod: "npm:3.25.67"
   languageName: unknown
@@ -16785,11 +16842,13 @@ __metadata:
     lodash: "npm:4.17.23"
     node-machine-id: "npm:^1.1.10"
     ora: "npm:^5.4.1"
+    rimraf: "catalog:"
     rollup: "npm:4.59.0"
     semver: "npm:7.5.4"
     sort-package-json: "npm:2.10.0"
     tar: "npm:7.5.9"
     tsconfig: "npm:5.37.1"
+    typescript: "catalog:"
   bin:
     create-strapi-app: ./bin/index.js
   languageName: unknown
@@ -32120,7 +32179,7 @@ __metadata:
     prettier: "npm:3.3.3"
     prettier-2: "npm:prettier@^2"
     qs: "npm:6.14.2"
-    rimraf: "npm:5.0.5"
+    rimraf: "catalog:"
     rollup: "npm:4.59.0"
     rollup-plugin-html: "npm:0.2.1"
     semver: "npm:7.5.4"
@@ -32130,7 +32189,7 @@ __metadata:
     syncpack: "npm:13.0.4"
     tar: "npm:7.5.9"
     ts-jest: "npm:29.1.0"
-    typescript: "npm:5.4.4"
+    typescript: "catalog:"
     vitest: "catalog:"
     yalc: "npm:1.0.0-pre.53"
     yargs: "npm:17.7.2"
