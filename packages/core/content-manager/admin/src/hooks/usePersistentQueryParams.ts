@@ -30,10 +30,10 @@ export type PersistentQueryConfig = Record<string, PersistentQueryConfigEntry>;
 const normalizeConfigEntry = (
   key: string,
   entry: PersistentQueryConfigEntry,
-  scope: string | undefined
+  scope: string | false | undefined
 ) => {
   const { paths } = entry;
-  const isScoped = entry.scoped === true && scope !== undefined;
+  const isScoped = entry.scoped === true && !!scope;
 
   return {
     key: isScoped ? `${key}:${scope}` : key,
