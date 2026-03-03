@@ -38,6 +38,8 @@
   "components.DynamicZone.move-up-label": "Move component up",
   "components.DynamicZone.pick-compo": "Pick one component",
   "components.DynamicZone.required": "Component is required",
+  "components.DynamicZone.move-up": "Move up",
+  "components.DynamicZone.move-down": "Move down",
   "components.EmptyAttributesBlock.button": "Go to settings page",
   "components.EmptyAttributesBlock.description": "You can change your settings",
   "components.FieldItem.linkToComponentLayout": "Set the component's layout",
@@ -139,6 +141,11 @@
   "containers.SettingPage.editSettings.entry.title": "Entry title",
   "containers.SettingPage.editSettings.entry.title.description": "Set the displayed field of your entry",
   "containers.SettingPage.editSettings.relation-field.description": "Set the displayed field in both the edit and list views",
+  "containers.SettingPage.editSettings.relationOpenMode": "Relation open behavior",
+  "containers.SettingPage.editSettings.relationOpenMode.description": "Choose how relation entries open when clicked",
+  "containers.SettingPage.editSettings.relationOpenMode.modal": "Modal (default)",
+  "containers.SettingPage.editSettings.relationOpenMode.newTab": "Open in new tab",
+  "containers.SettingPage.editSettings.relationOpenMode.page": "Navigate to page",
   "containers.SettingPage.editSettings.title": "Edit view (settings)",
   "containers.SettingPage.layout": "Layout",
   "containers.SettingPage.listSettings.description": "Configure the options for this Collection Type",
@@ -319,5 +326,7 @@
   "widget.last-edited.single-type": "Single-Type",
   "widget.last-edited.no-data": "No edited entries",
   "widget.last-published.title": "Last published entries",
-  "widget.last-published.no-data": "No published entries"
+  "widget.last-published.no-data": "No published entries",
+  "actions-drawer.open": "Open more actions",
+  "actions-drawer.close": "Close more actions"
 }
