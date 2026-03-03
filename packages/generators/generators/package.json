@@ -38,11 +38,11 @@
     "build": "run -T npm-run-all clean --parallel build:code build:types",
     "build:code": "run -T run-p build:code:rollup copy-files",
     "build:code:rollup": "run -T rollup -c",
-    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "clean": "run -T rimraf ./dist",
+    "build:types": "tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "clean": "rimraf ./dist",
     "copy-files": "copyfiles -u 1 -a 'src/templates/**/*' 'src/files/**/*' dist",
     "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
+    "test:ts": "tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
     "watch": "run -T rollup -c -w"
@@ -65,7 +65,9 @@
     "@types/jscodeshift": "0.12.0",
     "eslint-config-custom": "5.37.1",
     "outdent": "^0.8.0",
-    "tsconfig": "5.37.1"
+    "rimraf": "catalog:",
+    "tsconfig": "5.37.1",
+    "typescript": "catalog:"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",

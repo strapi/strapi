@@ -37,7 +37,7 @@
   "scripts": {
     "build": "run -T npm-run-all clean build:code",
     "build:code": "run -T rollup -c",
-    "clean": "run -T rimraf dist",
+    "clean": "rimraf dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
@@ -78,6 +78,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
+    "rimraf": "catalog:",
     "styled-components": "6.1.8"
   },
   "peerDependencies": {

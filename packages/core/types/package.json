@@ -34,13 +34,13 @@
   ],
   "scripts": {
     "build": "run -T run-s clean build:types",
-    "build:types": "run -T tsc -p tsconfig.build.json",
-    "clean": "run -T rimraf ./dist",
+    "build:types": "tsc -p tsconfig.build.json",
+    "clean": "rimraf ./dist",
     "doc:ts": "typedoc",
     "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
-    "watch": "run -T tsc -p tsconfig.build.json -w"
+    "test:ts": "tsc --noEmit",
+    "watch": "tsc -p tsconfig.build.json -w"
   },
   "dependencies": {
     "@casl/ability": "6.7.5",
@@ -69,8 +69,9 @@
     "@types/node-schedule": "2.1.7",
     "eslint-config-custom": "5.37.1",
     "lodash": "4.17.23",
+    "rimraf": "catalog:",
     "tsconfig": "5.37.1",
-    "typescript": "5.4.4",
+    "typescript": "catalog:",
     "undici": "6.23.0"
   },
   "engines": {

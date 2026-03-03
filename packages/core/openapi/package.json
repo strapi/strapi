@@ -43,9 +43,9 @@
   "scripts": {
     "build": "run -T npm-run-all clean --parallel build:code build:types",
     "build:code": "run -T  rollup -c",
-    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:types": "tsc -p tsconfig.build.json --emitDeclarationOnly",
     "watch": "run -T rollup -c -w",
-    "clean": "run -T rimraf ./dist",
+    "clean": "rimraf ./dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
@@ -62,6 +62,8 @@
   },
   "devDependencies": {
     "@strapi/types": "5.37.1",
-    "@types/debug": "^4"
+    "@types/debug": "^4",
+    "rimraf": "catalog:",
+    "typescript": "catalog:"
   }
 }

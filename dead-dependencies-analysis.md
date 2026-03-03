@@ -2,136 +2,99 @@
 
 > Branch: `cursor/yarn-catalog-dead-dependencies-60e9`
 > Date: 2026-03-03
-> Context: Strapi monorepo uses Yarn 4.12.0 with `node-modules` linker. Catalog currently tracks only `vitest: ^4.0.18`.
+> Context: Strapi monorepo uses Yarn 4.12.0 with `node-modules` linker. Catalog started with `vitest: ^4.0.18`.
 
 ---
 
-## Methodology
+## Approach
 
-1. Extracted `devDependencies` from all 42 workspace packages under `packages/`
-2. For each dep, verified usage via:
-   - **Scripts**: does the package call the binary directly or via `run -T` (workspace root tool)?
-   - **Source imports**: is the package imported in `.ts` / `.tsx` source files?
-   - **Config files**: is it referenced in `tsconfig.json`, `jest.config.js`, etc.?
+Instead of removing deps that were "dead" due to `run -T` indirection, the chosen fix is:
 
-**Key rule for `run -T <cmd>`**: Yarn Berry's `run -T` resolves the binary from the _root_ workspace, not the package's own `node_modules`. A package that only calls `run -T tsc` does NOT need `typescript` in its own `devDependencies` — the root already has it.
+1. **Remove the `-T` flag** from all `tsc` and `rimraf` script invocations so each package uses its own declared dep.
+2. **Add the dep to each package** that was missing it, using a `catalog:` reference.
+3. **Add to the yarn catalog** so the version is declared once and shared.
+
+This makes each package self-contained and removes the implicit reliance on the root workspace for tool resolution.
 
 ---
 
-## Confirmed Dead Dependencies
+## Catalog — Before / After
 
-### 1. `typescript` — 6 packages
-
-All six packages have `typescript` in `devDependencies` but only invoke `tsc` via `run -T tsc` (root workspace binary). No programmatic `import ... from 'typescript'` found anywhere.
-
-| Package | File |
-|---|---|
-| `@strapi/content-releases` | `packages/core/content-releases/package.json` |
-| `@strapi/plugin-cloud` | `packages/plugins/cloud/package.json` |
-| `@strapi/plugin-color-picker` | `packages/plugins/color-picker/package.json` |
-| `@strapi/plugin-graphql` | `packages/plugins/graphql/package.json` |
-| `@strapi/types` | `packages/core/types/package.json` |
-| `@strapi/data-transfer` | `packages/core/data-transfer/package.json` |
-
-Evidence (all clean scripts / tsc calls):
-```
-"build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly"
-"test:ts":     "run -T tsc --noEmit"
+```yaml
+# .yarnrc.yml — after
+catalog:
+  rimraf: 5.0.5
+  typescript: 5.4.4
+  vitest: ^4.0.18
 ```
 
-Root `package.json` has `typescript: 5.4.4` in `devDependencies` → available to all packages via `run -T`.
+---
+
+## Changes Applied
+
+### `typescript` — 35 packages
+
+`run -T tsc` → `tsc` in all scripts. `typescript: "catalog:"` added or updated in `devDependencies`.
+
+Packages that **already had** `typescript` (version changed to `catalog:`):
+`@strapi/content-releases`, `@strapi/plugin-cloud`, `@strapi/plugin-color-picker`, `@strapi/plugin-graphql`, `@strapi/types`, `@strapi/data-transfer`
+
+Packages that **gained** `typescript: "catalog:"` (were relying silently on `run -T`):
+`@strapi/generators`, `@strapi/provider-upload-aws-s3`, `@strapi/provider-upload-local`, `@strapi/provider-email-amazon-ses`, `@strapi/provider-email-mailgun`, `@strapi/provider-email-nodemailer`, `@strapi/provider-email-sendmail`, `@strapi/provider-email-sendgrid`, `@strapi/provider-upload-cloudinary`, `create-strapi-app`, `@strapi/cloud-cli`, `@strapi/admin-test-utils`, `@strapi/plugin-documentation`, `@strapi/plugin-sentry`, `@strapi/i18n`, `@strapi/plugin-users-permissions`, `@strapi/openapi`, `@strapi/content-type-builder`, `@strapi/strapi`, `@strapi/database`, `@strapi/email`, `@strapi/upload`, `@strapi/permissions`, `@strapi/admin`, `@strapi/content-manager`, `@strapi/core`, `@strapi/review-workflows`, `@strapi/utils`, `@strapi/upgrade`, `@strapi/logger`
 
 ---
 
-### 2. `rimraf` — 1 package
+### `rimraf` — 33 packages
 
-`@strapi/upgrade` has `rimraf` in `devDependencies` but calls it via `run -T rimraf ./dist`. No programmatic usage. Root has `rimraf: 5.0.5`.
+`run -T rimraf` → `rimraf` in all `clean` scripts. `rimraf: "catalog:"` added or updated.
 
-| Package | File | Script |
+`@strapi/data-transfer` already called `rimraf` directly (no `run -T`) — its version was updated to `catalog:`.
+`@strapi/upgrade` called `run -T rimraf` and already had `rimraf: "5.0.5"` — flag removed, version updated to `catalog:`.
+All other 31 packages only used `run -T rimraf` without declaring the dep — flag removed, dep added as `catalog:`.
+
+---
+
+### Root `package.json`
+
+```diff
+- "rimraf": "5.0.5",
++ "rimraf": "catalog:",
+
+- "typescript": "5.4.4",
++ "typescript": "catalog:",
+```
+
+---
+
+## Still Pending (Requires Human Decision)
+
+### `cross-env` in `@strapi/plugin-graphql` — confirmed dead
+Listed in `devDependencies`, absent from all scripts and source files. Safe to remove.
+
+### `@strapi/ts-zen` in 3 packages — confirmed dead
+Present in `@strapi/core`, `@strapi/strapi`, `@strapi/types` devDeps. Not referenced in any tsconfig, source, or script. Package not found in `node_modules`.
+
+> TODO @Nico [Verify with team if @strapi/ts-zen was a planned/experimental TypeScript plugin. Remove if confirmed unused.]
+
+### `react-query` in 3 packages — likely dead
+`@strapi/content-releases`, `@strapi/content-type-builder`, `@strapi/i18n` list `react-query: 3.39.3` but no direct imports found. Available transitively via `@strapi/admin-test-utils`.
+
+> TODO @Nico [Confirm tests don't depend on explicit version pinning. Remove if safe.]
+
+### `lodash` (runtime) in `@strapi/types` — likely wrong package
+Only type imports used (`import type { PropertyPath } from 'lodash'`). Should be `@types/lodash`, not the runtime `lodash`.
+
+> TODO @Nico [Replace `lodash` → `@types/lodash` in `packages/core/types/package.json`.]
+
+---
+
+## Next Catalog Candidates
+
+With `typescript` and `rimraf` now in the catalog, natural next candidates following the same pattern:
+
+| Dep | Packages | Notes |
 |---|---|---|
-| `@strapi/upgrade` | `packages/utils/upgrade/package.json` | `"clean": "run -T rimraf ./dist"` |
-
-> **Note**: `@strapi/data-transfer` calls `"clean": "rimraf ./dist"` (direct, no `run -T`) — its `rimraf` devDep is **alive**.
-
----
-
-### 3. `cross-env` — 1 package
-
-`@strapi/plugin-graphql` lists `cross-env: ^7.0.3` in `devDependencies`. It does not appear in any script, source file, or config file.
-
-| Package | File |
-|---|---|
-| `@strapi/plugin-graphql` | `packages/plugins/graphql/package.json` |
-
----
-
-### 4. `@strapi/ts-zen` — 3 packages
-
-`@strapi/ts-zen: ^0.2.0` appears in 3 packages' devDependencies but is referenced **nowhere**: no `import`, no tsconfig `plugins` array, no script invocation. The package does not appear in `node_modules`.
-
-| Package | File |
-|---|---|
-| `@strapi/core` | `packages/core/core/package.json` |
-| `@strapi/strapi` | `packages/core/strapi/package.json` |
-| `@strapi/types` | `packages/core/types/package.json` |
-
-> TODO @Nico [Verify with team if @strapi/ts-zen was a planned/experimental TypeScript plugin that never landed. If so, remove from all 3 packages.]
-
----
-
-## Likely Dead (Lower Confidence)
-
-### 5. `react-query` — 3 packages
-
-These packages list `react-query: 3.39.3` in `devDependencies` but no direct `from 'react-query'` imports exist in source or test files. `react-query` is already a production dep of `@strapi/admin-test-utils` (which these packages use for tests), so it is available transitively.
-
-| Package | File |
-|---|---|
-| `@strapi/content-releases` | `packages/core/content-releases/package.json` |
-| `@strapi/content-type-builder` | `packages/core/content-type-builder/package.json` |
-| `@strapi/i18n` | `packages/plugins/i18n/package.json` |
-
-> TODO @Nico [Confirm tests don't rely on react-query being explicitly listed (e.g., for version pinning via moduleNameMapper). If not, remove.]
-
----
-
-### 6. `lodash` (runtime) in `@strapi/types`
-
-`packages/core/types` lists `lodash` (runtime) in devDeps but only uses type imports:
-
-```ts
-// packages/core/types/src/core/strapi.ts
-import type { PropertyPath } from 'lodash';
-```
-
-Types for lodash come from `@types/lodash`, not the `lodash` runtime. `@types/lodash` is hoisted from other packages (e.g., `@strapi/core`, `@strapi/admin`), so TypeScript compilation works today. But the explicit `lodash` devDep in `@strapi/types` is wrong — it should be `@types/lodash` (or rely on the workspace hoist).
-
-> TODO @Nico [Replace `lodash` → `@types/lodash` in `packages/core/types/package.json`, or explicitly add `@types/lodash` to make the type dependency self-contained.]
-
----
-
-## Summary Table
-
-| Dep | Affected Packages | Confidence | Action |
-|---|---|---|---|
-| `typescript` | 6 packages | ✅ Confirmed dead | Remove |
-| `rimraf` | `@strapi/upgrade` | ✅ Confirmed dead | Remove |
-| `cross-env` | `@strapi/plugin-graphql` | ✅ Confirmed dead | Remove |
-| `@strapi/ts-zen` | 3 packages | ✅ Confirmed dead | Verify + Remove |
-| `react-query` | 3 packages | ⚠️ Likely dead | Verify + Remove |
-| `lodash` → `@types/lodash` | `@strapi/types` | ⚠️ Likely wrong pkg | Replace |
-
-**Total confirmed removals: 11 devDependency entries across 9 packages.**
-
----
-
-## Catalog Opportunity (Next Step)
-
-Once dead deps are cleaned, the catalog can be expanded with high-value shared devDeps:
-
-- `typescript` — currently in root `devDependencies`, used by all packages via `run -T tsc`
-- `rimraf` — same pattern as typescript
-- `jest` / `@swc/jest` — used by ~35 packages via jest configs that extend root presets
-- `@testing-library/react`, `msw`, `styled-components` — appear across 10+ packages
-
-These are good candidates for the catalog after the dead dep cleanup.
+| `jest` | ~35 packages | All run `jest` directly after `run -T` removal follows same pattern |
+| `@swc/jest` | root + `@strapi/core` | Transform used by all jest configs via root preset |
+| `eslint` | ~30 packages | Via `run -T eslint` |
+| `rollup` | ~30 packages | Via `run -T rollup` |
