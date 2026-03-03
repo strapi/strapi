@@ -122,7 +122,9 @@ const AdminLayout = () => {
                 topMobileNavigation={topMobileNavigation}
                 burgerMobileNavigation={burgerMobileNavigation}
               />
-              <Box
+              <Flex
+                direction="column"
+                alignItems="stretch"
                 flex={1}
                 overflow="auto"
                 width="100%"
@@ -133,7 +135,7 @@ const AdminLayout = () => {
               >
                 <UpsellBanner />
                 <Outlet />
-              </Box>
+              </Flex>
             </Flex>
           </Box>
         </DndProvider>

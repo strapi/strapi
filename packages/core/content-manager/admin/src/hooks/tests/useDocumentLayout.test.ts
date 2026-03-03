@@ -22,6 +22,7 @@ describe('useDocumentLayout', () => {
         mainField: 'id',
         pageSize: 10,
         pagination: false,
+        relationOpenMode: 'modal',
         searchable: false,
       },
     });
@@ -328,6 +329,7 @@ describe('useDocumentLayout', () => {
         mainField: 'id',
         pageSize: 10,
         pagination: false,
+        relationOpenMode: 'modal',
         searchable: false,
       },
     });
