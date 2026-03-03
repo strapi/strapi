@@ -9301,7 +9301,7 @@ __metadata:
     react-window: "npm:1.8.10"
     rimraf: "npm:5.0.5"
     sanitize-html: "npm:2.13.0"
-    scheduler: "npm:0.23.0"
+    scheduler: "npm:^0.23.2"
     semver: "npm:7.5.4"
     sift: "npm:16.0.1"
     sonner: "npm:2.0.7"
@@ -30038,15 +30038,6 @@ __metadata:
   dependencies:
     xmlchars: "npm:^2.2.0"
   checksum: 10c0/3847b839f060ef3476eb8623d099aa502ad658f5c40fd60c105ebce86d244389b0d76fcae30f4d0c728d7705ceb2f7e9b34bb54717b6a7dbedaf5dad2d9a4b74
-  languageName: node
-  linkType: hard
-
-"scheduler@npm:0.23.0":
-  version: 0.23.0
-  resolution: "scheduler@npm:0.23.0"
-  dependencies:
-    loose-envify: "npm:^1.1.0"
-  checksum: 10c0/b777f7ca0115e6d93e126ac490dbd82642d14983b3079f58f35519d992fa46260be7d6e6cede433a92db70306310c6f5f06e144f0e40c484199e09c1f7be53dd
   languageName: node
   linkType: hard
 
