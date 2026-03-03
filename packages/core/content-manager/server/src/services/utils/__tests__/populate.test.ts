@@ -187,7 +187,7 @@ describe('Populate', () => {
       });
     });
 
-    describe('populateLocalizationsMode option', () => {
+    describe('initialPopulate override', () => {
       test('defaults to validation populate for localizations', () => {
         const uid = 'withLocalizations';
 
@@ -198,11 +198,13 @@ describe('Populate', () => {
         expect(result.localizations).toHaveProperty('populate');
       });
 
-      test('populateLocalizationsMode: minimal returns only locale, documentId, publishedAt fields', () => {
+      test('initialPopulate overrides localizations with minimal fields', () => {
         const uid = 'withLocalizations';
 
         const result = getDeepPopulate(uid as any, {
-          populateLocalizationsMode: 'minimal',
+          initialPopulate: {
+            localizations: { fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'] },
+          } as any,
         }) as Record<string, any>;
 
         expect(result).toEqual({
@@ -212,11 +214,13 @@ describe('Populate', () => {
         });
       });
 
-      test('populateLocalizationsMode: none excludes localizations from populate', () => {
+      test('initialPopulate with false suppresses localizations populate', () => {
         const uid = 'withLocalizations';
 
         const result = getDeepPopulate(uid as any, {
-          populateLocalizationsMode: 'none',
+          initialPopulate: {
+            localizations: false,
+          } as any,
         }) as Record<string, any>;
 
         expect(result).toEqual({
@@ -224,42 +228,18 @@ describe('Populate', () => {
         });
       });
 
-      test('populateLocalizationsMode: validation returns full validation populate', () => {
-        const uid = 'withLocalizations';
+      test('initialPopulate override works for any relation attribute', () => {
+        const uid = 'relationOTM';
 
         const result = getDeepPopulate(uid as any, {
-          populateLocalizationsMode: 'validation',
+          initialPopulate: {
+            relationAttrName: { fields: ['id', 'name'] },
+          } as any,
         }) as Record<string, any>;
 
-        expect(result).toHaveProperty('localizations');
-        expect(result.localizations).toHaveProperty('populate');
-      });
-
-      test('non-localized content type falls through to default handling regardless of mode', () => {
-        const uid = 'withLocalizationsNotLocalized';
-
-        // With minimal mode, non-localized types should NOT use fields-based populate
-        // (locale is private on non-localized types, which would fail validation)
-        const minimalResult = getDeepPopulate(uid as any, {
-          populateLocalizationsMode: 'minimal',
-        }) as Record<string, any>;
-
-        // Should fall through to default invisible attribute handling (return true)
-        expect(minimalResult.localizations).toBe(true);
-
-        // With none mode, non-localized types should also fall through
-        const noneResult = getDeepPopulate(uid as any, {
-          populateLocalizationsMode: 'none',
-        }) as Record<string, any>;
-
-        expect(noneResult.localizations).toBe(true);
-
-        // With validation mode, non-localized types should also fall through
-        const validationResult = getDeepPopulate(uid as any, {
-          populateLocalizationsMode: 'validation',
-        }) as Record<string, any>;
-
-        expect(validationResult.localizations).toBe(true);
+        expect(result).toEqual({
+          relationAttrName: { fields: ['id', 'name'] },
+        });
       });
     });
   });

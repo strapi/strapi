@@ -24,13 +24,6 @@ type PopulateOptions = {
   countMany?: boolean;
   countOne?: boolean;
   maxLevel?: number;
-  /**
-   * Controls how the `localizations` relation is populated.
-   * - 'none': Do not populate localizations
-   * - 'minimal': Only populate locale, documentId, publishedAt fields
-   * - 'validation': Full validation populate (default, current behavior)
-   */
-  populateLocalizationsMode?: 'none' | 'minimal' | 'validation';
 };
 
 /**
@@ -45,49 +38,23 @@ function getPopulateForRelation(
   attribute: Schema.Attribute.AnyAttribute,
   model: Model,
   attributeName: string,
-  { countMany, countOne, initialPopulate, populateLocalizationsMode }: PopulateOptions
+  { countMany, countOne, initialPopulate }: PopulateOptions
 ) {
   const isManyRelation = isAnyToMany(attribute);
 
-  if (initialPopulate) {
+  // Use initialPopulate when explicitly provided (including `false` to suppress population)
+  if (initialPopulate !== undefined) {
     return initialPopulate;
   }
 
+  // If populating localizations attribute, also include validatable fields
+  // Mainly needed for bulk locale publishing, so the Client has all the information necessary to perform validations
   if (attributeName === 'localizations') {
-    // Only apply special localizations handling for localized content types.
-    // The i18n plugin adds locale/localizations to ALL content types, but marks
-    // them as private for non-localized types. Using fields-based populate on
-    // non-localized types would fail validation (locale is a private field).
-    const isLocalized =
-      (model as { pluginOptions?: { i18n?: { localized?: boolean } } }).pluginOptions?.i18n
-        ?.localized === true;
+    const validationPopulate = getPopulateForValidation(model.uid as UID.Schema);
 
-    if (isLocalized) {
-      const mode = populateLocalizationsMode ?? 'validation';
-
-      if (mode === 'none') {
-        return false;
-      }
-
-      if (mode === 'minimal') {
-        // Minimal fields required for CM localization features:
-        // - locale: identifies which locale this localization represents
-        // - documentId: links all localizations of the same document together
-        // - publishedAt: determines draft/published status
-        // - updatedAt: needed to compute "modified" status (draft updated after publish)
-        return {
-          fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'],
-        };
-      }
-
-      // 'validation' mode — full validation populate (needed for bulk locale publishing)
-      const validationPopulate = getPopulateForValidation(model.uid as UID.Schema);
-
-      return {
-        populate: validationPopulate.populate,
-      };
-    }
-    // Non-localized types: fall through to default handling (return true for invisible attributes)
+    return {
+      populate: validationPopulate.populate,
+    };
   }
 
   // always populate createdBy, updatedBy, localizations etc.
@@ -188,7 +155,6 @@ const getDeepPopulate = (
     countMany = false,
     countOne = false,
     maxLevel = Infinity,
-    populateLocalizationsMode,
   }: PopulateOptions = {},
   level = 1
 ) => {
@@ -215,7 +181,6 @@ const getDeepPopulate = (
             countMany,
             countOne,
             maxLevel,
-            populateLocalizationsMode,
           },
           level
         )
@@ -414,10 +379,35 @@ const buildDeepPopulate = (uid: UID.CollectionType) => {
   return getService('populate-builder')(uid).populateDeep(Infinity).countRelations().build();
 };
 
+/**
+ * Restrict localizations populate to only metadata fields for localized content types.
+ * Returns an empty object for non-localized content types.
+ *
+ * By default, localizations are deeply populated which includes all relations and
+ * components for every locale — this is expensive and unnecessary for CM responses.
+ * The CM only needs these fields from localizations:
+ * - locale: to identify which locales exist
+ * - documentId: to link to the localized document
+ * - publishedAt: to determine published/draft status
+ * - updatedAt: to support the modified state indicator in the UI
+ */
+const getPopulateForLocalizations = (model: UID.Schema) => {
+  const modelSchema = strapi.getModel(model);
+  if (
+    (modelSchema as unknown as { pluginOptions: { i18n: { localized?: boolean } } }).pluginOptions
+      ?.i18n?.localized
+  ) {
+    return { localizations: { fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'] } };
+  }
+
+  return {};
+};
+
 export {
   getDeepPopulate,
   getDeepPopulateDraftCount,
   getPopulateForValidation,
   getQueryPopulate,
   buildDeepPopulate,
+  getPopulateForLocalizations,
 };

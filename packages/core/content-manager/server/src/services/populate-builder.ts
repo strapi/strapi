@@ -1,4 +1,4 @@
-import { isNil } from 'lodash/fp';
+import { isNil, merge } from 'lodash/fp';
 import type { UID } from '@strapi/types';
 import { type Populate, getDeepPopulate, getQueryPopulate } from './utils/populate';
 
@@ -16,12 +16,7 @@ const populateBuilder = (uid: UID.Schema) => {
   let getInitialPopulate = async (): Promise<undefined | Populate> => {
     return undefined;
   };
-  const deepPopulateOptions: {
-    countMany: boolean;
-    countOne: boolean;
-    maxLevel: number;
-    populateLocalizationsMode?: 'none' | 'minimal' | 'validation';
-  } = {
+  const deepPopulateOptions = {
     countMany: false,
     countOne: false,
     maxLevel: -1,
@@ -63,11 +58,14 @@ const populateBuilder = (uid: UID.Schema) => {
     },
 
     /**
-     * Controls how the localizations relation is populated.
-     * @param [mode='validation'] - 'none' | 'minimal' | 'validation'
+     * Override the populate for specific attributes, taking precedence over
+     * query-derived or deep populate defaults.
+     *
+     * @param overrides - Populate overrides to merge (e.g. { localizations: { fields: ['locale'] } })
      */
-    populateLocalizationsMode(mode: 'none' | 'minimal' | 'validation') {
-      deepPopulateOptions.populateLocalizationsMode = mode;
+    withPopulateOverride(overrides: Record<string, any>) {
+      const prev = getInitialPopulate;
+      getInitialPopulate = async () => merge((await prev()) || {}, overrides);
       return builder;
     },
 
