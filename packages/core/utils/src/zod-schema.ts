@@ -1,7 +1,7 @@
 /**
  * Re-export of the Zod v4 schema builder from the same version Strapi uses
  * internally. Use this for building schemas passed to content API param
- * registration (addQueryParams / addBodyParams) so your code stays compatible
+ * registration (addQueryParams / addInputParams) so your code stays compatible
  * across Strapi minor/patch updates.
  *
  * @example

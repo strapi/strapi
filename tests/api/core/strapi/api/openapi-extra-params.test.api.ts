@@ -32,9 +32,12 @@ describe('OpenAPI – extra params from contentAPI.addQueryParams', () => {
   let strapi: Awaited<ReturnType<typeof createStrapiInstance>>;
 
   beforeAll(async () => {
-    strapi = await createStrapiInstance();
-    strapi.contentAPI.addQueryParams({
-      search: { schema: z.string().max(200).optional() },
+    strapi = await createStrapiInstance({
+      register: ({ strapi: s }) => {
+        s.contentAPI.addQueryParams({
+          search: { schema: z.string().max(200).optional() },
+        });
+      },
     });
   });
 

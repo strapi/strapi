@@ -204,46 +204,94 @@ describe('Core API - Validate', () => {
     });
   });
 
-  describe('contentAPI.addQueryParams (strictParams + real request)', () => {
-    const z = require('zod/v4');
+  describe('contentAPI.addQueryParams and addInputParams (strictParams + real request)', () => {
+    let bodyParamTestDocumentId;
 
     beforeAll(() => {
       strapi.contentAPI.addQueryParams({
-        search: {
+        extraParam: {
           schema: (zInstance) => zInstance.string().max(200).optional(),
           matchRoute: (route) => route.method === 'GET' && route.path === '/documents',
         },
       });
-      // Routes were already registered at load(); re-apply so they get the new param.
-      // Ignore "param already exists" when the same route object appears in multiple routers.
+      strapi.contentAPI.addInputParams({
+        clientMutationId: {
+          schema: (zInstance) => zInstance.string().max(100).optional(),
+          matchRoute: (route) => route.method === 'POST' && route.path === '/documents',
+        },
+      });
+    });
+
+    afterEach(async () => {
+      strapi.config.set('api.rest.strictParams', undefined);
+      strapi.config.set('api.documents.strictParams', undefined);
+      if (bodyParamTestDocumentId) {
+        await strapi.documents('api::document.document').delete({
+          documentId: bodyParamTestDocumentId,
+          locale: '*',
+        });
+        bodyParamTestDocumentId = null;
+      }
+    });
+
+    const applyExtraParamsToAllRouters = () => {
       for (const apiName of Object.keys(strapi.apis)) {
         const api = strapi.api(apiName);
         const routers = api.routes ?? {};
         for (const router of Object.values(routers)) {
           if (router.routes && Array.isArray(router.routes)) {
-            try {
-              strapi.contentAPI.applyExtraParamsToRoutes(router.routes);
-            } catch (err) {
-              if (!/param "search" already exists on route/.test(err.message)) {
-                throw err;
-              }
-            }
+            strapi.contentAPI.applyExtraParamsToRoutes(router.routes);
           }
         }
       }
+    };
+
+    // Order matters: run "no apply" tests first, then apply once, then "after apply" tests.
+    it('returns 400 when strictParams is true and custom query param was registered but applyExtraParamsToRoutes has not been run', async () => {
+      strapi.config.set('api.rest.strictParams', true);
+      strapi.config.set('api.documents.strictParams', true);
+
+      const res = await rq.get('/api/documents', { qs: { extraParam: 'hello' } });
+
+      expect(res.status).toEqual(400);
     });
 
-    afterEach(() => {
-      strapi.config.set('api.rest.strictParams', undefined);
-    });
-
-    it('returns 200 when strictParams is true and request includes custom query param registered via addQueryParams', async () => {
+    it('returns 400 when strictParams is true and custom body param was registered but applyExtraParamsToRoutes has not been run', async () => {
       strapi.config.set('api.rest.strictParams', true);
 
-      const res = await rq.get('/api/documents', { qs: { search: 'hello' } });
+      const res = await rq.post('/api/documents', {
+        body: {
+          data: { name: 'Body param test', clientMutationId: 'abc-123' },
+        },
+      });
+
+      expect(res.status).toEqual(400);
+    });
+
+    it('returns 200 when strictParams is true and request includes custom query param after applyExtraParamsToRoutes (as initRouting does)', async () => {
+      applyExtraParamsToAllRouters();
+      strapi.config.set('api.rest.strictParams', true);
+      strapi.config.set('api.documents.strictParams', true);
+
+      const res = await rq.get('/api/documents', { qs: { extraParam: 'hello' } });
 
       expect(res.status).toEqual(200);
       expect(res.body.data).toBeDefined();
+    });
+
+    it('returns 201 when strictParams is true and request body includes custom body param after applyExtraParamsToRoutes (as initRouting does)', async () => {
+      strapi.config.set('api.rest.strictParams', true);
+
+      const res = await rq.post('/api/documents', {
+        body: {
+          data: { name: 'Body param test', clientMutationId: 'abc-123' },
+        },
+      });
+
+      expect(res.status).toEqual(201);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.name).toBe('Body param test');
+      bodyParamTestDocumentId = res.body.data.documentId;
     });
   });
 

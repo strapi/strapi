@@ -13,7 +13,7 @@ export { isOperator, isOperatorOfType } from './operators';
 export * as queryParams from './convert-query-params';
 export {
   ALLOWED_QUERY_PARAM_KEYS,
-  RESERVED_BODY_PARAM_KEYS,
+  RESERVED_INPUT_PARAM_KEYS,
   SHARED_QUERY_PARAM_KEYS,
 } from './content-api-constants';
 export { type RouteLike } from './content-api-route-params';

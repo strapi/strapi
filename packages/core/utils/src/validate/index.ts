@@ -31,7 +31,7 @@ export interface Options {
    */
   strictParams?: boolean;
   /**
-   * When set, extra query/body params are derived from the route's request schema (and validated with Zod).
+   * When set, extra query/input params are derived from the route's request schema (and validated with Zod).
    * When absent, no extra params are allowed in strict mode.
    */
   route?: RouteLike;
@@ -98,7 +98,7 @@ const createAPIValidators = (opts: APIOptions) => {
       },
       // non-writable attributes
       traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema, getModel }),
-      // unrecognized attributes (allowedExtraRootKeys = registered body param keys)
+      // unrecognized attributes (allowedExtraRootKeys = registered input param keys)
       traverseEntity(visitors.throwUnrecognizedFields, {
         schema,
         getModel,
@@ -129,7 +129,7 @@ const createAPIValidators = (opts: APIOptions) => {
       // The route's body schema is z.object({ data: ... }), so its shape includes "data". We skip "data" because
       // the main document payload is already validated above by traverseEntity (throwUnrecognizedFields, etc.);
       // relation ops (connect/disconnect/set) are handled there, not by the route's Zod schema. We only run
-      // Zod here for truly extra root keys added via addBodyParams (e.g. clientMutationId).
+      // Zod here for truly extra root keys added via addInputParams (e.g. clientMutationId).
       if (isObject(data) && route?.request?.body?.['application/json']) {
         const bodySchema = route.request.body['application/json'];
         if (typeof bodySchema === 'object' && 'shape' in bodySchema) {

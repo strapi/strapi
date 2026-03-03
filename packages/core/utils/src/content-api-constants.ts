@@ -32,10 +32,10 @@ export const ALLOWED_QUERY_PARAM_KEYS = [
 ] as const;
 
 /**
- * Root-level body keys reserved for core (id, documentId).
- * These cannot be added as custom body params via contentAPI.addBodyParams.
+ * Root-level body.data keys reserved for core (id, documentId).
+ * These cannot be added as custom input params via contentAPI.addInputParams.
  */
-export const RESERVED_BODY_PARAM_KEYS = [
+export const RESERVED_INPUT_PARAM_KEYS = [
   constants.ID_ATTRIBUTE,
   constants.DOC_ID_ATTRIBUTE,
 ] as const;
