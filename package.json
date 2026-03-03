@@ -179,7 +179,7 @@
     "tar": "7.5.9",
     "ts-jest": "29.1.0",
     "typescript": "5.4.4",
-    "vitest": "4.0.18",
+    "vitest": "catalog:",
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
