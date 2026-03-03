@@ -1,30 +1,19 @@
-import path from 'node:path';
-import readPkgUp from 'read-pkg-up';
 import type { InlineConfig, UserConfig } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 import react from '@vitejs/plugin-react-swc';
 
 import { getUserConfig } from '../core/config';
+import { getModulePath } from '../core/resolve-module';
 import { isDesignSystemLinked } from '../core/linked-packages';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import { getMonorepoAliases } from '../core/aliases';
 import type { BuildContext } from '../create-build-context';
 import { buildFilesPlugin } from './plugins';
 
-/**
- * Resolve module to package root for use in aliases. Ensures pnpm's strict
- * node_modules structure can resolve packages when bundling plugin chunks.
- */
-const getModulePath = (mod: string) => {
-  const modulePath = require.resolve(mod);
-  const pkg = readPkgUp.sync({ cwd: path.dirname(modulePath) });
-  return pkg ? path.dirname(pkg.path) : modulePath;
-};
-
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
   const isMonorepoExampleApp = (ctx.strapi as any).internal_config?.uuid === 'getstarted';
-  const designSystemLinked = isDesignSystemLinked(ctx.cwd);
+  const designSystemLinked = isDesignSystemLinked();
 
   return {
     root: ctx.cwd,
