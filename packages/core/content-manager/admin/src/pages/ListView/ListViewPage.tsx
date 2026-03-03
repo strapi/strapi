@@ -58,8 +58,6 @@ import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 
-import type { Modules } from '@strapi/types';
-
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 
 /* -------------------------------------------------------------------------------------------------
@@ -264,14 +262,6 @@ const ListViewPage = () => {
         defaultMessage: 'Untitled',
       });
 
-  const handleRowClick = (id: Modules.Documents.ID) => () => {
-    trackUsage('willEditEntryFromList');
-    navigate({
-      pathname: id.toString(),
-      search: stringify({ plugins: query.plugins }),
-    });
-  };
-
   const isEmptyState = !isFetching && results.length === 0;
 
   const endActions = (
@@ -393,28 +383,37 @@ const ListViewPage = () => {
                   <Table.Body>
                     {results.map((row) => {
                       return (
-                        <Table.Row
-                          cursor="pointer"
-                          key={row.id}
-                          onClick={handleRowClick(row.documentId)}
-                        >
-                          <Table.CheckboxCell id={row.id} />
-                          {tableHeaders.map(({ cellFormatter, ...header }) => {
+                        <LinkRow cursor="pointer" key={row.id}>
+                          <Table.CheckboxCell
+                            id={row.id}
+                            style={{ position: 'relative', zIndex: 1 }}
+                          />
+                          {tableHeaders.map(({ cellFormatter, ...header }, index) => {
+                            const rowLink = index === 0 && (
+                              <RowLink
+                                to={{
+                                  pathname: row.documentId.toString(),
+                                  search: stringify({ plugins: query.plugins }),
+                                }}
+                                onClick={() => trackUsage('willEditEntryFromList')}
+                                tabIndex={-1}
+                              />
+                            );
+
                             if (header.name === 'status') {
                               const { status } = row;
 
                               return (
                                 <Table.Cell key={header.name}>
+                                  {rowLink}
                                   <DocumentStatus status={status} maxWidth={'min-content'} />
                                 </Table.Cell>
                               );
                             }
                             if (['createdBy', 'updatedBy'].includes(header.name.split('.')[0])) {
-                              // Display the users full name
-                              // Some entries doesn't have a user assigned as creator/updater (ex: entries created through content API)
-                              // In this case, we display a dash
                               return (
                                 <Table.Cell key={header.name}>
+                                  {rowLink}
                                   <Typography textColor="neutral800">
                                     {row[header.name.split('.')[0]]
                                       ? getDisplayName(row[header.name.split('.')[0]])
@@ -426,6 +425,7 @@ const ListViewPage = () => {
                             if (typeof cellFormatter === 'function') {
                               return (
                                 <Table.Cell key={header.name}>
+                                  {rowLink}
                                   {/* @ts-expect-error – TODO: fix this TS error */}
                                   {cellFormatter(row, header, { collectionType, model })}
                                 </Table.Cell>
@@ -433,6 +433,7 @@ const ListViewPage = () => {
                             }
                             return (
                               <Table.Cell key={header.name}>
+                                {rowLink}
                                 <CellContent
                                   content={row[header.name.split('.')[0]]}
                                   rowId={row.documentId}
@@ -441,11 +442,10 @@ const ListViewPage = () => {
                               </Table.Cell>
                             );
                           })}
-                          {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
                           <ActionsCell onClick={(e) => e.stopPropagation()}>
                             <TableActions document={row} />
                           </ActionsCell>
-                        </Table.Row>
+                        </LinkRow>
                       );
                     })}
                   </Table.Body>
@@ -466,9 +466,23 @@ const ListViewPage = () => {
   );
 };
 
+const LinkRow = styled(Table.Row)`
+  position: relative;
+`;
+
+const RowLink = styled(ReactRouterLink)`
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+`;
+
 const ActionsCell = styled(Table.Cell)`
   display: flex;
   justify-content: flex-end;
+  position: relative;
+  z-index: 1;
 `;
 
 /* -------------------------------------------------------------------------------------------------
