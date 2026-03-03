@@ -60,6 +60,9 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         // Omit when linked so local changes are picked up (see exclude above)
         ...(!designSystemLinked ? ['@strapi/design-system'] : []),
         '@radix-ui/react-tooltip',
+        // Pre-bundle lodash: design-system uses named imports (e.g. assignWith) but lodash
+        // is CommonJS-only; pre-bundling converts it to ESM for the browser
+        'lodash',
         /**
          * Pre-bundle other dependencies that would otherwise cause a page reload when imported.
          * See "performance" section: https://vite.dev/guide/dep-pre-bundling.html#the-why
@@ -133,12 +136,14 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
         'styled-components',
         '@strapi/design-system',
         '@radix-ui/react-tooltip',
+        'lodash',
       ],
       // Explicit aliases ensure resolution under pnpm's strict dependency isolation,
       // where packages imported by plugins may not be resolvable from plugin chunks
       alias: {
         '@strapi/design-system': getModulePath('@strapi/design-system'),
         '@radix-ui/react-tooltip': getModulePath('@radix-ui/react-tooltip'),
+        lodash: getModulePath('lodash'),
       },
     },
     plugins: [react(), buildFilesPlugin(ctx)],
