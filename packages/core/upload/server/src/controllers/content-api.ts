@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils from '@strapi/utils';
+import utils, { errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -22,16 +22,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   const validateQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
-    const { auth } = ctx.state;
+    const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.validate.query(data, schema, { auth });
+    return strapi.contentAPI.validate.query(data, schema, { auth, route });
   };
 
   const sanitizeQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
-    const { auth } = ctx.state;
+    const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.sanitize.query(data, schema, { auth });
+    return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
   };
 
   return {
@@ -99,7 +99,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
-      const { validFiles, filteredBody } = await prepareUploadRequest(filesInput, body, strapi);
+      const {
+        validFiles,
+        filteredBody,
+        errors: validationErrors,
+      } = await prepareUploadRequest(filesInput, body, strapi);
+      if (validFiles.length === 0) {
+        throw new errors.ValidationError(validationErrors[0].message);
+      }
 
       // cannot replace with more than one file
       if (Array.isArray(filesInput)) {
@@ -122,7 +129,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
-      const { validFiles, filteredBody } = await prepareUploadRequest(filesInput, body, strapi);
+      const {
+        validFiles,
+        filteredBody,
+        errors: validationErrors,
+      } = await prepareUploadRequest(filesInput, body, strapi);
+      if (validFiles.length === 0) {
+        throw new errors.ValidationError(validationErrors[0].message);
+      }
 
       const isMultipleFiles = validFiles.length > 1;
       const data: any = await validateUploadBody(filteredBody, isMultipleFiles);
