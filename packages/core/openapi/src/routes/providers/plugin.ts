@@ -30,10 +30,20 @@ export class PluginRoutesProvider extends AbstractRoutesProvider {
       const { routes } = plugin;
 
       return Array.isArray(routes)
-        ? // If it is a simple Route[], return as is
-          routes
-        : // Else, extract and flatten every route from each router
-          Object.values(routes).flatMap((router) => router.routes);
+        ? routes
+        : Object.values(routes).flatMap((router: any) => {
+            const prefix = router.prefix ?? '';
+
+            return router.routes.map((route: Core.Route) => {
+              const fullPath =
+                (`${prefix}${route.path}` || '/').replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+
+              return {
+                ...route,
+                path: fullPath,
+              };
+            });
+          });
     });
 
     debug('found %o routes in Strapi plugins', routes.length);
