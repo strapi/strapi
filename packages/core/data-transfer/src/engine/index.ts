@@ -785,7 +785,9 @@ class TransferEngine<
       throw e;
     }
 
-    // Check if there were any errors in the diagnostics
+    // Fail only if there were non-bypassed errors (e.g. a stage's stream failed). Bypassed
+    // cases (schema diff ignored, attemptResolveError) do not call reportError, so they
+    // never add to the stack and do not trigger this abort.
     const hasErrors = this.diagnostics.stack.items.some((item) => item.kind === 'error');
     if (hasErrors) {
       throw new Error('Transfer completed with errors. Check the logs for details.');
