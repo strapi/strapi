@@ -169,6 +169,7 @@ describe('useDocument', () => {
       },
       attributes: {
         id: { type: 'string' },
+        documentId: { type: 'string' },
         slug: { type: 'uid' },
         name: { type: 'string' },
         city: {
@@ -293,6 +294,9 @@ describe('useDocument', () => {
           id: {
             type: 'string',
           },
+          documentId: {
+            type: 'string',
+          },
           name: {
             type: 'string',
             default: 'toto',
@@ -338,6 +342,7 @@ describe('useDocument', () => {
 
     expect(result.current.getInitialFormValues).toBeInstanceOf(Function);
     expect(result.current.getInitialFormValues()).toEqual({
+      documentId: '12345',
       name: 'Entry 1',
     });
   });

@@ -1,28 +1,36 @@
 import { errors } from '@strapi/utils';
-import { act, renderHook, screen, server } from '@tests/utils';
+import { renderHook, screen, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
 import { useDocumentActions } from '../useDocumentActions';
 
+jest.mock('@strapi/admin/strapi-admin/ee', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin/ee'),
+  useGetAIFeatureConfigQuery: () => ({ data: undefined }),
+  useAIAvailability: () => false,
+}));
+
 describe('useDocumentActions', () => {
-  it('should return an object with the correct methods', () => {
+  it('should return an object with the correct methods', async () => {
     const { result } = renderHook(() => useDocumentActions());
 
-    expect(result.current).toEqual({
-      autoClone: expect.any(Function),
-      publishMany: expect.any(Function),
-      clone: expect.any(Function),
-      create: expect.any(Function),
-      discard: expect.any(Function),
-      delete: expect.any(Function),
-      deleteMany: expect.any(Function),
-      getDocument: expect.any(Function),
-      publish: expect.any(Function),
-      update: expect.any(Function),
-      unpublish: expect.any(Function),
-      unpublishMany: expect.any(Function),
-      isLoading: expect.any(Boolean),
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        autoClone: expect.any(Function),
+        publishMany: expect.any(Function),
+        clone: expect.any(Function),
+        create: expect.any(Function),
+        discard: expect.any(Function),
+        delete: expect.any(Function),
+        deleteMany: expect.any(Function),
+        getDocument: expect.any(Function),
+        publish: expect.any(Function),
+        update: expect.any(Function),
+        unpublish: expect.any(Function),
+        unpublishMany: expect.any(Function),
+        isLoading: expect.any(Boolean),
+      });
     });
   });
 
@@ -32,14 +40,13 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
             documentId: '12345',
           },
           {
-            documentId: '12345',
             title: 'test',
             content: 'the brown fox jumps over the lazy dog',
           }
@@ -51,7 +58,7 @@ describe('useDocumentActions', () => {
       expect(response).toEqual({
         data: {
           content: 'the brown fox jumps over the lazy dog',
-          documentId: '12345',
+          documentId: '67890',
           id: 2,
           title: 'test',
         },
@@ -74,7 +81,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.clone(
           {
             model: mockData.contentManager.contentType,
@@ -108,7 +115,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.create(
           {
             model: mockData.contentManager.contentType,
@@ -130,6 +137,9 @@ describe('useDocumentActions', () => {
           title: 'test',
         },
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Saved document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -148,7 +158,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.create(
           {
             model: mockData.contentManager.contentType,
@@ -180,7 +190,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -195,6 +205,9 @@ describe('useDocumentActions', () => {
         id: 1,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Deleted document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -213,7 +226,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -241,7 +254,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.deleteMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -256,6 +269,9 @@ describe('useDocumentActions', () => {
       expect(response).toEqual({
         count: 2,
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Successfully deleted.');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -274,7 +290,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.deleteMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -302,7 +318,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -317,6 +333,9 @@ describe('useDocumentActions', () => {
         id: 1,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Changes discarded');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -335,7 +354,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.discard({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -363,7 +382,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -378,6 +397,9 @@ describe('useDocumentActions', () => {
         id: 1,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Deleted document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -396,7 +418,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.delete({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -424,7 +446,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.publish(
           {
             collectionType: 'collection-types',
@@ -445,6 +467,9 @@ describe('useDocumentActions', () => {
         publishedAt: '2024-01-23T16:23:38.948Z',
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Published document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -463,7 +488,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.publish(
           {
             collectionType: 'collection-types',
@@ -496,7 +521,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
@@ -523,6 +548,9 @@ describe('useDocumentActions', () => {
           updatedAt: '',
         },
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Saved document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -541,7 +569,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.update(
           {
             collectionType: 'collection-types',
@@ -575,7 +603,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -591,6 +619,9 @@ describe('useDocumentActions', () => {
         publishedAt: null,
         title: 'test',
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Unpublished document');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -609,7 +640,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublish({
           collectionType: 'collection-types',
           model: mockData.contentManager.contentType,
@@ -637,7 +668,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublishMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],
@@ -649,6 +680,9 @@ describe('useDocumentActions', () => {
       expect(response).toEqual({
         count: 2,
       });
+
+      // Wait for notification to prevent act warnings from Sonner
+      await screen.findByText('Successfully unpublished.');
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -667,7 +701,7 @@ describe('useDocumentActions', () => {
 
       let response;
 
-      await act(async () => {
+      await waitFor(async () => {
         const res = await result.current.unpublishMany({
           model: mockData.contentManager.contentType,
           documentIds: ['12345', '6789'],

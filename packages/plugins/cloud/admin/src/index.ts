@@ -6,7 +6,7 @@ import { Initializer } from './components/Initializer';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-const name = 'Deploy';
+const pluginName = 'Deploy';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -19,8 +19,8 @@ export default {
         to: `plugins/${pluginId}`,
         icon: Cloud,
         intlLabel: {
-          id: `${pluginId}.plugin.name`,
-          defaultMessage: name,
+          id: `${pluginId}.Plugin.name`,
+          defaultMessage: pluginName,
         },
         Component: async () => {
           const { App } = await import('./pages/App');
@@ -32,7 +32,7 @@ export default {
         id: pluginId,
         initializer: Initializer,
         isReady: false,
-        name,
+        name: pluginName,
       };
 
       app.registerPlugin(plugin);

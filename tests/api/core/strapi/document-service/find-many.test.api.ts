@@ -130,5 +130,24 @@ describe('Document Service', () => {
       const count = await strapi.documents(ARTICLE_UID).count(params);
       expect(count).toBe(articles.length);
     });
+
+    it('Find all documents with locale="*"', async () => {
+      const params = {
+        locale: '*',
+      } as const;
+
+      const articles = await findArticles(params);
+
+      // Should return articles from all locales
+      expect(articles.length).toBeGreaterThan(0);
+
+      // Verify we have articles from different locales
+      const locales = [...new Set(articles.map((article) => article.locale))];
+      expect(locales.length).toBeGreaterThan(1);
+
+      // expect count to be the same as findMany
+      const count = await strapi.documents(ARTICLE_UID).count(params);
+      expect(count).toBe(articles.length);
+    });
   });
 });

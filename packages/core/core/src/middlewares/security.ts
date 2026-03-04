@@ -1,5 +1,6 @@
 import { defaultsDeep, mergeWith } from 'lodash/fp';
 import helmet, { KoaHelmet } from 'koa-helmet';
+import { CSP_DEFAULTS } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
 
@@ -13,9 +14,7 @@ const defaults: Config = {
   contentSecurityPolicy: {
     useDefaults: true,
     directives: {
-      'connect-src': ["'self'", 'https:'],
-      'img-src': ["'self'", 'data:', 'blob:', 'https://market-assets.strapi.io'],
-      'media-src': ["'self'", 'data:', 'blob:'],
+      ...CSP_DEFAULTS,
       upgradeInsecureRequests: null,
     },
   },
@@ -41,7 +40,6 @@ export const security: Core.MiddlewareFactory<Config> =
   (config, { strapi }) =>
   (ctx, next) => {
     let helmetConfig: Config = defaultsDeep(defaults, config);
-
     const specialPaths = ['/documentation'];
 
     const directives: {

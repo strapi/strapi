@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { clickAndWait } from '../../../utils/shared';
+import { login } from '../../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { clickAndWait } from '../../../../utils/shared';
 
 const AUTHOR_EDIT_URL =
   /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
@@ -211,7 +211,7 @@ test.describe('Relations on the fly - Edit a Relation', () => {
     // Step 1. Got to Shop single-type
     await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
     // Step 2. Choose the product carousel component and open its toggle
-    await page.getByRole('button', { name: 'Product carousel' }).click();
+    await page.getByRole('button', { name: 'Product carousel', exact: true }).click();
     // Step 3. Select a product
     await page.getByRole('combobox', { name: 'products' }).click();
     await page.getByRole('option', { name: 'Nike Mens 23/24 Away Stadium Jersey' }).click();

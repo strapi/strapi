@@ -183,7 +183,7 @@ export function useAPIErrorHandler(
          * In that case we return a generic error message.
          */
         if (!error.message) {
-          return 'Unknown error occured.';
+          return 'Unknown error occurred.';
         }
 
         return formatError(err);

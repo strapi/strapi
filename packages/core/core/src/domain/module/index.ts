@@ -107,6 +107,9 @@ export const createModule = (
     get routes() {
       return rawModule.routes ?? {};
     },
+    set routes(routes: Record<string, Core.Router>) {
+      rawModule.routes = routes;
+    },
     config(path: PropertyPath, defaultValue: unknown) {
       const pathArray = flatten([namespace, path]);
       return strapi.get('config').get(pathArray, defaultValue);

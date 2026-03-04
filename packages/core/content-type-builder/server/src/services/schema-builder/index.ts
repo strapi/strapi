@@ -86,58 +86,60 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
     convertAttributes(attributes: any) {
       return Object.keys(attributes).reduce(
         (acc, key) => {
-          const attribute = attributes[key];
-
-          const { configurable, private: isPrivate } = attribute;
-
-          const baseProperties = {
-            private: isPrivate === true ? true : undefined,
-            configurable: configurable === false ? false : undefined,
-          };
-
-          if (attribute.type === 'relation') {
-            const { target, relation, targetAttribute, dominant, ...restOfProperties } = attribute;
-
-            const attr = {
-              type: 'relation',
-              relation,
-              target,
-              ...restOfProperties,
-              ...baseProperties,
-            };
-
-            acc[key] = attr;
-
-            if (target && !this.contentTypes.has(target)) {
-              throw new errors.ApplicationError(`target: ${target} does not exist`);
-            }
-
-            if (_.isNil(targetAttribute)) {
-              return acc;
-            }
-
-            if (['oneToOne', 'manyToMany'].includes(relation) && dominant === true) {
-              attr.inversedBy = targetAttribute;
-            } else if (['oneToOne', 'manyToMany'].includes(relation) && dominant === false) {
-              attr.mappedBy = targetAttribute;
-            } else if (['oneToOne', 'manyToOne', 'manyToMany'].includes(relation)) {
-              attr.inversedBy = targetAttribute;
-            } else if (['oneToMany'].includes(relation)) {
-              attr.mappedBy = targetAttribute;
-            }
-
-            return acc;
-          }
-
-          acc[key] = {
-            ...attribute,
-            ...baseProperties,
-          };
-
+          acc[key] = this.convertAttribute(attributes[key]);
           return acc;
         },
         {} as Record<string, unknown>
       );
+    },
+
+    convertAttribute(attribute: any) {
+      const { configurable, private: isPrivate, conditions } = attribute;
+
+      const baseProperties = {
+        private: isPrivate === true ? true : undefined,
+        configurable: configurable === false ? false : undefined,
+        // IMPORTANT: Preserve conditions only if they exist and are not undefined/null
+        ...(conditions !== undefined && conditions !== null && { conditions }),
+      };
+
+      if (attribute.type === 'relation') {
+        const { target, relation, targetAttribute, dominant, ...restOfProperties } = attribute;
+
+        const attr = {
+          type: 'relation',
+          relation,
+          target,
+          ...restOfProperties,
+          ...baseProperties,
+        };
+
+        // TODO: uncomment this when we pre-create empty types and targets exists if we create multiple types at once
+        // if (target && !this.contentTypes.has(target)) {
+        //   throw new errors.ApplicationError(`target: ${target} does not exist`);
+        // }
+
+        if (_.isNil(targetAttribute)) {
+          return attr;
+        }
+
+        if (['oneToOne', 'manyToMany'].includes(relation) && dominant === true) {
+          attr.inversedBy = targetAttribute;
+        } else if (['oneToOne', 'manyToMany'].includes(relation) && dominant === false) {
+          attr.mappedBy = targetAttribute;
+        } else if (['oneToOne', 'manyToOne', 'manyToMany'].includes(relation)) {
+          attr.inversedBy = targetAttribute;
+        } else if (['oneToMany'].includes(relation)) {
+          attr.mappedBy = targetAttribute;
+        }
+
+        return attr;
+      }
+
+      return {
+        ...attribute,
+        ...baseProperties,
+      };
     },
 
     ...createComponentBuilder(),

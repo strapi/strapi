@@ -5,6 +5,7 @@
 
 import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
+import jsonLogic from 'json-logic-js';
 import strapiUtils from '@strapi/utils';
 import type { Modules, UID, Struct, Schema } from '@strapi/types';
 import { Validators, ValidatorMetas } from './validators';
@@ -268,6 +269,15 @@ const createAttributeValidator =
   (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMetas, options: ValidatorContext) => {
     let validator = yup.mixed();
 
+    // If field is conditionally invisible, skip all validation for it
+    if (metas.attr.conditions?.visible) {
+      const isVisible = jsonLogic.apply(metas.attr.conditions.visible, metas.data);
+
+      if (!isVisible) {
+        return yup.mixed().notRequired(); // Completely skip validation
+      }
+    }
+
     if (isMediaAttribute(metas.attr)) {
       validator = yup.mixed();
     } else if (isScalarAttribute(metas.attr)) {
@@ -342,6 +352,7 @@ const createModelValidator =
         const metas = {
           attr: model.attributes[attributeName],
           updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
+          data,
           model,
           entity,
           componentContext,

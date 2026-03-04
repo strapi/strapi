@@ -8,6 +8,7 @@ import { toRegressedEnumValue } from '../../../utils/toRegressedEnumValue';
 
 import {
   alreadyUsedAttributeNames,
+  createStringShape,
   createTextShape,
   isMinSuperiorThanMax,
   isNameAllowed,
@@ -289,7 +290,7 @@ export const attributeTypes = {
       relation: yup.string().required(),
       type: yup.string().required(),
       targetAttribute: yup.lazy(() => {
-        const relationType = getRelationType(modifiedData.relation, modifiedData.targetAttribute);
+        const relationType = getRelationType(modifiedData.relation!, modifiedData.targetAttribute);
 
         if (relationType === 'oneWay' || relationType === 'manyWay') {
           return yup.string().nullable();
@@ -351,7 +352,7 @@ export const attributeTypes = {
     return yup.object(shape);
   },
   string(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
-    const shape = createTextShape(usedAttributeNames, reservedNames);
+    const shape = createStringShape(usedAttributeNames, reservedNames);
 
     return yup.object(shape);
   },

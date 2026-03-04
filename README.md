@@ -54,9 +54,10 @@ Strapi Community Edition is a free and open-source headless CMS enabling you to 
 
 ### ⏳ Installation
 
-Install Strapi with this **Quickstart** command to create a Strapi project instantly:
+Use the **Quickstart** command below to create a new Strapi project instantly:
 
-- (Use **yarn** to install the Strapi project (recommended). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
+- We recommend using **yarn** to create a Strapi project.  
+  [View yarn installation docs](https://yarnpkg.com/lang/en/docs/install/).
 
 ```bash
 yarn create strapi
@@ -64,7 +65,7 @@ yarn create strapi
 
 **or**
 
-- (Using npx to install the Strapi project.)
+(Using npx to install the Latest Version Strapi project.)
 
 ```bash
 npx create-strapi@latest
@@ -98,7 +99,8 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 | Strapi Version  | Recommended | Minimum |
 | --------------- | ----------- | ------- |
-| 5.0.0 and up    | 20.x        | 18.x    |
+| 5.31.0 and up   | 24.x        | 20.x    |
+| 5.0.0 to 5.30.1 | 20.x        | 18.x    |
 | 4.14.5 and up   | 20.x        | 18.x    |
 | 4.11.0 and up   | 18.x        | 16.x    |
 | 4.3.9 to 4.10.x | 18.x        | 14.x    |

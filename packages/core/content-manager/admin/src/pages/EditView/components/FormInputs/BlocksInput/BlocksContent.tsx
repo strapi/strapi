@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useIsMobile } from '@strapi/admin/strapi-admin';
 import {
   Box,
   BoxComponent,
@@ -23,9 +24,9 @@ import { decorateCode } from './Blocks/Code';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
-import { getEntries, isLinkNode, isListNode } from './utils/types';
+import { getEntries } from './utils/types';
 
-const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
+const StyledEditable = styled(Editable)<{ $isExpandedMode: boolean }>`
   // The outline style is set on the wrapper with :focus-within
   outline: none;
   display: flex;
@@ -33,16 +34,20 @@ const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
   gap: ${({ theme }) => theme.spaces[3]};
   height: 100%;
   // For fullscreen align input in the center with fixed width
-  width: ${(props) => (props.isExpandedMode ? '512px' : '100%')};
+  width: ${(props) => (props.$isExpandedMode ? '512px' : '100%')};
   margin: auto;
+  font-size: 1.6rem;
 
+  ${({ theme }) => theme.breakpoints.medium} {
+    font-size: 1.4rem;
+  }
   > *:last-child {
     padding-bottom: ${({ theme }) => theme.spaces[3]};
   }
 `;
 
-const Wrapper = styled<BoxComponent>(Box)<{ isOverDropTarget: boolean }>`
-  position: ${({ isOverDropTarget }) => isOverDropTarget && 'relative'};
+const Wrapper = styled<BoxComponent>(Box)<{ $isOverDropTarget: boolean }>`
+  position: ${({ $isOverDropTarget }) => $isOverDropTarget && 'relative'};
 `;
 
 type DragDirection = (typeof DIRECTIONS)[keyof typeof DIRECTIONS];
@@ -133,9 +138,10 @@ const DragAndDropElement = ({
   dragDirection,
   dragHandleTopMargin,
 }: DragAndDropElementProps) => {
-  const { editor, disabled, name, setLiveText } = useBlocksEditorContext('drag-and-drop');
+  const { editor, disabled, name, setLiveText } = useBlocksEditorContext('DragAndDropElement');
   const { formatMessage } = useIntl();
   const [dragVisibility, setDragVisibility] = React.useState<CSSProperties['visibility']>('hidden');
+  const isDragAndDropEnabled = !disabled;
 
   const handleMoveBlock = React.useCallback(
     (newIndex: Array<number>, currentIndex: Array<number>) => {
@@ -165,7 +171,7 @@ const DragAndDropElement = ({
   );
 
   const [{ handlerId, isDragging, isOverDropTarget, direction }, blockRef, dropRef, dragRef] =
-    useDragAndDrop(!disabled, {
+    useDragAndDrop(isDragAndDropEnabled, {
       type: `${ItemTypes.BLOCKS}_${name}`,
       index,
       item: {
@@ -192,7 +198,7 @@ const DragAndDropElement = ({
   }, [editor.selection]);
 
   return (
-    <Wrapper ref={composedBoxRefs} isOverDropTarget={isOverDropTarget}>
+    <Wrapper ref={composedBoxRefs} $isOverDropTarget={isOverDropTarget}>
       {isOverDropTarget && (
         <DropPlaceholder
           borderStyle="solid"
@@ -214,24 +220,33 @@ const DragAndDropElement = ({
           gap={2}
           paddingLeft={2}
           alignItems="start"
-          onDragStart={(event) => {
-            const target = event.target as HTMLElement;
-            const currentTarget = event.currentTarget as HTMLElement;
+          onDragStart={
+            isDragAndDropEnabled
+              ? (event) => {
+                  const target = event.target as HTMLElement;
+                  const currentTarget = event.currentTarget as HTMLElement;
 
-            // Dragging action should only trigger drag event when button is dragged, however update styles on the whole dragItem.
-            if (target.getAttribute('role') !== 'button') {
-              event.preventDefault();
-            } else {
-              // Setting styles using dragging state is not working, so set it on current target element as nodes get dragged
-              currentTarget.style.opacity = '0.5';
-            }
-          }}
-          onDragEnd={(event) => {
-            const currentTarget = event.currentTarget as HTMLElement;
-            currentTarget.style.opacity = '1';
-          }}
-          onMouseMove={() => setDragVisibility('visible')}
-          onSelect={() => setDragVisibility('visible')}
+                  // Dragging action should only trigger drag event when button is dragged, however update styles on the whole dragItem.
+                  if (target.getAttribute('role') !== 'button') {
+                    event.preventDefault();
+                  } else {
+                    // Setting styles using dragging state is not working, so set it on current target element as nodes get dragged
+                    currentTarget.style.opacity = '0.5';
+                  }
+                }
+              : undefined
+          }
+          onDragEnd={
+            isDragAndDropEnabled
+              ? (event) => {
+                  const currentTarget = event.currentTarget as HTMLElement;
+                  currentTarget.style.opacity = '1';
+                }
+              : undefined
+          }
+          onMouseEnter={() => setDragVisibility('visible')}
+          onFocusCapture={() => setDragVisibility('visible')}
+          onBlurCapture={() => setDragVisibility('hidden')}
           onMouseLeave={() => setDragVisibility('hidden')}
           aria-disabled={disabled}
           $dragVisibility={dragVisibility}
@@ -246,10 +261,10 @@ const DragAndDropElement = ({
               id: getTranslation('components.DragHandle-label'),
               defaultMessage: 'Drag',
             })}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
             aria-disabled={disabled}
             disabled={disabled}
-            draggable
+            draggable={isDragAndDropEnabled}
             // For some blocks top margin added to drag handle to align at the text level
             $dragHandleTopMargin={dragHandleTopMargin}
           >
@@ -317,14 +332,16 @@ type BaseRenderElementProps = Direction & {
   props: RenderElementProps['children'];
   blocks: BlocksStore;
   editor: Editor;
+  isMobile: boolean;
 };
 
 const baseRenderElement = ({
   props,
   blocks,
   editor,
-  setDragDirection,
   dragDirection,
+  setDragDirection,
+  isMobile,
 }: BaseRenderElementProps) => {
   const { element } = props;
 
@@ -332,13 +349,9 @@ const baseRenderElement = ({
   const block = blockMatch || blocks.paragraph;
   const nodePath = ReactEditor.findPath(editor, element);
 
-  // Link is inline block so it cannot be dragged
-  // List items and nested list blocks i.e. lists with indent level higher than 0 are skipped from dragged items
-  if (
-    isLinkNode(element) ||
-    (isListNode(element) && element.indentLevel && element.indentLevel > 0) ||
-    element.type === 'list-item'
-  ) {
+  const isDraggable = block.isDraggable?.(element) ?? true;
+
+  if (!isDraggable || isMobile) {
     return block.renderElement(props);
   }
 
@@ -354,6 +367,8 @@ const baseRenderElement = ({
   );
 };
 
+const dragNoop = () => true;
+
 interface BlocksContentProps {
   placeholder?: string;
   ariaLabelId: string;
@@ -362,6 +377,7 @@ interface BlocksContentProps {
 const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
     useBlocksEditorContext('BlocksContent');
+  const isMobile = useIsMobile();
   const blocksRef = React.useRef<HTMLDivElement>(null);
   const { formatMessage } = useIntl();
   const [dragDirection, setDragDirection] = React.useState<DragDirection | null>(null);
@@ -415,8 +431,8 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   // Create renderElement function base on the blocks store
   const renderElement = React.useCallback(
     (props: RenderElementProps) =>
-      baseRenderElement({ props, blocks, editor, dragDirection, setDragDirection }),
-    [blocks, editor, dragDirection, setDragDirection]
+      baseRenderElement({ props, blocks, editor, dragDirection, setDragDirection, isMobile }),
+    [blocks, editor, dragDirection, isMobile, setDragDirection]
   );
 
   const checkSnippet = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -546,9 +562,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       case 'Escape':
         return ReactEditor.blur(editor);
     }
-
     handleKeyboardShortcuts(event);
-
     // Check if a snippet was triggered
     if (event.key === ' ') {
       checkSnippet(event);
@@ -561,27 +575,26 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
    *  We are overriding it to check if the selection is not fully within the visible area of the editor,
    *  we use scrollBy one line to the bottom
    */
-  const handleScrollSelectionIntoView = () => {
-    if (!editor.selection) return;
-    const domRange = ReactEditor.toDOMRange(editor, editor.selection);
-    const domRect = domRange.getBoundingClientRect();
-    const blocksInput = blocksRef.current;
 
-    if (!blocksInput) {
+  const handleScrollSelectionIntoView = React.useCallback(() => {
+    if (!editor.selection || !blocksRef.current) {
       return;
     }
 
-    const editorRect = blocksInput.getBoundingClientRect();
+    const domRange = ReactEditor.toDOMRange(editor, editor.selection);
+    const domRect = domRange.getBoundingClientRect();
+
+    const editorRect = blocksRef.current.getBoundingClientRect();
 
     // Check if the selection is not fully within the visible area of the editor
     if (domRect.top < editorRect.top || domRect.bottom > editorRect.bottom) {
       // Scroll by one line to the bottom
-      blocksInput.scrollBy({
+      blocksRef.current.scrollBy({
         top: 28, // 20px is the line-height + 8px line gap
         behavior: 'smooth',
       });
     }
-  };
+  }, [editor]);
 
   return (
     <Box
@@ -593,6 +606,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       background="neutral0"
       color="neutral800"
       lineHeight={6}
+      paddingLeft={{ initial: 4, medium: 0 }}
       paddingRight={7}
       paddingTop={6}
       paddingBottom={3}
@@ -601,19 +615,15 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         aria-labelledby={ariaLabelId}
         readOnly={disabled}
         placeholder={placeholder}
-        isExpandedMode={isExpandedMode}
+        $isExpandedMode={isExpandedMode}
         decorate={decorateCode}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}
         scrollSelectionIntoView={handleScrollSelectionIntoView}
         // As we have our own handler to drag and drop the elements returing true will skip slate's own event handler
-        onDrop={() => {
-          return true;
-        }}
-        onDragStart={() => {
-          return true;
-        }}
+        onDrop={dragNoop}
+        onDragStart={dragNoop}
       />
       {modalElement}
     </Box>

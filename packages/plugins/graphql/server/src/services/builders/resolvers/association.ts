@@ -1,5 +1,5 @@
-import { get } from 'lodash/fp';
-import { async, errors } from '@strapi/utils';
+import { get, merge } from 'lodash/fp';
+import { async, contentTypes, errors } from '@strapi/utils';
 import type { Internal } from '@strapi/types';
 
 import type { Context } from '../../types';
@@ -57,12 +57,92 @@ export default ({ strapi }: Context) => {
             auth,
           }
         );
+        const transformedQuery = strapi.get('query-params').transform(targetUID, sanitizedQuery);
 
-        const dbQuery = strapi.get('query-params').transform(targetUID, sanitizedQuery);
+        const isTargetDraftAndPublishContentType =
+          contentTypes.hasDraftAndPublish(targetContentType);
 
-        const data = await strapi.db?.query(contentTypeUID).load(parent, attributeName, dbQuery);
+        // Helper to check if a field is from built-in queries (not custom resolvers)
+        // Use the precomputed lookup populated by the content-api service at schema build time.
+        const isBuiltInQueryField = (fieldName: string) => {
+          const graphqlService = strapi.plugin('graphql').service('content-api');
+          return graphqlService.isBuiltInQueryField(fieldName);
+        };
 
-        const info = {
+        // Only inherit status from built-in queries to avoid conflicts with custom resolvers
+        const inheritedStatus =
+          context.rootQueryArgs?.status &&
+          context.rootQueryArgs?._originField &&
+          isBuiltInQueryField(context.rootQueryArgs._originField)
+            ? context.rootQueryArgs.status
+            : null;
+
+        const statusToApply = args.status || inheritedStatus;
+
+        const defaultFilters =
+          isTargetDraftAndPublishContentType && statusToApply
+            ? {
+                where: {
+                  publishedAt: statusToApply === 'published' ? { $notNull: true } : { $null: true },
+                },
+              }
+            : {};
+
+        // Inherit hasPublishedVersion from root query (same pattern as status)
+        const inheritedHasPublishedVersion =
+          context.rootQueryArgs?.hasPublishedVersion !== undefined &&
+          context.rootQueryArgs?._originField &&
+          isBuiltInQueryField(context.rootQueryArgs._originField)
+            ? context.rootQueryArgs.hasPublishedVersion
+            : undefined;
+
+        // Build hasPublishedVersion condition for this relation's model
+        let hasPublishedVersionFilters: Record<string, any> = {};
+        if (isTargetDraftAndPublishContentType && inheritedHasPublishedVersion !== undefined) {
+          const meta = strapi.db.metadata.get(targetUID);
+          const tableName = meta.tableName;
+          const documentIdAttr = meta.attributes.documentId;
+          const publishedAtAttr = meta.attributes.publishedAt;
+          const documentIdColumn =
+            ('columnName' in documentIdAttr && documentIdAttr.columnName) || 'document_id';
+          const publishedAtColumn =
+            ('columnName' in publishedAtAttr && publishedAtAttr.columnName) || 'published_at';
+
+          const knex = strapi.db.connection;
+          const subquery = knex(tableName)
+            .distinct(documentIdColumn)
+            .whereNotNull(publishedAtColumn);
+
+          hasPublishedVersionFilters = {
+            where: {
+              documentId: inheritedHasPublishedVersion ? { $in: subquery } : { $notIn: subquery },
+            },
+          };
+        }
+
+        const dbQuery = merge(merge(defaultFilters, hasPublishedVersionFilters), transformedQuery);
+
+        // Sign media URLs if upload plugin is available and using private provider
+        const data = await (async () => {
+          const rawData = await strapi.db
+            .query(contentTypeUID)
+            .load(parent, attributeName, dbQuery);
+          if (isMediaAttribute && strapi.plugin('upload')) {
+            const { signFileUrls } = strapi.plugin('upload').service('file');
+
+            if (Array.isArray(rawData)) {
+              return async.map(rawData, (item: any) => signFileUrls(item));
+            }
+
+            if (rawData) {
+              return signFileUrls(rawData);
+            }
+          }
+
+          return rawData;
+        })();
+
+        const sanitizeInfo = {
           args: sanitizedQuery,
           resourceUID: targetUID,
         };
@@ -87,12 +167,12 @@ export default ({ strapi }: Context) => {
         // If this is a to-many relation, it returns an object that
         // matches what the entity-response-collection's resolvers expect
         if (isToMany) {
-          return toEntityResponseCollection(data, info);
+          return toEntityResponseCollection(data, sanitizeInfo);
         }
 
         // Else, it returns an object that matches
         // what the entity-response's resolvers expect
-        return toEntityResponse(data, info);
+        return toEntityResponse(data, sanitizeInfo);
       };
     },
   };

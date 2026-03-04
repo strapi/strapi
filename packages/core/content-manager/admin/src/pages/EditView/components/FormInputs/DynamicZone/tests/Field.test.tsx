@@ -1,5 +1,5 @@
 import { Form } from '@strapi/admin/strapi-admin';
-import { act, render as renderRTL, screen, waitFor } from '@tests/utils';
+import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
 import { DynamicZone, DynamicZoneProps } from '../Field';
@@ -13,6 +13,11 @@ const TEST_NAME = 'DynamicZoneComponent';
  */
 jest.mock('../../../InputRenderer', () => ({
   InputRenderer: () => 'INPUTS',
+}));
+
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useIsDesktop: jest.fn().mockReturnValue(true),
 }));
 
 describe('DynamicZone', () => {
@@ -120,7 +125,7 @@ describe('DynamicZone', () => {
         })
       );
 
-      expect(screen.getByText('test comp - toto')).toBeInTheDocument();
+      expect(await screen.findByText('test comp - toto')).toBeInTheDocument();
     });
 
     it('should call the removeComponentFromDynamicZone callback when the RemoveButton is clicked', async () => {
@@ -200,7 +205,7 @@ describe('DynamicZone', () => {
 
       const [draggedItem] = screen.getAllByRole('button', { name: 'Drag' });
 
-      act(() => {
+      await waitFor(() => {
         draggedItem.focus();
       });
 
@@ -230,7 +235,7 @@ describe('DynamicZone', () => {
 
       const [draggedItem] = screen.getAllByRole('button', { name: 'Drag' });
 
-      act(() => {
+      await waitFor(() => {
         draggedItem.focus();
       });
 
@@ -262,7 +267,7 @@ describe('DynamicZone', () => {
 
       const [draggedItem] = screen.getAllByRole('button', { name: 'Drag' });
 
-      act(() => {
+      await waitFor(() => {
         draggedItem.focus();
       });
 
@@ -290,7 +295,7 @@ describe('DynamicZone', () => {
 
       const [draggedItem] = screen.getAllByRole('button', { name: 'Drag' });
 
-      act(() => {
+      await waitFor(() => {
         draggedItem.focus();
       });
 
