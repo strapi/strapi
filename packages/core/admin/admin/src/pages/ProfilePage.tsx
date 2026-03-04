@@ -213,6 +213,7 @@ const ProfilePage = () => {
                     loading={isSubmitting}
                     type="submit"
                     disabled={!modified}
+                    fullWidth
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>
@@ -230,8 +231,8 @@ const ProfilePage = () => {
             </>
           )}
         </Form>
-        {isDesktop && (
-          <Box>
+        {isDesktop && process.env.NODE_ENV === 'development' && (
+          <Box paddingBottom={6}>
             <Layouts.Content>
               <GuidedTourSection />
             </Layouts.Content>

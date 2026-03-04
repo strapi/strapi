@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { useForm, createRulesEngine } from '@strapi/admin/strapi-admin';
 import { Box, BoxProps, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -52,8 +51,6 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
 const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
   const modelUid = document.schema?.uid;
-  const fieldValues = useForm('Fields', (state) => state.values);
-  const rulesEngine = createRulesEngine();
 
   const getLabel = (name: string, label: string) => {
     return formatMessage({
@@ -63,27 +60,11 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
   };
 
   return (
-    <Flex
-      direction="column"
-      alignItems="stretch"
-      gap={{
-        initial: 4,
-        large: 6,
-      }}
-    >
+    <Flex direction="column" alignItems="stretch" gap={6}>
       {layout.map((panel, index) => {
         if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
           const [row] = panel;
           const [field] = row;
-          const attribute = document.schema?.attributes[field.name];
-          const condition = attribute?.conditions?.visible;
-
-          if (condition) {
-            const isVisible = rulesEngine.evaluate(condition, fieldValues);
-            if (!isVisible) {
-              return null; // Skip rendering the dynamic zone if the condition is not met
-            }
-          }
 
           return (
             <Grid.Root key={field.name} gap={4}>
@@ -100,33 +81,11 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
 
         return (
           <Box key={index} {...(hasBackground && panelStyles)}>
-            <Flex
-              direction="column"
-              alignItems="stretch"
-              gap={{
-                initial: 4,
-                large: 6,
-              }}
-            >
+            <Flex direction="column" alignItems="stretch" gap={6}>
               {panel.map((row, gridRowIndex) => {
-                const visibleFields = row.filter(({ name }) => {
-                  const attribute = document.schema?.attributes[name];
-                  const condition = attribute?.conditions?.visible;
-
-                  if (condition) {
-                    return rulesEngine.evaluate(condition, fieldValues);
-                  }
-
-                  return true;
-                });
-
-                if (visibleFields.length === 0) {
-                  return null; // Skip rendering the entire grid row
-                }
-
                 return (
-                  <ResponsiveGridRoot key={gridRowIndex} gap={4}>
-                    {visibleFields.map(({ size, ...field }) => {
+                  <ResponsiveGridRoot key={gridRowIndex} gap={{ initial: 6, medium: 4 }}>
+                    {row.map(({ size, ...field }) => {
                       return (
                         <ResponsiveGridItem
                           col={size}

@@ -228,7 +228,7 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
     }
     case 'boolean': {
       return {
-        default: yup.boolean(),
+        default: yup.boolean().nullable(),
         required: validators.required,
       };
     }

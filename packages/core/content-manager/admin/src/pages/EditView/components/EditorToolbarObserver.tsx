@@ -1,9 +1,10 @@
 import * as React from 'react';
 
 import { useElementOnScreen } from '@strapi/admin/strapi-admin';
-import { IconButton, Menu } from '@strapi/design-system';
+import { Box, IconButton, Menu } from '@strapi/design-system';
 import { More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * ObservedToolbarComponent
@@ -67,6 +68,38 @@ export interface ObservedComponent {
   key: string;
 }
 
+/* -------------------------------------------------------------------------------------------------
+ * MenuTriggerWrapper
+ * -----------------------------------------------------------------------------------------------*/
+/**
+ * The menu trigger is rendered by the observer, after the last visible toolbar item.
+ * We use a wrapper with a ::before pseudo-element to render a vertical separator that
+ * always appears immediately before the "More" menu button, regardless of which items
+ * are visible or moved into the overflow menu.
+ */
+const MenuTriggerWrapper = styled(Box)`
+  display: flex;
+  align-items: center;
+
+  &::before {
+    content: '';
+    background: ${({ theme }) => theme.colors.neutral150};
+    width: 1px;
+    height: 2.4rem;
+    margin-left: ${({ theme }) => theme.spaces[1]};
+    margin-right: ${({ theme }) => theme.spaces[1]};
+
+    ${({ theme }) => theme.breakpoints.medium} {
+      margin-left: ${({ theme }) => theme.spaces[2]};
+      margin-right: ${({ theme }) => theme.spaces[2]};
+    }
+  }
+
+  [data-hide-toolbar-separator='true'] &::before {
+    display: none;
+  }
+`;
+
 export const EditorToolbarObserver = ({
   observedComponents,
   menuTriggerVariant = 'ghost',
@@ -118,33 +151,32 @@ export const EditorToolbarObserver = ({
     .toSpliced(
       menuIndex,
       0,
-      <Menu.Root
-        key="more-menu"
-        defaultOpen={false}
-        open={isMenuOpenWithContent}
-        onOpenChange={setOpen}
+      <MenuTriggerWrapper
+        key="more-menu-wrapper"
+        style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
       >
-        <Menu.Trigger
-          paddingLeft={0}
-          paddingRight={0}
-          ref={menuTriggerRef}
-          variant={menuTriggerVariant}
-          style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
-          label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
-          tag={IconButton}
-          icon={<More />}
-        />
-        <Menu.Content
-          onCloseAutoFocus={(e) => e.preventDefault()}
-          maxHeight="100%"
-          minWidth="256px"
-          popoverPlacement="bottom-end"
-          zIndex={2}
-        >
-          {observedComponents.slice(menuIndex).map((component) => (
-            <React.Fragment key={component.key}>{component.menu}</React.Fragment>
-          ))}
-        </Menu.Content>
-      </Menu.Root>
+        <Menu.Root defaultOpen={false} open={isMenuOpenWithContent} onOpenChange={setOpen}>
+          <Menu.Trigger
+            paddingLeft={0}
+            paddingRight={0}
+            ref={menuTriggerRef}
+            variant={menuTriggerVariant}
+            label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
+            tag={IconButton}
+            icon={<More />}
+          />
+          <Menu.Content
+            onCloseAutoFocus={(e) => e.preventDefault()}
+            maxHeight="100%"
+            minWidth="256px"
+            popoverPlacement="bottom-end"
+            zIndex={2}
+          >
+            {observedComponents.slice(menuIndex).map((component) => (
+              <React.Fragment key={component.key}>{component.menu}</React.Fragment>
+            ))}
+          </Menu.Content>
+        </Menu.Root>
+      </MenuTriggerWrapper>
     );
 };
