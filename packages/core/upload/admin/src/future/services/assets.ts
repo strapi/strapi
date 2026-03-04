@@ -1,6 +1,11 @@
 import { uploadApi } from './api';
 
-import type { GetFiles, File, Pagination } from '../../../../shared/contracts/files';
+import type {
+  GetFiles,
+  File,
+  Pagination,
+  AssetWithPopulatedCreatedBy,
+} from '../../../../shared/contracts/files';
 
 interface GetAssetsParams {
   page?: number;
@@ -47,7 +52,14 @@ const assetsApi = uploadApi.injectEndpoints({
             ]
           : [{ type: 'Asset', id: 'LIST' }],
     }),
+    getAsset: builder.query<AssetWithPopulatedCreatedBy, number>({
+      query: (id) => ({
+        url: `/upload/files/${id}`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error, id) => [{ type: 'Asset' as const, id }],
+    }),
   }),
 });
 
-export const { useGetAssetsQuery } = assetsApi;
+export const { useGetAssetsQuery, useGetAssetQuery } = assetsApi;

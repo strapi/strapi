@@ -1,7 +1,7 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "5.37.1",
-  "description": "Nodemailer provider for Strapi 3",
+  "version": "5.38.0",
+  "description": "Nodemailer provider for Strapi",
   "keywords": [
     "strapi",
     "email",
@@ -45,6 +45,19 @@
   "module": "./dist/index.mjs",
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist/"
   ],
@@ -54,16 +67,16 @@
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
+    "test:unit": "run -T jest",
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "lodash": "4.17.23",
-    "nodemailer": "6.10.1"
+    "nodemailer": "8.0.1"
   },
   "devDependencies": {
-    "@types/nodemailer": "6.4.7",
-    "eslint-config-custom": "5.37.1",
-    "tsconfig": "5.37.1"
+    "@types/nodemailer": "7.0.10",
+    "eslint-config-custom": "5.38.0",
+    "tsconfig": "5.38.0"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
