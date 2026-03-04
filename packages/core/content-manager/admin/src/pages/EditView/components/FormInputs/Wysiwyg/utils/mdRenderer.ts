@@ -5,7 +5,7 @@ import abbr from 'markdown-it-abbr';
 import container from 'markdown-it-container';
 // @ts-expect-error - library does not export types
 import deflist from 'markdown-it-deflist';
-import emoji from 'markdown-it-emoji';
+import { full as emoji } from 'markdown-it-emoji';
 import footnote from 'markdown-it-footnote';
 // @ts-expect-error - library does not export types
 import ins from 'markdown-it-ins';

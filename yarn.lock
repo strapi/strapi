@@ -9632,9 +9632,9 @@ __metadata:
     "@types/jsonwebtoken": "npm:9.0.3"
     "@types/koa-passport": "npm:6.0.1"
     "@types/lodash": "npm:^4.14.191"
-    "@types/markdown-it": "npm:13.0.7"
+    "@types/markdown-it": "npm:^14"
     "@types/markdown-it-container": "npm:2.0.9"
-    "@types/markdown-it-emoji": "npm:2.0.4"
+    "@types/markdown-it-emoji": "npm:3.0.1"
     "@types/markdown-it-footnote": "npm:3.0.3"
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
@@ -9785,7 +9785,7 @@ __metadata:
     markdown-it-abbr: "npm:^1.0.4"
     markdown-it-container: "npm:^3.0.0"
     markdown-it-deflist: "npm:^2.1.0"
-    markdown-it-emoji: "npm:^2.0.0"
+    markdown-it-emoji: "npm:^3.0.0"
     markdown-it-footnote: "npm:^3.0.3"
     markdown-it-ins: "npm:^3.0.1"
     markdown-it-mark: "npm:^3.0.1"
@@ -12286,10 +12286,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/linkify-it@npm:*":
-  version: 3.0.5
-  resolution: "@types/linkify-it@npm:3.0.5"
-  checksum: 10c0/696e09975991c649ba37c5585714929fdebf5c64a8bfb99910613ef838337dbbba6c608fccdfa03d6347432586ef12e139bc0e947ae6fec569096fef5cc1c550
+"@types/linkify-it@npm:^5":
+  version: 5.0.0
+  resolution: "@types/linkify-it@npm:5.0.0"
+  checksum: 10c0/7bbbf45b9dde17bf3f184fee585aef0e7342f6954f0377a24e4ff42ab5a85d5b806aaa5c8d16e2faf2a6b87b2d94467a196b7d2b85c9c7de2f0eaac5487aaab8
   languageName: node
   linkType: hard
 
@@ -12316,12 +12316,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/markdown-it-emoji@npm:2.0.4":
-  version: 2.0.4
-  resolution: "@types/markdown-it-emoji@npm:2.0.4"
+"@types/markdown-it-emoji@npm:3.0.1":
+  version: 3.0.1
+  resolution: "@types/markdown-it-emoji@npm:3.0.1"
   dependencies:
-    "@types/markdown-it": "npm:*"
-  checksum: 10c0/f8c9ae079d7fd89bcbb013684a59a565cd749848a1a7560ce6a2081d8ce9c43fe9fcff621082eca6f22fb68de6dc2bca70b24d1ac300b6c9ccffdbfe5eca6490
+    "@types/markdown-it": "npm:^14"
+  checksum: 10c0/bb56961c576065b2887f4e0c373fbf7dd3291e648c0b9755fcaaddae4aab3873add58eddfef8641c11a1744b0d98b0968df09bd76c10686638275575bdcbe2a7
   languageName: node
   linkType: hard
 
@@ -12334,13 +12334,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/markdown-it@npm:*, @types/markdown-it@npm:13.0.7":
-  version: 13.0.7
-  resolution: "@types/markdown-it@npm:13.0.7"
+"@types/markdown-it@npm:*, @types/markdown-it@npm:^14":
+  version: 14.1.2
+  resolution: "@types/markdown-it@npm:14.1.2"
   dependencies:
-    "@types/linkify-it": "npm:*"
-    "@types/mdurl": "npm:*"
-  checksum: 10c0/8a0fda0eb518ca2b25fcb5da32398930729270e9095cd4f7f3e379098b9d0f9e6336974becf2f36e69bbdbdc57818fef731149988c9e98e9f3f47501fefd9d39
+    "@types/linkify-it": "npm:^5"
+    "@types/mdurl": "npm:^2"
+  checksum: 10c0/34f709f0476bd4e7b2ba7c3341072a6d532f1f4cb6f70aef371e403af8a08a7c372ba6907ac426bc618d356dab660c5b872791ff6c1ead80c483e0d639c6f127
   languageName: node
   linkType: hard
 
@@ -12353,10 +12353,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mdurl@npm:*":
-  version: 1.0.5
-  resolution: "@types/mdurl@npm:1.0.5"
-  checksum: 10c0/8991c781eb94fb3621e48e191251a94057908fc14be60f52bdd7c48684af923ffa77559ea979450a0475f85c08f8a472f99ff9c2ca4308961b9b9d35fd7584f7
+"@types/mdurl@npm:^2":
+  version: 2.0.0
+  resolution: "@types/mdurl@npm:2.0.0"
+  checksum: 10c0/cde7bb571630ed1ceb3b92a28f7b59890bb38b8f34cd35326e2df43eebfc74985e6aa6fd4184e307393bad8a9e0783a519a3f9d13c8e03788c0f98e5ec869c5e
   languageName: node
   linkType: hard
 
@@ -25426,10 +25426,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"markdown-it-emoji@npm:^2.0.0":
-  version: 2.0.2
-  resolution: "markdown-it-emoji@npm:2.0.2"
-  checksum: 10c0/c22791a7e25b6b0d6f9fa6a9ed90d6d41dcb5751ffb5d2a811053c7400c37d2c9e0bbbc7b78d5449b36dc95e468177198e3431d9912c15970f729a95510d669d
+"markdown-it-emoji@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "markdown-it-emoji@npm:3.0.0"
+  checksum: 10c0/e2bca9cfbf0e7e652c00c91450e88017ce4b66a84c25130aa2da6c7013fc3d51ed70715565807d4607c1967ca224edbbc231523b80b0a56436efad5feb6e2666
   languageName: node
   linkType: hard
 
