@@ -29,7 +29,6 @@
   "dependencies": {
     "@strapi/design-system": "2.2.0",
     "@strapi/icons": "2.2.0",
-    "eslint": "8.57.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.30.3",
@@ -37,7 +36,8 @@
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.2.0",
-    "@strapi/strapi": "workspace:*"
+    "@strapi/strapi": "workspace:*",
+    "eslint": "8.57.1"
   },
   "engines": {
     "node": ">=20.0.0 <=24.x.x",
