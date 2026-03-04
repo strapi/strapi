@@ -732,8 +732,11 @@ class TransferEngine<
   }
 
   async transfer(): Promise<ITransferResults<S, D>> {
-    // reset data between transfers
+    // Reset data and diagnostics so each run is independent: the "hasErrors" check below
+    // only considers diagnostics from this run, and reusing the same engine for multiple
+    // transfers does not false-fail on errors from a previous run.
     this.progress.data = {};
+    this.diagnostics.clear();
 
     try {
       this.#emitTransferUpdate('init');

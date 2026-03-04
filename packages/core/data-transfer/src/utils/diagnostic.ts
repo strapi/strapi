@@ -63,6 +63,7 @@ export interface IDiagnosticReporter {
   };
 
   report(diagnostic: Diagnostic): IDiagnosticReporter;
+  clear(): IDiagnosticReporter;
   onDiagnostic(listener: DiagnosticListener): IDiagnosticReporter;
   on<T extends DiagnosticKind>(kind: T, listener: DiagnosticListener<T>): IDiagnosticReporter;
 }
@@ -111,6 +112,11 @@ const createDiagnosticReporter = (
 
       stack.push(diagnostic);
 
+      return this;
+    },
+
+    clear() {
+      stack.length = 0;
       return this;
     },
 
