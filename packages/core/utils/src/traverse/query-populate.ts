@@ -33,6 +33,20 @@ const isPopulateString = (value: unknown): value is string => {
 const isStringArray = (value: unknown): value is string[] =>
   isArray(value) && value.every(isString);
 
+/**
+ * Detects objects with consecutive numeric string keys (e.g. { "0": "a", "1": "b", "2": "c" }).
+ * This happens when the `qs` query string parser exceeds its `arrayLimit` and produces
+ * a plain object instead of an array.
+ */
+const isArrayLikeObject = (value: unknown): value is Record<string, string> => {
+  if (!isObject(value) || isArray(value)) return false;
+
+  const keys = Object.keys(value as Record<string, unknown>);
+  if (keys.length === 0) return false;
+
+  return keys.every((k) => /^\d+$/.test(k));
+};
+
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
 const populate = traverseFactory()
@@ -54,6 +68,11 @@ const populate = traverseFactory()
     );
 
     return paths.filter((item) => !isNil(item));
+  })
+  // qs produces objects with numeric keys when arrayLimit is exceeded; convert back to array
+  .intercept(isArrayLikeObject, async (visitor, options, populate, { recurse }) => {
+    const values = Object.values(populate);
+    return recurse(visitor, options, values);
   })
   // for wildcard, generate custom utilities to modify the values
   .parse(isWildcard, () => ({
