@@ -308,12 +308,15 @@ class LocalFileSourceProvider implements ISourceProvider {
             },
 
             async onReadEntry(entry: ReadEntry) {
-              // Collect all the content of the entry file
-              const content = await entry.collect();
+              // Collect all the content of the entry stream (ReadEntry has no .collect() in tar v7)
+              const chunks: Buffer[] = [];
+              for await (const chunk of entry) {
+                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+              }
 
               try {
                 // Parse from buffer array to string to JSON
-                const parsedContent = JSON.parse(Buffer.concat(content).toString());
+                const parsedContent = JSON.parse(Buffer.concat(chunks).toString());
 
                 // Resolve the Promise with the parsed content
                 resolve(parsedContent);
