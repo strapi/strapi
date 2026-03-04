@@ -5,8 +5,8 @@ import { useIntl } from 'react-intl';
 import { Layouts } from '../../../components/Layouts/Layout';
 import { RESPONSIVE_DEFAULT_SPACING } from '../../../constants/theme';
 import { useTypedSelector } from '../../../core/store/hooks';
-import darkIllustration from '../assets/purchase-page-sso-illustration-dark.svg';
-import lightIllustration from '../assets/purchase-page-sso-illustration-light.svg';
+import darkIllustration from '../assets/purchase-page-sso-illustration-dark.jpg';
+import lightIllustration from '../assets/purchase-page-sso-illustration-light.jpg';
 
 const PurchaseSingleSignOn = () => {
   const { formatMessage } = useIntl();
@@ -127,7 +127,7 @@ const PurchaseSingleSignOn = () => {
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    objectPosition: 'bottom left',
+                    objectPosition: 'center center', // Focus point is the center of the image
                   }}
                 />
               </div>

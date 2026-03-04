@@ -144,7 +144,7 @@ const ApplicationInfoPage = () => {
             })}
             primaryAction={
               canUpdate && (
-                <Button disabled={isSaveDisabled} type="submit" startIcon={<Check />}>
+                <Button disabled={isSaveDisabled} type="submit" startIcon={<Check />} fullWidth>
                   {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                 </Button>
               )

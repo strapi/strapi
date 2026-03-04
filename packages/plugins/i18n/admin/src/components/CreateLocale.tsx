@@ -54,6 +54,7 @@ const CreateLocale = ({ disabled, variant = 'default' }: CreateLocaleProps) => {
           startIcon={<Plus />}
           onClick={() => setVisible(true)}
           size="S"
+          fullWidth
         >
           {formatMessage({
             id: getTranslation('Settings.list.actions.add'),

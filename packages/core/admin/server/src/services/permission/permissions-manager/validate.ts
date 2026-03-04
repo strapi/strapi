@@ -1,21 +1,17 @@
-import { subject as asSubject, detectSubjectType } from '@casl/ability';
-import { permittedFieldsOf } from '@casl/ability/extra';
-import {
-  defaults,
-  omit,
-  isArray,
-  isEmpty,
-  isNil,
-  flatMap,
-  some,
-  prop,
-  uniq,
-  intersection,
-  getOr,
-  isObject,
-} from 'lodash/fp';
+import { subject as asSubject } from '@casl/ability';
+import { defaults, omit, isArray, isEmpty, uniq, intersection, getOr, isObject } from 'lodash/fp';
 
-import { contentTypes, traverseEntity, traverse, validate, async, errors } from '@strapi/utils';
+import {
+  contentTypes,
+  traverseEntity,
+  traverse,
+  validate,
+  async,
+  errors,
+  createModelCache,
+} from '@strapi/utils';
+import { createPermissionFieldsCache } from './permission-fields';
+
 import { ADMIN_USER_ALLOWED_FIELDS } from '../../../domain/user';
 
 const { ValidationError } = errors;
@@ -46,9 +42,12 @@ const throwInvalidKey = ({ key, path }: { key: string; path?: string | null }) =
 export default ({ action, ability, model }: any) => {
   const schema = strapi.getModel(model);
 
+  // Create request-scoped model cache to avoid redundant getModel() calls
+  const modelCache = createModelCache(strapi.getModel.bind(strapi));
+
   const ctx = {
     schema,
-    getModel: strapi.getModel.bind(strapi),
+    getModel: modelCache.getModel,
   };
 
   const createValidateQuery = (options = {} as any) => {
@@ -57,38 +56,66 @@ export default ({ action, ability, model }: any) => {
     // TODO: validate relations to admin users in all validators
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
-    const validateFilters = async.pipe(
-      traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), ctx),
-      traverse.traverseQueryFilters(throwDisallowedAdminUserFields, ctx),
-      traverse.traverseQueryFilters(throwPassword, ctx),
-      traverse.traverseQueryFilters(({ key, value, path }) => {
-        if (isObject(value) && isEmpty(value)) {
-          throwInvalidKey({ key, path: path.attribute });
-        }
-      }, ctx)
-    );
+    const createValidateFilters = (ctx: any) =>
+      async.pipe(
+        traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), ctx),
+        traverse.traverseQueryFilters(throwDisallowedAdminUserFields, ctx),
+        traverse.traverseQueryFilters(throwPassword, ctx),
+        traverse.traverseQueryFilters(({ key, value, path }) => {
+          if (isObject(value) && isEmpty(value)) {
+            throwInvalidKey({ key, path: path.attribute });
+          }
+        }, ctx)
+      );
 
-    const validateSort = async.pipe(
-      traverse.traverseQuerySort(throwDisallowedFields(permittedFields), ctx),
-      traverse.traverseQuerySort(throwDisallowedAdminUserFields, ctx),
-      traverse.traverseQuerySort(throwPassword, ctx),
-      traverse.traverseQuerySort(({ key, attribute, value, path }) => {
-        if (!isScalarAttribute(attribute) && isEmpty(value)) {
-          throwInvalidKey({ key, path: path.attribute });
-        }
-      }, ctx)
-    );
+    const createValidateSort = (ctx: any) =>
+      async.pipe(
+        traverse.traverseQuerySort(throwDisallowedFields(permittedFields), ctx),
+        traverse.traverseQuerySort(throwDisallowedAdminUserFields, ctx),
+        traverse.traverseQuerySort(throwPassword, ctx),
+        traverse.traverseQuerySort(({ key, attribute, value, path }) => {
+          if (!isScalarAttribute(attribute) && isEmpty(value)) {
+            throwInvalidKey({ key, path: path.attribute });
+          }
+        }, ctx)
+      );
 
-    const validateFields = async.pipe(
-      traverse.traverseQueryFields(throwDisallowedFields(permittedFields), ctx),
-      traverse.traverseQueryFields(throwPassword, ctx)
-    );
+    const createValidateFields = (ctx: any) =>
+      async.pipe(
+        traverse.traverseQueryFields(throwDisallowedFields(permittedFields), ctx),
+        traverse.traverseQueryFields(throwPassword, ctx)
+      );
+
+    const validateFilters = createValidateFilters(ctx);
+    const validateSort = createValidateSort(ctx);
+    const validateFields = createValidateFields(ctx);
+
+    const validateNestedPopulate = async ({ key, value, schema, attribute, getModel }: any) => {
+      if (attribute) {
+        return;
+      }
+
+      const nestedCtx = { schema, getModel };
+
+      if (key === 'sort') {
+        await createValidateSort(nestedCtx)(value);
+      }
+
+      if (key === 'filters') {
+        await createValidateFilters(nestedCtx)(value);
+      }
+
+      if (key === 'fields') {
+        await createValidateFields(nestedCtx)(value);
+      }
+    };
 
     const validatePopulate = async.pipe(
       traverse.traverseQueryPopulate(throwDisallowedFields(permittedFields), ctx),
       traverse.traverseQueryPopulate(throwDisallowedAdminUserFields, ctx),
       traverse.traverseQueryPopulate(throwHiddenFields, ctx),
-      traverse.traverseQueryPopulate(throwPassword, ctx)
+      traverse.traverseQueryPopulate(throwPassword, ctx),
+      traverse.traverseQueryPopulate(validateNestedPopulate, ctx)
     );
 
     return async (query: any) => {
@@ -129,6 +156,8 @@ export default ({ action, ability, model }: any) => {
   };
 
   const wrapValidate = (createValidateFunction: any) => {
+    const { getPermissionFields } = createPermissionFieldsCache(ability);
+
     // TODO
     // @ts-expect-error define the correct return type
     const wrappedValidate = async (data, options = {}): Promise<unknown> => {
@@ -138,20 +167,15 @@ export default ({ action, ability, model }: any) => {
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);
 
-      const permittedFields = permittedFieldsOf(ability, actionOverride, subject, {
-        fieldsFrom: (rule) => rule.fields || [],
-      });
-
-      const hasAtLeastOneRegistered = some(
-        (fields) => !isNil(fields),
-        flatMap(prop('fields'), ability.rulesFor(actionOverride, detectSubjectType(subject)))
+      const { permittedFields, hasAtLeastOneRegistered, shouldIncludeAll } = getPermissionFields(
+        actionOverride,
+        subject
       );
-      const shouldIncludeAllFields = isEmpty(permittedFields) && !hasAtLeastOneRegistered;
 
       const validateOptions = {
         ...options,
         fields: {
-          shouldIncludeAll: shouldIncludeAllFields,
+          shouldIncludeAll,
           permitted: permittedFields,
           hasAtLeastOneRegistered,
         },

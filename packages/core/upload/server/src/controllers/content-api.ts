@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import utils from '@strapi/utils';
+import utils, { errors } from '@strapi/utils';
 
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
@@ -8,6 +8,7 @@ import { getService } from '../utils';
 import { FILE_MODEL_UID } from '../constants';
 import { validateUploadBody } from './validation/content-api/upload';
 import { FileInfo } from '../types';
+import { prepareUploadRequest } from '../utils/mime-validation';
 
 const { ValidationError } = utils.errors;
 
@@ -21,16 +22,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   const validateQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
-    const { auth } = ctx.state;
+    const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.validate.query(data, schema, { auth });
+    return strapi.contentAPI.validate.query(data, schema, { auth, route });
   };
 
   const sanitizeQuery = async (data: Record<string, unknown>, ctx: Context) => {
     const schema = strapi.getModel(FILE_MODEL_UID);
-    const { auth } = ctx.state;
+    const { auth, route } = ctx.state;
 
-    return strapi.contentAPI.sanitize.query(data, schema, { auth });
+    return strapi.contentAPI.sanitize.query(data, schema, { auth, route });
   };
 
   return {
@@ -95,11 +96,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async replaceFile(ctx: Context) {
       const {
         query: { id },
-        request: { body, files: { files } = {} },
+        request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
+      const {
+        validFiles,
+        filteredBody,
+        errors: validationErrors,
+      } = await prepareUploadRequest(filesInput, body, strapi);
+      if (validFiles.length === 0) {
+        throw new errors.ValidationError(validationErrors[0].message);
+      }
+
       // cannot replace with more than one file
-      if (Array.isArray(files)) {
+      if (Array.isArray(filesInput)) {
         throw new ValidationError('Cannot replace a file with multiple ones');
       }
 
@@ -107,34 +117,47 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ValidationError('File id is required and must be a single value');
       }
 
-      const data = (await validateUploadBody(body)) as { fileInfo: FileInfo };
+      const data = (await validateUploadBody(filteredBody)) as { fileInfo: FileInfo };
 
-      const replacedFiles = await getService('upload').replace(id, { data, file: files });
+      const replacedFiles = await getService('upload').replace(id, { data, file: validFiles[0] });
 
       ctx.body = await sanitizeOutput(replacedFiles, ctx);
     },
 
     async uploadFiles(ctx: Context) {
       const {
-        request: { body, files: { files } = {} },
+        request: { body, files: { files: filesInput } = {} },
       } = ctx;
 
-      const data: any = await validateUploadBody(body, Array.isArray(files));
+      const {
+        validFiles,
+        filteredBody,
+        errors: validationErrors,
+      } = await prepareUploadRequest(filesInput, body, strapi);
+      if (validFiles.length === 0) {
+        throw new errors.ValidationError(validationErrors[0].message);
+      }
+
+      const isMultipleFiles = validFiles.length > 1;
+      const data: any = await validateUploadBody(filteredBody, isMultipleFiles);
 
       const apiUploadFolderService = getService('api-upload-folder');
 
       const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
 
-      if (Array.isArray(files)) {
+      if (isMultipleFiles) {
         data.fileInfo = data.fileInfo || [];
-        data.fileInfo = files.map((_f, i) => ({ ...data.fileInfo[i], folder: apiUploadFolder.id }));
+        data.fileInfo = validFiles.map((_f, i) => ({
+          ...data.fileInfo[i],
+          folder: apiUploadFolder.id,
+        }));
       } else {
         data.fileInfo = { ...data.fileInfo, folder: apiUploadFolder.id };
       }
 
       const uploadedFiles = await getService('upload').upload({
         data,
-        files: Array.isArray(files) ? files : [files],
+        files: validFiles,
       });
 
       ctx.body = await sanitizeOutput(uploadedFiles as any, ctx);

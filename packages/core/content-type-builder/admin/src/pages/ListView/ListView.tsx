@@ -59,6 +59,12 @@ const ListView = () => {
     return <Navigate to="/plugins/content-type-builder/content-types/create-content-type" />;
   }
 
+  if (contentTypeUid && type.modelType === 'contentType' && type.visible === false) {
+    return (
+      <Navigate to="/plugins/content-type-builder/content-types/create-content-type" replace />
+    );
+  }
+
   const isFromPlugin = 'plugin' in type && type?.plugin !== undefined;
 
   const forTarget = contentTypeUid ? 'contentType' : 'component';
