@@ -330,7 +330,10 @@ class TransferEngine<
 
   /**
    * Create and return a PassThrough stream for per-chunk progress tracking (used for assets).
-   * Upon writing data into it, it'll update the Engine's transfer progress data and trigger stage update events per chunk.
+   * Pipes each asset's binary stream through a Transform that counts bytes and forwards chunks,
+   * then replaces asset.stream with that transform so the destination has a single consumer.
+   * This avoids consuming the stream (which would leave the destination with an empty stream)
+   * and ensures backpressure is applied so memory is not held for the entire transfer.
    */
   #progressTrackerChunks(
     stage: TransferStage,
@@ -338,10 +341,14 @@ class TransferEngine<
       key?(value: unknown): string;
     }
   ) {
+    const updateAggregateBytes = this.#updateAggregateBytes.bind(this);
+    const incrementAggregateCount = this.#incrementAggregateCount.bind(this);
+    const emitStageUpdate = this.#emitStageUpdate.bind(this);
+
     return new PassThrough({
       objectMode: true,
       transform: (asset, _encoding, callback) => {
-        if (!asset?.stream || typeof asset.stream.on !== 'function') {
+        if (!asset?.stream || typeof asset.stream.pipe !== 'function') {
           return callback(null, asset);
         }
 
@@ -355,22 +362,30 @@ class TransferEngine<
           throw new TransferEngineError('fatal', 'Stage progress data not found');
         }
 
-        asset.stream.on('data', (chunk: Buffer) => {
-          stageProgress.bytes += chunk.length;
-          if (key) {
-            this.#updateAggregateBytes(stageProgress, key, chunk.length);
-          }
-          this.#emitStageUpdate('progress', stage);
+        const progressTransform = new Transform({
+          objectMode: true,
+          transform(chunk: Buffer | unknown, _enc, cb) {
+            const byteLength = Buffer.isBuffer(chunk) ? chunk.length : 1;
+            stageProgress.bytes += byteLength;
+            if (key) {
+              updateAggregateBytes(stageProgress, key, byteLength);
+            }
+            emitStageUpdate('progress', stage);
+            cb(null, chunk);
+          },
+          flush(cb) {
+            stageProgress.count += 1;
+            if (key) {
+              incrementAggregateCount(stageProgress, key);
+            }
+            emitStageUpdate('progress', stage);
+            cb(null);
+          },
         });
 
-        asset.stream.on('end', () => {
-          stageProgress.count += 1;
-          if (key) {
-            this.#incrementAggregateCount(stageProgress, key);
-          }
-          this.#emitStageUpdate('progress', stage);
-        });
-
+        asset.stream.on('error', (err: Error) => progressTransform.destroy(err));
+        asset.stream.pipe(progressTransform);
+        asset.stream = progressTransform;
         callback(null, asset);
       },
     });
@@ -657,6 +672,7 @@ class TransferEngine<
       if (!destination.destroyed) {
         destination.destroy(e as Error);
       }
+      throw e;
     } finally {
       updateEndTime();
     }

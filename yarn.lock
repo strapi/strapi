@@ -16294,6 +16294,7 @@ __metadata:
     "@types/node": "npm:^20"
     "@types/react": "npm:^18"
     "@types/react-dom": "npm:^18"
+    form-data: "npm:^4.0.0"
     mysql2: "npm:3.9.8"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"

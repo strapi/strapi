@@ -111,7 +111,20 @@ export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
         await signFile(file);
       }
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
-      const stats = await getFileStats(filepath, strapi, isLocalProvider);
+      let stats: { size: number };
+      try {
+        stats = await getFileStats(filepath, strapi, isLocalProvider);
+      } catch (err: unknown) {
+        const code =
+          err && typeof err === 'object' && 'code' in err
+            ? (err as NodeJS.ErrnoException).code
+            : undefined;
+        if (code === 'ENOENT') {
+          strapi.log.warn(`[Data transfer] Skipping missing asset file: ${filepath}`);
+          continue;
+        }
+        throw err;
+      }
       const stream = getFileStream(filepath, strapi, isLocalProvider);
 
       yield {
@@ -128,7 +141,20 @@ export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
           const fileFormatFilepath = isLocalProvider
             ? join(strapi.dirs.static.public, fileFormat.url)
             : fileFormat.url;
-          const fileFormatStats = await getFileStats(fileFormatFilepath, strapi, isLocalProvider);
+          let fileFormatStats: { size: number };
+          try {
+            fileFormatStats = await getFileStats(fileFormatFilepath, strapi, isLocalProvider);
+          } catch (err: unknown) {
+            const code =
+              err && typeof err === 'object' && 'code' in err
+                ? (err as NodeJS.ErrnoException).code
+                : undefined;
+            if (code === 'ENOENT') {
+              strapi.log.warn(`[Data transfer] Skipping missing asset file: ${fileFormatFilepath}`);
+              continue;
+            }
+            throw err;
+          }
           const fileFormatStream = getFileStream(fileFormatFilepath, strapi, isLocalProvider);
           const metadata = { ...fileFormat, type: format, id: file.id, mainHash: file.hash };
           yield {

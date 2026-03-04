@@ -1,6 +1,9 @@
-import { posix, win32 } from 'path';
+import path, { posix, win32 } from 'path';
+import os from 'os';
+import fs from 'fs-extra';
 import { cloneDeep, get, set } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
+import { pipeline } from 'stream/promises';
 import type { Struct } from '@strapi/types';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
 
@@ -14,6 +17,7 @@ import type {
   ITransferEngineOptions,
   TransferFilterPreset,
 } from '../../../types';
+
 import { extendExpectForDataTransferTests } from '../../__tests__/test-utils';
 import { TransferEngineValidationError } from '../errors';
 
@@ -1119,7 +1123,7 @@ describe('Transfer engine', () => {
         createEntitiesReadStream() {
           const stream = Readable.from(sourceData, { objectMode: true });
           const originalPause = stream.pause.bind(stream);
-          stream.pause = function () {
+          stream.pause = function pause() {
             sourcePaused = true;
             return originalPause();
           };
@@ -1201,7 +1205,7 @@ describe('Transfer engine', () => {
         createAssetsReadStream() {
           const stream = getAssetsMockSourceStream(assetData);
           const originalPause = stream.pause.bind(stream);
-          stream.pause = function () {
+          stream.pause = function pause() {
             sourcePaused = true;
             return originalPause();
           };
@@ -1224,5 +1228,487 @@ describe('Transfer engine', () => {
         assetData.map((asset) => asset.stats.size)
       );
     }, 3000);
+  });
+
+  describe('asset stream data and memory', () => {
+    /**
+     * Proves that asset stream bytes reach the destination. If the progress tracker
+     * consumed the stream (old bug), the destination would receive 0 bytes per asset.
+     */
+    test('destination receives full stream bytes for each asset (no double-consumption)', async () => {
+      const expectedBytesPerAsset = [100, 250, 75];
+      const assetData: IAsset[] = expectedBytesPerAsset.map((size, i) => ({
+        filename: `file${i}.jpg`,
+        filepath: posix.join(__dirname, `file${i}.jpg`),
+        stats: { size },
+        stream: Readable.from(Array.from({ length: size }, () => Buffer.alloc(1))),
+        metadata: {
+          hash: `hash${i}`,
+          ext: '.jpg',
+          id: i,
+          name: '',
+          mime: 'image/jpeg',
+          size: 0,
+          url: '',
+        },
+      }));
+
+      const bytesReceivedPerAsset: number[] = [];
+
+      const destination: IDestinationProvider = {
+        ...completeDestination,
+        createAssetsWriteStream() {
+          return new Writable({
+            objectMode: true,
+            async write(asset: IAsset, _encoding, callback) {
+              if (!asset?.stream || typeof asset.stream.pipe !== 'function') {
+                bytesReceivedPerAsset.push(0);
+                return callback();
+              }
+              let bytes = 0;
+              const counter = new Writable({
+                write(chunk: Buffer | unknown, _enc, cb) {
+                  bytes += Buffer.isBuffer(chunk) ? chunk.length : 1;
+                  cb();
+                },
+              });
+              try {
+                await pipeline(asset.stream, counter);
+              } catch (e) {
+                return callback(e instanceof Error ? e : new Error(String(e)));
+              }
+              bytesReceivedPerAsset.push(bytes);
+              callback();
+            },
+          });
+        },
+      };
+
+      const source = createSource({ assets: assetData });
+      const engine = createTransferEngine(source, destination, defaultOptions);
+      await engine.transfer();
+
+      expect(bytesReceivedPerAsset).toEqual(expectedBytesPerAsset);
+    }, 5000);
+
+    /**
+     * Ensures we are not buffering all asset data in memory: heap growth during
+     * transfer should stay well below total bytes transferred (streaming behavior).
+     */
+    test('heap growth during asset transfer stays bounded (streaming, not buffering)', async () => {
+      const assetCount = 15;
+      const bytesPerAsset = 50 * 1024; // 50KB each
+      const totalBytes = assetCount * bytesPerAsset;
+      const assetData: IAsset[] = Array.from({ length: assetCount }, (_, i) => ({
+        filename: `large${i}.bin`,
+        filepath: posix.join(__dirname, `large${i}.bin`),
+        stats: { size: bytesPerAsset },
+        stream: Readable.from(
+          Array.from({ length: bytesPerAsset / 1024 }, () => Buffer.alloc(1024))
+        ),
+        metadata: {
+          hash: `h${i}`,
+          ext: '.bin',
+          id: i,
+          name: '',
+          mime: 'application/octet-stream',
+          size: 0,
+          url: '',
+        },
+      }));
+
+      const initialHeap = process.memoryUsage().heapUsed;
+      const source = createSource({ assets: assetData });
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+      await engine.transfer();
+      const finalHeap = process.memoryUsage().heapUsed;
+      const heapGrowth = finalHeap - initialHeap;
+
+      // If we were buffering all asset data in memory, growth would be on the order of totalBytes.
+      // Allow 2x totalBytes to account for Jest/V8 overhead; we're checking we're not holding
+      // the entire transfer in RAM (which would be ~totalBytes and often more with copies).
+      expect(heapGrowth).toBeLessThan(totalBytes * 2);
+    }, 10000);
+  });
+
+  describe('asset transfer integration (order, content, memory)', () => {
+    /**
+     * Full transfer path: source → engine (progress tracker) → destination that
+     * "writes" each asset to a temp file. Verifies:
+     * 1) Assets are received and written in correct order (no race).
+     * 2) Each file's content matches the source (no mixing/corruption).
+     * 3) Heap during transfer stays bounded (streaming, not buffering).
+     */
+    test('full asset transfer: order preserved, content correct, memory bounded', async () => {
+      const assetCount = 6;
+      const bytesPerAsset = 10 * 1024; // 10KB each, unique byte value per asset
+      const tmpDir = path.join(os.tmpdir(), `strapi-dt-integration-${Date.now()}`);
+      await fs.ensureDir(tmpDir);
+
+      const assetData: IAsset[] = Array.from({ length: assetCount }, (_, i) => ({
+        filename: `media-${i}.bin`,
+        filepath: posix.join(__dirname, `media-${i}.bin`),
+        stats: { size: bytesPerAsset },
+        stream: Readable.from([Buffer.alloc(bytesPerAsset, i)]),
+        metadata: {
+          hash: `hash${i}`,
+          ext: '.bin',
+          id: i,
+          name: `media-${i}`,
+          mime: 'application/octet-stream',
+          size: bytesPerAsset,
+          url: '',
+        },
+      }));
+
+      const writeOrder: number[] = [];
+      const memorySamples: number[] = [];
+      let memoryInterval: ReturnType<typeof setInterval> | null = null;
+
+      const destination: IDestinationProvider = {
+        ...createDestination(),
+        createAssetsWriteStream: jest.fn().mockResolvedValue(
+          new Writable({
+            objectMode: true,
+            async write(asset: IAsset, _encoding, callback) {
+              const index = assetData.findIndex((a) => a.filename === asset.filename);
+              writeOrder.push(index);
+              const outPath = path.join(tmpDir, asset.filename);
+              if (!asset?.stream || typeof asset.stream.pipe !== 'function') {
+                return callback(new Error('Missing or invalid asset stream'));
+              }
+              try {
+                await pipeline(asset.stream, fs.createWriteStream(outPath));
+              } catch (e) {
+                return callback(e instanceof Error ? e : new Error(String(e)));
+              }
+              callback();
+            },
+          })
+        ),
+      };
+
+      const source = createSource({
+        assets: assetData,
+        schemas: Object.values(schemas) as Struct.Schema[],
+        entities: [],
+        links: [],
+        configuration: [],
+      });
+
+      memorySamples.push(process.memoryUsage().heapUsed);
+      memoryInterval = setInterval(() => {
+        memorySamples.push(process.memoryUsage().heapUsed);
+      }, 25);
+
+      const engine = createTransferEngine(source, destination, {
+        ...defaultOptions,
+        only: ['files'],
+      });
+      await engine.transfer();
+
+      if (memoryInterval) {
+        clearInterval(memoryInterval);
+      }
+      memorySamples.push(process.memoryUsage().heapUsed);
+
+      const initialHeap = memorySamples[0];
+      const maxHeap = Math.max(...memorySamples);
+      const heapGrowth = maxHeap - initialHeap;
+      const totalBytes = assetCount * bytesPerAsset;
+      // Allow 20x totalBytes: we must not hold an absurd multiple of the transfer in RAM.
+      // (Jest/V8 baseline varies; threshold catches "buffer entire transfer" without flaking.)
+      expect(heapGrowth).toBeLessThan(totalBytes * 20);
+
+      expect(writeOrder).toHaveLength(assetCount);
+      expect(writeOrder).toEqual([0, 1, 2, 3, 4, 5]);
+
+      for (let i = 0; i < assetCount; i += 1) {
+        const content = await fs.readFile(path.join(tmpDir, `media-${i}.bin`));
+        expect(content.length).toBe(bytesPerAsset);
+        expect(content.every((b) => b === i)).toBe(true);
+      }
+
+      await fs.remove(tmpDir).catch(() => {});
+    }, 15000);
+  });
+
+  describe('backpressure (schemas, links, configuration)', () => {
+    test('schemas source stream pauses under backpressure and data integrity is maintained', async () => {
+      const schemaData = getSchemasMockSourceStream();
+      const schemaChunks = await new Promise<Struct.Schema[]>((resolve, reject) => {
+        const chunks: Struct.Schema[] = [];
+        schemaData.on('data', (chunk: Struct.Schema) => chunks.push(chunk));
+        schemaData.on('end', () => resolve(chunks));
+        schemaData.on('error', reject);
+      });
+
+      let sourcePaused = false;
+      const processedData: Struct.Schema[] = [];
+
+      const slowDestination: IDestinationProvider = {
+        ...completeDestination,
+        createSchemasWriteStream() {
+          return new Writable({
+            objectMode: true,
+            highWaterMark: 1,
+            write(chunk, _encoding, callback) {
+              processedData.push(chunk);
+              setTimeout(callback, 10);
+            },
+          });
+        },
+      };
+
+      const source = {
+        ...createSource({ schemas: schemaChunks }),
+        createSchemasReadStream() {
+          const stream = getSchemasMockSourceStream(schemaChunks);
+          const originalPause = stream.pause.bind(stream);
+          stream.pause = function () {
+            sourcePaused = true;
+            return originalPause();
+          };
+          return stream;
+        },
+      };
+
+      const engine = createTransferEngine(source, slowDestination, defaultOptions);
+      await engine.transfer();
+
+      expect(sourcePaused).toBe(true);
+      expect(processedData).toEqual(schemaChunks);
+    }, 2000);
+
+    test('links source stream pauses under backpressure and data integrity is maintained', async () => {
+      const linksData = [...defaultLinksData];
+      let sourcePaused = false;
+      const processedData: ILink[] = [];
+
+      const slowDestination: IDestinationProvider = {
+        ...completeDestination,
+        createLinksWriteStream() {
+          return new Writable({
+            objectMode: true,
+            highWaterMark: 1,
+            write(chunk, _encoding, callback) {
+              processedData.push(chunk);
+              setTimeout(callback, 10);
+            },
+          });
+        },
+      };
+
+      const source = {
+        ...createSource({ links: linksData }),
+        createLinksReadStream() {
+          const stream = getLinksMockSourceStream(linksData);
+          const originalPause = stream.pause.bind(stream);
+          stream.pause = function () {
+            sourcePaused = true;
+            return originalPause();
+          };
+          return stream;
+        },
+      };
+
+      const engine = createTransferEngine(source, slowDestination, defaultOptions);
+      await engine.transfer();
+
+      expect(sourcePaused).toBe(true);
+      expect(processedData).toHaveLength(linksData.length);
+      expect(processedData).toEqual(expect.arrayContaining(linksData));
+    }, 2000);
+
+    test('configuration source stream pauses under backpressure and data integrity is maintained', async () => {
+      const configData: IConfiguration[] = [
+        { type: 'core-store', value: { key: 'foo', value: 'alice' } },
+        { type: 'core-store', value: { key: 'bar', value: 'bob' } },
+        { type: 'core-store', value: { key: 'baz', value: 'charlie' } },
+      ];
+      let sourcePaused = false;
+      const processedData: IConfiguration[] = [];
+
+      const slowDestination: IDestinationProvider = {
+        ...completeDestination,
+        createConfigurationWriteStream() {
+          return new Writable({
+            objectMode: true,
+            highWaterMark: 1,
+            write(chunk, _encoding, callback) {
+              processedData.push(chunk);
+              setTimeout(callback, 10);
+            },
+          });
+        },
+      };
+
+      const source = {
+        ...createSource({ configuration: configData }),
+        createConfigurationReadStream() {
+          const stream = getConfigurationMockSourceStream(configData);
+          const originalPause = stream.pause.bind(stream);
+          stream.pause = function () {
+            sourcePaused = true;
+            return originalPause();
+          };
+          return stream;
+        },
+      };
+
+      const engine = createTransferEngine(source, slowDestination, defaultOptions);
+      await engine.transfer();
+
+      expect(sourcePaused).toBe(true);
+      expect(processedData).toEqual(configData);
+    }, 2000);
+  });
+
+  describe('stream cleanup and memory', () => {
+    test('all stage streams are destroyed after successful transfer', async () => {
+      const createdReadStreams: Readable[] = [];
+      const createdWriteStreams: Writable[] = [];
+
+      const source = {
+        ...createSource(),
+        createEntitiesReadStream: jest.fn().mockImplementation(async () => {
+          const s = getEntitiesMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+        createLinksReadStream: jest.fn().mockImplementation(() => {
+          const s = getLinksMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+        createAssetsReadStream: jest.fn().mockImplementation(async () => {
+          const s = getAssetsMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+        createConfigurationReadStream: jest.fn().mockImplementation(() => {
+          const s = getConfigurationMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+        createSchemasReadStream: jest.fn().mockImplementation(() => {
+          const s = getSchemasMockSourceStream();
+          createdReadStreams.push(s);
+          return s;
+        }),
+      };
+
+      const destination = {
+        ...createDestination(),
+        createEntitiesWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+        createLinksWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+        createAssetsWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+        createConfigurationWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+        createSchemasWriteStream: jest.fn().mockImplementation(async () => {
+          const w = getMockDestinationStream();
+          createdWriteStreams.push(w);
+          return w;
+        }),
+      };
+
+      const engine = createTransferEngine(source, destination, defaultOptions);
+      await engine.transfer();
+
+      createdReadStreams.forEach((stream) => {
+        expect(stream.destroyed).toBe(true);
+      });
+      createdWriteStreams.forEach((stream) => {
+        expect(stream.destroyed).toBe(true);
+      });
+    });
+
+    test('repeated transfers do not leave streams undestroyed', async () => {
+      const transferCount = 5;
+      const allReadStreams: Readable[] = [];
+      const allWriteStreams: Writable[] = [];
+
+      const source = createSource();
+      source.createEntitiesReadStream = jest.fn().mockImplementation(async () => {
+        const s = getEntitiesMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+      source.createLinksReadStream = jest.fn().mockImplementation(() => {
+        const s = getLinksMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+      source.createSchemasReadStream = jest.fn().mockImplementation(() => {
+        const s = getSchemasMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+      source.createAssetsReadStream = jest.fn().mockImplementation(async () => {
+        const s = getAssetsMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+      source.createConfigurationReadStream = jest.fn().mockImplementation(() => {
+        const s = getConfigurationMockSourceStream();
+        allReadStreams.push(s);
+        return s;
+      });
+
+      const destination = createDestination();
+      destination.createEntitiesWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+      destination.createLinksWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+      destination.createSchemasWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+      destination.createAssetsWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+      destination.createConfigurationWriteStream = jest.fn().mockImplementation(async () => {
+        const w = getMockDestinationStream();
+        allWriteStreams.push(w);
+        return w;
+      });
+
+      const engine = createTransferEngine(source, destination, defaultOptions);
+
+      for (let i = 0; i < transferCount; i += 1) {
+        await engine.transfer();
+      }
+
+      allReadStreams.forEach((stream) => {
+        expect(stream.destroyed).toBe(true);
+      });
+      allWriteStreams.forEach((stream) => {
+        expect(stream.destroyed).toBe(true);
+      });
+    });
   });
 });

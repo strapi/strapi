@@ -50,6 +50,11 @@ export interface PushHandler extends Handler {
   flow?: TransferFlow;
 
   /**
+   * Interval for periodic destination memory logging during assets stage
+   */
+  memoryLogInterval?: ReturnType<typeof setInterval>;
+
+  /**
    * Checks that the given action is a valid push transfer action
    */
   assertValidTransferAction(action: string): asserts action is PushTransferAction;
@@ -146,6 +151,10 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     });
   },
   cleanup(this: PushHandler) {
+    if (this.memoryLogInterval) {
+      clearInterval(this.memoryLogInterval);
+      delete this.memoryLogInterval;
+    }
     proto.cleanup.call(this);
 
     this.streams = {};
@@ -338,6 +347,21 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
       this.stats[stage] = { started: 0, finished: 0 };
 
+      if (stage === 'assets') {
+        strapi.log.info(
+          '[Transfer destination] Assets stage started, starting memory log every 2s'
+        );
+        this.memoryLogInterval = setInterval(() => {
+          const mem = process.memoryUsage();
+          const stats = this.stats?.assets;
+          const rssMb = (mem.rss / 1024 / 1024).toFixed(1);
+          const heapMb = (mem.heapUsed / 1024 / 1024).toFixed(1);
+          strapi.log.info(
+            `[Transfer destination] memory RSS=${rssMb}MB heapUsed=${heapMb}MB | assets started=${stats?.started ?? 0} finished=${stats?.finished ?? 0}`
+          );
+        }, 2000);
+      }
+
       return { ok: true };
     }
 
@@ -367,6 +391,11 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     }
 
     if (msg.action === 'end') {
+      if (stage === 'assets' && this.memoryLogInterval) {
+        clearInterval(this.memoryLogInterval);
+        delete this.memoryLogInterval;
+        strapi.log.info('[Transfer destination] Assets stage ended, stopped memory log');
+      }
       this.unlockTransferStep(stage);
       const stream = this.streams?.[stage];
 
@@ -424,6 +453,10 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       if (action === 'start') {
         this.stats.assets.started += 1;
         this.assets[assetID] = { ...item.data, stream: new PassThrough() };
+        const filename = item.data?.filename ?? assetID;
+        strapi.log.info(
+          `[Transfer destination] Asset start #${this.stats.assets.started} id=${assetID} filename=${filename}`
+        );
         writeAsync(assetsStream, this.assets[assetID]);
       }
 
@@ -436,6 +469,9 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       }
 
       if (action === 'end') {
+        strapi.log.info(
+          `[Transfer destination] Asset end id=${assetID} (finished=${this.stats.assets.finished + 1}/${this.stats.assets.started})`
+        );
         await new Promise<void>((resolve, reject) => {
           const { stream: assetStream } = this.assets[assetID];
           assetStream
