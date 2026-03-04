@@ -31,7 +31,7 @@ import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
+import { NavLink, Link as ReactRouterLink, useNavigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
@@ -57,8 +57,6 @@ import { listViewFilters as Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
-
-import type { Modules } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 
@@ -264,14 +262,6 @@ const ListViewPage = () => {
         defaultMessage: 'Untitled',
       });
 
-  const handleRowClick = (id: Modules.Documents.ID) => () => {
-    trackUsage('willEditEntryFromList');
-    navigate({
-      pathname: id.toString(),
-      search: stringify({ plugins: query.plugins }),
-    });
-  };
-
   const isEmptyState = !isFetching && results.length === 0;
 
   const endActions = (
@@ -393,18 +383,31 @@ const ListViewPage = () => {
                   <Table.Body>
                     {results.map((row) => {
                       return (
-                        <Table.Row
-                          cursor="pointer"
-                          key={row.id}
-                          onClick={handleRowClick(row.documentId)}
-                        >
-                          <Table.CheckboxCell id={row.id} />
-                          {tableHeaders.map(({ cellFormatter, ...header }) => {
+                        <Table.Row position="relative" key={row.id}>
+                          <Table.CheckboxCell id={row.id} position="relative" zIndex={1} />
+                          {tableHeaders.map(({ cellFormatter, ...header }, index) => {
+                            const blockLink =
+                              index === 0 ? (
+                                <RowLink
+                                  to={{
+                                    pathname: row.documentId.toString(),
+                                    search: stringify({ plugins: query.plugins }),
+                                  }}
+                                  onClick={() => trackUsage('willEditEntryFromList')}
+                                  tabIndex={-1}
+                                  aria-label={formatMessage({
+                                    id: 'app.utils.edit',
+                                    defaultMessage: 'Edit',
+                                  })}
+                                />
+                              ) : null;
+
                             if (header.name === 'status') {
                               const { status } = row;
 
                               return (
                                 <Table.Cell key={header.name}>
+                                  {blockLink}
                                   <DocumentStatus status={status} maxWidth={'min-content'} />
                                 </Table.Cell>
                               );
@@ -415,6 +418,7 @@ const ListViewPage = () => {
                               // In this case, we display a dash
                               return (
                                 <Table.Cell key={header.name}>
+                                  {blockLink}
                                   <Typography textColor="neutral800">
                                     {row[header.name.split('.')[0]]
                                       ? getDisplayName(row[header.name.split('.')[0]])
@@ -426,6 +430,7 @@ const ListViewPage = () => {
                             if (typeof cellFormatter === 'function') {
                               return (
                                 <Table.Cell key={header.name}>
+                                  {blockLink}
                                   {/* @ts-expect-error – TODO: fix this TS error */}
                                   {cellFormatter(row, header, { collectionType, model })}
                                 </Table.Cell>
@@ -433,6 +438,7 @@ const ListViewPage = () => {
                             }
                             return (
                               <Table.Cell key={header.name}>
+                                {blockLink}
                                 <CellContent
                                   content={row[header.name.split('.')[0]]}
                                   rowId={row.documentId}
@@ -441,8 +447,7 @@ const ListViewPage = () => {
                               </Table.Cell>
                             );
                           })}
-                          {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
-                          <ActionsCell onClick={(e) => e.stopPropagation()}>
+                          <ActionsCell>
                             <TableActions document={row} />
                           </ActionsCell>
                         </Table.Row>
@@ -469,6 +474,15 @@ const ListViewPage = () => {
 const ActionsCell = styled(Table.Cell)`
   display: flex;
   justify-content: flex-end;
+  position: relative;
+  z-index: 1;
+`;
+
+const RowLink = styled(NavLink)`
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
 `;
 
 /* -------------------------------------------------------------------------------------------------
