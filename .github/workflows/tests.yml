@@ -579,7 +579,7 @@ jobs:
     if: ${{ !github.event.pull_request.head.repo.fork && (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true') }}
     needs: [conditions, unit_back, unit_front]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
@@ -587,14 +587,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: unit-coverage-reports
-          path: ./
+          path: unit-coverage
         continue-on-error: true
 
       - name: Download frontend test coverage
         uses: actions/download-artifact@v4
         with:
           name: front-coverage-reports
-          path: ./
+          path: front-coverage
         continue-on-error: true
 
       - name: List coverage files (debug)
@@ -608,7 +608,7 @@ jobs:
 
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
-        uses: SonarSource/sonarqube-quality-gate-action@master
+        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
         timeout-minutes: 5
         continue-on-error: true
         env:
