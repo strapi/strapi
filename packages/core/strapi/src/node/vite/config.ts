@@ -102,7 +102,20 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     },
     resolve: {
       // https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
-      dedupe: ['react', 'react-dom', 'react-router-dom', 'styled-components'],
+      // Also deduplicate @strapi/* packages so local plugins that list them as
+      // direct dependencies don't pull in a second copy during the build.
+      // See: https://github.com/strapi/strapi/issues/22946
+      dedupe: [
+        'react',
+        'react-dom',
+        'react-router-dom',
+        'styled-components',
+        '@strapi/strapi',
+        '@strapi/admin',
+        '@strapi/design-system',
+        '@strapi/icons',
+        '@strapi/utils',
+      ],
     },
     plugins: [react(), buildFilesPlugin(ctx)],
   };
