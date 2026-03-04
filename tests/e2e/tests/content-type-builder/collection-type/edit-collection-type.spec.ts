@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { waitForRestart } from '../../../utils/restart';
-import { resetFiles } from '../../../utils/file-reset';
-import { navToHeader } from '../../../utils/shared';
-import { sharedSetup } from '../../../utils/setup';
+import { waitForRestart } from '../../../../utils/restart';
+import { resetFiles } from '../../../../utils/file-reset';
+import { navToHeader } from '../../../../utils/shared';
+import { sharedSetup } from '../../../../utils/setup';
 
 test.describe('Edit collection type', () => {
   // very long timeout for these tests because they restart the server multiple times

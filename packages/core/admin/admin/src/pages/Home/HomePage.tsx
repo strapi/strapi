@@ -192,6 +192,7 @@ const HomePageCE = () => {
               size="S"
               startIcon={<Plus />}
               onClick={() => setIsAddWidgetModalOpen(true)}
+              fullWidth
             >
               {formatMessage({
                 id: 'HomePage.addWidget.button',
@@ -229,7 +230,7 @@ const HomePageCE = () => {
                       canResize,
                     }) => (
                       <React.Fragment key={widget.uid}>
-                        <Grid.Item col={widgetWidth} s={12}>
+                        <Grid.Item col={widgetWidth} xs={12}>
                           <WidgetRoot
                             uid={widget.uid}
                             title={widget.title}

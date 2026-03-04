@@ -3,7 +3,8 @@ import type { AdminUser } from '../../../shared/contracts/shared';
 
 import { getService } from '../utils';
 import { validateProfileUpdateInput } from '../validation/user';
-import { GetMe, GetOwnPermissions, UpdateMe, GetAiToken } from '../../../shared/contracts/users';
+import { GetMe, GetOwnPermissions, UpdateMe } from '../../../shared/contracts/users';
+import { getSessionManager } from '../../../shared/utils/session-auth';
 
 export default {
   async getMe(ctx: Context) {
@@ -32,6 +33,12 @@ export default {
           currentPassword: ['Invalid credentials'],
         });
       }
+
+      // Invalidate all sessions when password changes for security
+      const sessionManager = getSessionManager();
+      if (sessionManager && sessionManager.hasOrigin('admin')) {
+        await sessionManager('admin').invalidateRefreshToken(String(ctx.state.user.id));
+      }
     }
 
     const updatedUser = await userService.updateById(ctx.state.user.id, userInfo);
@@ -51,23 +58,5 @@ export default {
       // @ts-expect-error - transform response type to sanitized permission
       data: userPermissions.map(sanitizePermission),
     } satisfies GetOwnPermissions.Response;
-  },
-
-  async getAiToken(ctx: Context) {
-    try {
-      // Security check: Ensure user is authenticated and has proper permissions
-      if (!ctx.state.user) {
-        return ctx.unauthorized('Authentication required');
-      }
-
-      const tokenData = await getService('user').getAiToken();
-
-      ctx.body = {
-        data: tokenData,
-      } satisfies GetAiToken.Response;
-    } catch (error) {
-      const errorMessage = 'AI token request failed. Check server logs for details.';
-      return ctx.internalServerError(errorMessage);
-    }
   },
 };

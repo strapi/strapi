@@ -110,7 +110,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
               .map(({ size, ...field }) => (
                 <Grid.Item
                   key={field.name}
-                  s={12}
+                  xs={12}
                   col={size}
                   direction="column"
                   alignItems="stretch"

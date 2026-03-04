@@ -97,6 +97,7 @@ export const ConfigureTheView = ({ config }: ConfigureTheViewProps) => {
                 startIcon={<Check />}
                 disabled={isEqual(modifiedData, initialData)}
                 type="submit"
+                fullWidth
               >
                 {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
               </Button>

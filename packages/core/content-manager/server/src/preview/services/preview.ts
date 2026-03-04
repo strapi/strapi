@@ -22,7 +22,7 @@ const createPreviewService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       try {
         // Try to get the preview URL from the user-defined handler
-        return handler(uid, params);
+        return await handler(uid, params);
       } catch (error) {
         // Log the error and throw a generic error
         strapi.log.error(`Failed to get preview URL: ${error}`);

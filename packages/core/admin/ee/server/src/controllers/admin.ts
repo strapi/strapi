@@ -10,8 +10,8 @@ export default {
   // NOTE: Overrides CE admin controller
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
-    const isAIConfigured = strapi.config.get('admin.ai', { enabled: false });
     const isAILicense = strapi.ee.features.isEnabled('cms-ai');
+    const isAIConfigured = strapi.config.get('admin.ai', { enabled: isAILicense });
 
     try {
       return {
@@ -66,7 +66,6 @@ export default {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      aiLicenseKey: env('STRAPI_ADMIN_AI_LICENSE'),
       type: strapi.ee.type,
       isTrial: strapi.ee.isTrial,
       features: strapi.ee.features.list() ?? [],
