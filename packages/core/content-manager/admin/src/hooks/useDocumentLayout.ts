@@ -115,6 +115,7 @@ const DEFAULT_SETTINGS = {
   defaultSortOrder: 'asc',
   mainField: 'id',
   pageSize: 10,
+  relationOpenMode: 'modal' as const,
 };
 
 /**
