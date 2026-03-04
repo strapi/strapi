@@ -1,4 +1,6 @@
 import { readFile } from 'node:fs/promises';
+import { extname } from 'node:path';
+import { lookup } from 'mime-types';
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
@@ -15,6 +17,7 @@ type UploadValidationError = {
 type ValidationResult = {
   isValid: boolean;
   error?: UploadValidationError;
+  detectedMime?: string;
 };
 
 type ErrorDetail = {
@@ -31,7 +34,8 @@ async function readFileChunk(filePath: string, chunkSize: number = 4100): Promis
 export async function detectMimeType(file: any): Promise<string | undefined> {
   let buffer: Buffer;
 
-  const filePath = file.path || file.filepath || file.tempFilePath;
+  // Support multiple property names used by different multipart parsers (formidable uses filepath)
+  const filePath = file.filepath ?? file.path ?? file.tempFilePath ?? file.filePath;
 
   if (filePath) {
     try {
@@ -44,7 +48,7 @@ export async function detectMimeType(file: any): Promise<string | undefined> {
   } else if (file.buffer) {
     buffer = file.buffer.length > 4100 ? file.buffer.subarray(0, 4100) : file.buffer;
   } else {
-    // No file data available
+    // No file path or buffer; cannot detect MIME. Validation will use declared/extension or reject.
     return undefined;
   }
 
@@ -94,16 +98,96 @@ export function isMimeTypeAllowed(mimeType: string, config: SecurityConfig): boo
     return false;
   }
 
-  if (allowedTypes?.length) {
-    return matchesMimePattern(mimeType, allowedTypes);
+  if (Array.isArray(allowedTypes)) {
+    return allowedTypes.length > 0 && matchesMimePattern(mimeType, allowedTypes);
   }
 
   return true;
 }
 
+/**
+ * Single gate for allow/deny. Returns ValidationResult.
+ * Doc: docs/docs/01-core/upload/01-backend/01-mime-validation.md
+ */
+function validateAllowBanLists(
+  mimetype: string,
+  fileName: string,
+  declaredType: string,
+  detectedType: string | undefined,
+  config: SecurityConfig
+): ValidationResult {
+  if (!mimetype) {
+    return {
+      isValid: false,
+      error: {
+        code: 'MIME_TYPE_NOT_ALLOWED',
+        message: 'MIME type is not allowed',
+        details: {
+          fileName,
+          reason: 'No MIME type to validate',
+          declaredType,
+          detectedType,
+          allowedTypes: config.allowedTypes,
+          deniedTypes: config.deniedTypes,
+        },
+      },
+    };
+  }
+  if (config.deniedTypes?.length && matchesMimePattern(mimetype, config.deniedTypes)) {
+    return buildNotAllowedError(fileName, declaredType, detectedType, mimetype, config);
+  }
+  if (!Array.isArray(config.allowedTypes)) {
+    return { isValid: true, detectedMime: mimetype };
+  }
+  if (config.allowedTypes.length === 0) {
+    return {
+      isValid: false,
+      error: {
+        code: 'MIME_TYPE_NOT_ALLOWED',
+        message: 'MIME type is not allowed',
+        details: {
+          fileName,
+          reason: 'Allow list is empty',
+          declaredType,
+          detectedType,
+          allowedTypes: config.allowedTypes,
+          deniedTypes: config.deniedTypes,
+        },
+      },
+    };
+  }
+  if (matchesMimePattern(mimetype, config.allowedTypes)) {
+    return { isValid: true, detectedMime: mimetype };
+  }
+  return {
+    isValid: false,
+    error: {
+      code: 'MIME_TYPE_NOT_ALLOWED',
+      message: `File type '${mimetype}' is not allowed`,
+      details: {
+        fileName,
+        declaredType,
+        detectedType,
+        finalType: mimetype,
+        allowedTypes: config.allowedTypes,
+        deniedTypes: config.deniedTypes,
+      },
+    },
+  };
+}
+
+function isDeclaredGeneric(declaredMimeType: string): boolean {
+  return !declaredMimeType || declaredMimeType === 'application/octet-stream';
+}
+
 export function extractFileInfo(file: any) {
   const fileName =
-    file.originalFilename || file.name || file.filename || file.newFilename || 'unknown';
+    file.originalFilename ||
+    file.name ||
+    file.filename ||
+    file.newFilename ||
+    file.originalname ||
+    'unknown';
   const declaredMimeType = file.mimetype || file.type || file.mimeType || file.mime || '';
 
   return { fileName, declaredMimeType };
@@ -116,63 +200,94 @@ export async function validateFile(
 ): Promise<ValidationResult> {
   const { allowedTypes, deniedTypes } = config;
 
-  if (!allowedTypes && !deniedTypes) {
-    return { isValid: true };
-  }
-
   const { fileName, declaredMimeType } = extractFileInfo(file);
 
-  let detectedMime: string | undefined;
-  let mimeDetectionFailed = false;
+  const fileExt = extname(fileName).toLowerCase();
+  const expectedMimeFromExt = fileExt ? lookup(fileExt) || null : null;
 
+  // Reject if declared type is denied.
+  if (
+    !isDeclaredGeneric(declaredMimeType) &&
+    deniedTypes?.length &&
+    matchesMimePattern(declaredMimeType, deniedTypes)
+  ) {
+    return buildNotAllowedError(fileName, declaredMimeType, undefined, declaredMimeType, config);
+  }
+
+  // Reject if extension's type is denied.
+  if (
+    expectedMimeFromExt &&
+    deniedTypes?.length &&
+    matchesMimePattern(expectedMimeFromExt, deniedTypes)
+  ) {
+    return buildNotAllowedError(fileName, declaredMimeType, undefined, expectedMimeFromExt, config);
+  }
+
+  // Run content detection.
+  let detectedMime: string | undefined;
   try {
     detectedMime = await detectMimeType(file);
   } catch (error) {
-    mimeDetectionFailed = true;
-    strapi.log.warn('Failed to detect MIME type from file', {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    strapi.log.warn(`Failed to detect MIME type from file: ${errMsg}`, {
       fileName,
-      error: error instanceof Error ? error.message : String(error),
+      error: errMsg,
     });
   }
 
-  const mimeToValidate = detectedMime || declaredMimeType;
+  const declaredMatchesExtension =
+    !isDeclaredGeneric(declaredMimeType) &&
+    expectedMimeFromExt !== null &&
+    expectedMimeFromExt !== undefined &&
+    (matchesMimePattern(declaredMimeType, [expectedMimeFromExt]) ||
+      matchesMimePattern(expectedMimeFromExt, [declaredMimeType]));
+  const detectedMatchesDeclared =
+    detectedMime && declaredMimeType && matchesMimePattern(detectedMime, [declaredMimeType]);
 
-  if (
-    !detectedMime &&
-    (declaredMimeType === 'application/octet-stream' || !declaredMimeType || mimeDetectionFailed)
-  ) {
-    if (allowedTypes?.length || deniedTypes?.length) {
-      return {
-        isValid: false,
-        error: {
-          code: 'MIME_TYPE_NOT_ALLOWED',
-          message: `Cannot verify file type for security reasons`,
-          details: {
-            fileName,
-            reason: 'Unable to detect MIME type from file content',
-            declaredType: declaredMimeType,
-            mimeDetectionFailed,
-          },
-        },
-      };
-    }
+  // Trusted declaration: declared matches extension and detection confirms.
+  if (declaredMatchesExtension && detectedMatchesDeclared) {
+    return validateAllowBanLists(
+      declaredMimeType,
+      fileName,
+      declaredMimeType,
+      detectedMime,
+      config
+    );
   }
 
+  // Reject if detected type is denied.
+  if (detectedMime && deniedTypes?.length && matchesMimePattern(detectedMime, deniedTypes)) {
+    return buildNotAllowedError(fileName, declaredMimeType, detectedMime, detectedMime, config);
+  }
+
+  // Reject if detected is not in allow list (extension/declared cannot override).
+  // Exception: file-type often returns application/zip for Office formats (docx, xlsx); skip so the next block can allow via extension type.
+  const isZipWithAllowedExt =
+    detectedMime === 'application/zip' &&
+    expectedMimeFromExt &&
+    expectedMimeFromExt !== 'application/zip' &&
+    Array.isArray(allowedTypes) &&
+    allowedTypes.length > 0 &&
+    matchesMimePattern(expectedMimeFromExt, allowedTypes);
   if (
-    mimeToValidate &&
-    (allowedTypes || deniedTypes) &&
-    !isMimeTypeAllowed(mimeToValidate, config)
+    detectedMime &&
+    Array.isArray(allowedTypes) &&
+    allowedTypes.length > 0 &&
+    !matchesMimePattern(detectedMime, allowedTypes) &&
+    !isZipWithAllowedExt
   ) {
     return {
       isValid: false,
       error: {
         code: 'MIME_TYPE_NOT_ALLOWED',
-        message: `File type '${mimeToValidate}' is not allowed`,
+        message: 'MIME type is not allowed',
         details: {
           fileName,
-          detectedType: detectedMime,
+          reason:
+            'File content was detected as a type not in the allow list; extension or declared type cannot override',
           declaredType: declaredMimeType,
-          finalType: mimeToValidate,
+          detectedType: detectedMime,
+          expectedMimeFromExtension: expectedMimeFromExt,
           allowedTypes,
           deniedTypes,
         },
@@ -180,7 +295,103 @@ export async function validateFile(
     };
   }
 
-  return { isValid: true };
+  // Use detected type when defined and (no extension, or detected matches extension, or declared is generic).
+  const detectedMatchesExtension =
+    detectedMime &&
+    expectedMimeFromExt !== null &&
+    expectedMimeFromExt !== undefined &&
+    matchesMimePattern(detectedMime, [expectedMimeFromExt]);
+  if (
+    detectedMime &&
+    (!expectedMimeFromExt || detectedMatchesExtension || isDeclaredGeneric(declaredMimeType))
+  ) {
+    // Office/zip exception: use extension type when detection returned application/zip and extension is in allow list.
+    if (
+      detectedMime === 'application/zip' &&
+      expectedMimeFromExt &&
+      expectedMimeFromExt !== 'application/zip'
+    ) {
+      const extResult = validateAllowBanLists(
+        expectedMimeFromExt,
+        fileName,
+        declaredMimeType,
+        detectedMime,
+        config
+      );
+      if (extResult.isValid) {
+        strapi.log.warn(
+          'MIME type detection returned application/zip; trusting extension for allow list',
+          { fileName, fileExtension: fileExt, expectedMimeFromExtension: expectedMimeFromExt }
+        );
+        return extResult;
+      }
+    }
+    return validateAllowBanLists(detectedMime, fileName, declaredMimeType, detectedMime, config);
+  }
+
+  // Use extension's type when present.
+  if (expectedMimeFromExt) {
+    return validateAllowBanLists(
+      expectedMimeFromExt,
+      fileName,
+      declaredMimeType,
+      detectedMime,
+      config
+    );
+  }
+
+  // Use declared type as last resort.
+  if (declaredMimeType) {
+    return validateAllowBanLists(
+      declaredMimeType,
+      fileName,
+      declaredMimeType,
+      detectedMime,
+      config
+    );
+  }
+
+  // Reject when no type can be chosen.
+  return {
+    isValid: false,
+    error: {
+      code: 'MIME_TYPE_NOT_ALLOWED',
+      message: 'Cannot verify file type for security reasons',
+      details: {
+        fileName,
+        reason: 'No MIME type to validate (no declared type, no extension, no detection)',
+        declaredType: declaredMimeType,
+        detectedType: detectedMime,
+        allowedTypes,
+        deniedTypes,
+      },
+    },
+  };
+}
+
+function buildNotAllowedError(
+  fileName: string,
+  declaredType: string,
+  detectedType: string | undefined,
+  rejectedType: string,
+  config: SecurityConfig
+): ValidationResult {
+  return {
+    isValid: false,
+    error: {
+      code: 'MIME_TYPE_NOT_ALLOWED',
+      message: `File type '${rejectedType}' is not allowed`,
+      details: {
+        fileName,
+        declaredType,
+        detectedType,
+        finalType: rejectedType,
+        allowedTypes: config.allowedTypes,
+        deniedTypes: config.deniedTypes,
+        reason: 'MIME type is in the denied list',
+      },
+    },
+  };
 }
 
 export async function validateFiles(files: any, strapi: Core.Strapi): Promise<ValidationResult[]> {
@@ -190,7 +401,14 @@ export async function validateFiles(files: any, strapi: Core.Strapi): Promise<Va
     return [];
   }
 
-  const config: SecurityConfig = strapi.config.get('plugin::upload.security', {});
+  // Use array path so 'plugin::upload' is a single key (lodash string path splits on '.')
+  let config: SecurityConfig = strapi.config.get(
+    ['plugin::upload', 'security'],
+    {}
+  ) as SecurityConfig;
+  if (!config || typeof config !== 'object') {
+    config = {};
+  }
   if (
     config.allowedTypes &&
     (!Array.isArray(config.allowedTypes) ||
@@ -215,7 +433,7 @@ export async function validateFiles(files: any, strapi: Core.Strapi): Promise<Va
     strapi.log.warn(
       'No upload security configuration found. Consider configuring plugin.upload.security for enhanced file validation.'
     );
-    return filesArray.map(() => ({ isValid: true }));
+    // Do not return; we still run validation so MIME detection runs and stored file gets detected type when possible
   }
 
   const validationPromises = filesArray.map(async (file, index) => {
@@ -264,6 +482,10 @@ export async function enforceUploadSecurity(
   for (const [index, result] of validationResults.entries()) {
     if (result.isValid) {
       const file = filesArray[index];
+      // Enrich file with detected MIME type for use in storage
+      if (result.detectedMime) {
+        file.detectedMimeType = result.detectedMime;
+      }
       validFiles.push(file);
       validFileNames.push(file.originalFilename || file.name);
     } else if (result.error) {
