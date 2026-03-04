@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { sharedSetup } from '../../utils/setup';
-import { STRAPI_GUIDED_TOUR_CONFIG, setGuidedTourLocalStorage } from '../../utils/global-setup';
-import { clickAndWait, describeOnCondition } from '../../utils/shared';
-import { waitForRestart } from '../../utils/restart';
+import { sharedSetup } from '../../../utils/setup';
+import { STRAPI_GUIDED_TOUR_CONFIG, setGuidedTourLocalStorage } from '../../../utils/global-setup';
+import { clickAndWait, describeOnCondition } from '../../../utils/shared';
+import { waitForRestart } from '../../../utils/restart';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 

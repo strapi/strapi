@@ -101,6 +101,9 @@ describe('useBulkMove', () => {
     const { post } = useFetchClient();
 
     expect(post).toHaveBeenCalledWith('/upload/actions/bulk-move', expect.any(Object));
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been moved successfully.');
   });
 
   test('does properly collect all asset ids', async () => {
@@ -118,6 +121,9 @@ describe('useBulkMove', () => {
       destinationFolderId: FIXTURE_DESTINATION_FOLDER_ID,
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
     });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been moved successfully.');
   });
 
   test('does properly collect all folder ids', async () => {
@@ -135,6 +141,9 @@ describe('useBulkMove', () => {
       destinationFolderId: FIXTURE_DESTINATION_FOLDER_ID,
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),
     });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been moved successfully.');
   });
 
   test('does properly collect folder and asset ids', async () => {
@@ -153,6 +162,9 @@ describe('useBulkMove', () => {
       fileIds: FIXTURE_ASSETS.map(({ id }) => id),
       folderIds: FIXTURE_FOLDERS.map(({ id }) => id),
     });
+
+    // Wait for notification to prevent act warnings from Sonner
+    await screen.findByText('Elements have been moved successfully.');
   });
 
   test('does re-fetch assets, if files were deleted', async () => {

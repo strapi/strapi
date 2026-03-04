@@ -38,7 +38,6 @@ export interface Strapi extends Container {
   db: Database;
   app: any;
   EE?: boolean;
-  aiLicenseKey?: string;
   ai?: {
     enabled: boolean;
   };
@@ -47,6 +46,8 @@ export interface Strapi extends Container {
     type: string | null | undefined;
     isEE: boolean;
     isTrial: boolean;
+    subscriptionId?: string | null | undefined;
+    planPriceId?: string | null | undefined;
     getTrialEndDate: ({
       strapi,
     }: {
@@ -81,6 +82,7 @@ export interface Strapi extends Container {
   apis: Record<string, Core.Module>;
   api(name: string): Core.Module;
   auth: Modules.Auth.AuthenticationService;
+  /** Content API: permissions, route map, sanitize/validate, and registration of extra query/input params (see addQueryParams, addInputParams). */
   contentAPI: Modules.ContentAPI.ContentApi;
   sanitizers: Modules.Sanitizers.SanitizersRegistry;
   validators: Modules.Validators.ValidatorsRegistry;

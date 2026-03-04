@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { useCollator, useFilter } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
+import { useCTBTracking } from '../CTBSession/ctbSession';
 import { useDataManager } from '../DataManager/useDataManager';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
@@ -45,7 +45,7 @@ type Menu = MenuSection[];
 export const useContentTypeBuilderMenu = () => {
   const { componentsGroupedByCategory, isInDevelopmentMode, sortedContentTypesList } =
     useDataManager();
-  const { trackUsage } = useTracking();
+  const { trackUsage } = useCTBTracking();
   const [searchValue, setSearchValue] = useState('');
   const { onOpenModalCreateSchema } = useFormModalNavigation();
   const { locale } = useIntl();

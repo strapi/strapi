@@ -145,6 +145,7 @@ export const SingleSignOnPage = () => {
                     loading={isSubmitting}
                     startIcon={<Check />}
                     type="submit"
+                    fullWidth
                   >
                     {formatMessage({
                       id: 'global.save',
