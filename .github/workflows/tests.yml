@@ -176,7 +176,7 @@ jobs:
         run: yarn nx affected --target=test:unit --nx-ignore-cycles -- --coverage
 
       - name: Upload coverage artifacts
-        if: matrix.node == 20 # Only upload from one node version to avoid conflicts
+        if: matrix.node == 24 # Only upload from one node version to avoid conflicts
         uses: actions/upload-artifact@v4
         with:
           name: unit-coverage-reports
