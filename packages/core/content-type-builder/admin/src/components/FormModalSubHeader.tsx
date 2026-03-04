@@ -5,10 +5,10 @@ import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils';
 
-import type { SchemaType } from '../types';
+import type { Struct } from '@strapi/types';
 
 type ModalTitleProps = {
-  forTarget?: SchemaType;
+  forTarget?: Struct.ModelType;
   step?: string;
   kind?: string;
   modalType?: string;
@@ -49,7 +49,7 @@ export const getModalTitleSubHeader = ({
 type FormModalSubHeaderProps = {
   actionType: string;
   modalType: string;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   kind?: string;
   step?: string;
   attributeType: string;

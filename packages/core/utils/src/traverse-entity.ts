@@ -3,6 +3,23 @@ import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
 import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
+/**
+ * Execute promises in parallel but throw errors in array index order.
+ */
+const parallelWithOrderedErrors = async <T>(promises: Promise<T>[]): Promise<T[]> => {
+  const results = await Promise.allSettled(promises);
+
+  // Throw first error in array index order (matches sequential behavior)
+  for (let i = 0; i < results.length; i += 1) {
+    const result = results[i];
+    if (result.status === 'rejected') {
+      throw result.reason;
+    }
+  }
+
+  return results.map((r) => (r as PromiseFulfilledResult<T>).value);
+};
+
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
 
 export interface VisitorOptions {
@@ -14,6 +31,8 @@ export interface VisitorOptions {
   path: Path;
   getModel(uid: string): Model;
   parent?: Parent;
+  /** Extra root-level keys allowed (e.g. registered input params). Only used when path.attribute === null. */
+  allowedExtraRootKeys?: string[];
 }
 
 export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtils) => void;
@@ -21,6 +40,7 @@ export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtil
 export interface Path {
   raw: string | null;
   attribute: string | null;
+  rawWithIndices?: string | null;
 }
 
 export interface TraverseOptions {
@@ -28,6 +48,8 @@ export interface TraverseOptions {
   path?: Path;
   parent?: Parent;
   getModel(uid: string): Model;
+  /** Extra root-level keys allowed (e.g. registered input params). Only used when path.attribute === null. */
+  allowedExtraRootKeys?: string[];
 }
 
 export interface Parent {
@@ -38,21 +60,38 @@ export interface Parent {
 }
 
 const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
-  const { path = { raw: null, attribute: null }, schema, getModel } = options;
+  const {
+    path = { raw: null, attribute: null, rawWithIndices: null },
+    schema,
+    getModel,
+    allowedExtraRootKeys,
+  } = options;
 
   let parent = options.parent;
 
   const traverseMorphRelationTarget = async (visitor: Visitor, path: Path, entry: Data) => {
     const targetSchema = getModel(entry.__type!);
 
-    const traverseOptions: TraverseOptions = { schema: targetSchema, path, getModel, parent };
+    const traverseOptions: TraverseOptions = {
+      schema: targetSchema,
+      path,
+      getModel,
+      parent,
+      allowedExtraRootKeys,
+    };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
   const traverseRelationTarget =
     (schema: Model) => async (visitor: Visitor, path: Path, entry: Data) => {
-      const traverseOptions: TraverseOptions = { schema, path, getModel, parent };
+      const traverseOptions: TraverseOptions = {
+        schema,
+        path,
+        getModel,
+        parent,
+        allowedExtraRootKeys,
+      };
 
       return traverseEntity(visitor, traverseOptions, entry);
     };
@@ -61,20 +100,38 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     const targetSchemaUID = 'plugin::upload.file';
     const targetSchema = getModel(targetSchemaUID);
 
-    const traverseOptions: TraverseOptions = { schema: targetSchema, path, getModel, parent };
+    const traverseOptions: TraverseOptions = {
+      schema: targetSchema,
+      path,
+      getModel,
+      parent,
+      allowedExtraRootKeys,
+    };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
   const traverseComponent = async (visitor: Visitor, path: Path, schema: Model, entry: Data) => {
-    const traverseOptions: TraverseOptions = { schema, path, getModel, parent };
+    const traverseOptions: TraverseOptions = {
+      schema,
+      path,
+      getModel,
+      parent,
+      allowedExtraRootKeys,
+    };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
   const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) => {
     const targetSchema = getModel(entry.__component!);
-    const traverseOptions: TraverseOptions = { schema: targetSchema, path, getModel, parent };
+    const traverseOptions: TraverseOptions = {
+      schema: targetSchema,
+      path,
+      getModel,
+      parent,
+      allowedExtraRootKeys,
+    };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
@@ -98,6 +155,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     const newPath = { ...path };
 
     newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
+    newPath.rawWithIndices = isNil(path.rawWithIndices) ? key : `${path.rawWithIndices}.${key}`;
 
     if (!isNil(attribute)) {
       newPath.attribute = isNil(path.attribute) ? key : `${path.attribute}.${key}`;
@@ -113,6 +171,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       path: newPath,
       getModel,
       parent,
+      allowedExtraRootKeys,
     };
 
     await visitor(visitorOptions, visitorUtils);
@@ -125,10 +184,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       continue;
     }
 
-    // The current attribute becomes the parent once visited
-    parent = { schema, key, attribute, path: newPath };
-
     if (isRelationalAttribute(attribute)) {
+      parent = { schema, key, attribute, path: newPath };
       const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
 
       const method = isMorphRelation
@@ -136,11 +193,18 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
         : traverseRelationTarget(getModel(attribute.target!));
 
       if (isArray(value)) {
-        const res = new Array(value.length);
-        for (let i = 0; i < value.length; i += 1) {
-          res[i] = await method(visitor, newPath, value[i]);
-        }
-        copy[key] = res;
+        // Process array items in parallel with ordered error handling
+        copy[key] = await parallelWithOrderedErrors(
+          value.map((item, i) => {
+            const arrayPath = {
+              ...newPath,
+              rawWithIndices: isNil(newPath.rawWithIndices)
+                ? `${i}`
+                : `${newPath.rawWithIndices}.${i}`,
+            };
+            return method(visitor, arrayPath, item);
+          })
+        );
       } else {
         copy[key] = await method(visitor, newPath, value as Data);
       }
@@ -149,13 +213,21 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (isMediaAttribute(attribute)) {
-      // need to update copy
+      parent = { schema, key, attribute, path: newPath };
+
       if (isArray(value)) {
-        const res = new Array(value.length);
-        for (let i = 0; i < value.length; i += 1) {
-          res[i] = await traverseMediaTarget(visitor, newPath, value[i]);
-        }
-        copy[key] = res;
+        // Process media array items in parallel with ordered error handling
+        copy[key] = await parallelWithOrderedErrors(
+          value.map((item, i) => {
+            const arrayPath = {
+              ...newPath,
+              rawWithIndices: isNil(newPath.rawWithIndices)
+                ? `${i}`
+                : `${newPath.rawWithIndices}.${i}`,
+            };
+            return traverseMediaTarget(visitor, arrayPath, item);
+          })
+        );
       } else {
         copy[key] = await traverseMediaTarget(visitor, newPath, value as Data);
       }
@@ -164,14 +236,22 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (attribute.type === 'component') {
+      parent = { schema, key, attribute, path: newPath };
       const targetSchema = getModel(attribute.component);
 
       if (isArray(value)) {
-        const res: Data[] = new Array(value.length);
-        for (let i = 0; i < value.length; i += 1) {
-          res[i] = await traverseComponent(visitor, newPath, targetSchema, value[i]);
-        }
-        copy[key] = res;
+        // Process component array items in parallel with ordered error handling
+        copy[key] = await parallelWithOrderedErrors(
+          value.map((item, i) => {
+            const arrayPath = {
+              ...newPath,
+              rawWithIndices: isNil(newPath.rawWithIndices)
+                ? `${i}`
+                : `${newPath.rawWithIndices}.${i}`,
+            };
+            return traverseComponent(visitor, arrayPath, targetSchema, item);
+          })
+        );
       } else {
         copy[key] = await traverseComponent(visitor, newPath, targetSchema, value as Data);
       }
@@ -180,11 +260,20 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (attribute.type === 'dynamiczone' && isArray(value)) {
-      const res = new Array(value.length);
-      for (let i = 0; i < value.length; i += 1) {
-        res[i] = await visitDynamicZoneEntry(visitor, newPath, value[i]);
-      }
-      copy[key] = res;
+      parent = { schema, key, attribute, path: newPath };
+
+      // Process dynamic zone items in parallel with ordered error handling
+      copy[key] = await parallelWithOrderedErrors(
+        value.map((item, i) => {
+          const arrayPath = {
+            ...newPath,
+            rawWithIndices: isNil(newPath.rawWithIndices)
+              ? `${i}`
+              : `${newPath.rawWithIndices}.${i}`,
+          };
+          return visitDynamicZoneEntry(visitor, arrayPath, item);
+        })
+      );
 
       continue;
     }

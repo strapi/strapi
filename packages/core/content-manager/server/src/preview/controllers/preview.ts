@@ -30,7 +30,7 @@ const createPreviewController = () => {
       }
 
       return {
-        data: { url },
+        data: { url: url || undefined },
       } satisfies Preview.GetPreviewUrl.Response;
     },
   } satisfies Core.Controller;

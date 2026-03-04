@@ -3,8 +3,6 @@ import { contentTypes } from '@strapi/utils';
 
 import { omit, castArray } from 'lodash/fp';
 
-import { scheduleJob } from 'node-schedule';
-
 import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 
@@ -93,14 +91,13 @@ const getSchemas = (uid: UID.CollectionType) => {
 
 const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
   const state: {
-    deleteExpiredJob: ReturnType<typeof scheduleJob> | null;
     isInitialized: boolean;
   } = {
-    deleteExpiredJob: null,
     isInitialized: false,
   };
 
   const serviceUtils = createServiceUtils({ strapi });
+  const { persistTablesWithPrefix } = strapi.service('admin::persist-tables');
 
   return {
     async bootstrap() {
@@ -108,6 +105,9 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (state.isInitialized) {
         return;
       }
+
+      // Avoid data loss in case users temporarily don't have a license
+      await persistTablesWithPrefix('strapi_history_versions');
 
       strapi.documents.use(async (context, next) => {
         const result = (await next()) as any;
@@ -172,33 +172,55 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       // Schedule a job to delete expired history versions every day at midnight
-      state.deleteExpiredJob = scheduleJob('historyDaily', '0 0 * * *', () => {
-        const retentionDaysInMilliseconds = serviceUtils.getRetentionDays() * 24 * 60 * 60 * 1000;
-        const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
+      strapi.cron.add({
+        deleteHistoryDaily: {
+          async task() {
+            const BATCH_SIZE = 1000;
 
-        strapi.db
-          .query(HISTORY_VERSION_UID)
-          .deleteMany({
-            where: {
-              created_at: {
-                $lt: expirationDate,
-              },
-            },
-          })
-          .catch((error) => {
-            if (error instanceof Error) {
-              strapi.log.error('Error deleting expired history versions', error.message);
-            }
-          });
+            const retentionDaysInMilliseconds =
+              serviceUtils.getRetentionDays() * 24 * 60 * 60 * 1000;
+            const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
+
+            // Delete in batches of 1000 to avoid a single query that
+            // exhausts the DB connection pool and blocks other operations.
+            let deleted: number;
+            do {
+              // Fetch up to BATCH_SIZE expired IDs
+              const expiredVersions = await strapi.db.query(HISTORY_VERSION_UID).findMany({
+                select: ['id'],
+                where: {
+                  created_at: {
+                    $lt: expirationDate,
+                  },
+                },
+                limit: BATCH_SIZE,
+              });
+
+              const ids = expiredVersions.map((v: { id: number | string }) => v.id);
+              deleted = ids.length;
+
+              // Delete this batch by ID
+              if (deleted > 0) {
+                await strapi.db.query(HISTORY_VERSION_UID).deleteMany({
+                  where: {
+                    id: { $in: ids },
+                  },
+                });
+              }
+
+              // If we got a full batch, there are likely more rows to delete — loop again.
+              // If we got fewer, we've handled everything and can stop.
+            } while (deleted >= BATCH_SIZE);
+          },
+          options: '0 0 * * *',
+        },
       });
 
       state.isInitialized = true;
     },
 
     async destroy() {
-      if (state.deleteExpiredJob) {
-        state.deleteExpiredJob.cancel();
-      }
+      strapi.cron.remove('deleteHistoryDaily');
     },
   };
 };

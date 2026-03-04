@@ -114,7 +114,7 @@ const Settings = () => {
       <Grid.Root key="bottom" gap={4}>
         {formLayout.map((row) =>
           row.map(({ size, ...field }) => (
-            <Grid.Item key={field.name} s={12} col={size} direction="column" alignItems="stretch">
+            <Grid.Item key={field.name} xs={12} col={size} direction="column" alignItems="stretch">
               {/* @ts-expect-error – issue with EnumerationProps conflicting with InputProps */}
               <InputRenderer {...field} />
             </Grid.Item>

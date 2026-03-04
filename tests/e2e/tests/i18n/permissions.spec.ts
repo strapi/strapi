@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
-import { waitForRestart } from '../../utils/restart';
-import { resetFiles } from '../../utils/file-reset';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import { waitForRestart } from '../../../utils/restart';
+import { resetFiles } from '../../../utils/file-reset';
 
 test.describe('Locale Permissions', () => {
   test.describe.configure({ timeout: 500000 });
@@ -49,7 +49,7 @@ test.describe('Locale Permissions', () => {
     // header is behind the permissions component.
     await page.evaluate(() => window.scrollTo(0, 0));
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Logout and login as editor
@@ -72,7 +72,7 @@ test.describe('Locale Permissions', () => {
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }));
     await page.getByLabel('title').fill('the richmond way');
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Verify we cannot create a new entry in the french locale as editors do
@@ -92,7 +92,7 @@ test.describe('Locale Permissions', () => {
     await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }));
     await page.getByLabel('title').fill('trent crimm');
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Create a Spanish (es) locale for the entry
@@ -101,7 +101,7 @@ test.describe('Locale Permissions', () => {
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
     await page.getByLabel('title').fill('dani rojas');
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Delete the Spanish (es) locale entry
@@ -109,7 +109,7 @@ test.describe('Locale Permissions', () => {
     await clickAndWait(page, page.getByRole('button', { name: 'More actions' }));
     await clickAndWait(page, page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }));
     await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
-    await findAndClose(page, 'Success:Deleted');
+    await findAndClose(page, 'Deleted');
 
     /**
      * Navigate to our homepage single-type and create a new entry
@@ -117,7 +117,7 @@ test.describe('Locale Permissions', () => {
     await navToHeader(page, ['Content Manager', 'Homepage'], 'Homepage');
     await page.getByLabel('title').fill('football is life');
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Create a Spanish (es) locale for the homepage entry
@@ -126,7 +126,7 @@ test.describe('Locale Permissions', () => {
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
     await page.getByLabel('title').fill('el fútbol también es muerte.');
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Success:Saved');
+    await findAndClose(page, 'Saved');
 
     /**
      * Delete the Spanish (es) locale homepage entry
@@ -134,6 +134,6 @@ test.describe('Locale Permissions', () => {
     await clickAndWait(page, page.getByRole('button', { name: 'More actions' }));
     await clickAndWait(page, page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }));
     await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
-    await findAndClose(page, 'Success:Deleted');
+    await findAndClose(page, 'Deleted');
   });
 });

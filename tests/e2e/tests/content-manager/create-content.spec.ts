@@ -5,10 +5,10 @@ import {
   findAndClose,
   isElementBefore,
   navToHeader,
-} from '../../utils/shared';
-import { createContent, FieldValue, verifyFields } from '../../utils/content-creation';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
+} from '../../../utils/shared';
+import { createContent, FieldValue, verifyFields } from '../../../utils/content-creation';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
 
 test.describe('Adding content', () => {
   test.beforeEach(async ({ page }) => {
@@ -235,7 +235,7 @@ test.describe('Adding content', () => {
   for (const { description, fields, expectedError } of testCases) {
     test(`when I publish ${description} I see an error`, async ({ page }) => {
       await createContent(page, 'Match', fields, { save: false, publish: true, verify: false });
-      expect(page.getByText(expectedError).first()).toBeVisible();
+      await expect(page.getByText(expectedError).first()).toBeVisible();
     });
   }
 });

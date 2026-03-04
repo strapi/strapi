@@ -1,14 +1,16 @@
 // TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton } from '@strapi/design-system';
-import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
+import { Crop as Resize, Download as DownloadIcon, Trash, PinMap } from '@strapi/icons';
+import cropperjscss from 'cropperjs/dist/cropper.css?raw';
 import { useIntl } from 'react-intl';
+import { createGlobalStyle } from 'styled-components';
 
-import { AssetType } from '../../../constants';
+import { AssetType } from '../../../enums';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
+import { useTracking } from '../../../hooks/useTracking';
 import { useUpload } from '../../../hooks/useUpload';
 import { createAssetUrl, getTrad, downloadFile } from '../../../utils';
 import { CopyLinkButton } from '../../CopyLinkButton/CopyLinkButton';
@@ -17,17 +19,23 @@ import { RemoveAssetDialog } from '../RemoveAssetDialog';
 
 import { AssetPreview } from './AssetPreview';
 import { CroppingActions } from './CroppingActions';
+import { FocalPointActions } from './FocalPointActions';
 import {
   ActionRow,
   BadgeOverride,
   RelativeBox,
   UploadProgressWrapper,
   Wrapper,
+  FocalPointImageWrapper,
+  FocalPointAim,
+  FocalPointHalo,
 } from './PreviewComponents';
 
-import type { File as FileDefinition, RawFile } from '../../../../../shared/contracts/files';
-
-import 'cropperjs/dist/cropper.css';
+import type {
+  File as FileDefinition,
+  RawFile,
+  FocalPoint,
+} from '../../../../../shared/contracts/files';
 
 interface Asset extends Omit<FileDefinition, 'folder'> {
   isLocal?: boolean;
@@ -46,6 +54,10 @@ interface PreviewBoxProps {
   onCropStart: () => void;
   onCropCancel: () => void;
   trackedLocation?: string;
+  formFocalPoint?: FocalPoint | null;
+  onFocalPointStart: () => void;
+  onFocalPointFinish: (focalPoint: FocalPoint) => void;
+  onFocalPointCancel: () => void;
 }
 
 export const PreviewBox = ({
@@ -59,7 +71,12 @@ export const PreviewBox = ({
   onCropCancel,
   replacementFile,
   trackedLocation,
+  formFocalPoint,
+  onFocalPointStart,
+  onFocalPointFinish,
+  onFocalPointCancel,
 }: PreviewBoxProps) => {
+  const CropperjsStyle = createGlobalStyle`${cropperjscss}`;
   const { trackUsage } = useTracking();
   const previewRef = React.useRef(null);
   const [isCropImageReady, setIsCropImageReady] = React.useState(false);
@@ -71,6 +88,10 @@ export const PreviewBox = ({
   const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height } =
     useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
+  const [isInFocalPointMode, setIsInFocalPointMode] = React.useState<boolean>(false);
+  const [focalPoint, setFocalPoint] = React.useState<FocalPoint>(
+    formFocalPoint ?? { x: 50, y: 50 }
+  );
 
   const {
     upload,
@@ -164,14 +185,60 @@ export const PreviewBox = ({
     setHasCropIntent(true);
   };
 
+  const calculateFocalPointFromEvent = (e: React.MouseEvent<HTMLElement>): FocalPoint => {
+    const { clientX, clientY } = e;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const posX = clientX - rect.left;
+    const posY = clientY - rect.top;
+
+    return {
+      x: Number(((posX / rect.width) * 100).toFixed(2)),
+      y: Number(((posY / rect.height) * 100).toFixed(2)),
+    };
+  };
+
+  const handleFocalPointClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (!isInFocalPointMode) return;
+    setFocalPoint(calculateFocalPointFromEvent(e));
+  };
+
+  const handleFocalPointCancel = () => {
+    setIsInFocalPointMode(false);
+    setFocalPoint(formFocalPoint ?? { x: 50, y: 50 });
+    onFocalPointCancel();
+  };
+
+  const handleFocalPointStart = () => {
+    onFocalPointStart();
+    setIsInFocalPointMode(true);
+  };
+
+  const handleFocalPointValidate = () => {
+    setIsInFocalPointMode(false);
+    onFocalPointFinish(focalPoint);
+  };
+
+  const handleFocalPointReset = () => {
+    setFocalPoint({ x: 50, y: 50 });
+  };
+
   return (
     <>
+      <CropperjsStyle />
       <RelativeBox hasRadius background="neutral150" borderColor="neutral200">
         {isCropperReady && isInCroppingMode && (
           <CroppingActions
             onValidate={handleCropping}
             onDuplicate={asset.isLocal ? undefined : handleDuplication}
             onCancel={handleCropCancel}
+          />
+        )}
+
+        {isInFocalPointMode && (
+          <FocalPointActions
+            onValidate={handleFocalPointValidate}
+            onCancel={handleFocalPointCancel}
+            onReset={handleFocalPointReset}
           />
         )}
 
@@ -211,6 +278,18 @@ export const PreviewBox = ({
                 <Resize />
               </IconButton>
             )}
+
+            {canUpdate && asset.mime?.includes(AssetType.Image) && (
+              <IconButton
+                label={formatMessage({
+                  id: getTrad('control-card.set-focal-point'),
+                  defaultMessage: 'Set focal point',
+                })}
+                onClick={handleFocalPointStart}
+              >
+                <PinMap />
+              </IconButton>
+            )}
           </Flex>
         </ActionRow>
 
@@ -233,28 +312,44 @@ export const PreviewBox = ({
             </UploadProgressWrapper>
           )}
 
-          <AssetPreview
-            ref={previewRef}
-            mime={asset.mime!}
-            name={asset.name}
-            url={hasCropIntent ? assetUrl! : thumbnailUrl!}
-            onLoad={() => {
-              if (asset.isLocal || hasCropIntent) {
-                setIsCropImageReady(true);
-              }
-            }}
-          />
+          <FocalPointImageWrapper>
+            <AssetPreview
+              ref={previewRef}
+              mime={asset.mime!}
+              name={asset.name}
+              url={hasCropIntent ? assetUrl! : thumbnailUrl!}
+              onLoad={() => {
+                if (asset.isLocal || hasCropIntent) {
+                  setIsCropImageReady(true);
+                }
+              }}
+              onClick={handleFocalPointClick}
+              style={{ cursor: isInFocalPointMode ? 'crosshair' : undefined }}
+            />
+
+            {/* Show the set focal point marker */}
+            {isInFocalPointMode && (
+              <FocalPointAim $focalPoint={focalPoint}>
+                <FocalPointHalo />
+              </FocalPointAim>
+            )}
+          </FocalPointImageWrapper>
         </Wrapper>
 
         <ActionRow
           paddingLeft={2}
           paddingRight={2}
           justifyContent="flex-end"
-          $blurry={isInCroppingMode}
+          $blurry={isInCroppingMode || isInFocalPointMode}
         >
           {isInCroppingMode && width && height && (
             <BadgeOverride background="neutral900" color="neutral0">
               {width && height ? `${height}✕${width}` : 'N/A'}
+            </BadgeOverride>
+          )}
+          {isInFocalPointMode && (
+            <BadgeOverride background="neutral900" color="neutral0">
+              {`x: ${focalPoint.x}% | y: ${focalPoint.y}%`}
             </BadgeOverride>
           )}
         </ActionRow>
@@ -262,9 +357,11 @@ export const PreviewBox = ({
 
       <RemoveAssetDialog
         open={showConfirmDialog}
-        onClose={() => {
+        onClose={(value) => {
           setShowConfirmDialog(false);
-          onDelete(null);
+          if (value === null) {
+            onDelete(null);
+          }
         }}
         asset={asset}
       />

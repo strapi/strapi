@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Form, Layouts } from '@strapi/admin/strapi-admin';
+import { Form, Layouts, useForm, createRulesEngine, useIsMobile } from '@strapi/admin/strapi-admin';
 import { Box, Divider, Flex, Grid, Typography } from '@strapi/design-system';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
@@ -103,13 +103,24 @@ function getRemaingFieldsLayout({
  * -----------------------------------------------------------------------------------------------*/
 
 const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
+  const isMobile = useIsMobile();
+  const fieldValues = useForm('Fields', (state) => state.values);
+  const rulesEngine = createRulesEngine();
   if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
     const [row] = panel;
     const [field] = row;
+    const condition = field.attribute?.conditions?.visible;
+
+    if (condition) {
+      const isVisible = rulesEngine.evaluate(condition, fieldValues);
+      if (!isVisible) {
+        return null; // Skip rendering the dynamic zone if the condition is not met
+      }
+    }
 
     return (
       <Grid.Root key={field.name} gap={4}>
-        <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
+        <Grid.Item xs={12} direction="column" alignItems="stretch">
           <VersionInputRenderer {...field} />
         </Grid.Item>
       </Grid.Root>
@@ -118,34 +129,46 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
 
   return (
     <Box
-      hasRadius
-      background="neutral0"
-      shadow="tableShadow"
-      paddingLeft={6}
-      paddingRight={6}
-      paddingTop={6}
-      paddingBottom={6}
-      borderColor="neutral150"
+      hasRadius={!isMobile}
+      background={{ initial: 'transparent', medium: 'neutral0' }}
+      shadow={{ initial: 'none', medium: 'tableShadow' }}
+      padding={{ initial: 0, medium: 6 }}
+      borderColor={{ initial: 'transparent', medium: 'neutral150' }}
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
-        {panel.map((row, gridRowIndex) => (
-          <Grid.Root key={gridRowIndex} gap={4}>
-            {row.map(({ size, ...field }) => {
-              return (
-                <Grid.Item
-                  col={size}
-                  key={field.name}
-                  s={12}
-                  xs={12}
-                  direction="column"
-                  alignItems="stretch"
-                >
-                  <VersionInputRenderer {...field} />
-                </Grid.Item>
-              );
-            })}
-          </Grid.Root>
-        ))}
+        {panel.map((row, gridRowIndex) => {
+          const visibleFields = row.filter((field) => {
+            const condition = field.attribute?.conditions?.visible;
+
+            if (condition) {
+              return rulesEngine.evaluate(condition, fieldValues);
+            }
+
+            return true;
+          });
+
+          if (visibleFields.length === 0) {
+            return null; // Skip rendering the entire grid row
+          }
+
+          return (
+            <Grid.Root key={gridRowIndex} gap={{ initial: 6, medium: 4 }}>
+              {visibleFields.map(({ size, ...field }) => {
+                return (
+                  <Grid.Item
+                    col={size}
+                    key={field.name}
+                    xs={12}
+                    direction="column"
+                    alignItems="stretch"
+                  >
+                    <VersionInputRenderer {...field} />
+                  </Grid.Item>
+                );
+              })}
+            </Grid.Root>
+          );
+        })}
       </Flex>
     </Box>
   );
@@ -217,53 +240,65 @@ const VersionContent = () => {
 
   return (
     <Layouts.Content>
-      <Box paddingBottom={8}>
-        <Form disabled={true} method="PUT" initialValues={transformedData}>
+      <Box paddingBottom={{ initial: 0, large: 8 }}>
+        <Form key={version.id} disabled={true} method="PUT" initialValues={transformedData}>
           <Flex direction="column" alignItems="stretch" gap={6} position="relative">
             {[...layout, ...remainingFieldsLayout].map((panel, index) => {
               return <FormPanel key={index} panel={panel} />;
             })}
           </Flex>
         </Form>
-      </Box>
-      {removedAttributesAsFields.length > 0 && (
-        <>
-          <Divider />
-          <Box paddingTop={8}>
-            <Flex direction="column" alignItems="flex-start" paddingBottom={6} gap={1}>
-              <Typography variant="delta">
-                {formatMessage({
-                  id: 'content-manager.history.content.unknown-fields.title',
-                  defaultMessage: 'Unknown fields',
-                })}
-              </Typography>
-              <Typography variant="pi">
-                {formatMessage(
-                  {
-                    id: 'content-manager.history.content.unknown-fields.message',
-                    defaultMessage:
-                      'These fields have been deleted or renamed in the Content-Type Builder. <b>These fields will not be restored.</b>',
-                  },
-                  {
-                    b: (chunks: React.ReactNode) => (
-                      <Typography variant="pi" fontWeight="bold">
-                        {chunks}
-                      </Typography>
-                    ),
-                  }
-                )}
-              </Typography>
-            </Flex>
-            <Form disabled={true} method="PUT" initialValues={version.data}>
-              <Flex direction="column" alignItems="stretch" gap={6} position="relative">
-                {unknownFieldsLayout.map((panel, index) => {
-                  return <FormPanel key={index} panel={panel} />;
-                })}
+        {removedAttributesAsFields.length > 0 && (
+          <>
+            <Box paddingTop={{ initial: 4, large: 0 }}>
+              <Divider />
+            </Box>
+            <Box paddingTop={{ initial: 4, large: 8 }}>
+              <Flex
+                direction="column"
+                alignItems="flex-start"
+                paddingBottom={{ initial: 4, large: 6 }}
+                gap={1}
+              >
+                <Typography variant="delta">
+                  {formatMessage({
+                    id: 'content-manager.history.content.unknown-fields.title',
+                    defaultMessage: 'Unknown fields',
+                  })}
+                </Typography>
+                <Typography variant="pi">
+                  {formatMessage(
+                    {
+                      id: 'content-manager.history.content.unknown-fields.message',
+                      defaultMessage:
+                        'These fields have been deleted or renamed in the Content-Type Builder. <b>These fields will not be restored.</b>',
+                    },
+                    {
+                      b: (chunks: React.ReactNode) => (
+                        <Typography variant="pi" fontWeight="bold">
+                          {chunks}
+                        </Typography>
+                      ),
+                    }
+                  )}
+                </Typography>
               </Flex>
-            </Form>
-          </Box>
-        </>
-      )}
+              <Form
+                key={`${version.id}-unknownFields`}
+                disabled={true}
+                method="PUT"
+                initialValues={version.data}
+              >
+                <Flex direction="column" alignItems="stretch" gap={6} position="relative">
+                  {unknownFieldsLayout.map((panel, index) => {
+                    return <FormPanel key={index} panel={panel} />;
+                  })}
+                </Flex>
+              </Form>
+            </Box>
+          </>
+        )}
+      </Box>
     </Layouts.Content>
   );
 };

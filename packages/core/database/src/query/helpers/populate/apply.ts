@@ -671,6 +671,28 @@ const pickPopulateParams = (populate: Record<string, unknown>) => {
   return _.pick(fieldsToPick, populate);
 };
 
+const getPopulateValue = (populate: Record<string, any>, filters: Record<string, any>) => {
+  const populateValue = {
+    filters,
+    ...pickPopulateParams(populate),
+  };
+
+  if ('on' in populateValue) {
+    populateValue.on = _.mapValues(
+      (value) => {
+        if (_.isPlainObject(value)) {
+          value.filters = filters;
+        }
+
+        return value;
+      },
+      populateValue.on as Record<string, any>
+    );
+  }
+
+  return populateValue;
+};
+
 const applyPopulate = async (results: Row[], populate: Record<string, any>, ctx: Context) => {
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
@@ -686,10 +708,7 @@ const applyPopulate = async (results: Row[], populate: Record<string, any>, ctx:
       throw new Error(`Invalid populate attribute ${attributeName}`);
     }
 
-    const populateValue = {
-      filters: qb.state.filters,
-      ...pickPopulateParams(populate[attributeName]),
-    };
+    const populateValue = getPopulateValue(populate[attributeName], qb.state.filters);
 
     const isCount = 'count' in populateValue && populateValue.count === true;
 

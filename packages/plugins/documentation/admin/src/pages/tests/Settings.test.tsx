@@ -4,6 +4,13 @@ import { rest } from 'msw';
 import { server } from '../../../../tests/server';
 import { SettingsPage } from '../Settings';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 describe('SettingsPage', () => {
   it('renders the setting page correctly', async () => {
     const { getByRole, queryByText, getByText } = render(<SettingsPage />);

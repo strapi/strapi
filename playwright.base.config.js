@@ -37,9 +37,13 @@ const getEnvBool = (envVar, defaultValue) => {
  */
 const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
   testDir,
+  testMatch: '*.spec.ts',
 
   /* default timeout for a jest test */
   timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
+
+  /* Global setup to set localStorage for all tests */
+  globalSetup: require.resolve('./tests/utils/global-setup.ts'),
 
   expect: {
     /**
@@ -91,6 +95,9 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
           },
         }
       : 'off',
+
+    /* Use the storage state with localStorage set globally */
+    storageState: './tests/e2e/playwright-storage-state.json',
   },
 
   /* Configure projects for major browsers */
@@ -99,6 +106,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        permissions: ['clipboard-read', 'clipboard-write'],
       },
     },
 
@@ -106,6 +114,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
+        // Firefox doesn't need clipboard permissions for secure sites
       },
     },
 
@@ -113,6 +122,7 @@ const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
+        permissions: ['clipboard-read'],
       },
     },
   ],

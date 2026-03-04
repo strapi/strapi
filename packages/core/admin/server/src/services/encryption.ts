@@ -1,12 +1,14 @@
 import crypto from 'crypto';
+import type { Core } from '@strapi/types';
 
 const IV_LENGTH = 16; // 16 bytes for AES-GCM IV
 const ENCRYPTION_VERSION = 'v1';
 
 const getHashedKey = (): Buffer | null => {
-  const rawKey: string = strapi.config.get('admin.secrets.encryptionKey');
+  const secrets = strapi.config.get<Core.Config.Admin['secrets']>('admin.secrets');
+  const rawKey: string | undefined = secrets?.encryptionKey;
   if (!rawKey) {
-    strapi.log.warn('Encryption key is missing from config');
+    strapi.log.warn('Encryption key is missing from admin.secrets.encryptionKey configuration');
     return null;
   }
 

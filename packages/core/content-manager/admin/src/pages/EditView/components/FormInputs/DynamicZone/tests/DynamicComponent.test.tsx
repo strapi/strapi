@@ -15,6 +15,11 @@ jest.mock('../../../InputRenderer', () => ({
   InputRenderer: () => 'INPUTS',
 }));
 
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useIsDesktop: jest.fn().mockReturnValue(true),
+}));
+
 describe('DynamicComponent', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -35,6 +40,7 @@ describe('DynamicComponent', () => {
         },
       ],
     },
+    totalLength: 1,
   } satisfies DynamicComponentProps;
 
   interface TestComponentProps extends Partial<DynamicComponentProps> {

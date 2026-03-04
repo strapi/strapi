@@ -18,6 +18,7 @@ import {
   useField,
 } from '../../../../../../admin/src/components/Form';
 import { InputRenderer } from '../../../../../../admin/src/components/FormInputs/Renderer';
+import { GradientBadge } from '../../../../../../admin/src/components/GradientBadge';
 import { Layouts } from '../../../../../../admin/src/components/Layouts/Layout';
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
@@ -112,7 +113,7 @@ export const SingleSignOnPage = () => {
   const isLoadingData = isLoadingRoles || isLoadingPermissions || isLoadingProviderOptions;
 
   return (
-    <Layouts.Root>
+    <>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -144,6 +145,7 @@ export const SingleSignOnPage = () => {
                     loading={isSubmitting}
                     startIcon={<Check />}
                     type="submit"
+                    fullWidth
                   >
                     {formatMessage({
                       id: 'global.save',
@@ -159,6 +161,14 @@ export const SingleSignOnPage = () => {
                   id: 'Settings.sso.description',
                   defaultMessage: 'Configure the settings for the Single Sign-On feature.',
                 })}
+                secondaryAction={
+                  <GradientBadge
+                    label={formatMessage({
+                      id: 'components.premiumFeature.title',
+                      defaultMessage: 'Premium feature',
+                    })}
+                  />
+                }
               />
               <Layouts.Content>
                 {isSubmitting || isLoadingData ? (
@@ -242,6 +252,7 @@ export const SingleSignOnPage = () => {
                         <Grid.Item
                           key={field.name}
                           col={size}
+                          xs={12}
                           direction="column"
                           alignItems="stretch"
                         >
@@ -256,7 +267,7 @@ export const SingleSignOnPage = () => {
           )}
         </Form>
       </Page.Main>
-    </Layouts.Root>
+    </>
   );
 };
 
