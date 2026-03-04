@@ -71,13 +71,7 @@ yarn create strapi my-project
 **npx**
 
 ```bash
-npx create-strapi@latest my-project
-```
-
-**pnpm**
-
-```bash
-pnpm create strapi@latest my-project
+npx create-strapi my-project
 ```
 
 This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
@@ -157,7 +151,7 @@ See our dedicated [repository](https://github.com/strapi/documentation) for the 
 
 ## Security
 
-If you discover a security issue, please report it responsibly. See our [Security Policy](https://github.com/strapi/strapi/blob/develop/SECURITY.md) for our disclosure process and contact info.
+If you discover a security issue, please report it responsibly. See our [Security Policy](https://github.com/strapi/strapi/blob/main/SECURITY.md) for our disclosure process and contact info.
 
 ## About Strapi
 
@@ -168,9 +162,7 @@ If you discover a security issue, please report it responsibly. See our [Securit
 
 ## Support Strapi
 
-If Strapi is useful to you, give us a star:
-
-- **[Star us on GitHub](https://github.com/strapi/strapi)**: It helps more than you think!
+If Strapi is useful to you, give us a star. It helps more than you think!
 
 ## Thanks to All Contributors
 
