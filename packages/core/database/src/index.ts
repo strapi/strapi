@@ -16,6 +16,8 @@ import type { Model, JoinTable } from './types';
 import type { Identifiers } from './utils/identifiers';
 import { createRepairManager, type RepairManager } from './repairs';
 
+export type { Event } from './lifecycles';
+
 export { isKnexQuery } from './utils/knex';
 
 interface Settings {
