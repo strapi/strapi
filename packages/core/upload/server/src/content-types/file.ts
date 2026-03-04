@@ -27,11 +27,15 @@ export default {
         required: true,
       },
       alternativeText: {
-        type: 'string',
+        type: 'text',
         configurable: false,
       },
       caption: {
-        type: 'string',
+        type: 'text',
+        configurable: false,
+      },
+      focalPoint: {
+        type: 'json',
         configurable: false,
       },
       width: {
@@ -66,12 +70,12 @@ export default {
         required: true,
       },
       url: {
-        type: 'string',
+        type: 'text',
         configurable: false,
         required: true,
       },
       previewUrl: {
-        type: 'string',
+        type: 'text',
         configurable: false,
       },
       provider: {

@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { Box, Divider, Flex, FlexComponent, useCollator } from '@strapi/design-system';
+import { Box, Divider, Flex, FlexComponent, IconButton, useCollator } from '@strapi/design-system';
 import { Cross, List } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useTracking } from '../features/Tracking';
+import { useIsDesktop } from '../hooks/useMediaQuery';
 import { Menu, MenuItem, MobileMenuItem } from '../hooks/useMenu';
 
 import { MainNav } from './MainNav/MainNav';
@@ -73,6 +74,7 @@ const LeftMenu = ({
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
+  const isDesktop = useIsDesktop();
 
   const handleClickOnLink = (destination: string) => {
     trackUsage('willNavigate', { from: pathname, to: destination });
@@ -127,7 +129,7 @@ const LeftMenu = ({
       <MainNav>
         <NavBrand />
 
-        <Divider />
+        {isDesktop && <Divider />}
 
         <MenuDetails>
           <NavListWrapper
@@ -185,21 +187,23 @@ const LeftMenu = ({
             large: 'none',
           }}
         >
-          <Flex
-            height="3.2rem"
-            width="3.2rem"
-            justifyContent="center"
-            alignItems="center"
-            onClick={() => setIsBurgerMenuShown(!isBurgerMenuShown)}
+          <IconButton
+            onClick={() => setIsBurgerMenuShown((prev) => !prev)}
+            style={{ border: 'none' }}
+            label="Menu"
+            type="button"
+            aria-expanded={isBurgerMenuShown}
+            aria-controls="burger-menu"
           >
-            {!isBurgerMenuShown ? <List /> : <Cross />}
-          </Flex>
+            {!isBurgerMenuShown ? <List fill="neutral1000" /> : <Cross fill="neutral1000" />}
+          </IconButton>
         </Box>
       </MainNav>
       <NavBurgerMenu
         isShown={isBurgerMenuShown}
         listLinks={burgerMobileNavigationLinks}
         handleClickOnLink={handleClickOnLink}
+        onClose={() => setIsBurgerMenuShown(false)}
       />
     </>
   );

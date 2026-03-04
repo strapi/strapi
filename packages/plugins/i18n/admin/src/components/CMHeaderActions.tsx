@@ -388,7 +388,8 @@ const AITranslationStatusIcon = styled(Status)<{ $isAISettingEnabled: boolean }>
   gap: ${({ theme }) => theme.spaces[1]};
   justify-content: center;
   align-items: center;
-  height: 100%;
+  height: 3.2rem;
+  width: 3.2rem;
 
   // Disabled state
   ${({ $isAISettingEnabled, theme }) =>
@@ -457,8 +458,9 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
   return {
     _status: {
       message: (
-        <Box
+        <Flex
           height="100%"
+          alignItems="center"
           aria-label={formatMessage({
             id: getTranslation('CMEditViewAITranslation.status-aria-label'),
             defaultMessage: 'AI Translation Status',
@@ -471,7 +473,7 @@ const AITranslationStatusAction = ({ documentId, model, collectionType }: Header
           >
             {status === 'processing' ? <SpinningLoader /> : <Sparkle />}
           </AITranslationStatusIcon>
-        </Box>
+        </Flex>
       ),
       tooltip: (
         <Flex direction="column" padding={4} alignItems="flex-start" width="25rem">
@@ -766,6 +768,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
   model,
   collectionType,
   action,
+  meta,
 }: ExtendedDocumentActionProps) => {
   const locale = document?.locale ?? null;
   const [{ query }] = useQueryParams<{ status: 'draft' | 'published' }>();
@@ -833,23 +836,61 @@ const BulkLocaleAction: DocumentActionComponent = ({
       return [[], {}];
     }
 
-    const localizations = document.localizations ?? [];
+    const metaLocalizations = (meta?.availableLocales ?? []).map((locale) => ({
+      locale: locale.locale,
+      status: (locale.status ?? 'draft') as LocaleStatus['status'],
+    }));
+
+    const documentLocalizations = (
+      (document.localizations ?? []) as Array<{
+        locale?: string | null;
+        status?: Modules.Documents.Params.PublicationStatus.Kind | 'modified' | null;
+      }>
+    ).map((doc) => ({
+      locale: doc.locale ?? undefined,
+      status: (doc.status ?? 'draft') as LocaleStatus['status'],
+    }));
+
+    const localesMap = new Map<string, LocaleStatus>();
+
+    metaLocalizations.forEach(({ locale, status }) => {
+      if (locale) {
+        localesMap.set(locale, { locale, status });
+      }
+    });
+
+    documentLocalizations.forEach(({ locale, status }) => {
+      if (locale) {
+        localesMap.set(locale, { locale, status });
+      }
+    });
 
     // Build the rows for the bulk locale publish modal by combining the current
     // document with all the available locales from the document meta
-    const locales: LocaleStatus[] = localizations.map((doc: any) => {
-      const { locale, status } = doc;
-      return { locale, status };
-    });
+    const locales: LocaleStatus[] = [];
 
-    // Add the current document locale
-    locales.unshift({
-      locale: document.locale,
-      status: document.status,
-    });
+    if (document?.locale) {
+      locales.push({
+        locale: document.locale,
+        status: (document.status ?? 'draft') as LocaleStatus['status'],
+      });
+    }
+
+    locales.push(
+      ...Array.from(localesMap.entries())
+        .filter(([locale]) => locale !== document?.locale)
+        .map(([, value]) => value)
+    );
+
+    if (locales.length === 0 && document?.locale) {
+      locales.push({
+        locale: document.locale,
+        status: (document.status ?? 'draft') as LocaleStatus['status'],
+      });
+    }
 
     // Build the validation errors for each locale.
-    const allDocuments = [document, ...localizations];
+    const allDocuments = [document, ...(document.localizations ?? [])];
     const errors = allDocuments.reduce<FormErrors>((errs, document) => {
       if (!document) {
         return errs;
@@ -864,7 +905,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
     }, {});
 
     return [locales, errors];
-  }, [document, validate]);
+  }, [document, meta?.availableLocales, validate]);
 
   const isBulkPublish = action === 'bulk-publish';
   const localesForAction = selectedRows.reduce((acc: string[], selectedRow: LocaleStatus) => {

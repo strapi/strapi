@@ -38,8 +38,7 @@ export default {
   // This returns an empty feature list for CE
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
-    const ai = strapi.config.get('admin.ai', {});
-    return { data: { isEE: false, features: [], flags, ai } };
+    return { data: { isEE: false, features: [], flags, ai: { enabled: false } } };
   },
 
   async init() {
@@ -103,7 +102,6 @@ export default {
       path.join(strapi.dirs.app.root, 'src', 'admin')
     );
     const isHostedOnStrapiCloud = env('STRAPI_HOSTING', null) === 'strapi.cloud';
-    const aiLicenseKey = env('STRAPI_ADMIN_AI_LICENSE', undefined);
 
     const numberOfAllContentTypes = _.size(strapi.contentTypes);
     const numberOfComponents = _.size(strapi.components);
@@ -122,7 +120,6 @@ export default {
         useTypescriptOnServer,
         useTypescriptOnAdmin,
         isHostedOnStrapiCloud,
-        aiLicenseKey,
         numberOfAllContentTypes, // TODO: V5: This event should be renamed numberOfContentTypes in V5 as the name is already taken to describe the number of content types using i18n.
         numberOfComponents,
         numberOfDynamicZones: getNumberOfDynamicZones(),

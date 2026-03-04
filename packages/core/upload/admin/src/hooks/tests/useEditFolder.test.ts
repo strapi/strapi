@@ -1,5 +1,5 @@
 import { useFetchClient } from '@strapi/admin/strapi-admin';
-import { act, renderHook } from '@tests/utils';
+import { renderHook, waitFor } from '@tests/utils';
 
 import { useEditFolder } from '../useEditFolder';
 
@@ -38,7 +38,7 @@ describe('useEditFolder', () => {
     } = setup();
     const { editFolder } = current;
 
-    await act(async () => {
+    await waitFor(async () => {
       await editFolder(FOLDER_CREATE_FIXTURE);
     });
 
@@ -53,7 +53,7 @@ describe('useEditFolder', () => {
     } = setup();
     const { editFolder } = current;
 
-    await act(async () => {
+    await waitFor(async () => {
       await editFolder(
         {
           name: FOLDER_EDIT_FIXTURE.name,
@@ -73,7 +73,7 @@ describe('useEditFolder', () => {
     } = setup();
     const { editFolder } = current;
 
-    await act(async () => {
+    await waitFor(async () => {
       await editFolder(
         {
           name: FOLDER_EDIT_FIXTURE.name,
@@ -92,7 +92,7 @@ describe('useEditFolder', () => {
     } = setup();
     const { editFolder } = current;
 
-    await act(async () => {
+    await waitFor(async () => {
       await editFolder(
         {
           name: FOLDER_EDIT_FIXTURE.name,

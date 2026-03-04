@@ -19,6 +19,8 @@ import { Marker } from './Marker';
 const MarkdownStyles = styled(Typography)`
   max-width: 65ch;
   margin: 0 auto;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 
   h1,
   h2,
@@ -75,6 +77,11 @@ const MarkdownStyles = styled(Typography)`
       text-decoration: underline;
     }
   }
+`;
+
+const UserMessageTypography = styled(Typography)`
+  overflow-wrap: anywhere;
+  word-break: break-word;
 `;
 
 // ---------------------------
@@ -195,7 +202,7 @@ const UserMessage = ({ message }: { message: UserMessageType }) => {
         <Box background="neutral150" borderStyle="none" padding={['10px', '16px']} hasRadius>
           {message.parts.map((content, index) => {
             if (content.type !== 'text') return null;
-            return <Typography key={index}>{content.text}</Typography>;
+            return <UserMessageTypography key={index}>{content.text}</UserMessageTypography>;
           })}
         </Box>
       ) : null}

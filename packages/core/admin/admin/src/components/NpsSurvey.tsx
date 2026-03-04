@@ -28,6 +28,8 @@ import { usePersistentState } from '../hooks/usePersistentState';
 const FieldWrapper = styled(Field.Root)`
   height: 3.2rem;
   width: 3.2rem;
+  align-items: center;
+  justify-content: center;
 
   > label,
   ~ input {
@@ -194,7 +196,6 @@ const NpsSurvey = () => {
         version: strapiVersion ?? undefined,
         license: window.strapi.projectType,
         isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
-        aiLicenseKey: process.env.STRAPI_ADMIN_AI_LICENSE,
       };
       const res = await fetch(
         `${process.env.STRAPI_ANALYTICS_URL || 'https://analytics.strapi.io'}/submit-nps`,

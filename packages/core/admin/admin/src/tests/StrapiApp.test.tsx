@@ -539,12 +539,6 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.configurations.menuLogo).toBe('fr');
     });
 
-    it('should override the favicon', () => {
-      const app = new StrapiApp({ config: { head: { favicon: 'fr' } } });
-
-      expect(app.configurations.head.favicon).toBe('fr');
-    });
-
     it('should override the light theme', () => {
       // @ts-expect-error - test mocks
       const app = new StrapiApp({ config: { theme: { light: { colors: { red: 'black' } } } } });

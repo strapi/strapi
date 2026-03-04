@@ -1,0 +1,78 @@
+name: Find duplicate from issue id
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_id:
+        description: 'Id of the issue to check for duplicates'
+        required: true
+
+jobs:
+  deduplicate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Check for duplicate issues
+        uses: anthropics/claude-code-action@v1
+        with:
+          prompt: |
+            Analyze this issue and check if it's a duplicate of other issues in the repository.
+
+            Issue: #${{ github.event.inputs.issue_id }}
+            Repository: ${{ github.repository }}
+
+            Your task:  
+            1. Use mcp__github__get_issue to get details of the current issue (#${{ github.event.inputs.issue_id }})
+            2. Search for similar existing issues using mcp__github__search_issues with relevant keywords from the issue title and body
+            3. Compare the current issue with existing ones to identify potential duplicates
+
+            Criteria for duplicates:
+            - Same bug or error being reported
+            - Same feature request (even if worded differently)
+            - Same question being asked
+            - Same steps to reproduce the issue
+            - Issues describing the same root problem
+
+            If you find duplicates:
+            - Add a comment on the current issue linking to the other issue(s)
+            - Apply a "flag: duplicate" label to the new issue
+            - Be kind, Be polite and explain why it's a duplicate. Mention you might be making mistakes
+            - you must not close the issue
+
+            If it's NOT a duplicate:
+            - stop and exit
+
+            Here is a template for the comment:
+              Thanks for reporting this! This appears to be a duplicate of issue #[ISSUE_NUMBER] ([ISSUE_TITLE]).
+
+              Both issues report the same problem:
+                list the reasons why you think it's a duplicate
+              
+              If you believe this issue is actually different or I've made an error, please feel free to reopen with additional details or comment on the existing issue. Labelling as duplicate, but happy to be corrected if needed!
+              
+              ---
+              *This action was performed automatically. If you believe this was done in error, please contact a human maintainer.*
+
+
+            Use these tools:
+            - mcp__github__get_issue: Get issue details
+            - mcp__github__search_issues: Search for similar issues
+            - mcp__github__list_issues: List recent issues if needed
+            - mcp__github__add_issue_comment: Add a comment if duplicate found
+            - mcp__github__update_issue: Add labels
+
+            Be thorough but efficient. Focus on finding true duplicates, not just similar issues.
+
+          anthropic_api_key: ${{ secrets.DUPLICATE_ISSUE_ANTHROPIC_API_KEY }}
+          claude_args: |
+            --allowedTools "mcp__github__get_issue,mcp__github__search_issues,mcp__github__list_issues,mcp__github__add_issue_comment,mcp__github__update_issue,mcp__github__get_issue_comments"

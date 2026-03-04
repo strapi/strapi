@@ -114,7 +114,7 @@ const validatePkg = async ({ pkg }: { pkg: object }): Promise<PackageJson> => {
             throw new Error(
               `'${err.path}' in 'package.json' must be of type '${chalk.magenta(
                 err.params.type
-              )}' (recieved '${chalk.magenta(typeof err.params.value)}')`
+              )}' (received '${chalk.magenta(typeof err.params.value)}')`
             );
           }
       }

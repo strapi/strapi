@@ -41,6 +41,7 @@ describe('EditFieldForm', () => {
   type FieldData = ConfigurationFormData['layout'][number]['children'][number];
   interface RenderProps extends Partial<EditFieldFormProps> {
     initialValues?: Record<string, FieldData>;
+    onChange?: (data: FieldData) => void;
   }
 
   const INITIAL_DATA: Record<string, FieldData> = {
@@ -241,6 +242,32 @@ describe('EditFieldForm', () => {
       await user.click(await screen.findByRole('combobox', { name: 'Entry title' }));
 
       expect(await screen.findByRole('option', { name: 'id' })).toBeInTheDocument();
+    });
+  });
+
+  describe('Nullable field validation regression tests', () => {
+    it('should accept empty description field without validation errors', async () => {
+      const { user } = render({
+        initialValues: {
+          field: {
+            __temp_key__: 'a',
+            description: '', // Test empty description (nullable field)
+            editable: true,
+            name: 'field',
+            label: 'Field',
+            size: 12,
+          },
+        },
+      });
+
+      const descriptionInput = await screen.findByRole('textbox', { name: 'Description' });
+      expect(descriptionInput).toHaveValue('');
+
+      // Submit the form to trigger validation
+      await user.click(await screen.findByRole('button', { name: 'Finish' }));
+
+      // Should not show validation errors for empty description (nullable field)
+      expect(screen.queryByText(/description.*required/i)).not.toBeInTheDocument();
     });
   });
 });
