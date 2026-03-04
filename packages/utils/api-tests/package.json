@@ -5,7 +5,7 @@
   "dependencies": {
     "dotenv": "16.4.5",
     "lodash": "4.17.23",
-    "qs": "6.14.2",
+    "qs": "6.15.0",
     "supertest": "6.3.3"
   }
 }

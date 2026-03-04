@@ -167,7 +167,7 @@
     "plop": "4.0.1",
     "prettier": "3.3.3",
     "prettier-2": "npm:prettier@^2",
-    "qs": "6.14.2",
+    "qs": "6.15.0",
     "rimraf": "5.0.5",
     "rollup": "4.59.0",
     "rollup-plugin-html": "0.2.1",

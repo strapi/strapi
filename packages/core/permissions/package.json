@@ -41,7 +41,7 @@
     "@casl/ability": "6.7.5",
     "@strapi/utils": "5.38.0",
     "lodash": "4.17.23",
-    "qs": "6.14.2",
+    "qs": "6.15.0",
     "sift": "16.0.1"
   },
   "devDependencies": {
