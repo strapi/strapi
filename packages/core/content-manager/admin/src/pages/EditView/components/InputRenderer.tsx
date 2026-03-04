@@ -94,6 +94,15 @@ const BaseInputRenderer = ({
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+  const renderComponentInput = React.useCallback(
+    (componentInputProps: InputRendererProps) => (
+      <MemoizedInputRenderer
+        key={`input-${componentInputProps.name}-${localeKey}`}
+        {...componentInputProps}
+      />
+    ),
+    [localeKey]
+  );
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
@@ -177,27 +186,29 @@ const BaseInputRenderer = ({
         />
       );
     case 'component':
+      // Preview focus/blur handlers are not used for data-structure roots (component/dynamic zone).
+      // Dropping them avoids unstable function props cascading through memoized component trees.
+      const { onBlur: _onComponentBlur, onFocus: _onComponentFocus, ...componentProps } = props;
+
       return (
         <ComponentInput
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...componentProps}
           hint={hint}
           layout={components[props.attribute.component].layout}
           disabled={fieldIsDisabled}
         >
-          {(componentInputProps) => (
-            <MemoizedInputRenderer
-              key={`input-${componentInputProps.name}-${localeKey}`}
-              {...componentInputProps}
-            />
-          )}
+          {renderComponentInput}
         </ComponentInput>
       );
     case 'dynamiczone':
+      // Same rationale as `component` above: keep data-structure root props stable.
+      const { onBlur: _onDzBlur, onFocus: _onDzFocus, ...dynamicZoneProps } = props;
+
       return (
         <DynamicZone
           key={`input-${props.name}-${localeKey}`}
-          {...props}
+          {...dynamicZoneProps}
           hint={hint}
           disabled={fieldIsDisabled}
         />
