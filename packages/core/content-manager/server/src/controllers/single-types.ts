@@ -209,17 +209,17 @@ export default {
       let document = await findDocument(sanitizedQuery, model, { locale, status: 'draft' });
 
       // If document exists and user can update it, update it before publishing
-      if (document && permissionChecker.can.update(document)) {
+      const shouldUpdate = document && permissionChecker.can.update(document);
+      // If document doesn't exist and user can create it, create it before publishing
+      const shouldCreate = !document && permissionChecker.can.create();
+      if (shouldUpdate || shouldCreate) {
         document = await createOrUpdateDocument(ctx, { populate });
       } else if (!document) {
-        // Document doesn't exist, try to create it
-        if (permissionChecker.cannot.create()) {
-          throw new errors.ForbiddenError();
-        }
-        document = await createOrUpdateDocument(ctx, { populate });
+        // Document doesn't exist and user can't create it
+        throw new errors.ForbiddenError();
       }
-      // Else: document exists but user can't update it, just publish the existing draft
 
+      // If document doesn't exist, throw an error
       if (!document) {
         throw new errors.NotFoundError();
       }
