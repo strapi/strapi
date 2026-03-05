@@ -208,10 +208,12 @@ export const getPublishOrderForContentTypes = (
           targetModel && contentTypesUtils.hasDraftAndPublish(targetModel);
 
         if (isTargetInRelease && targetHasDraftAndPublish) {
-          if (!dependencies.has(uid)) {
-            dependencies.set(uid, new Set());
+          let dependencySet = dependencies.get(uid);
+          if (!dependencySet) {
+            dependencySet = new Set();
+            dependencies.set(uid, dependencySet);
           }
-          dependencies.get(uid)!.add(targetContentTypeUid);
+          dependencySet.add(targetContentTypeUid);
         }
       }
     }
