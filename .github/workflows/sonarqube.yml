@@ -1,0 +1,58 @@
+# Runs after Tests workflow. Uses coverage artifacts from that run.
+# Non-blocking: not a required status check; visible in CI for awareness.
+name: SonarQube
+
+on:
+  workflow_run:
+    workflows: ['Tests']
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && !github.event.workflow_run.head_repository.fork }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download unit test coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-coverage-reports
+          path: unit-coverage
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Download frontend test coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: front-coverage-reports
+          path: front-coverage
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: List coverage files (debug)
+        run: find . -name "lcov.info" -type f
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        continue-on-error: true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST_URL }}
+
+      - name: SonarQube Quality Gate check
+        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
+        timeout-minutes: 5
+        continue-on-error: true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST_URL }}
