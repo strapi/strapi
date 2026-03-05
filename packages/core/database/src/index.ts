@@ -265,3 +265,4 @@ class Database {
 
 export { Database, errors };
 export type { Model, JoinTable, Identifiers, Migration };
+export { DeleteReason } from './entity-manager';

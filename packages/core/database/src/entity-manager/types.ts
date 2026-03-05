@@ -21,6 +21,11 @@ export type Params = {
 
 export type FindOneParams = Pick<Params, 'where' | 'select' | 'populate' | '_q' | 'orderBy'>;
 
+export enum DeleteReason {
+  Republish = 'republish',
+  DiscardDraft = 'discardDraft',
+}
+
 export interface Repository {
   findOne(params?: FindOneParams): Promise<any>;
   findMany(params?: Params): Promise<any[]>;

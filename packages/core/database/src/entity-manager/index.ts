@@ -47,7 +47,8 @@ import { relationsOrderer } from './relations-orderer';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
 import type { ID } from '../types';
-import { EntityManager, Repository, Entity } from './types';
+import { EntityManager, Repository, Entity, DeleteReason } from './types';
+import type { States } from '../lifecycles';
 
 export * from './types';
 
@@ -437,9 +438,18 @@ export const createEntityManager = (db: Database): EntityManager => {
     },
 
     async delete(uid, params = {}) {
-      const states = await db.lifecycles.run('beforeDelete', uid, { params });
+      const { deleteReason, ...paramsWithoutReason } = params as typeof params & {
+        deleteReason?: DeleteReason;
+      };
+      const skipLifecycles =
+        deleteReason === DeleteReason.Republish || deleteReason === DeleteReason.DiscardDraft;
 
-      const { where, select, populate } = params;
+      let states!: States;
+      if (!skipLifecycles) {
+        states = await db.lifecycles.run('beforeDelete', uid, { params: paramsWithoutReason });
+      }
+
+      const { where, select, populate } = paramsWithoutReason;
 
       if (isEmpty(where)) {
         throw new Error('Delete requires a where parameter');
@@ -470,7 +480,14 @@ export const createEntityManager = (db: Database): EntityManager => {
         throw e;
       }
 
-      await db.lifecycles.run('afterDelete', uid, { params, result: entity }, states);
+      if (!skipLifecycles) {
+        await db.lifecycles.run(
+          'afterDelete',
+          uid,
+          { params: paramsWithoutReason, result: entity },
+          states
+        );
+      }
 
       return entity;
     },

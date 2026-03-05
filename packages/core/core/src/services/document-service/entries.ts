@@ -1,4 +1,5 @@
 import type { UID, Modules } from '@strapi/types';
+import type { DeleteReason } from '@strapi/database';
 import { async, errors } from '@strapi/utils';
 import { assoc, omit } from 'lodash/fp';
 
@@ -87,10 +88,10 @@ const createEntriesService = (
     return doc;
   }
 
-  async function deleteEntry(id: number) {
+  async function deleteEntry(id: number, deleteParams = {} as { deleteReason?: DeleteReason }) {
     const componentsToDelete = await components.getComponents(uid, { id });
 
-    const deletedEntry = await strapi.db.query(uid).delete({ where: { id } });
+    const deletedEntry = await strapi.db.query(uid).delete({ where: { id }, ...deleteParams });
 
     await components.deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
 

@@ -9,6 +9,7 @@ import {
 } from '@strapi/utils';
 
 import type { UID, Modules } from '@strapi/types';
+import { DeleteReason } from '@strapi/database';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
@@ -577,8 +578,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldPublishedVersions,
     });
 
-    // Delete old published versions
-    await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
+    // Delete old published versions (skip entity lifecycles - republish, not explicit delete)
+    await async.map(oldPublishedVersions, (entry: any) =>
+      entries.delete(entry.id, { deleteReason: DeleteReason.Republish })
+    );
 
     // Add firstPublishedAt to draft if it doesn't exist
     const updatedDraft = await async.map(draftsToPublish, (draft: any) =>
@@ -673,8 +676,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldDrafts,
     });
 
-    // Delete old drafts
-    await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
+    // Delete old drafts (skip entity lifecycles - discard-draft cycle, not explicit delete)
+    await async.map(oldDrafts, (entry: any) =>
+      entries.delete(entry.id, { deleteReason: DeleteReason.DiscardDraft })
+    );
 
     // Transform published entry data and create draft versions
     const draftEntries = await async.map(versionsToDraft, (entry: any) =>
