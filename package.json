@@ -84,6 +84,9 @@
     "test:unit:update": "jest --config jest.config.js -u",
     "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
     "test:unit:watch": "run test:unit --watch",
+    "test:unit:coverage": "jest --config jest.config.js --coverage",
+    "test:front:coverage": "cross-env IS_EE=true jest --config jest.config.front.js --runInBand --coverage",
+    "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch"
   },
