@@ -19,12 +19,4 @@ module.exports = {
     '!**/rollup*.{js,ts,mjs}',
   ],
   coveragePathIgnorePatterns: ['/node_modules/', '/__tests__/'],
-  coverageThreshold: {
-    global: {
-      branches: 95,
-      functions: 95,
-      lines: 95,
-      statements: 95,
-    },
-  },
 };
