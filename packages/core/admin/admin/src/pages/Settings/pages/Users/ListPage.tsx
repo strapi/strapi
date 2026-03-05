@@ -15,6 +15,7 @@ import { Pagination } from '../../../../components/Pagination';
 import { SearchInput } from '../../../../components/SearchInput';
 import { Table } from '../../../../components/Table';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAuth } from '../../../../features/Auth';
 import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
@@ -43,7 +44,7 @@ const ListPageCE = () => {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [idsToDelete, setIdsToDelete] = React.useState<Array<SanitizedAdminUser['id']>>([]);
   const { data, isError, isLoading } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }));
-
+  const { user: currentUser } = useAuth('ListPageCE', (auth) => auth);
   const { pagination, users = [] } = data ?? {};
 
   const CreateAction = useEnterprise(
@@ -200,7 +201,7 @@ const ListPageCE = () => {
                             <Pencil />
                           </IconButton>
                         ) : null}
-                        {canDelete ? (
+                        {canDelete && currentUser?.id !== user.id ? (
                           <IconButton
                             onClick={handleDeleteClick(user.id)}
                             label={formatMessage(

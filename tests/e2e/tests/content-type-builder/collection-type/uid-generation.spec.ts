@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { resetFiles } from '../../../utils/file-reset';
-import { sharedSetup } from '../../../utils/setup';
-import { clickAndWait } from '../../../utils/shared';
-import { waitForRestart } from '../../../utils/restart';
+import { resetFiles } from '../../../../utils/file-reset';
+import { sharedSetup } from '../../../../utils/setup';
+import { clickAndWait } from '../../../../utils/shared';
+import { waitForRestart } from '../../../../utils/restart';
 
 test.describe('Content Type UID Generation', () => {
   test.beforeEach(async ({ page }) => {

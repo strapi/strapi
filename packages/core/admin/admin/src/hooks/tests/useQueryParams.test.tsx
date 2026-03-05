@@ -1,6 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 
-import { renderHook, act, screen } from '@tests/utils';
+import { renderHook, screen, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
 import { useQueryParams } from '../useQueryParams';
@@ -16,7 +16,7 @@ const LocationDisplay = () => {
 };
 
 describe('useQueryParams', () => {
-  it('should set and remove the query params using setQuery method', () => {
+  it('should set and remove the query params using setQuery method', async () => {
     const { result } = renderHook(
       ({ initialParams }) =>
         useQueryParams<{ type?: string; filters?: object; page?: number }>(initialParams),
@@ -34,7 +34,7 @@ describe('useQueryParams', () => {
     const [{ query }, setQuery] = result.current;
     expect(query).toEqual({ page: 1, type: 'plugins' }); // initial params
 
-    act(() => {
+    await waitFor(() => {
       setQuery({ type: 'plugins' }, 'remove');
     });
 
@@ -42,7 +42,7 @@ describe('useQueryParams', () => {
     expect(searchParams.has('type')).toBe(false);
     expect(searchParams.has('page')).toBe(true);
 
-    act(() => {
+    await waitFor(() => {
       setQuery({ filters: { type: 'audio' }, page: 1 });
     });
     const updatedSearchParams = new URLSearchParams(screen.getByRole('listitem').textContent ?? '');

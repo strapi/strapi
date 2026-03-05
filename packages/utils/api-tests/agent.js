@@ -59,8 +59,24 @@ const createAgent = (strapi, initialState = {}) => {
     }
 
     if (formData) {
-      const attachFieldToRequest = (field) => rq.field(field, formData[field]);
-      Object.keys(formData).forEach(attachFieldToRequest);
+      Object.keys(formData).forEach((field) => {
+        const value = formData[field];
+        // File attachment: { path, filename } or { value, filename }; optional contentType for multipart part
+        if (value && typeof value === 'object' && 'filename' in value && !Array.isArray(value)) {
+          const opts = { filename: value.filename };
+          if (value.contentType !== undefined) {
+            opts.contentType = value.contentType;
+          }
+          if ('path' in value) {
+            rq.attach(field, value.path, opts);
+          } else if ('value' in value) {
+            rq.attach(field, value.value, opts);
+          }
+        } else {
+          // Regular form field (string, number, etc.)
+          rq.field(field, value);
+        }
+      });
     }
 
     if (isNil(formData)) {
@@ -96,6 +112,12 @@ const createAgent = (strapi, initialState = {}) => {
 
     setHeaders(headers) {
       return this.assignState({ headers });
+    },
+
+    asHTTPS() {
+      const httpsHeaders = { 'x-forwarded-proto': 'https', 'x-forwarded-port': '443' };
+      const merged = Object.assign({}, state.headers || {}, httpsHeaders);
+      return this.setHeaders(merged);
     },
 
     getLoggedUser() {

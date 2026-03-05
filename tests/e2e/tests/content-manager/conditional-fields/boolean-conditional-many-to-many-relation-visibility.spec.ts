@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { login } from '../../../utils/login';
-import { createContent, fillField } from '../../../utils/content-creation';
-import { navToHeader } from '../../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import';
+import { login } from '../../../../utils/login';
+import { createContent, fillField } from '../../../../utils/content-creation';
+import { navToHeader } from '../../../../utils/shared';
 
 test.describe('Conditional Fields - Boolean-controlled conditional many-to-many relation fields', () => {
   test.beforeEach(async ({ page }) => {

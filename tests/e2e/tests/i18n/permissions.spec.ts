@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
-import { waitForRestart } from '../../utils/restart';
-import { resetFiles } from '../../utils/file-reset';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { login } from '../../../utils/login';
+import { clickAndWait, findAndClose, navToHeader } from '../../../utils/shared';
+import { waitForRestart } from '../../../utils/restart';
+import { resetFiles } from '../../../utils/file-reset';
 
 test.describe('Locale Permissions', () => {
   test.describe.configure({ timeout: 500000 });

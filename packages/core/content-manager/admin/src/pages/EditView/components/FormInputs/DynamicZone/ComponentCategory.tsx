@@ -5,7 +5,6 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
-import { RESPONSIVE_CONTAINER_BREAKPOINTS } from '../../FormLayout';
 
 interface ComponentCategoryProps {
   category: string;
@@ -80,16 +79,21 @@ const Grid =
     ? styled(Box)`
         display: grid;
         grid-template-columns: repeat(auto-fill, 100%);
-        grid-gap: 4px;
+        grid-gap: 12px;
 
-        @container (min-width: ${() => RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+        ${({ theme }) => theme.breakpoints.medium} {
           grid-template-columns: repeat(auto-fill, 14rem);
+          grid-gap: 4px;
         }
       `
     : styled(Box)`
         display: grid;
         grid-template-columns: repeat(auto-fill, 100%);
-        grid-gap: 4px;
+        grid-gap: 12px;
+
+        ${({ theme }) => theme.breakpoints.medium} {
+          grid-gap: 4px;
+        }
       `;
 
 const ComponentBox = styled<FlexComponent<'button'>>(Flex)`

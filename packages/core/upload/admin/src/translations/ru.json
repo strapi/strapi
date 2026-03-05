@@ -86,7 +86,7 @@
   "modal.upload-list.footer.button": "Загрузить {number, plural, one {# ресурс} other {# ресурсов}} в бтиблиотеку",
   "modal.upload-list.sub-header-subtitle": "Управление ресурсами перед добавлением в медиабиблиотеку",
   "modal.upload-list.sub-header.button": "Добавить ещё ресурсы",
-  "modal.upload.cancelled": "Upload manually aborted.",
+  "modal.upload.cancelled": "Загрузка вручную прервана.",
   "page.title": "Настройки - Медиабиблиотека",
   "permissions.not-allowed.update": "Вам не разрешено редактировать этот файл.",
   "plugin.description.long": "Управление медиафайлами.",

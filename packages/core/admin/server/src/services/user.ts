@@ -413,7 +413,6 @@ const getLanguagesInUse = async (): Promise<string[]> => {
 
   return users.map((user) => user.preferedLanguage || 'en');
 };
-
 export default {
   create,
   updateById,

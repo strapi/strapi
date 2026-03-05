@@ -11,7 +11,7 @@ import { InputProps } from './types';
 const TimeInput = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const { formatMessage } = useIntl();
-    const field = useField<string>(name);
+    const field = useField<string | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
@@ -25,7 +25,7 @@ const TimeInput = forwardRef<HTMLInputElement, InputProps>(
           onChange={(time) => {
             field.onChange(name, `${time}:00.000`);
           }}
-          onClear={() => field.onChange(name, undefined)}
+          onClear={() => field.onChange(name, null)}
           value={field.value ?? ''}
           {...props}
         />

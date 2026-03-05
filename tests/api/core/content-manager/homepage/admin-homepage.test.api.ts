@@ -111,7 +111,13 @@ describe('Homepage API', () => {
 
   describe('Recent Documents', () => {
     beforeAll(async () => {
-      await builder.addContentTypes([articleModel, globalModel, tagModel, authorModel]).build();
+      await builder
+        .addContentTypes([articleModel, globalModel, tagModel, authorModel])
+        .addFixtures('plugin::i18n.locale', [
+          { name: 'French', code: 'fr' },
+          { name: 'German', code: 'de' },
+        ])
+        .build();
       strapi = await createStrapiInstance();
       rq = await createAuthRequest({ strapi });
     });
@@ -263,7 +269,76 @@ describe('Homepage API', () => {
       expect(response.body.data[1].status).toBe('modified');
     });
 
+    /**
+     * GET /content-manager/homepage/recent-documents?action=publish
+     * - Used to display the list of recently published documents (no matter the locale) in a widget on the Homepage.
+     */
+    it('finds published documents from different locales', async () => {
+      // Create and publish an article in English locale (default)
+      const englishArticle = await strapi.documents(articleUid).create({
+        data: {
+          title: 'English Article Title',
+        },
+        locale: 'en',
+      });
+      await strapi.documents(articleUid).publish({
+        documentId: englishArticle.documentId,
+        locale: 'en',
+      });
+
+      // Create and publish an article in French locale
+      const frenchArticle = await strapi.documents(articleUid).create({
+        data: {
+          title: 'Titre Article Français',
+        },
+        locale: 'fr',
+      });
+      await strapi.documents(articleUid).publish({
+        documentId: frenchArticle.documentId,
+        locale: 'fr',
+      });
+
+      // Create and publish an article in German locale
+      const germanArticle = await strapi.documents(articleUid).create({
+        data: {
+          title: 'Deutscher Artikel Titel',
+        },
+        locale: 'de',
+      });
+      await strapi.documents(articleUid).publish({
+        documentId: germanArticle.documentId,
+        locale: 'de',
+      });
+
+      const response = await rq({
+        method: 'GET',
+        url: '/content-manager/homepage/recent-documents?action=publish',
+      });
+
+      expect(response.statusCode).toBe(200);
+      // We expect the 3 new documents, but also one that was published in the previous test
+      expect(response.body.data).toHaveLength(4);
+      expect(response.body.data.every((doc) => doc.publishedAt)).not.toBe(null);
+
+      // Verify we have entries from different locales
+      const locales = response.body.data.map((doc) => doc.locale);
+      expect(locales).toContain('en');
+      expect(locales).toContain('fr');
+      expect(locales).toContain('de');
+
+      // Verify the titles are correct for each locale
+      const titles = response.body.data.map((doc) => doc.title);
+      expect(titles).toContain('English Article Title');
+      expect(titles).toContain('Titre Article Français');
+      expect(titles).toContain('Deutscher Artikel Titel');
+
+      // Verify all entries have published status
+      expect(response.body.data.every((doc) => doc.status === 'published')).toBe(true);
+    });
+
     afterAll(async () => {
+      // Clean up locales
+      await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
       await strapi.destroy();
       await builder.cleanup();
     });

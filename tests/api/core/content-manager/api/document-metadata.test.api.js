@@ -55,8 +55,6 @@ const product = {
     },
     // TODO - Add other fields with validation requirements
     shopName: {
-      // This field has no validation requirements so should be excluded from
-      // available locales
       type: 'string',
     },
   },
@@ -318,10 +316,11 @@ describe('CM API - Document metadata', () => {
       updatedAt: expect.any(String),
     };
     expect(meta.availableLocales).toMatchObject([expectedLocaleData]);
-    // Ensure no unwanted keys are present
-    const unwantedKeys = ['shopName'];
-    unwantedKeys.forEach((key) => {
-      expect(meta.availableLocales[0]).not.toHaveProperty(key);
+    // The data should include the non-localized fields in the available locales
+    // to auto fill the form when creating a new locale
+    const neededKeys = ['shopName'];
+    neededKeys.forEach((key) => {
+      expect(meta.availableLocales[0]).toHaveProperty(key);
     });
 
     expect(meta.availableStatus).toEqual([]);

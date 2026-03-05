@@ -25,6 +25,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -53,6 +54,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -80,6 +82,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -108,6 +111,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -136,6 +140,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -164,6 +169,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -193,6 +199,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -221,6 +228,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -248,6 +256,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -276,6 +285,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -305,6 +315,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -336,6 +347,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.contentManager.createContent,
@@ -366,6 +378,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
@@ -400,6 +413,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
@@ -431,6 +445,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
@@ -459,6 +474,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
@@ -486,6 +502,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: false,
+        hidden: false,
         completedActions: [],
       };
 
@@ -514,6 +531,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: false,
+        hidden: false,
         completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken],
       };
 
@@ -543,6 +561,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
@@ -570,6 +589,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: false,
+        hidden: false,
         completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
@@ -597,6 +617,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
@@ -628,6 +649,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: false,
+        hidden: false,
         completedActions: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
@@ -661,6 +683,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
@@ -692,6 +715,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -719,6 +743,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema],
       };
 
@@ -746,6 +771,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -773,6 +799,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: false,
+        hidden: false,
         completedActions: [
           GUIDED_TOUR_REQUIRED_ACTIONS.contentTypeBuilder.createSchema,
           GUIDED_TOUR_REQUIRED_ACTIONS.apiTokens.copyToken,
@@ -803,6 +830,66 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
+        completedActions: [],
+      };
+
+      expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+  });
+
+  describe('set_hidden', () => {
+    it('should change the hidden property', () => {
+      const initialState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+        },
+        enabled: true,
+        hidden: false,
+        completedActions: [],
+      };
+
+      const action: Action = {
+        type: 'set_hidden',
+        payload: true,
+      };
+
+      const expectedState = {
+        tours: {
+          contentTypeBuilder: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+          strapiCloud: {
+            currentStep: 0,
+            isCompleted: false,
+          },
+        },
+        enabled: true,
+        hidden: true,
         completedActions: [],
       };
 
@@ -832,6 +919,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -860,6 +948,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -887,6 +976,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
@@ -915,6 +1005,7 @@ describe('GuidedTour | reducer', () => {
           },
         },
         enabled: true,
+        hidden: false,
         completedActions: [],
       };
 
