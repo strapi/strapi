@@ -638,7 +638,6 @@ jobs:
         api_ee_pg,
         api_ee_mysql,
         api_ee_sqlite,
-        sonarqube,
       ]
     steps:
       - run: exit 1
