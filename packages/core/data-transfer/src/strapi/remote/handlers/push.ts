@@ -165,6 +165,10 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   },
 
   teardown(this: PushHandler) {
+    if (this.memoryLogInterval) {
+      clearInterval(this.memoryLogInterval);
+      delete this.memoryLogInterval;
+    }
     if (this.provider) {
       this.provider.rollback();
     }
@@ -356,10 +360,10 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
           const stats = this.stats?.assets;
           const rssMb = (mem.rss / 1024 / 1024).toFixed(1);
           const heapMb = (mem.heapUsed / 1024 / 1024).toFixed(1);
-          strapi.log.info(
+          strapi.log.debug(
             `[Transfer destination] memory RSS=${rssMb}MB heapUsed=${heapMb}MB | assets started=${stats?.started ?? 0} finished=${stats?.finished ?? 0}`
           );
-        }, 2000);
+        }, 5000);
       }
 
       return { ok: true };
@@ -394,7 +398,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       if (stage === 'assets' && this.memoryLogInterval) {
         clearInterval(this.memoryLogInterval);
         delete this.memoryLogInterval;
-        strapi.log.info('[Transfer destination] Assets stage ended, stopped memory log');
+        strapi.log.debug('[Transfer destination] Assets stage ended, stopped memory log');
       }
       this.unlockTransferStep(stage);
       const stream = this.streams?.[stage];
