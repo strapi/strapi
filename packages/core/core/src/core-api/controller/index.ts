@@ -14,6 +14,18 @@ const isSingleType = (
 
 const getAuthFromKoaContext = (ctx: Koa.Context) => prop('state.auth', ctx) ?? {};
 
+/** Build options for contentAPI.sanitize/validate from the request context (auth, route, strictParams). */
+const getContentAPIOptions = (ctx: Koa.Context) => {
+  const auth = getAuthFromKoaContext(ctx);
+  const route = ctx.state?.route;
+  const options: { auth: unknown; strictParams?: boolean; route?: typeof route } = { auth, route };
+  const apiStrictParams = strapi.config.get('api.rest.strictParams');
+  if (typeof apiStrictParams === 'boolean') {
+    options.strictParams = apiStrictParams;
+  }
+  return options;
+};
+
 function createController<T extends Struct.SingleTypeSchema | Struct.CollectionTypeSchema>(opts: {
   contentType: T;
 }): T extends Struct.SingleTypeSchema
@@ -43,27 +55,19 @@ function createController({
     },
 
     async sanitizeInput(data, ctx) {
-      const auth = getAuthFromKoaContext(ctx);
-
-      return strapi.contentAPI.sanitize.input(data, contentType, { auth });
+      return strapi.contentAPI.sanitize.input(data, contentType, getContentAPIOptions(ctx));
     },
 
     async sanitizeQuery(ctx) {
-      const auth = getAuthFromKoaContext(ctx);
-
-      return strapi.contentAPI.sanitize.query(ctx.query, contentType, { auth });
+      return strapi.contentAPI.sanitize.query(ctx.query, contentType, getContentAPIOptions(ctx));
     },
 
     async validateQuery(ctx) {
-      const auth = getAuthFromKoaContext(ctx);
-
-      return strapi.contentAPI.validate.query(ctx.query, contentType, { auth });
+      return strapi.contentAPI.validate.query(ctx.query, contentType, getContentAPIOptions(ctx));
     },
 
     async validateInput(data, ctx) {
-      const auth = getAuthFromKoaContext(ctx);
-
-      return strapi.contentAPI.validate.input(data, contentType, { auth });
+      return strapi.contentAPI.validate.input(data, contentType, getContentAPIOptions(ctx));
     },
   };
 
