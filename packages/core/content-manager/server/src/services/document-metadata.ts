@@ -4,7 +4,6 @@ import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
-import { getPopulateForValidation } from './utils/populate';
 
 const { getScalarAttributes, getMediaAttributes } = contentTypes;
 
@@ -216,7 +215,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   ) {
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
     // i18n is disabled
-    const { populate = {}, fields = [] } = getPopulateForValidation(uid);
 
     // Include non-translatable scalar and media fields in availableLocales for i18n prefilling
     let nonLocalizedFields: string[] = [];
@@ -262,7 +260,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const params = {
       populate: {
-        ...populate,
         ...mediaPopulate,
         // NOTE: creator fields are selected in this way to avoid exposing sensitive data
         createdBy: {
@@ -272,7 +269,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           select: ['id', 'firstname', 'lastname', 'email'],
         },
       },
-      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...fields, ...nonLocalizedFields]),
+      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...nonLocalizedFields]),
       filters: {
         documentId: version.documentId,
       },

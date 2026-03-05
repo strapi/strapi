@@ -42,7 +42,8 @@ function getPopulateForRelation(
 ) {
   const isManyRelation = isAnyToMany(attribute);
 
-  if (initialPopulate) {
+  // Use initialPopulate when explicitly provided (including `false` to suppress population)
+  if (initialPopulate !== undefined) {
     return initialPopulate;
   }
 
@@ -378,10 +379,35 @@ const buildDeepPopulate = (uid: UID.CollectionType) => {
   return getService('populate-builder')(uid).populateDeep(Infinity).countRelations().build();
 };
 
+/**
+ * Restrict localizations populate to only metadata fields for localized content types.
+ * Returns an empty object for non-localized content types.
+ *
+ * By default, localizations are deeply populated which includes all relations and
+ * components for every locale — this is expensive and unnecessary for CM responses.
+ * The CM only needs these fields from localizations:
+ * - locale: to identify which locales exist
+ * - documentId: to link to the localized document
+ * - publishedAt: to determine published/draft status
+ * - updatedAt: to support the modified state indicator in the UI
+ */
+const getPopulateForLocalizations = (model: UID.Schema) => {
+  const modelSchema = strapi.getModel(model);
+  if (
+    (modelSchema as unknown as { pluginOptions: { i18n: { localized?: boolean } } }).pluginOptions
+      ?.i18n?.localized
+  ) {
+    return { localizations: { fields: ['locale', 'documentId', 'publishedAt', 'updatedAt'] } };
+  }
+
+  return {};
+};
+
 export {
   getDeepPopulate,
   getDeepPopulateDraftCount,
   getPopulateForValidation,
   getQueryPopulate,
   buildDeepPopulate,
+  getPopulateForLocalizations,
 };
