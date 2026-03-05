@@ -84,6 +84,9 @@
     "test:unit:update": "jest --config jest.config.js -u",
     "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
     "test:unit:watch": "run test:unit --watch",
+    "test:unit:coverage": "jest --config jest.config.js --coverage",
+    "test:front:coverage": "cross-env IS_EE=true jest --config jest.config.front.js --runInBand --coverage",
+    "test:coverage": "yarn test:unit:coverage && yarn test:front:coverage",
     "test:unit:vitest": "vitest run",
     "test:unit:vitest:watch": "vitest --watch"
   },
@@ -166,7 +169,7 @@
     "plop": "4.0.1",
     "prettier": "3.3.3",
     "prettier-2": "npm:prettier@^2",
-    "qs": "6.14.2",
+    "qs": "6.15.0",
     "rimraf": "5.0.5",
     "rollup": "4.59.0",
     "rollup-plugin-html": "0.2.1",
