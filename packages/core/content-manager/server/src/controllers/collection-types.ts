@@ -491,10 +491,11 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { populate, locale, isPublished: false })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      populate,
+      locale,
+      isPublished: false,
+    });
 
     for (const entity of entities) {
       if (!entity) {
@@ -529,10 +530,10 @@ export default {
       allowMultipleLocales: true,
     });
 
-    const entityPromises = documentIds.map((documentId: any) =>
-      documentManager.findLocales(documentId, model, { locale, isPublished: true })
-    );
-    const entities = (await Promise.all(entityPromises)).flat();
+    const entities = await documentManager.findLocales(documentIds, model, {
+      locale,
+      isPublished: true,
+    });
 
     for (const entity of entities) {
       if (!entity) {

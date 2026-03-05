@@ -229,11 +229,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     if (!availableLocales && !availableStatus) {
       // Nothing to compute.
-      return { availableLocales: [], availableStatus: [] };
+      return { availableLocales: [], availableStatus: [], versions: [] as DocumentVersion[] };
     }
     if (!isLocalized && !hasDnP) {
       // If there are no locales and no draft/publish, there's only ever 1 version of any document.
-      return { availableLocales: [], availableStatus: [] };
+      return { availableLocales: [], availableStatus: [], versions: [] as DocumentVersion[] };
     }
 
     const onlyStatusIsRelevant = hasDnP && (!isLocalized || !availableLocales);
@@ -252,6 +252,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       return {
         availableLocales: [],
         availableStatus: otherVersion ? [pick(AVAILABLE_STATUS_FIELDS, otherVersion)] : [],
+        versions: [] as DocumentVersion[],
       };
     }
 
@@ -328,6 +329,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return {
       availableLocales: availableLocalesResult,
       availableStatus: availableStatusResult ? [availableStatusResult] : [],
+      versions,
     };
   },
 
@@ -358,19 +360,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       opts.availableStatus = false;
     }
 
-    const meta = await this.getMetadata(uid, document, opts);
+    const { versions, ...meta } = await this.getMetadata(uid, document, opts);
 
     // Populate localization statuses
     if (document.localizations?.length) {
-      const otherStatus = await this.getManyAvailableStatus(uid, document.localizations);
-
       document.localizations = document.localizations.map((d) => {
-        const status = otherStatus.find(
-          (s) => s.documentId === d.documentId && s.locale === d.locale
+        // Find the counterpart version (same documentId + locale, opposite publishedAt) from
+        // the already-fetched versions array, avoiding an extra DB query.
+        const counterpart = versions.find(
+          (v) =>
+            v.documentId === d.documentId &&
+            v.locale === d.locale &&
+            (d.publishedAt !== null ? v.publishedAt === null : v.publishedAt !== null)
         );
         return {
           ...d,
-          status: this.getStatus(d, status ? [status] : []),
+          status: this.getStatus(d, counterpart ? [counterpart] : []),
         };
       });
     }
