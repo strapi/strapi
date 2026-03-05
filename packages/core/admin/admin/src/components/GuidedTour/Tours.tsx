@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Popover, Portal } from '@strapi/design-system';
+import { Box, Popover, Portal, setOpacity } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
@@ -53,12 +53,6 @@ const GuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
 
   return <GuidedTourTooltipImpl {...props}>{children}</GuidedTourTooltipImpl>;
 };
-
-// TODO: This should be exported from the design system
-const setOpacity = (hex: string, alpha: number) =>
-  `${hex}${Math.floor(alpha * 255)
-    .toString(16)
-    .padStart(2, '0')}`;
 
 const GuidedTourOverlay = styled(Box)`
   position: fixed;
