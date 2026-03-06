@@ -59,7 +59,9 @@ const renderAdmin = async (
     },
     ai: {
       enabled: true,
-    },
+      // Global pollution from the Node.js scope.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any,
   };
 
   const { get } = getFetchClient();
@@ -90,7 +92,9 @@ const renderAdmin = async (
       isEnabled: (featureName) => features.some((feature) => feature.name === featureName),
     };
     window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
-    window.strapi.ai = ai;
+    // Global pollution from the Node.js scope.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    window.strapi.ai = ai as any;
   } catch (err) {
     /**
      * If this fails, we simply don't activate any EE features.

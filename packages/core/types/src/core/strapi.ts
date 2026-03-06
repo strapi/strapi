@@ -38,9 +38,6 @@ export interface Strapi extends Container {
   db: Database;
   app: any;
   EE?: boolean;
-  ai?: {
-    enabled: boolean;
-  };
   ee: {
     seats: number | null | undefined;
     type: string | null | undefined;
@@ -63,7 +60,7 @@ export interface Strapi extends Container {
   components: Schema.Components;
   reload: Reloader;
   config: ConfigProvider;
-  mcp: Modules.MCP.McpService;
+  ai: Modules.AI.AiNamespace;
   services: Record<string, Core.Service>;
   service(uid: UID.Service): Core.Service;
   controllers: Record<string, Core.Controller>;

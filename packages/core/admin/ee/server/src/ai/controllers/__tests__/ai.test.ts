@@ -31,7 +31,7 @@ describe('AI Controller', () => {
     const createMockStrapi = (aiContainer = {}) => {
       return {
         get: jest.fn((service) => {
-          if (service === 'ai') {
+          if (service === 'ai.admin') {
             return {
               getAiToken: jest.fn(),
               ...aiContainer,
@@ -96,7 +96,7 @@ describe('AI Controller', () => {
 
       await aiController.getAiToken(ctx as any);
 
-      expect(global.strapi.get).toHaveBeenCalledWith('ai');
+      expect(global.strapi.get).toHaveBeenCalledWith('ai.admin');
       expect(mockAiContainer.getAiToken).toHaveBeenCalled();
     });
   });

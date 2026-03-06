@@ -13,7 +13,7 @@ export default {
         return ctx.unauthorized('Authentication required');
       }
 
-      const aiToken = await strapi.get('ai').getAiToken();
+      const aiToken = await strapi.get('ai.admin').getAiToken();
 
       ctx.body = {
         data: aiToken,
@@ -149,7 +149,7 @@ export default {
     }
   },
   async getAIFeatureConfig(ctx: Context) {
-    const aiFeatureConfig = await strapi.get('ai').getAIFeatureConfig();
+    const aiFeatureConfig = await strapi.get('ai.admin').getAIFeatureConfig();
 
     ctx.body = {
       data: aiFeatureConfig,

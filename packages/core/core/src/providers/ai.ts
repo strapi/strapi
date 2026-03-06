@@ -1,15 +1,16 @@
 import { defineProvider } from './provider';
-import { createMcpService } from '../services/mcp';
+import { createAiNamespace } from '../services/ai';
 
 export default defineProvider({
   init(strapi) {
-    strapi.add('mcp', () => createMcpService(strapi));
+    strapi.add('ai', () => createAiNamespace(strapi));
   },
   async bootstrap(strapi) {
-    if (strapi.get('mcp').isEnabled()) {
+    const { mcp } = strapi.get('ai');
+    if (mcp.isEnabled() === true) {
       try {
         strapi.log.info('[MCP] Starting MCP server...');
-        await strapi.get('mcp').start();
+        await mcp.start();
       } catch (error) {
         strapi.log.error('[MCP] Failed to start MCP server', { error });
       }
@@ -18,10 +19,11 @@ export default defineProvider({
     }
   },
   async destroy(strapi) {
-    if (strapi.get('mcp').isRunning()) {
+    const { mcp } = strapi.get('ai');
+    if (mcp.isRunning() === true) {
       try {
         strapi.log.info('[MCP] Stopping MCP server...');
-        await strapi.get('mcp').stop();
+        await mcp.stop();
       } catch (error) {
         strapi.log.error('[MCP] Failed to stop MCP server', { error });
       }

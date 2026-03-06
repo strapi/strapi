@@ -210,7 +210,7 @@ const createAIMetadataService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       let token: string;
       try {
-        const tokenData = await strapi.get('ai').getAiToken();
+        const tokenData = await strapi.get('ai.admin').getAiToken();
         token = tokenData.token;
       } catch (error) {
         throw new Error('Failed to retrieve AI token', {

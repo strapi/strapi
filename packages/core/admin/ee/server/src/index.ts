@@ -13,7 +13,7 @@ import { auditLog } from './audit-logs/content-types/audit-log';
 import aiRoutes from './ai/routes/ai';
 import aiController from './ai/controllers/ai';
 import type { Core } from '@strapi/types';
-import { createAIContainer } from './ai/containers/ai';
+import { createAIAdminService } from './ai/containers/ai';
 
 const getAdminEE = () => {
   const eeAdmin = {
@@ -54,7 +54,7 @@ const getAdminEE = () => {
 
       // Register internal ai service
       if (isAIEnabled) {
-        strapi.add('ai', createAIContainer({ strapi }));
+        strapi.add('ai.admin', () => createAIAdminService({ strapi }));
       }
 
       if (isAuditLogsEnabled) {

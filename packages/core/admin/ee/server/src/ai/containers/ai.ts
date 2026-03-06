@@ -17,7 +17,7 @@ const aiTokenCache = new Map<
   }
 >();
 
-const createAIContainer = ({ strapi }: { strapi: Core.Strapi }) => {
+const createAIAdminService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getAIFeatureConfig = async () => {
     const i18nSettings = await strapi.plugin('i18n').service('settings').getSettings();
     const uploadSettings = await strapi.plugin('upload').service('upload').getSettings();
@@ -199,4 +199,4 @@ const createAIContainer = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 };
 
-export { createAIContainer };
+export { createAIAdminService };
