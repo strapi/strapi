@@ -46,6 +46,10 @@ const AVAILABLE_LOCALES_FIELDS = [
   'publishedAt',
 ];
 
+/** Returns a DB filter that matches the opposite publish status. */
+const oppositePublishStatus = (publishedAt: unknown) =>
+  publishedAt !== null ? { $null: true } : { $notNull: true };
+
 const CONTENT_MANAGER_STATUS = {
   PUBLISHED: 'published',
   DRAFT: 'draft',
@@ -242,7 +246,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
             where: {
               documentId: version.documentId,
               ...(version.locale ? { locale: version.locale } : {}),
-              publishedAt: version.publishedAt !== null ? { $null: true } : { $notNull: true },
+              publishedAt: oppositePublishStatus(version.publishedAt),
             },
             select: AVAILABLE_STATUS_SCALAR_FIELDS,
             populate: AVAILABLE_STATUS_POPULATE,
@@ -368,7 +372,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           (v) =>
             v.documentId === d.documentId &&
             v.locale === d.locale &&
-            (d.publishedAt !== null ? v.publishedAt === null : v.publishedAt !== null)
+            (d.publishedAt === null) !== (v.publishedAt === null)
         );
         return {
           ...d,

@@ -200,7 +200,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
           documentIds.map((id) =>
             strapi
               .documents(uid)
-              .unpublish({ ...opts, documentId: id })
+              .unpublish({ ...opts, documentId: id, populate: {} })
               .then((result) => result?.entries)
           )
         );
