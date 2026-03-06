@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { CodeBlock as CodeBlockIcon } from '@strapi/icons';
-import * as Prism from 'prismjs';
+import * as PrismModule from 'prismjs';
 import { useIntl } from 'react-intl';
 import { BaseRange, Element, Editor, Node, NodeEntry, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
@@ -65,10 +65,23 @@ import 'prismjs/components/prism-tsx';
 import 'prismjs/components/prism-vbnet';
 import 'prismjs/components/prism-yaml';
 
+// prismjs is UMD and may not expose a namespace when bundled by Vite; the content-manager
+// index preloads it so 'window.Prism' is set. Use that when the module import is empty.
+const Prism =
+  typeof PrismModule !== 'undefined' && PrismModule?.languages
+    ? PrismModule
+    : typeof window !== 'undefined'
+      ? (window as Window & { Prism: typeof PrismModule }).Prism
+      : undefined;
+
 type BaseRangeCustom = BaseRange & { className: string };
 
 export const decorateCode = ([node, path]: NodeEntry) => {
   const ranges: BaseRangeCustom[] = [];
+
+  // Prism can be undefined when the UMD bundle doesn't expose a namespace and window.Prism
+  // isn't set yet (e.g. this chunk ran before the content-manager preload). Skip decoration.
+  if (!Prism?.languages) return ranges;
 
   // make sure it is an Slate Element
   if (!Element.isElement(node) || node.type !== 'code') return ranges;
