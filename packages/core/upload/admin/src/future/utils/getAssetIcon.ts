@@ -6,9 +6,9 @@ import {
   FilePdf,
   FileXls,
   FileZip,
-  Monitor,
-  VolumeUp,
-  Images,
+  Play,
+  Headphones,
+  Image,
 } from '@strapi/icons';
 import { DefaultTheme } from 'styled-components';
 
@@ -38,15 +38,15 @@ export const getAssetIcon = (mime: string | undefined, ext: string | undefined):
   const fileExtension = getFileExtension(ext);
 
   if (mime?.includes(AssetType.Image)) {
-    return Images;
+    return Image;
   }
 
   if (mime?.includes(AssetType.Video)) {
-    return Monitor;
+    return Play;
   }
 
   if (mime?.includes(AssetType.Audio)) {
-    return VolumeUp;
+    return Headphones;
   }
 
   return fileExtension ? DOC_ICON_MAP[fileExtension] || FileIcon : FileIcon;

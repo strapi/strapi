@@ -1,6 +1,11 @@
 import { uploadApi } from './api';
 
-import type { Folder, GetFolder, GetFolders } from '../../../../shared/contracts/folders';
+import type {
+  Folder,
+  CreateFolders,
+  GetFolder,
+  GetFolders,
+} from '../../../../shared/contracts/folders';
 
 export type FolderWithCounts = Omit<Folder, 'children' | 'files'> & {
   children?: { count: number };
@@ -48,6 +53,15 @@ const foldersApi = uploadApi.injectEndpoints({
         return [{ type: 'Folder', id: 'LIST' }];
       },
     }),
+    createFolder: builder.mutation<CreateFolders.Response['data'], CreateFolders.Request['body']>({
+      query: (body) => ({
+        url: '/upload/folders',
+        method: 'POST',
+        data: body,
+      }),
+      transformResponse: (response: CreateFolders.Response) => response.data,
+      invalidatesTags: [{ type: 'Folder', id: 'LIST' }],
+    }),
     getFolder: builder.query<FolderWithCounts, { id: number }>({
       query: ({ id }) => ({
         url: `/upload/folders/${id}`,
@@ -73,4 +87,4 @@ const foldersApi = uploadApi.injectEndpoints({
   }),
 });
 
-export const { useGetFoldersQuery, useGetFolderQuery } = foldersApi;
+export const { useCreateFolderMutation, useGetFoldersQuery, useGetFolderQuery } = foldersApi;
