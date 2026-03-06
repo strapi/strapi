@@ -127,8 +127,8 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
               name: '__status',
               type: 'enumeration',
               label: formatMessage({
-                id: getTranslation('containers.list.filters.publicationStatus'),
-                defaultMessage: 'Publication status',
+                id: getTranslation('containers.list.filters.status'),
+                defaultMessage: 'Status',
               }),
               operators: [
                 {
@@ -153,6 +153,20 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
                     defaultMessage: 'Published',
                   }),
                   value: 'published',
+                },
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.publishedModified'),
+                    defaultMessage: 'Published (modified)',
+                  }),
+                  value: 'published-modified',
+                },
+                {
+                  label: formatMessage({
+                    id: getTranslation('containers.List.publishedUnmodified'),
+                    defaultMessage: 'Published (unmodified)',
+                  }),
+                  value: 'published-unmodified',
                 },
               ],
             } satisfies Filters.Filter;

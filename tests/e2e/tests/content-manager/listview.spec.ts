@@ -24,8 +24,8 @@ test.describe('List View', () => {
     await expect(page.getByRole('row')).toHaveCount(2);
   });
 
-  test.describe('Publication status filter (Draft/Published)', () => {
-    test('Publication status filter is available and filtering by Draft shows only draft entries', async ({
+  test.describe('Status filter (Draft/Published)', () => {
+    test('Status filter is available and filtering by Draft shows only draft entries', async ({
       page,
     }) => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
@@ -36,12 +36,12 @@ test.describe('List View', () => {
 
       await page.getByRole('button', { name: 'Filters' }).click();
       await page.getByRole('combobox', { name: 'Select field' }).click();
-      await page.getByRole('option', { name: 'Publication status' }).click();
-      await page.getByRole('combobox', { name: 'Publication status' }).click();
+      await page.getByRole('option', { name: 'Status' }).click();
+      await page.getByRole('combobox', { name: 'Status' }).click();
       await page.getByRole('option', { name: 'Draft' }).click();
       await page.getByRole('button', { name: 'Add filter' }).click();
 
-      await expect(page.getByText('Publication status is draft')).toBeVisible();
+      await expect(page.getByText('Status is draft')).toBeVisible();
       // 2 articles (draft) + 1 header row
       await expect(page.getByRole('row')).toHaveCount(3);
       await expect(page.getByRole('gridcell', { name: 'Draft' })).toHaveCount(2);
@@ -64,15 +64,15 @@ test.describe('List View', () => {
 
       await expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
 
-      // Apply Publication status = Published filter
+      // Apply Status = Published filter
       await page.getByRole('button', { name: 'Filters' }).click();
       await page.getByRole('combobox', { name: 'Select field' }).click();
-      await page.getByRole('option', { name: 'Publication status' }).click();
-      await page.getByRole('combobox', { name: 'Publication status' }).click();
-      await page.getByRole('option', { name: 'Published' }).click();
+      await page.getByRole('option', { name: 'Status' }).click();
+      await page.getByRole('combobox', { name: 'Status' }).click();
+      await page.getByRole('option', { name: 'Published', exact: true }).click();
       await page.getByRole('button', { name: 'Add filter' }).click();
 
-      await expect(page.getByText('Publication status is published')).toBeVisible();
+      await expect(page.getByText('Status is published')).toBeVisible();
       await expect(page.getByRole('row')).toHaveCount(3);
       await expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
     });
@@ -84,12 +84,12 @@ test.describe('List View', () => {
       // with-admin: 2 draft articles, none published
       await page.getByRole('button', { name: 'Filters' }).click();
       await page.getByRole('combobox', { name: 'Select field' }).click();
-      await page.getByRole('option', { name: 'Publication status' }).click();
-      await page.getByRole('combobox', { name: 'Publication status' }).click();
-      await page.getByRole('option', { name: 'Published' }).click();
+      await page.getByRole('option', { name: 'Status' }).click();
+      await page.getByRole('combobox', { name: 'Status' }).click();
+      await page.getByRole('option', { name: 'Published', exact: true }).click();
       await page.getByRole('button', { name: 'Add filter' }).click();
 
-      await expect(page.getByText('Publication status is published')).toBeVisible();
+      await expect(page.getByText('Status is published')).toBeVisible();
       await expect(page.getByText('No content found')).toBeVisible();
     });
   });
