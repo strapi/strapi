@@ -9,6 +9,7 @@ import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/c
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
 import { indexByDocumentId } from './utils/document-status';
+import { getPopulateForLocalizations } from '../services/utils/populate';
 
 type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
@@ -140,6 +141,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .populateDeep(1)
       .countRelations({ toOne: false, toMany: true })
+      .withPopulateOverride(getPopulateForLocalizations(model))
       .build();
 
     const { locale, status } = await getDocumentLocaleAndStatus(query, model);
@@ -186,10 +188,12 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(ctx.query);
+
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
       .populateDeep(Infinity)
       .countRelations()
+      .withPopulateOverride(getPopulateForLocalizations(model))
       .build();
 
     const { locale, status } = await getDocumentLocaleAndStatus(ctx.query, model);
@@ -388,10 +392,12 @@ export default {
     const publishedDocument = await strapi.db.transaction(async () => {
       // Create or update document
       const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
+
       const populate = await getService('populate-builder')(model)
         .populateFromQuery(permissionQuery)
         .populateDeep(Infinity)
         .countRelations()
+        .withPopulateOverride(getPopulateForLocalizations(model))
         .build();
 
       let document: any;
