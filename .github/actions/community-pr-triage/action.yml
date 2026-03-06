@@ -1,0 +1,21 @@
+name: Community PR Triage
+description: Score and triage community PRs, optionally sync to Linear
+inputs:
+  dry-run:
+    description: 'Skip Linear sync (report only)'
+    default: 'true'
+  sprint-update:
+    description: 'Post sprint update and create milestone'
+    default: 'false'
+outputs:
+  report-path:
+    description: 'Path to the generated markdown report'
+  created:
+    description: 'Number of Linear issues created'
+  updated:
+    description: 'Number of Linear issues updated'
+  closed:
+    description: 'Number of Linear issues closed'
+runs:
+  using: node20
+  main: dist/index.cjs
