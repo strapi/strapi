@@ -38,7 +38,7 @@ test.describe('List View', () => {
       await page.getByRole('combobox', { name: 'Select field' }).click();
       await page.getByRole('option', { name: 'Status' }).click();
       await page.getByRole('combobox', { name: 'Status' }).click();
-      await page.getByRole('option', { name: 'Draft' }).click();
+      await page.getByRole('option', { name: 'Draft (never published)' }).click();
       await page.getByRole('button', { name: 'Add filter' }).click();
 
       await expect(page.getByText('Status is draft')).toBeVisible();
@@ -69,7 +69,7 @@ test.describe('List View', () => {
       await page.getByRole('combobox', { name: 'Select field' }).click();
       await page.getByRole('option', { name: 'Status' }).click();
       await page.getByRole('combobox', { name: 'Status' }).click();
-      await page.getByRole('option', { name: 'Published', exact: true }).click();
+      await page.getByRole('option', { name: 'Published (all)' }).click();
       await page.getByRole('button', { name: 'Add filter' }).click();
 
       await expect(page.getByText('Status is published')).toBeVisible();
@@ -86,7 +86,7 @@ test.describe('List View', () => {
       await page.getByRole('combobox', { name: 'Select field' }).click();
       await page.getByRole('option', { name: 'Status' }).click();
       await page.getByRole('combobox', { name: 'Status' }).click();
-      await page.getByRole('option', { name: 'Published', exact: true }).click();
+      await page.getByRole('option', { name: 'Published (all)' }).click();
       await page.getByRole('button', { name: 'Add filter' }).click();
 
       await expect(page.getByText('Status is published')).toBeVisible();

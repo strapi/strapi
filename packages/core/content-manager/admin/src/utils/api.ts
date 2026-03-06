@@ -16,14 +16,14 @@ type TransformedQuery<TQuery extends Query> = Omit<TQuery, 'plugins'> & {
 };
 
 /**
+ * @description
  * Creates a valid query params object for get requests
- * (e.g. plugins[i18n][locale]=en is merged to root as locale=en).
- * Status filter (__status in filters.$and) is left as-is; the server controller
- * rewrites it before calling the document service.
+ * ie. plugins[i18n][locale]=en becomes locale=en
  */
 const buildValidParams = <TQuery extends Query>(query: TQuery): TransformedQuery<TQuery> => {
   if (!query) return query;
 
+  // Extract pluginOptions from the query, they shouldn't be part of the URL
   const { plugins: _, ...validQueryParams } = {
     ...query,
     ...Object.values(query?.plugins ?? {}).reduce<Record<string, string>>(
@@ -32,7 +32,7 @@ const buildValidParams = <TQuery extends Query>(query: TQuery): TransformedQuery
     ),
   };
 
-  return validQueryParams as TransformedQuery<TQuery>;
+  return validQueryParams;
 };
 
 type BaseQueryError = ApiError | UnknownApiError;

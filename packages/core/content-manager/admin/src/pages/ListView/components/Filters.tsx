@@ -142,28 +142,28 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
               options: [
                 {
                   label: formatMessage({
-                    id: getTranslation('containers.List.draft'),
-                    defaultMessage: 'Draft',
+                    id: getTranslation('containers.List.statusFilter.draft'),
+                    defaultMessage: 'Draft (never published)',
                   }),
                   value: 'draft',
                 },
                 {
                   label: formatMessage({
-                    id: getTranslation('containers.List.published'),
-                    defaultMessage: 'Published',
+                    id: getTranslation('containers.List.statusFilter.published'),
+                    defaultMessage: 'Published (all)',
                   }),
                   value: 'published',
                 },
                 {
                   label: formatMessage({
-                    id: getTranslation('containers.List.publishedModified'),
+                    id: getTranslation('containers.List.statusFilter.publishedModified'),
                     defaultMessage: 'Published (modified)',
                   }),
                   value: 'published-modified',
                 },
                 {
                   label: formatMessage({
-                    id: getTranslation('containers.List.publishedUnmodified'),
+                    id: getTranslation('containers.List.statusFilter.publishedUnmodified'),
                     defaultMessage: 'Published (unmodified)',
                   }),
                   value: 'published-unmodified',
