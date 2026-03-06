@@ -24,6 +24,76 @@ test.describe('List View', () => {
     await expect(page.getByRole('row')).toHaveCount(2);
   });
 
+  test.describe('Publication status filter (Draft/Published)', () => {
+    test('Publication status filter is available and filtering by Draft shows only draft entries', async ({
+      page,
+    }) => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Article' }).click();
+
+      // with-admin.tar: Article has 2 entries, both draft initially
+      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+
+      await page.getByRole('button', { name: 'Filters' }).click();
+      await page.getByRole('combobox', { name: 'Select field' }).click();
+      await page.getByRole('option', { name: 'Publication status' }).click();
+      await page.getByRole('combobox', { name: 'Publication status' }).click();
+      await page.getByRole('option', { name: 'Draft' }).click();
+      await page.getByRole('button', { name: 'Add filter' }).click();
+
+      await expect(page.getByText('Publication status is draft')).toBeVisible();
+      // 2 articles (draft) + 1 header row
+      await expect(page.getByRole('row')).toHaveCount(3);
+      await expect(page.getByRole('gridcell', { name: 'Draft' })).toHaveCount(2);
+    });
+
+    test('Filtering by Published shows only published entries', async ({ page }) => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Article' }).click();
+
+      // Publish all articles first (with-admin has 2 draft articles)
+      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
+      await checkbox.check();
+      await page.getByRole('button', { name: 'Publish' }).first().click();
+      await page
+        .getByLabel('Publish entries')
+        .getByRole('checkbox', { name: 'Select all entries' })
+        .check();
+      await page.getByLabel('Publish entries').getByRole('button', { name: 'Publish' }).click();
+      await page.getByLabel('Confirm').getByRole('button', { name: 'Publish' }).click();
+
+      await expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
+
+      // Apply Publication status = Published filter
+      await page.getByRole('button', { name: 'Filters' }).click();
+      await page.getByRole('combobox', { name: 'Select field' }).click();
+      await page.getByRole('option', { name: 'Publication status' }).click();
+      await page.getByRole('combobox', { name: 'Publication status' }).click();
+      await page.getByRole('option', { name: 'Published' }).click();
+      await page.getByRole('button', { name: 'Add filter' }).click();
+
+      await expect(page.getByText('Publication status is published')).toBeVisible();
+      await expect(page.getByRole('row')).toHaveCount(3);
+      await expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
+    });
+
+    test('Filtering by Published when all are draft shows no content', async ({ page }) => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Article' }).click();
+
+      // with-admin: 2 draft articles, none published
+      await page.getByRole('button', { name: 'Filters' }).click();
+      await page.getByRole('combobox', { name: 'Select field' }).click();
+      await page.getByRole('option', { name: 'Publication status' }).click();
+      await page.getByRole('combobox', { name: 'Publication status' }).click();
+      await page.getByRole('option', { name: 'Published' }).click();
+      await page.getByRole('button', { name: 'Add filter' }).click();
+
+      await expect(page.getByText('Publication status is published')).toBeVisible();
+      await expect(page.getByText('No content found')).toBeVisible();
+    });
+  });
+
   test('A user should be able to navigate to the ListView of the content manager and see some entries', async ({
     page,
   }) => {

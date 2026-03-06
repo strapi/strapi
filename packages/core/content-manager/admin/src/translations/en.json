@@ -111,6 +111,7 @@
   "containers.List.draft": "Draft",
   "containers.List.published": "Published",
   "containers.List.modified": "Modified",
+  "containers.list.filters.publicationStatus": "Publication status",
   "containers.list.displayedFields": "Displayed Fields",
   "containers.list.items": "{number} {number, plural, =0 {items} one {item} other {items}}",
   "containers.list.table.row-actions": "Row actions",

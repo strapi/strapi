@@ -127,8 +127,8 @@ const Root = ({ disabled, schema, children }: FiltersProps) => {
               name: '__status',
               type: 'enumeration',
               label: formatMessage({
-                id: getTranslation('containers.list.table-headers.publishedAt'),
-                defaultMessage: 'State',
+                id: getTranslation('containers.list.filters.publicationStatus'),
+                defaultMessage: 'Publication status',
               }),
               operators: [
                 {
