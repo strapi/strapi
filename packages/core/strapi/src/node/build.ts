@@ -50,7 +50,7 @@ const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
     const compilingTsSpinner = logger.spinner(`Compiling TS`).start();
 
     try {
-      tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
+      await tsUtils.compile(cwd, { configOptions: { ignoreDiagnostics: false } });
     } catch (err: unknown) {
       // we exit here to maintain the same behavior as before.
       process.exit(1);
