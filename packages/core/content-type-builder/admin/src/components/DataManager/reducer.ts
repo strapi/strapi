@@ -4,7 +4,6 @@ import omit from 'lodash/omit';
 
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
-import { removeManagedIndexesForAttribute } from '../FormModal/utils/indexing';
 
 import { createUndoRedoSlice } from './undoRedo';
 
@@ -567,10 +566,17 @@ const slice = createUndoRedoSlice(
         removeAttributeAt(type, attributeToRemoveIndex);
 
         if (forTarget === 'contentType' && 'indexes' in type) {
-          (type as ContentType).indexes = removeManagedIndexesForAttribute({
-            indexes: ((type as ContentType).indexes as Record<string, unknown>[] | undefined) ?? [],
-            attributeName: attributeToRemoveName,
-          }) as unknown[] | undefined;
+          const indexes =
+            ((type as ContentType).indexes as { attributes?: string[] }[] | undefined) ?? [];
+          (type as ContentType).indexes = indexes.filter(
+            (idx) =>
+              !Array.isArray(idx.attributes) ||
+              idx.attributes.length !== 1 ||
+              idx.attributes[0] !== attributeToRemoveName
+          ) as ContentType['indexes'];
+          if ((type as ContentType).indexes?.length === 0) {
+            delete (type as ContentType).indexes;
+          }
         }
       },
       // only edits a component in practice

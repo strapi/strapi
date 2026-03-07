@@ -239,8 +239,6 @@ const createHelpers = (db: Database) => {
 
   /**
    * Drops an index from table
-   * @param {Knex.TableBuilder} tableBuilder
-   * @param {Index} index
    */
   const dropIndex = (tableBuilder: Knex.TableBuilder, index: Index, existingIndexes?: Index[]) => {
     if (!db.config.settings?.forceMigration) {

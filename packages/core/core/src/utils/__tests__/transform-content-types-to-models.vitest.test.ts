@@ -343,62 +343,30 @@ describe('transformContentTypesToModels', () => {
       }
     );
 
-    it('supports attribute-based custom indexes', () => {
+    it('creates non-unique index from indexes array with type index and attributes', () => {
+      const modifiedContentTypes = patchContentTypes('countries', {
+        indexes: [{ type: 'index', attributes: ['name'] }],
+      } as any);
+
+      const models = transformContentTypesToModels(modifiedContentTypes, identifiers);
+      const model = models.find((m) => m.uid === 'api::countries.countries');
+      const nameIndex = model?.indexes?.find((idx) => idx.columns.includes('name'));
+
+      expect(nameIndex).toBeDefined();
+      expect(nameIndex?.columns).toEqual(['name']);
+      expect(nameIndex?.type).toBeUndefined();
+    });
+
+    it('ignores unique entries in schema indexes array', () => {
       const modifiedContentTypes = patchContentTypes('countries', {
         indexes: [{ attributes: ['name'], type: 'unique' }],
       } as any);
 
       const models = transformContentTypesToModels(modifiedContentTypes, identifiers);
       const model = models.find((m) => m.uid === 'api::countries.countries');
+      const uniqueIndex = model?.indexes?.find((idx) => idx.type === 'unique');
 
-      expect(model?.indexes).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            columns: ['name'],
-            type: 'unique',
-          }),
-        ])
-      );
-    });
-
-    it('supports variant scope for attribute-based indexes', () => {
-      const modifiedContentTypes = patchContentTypes('countries', {
-        attributes: {
-          locale: { type: 'string' },
-        },
-        indexes: [{ attributes: ['name'], type: 'unique', scope: 'variant' }],
-      } as any);
-
-      const models = transformContentTypesToModels(modifiedContentTypes, identifiers);
-      const model = models.find((m) => m.uid === 'api::countries.countries');
-      const uniqueIndex = model?.indexes?.find(
-        (idx) => idx.type === 'unique' && idx.columns.includes('name')
-      );
-
-      expect(uniqueIndex?.columns).toEqual(expect.arrayContaining(['name', 'locale']));
-    });
-
-    it('includes draft/publish lifecycle column for variant unique indexes', () => {
-      const modifiedContentTypes = patchContentTypes('countries', {
-        options: {
-          draftAndPublish: true,
-        },
-        attributes: {
-          publishedAt: { type: 'datetime' },
-          locale: { type: 'string' },
-        },
-        indexes: [{ attributes: ['name'], type: 'unique', scope: 'variant' }],
-      } as any);
-
-      const models = transformContentTypesToModels(modifiedContentTypes, identifiers);
-      const model = models.find((m) => m.uid === 'api::countries.countries');
-      const uniqueIndex = model?.indexes?.find(
-        (idx) => idx.type === 'unique' && idx.columns.includes('name')
-      );
-
-      expect(uniqueIndex?.columns).toEqual(
-        expect.arrayContaining(['name', 'locale', 'published_at'])
-      );
+      expect(uniqueIndex).toBeUndefined();
     });
 
     it('keeps legacy columns indexes', () => {

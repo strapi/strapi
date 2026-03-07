@@ -24,7 +24,7 @@ test.describe('Feature flags visibility', () => {
     expect(flags.indexing).toBe(false);
     expect(flags.mediaLibrary).toBe(false);
 
-    // Indexing feature: hidden in CTB attribute advanced settings when future flag is disabled.
+    // Indexing feature: "Add database index" checkbox hidden in CTB attribute settings when future flag is disabled.
     await navToHeader(page, ['Content-Type Builder', 'Article'], 'Article');
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
     await page
@@ -33,10 +33,7 @@ test.describe('Feature flags visibility', () => {
     await page.getByLabel('Name', { exact: true }).fill('featureFlagCheckField');
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await expect(page.getByText('Unique field')).toBeVisible();
-    await expect(page.getByText('Indexing', { exact: true })).toHaveCount(0);
-    await expect(page.getByRole('radio', { name: /Unique \(global\)/i })).toHaveCount(0);
-    await expect(page.getByRole('radio', { name: /Unique \(variant\)/i })).toHaveCount(0);
-    await expect(page.getByRole('radio', { name: /Index \(non-unique\)/i })).toHaveCount(0);
+    await expect(page.getByText('Add database index', { exact: true })).toHaveCount(0);
     await page.getByRole('button', { name: 'Finish' }).click();
 
     // Media library future feature: no grid/table toggles in legacy media library UI.

@@ -5,32 +5,12 @@ import { isAttributeIndexingFutureEnabled } from '../utils/indexing';
 import { attributeOptions } from './attributeOptions';
 
 type DataType = 'biginteger' | 'string' | 'integer' | 'float' | 'decimal';
-type IndexMode = 'none' | 'index' | 'unique-global' | 'unique-variant';
 
-const getUniqueOption = (data?: { indexMode?: IndexMode }) => {
-  const isIndexingEnabled = isAttributeIndexingFutureEnabled();
-  const hasUniqueIndex =
-    isIndexingEnabled &&
-    (data?.indexMode === 'unique-global' || data?.indexMode === 'unique-variant');
-
-  return {
-    ...attributeOptions.unique,
-    disabled: hasUniqueIndex,
-    description: hasUniqueIndex
-      ? {
-          id: getTrad('form.attribute.item.uniqueField.enforcedByIndex.description'),
-          defaultMessage: 'Automatically enabled because a unique database index is selected.',
-        }
-      : attributeOptions.unique.description,
-  };
-};
-
-const getIndexModeOption = () => {
+const getIndexedOption = () => {
   if (!isAttributeIndexingFutureEnabled()) {
     return [];
   }
-
-  return [attributeOptions.indexMode];
+  return [attributeOptions.indexed];
 };
 
 const conditionSection = {
@@ -170,7 +150,7 @@ export const advancedForm = {
       ],
     };
   },
-  date({ type, indexMode }: { type: string; indexMode?: IndexMode }) {
+  date({ type }: { type: string }) {
     return {
       sections: [
         {
@@ -193,8 +173,8 @@ export const advancedForm = {
           },
           items: [
             attributeOptions.required,
-            getUniqueOption({ indexMode }),
-            ...getIndexModeOption(),
+            attributeOptions.unique,
+            ...getIndexedOption(),
             attributeOptions.private,
           ],
         },
@@ -216,7 +196,7 @@ export const advancedForm = {
       ],
     };
   },
-  email(data?: { indexMode?: IndexMode }) {
+  email() {
     return {
       sections: [
         {
@@ -235,8 +215,8 @@ export const advancedForm = {
           },
           items: [
             attributeOptions.required,
-            getUniqueOption(data),
-            ...getIndexModeOption(),
+            attributeOptions.unique,
+            ...getIndexedOption(),
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,
@@ -354,7 +334,7 @@ export const advancedForm = {
       ],
     };
   },
-  number(data: { type: DataType; indexMode?: IndexMode }) {
+  number(data: { type: DataType }) {
     const inputStep = data.type === 'decimal' || data.type === 'float' ? 'any' : 1;
 
     return {
@@ -382,8 +362,8 @@ export const advancedForm = {
           },
           items: [
             attributeOptions.required,
-            getUniqueOption(data),
-            ...getIndexModeOption(),
+            attributeOptions.unique,
+            ...getIndexedOption(),
             attributeOptions.max,
             attributeOptions.min,
             attributeOptions.private,
@@ -447,7 +427,7 @@ export const advancedForm = {
       ],
     };
   },
-  text(data?: { indexMode?: IndexMode }) {
+  text() {
     return {
       sections: [
         { sectionTitle: null, items: [attributeOptions.default, attributeOptions.regex] },
@@ -458,8 +438,8 @@ export const advancedForm = {
           },
           items: [
             attributeOptions.required,
-            getUniqueOption(data),
-            ...getIndexModeOption(),
+            attributeOptions.unique,
+            ...getIndexedOption(),
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,

@@ -60,11 +60,10 @@ import { createComponentUid, createUid } from './utils/createUid';
 import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
 import { getFormInputNames } from './utils/getFormInputNames';
 import {
-  buildNextIndexes,
+  buildIndexesWithAttributeIndex,
   isAttributeIndexingFutureEnabled,
-  resolveIndexMode,
+  resolveIndexed,
   stripAttributeIndexFields,
-  type IndexMode,
 } from './utils/indexing';
 
 import type { ContentType } from '../../types';
@@ -153,51 +152,20 @@ export const FormModal = () => {
   const isIndexingEnabled = isAttributeIndexingFutureEnabled();
 
   const syncContentTypeIndexesForAttribute = React.useCallback(
-    ({
-      newAttributeName,
-      oldAttributeName,
-      mode,
-    }: {
-      newAttributeName: string;
-      oldAttributeName?: string;
-      mode: IndexMode;
-    }) => {
-      if (!isIndexingEnabled) {
-        return;
-      }
-
-      if (forTarget !== 'contentType') {
-        return;
-      }
-
+    (newAttributeName: string, oldAttributeName: string | undefined, indexed: boolean) => {
+      if (!isIndexingEnabled || forTarget !== 'contentType') return;
       const contentType = contentTypes[targetUid];
-      if (!contentType) {
-        return;
-      }
-
-      setContentTypeIndexes({
-        uid: contentType.uid,
-        indexes: buildNextIndexes({
-          indexes: contentType.indexes as Record<string, unknown>[] | undefined,
-          oldAttributeName,
-          newAttributeName,
-          mode,
-        }) as unknown[] | undefined,
-      });
+      if (!contentType) return;
+      const next = buildIndexesWithAttributeIndex(
+        contentType.indexes as { type?: string; attributes?: string[] }[] | undefined,
+        oldAttributeName,
+        newAttributeName,
+        indexed
+      );
+      setContentTypeIndexes({ uid: contentType.uid, indexes: next as unknown[] | undefined });
     },
     [contentTypes, forTarget, isIndexingEnabled, setContentTypeIndexes, targetUid]
   );
-
-  const normalizeAttributeIndexConsistency = React.useCallback((attribute: Record<string, any>) => {
-    const indexMode = attribute.indexMode as IndexMode | undefined;
-    const normalized = { ...attribute };
-
-    if (indexMode === 'unique-global' || indexMode === 'unique-variant') {
-      normalized.unique = true;
-    }
-
-    return normalized;
-  }, []);
 
   const checkFieldNameChanges = () => {
     // Only check when editing an attribute
@@ -335,21 +303,15 @@ export const FormModal = () => {
         if (
           isIndexingEnabled &&
           modalType === 'attribute' &&
-          actionType === 'edit' &&
           forTarget === 'contentType' &&
           attributeToEdit?.name
         ) {
-          const indexMode = resolveIndexMode({
-            indexes:
-              (contentTypes[targetUid]?.indexes as Record<string, unknown>[] | undefined) ?? [],
-            attributeName: attributeToEdit.name,
-            legacyUnique: Boolean(attributeToEdit.unique),
-          });
-
-          attributeToEdit.indexMode = indexMode;
-          if (indexMode === 'unique-global' || indexMode === 'unique-variant') {
-            attributeToEdit.unique = true;
-          }
+          attributeToEdit.indexed = resolveIndexed(
+            (contentTypes[targetUid] as ContentType)?.indexes as
+              | { attributes?: string[]; type?: string }[]
+              | undefined,
+            attributeToEdit.name
+          );
         }
 
         // We need to set the repeatable key to false when editing a component
@@ -585,22 +547,8 @@ export const FormModal = () => {
           value: val,
         })
       );
-
-      if (
-        isIndexingEnabled &&
-        name === 'indexMode' &&
-        (val === 'unique-global' || val === 'unique-variant') &&
-        modifiedData.unique !== true
-      ) {
-        dispatch(
-          actions.onChange({
-            keys: ['unique'],
-            value: true,
-          })
-        );
-      }
     },
-    [dispatch, formErrors, isIndexingEnabled, modifiedData.unique]
+    [dispatch, formErrors]
   );
 
   const submitForm = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
@@ -744,9 +692,7 @@ export const FormModal = () => {
 
         // The user is creating a DZ (he had entered the name of the dz)
         if (isDynamicZoneAttribute) {
-          const attributeToSet = stripAttributeIndexFields(
-            normalizeAttributeIndexConsistency(modifiedData)
-          );
+          const attributeToSet = stripAttributeIndexFields(modifiedData);
 
           if (actionType === 'create') {
             addAttribute({
@@ -780,10 +726,8 @@ export const FormModal = () => {
 
         // Normal fields like boolean relations or dynamic zone
         if (!isComponentAttribute) {
-          const attributeToSet = stripAttributeIndexFields(
-            normalizeAttributeIndexConsistency(modifiedData)
-          );
-          const selectedIndexMode = (modifiedData.indexMode ?? 'none') as IndexMode;
+          const attributeToSet = stripAttributeIndexFields(modifiedData);
+          const indexed = Boolean(modifiedData.indexed);
 
           if (actionType === 'create') {
             addAttribute({
@@ -791,10 +735,7 @@ export const FormModal = () => {
               forTarget,
               targetUid,
             });
-            syncContentTypeIndexesForAttribute({
-              newAttributeName: String(attributeToSet.name),
-              mode: selectedIndexMode,
-            });
+            syncContentTypeIndexesForAttribute(String(attributeToSet.name), undefined, indexed);
           } else {
             editAttribute({
               attributeToSet,
@@ -802,11 +743,11 @@ export const FormModal = () => {
               targetUid,
               name: initialData.name,
             });
-            syncContentTypeIndexesForAttribute({
-              oldAttributeName: initialData.name,
-              newAttributeName: String(attributeToSet.name),
-              mode: selectedIndexMode,
-            });
+            syncContentTypeIndexesForAttribute(
+              String(attributeToSet.name),
+              initialData.name,
+              indexed
+            );
           }
 
           if (shouldContinue) {
@@ -845,19 +786,12 @@ export const FormModal = () => {
         }
 
         if (actionType === 'create') {
-          const attributeToSet = stripAttributeIndexFields(
-            normalizeAttributeIndexConsistency(modifiedData)
-          );
-          const selectedIndexMode = (modifiedData.indexMode ?? 'none') as IndexMode;
+          const attributeToSet = stripAttributeIndexFields(modifiedData);
 
           addAttribute({
             attributeToSet,
             forTarget,
             targetUid,
-          });
-          syncContentTypeIndexesForAttribute({
-            newAttributeName: String(attributeToSet.name),
-            mode: selectedIndexMode,
           });
         } else {
           // Ensure conditions are explicitly set to undefined if they were removed
@@ -868,13 +802,12 @@ export const FormModal = () => {
           // { name: "field" } vs { name: "field", conditions: undefined }
           // without this, deleted conditions would be preserved by the backend's
           // reuseUnsetPreviousProperties function.
-          const attributeData = stripAttributeIndexFields(
-            normalizeAttributeIndexConsistency({ ...modifiedData })
-          );
+          const attributeData = stripAttributeIndexFields({ ...modifiedData });
           if (!('conditions' in modifiedData) || modifiedData.conditions === undefined) {
             // Explicitly add the conditions key with undefined value
             attributeData.conditions = undefined;
           }
+          const indexed = Boolean(modifiedData.indexed);
 
           editAttribute({
             attributeToSet: attributeData,
@@ -882,12 +815,7 @@ export const FormModal = () => {
             targetUid,
             name: initialData.name,
           });
-
-          syncContentTypeIndexesForAttribute({
-            oldAttributeName: initialData.name,
-            newAttributeName: String(attributeData.name),
-            mode: (modifiedData.indexMode ?? 'none') as IndexMode,
-          });
+          syncContentTypeIndexesForAttribute(String(attributeData.name), initialData.name, indexed);
         }
 
         if (shouldContinue) {
@@ -946,14 +874,17 @@ export const FormModal = () => {
         });
 
         // Add the field to the schema
-        const attributeToSet = stripAttributeIndexFields(
-          normalizeAttributeIndexConsistency(modifiedData)
-        );
+        const attributeToSet = stripAttributeIndexFields(modifiedData);
         addAttribute({
           attributeToSet,
           forTarget,
           targetUid,
         });
+        syncContentTypeIndexesForAttribute(
+          String(attributeToSet.name),
+          undefined,
+          Boolean(modifiedData.indexed)
+        );
 
         dispatch(actions.resetProps());
 
