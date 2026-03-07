@@ -1,4 +1,4 @@
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Field, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { Wrapper } from './Styles';
@@ -29,10 +29,9 @@ export const CustomRadioGroup = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={2}>
-      <Typography variant="pi" fontWeight="bold" textColor="neutral800" htmlFor={name} tag="label">
-        {formatMessage(intlLabel)}
-      </Typography>
+    <Field.Root name={name}>
+      <Field.Label>{formatMessage(intlLabel)}</Field.Label>
+      <Field.Hint />
       <Wrapper gap={4} alignItems="stretch">
         {radios.map((radio) => {
           return (
@@ -64,6 +63,6 @@ export const CustomRadioGroup = ({
           );
         })}
       </Wrapper>
-    </Flex>
+    </Field.Root>
   );
 };

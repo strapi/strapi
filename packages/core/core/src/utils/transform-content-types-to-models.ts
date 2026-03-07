@@ -394,18 +394,23 @@ const withVariantScopeColumns = (
   contentType: LoadedContentTypeModel,
   columns: string[],
   identifiers: Identifiers,
-  scope?: Scope
+  scope?: Scope,
+  type?: ModelIndex['type'] | string
 ) => {
-  if (scope !== 'variant') {
-    return columns;
+  const scopedColumns = [...columns];
+
+  // For draft & publish types, unique indexes must include publication state
+  // so draft and published versions of the same entry can coexist.
+  if (type === 'unique' && contentType.options?.draftAndPublish) {
+    scopedColumns.push(identifiers.getColumnName('published_at'));
   }
 
-  if (contentType.attributes?.locale) {
-    const localeColumn = identifiers.getColumnName('locale');
-    return Array.from(new Set([...columns, localeColumn]));
+  // Locale is a variant dimension, not a global one.
+  if (scope === 'variant' && contentType.attributes?.locale) {
+    scopedColumns.push(identifiers.getColumnName('locale'));
   }
 
-  return columns;
+  return Array.from(new Set(scopedColumns));
 };
 
 const autoIndexName = (
@@ -448,7 +453,8 @@ const normalizeIndexes = (
         contentType,
         [...baseColumns],
         identifiers,
-        index.scope
+        index.scope,
+        normalizedType
       );
 
       return {

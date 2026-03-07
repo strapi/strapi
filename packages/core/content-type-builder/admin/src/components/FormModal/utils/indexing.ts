@@ -3,6 +3,15 @@ type IndexScope = 'global' | 'variant';
 
 export type IndexMode = 'none' | 'index' | 'unique-global' | 'unique-variant';
 
+export const isAttributeIndexingFutureEnabled = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const strapiGlobal = (window as any).strapi;
+  return strapiGlobal?.future?.isEnabled?.('unstableContentTypeBuilderIndexing') === true;
+};
+
 type ModelIndex = {
   name?: string;
   type?: string;
@@ -50,10 +59,47 @@ const createIndexFromMode = (attributeName: string, mode: IndexMode): ModelIndex
   };
 };
 
+const isSingleAttributeManagedIndex = (index: ModelIndex) => {
+  return (
+    !isLegacyColumnsIndex(index) && Array.isArray(index.attributes) && index.attributes.length === 1
+  );
+};
+
+const getManagedIndexSignature = (index: ModelIndex) => {
+  if (!isSingleAttributeManagedIndex(index)) {
+    return null;
+  }
+
+  const attribute = index.attributes?.[0];
+  const type = index.type ?? 'index';
+  const scope = index.scope ?? 'global';
+
+  return `${attribute}::${type}::${scope}`;
+};
+
+const dedupeManagedIndexes = (indexes: ModelIndex[]) => {
+  const seen = new Set<string>();
+
+  return indexes.filter((index) => {
+    const signature = getManagedIndexSignature(index);
+
+    if (!signature) {
+      return true;
+    }
+
+    if (seen.has(signature)) {
+      return false;
+    }
+
+    seen.add(signature);
+    return true;
+  });
+};
+
 export const resolveIndexMode = ({
   indexes,
   attributeName,
-  legacyUnique,
+  legacyUnique: _legacyUnique,
 }: {
   indexes?: ModelIndex[];
   attributeName: string;
@@ -71,7 +117,8 @@ export const resolveIndexMode = ({
     }
   }
 
-  return legacyUnique ? 'unique-global' : 'none';
+  // Legacy attribute.unique stays business-logic-only and must not imply a DB index mode.
+  return 'none';
 };
 
 export const buildNextIndexes = ({
@@ -102,8 +149,9 @@ export const buildNextIndexes = ({
 
   const maybeNewIndex = createIndexFromMode(newAttributeName, mode);
   const next = maybeNewIndex ? [...preserved, maybeNewIndex] : preserved;
+  const deduped = dedupeManagedIndexes(next);
 
-  return next.length > 0 ? next : undefined;
+  return deduped.length > 0 ? deduped : undefined;
 };
 
 export const removeManagedIndexesForAttribute = ({

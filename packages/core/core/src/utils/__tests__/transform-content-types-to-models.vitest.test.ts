@@ -378,6 +378,29 @@ describe('transformContentTypesToModels', () => {
       expect(uniqueIndex?.columns).toEqual(expect.arrayContaining(['name', 'locale']));
     });
 
+    it('includes draft/publish lifecycle column for variant unique indexes', () => {
+      const modifiedContentTypes = patchContentTypes('countries', {
+        options: {
+          draftAndPublish: true,
+        },
+        attributes: {
+          publishedAt: { type: 'datetime' },
+          locale: { type: 'string' },
+        },
+        indexes: [{ attributes: ['name'], type: 'unique', scope: 'variant' }],
+      } as any);
+
+      const models = transformContentTypesToModels(modifiedContentTypes, identifiers);
+      const model = models.find((m) => m.uid === 'api::countries.countries');
+      const uniqueIndex = model?.indexes?.find(
+        (idx) => idx.type === 'unique' && idx.columns.includes('name')
+      );
+
+      expect(uniqueIndex?.columns).toEqual(
+        expect.arrayContaining(['name', 'locale', 'published_at'])
+      );
+    });
+
     it('keeps legacy columns indexes', () => {
       const modifiedContentTypes = patchContentTypes('countries', {
         indexes: [{ name: 'legacy_idx', columns: ['name'], type: null }],

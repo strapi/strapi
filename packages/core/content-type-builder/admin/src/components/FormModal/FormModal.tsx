@@ -61,6 +61,7 @@ import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
 import { getFormInputNames } from './utils/getFormInputNames';
 import {
   buildNextIndexes,
+  isAttributeIndexingFutureEnabled,
   resolveIndexMode,
   stripAttributeIndexFields,
   type IndexMode,
@@ -149,6 +150,7 @@ export const FormModal = () => {
 
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState<any>(null);
+  const isIndexingEnabled = isAttributeIndexingFutureEnabled();
 
   const syncContentTypeIndexesForAttribute = React.useCallback(
     ({
@@ -160,6 +162,10 @@ export const FormModal = () => {
       oldAttributeName?: string;
       mode: IndexMode;
     }) => {
+      if (!isIndexingEnabled) {
+        return;
+      }
+
       if (forTarget !== 'contentType') {
         return;
       }
@@ -179,7 +185,7 @@ export const FormModal = () => {
         }) as unknown[] | undefined,
       });
     },
-    [contentTypes, forTarget, setContentTypeIndexes, targetUid]
+    [contentTypes, forTarget, isIndexingEnabled, setContentTypeIndexes, targetUid]
   );
 
   const normalizeAttributeIndexConsistency = React.useCallback((attribute: Record<string, any>) => {
@@ -327,6 +333,7 @@ export const FormModal = () => {
         };
 
         if (
+          isIndexingEnabled &&
           modalType === 'attribute' &&
           actionType === 'edit' &&
           forTarget === 'contentType' &&
@@ -580,6 +587,7 @@ export const FormModal = () => {
       );
 
       if (
+        isIndexingEnabled &&
         name === 'indexMode' &&
         (val === 'unique-global' || val === 'unique-variant') &&
         modifiedData.unique !== true
@@ -592,7 +600,7 @@ export const FormModal = () => {
         );
       }
     },
-    [dispatch, formErrors, modifiedData.unique]
+    [dispatch, formErrors, isIndexingEnabled, modifiedData.unique]
   );
 
   const submitForm = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {

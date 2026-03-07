@@ -40,6 +40,39 @@ const enforceUniqueAttributesForUniqueIndexes = (contentType: any) => {
   });
 };
 
+const dedupeManagedSingleAttributeIndexes = (contentType: any) => {
+  if (!Array.isArray(contentType?.indexes)) {
+    return;
+  }
+
+  const seen = new Set<string>();
+
+  contentType.indexes = contentType.indexes.filter((index: any) => {
+    const hasLegacyColumns = Array.isArray(index?.columns) && index.columns.length > 0;
+    const hasSingleAttribute =
+      Array.isArray(index?.attributes) &&
+      index.attributes.length === 1 &&
+      typeof index.attributes[0] === 'string';
+
+    // Preserve legacy and multi-attribute indexes exactly as-is.
+    if (hasLegacyColumns || !hasSingleAttribute) {
+      return true;
+    }
+
+    const attribute = index.attributes[0];
+    const type = index?.type ?? 'index';
+    const scope = index?.scope ?? 'global';
+    const signature = `${attribute}::${type}::${scope}`;
+
+    if (seen.has(signature)) {
+      return false;
+    }
+
+    seen.add(signature);
+    return true;
+  });
+};
+
 const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
   schema.components.forEach((component) => {
     if (component.action === 'delete') {
@@ -206,6 +239,7 @@ export const updateSchema = async (schema: CTBSchema) => {
     const { action, uid } = contentType;
 
     if (action === 'create' || action === 'update') {
+      dedupeManagedSingleAttributeIndexes(contentType);
       enforceUniqueAttributesForUniqueIndexes(contentType);
     }
 

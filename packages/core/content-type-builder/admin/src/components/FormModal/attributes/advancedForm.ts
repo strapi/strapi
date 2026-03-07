@@ -1,5 +1,6 @@
 import { getTrad } from '../../../utils/getTrad';
 import { componentForm } from '../component/componentForm';
+import { isAttributeIndexingFutureEnabled } from '../utils/indexing';
 
 import { attributeOptions } from './attributeOptions';
 
@@ -7,8 +8,10 @@ type DataType = 'biginteger' | 'string' | 'integer' | 'float' | 'decimal';
 type IndexMode = 'none' | 'index' | 'unique-global' | 'unique-variant';
 
 const getUniqueOption = (data?: { indexMode?: IndexMode }) => {
+  const isIndexingEnabled = isAttributeIndexingFutureEnabled();
   const hasUniqueIndex =
-    data?.indexMode === 'unique-global' || data?.indexMode === 'unique-variant';
+    isIndexingEnabled &&
+    (data?.indexMode === 'unique-global' || data?.indexMode === 'unique-variant');
 
   return {
     ...attributeOptions.unique,
@@ -20,6 +23,14 @@ const getUniqueOption = (data?: { indexMode?: IndexMode }) => {
         }
       : attributeOptions.unique.description,
   };
+};
+
+const getIndexModeOption = () => {
+  if (!isAttributeIndexingFutureEnabled()) {
+    return [];
+  }
+
+  return [attributeOptions.indexMode];
 };
 
 const conditionSection = {
@@ -183,7 +194,7 @@ export const advancedForm = {
           items: [
             attributeOptions.required,
             getUniqueOption({ indexMode }),
-            attributeOptions.indexMode,
+            ...getIndexModeOption(),
             attributeOptions.private,
           ],
         },
@@ -225,7 +236,7 @@ export const advancedForm = {
           items: [
             attributeOptions.required,
             getUniqueOption(data),
-            attributeOptions.indexMode,
+            ...getIndexModeOption(),
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,
@@ -372,7 +383,7 @@ export const advancedForm = {
           items: [
             attributeOptions.required,
             getUniqueOption(data),
-            attributeOptions.indexMode,
+            ...getIndexModeOption(),
             attributeOptions.max,
             attributeOptions.min,
             attributeOptions.private,
@@ -448,7 +459,7 @@ export const advancedForm = {
           items: [
             attributeOptions.required,
             getUniqueOption(data),
-            attributeOptions.indexMode,
+            ...getIndexModeOption(),
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,
